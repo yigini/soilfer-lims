@@ -1,0 +1,1653 @@
+diff --git a/server/tests/contracts/api_key_scoping_isolation.test.js b/server/tests/contracts/api_key_scoping_isolation.test.js
+index c293b207..1e287a51 100644
+--- a/server/tests/contracts/api_key_scoping_isolation.test.js
++++ b/server/tests/contracts/api_key_scoping_isolation.test.js
+@@ -105,0 +106,6 @@ describe('API Key Scoping Isolation Contract (SL-22 Security Fix)', () => {
++        // #209: each NEW owned accepted scope witness has its own unchanged pH owner/order.
++        require('../../services/workflowStateRules').assertFixtureContext();
++        for (const sampleId of [sampleGtmId, sampleMozId]) await prisma.sampleOrderRevision.create({ data: {
++            id: crypto.randomUUID(), sampleId, version: 1, status: 'ACTIVE', reason: 'Owned API scope execution order context',
++            requestedBy: 'system:fixture', lines: { create: [{ id: crypto.randomUUID(), analysis: 'pH',
++                workItemId: null, status: 'ACTIVE', isRequired: true }] } } });
+diff --git a/server/tests/contracts/audit_0_10_current_result_views.test.js b/server/tests/contracts/audit_0_10_current_result_views.test.js
+index eb52a019..34fa8317 100644
+--- a/server/tests/contracts/audit_0_10_current_result_views.test.js
++++ b/server/tests/contracts/audit_0_10_current_result_views.test.js
+@@ -40,0 +41,4 @@ describe('Audit 0.10: current results in exports and working grid', () => {
++        // #209: the NEW owned retained SOC history declares its usable legacy order.
++        await prisma.$transaction(tx => tx.sampleOrderRevision.create({ data: { id: id('ORDER-010'), sampleId,
++            version: 1, status: 'ACTIVE', reason: 'Owned retained selected-value execution context', requestedBy: jwt.decode(token).username,
++            lines: { create: [{ id: id('LINE-010'), analysis: 'SOC', workItemId: null, status: 'ACTIVE', isRequired: true }] } } }));
+diff --git a/server/tests/contracts/audit_0_11_workbench_queue.test.js b/server/tests/contracts/audit_0_11_workbench_queue.test.js
+index e0b8794b..19113364 100644
+--- a/server/tests/contracts/audit_0_11_workbench_queue.test.js
++++ b/server/tests/contracts/audit_0_11_workbench_queue.test.js
+@@ -25,0 +26,4 @@ describe('Audit 0.11: queue evidence and instrument readiness', () => {
++        // #209: declare usable retained order lines during NEW owned positive fixture assembly.
++        await prisma.$transaction(tx => tx.sampleOrderRevision.create({ data: { id: id('ORDER-11'), sampleId: sampleId,
++            version: 1, status: 'ACTIVE', reason: 'Owned retained positive execution order context', requestedBy: jwt.decode(token).username,
++            lines: { create: ([analysis]).map(analysis => ({ id: id('ORDER-11'), analysis, workItemId: null, status: 'ACTIVE', isRequired: true })) } } }));
+diff --git a/server/tests/contracts/audit_0_14_number_entry.test.js b/server/tests/contracts/audit_0_14_number_entry.test.js
+index b50af031..e3124b7b 100644
+--- a/server/tests/contracts/audit_0_14_number_entry.test.js
++++ b/server/tests/contracts/audit_0_14_number_entry.test.js
+@@ -29,0 +30,6 @@ describe('Audit 0.14: normalized entries and lab number policy', () => {
++        // #209: usable order context is declared only in this NEW owned fixture assembly.
++        require('../../services/workflowStateRules').assertFixtureContext();
++        await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: sampleId,
++            version: 1, status: 'ACTIVE', reason: 'Owned numerical execution order context', requestedBy: 'system:fixture',
++            lines: { create: [analysis].map(analysis => ({ id: require('node:crypto').randomUUID(), analysis,
++                workItemId: null, status: 'ACTIVE', isRequired: true })) } } });
+diff --git a/server/tests/contracts/audit_0_15_duplicate_loq.test.js b/server/tests/contracts/audit_0_15_duplicate_loq.test.js
+index e360e130..53766cee 100644
+--- a/server/tests/contracts/audit_0_15_duplicate_loq.test.js
++++ b/server/tests/contracts/audit_0_15_duplicate_loq.test.js
+@@ -75,0 +76,4 @@ describe('Audit 0.15: both HTTP evaluation paths preserve LOQ and raw censoring
++            // #209: declare the usable retained order during NEW owned fixture assembly.
++            await prisma.$transaction(tx => tx.sampleOrderRevision.create({ data: { id: id('ORDER015'), sampleId: sampleId,
++                version: 1, status: 'ACTIVE', reason: 'Owned execution context with a retained usable order', requestedBy: 'system:fixture',
++                lines: { create: [{ id: id('LINE015'), analysis: analysis, workItemId: null, status: 'ACTIVE', isRequired: true }] } } }));
+@@ -83,0 +88,4 @@ describe('Audit 0.15: both HTTP evaluation paths preserve LOQ and raw censoring
++            // #209: declare the usable retained order during NEW owned fixture assembly.
++            await prisma.$transaction(tx => tx.sampleOrderRevision.create({ data: { id: id('ORDER015'), sampleId: sampleId,
++                version: 1, status: 'ACTIVE', reason: 'Owned execution context with a retained usable order', requestedBy: 'system:fixture',
++                lines: { create: [{ id: id('LINE015'), analysis: analysis, workItemId: null, status: 'ACTIVE', isRequired: true }] } } }));
+@@ -242,0 +251,4 @@ describe('Audit 0.15: real batch method and analysis evidence', () => {
++            // #209: declare the usable retained order during NEW owned fixture assembly.
++            await prisma.$transaction(tx => tx.sampleOrderRevision.create({ data: { id: id('ORDER015'), sampleId: sampleId,
++                version: 1, status: 'ACTIVE', reason: 'Owned execution context with a retained usable order', requestedBy: 'system:fixture',
++                lines: { create: [{ id: id('LINE015'), analysis: analysis, workItemId: null, status: 'ACTIVE', isRequired: true }] } } }));
+diff --git a/server/tests/contracts/audit_0_2_qc_lock.test.js b/server/tests/contracts/audit_0_2_qc_lock.test.js
+index 3d85636e..7371a6ca 100644
+--- a/server/tests/contracts/audit_0_2_qc_lock.test.js
++++ b/server/tests/contracts/audit_0_2_qc_lock.test.js
+@@ -103,0 +104,2 @@ describe('Audit 0.2: batch QC lock and durable evidence', () => {
++        if (seedCachedEvidence) await prisma.$transaction(tx => require('../../services/orderService').createInitialOrder(tx,
++            { id: sampleId }, ['PH_H2O'], jwt.decode(tokens.LAB_MANAGER)));
+diff --git a/server/tests/contracts/audit_0_3_publication.test.js b/server/tests/contracts/audit_0_3_publication.test.js
+index 1c65a9d1..e5d7dee1 100644
+--- a/server/tests/contracts/audit_0_3_publication.test.js
++++ b/server/tests/contracts/audit_0_3_publication.test.js
+@@ -57,0 +58,6 @@ describe('Audit 0.3: reviewed results and policy-aware publication', () => {
++        // Declare usable retained order facts without altering approval, work or QC metadata.
++        // The caller transaction also follows the existing owned legacy connection injection.
++        await prisma.$transaction(tx => tx.sampleOrderRevision.create({ data: { id: id('ORDER-03'), sampleId,
++            version: 1, status: 'ACTIVE', reason: 'Retained publication measurement order context',
++            lines: { create: { id: id('LINE-03'), analysis: param, workItemId: null, isRequired: true, status: 'ACTIVE' } }
++        } }));
+diff --git a/server/tests/contracts/audit_0_5_legacy_review.test.js b/server/tests/contracts/audit_0_5_legacy_review.test.js
+index ae68765f..ae295199 100644
+--- a/server/tests/contracts/audit_0_5_legacy_review.test.js
++++ b/server/tests/contracts/audit_0_5_legacy_review.test.js
+@@ -28,0 +29,4 @@ describe('Audit 0.5: legacy review delegates to the guarded authority', () => {
++        // #209: only the positive evidence witness gets a declared retained usable order.
++        if (evidence) await prisma.$transaction(tx => tx.sampleOrderRevision.create({ data: { id: id('ORDER-05'), sampleId,
++            version: 1, status: 'ACTIVE', reason: 'Owned retained legacy review execution context', requestedBy: require('jsonwebtoken').decode(manager).username,
++            lines: { create: [{ id: id('LINE-05'), analysis: 'PH_H2O', workItemId: null, status: 'ACTIVE', isRequired: true }] } } }));
+diff --git a/server/tests/contracts/audit_0_6_review_atomicity.test.js b/server/tests/contracts/audit_0_6_review_atomicity.test.js
+index 74600cee..de87d04e 100644
+--- a/server/tests/contracts/audit_0_6_review_atomicity.test.js
++++ b/server/tests/contracts/audit_0_6_review_atomicity.test.js
+@@ -34,0 +35,4 @@ describe('Audit 0.6: review state and atomic status/version compare-and-set', ()
++            // #209: declare retained usable order context while assembling this NEW owned fixture.
++            await prisma.$transaction(tx => tx.sampleOrderRevision.create({ data: { id: id('ORDER-06-LEGACY'), sampleId: database.sampleId,
++                version: 1, status: 'ACTIVE', reason: 'Owned retained execution order context', requestedBy: jwt.decode(manager).username,
++                lines: { create: [{ id: id('LINE-06-LEGACY'), analysis: analysis, workItemId: null, status: 'ACTIVE', isRequired: true }] } } }));
+@@ -45,0 +50,4 @@ describe('Audit 0.6: review state and atomic status/version compare-and-set', ()
++        // #209: declare retained usable order context while assembling this NEW owned fixture.
++        await prisma.$transaction(tx => tx.sampleOrderRevision.create({ data: { id: id('ORDER-06'), sampleId: sampleId,
++            version: 1, status: 'ACTIVE', reason: 'Owned retained execution order context', requestedBy: jwt.decode(manager).username,
++            lines: { create: [{ id: id('LINE-06'), analysis: analysis, workItemId: null, status: 'ACTIVE', isRequired: true }] } } }));
+@@ -70,0 +79,7 @@ describe('Audit 0.6: review state and atomic status/version compare-and-set', ()
++            // #209: only this separately seeded canonical witness needs its matching retained order line.
++            await prisma.$transaction(async tx => {
++                const revision = await tx.sampleOrderRevision.findFirstOrThrow({ where: { sampleId: f.sampleId, status: 'ACTIVE' } });
++                if (!await tx.orderLine.count({ where: { revisionId: revision.id, analysis: item.analysis, status: 'ACTIVE' } }))
++                    await tx.orderLine.create({ data: { id: id('LINE-06-CACHED'), revisionId: revision.id, analysis: item.analysis,
++                        workItemId: null, status: 'ACTIVE', isRequired: true } });
++            });
+diff --git a/server/tests/contracts/audit_0_7_resubmission.test.js b/server/tests/contracts/audit_0_7_resubmission.test.js
+index d5955bbc..2e54f2c7 100644
+--- a/server/tests/contracts/audit_0_7_resubmission.test.js
++++ b/server/tests/contracts/audit_0_7_resubmission.test.js
+@@ -32,0 +33,5 @@ describe('Audit 0.7: returned work can be recorded and submitted again', () => {
++        // #209: NEW owned retained execution history declares its existing owner's order.
++        require('../../services/workflowStateRules').assertFixtureContext();
++        await prisma.sampleOrderRevision.create({ data: { id: id('ORDER-07'), sampleId, version: 1,
++            status: 'ACTIVE', reason: 'Owned resubmission execution order context', requestedBy: 'system:fixture',
++            lines: { create: [{ id: id('LINE-07'), analysis, workItemId: null, status: 'ACTIVE', isRequired: true }] } } });
+@@ -96,0 +102,5 @@ describe('Audit 0.7: returned work can be recorded and submitted again', () => {
++        // #209: only the newly assembled remaining S1 owner gets a new matching line.
++        require('../../services/workflowStateRules').assertFixtureContext();
++        const retainedOrder = await prisma.sampleOrderRevision.findFirst({ where: { sampleId: f.sampleId, status: 'ACTIVE' } });
++        await prisma.orderLine.create({ data: { id: id('LINE-07-REMAINING'), revisionId: retainedOrder.id,
++            analysis: remaining.analysis, workItemId: null, status: 'ACTIVE', isRequired: true } });
+diff --git a/server/tests/contracts/audit_0_8_report_truthfulness.test.js b/server/tests/contracts/audit_0_8_report_truthfulness.test.js
+index ab20e6f2..e5f0371f 100644
+--- a/server/tests/contracts/audit_0_8_report_truthfulness.test.js
++++ b/server/tests/contracts/audit_0_8_report_truthfulness.test.js
+@@ -38,0 +39,4 @@ describe('Audit 0.8: issued identity and truthful report evidence', () => {
++        // #209: declare usable retained order lines during NEW owned positive fixture assembly.
++        await prisma.$transaction(tx => tx.sampleOrderRevision.create({ data: { id: id('ORDER-08'), sampleId: sampleId,
++            version: 1, status: 'ACTIVE', reason: 'Owned retained positive execution order context', requestedBy: require('jsonwebtoken').decode(token).username,
++            lines: { create: (['PH_H2O']).map(analysis => ({ id: id('ORDER-08'), analysis, workItemId: null, status: 'ACTIVE', isRequired: true })) } } }));
+diff --git a/server/tests/contracts/audit_0_9_public_report_superseded.test.js b/server/tests/contracts/audit_0_9_public_report_superseded.test.js
+index 96ac9de7..57c3d9f9 100644
+--- a/server/tests/contracts/audit_0_9_public_report_superseded.test.js
++++ b/server/tests/contracts/audit_0_9_public_report_superseded.test.js
+@@ -26,0 +27,5 @@ describe('Audit 0.9: superseded public links', () => {
++        // #209: declare only this NEW owned retained PH execution's legacy order context.
++        require('../../services/workflowStateRules').assertFixtureContext();
++        await prisma.sampleOrderRevision.create({ data: { id: id('ORDER-09'), sampleId, version: 1,
++            status: 'ACTIVE', reason: 'Owned retained report execution order context', requestedBy: 'system:fixture',
++            lines: { create: [{ id: id('LINE-09'), analysis: 'PH_H2O', workItemId: null, status: 'ACTIVE', isRequired: true }] } } });
+diff --git a/server/tests/contracts/audit_1_0_lab_policies.test.js b/server/tests/contracts/audit_1_0_lab_policies.test.js
+index c4e6bd4e..db8591c6 100644
+--- a/server/tests/contracts/audit_1_0_lab_policies.test.js
++++ b/server/tests/contracts/audit_1_0_lab_policies.test.js
+@@ -247,0 +248,3 @@ describe('Audit 1.0: persistent lab policies', () => {
++        // #209: current intake creates this order before the first export witness.
++        await prisma.$transaction(tx => require('../../services/orderService').createInitialOrder(tx,
++            { id: sampleId }, ['SOC'], actor));
+@@ -295,0 +299,4 @@ describe('Audit 1.0: persistent lab policies', () => {
++        // #209: declare the usable retained order during NEW owned fixture assembly.
++        await prisma.$transaction(tx => tx.sampleOrderRevision.create({ data: { id: id('POL-REPORT-ORDER'), sampleId: sampleId,
++            version: 1, status: 'ACTIVE', reason: 'Owned execution context with a retained usable order', requestedBy: actor.username,
++            lines: { create: [{ id: id('POL-REPORT-LINE'), analysis: 'PH_H2O', workItemId: null, status: 'ACTIVE', isRequired: true }] } } }));
+diff --git a/server/tests/contracts/audit_1_1_reconcile_duplicates.test.js b/server/tests/contracts/audit_1_1_reconcile_duplicates.test.js
+index ac48be84..10cc3cfc 100644
+--- a/server/tests/contracts/audit_1_1_reconcile_duplicates.test.js
++++ b/server/tests/contracts/audit_1_1_reconcile_duplicates.test.js
+@@ -64 +64 @@ describe('Audit 1.1: duplicate references and atomic analysis reconciliation', (
+-            .set('Authorization', `Bearer ${token}`).send({ analyses: ['PH_H2O', 'SOC'] });
++            .set('Authorization', `Bearer ${token}`).send({ analyses: ['PH_H2O', 'SOC'], reason: 'Reviewed removal of unrelated unstarted CEC' });
+diff --git a/server/tests/contracts/audit_1_2_guard_installer.test.js b/server/tests/contracts/audit_1_2_guard_installer.test.js
+index 6894eebc..571fa8f6 100644
+--- a/server/tests/contracts/audit_1_2_guard_installer.test.js
++++ b/server/tests/contracts/audit_1_2_guard_installer.test.js
+@@ -448,0 +449 @@ test('a complete guarded database passes the read-only gate, listens and answers
++    require('../../scripts/install_order_revisions').installOrderRevisions({dbPath:fixture.file,apply:true});
+diff --git a/server/tests/contracts/audit_1_2_legacy_results.test.js b/server/tests/contracts/audit_1_2_legacy_results.test.js
+index 6629993a..db9d6389 100644
+--- a/server/tests/contracts/audit_1_2_legacy_results.test.js
++++ b/server/tests/contracts/audit_1_2_legacy_results.test.js
+@@ -24,0 +25,4 @@ async function fixture(status = 'PROCESSING', flags = {}, itemStatus = 'IN_PROGR
++    // #209: declare retained usable order context while assembling this NEW owned fixture.
++    await prisma.$transaction(tx => tx.sampleOrderRevision.create({ data: { id: randomUUID(), sampleId: sample.id,
++        version: 1, status: 'ACTIVE', reason: 'Owned retained execution order context', requestedBy: repeatReviewer.username,
++        lines: { create: [{ id: randomUUID(), analysis: analysis, workItemId: null, status: 'ACTIVE', isRequired: true }] } } }));
+@@ -135,0 +140,7 @@ test('blocking matrix diagnostics retain 422 before any lifecycle or submission
++        // #209: only this separately seeded canonical witness needs its matching retained order line.
++        await prisma.$transaction(async tx => {
++            const revision = await tx.sampleOrderRevision.findFirstOrThrow({ where: { sampleId: row.sample.id, status: 'ACTIVE' } });
++            if (!await tx.orderLine.count({ where: { revisionId: revision.id, analysis: param, status: 'ACTIVE' } }))
++                await tx.orderLine.create({ data: { id: randomUUID(), revisionId: revision.id, analysis: param,
++                    workItemId: null, status: 'ACTIVE', isRequired: true } });
++        });
+diff --git a/server/tests/contracts/audit_1_2_offline_state.test.js b/server/tests/contracts/audit_1_2_offline_state.test.js
+index d3fcd67c..0b1f9341 100644
+--- a/server/tests/contracts/audit_1_2_offline_state.test.js
++++ b/server/tests/contracts/audit_1_2_offline_state.test.js
+@@ -22,0 +23,5 @@ async function fixture(status = 'PROCESSING') {
++    // #209: NEW owned retained evidence declares its actual existing owner's order.
++    require('../../services/workflowStateRules').assertFixtureContext();
++    await prisma.sampleOrderRevision.create({ data: { id: randomUUID(), sampleId: sample.id,
++        version: 1, status: 'ACTIVE', reason: 'Owned offline execution order context', requestedBy: 'system:fixture',
++        lines: { create: [{ id: randomUUID(), analysis, workItemId: null, status: 'ACTIVE', isRequired: true }] } } });
+diff --git a/server/tests/contracts/audit_1_2_spectral_state.test.js b/server/tests/contracts/audit_1_2_spectral_state.test.js
+index 364cc0c0..42ffdd9a 100644
+--- a/server/tests/contracts/audit_1_2_spectral_state.test.js
++++ b/server/tests/contracts/audit_1_2_spectral_state.test.js
+@@ -61,0 +62,5 @@ async function fixture({ status = 'COMPLETED', parentStatus = 'PROCESSING' } = {
++    // The valid accepted pH bystander has a retained order; spectral refusal states stay intact.
++    await db.$transaction(tx => tx.sampleOrderRevision.create({ data: { id: randomUUID(), sampleId: sample.id,
++        version: 1, status: 'ACTIVE', reason: 'Retained spectral-bystander pH order context',
++        lines: { create: { id: randomUUID(), analysis: 'PH_H2O', workItemId: null, isRequired: true, status: 'ACTIVE' } }
++    } }));
+diff --git a/server/tests/contracts/audit_1_2_state_authority.test.js b/server/tests/contracts/audit_1_2_state_authority.test.js
+index 33e440d1..5dd619ff 100644
+--- a/server/tests/contracts/audit_1_2_state_authority.test.js
++++ b/server/tests/contracts/audit_1_2_state_authority.test.js
+@@ -156 +156,2 @@ test.each(['analyses', 'order'])('%s adding work to SUBMITTED_FULL atomically re
+-    expect(saved.receipts).toHaveLength(mode === 'order' ? 1 : 0);
++    // Claudio6169628053: a supplied key is recorded once on either route.
++    expect(saved.receipts).toHaveLength(1);
+@@ -185 +186 @@ test.each(['analyses', 'order'])('%s a failed order snapshot rolls back already
+-    await expect(client.$transaction(tx => analysisOrders.reviseAnalyses(sample.id, { analyses: ['PH_H2O', 'SOC'] }, manager, { mode,
++    await expect(client.$transaction(tx => analysisOrders.reviseAnalyses(sample.id, { analyses: ['PH_H2O', 'SOC'], reason: 'Reviewed additional ordered parameter before injected failure' }, manager, { mode,
+@@ -197 +198 @@ test('a failed command receipt rolls back the new order, sample processing trans
+-        await expect(analysisOrders.reviseAnalyses(sample.id, { analyses: ['PH_H2O', 'SOC'] }, manager,
++        await expect(analysisOrders.reviseAnalyses(sample.id, { analyses: ['PH_H2O', 'SOC'], reason: 'Reviewed additional ordered parameter before injected failure' }, manager,
+@@ -700,0 +702,49 @@ test('an accepted marked gate duplicate prevents revert of the canonical gate wi
++
++// #209/6169628053: these checks exercise response, payload, mode and absent-key contracts separately.
++function keyedOrderTables() {
++    const raw = new (require('better-sqlite3'))(databasePath, { readonly: true, fileMustExist: true });
++    try {
++        return raw.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name").all().map(({ name }) => ({
++            name, rows: raw.prepare('SELECT * FROM "' + name.replaceAll('"', '""') + '"').all().map(row => JSON.stringify(row)).sort()
++        }));
++    } finally { raw.close(); }
++}
++
++async function keyedOrderCase(mode, keyed = true) {
++    const { sample } = await fixture('PROCESSING', 'PH_H2O', 'NOT_ASSIGNED');
++    await samples.transitionSample(sample.id, sample.status, manager, null, { requiredAnalyses: '["PH_H2O"]' }, client);
++    const input = { analyses: ['PH_H2O', 'SOC'], reason: 'Reviewed complete keyed order target' };
++    const options = { mode, tx: client, ...(keyed && { idempotencyKey: id() }) };
++    const original = await analysisOrders.reviseAnalyses(sample.id, input, manager, options);
++    return { sample, input, options, original };
++}
++
++test.each(['analyses', 'order'])('%s same-key replay returns the original response with all-table zero writes', async mode => {
++    const f = await keyedOrderCase(mode), before = keyedOrderTables();
++    expect(await client.commandReceipt.count({ where: { targetResource: `Sample:${f.sample.id}` } })).toBe(1);
++    const replay = await analysisOrders.reviseAnalyses(f.sample.id, f.input, manager, f.options);
++    expect(JSON.parse(JSON.stringify(replay))).toEqual(JSON.parse(JSON.stringify(f.original)));
++    expect(keyedOrderTables()).toEqual(before);
++});
++
++test.each(['analyses', 'order'])('%s same key with a differing reason refuses with all-table zero writes', async mode => {
++    const f = await keyedOrderCase(mode), before = keyedOrderTables();
++    await expect(analysisOrders.reviseAnalyses(f.sample.id, { ...f.input, reason: 'Different deliberate order reason' }, manager, f.options))
++        .rejects.toMatchObject({ statusCode: 409, code: 'IDEMPOTENCY_KEY_CONFLICT' });
++    expect(keyedOrderTables()).toEqual(before);
++});
++
++test.each(['analyses', 'order'])('%s key cannot replay identical parameters through the other mode and changes no table', async mode => {
++    const f = await keyedOrderCase(mode), before = keyedOrderTables();
++    await expect(analysisOrders.reviseAnalyses(f.sample.id, f.input, manager, { ...f.options, mode: mode === 'order' ? 'analyses' : 'order' }))
++        .rejects.toMatchObject({ statusCode: 409, code: 'IDEMPOTENCY_KEY_CONFLICT' });
++    expect(keyedOrderTables()).toEqual(before);
++});
++
++test.each(['analyses', 'order'])('%s command without a key writes its order and work without any receipt', async mode => {
++    const f = await keyedOrderCase(mode, false);
++    expect(f.original).toMatchObject({ success: true, added: ['SOC'] });
++    expect(await client.sampleOrderRevision.count({ where: { sampleId: f.sample.id, status: 'ACTIVE' } })).toBe(1);
++    expect(await client.workItem.count({ where: { sampleId: f.sample.id, analysis: 'SOC' } })).toBe(1);
++    expect(await client.commandReceipt.count({ where: { targetResource: `Sample:${f.sample.id}` } })).toBe(0);
++});
+diff --git a/server/tests/contracts/audit_1_2_workbench_state.test.js b/server/tests/contracts/audit_1_2_workbench_state.test.js
+index a9474a8a..713c71c3 100644
+--- a/server/tests/contracts/audit_1_2_workbench_state.test.js
++++ b/server/tests/contracts/audit_1_2_workbench_state.test.js
+@@ -96,0 +97,6 @@ async function fixture(sampleStatus = 'PROCESSING', itemStatus = 'COMPLETED', an
++    if (!['PREPARATION', 'DRYING', ...workflow.CLOSURE_TASK_ANALYSES].includes(analysis)) {
++        // #209: declare retained usable order context while assembling this NEW owned fixture.
++        await prisma.$transaction(tx => tx.sampleOrderRevision.create({ data: { id: randomUUID(), sampleId: sample.id,
++            version: 1, status: 'ACTIVE', reason: 'Owned retained execution order context', requestedBy: manager.username,
++            lines: { create: [{ id: randomUUID(), analysis: analysis, workItemId: null, status: 'ACTIVE', isRequired: true }] } } }));
++    }
+@@ -115,0 +122,9 @@ async function seedSubmissionAttempt(row,item=row.item) {
++    if (item.id !== row.item.id) {
++        // #209: only this separately seeded canonical witness needs its matching retained order line.
++        await prisma.$transaction(async tx => {
++            const revision = await tx.sampleOrderRevision.findFirstOrThrow({ where: { sampleId: row.sample.id, status: 'ACTIVE' } });
++            if (!await tx.orderLine.count({ where: { revisionId: revision.id, analysis: item.analysis, status: 'ACTIVE' } }))
++                await tx.orderLine.create({ data: { id: randomUUID(), revisionId: revision.id, analysis: item.analysis,
++                    workItemId: null, status: 'ACTIVE', isRequired: true } });
++        });
++    }
+diff --git a/server/tests/contracts/audit_1_4_uuid_transactions.test.js b/server/tests/contracts/audit_1_4_uuid_transactions.test.js
+index e91fb392..297d2fca 100644
+--- a/server/tests/contracts/audit_1_4_uuid_transactions.test.js
++++ b/server/tests/contracts/audit_1_4_uuid_transactions.test.js
+@@ -147,0 +148,3 @@ describe('Audit 1.4: UUID writes and atomic replicate supersession', () => {
++        await require('../../services/orderService').reviseAnalyses(sampleId, {
++            analyses: ['TEXTURE'], reason: 'Owned complete retained fraction and texture order context'
++        }, jwt.decode(token), { tx: prisma, mode: 'order' });
+diff --git a/server/tests/contracts/audit_1_5_result_writes.test.js b/server/tests/contracts/audit_1_5_result_writes.test.js
+index 6b421ae6..47a1f3fc 100644
+--- a/server/tests/contracts/audit_1_5_result_writes.test.js
++++ b/server/tests/contracts/audit_1_5_result_writes.test.js
+@@ -33,0 +34,6 @@ async function fixture({ analysis = code, batch = batchId, equipmentId = null, s
++    if (!["SPEC_MIR", "DRYING"].includes(analysis)) {
++        // #209: declare the usable retained order during NEW owned fixture assembly.
++        await prisma.$transaction(tx => tx.sampleOrderRevision.create({ data: { id: randomUUID(), sampleId: sampleId,
++            version: 1, status: 'ACTIVE', reason: 'Owned execution context with a retained usable order', requestedBy: actor.username,
++            lines: { create: [{ id: randomUUID(), analysis: analysis === 'PSA' ? 'TEXTURE' : analysis, workItemId: null, status: 'ACTIVE', isRequired: true }] } } }));
++    }
+@@ -210 +216,2 @@ test('conflicting attempt and work item batches refuse with all-table zero write
+-    await prisma.workAttempt.create({ data: { id: attemptId, workItemId: f.item.id, author: actor.username, qcBatchId: 'different-server-batch' } });
++    const orderLine = await prisma.orderLine.findFirstOrThrow({ where: { revision: { sampleId: f.sample.id, status: 'ACTIVE' } } });
++    await prisma.workAttempt.create({ data: { id: attemptId, workItemId: f.item.id, orderLineId: orderLine.id, author: actor.username, qcBatchId: 'different-server-batch' } });
+diff --git a/server/tests/contracts/audit_1_6_intake_cancellation.test.js b/server/tests/contracts/audit_1_6_intake_cancellation.test.js
+index 6e08867e..c82a59c8 100644
+--- a/server/tests/contracts/audit_1_6_intake_cancellation.test.js
++++ b/server/tests/contracts/audit_1_6_intake_cancellation.test.js
+@@ -61,0 +62,6 @@ test.each(['result', 'scan', 'attempt', 'draft', 'evidence-event', 'equipment-us
++    if (['result', 'attempt', 'evidence-event'].includes(evidence)) {
++        // #209: declare the usable retained order during NEW owned fixture assembly.
++        await prisma.$transaction(tx => tx.sampleOrderRevision.create({ data: { id: randomUUID(), sampleId: f.sample.id,
++            version: 1, status: 'ACTIVE', reason: 'Owned execution context with a retained usable order', requestedBy: actor.username,
++            lines: { create: [{ id: randomUUID(), analysis: f.item.analysis, workItemId: null, status: 'ACTIVE', isRequired: true }] } } }));
++    }
+@@ -68 +74,2 @@ test.each(['result', 'scan', 'attempt', 'draft', 'evidence-event', 'equipment-us
+-    if (evidence === 'attempt') await prisma.workAttempt.create({ data: { id: randomUUID(), workItemId: f.item.id, author: actor.username } });
++    const orderLine = evidence === 'attempt' ? await prisma.orderLine.findFirstOrThrow({ where: { revision: { sampleId: f.sample.id, status: 'ACTIVE' } } }) : null;
++    if (evidence === 'attempt') await prisma.workAttempt.create({ data: { id: randomUUID(), workItemId: f.item.id, orderLineId: orderLine.id, author: actor.username } });
+@@ -169,0 +177,4 @@ test('generic rejection of accepted work with a result is refused without changi
++    // #209: declare the usable retained order during NEW owned fixture assembly.
++    await prisma.$transaction(tx => tx.sampleOrderRevision.create({ data: { id: randomUUID(), sampleId: f.sample.id,
++        version: 1, status: 'ACTIVE', reason: 'Owned execution context with a retained usable order', requestedBy: actor.username,
++        lines: { create: [{ id: randomUUID(), analysis: f.item.analysis, workItemId: null, status: 'ACTIVE', isRequired: true }] } } }));
+@@ -300,0 +312,4 @@ test('undo-intake HTTP route refuses analytical evidence with 409 and no table w
++    // #209: declare the usable retained order during NEW owned fixture assembly.
++    await prisma.$transaction(tx => tx.sampleOrderRevision.create({ data: { id: randomUUID(), sampleId: f.sample.id,
++        version: 1, status: 'ACTIVE', reason: 'Owned execution context with a retained usable order', requestedBy: actor.username,
++        lines: { create: [{ id: randomUUID(), analysis: f.item.analysis, workItemId: null, status: 'ACTIVE', isRequired: true }] } } }));
+diff --git a/server/tests/contracts/audit_2_6_equipment_commit.test.js b/server/tests/contracts/audit_2_6_equipment_commit.test.js
+index 44048baa..02418aa0 100644
+--- a/server/tests/contracts/audit_2_6_equipment_commit.test.js
++++ b/server/tests/contracts/audit_2_6_equipment_commit.test.js
+@@ -18 +18 @@ async function fixture() {
+-        await createSampleFixture(prisma, { data: { id: sampleId, originalId: sampleId, labId: sampleId, assignedLab: labId,
++        const sample = await createSampleFixture(prisma, { data: { id: sampleId, originalId: sampleId, labId: sampleId, assignedLab: labId,
+@@ -21,0 +22,2 @@ async function fixture() {
++        if (!['APPROVED','ARCHIVED','DISPOSED'].includes(sample.status)) await prisma.$transaction(tx =>
++            require('../../services/orderService').createInitialOrder(tx,sample,[code],actor));
+diff --git a/server/tests/contracts/audit_3_1_attempt_execution.test.js b/server/tests/contracts/audit_3_1_attempt_execution.test.js
+index 1af434f9..15aff2e1 100644
+--- a/server/tests/contracts/audit_3_1_attempt_execution.test.js
++++ b/server/tests/contracts/audit_3_1_attempt_execution.test.js
+@@ -87,0 +88,5 @@ async function fixture(analyses=['AT190'],{work=true}={}) {
++    // Current order context preserves the retained fraction-panel owners under Claudio6166518424.
++    const companionQuestion=analyses.includes('TEXTURE')&&analyses.some(code=>['SAND','SILT','CLAY'].includes(code));
++    if(work&&!companionQuestion)await client.$transaction(tx=>require('../../services/orderService').createInitialOrder(tx,sample,analyses,actor));
++    if(work&&companionQuestion)await require('../../services/orderService').reviseAnalyses(sample.id,
++        {analyses,reason:'Declared current order for retained independent fraction execution'},actor,{tx:client});
+diff --git a/server/tests/contracts/audit_3_1_attempt_sql_guards.test.js b/server/tests/contracts/audit_3_1_attempt_sql_guards.test.js
+index b7c769f0..1b21bca0 100644
+--- a/server/tests/contracts/audit_3_1_attempt_sql_guards.test.js
++++ b/server/tests/contracts/audit_3_1_attempt_sql_guards.test.js
+@@ -277,0 +278,5 @@ test('the authenticated workspace returns linked and unlinked attempt metadata w
++    // Keep this deliberate pre-191 guard suite unchanged. Its current read-only
++    // workspace requires only the new nullable model shape, not successor guards.
++    const {loadOrderRevisionMigrationSource}=require('../../services/orderRevisionMigrationSource');
++    const orderModelColumns=loadOrderRevisionMigrationSource();
++    db.exec(orderModelColumns.schemaSql);
+diff --git a/server/tests/contracts/audit_3_3_separate_texture.test.js b/server/tests/contracts/audit_3_3_separate_texture.test.js
+index aee40c23..70da6761 100644
+--- a/server/tests/contracts/audit_3_3_separate_texture.test.js
++++ b/server/tests/contracts/audit_3_3_separate_texture.test.js
+@@ -27,0 +28,2 @@ async function fixture({mean=false,clayValue=15}={}) {
++    await require('../../services/orderService').reviseAnalyses(sample.id,
++        {analyses:['SAND','SILT','CLAY','TEXTURE'],reason:'Declared current companion order for retained fraction review'},f.actor,{tx:f.db});
+@@ -163,0 +166 @@ test('a stale TEXTURE sample cannot hide a good neighboring sample in the grid;
++    await f.db.$transaction(tx=>require('../../services/orderService').createInitialOrder(tx,goodSample,[f.analysisCode],f.actor));
+@@ -220,0 +224 @@ test('a complete composite execution still saves one atomic four-output selectio
++    await f.db.$transaction(tx=>require('../../services/orderService').createInitialOrder(tx,sample,['TEXTURE'],f.actor));
+diff --git a/server/tests/contracts/audit_4_1_run_start_header.test.js b/server/tests/contracts/audit_4_1_run_start_header.test.js
+index 214fcf51..5cdd26c5 100644
+--- a/server/tests/contracts/audit_4_1_run_start_header.test.js
++++ b/server/tests/contracts/audit_4_1_run_start_header.test.js
+@@ -111,0 +112,2 @@ test.each(['no-batch', 'unstarted', 'legacy-null'])('real HTTP keeps the existin
++        // A usable sample order does not invent the legacy run's unknown first-start metadata.
++        await f.db.$transaction(tx => require('../../services/orderService').createInitialOrder(tx, { id: sampleId }, [f.analysisCode], f.actor));
+diff --git a/server/tests/contracts/audit_4_3_keyboard_playwright.test.js b/server/tests/contracts/audit_4_3_keyboard_playwright.test.js
+index 5cee46e6..ca3c0edd 100644
+--- a/server/tests/contracts/audit_4_3_keyboard_playwright.test.js
++++ b/server/tests/contracts/audit_4_3_keyboard_playwright.test.js
+@@ -35,0 +36 @@ test('real Chromium types and records 40 values through the production app with
++            await f.db.$transaction(tx => require('../../services/orderService').createInitialOrder(tx, sample, [f.analysisCode], f.actor));
+diff --git a/server/tests/contracts/audit_4_6_calculation_install.test.js b/server/tests/contracts/audit_4_6_calculation_install.test.js
+index 21962634..7a197771 100644
+--- a/server/tests/contracts/audit_4_6_calculation_install.test.js
++++ b/server/tests/contracts/audit_4_6_calculation_install.test.js
+@@ -110,0 +111,2 @@ async function correctionSqlFixture({ resultField, calculationField, noWitness =
++        // Give the valid witness current intake's order before the unchanged SQL tamper probes.
++        await db.$transaction(tx => require('../../services/orderService').createInitialOrder(tx, sample, ['P_OLSEN'], manager));
+@@ -138,0 +141 @@ async function correctionSqlFixture({ resultField, calculationField, noWitness =
++            await db.$transaction(tx => require('../../services/orderService').createInitialOrder(tx, otherSample, ['P_OLSEN'], manager));
+diff --git a/server/tests/contracts/audit_4_6_calibration.test.js b/server/tests/contracts/audit_4_6_calibration.test.js
+index ce1feed8..f8a27e7b 100644
+--- a/server/tests/contracts/audit_4_6_calibration.test.js
++++ b/server/tests/contracts/audit_4_6_calibration.test.js
+@@ -62,0 +63,2 @@ async function fixture({ additionalItem = false } = {}) {
++    // This positive native execution has the order current intake creates.
++    await db.$transaction(tx => require('../../services/orderService').createInitialOrder(tx, sample, [method.analysisCode], manager));
+@@ -68,0 +71 @@ async function fixture({ additionalItem = false } = {}) {
++        await db.$transaction(tx => require('../../services/orderService').createInitialOrder(tx, laterSample, [method.analysisCode], manager));
+@@ -325,0 +329,3 @@ test.each([null, 'unresolvable-owned-lab'])('no-template completion retains the
++    await require('../../services/orderService').reviseAnalyses(f.sample.id, {
++        analyses: ['P_OLSEN', 'P_BRAY1'], reason: 'Owned additional non-calculated determination'
++    }, f.manager, { tx: f.db });
+diff --git a/server/tests/contracts/audit_4_7_calculation_import.test.js b/server/tests/contracts/audit_4_7_calculation_import.test.js
+index a91df2af..6ee1adbe 100644
+--- a/server/tests/contracts/audit_4_7_calculation_import.test.js
++++ b/server/tests/contracts/audit_4_7_calculation_import.test.js
+@@ -36,0 +37,4 @@ async function fixture({ qc = false } = {}) {
++    await require('../../services/orderService').reviseAnalyses(sampleId, {
++        analyses: [...f.items.map(item => item.analysis), ...f.calculated.map(row => row.code)],
++        reason: 'Owned additional activated calculation determinations'
++    }, f.actor, { tx: f.db });
+diff --git a/server/tests/contracts/audit_4_7_instrument_import_install.test.js b/server/tests/contracts/audit_4_7_instrument_import_install.test.js
+index bb001ceb..0df9a823 100644
+--- a/server/tests/contracts/audit_4_7_instrument_import_install.test.js
++++ b/server/tests/contracts/audit_4_7_instrument_import_install.test.js
+@@ -179,0 +180,6 @@ test.each(['Prisma', 'native workbench'])('a populated %s predecessor retains ev
++        // #209: this NEW literal PRE200 copy lacks only the current model's nullable line identity.
++        const { loadOrderRevisionMigrationSource } = require('../../services/orderRevisionMigrationSource');
++        const orderShape = loadOrderRevisionMigrationSource();
++        read(raw => raw.exec(orderShape.schemaSql));
++        for (const item of f.items) await f.db.$transaction(tx => require('../../services/orderService').createInitialOrder(tx,
++            { id: item.sampleId }, [item.analysis], f.actor));
+diff --git a/server/tests/contracts/audit_4_8_cross_check_evidence.test.js b/server/tests/contracts/audit_4_8_cross_check_evidence.test.js
+index b695608d..2cd25a7e 100644
+--- a/server/tests/contracts/audit_4_8_cross_check_evidence.test.js
++++ b/server/tests/contracts/audit_4_8_cross_check_evidence.test.js
+@@ -40,0 +41,3 @@ async function cnFixture(basis) {
++        await require('../../services/orderService').reviseAnalyses(f.sampleId, {
++            analyses: f.items.map(owner => owner.analysis), reason: 'Owned additional C:N determination'
++        }, f.actor, { tx: f.db });
+@@ -82,0 +86,5 @@ test('an unregistered historical lab saves and submits through the real HTTP wor
++    // This historical lab case has a usable retained order, without inventing a Lab or policy.
++    await f.db.sampleOrderRevision.create({ data: { id: randomUUID(), sampleId, version: 1, status: 'ACTIVE',
++        reason: 'Retained historical SOC/TN order context', lines: { create: ['SOC', 'TN'].map(analysis => ({
++            id: randomUUID(), analysis, workItemId: null, isRequired: true, status: 'ACTIVE'
++        })) } } });
+@@ -154,0 +163,3 @@ async function fixture({ differentText = false, curated = false } = {}) {
++        await require('../../services/orderService').reviseAnalyses(f.sampleId, {
++            analyses: f.items.map(owner => owner.analysis), reason: 'Owned additional cross-check determination'
++        }, f.actor, { tx: f.db });
+diff --git a/server/tests/contracts/audit_4_8_cross_check_install.test.js b/server/tests/contracts/audit_4_8_cross_check_install.test.js
+index 875210d8..93af69f5 100644
+--- a/server/tests/contracts/audit_4_8_cross_check_install.test.js
++++ b/server/tests/contracts/audit_4_8_cross_check_install.test.js
+@@ -11,0 +12,2 @@ const { scanSource } = require('../helpers/workflowWriteScanner');
++const { loadOrderRevisionMigrationSource } = require('../../services/orderRevisionMigrationSource');
++const orderSource = loadOrderRevisionMigrationSource();
+@@ -16,0 +19,4 @@ async function fixture() {
++    // Current Prisma needs its declared nullable shape on this NEW owned pre-201 context.
++    // The captured historical source, original guards and prior owner receipts are unchanged.
++    const orderShape = new Database(file);
++    try { orderShape.exec(orderSource.schemaSql); } finally { orderShape.close(); }
+@@ -25,0 +32,3 @@ async function fixture() {
++        await db.$transaction(tx => require('../../services/orderService').createInitialOrder(tx, sample, ['SOC'], {
++            username: 'system:fixture', role: 'SUPER_ADMIN', labId
++        }));
+diff --git a/server/tests/contracts/audit_6_1_first_fill.test.js b/server/tests/contracts/audit_6_1_first_fill.test.js
+index d5c2f86d..94a11f0d 100644
+--- a/server/tests/contracts/audit_6_1_first_fill.test.js
++++ b/server/tests/contracts/audit_6_1_first_fill.test.js
+@@ -25,0 +26,4 @@ async function fixture(reasonCode='CLIENT_RETEST',originalReplicates=2,analysisC
++ // Declare the retained usable order during owned fixture assembly; approval facts stay unchanged.
++ const retainedOrder=await f.db.sampleOrderRevision.create({data:{id:randomUUID(),sampleId:f.sample.id,version:1,status:'ACTIVE',
++  reason:'Retained accepted-parent order context',lines:{create:{id:randomUUID(),analysis:f.analysisCode,workItemId:null,isRequired:true,status:'ACTIVE'}}},include:{lines:true}});
++ f.retainedOrderLine=retainedOrder.lines[0];
+@@ -100,0 +105 @@ async function unlinkedFixture(analysisCode){
++   orderLineId:f.retainedOrderLine.id,
+diff --git a/server/tests/contracts/audit_6_1_non_scientific_authorisation.test.js b/server/tests/contracts/audit_6_1_non_scientific_authorisation.test.js
+index fd868721..216f1a82 100644
+--- a/server/tests/contracts/audit_6_1_non_scientific_authorisation.test.js
++++ b/server/tests/contracts/audit_6_1_non_scientific_authorisation.test.js
+@@ -27,0 +28,4 @@ async function fixture(status='APPROVED',itemStatus='ACCEPTED'){
++ // Explicit retained order facts in this fresh owned approved-history fixture.
++ // Legacy line ownership stays NULL; new scientific reservations resolve it.
++ await f.db.sampleOrderRevision.create({data:{id:randomUUID(),sampleId:f.sample.id,version:1,status:'ACTIVE',reason:'Retained approved-history order context',
++  lines:{create:{id:randomUUID(),analysis:'PH_H2O',workItemId:null,isRequired:true,status:'ACTIVE'}}}});
+diff --git a/server/tests/contracts/audit_6_2_report_revisions.test.js b/server/tests/contracts/audit_6_2_report_revisions.test.js
+index a434794d..35f1d7db 100644
+--- a/server/tests/contracts/audit_6_2_report_revisions.test.js
++++ b/server/tests/contracts/audit_6_2_report_revisions.test.js
+@@ -34,0 +35,5 @@ describe('Audit 6.2: report revisions and amendment marking', () => {
++        // #209: declare only this NEW owned retained PH execution's legacy order context.
++        require('../../services/workflowStateRules').assertFixtureContext();
++        await prisma.sampleOrderRevision.create({ data: { id: id('ORDER-62'), sampleId, version: 1,
++            status: 'ACTIVE', reason: 'Owned retained report execution order context', requestedBy: 'system:fixture',
++            lines: { create: [{ id: id('LINE-62'), analysis: 'PH_H2O', workItemId: null, status: 'ACTIVE', isRequired: true }] } } });
+diff --git a/server/tests/contracts/audit_6_3_report_content.test.js b/server/tests/contracts/audit_6_3_report_content.test.js
+index c8b0b6a5..3ae1218b 100644
+--- a/server/tests/contracts/audit_6_3_report_content.test.js
++++ b/server/tests/contracts/audit_6_3_report_content.test.js
+@@ -24,0 +25,3 @@ async function fixture({approved=false,approval={}}={}){
++  // A valid retained order does not fill the deliberately missing approval evidence.
++  await f.db.sampleOrderRevision.create({data:{id:randomUUID(),sampleId:sample.id,version:1,status:'ACTIVE',
++   reason:'Retained report-evidence order context',lines:{create:{id:randomUUID(),analysis:f.analysisCode,workItemId:null,isRequired:true,status:'ACTIVE'}}}});
+diff --git a/server/tests/contracts/catalogue_governance.test.js b/server/tests/contracts/catalogue_governance.test.js
+index fd1401eb..0e83003a 100644
+--- a/server/tests/contracts/catalogue_governance.test.js
++++ b/server/tests/contracts/catalogue_governance.test.js
+@@ -99,0 +100,6 @@ describe('Catalogue governance and connected selections', () => {
++        // #209: declare usable legacy order lines only in this NEW owned positive assembly.
++        require('../../services/workflowStateRules').assertFixtureContext();
++        await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: sample.id,
++            version: 1, status: 'ACTIVE', reason: 'Owned QC/unit/catalogue execution order context', requestedBy: 'system:fixture',
++            lines: { create: [a.code].map(analysis => ({ id: require('node:crypto').randomUUID(), analysis,
++                workItemId: null, status: 'ACTIVE', isRequired: true })) } } });
+diff --git a/server/tests/contracts/catalogue_result_entry.test.js b/server/tests/contracts/catalogue_result_entry.test.js
+index 2b6725a4..cdd4ab64 100644
+--- a/server/tests/contracts/catalogue_result_entry.test.js
++++ b/server/tests/contracts/catalogue_result_entry.test.js
+@@ -51,0 +52,6 @@ describe('Catalogue rules also govern the sample results endpoint', () => {
++        // #209: declare usable legacy order lines only in this NEW owned positive assembly.
++        require('../../services/workflowStateRules').assertFixtureContext();
++        await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: sampleId,
++            version: 1, status: 'ACTIVE', reason: 'Owned QC/unit/catalogue execution order context', requestedBy: 'system:fixture',
++            lines: { create: [param].map(analysis => ({ id: require('node:crypto').randomUUID(), analysis,
++                workItemId: null, status: 'ACTIVE', isRequired: true })) } } });
+diff --git a/server/tests/contracts/controlled_units_interpretation.test.js b/server/tests/contracts/controlled_units_interpretation.test.js
+index 5d964eb3..a3ab9045 100644
+--- a/server/tests/contracts/controlled_units_interpretation.test.js
++++ b/server/tests/contracts/controlled_units_interpretation.test.js
+@@ -44,0 +45,6 @@ describe('BLK-1: Controlled Unit Vocabulary & Agronomic Interpretation Engine',
++        // #209: declare usable legacy order lines only in this NEW owned positive assembly.
++        require('../../services/workflowStateRules').assertFixtureContext();
++        await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: sampleId,
++            version: 1, status: 'ACTIVE', reason: 'Owned QC/unit/catalogue execution order context', requestedBy: 'system:fixture',
++            lines: { create: (await prisma.workItem.findMany({ where: { sampleId, status: 'ACCEPTED' } })).map(item => item.analysis).map(analysis => ({ id: require('node:crypto').randomUUID(), analysis,
++                workItemId: null, status: 'ACTIVE', isRequired: true })) } } });
+diff --git a/server/tests/contracts/deployment_readiness_bootstrap.test.js b/server/tests/contracts/deployment_readiness_bootstrap.test.js
+index 7f90215e..282de4a8 100644
+--- a/server/tests/contracts/deployment_readiness_bootstrap.test.js
++++ b/server/tests/contracts/deployment_readiness_bootstrap.test.js
+@@ -372,0 +373 @@ bash "${entryScript.replace(/\\/g, '/')}"
++        require('../../scripts/install_order_revisions').installOrderRevisions({ dbPath: targetDb, apply: true });
+@@ -431,0 +433,2 @@ bash "${entryScript.replace(/\\/g, '/')}"
++            .replaceAll('node scripts/install_order_revisions.js',
++                `node "${path.join(serverDir, 'scripts/install_order_revisions.js').replace(/\\/g, '/')}"`)
+diff --git a/server/tests/contracts/edit_analyses_permission.test.js b/server/tests/contracts/edit_analyses_permission.test.js
+index 8e58c72e..a447f9e2 100644
+--- a/server/tests/contracts/edit_analyses_permission.test.js
++++ b/server/tests/contracts/edit_analyses_permission.test.js
+@@ -58 +58,2 @@ describe('SD-06: EDIT_ANALYSES Permission Gate Contract', () => {
+-                analyses: ['PH_H2O', 'SOC']
++                analyses: ['PH_H2O', 'SOC'],
++                reason: 'Reviewed complete analysis selection'
+diff --git a/server/tests/contracts/exchange_error_semantics.test.js b/server/tests/contracts/exchange_error_semantics.test.js
+index 92b5a692..b0949b38 100644
+--- a/server/tests/contracts/exchange_error_semantics.test.js
++++ b/server/tests/contracts/exchange_error_semantics.test.js
+@@ -38,0 +39,6 @@ describe('Issue #140 Work Package A0: Exchange Eligibility 503 Semantics & Invar
++        // #209: declared legacy order for this NEW owned accepted numerical/reference assembly.
++        require('../../services/workflowStateRules').assertFixtureContext();
++        await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: sampleApproved.id,
++            version: 1, status: 'ACTIVE', reason: 'Owned accepted reference order context', requestedBy: 'system:fixture',
++            lines: { create: [{ id: require('node:crypto').randomUUID(), analysis: 'PH_H2O',
++                workItemId: null, status: 'ACTIVE', isRequired: true }] } } });
+diff --git a/server/tests/contracts/export_normalization.test.js b/server/tests/contracts/export_normalization.test.js
+index c84167f3..7b212987 100644
+--- a/server/tests/contracts/export_normalization.test.js
++++ b/server/tests/contracts/export_normalization.test.js
+@@ -40,0 +41,6 @@ describe('WP-22: Dual Export Paths (As-Measured & Normalized Controlled Units)',
++        // #209: declared legacy order for this NEW owned accepted numerical/reference assembly.
++        require('../../services/workflowStateRules').assertFixtureContext();
++        await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: testSample.id,
++            version: 1, status: 'ACTIVE', reason: 'Owned accepted reference order context', requestedBy: 'system:fixture',
++            lines: { create: [{ id: require('node:crypto').randomUUID(), analysis: 'SOC',
++                workItemId: null, status: 'ACTIVE', isRequired: true }] } } });
+diff --git a/server/tests/contracts/interim_gaps_verification.test.js b/server/tests/contracts/interim_gaps_verification.test.js
+index eed0deae..e12076ad 100644
+--- a/server/tests/contracts/interim_gaps_verification.test.js
++++ b/server/tests/contracts/interim_gaps_verification.test.js
+@@ -548,0 +549,6 @@ describe('Interim Gaps 1, 2, 3 Verification (IR-14, Staff/Lab Review Tokens, Syn
++            // #209: declared legacy order only for this NEW owned positive sync execution assembly.
++            require('../../services/workflowStateRules').assertFixtureContext();
++            await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: testSample.id,
++                version: 1, status: 'ACTIVE', reason: 'Owned positive canonical sync order context', requestedBy: 'system:fixture',
++                lines: { create: ['PH_H2O', 'SPEC_MIR'].map(analysis => ({ id: require('node:crypto').randomUUID(), analysis,
++                    workItemId: null, status: 'ACTIVE', isRequired: true })) } } });
+diff --git a/server/tests/contracts/issue_206_sample_containers.test.js b/server/tests/contracts/issue_206_sample_containers.test.js
+index da5ce8f7..33480015 100644
+--- a/server/tests/contracts/issue_206_sample_containers.test.js
++++ b/server/tests/contracts/issue_206_sample_containers.test.js
+@@ -122,0 +123 @@ test('the additive attempt insert guard refuses foreign/non-aliquot links; futur
++    const otherOrderLine = await f.db.orderLine.findFirst({where:{workItemId:f.items[1].id,revision:{status:'ACTIVE'}}});
+@@ -124,3 +125,3 @@ test('the additive attempt insert guard refuses foreign/non-aliquot links; futur
+-        const insert = db.prepare("INSERT INTO WorkAttempt(id,workItemId,attemptNo,aliquotId,status,updatedAt) VALUES(?,?,?,?, 'RECORDED',?)");
+-        expect(() => insert.run(randomUUID(), f.items[1].id, 1, aliquot.id, Date.now())).toThrow(/SAMPLE_CONTAINER_ALIQUOT_INVALID/);
+-        expect(() => insert.run(randomUUID(), f.items[1].id, 1, bulk.id, Date.now())).toThrow(/SAMPLE_CONTAINER_ALIQUOT_INVALID/);
++        const insert = db.prepare("INSERT INTO WorkAttempt(id,workItemId,attemptNo,aliquotId,status,updatedAt,orderLineId) VALUES(?,?,?,?, 'RECORDED',?,?)");
++        expect(() => insert.run(randomUUID(), f.items[1].id, 1, aliquot.id, Date.now(),otherOrderLine.id)).toThrow(/SAMPLE_CONTAINER_ALIQUOT_INVALID/);
++        expect(() => insert.run(randomUUID(), f.items[1].id, 1, bulk.id, Date.now(),otherOrderLine.id)).toThrow(/SAMPLE_CONTAINER_ALIQUOT_INVALID/);
+@@ -131 +132 @@ test('the additive attempt insert guard refuses foreign/non-aliquot links; futur
+-        expect(() => insert.run(randomUUID(), f.items[0].id, 2, aliquot.id, Date.now())).toThrow(/SAMPLE_CONTAINER_ALIQUOT_INVALID/);
++        expect(() => insert.run(randomUUID(), f.items[0].id, 2, aliquot.id, Date.now(),before.orderLineId)).toThrow(/SAMPLE_CONTAINER_ALIQUOT_INVALID/);
+diff --git a/server/tests/contracts/issue_209_order_revision_http.test.js b/server/tests/contracts/issue_209_order_revision_http.test.js
+new file mode 100644
+index 00000000..33f94238
+--- /dev/null
++++ b/server/tests/contracts/issue_209_order_revision_http.test.js
+@@ -0,0 +1,79 @@
++const { randomUUID } = require('node:crypto'), jwt = require('jsonwebtoken'), request = require('supertest');
++const app = require('../../app'), db = require('../../prisma');
++const { getAuthToken } = require('../setup');
++const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
++let lab, actor, token, codes;
++beforeAll(async () => {
++    lab = await db.lab.create({ data: { id: randomUUID(), code: randomUUID(), name: 'Owned order HTTP laboratory', country: 'GTM' } });
++    token = await getAuthToken('LAB_MANAGER', lab.id); actor = jwt.decode(token);
++    await db.user.update({ where: { id: actor.id }, data: { mustChangePassword: false } });
++    codes = [1,2].map(() => 'ORDER-' + randomUUID().toUpperCase());
++    for (const code of codes) await db.analysis.create({ data: { code, name: 'Owned order analysis' } });
++});
++async function fixture(status = 'PROCESSING') {
++    const sample = await createSampleFixture(db, { data: { id: randomUUID(), originalId: randomUUID(), assignedLab: lab.id,
++        country: 'GTM', status, requiredAnalyses: JSON.stringify([codes[0]]) } });
++    if (status !== 'PROCESSING') return { sample };
++    const item = await createWorkItemFixture(db, { data: { id: randomUUID(), sampleId: sample.id, labId: lab.id,
++        assignedLab: lab.id, analysis: codes[0], status: 'NOT_ASSIGNED' } });
++    await db.$transaction(tx => require('../../services/orderService').createInitialOrder(tx, sample, [codes[0]], actor));
++    return { sample, item };
++}
++const send = (route,id,body,auth=token,key=null) => {
++    let pending = request(app)[route === 'analyses' ? 'put' : 'post']('/api/samples/' + id + '/' + route)
++        .set('Authorization', 'Bearer ' + auth);
++    if (key) pending = pending.set('x-idempotency-key', key);
++    return pending.send(body);
++};
++test.each(['analyses','orders'])('%s HTTP route requires a reason for a changed normalized full target, then saves one ACTIVE order', async route => {
++    const { sample } = await fixture(), before = await db.sampleOrderRevision.findMany({ where: { sampleId: sample.id } });
++    const refused = await send(route, sample.id, { analyses: codes });
++    expect(refused.status).toBe(400); expect(refused.body.code).toBe('TRANSITION_REASON_REQUIRED');
++    expect(await db.sampleOrderRevision.findMany({ where: { sampleId: sample.id } })).toEqual(before);
++    const accepted = await send(route, sample.id, { analyses: codes.map(code => ' ' + code + ' '), reason: 'Reviewed complete target order' });
++    expect(accepted.status).toBe(200);
++    expect(await db.sampleOrderRevision.count({ where: { sampleId: sample.id, status: 'ACTIVE' } })).toBe(1);
++    const current = await db.sampleOrderRevision.findFirst({ where: { sampleId: sample.id, status: 'ACTIVE' }, include: { lines: true } });
++    expect(current.lines.map(line => line.analysis).sort()).toEqual([...codes].sort());
++    expect(current.lines.every(line => line.workItemId)).toBe(true);
++});
++test.each(['analyses','orders'])('%s HTTP receipt replays the exact command once and refuses a changed reason', async route => {
++    const { sample } = await fixture(), key = randomUUID(), body = { analyses: codes, reason: 'Reviewed exact command' };
++    expect((await send(route,sample.id,body,token,key)).status).toBe(200);
++    const count = await db.sampleOrderRevision.count({ where: { sampleId: sample.id } });
++    expect((await send(route,sample.id,body,token,key)).status).toBe(200);
++    expect(await db.sampleOrderRevision.count({ where: { sampleId: sample.id } })).toBe(count);
++    const conflict = await send(route,sample.id,{ ...body,reason:'Different command' },token,key);
++    expect(conflict.status).toBe(409); expect(conflict.body.code).toBe('IDEMPOTENCY_KEY_CONFLICT');
++    expect(await db.sampleOrderRevision.count({ where: { sampleId: sample.id } })).toBe(count);
++});
++test.each(['APPROVED','ARCHIVED','DISPOSED'])('both HTTP routes preserve the %s amendment boundary', async status => {
++    const { sample } = await fixture(status);
++    for (const route of ['analyses','orders']) {
++        const response = await send(route,sample.id,{ analyses:codes,reason:'Reviewed amended order' });
++        expect(response.status).toBe(409); expect(response.body.code).toBe('AMENDMENT_WORKFLOW_REQUIRED');
++    }
++    expect(await db.sampleOrderRevision.count({ where: { sampleId: sample.id } })).toBe(0);
++});
++test('both HTTP routes enforce laboratory scope', async () => {
++    const { sample } = await fixture(), foreign = await getAuthToken('LAB_MANAGER',randomUUID());
++    for (const route of ['analyses','orders']) expect((await send(route,sample.id,{ analyses:codes,reason:'Reviewed order' },foreign)).status).toBe(403);
++    expect(await db.sampleOrderRevision.count({ where: { sampleId: sample.id } })).toBe(1);
++});
++test('initial intake work generation writes one linked order through the shared service', async () => {
++    const sample = await createSampleFixture(db, { data: { id:randomUUID(),originalId:randomUUID(),assignedLab:lab.id,country:'GTM',
++        status:'PROCESSING',requiredAnalyses:JSON.stringify([codes[0]]) } });
++    await db.$transaction(async tx => {
++        const service = require('../../services/intakeWorkItemService');
++        await service.generate(tx,sample,await service.planForSample(tx,sample),actor);
++    });
++    const revision = await db.sampleOrderRevision.findFirst({ where:{sampleId:sample.id},include:{lines:true} });
++    expect(revision.lines).toHaveLength(1);
++    expect(await db.workItem.findUnique({where:{id:revision.lines[0].workItemId}})).toMatchObject({sampleId:sample.id,analysis:codes[0]});
++});
++test('released removal of unstarted work retains its historical line identifier', async () => {
++    const {sample,item} = await fixture(), old = await db.orderLine.findFirst({where:{workItemId:item.id}});
++    const response = await send('orders',sample.id,{analyses:[],reason:'Reviewed removal of unstarted work'});
++    expect(response.status).toBe(200); expect(await db.workItem.findUnique({where:{id:item.id}})).toBeNull();
++    expect(await db.orderLine.findUnique({where:{id:old.id}})).toEqual(old);
++});
+diff --git a/server/tests/contracts/issue_209_order_revision_integration.test.js b/server/tests/contracts/issue_209_order_revision_integration.test.js
+new file mode 100644
+index 00000000..a352c611
+--- /dev/null
++++ b/server/tests/contracts/issue_209_order_revision_integration.test.js
+@@ -0,0 +1,408 @@
++const fs = require('node:fs');
++const { randomUUID, createHash } = require('node:crypto');
++const Database = require('better-sqlite3');
++const { qcGateFixture } = require('../helpers/qcGateFixture');
++const installer = require('../../scripts/install_order_revisions');
++const order = require('../../services/orderService');
++const { resolveOrderLine } = require('../../services/orderLineResolutionService');
++
++const held = [];
++const triples = file => Object.fromEntries(['', '-wal', '-shm'].map(suffix => [suffix,
++    fs.existsSync(file + suffix) ? createHash('sha256').update(fs.readFileSync(file + suffix)).digest('hex') : null]));
++
++async function fixture({ revisions = 1, lines = 1, historicalOpen = false } = {}) {
++    const f = await qcGateFixture({ resolvedRules: false, fixedWindowPolicy: false, installOrderRevisions: false }); held.push(f);
++    const item = f.items[0];
++    await require('../../services/sampleStateService').transitionSample(item.sampleId, 'PROCESSING', f.actor,
++        'Declared complete order context', { requiredAnalyses: JSON.stringify([item.analysis]) }, f.db);
++    const db = new Database(f.file, { fileMustExist: true });
++    try {
++        db.pragma('foreign_keys=ON');
++        for (let version = 1; version <= revisions; version++) {
++            const revisionId = randomUUID();
++            db.prepare('INSERT INTO SampleOrderRevision(id,sampleId,version,status,reason,createdAt,updatedAt) VALUES(?,?,?,?,?,?,?)')
++                .run(revisionId, item.sampleId, version, 'ACTIVE', 'Retained order context', 1, 1);
++            for (let index = 0; index < lines; index++) db.prepare('INSERT INTO OrderLine(id,revisionId,analysis,isRequired,status,createdAt,updatedAt) VALUES(?,?,?,?,?,?,?)')
++                .run(randomUUID(), revisionId, item.analysis, 1, 'ACTIVE', 1, 1);
++        }
++    } finally { db.close(); }
++    if (historicalOpen) {
++        f.openId = randomUUID();
++        // A retained #191 reservation uses its ordinary Prisma timestamp representation.
++        await f.db.workAttempt.create({ data: { id: f.openId, workItemId: item.id, attemptNo: 1, status: 'OPEN',
++            version: 1, createdAt: new Date(1), updatedAt: new Date(1) } });
++    }
++    return f;
++}
++
++async function rows(f) {
++    const db = new Database(f.file, { readonly: true, fileMustExist: true });
++    try { return {
++        revisions: db.prepare('SELECT id,sampleId,version,status,reason,createdAt,updatedAt FROM SampleOrderRevision ORDER BY id').all(),
++        lines: db.prepare('SELECT id,revisionId,analysis,methodologyId,methodRevision,isRequired,status,omissionReason,omissionAuthorizedBy,omissionAuthorizedAt,predecessorLineId,createdAt,updatedAt FROM OrderLine ORDER BY id').all(),
++        attempts: db.prepare('SELECT * FROM WorkAttempt ORDER BY id').all()
++    }; } finally { db.close(); }
++}
++
++afterAll(async () => { for (const f of held) await f.db.$disconnect(); }); // Retain every owned fixture/triple.
++
++async function textureFixture({ fractions = ['SAND','SILT','CLAY'], completed = false, initial = true } = {}) {
++    const f = await qcGateFixture({resolvedRules:false,fixedWindowPolicy:false}); held.push(f);
++    const {createSampleFixture,createWorkItemFixture}=require('../helpers/workflowFixtures');
++    for(const analysis of ['SAND','SILT','CLAY','TEXTURE']) await f.db.analysis.upsert({where:{code:analysis},update:{},
++        create:{code:analysis,name:'Owned order '+analysis,units:'%'}});
++    f.textureSample=await createSampleFixture(f.db,{data:{id:randomUUID(),originalId:randomUUID(),assignedLab:f.labId,
++        status:'PROCESSING',dryingStatus:'DONE',preparationStatus:'DONE',requiredAnalyses:'["TEXTURE"]'}});
++    f.textureOwners=[];
++    for(const analysis of [...fractions,'TEXTURE']) f.textureOwners.push(await createWorkItemFixture(f.db,{data:{id:randomUUID(),
++        sampleId:f.textureSample.id,assignedLab:f.labId,analysis,status:completed&&analysis==='SAND'?'COMPLETED':'IN_PROGRESS',history:'[]'}}));
++    if(initial) await f.db.$transaction(tx=>order.createInitialOrder(tx,f.textureSample,['TEXTURE'],f.actor));
++    return f;
++}
++
++test('a TEXTURE target retains all existing fraction owners including completed work and fixes four linked lines in one revision',async()=>{
++    const f=await textureFixture({completed:true}),before=await rows(f);
++    const originalItems=await f.db.workItem.findMany({where:{sampleId:f.textureSample.id},orderBy:{id:'asc'}});
++    const revised=await order.reviseAnalyses(f.textureSample.id,{analyses:['SAND','SILT','CLAY','TEXTURE'],
++        reason:'Reviewed retained fraction companions'},f.actor,{tx:f.db,mode:'order'});
++    expect(await f.db.workItem.findMany({where:{sampleId:f.textureSample.id},orderBy:{id:'asc'}})).toEqual(originalItems);
++    const lines=await f.db.orderLine.findMany({where:{revisionId:revised.revision.id}});
++    expect(lines).toHaveLength(4);expect(lines.map(line=>line.analysis).sort()).toEqual(['CLAY','SAND','SILT','TEXTURE']);
++    for(const item of f.textureOwners) expect(await f.db.$transaction(tx=>resolveOrderLine(tx,item)))
++        .toBe(lines.find(line=>line.workItemId===item.id).id);
++    const after=await rows(f);expect(after.lines.filter(line=>before.lines.some(old=>old.id===line.id))).toEqual(before.lines);
++    expect(after.attempts).toEqual(before.attempts);
++    expect((await f.db.sample.findUnique({where:{id:f.textureSample.id}})).requiredAnalyses).toBe('["TEXTURE"]');
++    const audit=await f.db.auditLog.findFirst({where:{sampleId:f.textureSample.id,action:'ORDER_REVISION_APPLIED'}});
++    expect(JSON.parse(audit.details).companionWorkItemIds.sort()).toEqual(f.textureOwners.filter(item=>item.analysis!=='TEXTURE').map(item=>item.id).sort());
++});
++
++test('one or two retained fractions refuse a TEXTURE alias with named missing owners and zero row changes',async()=>{
++    for(const fractions of [['SAND'],['SAND','SILT']]){
++        const f=await textureFixture({fractions}),before=JSON.stringify(await f.snapshot());
++        await expect(order.reviseAnalyses(f.textureSample.id,{analyses:['SOIL_TEXTURE'],reason:'Reviewed partial owners'},f.actor,{tx:f.db}))
++            .rejects.toMatchObject({code:'TEXTURE_FRACTION_OWNERS_INCOMPLETE',statusCode:409,
++                details:{missingFractions:['SAND','SILT','CLAY'].filter(code=>!fractions.includes(code))}});
++        expect(JSON.stringify(await f.snapshot())).toBe(before);
++    }
++});
++
++test('TEXTURE without explicit fraction selections still preserves all existing owners; explicit removal waives them with the reason',async()=>{
++    const f=await textureFixture();
++    await order.reviseAnalyses(f.textureSample.id,{analyses:['TEXTURE'],reason:'Reviewed existing companions'},f.actor,{tx:f.db});
++    expect(await f.db.orderLine.count({where:{revision:{sampleId:f.textureSample.id,status:'ACTIVE'}}})).toBe(4);
++    await order.reviseAnalyses(f.textureSample.id,{analyses:[],reason:'Explicit removal of fraction work'},f.actor,{tx:f.db});
++    const items=await f.db.workItem.findMany({where:{sampleId:f.textureSample.id}});
++    expect(items.every(item=>item.status==='WAIVED'&&item.reanalysisReason==='Explicit removal of fraction work')).toBe(true);
++});
++
++test('initial generation for a new four-selection sample still creates only the logical TEXTURE measurement owner',async()=>{
++    const f=await textureFixture({fractions:[],initial:false});
++    const sample=await require('../helpers/workflowFixtures').createSampleFixture(f.db,{data:{id:randomUUID(),originalId:randomUUID(),
++        assignedLab:f.labId,status:'PROCESSING',requiredAnalyses:'["SAND","SILT","CLAY","TEXTURE"]'}});
++    await f.db.$transaction(async tx=>{const intake=require('../../services/intakeWorkItemService');
++        await intake.generate(tx,sample,await intake.planForSample(tx,sample),f.actor);});
++    const items=await f.db.workItem.findMany({where:{sampleId:sample.id,analysis:{notIn:['DRYING','PREPARATION']}}});
++    expect(items.map(item=>item.analysis)).toEqual(['TEXTURE']);
++    const lines=await f.db.orderLine.findMany({where:{revision:{sampleId:sample.id,status:'ACTIVE'}}});
++    expect(lines).toHaveLength(1);expect(lines[0]).toMatchObject({analysis:'TEXTURE',workItemId:items[0].id});
++});
++
++test('kit counts separate fraction line refusals and incomplete owner samples without touching the original triple',async()=>{
++    const f=await textureFixture({fractions:['SAND','SILT']}),physical=triples(f.file);
++    const result=installer.installOrderRevisions({dbPath:f.file});
++    expect(triples(f.file)).toEqual(physical);
++    expect(result.impact).toMatchObject({fractionOwnerRefusalCount:2,incompleteTextureOwnerSampleCount:1,
++        refusalCounts:{FRACTION_OWNER_LINE_REQUIRED:2}});
++    expect(result.impact.incompleteTextureOwners).toEqual([{sampleId:f.textureSample.id,
++        workItemIds:expect.arrayContaining(f.textureOwners.filter(item=>item.analysis!=='TEXTURE').map(item=>item.id)),missingFractions:['CLAY']}]);
++    expect(result.impact.refusedOpenWorkItems.filter(item=>item.sampleId===f.textureSample.id)).toEqual(expect.arrayContaining([
++        expect.objectContaining({analysis:'SAND',cause:'FRACTION_OWNER_LINE_REQUIRED',orderLineCause:'NO_LINE'}),
++        expect.objectContaining({analysis:'SILT',cause:'FRACTION_OWNER_LINE_REQUIRED',orderLineCause:'NO_LINE'})]));
++});
++
++test('installer dry/apply/repeat retains three ACTIVE histories, every line and a null historical OPEN identity', async () => {
++    const f = await fixture({ revisions: 3, historicalOpen: true }), before = await rows(f), physical = triples(f.file);
++    const dry = installer.installOrderRevisions({ dbPath: f.file });
++    expect(dry).toMatchObject({ classification: 'PRE_209', mode: 'DRY_RUN', totalChanges: 0, backfilledCount: 0,
++        impact: { multipleActiveSampleCount: 1 } });
++    expect(triples(f.file)).toEqual(physical);
++    expect(dry.impact).toMatchObject({ continuingReservedOpenCount: 1,
++        refusalCounts: { NO_LINE: 0, AMBIGUOUS_LINE: 0, MULTIPLE_ACTIVE_REVISIONS: 0 } });
++    expect(dry.impact.continuingReservedOpenWorkItems).toEqual([expect.objectContaining({ attemptId: f.openId, retainedOrderLineId: null })]);
++    expect(installer.installOrderRevisions({ dbPath: f.file, apply: true })).toMatchObject({ classification: 'COMPLETE_209', originalRowsPreserved: true, backfilledCount: 0 });
++    expect(await rows(f)).toEqual(before);
++    const after = triples(f.file);
++    expect(installer.installOrderRevisions({ dbPath: f.file, apply: true })).toMatchObject({ classification: 'COMPLETE_209', mode: 'NO_OP', totalChanges: 0 });
++    expect(triples(f.file)).toEqual(after);
++});
++
++test('a full reasoned revision supersedes all three ACTIVE ids while every old line and attempt stays byte-equivalent', async () => {
++    const f = await fixture({ revisions: 3, historicalOpen: true }), before = await rows(f);
++    installer.installOrderRevisions({ dbPath: f.file, apply: true });
++    const result = await order.reviseAnalyses(f.items[0].sampleId, { analyses: [f.items[0].analysis], reason: 'Reviewed complete target against actual work' }, f.actor, { tx: f.db, mode: 'order' });
++    expect(result.revision.status).toBe('ACTIVE');
++    expect(await f.db.sampleOrderRevision.count({ where: { sampleId: f.items[0].sampleId, status: 'ACTIVE' } })).toBe(1);
++    expect(await f.db.sampleOrderRevision.count({ where: { sampleId: f.items[0].sampleId, status: 'SUPERSEDED' } })).toBe(3);
++    const after = await rows(f);
++    expect(after.lines.filter(line => before.lines.some(old => old.id === line.id))).toEqual(before.lines);
++    expect(after.attempts).toEqual(before.attempts);
++    const audit = await f.db.auditLog.findFirst({ where: { sampleId: f.items[0].sampleId, action: 'ORDER_REVISION_APPLIED' } });
++    expect(JSON.parse(audit.details)).toMatchObject({ priorActiveCount: 3, supersededRevisionIds: before.revisions.map(row => row.id) });
++    const newLines = await f.db.orderLine.findMany({ where: { revisionId: result.revision.id } });
++    expect(newLines).toHaveLength(1); expect(newLines[0].workItemId).toBe(f.items[0].id);
++});
++
++test('legacy single-match resolution writes only the newly inserted attempt link', async () => {
++    const f = await fixture(), before = await rows(f);
++    installer.installOrderRevisions({ dbPath: f.file, apply: true });
++    const result = await f.result(f.items[0]);
++    const attempt = await f.db.workAttempt.findUnique({ where: { id: result.attemptId } });
++    expect(attempt.orderLineId).toBe(before.lines[0].id);
++    expect((await rows(f)).lines).toEqual(before.lines);
++    expect((await f.db.orderLine.findUnique({ where: { id: before.lines[0].id } })).workItemId).toBeNull();
++});
++
++test.each([[0, 0, 'NO_LINE'], [1, 2, 'AMBIGUOUS_LINE'], [2, 1, 'MULTIPLE_ACTIVE_REVISIONS']])(
++    'a legacy %i-revision/%i-line context refuses with %s and no row writes', async (revisions, lines, cause) => {
++        const f = await fixture({ revisions, lines }); installer.installOrderRevisions({ dbPath: f.file, apply: true });
++        const before = await rows(f);
++        await expect(f.db.$transaction(tx => resolveOrderLine(tx, f.items[0]))).rejects.toMatchObject({ code: 'ORDER_LINE_REQUIRED', statusCode: 409, details: { cause } });
++        expect(await rows(f)).toEqual(before);
++        expect(installer.installOrderRevisions({ dbPath: f.file }).impact.refusalCounts[cause]).toBe(1);
++    });
++
++test('a retained OPEN attempt fills with its original null order-line identity', async () => {
++    const f = await fixture({ historicalOpen: true }); installer.installOrderRevisions({ dbPath: f.file, apply: true });
++    const before = (await rows(f)).attempts.find(row => row.id === f.openId);
++    let result;
++    try { result = await f.result(f.items[0]); }
++    catch (error) { throw new Error('Historical first-fill guard: ' + error.code + ': ' + error.message); }
++    expect(result.attemptId).toBe(f.openId);
++    expect(await f.db.workAttempt.findUnique({ where: { id: f.openId } })).toMatchObject({ status: 'RECORDED', orderLineId: null });
++    const after = (await rows(f)).attempts.find(row => row.id === f.openId);
++    for (const field of ['id','workItemId','orderLineId','attemptNo','batchId','reason','requestedBy','requestedAt','parentAttemptId','note',
++        'rawData','calcVersion','dilutionFactor','aliquotId','legacyAttemptNoConflict','version','createdAt','updatedAt']) expect(after[field]).toEqual(before[field]);
++});
++
++test('two concurrent complete revisions leave exactly one ACTIVE revision', async () => {
++    const f = await fixture({ revisions: 3 }); installer.installOrderRevisions({ dbPath: f.file, apply: true });
++    const outcomes = await Promise.allSettled([1, 2].map(index => order.reviseAnalyses(f.items[0].sampleId,
++        { analyses: [f.items[0].analysis], reason: 'Reviewed concurrent full target ' + index }, f.actor, { tx: f.db, mode: 'order' })));
++    expect(outcomes.some(outcome => outcome.status === 'fulfilled')).toBe(true);
++    for (const outcome of outcomes) if (outcome.status === 'rejected') expect(outcome.reason).toMatchObject({ code: 'ORDER_REVISION_CHANGED', statusCode: 409 });
++    expect(await f.db.sampleOrderRevision.count({ where: { sampleId: f.items[0].sampleId, status: 'ACTIVE' } })).toBe(1);
++});
++
++test('raw new-attempt insertion cannot select one ambiguous legacy line', async () => {
++    const f = await fixture({ lines: 2 }); installer.installOrderRevisions({ dbPath: f.file, apply: true });
++    const line = await f.db.orderLine.findFirst({ where: { revision: { sampleId: f.items[0].sampleId } } });
++    const connection = new Database(f.file, { fileMustExist: true });
++    try {
++        expect(() => connection.prepare('INSERT INTO WorkAttempt(id,workItemId,orderLineId,attemptNo,status,version,createdAt,updatedAt) VALUES(?,?,?,?,?,?,?,?)')
++            .run(randomUUID(), f.items[0].id, line.id, 1, 'OPEN', 1, 1, 1)).toThrow('ORDER_LINE_REQUIRED');
++    } finally { connection.close(); }
++    expect(await f.db.workAttempt.count({ where: { workItemId: f.items[0].id } })).toBe(0);
++});
++
++test('a new linked line cannot have its ownership or analysis rewritten', async () => {
++    const f = await fixture({ revisions: 3 }); installer.installOrderRevisions({ dbPath: f.file, apply: true });
++    const revised = await order.reviseAnalyses(f.items[0].sampleId, { analyses: [f.items[0].analysis], reason: 'Reviewed immutable line identity' }, f.actor, { tx: f.db, mode: 'order' });
++    const line = await f.db.orderLine.findFirst({ where: { revisionId: revised.revision.id } }), before = JSON.stringify(line);
++    const connection = new Database(f.file, { fileMustExist: true });
++    try {
++        expect(() => connection.prepare('UPDATE OrderLine SET workItemId=NULL WHERE id=?').run(line.id)).toThrow('ORDER_LINE_IDENTITY_IMMUTABLE');
++        expect(() => connection.prepare('UPDATE OrderLine SET analysis=? WHERE id=?').run('OTHER', line.id)).toThrow('ORDER_LINE_IDENTITY_IMMUTABLE');
++    } finally { connection.close(); }
++    expect(JSON.stringify(await f.db.orderLine.findUnique({ where: { id: line.id } }))).toBe(before);
++});
++
++test('a reasoned repeat receives its resolved legacy line at the new reservation INSERT', async () => {
++    const f = await fixture(); installer.installOrderRevisions({ dbPath: f.file, apply: true });
++    const original = await f.result(f.items[0]);
++    const originalAttempt = await f.db.workAttempt.findUnique({ where: { id: original.attemptId } });
++    const result = await require('../../services/workRepeatService').requestRepeat(f.db, f.items[0].id, f.actor,
++        { reason: 'INSTRUMENT_FAULT', note: 'Reviewed remeasurement request' });
++    expect(result.attempt).toMatchObject({ status: 'OPEN', orderLineId: originalAttempt.orderLineId, parentAttemptId: originalAttempt.id });
++    expect(result.attempt.id).not.toBe(originalAttempt.id);
++    expect(await f.db.workAttempt.findUnique({ where: { id: originalAttempt.id } })).toMatchObject({ orderLineId: originalAttempt.orderLineId });
++});
++
++test('scientific amendment authorisation links only its newly reserved attempt to the current order', async () => {
++    const f = await qcGateFixture({ status: 'ACCEPTED', resolvedRules: false, fixedWindowPolicy: false }); held.push(f);
++    const item = f.items[0], original = await f.result(item);
++    await require('../../services/sampleStateService').transitionSample(item.sampleId, 'APPROVED', f.actor,
++        'Owned completed approval before amendment', {}, f.db);
++    const before = await rows(f), service = require('../../services/scientificAmendmentService');
++    const requested = await service.requestScientificAmendment(f.db, item.sampleId, f.actor,
++        { reason: 'Reviewed client retest of retained finding', reasonCode: 'CLIENT_RETEST', selectedWorkItemIds: [item.id] });
++    const approved = await service.authoriseScientificAmendment(f.db, item.sampleId, requested.amendment.id,
++        { ...f.actor, username: 'system:other-authoriser' }, { expectedVersion: requested.amendment.version });
++    expect(approved.attempts).toHaveLength(1);
++    expect(approved.attempts[0]).toMatchObject({ status: 'OPEN', parentAttemptId: original.attemptId, orderLineId: before.lines[0].id });
++    const after = await rows(f);
++    expect(after.lines).toEqual(before.lines);
++    expect(after.attempts.filter(row => row.id === original.attemptId)).toEqual(before.attempts);
++});
++
++test('order revisions enforce permission and laboratory scope before changing retained rows', async () => {
++    const f = await fixture(); installer.installOrderRevisions({ dbPath: f.file, apply: true });
++    const before = await rows(f), input = { analyses: [f.items[0].analysis], reason: 'Reviewed complete order' };
++    await expect(order.reviseAnalyses(f.items[0].sampleId, input, { ...f.actor, role: 'TECHNICIAN' }, { tx: f.db }))
++        .rejects.toMatchObject({ code: 'EDIT_ANALYSES_FORBIDDEN', statusCode: 403 });
++    await expect(order.reviseAnalyses(f.items[0].sampleId, input, { ...f.actor, role: 'LAB_MANAGER', labId: randomUUID() }, { tx: f.db }))
++        .rejects.toMatchObject({ statusCode: 403 });
++    expect(await rows(f)).toEqual(before);
++});
++
++test('the read-only kit collector preserves an active WAL triple and accounts for every nested retained snapshot', async () => {
++    const f = await fixture({ revisions: 3, historicalOpen: true });
++    const writer = new Database(f.file, { fileMustExist: true });
++    try {
++        writer.pragma('journal_mode=WAL');
++        writer.prepare('INSERT INTO AuditLog(id,entity,entityId,action,performedBy,timestamp) VALUES(?,?,?,?,?,?)')
++            .run(randomUUID(), 'SAMPLE', f.items[0].sampleId, 'OWNED_IMPACT_WAL_CONTEXT', 'system:fixture', Date.now());
++        const before = triples(f.file), result = require('../../scripts/order_revision_impact').collectOrderRevisionImpact({ dbPath: f.file });
++        expect(before['-wal']).not.toBeNull(); expect(triples(f.file)).toEqual(before);
++        expect(result).toMatchObject({ classification: 'PRE_209', access: 'RETAINED_SNAPSHOT_ONLY', totalChanges: 0,
++            originalFilesPreserved: true, productionMutations: 0, impact: { multipleActiveSampleCount: 1, continuingReservedOpenCount: 1 } });
++        expect(result.retainedAllocation.files.filter(row => row.path.endsWith('snapshot.db')).length).toBeGreaterThanOrEqual(2);
++        expect(result.retainedAllocation.conservativeAllocationBytes).toBeGreaterThanOrEqual(result.retainedAllocation.logicalBytes);
++        for (const retained of result.retainedAllocation.files) {
++            expect(fs.existsSync(retained.path)).toBe(true);
++            expect(createHash('sha256').update(fs.readFileSync(retained.path)).digest('hex')).toBe(retained.sha256);
++        }
++    } finally { writer.close(); }
++});
++
++test('the actual shipped post-start order programme preserves an owned WAL-mode original without sidecars', async () => {
++    const f = await qcGateFixture({ resolvedRules:false,fixedWindowPolicy:false }); held.push(f); await f.db.$disconnect();
++    const target = f.file + '.post-order-' + randomUUID() + '.db';
++    for (const suffix of ['','-wal','-shm']) if (fs.existsSync(f.file + suffix)) fs.copyFileSync(f.file + suffix,target + suffix,fs.constants.COPYFILE_EXCL);
++    const writer = new Database(target,{fileMustExist:true}); try { writer.pragma('journal_mode=WAL'); } finally { writer.close(); }
++    const before = triples(target); expect(before['-wal']).toBeNull(); expect(before['-shm']).toBeNull();
++    const path = require('node:path'), root = path.resolve(__dirname,'../../..');
++    const rehearsal = fs.readFileSync(path.join(root,'server/scripts/rehearsal_deployment_readiness.cjs'),'utf8');
++    const section = rehearsal.slice(rehearsal.indexOf('const orderAfterOutput ='),rehearsal.indexOf('const orderAfter = JSON.parse'));
++    const programme = section.match(/IMAGE_TAG,'node','-e',\s*`([\s\S]*?)`\s*\]/)[1].replace("'/owned-order/dev.db'",JSON.stringify(target));
++    const actual = JSON.parse(require('node:child_process').execFileSync(process.execPath,['-e',programme],{cwd:path.join(root,'server'),encoding:'utf8'}));
++    expect(actual).toMatchObject({ready:{classification:'COMPLETE_209',totalChanges:0},again:{mode:'NO_OP',totalChanges:0},
++        impact:{originalFilesPreserved:true,totalChanges:0},dbWalShmPreserved:true,secondaryInspectionsOnRetainedSnapshot:true});
++    expect(triples(target)).toEqual(before);
++});
++
++test.each([
++    ['wrong type', connection => connection.exec('ALTER TABLE OrderLine ADD COLUMN workItemId INTEGER')],
++    ['unreviewed foreign key', connection => connection.exec('ALTER TABLE OrderLine ADD COLUMN workItemId TEXT REFERENCES WorkItem(id)')],
++    ['tampered index', connection => connection.exec('ALTER TABLE OrderLine ADD COLUMN workItemId TEXT; CREATE INDEX OrderLine_workItemId_idx ON OrderLine(analysis)')],
++    ['partial guard', connection => connection.exec("CREATE TRIGGER SampleOrderRevision_active_insert BEFORE INSERT ON SampleOrderRevision BEGIN SELECT RAISE(ABORT,'OWNED_PARTIAL_209'); END;")]
++])('the read-only owner refuses partial or mismatched schema without touching the original triple: %s', async (_name, change) => {
++    const f = await fixture(), connection = new Database(f.file,{fileMustExist:true});
++    try { change(connection); } finally { connection.close(); }
++    const before = triples(f.file), retained = await rows(f);
++    expect(() => installer.installOrderRevisions({dbPath:f.file,apply:true})).toThrow('Order storage differs');
++    expect(triples(f.file)).toEqual(before); expect(await rows(f)).toEqual(retained);
++});
++
++test('an actual Prisma-wrapped native order guard returns the service-owned stable code', async () => {
++    const f = await fixture({lines:2}); installer.installOrderRevisions({dbPath:f.file,apply:true});
++    const before = await rows(f), lineId = before.lines[0].id;
++    await expect(f.db.$transaction(tx => require('../../services/orderAttemptWriteService').insertOrderBoundAttempt(tx,
++        {id:randomUUID(),workItemId:f.items[0].id,orderLineId:lineId,attemptNo:1,status:'OPEN',version:1,createdAt:new Date(),updatedAt:new Date()})))
++        .rejects.toMatchObject({code:'ORDER_ATTEMPT_INSERT_REFUSED',statusCode:409});
++    expect(await rows(f)).toEqual(before);
++});
++
++function addOwnedInsertRefusal(f) {
++    const connection = new Database(f.file,{fileMustExist:true});
++    try { connection.exec("CREATE TRIGGER owned_order_attempt_refusal BEFORE INSERT ON WorkAttempt BEGIN SELECT RAISE(ABORT,'OWNED_GUARD_REFUSAL'); END;"); }
++    finally { connection.close(); }
++}
++
++function addOwnedInitialRevisionRefusal(f) {
++    const connection=new Database(f.file,{fileMustExist:true});
++    try {connection.exec("CREATE TRIGGER owned_initial_order_refusal BEFORE INSERT ON SampleOrderRevision BEGIN SELECT RAISE(ABORT,'OWNED_INITIAL_ORDER_REFUSAL'); END;");}
++    finally {connection.close();}
++}
++function addOwnedInitialLineRefusal(f) {
++    const connection=new Database(f.file,{fileMustExist:true});
++    try {connection.exec("CREATE TRIGGER owned_initial_line_refusal BEFORE INSERT ON OrderLine BEGIN SELECT RAISE(ABORT,'OWNED_INITIAL_LINE_REFUSAL'); END;");}
++    finally {connection.close();}
++}
++
++test.each([['revision',addOwnedInitialRevisionRefusal],['line',addOwnedInitialLineRefusal]])(
++    'an actual initial %s INSERT failure rolls back all generated WorkItems, order rows and audits in the same intake transaction',async(_name,refuse)=>{
++        const f=await qcGateFixture({resolvedRules:false,fixedWindowPolicy:false});held.push(f);
++        const sample=await require('../helpers/workflowFixtures').createSampleFixture(f.db,{data:{id:randomUUID(),originalId:randomUUID(),
++            assignedLab:f.labId,status:'PROCESSING',requiredAnalyses:JSON.stringify([f.analysisCode])}});
++        refuse(f);const before=await f.snapshot();
++        await expect(f.db.$transaction(async tx=>{const intake=require('../../services/intakeWorkItemService');
++            await intake.generate(tx,sample,await intake.planForSample(tx,sample),f.actor);})) .rejects.toBeDefined();
++        expect(await f.snapshot()).toEqual(before);
++        expect(await f.db.workItem.count({where:{sampleId:sample.id}})).toBe(0);
++        expect(await f.db.sampleOrderRevision.count({where:{sampleId:sample.id}})).toBe(0);
++    });
++
++test('runtime-reachable missing revision and missing matching line remain zero-write refusals and have distinct read-only impact lists',async()=>{
++    for(const [revisions,contextCause] of [[0,'NO_ACTIVE_REVISION'],[1,'NO_MATCHING_LINE']]){
++        const f=await fixture({revisions,lines:0});installer.installOrderRevisions({dbPath:f.file,apply:true});
++        const before=await f.snapshot();
++        await expect(f.db.$transaction(tx=>resolveOrderLine(tx,f.items[0]))).rejects.toMatchObject({code:'ORDER_LINE_REQUIRED',statusCode:409,
++            details:{cause:'NO_LINE',contextCause}});
++        expect(await f.snapshot()).toEqual(before);
++        const physical=triples(f.file),impact=installer.installOrderRevisions({dbPath:f.file}).impact;
++        expect(triples(f.file)).toEqual(physical);
++        expect(impact.refusalCounts.NO_LINE).toBe(1);
++        expect(impact.noActiveRevisionCount).toBe(revisions===0?1:0);
++        expect(impact.noMatchingLineCount).toBe(revisions===1?1:0);
++        expect(impact.refusedOpenWorkItems).toEqual([expect.objectContaining({sampleId:f.items[0].sampleId,contextCause})]);
++    }
++});
++
++test('an approved orphan remains non-editable and its prospective amendment impact requires STOP with sample ids, without writes',async()=>{
++    const f=await qcGateFixture({resolvedRules:false,fixedWindowPolicy:false});held.push(f);
++    const helpers=require('../helpers/workflowFixtures');
++    const sample=await helpers.createSampleFixture(f.db,{data:{id:randomUUID(),originalId:randomUUID(),assignedLab:f.labId,
++        status:'APPROVED',requiredAnalyses:JSON.stringify([f.analysisCode])}});
++    const item=await helpers.createWorkItemFixture(f.db,{data:{id:randomUUID(),sampleId:sample.id,assignedLab:f.labId,
++        analysis:f.analysisCode,status:'ACCEPTED'}});
++    const before=await f.snapshot();
++    await expect(order.reviseAnalyses(sample.id,{analyses:[f.analysisCode],reason:'Orphan order remedy requested'},f.actor,{tx:f.db}))
++        .rejects.toMatchObject({code:'AMENDMENT_WORKFLOW_REQUIRED',statusCode:409});
++    await expect(f.db.$transaction(tx=>resolveOrderLine(tx,item))).rejects.toMatchObject({code:'ORDER_LINE_REQUIRED',statusCode:409});
++    expect(await f.snapshot()).toEqual(before);
++    const physical=triples(f.file),impact=installer.installOrderRevisions({dbPath:f.file}).impact;
++    expect(triples(f.file)).toEqual(physical);
++    expect(impact).toMatchObject({prospectiveApprovedAmendmentRefusalCount:1,prospectiveApprovedAmendmentSampleCount:1,
++        approvedAmendmentSampleIds:[sample.id],approvedAmendmentKitGate:'STOP_APPROVED_AMENDMENT_REMEDIATION_REQUIRED'});
++    expect(impact.prospectiveApprovedAmendmentRefusals).toEqual([expect.objectContaining({sampleId:sample.id,workItemId:item.id,
++        cause:'NO_LINE',contextCause:'NO_ACTIVE_REVISION'})]);
++    expect(impact.refusedOpenWorkItems.some(row=>row.workItemId===item.id)).toBe(false);
++});
++test('first execution maps an actual wrapped INSERT refusal and rolls back all result and audit writes', async () => {
++    const f = await fixture(); installer.installOrderRevisions({dbPath:f.file,apply:true}); addOwnedInsertRefusal(f);
++    const before = await f.snapshot();
++    await expect(f.result(f.items[0])).rejects.toMatchObject({code:'ORDER_ATTEMPT_INSERT_REFUSED',statusCode:409});
++    expect(await f.snapshot()).toEqual(before);
++});
++test('repeat reservation maps an actual wrapped INSERT refusal and rolls back its parent transition', async () => {
++    const f = await fixture(); installer.installOrderRevisions({dbPath:f.file,apply:true}); await f.result(f.items[0]); addOwnedInsertRefusal(f);
++    const before = await f.snapshot(), attempts = (await rows(f)).attempts;
++    await expect(require('../../services/workRepeatService').requestRepeat(f.db,f.items[0].id,f.actor,
++        {reason:'INSTRUMENT_FAULT',note:'Owned rejected repeat'})).rejects.toMatchObject({code:'ORDER_ATTEMPT_INSERT_REFUSED',statusCode:409});
++    expect(await f.snapshot()).toEqual(before); expect((await rows(f)).attempts).toEqual(attempts);
++});
++test('scientific reservation maps an actual wrapped INSERT refusal and retains its PENDING authorisation', async () => {
++    const f = await qcGateFixture({status:'ACCEPTED',resolvedRules:false,fixedWindowPolicy:false}); held.push(f);
++    const item = f.items[0]; await f.result(item);
++    await require('../../services/sampleStateService').transitionSample(item.sampleId,'APPROVED',f.actor,'Owned completed approval',{},f.db);
++    const service = require('../../services/scientificAmendmentService');
++    const requested = await service.requestScientificAmendment(f.db,item.sampleId,f.actor,
++        {reason:'Owned client retest',reasonCode:'CLIENT_RETEST',selectedWorkItemIds:[item.id]}); addOwnedInsertRefusal(f);
++    const before = await f.snapshot(), attempts = (await rows(f)).attempts;
++    await expect(service.authoriseScientificAmendment(f.db,item.sampleId,requested.amendment.id,
++        {...f.actor,username:'system:other-authoriser'},{expectedVersion:requested.amendment.version}))
++        .rejects.toMatchObject({code:'ORDER_ATTEMPT_INSERT_REFUSED',statusCode:409});
++    expect(await f.snapshot()).toEqual(before); expect((await rows(f)).attempts).toEqual(attempts);
++    expect(await f.db.sampleAmendment.findUnique({where:{id:requested.amendment.id}})).toMatchObject({status:'PENDING',version:requested.amendment.version});
++});
+diff --git a/server/tests/contracts/issue_209_order_revision_request.test.js b/server/tests/contracts/issue_209_order_revision_request.test.js
+new file mode 100644
+index 00000000..258d2062
+--- /dev/null
++++ b/server/tests/contracts/issue_209_order_revision_request.test.js
+@@ -0,0 +1,51 @@
++const { orderRevisionRequest } = require('../../services/orderRevisionContract');
++
++const facts = { currentAnalyses: ['PH_H2O'], priorActiveCount: 1 };
++const errorCode = (action, code, status) => {
++    try { action(); throw new Error('Expected refusal'); }
++    catch (error) { expect(error).toMatchObject({ code, statusCode: status }); }
++};
++
++describe('#209 reasoned complete order request', () => {
++    test.each([undefined, null, '', '   ', 42])('a changed order refuses invalid reason %p', reason => {
++        errorCode(() => orderRevisionRequest({ analyses: ['PH_H2O', 'SOC'], reason }, facts),
++            'TRANSITION_REASON_REQUIRED', 400);
++    });
++    test('normalises aliases, whitespace and compound codes before comparing the complete set', () => {
++        const input = { analyses: [' Particle Size Analysis ', 'TEXTURE', 'exchangeableBases'], reason: '  Client revised the order  ' };
++        const before = JSON.stringify(input);
++        expect(orderRevisionRequest(input, facts)).toEqual({ analyses: ['TEXTURE', 'EXCH_CA', 'EXCH_MG', 'EXCH_K', 'EXCH_NA'],
++            reason: 'Client revised the order', changed: true, explicitTarget: true });
++        expect(JSON.stringify(input)).toBe(before);
++    });
++    test('equivalent normalised sets are a no-op without an invented reason', () => {
++        expect(orderRevisionRequest({ analyses: ['TEXTURE', 'PH_H2O'] },
++            { currentAnalyses: ['PH_H2O', 'pSA'], priorActiveCount: 1 })).toMatchObject({ changed: false, reason: null });
++    });
++    test('three historical ACTIVE revisions require an explicit complete set', () => {
++        errorCode(() => orderRevisionRequest({ reason: 'Reviewed all orders' }, { ...facts, priorActiveCount: 3 }),
++            'ORDER_TARGET_REQUIRED', 409);
++    });
++    test('an unchanged target still needs a deliberate reason when repairing ACTIVE ambiguity', () => {
++        errorCode(() => orderRevisionRequest({ analyses: ['PH_H2O'] }, { ...facts, priorActiveCount: 3 }),
++            'TRANSITION_REASON_REQUIRED', 400);
++        expect(orderRevisionRequest({ analyses: ['PH_H2O'], reason: 'Reviewed all prior revisions' },
++            { ...facts, priorActiveCount: 3 })).toMatchObject({ changed: true, explicitTarget: true });
++    });
++    test('a complete empty set is a reasoned request, leaving downstream reconciliation to protect recorded work', () => {
++        expect(orderRevisionRequest({ analyses: [], reason: 'No remaining requested analyses' }, facts)).toMatchObject({ analyses: [], changed: true });
++    });
++    test('a reasoned line repair cannot disappear as an unchanged-analysis no-op', () => {
++        errorCode(() => orderRevisionRequest({ analyses: ['PH_H2O'] }, { ...facts, requiresLineRevision: true }),
++            'TRANSITION_REASON_REQUIRED', 400);
++        expect(orderRevisionRequest({ analyses: ['PH_H2O'], reason: 'Resolve missing order line' },
++            { ...facts, requiresLineRevision: true })).toMatchObject({ changed: true });
++    });
++    test.each(['PH_H2O', [''], ['  '], [null], [42]])('refuses malformed requested selections %p', analyses => {
++        errorCode(() => orderRevisionRequest({ analyses, reason: 'Changed order' }, facts), 'INVALID_ANALYSIS_SELECTION', 400);
++    });
++    test('corrupt stored selections cannot be silently replaced', () => {
++        errorCode(() => orderRevisionRequest({ analyses: ['PH_H2O'], reason: 'Changed order' },
++            { currentAnalyses: null, priorActiveCount: 1 }), 'INVALID_STORED_ANALYSES', 409);
++    });
++});
+diff --git a/server/tests/contracts/issue_209_order_revision_ui.test.js b/server/tests/contracts/issue_209_order_revision_ui.test.js
+new file mode 100644
+index 00000000..96174a97
+--- /dev/null
++++ b/server/tests/contracts/issue_209_order_revision_ui.test.js
+@@ -0,0 +1,35 @@
++const fs = require('node:fs'), path = require('node:path');
++const { mountUi } = require('../helpers/qcWorksheetUi');
++function mount(status = 'PROCESSING') {
++    const axios = { get: jest.fn(async () => ({ data: [] })), post: jest.fn(async () => ({ data: {} })), put: jest.fn(async () => ({ data: {} })) };
++    return mountUi('components/sample/AnalysisUpdateModal.jsx', { sample: { id: 'owned-order-ui', status, requiredAnalyses: ['PH_H2O'] },
++        isOpen: true, onClose: jest.fn(), onUpdateSuccess: jest.fn() }, { axios });
++}
++const save = view => view.all().find(node => node.type === 'button' && String(view.text()).includes('Save Changes') && node.props.onClick?.name === 'handleSave');
++const reason = view => view.all().find(node => node.type === 'input' && node.props.id === 'order-revision-reason');
++
++test('the actual analysis dialog requires a reason and sends the full selection with that reason', async () => {
++    const view = mount(); await view.render();
++    expect(reason(view).props.required).toBe(true); expect(save(view).props.disabled).toBe(true);
++    await save(view).props.onClick(); await view.render(); expect(view.axios.put).not.toHaveBeenCalled();
++    expect(view.text()).toContain('orderRevision.reasonRequired');
++    reason(view).props.onChange({ target: { value: ' Reviewed full order ' } }); await view.render();
++    expect(save(view).props.disabled).toBe(false); await save(view).props.onClick();
++    expect(view.axios.put).toHaveBeenCalledWith('/api/samples/owned-order-ui/analyses',
++        expect.objectContaining({ analyses: ['PH_H2O'], reason: 'Reviewed full order' }), expect.any(Object));
++    view.unmount();
++});
++
++test.each(['APPROVED', 'ARCHIVED', 'DISPOSED'])('the actual %s dialog guides amendment and disables direct order changes', async status => {
++    const view = mount(status); await view.render();
++    reason(view).props.onChange({ target: { value: 'Reviewed request' } }); await view.render();
++    expect(save(view).props.disabled).toBe(true); expect(view.text()).toContain('orderRevision.amendmentRequired');
++    expect(view.axios.put).not.toHaveBeenCalled(); view.unmount();
++});
++
++test.each(['en','es','es-419','fr','pt'])('order-revision messages exist in both %s catalogues', locale => {
++    for (const directory of ['client/src/translations', 'server/locales']) {
++        const messages = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../../..', directory, locale + '.json'), 'utf8')).orderRevision;
++        for (const key of ['reason','reasonPlaceholder','reasonRequired','completeTarget','amendmentRequired']) expect(messages[key].trim()).not.toBe('');
++    }
++});
+diff --git a/server/tests/contracts/issue_213_export_equals_report.test.js b/server/tests/contracts/issue_213_export_equals_report.test.js
+index 63fd5882..00dd52bc 100644
+--- a/server/tests/contracts/issue_213_export_equals_report.test.js
++++ b/server/tests/contracts/issue_213_export_equals_report.test.js
+@@ -168,0 +169,3 @@ test('an analysis configured in a non-standard unit (SOC in %) keeps its unconve
++    await require('../../services/orderService').reviseAnalyses(f.item.sampleId, {
++        analyses: [f.items[0].analysis, 'SOC'], reason: 'Owned additional percent SOC determination'
++    }, f.actor, { tx: f.db });
+diff --git a/server/tests/contracts/issue_278_texture_closure_policy.test.js b/server/tests/contracts/issue_278_texture_closure_policy.test.js
+index 2a08ad45..4ac1caaa 100644
+--- a/server/tests/contracts/issue_278_texture_closure_policy.test.js
++++ b/server/tests/contracts/issue_278_texture_closure_policy.test.js
+@@ -137,0 +138,6 @@ describe('#278 laboratory policy and the real submission gate', () => {
++        // #209: declare usable legacy order lines only in this NEW owned positive assembly.
++        require('../../services/workflowStateRules').assertFixtureContext();
++        await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: sampleId,
++            version: 1, status: 'ACTIVE', reason: 'Owned QC/unit/catalogue execution order context', requestedBy: 'system:fixture',
++            lines: { create: ['SAND', 'SILT', 'CLAY'].map(analysis => ({ id: require('node:crypto').randomUUID(), analysis,
++                workItemId: null, status: 'ACTIVE', isRequired: true })) } } });
+diff --git a/server/tests/contracts/issue_281_cross_check_bounds.test.js b/server/tests/contracts/issue_281_cross_check_bounds.test.js
+index ca2546c0..247c2535 100644
+--- a/server/tests/contracts/issue_281_cross_check_bounds.test.js
++++ b/server/tests/contracts/issue_281_cross_check_bounds.test.js
+@@ -78,0 +79,4 @@ describe('#281 a stored out-of-range value', () => {
++        // #209: declare usable retained order lines during NEW owned positive fixture assembly.
++        await prisma.$transaction(tx => tx.sampleOrderRevision.create({ data: { id: randomUUID(), sampleId: sampleId,
++            version: 1, status: 'ACTIVE', reason: 'Owned retained positive execution order context', requestedBy: jwt.decode(token).username,
++            lines: { create: (codes).map(analysis => ({ id: randomUUID(), analysis, workItemId: null, status: 'ACTIVE', isRequired: true })) } } }));
+diff --git a/server/tests/contracts/issue_291_texture_input_authority.test.js b/server/tests/contracts/issue_291_texture_input_authority.test.js
+index 48ea0426..b1ad2932 100644
+--- a/server/tests/contracts/issue_291_texture_input_authority.test.js
++++ b/server/tests/contracts/issue_291_texture_input_authority.test.js
+@@ -62,0 +63,3 @@ async function fixture(unit,values=[40,40,19],censoring={}) {
++    await require('../../services/orderService').reviseAnalyses(sample.id, {
++        analyses: ['TEXTURE'], reason: 'Owned complete existing fraction and texture order context'
++    }, f.actor, { tx: f.db, mode: 'order' });
+diff --git a/server/tests/contracts/mandatory_reason.test.js b/server/tests/contracts/mandatory_reason.test.js
+index 38d5c8e1..d08428b5 100644
+--- a/server/tests/contracts/mandatory_reason.test.js
++++ b/server/tests/contracts/mandatory_reason.test.js
+@@ -99,0 +100,6 @@ describe('SD-10: Mandatory Reason on Rejection and Reopening Contract', () => {
++        // #209: usable order context is declared only in this NEW owned fixture assembly.
++        require('../../services/workflowStateRules').assertFixtureContext();
++        await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: sampleId,
++            version: 1, status: 'ACTIVE', reason: 'Owned numerical execution order context', requestedBy: 'system:fixture',
++            lines: { create: ['PH_H2O'].map(analysis => ({ id: require('node:crypto').randomUUID(), analysis,
++                workItemId: null, status: 'ACTIVE', isRequired: true })) } } });
+diff --git a/server/tests/contracts/matrix_blocking_diagnostics.test.js b/server/tests/contracts/matrix_blocking_diagnostics.test.js
+index 2b29726a..44c3c87c 100644
+--- a/server/tests/contracts/matrix_blocking_diagnostics.test.js
++++ b/server/tests/contracts/matrix_blocking_diagnostics.test.js
+@@ -35,0 +36,6 @@ describe('WP-15: Blocking vs Advisory Scientific Matrix Diagnostics', () => {
++        // #209: usable order context is declared only in this NEW owned fixture assembly.
++        require('../../services/workflowStateRules').assertFixtureContext();
++        await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: testSampleId,
++            version: 1, status: 'ACTIVE', reason: 'Owned numerical execution order context', requestedBy: 'system:fixture',
++            lines: { create: analysisDefinitions.map(([code]) => code).map(analysis => ({ id: require('node:crypto').randomUUID(), analysis,
++                workItemId: null, status: 'ACTIVE', isRequired: true })) } } });
+diff --git a/server/tests/contracts/matrix_validation.test.js b/server/tests/contracts/matrix_validation.test.js
+index fa12f943..c142b525 100644
+--- a/server/tests/contracts/matrix_validation.test.js
++++ b/server/tests/contracts/matrix_validation.test.js
+@@ -14,0 +15,6 @@ async function assignOrderedWork(sampleId, token) {
++    // #209: usable order context is declared only in this NEW owned fixture assembly.
++    require('../../services/workflowStateRules').assertFixtureContext();
++    await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: sampleId,
++        version: 1, status: 'ACTIVE', reason: 'Owned numerical execution order context', requestedBy: 'system:fixture',
++        lines: { create: parameters.map(([code]) => code).map(analysis => ({ id: require('node:crypto').randomUUID(), analysis,
++            workItemId: null, status: 'ACTIVE', isRequired: true })) } } });
+diff --git a/server/tests/contracts/mobile_offline_sync.test.js b/server/tests/contracts/mobile_offline_sync.test.js
+index f8e3a49b..f80a0b50 100644
+--- a/server/tests/contracts/mobile_offline_sync.test.js
++++ b/server/tests/contracts/mobile_offline_sync.test.js
+@@ -228,0 +229,6 @@ describe('Mobile Offline Work & Idempotent Synchronization Contracts', () => {
++            // #209: only this NEW owned positive analytical execution gets its order context.
++            require('../../services/workflowStateRules').assertFixtureContext();
++            await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(),
++                sampleId: testSample.id, version: 1, status: 'ACTIVE', reason: 'Owned mobile execution order context',
++                requestedBy: 'system:fixture', lines: { create: [{ id: require('node:crypto').randomUUID(),
++                    analysis: 'PH_H2O', workItemId: null, status: 'ACTIVE', isRequired: true }] } } });
+diff --git a/server/tests/contracts/nsis_policy_and_scoping.test.js b/server/tests/contracts/nsis_policy_and_scoping.test.js
+index 5ff2cc44..0b2e23d0 100644
+--- a/server/tests/contracts/nsis_policy_and_scoping.test.js
++++ b/server/tests/contracts/nsis_policy_and_scoping.test.js
+@@ -36,0 +37,6 @@ describe('Issue #140 Work Package P2: SIS Shared Access & Publication Policy Con
++        // #209: declared legacy order for this NEW owned accepted numerical/reference assembly.
++        require('../../services/workflowStateRules').assertFixtureContext();
++        await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: sampleApprovedGtm.id,
++            version: 1, status: 'ACTIVE', reason: 'Owned accepted reference order context', requestedBy: 'system:fixture',
++            lines: { create: [{ id: require('node:crypto').randomUUID(), analysis: 'PH_H2O',
++                workItemId: null, status: 'ACTIVE', isRequired: true }] } } });
+diff --git a/server/tests/contracts/nsis_v2_exchange.test.js b/server/tests/contracts/nsis_v2_exchange.test.js
+index 2088cdd2..c67b6f74 100644
+--- a/server/tests/contracts/nsis_v2_exchange.test.js
++++ b/server/tests/contracts/nsis_v2_exchange.test.js
+@@ -45,0 +46,6 @@ describe('Issue #140 Work Packages P3 & P4: V2 Data Exchange API Contracts', ()
++        // #209: declared legacy order for this NEW owned accepted numerical/reference assembly.
++        require('../../services/workflowStateRules').assertFixtureContext();
++        await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: sample1.id,
++            version: 1, status: 'ACTIVE', reason: 'Owned accepted reference order context', requestedBy: 'system:fixture',
++            lines: { create: [{ id: require('node:crypto').randomUUID(), analysis: 'PH_H2O',
++                workItemId: null, status: 'ACTIVE', isRequired: true }] } } });
+diff --git a/server/tests/contracts/prerequisite_gate.test.js b/server/tests/contracts/prerequisite_gate.test.js
+index 4c779c99..12166bcd 100644
+--- a/server/tests/contracts/prerequisite_gate.test.js
++++ b/server/tests/contracts/prerequisite_gate.test.js
+@@ -129,0 +130,6 @@ describe('SD-05: Server-Side Prerequisite Gate Contract', () => {
++        // #209: usable order context is declared only in this NEW owned fixture assembly.
++        require('../../services/workflowStateRules').assertFixtureContext();
++        await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: sampleId,
++            version: 1, status: 'ACTIVE', reason: 'Owned numerical execution order context', requestedBy: 'system:fixture',
++            lines: { create: ['PH_H2O'].map(analysis => ({ id: require('node:crypto').randomUUID(), analysis,
++                workItemId: null, status: 'ACTIVE', isRequired: true })) } } });
+diff --git a/server/tests/contracts/profile_identity_routes.test.js b/server/tests/contracts/profile_identity_routes.test.js
+index 5360f5ba..6a8a5217 100644
+--- a/server/tests/contracts/profile_identity_routes.test.js
++++ b/server/tests/contracts/profile_identity_routes.test.js
+@@ -34,0 +35,5 @@ describe('Mounted profile correction, scope and immutable export contracts',()=>
++        // #209: declared only for this NEW owned released numerical history.
++        require('../../services/workflowStateRules').assertFixtureContext();
++        await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: ids.released,
++            version: 1, status: 'ACTIVE', reason: 'Owned released profile execution order context', requestedBy: 'system:fixture',
++            lines: { create: [{ id: require('node:crypto').randomUUID(), analysis: 'PH_H2O', workItemId: null, status: 'ACTIVE', isRequired: true }] } } });
+diff --git a/server/tests/contracts/qc_controls.test.js b/server/tests/contracts/qc_controls.test.js
+index fb4dbec7..97bc5e4a 100644
+--- a/server/tests/contracts/qc_controls.test.js
++++ b/server/tests/contracts/qc_controls.test.js
+@@ -138,0 +139,6 @@ describe('BLK-2: Minimum Viable Typed QC Controls Contract', () => {
++        // #209: declare usable legacy order lines only in this NEW owned positive assembly.
++        require('../../services/workflowStateRules').assertFixtureContext();
++        await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: sampleId,
++            version: 1, status: 'ACTIVE', reason: 'Owned QC/unit/catalogue execution order context', requestedBy: 'system:fixture',
++            lines: { create: [item.analysis].map(analysis => ({ id: require('node:crypto').randomUUID(), analysis,
++                workItemId: null, status: 'ACTIVE', isRequired: true })) } } });
+diff --git a/server/tests/contracts/qc_disposition_flagging.test.js b/server/tests/contracts/qc_disposition_flagging.test.js
+index 1ee7ec1f..1c9e68fd 100644
+--- a/server/tests/contracts/qc_disposition_flagging.test.js
++++ b/server/tests/contracts/qc_disposition_flagging.test.js
+@@ -31,0 +32,6 @@ describe('WP-29: QC Service & Batch Disposition Result Flagging', () => {
++        // #209: usable legacy order context only for this NEW owned positive execution assembly.
++        require('../../services/workflowStateRules').assertFixtureContext();
++        await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: testSampleId,
++            version: 1, status: 'ACTIVE', reason: 'Owned workbench/QC execution order context', requestedBy: 'system:fixture',
++            lines: { create: ['PH'].map(analysis => ({ id: require('node:crypto').randomUUID(), analysis,
++                workItemId: null, status: 'ACTIVE', isRequired: true })) } } });
+diff --git a/server/tests/contracts/qc_disposition_release_gate.test.js b/server/tests/contracts/qc_disposition_release_gate.test.js
+index 8b60424e..1d84a28e 100644
+--- a/server/tests/contracts/qc_disposition_release_gate.test.js
++++ b/server/tests/contracts/qc_disposition_release_gate.test.js
+@@ -29,0 +30,29 @@ const evidenceBatch = async id => batchApiView(await prisma.batch.findUnique({ w
++// #209: order context belongs only to this NEW owned QC fixture assembly.
++async function declareOwnedQcOrderContext(sampleId) {
++    require('../../services/workflowStateRules').assertFixtureContext();
++    await prisma.$transaction(async tx => {
++        const main = (await tx.$queryRawUnsafe('PRAGMA database_list')).find(row => row.name === 'main');
++        const path = require('node:path'), fs = require('node:fs');
++        if (!main?.file || !fs.existsSync(main.file) || path.dirname(fs.realpathSync(main.file)) !== path.resolve(__dirname, '../.tmp'))
++            throw Error('QC order context requires this owned test database.');
++        if (process.env.PRODUCTION_DATABASE_PATH && path.resolve(main.file).toLowerCase() === path.resolve(process.env.PRODUCTION_DATABASE_PATH).toLowerCase())
++            throw Error('QC order context refuses production.');
++        const owners = await tx.workItem.findMany({ where: { sampleId, duplicateOf: null } });
++        const codes = [...new Set(owners.map(item => item.analysis.trim()))];
++        if (!codes.length) throw Error('QC order context requires existing canonical owners.');
++        const active = await tx.sampleOrderRevision.findMany({ where: { sampleId, status: 'ACTIVE' }, include: { lines: true } });
++        if (active.length > 1) throw Error('QC owned assembly requires a single declared active order.');
++        const uuid = () => require('node:crypto').randomUUID();
++        if (!active.length) {
++            await tx.sampleOrderRevision.create({ data: { id: uuid(), sampleId, version: 1, status: 'ACTIVE',
++                reason: 'Owned retained QC execution order context', requestedBy: 'system:fixture',
++                lines: { create: codes.map(analysis => ({ id: uuid(), analysis, workItemId: null, status: 'ACTIVE', isRequired: true })) } } });
++        } else for (const analysis of codes) {
++            const matching = active[0].lines.filter(line => line.analysis === analysis && line.status === 'ACTIVE');
++            if (matching.length > 1) throw Error('QC owned assembly refuses ambiguous declared lines.');
++            if (!matching.length) await tx.orderLine.create({ data: { id: uuid(), revisionId: active[0].id,
++                analysis, workItemId: null, status: 'ACTIVE', isRequired: true } });
++        }
++    });
++}
++
+@@ -143,0 +173 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
++        await declareOwnedQcOrderContext(sample1.id);
+@@ -211,0 +242 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
++        await declareOwnedQcOrderContext(reportId);
+@@ -424,0 +456 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
++        await declareOwnedQcOrderContext(releasedSample.id);
+@@ -439,0 +472 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
++        await declareOwnedQcOrderContext(manualInvalidData.sampleId);
+@@ -518,0 +552 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
++        await declareOwnedQcOrderContext(activeSample.id);
+@@ -576,0 +611 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
++        await declareOwnedQcOrderContext(activeSample.id);
+@@ -594,0 +630 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
++        await declareOwnedQcOrderContext(activeSample.id);
+@@ -612,0 +649 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
++        await declareOwnedQcOrderContext(activeSample.id);
+@@ -630,0 +668 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
++        await declareOwnedQcOrderContext(activeSample.id);
+@@ -687,0 +726 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
++        await declareOwnedQcOrderContext(archivedSample.id);
+@@ -714,0 +754 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
++        await declareOwnedQcOrderContext(disposedSample.id);
+@@ -749,0 +790 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
++        await declareOwnedQcOrderContext(pubSample.id);
+@@ -922,0 +964 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
++        await declareOwnedQcOrderContext(activeSample.id);
+@@ -982,0 +1025 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
++        await declareOwnedQcOrderContext(sample.id);
+@@ -1033,0 +1077 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
++        await declareOwnedQcOrderContext(sample.id);
+@@ -1079,0 +1124 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
++        await declareOwnedQcOrderContext(sample.id);
+@@ -1133,0 +1179 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
++        await declareOwnedQcOrderContext(sample.id);
+@@ -1151,0 +1198 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
++        await declareOwnedQcOrderContext(sample.id);
+@@ -1205,0 +1253 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
++        await declareOwnedQcOrderContext(histSample.id);
+diff --git a/server/tests/contracts/reconcile_analyses.test.js b/server/tests/contracts/reconcile_analyses.test.js
+index b7e03d27..3f8cd852 100644
+--- a/server/tests/contracts/reconcile_analyses.test.js
++++ b/server/tests/contracts/reconcile_analyses.test.js
+@@ -75,0 +76,3 @@ describe('SD-03: Work Item Reconciliation on Analysis List Change Contract', ()
++        await prisma.$transaction(async tx => require('../../services/orderService').createInitialOrder(tx,
++            await tx.sample.findUnique({ where: { id: sampleId } }), ['PH_H2O', 'SOC', 'CEC'],
++            require('jsonwebtoken').decode(mgrGtmToken)));
+@@ -98 +101,2 @@ describe('SD-03: Work Item Reconciliation on Analysis List Change Contract', ()
+-                analyses: ['PH_H2O', 'SOC'] // CEC dropped
++                analyses: ['PH_H2O', 'SOC'], // CEC dropped
++                reason: 'Reviewed removal while retaining recorded evidence'
+@@ -163 +167,2 @@ describe('SD-03: Work Item Reconciliation on Analysis List Change Contract', ()
+-                analyses: ['CEC'] // PH_H2O dropped
++                analyses: ['CEC'], // PH_H2O dropped
++                reason: 'Reviewed removal of unstarted analysis'
+diff --git a/server/tests/contracts/reopened_governance_scenarios.test.js b/server/tests/contracts/reopened_governance_scenarios.test.js
+index 5505ea42..b6f3491d 100644
+--- a/server/tests/contracts/reopened_governance_scenarios.test.js
++++ b/server/tests/contracts/reopened_governance_scenarios.test.js
+@@ -311,0 +312,6 @@ describe('Reopened Governance & Offline Parity Contract Tests', () => {
++            // #209: declared legacy order only for this NEW owned positive sync execution assembly.
++            require('../../services/workflowStateRules').assertFixtureContext();
++            await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: sampleA.id,
++                version: 1, status: 'ACTIVE', reason: 'Owned positive canonical sync order context', requestedBy: 'system:fixture',
++                lines: { create: ['PH_H2O', 'SPEC_MIR', 'TEXTURE'].map(analysis => ({ id: require('node:crypto').randomUUID(), analysis,
++                    workItemId: null, status: 'ACTIVE', isRequired: true })) } } });
+diff --git a/server/tests/contracts/report_pdf.test.js b/server/tests/contracts/report_pdf.test.js
+index 56857885..53a39d1e 100644
+--- a/server/tests/contracts/report_pdf.test.js
++++ b/server/tests/contracts/report_pdf.test.js
+@@ -41,0 +42,4 @@ describe('BLK-3: Report & Certificate PDF Generation Contract', () => {
++        // #209: declare usable retained order lines during NEW owned positive fixture assembly.
++        await prisma.$transaction(tx => tx.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: s.id,
++            version: 1, status: 'ACTIVE', reason: 'Owned retained positive execution order context', requestedBy: require('jsonwebtoken').decode(mgrToken).username,
++            lines: { create: (['PH_H2O','SOC','SAND','SILT','CLAY']).map(analysis => ({ id: require('node:crypto').randomUUID(), analysis, workItemId: null, status: 'ACTIVE', isRequired: true })) } } }));
+diff --git a/server/tests/contracts/result_provenance.test.js b/server/tests/contracts/result_provenance.test.js
+index 9a96a19c..f858f21f 100644
+--- a/server/tests/contracts/result_provenance.test.js
++++ b/server/tests/contracts/result_provenance.test.js
+@@ -62,0 +63,6 @@ describe('WP-31: Result Provenance Tracking', () => {
++        // #209: usable order context is declared only in this NEW owned fixture assembly.
++        require('../../services/workflowStateRules').assertFixtureContext();
++        await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: testSampleId,
++            version: 1, status: 'ACTIVE', reason: 'Owned numerical execution order context', requestedBy: 'system:fixture',
++            lines: { create: ['EC', 'CLAY_PRED', 'SOC', 'TOTAL_N'].map(analysis => ({ id: require('node:crypto').randomUUID(), analysis,
++                workItemId: null, status: 'ACTIVE', isRequired: true })) } } });
+@@ -72,0 +79,5 @@ describe('WP-31: Result Provenance Tracking', () => {
++        // #209: append only the newly assembled owner's line; retain every prior line.
++        require('../../services/workflowStateRules').assertFixtureContext();
++        const declaredOrder = await prisma.sampleOrderRevision.findFirst({ where: { sampleId: testSampleId, status: 'ACTIVE' } });
++        await prisma.orderLine.create({ data: { id: require('node:crypto').randomUUID(), revisionId: declaredOrder.id,
++            analysis: 'PH', workItemId: null, status: 'ACTIVE', isRequired: true } });
+@@ -129,0 +141,5 @@ describe('WP-31: Result Provenance Tracking', () => {
++        // #209: append only the newly assembled owner's line; retain every prior line.
++        require('../../services/workflowStateRules').assertFixtureContext();
++        const declaredOrder = await prisma.sampleOrderRevision.findFirst({ where: { sampleId: testSampleId, status: 'ACTIVE' } });
++        await prisma.orderLine.create({ data: { id: require('node:crypto').randomUUID(), revisionId: declaredOrder.id,
++            analysis: 'TEXTURE', workItemId: null, status: 'ACTIVE', isRequired: true } });
+diff --git a/server/tests/contracts/review_reports_amendments_p6.test.js b/server/tests/contracts/review_reports_amendments_p6.test.js
+index e607bdf0..6ed53505 100644
+--- a/server/tests/contracts/review_reports_amendments_p6.test.js
++++ b/server/tests/contracts/review_reports_amendments_p6.test.js
+@@ -80,0 +81,2 @@ describe('Package P6: Review, Reports & Amendments Verification', () => {
++        await prisma.$transaction(tx => require('../../services/orderService').createInitialOrder(tx,
++            sampleForReview, ['PH_H2O', 'EC'], require('jsonwebtoken').decode(mgrToken)));
+diff --git a/server/tests/contracts/sample_detail.test.js b/server/tests/contracts/sample_detail.test.js
+index d67fc558..f240f087 100644
+--- a/server/tests/contracts/sample_detail.test.js
++++ b/server/tests/contracts/sample_detail.test.js
+@@ -176 +176 @@ describe('SD-15: Comprehensive Sample Detail End-to-End Contract Suite', () => {
+-                    analyses: ['PH_H2O', 'EC_1_5']
++                    analyses: ['PH_H2O', 'EC_1_5'], reason: 'Reviewed removal of unstarted OC'
+@@ -230 +230 @@ describe('SD-15: Comprehensive Sample Detail End-to-End Contract Suite', () => {
+-                    analyses: [] // Attempt to remove EC_1_5
++                    analyses: [], reason: 'Reviewed recorded EC removal refusal' // Attempt to remove EC_1_5
+diff --git a/server/tests/contracts/spectral_stage_e.test.js b/server/tests/contracts/spectral_stage_e.test.js
+index 764ade9b..e011ac9c 100644
+--- a/server/tests/contracts/spectral_stage_e.test.js
++++ b/server/tests/contracts/spectral_stage_e.test.js
+@@ -100,0 +101,6 @@ describe('Spectral Library Stage E: Turn the Endpoint into a Contract (SL-22 to
++        // #209: declared legacy order for this NEW owned accepted numerical/reference assembly.
++        require('../../services/workflowStateRules').assertFixtureContext();
++        await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: sampleGtmId,
++            version: 1, status: 'ACTIVE', reason: 'Owned accepted reference order context', requestedBy: 'system:fixture',
++            lines: { create: [{ id: require('node:crypto').randomUUID(), analysis: 'SOC',
++                workItemId: null, status: 'ACTIVE', isRequired: true }] } } });
+diff --git a/server/tests/contracts/texture_work_item_atomic.test.js b/server/tests/contracts/texture_work_item_atomic.test.js
+index db6a52f9..ab16a996 100644
+--- a/server/tests/contracts/texture_work_item_atomic.test.js
++++ b/server/tests/contracts/texture_work_item_atomic.test.js
+@@ -93,0 +94,2 @@ describe('Texture Work Item & Atomic Linked Results Contracts (Mandatory Correct
++            await prisma.$transaction(tx=>require('../../services/orderService').createInitialOrder(tx,
++                {id:sampleId},['TEXTURE'],{username:'system:owned-texture-order',role:'SUPER_ADMIN',labId}));
+diff --git a/server/tests/contracts/workbench_draft_integrity.test.js b/server/tests/contracts/workbench_draft_integrity.test.js
+index 652d72b4..fe05418d 100644
+--- a/server/tests/contracts/workbench_draft_integrity.test.js
++++ b/server/tests/contracts/workbench_draft_integrity.test.js
+@@ -226,0 +227,6 @@ describe('Workbench Draft Integrity Contract (P0)', () => {
++        // #209: usable legacy order context only for this NEW owned positive execution assembly.
++        require('../../services/workflowStateRules').assertFixtureContext();
++        await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: testSampleId,
++            version: 1, status: 'ACTIVE', reason: 'Owned workbench/QC execution order context', requestedBy: 'system:fixture',
++            lines: { create: ['PH'].map(analysis => ({ id: require('node:crypto').randomUUID(), analysis,
++                workItemId: null, status: 'ACTIVE', isRequired: true })) } } });
+diff --git a/server/tests/contracts/workbench_pipeline_twostep.test.js b/server/tests/contracts/workbench_pipeline_twostep.test.js
+index 99ad83ac..d8b20108 100644
+--- a/server/tests/contracts/workbench_pipeline_twostep.test.js
++++ b/server/tests/contracts/workbench_pipeline_twostep.test.js
+@@ -116,0 +117,6 @@ describe('Workbench Two-Step Record & Submit Pipeline (Phase 4)', () => {
++        // #209: usable legacy order context only for this NEW owned positive execution assembly.
++        require('../../services/workflowStateRules').assertFixtureContext();
++        await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: testSampleId,
++            version: 1, status: 'ACTIVE', reason: 'Owned workbench/QC execution order context', requestedBy: 'system:fixture',
++            lines: { create: ['PH', 'EC'].map(analysis => ({ id: require('node:crypto').randomUUID(), analysis,
++                workItemId: null, status: 'ACTIVE', isRequired: true })) } } });
+diff --git a/server/tests/contracts/workbench_single_entry.test.js b/server/tests/contracts/workbench_single_entry.test.js
+index 62675d94..0badd400 100644
+--- a/server/tests/contracts/workbench_single_entry.test.js
++++ b/server/tests/contracts/workbench_single_entry.test.js
+@@ -154,0 +155,3 @@ describe('Workbench Single-Entry Architecture & Operational Lifecycle Contract',
++        // #209: retained execution parents remain until this owned database is torn down.
++        require('../../services/workflowStateRules').assertFixtureContext();
++        if (await prisma.workAttempt.count({ where: { workItem: { sampleId: testSampleId } } }) === 0) {
+@@ -156,0 +160 @@ describe('Workbench Single-Entry Architecture & Operational Lifecycle Contract',
++        } // #209 owned retained order parents
+@@ -444,0 +449,2 @@ describe('Workbench Single-Entry Architecture & Operational Lifecycle Contract',
++            // #209: this direct controller mock has the headers object supplied by the actual HTTP route.
++            req.headers = {};
+diff --git a/server/tests/contracts/workspace_projection_p2.test.js b/server/tests/contracts/workspace_projection_p2.test.js
+index b22db3b1..1094b66c 100644
+--- a/server/tests/contracts/workspace_projection_p2.test.js
++++ b/server/tests/contracts/workspace_projection_p2.test.js
+@@ -88,0 +89,6 @@ describe('Package P2: Sample Workspace Projection & Transactional Foundations',
++        // #209: NEW owned projection history declares both existing analytical owners, preserving the spectral gap.
++        require('../../services/workflowStateRules').assertFixtureContext();
++        await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: testSample.id,
++            version: 1, status: 'ACTIVE', reason: 'Owned workspace projection execution order context', requestedBy: 'system:fixture',
++            lines: { create: ['PH_H2O', 'VIS_NIR'].map(analysis => ({ id: require('node:crypto').randomUUID(), analysis,
++                workItemId: null, status: 'ACTIVE', isRequired: true })) } } });
+@@ -174,0 +181,10 @@ describe('Package P2: Sample Workspace Projection & Transactional Foundations',
++        // #209: preserve the original first-revision1 remedy scenario on NEW owned missing-order work.
++        const projectionSample = testSample;
++        const firstOrderSampleId = 'ws-first-order-' + require('node:crypto').randomUUID();
++        testSample = await createSampleFixture(prisma, { data: { id: firstOrderSampleId, originalId: firstOrderSampleId,
++            labId: 'S-P2-FIRST-ORDER', assignedLab: 'LAB-P2', country: 'P2C', status: 'PROCESSING',
++            dryingStatus: 'DONE', preparationStatus: 'DONE', requiredAnalyses: JSON.stringify(['PH_H2O', 'VIS_NIR']) } });
++        for (const [analysis, status] of [['PH_H2O', 'SUBMITTED'], ['VIS_NIR', 'ACCEPTED']])
++            await createWorkItemFixture(prisma, { data: { id: firstOrderSampleId + '-' + analysis, sampleId: firstOrderSampleId,
++                analysis, status, assignedLab: 'LAB-P2', assignedTo: techUser.username, labId: 'LAB-P2' } });
++        try {
+@@ -204,0 +221 @@ describe('Package P2: Sample Workspace Projection & Transactional Foundations',
++        } finally { testSample = projectionSample; }
+diff --git a/server/tests/globalSetup.js b/server/tests/globalSetup.js
+index e6315af9..6b26f297 100644
+--- a/server/tests/globalSetup.js
++++ b/server/tests/globalSetup.js
+@@ -93,0 +94 @@ module.exports = async function globalSetup() {
++        require('../scripts/install_order_revisions').installOrderRevisions({dbPath:testDbPath,apply:true});
+diff --git a/server/tests/helpers/legacyWorkflowDatabase.js b/server/tests/helpers/legacyWorkflowDatabase.js
+index 6bf76312..7eee53a7 100644
+--- a/server/tests/helpers/legacyWorkflowDatabase.js
++++ b/server/tests/helpers/legacyWorkflowDatabase.js
+@@ -264,0 +265,3 @@ function beforeGuards(options) {
++            // #209 adds only this nullable new-line identity. The captured
++            // historical DDL and every other expected gap remain unchanged.
++            expected.push({table:'OrderLine',fields:['workItemId']});
+diff --git a/server/tests/helpers/qcGateFixture.js b/server/tests/helpers/qcGateFixture.js
+index 7589ddc4..86327e76 100644
+--- a/server/tests/helpers/qcGateFixture.js
++++ b/server/tests/helpers/qcGateFixture.js
+@@ -11 +11 @@ const { installCalculationReleasePrerequisites } = require('./calculationRelease
+-async function qcGateFixture({ count = 1, criteria = {}, status = 'IN_PROGRESS', sharedSample = false, resolvedRules = true, installSelectionEvidence = true, installOverrideRequests = true, installInstrumentImports = true, installSampleContainers = true, installControlCharts = true, fixedWindowPolicy = criteria.lrmMode !== 'CONTROL_CHART' && criteria.lrmPerBatch !== 0 } = {}) {
++async function qcGateFixture({ count = 1, criteria = {}, status = 'IN_PROGRESS', sharedSample = false, resolvedRules = true, installSelectionEvidence = true, installOverrideRequests = true, installInstrumentImports = true, installSampleContainers = true, installControlCharts = true, installOrderRevisions = true, fixedWindowPolicy = criteria.lrmMode !== 'CONTROL_CHART' && criteria.lrmPerBatch !== 0 } = {}) {
+@@ -65,0 +66,10 @@ async function qcGateFixture({ count = 1, criteria = {}, status = 'IN_PROGRESS',
++    if (installInstrumentImports && installSampleContainers && installControlCharts && installOrderRevisions) {
++        require('../../scripts/install_order_revisions').installOrderRevisions({ dbPath: file, apply: true });
++        for (const sampleId of new Set(items.map(item => item.sampleId))) {
++            await db.$transaction(async tx => {
++                const current = await tx.sample.findUnique({ where: { id: sampleId } });
++                await require('../../services/orderService').createInitialOrder(tx, current,
++                    items.filter(item => item.sampleId === sampleId).map(item => item.analysis), actor);
++            });
++        }
++    }
+diff --git a/server/tests/helpers/qcWorksheetUi.js b/server/tests/helpers/qcWorksheetUi.js
+index 08137bdc..e6de7f0e 100644
+--- a/server/tests/helpers/qcWorksheetUi.js
++++ b/server/tests/helpers/qcWorksheetUi.js
+@@ -25,0 +26 @@ function mountUi(filename, props = {}, { canEdit = true, user = null, responses
++    const browserWindow = new EventTarget(); browserWindow.innerWidth = 1200;
+@@ -30 +31 @@ function mountUi(filename, props = {}, { canEdit = true, user = null, responses
+-            { module, exports: module.exports, console, setTimeout, clearTimeout, Date, crypto: require('node:crypto').webcrypto, AbortController, FormData, window: { innerWidth: 1200 }, require(name) {
++            { module, exports: module.exports, console, setTimeout, clearTimeout, Date, crypto: require('node:crypto').webcrypto, AbortController, FormData, window: browserWindow, require(name) {
+diff --git a/server/tests/helpers/workAttemptFixtures.js b/server/tests/helpers/workAttemptFixtures.js
+index 365cfb6e..a461d444 100644
+--- a/server/tests/helpers/workAttemptFixtures.js
++++ b/server/tests/helpers/workAttemptFixtures.js
+@@ -28 +28,2 @@ async function insertFixtureExecution(tx, ctx, allocation, evidence, attemptStat
+-        await tx.workAttempt.create({ data: { id: allocation.id, workItemId: ctx.item.id, attemptNo: allocation.attemptNo,
++        const orderLineId = await require('../../services/orderLineResolutionService').resolveOrderLine(tx, ctx.item);
++        await tx.workAttempt.create({ data: { id: allocation.id, workItemId: ctx.item.id, orderLineId, attemptNo: allocation.attemptNo,
+diff --git a/server/tests/helpers/workflowWriteScanner.js b/server/tests/helpers/workflowWriteScanner.js
+index 6e7c5398..af06fe33 100644
+--- a/server/tests/helpers/workflowWriteScanner.js
++++ b/server/tests/helpers/workflowWriteScanner.js
+@@ -33,0 +34,5 @@ const QC_EVIDENCE_SOURCES = Object.freeze([
++    // #209/6163271808: inspect the exact additive source; no writer exemption.
++    Object.freeze({ functionName: 'loadOrderRevisionMigrationSource', loader: 'services/orderRevisionMigrationSource.js',
++        loaderSha256: 'ba6baba68eceb2355cbc68a7a6bba83a1e3c7f168a30bdf8a35df80c8dde1093',
++        directory: '20261014000100_order_revision_contract', sqlSha256: '5c51f423689b1c726e16c12cdce7b381574661017cdb622eb3f562957a18304c',
++        boundary: '-- Contract guards' }),
+diff --git a/server/tests/scenarios/scientific_validation.test.js b/server/tests/scenarios/scientific_validation.test.js
+index 54a2814f..2d4bc711 100644
+--- a/server/tests/scenarios/scientific_validation.test.js
++++ b/server/tests/scenarios/scientific_validation.test.js
+@@ -106,0 +107,6 @@ describe('Scenario H: Scientific Validation', () => {
++        // #209: usable order context is declared only in this NEW owned fixture assembly.
++        require('../../services/workflowStateRules').assertFixtureContext();
++        await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: sampleId,
++            version: 1, status: 'ACTIVE', reason: 'Owned numerical execution order context', requestedBy: 'system:fixture',
++            lines: { create: ['PH_H2O'].map(analysis => ({ id: require('node:crypto').randomUUID(), analysis,
++                workItemId: null, status: 'ACTIVE', isRequired: true })) } } });
+diff --git a/server/tests/security/wiring.test.js b/server/tests/security/wiring.test.js
+index bac47a94..3928c1c8 100644
+--- a/server/tests/security/wiring.test.js
++++ b/server/tests/security/wiring.test.js
+@@ -133 +133 @@ describe('WP-03: Dead-Code & System Wiring Regression Tests', () => {
+-        // The controller delegates to the state authority, which must retain
++        // The retained entry point delegates to the shared order authority, which retains
+@@ -135 +135 @@ describe('WP-03: Dead-Code & System Wiring Regression Tests', () => {
+-        const analysisAuthority = fs.readFileSync(path.join(serverDir, 'services/sampleAnalysisStateService.js'), 'utf8');
++        const analysisAuthority = fs.readFileSync(path.join(serverDir, 'services/orderService.js'), 'utf8');

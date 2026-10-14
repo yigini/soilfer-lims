@@ -1,0 +1,597 @@
+{
+  "preparedUtc": "2026-10-14T17:57:51.090353+00:00",
+  "base": "2242bcb4861a7085bb95e78e0e7b1e4edf11d1b8",
+  "sourceAudit": "5dd74af2d198953affcc099af74309a20e179321",
+  "applicationPaths": 122,
+  "testFixturePaths": 87,
+  "completeLiteralDiffBytes": 139561,
+  "completeLiteralDiffSha256": "d975aeb8b8d446c86cb1c8a5d6f6ae25c84af13f58735038a5017d3271c2b041",
+  "testFixtureLineRanges": [
+    {
+      "path": "server/tests/contracts/api_key_scoping_isolation.test.js",
+      "changedLineRanges": [
+        "-105,0 +106,6"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/audit_0_10_current_result_views.test.js",
+      "changedLineRanges": [
+        "-40,0 +41,4"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/audit_0_11_workbench_queue.test.js",
+      "changedLineRanges": [
+        "-25,0 +26,4"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/audit_0_14_number_entry.test.js",
+      "changedLineRanges": [
+        "-29,0 +30,6"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/audit_0_15_duplicate_loq.test.js",
+      "changedLineRanges": [
+        "-75,0 +76,4",
+        "-83,0 +88,4",
+        "-242,0 +251,4"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/audit_0_2_qc_lock.test.js",
+      "changedLineRanges": [
+        "-103,0 +104,2"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/audit_0_3_publication.test.js",
+      "changedLineRanges": [
+        "-57,0 +58,6"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/audit_0_5_legacy_review.test.js",
+      "changedLineRanges": [
+        "-28,0 +29,4"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/audit_0_6_review_atomicity.test.js",
+      "changedLineRanges": [
+        "-34,0 +35,4",
+        "-45,0 +50,4",
+        "-70,0 +79,7"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/audit_0_7_resubmission.test.js",
+      "changedLineRanges": [
+        "-32,0 +33,5",
+        "-96,0 +102,5"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/audit_0_8_report_truthfulness.test.js",
+      "changedLineRanges": [
+        "-38,0 +39,4"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/audit_0_9_public_report_superseded.test.js",
+      "changedLineRanges": [
+        "-26,0 +27,5"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/audit_1_0_lab_policies.test.js",
+      "changedLineRanges": [
+        "-247,0 +248,3",
+        "-295,0 +299,4"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/audit_1_1_reconcile_duplicates.test.js",
+      "changedLineRanges": [
+        "-64 +64"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/audit_1_2_guard_installer.test.js",
+      "changedLineRanges": [
+        "-448,0 +449"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/audit_1_2_legacy_results.test.js",
+      "changedLineRanges": [
+        "-24,0 +25,4",
+        "-135,0 +140,7"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/audit_1_2_offline_state.test.js",
+      "changedLineRanges": [
+        "-22,0 +23,5"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/audit_1_2_spectral_state.test.js",
+      "changedLineRanges": [
+        "-61,0 +62,5"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/audit_1_2_state_authority.test.js",
+      "changedLineRanges": [
+        "-156 +156,2",
+        "-185 +186",
+        "-197 +198",
+        "-700,0 +702,49"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/audit_1_2_workbench_state.test.js",
+      "changedLineRanges": [
+        "-96,0 +97,6",
+        "-115,0 +122,9"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/audit_1_4_uuid_transactions.test.js",
+      "changedLineRanges": [
+        "-147,0 +148,3"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/audit_1_5_result_writes.test.js",
+      "changedLineRanges": [
+        "-33,0 +34,6",
+        "-210 +216,2"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/audit_1_6_intake_cancellation.test.js",
+      "changedLineRanges": [
+        "-61,0 +62,6",
+        "-68 +74,2",
+        "-169,0 +177,4",
+        "-300,0 +312,4"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/audit_2_6_equipment_commit.test.js",
+      "changedLineRanges": [
+        "-18 +18",
+        "-21,0 +22,2"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/audit_3_1_attempt_execution.test.js",
+      "changedLineRanges": [
+        "-87,0 +88,5"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/audit_3_1_attempt_sql_guards.test.js",
+      "changedLineRanges": [
+        "-277,0 +278,5"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/audit_3_3_separate_texture.test.js",
+      "changedLineRanges": [
+        "-27,0 +28,2",
+        "-163,0 +166",
+        "-220,0 +224"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/audit_4_1_run_start_header.test.js",
+      "changedLineRanges": [
+        "-111,0 +112,2"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/audit_4_3_keyboard_playwright.test.js",
+      "changedLineRanges": [
+        "-35,0 +36"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/audit_4_6_calculation_install.test.js",
+      "changedLineRanges": [
+        "-110,0 +111,2",
+        "-138,0 +141"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/audit_4_6_calibration.test.js",
+      "changedLineRanges": [
+        "-62,0 +63,2",
+        "-68,0 +71",
+        "-325,0 +329,3"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/audit_4_7_calculation_import.test.js",
+      "changedLineRanges": [
+        "-36,0 +37,4"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/audit_4_7_instrument_import_install.test.js",
+      "changedLineRanges": [
+        "-179,0 +180,6"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/audit_4_8_cross_check_evidence.test.js",
+      "changedLineRanges": [
+        "-40,0 +41,3",
+        "-82,0 +86,5",
+        "-154,0 +163,3"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/audit_4_8_cross_check_install.test.js",
+      "changedLineRanges": [
+        "-11,0 +12,2",
+        "-16,0 +19,4",
+        "-25,0 +32,3"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/audit_6_1_first_fill.test.js",
+      "changedLineRanges": [
+        "-25,0 +26,4",
+        "-100,0 +105"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/audit_6_1_non_scientific_authorisation.test.js",
+      "changedLineRanges": [
+        "-27,0 +28,4"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/audit_6_2_report_revisions.test.js",
+      "changedLineRanges": [
+        "-34,0 +35,5"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/audit_6_3_report_content.test.js",
+      "changedLineRanges": [
+        "-24,0 +25,3"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/catalogue_governance.test.js",
+      "changedLineRanges": [
+        "-99,0 +100,6"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/catalogue_result_entry.test.js",
+      "changedLineRanges": [
+        "-51,0 +52,6"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/controlled_units_interpretation.test.js",
+      "changedLineRanges": [
+        "-44,0 +45,6"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/deployment_readiness_bootstrap.test.js",
+      "changedLineRanges": [
+        "-372,0 +373",
+        "-431,0 +433,2"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/edit_analyses_permission.test.js",
+      "changedLineRanges": [
+        "-58 +58,2"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/exchange_error_semantics.test.js",
+      "changedLineRanges": [
+        "-38,0 +39,6"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/export_normalization.test.js",
+      "changedLineRanges": [
+        "-40,0 +41,6"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/interim_gaps_verification.test.js",
+      "changedLineRanges": [
+        "-548,0 +549,6"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/issue_206_sample_containers.test.js",
+      "changedLineRanges": [
+        "-122,0 +123",
+        "-124,3 +125,3",
+        "-131 +132"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/issue_209_order_revision_http.test.js",
+      "changedLineRanges": [
+        "-0,0 +1,79"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/issue_209_order_revision_integration.test.js",
+      "changedLineRanges": [
+        "-0,0 +1,408"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/issue_209_order_revision_request.test.js",
+      "changedLineRanges": [
+        "-0,0 +1,51"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/issue_209_order_revision_ui.test.js",
+      "changedLineRanges": [
+        "-0,0 +1,35"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/issue_213_export_equals_report.test.js",
+      "changedLineRanges": [
+        "-168,0 +169,3"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/issue_278_texture_closure_policy.test.js",
+      "changedLineRanges": [
+        "-137,0 +138,6"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/issue_281_cross_check_bounds.test.js",
+      "changedLineRanges": [
+        "-78,0 +79,4"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/issue_291_texture_input_authority.test.js",
+      "changedLineRanges": [
+        "-62,0 +63,3"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/mandatory_reason.test.js",
+      "changedLineRanges": [
+        "-99,0 +100,6"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/matrix_blocking_diagnostics.test.js",
+      "changedLineRanges": [
+        "-35,0 +36,6"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/matrix_validation.test.js",
+      "changedLineRanges": [
+        "-14,0 +15,6"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/mobile_offline_sync.test.js",
+      "changedLineRanges": [
+        "-228,0 +229,6"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/nsis_policy_and_scoping.test.js",
+      "changedLineRanges": [
+        "-36,0 +37,6"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/nsis_v2_exchange.test.js",
+      "changedLineRanges": [
+        "-45,0 +46,6"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/prerequisite_gate.test.js",
+      "changedLineRanges": [
+        "-129,0 +130,6"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/profile_identity_routes.test.js",
+      "changedLineRanges": [
+        "-34,0 +35,5"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/qc_controls.test.js",
+      "changedLineRanges": [
+        "-138,0 +139,6"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/qc_disposition_flagging.test.js",
+      "changedLineRanges": [
+        "-31,0 +32,6"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/qc_disposition_release_gate.test.js",
+      "changedLineRanges": [
+        "-29,0 +30,29",
+        "-143,0 +173",
+        "-211,0 +242",
+        "-424,0 +456",
+        "-439,0 +472",
+        "-518,0 +552",
+        "-576,0 +611",
+        "-594,0 +630",
+        "-612,0 +649",
+        "-630,0 +668",
+        "-687,0 +726",
+        "-714,0 +754",
+        "-749,0 +790",
+        "-922,0 +964",
+        "-982,0 +1025",
+        "-1033,0 +1077",
+        "-1079,0 +1124",
+        "-1133,0 +1179",
+        "-1151,0 +1198",
+        "-1205,0 +1253"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/reconcile_analyses.test.js",
+      "changedLineRanges": [
+        "-75,0 +76,3",
+        "-98 +101,2",
+        "-163 +167,2"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/reopened_governance_scenarios.test.js",
+      "changedLineRanges": [
+        "-311,0 +312,6"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/report_pdf.test.js",
+      "changedLineRanges": [
+        "-41,0 +42,4"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/result_provenance.test.js",
+      "changedLineRanges": [
+        "-62,0 +63,6",
+        "-72,0 +79,5",
+        "-129,0 +141,5"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/review_reports_amendments_p6.test.js",
+      "changedLineRanges": [
+        "-80,0 +81,2"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/sample_detail.test.js",
+      "changedLineRanges": [
+        "-176 +176",
+        "-230 +230"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/spectral_stage_e.test.js",
+      "changedLineRanges": [
+        "-100,0 +101,6"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/texture_work_item_atomic.test.js",
+      "changedLineRanges": [
+        "-93,0 +94,2"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/workbench_draft_integrity.test.js",
+      "changedLineRanges": [
+        "-226,0 +227,6"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/workbench_pipeline_twostep.test.js",
+      "changedLineRanges": [
+        "-116,0 +117,6"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/workbench_single_entry.test.js",
+      "changedLineRanges": [
+        "-154,0 +155,3",
+        "-156,0 +160",
+        "-444,0 +449,2"
+      ]
+    },
+    {
+      "path": "server/tests/contracts/workspace_projection_p2.test.js",
+      "changedLineRanges": [
+        "-88,0 +89,6",
+        "-174,0 +181,10",
+        "-204,0 +221"
+      ]
+    },
+    {
+      "path": "server/tests/globalSetup.js",
+      "changedLineRanges": [
+        "-93,0 +94"
+      ]
+    },
+    {
+      "path": "server/tests/helpers/legacyWorkflowDatabase.js",
+      "changedLineRanges": [
+        "-264,0 +265,3"
+      ]
+    },
+    {
+      "path": "server/tests/helpers/qcGateFixture.js",
+      "changedLineRanges": [
+        "-11 +11",
+        "-65,0 +66,10"
+      ]
+    },
+    {
+      "path": "server/tests/helpers/qcWorksheetUi.js",
+      "changedLineRanges": [
+        "-25,0 +26",
+        "-30 +31"
+      ]
+    },
+    {
+      "path": "server/tests/helpers/workAttemptFixtures.js",
+      "changedLineRanges": [
+        "-28 +28,2"
+      ]
+    },
+    {
+      "path": "server/tests/helpers/workflowWriteScanner.js",
+      "changedLineRanges": [
+        "-33,0 +34,5"
+      ]
+    },
+    {
+      "path": "server/tests/scenarios/scientific_validation.test.js",
+      "changedLineRanges": [
+        "-106,0 +107,6"
+      ]
+    },
+    {
+      "path": "server/tests/security/wiring.test.js",
+      "changedLineRanges": [
+        "-133 +133",
+        "-135 +135"
+      ]
+    }
+  ],
+  "fullRunStillActive": true,
+  "sourcePRCreated": false,
+  "finalAuditRequested": false,
+  "productionOperations": 0
+}

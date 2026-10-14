@@ -1,0 +1,33 @@
+{
+  "retainedUtc": "2026-10-14T18:03:05.326634+00:00",
+  "files": {
+    "WP/backlog-resume-20261013/prepare-issue209-classified-source-only-review-once.py": {
+      "bytes": 5049,
+      "sha256": "0b194a852aeffc794d2309dbd4986824c783f4aa61cc12b31b3410158af37489"
+    },
+    "WP/backlog-resume-20261013/create-issue209-classified-source-pr-once.py": {
+      "bytes": 13287,
+      "sha256": "35c732db6f2a8f278a5b71ec3033bf96f4e013c342b5cabf5b8b89a2e5687bd2"
+    },
+    "WP/backlog-resume-20261013/retain-issue209-full-classified-terminal-once.py": {
+      "bytes": 6795,
+      "sha256": "848180dc76377f15bd81cbce02353cc2be3702b3e099abf84839eb7698201255"
+    },
+    "WP/backlog-resume-20261013/issue209-review-source-line-inventory-preparation/all-test-fixture-lines-original.diff": {
+      "bytes": 139561,
+      "sha256": "d975aeb8b8d446c86cb1c8a5d6f6ae25c84af13f58735038a5017d3271c2b041"
+    },
+    "WP/backlog-resume-20261013/issue209-review-source-line-inventory-preparation/line-inventory.json": {
+      "bytes": 14494,
+      "sha256": "95f1450a05a4b887911b6ab81347c7a0dc95ed4610c6fd57b94bac225e55182e"
+    }
+  },
+  "sameFullSession": 4994,
+  "fullStillActive": true,
+  "fullPassClaimed": false,
+  "reviewRefCreated": false,
+  "sourcePRCreated": false,
+  "preparedHelpersUnused": true,
+  "stockSourceChanges": 0,
+  "productionOperations": 0
+}
