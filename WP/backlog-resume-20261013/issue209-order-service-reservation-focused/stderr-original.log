@@ -1,0 +1,36 @@
+PASS tests/contracts/issue_209_order_revision_integration.test.js (12.832 s)
+  √ installer dry/apply/repeat retains three ACTIVE histories, every line and a null historical OPEN identity (2026 ms)
+  √ a full reasoned revision supersedes all three ACTIVE ids while every old line and attempt stays byte-equivalent (1486 ms)
+  √ legacy single-match resolution writes only the newly inserted attempt link (1444 ms)
+  √ a legacy 0-revision/0-line context refuses with NO_LINE and no row writes (1572 ms)
+  √ a legacy 1-revision/2-line context refuses with AMBIGUOUS_LINE and no row writes (1514 ms)
+  √ a legacy 2-revision/1-line context refuses with MULTIPLE_ACTIVE_REVISIONS and no row writes (1493 ms)
+  √ a retained OPEN attempt fills with its original null order-line identity (1425 ms)
+  √ two concurrent complete revisions leave exactly one ACTIVE revision (1418 ms)
+
+PASS tests/contracts/issue_209_order_revision_request.test.js
+  #209 reasoned complete order request
+    √ a changed order refuses invalid reason undefined
+    √ a changed order refuses invalid reason null (1 ms)
+    √ a changed order refuses invalid reason ""
+    √ a changed order refuses invalid reason "   "
+    √ a changed order refuses invalid reason 42
+    √ normalises aliases, whitespace and compound codes before comparing the complete set
+    √ equivalent normalised sets are a no-op without an invented reason
+    √ three historical ACTIVE revisions require an explicit complete set (1 ms)
+    √ an unchanged target still needs a deliberate reason when repairing ACTIVE ambiguity
+    √ a complete empty set is a reasoned request, leaving downstream reconciliation to protect recorded work
+    √ a reasoned line repair cannot disappear as an unchanged-analysis no-op
+    √ refuses malformed requested selections "PH_H2O"
+    √ refuses malformed requested selections [""]
+    √ refuses malformed requested selections ["  "] (1 ms)
+    √ refuses malformed requested selections [null]
+    √ refuses malformed requested selections [42]
+    √ corrupt stored selections cannot be silently replaced
+
+Test Suites: 2 passed, 2 total
+Tests:       25 passed, 25 total
+Snapshots:   0 total
+Time:        13.199 s, estimated 15 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\issue_209_order_revision_request.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\issue_209_order_revision_integration.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\issue209-order-service-reservation-focused\report-original.json

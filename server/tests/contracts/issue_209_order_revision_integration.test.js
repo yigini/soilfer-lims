@@ -25,12 +25,13 @@ async function fixture({ revisions = 1, lines = 1, historicalOpen = false } = {}
             for (let index = 0; index < lines; index++) db.prepare('INSERT INTO OrderLine(id,revisionId,analysis,isRequired,status,createdAt,updatedAt) VALUES(?,?,?,?,?,?,?)')
                 .run(randomUUID(), revisionId, item.analysis, 1, 'ACTIVE', 1, 1);
         }
-        if (historicalOpen) {
-            f.openId = randomUUID();
-            db.prepare('INSERT INTO WorkAttempt(id,workItemId,attemptNo,status,version,createdAt,updatedAt) VALUES(?,?,?,?,?,?,?)')
-                .run(f.openId, item.id, 1, 'OPEN', 1, 1, 1);
-        }
     } finally { db.close(); }
+    if (historicalOpen) {
+        f.openId = randomUUID();
+        // A retained #191 reservation uses its ordinary Prisma timestamp representation.
+        await f.db.workAttempt.create({ data: { id: f.openId, workItemId: item.id, attemptNo: 1, status: 'OPEN',
+            version: 1, createdAt: new Date(1), updatedAt: new Date(1) } });
+    }
     return f;
 }
 
@@ -95,9 +96,15 @@ test.each([[0, 0, 'NO_LINE'], [1, 2, 'AMBIGUOUS_LINE'], [2, 1, 'MULTIPLE_ACTIVE_
 
 test('a retained OPEN attempt fills with its original null order-line identity', async () => {
     const f = await fixture({ historicalOpen: true }); installer.installOrderRevisions({ dbPath: f.file, apply: true });
-    const result = await f.result(f.items[0]);
+    const before = (await rows(f)).attempts.find(row => row.id === f.openId);
+    let result;
+    try { result = await f.result(f.items[0]); }
+    catch (error) { throw new Error('Historical first-fill guard: ' + error.code + ': ' + error.message); }
     expect(result.attemptId).toBe(f.openId);
     expect(await f.db.workAttempt.findUnique({ where: { id: f.openId } })).toMatchObject({ status: 'RECORDED', orderLineId: null });
+    const after = (await rows(f)).attempts.find(row => row.id === f.openId);
+    for (const field of ['id','workItemId','orderLineId','attemptNo','batchId','reason','requestedBy','requestedAt','parentAttemptId','note',
+        'rawData','calcVersion','dilutionFactor','aliquotId','legacyAttemptNoConflict','version','createdAt','updatedAt']) expect(after[field]).toEqual(before[field]);
 });
 
 test('two concurrent complete revisions leave exactly one ACTIVE revision', async () => {

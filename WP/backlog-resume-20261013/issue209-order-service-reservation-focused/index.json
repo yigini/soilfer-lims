@@ -1,0 +1,90 @@
+{
+  "retainedUtc": "2026-10-14T08:08:53.485522+00:00",
+  "status": "CLOSED_REAL_SERVICE_INSTALLER_FOCUSED_PASS",
+  "summary": {
+    "closedUtc": "2026-10-14T08:05:53.908904+00:00",
+    "exit": 0,
+    "suites": 2,
+    "tests": 25,
+    "passedTests": 25,
+    "failed": 0,
+    "pending": 0,
+    "todo": 0,
+    "sourceUnchanged": true,
+    "selectedInventoryEqual": true,
+    "fullDiscovery": 368,
+    "ordinarySetups": true,
+    "workerIdleMemoryLimit": 512000000,
+    "productionOperations": 0,
+    "status": "PASS"
+  },
+  "cause": "All25 tests pass, including retained OPEN first fill with originalNULL and every immutable identity scalar unchanged using ordinary pre209Prisma reservation timestamps. Both prior failures remain honest. No runtime guard or timestamp normalization change.",
+  "sourceDraftPaths": [
+    "server/services/orderService.js",
+    "server/services/orderLineResolutionService.js",
+    "server/services/orderRevisionMigrationSource.js",
+    "server/scripts/install_order_revisions.js",
+    "server/services/sampleAnalysisStateService.js",
+    "server/services/intakeWorkItemService.js",
+    "server/services/workAttemptWriteService.js",
+    "server/services/workRepeatService.js",
+    "server/services/scientificAmendmentService.js",
+    "server/prisma/schema.prisma",
+    "server/prisma/migrations/20261014000100_order_revision_contract/migration.sql",
+    "server/tests/contracts/issue_209_order_revision_integration.test.js",
+    "server/tests/helpers/legacyWorkflowDatabase.js"
+  ],
+  "scopeComment": 6163271808,
+  "applicationFullyVerified": false,
+  "productionOperations": 0,
+  "rawFiles": {
+    "WP/backlog-resume-20261013/issue209-order-service-reservation-focused/command.json": {
+      "bytes": 998,
+      "sha256": "b7d0988b32bf7c2bedc194073eca68b16efde81e4bfa298a2fad6b082cb44320"
+    },
+    "WP/backlog-resume-20261013/issue209-order-service-reservation-focused/config-original.json": {
+      "bytes": 6077,
+      "sha256": "610d4b4b8e0440ed308a9d79697861e1f2759c97e24b158dc369c471af9f9042"
+    },
+    "WP/backlog-resume-20261013/issue209-order-service-reservation-focused/config-stderr-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "WP/backlog-resume-20261013/issue209-order-service-reservation-focused/exit-original.txt": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "WP/backlog-resume-20261013/issue209-order-service-reservation-focused/inventory-original.json": {
+      "bytes": 49296,
+      "sha256": "318ab82115b50a48409667894df04f204e840fd43cc9c1c887ea1a4c72d33ede"
+    },
+    "WP/backlog-resume-20261013/issue209-order-service-reservation-focused/inventory-stderr-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "WP/backlog-resume-20261013/issue209-order-service-reservation-focused/report-original.json": {
+      "bytes": 11455,
+      "sha256": "af5f82a2d8e6f1f4c1723dec4dd0701306652a5ff604f8b5a0127e76097c991a"
+    },
+    "WP/backlog-resume-20261013/issue209-order-service-reservation-focused/source-after.json": {
+      "bytes": 3001,
+      "sha256": "11505ebf5a39fd6e7c6d68aff8ed63941da52956cabe04a33e0a389396549387"
+    },
+    "WP/backlog-resume-20261013/issue209-order-service-reservation-focused/source-before.json": {
+      "bytes": 3001,
+      "sha256": "11505ebf5a39fd6e7c6d68aff8ed63941da52956cabe04a33e0a389396549387"
+    },
+    "WP/backlog-resume-20261013/issue209-order-service-reservation-focused/stderr-original.log": {
+      "bytes": 2670,
+      "sha256": "6d28f4e8a527e964cdfbb3fd4c70f04b07c197dde57bdfa6bd9ace1d312685a5"
+    },
+    "WP/backlog-resume-20261013/issue209-order-service-reservation-focused/stdout-original.log": {
+      "bytes": 727,
+      "sha256": "b6ce1e101d4c7acc220d319fe374a58314214f295aa3ebed13ae25924ccf8eb5"
+    },
+    "WP/backlog-resume-20261013/issue209-order-service-reservation-focused/summary.json": {
+      "bytes": 360,
+      "sha256": "e739fe66c5a5d4e79c7e7fe2386820a2b146b06f425cab99cde2d9213f946c7f"
+    }
+  }
+}
