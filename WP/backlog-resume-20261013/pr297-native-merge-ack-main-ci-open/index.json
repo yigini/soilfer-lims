@@ -1,0 +1,86 @@
+{
+  "retainedUtc": "2026-10-14T21:02:22.103261+00:00",
+  "status": "MAIN_CI_OPEN_NATIVE_MERGE_ACK_DELIVERED",
+  "number": 297,
+  "issue": 209,
+  "run": 38636615469,
+  "attempt": 1,
+  "head": "cde8c8896f5f9d5f1ab07b0ae16b1a765e0a6367",
+  "sourceHead": "6bd516c42a07332d0b0653ed150d1526bf7e424e",
+  "tree": "638580d50f61254609de3abd42d93afc676a5727",
+  "base": "2242bcb4861a7085bb95e78e0e7b1e4edf11d1b8",
+  "ciStatus": "in_progress",
+  "conclusion": null,
+  "runUrl": "https://github.com/yigini/soilfer-lims/actions/runs/38636615469",
+  "mainCiLogsCollected": false,
+  "ciDispatches": 0,
+  "sourceMergeEvidenceAudit": "df40c77f3430f2c1f03d6f8e24429825f6668dee",
+  "actualAuditCommentId": 6178123314,
+  "nativeMergeAcknowledgementDeliveredOnce": true,
+  "nativeVerification": {
+    "window": 7867734,
+    "app": "Claude_pzs8sxrjxfjjc!Claude",
+    "project": "LIMS Audit",
+    "thread": "Lab workflow audit and plan",
+    "freshWindowTargetAndEmptyRightComposer": true,
+    "focusCaretVerified": true,
+    "ownDraftHeadAndEndInspected": true,
+    "singleReturn": true,
+    "actualSentBubbleVisible": true,
+    "rightComposerEmptyAfterSend": true,
+    "claudioDoingVisibleAfterSend": true,
+    "centreHumanDraft": "can you go and ask Pip",
+    "centreDraftPreserved": true,
+    "humanCardsUntouched": true,
+    "actualNewHeadNativePassReadBeforeAcknowledgement": true,
+    "noDuplicateAuditRequest": true
+  },
+  "mainTerminalHelperStatus": "PREPARED_UNUSED_REQUIRES_ACTUAL_SAME_RUN_CLOSURE_READ_ORIGINALS_AND_HELPER",
+  "productionOperations": 0,
+  "productionCountsCollected": false,
+  "kitGateExists": false,
+  "issue209State": "open",
+  "closingIssuesReferences": [],
+  "files": {
+    "main-run-open-original.json": {
+      "bytes": 12108,
+      "sha256": "4bd98a1a52e0f6f6b2e6b519cfa40cb4baf76653af1055feea3c9dc6db60b321"
+    },
+    "main-jobs-open-original.json": {
+      "bytes": 3480,
+      "sha256": "de1dc2795fba7ca67ff31328aa2e68ca44f9d919aad889f0552eab035c052283"
+    },
+    "one-main-head-run-original.json": {
+      "bytes": 12144,
+      "sha256": "624a70422ca08226a93920f370d5fd2920c5989caac71bc61195eeece3e9e35a"
+    },
+    "main-original.json": {
+      "bytes": 336,
+      "sha256": "8ab38fb8db0993cd672bbb2e6bf3b6ca8d124087fb841ecc97bad4fb1d9bfe89"
+    },
+    "pr-merged-original.json": {
+      "bytes": 33502,
+      "sha256": "84adabc4b6242c090cb6063d8be0a61e36771c3ea1ce21dca83f26b4f87dc543"
+    },
+    "actual-pass-original.json": {
+      "bytes": 5571,
+      "sha256": "2272d318b7d824d7341e90cd340b53bfeb81dc5cbec26150f857b4db8251a167"
+    },
+    "issue209-original.json": {
+      "bytes": 8349,
+      "sha256": "2f1adbd929297ceea9adbd3346dbe7fdaed8fefb0ad62cdf9940993d8286a3a0"
+    },
+    "closing-refs-original.json": {
+      "bytes": 31,
+      "sha256": "41d2c505b45e615f2361b1e657a3a9a2ec9be8dc89cee69269b8121226d416db"
+    },
+    "native-actual-sent.txt": {
+      "bytes": 1580,
+      "sha256": "3420c518a159ac11c2465ac51d8d90a8ab39c0253f39f57f3a0ce390ea84ec77"
+    },
+    "prepared-unused-main-terminal-helper.py": {
+      "bytes": 9940,
+      "sha256": "e168f15e251891e47446f20afc8695df2ee6feacf7404a7b8949209d8873bdd2"
+    }
+  }
+}
