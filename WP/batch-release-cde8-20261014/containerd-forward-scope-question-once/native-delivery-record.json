@@ -1,0 +1,24 @@
+{
+  "status": "ACTUAL_SENT_ONCE_VISUALLY_VERIFIED",
+  "verifiedUtc": "2026-10-14T22:50:28.619Z",
+  "actualReturnedWindow": {
+    "app": "Claude_pzs8sxrjxfjjc!Claude",
+    "id": 7867734,
+    "title": "Claude"
+  },
+  "targetProject": "LIMS Audit",
+  "targetThread": "Lab workflow audit and plan",
+  "questionId": 6180207219,
+  "freshTargetObserved": true,
+  "rightComposerEmptyBefore": true,
+  "caretObserved": true,
+  "ownedDraftEndAndHeadInspected": true,
+  "returnCount": 1,
+  "actualSentBubbleObserved": true,
+  "rightComposerEmptyAfter": true,
+  "actualClStatus": "Hyperspacing",
+  "humanCentreDraft": "can you go and ask Pip",
+  "humanDraftPreserved": true,
+  "newExecutionAuthority": null,
+  "productionOperations": 0
+}

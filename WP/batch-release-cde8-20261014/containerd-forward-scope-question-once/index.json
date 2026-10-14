@@ -1,0 +1,79 @@
+{
+  "status": "ACTUAL_CONTAINERD_SCOPE_QUESTION_NATIVE_DELIVERY_RETAINED",
+  "questionId": 6180207219,
+  "retainedUtc": "2026-10-14T22:50:29.604670+00:00",
+  "actualDirection": null,
+  "newExecutionAuthority": null,
+  "files": [
+    {
+      "path": "WP/batch-release-cde8-20261014/containerd-forward-scope-question-once/actual-question-body.txt",
+      "bytes": 4384,
+      "sha256": "e25a2a7c901b017f9dd6801bb4e6b630f546e0e416c421e6b66738102058ae0e"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/containerd-forward-scope-question-once/actual-question-confirmed.json",
+      "bytes": 6227,
+      "sha256": "07c35224d954d1487f7397a35bb636f6e6e2da98b30a1bc0cf6fd96d2fe16d03"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/containerd-forward-scope-question-once/actual-question-fresh-original.json",
+      "bytes": 5989,
+      "sha256": "91c378b91dead201c783726e6a038538b2fede83028a7beaef5c42a4c5ba2ff5"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/containerd-forward-scope-question-once/current-main-original.json",
+      "bytes": 336,
+      "sha256": "8ab38fb8db0993cd672bbb2e6bf3b6ca8d124087fb841ecc97bad4fb1d9bfe89"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/containerd-forward-scope-question-once/issue162-history-before-original.json",
+      "bytes": 1729816,
+      "sha256": "a116df638f6f2f333e2440cb56914b397f14bd8e73825eda2ab51baf2081f912"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/containerd-forward-scope-question-once/native-actual-sent.txt",
+      "bytes": 1978,
+      "sha256": "93469935ee214c274ce5d23e9b04420802dca75aa09bfff7b07f7f669bfbd5ef"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/containerd-forward-scope-question-once/native-delivery-record.json",
+      "bytes": 725,
+      "sha256": "392c6181de9c32afffe95a031c78d0f7fbf960a07eb04a001e8c24a471ad0ec4"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/containerd-forward-scope-question-once/post-intent.json",
+      "bytes": 198,
+      "sha256": "cf1785f404525e52e5233191b15135a83d6e07a35b8b353bbe0b89fc4b80ebc0"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/containerd-forward-scope-question-once/post-response-original.json",
+      "bytes": 5989,
+      "sha256": "91c378b91dead201c783726e6a038538b2fede83028a7beaef5c42a4c5ba2ff5"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/containerd-forward-scope-question-once/post-stderr-original.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/containerd-forward-scope-question-once/request-payload-original.json",
+      "bytes": 4412,
+      "sha256": "f1b74daa372d29ca9fcf1644986a2aaf03f83a63e5a6eb406c6489155a9cb4ee"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/raise-batch-build-containerd-forward-scope-boundary-once.py",
+      "bytes": 7160,
+      "sha256": "fb4d1bd9cf0bb043d0386d4ebca3f682d14176c91f06f3fc516ffaca77715370"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/retain-build-containerd-scope-question-native-once.py",
+      "bytes": 3584,
+      "sha256": "8e46c9bb45f58f615b06aa2a7cc9ab2d7b2754341d564c31823ae93f3c90e496"
+    },
+    {
+      "path": "WP/audit-release-eb6de2e8/README.md",
+      "bytes": 413090,
+      "sha256": "a863fd7ac20bedc4e3424b11c1f560ddb7ab63827e8eeff2887e124913bc13aa"
+    }
+  ]
+}
