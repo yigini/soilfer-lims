@@ -1,0 +1,31 @@
+{
+  "status": "PROPOSED_SCOPE_REQUIRES_ACTUAL_CLAUDIO_DIRECTION_THEN_CONCRETE_NEW_SOURCE_REVIEW",
+  "candidate": "cde8c8896f5f9d5f1ab07b0ae16b1a765e0a6367",
+  "imageForensicBinding": "sha256:1d4882f49f351a08549c79c0409f7848dbb205feef314b33432aae63ed11217b",
+  "originalFailureSha256": "4474dcd30269c0710e17723e2f702114f09d48129ccc070b499aa65a69ab30c2",
+  "scope": "READONLY_VALIDATION_EXISTING_ONCE_BUILT_IMAGE_NEW_FORWARD_RECEIPT_ONLY",
+  "newDockerBuilds": 0,
+  "existingImagesRetagged": 0,
+  "containerStarts": 0,
+  "databaseConnections": 0,
+  "volumeMounts": 0,
+  "originalRootWrites": 0,
+  "originalFailureReclassified": false,
+  "originalGateOverridden": false,
+  "newReceiptRoot": null,
+  "newToolingSource": null,
+  "newSourceReview": null,
+  "newReceipt": null,
+  "proofOrProductionAuthority": null,
+  "requirements": [
+    "Keep original failed gate/root/unit/image/inputs/logs unchanged; never replay or cleanup",
+    "Independent original21input/raw1560application source/closedDockerlog/exit0/imageID+revision+size validation",
+    "Discover and bind actual Docker and containerd storage roots without changing daemon configuration",
+    "Complete bounded physical accounting on disjoint roots and all retained release allocations with no DB/volume connection",
+    "Retain original missing pre-build containerd allocation explicitly; never invent it or retroactively pass the old500MBgate",
+    "Unchanged reserve floor/scaled reserve/unexplained growth limit/workload pins",
+    "Only after exact new source review, potentially create a new distinct receipt for the same once-built image; no proof/deploy authority inferred",
+    "Future stopped-copy proof/actual214209impact/policyNOOP/YYnonzero/approvedSTOP/finalkit/freshgate reviews remain required"
+  ],
+  "question": "Is this separately reviewed, read-only forward receipt route in scope, or must the retained once-built image stay excluded? No rebuild, retag, original receipt fabrication or old-gate override is proposed."
+}

@@ -1,0 +1,13 @@
+{
+  "status": "READONLY_TOPOLOGY_COLLECTOR_TIMED_OUT",
+  "evidenceKind": "TOOL_OUTPUT_TRANSCRIPTION",
+  "consumedHelper": "inspect-closed-batch-build-storage-topology-once.py",
+  "localExitCode": 1,
+  "literalError": "subprocess.TimeoutExpired: Command '['ssh', '-o', 'BatchMode=yes', '-o', 'ConnectTimeout=15', 'root@46.19.33.37', 'python3', '-B', '-']' timed out after 60 seconds",
+  "originalScriptRetained": true,
+  "completedAllocationResultAvailable": false,
+  "followupBoundedMetadataOnly": true,
+  "laterDuProcessInventoryEmpty": true,
+  "processesStoppedByPip": 0,
+  "productionOperations": 0
+}

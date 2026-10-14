@@ -1,0 +1,66 @@
+{
+  "status": "ACTUAL_CONTAINERD_STORAGE_OMITTED_ORIGINAL_GATE_REMAINS_FAILED",
+  "files": [
+    {
+      "path": "WP/batch-release-cde8-20261014/closed-build-storage-topology-once/readonly-probe-source.py",
+      "bytes": 1173,
+      "sha256": "1b07c59cc7fdfabf005c46bb5920ec48f3f24cbd16f4654c38129869c573d40a"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/closed-build-bounded-topology-no-du-once/exit-original.json",
+      "bytes": 91,
+      "sha256": "f9d17bf19d6f679764fc2f9bff6b687c75a28bf8e5a8e6a54c7ca5659b32daa8"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/closed-build-bounded-topology-no-du-once/readonly-probe-source.py",
+      "bytes": 1907,
+      "sha256": "5f5fc28250ac7106915a809ef2c68a3ae96359095dc671cab4ab884d57f5c0c4"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/closed-build-bounded-topology-no-du-once/stderr-original.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/closed-build-bounded-topology-no-du-once/stdout-original.json",
+      "bytes": 1913,
+      "sha256": "44644fe4b5af978f9a2552b57d7881a6f7f444a542be2b6ca1589bcaea3e8eed"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/closed-build-accounting-forward-boundary/forward-remedy-scope-proposal.json",
+      "bytes": 2027,
+      "sha256": "cf9cd36e80a2b4fad2e651a2d8e362550d3221fa6dcb06255207c36fd75e7fe3"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/closed-build-accounting-forward-boundary/recursive-topology-timeout-transcription.json",
+      "bytes": 615,
+      "sha256": "05a7a5c5635e7fa860f64357db285bfd018273a4c51e244c9b65c17100806339"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/closed-build-accounting-forward-boundary/storage-boundary-analysis.json",
+      "bytes": 1440,
+      "sha256": "334aa1168390c56b5f218a13c530e356bf4511f5b5677238d472bcf69f7c3a41"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/inspect-closed-batch-build-storage-topology-once.py",
+      "bytes": 2119,
+      "sha256": "2762b776f2d72c00adbfd32e9171a82cc36edfc624a243937f93b705fd84ed50"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/inspect-closed-build-bounded-topology-no-du-once.py",
+      "bytes": 3068,
+      "sha256": "0dc351fb6d4a7bc402fd918a33ac9338c068e0f01cca4dc930a82da332d09952"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/retain-batch-build-containerd-accounting-boundary-once.py",
+      "bytes": 8529,
+      "sha256": "0ec0757ce6a0030c66f701b760c6b90121b6538aa9b251e5b87b27cf82308fe0"
+    },
+    {
+      "path": "WP/audit-release-eb6de2e8/README.md",
+      "bytes": 412219,
+      "sha256": "044095f128f7a192eba02656ff4e3edc4639913060a346bbaeb3e77f668f4454"
+    }
+  ],
+  "newForwardAuthority": null
+}
