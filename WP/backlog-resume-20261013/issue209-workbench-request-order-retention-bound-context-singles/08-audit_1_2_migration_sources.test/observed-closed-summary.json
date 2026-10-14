@@ -1,0 +1,12 @@
+{
+  "closedUtc": "2026-10-14T17:29:46.683400+00:00",
+  "suite": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\security\\audit_1_2_migration_sources.test.js",
+  "exit": 0,
+  "originalReportPresent": true,
+  "tests": 33,
+  "passed": 33,
+  "failed": 0,
+  "expectedTests": 33,
+  "sourceUnchanged": true,
+  "status": "PASS"
+}

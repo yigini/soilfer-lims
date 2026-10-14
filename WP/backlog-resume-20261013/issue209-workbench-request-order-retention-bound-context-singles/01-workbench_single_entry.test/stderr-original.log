@@ -1,0 +1,75 @@
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-SINGLE-ENTRY
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-SINGLE-ENTRY
+
+      at log (wsServer.js:305:24)
+
+  console.error
+    [reviewWorkItem] Error: Error: Work item WI-PH-1791998904815 is no longer eligible for this review. Only submitted work items can be reviewed.
+        at itemStateError (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewCommitService.js:25:26)
+        at itemStateError (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewCommitService.js:41:25)
+        at Object.assertReviewable [as reviewWorkItem] (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workItemController.js:818:9)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Object.<anonymous> (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\workbench_single_entry.test.js:294:13) {
+      statusCode: 409,
+      code: 'ITEM_NOT_SUBMITTED',
+      workItemId: 'WI-PH-1791998904815'
+    }
+
+      1048 |         });
+      1049 |     } catch (error) {
+    > 1050 |         console.error('[reviewWorkItem] Error:', error);
+           |                 ^
+      1051 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to review work item', ...(error.code && { code: error.code }), ...(error.details || {}) });
+      1052 |     }
+      1053 | };
+
+      at Object.error [as reviewWorkItem] (controllers/workItemController.js:1050:17)
+      at Object.<anonymous> (tests/contracts/workbench_single_entry.test.js:294:13)
+
+  console.log
+    [commitSubmissions] Invoked by tech_marco_single with 1 samples: [ 'SMP-ENTRY-1791998904815' ]
+
+      at Object.log [as commitSubmissions] (controllers/workbenchController.js:1806:13)
+
+  console.log
+    [WS] Broadcast SUBMISSION_CREATED to 0 socket(s) in lab LAB-SINGLE-ENTRY
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-SINGLE-ENTRY
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+PASS tests/contracts/workbench_single_entry.test.js
+  Workbench Single-Entry Architecture & Operational Lifecycle Contract
+    Operational Confirmation Lifecycle (A01, A02, P1)
+      √ Rejects incomplete checklist with HTTP 422 (15 ms)
+      √ Rejects PREPARATION before DRYING is completed with HTTP 409 (4 ms)
+      √ Confirms DRYING checklist, generates durable receipt, unlocks gate, and creates NO scientific submission (50 ms)
+      √ Confirms PREPARATION checklist once drying is complete (23 ms)
+    Closure of Execution Shortcuts (A11, P4, W08)
+      √ PUT /api/work/:id/status rejects bare Done on operational gate without checklist (16 ms)
+      √ PUT /api/samples/:id/phase rejects DONE without verified checklist (2 ms)
+    Manager Review & Scientific Approval Policy (A05, P2, W10)
+      √ Rejects approving unrecorded or unsubmitted scientific tasks (37 ms)
+      √ Submitting and reviewing scientific determination reconciles Submission and ReviewDecision (164 ms)
+    Truthful Responses & Queue Views (W04, W06, P3)
+      √ batchSave responds HTTP 422 when saved: 0 and errors exist (3 ms)
+      √ previewSubmissions filters out operational gates and bare Done completions (1 ms)
+      √ getQueue supports view filtering (my_work, ready_to_submit, submitted, completed) (25 ms)
+    Order Revision Snapshotting & Workspace Diagnostics (A14, A15, W09)
+      √ updateSampleAnalyses creates coherent OrderRevision v2 and OrderLines transactionally (31 ms)
+      √ SampleWorkspaceService projects active revision and flags any order mismatch (30 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       13 passed, 13 total
+Snapshots:   0 total
+Time:        1.411 s, estimated 2 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\workbench_single_entry.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\issue209-workbench-request-order-retention-bound-context-singles\01-workbench_single_entry.test\report-original.json

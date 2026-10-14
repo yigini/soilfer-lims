@@ -1,0 +1,259 @@
+{
+  "createdUtc": "2026-10-14T17:21:14.934183+00:00",
+  "reviewedBeforeChanges": true,
+  "originalFailedCases": 11,
+  "cases": [
+    {
+      "suite": "workbench_single_entry.test.js",
+      "test": "Workbench Single-Entry Architecture & Operational Lifecycle Contract Order Revision Snapshotting & Workspace Diagnostics (A14, A15, W09) updateSampleAnalyses creates coherent OrderRevision v2 and OrderLines transactionally",
+      "originalFailureSha256": "4be8a778b92530be821377881a15fbcba9c00618f2277be0d9bbf7b5ecda46fa",
+      "originalObservedHeader": [
+        "Error: expect(received).toBe(expected) // Object.is equality",
+        "",
+        "Expected: true",
+        "Received: undefined",
+        "    at Object.toBe (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\workbench_single_entry.test.js:446:37)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)"
+      ],
+      "originalCaseLineNumbers": [
+        "446"
+      ],
+      "classification": "FIXTURE_ONLY_MISSING_HTTP_HEADERS_OR_NEW_OWNED_POSITIVE_EXECUTION_ORDER_CONTEXT",
+      "sourceDecision": "Actual closed13/11/2 diagnostic found500 missing mock req.headers before order service; existing ACTIVE revision1/PH+EC lines valid. Add req.headers={} at sole direct updateSampleAnalyses mock site, remove only NEW diagnostic console. Mounted Express route supplies headers; no reachable runtime gap observed. Existing POTASSIUM name/units/request/reason, version2/three-line/supersession, all operational/approval/custody/report/workspace assertions preserved.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial-order WIs remain reachable zero-write refused with distinct readonly lists/approvednonzeroSTOP. Direct mocked HTTP request missing headers is unreachable at mounted Express route; no application normalization/backfill/relink/amendment order step."
+    },
+    {
+      "suite": "workbench_single_entry.test.js",
+      "test": "Workbench Single-Entry Architecture & Operational Lifecycle Contract Order Revision Snapshotting & Workspace Diagnostics (A14, A15, W09) SampleWorkspaceService projects active revision and flags any order mismatch",
+      "originalFailureSha256": "80d1fa1470749851980af201405dc8a4ce80313c39d7c18880fd4d1e3b8c0b96",
+      "originalObservedHeader": [
+        "Error: expect(received).toBe(expected) // Object.is equality",
+        "",
+        "Expected: 2",
+        "Received: 1",
+        "    at Object.toBe (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\workbench_single_entry.test.js:466:52)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)"
+      ],
+      "originalCaseLineNumbers": [
+        "466"
+      ],
+      "classification": "FIXTURE_ONLY_MISSING_HTTP_HEADERS_OR_NEW_OWNED_POSITIVE_EXECUTION_ORDER_CONTEXT",
+      "sourceDecision": "Actual closed13/11/2 diagnostic found500 missing mock req.headers before order service; existing ACTIVE revision1/PH+EC lines valid. Add req.headers={} at sole direct updateSampleAnalyses mock site, remove only NEW diagnostic console. Mounted Express route supplies headers; no reachable runtime gap observed. Existing POTASSIUM name/units/request/reason, version2/three-line/supersession, all operational/approval/custody/report/workspace assertions preserved.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial-order WIs remain reachable zero-write refused with distinct readonly lists/approvednonzeroSTOP. Direct mocked HTTP request missing headers is unreachable at mounted Express route; no application normalization/backfill/relink/amendment order step."
+    },
+    {
+      "suite": "workbench_draft_integrity.test.js",
+      "test": "Workbench Draft Integrity Contract (P0) 5. Non-draft batchSave records determinations into Result and purges draft",
+      "originalFailureSha256": "9cf274d7dea88e8f994cb73057e74118e4525c92b88e7e35873e3d0f85f53bd6",
+      "originalObservedHeader": [
+        "Error: expect(received).not.toBeNull()",
+        "",
+        "Received: null",
+        "    at Object.toBeNull (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\workbench_draft_integrity.test.js:254:31)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)"
+      ],
+      "originalCaseLineNumbers": [
+        "254"
+      ],
+      "classification": "FIXTURE_ONLY_MISSING_HTTP_HEADERS_OR_NEW_OWNED_POSITIVE_EXECUTION_ORDER_CONTEXT",
+      "sourceDecision": "Only positive fifth non-draft write gets one legacy NULL PH line for existing canonical+duplicate owners; original same legacy match supports both retained readings. Earlier draft-only zero Results/report exclusion/discard/conflict/KEEP_LOCAL required reason remain orderless and unchanged. Two independent7.25/7.30 retained replicates/policy/no overwrite/versions/basis/purge assertions unchanged. Original null result/zero replicates observed; current execution order preflight source inspected, no unobserved old response code invented.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial-order WIs remain reachable zero-write refused with distinct readonly lists/approvednonzeroSTOP. Direct mocked HTTP request missing headers is unreachable at mounted Express route; no application normalization/backfill/relink/amendment order step."
+    },
+    {
+      "suite": "workbench_draft_integrity.test.js",
+      "test": "Workbench Draft Integrity Contract (P0) 6. Replicate 2 does not overwrite Replicate 1 in Result table",
+      "originalFailureSha256": "d8bd3de4738d6f2952c17603740cddf51cb33a1a6c9fc61618bf36be38d26c49",
+      "originalObservedHeader": [
+        "Error: expect(received).toBe(expected) // Object.is equality",
+        "",
+        "Expected: 2",
+        "Received: 0",
+        "    at Object.toBe (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\workbench_draft_integrity.test.js:309:39)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)"
+      ],
+      "originalCaseLineNumbers": [
+        "309"
+      ],
+      "classification": "FIXTURE_ONLY_MISSING_HTTP_HEADERS_OR_NEW_OWNED_POSITIVE_EXECUTION_ORDER_CONTEXT",
+      "sourceDecision": "Only positive fifth non-draft write gets one legacy NULL PH line for existing canonical+duplicate owners; original same legacy match supports both retained readings. Earlier draft-only zero Results/report exclusion/discard/conflict/KEEP_LOCAL required reason remain orderless and unchanged. Two independent7.25/7.30 retained replicates/policy/no overwrite/versions/basis/purge assertions unchanged. Original null result/zero replicates observed; current execution order preflight source inspected, no unobserved old response code invented.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial-order WIs remain reachable zero-write refused with distinct readonly lists/approvednonzeroSTOP. Direct mocked HTTP request missing headers is unreachable at mounted Express route; no application normalization/backfill/relink/amendment order step."
+    },
+    {
+      "suite": "qc_disposition_flagging.test.js",
+      "test": "WP-29: QC Service & Batch Disposition Result Flagging 1. qcService accurately computes blank threshold, duplicate RPD, and control recovery",
+      "originalFailureSha256": "f5e2ebd0cba6f13db1f9d2d2f80ee190ef8d606773b80ef77cfe7f49e28cd36f",
+      "originalObservedHeader": [
+        "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+        "    at Object.resolveOrderLine (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\orderLineResolutionService.js:30:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at insertExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workAttemptWriteService.js:63:25)",
+        "    at insertFixtureExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:36:9)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:83:9",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)"
+      ],
+      "originalCaseLineNumbers": [
+        "33"
+      ],
+      "classification": "FIXTURE_ONLY_MISSING_HTTP_HEADERS_OR_NEW_OWNED_POSITIVE_EXECUTION_ORDER_CONTEXT",
+      "sourceDecision": "NEW explicit completed PH owner gets one legacy NULL order before its numerical witness, preserving Batch absent at execution time and all original values/flags/statuses. Pure blank/RPD/recovery and typed failed controls/result invalidation/manager warning restoration assertions unchanged. No new Batch/owner/evidence or runtime changes.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial-order WIs remain reachable zero-write refused with distinct readonly lists/approvednonzeroSTOP. Direct mocked HTTP request missing headers is unreachable at mounted Express route; no application normalization/backfill/relink/amendment order step."
+    },
+    {
+      "suite": "qc_disposition_flagging.test.js",
+      "test": "WP-29: QC Service & Batch Disposition Result Flagging 2. A batch evaluated as QC_FAIL creates typed BatchQcResult rows and flags associated results",
+      "originalFailureSha256": "f5e2ebd0cba6f13db1f9d2d2f80ee190ef8d606773b80ef77cfe7f49e28cd36f",
+      "originalObservedHeader": [
+        "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+        "    at Object.resolveOrderLine (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\orderLineResolutionService.js:30:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at insertExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workAttemptWriteService.js:63:25)",
+        "    at insertFixtureExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:36:9)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:83:9",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)"
+      ],
+      "originalCaseLineNumbers": [
+        "33"
+      ],
+      "classification": "FIXTURE_ONLY_MISSING_HTTP_HEADERS_OR_NEW_OWNED_POSITIVE_EXECUTION_ORDER_CONTEXT",
+      "sourceDecision": "NEW explicit completed PH owner gets one legacy NULL order before its numerical witness, preserving Batch absent at execution time and all original values/flags/statuses. Pure blank/RPD/recovery and typed failed controls/result invalidation/manager warning restoration assertions unchanged. No new Batch/owner/evidence or runtime changes.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial-order WIs remain reachable zero-write refused with distinct readonly lists/approvednonzeroSTOP. Direct mocked HTTP request missing headers is unreachable at mounted Express route; no application normalization/backfill/relink/amendment order step."
+    },
+    {
+      "suite": "qc_disposition_flagging.test.js",
+      "test": "WP-29: QC Service & Batch Disposition Result Flagging 3. Manager disposition with PROCEED_WITH_WARNING overrides fail and restores result validity",
+      "originalFailureSha256": "f5e2ebd0cba6f13db1f9d2d2f80ee190ef8d606773b80ef77cfe7f49e28cd36f",
+      "originalObservedHeader": [
+        "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+        "    at Object.resolveOrderLine (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\orderLineResolutionService.js:30:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at insertExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workAttemptWriteService.js:63:25)",
+        "    at insertFixtureExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:36:9)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:83:9",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)"
+      ],
+      "originalCaseLineNumbers": [
+        "33"
+      ],
+      "classification": "FIXTURE_ONLY_MISSING_HTTP_HEADERS_OR_NEW_OWNED_POSITIVE_EXECUTION_ORDER_CONTEXT",
+      "sourceDecision": "NEW explicit completed PH owner gets one legacy NULL order before its numerical witness, preserving Batch absent at execution time and all original values/flags/statuses. Pure blank/RPD/recovery and typed failed controls/result invalidation/manager warning restoration assertions unchanged. No new Batch/owner/evidence or runtime changes.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial-order WIs remain reachable zero-write refused with distinct readonly lists/approvednonzeroSTOP. Direct mocked HTTP request missing headers is unreachable at mounted Express route; no application normalization/backfill/relink/amendment order step."
+    },
+    {
+      "suite": "workbench_pipeline_twostep.test.js",
+      "test": "Workbench Two-Step Record & Submit Pipeline (Phase 4) 2. commitCompletion records determinations, completes items and returns receipt",
+      "originalFailureSha256": "ad6dddf1e566736cb9abfd05d4392d759a5538af383de4071d608a44fb0831cc",
+      "originalObservedHeader": [
+        "Error: expect(received).toBe(expected) // Object.is equality",
+        "",
+        "Expected: true",
+        "Received: undefined",
+        "    at Object.toBe (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\workbench_pipeline_twostep.test.js:132:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)"
+      ],
+      "originalCaseLineNumbers": [
+        "132"
+      ],
+      "classification": "FIXTURE_ONLY_MISSING_HTTP_HEADERS_OR_NEW_OWNED_POSITIVE_EXECUTION_ORDER_CONTEXT",
+      "sourceDecision": "Only positive second commitCompletion gets PH+EC legacy NULL order lines for existing owners before recording. Earlier invalid-number preview remains orderless/unchanged. Original commit success undefined then zero eligible package/receipt failures are source-inferred downstream of refused recording; no old error code fabricated. Original two values/versions/receipt/full submission/bundling/status and recent receipt assertions unchanged.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial-order WIs remain reachable zero-write refused with distinct readonly lists/approvednonzeroSTOP. Direct mocked HTTP request missing headers is unreachable at mounted Express route; no application normalization/backfill/relink/amendment order step."
+    },
+    {
+      "suite": "workbench_pipeline_twostep.test.js",
+      "test": "Workbench Two-Step Record & Submit Pipeline (Phase 4) 3. previewSubmissions bundles completed items by sample",
+      "originalFailureSha256": "d13e0f55661d919c535fd2f9113089f9c15541032866780f8f8291145ab0ccb3",
+      "originalObservedHeader": [
+        "Error: expect(received).toBe(expected) // Object.is equality",
+        "",
+        "Expected: 1",
+        "Received: 0",
+        "    at Object.toBe (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\workbench_pipeline_twostep.test.js:156:43)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)"
+      ],
+      "originalCaseLineNumbers": [
+        "156"
+      ],
+      "classification": "FIXTURE_ONLY_MISSING_HTTP_HEADERS_OR_NEW_OWNED_POSITIVE_EXECUTION_ORDER_CONTEXT",
+      "sourceDecision": "Only positive second commitCompletion gets PH+EC legacy NULL order lines for existing owners before recording. Earlier invalid-number preview remains orderless/unchanged. Original commit success undefined then zero eligible package/receipt failures are source-inferred downstream of refused recording; no old error code fabricated. Original two values/versions/receipt/full submission/bundling/status and recent receipt assertions unchanged.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial-order WIs remain reachable zero-write refused with distinct readonly lists/approvednonzeroSTOP. Direct mocked HTTP request missing headers is unreachable at mounted Express route; no application normalization/backfill/relink/amendment order step."
+    },
+    {
+      "suite": "workbench_pipeline_twostep.test.js",
+      "test": "Workbench Two-Step Record & Submit Pipeline (Phase 4) 4. commitSubmissions creates Submission and transitions items to SUBMITTED",
+      "originalFailureSha256": "139af979a61b1e1a8888316ee4e88d7e400ea14d10db66235e450659e17d609c",
+      "originalObservedHeader": [
+        "Error: expect(received).toBe(expected) // Object.is equality",
+        "",
+        "Expected: true",
+        "Received: undefined",
+        "    at Object.toBe (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\workbench_pipeline_twostep.test.js:177:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)"
+      ],
+      "originalCaseLineNumbers": [
+        "177"
+      ],
+      "classification": "FIXTURE_ONLY_MISSING_HTTP_HEADERS_OR_NEW_OWNED_POSITIVE_EXECUTION_ORDER_CONTEXT",
+      "sourceDecision": "Only positive second commitCompletion gets PH+EC legacy NULL order lines for existing owners before recording. Earlier invalid-number preview remains orderless/unchanged. Original commit success undefined then zero eligible package/receipt failures are source-inferred downstream of refused recording; no old error code fabricated. Original two values/versions/receipt/full submission/bundling/status and recent receipt assertions unchanged.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial-order WIs remain reachable zero-write refused with distinct readonly lists/approvednonzeroSTOP. Direct mocked HTTP request missing headers is unreachable at mounted Express route; no application normalization/backfill/relink/amendment order step."
+    },
+    {
+      "suite": "workbench_pipeline_twostep.test.js",
+      "test": "Workbench Two-Step Record & Submit Pipeline (Phase 4) 5. getReceipts returns recent activity receipts",
+      "originalFailureSha256": "3503a53dbcc7bd0405a0d75daba61a8399a82c3cdd927041873a498daab54236",
+      "originalObservedHeader": [
+        "Error: expect(received).toBeGreaterThan(expected)",
+        "",
+        "Expected: > 0",
+        "Received:   0",
+        "    at Object.toBeGreaterThan (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\workbench_pipeline_twostep.test.js:211:38)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)"
+      ],
+      "originalCaseLineNumbers": [
+        "211"
+      ],
+      "classification": "FIXTURE_ONLY_MISSING_HTTP_HEADERS_OR_NEW_OWNED_POSITIVE_EXECUTION_ORDER_CONTEXT",
+      "sourceDecision": "Only positive second commitCompletion gets PH+EC legacy NULL order lines for existing owners before recording. Earlier invalid-number preview remains orderless/unchanged. Original commit success undefined then zero eligible package/receipt failures are source-inferred downstream of refused recording; no old error code fabricated. Original two values/versions/receipt/full submission/bundling/status and recent receipt assertions unchanged.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial-order WIs remain reachable zero-write refused with distinct readonly lists/approvednonzeroSTOP. Direct mocked HTTP request missing headers is unreachable at mounted Express route; no application normalization/backfill/relink/amendment order step."
+    }
+  ],
+  "actualSingleEntryDiagnosticIndex": "issue209-single-entry-refusal-observation-singles/index.json",
+  "productionOperations": 0,
+  "correctedBeforeSuccessor": true,
+  "retainedParentCleanupDecision": "After all13 original assertions passed, original teardown FK refused orderLine deletion referenced by retained WorkAttempt. Guard only two old orderLine/revision delete calls when retained attempts exist; keep original statements/all assertions/runtime FK/history guards. Not a runtime repair or hidden failing assertion.",
+  "previousProofRefused": "Common closing brace removal matched an old brace; no tests started from that preparer. Replace only added guard closing marker, then prove old source byte-for-byte."
+}

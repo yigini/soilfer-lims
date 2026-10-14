@@ -1,0 +1,12 @@
+{
+  "closedUtc": "2026-10-14T17:28:32.981063+00:00",
+  "suite": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\workbench_pipeline_twostep.test.js",
+  "exit": 0,
+  "originalReportPresent": true,
+  "tests": 5,
+  "passed": 5,
+  "failed": 0,
+  "expectedTests": 5,
+  "sourceUnchanged": true,
+  "status": "PASS"
+}

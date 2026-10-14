@@ -1,0 +1,12 @@
+PASS tests/contracts/qc_disposition_flagging.test.js
+  WP-29: QC Service & Batch Disposition Result Flagging
+    √ 1. qcService accurately computes blank threshold, duplicate RPD, and control recovery (251 ms)
+    √ 2. A batch evaluated as QC_FAIL creates typed BatchQcResult rows and flags associated results (171 ms)
+    √ 3. Manager disposition with PROCEED_WITH_WARNING overrides fail and restores result validity (68 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       3 passed, 3 total
+Snapshots:   0 total
+Time:        1.204 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\qc_disposition_flagging.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\issue209-workbench-request-order-retention-bound-context-singles\04-qc_disposition_flagging.test\report-original.json

@@ -1,0 +1,14 @@
+{
+  "recordedUtc": "2026-10-14T17:28:19.657203+00:00",
+  "helper": "prepare-issue209-workbench-order-parent-retention-context-once.py",
+  "helperSha256": "933b648c9d6fc4469953c6002f7489525fc93451a948fad8329b8a2e9146c51b",
+  "exit": 1,
+  "sourceWrittenBeforeProofRefusal": true,
+  "commonClosingMarkerCausedProofMismatch": true,
+  "testsStarted": false,
+  "oldSourceExactlyRecoveredByAnchoredRemoval": true,
+  "oldHelperAndArtifactsPreserved": true,
+  "onlyAddedClosingMarkerChanged": true,
+  "runtimeChanges": 0,
+  "productionOperations": 0
+}
