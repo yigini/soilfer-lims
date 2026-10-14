@@ -1,0 +1,111 @@
+{
+  "observedUtc": "2026-10-14T07:28:57.843292+00:00",
+  "status": "MERGED_ACTUAL_AUDITED_HEAD",
+  "pr": 296,
+  "issue": 214,
+  "sourceHead": "5e0b32830f961b3236c7cf8f74cf8f676e98fbaa",
+  "sourceTree": "f2152e240b355cd141612b783c6ccf04f5c8383a",
+  "priorMain": "6d750914d8565acdd496767a7dd935811b5a89b2",
+  "merge": "2242bcb4861a7085bb95e78e0e7b1e4edf11d1b8",
+  "mergedUtc": "2026-10-14T07:28:52Z",
+  "parents": [
+    "6d750914d8565acdd496767a7dd935811b5a89b2",
+    "5e0b32830f961b3236c7cf8f74cf8f676e98fbaa"
+  ],
+  "mergedTreeEqualsAuditedSource": true,
+  "actualAuditCommentId": 6163165778,
+  "actualAuditEvidenceCommit": "5c1dce6314fc1b6f388fd516a3a51d8d79326666",
+  "prCi": 38524553288,
+  "mainCi": [
+    {
+      "id": 38528593695,
+      "head": "2242bcb4861a7085bb95e78e0e7b1e4edf11d1b8",
+      "attempt": 1,
+      "status": "queued",
+      "conclusion": null,
+      "url": "https://github.com/yigini/soilfer-lims/actions/runs/38528593695"
+    }
+  ],
+  "mainCiLogsCollected": false,
+  "closingIssuesReferences": [],
+  "issue214State": "open",
+  "deploymentPerformed": false,
+  "productionOperations": 0,
+  "nativeMergeAcknowledgementSent": false,
+  "issue209Started": true,
+  "issue209ScopeQuestion": 6163178638,
+  "files": {
+    "actual-merge-commit-original.json": {
+      "bytes": 2722,
+      "sha256": "72b993805e1ea4456f61b41c6856d0ac047638f5b5bda4d683e0c8297b4e1bff"
+    },
+    "checks-original.json": {
+      "bytes": 3564,
+      "sha256": "6e128c3a0742ed7b0e33b20691f1d051decc97bb6940730bc0d21826c11cd213"
+    },
+    "closing-refs-after-original.json": {
+      "bytes": 48,
+      "sha256": "53168d66d92def48cb83bdaedcacc1fca713370d9254d58532f6746a5c470719"
+    },
+    "closing-refs-original.json": {
+      "bytes": 158,
+      "sha256": "6d7ffde95c7a63be642a25159f6a7a0b2069715520cb5e216729fea71796c5cb"
+    },
+    "comments-original.json": {
+      "bytes": 13442,
+      "sha256": "93e75db0b6641d43a907562e5b8a00cb69fc52629e5dfcd35e1f451309aeb84d"
+    },
+    "issue214-after-original.json": {
+      "bytes": 8805,
+      "sha256": "09a09d239ef798edb131eb5aeafa0085258d04c3192d5bad6c9388445438f481"
+    },
+    "jobs-original.json": {
+      "bytes": 4335,
+      "sha256": "71a9734f6df78ef1b131acafda74ca1ff94ccfd3cb47ea0721ad7cfb6e1f466e"
+    },
+    "main-ci-open-original.json": {
+      "bytes": 12138,
+      "sha256": "e9d6450358bc247f2869aa0df211180eebd316c2badd139df31b0e5de0ec6731"
+    },
+    "main-merged-original.json": {
+      "bytes": 336,
+      "sha256": "e0c8d4117149b05e499ad0abfd6f0456aed24d869f784317aa0c1072415e39c9"
+    },
+    "main-original.json": {
+      "bytes": 336,
+      "sha256": "d6b707488e04e5b417de94d0c4e7a7872b66b92ade6062f4a9230f81e2564253"
+    },
+    "merge-request.json": {
+      "bytes": 77,
+      "sha256": "7283bb669512d7411e57e8350bc241a19e1362410c6f5e1ffaaf487aad6141f7"
+    },
+    "merge-response-original.json": {
+      "bytes": 109,
+      "sha256": "11620fb44b39decb86fd271cedd1be0c6a6fa2d11f5344cc5d1a2910cf10951a"
+    },
+    "merge-response-stderr.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "mutation-started.json": {
+      "bytes": 116,
+      "sha256": "41b332496d052700ab70f72d49f6c3d66870cedde779ed2b5ded6b44539e3dba"
+    },
+    "pr-merged-original.json": {
+      "bytes": 65850,
+      "sha256": "d9811426fecf45703c6108cd98fd5497b0cad5a263a5a877e9123c9c4b5dbdf3"
+    },
+    "pr-original.json": {
+      "bytes": 64906,
+      "sha256": "ff0012987a64432699bf1b81fa4c4702c577d72a6c1d92a5cf1c496999ff655e"
+    },
+    "run-original.json": {
+      "bytes": 12666,
+      "sha256": "3bd6076449d0820e09ef2e1459f82a2f7edfae2dbef4853b257d6ddb5a2a6244"
+    },
+    "verdict-original.json": {
+      "bytes": 8178,
+      "sha256": "83293fdf38e293253ec6ae50ff81dc3a9b61cd87fe863d04eaa465f99a8b9f47"
+    }
+  }
+}
