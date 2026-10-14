@@ -1,0 +1,11 @@
+{
+  "status": "LOCAL_POSTCOMMIT_RAW_VERIFIER_REFUSED_BEFORE_PUSH",
+  "evidenceKind": "TOOL_OUTPUT_TRANSCRIPTION",
+  "consumedHelper": "retain-forward-metadata-233000-closed-stop-once.py",
+  "localExitCode": 1,
+  "literalError": "fatal: failed to stat revision:path: Filename too long",
+  "committedAudit": "e8f2f2e330ab8daa987c269fe576f2a4a9f15874",
+  "allStagedRawBlobsPreviouslyVerified": true,
+  "completion": "Every original committed blob independently verified by ls-tree OID and cat-file, then same prepared commit pushed; no rename or original record change",
+  "productionOperations": 0
+}
