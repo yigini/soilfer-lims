@@ -1,0 +1,26 @@
+{
+  "WP/backlog-resume-20261013/pr296-native-merge-acknowledgement/actual-native-acknowledgement.txt": {
+    "bytes": 1263,
+    "sha256": "ff5186c354ef4379820440481b514e9c33f9430aca250e0e522ed1522229f7dd"
+  },
+  "WP/backlog-resume-20261013/pr296-native-merge-acknowledgement/main-ci-jobs-original.json": {
+    "bytes": 3480,
+    "sha256": "6b1a7c696bd9696af24cce3ed06537dfd244bb74243b0804158f0a7b731a83ee"
+  },
+  "WP/backlog-resume-20261013/pr296-native-merge-acknowledgement/main-ci-original.json": {
+    "bytes": 12107,
+    "sha256": "d302a5b6c43b0a93a9ce721b5f0f62bd5db1c6cf4e48f535c80a9d3a7c0f68d6"
+  },
+  "WP/backlog-resume-20261013/pr296-native-merge-acknowledgement/main-original.json": {
+    "bytes": 336,
+    "sha256": "e0c8d4117149b05e499ad0abfd6f0456aed24d869f784317aa0c1072415e39c9"
+  },
+  "WP/backlog-resume-20261013/pr296-native-merge-acknowledgement/native-delivery-record.json": {
+    "bytes": 1131,
+    "sha256": "55fdee517073dcfdbba1a79aca52b24b576c883ede81d544eace61a08213d2d5"
+  },
+  "WP/backlog-resume-20261013/pr296-native-merge-acknowledgement/pr-merged-original.json": {
+    "bytes": 65850,
+    "sha256": "7bac7fa53b85ad0b69a3fcfb0b23be34a9bc2e4e892162c6b6d5c38a30187214"
+  }
+}
