@@ -1,0 +1,134 @@
+{
+  "retainedUtc": "2026-10-14T10:36:22.881188+00:00",
+  "status": "CLOSED_INDEPENDENT_OWNED_CONTEXT_REGRESSION_PASS",
+  "summary": {
+    "closedUtc": "2026-10-14T10:32:20.048115+00:00",
+    "exit": 0,
+    "suites": 11,
+    "tests": 350,
+    "passedTests": 350,
+    "failed": 0,
+    "pending": 0,
+    "todo": 0,
+    "sourceUnchanged": true,
+    "selectedInventoryEqual": true,
+    "fullDiscovery": 370,
+    "ordinarySetups": true,
+    "workerIdleMemoryLimit": 512000000,
+    "productionOperations": 0,
+    "status": "PASS"
+  },
+  "cause": "All11suites350testsPASS; explicit current order context fixes existing equipment/P6 positives, valid orderLine in unchanged206aliquot refusal probes, exact nullable209modelshape for deliberate pre191workspace reads, and same wiring permission predicate retargeted to orderService. All old guard/assertion predicates unchanged; current core209+scanners pass. Fraction runtime/normalizer untouched pending new6166098211 decision.",
+  "sourceDraftPaths": [
+    "server/services/orderService.js",
+    "server/services/orderLineResolutionService.js",
+    "server/services/orderRevisionMigrationSource.js",
+    "server/scripts/install_order_revisions.js",
+    "server/services/sampleAnalysisStateService.js",
+    "server/services/intakeWorkItemService.js",
+    "server/services/workAttemptWriteService.js",
+    "server/services/workRepeatService.js",
+    "server/services/scientificAmendmentService.js",
+    "server/prisma/schema.prisma",
+    "server/prisma/migrations/20261014000100_order_revision_contract/migration.sql",
+    "server/tests/contracts/issue_209_order_revision_integration.test.js",
+    "server/tests/helpers/legacyWorkflowDatabase.js",
+    "server/services/workAttemptReservationService.js",
+    "server/tests/contracts/issue_209_order_revision_ui.test.js",
+    "server/index.js",
+    "server/tests/globalSetup.js",
+    "Dockerfile",
+    "docker-entrypoint.sh",
+    ".gitattributes",
+    "server/controllers/sampleController.js",
+    "server/tests/helpers/workflowWriteScanner.js",
+    "server/tests/helpers/qcGateFixture.js",
+    "server/tests/helpers/workAttemptFixtures.js",
+    "client/src/components/sample/AnalysisUpdateModal.jsx",
+    "docs/audit/209-order-revisions.md",
+    "server/tests/security/wiring.test.js",
+    "server/tests/contracts/audit_2_6_equipment_commit.test.js",
+    "server/tests/contracts/review_reports_amendments_p6.test.js",
+    "server/tests/contracts/audit_3_1_attempt_sql_guards.test.js",
+    "server/tests/contracts/issue_206_sample_containers.test.js",
+    "server/services/orderAttemptWriteService.js",
+    "server/tests/helpers/qcWorksheetUi.js",
+    "server/scripts/order_revision_impact.js",
+    "server/tests/contracts/issue_209_order_revision_http.test.js",
+    "server/scripts/rehearsal_deployment_readiness.cjs",
+    "server/tests/contracts/deployment_readiness_bootstrap.test.js",
+    "server/tests/contracts/reconcile_analyses.test.js",
+    "server/tests/contracts/edit_analyses_permission.test.js",
+    "client/src/translations/en.json",
+    "client/src/translations/es.json",
+    "client/src/translations/es-419.json",
+    "client/src/translations/fr.json",
+    "client/src/translations/pt.json",
+    "server/locales/en.json",
+    "server/locales/es.json",
+    "server/locales/es-419.json",
+    "server/locales/fr.json",
+    "server/locales/pt.json"
+  ],
+  "scopeComment": 6163271808,
+  "applicationFullyVerified": false,
+  "productionOperations": 0,
+  "rawFiles": {
+    "WP/backlog-resume-20261013/issue209-independent-owned-context-regression/command.json": {
+      "bytes": 2652,
+      "sha256": "ff19ba6d8207bfa3ad1ae94badea8e76ea8ec4b404c029bdf8e4f3614cc2e472"
+    },
+    "WP/backlog-resume-20261013/issue209-independent-owned-context-regression/config-original.json": {
+      "bytes": 6579,
+      "sha256": "eab4ece25b33d2d5cb9a53c16ece286fe066e983e90678052ed3fc0468e57534"
+    },
+    "WP/backlog-resume-20261013/issue209-independent-owned-context-regression/config-stderr-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "WP/backlog-resume-20261013/issue209-independent-owned-context-regression/exit-original.txt": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "WP/backlog-resume-20261013/issue209-independent-owned-context-regression/inventory-original.json": {
+      "bytes": 49572,
+      "sha256": "cd9377cd7feba630f4bb8b1eb023e5aa06ae7c389d9ce2d5b109a92734bb9b69"
+    },
+    "WP/backlog-resume-20261013/issue209-independent-owned-context-regression/inventory-stderr-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "WP/backlog-resume-20261013/issue209-independent-owned-context-regression/physical-retained-terminal-index.json": {
+      "bytes": 30359,
+      "sha256": "18556b3954afaaf4698950fd52bdd38367de506f159289f4097c5d2c4a98f783"
+    },
+    "WP/backlog-resume-20261013/issue209-independent-owned-context-regression/physical-retention-original.jsonl": {
+      "bytes": 24944,
+      "sha256": "873eac94ab98fb8c78449c22ddac617824e2c2b71c77a6b683633c16750b61d0"
+    },
+    "WP/backlog-resume-20261013/issue209-independent-owned-context-regression/report-original.json": {
+      "bytes": 155634,
+      "sha256": "78f98800581e6c4aeeb580cb5fb01f4dc88e1ab8a84314af4d6080aa365bc91f"
+    },
+    "WP/backlog-resume-20261013/issue209-independent-owned-context-regression/source-after.json": {
+      "bytes": 114832,
+      "sha256": "41dad00907ff46218c95314002e03bc8296283f8441b37cc8a450e22ede9a023"
+    },
+    "WP/backlog-resume-20261013/issue209-independent-owned-context-regression/source-before.json": {
+      "bytes": 114832,
+      "sha256": "41dad00907ff46218c95314002e03bc8296283f8441b37cc8a450e22ede9a023"
+    },
+    "WP/backlog-resume-20261013/issue209-independent-owned-context-regression/stderr-original.log": {
+      "bytes": 55035,
+      "sha256": "ed97c9b5d441a4844dc2979785a73d5631554f2430a6ecaf7678a2ce71344bf9"
+    },
+    "WP/backlog-resume-20261013/issue209-independent-owned-context-regression/stdout-original.log": {
+      "bytes": 2173,
+      "sha256": "0890ff28230d433e5ac5b8e54dd9e4d3dc7aa07686f7c19d2cbdbc1bb0aed2fc"
+    },
+    "WP/backlog-resume-20261013/issue209-independent-owned-context-regression/summary.json": {
+      "bytes": 363,
+      "sha256": "7f73a89682aca948cdbb528f47c3ae4fa2fca360f114303fe1599cfe16ddb97d"
+    }
+  }
+}
