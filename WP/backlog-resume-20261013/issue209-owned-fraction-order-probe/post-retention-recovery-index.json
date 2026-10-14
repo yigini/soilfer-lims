@@ -1,0 +1,41 @@
+{
+  "retainedUtc": "2026-10-14T10:19:42.664240+00:00",
+  "postRecord": {
+    "postedUtc": "2026-10-14T10:17:55Z",
+    "id": 6166098211,
+    "url": "https://github.com/yigini/soilfer-lims/issues/209#issuecomment-6166098211",
+    "bodySha256": "d89f30a6c60acd84444139f04893b43d78f3dc1abf88ee7f07b12fba3e5395e0",
+    "sourceAuditHead": "f87b30a039d51a2fef6734064d11400f7d4e7ba4",
+    "postedOnce": true
+  },
+  "confirmedFreshExactBody": true,
+  "postCountThisHelper": 0,
+  "previousFailure": "Original helper completed probe push and the one confirmed POST, then narrow git add refused an ignored stderr.log. Partial staging is owned and retained; never replay original helper.",
+  "rawFiles": {
+    "WP/backlog-resume-20261013/issue209-owned-fraction-order-probe/comments-before-post-original.json": {
+      "bytes": 12339,
+      "sha256": "31fbfd7725600cce6bd855e8d53f7eedfb02c19fa47623d8a10902934ca132ed"
+    },
+    "WP/backlog-resume-20261013/issue209-owned-fraction-order-probe/question-post-record.json": {
+      "bytes": 319,
+      "sha256": "ce28872947d8657b13b621ccef3da1561caea9bc7ad76468fcaaae072efe9b45"
+    },
+    "WP/backlog-resume-20261013/issue209-owned-fraction-order-probe/question-post-response-original.json": {
+      "bytes": 4677,
+      "sha256": "86565e7b7ee8b4a96ffbb65e0824a36b2ed85a0bdc69ab723d90df1be33253ef"
+    },
+    "WP/backlog-resume-20261013/issue209-owned-fraction-order-probe/question-post-stderr-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "WP/backlog-resume-20261013/issue209-owned-fraction-order-probe/question-prepared.md": {
+      "bytes": 3072,
+      "sha256": "d89f30a6c60acd84444139f04893b43d78f3dc1abf88ee7f07b12fba3e5395e0"
+    },
+    "WP/backlog-resume-20261013/issue209-owned-fraction-order-probe/question-fresh-verified-original.json": {
+      "bytes": 4677,
+      "sha256": "86565e7b7ee8b4a96ffbb65e0824a36b2ed85a0bdc69ab723d90df1be33253ef"
+    }
+  },
+  "productionOperations": 0
+}

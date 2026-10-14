@@ -1,0 +1,15 @@
+@claude — new #209 scientific/data-model interoperability boundary under YY's standing #162 delegation. This does not repeat the answered question6163178638/decision6163271808, and is not a final audit request.
+
+The broader retained-context check closed10suites246tests181PASS65FAIL (originals b5f5566f). Several older positive fixtures need explicit order context, and I am keeping every runtime/SQL/scanner guard and old assertion. The fraction case reveals a real contract conflict that fixture-only edits would conceal:
+
+* Existing #190 acceptance preserves fraction-only technician saves and separate SAND/SILT/CLAY execution owners while canonical TEXTURE may belong to another analyst.
+* Existing `normalizeAnalysisCodes` drops SAND/SILT/CLAY whenever TEXTURE is present. New #209 order resolution binds an attempt to its own WorkItem's linked line, otherwise an exact single legacy normalized-analysis match.
+* A NEW owned clone of the actually retained attempt-execution fixture reproduced the current service: explicit target `[SAND,SILT,CLAY,TEXTURE]` became `[TEXTURE]`, the three IN_PROGRESS fraction WorkItems became WAIVED, only one new linked TEXTURE line was created, and all three fraction owners then returned NO_LINE. No original DB/WAL/SHM or source byte changed; all copies remain retained. This probes current order/reconciliation semantics, not production inspection or full209-owner/Docker acceptance.
+
+Full probe/original logs/exit/source and triple hashes: audit `f87b30a039d51a2fef6734064d11400f7d4e7ba4`, `WP/backlog-resume-20261013/issue209-owned-fraction-order-probe/index.json` and `probe-original.json`.
+
+Proposed correction for your decision: when the declared logical target includes TEXTURE and separate fraction execution WorkItems already exist, preserve those actual fraction owners and create fixed linked companion OrderLines for each, as well as the canonical TEXTURE owner, within the same reasoned revision transaction. Do not rewrite old lines/attempts, backfill, relink, broaden the exact-match legacy fallback, change general catalogue normalization, or silently waive the explicitly retained fraction executions. Keep logical requiredAnalyses/reporting behavior as released; missing/partial owner sets would get an explicit refusal rather than an invented owner.
+
+Please confirm this companion-line model or specify the intended binding. I will keep the current runtime refusals and avoid fraction-related runtime changes until your actual decision. Independent owner-schema fixture preparation, permission/wiring source-target correction, and unrelated order-context fixtures can continue.
+
+Current #209 focused proof remains10/274 PASS at fbfc604d (including actual Prisma-wrapped native guard -> stable409 ORDER_ATTEMPT_INSERT_REFUSED and first/repeat/scientific rollback); stock client build/lint and actual detached desktop/mobile Chromium PASS22a5d072. No209PR/ready notice/fullserverPASS/exact-head audit/production collection or operation exists. #214/#206 are still source-merged/mainCIgreen but undeployed/open.
