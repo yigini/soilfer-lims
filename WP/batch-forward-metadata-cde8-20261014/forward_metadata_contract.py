@@ -4,7 +4,7 @@ CANDIDATE='cde8c8896f5f9d5f1ab07b0ae16b1a765e0a6367'
 TREE='638580d50f61254609de3abd42d93afc676a5727'
 IMAGE='sha256:1d4882f49f351a08549c79c0409f7848dbb205feef314b33432aae63ed11217b'
 OLD_ROOT='/opt/lims/releases/workflow-batch-build-cde8c889-20261014T221500Z'
-ROOT_NAME='workflow-batch-forward-metadata-cde8c889-20261014T233000Z'
+ROOT_NAME='workflow-batch-forward-metadata-cde8c889-20261015T000500Z'
 SCOPE='READONLY_FORWARD_METADATA_EVIDENCE_ONLY_NO_ADOPTION'
 SOURCE_FILES=frozenset({'forward_metadata_contract.py','collect_forward_metadata.py','prepare_forward_metadata.py','launch_forward_metadata.py','verify_forward_metadata_guards.py'})
 REFS={'candidate-image.id':{'bytes':71,'sha256':'6bb4227f82debcf97845874330ae261d044b749819d2f2193a0fc0c3935967e3','mode':0o600},'docker-build.log':{'bytes':28713,'sha256':'5a7736d9d36aaccafa9d98d84c3d1a537af4ee29b5255022d2565d78792db0f4','mode':0o400},'candidate-image-fresh-inspect-original.json':{'bytes':7229,'sha256':'c4b4d2fabe2783adf0eb6f842bb424982fcb6a7d53753b3dde2c79800f821c14','mode':None}}
@@ -48,7 +48,7 @@ def tokens(index):
         'scopeDirectionId=6180234041','referenceDirectionId=6180335648','reserveFloorBytes='+str(FLOOR),'originalResidualBytes='+str(RESIDUAL),
         'unexplainedAbortBytes='+str(ABORT),'metadataCallTimeoutSeconds='+str(CALL_TIMEOUT),'metadataCollectionTimeoutSeconds='+str(COLLECTION_TIMEOUT),
         'metadataUnitTimeoutSeconds='+str(UNIT_TIMEOUT),'metadataMemoryLimitBytes='+str(MEMORY),'metadataMaxOutputBytes='+str(MAX_OUTPUT),'metadataMaxCommands='+str(MAX_COMMANDS),
-        'imageEligibility=false','imageAdoptionReceipts=0','filesystemDuCalls=0','labAndHubBuildsOwnedByYY=true','releaseWindowControl=RELEASE_DAY_DISK_ABORTS_ACCEPTED']+[n+'='+d for n,d in sorted(files.items())]
+        'snapshotSelection=EXACT_CANDIDATE_ROOTFS_CHAIN_AND_PARENTS','catalogueTruncation=false','imageEligibility=false','imageAdoptionReceipts=0','filesystemDuCalls=0','labAndHubBuildsOwnedByYY=true','releaseWindowControl=RELEASE_DAY_DISK_ABORTS_ACCEPTED']+[n+'='+d for n,d in sorted(files.items())]
 def source_review(v,index):
     require(type(v.get('id')) is int and v['id']>6180335648 and v.get('html_url')=='https://github.com/yigini/soilfer-lims/issues/162#issuecomment-'+str(v['id']),'New exact-source review required')
     require((v.get('performed_via_github_app') or {}).get('slug')=='claude' and v.get('created_at')==v.get('updated_at') and v.get('created_at','')>'2026-10-14T22:57:41Z','Actual unedited new Claude source verdict required')
@@ -101,6 +101,24 @@ def snapshot_keys(text):
     require(len(keys)<=80 and len(keys)==len(set(keys)),'Snapshot inventory duplicate or exceeds bound; no truncation')
     for key in keys:safe_key(key)
     return keys
+def selected_snapshot_keys(text,layers):
+    lines=text.splitlines();require(lines and 'KEY' in lines[0] and 'PARENT' in lines[0] and 'KIND' in lines[0],'Complete snapshot catalogue interface required')
+    catalogue={}
+    for line in lines[1:]:
+        if not line.split():continue
+        fields=line.split();require(len(fields) in [2,3],'Snapshot catalogue row shape changed')
+        key=fields[0];safe_key(key);require(key not in catalogue,'Duplicate complete catalogue key')
+        parent=fields[1] if len(fields)==3 else None
+        if parent is not None:safe_key(parent)
+        require(fields[-1] in ['Active','View','Committed'],'Snapshot catalogue kind changed')
+        catalogue[key]={'parent':parent,'kind':fields[-1]}
+    require(isinstance(layers,list) and 0<len(layers)<=80,'Exact candidate layer-chain bound required')
+    selected=[];parent=None
+    for diff in layers:
+        digest(diff);key=diff if parent is None else 'sha256:'+hashlib.sha256((parent+' '+diff).encode()).hexdigest()
+        require(key in catalogue and catalogue[key]['kind']=='Committed' and catalogue[key]['parent']==parent,'Exact candidate chain/parent missing or uncommitted')
+        selected.append(key);parent=key
+    return selected
 def oci_children(obj):
     require(isinstance(obj,dict),'OCI metadata object required');out=[]
     entries=obj.get('manifests',[]);require(isinstance(entries,list),'OCI manifest list shape differs')

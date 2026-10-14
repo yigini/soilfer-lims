@@ -22,7 +22,7 @@ class MetadataGuards(unittest.TestCase):
         with self.assertRaises(RuntimeError):initial_inventory(v)
     def test_exact_first_new_root_is_bound_and_failed_root_or_aliases_refuse(self):
         self.assertEqual(str(safe_root(ROOT_NAME)),'/opt/lims/releases/'+ROOT_NAME)
-        for v in [OLD_ROOT,ROOT_NAME+'-retry','../'+ROOT_NAME,ROOT_NAME.replace('233000','234000')]:
+        for v in [OLD_ROOT,'workflow-batch-forward-metadata-cde8c889-20261014T233000Z',ROOT_NAME+'-retry','../'+ROOT_NAME,ROOT_NAME.replace('000500','001000')]:
             with self.assertRaises(RuntimeError):safe_root(v)
     def test_exported_manifest_id_and_config_reference_mismatches_stop(self):
         self.assertEqual(exported_image('#71 exporting manifest list '+IMAGE+' done\n'),IMAGE)
@@ -86,4 +86,27 @@ class MetadataGuards(unittest.TestCase):
             spec=copy.deepcopy(values[0]);spec[k]=v
             with self.subTest(k=k),self.assertRaises(RuntimeError):validate_spec(spec,*values[1:])
         with self.assertRaises(RuntimeError):evidence_only({'imageEligibility':False,'imageAdoptionReceipts':False,'proofLaunches':0,'productionDeployments':0})
+    def chain_fixture(self,count=3):
+        layers=['sha256:'+('%064x'%(i+1)) for i in range(count)];rows=[];parent=None;keys=[]
+        for diff in layers:
+            key=diff if parent is None else 'sha256:'+hashlib.sha256((parent+' '+diff).encode()).hexdigest()
+            rows.append(key+' '+(parent+' ' if parent else '')+'Committed');keys.append(key);parent=key
+        return layers,keys,rows
+    def test_large_complete_catalogue_selects_only_exact_candidate_chain_without_truncation(self):
+        layers,keys,rows=self.chain_fixture()
+        rows=['unrelated'+str(i)+' Active' for i in range(1526)]+rows
+        self.assertEqual(selected_snapshot_keys('KEY PARENT KIND\n'+'\n'.join(rows),layers),keys)
+    def test_chain_selection_refuses_missing_duplicate_wrong_parent_or_active_target(self):
+        layers,keys,rows=self.chain_fixture()
+        bad=[rows[:-1],rows+[rows[0]],[rows[0],keys[1]+' wrong-parent Committed',rows[2]],[rows[0].replace('Committed','Active')]+rows[1:]]
+        for values in bad:
+            with self.assertRaises(RuntimeError):selected_snapshot_keys('KEY PARENT KIND\n'+'\n'.join(values),layers)
+    def test_chain_selection_refuses_malformed_keys_kinds_and_runtime_layer_digest(self):
+        layers,keys,rows=self.chain_fixture()
+        for extra in ['--bad Active','good Unknown','too many fields Active']:
+            with self.assertRaises(RuntimeError):selected_snapshot_keys('KEY PARENT KIND\n'+'\n'.join(rows+[extra]),layers)
+        with self.assertRaises(RuntimeError):selected_snapshot_keys('KEY PARENT KIND\n'+'\n'.join(rows),['sha256:short'])
+    def test_candidate_chain_bound_is_not_expanded_by_large_catalogue(self):
+        layers,keys,rows=self.chain_fixture(81)
+        with self.assertRaises(RuntimeError):selected_snapshot_keys('KEY PARENT KIND\n'+'\n'.join(rows),layers)
 if __name__=='__main__':unittest.main(verbosity=2)

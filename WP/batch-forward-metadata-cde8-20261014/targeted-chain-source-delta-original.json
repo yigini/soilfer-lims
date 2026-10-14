@@ -1,0 +1,33 @@
+{
+  "status": "EXACT_TARGETED_METADATA_DELTA_VERIFIED",
+  "oldSource": "0b01804f9d409d74a19472c22469824e2df95005",
+  "baseAudit": "1da5885659f5bfd7831e51f30471ed068e8550f7",
+  "changedSourcePaths": [
+    "collect_forward_metadata.py",
+    "forward_metadata_contract.py",
+    "verify_forward_metadata_guards.py"
+  ],
+  "unchangedSourcePaths": [
+    "launch_forward_metadata.py",
+    "prepare_forward_metadata.py"
+  ],
+  "oldGuardCount": 14,
+  "newGuardCount": 18,
+  "oldGuardsByteIdentical": 13,
+  "onlyAdaptedOldGuard": [
+    "test_exact_first_new_root_is_bound_and_failed_root_or_aliases_refuse"
+  ],
+  "addedGuards": [
+    "test_candidate_chain_bound_is_not_expanded_by_large_catalogue",
+    "test_chain_selection_refuses_malformed_keys_kinds_and_runtime_layer_digest",
+    "test_chain_selection_refuses_missing_duplicate_wrong_parent_or_active_target",
+    "test_large_complete_catalogue_selects_only_exact_candidate_chain_without_truncation"
+  ],
+  "actualCompleteCatalogue": 1526,
+  "selectedCandidateCount": 59,
+  "allSelectedCommittedWithExactParents": true,
+  "catalogueTruncated": false,
+  "imageEligibility": false,
+  "newSourceReview": null,
+  "metadataOperatorsExecuted": 0
+}

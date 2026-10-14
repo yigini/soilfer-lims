@@ -1,0 +1,23 @@
+test_candidate_chain_bound_is_not_expanded_by_large_catalogue (targeted_metadata_guard_memory.MetadataGuards) ... ok
+test_chain_selection_refuses_malformed_keys_kinds_and_runtime_layer_digest (targeted_metadata_guard_memory.MetadataGuards) ... ok
+test_chain_selection_refuses_missing_duplicate_wrong_parent_or_active_target (targeted_metadata_guard_memory.MetadataGuards) ... ok
+test_duplicate_json_and_expanded_reference_roles_refuse (targeted_metadata_guard_memory.MetadataGuards) ... ok
+test_exact_first_new_root_is_bound_and_failed_root_or_aliases_refuse (targeted_metadata_guard_memory.MetadataGuards) ... ok
+test_exported_manifest_id_and_config_reference_mismatches_stop (targeted_metadata_guard_memory.MetadataGuards) ... ok
+test_large_complete_catalogue_selects_only_exact_candidate_chain_without_truncation (targeted_metadata_guard_memory.MetadataGuards) ... ok
+test_metadata_evidence_cannot_grant_image_or_production_authority (targeted_metadata_guard_memory.MetadataGuards) ... ok
+test_metadata_spec_passes_only_same_graph_and_explicitly_distinct_reference_roles (targeted_metadata_guard_memory.MetadataGuards) ... ok
+test_mutations_filesystem_du_and_wrong_images_are_refused (targeted_metadata_guard_memory.MetadataGuards) ... ok
+test_oci_configuration_payload_is_not_mistaken_for_descriptor (targeted_metadata_guard_memory.MetadataGuards) ... ok
+test_oci_platform_selection_preserves_only_owned_runtime_metadata (targeted_metadata_guard_memory.MetadataGuards) ... ok
+test_old_or_edited_wrong_actor_or_incomplete_source_review_refuses (targeted_metadata_guard_memory.MetadataGuards) ... ok
+test_option_injection_unknown_namespace_and_digest_shapes_refuse (targeted_metadata_guard_memory.MetadataGuards) ... ok
+test_read_interfaces_allow_only_bounded_metadata_families (targeted_metadata_guard_memory.MetadataGuards) ... ok
+test_real_unit_created_empty_outputs_are_accepted_consumed_and_aliases_refuse (targeted_metadata_guard_memory.MetadataGuards) ... ok
+test_snapshot_catalog_is_complete_or_refuses_without_truncation (targeted_metadata_guard_memory.MetadataGuards) ... ok
+test_spec_and_evidence_cannot_expand_zero_operations_or_accept_boolean_counts (targeted_metadata_guard_memory.MetadataGuards) ... ok
+
+----------------------------------------------------------------------
+Ran 18 tests in 0.023s
+
+OK

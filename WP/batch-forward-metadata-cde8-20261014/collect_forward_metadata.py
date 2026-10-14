@@ -49,7 +49,7 @@ def main():
         return out.read_bytes()
     try:
         fresh=call(['docker','image','inspect',IMAGE],'candidate-image-inspect')
-        require(fresh is not None,'Read-only candidate inspect failed');compare_image(load('candidate-image-fresh-inspect-original.json')[0],exact_json(fresh)[0])
+        require(fresh is not None,'Read-only candidate inspect failed');candidate=exact_json(fresh)[0];compare_image(load('candidate-image-fresh-inspect-original.json')[0],candidate)
         for fmt,wanted in [('{{.DockerRootDir}}','/var/lib/docker'),('{{.Driver}}','overlayfs')]:
             raw=call(['docker','info','--format',fmt],'docker-'+('root' if 'Root' in fmt else 'driver'))
             require(raw is not None and raw.decode().strip()==wanted,'Actual Docker topology changed')
@@ -65,12 +65,15 @@ def main():
             call(prefix+['content','list'],ns+'-content')
             snapshots=call(prefix+['snapshots','--snapshotter','overlayfs','list'],ns+'-snapshots')
             if snapshots is None:continue
-            keys=snapshot_keys(snapshots.decode())
+            if ns!='moby':continue
+            keys=selected_snapshot_keys(snapshots.decode(),candidate['RootFS']['Layers'])
+            save(ns+'-selected-exact-candidate-chain.json',{'selection':'EXACT_CANDIDATE_ROOTFS_CHAIN_AND_PARENTS','keys':keys,'selectedCount':len(keys),'completeCatalogueBytes':len(snapshots),'completeCatalogueSha256':sha(snapshots),'catalogueTruncated':False})
             for number,key in enumerate(keys):
                 safe_key(key);raw=call(prefix+['snapshots','--snapshotter','overlayfs','info',key],ns+'-snapshot-info-'+str(number))
                 if raw is None:continue
                 info=exact_json(raw);kind=info.get('Kind',info.get('kind'))
-                if kind in ['Committed','COMMITTED',3]:call(prefix+['snapshots','--snapshotter','overlayfs','usage',key],ns+'-snapshot-usage-'+str(number))
+                require(kind in ['Committed','COMMITTED',3],'Selected candidate snapshot is not committed')
+                call(prefix+['snapshots','--snapshotter','overlayfs','usage',key],ns+'-snapshot-usage-'+str(number))
         # BuildKit DiskUsage is a bounded read-only API through buildx. Client
         # state stays in this new root. No filesystem du executable is invoked.
         call(['docker','buildx','du','--format','json'],'buildkit-cache-metadata')
