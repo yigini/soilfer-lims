@@ -1,0 +1,37 @@
+{
+  "record": {
+    "recordedUtc": "2026-10-14T09:27:06.549567+00:00",
+    "observationNoLaterThanUtc": "2026-10-14T09:25:55Z",
+    "exactCaptureTimeAvailable": false,
+    "source": "Actual returned Claude5311708 displayed LIMS Audit / Lab workflow audit and plan, visual transcription; not a native API export.",
+    "initialProject": "Dashboards",
+    "action": "One visible LIMS Audit project selection followed by fresh state after its delayed navigation",
+    "rightComposer": "EMPTY",
+    "centreHumanDraft": "can you go and ask Pip",
+    "humanDraftPreserved": true,
+    "messageSent": false,
+    "cardsAnswered": false,
+    "applicationFullPass": false,
+    "finalAuditRequest": false,
+    "productionOperations": 0,
+    "direction": "Keep source guards; map wrapped guard errors to stable service-owned codes and verify actual application/Prisma calls before final audit."
+  },
+  "rawFiles": {
+    "WP/backlog-resume-20261013/issue209-native-guard-wrapper-direction/comments209-original.json": {
+      "bytes": 12339,
+      "sha256": "31fbfd7725600cce6bd855e8d53f7eedfb02c19fa47623d8a10902934ca132ed"
+    },
+    "WP/backlog-resume-20261013/issue209-native-guard-wrapper-direction/issue209-original.json": {
+      "bytes": 8349,
+      "sha256": "fdc790781df91cb9fff22e9281cad4faba687ac766fae201690c088385f17ff7"
+    },
+    "WP/backlog-resume-20261013/issue209-native-guard-wrapper-direction/native-readonly-record.json": {
+      "bytes": 840,
+      "sha256": "602e128ed6b838e0d5a34ab9823ea9c8037aa64f3ff82352c77885ddedeccb56"
+    },
+    "WP/backlog-resume-20261013/issue209-native-guard-wrapper-direction/visual-transcription.txt": {
+      "bytes": 759,
+      "sha256": "dcd057ab83a0feb384d9c82751e1263a7c478632e26cc7ffcf50e3b0efbe5294"
+    }
+  }
+}

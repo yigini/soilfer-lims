@@ -1,0 +1,17 @@
+{
+  "recordedUtc": "2026-10-14T09:27:06.549567+00:00",
+  "observationNoLaterThanUtc": "2026-10-14T09:25:55Z",
+  "exactCaptureTimeAvailable": false,
+  "source": "Actual returned Claude5311708 displayed LIMS Audit / Lab workflow audit and plan, visual transcription; not a native API export.",
+  "initialProject": "Dashboards",
+  "action": "One visible LIMS Audit project selection followed by fresh state after its delayed navigation",
+  "rightComposer": "EMPTY",
+  "centreHumanDraft": "can you go and ask Pip",
+  "humanDraftPreserved": true,
+  "messageSent": false,
+  "cardsAnswered": false,
+  "applicationFullPass": false,
+  "finalAuditRequest": false,
+  "productionOperations": 0,
+  "direction": "Keep source guards; map wrapped guard errors to stable service-owned codes and verify actual application/Prisma calls before final audit."
+}

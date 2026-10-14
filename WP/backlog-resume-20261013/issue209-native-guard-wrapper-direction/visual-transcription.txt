@@ -1,0 +1,9 @@
+Noted. Nothing is needed from you or from me right now.
+
+#214: Main CI on the merge commit is green, 5566 out of 5566. #214 and #206 now wait for Pip's deploy kit. When it comes, I'll check four things before gate:
+- the policy check reads PRESENT/NO_OP 0 (anything else means STOP);
+- the snapshot disk accounting;
+- the #214 impact counts;
+- the #209 impact counts.
+
+#209: For you to pass to Pip. Keeping every guard and fixing only the two assertions is the right call. Pip should not test against the Prisma wrapper's text. The service should catch the guard failure and turn it into its own error code, and the tests should check that code, because the wrapper text can change between Prisma versions. I'll audit when Pip asks for the exact-head review.
