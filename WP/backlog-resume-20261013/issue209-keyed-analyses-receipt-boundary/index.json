@@ -1,0 +1,70 @@
+{
+  "record": {
+    "recordedUtc": "2026-10-14T13:34:10.899010+00:00",
+    "comment": 6169593044,
+    "url": "https://github.com/yigini/soilfer-lims/issues/209#issuecomment-6169593044",
+    "createdUtc": "2026-10-14T13:34:08Z",
+    "sourceEvidenceAudit": "aa25effa110cb92dde6f1dba4047a79fb3b1f9a5",
+    "bodySha256": "cffbeab11584925a4286268e954752825902bc235cbb2fa602d99bbc6db885ea",
+    "postedOnce": true,
+    "actualAnswerPending": true,
+    "nativeHandoffSent": false,
+    "assertionChanges": 0,
+    "runtimeChanges": 0,
+    "productionOperations": 0
+  },
+  "rawFiles": {
+    "WP/backlog-resume-20261013/issue209-keyed-analyses-receipt-boundary/audit_1_2_state_authority.test.js.source-original": {
+      "bytes": 57231,
+      "sha256": "a4d355dcfa9e9cfc61cdf21cca59dba59d61eb2c829877db3bcaffcf82f0f459"
+    },
+    "WP/backlog-resume-20261013/issue209-keyed-analyses-receipt-boundary/comments-before-original.json": {
+      "bytes": 35940,
+      "sha256": "2dbf11be33ddb6400145b0ccc19bd0c70243fc962f97c4b8b9bf8e6c4a8b1a9b"
+    },
+    "WP/backlog-resume-20261013/issue209-keyed-analyses-receipt-boundary/main-before-original.json": {
+      "bytes": 336,
+      "sha256": "e0c8d4117149b05e499ad0abfd6f0456aed24d869f784317aa0c1072415e39c9"
+    },
+    "WP/backlog-resume-20261013/issue209-keyed-analyses-receipt-boundary/orderService.js.source-original": {
+      "bytes": 12016,
+      "sha256": "8391a86dbc58b47a18faf2b931430cc7dbd8af980480ac7a0b943fe9b0736e49"
+    },
+    "WP/backlog-resume-20261013/issue209-keyed-analyses-receipt-boundary/original-failing-assertion.json": {
+      "bytes": 6614,
+      "sha256": "3670799089793fde3511acae80764d6417c2a5111184ef83e402632b8d5444ad"
+    },
+    "WP/backlog-resume-20261013/issue209-keyed-analyses-receipt-boundary/question-fresh-original.json": {
+      "bytes": 4825,
+      "sha256": "e45bfb131378df01d3631c1b956405c30c530460ae618b8501d93a23caa544cb"
+    },
+    "WP/backlog-resume-20261013/issue209-keyed-analyses-receipt-boundary/question-original.md": {
+      "bytes": 3224,
+      "sha256": "cffbeab11584925a4286268e954752825902bc235cbb2fa602d99bbc6db885ea"
+    },
+    "WP/backlog-resume-20261013/issue209-keyed-analyses-receipt-boundary/question-post-exit-original.txt": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "WP/backlog-resume-20261013/issue209-keyed-analyses-receipt-boundary/question-post-original.json": {
+      "bytes": 4825,
+      "sha256": "e45bfb131378df01d3631c1b956405c30c530460ae618b8501d93a23caa544cb"
+    },
+    "WP/backlog-resume-20261013/issue209-keyed-analyses-receipt-boundary/question-post-record.json": {
+      "bytes": 520,
+      "sha256": "2504d254a4a72054f35076671b1096405120af28d8145442e644c8969b5a7617"
+    },
+    "WP/backlog-resume-20261013/issue209-keyed-analyses-receipt-boundary/question-post-request.json": {
+      "bytes": 3248,
+      "sha256": "ce773e2629f0ec35384cf3b1064cc79cb44189beecd43a0b7fdffa2181a5010f"
+    },
+    "WP/backlog-resume-20261013/issue209-keyed-analyses-receipt-boundary/question-post-stderr-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "WP/backlog-resume-20261013/issue209-keyed-analyses-receipt-boundary/sampleController.js.source-original": {
+      "bytes": 99361,
+      "sha256": "8014827cc72e38d90acfc552694b9c3cd116b1dab86fba4ab712135d5ea0a574"
+    }
+  }
+}
