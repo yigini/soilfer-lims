@@ -1,0 +1,106 @@
+{
+  "status": "ACTUAL_TARGETED_METADATA_SOURCE_REQUEST_NATIVE_RETAINED",
+  "requestId": 6181142228,
+  "toolingCommit": "8df9e1261647dcc8ba018c739bd606fe5291f1ca",
+  "retainedUtc": "2026-10-14T23:59:45.295725+00:00",
+  "newSourceReview": null,
+  "imageEligibility": false,
+  "newExecutionAuthority": null,
+  "files": [
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/targeted-source-review-request-8df9e126/actual-reference-before-original.json",
+      "bytes": 5195,
+      "sha256": "3e5ff7910985af8de6c8294efd76612e68c2956669e8fca7b1d3ea80d353340a"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/targeted-source-review-request-8df9e126/actual-request-confirmed.json",
+      "bytes": 9943,
+      "sha256": "336f55634d179d4aacd35bf8a64d557eff1429c7812de32c6672bca30e97432c"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/targeted-source-review-request-8df9e126/actual-request-fresh-original.json",
+      "bytes": 9705,
+      "sha256": "aef2fc1101b72110eeaa8fde10b5e3ebc5094d3514e6711512e4c29b1f329335"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/targeted-source-review-request-8df9e126/actual-review-request-body.txt",
+      "bytes": 8059,
+      "sha256": "69e9a9f75c205c257c94870a18739b22fc1a42e41ca87d9a2cfe5607bc1c2311"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/targeted-source-review-request-8df9e126/actual-scope-before-original.json",
+      "bytes": 6613,
+      "sha256": "1a199ef0023c5ba2315d038de4f5797831679f3382933d50e34336b92ffa7ddb"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/targeted-source-review-request-8df9e126/current-main-original.json",
+      "bytes": 336,
+      "sha256": "8ab38fb8db0993cd672bbb2e6bf3b6ca8d124087fb841ecc97bad4fb1d9bfe89"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/targeted-source-review-request-8df9e126/history-before-original.json",
+      "bytes": 1770010,
+      "sha256": "d276cb551c7ef646a8a017c366bd6c4bc971776a914e390176a9bd820f2f6de0"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/targeted-source-review-request-8df9e126/main-ci-original.json",
+      "bytes": 12111,
+      "sha256": "b76e9a34b6be2aef115860d2280e850d14b16edb41c64ccafd0b474243e4f7e2"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/targeted-source-review-request-8df9e126/native-actual-sent.txt",
+      "bytes": 2180,
+      "sha256": "fcd5ef39f8fd43332a5983582f397de15548fea85f2d61f9da04a5477b6404e7"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/targeted-source-review-request-8df9e126/native-delivery-record.json",
+      "bytes": 877,
+      "sha256": "b341e1fbdb88ed9c83fd4467786ee2760f8061a468b794eda1a06a9e55211ae8"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/targeted-source-review-request-8df9e126/old-source-pass-original.json",
+      "bytes": 9162,
+      "sha256": "8d1c3cd77dc96d16b256de8bd210a414531b2a30fe3069d566751d06546c473e"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/targeted-source-review-request-8df9e126/post-intent.json",
+      "bytes": 256,
+      "sha256": "fb88c525657086685bef8c4f691cd0655baa33f20a67a0208143db7cbc36c61b"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/targeted-source-review-request-8df9e126/post-response-original.json",
+      "bytes": 9705,
+      "sha256": "aef2fc1101b72110eeaa8fde10b5e3ebc5094d3514e6711512e4c29b1f329335"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/targeted-source-review-request-8df9e126/post-stderr-original.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/targeted-source-review-request-8df9e126/request-payload-original.json",
+      "bytes": 8128,
+      "sha256": "20b5c578c65186304817e178631b913bc8a8b57f33c982d6f4616fe5e33b1dc2"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/targeted-source-review-request-8df9e126/tooling-source-index.json",
+      "bytes": 1664,
+      "sha256": "af586d39ffe78963316eb1cc88e564f0a8e173f4663838699c98040a18e3476b"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/request-targeted-forward-metadata-chain-source-review-once.py",
+      "bytes": 9351,
+      "sha256": "0f190c29dd2dbf554331367b4985dc36fe63303d657e58acab00627ba7bb5e53"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/retain-targeted-metadata-source-request-native-once.py",
+      "bytes": 4032,
+      "sha256": "54a951e1c88216e0a8a6c6676556b677b0b05b50ad35afd828b488e04bbd164d"
+    },
+    {
+      "path": "WP/audit-release-eb6de2e8/README.md",
+      "bytes": 421349,
+      "sha256": "9227e6d59b05e40affc629f06cb336599ad7a77da8fd8cc0150c85eb90ff8265"
+    }
+  ]
+}

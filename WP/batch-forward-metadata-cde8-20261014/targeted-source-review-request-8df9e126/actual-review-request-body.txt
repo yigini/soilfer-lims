@@ -1,0 +1,56 @@
+Claudio: first metadata capture CLOSED STOP; NEW concrete targeted metadata successor for exact-source review, #206+#214+#209.
+
+Your exact0bSourcePASS6180876636 authorized only the one233000capture, now consumed. It closed23:43:21.814UTC/exit1/STOP_METADATA_INCOMPLETE_IMAGE_EXCLUDED: the full moby catalogue has1,526unique snapshot keys, exceeding80. No truncation or per-key/cache/OCI read ran. Eight original calls exited0; candidate inspect is byte-identical to the distinct first forensic response SHA256c4b4d2fabe2783adf0eb6f842bb424982fcb6a7d53753b3dde2c79800f821c14. All bound filesystem floors passed. Original47remote artifacts/package/launch/source91verifiedblobs are immutable at [closed STOP](https://github.com/yigini/soilfer-lims/blob/e8f2f2e330ab8daa987c269fe576f2a4a9f15874/WP/batch-forward-metadata-cde8-20261014/first-metadata-233000-closed-stop/index.json). An initial Windows long revision:path verification error after commit stopped before push; the OID-only completion verified/pushed that same commit and retained the original error at1da5885659f5bfd7831e51f30471ed068e8550f7. No replay/adoption was attempted.
+
+Please independently review NEW exact tooling 8df9e1261647dcc8ba018c739bd606fe5291f1ca. It preserves the complete catalogue and chooses only candidate RootFS ChainIDs plus all exact parents. The actual retained catalogue validates59unique candidate keys, every one Committed with exact parent. It skips per-key reads for unrelated moby snapshots and the buildkit catalogue. Missing/duplicate/malformed/uncommitted/wrong-parent keys refuse; a candidate chain>80 still refuses. Same80selected-key budget,2MiBcomplete-catalogue budget,256calls,10secondcalls,600secondcollection,900secondunit,805306368memory/swap0. No arbitrary truncation or bound increase. This is targeted evidence only, not a claim about all daemon snapshots or full growth attribution.
+
+The new root is `/opt/lims/releases/workflow-batch-forward-metadata-cde8c889-20261015T000500Z`, currently UNCREATED. Old233000root/operator is refused and remains immutable. Only three source paths changed: contract exact newroot/selection/bindings, collector exact candidate-chain targeting/committed usage, and four additional selection/refusal tests plus adapting the old root guard. Preparer/launcher are byte-identical. Thirteen original guard methods are byte-identical; the remaining old guard only adapts root aliases and rejects233000.
+
+- [collect_forward_metadata.py](https://github.com/yigini/soilfer-lims/blob/8df9e1261647dcc8ba018c739bd606fe5291f1ca/WP/batch-forward-metadata-cde8-20261014/collect_forward_metadata.py)
+- [forward_metadata_contract.py](https://github.com/yigini/soilfer-lims/blob/8df9e1261647dcc8ba018c739bd606fe5291f1ca/WP/batch-forward-metadata-cde8-20261014/forward_metadata_contract.py)
+- [launch_forward_metadata.py](https://github.com/yigini/soilfer-lims/blob/8df9e1261647dcc8ba018c739bd606fe5291f1ca/WP/batch-forward-metadata-cde8-20261014/launch_forward_metadata.py)
+- [prepare_forward_metadata.py](https://github.com/yigini/soilfer-lims/blob/8df9e1261647dcc8ba018c739bd606fe5291f1ca/WP/batch-forward-metadata-cde8-20261014/prepare_forward_metadata.py)
+- [verify_forward_metadata_guards.py](https://github.com/yigini/soilfer-lims/blob/8df9e1261647dcc8ba018c739bd606fe5291f1ca/WP/batch-forward-metadata-cde8-20261014/verify_forward_metadata_guards.py)
+
+[Scope/full graph](https://github.com/yigini/soilfer-lims/blob/8df9e1261647dcc8ba018c739bd606fe5291f1ca/WP/batch-forward-metadata-cde8-20261014/README.md), [closed actual local+host proof](https://github.com/yigini/soilfer-lims/blob/8df9e1261647dcc8ba018c739bd606fe5291f1ca/WP/batch-forward-metadata-cde8-20261014/targeted-chain-source-verification-once/exit-original.json), [actual retained catalogue selection](https://github.com/yigini/soilfer-lims/blob/8df9e1261647dcc8ba018c739bd606fe5291f1ca/WP/batch-forward-metadata-cde8-20261014/targeted-chain-source-verification-once/actual-retained-catalogue-selection-original.json), [exact source/old-guard delta](https://github.com/yigini/soilfer-lims/blob/8df9e1261647dcc8ba018c739bd606fe5291f1ca/WP/batch-forward-metadata-cde8-20261014/targeted-chain-source-delta-original.json).
+
+Verification closed23:55:24.579567UTC:18local +18actual host Python3.9pure guard tests PASS; all5source files compile/hash unchanged. Both environments read the same complete retained244320B/SHA256f9ac4687d7fa74206c9a598a42ffd8c05116e3224c8758e17227a01c90464461/1,526-row catalogue and select the same59Committed exact-parent chain keys. Those tests ran no metadata operator/API/imageinspect/receipt/production connection. All19publication blobs were raw Git OID verified before push.
+
+All immutable candidate ID/sealed log/distinct forensic reference roles/modes/absence and fresh exact image Id/platform/RootFS/Config/revision comparison remain. The command whitelist/client-state confinement/19-file0400package/two fresh empty unit outputs/one exclusive intent/newunusedunit/current main+CI+actual direction+review+lateral rejection checks remain. No pull/push/save/load/build/retag/container start/prune/DB/volume/daemon/config changes/filesystem du executable/originalroot writes. Read-only BuildKit DiskUsage API remains bounded; stopping an owned client never authorizes daemon/job changes. Floor10556150894 on all3bound filesystems, original500000000abort, both YY pins unchanged.
+
+Candidate1d4882f4 remains excluded/forensic only. Original221500build FAILED with3,609,116,672B unexplained growth and missing pre-build containerd allocation remains unknown. Scope6180234041/reference6180335648 are direction only; original0bPASS does not approve this successor. Terminal always imageEligibility=false/imageAdoptionReceipts=0/proof0/deploy0/fullGrowthAttributionCompleted=false. Any later validator/adoption-receipt source requires separate exact review and full attribution with residual>=500MB STOP. All future adoption/proof/scientific214209impact/invalidStoredAnalysisSampleCount/sample-owner lists/policyPRESENTNO_OP0orSTOP/retained allocations/nonzeroYY/approved-amendmentSTOP/separate forward remedy/final exactkit/fresh single-use gate remain. #103 no connection/APPLYGO. Maincde8/tree638/mainCI38636615469attempt1 SUCCESS370/5649 and3source merges remain; human files/drafts/cards/history untouched.
+
+If this new component passes, please start a NEW verdict `Source review: PASS` and include ALL literal bindings below. Authority is only one targeted metadata evidence capture at the NEW root, never adoption/proof/deploy:
+
+```
+8df9e1261647dcc8ba018c739bd606fe5291f1ca
+cde8c8896f5f9d5f1ab07b0ae16b1a765e0a6367
+638580d50f61254609de3abd42d93afc676a5727
+sha256:1d4882f49f351a08549c79c0409f7848dbb205feef314b33432aae63ed11217b
+metadataScope=READONLY_FORWARD_METADATA_EVIDENCE_ONLY_NO_ADOPTION
+originalFailedBuildRoot=/opt/lims/releases/workflow-batch-build-cde8c889-20261014T221500Z
+originalMetadataRoot=/opt/lims/releases/workflow-batch-forward-metadata-cde8c889-20261015T000500Z
+scopeDirectionId=6180234041
+referenceDirectionId=6180335648
+reserveFloorBytes=10556150894
+originalResidualBytes=3609116672
+unexplainedAbortBytes=500000000
+metadataCallTimeoutSeconds=10
+metadataCollectionTimeoutSeconds=600
+metadataUnitTimeoutSeconds=900
+metadataMemoryLimitBytes=805306368
+metadataMaxOutputBytes=2097152
+metadataMaxCommands=256
+snapshotSelection=EXACT_CANDIDATE_ROOTFS_CHAIN_AND_PARENTS
+catalogueTruncation=false
+imageEligibility=false
+imageAdoptionReceipts=0
+filesystemDuCalls=0
+labAndHubBuildsOwnedByYY=true
+releaseWindowControl=RELEASE_DAY_DISK_ABORTS_ACCEPTED
+collect_forward_metadata.py=9d2b6e1dc8fbb2050b92275034133fcf2659cc1c5e22da6e63e077ebcaf9b8b0
+forward_metadata_contract.py=b49bfb98d721a9e7e5034b8af98068121686ccdb8eb1eaf6aa0746eec1fe403c
+launch_forward_metadata.py=52f83d09f2816a80f9f0ed8f2faea580a37156c5a13b33c4dd4d852561a85f0a
+prepare_forward_metadata.py=7ebaa9b53e8cdca1824008cd773b631d1f5c1cf08c6639fe718aa39da2cd2505
+verify_forward_metadata_guards.py=3f07f8f38655c7e26d6d2000f11f060887e4db11eb85a922b0972e6b100470c3
+```
