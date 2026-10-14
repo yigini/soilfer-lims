@@ -1,0 +1,128 @@
+{
+  "retainedUtc": "2026-10-14T09:03:10.286602+00:00",
+  "status": "CLOSED_HTTP_READINESS_OWNED_REGRESSION_FAILURE",
+  "summary": {
+    "closedUtc": "2026-10-14T09:01:33.143144+00:00",
+    "exit": 1,
+    "suites": 10,
+    "tests": 266,
+    "passedTests": 264,
+    "failed": 2,
+    "pending": 0,
+    "todo": 0,
+    "sourceUnchanged": true,
+    "selectedInventoryEqual": true,
+    "fullDiscovery": 370,
+    "ordinarySetups": true,
+    "workerIdleMemoryLimit": 512000000,
+    "productionOperations": 0,
+    "status": "FAILED_OR_INCOMPLETE"
+  },
+  "cause": "Closed10suites266tests264PASS2FAIL; both new HTTP normalization cases lowercased custom case-sensitive catalogue codes. Existing normalizer preserves arbitrary catalogue case, trims whitespace and resolves declared aliases/compounds. Do not change runtime semantics; correct test input to actual normalization. All other cases pass including receipts, scopes, amendment boundaries, intake, repeats, bootstrap, collector activeWAL/copy allocation and actual embedded order programme.",
+  "sourceDraftPaths": [
+    "server/services/orderService.js",
+    "server/services/orderLineResolutionService.js",
+    "server/services/orderRevisionMigrationSource.js",
+    "server/scripts/install_order_revisions.js",
+    "server/services/sampleAnalysisStateService.js",
+    "server/services/intakeWorkItemService.js",
+    "server/services/workAttemptWriteService.js",
+    "server/services/workRepeatService.js",
+    "server/services/scientificAmendmentService.js",
+    "server/prisma/schema.prisma",
+    "server/prisma/migrations/20261014000100_order_revision_contract/migration.sql",
+    "server/tests/contracts/issue_209_order_revision_integration.test.js",
+    "server/tests/helpers/legacyWorkflowDatabase.js",
+    "server/services/workAttemptReservationService.js",
+    "server/tests/contracts/issue_209_order_revision_ui.test.js",
+    "server/index.js",
+    "server/tests/globalSetup.js",
+    "Dockerfile",
+    "docker-entrypoint.sh",
+    ".gitattributes",
+    "server/controllers/sampleController.js",
+    "server/tests/helpers/workflowWriteScanner.js",
+    "server/tests/helpers/qcGateFixture.js",
+    "server/tests/helpers/workAttemptFixtures.js",
+    "client/src/components/sample/AnalysisUpdateModal.jsx",
+    "docs/audit/209-order-revisions.md",
+    "server/tests/helpers/qcWorksheetUi.js",
+    "server/scripts/order_revision_impact.js",
+    "server/tests/contracts/issue_209_order_revision_http.test.js",
+    "server/scripts/rehearsal_deployment_readiness.cjs",
+    "server/tests/contracts/deployment_readiness_bootstrap.test.js",
+    "server/tests/contracts/reconcile_analyses.test.js",
+    "server/tests/contracts/edit_analyses_permission.test.js",
+    "client/src/translations/en.json",
+    "client/src/translations/es.json",
+    "client/src/translations/es-419.json",
+    "client/src/translations/fr.json",
+    "client/src/translations/pt.json",
+    "server/locales/en.json",
+    "server/locales/es.json",
+    "server/locales/es-419.json",
+    "server/locales/fr.json",
+    "server/locales/pt.json"
+  ],
+  "scopeComment": 6163271808,
+  "applicationFullyVerified": false,
+  "productionOperations": 0,
+  "rawFiles": {
+    "WP/backlog-resume-20261013/issue209-http-readiness-owned-regression/command.json": {
+      "bytes": 2515,
+      "sha256": "7161e0932eaa50649eb564ae4de4a29775b2a7f7433807c86302329ae02725d8"
+    },
+    "WP/backlog-resume-20261013/issue209-http-readiness-owned-regression/config-original.json": {
+      "bytes": 6580,
+      "sha256": "f357edaad01a17de344197d3efe72a5f0ad0439d680735e116a684d24de8a1c5"
+    },
+    "WP/backlog-resume-20261013/issue209-http-readiness-owned-regression/config-stderr-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "WP/backlog-resume-20261013/issue209-http-readiness-owned-regression/exit-original.txt": {
+      "bytes": 2,
+      "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+    },
+    "WP/backlog-resume-20261013/issue209-http-readiness-owned-regression/inventory-original.json": {
+      "bytes": 49572,
+      "sha256": "2f271fda9aecb4252b5fd65879a4481ae89928f4163de65e13681fdff2facf65"
+    },
+    "WP/backlog-resume-20261013/issue209-http-readiness-owned-regression/inventory-stderr-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "WP/backlog-resume-20261013/issue209-http-readiness-owned-regression/physical-retained-terminal-index.json": {
+      "bytes": 15718,
+      "sha256": "09615bf96d22ebb2d6a517e3025ba2d0a5fd4391b5c109a8322ee8807660a255"
+    },
+    "WP/backlog-resume-20261013/issue209-http-readiness-owned-regression/physical-retention-original.jsonl": {
+      "bytes": 12962,
+      "sha256": "7b8ffe4eb4fde05f7c86789bf4038012936799183242f5815b18422babd668ed"
+    },
+    "WP/backlog-resume-20261013/issue209-http-readiness-owned-regression/report-original.json": {
+      "bytes": 121632,
+      "sha256": "8b01e30d27393a39ac01e56f21c36a3fa0596162c05a53e63ce72fac5d4efd13"
+    },
+    "WP/backlog-resume-20261013/issue209-http-readiness-owned-regression/source-after.json": {
+      "bytes": 114715,
+      "sha256": "dbe39ce9a7411cf195a67f5573f4785841e58bce913b93be9eca0375184480bc"
+    },
+    "WP/backlog-resume-20261013/issue209-http-readiness-owned-regression/source-before.json": {
+      "bytes": 114715,
+      "sha256": "dbe39ce9a7411cf195a67f5573f4785841e58bce913b93be9eca0375184480bc"
+    },
+    "WP/backlog-resume-20261013/issue209-http-readiness-owned-regression/stderr-original.log": {
+      "bytes": 78651,
+      "sha256": "283fe85523e4b9140e48e098f4c6565a75cea04c3e2484c5801293b7f7dec00d"
+    },
+    "WP/backlog-resume-20261013/issue209-http-readiness-owned-regression/stdout-original.log": {
+      "bytes": 2053,
+      "sha256": "02bc5c46aa42b3be4fa2eb45c001165b5876c802f35cfda8ec26bd4cd0df2e71"
+    },
+    "WP/backlog-resume-20261013/issue209-http-readiness-owned-regression/summary.json": {
+      "bytes": 379,
+      "sha256": "bf46ede15d9e3aed56161864863061337bf03aae891b8f6c162ca0d8227e1cc2"
+    }
+  }
+}

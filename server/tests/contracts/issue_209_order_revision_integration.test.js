@@ -179,3 +179,39 @@ test('order revisions enforce permission and laboratory scope before changing re
         .rejects.toMatchObject({ statusCode: 403 });
     expect(await rows(f)).toEqual(before);
 });
+
+test('the read-only kit collector preserves an active WAL triple and accounts for every nested retained snapshot', async () => {
+    const f = await fixture({ revisions: 3, historicalOpen: true });
+    const writer = new Database(f.file, { fileMustExist: true });
+    try {
+        writer.pragma('journal_mode=WAL');
+        writer.prepare('INSERT INTO AuditLog(id,entity,entityId,action,performedBy,timestamp) VALUES(?,?,?,?,?,?)')
+            .run(randomUUID(), 'SAMPLE', f.items[0].sampleId, 'OWNED_IMPACT_WAL_CONTEXT', 'system:fixture', Date.now());
+        const before = triples(f.file), result = require('../../scripts/order_revision_impact').collectOrderRevisionImpact({ dbPath: f.file });
+        expect(before['-wal']).not.toBeNull(); expect(triples(f.file)).toEqual(before);
+        expect(result).toMatchObject({ classification: 'PRE_209', access: 'RETAINED_SNAPSHOT_ONLY', totalChanges: 0,
+            originalFilesPreserved: true, productionMutations: 0, impact: { multipleActiveSampleCount: 1, continuingReservedOpenCount: 1 } });
+        expect(result.retainedAllocation.files.filter(row => row.path.endsWith('snapshot.db')).length).toBeGreaterThanOrEqual(2);
+        expect(result.retainedAllocation.conservativeAllocationBytes).toBeGreaterThanOrEqual(result.retainedAllocation.logicalBytes);
+        for (const retained of result.retainedAllocation.files) {
+            expect(fs.existsSync(retained.path)).toBe(true);
+            expect(createHash('sha256').update(fs.readFileSync(retained.path)).digest('hex')).toBe(retained.sha256);
+        }
+    } finally { writer.close(); }
+});
+
+test('the actual shipped post-start order programme preserves an owned WAL-mode original without sidecars', async () => {
+    const f = await qcGateFixture({ resolvedRules:false,fixedWindowPolicy:false }); held.push(f); await f.db.$disconnect();
+    const target = f.file + '.post-order-' + randomUUID() + '.db';
+    for (const suffix of ['','-wal','-shm']) if (fs.existsSync(f.file + suffix)) fs.copyFileSync(f.file + suffix,target + suffix,fs.constants.COPYFILE_EXCL);
+    const writer = new Database(target,{fileMustExist:true}); try { writer.pragma('journal_mode=WAL'); } finally { writer.close(); }
+    const before = triples(target); expect(before['-wal']).toBeNull(); expect(before['-shm']).toBeNull();
+    const path = require('node:path'), root = path.resolve(__dirname,'../../..');
+    const rehearsal = fs.readFileSync(path.join(root,'server/scripts/rehearsal_deployment_readiness.cjs'),'utf8');
+    const section = rehearsal.slice(rehearsal.indexOf('const orderAfterOutput ='),rehearsal.indexOf('const orderAfter = JSON.parse'));
+    const programme = section.match(/IMAGE_TAG,'node','-e',\s*`([\s\S]*?)`\s*\]/)[1].replace("'/owned-order/dev.db'",JSON.stringify(target));
+    const actual = JSON.parse(require('node:child_process').execFileSync(process.execPath,['-e',programme],{cwd:path.join(root,'server'),encoding:'utf8'}));
+    expect(actual).toMatchObject({ready:{classification:'COMPLETE_209',totalChanges:0},again:{mode:'NO_OP',totalChanges:0},
+        impact:{originalFilesPreserved:true,totalChanges:0},dbWalShmPreserved:true,secondaryInspectionsOnRetainedSnapshot:true});
+    expect(triples(target)).toEqual(before);
+});

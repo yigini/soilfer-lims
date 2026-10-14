@@ -55,7 +55,8 @@ describe('SD-06: EDIT_ANALYSES Permission Gate Contract', () => {
             .put(`/api/samples/${sampleId}/analyses`)
             .set('Authorization', `Bearer ${receptionToken}`)
             .send({
-                analyses: ['PH_H2O', 'SOC']
+                analyses: ['PH_H2O', 'SOC'],
+                reason: 'Reviewed complete analysis selection'
             });
 
         expect(res.status).toBe(200);
