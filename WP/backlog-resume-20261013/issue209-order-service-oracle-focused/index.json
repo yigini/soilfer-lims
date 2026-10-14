@@ -1,0 +1,90 @@
+{
+  "retainedUtc": "2026-10-14T08:04:45.983938+00:00",
+  "status": "CLOSED_FAILED_HISTORICAL_OPEN_FIRST_FILL",
+  "summary": {
+    "closedUtc": "2026-10-14T08:01:59.832545+00:00",
+    "exit": 1,
+    "suites": 2,
+    "tests": 25,
+    "passedTests": 24,
+    "failed": 1,
+    "pending": 0,
+    "todo": 0,
+    "sourceUnchanged": true,
+    "selectedInventoryEqual": true,
+    "fullDiscovery": 368,
+    "ordinarySetups": true,
+    "workerIdleMemoryLimit": 512000000,
+    "productionOperations": 0,
+    "status": "FAILED_OR_INCOMPLETE"
+  },
+  "cause": "Seven integration tests and17request tests pass; raw integer-timestamp historical OPEN fixture first fill is refused by an existing workflow guard. Exact guard code pending isolated inspection. No guard change.",
+  "sourceDraftPaths": [
+    "server/services/orderService.js",
+    "server/services/orderLineResolutionService.js",
+    "server/services/orderRevisionMigrationSource.js",
+    "server/scripts/install_order_revisions.js",
+    "server/services/sampleAnalysisStateService.js",
+    "server/services/intakeWorkItemService.js",
+    "server/services/workAttemptWriteService.js",
+    "server/services/workRepeatService.js",
+    "server/services/scientificAmendmentService.js",
+    "server/prisma/schema.prisma",
+    "server/prisma/migrations/20261014000100_order_revision_contract/migration.sql",
+    "server/tests/contracts/issue_209_order_revision_integration.test.js",
+    "server/tests/helpers/legacyWorkflowDatabase.js"
+  ],
+  "scopeComment": 6163271808,
+  "applicationFullyVerified": false,
+  "productionOperations": 0,
+  "rawFiles": {
+    "WP/backlog-resume-20261013/issue209-order-service-oracle-focused/command.json": {
+      "bytes": 993,
+      "sha256": "39c0f14777d2d9920a0a5c7d3cc79027588c965d2dc057ede3dcc98367a46c59"
+    },
+    "WP/backlog-resume-20261013/issue209-order-service-oracle-focused/config-original.json": {
+      "bytes": 6077,
+      "sha256": "b908878902f3ce36c6af2c3df5b3ca0e3443c6ea4ae5ea233934203349f062dc"
+    },
+    "WP/backlog-resume-20261013/issue209-order-service-oracle-focused/config-stderr-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "WP/backlog-resume-20261013/issue209-order-service-oracle-focused/exit-original.txt": {
+      "bytes": 2,
+      "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+    },
+    "WP/backlog-resume-20261013/issue209-order-service-oracle-focused/inventory-original.json": {
+      "bytes": 49296,
+      "sha256": "318ab82115b50a48409667894df04f204e840fd43cc9c1c887ea1a4c72d33ede"
+    },
+    "WP/backlog-resume-20261013/issue209-order-service-oracle-focused/inventory-stderr-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "WP/backlog-resume-20261013/issue209-order-service-oracle-focused/report-original.json": {
+      "bytes": 13125,
+      "sha256": "a836a53436007adf29a10721c196bb1b568a1397635c7b07a4e2b5313f5cf9e8"
+    },
+    "WP/backlog-resume-20261013/issue209-order-service-oracle-focused/source-after.json": {
+      "bytes": 3001,
+      "sha256": "fb2c1b7f8cef57443cb5f19955c37d8b669a6af94c6263372bfd16b7674ebee3"
+    },
+    "WP/backlog-resume-20261013/issue209-order-service-oracle-focused/source-before.json": {
+      "bytes": 3001,
+      "sha256": "fb2c1b7f8cef57443cb5f19955c37d8b669a6af94c6263372bfd16b7674ebee3"
+    },
+    "WP/backlog-resume-20261013/issue209-order-service-oracle-focused/stderr-original.log": {
+      "bytes": 3627,
+      "sha256": "30060b1920e39fbe161dd90d84c82c0fe80eeb4f7f725598e2bed91749c43cce"
+    },
+    "WP/backlog-resume-20261013/issue209-order-service-oracle-focused/stdout-original.log": {
+      "bytes": 722,
+      "sha256": "6599f493803ba7057bceb0e65a14523353d01d82ea4928cd53f117cc5b48bf96"
+    },
+    "WP/backlog-resume-20261013/issue209-order-service-oracle-focused/summary.json": {
+      "bytes": 376,
+      "sha256": "f0a42ddd6c9b5e0b6d01d51d04f60f3554e10404083a33d874b96fcc230d4b89"
+    }
+  }
+}
