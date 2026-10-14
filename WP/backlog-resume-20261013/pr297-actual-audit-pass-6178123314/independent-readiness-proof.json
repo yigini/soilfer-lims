@@ -1,0 +1,347 @@
+{
+  "policyChartEntrypointProof": {
+    "scenario": "PRE_199-default-entrypoint-COMPLETE_214",
+    "before": {
+      "dry": {
+        "classification": "ABSENT",
+        "sourceSha256": "fa6ef0563f80704dbc4ee08d90ceae91f632c912813ca037221b02aa03ef7b70",
+        "addReportPolicyVersion": true,
+        "plannedSql": "CREATE TABLE \"LabPolicy\" (\n  \"id\" TEXT NOT NULL PRIMARY KEY,\n  \"labId\" TEXT NOT NULL,\n  \"presetCode\" TEXT CHECK (\"presetCode\" IS NULL OR \"presetCode\" IN ('ISO17025_STRICT','BASIC','ADVISORY')),\n  \"version\" INTEGER NOT NULL DEFAULT 1 CHECK (\"version\" >= 1),\n  \"updatedBy\" TEXT NOT NULL,\n  \"updatedAt\" DATETIME NOT NULL,\n  FOREIGN KEY (\"labId\") REFERENCES \"Lab\"(\"id\") ON DELETE RESTRICT ON UPDATE CASCADE\n);\nCREATE UNIQUE INDEX \"LabPolicy_labId_key\" ON \"LabPolicy\"(\"labId\");\nCREATE TABLE \"LabPolicyOverride\" (\n  \"id\" TEXT NOT NULL PRIMARY KEY,\n  \"labId\" TEXT NOT NULL,\n  \"key\" TEXT NOT NULL,\n  \"analysisCode\" TEXT,\n  \"methodologyId\" TEXT,\n  \"value\" TEXT NOT NULL CHECK (json_valid(\"value\")),\n  \"reason\" TEXT NOT NULL CHECK (length(trim(\"reason\")) > 0),\n  \"setBy\" TEXT NOT NULL,\n  \"setAt\" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  \"revokedAt\" DATETIME,\n  \"revokedBy\" TEXT,\n  FOREIGN KEY (\"labId\") REFERENCES \"Lab\"(\"id\") ON DELETE RESTRICT ON UPDATE CASCADE\n);\nCREATE INDEX \"LabPolicyOverride_labId_key_idx\" ON \"LabPolicyOverride\"(\"labId\",\"key\");\nCREATE UNIQUE INDEX \"LabPolicyOverride_one_current_scope\" ON \"LabPolicyOverride\"(\n  \"labId\",\"key\",COALESCE(\"analysisCode\",''),COALESCE(\"methodologyId\",'')\n) WHERE \"revokedAt\" IS NULL;\nALTER TABLE \"Report\" ADD COLUMN \"policyVersion\" INTEGER;\n",
+        "plannedDdlCount": 6,
+        "readonlySnapshot": {
+          "path": "/tmp/lims-policy-schema-readonly-ekLecO/snapshot.db",
+          "originalDbWalShmSha256": {
+            "": "d55d811d59232b4301bdc4221c697da6366a584736cfe67cb30e7c1abd015141",
+            "-wal": "43eb0348fb66e80e43f9d4a47e858c8c1a24529f63f58fcac4726da2afee8315",
+            "-shm": "4de42339d587338c208047e7465282cb5d3d37231facf92dcfb8b7ce1eae3fd5"
+          },
+          "originalFilesPreserved": true
+        },
+        "mode": "DRY_RUN",
+        "totalChanges": 0,
+        "dataWrites": 0
+      },
+      "dbWalShmPreserved": true
+    },
+    "after": {
+      "ready": {
+        "classification": "PRESENT",
+        "shape": "CANONICAL",
+        "sourceSha256": "fa6ef0563f80704dbc4ee08d90ceae91f632c912813ca037221b02aa03ef7b70",
+        "addReportPolicyVersion": false,
+        "plannedSql": "",
+        "plannedDdlCount": 0,
+        "readonlySnapshot": {
+          "path": "/tmp/lims-policy-schema-readonly-LICHGH/snapshot.db",
+          "originalDbWalShmSha256": {
+            "": "47a8fe34e42e6dbf29105c0fd15079cd43e6899283524700693cf0c922a398c6",
+            "-wal": null,
+            "-shm": null
+          },
+          "originalFilesPreserved": true
+        },
+        "mode": "NO_OP",
+        "totalChanges": 0,
+        "dataWrites": 0
+      },
+      "again": {
+        "classification": "PRESENT",
+        "shape": "CANONICAL",
+        "sourceSha256": "fa6ef0563f80704dbc4ee08d90ceae91f632c912813ca037221b02aa03ef7b70",
+        "addReportPolicyVersion": false,
+        "plannedSql": "",
+        "plannedDdlCount": 0,
+        "readonlySnapshot": {
+          "path": "/tmp/lims-policy-schema-readonly-InJaFI/snapshot.db",
+          "originalDbWalShmSha256": {
+            "": "47a8fe34e42e6dbf29105c0fd15079cd43e6899283524700693cf0c922a398c6",
+            "-wal": null,
+            "-shm": null
+          },
+          "originalFilesPreserved": true
+        },
+        "mode": "NO_OP",
+        "totalChanges": 0,
+        "dataWrites": 0
+      },
+      "charts": {
+        "classification": "COMPLETE_214",
+        "sources": {
+          "migrationSha256": "49b378296a8a0ede3318ae1e543060478b55827db0ec981d8cc4bd6180a56df6",
+          "contractVersion": "214-v1"
+        },
+        "receipt": {
+          "sources": {
+            "migrationSha256": "49b378296a8a0ede3318ae1e543060478b55827db0ec981d8cc4bd6180a56df6",
+            "contractVersion": "214-v1"
+          },
+          "originalRowsSha256": "8dce27584da31148565a00843552e68ec94908e81fa002a486a93b6e0dcf7e5f",
+          "originalRowsPreserved": true,
+          "backfilledCount": 0,
+          "receiptSha256": "dc9afa736178daffae65f1da9b978e7e49946bf459288ec5e7fc39190d91274e"
+        },
+        "mode": "DRY_RUN",
+        "totalChanges": 0,
+        "backfilledCount": 0
+      },
+      "counts": {
+        "LabPolicy": 0,
+        "LabPolicyOverride": 0
+      },
+      "dbWalShmPreserved": true,
+      "secondaryInspectionsOnRetainedSnapshot": true
+    }
+  },
+  "orderRevisionEntrypointProof": {
+    "scenario": "PRE_199-default-entrypoint-COMPLETE_209",
+    "before": {
+      "workItemIdAbsent": true,
+      "orderRevisions": 0,
+      "orderLines": 0,
+      "attempts": 0
+    },
+    "after": {
+      "ready": {
+        "classification": "COMPLETE_209",
+        "sourceSha256": "5c51f423689b1c726e16c12cdce7b381574661017cdb622eb3f562957a18304c",
+        "receipt": {
+          "sourceSha256": "5c51f423689b1c726e16c12cdce7b381574661017cdb622eb3f562957a18304c",
+          "originalRowsSha256": "2db4d14b2aca16fbbd4ec07d43f146710c67da33cccc4211a5bd8fbdb586b782",
+          "originalRowsPreserved": true,
+          "backfilledCount": 0,
+          "receiptSha256": "0904b280c9d21659c895883862e28fab88a8cf04880ed22708458249d06ed27d"
+        },
+        "mode": "DRY_RUN",
+        "totalChanges": 0,
+        "backfilledCount": 0,
+        "impact": {
+          "multipleActiveSampleCount": 0,
+          "multipleActive": [],
+          "refusalCounts": {
+            "NO_LINE": 0,
+            "AMBIGUOUS_LINE": 0,
+            "MULTIPLE_ACTIVE_REVISIONS": 0,
+            "FRACTION_OWNER_LINE_REQUIRED": 0
+          },
+          "refusedOpenWorkItems": [],
+          "noActiveRevisionCount": 0,
+          "noActiveRevisionWorkItems": [],
+          "noMatchingLineCount": 0,
+          "noMatchingLineWorkItems": [],
+          "prospectiveApprovedAmendmentRefusalCount": 0,
+          "prospectiveApprovedAmendmentSampleCount": 0,
+          "approvedAmendmentSampleIds": [],
+          "prospectiveApprovedAmendmentRefusals": [],
+          "approvedAmendmentKitGate": "NO_APPROVED_AMENDMENT_REFUSALS",
+          "fractionOwnerRefusalCount": 0,
+          "incompleteTextureOwnerSampleCount": 0,
+          "incompleteTextureOwners": [],
+          "invalidStoredAnalysisSampleCount": 0,
+          "invalidStoredAnalyses": [],
+          "continuingReservedOpenCount": 0,
+          "continuingReservedOpenWorkItems": [],
+          "ambiguousOpenReservationCount": 0,
+          "ambiguousOpenReservations": [],
+          "refusalScope": "Open measurement work requiring a new attempt INSERT; existing OPEN reservations reported separately"
+        },
+        "readonlySnapshot": {
+          "path": "/tmp/lims-policy-schema-readonly-bOIFAh/snapshot.db",
+          "originalDbWalShmSha256": {
+            "": "47a8fe34e42e6dbf29105c0fd15079cd43e6899283524700693cf0c922a398c6",
+            "-wal": null,
+            "-shm": null
+          },
+          "originalFilesPreserved": true
+        }
+      },
+      "again": {
+        "classification": "COMPLETE_209",
+        "sourceSha256": "5c51f423689b1c726e16c12cdce7b381574661017cdb622eb3f562957a18304c",
+        "receipt": {
+          "sourceSha256": "5c51f423689b1c726e16c12cdce7b381574661017cdb622eb3f562957a18304c",
+          "originalRowsSha256": "2db4d14b2aca16fbbd4ec07d43f146710c67da33cccc4211a5bd8fbdb586b782",
+          "originalRowsPreserved": true,
+          "backfilledCount": 0,
+          "receiptSha256": "0904b280c9d21659c895883862e28fab88a8cf04880ed22708458249d06ed27d"
+        },
+        "mode": "NO_OP",
+        "totalChanges": 0,
+        "backfilledCount": 0,
+        "impact": {
+          "multipleActiveSampleCount": 0,
+          "multipleActive": [],
+          "refusalCounts": {
+            "NO_LINE": 0,
+            "AMBIGUOUS_LINE": 0,
+            "MULTIPLE_ACTIVE_REVISIONS": 0,
+            "FRACTION_OWNER_LINE_REQUIRED": 0
+          },
+          "refusedOpenWorkItems": [],
+          "noActiveRevisionCount": 0,
+          "noActiveRevisionWorkItems": [],
+          "noMatchingLineCount": 0,
+          "noMatchingLineWorkItems": [],
+          "prospectiveApprovedAmendmentRefusalCount": 0,
+          "prospectiveApprovedAmendmentSampleCount": 0,
+          "approvedAmendmentSampleIds": [],
+          "prospectiveApprovedAmendmentRefusals": [],
+          "approvedAmendmentKitGate": "NO_APPROVED_AMENDMENT_REFUSALS",
+          "fractionOwnerRefusalCount": 0,
+          "incompleteTextureOwnerSampleCount": 0,
+          "incompleteTextureOwners": [],
+          "invalidStoredAnalysisSampleCount": 0,
+          "invalidStoredAnalyses": [],
+          "continuingReservedOpenCount": 0,
+          "continuingReservedOpenWorkItems": [],
+          "ambiguousOpenReservationCount": 0,
+          "ambiguousOpenReservations": [],
+          "refusalScope": "Open measurement work requiring a new attempt INSERT; existing OPEN reservations reported separately"
+        },
+        "readonlySnapshot": {
+          "path": "/tmp/lims-policy-schema-readonly-ONPhCm/snapshot.db",
+          "originalDbWalShmSha256": {
+            "": "47a8fe34e42e6dbf29105c0fd15079cd43e6899283524700693cf0c922a398c6",
+            "-wal": null,
+            "-shm": null
+          },
+          "originalFilesPreserved": true
+        }
+      },
+      "impact": {
+        "classification": "COMPLETE_209",
+        "sourceSha256": "5c51f423689b1c726e16c12cdce7b381574661017cdb622eb3f562957a18304c",
+        "receipt": {
+          "sourceSha256": "5c51f423689b1c726e16c12cdce7b381574661017cdb622eb3f562957a18304c",
+          "originalRowsSha256": "2db4d14b2aca16fbbd4ec07d43f146710c67da33cccc4211a5bd8fbdb586b782",
+          "originalRowsPreserved": true,
+          "backfilledCount": 0,
+          "receiptSha256": "0904b280c9d21659c895883862e28fab88a8cf04880ed22708458249d06ed27d"
+        },
+        "mode": "DRY_RUN",
+        "totalChanges": 0,
+        "backfilledCount": 0,
+        "impact": {
+          "multipleActiveSampleCount": 0,
+          "multipleActive": [],
+          "refusalCounts": {
+            "NO_LINE": 0,
+            "AMBIGUOUS_LINE": 0,
+            "MULTIPLE_ACTIVE_REVISIONS": 0,
+            "FRACTION_OWNER_LINE_REQUIRED": 0
+          },
+          "refusedOpenWorkItems": [],
+          "noActiveRevisionCount": 0,
+          "noActiveRevisionWorkItems": [],
+          "noMatchingLineCount": 0,
+          "noMatchingLineWorkItems": [],
+          "prospectiveApprovedAmendmentRefusalCount": 0,
+          "prospectiveApprovedAmendmentSampleCount": 0,
+          "approvedAmendmentSampleIds": [],
+          "prospectiveApprovedAmendmentRefusals": [],
+          "approvedAmendmentKitGate": "NO_APPROVED_AMENDMENT_REFUSALS",
+          "fractionOwnerRefusalCount": 0,
+          "incompleteTextureOwnerSampleCount": 0,
+          "incompleteTextureOwners": [],
+          "invalidStoredAnalysisSampleCount": 0,
+          "invalidStoredAnalyses": [],
+          "continuingReservedOpenCount": 0,
+          "continuingReservedOpenWorkItems": [],
+          "ambiguousOpenReservationCount": 0,
+          "ambiguousOpenReservations": [],
+          "refusalScope": "Open measurement work requiring a new attempt INSERT; existing OPEN reservations reported separately"
+        },
+        "readonlySnapshot": {
+          "path": "/tmp/lims-order-impact-LhgjNA/lims-policy-schema-readonly-BNPHHC/snapshot.db",
+          "originalDbWalShmSha256": {
+            "": "47a8fe34e42e6dbf29105c0fd15079cd43e6899283524700693cf0c922a398c6",
+            "-wal": null,
+            "-shm": null
+          },
+          "originalFilesPreserved": true
+        },
+        "access": "RETAINED_SNAPSHOT_ONLY",
+        "originalDbWalShmSha256": {
+          "": "47a8fe34e42e6dbf29105c0fd15079cd43e6899283524700693cf0c922a398c6",
+          "-wal": null,
+          "-shm": null
+        },
+        "originalFilesPreserved": true,
+        "productionMutations": 0,
+        "retainedAllocation": {
+          "root": "/tmp/lims-order-impact-LhgjNA",
+          "files": [
+            {
+              "path": "/tmp/lims-order-impact-LhgjNA/exit-original.json",
+              "bytes": 346,
+              "sha256": "9671da84cd4de4edcda971f459c756e1159a46af7839e2b62b31b39364b35813",
+              "allocatedBytes": 4096,
+              "conservativeAllocationBytes": 4096
+            },
+            {
+              "path": "/tmp/lims-order-impact-LhgjNA/lims-policy-schema-readonly-BNPHHC/snapshot.db",
+              "bytes": 2363392,
+              "sha256": "47a8fe34e42e6dbf29105c0fd15079cd43e6899283524700693cf0c922a398c6",
+              "allocatedBytes": 2363392,
+              "conservativeAllocationBytes": 2363392
+            },
+            {
+              "path": "/tmp/lims-order-impact-LhgjNA/lims-policy-schema-readonly-BNPHHC/snapshot.db-shm",
+              "bytes": 32768,
+              "sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb",
+              "allocatedBytes": 32768,
+              "conservativeAllocationBytes": 32768
+            },
+            {
+              "path": "/tmp/lims-order-impact-LhgjNA/lims-policy-schema-readonly-BNPHHC/snapshot.db-wal",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "allocatedBytes": 0,
+              "conservativeAllocationBytes": 0
+            },
+            {
+              "path": "/tmp/lims-order-impact-LhgjNA/lims-policy-schema-readonly-OIFfOF/snapshot.db",
+              "bytes": 2363392,
+              "sha256": "47a8fe34e42e6dbf29105c0fd15079cd43e6899283524700693cf0c922a398c6",
+              "allocatedBytes": 2363392,
+              "conservativeAllocationBytes": 2363392
+            },
+            {
+              "path": "/tmp/lims-order-impact-LhgjNA/lims-policy-schema-readonly-OIFfOF/snapshot.db-shm",
+              "bytes": 32768,
+              "sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb",
+              "allocatedBytes": 32768,
+              "conservativeAllocationBytes": 32768
+            },
+            {
+              "path": "/tmp/lims-order-impact-LhgjNA/lims-policy-schema-readonly-OIFfOF/snapshot.db-wal",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "allocatedBytes": 0,
+              "conservativeAllocationBytes": 0
+            },
+            {
+              "path": "/tmp/lims-order-impact-LhgjNA/stderr-original.log",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "allocatedBytes": 0,
+              "conservativeAllocationBytes": 0
+            },
+            {
+              "path": "/tmp/lims-order-impact-LhgjNA/stdout-original.json",
+              "bytes": 1981,
+              "sha256": "8e4ee245cdc70f048cbeebaab3b97d483bd63758d31ca387d16bfc7018782e90",
+              "allocatedBytes": 4096,
+              "conservativeAllocationBytes": 4096
+            }
+          ],
+          "logicalBytes": 4794647,
+          "allocationMeasured": true,
+          "conservativeAllocationBytes": 4800512
+        }
+      },
+      "dbWalShmPreserved": true,
+      "secondaryInspectionsOnRetainedSnapshot": true
+    },
+    "retainedRowsAndReceiptsPreserved": true
+  }
+}

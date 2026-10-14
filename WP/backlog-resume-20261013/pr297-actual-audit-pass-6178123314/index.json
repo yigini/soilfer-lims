@@ -1,0 +1,73 @@
+{
+  "observedUtc": "2026-10-14T20:57:36.973645+00:00",
+  "status": "ACTUAL_EXACT_HEAD_AUDIT_PASS",
+  "number": 297,
+  "issue": 209,
+  "head": "6bd516c42a07332d0b0653ed150d1526bf7e424e",
+  "tree": "638580d50f61254609de3abd42d93afc676a5727",
+  "base": "2242bcb4861a7085bb95e78e0e7b1e4edf11d1b8",
+  "verdictId": 6178123314,
+  "verdictUrl": "https://github.com/yigini/soilfer-lims/pull/297#issuecomment-6178123314",
+  "ci": 38629458186,
+  "ciEvidenceAudit": "401f07214e8b287331385316cb4287d82ad764c3",
+  "previousCiBlobsVerified": 14,
+  "exactJestSummary": [
+    "Test Suites: 370 passed, 370 total",
+    "Tests:       5649 passed, 5649 total"
+  ],
+  "readyNoticeSent": false,
+  "newAuditRequestSent": false,
+  "noticeBoundary": "Actual final exact-head PASS already posted before this heartbeat; do not duplicate the completed audit request.",
+  "nativeBoundary": "Fresh returned Claude7867734/LIMS Audit/Lab workflow audit and plan read after one activation recovery; right composer EMPTY, centre human draft can you go and ask Pip preserved. Latest visible native reply is old failed-audit direction; no new native PASS claimed and zero input.",
+  "kitRequirements": [
+    "invalidStoredAnalysisSampleCount and sample/owner lists; nonzero shown to YY",
+    "approved amendment nonzero STOP and separate Claudio-reviewed forward remedy",
+    "policy PRESENT/NO_OP0 or STOP",
+    "actual214/209 impact lists and retained-snapshot disk accounting before exact-kit audit/fresh gate"
+  ],
+  "productionOperations": 0,
+  "productionCountsCollected": false,
+  "mergePerformed": false,
+  "files": {
+    "actual-verdict-original.json": {
+      "bytes": 5571,
+      "sha256": "2272d318b7d824d7341e90cd340b53bfeb81dc5cbec26150f857b4db8251a167"
+    },
+    "comments-original.json": {
+      "bytes": 19805,
+      "sha256": "e0959ddaacf8fe39dd488f7f86ae0a9ae30c451bc8d27fea2a88035cc5a1aee9"
+    },
+    "pr-original.json": {
+      "bytes": 32558,
+      "sha256": "2ee8d254c93ef96293b7e08f0812f3396f07a34f3f7583752047f3a607c5f27d"
+    },
+    "main-original.json": {
+      "bytes": 336,
+      "sha256": "e0c8d4117149b05e499ad0abfd6f0456aed24d869f784317aa0c1072415e39c9"
+    },
+    "source-original.json": {
+      "bytes": 1168,
+      "sha256": "ad96f73c4b397aaa5ba6072b04783609fee102cf26a1c00d16e8e6050cfa2a56"
+    },
+    "ci-original.json": {
+      "bytes": 12554,
+      "sha256": "ea35864828a30f2fabf782f5025b94deda7b718ec3a07e5e818cea4137fbb2e8"
+    },
+    "checks-original.json": {
+      "bytes": 3565,
+      "sha256": "67c55055f71e5bf4dfb08517f3e4a0b249a485f606b1212ec01a8e849218f672"
+    },
+    "closing-references-original.json": {
+      "bytes": 158,
+      "sha256": "9ccd051b550a7f50dc0a30cf0b22c44e3572bb5d35f499e0b828975572810235"
+    },
+    "issue209-original.json": {
+      "bytes": 8349,
+      "sha256": "2f1adbd929297ceea9adbd3346dbe7fdaed8fefb0ad62cdf9940993d8286a3a0"
+    },
+    "independent-readiness-proof.json": {
+      "bytes": 15525,
+      "sha256": "237bba3b32bff921f9903d1c18352f6d2ccf1da50278a33c161bb42b6d549c21"
+    }
+  }
+}
