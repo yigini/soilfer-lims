@@ -1,0 +1,52 @@
+[
+  {
+    "path": "server/tests/contracts/nsis_policy_and_scoping.test.js",
+    "beforeSha256": "e7977325d5989ac413184a785a14cd2b11e1dc6232fa63ff8f11f15b19adf340",
+    "afterSha256": "e3170da8793b49c4a9853dbe5e241749d7738da3f56646af51de88e5956c1e71",
+    "oldSourceAndEveryAssertionExactlyRecoveredByRemovingAdditions": true,
+    "existingOwnersOnly": true,
+    "additions": [
+      "        // #209: declared legacy order for this NEW owned accepted numerical/reference assembly.\n        require('../../services/workflowStateRules').assertFixtureContext();\n        await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: sampleApprovedGtm.id,\n            version: 1, status: 'ACTIVE', reason: 'Owned accepted reference order context', requestedBy: 'system:fixture',\n            lines: { create: [{ id: require('node:crypto').randomUUID(), analysis: 'PH_H2O',\n                workItemId: null, status: 'ACTIVE', isRequired: true }] } } });\n"
+    ]
+  },
+  {
+    "path": "server/tests/contracts/exchange_error_semantics.test.js",
+    "beforeSha256": "b64c5b7ae14863a44109fd2642b668352c7847eab7b6e976949cfeea45b20d02",
+    "afterSha256": "7b2ddaae9390ce0cf283afa6583cc11d533e97deb9384c7cbd31ac2b46740c0e",
+    "oldSourceAndEveryAssertionExactlyRecoveredByRemovingAdditions": true,
+    "existingOwnersOnly": true,
+    "additions": [
+      "        // #209: declared legacy order for this NEW owned accepted numerical/reference assembly.\n        require('../../services/workflowStateRules').assertFixtureContext();\n        await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: sampleApproved.id,\n            version: 1, status: 'ACTIVE', reason: 'Owned accepted reference order context', requestedBy: 'system:fixture',\n            lines: { create: [{ id: require('node:crypto').randomUUID(), analysis: 'PH_H2O',\n                workItemId: null, status: 'ACTIVE', isRequired: true }] } } });\n"
+    ]
+  },
+  {
+    "path": "server/tests/contracts/nsis_v2_exchange.test.js",
+    "beforeSha256": "28e9ce488d569103f13bcfd4f8b098495a79d4c8fbe1c16926de0840ba101524",
+    "afterSha256": "cb449edfa6a20b802f8f579f78b8a6dda0cde7d3df114ae8bbdee97e6b9fc85b",
+    "oldSourceAndEveryAssertionExactlyRecoveredByRemovingAdditions": true,
+    "existingOwnersOnly": true,
+    "additions": [
+      "        // #209: declared legacy order for this NEW owned accepted numerical/reference assembly.\n        require('../../services/workflowStateRules').assertFixtureContext();\n        await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: sample1.id,\n            version: 1, status: 'ACTIVE', reason: 'Owned accepted reference order context', requestedBy: 'system:fixture',\n            lines: { create: [{ id: require('node:crypto').randomUUID(), analysis: 'PH_H2O',\n                workItemId: null, status: 'ACTIVE', isRequired: true }] } } });\n"
+    ]
+  },
+  {
+    "path": "server/tests/contracts/export_normalization.test.js",
+    "beforeSha256": "f930850ad6c6bfa1a2a3a3d78c1bcae2ce3fde81878c43dce66604d86cc5defb",
+    "afterSha256": "48799e5aeed0d30c687400c1f98e2e413085d95f704e6d9fe29eea06bfbcf06f",
+    "oldSourceAndEveryAssertionExactlyRecoveredByRemovingAdditions": true,
+    "existingOwnersOnly": true,
+    "additions": [
+      "        // #209: declared legacy order for this NEW owned accepted numerical/reference assembly.\n        require('../../services/workflowStateRules').assertFixtureContext();\n        await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: testSample.id,\n            version: 1, status: 'ACTIVE', reason: 'Owned accepted reference order context', requestedBy: 'system:fixture',\n            lines: { create: [{ id: require('node:crypto').randomUUID(), analysis: 'SOC',\n                workItemId: null, status: 'ACTIVE', isRequired: true }] } } });\n"
+    ]
+  },
+  {
+    "path": "server/tests/contracts/spectral_stage_e.test.js",
+    "beforeSha256": "76c59c38e14df19f0307a365563ccd19c991f54cfbacb2a9e6bd0600f1606beb",
+    "afterSha256": "322876cbc1302276c8cf1eae022306b507ee7274745e0755ceddb4536408e1ae",
+    "oldSourceAndEveryAssertionExactlyRecoveredByRemovingAdditions": true,
+    "existingOwnersOnly": true,
+    "additions": [
+      "        // #209: declared legacy order for this NEW owned accepted numerical/reference assembly.\n        require('../../services/workflowStateRules').assertFixtureContext();\n        await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: sampleGtmId,\n            version: 1, status: 'ACTIVE', reason: 'Owned accepted reference order context', requestedBy: 'system:fixture',\n            lines: { create: [{ id: require('node:crypto').randomUUID(), analysis: 'SOC',\n                workItemId: null, status: 'ACTIVE', isRequired: true }] } } });\n"
+    ]
+  }
+]

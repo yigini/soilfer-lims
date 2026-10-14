@@ -1,0 +1,36 @@
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+PASS tests/contracts/exchange_error_semantics.test.js
+  Issue #140 Work Package A0: Exchange Eligibility 503 Semantics & Invariants
+    E07-min: Unforgeable Request Correlation & Headers
+      √ Generates server-assigned X-Request-Id prefixed with xchg_ even before authentication (14 ms)
+      √ Preserves client correlation ID format or overwrites with unforgeable server ID (3 ms)
+    E02 & E05: Baseline Publication Invariants & Genuine Empty
+      √ Returns 200 OK with eligible approved sample and excludes processing & held samples (30 ms)
+      √ E02: Genuine empty query returns 200 OK with empty array (never 503) (36 ms)
+    E03: Single Policy Resolution & Total Coherence
+      √ buildSampleWhere is called once per getSamples request, avoiding duplicate hold scans (8 ms)
+    E01: Fail-Closed HTTP 503 Error Semantics Across All 4 Aliases & Endpoints
+      √ 1. All 4 exchange aliases fail-closed with 503, Retry-After: 5, and X-Request-Id on /samples (15 ms)
+      √ 2. Single sample detail endpoints fail-closed with 503 (7 ms)
+      √ 3. GeoJSON endpoints fail-closed with 503 (7 ms)
+      √ 4. V1 Results matrix fails-closed with 503 (3 ms)
+      √ 5. V2 Observations endpoint fails-closed with 503 (2 ms)
+      √ 6. Spectra endpoints fail-closed with 503 (6 ms)
+      √ 7. V1 Sync endpoint fails-closed with 503 (2 ms)
+      √ 8. Stats endpoints fail-closed with 503 (5 ms)
+      √ 9. Snapshot and changes error routing through handleExchangeError with 503 (10 ms)
+    Client Error (4xx) Preservation
+      √ Preserves 400 Bad Request on invalid parameter without converting to 503 (2 ms)
+      √ Preserves 404 Not Found on non-existent specimen without converting to 503 (5 ms)
+      √ Preserves 401 Unauthorized on invalid API key token (2 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       17 passed, 17 total
+Snapshots:   0 total
+Time:        1.67 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\exchange_error_semantics.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\issue209-exchange-spectral-context-singles\02-exchange_error_semantics.test\report-original.json

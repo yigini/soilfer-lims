@@ -1,0 +1,903 @@
+{
+  "createdUtc": "2026-10-14T17:47:55.090585+00:00",
+  "reviewedBeforeChanges": true,
+  "originalFailedCases": 37,
+  "cases": [
+    {
+      "suite": "nsis_policy_and_scoping.test.js",
+      "test": "Issue #140 Work Package P2: SIS Shared Access & Publication Policy Contracts 1. External consumer strictly receives APPROVED samples; excludes PROCESSING and HOLD",
+      "originalFailureSha256": "4a5a86bef20584dc2949e72876eb443a089089a22ef24511f5cdeb0ec7661a87",
+      "originalObservedHeader": [
+        "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+        "    at Object.resolveOrderLine (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\orderLineResolutionService.js:30:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at insertFixtureExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:28:29)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:83:9",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)",
+        "    at Object.<anonymous> (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\nsis_policy_and_scoping.test.js:46:87)"
+      ],
+      "originalCaseLineNumbers": [
+        "46"
+      ],
+      "classification": "FIXTURE_ONLY_NEW_OWNED_ACCEPTED_REFERENCE_WITHOUT_ORDER_CONTEXT",
+      "sourceDecision": "All five failures are the same beforeAll ORDER_LINE_REQUIRED from new explicit accepted PH_H2O witness with existing owner. Add one legacy NULL PH_H2O order only to that NEW GTM fixture before accepted attempt insertion. No order for ownerless HND/processing/held samples. Preserve approved-only publication, status filters, lab isolation404, empty scope denies all, scoped stats and existing QC/reported-selection path.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial orders are reachable from caught intake failures; unchanged new-execution preflight refuses zero writes. Current normal intake atomically creates initial order and rolls back failure. Approved runtime orphan remains noneditable/refused and readonly kit nonzeroSTOP for separate forward fix; these are declared NEW historical fixture assemblies, never runtime repair/backfill/relink/amendment step."
+    },
+    {
+      "suite": "nsis_policy_and_scoping.test.js",
+      "test": "Issue #140 Work Package P2: SIS Shared Access & Publication Policy Contracts 2. Requesting status=all or unapproved status does not leak unreleased samples",
+      "originalFailureSha256": "4a5a86bef20584dc2949e72876eb443a089089a22ef24511f5cdeb0ec7661a87",
+      "originalObservedHeader": [
+        "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+        "    at Object.resolveOrderLine (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\orderLineResolutionService.js:30:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at insertFixtureExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:28:29)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:83:9",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)",
+        "    at Object.<anonymous> (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\nsis_policy_and_scoping.test.js:46:87)"
+      ],
+      "originalCaseLineNumbers": [
+        "46"
+      ],
+      "classification": "FIXTURE_ONLY_NEW_OWNED_ACCEPTED_REFERENCE_WITHOUT_ORDER_CONTEXT",
+      "sourceDecision": "All five failures are the same beforeAll ORDER_LINE_REQUIRED from new explicit accepted PH_H2O witness with existing owner. Add one legacy NULL PH_H2O order only to that NEW GTM fixture before accepted attempt insertion. No order for ownerless HND/processing/held samples. Preserve approved-only publication, status filters, lab isolation404, empty scope denies all, scoped stats and existing QC/reported-selection path.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial orders are reachable from caught intake failures; unchanged new-execution preflight refuses zero writes. Current normal intake atomically creates initial order and rolls back failure. Approved runtime orphan remains noneditable/refused and readonly kit nonzeroSTOP for separate forward fix; these are declared NEW historical fixture assemblies, never runtime repair/backfill/relink/amendment step."
+    },
+    {
+      "suite": "nsis_policy_and_scoping.test.js",
+      "test": "Issue #140 Work Package P2: SIS Shared Access & Publication Policy Contracts 3. Key scoped to GTM-LAB1 cannot view HND-LAB1 approved sample (Lab Isolation)",
+      "originalFailureSha256": "4a5a86bef20584dc2949e72876eb443a089089a22ef24511f5cdeb0ec7661a87",
+      "originalObservedHeader": [
+        "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+        "    at Object.resolveOrderLine (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\orderLineResolutionService.js:30:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at insertFixtureExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:28:29)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:83:9",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)",
+        "    at Object.<anonymous> (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\nsis_policy_and_scoping.test.js:46:87)"
+      ],
+      "originalCaseLineNumbers": [
+        "46"
+      ],
+      "classification": "FIXTURE_ONLY_NEW_OWNED_ACCEPTED_REFERENCE_WITHOUT_ORDER_CONTEXT",
+      "sourceDecision": "All five failures are the same beforeAll ORDER_LINE_REQUIRED from new explicit accepted PH_H2O witness with existing owner. Add one legacy NULL PH_H2O order only to that NEW GTM fixture before accepted attempt insertion. No order for ownerless HND/processing/held samples. Preserve approved-only publication, status filters, lab isolation404, empty scope denies all, scoped stats and existing QC/reported-selection path.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial orders are reachable from caught intake failures; unchanged new-execution preflight refuses zero writes. Current normal intake atomically creates initial order and rolls back failure. Approved runtime orphan remains noneditable/refused and readonly kit nonzeroSTOP for separate forward fix; these are declared NEW historical fixture assemblies, never runtime repair/backfill/relink/amendment step."
+    },
+    {
+      "suite": "nsis_policy_and_scoping.test.js",
+      "test": "Issue #140 Work Package P2: SIS Shared Access & Publication Policy Contracts 4. API Key with empty lab scope fails closed (denies all samples)",
+      "originalFailureSha256": "4a5a86bef20584dc2949e72876eb443a089089a22ef24511f5cdeb0ec7661a87",
+      "originalObservedHeader": [
+        "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+        "    at Object.resolveOrderLine (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\orderLineResolutionService.js:30:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at insertFixtureExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:28:29)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:83:9",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)",
+        "    at Object.<anonymous> (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\nsis_policy_and_scoping.test.js:46:87)"
+      ],
+      "originalCaseLineNumbers": [
+        "46"
+      ],
+      "classification": "FIXTURE_ONLY_NEW_OWNED_ACCEPTED_REFERENCE_WITHOUT_ORDER_CONTEXT",
+      "sourceDecision": "All five failures are the same beforeAll ORDER_LINE_REQUIRED from new explicit accepted PH_H2O witness with existing owner. Add one legacy NULL PH_H2O order only to that NEW GTM fixture before accepted attempt insertion. No order for ownerless HND/processing/held samples. Preserve approved-only publication, status filters, lab isolation404, empty scope denies all, scoped stats and existing QC/reported-selection path.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial orders are reachable from caught intake failures; unchanged new-execution preflight refuses zero writes. Current normal intake atomically creates initial order and rolls back failure. Approved runtime orphan remains noneditable/refused and readonly kit nonzeroSTOP for separate forward fix; these are declared NEW historical fixture assemblies, never runtime repair/backfill/relink/amendment step."
+    },
+    {
+      "suite": "nsis_policy_and_scoping.test.js",
+      "test": "Issue #140 Work Package P2: SIS Shared Access & Publication Policy Contracts 5. /stats metrics are strictly scoped to authorized lab and released status",
+      "originalFailureSha256": "4a5a86bef20584dc2949e72876eb443a089089a22ef24511f5cdeb0ec7661a87",
+      "originalObservedHeader": [
+        "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+        "    at Object.resolveOrderLine (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\orderLineResolutionService.js:30:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at insertFixtureExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:28:29)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:83:9",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)",
+        "    at Object.<anonymous> (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\nsis_policy_and_scoping.test.js:46:87)"
+      ],
+      "originalCaseLineNumbers": [
+        "46"
+      ],
+      "classification": "FIXTURE_ONLY_NEW_OWNED_ACCEPTED_REFERENCE_WITHOUT_ORDER_CONTEXT",
+      "sourceDecision": "All five failures are the same beforeAll ORDER_LINE_REQUIRED from new explicit accepted PH_H2O witness with existing owner. Add one legacy NULL PH_H2O order only to that NEW GTM fixture before accepted attempt insertion. No order for ownerless HND/processing/held samples. Preserve approved-only publication, status filters, lab isolation404, empty scope denies all, scoped stats and existing QC/reported-selection path.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial orders are reachable from caught intake failures; unchanged new-execution preflight refuses zero writes. Current normal intake atomically creates initial order and rolls back failure. Approved runtime orphan remains noneditable/refused and readonly kit nonzeroSTOP for separate forward fix; these are declared NEW historical fixture assemblies, never runtime repair/backfill/relink/amendment step."
+    },
+    {
+      "suite": "exchange_error_semantics.test.js",
+      "test": "Issue #140 Work Package A0: Exchange Eligibility 503 Semantics & Invariants E07-min: Unforgeable Request Correlation & Headers Generates server-assigned X-Request-Id prefixed with xchg_ even before authentication",
+      "originalFailureSha256": "e69f495afd2fa6fc182ebd6de0626b62c8b77e876c0fd9f33d65de0a2c7e5fbc",
+      "originalObservedHeader": [
+        "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+        "    at Object.resolveOrderLine (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\orderLineResolutionService.js:30:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at insertFixtureExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:28:29)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:83:9",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)",
+        "    at Object.<anonymous> (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\exchange_error_semantics.test.js:49:84)"
+      ],
+      "originalCaseLineNumbers": [
+        "49"
+      ],
+      "classification": "FIXTURE_ONLY_NEW_OWNED_ACCEPTED_REFERENCE_WITHOUT_ORDER_CONTEXT",
+      "sourceDecision": "All17 failures are beforeAll ORDER_LINE_REQUIRED at new accepted PH_H2O witness. Declare one legacy NULL line for existing approved owner. Preserve correlation IDs, held/processing exclusion/genuine-empty200, once-only policy scan, every503/Retry-After/redaction alias assertion, snapshot/change routing, and400/404/401. No policyService missing-table catch, scope bypass, journal or runtime changes.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial orders are reachable from caught intake failures; unchanged new-execution preflight refuses zero writes. Current normal intake atomically creates initial order and rolls back failure. Approved runtime orphan remains noneditable/refused and readonly kit nonzeroSTOP for separate forward fix; these are declared NEW historical fixture assemblies, never runtime repair/backfill/relink/amendment step."
+    },
+    {
+      "suite": "exchange_error_semantics.test.js",
+      "test": "Issue #140 Work Package A0: Exchange Eligibility 503 Semantics & Invariants E07-min: Unforgeable Request Correlation & Headers Preserves client correlation ID format or overwrites with unforgeable server ID",
+      "originalFailureSha256": "e69f495afd2fa6fc182ebd6de0626b62c8b77e876c0fd9f33d65de0a2c7e5fbc",
+      "originalObservedHeader": [
+        "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+        "    at Object.resolveOrderLine (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\orderLineResolutionService.js:30:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at insertFixtureExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:28:29)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:83:9",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)",
+        "    at Object.<anonymous> (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\exchange_error_semantics.test.js:49:84)"
+      ],
+      "originalCaseLineNumbers": [
+        "49"
+      ],
+      "classification": "FIXTURE_ONLY_NEW_OWNED_ACCEPTED_REFERENCE_WITHOUT_ORDER_CONTEXT",
+      "sourceDecision": "All17 failures are beforeAll ORDER_LINE_REQUIRED at new accepted PH_H2O witness. Declare one legacy NULL line for existing approved owner. Preserve correlation IDs, held/processing exclusion/genuine-empty200, once-only policy scan, every503/Retry-After/redaction alias assertion, snapshot/change routing, and400/404/401. No policyService missing-table catch, scope bypass, journal or runtime changes.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial orders are reachable from caught intake failures; unchanged new-execution preflight refuses zero writes. Current normal intake atomically creates initial order and rolls back failure. Approved runtime orphan remains noneditable/refused and readonly kit nonzeroSTOP for separate forward fix; these are declared NEW historical fixture assemblies, never runtime repair/backfill/relink/amendment step."
+    },
+    {
+      "suite": "exchange_error_semantics.test.js",
+      "test": "Issue #140 Work Package A0: Exchange Eligibility 503 Semantics & Invariants E02 & E05: Baseline Publication Invariants & Genuine Empty Returns 200 OK with eligible approved sample and excludes processing & held samples",
+      "originalFailureSha256": "e69f495afd2fa6fc182ebd6de0626b62c8b77e876c0fd9f33d65de0a2c7e5fbc",
+      "originalObservedHeader": [
+        "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+        "    at Object.resolveOrderLine (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\orderLineResolutionService.js:30:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at insertFixtureExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:28:29)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:83:9",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)",
+        "    at Object.<anonymous> (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\exchange_error_semantics.test.js:49:84)"
+      ],
+      "originalCaseLineNumbers": [
+        "49"
+      ],
+      "classification": "FIXTURE_ONLY_NEW_OWNED_ACCEPTED_REFERENCE_WITHOUT_ORDER_CONTEXT",
+      "sourceDecision": "All17 failures are beforeAll ORDER_LINE_REQUIRED at new accepted PH_H2O witness. Declare one legacy NULL line for existing approved owner. Preserve correlation IDs, held/processing exclusion/genuine-empty200, once-only policy scan, every503/Retry-After/redaction alias assertion, snapshot/change routing, and400/404/401. No policyService missing-table catch, scope bypass, journal or runtime changes.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial orders are reachable from caught intake failures; unchanged new-execution preflight refuses zero writes. Current normal intake atomically creates initial order and rolls back failure. Approved runtime orphan remains noneditable/refused and readonly kit nonzeroSTOP for separate forward fix; these are declared NEW historical fixture assemblies, never runtime repair/backfill/relink/amendment step."
+    },
+    {
+      "suite": "exchange_error_semantics.test.js",
+      "test": "Issue #140 Work Package A0: Exchange Eligibility 503 Semantics & Invariants E02 & E05: Baseline Publication Invariants & Genuine Empty E02: Genuine empty query returns 200 OK with empty array (never 503)",
+      "originalFailureSha256": "e69f495afd2fa6fc182ebd6de0626b62c8b77e876c0fd9f33d65de0a2c7e5fbc",
+      "originalObservedHeader": [
+        "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+        "    at Object.resolveOrderLine (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\orderLineResolutionService.js:30:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at insertFixtureExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:28:29)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:83:9",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)",
+        "    at Object.<anonymous> (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\exchange_error_semantics.test.js:49:84)"
+      ],
+      "originalCaseLineNumbers": [
+        "49"
+      ],
+      "classification": "FIXTURE_ONLY_NEW_OWNED_ACCEPTED_REFERENCE_WITHOUT_ORDER_CONTEXT",
+      "sourceDecision": "All17 failures are beforeAll ORDER_LINE_REQUIRED at new accepted PH_H2O witness. Declare one legacy NULL line for existing approved owner. Preserve correlation IDs, held/processing exclusion/genuine-empty200, once-only policy scan, every503/Retry-After/redaction alias assertion, snapshot/change routing, and400/404/401. No policyService missing-table catch, scope bypass, journal or runtime changes.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial orders are reachable from caught intake failures; unchanged new-execution preflight refuses zero writes. Current normal intake atomically creates initial order and rolls back failure. Approved runtime orphan remains noneditable/refused and readonly kit nonzeroSTOP for separate forward fix; these are declared NEW historical fixture assemblies, never runtime repair/backfill/relink/amendment step."
+    },
+    {
+      "suite": "exchange_error_semantics.test.js",
+      "test": "Issue #140 Work Package A0: Exchange Eligibility 503 Semantics & Invariants E03: Single Policy Resolution & Total Coherence buildSampleWhere is called once per getSamples request, avoiding duplicate hold scans",
+      "originalFailureSha256": "e69f495afd2fa6fc182ebd6de0626b62c8b77e876c0fd9f33d65de0a2c7e5fbc",
+      "originalObservedHeader": [
+        "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+        "    at Object.resolveOrderLine (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\orderLineResolutionService.js:30:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at insertFixtureExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:28:29)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:83:9",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)",
+        "    at Object.<anonymous> (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\exchange_error_semantics.test.js:49:84)"
+      ],
+      "originalCaseLineNumbers": [
+        "49"
+      ],
+      "classification": "FIXTURE_ONLY_NEW_OWNED_ACCEPTED_REFERENCE_WITHOUT_ORDER_CONTEXT",
+      "sourceDecision": "All17 failures are beforeAll ORDER_LINE_REQUIRED at new accepted PH_H2O witness. Declare one legacy NULL line for existing approved owner. Preserve correlation IDs, held/processing exclusion/genuine-empty200, once-only policy scan, every503/Retry-After/redaction alias assertion, snapshot/change routing, and400/404/401. No policyService missing-table catch, scope bypass, journal or runtime changes.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial orders are reachable from caught intake failures; unchanged new-execution preflight refuses zero writes. Current normal intake atomically creates initial order and rolls back failure. Approved runtime orphan remains noneditable/refused and readonly kit nonzeroSTOP for separate forward fix; these are declared NEW historical fixture assemblies, never runtime repair/backfill/relink/amendment step."
+    },
+    {
+      "suite": "exchange_error_semantics.test.js",
+      "test": "Issue #140 Work Package A0: Exchange Eligibility 503 Semantics & Invariants E01: Fail-Closed HTTP 503 Error Semantics Across All 4 Aliases & Endpoints 1. All 4 exchange aliases fail-closed with 503, Retry-After: 5, and X-Request-Id on /samples",
+      "originalFailureSha256": "e69f495afd2fa6fc182ebd6de0626b62c8b77e876c0fd9f33d65de0a2c7e5fbc",
+      "originalObservedHeader": [
+        "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+        "    at Object.resolveOrderLine (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\orderLineResolutionService.js:30:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at insertFixtureExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:28:29)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:83:9",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)",
+        "    at Object.<anonymous> (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\exchange_error_semantics.test.js:49:84)"
+      ],
+      "originalCaseLineNumbers": [
+        "49"
+      ],
+      "classification": "FIXTURE_ONLY_NEW_OWNED_ACCEPTED_REFERENCE_WITHOUT_ORDER_CONTEXT",
+      "sourceDecision": "All17 failures are beforeAll ORDER_LINE_REQUIRED at new accepted PH_H2O witness. Declare one legacy NULL line for existing approved owner. Preserve correlation IDs, held/processing exclusion/genuine-empty200, once-only policy scan, every503/Retry-After/redaction alias assertion, snapshot/change routing, and400/404/401. No policyService missing-table catch, scope bypass, journal or runtime changes.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial orders are reachable from caught intake failures; unchanged new-execution preflight refuses zero writes. Current normal intake atomically creates initial order and rolls back failure. Approved runtime orphan remains noneditable/refused and readonly kit nonzeroSTOP for separate forward fix; these are declared NEW historical fixture assemblies, never runtime repair/backfill/relink/amendment step."
+    },
+    {
+      "suite": "exchange_error_semantics.test.js",
+      "test": "Issue #140 Work Package A0: Exchange Eligibility 503 Semantics & Invariants E01: Fail-Closed HTTP 503 Error Semantics Across All 4 Aliases & Endpoints 2. Single sample detail endpoints fail-closed with 503",
+      "originalFailureSha256": "e69f495afd2fa6fc182ebd6de0626b62c8b77e876c0fd9f33d65de0a2c7e5fbc",
+      "originalObservedHeader": [
+        "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+        "    at Object.resolveOrderLine (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\orderLineResolutionService.js:30:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at insertFixtureExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:28:29)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:83:9",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)",
+        "    at Object.<anonymous> (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\exchange_error_semantics.test.js:49:84)"
+      ],
+      "originalCaseLineNumbers": [
+        "49"
+      ],
+      "classification": "FIXTURE_ONLY_NEW_OWNED_ACCEPTED_REFERENCE_WITHOUT_ORDER_CONTEXT",
+      "sourceDecision": "All17 failures are beforeAll ORDER_LINE_REQUIRED at new accepted PH_H2O witness. Declare one legacy NULL line for existing approved owner. Preserve correlation IDs, held/processing exclusion/genuine-empty200, once-only policy scan, every503/Retry-After/redaction alias assertion, snapshot/change routing, and400/404/401. No policyService missing-table catch, scope bypass, journal or runtime changes.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial orders are reachable from caught intake failures; unchanged new-execution preflight refuses zero writes. Current normal intake atomically creates initial order and rolls back failure. Approved runtime orphan remains noneditable/refused and readonly kit nonzeroSTOP for separate forward fix; these are declared NEW historical fixture assemblies, never runtime repair/backfill/relink/amendment step."
+    },
+    {
+      "suite": "exchange_error_semantics.test.js",
+      "test": "Issue #140 Work Package A0: Exchange Eligibility 503 Semantics & Invariants E01: Fail-Closed HTTP 503 Error Semantics Across All 4 Aliases & Endpoints 3. GeoJSON endpoints fail-closed with 503",
+      "originalFailureSha256": "e69f495afd2fa6fc182ebd6de0626b62c8b77e876c0fd9f33d65de0a2c7e5fbc",
+      "originalObservedHeader": [
+        "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+        "    at Object.resolveOrderLine (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\orderLineResolutionService.js:30:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at insertFixtureExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:28:29)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:83:9",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)",
+        "    at Object.<anonymous> (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\exchange_error_semantics.test.js:49:84)"
+      ],
+      "originalCaseLineNumbers": [
+        "49"
+      ],
+      "classification": "FIXTURE_ONLY_NEW_OWNED_ACCEPTED_REFERENCE_WITHOUT_ORDER_CONTEXT",
+      "sourceDecision": "All17 failures are beforeAll ORDER_LINE_REQUIRED at new accepted PH_H2O witness. Declare one legacy NULL line for existing approved owner. Preserve correlation IDs, held/processing exclusion/genuine-empty200, once-only policy scan, every503/Retry-After/redaction alias assertion, snapshot/change routing, and400/404/401. No policyService missing-table catch, scope bypass, journal or runtime changes.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial orders are reachable from caught intake failures; unchanged new-execution preflight refuses zero writes. Current normal intake atomically creates initial order and rolls back failure. Approved runtime orphan remains noneditable/refused and readonly kit nonzeroSTOP for separate forward fix; these are declared NEW historical fixture assemblies, never runtime repair/backfill/relink/amendment step."
+    },
+    {
+      "suite": "exchange_error_semantics.test.js",
+      "test": "Issue #140 Work Package A0: Exchange Eligibility 503 Semantics & Invariants E01: Fail-Closed HTTP 503 Error Semantics Across All 4 Aliases & Endpoints 4. V1 Results matrix fails-closed with 503",
+      "originalFailureSha256": "e69f495afd2fa6fc182ebd6de0626b62c8b77e876c0fd9f33d65de0a2c7e5fbc",
+      "originalObservedHeader": [
+        "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+        "    at Object.resolveOrderLine (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\orderLineResolutionService.js:30:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at insertFixtureExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:28:29)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:83:9",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)",
+        "    at Object.<anonymous> (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\exchange_error_semantics.test.js:49:84)"
+      ],
+      "originalCaseLineNumbers": [
+        "49"
+      ],
+      "classification": "FIXTURE_ONLY_NEW_OWNED_ACCEPTED_REFERENCE_WITHOUT_ORDER_CONTEXT",
+      "sourceDecision": "All17 failures are beforeAll ORDER_LINE_REQUIRED at new accepted PH_H2O witness. Declare one legacy NULL line for existing approved owner. Preserve correlation IDs, held/processing exclusion/genuine-empty200, once-only policy scan, every503/Retry-After/redaction alias assertion, snapshot/change routing, and400/404/401. No policyService missing-table catch, scope bypass, journal or runtime changes.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial orders are reachable from caught intake failures; unchanged new-execution preflight refuses zero writes. Current normal intake atomically creates initial order and rolls back failure. Approved runtime orphan remains noneditable/refused and readonly kit nonzeroSTOP for separate forward fix; these are declared NEW historical fixture assemblies, never runtime repair/backfill/relink/amendment step."
+    },
+    {
+      "suite": "exchange_error_semantics.test.js",
+      "test": "Issue #140 Work Package A0: Exchange Eligibility 503 Semantics & Invariants E01: Fail-Closed HTTP 503 Error Semantics Across All 4 Aliases & Endpoints 5. V2 Observations endpoint fails-closed with 503",
+      "originalFailureSha256": "e69f495afd2fa6fc182ebd6de0626b62c8b77e876c0fd9f33d65de0a2c7e5fbc",
+      "originalObservedHeader": [
+        "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+        "    at Object.resolveOrderLine (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\orderLineResolutionService.js:30:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at insertFixtureExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:28:29)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:83:9",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)",
+        "    at Object.<anonymous> (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\exchange_error_semantics.test.js:49:84)"
+      ],
+      "originalCaseLineNumbers": [
+        "49"
+      ],
+      "classification": "FIXTURE_ONLY_NEW_OWNED_ACCEPTED_REFERENCE_WITHOUT_ORDER_CONTEXT",
+      "sourceDecision": "All17 failures are beforeAll ORDER_LINE_REQUIRED at new accepted PH_H2O witness. Declare one legacy NULL line for existing approved owner. Preserve correlation IDs, held/processing exclusion/genuine-empty200, once-only policy scan, every503/Retry-After/redaction alias assertion, snapshot/change routing, and400/404/401. No policyService missing-table catch, scope bypass, journal or runtime changes.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial orders are reachable from caught intake failures; unchanged new-execution preflight refuses zero writes. Current normal intake atomically creates initial order and rolls back failure. Approved runtime orphan remains noneditable/refused and readonly kit nonzeroSTOP for separate forward fix; these are declared NEW historical fixture assemblies, never runtime repair/backfill/relink/amendment step."
+    },
+    {
+      "suite": "exchange_error_semantics.test.js",
+      "test": "Issue #140 Work Package A0: Exchange Eligibility 503 Semantics & Invariants E01: Fail-Closed HTTP 503 Error Semantics Across All 4 Aliases & Endpoints 6. Spectra endpoints fail-closed with 503",
+      "originalFailureSha256": "e69f495afd2fa6fc182ebd6de0626b62c8b77e876c0fd9f33d65de0a2c7e5fbc",
+      "originalObservedHeader": [
+        "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+        "    at Object.resolveOrderLine (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\orderLineResolutionService.js:30:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at insertFixtureExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:28:29)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:83:9",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)",
+        "    at Object.<anonymous> (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\exchange_error_semantics.test.js:49:84)"
+      ],
+      "originalCaseLineNumbers": [
+        "49"
+      ],
+      "classification": "FIXTURE_ONLY_NEW_OWNED_ACCEPTED_REFERENCE_WITHOUT_ORDER_CONTEXT",
+      "sourceDecision": "All17 failures are beforeAll ORDER_LINE_REQUIRED at new accepted PH_H2O witness. Declare one legacy NULL line for existing approved owner. Preserve correlation IDs, held/processing exclusion/genuine-empty200, once-only policy scan, every503/Retry-After/redaction alias assertion, snapshot/change routing, and400/404/401. No policyService missing-table catch, scope bypass, journal or runtime changes.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial orders are reachable from caught intake failures; unchanged new-execution preflight refuses zero writes. Current normal intake atomically creates initial order and rolls back failure. Approved runtime orphan remains noneditable/refused and readonly kit nonzeroSTOP for separate forward fix; these are declared NEW historical fixture assemblies, never runtime repair/backfill/relink/amendment step."
+    },
+    {
+      "suite": "exchange_error_semantics.test.js",
+      "test": "Issue #140 Work Package A0: Exchange Eligibility 503 Semantics & Invariants E01: Fail-Closed HTTP 503 Error Semantics Across All 4 Aliases & Endpoints 7. V1 Sync endpoint fails-closed with 503",
+      "originalFailureSha256": "e69f495afd2fa6fc182ebd6de0626b62c8b77e876c0fd9f33d65de0a2c7e5fbc",
+      "originalObservedHeader": [
+        "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+        "    at Object.resolveOrderLine (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\orderLineResolutionService.js:30:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at insertFixtureExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:28:29)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:83:9",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)",
+        "    at Object.<anonymous> (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\exchange_error_semantics.test.js:49:84)"
+      ],
+      "originalCaseLineNumbers": [
+        "49"
+      ],
+      "classification": "FIXTURE_ONLY_NEW_OWNED_ACCEPTED_REFERENCE_WITHOUT_ORDER_CONTEXT",
+      "sourceDecision": "All17 failures are beforeAll ORDER_LINE_REQUIRED at new accepted PH_H2O witness. Declare one legacy NULL line for existing approved owner. Preserve correlation IDs, held/processing exclusion/genuine-empty200, once-only policy scan, every503/Retry-After/redaction alias assertion, snapshot/change routing, and400/404/401. No policyService missing-table catch, scope bypass, journal or runtime changes.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial orders are reachable from caught intake failures; unchanged new-execution preflight refuses zero writes. Current normal intake atomically creates initial order and rolls back failure. Approved runtime orphan remains noneditable/refused and readonly kit nonzeroSTOP for separate forward fix; these are declared NEW historical fixture assemblies, never runtime repair/backfill/relink/amendment step."
+    },
+    {
+      "suite": "exchange_error_semantics.test.js",
+      "test": "Issue #140 Work Package A0: Exchange Eligibility 503 Semantics & Invariants E01: Fail-Closed HTTP 503 Error Semantics Across All 4 Aliases & Endpoints 8. Stats endpoints fail-closed with 503",
+      "originalFailureSha256": "e69f495afd2fa6fc182ebd6de0626b62c8b77e876c0fd9f33d65de0a2c7e5fbc",
+      "originalObservedHeader": [
+        "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+        "    at Object.resolveOrderLine (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\orderLineResolutionService.js:30:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at insertFixtureExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:28:29)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:83:9",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)",
+        "    at Object.<anonymous> (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\exchange_error_semantics.test.js:49:84)"
+      ],
+      "originalCaseLineNumbers": [
+        "49"
+      ],
+      "classification": "FIXTURE_ONLY_NEW_OWNED_ACCEPTED_REFERENCE_WITHOUT_ORDER_CONTEXT",
+      "sourceDecision": "All17 failures are beforeAll ORDER_LINE_REQUIRED at new accepted PH_H2O witness. Declare one legacy NULL line for existing approved owner. Preserve correlation IDs, held/processing exclusion/genuine-empty200, once-only policy scan, every503/Retry-After/redaction alias assertion, snapshot/change routing, and400/404/401. No policyService missing-table catch, scope bypass, journal or runtime changes.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial orders are reachable from caught intake failures; unchanged new-execution preflight refuses zero writes. Current normal intake atomically creates initial order and rolls back failure. Approved runtime orphan remains noneditable/refused and readonly kit nonzeroSTOP for separate forward fix; these are declared NEW historical fixture assemblies, never runtime repair/backfill/relink/amendment step."
+    },
+    {
+      "suite": "exchange_error_semantics.test.js",
+      "test": "Issue #140 Work Package A0: Exchange Eligibility 503 Semantics & Invariants E01: Fail-Closed HTTP 503 Error Semantics Across All 4 Aliases & Endpoints 9. Snapshot and changes error routing through handleExchangeError with 503",
+      "originalFailureSha256": "e69f495afd2fa6fc182ebd6de0626b62c8b77e876c0fd9f33d65de0a2c7e5fbc",
+      "originalObservedHeader": [
+        "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+        "    at Object.resolveOrderLine (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\orderLineResolutionService.js:30:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at insertFixtureExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:28:29)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:83:9",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)",
+        "    at Object.<anonymous> (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\exchange_error_semantics.test.js:49:84)"
+      ],
+      "originalCaseLineNumbers": [
+        "49"
+      ],
+      "classification": "FIXTURE_ONLY_NEW_OWNED_ACCEPTED_REFERENCE_WITHOUT_ORDER_CONTEXT",
+      "sourceDecision": "All17 failures are beforeAll ORDER_LINE_REQUIRED at new accepted PH_H2O witness. Declare one legacy NULL line for existing approved owner. Preserve correlation IDs, held/processing exclusion/genuine-empty200, once-only policy scan, every503/Retry-After/redaction alias assertion, snapshot/change routing, and400/404/401. No policyService missing-table catch, scope bypass, journal or runtime changes.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial orders are reachable from caught intake failures; unchanged new-execution preflight refuses zero writes. Current normal intake atomically creates initial order and rolls back failure. Approved runtime orphan remains noneditable/refused and readonly kit nonzeroSTOP for separate forward fix; these are declared NEW historical fixture assemblies, never runtime repair/backfill/relink/amendment step."
+    },
+    {
+      "suite": "exchange_error_semantics.test.js",
+      "test": "Issue #140 Work Package A0: Exchange Eligibility 503 Semantics & Invariants Client Error (4xx) Preservation Preserves 400 Bad Request on invalid parameter without converting to 503",
+      "originalFailureSha256": "e69f495afd2fa6fc182ebd6de0626b62c8b77e876c0fd9f33d65de0a2c7e5fbc",
+      "originalObservedHeader": [
+        "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+        "    at Object.resolveOrderLine (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\orderLineResolutionService.js:30:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at insertFixtureExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:28:29)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:83:9",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)",
+        "    at Object.<anonymous> (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\exchange_error_semantics.test.js:49:84)"
+      ],
+      "originalCaseLineNumbers": [
+        "49"
+      ],
+      "classification": "FIXTURE_ONLY_NEW_OWNED_ACCEPTED_REFERENCE_WITHOUT_ORDER_CONTEXT",
+      "sourceDecision": "All17 failures are beforeAll ORDER_LINE_REQUIRED at new accepted PH_H2O witness. Declare one legacy NULL line for existing approved owner. Preserve correlation IDs, held/processing exclusion/genuine-empty200, once-only policy scan, every503/Retry-After/redaction alias assertion, snapshot/change routing, and400/404/401. No policyService missing-table catch, scope bypass, journal or runtime changes.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial orders are reachable from caught intake failures; unchanged new-execution preflight refuses zero writes. Current normal intake atomically creates initial order and rolls back failure. Approved runtime orphan remains noneditable/refused and readonly kit nonzeroSTOP for separate forward fix; these are declared NEW historical fixture assemblies, never runtime repair/backfill/relink/amendment step."
+    },
+    {
+      "suite": "exchange_error_semantics.test.js",
+      "test": "Issue #140 Work Package A0: Exchange Eligibility 503 Semantics & Invariants Client Error (4xx) Preservation Preserves 404 Not Found on non-existent specimen without converting to 503",
+      "originalFailureSha256": "e69f495afd2fa6fc182ebd6de0626b62c8b77e876c0fd9f33d65de0a2c7e5fbc",
+      "originalObservedHeader": [
+        "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+        "    at Object.resolveOrderLine (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\orderLineResolutionService.js:30:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at insertFixtureExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:28:29)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:83:9",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)",
+        "    at Object.<anonymous> (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\exchange_error_semantics.test.js:49:84)"
+      ],
+      "originalCaseLineNumbers": [
+        "49"
+      ],
+      "classification": "FIXTURE_ONLY_NEW_OWNED_ACCEPTED_REFERENCE_WITHOUT_ORDER_CONTEXT",
+      "sourceDecision": "All17 failures are beforeAll ORDER_LINE_REQUIRED at new accepted PH_H2O witness. Declare one legacy NULL line for existing approved owner. Preserve correlation IDs, held/processing exclusion/genuine-empty200, once-only policy scan, every503/Retry-After/redaction alias assertion, snapshot/change routing, and400/404/401. No policyService missing-table catch, scope bypass, journal or runtime changes.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial orders are reachable from caught intake failures; unchanged new-execution preflight refuses zero writes. Current normal intake atomically creates initial order and rolls back failure. Approved runtime orphan remains noneditable/refused and readonly kit nonzeroSTOP for separate forward fix; these are declared NEW historical fixture assemblies, never runtime repair/backfill/relink/amendment step."
+    },
+    {
+      "suite": "exchange_error_semantics.test.js",
+      "test": "Issue #140 Work Package A0: Exchange Eligibility 503 Semantics & Invariants Client Error (4xx) Preservation Preserves 401 Unauthorized on invalid API key token",
+      "originalFailureSha256": "e69f495afd2fa6fc182ebd6de0626b62c8b77e876c0fd9f33d65de0a2c7e5fbc",
+      "originalObservedHeader": [
+        "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+        "    at Object.resolveOrderLine (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\orderLineResolutionService.js:30:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at insertFixtureExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:28:29)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:83:9",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)",
+        "    at Object.<anonymous> (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\exchange_error_semantics.test.js:49:84)"
+      ],
+      "originalCaseLineNumbers": [
+        "49"
+      ],
+      "classification": "FIXTURE_ONLY_NEW_OWNED_ACCEPTED_REFERENCE_WITHOUT_ORDER_CONTEXT",
+      "sourceDecision": "All17 failures are beforeAll ORDER_LINE_REQUIRED at new accepted PH_H2O witness. Declare one legacy NULL line for existing approved owner. Preserve correlation IDs, held/processing exclusion/genuine-empty200, once-only policy scan, every503/Retry-After/redaction alias assertion, snapshot/change routing, and400/404/401. No policyService missing-table catch, scope bypass, journal or runtime changes.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial orders are reachable from caught intake failures; unchanged new-execution preflight refuses zero writes. Current normal intake atomically creates initial order and rolls back failure. Approved runtime orphan remains noneditable/refused and readonly kit nonzeroSTOP for separate forward fix; these are declared NEW historical fixture assemblies, never runtime repair/backfill/relink/amendment step."
+    },
+    {
+      "suite": "export_normalization.test.js",
+      "test": "WP-22: Dual Export Paths (As-Measured & Normalized Controlled Units) 1. Export controller emits dual columns (soc_as_measured, soc_unit, soc_normalized, soc_controlled_unit)",
+      "originalFailureSha256": "e00ee51751327ae00c28bf8dc96b4d61e1fae753b40bcaedbbe460784deadb03",
+      "originalObservedHeader": [
+        "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+        "    at Object.resolveOrderLine (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\orderLineResolutionService.js:30:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at insertFixtureExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:28:29)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:83:9",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)",
+        "    at Object.<anonymous> (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\export_normalization.test.js:41:9)"
+      ],
+      "originalCaseLineNumbers": [
+        "41"
+      ],
+      "classification": "FIXTURE_ONLY_NEW_OWNED_ACCEPTED_REFERENCE_WITHOUT_ORDER_CONTEXT",
+      "sourceDecision": "Both fail at new accepted SOC witness order preflight. Declare one legacy NULL SOC line on its existing owner; no extra methodology or unit inference. Preserve literal1.8percent,18g/kg normalization, headline1.8, both export routes/authoritative stored specimen lab scopes and reviewed selection.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial orders are reachable from caught intake failures; unchanged new-execution preflight refuses zero writes. Current normal intake atomically creates initial order and rolls back failure. Approved runtime orphan remains noneditable/refused and readonly kit nonzeroSTOP for separate forward fix; these are declared NEW historical fixture assemblies, never runtime repair/backfill/relink/amendment step."
+    },
+    {
+      "suite": "export_normalization.test.js",
+      "test": "WP-22: Dual Export Paths (As-Measured & Normalized Controlled Units) 2. SIS GeoJSON export emits dual columns in flat properties",
+      "originalFailureSha256": "e00ee51751327ae00c28bf8dc96b4d61e1fae753b40bcaedbbe460784deadb03",
+      "originalObservedHeader": [
+        "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+        "    at Object.resolveOrderLine (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\orderLineResolutionService.js:30:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at insertFixtureExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:28:29)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:83:9",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)",
+        "    at Object.<anonymous> (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\export_normalization.test.js:41:9)"
+      ],
+      "originalCaseLineNumbers": [
+        "41"
+      ],
+      "classification": "FIXTURE_ONLY_NEW_OWNED_ACCEPTED_REFERENCE_WITHOUT_ORDER_CONTEXT",
+      "sourceDecision": "Both fail at new accepted SOC witness order preflight. Declare one legacy NULL SOC line on its existing owner; no extra methodology or unit inference. Preserve literal1.8percent,18g/kg normalization, headline1.8, both export routes/authoritative stored specimen lab scopes and reviewed selection.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial orders are reachable from caught intake failures; unchanged new-execution preflight refuses zero writes. Current normal intake atomically creates initial order and rolls back failure. Approved runtime orphan remains noneditable/refused and readonly kit nonzeroSTOP for separate forward fix; these are declared NEW historical fixture assemblies, never runtime repair/backfill/relink/amendment step."
+    },
+    {
+      "suite": "nsis_v2_exchange.test.js",
+      "test": "Issue #140 Work Packages P3 & P4: V2 Data Exchange API Contracts 1. GET /api/v2/data-exchange/capabilities advertises supported contracts & features",
+      "originalFailureSha256": "10c62164bfe648dd9f9e7333dc0882d3c6a9ff272263a340ab8946c1cdf4a69d",
+      "originalObservedHeader": [
+        "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+        "    at Object.resolveOrderLine (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\orderLineResolutionService.js:30:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at insertFixtureExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:28:29)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:178:9",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)",
+        "    at Object.<anonymous> (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\nsis_v2_exchange.test.js:46:9)"
+      ],
+      "originalCaseLineNumbers": [
+        "46"
+      ],
+      "classification": "FIXTURE_ONLY_NEW_OWNED_ACCEPTED_REFERENCE_WITHOUT_ORDER_CONTEXT",
+      "sourceDecision": "All9 fail beforeAll at new accepted two-replica execution, ORDER_LINE_REQUIRED. Declare one legacy NULL PH_H2O line on existing sample1 owner before original single accepted attempt. Keep original two values6.4/6.5/replicate1/2 and one-attempt assertions; profile/accession metadata, strict exclusion, lossless observations, RFC7946, snapshot/highwater/change cursor/receipt retry/conflict/no sample mutation/keyset cached total unchanged. No order/owner/value added for no-lab or pagination samples.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial orders are reachable from caught intake failures; unchanged new-execution preflight refuses zero writes. Current normal intake atomically creates initial order and rolls back failure. Approved runtime orphan remains noneditable/refused and readonly kit nonzeroSTOP for separate forward fix; these are declared NEW historical fixture assemblies, never runtime repair/backfill/relink/amendment step."
+    },
+    {
+      "suite": "nsis_v2_exchange.test.js",
+      "test": "Issue #140 Work Packages P3 & P4: V2 Data Exchange API Contracts 2. GET /api/v2/data-exchange/samples returns structured V2 envelope and items",
+      "originalFailureSha256": "10c62164bfe648dd9f9e7333dc0882d3c6a9ff272263a340ab8946c1cdf4a69d",
+      "originalObservedHeader": [
+        "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+        "    at Object.resolveOrderLine (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\orderLineResolutionService.js:30:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at insertFixtureExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:28:29)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:178:9",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)",
+        "    at Object.<anonymous> (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\nsis_v2_exchange.test.js:46:9)"
+      ],
+      "originalCaseLineNumbers": [
+        "46"
+      ],
+      "classification": "FIXTURE_ONLY_NEW_OWNED_ACCEPTED_REFERENCE_WITHOUT_ORDER_CONTEXT",
+      "sourceDecision": "All9 fail beforeAll at new accepted two-replica execution, ORDER_LINE_REQUIRED. Declare one legacy NULL PH_H2O line on existing sample1 owner before original single accepted attempt. Keep original two values6.4/6.5/replicate1/2 and one-attempt assertions; profile/accession metadata, strict exclusion, lossless observations, RFC7946, snapshot/highwater/change cursor/receipt retry/conflict/no sample mutation/keyset cached total unchanged. No order/owner/value added for no-lab or pagination samples.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial orders are reachable from caught intake failures; unchanged new-execution preflight refuses zero writes. Current normal intake atomically creates initial order and rolls back failure. Approved runtime orphan remains noneditable/refused and readonly kit nonzeroSTOP for separate forward fix; these are declared NEW historical fixture assemblies, never runtime repair/backfill/relink/amendment step."
+    },
+    {
+      "suite": "nsis_v2_exchange.test.js",
+      "test": "Issue #140 Work Packages P3 & P4: V2 Data Exchange API Contracts 3. Strict OpenNSIS Profile (?profile=opennsis) excludes specimens missing lab accession",
+      "originalFailureSha256": "10c62164bfe648dd9f9e7333dc0882d3c6a9ff272263a340ab8946c1cdf4a69d",
+      "originalObservedHeader": [
+        "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+        "    at Object.resolveOrderLine (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\orderLineResolutionService.js:30:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at insertFixtureExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:28:29)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:178:9",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)",
+        "    at Object.<anonymous> (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\nsis_v2_exchange.test.js:46:9)"
+      ],
+      "originalCaseLineNumbers": [
+        "46"
+      ],
+      "classification": "FIXTURE_ONLY_NEW_OWNED_ACCEPTED_REFERENCE_WITHOUT_ORDER_CONTEXT",
+      "sourceDecision": "All9 fail beforeAll at new accepted two-replica execution, ORDER_LINE_REQUIRED. Declare one legacy NULL PH_H2O line on existing sample1 owner before original single accepted attempt. Keep original two values6.4/6.5/replicate1/2 and one-attempt assertions; profile/accession metadata, strict exclusion, lossless observations, RFC7946, snapshot/highwater/change cursor/receipt retry/conflict/no sample mutation/keyset cached total unchanged. No order/owner/value added for no-lab or pagination samples.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial orders are reachable from caught intake failures; unchanged new-execution preflight refuses zero writes. Current normal intake atomically creates initial order and rolls back failure. Approved runtime orphan remains noneditable/refused and readonly kit nonzeroSTOP for separate forward fix; these are declared NEW historical fixture assemblies, never runtime repair/backfill/relink/amendment step."
+    },
+    {
+      "suite": "nsis_v2_exchange.test.js",
+      "test": "Issue #140 Work Packages P3 & P4: V2 Data Exchange API Contracts 4. GET /api/v2/data-exchange/observations preserves all replicate determinations",
+      "originalFailureSha256": "10c62164bfe648dd9f9e7333dc0882d3c6a9ff272263a340ab8946c1cdf4a69d",
+      "originalObservedHeader": [
+        "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+        "    at Object.resolveOrderLine (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\orderLineResolutionService.js:30:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at insertFixtureExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:28:29)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:178:9",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)",
+        "    at Object.<anonymous> (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\nsis_v2_exchange.test.js:46:9)"
+      ],
+      "originalCaseLineNumbers": [
+        "46"
+      ],
+      "classification": "FIXTURE_ONLY_NEW_OWNED_ACCEPTED_REFERENCE_WITHOUT_ORDER_CONTEXT",
+      "sourceDecision": "All9 fail beforeAll at new accepted two-replica execution, ORDER_LINE_REQUIRED. Declare one legacy NULL PH_H2O line on existing sample1 owner before original single accepted attempt. Keep original two values6.4/6.5/replicate1/2 and one-attempt assertions; profile/accession metadata, strict exclusion, lossless observations, RFC7946, snapshot/highwater/change cursor/receipt retry/conflict/no sample mutation/keyset cached total unchanged. No order/owner/value added for no-lab or pagination samples.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial orders are reachable from caught intake failures; unchanged new-execution preflight refuses zero writes. Current normal intake atomically creates initial order and rolls back failure. Approved runtime orphan remains noneditable/refused and readonly kit nonzeroSTOP for separate forward fix; these are declared NEW historical fixture assemblies, never runtime repair/backfill/relink/amendment step."
+    },
+    {
+      "suite": "nsis_v2_exchange.test.js",
+      "test": "Issue #140 Work Packages P3 & P4: V2 Data Exchange API Contracts 5. GET /api/v2/data-exchange/geojson complies with RFC 7946 (no obsolete crs member)",
+      "originalFailureSha256": "10c62164bfe648dd9f9e7333dc0882d3c6a9ff272263a340ab8946c1cdf4a69d",
+      "originalObservedHeader": [
+        "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+        "    at Object.resolveOrderLine (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\orderLineResolutionService.js:30:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at insertFixtureExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:28:29)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:178:9",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)",
+        "    at Object.<anonymous> (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\nsis_v2_exchange.test.js:46:9)"
+      ],
+      "originalCaseLineNumbers": [
+        "46"
+      ],
+      "classification": "FIXTURE_ONLY_NEW_OWNED_ACCEPTED_REFERENCE_WITHOUT_ORDER_CONTEXT",
+      "sourceDecision": "All9 fail beforeAll at new accepted two-replica execution, ORDER_LINE_REQUIRED. Declare one legacy NULL PH_H2O line on existing sample1 owner before original single accepted attempt. Keep original two values6.4/6.5/replicate1/2 and one-attempt assertions; profile/accession metadata, strict exclusion, lossless observations, RFC7946, snapshot/highwater/change cursor/receipt retry/conflict/no sample mutation/keyset cached total unchanged. No order/owner/value added for no-lab or pagination samples.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial orders are reachable from caught intake failures; unchanged new-execution preflight refuses zero writes. Current normal intake atomically creates initial order and rolls back failure. Approved runtime orphan remains noneditable/refused and readonly kit nonzeroSTOP for separate forward fix; these are declared NEW historical fixture assemblies, never runtime repair/backfill/relink/amendment step."
+    },
+    {
+      "suite": "nsis_v2_exchange.test.js",
+      "test": "Issue #140 Work Packages P3 & P4: V2 Data Exchange API Contracts 6. POST /api/v2/data-exchange/snapshots creates bounded snapshot and reads pages",
+      "originalFailureSha256": "10c62164bfe648dd9f9e7333dc0882d3c6a9ff272263a340ab8946c1cdf4a69d",
+      "originalObservedHeader": [
+        "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+        "    at Object.resolveOrderLine (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\orderLineResolutionService.js:30:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at insertFixtureExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:28:29)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:178:9",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)",
+        "    at Object.<anonymous> (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\nsis_v2_exchange.test.js:46:9)"
+      ],
+      "originalCaseLineNumbers": [
+        "46"
+      ],
+      "classification": "FIXTURE_ONLY_NEW_OWNED_ACCEPTED_REFERENCE_WITHOUT_ORDER_CONTEXT",
+      "sourceDecision": "All9 fail beforeAll at new accepted two-replica execution, ORDER_LINE_REQUIRED. Declare one legacy NULL PH_H2O line on existing sample1 owner before original single accepted attempt. Keep original two values6.4/6.5/replicate1/2 and one-attempt assertions; profile/accession metadata, strict exclusion, lossless observations, RFC7946, snapshot/highwater/change cursor/receipt retry/conflict/no sample mutation/keyset cached total unchanged. No order/owner/value added for no-lab or pagination samples.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial orders are reachable from caught intake failures; unchanged new-execution preflight refuses zero writes. Current normal intake atomically creates initial order and rolls back failure. Approved runtime orphan remains noneditable/refused and readonly kit nonzeroSTOP for separate forward fix; these are declared NEW historical fixture assemblies, never runtime repair/backfill/relink/amendment step."
+    },
+    {
+      "suite": "nsis_v2_exchange.test.js",
+      "test": "Issue #140 Work Packages P3 & P4: V2 Data Exchange API Contracts 7. Continuous synchronization change feed returns changes with cursor",
+      "originalFailureSha256": "10c62164bfe648dd9f9e7333dc0882d3c6a9ff272263a340ab8946c1cdf4a69d",
+      "originalObservedHeader": [
+        "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+        "    at Object.resolveOrderLine (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\orderLineResolutionService.js:30:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at insertFixtureExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:28:29)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:178:9",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)",
+        "    at Object.<anonymous> (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\nsis_v2_exchange.test.js:46:9)"
+      ],
+      "originalCaseLineNumbers": [
+        "46"
+      ],
+      "classification": "FIXTURE_ONLY_NEW_OWNED_ACCEPTED_REFERENCE_WITHOUT_ORDER_CONTEXT",
+      "sourceDecision": "All9 fail beforeAll at new accepted two-replica execution, ORDER_LINE_REQUIRED. Declare one legacy NULL PH_H2O line on existing sample1 owner before original single accepted attempt. Keep original two values6.4/6.5/replicate1/2 and one-attempt assertions; profile/accession metadata, strict exclusion, lossless observations, RFC7946, snapshot/highwater/change cursor/receipt retry/conflict/no sample mutation/keyset cached total unchanged. No order/owner/value added for no-lab or pagination samples.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial orders are reachable from caught intake failures; unchanged new-execution preflight refuses zero writes. Current normal intake atomically creates initial order and rolls back failure. Approved runtime orphan remains noneditable/refused and readonly kit nonzeroSTOP for separate forward fix; these are declared NEW historical fixture assemblies, never runtime repair/backfill/relink/amendment step."
+    },
+    {
+      "suite": "nsis_v2_exchange.test.js",
+      "test": "Issue #140 Work Packages P3 & P4: V2 Data Exchange API Contracts 8. POST /api/v2/data-exchange/receipts logs delivery receipt without mutating DB samples",
+      "originalFailureSha256": "10c62164bfe648dd9f9e7333dc0882d3c6a9ff272263a340ab8946c1cdf4a69d",
+      "originalObservedHeader": [
+        "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+        "    at Object.resolveOrderLine (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\orderLineResolutionService.js:30:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at insertFixtureExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:28:29)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:178:9",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)",
+        "    at Object.<anonymous> (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\nsis_v2_exchange.test.js:46:9)"
+      ],
+      "originalCaseLineNumbers": [
+        "46"
+      ],
+      "classification": "FIXTURE_ONLY_NEW_OWNED_ACCEPTED_REFERENCE_WITHOUT_ORDER_CONTEXT",
+      "sourceDecision": "All9 fail beforeAll at new accepted two-replica execution, ORDER_LINE_REQUIRED. Declare one legacy NULL PH_H2O line on existing sample1 owner before original single accepted attempt. Keep original two values6.4/6.5/replicate1/2 and one-attempt assertions; profile/accession metadata, strict exclusion, lossless observations, RFC7946, snapshot/highwater/change cursor/receipt retry/conflict/no sample mutation/keyset cached total unchanged. No order/owner/value added for no-lab or pagination samples.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial orders are reachable from caught intake failures; unchanged new-execution preflight refuses zero writes. Current normal intake atomically creates initial order and rolls back failure. Approved runtime orphan remains noneditable/refused and readonly kit nonzeroSTOP for separate forward fix; these are declared NEW historical fixture assemblies, never runtime repair/backfill/relink/amendment step."
+    },
+    {
+      "suite": "nsis_v2_exchange.test.js",
+      "test": "Issue #140 Work Packages P3 & P4: V2 Data Exchange API Contracts 9. GET /api/v2/data-exchange/geojson keyset seek and cachedTotal pagination contract",
+      "originalFailureSha256": "10c62164bfe648dd9f9e7333dc0882d3c6a9ff272263a340ab8946c1cdf4a69d",
+      "originalObservedHeader": [
+        "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+        "    at Object.resolveOrderLine (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\orderLineResolutionService.js:30:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at insertFixtureExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:28:29)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:178:9",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)",
+        "    at Object.<anonymous> (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\nsis_v2_exchange.test.js:46:9)"
+      ],
+      "originalCaseLineNumbers": [
+        "46"
+      ],
+      "classification": "FIXTURE_ONLY_NEW_OWNED_ACCEPTED_REFERENCE_WITHOUT_ORDER_CONTEXT",
+      "sourceDecision": "All9 fail beforeAll at new accepted two-replica execution, ORDER_LINE_REQUIRED. Declare one legacy NULL PH_H2O line on existing sample1 owner before original single accepted attempt. Keep original two values6.4/6.5/replicate1/2 and one-attempt assertions; profile/accession metadata, strict exclusion, lossless observations, RFC7946, snapshot/highwater/change cursor/receipt retry/conflict/no sample mutation/keyset cached total unchanged. No order/owner/value added for no-lab or pagination samples.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial orders are reachable from caught intake failures; unchanged new-execution preflight refuses zero writes. Current normal intake atomically creates initial order and rolls back failure. Approved runtime orphan remains noneditable/refused and readonly kit nonzeroSTOP for separate forward fix; these are declared NEW historical fixture assemblies, never runtime repair/backfill/relink/amendment step."
+    },
+    {
+      "suite": "spectral_stage_e.test.js",
+      "test": "Spectral Library Stage E: Turn the Endpoint into a Contract (SL-22 to SL-26) SL-22: Scoped API key can only read its authorized laboratory spectra; absent scope is denied",
+      "originalFailureSha256": "15ed3cb53e9aff30d7834812665d86964cdd6a180e6d60bc1cf262fbfcc85a3d",
+      "originalObservedHeader": [
+        "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+        "    at Object.resolveOrderLine (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\orderLineResolutionService.js:30:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at insertFixtureExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:28:29)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:83:9",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)",
+        "    at Object.<anonymous> (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\spectral_stage_e.test.js:102:27)"
+      ],
+      "originalCaseLineNumbers": [
+        "102"
+      ],
+      "classification": "FIXTURE_ONLY_NEW_OWNED_ACCEPTED_REFERENCE_WITHOUT_ORDER_CONTEXT",
+      "sourceDecision": "All4 fail beforeAll at paired new accepted SOC reference ORDER_LINE_REQUIRED. Declare one legacy NULL SOC order before reference insertion. Keep literal Walkley-Black Result.methodologyId with executedMethodRevision null,18.5g/kg/AIR_DRY/MEASURED, unchanged MIR/NIR signal/axis/preparation/QC/scoped keys/absent scope/ETag304/bulk export. No order for MOZ ownerless spectrum; no synthetic controlled method or spectrum changes.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial orders are reachable from caught intake failures; unchanged new-execution preflight refuses zero writes. Current normal intake atomically creates initial order and rolls back failure. Approved runtime orphan remains noneditable/refused and readonly kit nonzeroSTOP for separate forward fix; these are declared NEW historical fixture assemblies, never runtime repair/backfill/relink/amendment step."
+    },
+    {
+      "suite": "spectral_stage_e.test.js",
+      "test": "Spectral Library Stage E: Turn the Endpoint into a Contract (SL-22 to SL-26) SL-23: Rich payload contract returns signal, acquisition, preparation, qc, and paired reference chemistry",
+      "originalFailureSha256": "15ed3cb53e9aff30d7834812665d86964cdd6a180e6d60bc1cf262fbfcc85a3d",
+      "originalObservedHeader": [
+        "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+        "    at Object.resolveOrderLine (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\orderLineResolutionService.js:30:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at insertFixtureExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:28:29)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:83:9",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)",
+        "    at Object.<anonymous> (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\spectral_stage_e.test.js:102:27)"
+      ],
+      "originalCaseLineNumbers": [
+        "102"
+      ],
+      "classification": "FIXTURE_ONLY_NEW_OWNED_ACCEPTED_REFERENCE_WITHOUT_ORDER_CONTEXT",
+      "sourceDecision": "All4 fail beforeAll at paired new accepted SOC reference ORDER_LINE_REQUIRED. Declare one legacy NULL SOC order before reference insertion. Keep literal Walkley-Black Result.methodologyId with executedMethodRevision null,18.5g/kg/AIR_DRY/MEASURED, unchanged MIR/NIR signal/axis/preparation/QC/scoped keys/absent scope/ETag304/bulk export. No order for MOZ ownerless spectrum; no synthetic controlled method or spectrum changes.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial orders are reachable from caught intake failures; unchanged new-execution preflight refuses zero writes. Current normal intake atomically creates initial order and rolls back failure. Approved runtime orphan remains noneditable/refused and readonly kit nonzeroSTOP for separate forward fix; these are declared NEW historical fixture assemblies, never runtime repair/backfill/relink/amendment step."
+    },
+    {
+      "suite": "spectral_stage_e.test.js",
+      "test": "Spectral Library Stage E: Turn the Endpoint into a Contract (SL-22 to SL-26) SL-24: Cursor pagination and ETag 304 validation",
+      "originalFailureSha256": "15ed3cb53e9aff30d7834812665d86964cdd6a180e6d60bc1cf262fbfcc85a3d",
+      "originalObservedHeader": [
+        "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+        "    at Object.resolveOrderLine (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\orderLineResolutionService.js:30:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at insertFixtureExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:28:29)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:83:9",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)",
+        "    at Object.<anonymous> (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\spectral_stage_e.test.js:102:27)"
+      ],
+      "originalCaseLineNumbers": [
+        "102"
+      ],
+      "classification": "FIXTURE_ONLY_NEW_OWNED_ACCEPTED_REFERENCE_WITHOUT_ORDER_CONTEXT",
+      "sourceDecision": "All4 fail beforeAll at paired new accepted SOC reference ORDER_LINE_REQUIRED. Declare one legacy NULL SOC order before reference insertion. Keep literal Walkley-Black Result.methodologyId with executedMethodRevision null,18.5g/kg/AIR_DRY/MEASURED, unchanged MIR/NIR signal/axis/preparation/QC/scoped keys/absent scope/ETag304/bulk export. No order for MOZ ownerless spectrum; no synthetic controlled method or spectrum changes.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial orders are reachable from caught intake failures; unchanged new-execution preflight refuses zero writes. Current normal intake atomically creates initial order and rolls back failure. Approved runtime orphan remains noneditable/refused and readonly kit nonzeroSTOP for separate forward fix; these are declared NEW historical fixture assemblies, never runtime repair/backfill/relink/amendment step."
+    },
+    {
+      "suite": "spectral_stage_e.test.js",
+      "test": "Spectral Library Stage E: Turn the Endpoint into a Contract (SL-22 to SL-26) SL-25: Bulk export endpoint returns full JSON dataset scoped to key",
+      "originalFailureSha256": "15ed3cb53e9aff30d7834812665d86964cdd6a180e6d60bc1cf262fbfcc85a3d",
+      "originalObservedHeader": [
+        "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+        "    at Object.resolveOrderLine (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\orderLineResolutionService.js:30:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at insertFixtureExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:28:29)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:83:9",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)",
+        "    at Object.<anonymous> (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\spectral_stage_e.test.js:102:27)"
+      ],
+      "originalCaseLineNumbers": [
+        "102"
+      ],
+      "classification": "FIXTURE_ONLY_NEW_OWNED_ACCEPTED_REFERENCE_WITHOUT_ORDER_CONTEXT",
+      "sourceDecision": "All4 fail beforeAll at paired new accepted SOC reference ORDER_LINE_REQUIRED. Declare one legacy NULL SOC order before reference insertion. Keep literal Walkley-Black Result.methodologyId with executedMethodRevision null,18.5g/kg/AIR_DRY/MEASURED, unchanged MIR/NIR signal/axis/preparation/QC/scoped keys/absent scope/ETag304/bulk export. No order for MOZ ownerless spectrum; no synthetic controlled method or spectrum changes.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial orders are reachable from caught intake failures; unchanged new-execution preflight refuses zero writes. Current normal intake atomically creates initial order and rolls back failure. Approved runtime orphan remains noneditable/refused and readonly kit nonzeroSTOP for separate forward fix; these are declared NEW historical fixture assemblies, never runtime repair/backfill/relink/amendment step."
+    }
+  ],
+  "changedLegacyExpectations": 0,
+  "runtimeSources": {
+    "server/tests/helpers/workAttemptFixtures.js": "d066fff99c30fc58bd0baae9715fdcf3235e7de9606d9920423a6420cf24d5d2",
+    "server/services/workAttemptWriteService.js": "be36f002f30d8d273296461db6e86b582df2bf7d6570718a57273e478841185b",
+    "server/services/orderLineResolutionService.js": "fb16963e58f0e60acb0ef6b9a55e8aae5cc8db8b2246b8c8091182bcbee62d09",
+    "server/services/orderService.js": "92c9285f7d0ac1604091a0a501f826827004c0e29fef6b12e1a9e8be25b1535a"
+  },
+  "productionOperations": 0
+}

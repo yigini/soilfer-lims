@@ -38,6 +38,12 @@ describe('WP-22: Dual Export Paths (As-Measured & Normalized Controlled Units)',
         // Pin6060286651: exact original parameter and lab; no alias mapping.
         await createWorkItemFixture(prisma, { data: { id: `${testSample.id}-SOC`, sampleId: testSample.id,
             analysis: 'SOC', assignedLab: testSample.assignedLab, status: 'ACCEPTED' } });
+        // #209: declared legacy order for this NEW owned accepted numerical/reference assembly.
+        require('../../services/workflowStateRules').assertFixtureContext();
+        await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: testSample.id,
+            version: 1, status: 'ACTIVE', reason: 'Owned accepted reference order context', requestedBy: 'system:fixture',
+            lines: { create: [{ id: require('node:crypto').randomUUID(), analysis: 'SOC',
+                workItemId: null, status: 'ACTIVE', isRequired: true }] } } });
         await createExecutionResultFixture(prisma, { attemptStatus: 'ACCEPTED',
             data: {
                 id: `RES-EXP-${Date.now()}`,

@@ -1,0 +1,23 @@
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+PASS tests/contracts/nsis_v2_exchange.test.js
+  Issue #140 Work Packages P3 & P4: V2 Data Exchange API Contracts
+    √ 1. GET /api/v2/data-exchange/capabilities advertises supported contracts & features (21 ms)
+    √ 2. GET /api/v2/data-exchange/samples returns structured V2 envelope and items (29 ms)
+    √ 3. Strict OpenNSIS Profile (?profile=opennsis) excludes specimens missing lab accession (10 ms)
+    √ 4. GET /api/v2/data-exchange/observations preserves all replicate determinations (24 ms)
+    √ 5. GET /api/v2/data-exchange/geojson complies with RFC 7946 (no obsolete crs member) (11 ms)
+    √ 6. POST /api/v2/data-exchange/snapshots creates bounded snapshot and reads pages (16 ms)
+    √ 7. Continuous synchronization change feed returns changes with cursor (7 ms)
+    √ 8. POST /api/v2/data-exchange/receipts logs delivery receipt without mutating DB samples (8 ms)
+    √ 9. GET /api/v2/data-exchange/geojson keyset seek and cachedTotal pagination contract (17 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       9 passed, 9 total
+Snapshots:   0 total
+Time:        1.665 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\nsis_v2_exchange.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\issue209-exchange-spectral-context-singles\03-nsis_v2_exchange.test\report-original.json

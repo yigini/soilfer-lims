@@ -1,0 +1,12 @@
+{
+  "recordedUtc": "2026-10-14T17:50:01.363200+00:00",
+  "originalHelper": "prepare-issue209-exchange-terminal-retainer-once.py",
+  "originalHelperSha256": "fb78d15b92eda3b846004fa31df62be5314df2e3d0c1d2b3446c3687b4471dd9",
+  "originalExit": 1,
+  "refusal": "Expected old prepare filename after context-prefix substitution had already renamed it",
+  "originalOutputRetainerWritten": false,
+  "testsStartedByPreparer": false,
+  "oldHelperPreserved": true,
+  "uniqueSuccessor": "prepare-issue209-exchange-terminal-retainer-prefix-bound-once.py",
+  "productionOperations": 0
+}

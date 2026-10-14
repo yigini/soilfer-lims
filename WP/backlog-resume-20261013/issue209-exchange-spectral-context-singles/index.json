@@ -1,0 +1,562 @@
+{
+  "retainedUtc": "2026-10-14T17:50:12.628798+00:00",
+  "summary": {
+    "closedUtc": "2026-10-14T17:49:28.793980+00:00",
+    "verificationKind": "SEQUENTIAL_ORDINARY_SINGLE_SUITE_SUCCESSOR",
+    "plannedSuites": 9,
+    "plannedTests": 353,
+    "closedSuites": 9,
+    "closedTests": 353,
+    "passedTests": 353,
+    "sourceUnchanged": true,
+    "selectedInventoryEqual": true,
+    "fullDiscovery": 370,
+    "ordinarySetups": true,
+    "stockAssertions": true,
+    "maxWorkers": 1,
+    "workerIdleMemoryLimit": 512000000,
+    "nodeOptions": "",
+    "productionOperations": 0,
+    "children": [
+      {
+        "closedUtc": "2026-10-14T17:48:00.990075+00:00",
+        "suite": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\nsis_policy_and_scoping.test.js",
+        "exit": 0,
+        "originalReportPresent": true,
+        "tests": 5,
+        "passed": 5,
+        "failed": 0,
+        "expectedTests": 5,
+        "sourceUnchanged": true,
+        "status": "PASS"
+      },
+      {
+        "closedUtc": "2026-10-14T17:48:05.117977+00:00",
+        "suite": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\exchange_error_semantics.test.js",
+        "exit": 0,
+        "originalReportPresent": true,
+        "tests": 17,
+        "passed": 17,
+        "failed": 0,
+        "expectedTests": 17,
+        "sourceUnchanged": true,
+        "status": "PASS"
+      },
+      {
+        "closedUtc": "2026-10-14T17:48:09.277674+00:00",
+        "suite": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\nsis_v2_exchange.test.js",
+        "exit": 0,
+        "originalReportPresent": true,
+        "tests": 9,
+        "passed": 9,
+        "failed": 0,
+        "expectedTests": 9,
+        "sourceUnchanged": true,
+        "status": "PASS"
+      },
+      {
+        "closedUtc": "2026-10-14T17:48:13.392337+00:00",
+        "suite": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\export_normalization.test.js",
+        "exit": 0,
+        "originalReportPresent": true,
+        "tests": 2,
+        "passed": 2,
+        "failed": 0,
+        "expectedTests": 2,
+        "sourceUnchanged": true,
+        "status": "PASS"
+      },
+      {
+        "closedUtc": "2026-10-14T17:48:17.417595+00:00",
+        "suite": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\spectral_stage_e.test.js",
+        "exit": 0,
+        "originalReportPresent": true,
+        "tests": 4,
+        "passed": 4,
+        "failed": 0,
+        "expectedTests": 4,
+        "sourceUnchanged": true,
+        "status": "PASS"
+      },
+      {
+        "closedUtc": "2026-10-14T17:48:25.120875+00:00",
+        "suite": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\audit_1_2_state_authority.test.js",
+        "exit": 0,
+        "originalReportPresent": true,
+        "tests": 139,
+        "passed": 139,
+        "failed": 0,
+        "expectedTests": 139,
+        "sourceUnchanged": true,
+        "status": "PASS"
+      },
+      {
+        "closedUtc": "2026-10-14T17:49:11.834282+00:00",
+        "suite": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\issue_209_order_revision_integration.test.js",
+        "exit": 0,
+        "originalReportPresent": true,
+        "tests": 32,
+        "passed": 32,
+        "failed": 0,
+        "expectedTests": 32,
+        "sourceUnchanged": true,
+        "status": "PASS"
+      },
+      {
+        "closedUtc": "2026-10-14T17:49:25.609039+00:00",
+        "suite": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\security\\audit_1_2_state_writes.test.js",
+        "exit": 0,
+        "originalReportPresent": true,
+        "tests": 112,
+        "passed": 112,
+        "failed": 0,
+        "expectedTests": 112,
+        "sourceUnchanged": true,
+        "status": "PASS"
+      },
+      {
+        "closedUtc": "2026-10-14T17:49:28.667542+00:00",
+        "suite": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\security\\audit_1_2_migration_sources.test.js",
+        "exit": 0,
+        "originalReportPresent": true,
+        "tests": 33,
+        "passed": 33,
+        "failed": 0,
+        "expectedTests": 33,
+        "sourceUnchanged": true,
+        "status": "PASS"
+      }
+    ],
+    "status": "PASS"
+  },
+  "verificationKind": "SEQUENTIAL_ORDINARY_SINGLE_SUITE_SUCCESSOR",
+  "rawFiles": {
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-singles/config-original.json": {
+      "bytes": 6617,
+      "sha256": "661b5d45d94f8b9f176e7fb96f10dcb3d97a11c57ece8830fecfbb13fdd94615"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-singles/config-stderr-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-singles/inventory-original.json": {
+      "bytes": 49572,
+      "sha256": "812862baaf867782ea7770f959b934b0d61c65e6f452decc84c9e0088d94f40e"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-singles/inventory-stderr-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-singles/physical-retained-terminal-index.json": {
+      "bytes": 480,
+      "sha256": "8d927c322000243daf67f163ec7d41b84686bec4e70c8a3798c43352903ef725"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-singles/physical-retention-original.jsonl": {
+      "bytes": 230,
+      "sha256": "469e9f9514be186984b770c911a1bd4893693eeb53eb0cc448317f84687c8a73"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-singles/source-after.json": {
+      "bytes": 117506,
+      "sha256": "0efd25cb980547d11039bdb112fdc0058e715a340ceda3e66a778687c36fe4d4"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-singles/source-before.json": {
+      "bytes": 117506,
+      "sha256": "0efd25cb980547d11039bdb112fdc0058e715a340ceda3e66a778687c36fe4d4"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-singles/started-open.json": {
+      "bytes": 230,
+      "sha256": "919bd4b1aa50c08af96d430b66ce0c04096e2887ce11846f17fdc23300542c53"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-singles/summary-observed.json": {
+      "bytes": 4201,
+      "sha256": "e64f9dce00857889bcd7319a8d472a645ea826d8bb5887353a02b5b92ef03763"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-singles/01-nsis_policy_and_scoping.test/command.json": {
+      "bytes": 1285,
+      "sha256": "071ab06a78c36febc14150d4e7bb20a41a93b35fb7acb051cde22a4b13a2a838"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-singles/01-nsis_policy_and_scoping.test/exit-original.txt": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-singles/01-nsis_policy_and_scoping.test/observed-closed-summary.json": {
+      "bytes": 358,
+      "sha256": "da46718fe3a7d75c16be6f070904932aac521824f6e094cbca4304c44ca528bf"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-singles/01-nsis_policy_and_scoping.test/report-original.json": {
+      "bytes": 3504,
+      "sha256": "34d0ac03b14cdc7e2c19f72aa30f24546fa797c31a85eebb9401ed8cb84adace"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-singles/01-nsis_policy_and_scoping.test/stderr-original.log": {
+      "bytes": 1124,
+      "sha256": "1587733465849ffe508482674a4b5a5c1cd06d5c16c5345a92985aec880d9126"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-singles/01-nsis_policy_and_scoping.test/stdout-original.log": {
+      "bytes": 979,
+      "sha256": "7ce9a5015badd12fad11103da0ff7bf2f6dc8277c66dd82626fd7248b807a3c0"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-singles/02-exchange_error_semantics.test/command.json": {
+      "bytes": 1287,
+      "sha256": "df118ef7f031676864b57637017a67bd77f6a6892ce23546f4f3f2ebf26ccc8c"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-singles/02-exchange_error_semantics.test/exit-original.txt": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-singles/02-exchange_error_semantics.test/observed-closed-summary.json": {
+      "bytes": 362,
+      "sha256": "f5a16160808146227466dfa4736649918d2eb40337ff2b2f96dc93fc8de43260"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-singles/02-exchange_error_semantics.test/report-original.json": {
+      "bytes": 11598,
+      "sha256": "91716ea10023d9803d9bf3e0daa53fe55535e7c22f2a9feb5d3f3c04e493968e"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-singles/02-exchange_error_semantics.test/stderr-original.log": {
+      "bytes": 2329,
+      "sha256": "f890a42aa4d229215be75c275447c889753abeaf2f7908afa3245c07fe3ff7c3"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-singles/02-exchange_error_semantics.test/stdout-original.log": {
+      "bytes": 981,
+      "sha256": "7285cadd8d4f1ecfe9713b79baa57e1320d2ec374f9ca15fe4d332a6ec2b40c6"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-singles/03-nsis_v2_exchange.test/command.json": {
+      "bytes": 1271,
+      "sha256": "f4ccd36b06480486f881a0281ab01bf19c2f48bb56a14c350ed1152a70cbef52"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-singles/03-nsis_v2_exchange.test/exit-original.txt": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-singles/03-nsis_v2_exchange.test/observed-closed-summary.json": {
+      "bytes": 351,
+      "sha256": "b3061b84e691e14b4aa7dd24855af0fb8078dbe106d2e8fb9b4b1a30d09fae6a"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-singles/03-nsis_v2_exchange.test/report-original.json": {
+      "bytes": 5533,
+      "sha256": "9730b16dc853b744bffa81a660b9a533c1ca21ea253130cd7175e801c09bc958"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-singles/03-nsis_v2_exchange.test/stderr-original.log": {
+      "bytes": 1510,
+      "sha256": "d673672e6870d3f6d3b2fc7bc6c3b8a78387a64fa4d1bff0681a25511d4333e8"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-singles/03-nsis_v2_exchange.test/stdout-original.log": {
+      "bytes": 965,
+      "sha256": "ee8d382a0405949514fa9c48afbf0499e0ff71b645972ce0694d540ef06efb6a"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-singles/04-export_normalization.test/command.json": {
+      "bytes": 1279,
+      "sha256": "bb664319f16bee31b9f043968d6bb0ccfd5a72be3359c951965664389ce4bf45"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-singles/04-export_normalization.test/exit-original.txt": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-singles/04-export_normalization.test/observed-closed-summary.json": {
+      "bytes": 355,
+      "sha256": "c02d5dde17a8c96b9d807f24bed644e17d9a121101121250128d62e124d8f588"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-singles/04-export_normalization.test/report-original.json": {
+      "bytes": 1874,
+      "sha256": "899ce738c6a1efc456a0c57c8ec651304cdeed8c96ed826c9e2407faf469fd0d"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-singles/04-export_normalization.test/stderr-original.log": {
+      "bytes": 1146,
+      "sha256": "1c8cc2a6b8bada659f71963e47404cc0faf8ad6278818ff02aa51f72fc06ea10"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-singles/04-export_normalization.test/stdout-original.log": {
+      "bytes": 973,
+      "sha256": "0cc6d3a0a05b32533bc4dbd883fe030fd138abe45d60b876a7e00d4b581e3fdf"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-singles/05-spectral_stage_e.test/command.json": {
+      "bytes": 1271,
+      "sha256": "dd576288e350040fcbeb0ead86f3f2b3014ae357753c803e655acc3b29de8c7b"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-singles/05-spectral_stage_e.test/exit-original.txt": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-singles/05-spectral_stage_e.test/observed-closed-summary.json": {
+      "bytes": 351,
+      "sha256": "46864ff1ea9792b8b6c094eebddc90d598cad8a6e6be4a9c26a65fbe70d7d820"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-singles/05-spectral_stage_e.test/report-original.json": {
+      "bytes": 2976,
+      "sha256": "fa4485bb42a5e2e02e35df4d1bcae20624fa2e580b3cbe96c5772fbbfd7ae2e7"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-singles/05-spectral_stage_e.test/stderr-original.log": {
+      "bytes": 1018,
+      "sha256": "0cee99e527e92baa30cbcb1c13cf5f47360d165e51a8191095add5636dd6dfaa"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-singles/05-spectral_stage_e.test/stdout-original.log": {
+      "bytes": 965,
+      "sha256": "c77a970c99a5f6158cfc3540d00576f0abf0595d2e1519fe6627ac164ba6316e"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-singles/06-audit_1_2_state_authority.test/command.json": {
+      "bytes": 1289,
+      "sha256": "0035a1b46c11acb16ec474953ee06b1f9d8969d5a3144c93e51ba1846ca8fdd8"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-singles/06-audit_1_2_state_authority.test/exit-original.txt": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-singles/06-audit_1_2_state_authority.test/observed-closed-summary.json": {
+      "bytes": 366,
+      "sha256": "3f4d29aefd0109a2298f20bce2b331c009416c60fe48e06e04e67266afac6163"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-singles/06-audit_1_2_state_authority.test/report-original.json": {
+      "bytes": 55948,
+      "sha256": "bd4ed117ea445bba4045b4debabc603294a4d7b31f541c53656d08824acc6b86"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-singles/06-audit_1_2_state_authority.test/stderr-original.log": {
+      "bytes": 17623,
+      "sha256": "2c5d719a7d020872eb700cadde9beec602fff3fee3952fc3722226c5cdd7010d"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-singles/06-audit_1_2_state_authority.test/stdout-original.log": {
+      "bytes": 983,
+      "sha256": "aebda1eb7a376d162aaac999b637baf863867c6d7262242ea39b84e940f3b388"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-singles/07-issue_209_order_revision_integration.test/command.json": {
+      "bytes": 1311,
+      "sha256": "b60f84add8335fc37d881ae3e27c05de8e29f65bb436e32dc328ba99cd6b9eea"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-singles/07-issue_209_order_revision_integration.test/exit-original.txt": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-singles/07-issue_209_order_revision_integration.test/observed-closed-summary.json": {
+      "bytes": 374,
+      "sha256": "4825d90e7cc55a226664576430e30132852429ffc23ffb255d10a82989ab8bed"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-singles/07-issue_209_order_revision_integration.test/report-original.json": {
+      "bytes": 14600,
+      "sha256": "febc258b3376be965cf672067a3f0a03a040859553806561893def8123a6dca6"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-singles/07-issue_209_order_revision_integration.test/stderr-original.log": {
+      "bytes": 5381,
+      "sha256": "4b8d63507a8efcada2fc13b5aab164c289e8353c7522b79f9e06cfd8dfaa6728"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-singles/07-issue_209_order_revision_integration.test/stdout-original.log": {
+      "bytes": 1005,
+      "sha256": "d9e56e94e51edc59e34f14806ca7a8a6efe387071fe7c1ef21dece5689671a0a"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-singles/08-audit_1_2_state_writes.test/command.json": {
+      "bytes": 1282,
+      "sha256": "6c133bdab280ff5422e62a4dd1cf10ce42dbf12795d0ebb9077072506328b5cf"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-singles/08-audit_1_2_state_writes.test/exit-original.txt": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-singles/08-audit_1_2_state_writes.test/observed-closed-summary.json": {
+      "bytes": 362,
+      "sha256": "e59bc7d7eb3666d0c20dbd6fa5172f6563cad52ac835ff8ba0e2e63209b3437d"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-singles/08-audit_1_2_state_writes.test/report-original.json": {
+      "bytes": 51292,
+      "sha256": "bc02b3e5078976979b1105359c4e242dfeea23dc939a8079f62a2043896fe3cd"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-singles/08-audit_1_2_state_writes.test/stderr-original.log": {
+      "bytes": 13913,
+      "sha256": "b3469adefae035287e105ba3ee721e87690ccb6ed6b3dc5dd50e29273b585e9e"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-singles/08-audit_1_2_state_writes.test/stdout-original.log": {
+      "bytes": 976,
+      "sha256": "eea4429b5e50165b4f8bc4609fb025e4f6afdbba24182240d2c9276e87611a2c"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-singles/09-audit_1_2_migration_sources.test/command.json": {
+      "bytes": 1292,
+      "sha256": "9adb29f1f76e7df41c3b7d2816d692d0860584e2366ab09ebeecd1c327f45afc"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-singles/09-audit_1_2_migration_sources.test/exit-original.txt": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-singles/09-audit_1_2_migration_sources.test/observed-closed-summary.json": {
+      "bytes": 364,
+      "sha256": "a4e20e65819fc0795b8b5ba10d3c844d5cc0b4364909f9deb1a7454a6e772090"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-singles/09-audit_1_2_migration_sources.test/report-original.json": {
+      "bytes": 13772,
+      "sha256": "f85b40301e41ae3eaa238752446086d95a50b61529191d638c7d2a0a75ac4e37"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-singles/09-audit_1_2_migration_sources.test/stderr-original.log": {
+      "bytes": 3567,
+      "sha256": "0daeb39f4152b43958b682f32b490bb0a56d2e161ba1df0af577f4affd8d287b"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-singles/09-audit_1_2_migration_sources.test/stdout-original.log": {
+      "bytes": 986,
+      "sha256": "1694b7622c131512c3a50fe6f09aa6f3ad61cdf7179aa71f16b6fd9937b6a64f"
+    }
+  },
+  "reviewFiles": {
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-review/exchange_error_semantics.test.js.before-original": {
+      "bytes": 16577,
+      "sha256": "b64c5b7ae14863a44109fd2642b668352c7847eab7b6e976949cfeea45b20d02"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-review/export_normalization.test.js.before-original": {
+      "bytes": 5395,
+      "sha256": "f930850ad6c6bfa1a2a3a3d78c1bcae2ce3fde81878c43dce66604d86cc5defb"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-review/fixture-additions-original.json": {
+      "bytes": 4962,
+      "sha256": "e99002236f0b387b3304078bff4c459f29e91032805d9d9eb9e574a53e6c8204"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-review/nsis_policy_and_scoping.test.js.before-original": {
+      "bytes": 8624,
+      "sha256": "e7977325d5989ac413184a785a14cd2b11e1dc6232fa63ff8f11f15b19adf340"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-review/nsis_v2_exchange.test.js.before-original": {
+      "bytes": 16267,
+      "sha256": "28e9ce488d569103f13bcfd4f8b098495a79d4c8fbe1c16926de0840ba101524"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-review/pre-correction-classification.json": {
+      "bytes": 101783,
+      "sha256": "25d4a0c7a052c67482031cdb025d56eeee1c03d9aae97e63658f106960ae18e4"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-review/retainer-preparer-refusal-record.json": {
+      "bytes": 574,
+      "sha256": "05e91ff70924d0a09fb80497538e2acecac6ab10b6b775dca12cafba50ee369a"
+    },
+    "WP/backlog-resume-20261013/issue209-exchange-spectral-context-review/spectral_stage_e.test.js.before-original": {
+      "bytes": 10822,
+      "sha256": "76c59c38e14df19f0307a365563ccd19c991f54cfbacb2a9e6bd0600f1606beb"
+    }
+  },
+  "sourceDraftPaths": [
+    ".gitattributes",
+    "Dockerfile",
+    "client/src/components/sample/AnalysisUpdateModal.jsx",
+    "client/src/translations/en.json",
+    "client/src/translations/es-419.json",
+    "client/src/translations/es.json",
+    "client/src/translations/fr.json",
+    "client/src/translations/pt.json",
+    "docker-entrypoint.sh",
+    "docs/audit/209-order-revisions.md",
+    "server/controllers/sampleController.js",
+    "server/index.js",
+    "server/locales/en.json",
+    "server/locales/es-419.json",
+    "server/locales/es.json",
+    "server/locales/fr.json",
+    "server/locales/pt.json",
+    "server/prisma/migrations/20261014000100_order_revision_contract/migration.sql",
+    "server/prisma/schema.prisma",
+    "server/scripts/install_order_revisions.js",
+    "server/scripts/order_revision_impact.js",
+    "server/scripts/rehearsal_deployment_readiness.cjs",
+    "server/services/intakeWorkItemService.js",
+    "server/services/orderAttemptWriteService.js",
+    "server/services/orderLineResolutionService.js",
+    "server/services/orderRevisionContract.js",
+    "server/services/orderRevisionMigrationSource.js",
+    "server/services/orderService.js",
+    "server/services/sampleAnalysisStateService.js",
+    "server/services/scientificAmendmentService.js",
+    "server/services/textureOrderContract.js",
+    "server/services/workAttemptReservationService.js",
+    "server/services/workAttemptWriteService.js",
+    "server/services/workItemReconciliationService.js",
+    "server/services/workRepeatService.js",
+    "server/tests/contracts/audit_2_6_equipment_commit.test.js",
+    "server/tests/contracts/audit_3_1_attempt_execution.test.js",
+    "server/tests/contracts/audit_3_1_attempt_sql_guards.test.js",
+    "server/tests/contracts/audit_3_3_separate_texture.test.js",
+    "server/tests/contracts/audit_6_1_non_scientific_authorisation.test.js",
+    "server/tests/contracts/deployment_readiness_bootstrap.test.js",
+    "server/tests/contracts/edit_analyses_permission.test.js",
+    "server/tests/contracts/issue_206_sample_containers.test.js",
+    "server/tests/contracts/issue_209_order_revision_http.test.js",
+    "server/tests/contracts/issue_209_order_revision_integration.test.js",
+    "server/tests/contracts/issue_209_order_revision_request.test.js",
+    "server/tests/contracts/issue_209_order_revision_ui.test.js",
+    "server/tests/contracts/reconcile_analyses.test.js",
+    "server/tests/contracts/review_reports_amendments_p6.test.js",
+    "server/tests/contracts/texture_work_item_atomic.test.js",
+    "server/tests/globalSetup.js",
+    "server/tests/helpers/legacyWorkflowDatabase.js",
+    "server/tests/helpers/qcGateFixture.js",
+    "server/tests/helpers/qcWorksheetUi.js",
+    "server/tests/helpers/workAttemptFixtures.js",
+    "server/tests/helpers/workflowWriteScanner.js",
+    "server/tests/security/wiring.test.js",
+    "server/tests/contracts/audit_4_6_calibration.test.js",
+    "server/tests/contracts/audit_4_6_calculation_install.test.js",
+    "server/tests/contracts/audit_4_1_run_start_header.test.js",
+    "server/tests/contracts/audit_1_2_guard_installer.test.js",
+    "server/tests/contracts/audit_4_3_keyboard_playwright.test.js",
+    "server/tests/contracts/audit_4_8_cross_check_evidence.test.js",
+    "server/tests/contracts/audit_6_1_first_fill.test.js",
+    "server/tests/contracts/audit_6_3_report_content.test.js",
+    "server/tests/contracts/audit_4_8_cross_check_install.test.js",
+    "server/tests/contracts/audit_1_2_spectral_state.test.js",
+    "server/tests/contracts/audit_0_3_publication.test.js",
+    "server/tests/contracts/issue_291_texture_input_authority.test.js",
+    "server/tests/contracts/issue_213_export_equals_report.test.js",
+    "server/tests/contracts/audit_4_7_calculation_import.test.js",
+    "server/tests/contracts/audit_1_4_uuid_transactions.test.js",
+    "server/tests/contracts/audit_0_15_duplicate_loq.test.js",
+    "server/tests/contracts/audit_1_0_lab_policies.test.js",
+    "server/tests/contracts/audit_1_5_result_writes.test.js",
+    "server/tests/contracts/audit_4_7_instrument_import_install.test.js",
+    "server/tests/contracts/audit_0_2_qc_lock.test.js",
+    "server/tests/contracts/audit_1_6_intake_cancellation.test.js",
+    "server/tests/contracts/audit_1_2_state_authority.test.js",
+    "server/tests/contracts/audit_1_2_workbench_state.test.js",
+    "server/tests/contracts/audit_0_6_review_atomicity.test.js",
+    "server/tests/contracts/audit_1_2_legacy_results.test.js",
+    "server/tests/contracts/audit_0_8_report_truthfulness.test.js",
+    "server/tests/contracts/report_pdf.test.js",
+    "server/tests/contracts/audit_0_11_workbench_queue.test.js",
+    "server/tests/contracts/issue_281_cross_check_bounds.test.js",
+    "server/tests/contracts/audit_0_10_current_result_views.test.js",
+    "server/tests/contracts/audit_0_5_legacy_review.test.js",
+    "server/tests/contracts/qc_disposition_release_gate.test.js",
+    "server/tests/contracts/audit_0_7_resubmission.test.js",
+    "server/tests/contracts/audit_0_9_public_report_superseded.test.js",
+    "server/tests/contracts/audit_6_2_report_revisions.test.js",
+    "server/tests/contracts/audit_0_14_number_entry.test.js",
+    "server/tests/contracts/mandatory_reason.test.js",
+    "server/tests/contracts/matrix_blocking_diagnostics.test.js",
+    "server/tests/contracts/matrix_validation.test.js",
+    "server/tests/contracts/prerequisite_gate.test.js",
+    "server/tests/contracts/result_provenance.test.js",
+    "server/tests/scenarios/scientific_validation.test.js",
+    "server/tests/contracts/mobile_offline_sync.test.js",
+    "server/tests/contracts/audit_1_2_offline_state.test.js",
+    "server/tests/contracts/qc_controls.test.js",
+    "server/tests/contracts/issue_278_texture_closure_policy.test.js",
+    "server/tests/contracts/controlled_units_interpretation.test.js",
+    "server/tests/contracts/catalogue_result_entry.test.js",
+    "server/tests/contracts/catalogue_governance.test.js",
+    "server/tests/contracts/profile_identity_routes.test.js",
+    "server/tests/contracts/api_key_scoping_isolation.test.js",
+    "server/tests/contracts/workspace_projection_p2.test.js",
+    "server/tests/contracts/workbench_single_entry.test.js",
+    "server/tests/contracts/workbench_draft_integrity.test.js",
+    "server/tests/contracts/workbench_pipeline_twostep.test.js",
+    "server/tests/contracts/qc_disposition_flagging.test.js",
+    "server/tests/contracts/audit_1_1_reconcile_duplicates.test.js",
+    "server/tests/contracts/sample_detail.test.js",
+    "server/tests/contracts/interim_gaps_verification.test.js",
+    "server/tests/contracts/reopened_governance_scenarios.test.js",
+    "server/tests/contracts/nsis_policy_and_scoping.test.js",
+    "server/tests/contracts/exchange_error_semantics.test.js",
+    "server/tests/contracts/nsis_v2_exchange.test.js",
+    "server/tests/contracts/export_normalization.test.js",
+    "server/tests/contracts/spectral_stage_e.test.js"
+  ],
+  "all37OriginalCasesPassed": true,
+  "totalOriginalFailedCasesResolved": 650,
+  "remainingOriginalUnresolved": 0,
+  "futureFullExpectedTests": 5642,
+  "changedLegacyExpectations": [
+    {
+      "comment": 6169628053,
+      "oldKeyedAnalysesReceiptCount": 0,
+      "newCount": 1
+    }
+  ],
+  "applicationFullyVerified": false,
+  "productionOperations": 0
+}

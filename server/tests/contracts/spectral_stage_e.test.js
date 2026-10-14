@@ -98,6 +98,12 @@ describe('Spectral Library Stage E: Turn the Endpoint into a Contract (SL-22 to 
         // Pins6060286651/6060409081: retain the literal method string without inventing a controlled revision.
         await createWorkItemFixture(prisma, { data: { id: `${sampleGtmId}-SOC`, sampleId: sampleGtmId,
             analysis: 'SOC', assignedLab: 'LAB-GTM', status: 'ACCEPTED' } });
+        // #209: declared legacy order for this NEW owned accepted numerical/reference assembly.
+        require('../../services/workflowStateRules').assertFixtureContext();
+        await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: sampleGtmId,
+            version: 1, status: 'ACTIVE', reason: 'Owned accepted reference order context', requestedBy: 'system:fixture',
+            lines: { create: [{ id: require('node:crypto').randomUUID(), analysis: 'SOC',
+                workItemId: null, status: 'ACTIVE', isRequired: true }] } } });
         // Create paired reference wet chemistry result
         const reference = await createExecutionResultFixture(prisma, { attemptStatus: 'ACCEPTED',
             data: {
