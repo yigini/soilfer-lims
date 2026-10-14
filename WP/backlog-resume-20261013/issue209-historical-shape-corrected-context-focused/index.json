@@ -1,0 +1,161 @@
+{
+  "retainedUtc": "2026-10-14T12:51:48.948573+00:00",
+  "observation": {
+    "observedTerminalUtc": "2026-10-14T12:51:48.824187+00:00",
+    "status": "INCOMPLETE_NO_ORIGINAL_REPORT_OR_EXIT_NATIVE_WORKER_OOM",
+    "originalReportPresent": false,
+    "originalExitKnown": false,
+    "originalFinalSummaryPresent": false,
+    "suitesPlanned": 6,
+    "testsPlanned": 381,
+    "completeCountsKnown": false,
+    "observedPassHeaders": [
+      "audit_1_2_spectral_state.test.js",
+      "audit_0_3_publication.test.js"
+    ],
+    "observedFailHeaders": [
+      "issue_209_order_revision_integration.test.js",
+      "audit_1_2_state_writes.test.js"
+    ],
+    "sourceUnchangedAtObservation": true,
+    "taskProcessesRemaining": 0,
+    "nodeOptions": "",
+    "workerIdleMemoryLimit": 512000000,
+    "productionOperations": 0
+  },
+  "sourceDraftPaths": [
+    ".gitattributes",
+    "Dockerfile",
+    "client/src/components/sample/AnalysisUpdateModal.jsx",
+    "client/src/translations/en.json",
+    "client/src/translations/es-419.json",
+    "client/src/translations/es.json",
+    "client/src/translations/fr.json",
+    "client/src/translations/pt.json",
+    "docker-entrypoint.sh",
+    "docs/audit/209-order-revisions.md",
+    "server/controllers/sampleController.js",
+    "server/index.js",
+    "server/locales/en.json",
+    "server/locales/es-419.json",
+    "server/locales/es.json",
+    "server/locales/fr.json",
+    "server/locales/pt.json",
+    "server/prisma/migrations/20261014000100_order_revision_contract/migration.sql",
+    "server/prisma/schema.prisma",
+    "server/scripts/install_order_revisions.js",
+    "server/scripts/order_revision_impact.js",
+    "server/scripts/rehearsal_deployment_readiness.cjs",
+    "server/services/intakeWorkItemService.js",
+    "server/services/orderAttemptWriteService.js",
+    "server/services/orderLineResolutionService.js",
+    "server/services/orderRevisionContract.js",
+    "server/services/orderRevisionMigrationSource.js",
+    "server/services/orderService.js",
+    "server/services/sampleAnalysisStateService.js",
+    "server/services/scientificAmendmentService.js",
+    "server/services/textureOrderContract.js",
+    "server/services/workAttemptReservationService.js",
+    "server/services/workAttemptWriteService.js",
+    "server/services/workItemReconciliationService.js",
+    "server/services/workRepeatService.js",
+    "server/tests/contracts/audit_2_6_equipment_commit.test.js",
+    "server/tests/contracts/audit_3_1_attempt_execution.test.js",
+    "server/tests/contracts/audit_3_1_attempt_sql_guards.test.js",
+    "server/tests/contracts/audit_3_3_separate_texture.test.js",
+    "server/tests/contracts/audit_6_1_non_scientific_authorisation.test.js",
+    "server/tests/contracts/deployment_readiness_bootstrap.test.js",
+    "server/tests/contracts/edit_analyses_permission.test.js",
+    "server/tests/contracts/issue_206_sample_containers.test.js",
+    "server/tests/contracts/issue_209_order_revision_http.test.js",
+    "server/tests/contracts/issue_209_order_revision_integration.test.js",
+    "server/tests/contracts/issue_209_order_revision_request.test.js",
+    "server/tests/contracts/issue_209_order_revision_ui.test.js",
+    "server/tests/contracts/reconcile_analyses.test.js",
+    "server/tests/contracts/review_reports_amendments_p6.test.js",
+    "server/tests/contracts/texture_work_item_atomic.test.js",
+    "server/tests/globalSetup.js",
+    "server/tests/helpers/legacyWorkflowDatabase.js",
+    "server/tests/helpers/qcGateFixture.js",
+    "server/tests/helpers/qcWorksheetUi.js",
+    "server/tests/helpers/workAttemptFixtures.js",
+    "server/tests/helpers/workflowWriteScanner.js",
+    "server/tests/security/wiring.test.js",
+    "server/tests/contracts/audit_4_6_calibration.test.js",
+    "server/tests/contracts/audit_4_6_calculation_install.test.js",
+    "server/tests/contracts/audit_4_1_run_start_header.test.js",
+    "server/tests/contracts/audit_1_2_guard_installer.test.js",
+    "server/tests/contracts/audit_4_3_keyboard_playwright.test.js",
+    "server/tests/contracts/audit_4_8_cross_check_evidence.test.js",
+    "server/tests/contracts/audit_6_1_first_fill.test.js",
+    "server/tests/contracts/audit_6_3_report_content.test.js",
+    "server/tests/contracts/audit_4_8_cross_check_install.test.js",
+    "server/tests/contracts/audit_1_2_spectral_state.test.js",
+    "server/tests/contracts/audit_0_3_publication.test.js"
+  ],
+  "applicationFullyVerified": false,
+  "productionOperations": 0,
+  "rawFiles": {
+    "WP/backlog-resume-20261013/issue209-historical-shape-corrected-context-focused/command.json": {
+      "bytes": 1974,
+      "sha256": "c8e69626c2c731b849e184cd7d5fa3bfde3a95b5499fcce411e00cf41ee166aa"
+    },
+    "WP/backlog-resume-20261013/issue209-historical-shape-corrected-context-focused/config-original.json": {
+      "bytes": 6617,
+      "sha256": "8522e8bdc51ae51db406336551e1eacd8aa6e934c985f6d6dab00617c8dd62ad"
+    },
+    "WP/backlog-resume-20261013/issue209-historical-shape-corrected-context-focused/config-stderr-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "WP/backlog-resume-20261013/issue209-historical-shape-corrected-context-focused/inventory-original.json": {
+      "bytes": 49572,
+      "sha256": "191de0cf337ef455fd2bee0cc7ae6eed52c357b96a3544c5a26035f8405ce3dc"
+    },
+    "WP/backlog-resume-20261013/issue209-historical-shape-corrected-context-focused/inventory-stderr-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "WP/backlog-resume-20261013/issue209-historical-shape-corrected-context-focused/observed-terminal.json": {
+      "bytes": 704,
+      "sha256": "dce33b7f8075155210be141460e617322d254a1a2b955304a9d7631def49b203"
+    },
+    "WP/backlog-resume-20261013/issue209-historical-shape-corrected-context-focused/physical-retained-observed-terminal-index.json": {
+      "bytes": 2642,
+      "sha256": "537e9a7bd95b4aa9cf0c4e8b83c2479786890b9d406b309251489525185c2524"
+    },
+    "WP/backlog-resume-20261013/issue209-historical-shape-corrected-context-focused/physical-retention-original.jsonl": {
+      "bytes": 2117,
+      "sha256": "05cc9d4f20769ed97b0c3b969ae489b926a77fadda3e4406c1ba93d9b7fbdf37"
+    },
+    "WP/backlog-resume-20261013/issue209-historical-shape-corrected-context-focused/source-before.json": {
+      "bytes": 114964,
+      "sha256": "dfe78c8b7b8f718a5c5af864f2cd5536d52bdcb95d5626b811ba68ed3f7e76c0"
+    },
+    "WP/backlog-resume-20261013/issue209-historical-shape-corrected-context-focused/source-observed-terminal.json": {
+      "bytes": 114964,
+      "sha256": "dfe78c8b7b8f718a5c5af864f2cd5536d52bdcb95d5626b811ba68ed3f7e76c0"
+    },
+    "WP/backlog-resume-20261013/issue209-historical-shape-corrected-context-focused/stderr-original.log": {
+      "bytes": 119021,
+      "sha256": "ad12301cabecef0f05411de1a49fc09d8bf917d8deac80099a94c63579d7f74b"
+    },
+    "WP/backlog-resume-20261013/issue209-historical-shape-corrected-context-focused/stdout-original.log": {
+      "bytes": 1580,
+      "sha256": "9ab4d3edd3d7058a41caf93053a20074517c74d06c253c5e5689e9ffdf1b2485"
+    },
+    "WP/backlog-resume-20261013/issue209-historical-shape-corrected-context-focused/task-processes-observed-terminal.json": {
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    "WP/backlog-resume-20261013/issue209-historical-shape-corrected-context-review/corrected-additions-original.json": {
+      "bytes": 2966,
+      "sha256": "c12903c9aeda6eecbee6fc2a6a03b23c2246fedafdb7622f2fc9092bc3c3b490"
+    },
+    "WP/backlog-resume-20261013/issue209-historical-shape-corrected-context-review/correction-classification.json": {
+      "bytes": 6957,
+      "sha256": "cdb4fa5d3c2dfec74d5c5c79c6eb3f3163cc7e18c7da19c59ad6fa7482a94591"
+    }
+  },
+  "next": "New sequential ordinary single-suite successor, same source/stock assertions/setups/oneworker512MB/blankNODE_OPTIONS; never replay original. No heap/GC changes."
+}

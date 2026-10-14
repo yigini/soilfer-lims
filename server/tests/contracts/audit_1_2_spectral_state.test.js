@@ -11,8 +11,6 @@ const prisma = require('../../prisma');
 const { getAuthToken, ensureTestLab } = require('../setup');
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const { createLegacyClosureDatabase, useLegacyRouteDatabase } = require('../helpers/legacyWorkflowDatabase');
-const { loadOrderRevisionMigrationSource } = require('../../services/orderRevisionMigrationSource');
-const orderSource = loadOrderRevisionMigrationSource();
 
 const labId = 'LAB-SPECTRAL-STATE-179';
 let token, equipmentId;
@@ -53,9 +51,6 @@ async function fixture({ status = 'COMPLETED', parentStatus = 'PROCESSING' } = {
             workItems: [{ ...itemData, createdAt: now, updatedAt: now }] });
         databases.push(database); db = database.client; useLegacyRouteDatabase(prisma, db);
         expect(installWorkAttemptContract({dbPath:database.file,apply:true}).classification).toBe('COMPLETE');
-        // Add only the current nullable model shape to this NEW owned legacy closure clone.
-        const orderShape = new Database(database.file);
-        try { orderShape.exec(orderSource.schemaSql); } finally { orderShape.close(); }
         sample = await db.sample.findUnique({ where: { id: sampleData.id } });
         item = await db.workItem.findUnique({ where: { id: itemData.id } });
     } else {

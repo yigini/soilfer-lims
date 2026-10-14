@@ -15,9 +15,6 @@ const { isInvalidOnlyByQcFailure } = require('../../services/qcService');
 const policyService = require('../../services/policyService');
 const { setFixtureQcRequirement } = require('../helpers/qcPolicyFixture');
 const { SPECTRAL_ACQUISITION_CODES } = require('../../config/spectralAcquisition');
-const Database = require('better-sqlite3');
-const { loadOrderRevisionMigrationSource } = require('../../services/orderRevisionMigrationSource');
-const orderSource = loadOrderRevisionMigrationSource();
 const labId = 'LAB-AUDIT-03';
 const id = prefix => `${prefix}-${crypto.randomUUID()}`;
 const modes = ['REQUIRED_BLOCKING', 'REQUIRED_WARN', 'ADVISORY', 'OFF'];
@@ -51,9 +48,6 @@ describe('Audit 0.3: reviewed results and policy-aware publication', () => {
                 batches: batch ? [{ ...batch, createdAt: batch.createdAt.getTime() }] : [] });
             ownedDatabases.push(database); useLegacyRouteDatabase(prisma, database.client);
             expect(installWorkAttemptContract({ dbPath: database.file, apply: true }).classification).toBe('COMPLETE');
-            // Current nullable model shape only, on this NEW owned closure context before capture.
-            const orderShape = new Database(database.file);
-            try { orderShape.exec(orderSource.schemaSql); } finally { orderShape.close(); }
             item = await database.client.workItem.findUnique({ where: { id: workItemId } });
         } else {
             await createSampleFixture(prisma, { data: sampleData });

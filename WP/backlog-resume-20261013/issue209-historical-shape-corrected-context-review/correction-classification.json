@@ -1,0 +1,68 @@
+{
+  "recordedUtc": "2026-10-14T12:42:49.964192+00:00",
+  "closedFailureAudit": "ab6b489e3c087e9a91e2694a4098339f27942f5c",
+  "closedFailures": [
+    {
+      "suite": "audit_1_2_spectral_state.test.js",
+      "test": "CANCELLED work refuses spectral link with zero changes",
+      "failureMessages": [
+        "SqliteError: duplicate column name: workItemId\n    at Database.exec (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\node_modules\\better-sqlite3\\lib\\methods\\wrappers.js:9:14)\n    at exec (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\audit_1_2_spectral_state.test.js:58:26)\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\audit_1_2_spectral_state.test.js:207:19"
+      ]
+    },
+    {
+      "suite": "audit_1_2_spectral_state.test.js",
+      "test": "CANCELLED work refuses spectral trash with zero changes",
+      "failureMessages": [
+        "SqliteError: duplicate column name: workItemId\n    at Database.exec (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\node_modules\\better-sqlite3\\lib\\methods\\wrappers.js:9:14)\n    at exec (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\audit_1_2_spectral_state.test.js:58:26)\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\audit_1_2_spectral_state.test.js:207:19"
+      ]
+    },
+    {
+      "suite": "audit_1_2_spectral_state.test.js",
+      "test": "CANCELLED work refuses upload acquisition with zero changes",
+      "failureMessages": [
+        "SqliteError: duplicate column name: workItemId\n    at Database.exec (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\node_modules\\better-sqlite3\\lib\\methods\\wrappers.js:9:14)\n    at exec (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\audit_1_2_spectral_state.test.js:58:26)\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\audit_1_2_spectral_state.test.js:406:19"
+      ]
+    },
+    {
+      "suite": "audit_1_2_spectral_state.test.js",
+      "test": "CANCELLED work refuses commit acquisition with zero changes",
+      "failureMessages": [
+        "SqliteError: duplicate column name: workItemId\n    at Database.exec (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\node_modules\\better-sqlite3\\lib\\methods\\wrappers.js:9:14)\n    at exec (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\audit_1_2_spectral_state.test.js:58:26)\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\audit_1_2_spectral_state.test.js:406:19"
+      ]
+    },
+    {
+      "suite": "audit_1_2_spectral_state.test.js",
+      "test": "CANCELLED bound work refuses scan review with zero changes",
+      "failureMessages": [
+        "SqliteError: duplicate column name: workItemId\n    at Database.exec (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\node_modules\\better-sqlite3\\lib\\methods\\wrappers.js:9:14)\n    at exec (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\audit_1_2_spectral_state.test.js:58:26)\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\audit_1_2_spectral_state.test.js:514:19"
+      ]
+    },
+    {
+      "suite": "audit_1_2_spectral_state.test.js",
+      "test": "relinking cannot remove evidence from a CANCELLED source item even if its new target is ready",
+      "failureMessages": [
+        "SqliteError: duplicate column name: workItemId\n    at Database.exec (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\node_modules\\better-sqlite3\\lib\\methods\\wrappers.js:9:14)\n    at exec (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\audit_1_2_spectral_state.test.js:58:26)\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\audit_1_2_spectral_state.test.js:560:19"
+      ]
+    },
+    {
+      "suite": "audit_0_3_publication.test.js",
+      "test": "Audit 0.3: reviewed results and policy-aware publication COMPLETED sample cannot publish",
+      "failureMessages": [
+        "SqliteError: duplicate column name: workItemId\n    at Database.exec (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\node_modules\\better-sqlite3\\lib\\methods\\wrappers.js:9:14)\n    at exec (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\audit_0_3_publication.test.js:56:30)\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\audit_0_3_publication.test.js:160:36"
+      ]
+    },
+    {
+      "suite": "audit_0_3_publication.test.js",
+      "test": "Audit 0.3: reviewed results and policy-aware publication CANCELLED work neither blocks nor prints a value",
+      "failureMessages": [
+        "SqliteError: duplicate column name: workItemId\n    at Database.exec (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\node_modules\\better-sqlite3\\lib\\methods\\wrappers.js:9:14)\n    at exec (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\audit_0_3_publication.test.js:56:30)\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\audit_0_3_publication.test.js:214:19"
+      ]
+    }
+  ],
+  "correction": "Remove ONLY new redundant schemaSql blocks/imports from spectral/publication because generated closure schema already has current column; keep PRE201 exactshape, all usable orders and every original assertion/guard",
+  "supersedesOnly": "Earlier planned missing-column assumption for current generated closure fixtures, not PRE201 pinned fixture or original source authority",
+  "runtimeAndSqlOwnersUnchanged": true,
+  "scannersNotWeakened": true,
+  "stockSourceRecovered": true,
+  "productionOperations": 0
+}

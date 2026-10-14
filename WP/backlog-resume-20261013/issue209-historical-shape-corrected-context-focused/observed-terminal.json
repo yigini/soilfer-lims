@@ -1,0 +1,23 @@
+{
+  "observedTerminalUtc": "2026-10-14T12:51:48.824187+00:00",
+  "status": "INCOMPLETE_NO_ORIGINAL_REPORT_OR_EXIT_NATIVE_WORKER_OOM",
+  "originalReportPresent": false,
+  "originalExitKnown": false,
+  "originalFinalSummaryPresent": false,
+  "suitesPlanned": 6,
+  "testsPlanned": 381,
+  "completeCountsKnown": false,
+  "observedPassHeaders": [
+    "audit_1_2_spectral_state.test.js",
+    "audit_0_3_publication.test.js"
+  ],
+  "observedFailHeaders": [
+    "issue_209_order_revision_integration.test.js",
+    "audit_1_2_state_writes.test.js"
+  ],
+  "sourceUnchangedAtObservation": true,
+  "taskProcessesRemaining": 0,
+  "nodeOptions": "",
+  "workerIdleMemoryLimit": 512000000,
+  "productionOperations": 0
+}

@@ -1,0 +1,43 @@
+{
+  "server/tests/contracts/audit_4_8_cross_check_install.test.js": {
+    "originalBytesRecoveredAfterRemovingAdditions": true,
+    "sourceSha256": "43ae68475fd59cb9650cb1c43cf18d856d4df4f1885019a15d27eb471e1682bc",
+    "originalSha256": "13ee094d6b0fc6d9153ba013cca4cd77f66469c2a122818750afb196eaaf0608",
+    "additions": [
+      {
+        "afterStart": 12,
+        "bytes": "const { loadOrderRevisionMigrationSource } = require('../../services/orderRevisionMigrationSource');\nconst orderSource = loadOrderRevisionMigrationSource();\n"
+      },
+      {
+        "afterStart": 19,
+        "bytes": "    // Current Prisma needs its declared nullable shape on this NEW owned pre-201 context.\n    // The captured historical source, original guards and prior owner receipts are unchanged.\n    const orderShape = new Database(file);\n    try { orderShape.exec(orderSource.schemaSql); } finally { orderShape.close(); }\n"
+      },
+      {
+        "afterStart": 32,
+        "bytes": "        await db.$transaction(tx => require('../../services/orderService').createInitialOrder(tx, sample, ['SOC'], {\n            username: 'system:fixture', role: 'SUPER_ADMIN', labId\n        }));\n"
+      }
+    ]
+  },
+  "server/tests/contracts/audit_1_2_spectral_state.test.js": {
+    "originalBytesRecoveredAfterRemovingAdditions": true,
+    "sourceSha256": "8f42da427ba39b1ce85405f07b7bd74235d123783f518105299eace517287902",
+    "originalSha256": "7be7e9441cb7f54654f1148edc6ced9805b266c0aa320fc05ec66d953912708c",
+    "additions": [
+      {
+        "afterStart": 62,
+        "bytes": "    // The valid accepted pH bystander has a retained order; spectral refusal states stay intact.\n    await db.$transaction(tx => tx.sampleOrderRevision.create({ data: { id: randomUUID(), sampleId: sample.id,\n        version: 1, status: 'ACTIVE', reason: 'Retained spectral-bystander pH order context',\n        lines: { create: { id: randomUUID(), analysis: 'PH_H2O', workItemId: null, isRequired: true, status: 'ACTIVE' } }\n    } }));\n"
+      }
+    ]
+  },
+  "server/tests/contracts/audit_0_3_publication.test.js": {
+    "originalBytesRecoveredAfterRemovingAdditions": true,
+    "sourceSha256": "6c932d92af4ba94ea71f70f23afe1748a8c13d3d403090d55e74547331a32549",
+    "originalSha256": "897da40fa44345bba41de6ee9858d521c7cddbf8d033e97c69cd7ca8d27e6fd0",
+    "additions": [
+      {
+        "afterStart": 58,
+        "bytes": "        // Declare usable retained order facts without altering approval, work or QC metadata.\n        // The caller transaction also follows the existing owned legacy connection injection.\n        await prisma.$transaction(tx => tx.sampleOrderRevision.create({ data: { id: id('ORDER-03'), sampleId,\n            version: 1, status: 'ACTIVE', reason: 'Retained publication measurement order context',\n            lines: { create: { id: id('LINE-03'), analysis: param, workItemId: null, isRequired: true, status: 'ACTIVE' } }\n        } }));\n"
+      }
+    ]
+  }
+}
