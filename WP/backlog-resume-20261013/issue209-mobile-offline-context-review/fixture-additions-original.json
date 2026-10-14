@@ -1,0 +1,20 @@
+[
+  {
+    "path": "server/tests/contracts/mobile_offline_sync.test.js",
+    "beforeSha256": "43dc43179e9be55b9e24ff90f9e31696325b4af5f1ce29f28e9c7e830b31c1bc",
+    "afterSha256": "56dd4250ecbc1335bd80289620c45b80621dcfe3678c1c4c679097220971c3fd",
+    "oldSourceAndEveryAssertionExactlyRecoveredByRemovingAdditions": true,
+    "additions": [
+      "            // #209: only this NEW owned positive analytical execution gets its order context.\n            require('../../services/workflowStateRules').assertFixtureContext();\n            await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(),\n                sampleId: testSample.id, version: 1, status: 'ACTIVE', reason: 'Owned mobile execution order context',\n                requestedBy: 'system:fixture', lines: { create: [{ id: require('node:crypto').randomUUID(),\n                    analysis: 'PH_H2O', workItemId: null, status: 'ACTIVE', isRequired: true }] } } });\n"
+    ]
+  },
+  {
+    "path": "server/tests/contracts/audit_1_2_offline_state.test.js",
+    "beforeSha256": "b2d8f64d1fac35ba61053acc4ebe8a0d498888ac4793b430d25b84bc12504494",
+    "afterSha256": "9e65170c85e8b6836a082ec891f47cf7b515ebd4bb3954d9f964c9fdbe08322c",
+    "oldSourceAndEveryAssertionExactlyRecoveredByRemovingAdditions": true,
+    "additions": [
+      "    // #209: NEW owned retained evidence declares its actual existing owner's order.\n    require('../../services/workflowStateRules').assertFixtureContext();\n    await prisma.sampleOrderRevision.create({ data: { id: randomUUID(), sampleId: sample.id,\n        version: 1, status: 'ACTIVE', reason: 'Owned offline execution order context', requestedBy: 'system:fixture',\n        lines: { create: [{ id: randomUUID(), analysis, workItemId: null, status: 'ACTIVE', isRequired: true }] } } });\n"
+    ]
+  }
+]

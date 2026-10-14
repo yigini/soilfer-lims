@@ -1,0 +1,195 @@
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User test_lab_technician_labofflinestate179 (Lab: LAB-OFFLINE-STATE-179) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/syncService.js:21:16)
+      at services/syncService.js:269:32
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at SyncService.processSyncBatch (services/syncService.js:268:21)
+      at perform (tests/contracts/audit_1_2_offline_state.test.js:43:22)
+      at tests/contracts/audit_1_2_offline_state.test.js:110:21
+
+  console.error
+    [SYNC_OP_ERROR] Failed to process SAVE_WORK_DRAFT (35968f02-3162-4c43-b66a-1a4d438fd8ba): TransitionError: Access Denied: You do not have permission to access this resource.
+        at Object.assertScope (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:64:49)
+        at assertScope (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\syncService.js:21:16)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\syncService.js:269:32
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at SyncService.processSyncBatch (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\syncService.js:268:21)
+        at perform (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_offline_state.test.js:43:22)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_offline_state.test.js:110:21 {
+      statusCode: 403,
+      status: 403,
+      code: 'ACCESS_DENIED_LAB',
+      details: {}
+    }
+
+      875 |             } catch (originalError) {
+      876 |                 const err = require('./resultWriteService').mapResultWriteError(originalError);
+    > 877 |                 console.error(`[SYNC_OP_ERROR] Failed to process ${op.type} (${opId}):`, err);
+          |                         ^
+      878 |                 receipts.push({
+      879 |                     operationId: opId,
+      880 |                     status: 'REJECTED',
+
+      at SyncService.error [as processSyncBatch] (services/syncService.js:877:25)
+      at perform (tests/contracts/audit_1_2_offline_state.test.js:43:22)
+      at tests/contracts/audit_1_2_offline_state.test.js:110:21
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User test_lab_technician_labofflinestate179 (Lab: LAB-OFFLINE-STATE-179) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/syncService.js:21:16)
+      at services/syncService.js:708:32
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at SyncService.processSyncBatch (services/syncService.js:707:21)
+      at perform (tests/contracts/audit_1_2_offline_state.test.js:43:22)
+      at tests/contracts/audit_1_2_offline_state.test.js:110:21
+
+  console.error
+    [SYNC_OP_ERROR] Failed to process COMPLETE_WORK (200b8ce1-6438-4085-8308-1656e3e4a48d): TransitionError: Access Denied: You do not have permission to access this resource.
+        at Object.assertScope (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:64:49)
+        at assertScope (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\syncService.js:21:16)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\syncService.js:708:32
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at SyncService.processSyncBatch (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\syncService.js:707:21)
+        at perform (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_offline_state.test.js:43:22)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_offline_state.test.js:110:21 {
+      statusCode: 403,
+      status: 403,
+      code: 'ACCESS_DENIED_LAB',
+      details: {}
+    }
+
+      875 |             } catch (originalError) {
+      876 |                 const err = require('./resultWriteService').mapResultWriteError(originalError);
+    > 877 |                 console.error(`[SYNC_OP_ERROR] Failed to process ${op.type} (${opId}):`, err);
+          |                         ^
+      878 |                 receipts.push({
+      879 |                     operationId: opId,
+      880 |                     status: 'REJECTED',
+
+      at SyncService.error [as processSyncBatch] (services/syncService.js:877:25)
+      at perform (tests/contracts/audit_1_2_offline_state.test.js:43:22)
+      at tests/contracts/audit_1_2_offline_state.test.js:110:21
+
+  console.error
+    [SYNC_OP_ERROR] Failed to process SAVE_WORK_DRAFT (d6415166-082b-4873-9296-28b315f3131d): Error: Injected offline state audit failure
+        at Object.create (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_offline_state.test.js:118:65)
+        at create (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workItemStateService.js:225:31)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:97)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\syncService.js:509:29
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at SyncService.processSyncBatch (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\syncService.js:268:21)
+        at perform (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_offline_state.test.js:43:22)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_offline_state.test.js:119:13
+
+      875 |             } catch (originalError) {
+      876 |                 const err = require('./resultWriteService').mapResultWriteError(originalError);
+    > 877 |                 console.error(`[SYNC_OP_ERROR] Failed to process ${op.type} (${opId}):`, err);
+          |                         ^
+      878 |                 receipts.push({
+      879 |                     operationId: opId,
+      880 |                     status: 'REJECTED',
+
+      at SyncService.error [as processSyncBatch] (services/syncService.js:877:25)
+      at perform (tests/contracts/audit_1_2_offline_state.test.js:43:22)
+      at tests/contracts/audit_1_2_offline_state.test.js:119:13
+
+  console.error
+    [SYNC_OP_ERROR] Failed to process COMPLETE_WORK (8975b82c-3b30-4418-8717-6635924da610): TransitionError: Use the transcription correction route or request a repeat to change a recorded cell.
+        at writeResultsExecutionChecked (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:411:15)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at writeResultsExecution (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:376:16)
+        at Object.writeResult (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\resultWriteService.js:369:13)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\syncService.js:723:44
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at SyncService.processSyncBatch (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\syncService.js:707:21)
+        at perform (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_offline_state.test.js:43:22)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_offline_state.test.js:119:13 {
+      statusCode: 409,
+      status: 409,
+      code: 'ATTEMPT_CORRECTION_REQUIRED',
+      details: {}
+    }
+
+      875 |             } catch (originalError) {
+      876 |                 const err = require('./resultWriteService').mapResultWriteError(originalError);
+    > 877 |                 console.error(`[SYNC_OP_ERROR] Failed to process ${op.type} (${opId}):`, err);
+          |                         ^
+      878 |                 receipts.push({
+      879 |                     operationId: opId,
+      880 |                     status: 'REJECTED',
+
+      at SyncService.error [as processSyncBatch] (services/syncService.js:877:25)
+      at perform (tests/contracts/audit_1_2_offline_state.test.js:43:22)
+      at tests/contracts/audit_1_2_offline_state.test.js:119:13
+
+  console.error
+    [SYNC_OP_ERROR] Failed to process COMPLETE_WORK (8460a382-bbea-4bb9-8888-337037564d5c): TransitionError: Work item changed before offline work was committed.
+        at freshExecutableItem (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\syncService.js:19:15)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\syncService.js:708:32
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at SyncService.processSyncBatch (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\syncService.js:707:21)
+        at perform (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_offline_state.test.js:43:22)
+        at Object.<anonymous> (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_offline_state.test.js:129:21) {
+      statusCode: 409,
+      status: 409,
+      code: 'WORKITEM_STATE_CHANGED',
+      details: {}
+    }
+
+      875 |             } catch (originalError) {
+      876 |                 const err = require('./resultWriteService').mapResultWriteError(originalError);
+    > 877 |                 console.error(`[SYNC_OP_ERROR] Failed to process ${op.type} (${opId}):`, err);
+          |                         ^
+      878 |                 receipts.push({
+      879 |                     operationId: opId,
+      880 |                     status: 'REJECTED',
+
+      at SyncService.error [as processSyncBatch] (services/syncService.js:877:25)
+      at perform (tests/contracts/audit_1_2_offline_state.test.js:43:22)
+      at Object.<anonymous> (tests/contracts/audit_1_2_offline_state.test.js:129:21)
+
+PASS tests/contracts/audit_1_2_offline_state.test.js
+  √ offline draft start preserves analytical base version and commits its central audit with the draft and receipt (131 ms)
+  √ offline completion centrally records provenance and preserves superseded analytical values (92 ms)
+  √ fresh scope refusal rolls back all SAVE_WORK_DRAFT changes inside its transaction (196 ms)
+  √ fresh scope refusal rolls back all COMPLETE_WORK changes inside its transaction (18 ms)
+  √ a failed central audit rolls back SAVE_WORK_DRAFT, evidence and receipt together (49 ms)
+  √ a failed central audit rolls back COMPLETE_WORK, evidence and receipt together (48 ms)
+  √ a stale item refuses completion and rolls back the transaction without partial evidence (39 ms)
+  √ offline completion leaves final APPROVED work and all evidence unchanged (13 ms)
+  √ offline completion leaves final ARCHIVED work and all evidence unchanged (12 ms)
+  √ offline completion leaves final DISPOSED work and all evidence unchanged (13 ms)
+  √ offline intake creates EXPECTED then records RECEIVED centrally with custody and receipt in one transaction (8 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       11 passed, 11 total
+Snapshots:   0 total
+Time:        1.64 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_offline_state.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\issue209-mobile-offline-context-singles\02-audit_1_2_offline_state.test\report-original.json

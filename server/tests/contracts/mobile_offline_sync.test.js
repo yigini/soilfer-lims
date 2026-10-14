@@ -226,6 +226,12 @@ describe('Mobile Offline Work & Idempotent Synchronization Contracts', () => {
         });
 
         test('COMPLETE_WORK: validates determination and updates WorkItem status', async () => {
+            // #209: only this NEW owned positive analytical execution gets its order context.
+            require('../../services/workflowStateRules').assertFixtureContext();
+            await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(),
+                sampleId: testSample.id, version: 1, status: 'ACTIVE', reason: 'Owned mobile execution order context',
+                requestedBy: 'system:fixture', lines: { create: [{ id: require('node:crypto').randomUUID(),
+                    analysis: 'PH_H2O', workItemId: null, status: 'ACTIVE', isRequired: true }] } } });
             const opId = 'op_test_complete_ph_001';
             const res = await request(app)
                 .post('/api/sync/operations')

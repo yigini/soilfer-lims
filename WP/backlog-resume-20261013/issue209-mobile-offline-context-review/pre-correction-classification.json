@@ -1,0 +1,303 @@
+{
+  "createdUtc": "2026-10-14T16:48:49.731289+00:00",
+  "reviewedBeforeChanges": true,
+  "originalFailedCases": 12,
+  "cases": [
+    {
+      "suite": "mobile_offline_sync.test.js",
+      "test": "Mobile Offline Work & Idempotent Synchronization Contracts 3. Batch Command Processing & Idempotency COMPLETE_WORK: validates determination and updates WorkItem status",
+      "originalFailureSha256": "2c0a717eeabba44174df9b2830f8c340e2433f6fe69b543cb3baa88b88344fc0",
+      "originalObservedHeader": [
+        "Error: expect(received).toBe(expected) // Object.is equality",
+        "",
+        "Expected: \"APPLIED\"",
+        "Received: \"REJECTED\"",
+        "    at Object.toBe (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\mobile_offline_sync.test.js:252:36)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)"
+      ],
+      "originalCaseLineNumbers": [
+        "252"
+      ],
+      "classification": "NEW_OWNED_EXECUTION_CONTEXT_WITH_ORIGINAL_SYNC_FAILURES_RETAINED",
+      "sourceDecision": "Only positive PH COMPLETE_WORK after unchanged DRYING checklist/duplicate operation gets a fresh legacy NULL PH_H2O order. Original receipts were REJECTED vs APPLIED and subsequent cross-target CONFLICT; no old refusal code observed/invented. Actual syncService sameTX writer.writeResult followed by receipt inspected: source-inferred missing execution order prevents first receipt and therefore later conflict. Device/health/work-pack/operational gates and all original sync receipt/status/result/key-conflict assertions remain byte-identical.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing-order WIs remain runtime-reachable zero-write refused with readonly distinct impact causes/approvednonzeroSTOP per6167740581; no automatic repair/backfill/relink."
+    },
+    {
+      "suite": "mobile_offline_sync.test.js",
+      "test": "Mobile Offline Work & Idempotent Synchronization Contracts 3. Batch Command Processing & Idempotency CONFLICT: Reused idempotency key with different target returns CONFLICT",
+      "originalFailureSha256": "01db1647e68a7d3d50c41f0a90c83f2a6e7082beb95cd1c4184f7739842e2f3e",
+      "originalObservedHeader": [
+        "Error: expect(received).toBe(expected) // Object.is equality",
+        "",
+        "Expected: \"CONFLICT\"",
+        "Received: \"REJECTED\"",
+        "    at Object.toBe (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\mobile_offline_sync.test.js:286:36)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)"
+      ],
+      "originalCaseLineNumbers": [
+        "286"
+      ],
+      "classification": "NEW_OWNED_EXECUTION_CONTEXT_WITH_ORIGINAL_SYNC_FAILURES_RETAINED",
+      "sourceDecision": "Only positive PH COMPLETE_WORK after unchanged DRYING checklist/duplicate operation gets a fresh legacy NULL PH_H2O order. Original receipts were REJECTED vs APPLIED and subsequent cross-target CONFLICT; no old refusal code observed/invented. Actual syncService sameTX writer.writeResult followed by receipt inspected: source-inferred missing execution order prevents first receipt and therefore later conflict. Device/health/work-pack/operational gates and all original sync receipt/status/result/key-conflict assertions remain byte-identical.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing-order WIs remain runtime-reachable zero-write refused with readonly distinct impact causes/approvednonzeroSTOP per6167740581; no automatic repair/backfill/relink."
+    },
+    {
+      "suite": "audit_1_2_offline_state.test.js",
+      "test": "offline draft start preserves analytical base version and commits its central audit with the draft and receipt",
+      "originalFailureSha256": "8945d3b0aed5ce857d47914d24cd7b03b2f57ed1cede9e0d391cc2ceee5147b0",
+      "originalObservedHeader": [
+        "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+        "    at Object.resolveOrderLine (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\orderLineResolutionService.js:30:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at insertExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workAttemptWriteService.js:63:25)",
+        "    at insertFixtureExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:36:9)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:83:9",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)"
+      ],
+      "originalCaseLineNumbers": [
+        "23",
+        "44"
+      ],
+      "classification": "NEW_OWNED_EXECUTION_CONTEXT_WITH_ORIGINAL_SYNC_FAILURES_RETAINED",
+      "sourceDecision": "Shared NEW owned retained initial6.2 witness declares one legacy NULL line for its existing numeric owner before execution. Includes APPROVED/ARCHIVED/DISPOSED retained-history fixtures without changing their statuses or executable-refusal boundaries. Original ORDER_LINE_REQUIRED occurred during positive fixture assembly. Draft base-version/audit, explicit independent CONFIRMATION repeat/new first-fill/history, stale CAS and fresh lab-scope/audit-failure full snapshot rollback, terminal refusal, actual zero-WI offline intake custody/receipt assertions remain unchanged. No runtime amendment order step.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing-order WIs remain runtime-reachable zero-write refused with readonly distinct impact causes/approvednonzeroSTOP per6167740581; no automatic repair/backfill/relink."
+    },
+    {
+      "suite": "audit_1_2_offline_state.test.js",
+      "test": "offline completion centrally records provenance and preserves superseded analytical values",
+      "originalFailureSha256": "811c5de96128c1de9c94a46ade56fe43dcb0490f491d339968ad9f16e98658cd",
+      "originalObservedHeader": [
+        "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+        "    at Object.resolveOrderLine (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\orderLineResolutionService.js:30:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at insertExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workAttemptWriteService.js:63:25)",
+        "    at insertFixtureExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:36:9)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:83:9",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)"
+      ],
+      "originalCaseLineNumbers": [
+        "23",
+        "57"
+      ],
+      "classification": "NEW_OWNED_EXECUTION_CONTEXT_WITH_ORIGINAL_SYNC_FAILURES_RETAINED",
+      "sourceDecision": "Shared NEW owned retained initial6.2 witness declares one legacy NULL line for its existing numeric owner before execution. Includes APPROVED/ARCHIVED/DISPOSED retained-history fixtures without changing their statuses or executable-refusal boundaries. Original ORDER_LINE_REQUIRED occurred during positive fixture assembly. Draft base-version/audit, explicit independent CONFIRMATION repeat/new first-fill/history, stale CAS and fresh lab-scope/audit-failure full snapshot rollback, terminal refusal, actual zero-WI offline intake custody/receipt assertions remain unchanged. No runtime amendment order step.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing-order WIs remain runtime-reachable zero-write refused with readonly distinct impact causes/approvednonzeroSTOP per6167740581; no automatic repair/backfill/relink."
+    },
+    {
+      "suite": "audit_1_2_offline_state.test.js",
+      "test": "fresh scope refusal rolls back all SAVE_WORK_DRAFT changes inside its transaction",
+      "originalFailureSha256": "87709f04f4c9e326a81a085946b574e3dfd1416fc82364e4d8c5bf7cc480c082",
+      "originalObservedHeader": [
+        "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+        "    at Object.resolveOrderLine (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\orderLineResolutionService.js:30:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at insertExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workAttemptWriteService.js:63:25)",
+        "    at insertFixtureExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:36:9)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:83:9",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)"
+      ],
+      "originalCaseLineNumbers": [
+        "23",
+        "100"
+      ],
+      "classification": "NEW_OWNED_EXECUTION_CONTEXT_WITH_ORIGINAL_SYNC_FAILURES_RETAINED",
+      "sourceDecision": "Shared NEW owned retained initial6.2 witness declares one legacy NULL line for its existing numeric owner before execution. Includes APPROVED/ARCHIVED/DISPOSED retained-history fixtures without changing their statuses or executable-refusal boundaries. Original ORDER_LINE_REQUIRED occurred during positive fixture assembly. Draft base-version/audit, explicit independent CONFIRMATION repeat/new first-fill/history, stale CAS and fresh lab-scope/audit-failure full snapshot rollback, terminal refusal, actual zero-WI offline intake custody/receipt assertions remain unchanged. No runtime amendment order step.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing-order WIs remain runtime-reachable zero-write refused with readonly distinct impact causes/approvednonzeroSTOP per6167740581; no automatic repair/backfill/relink."
+    },
+    {
+      "suite": "audit_1_2_offline_state.test.js",
+      "test": "fresh scope refusal rolls back all COMPLETE_WORK changes inside its transaction",
+      "originalFailureSha256": "87709f04f4c9e326a81a085946b574e3dfd1416fc82364e4d8c5bf7cc480c082",
+      "originalObservedHeader": [
+        "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+        "    at Object.resolveOrderLine (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\orderLineResolutionService.js:30:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at insertExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workAttemptWriteService.js:63:25)",
+        "    at insertFixtureExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:36:9)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:83:9",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)"
+      ],
+      "originalCaseLineNumbers": [
+        "23",
+        "100"
+      ],
+      "classification": "NEW_OWNED_EXECUTION_CONTEXT_WITH_ORIGINAL_SYNC_FAILURES_RETAINED",
+      "sourceDecision": "Shared NEW owned retained initial6.2 witness declares one legacy NULL line for its existing numeric owner before execution. Includes APPROVED/ARCHIVED/DISPOSED retained-history fixtures without changing their statuses or executable-refusal boundaries. Original ORDER_LINE_REQUIRED occurred during positive fixture assembly. Draft base-version/audit, explicit independent CONFIRMATION repeat/new first-fill/history, stale CAS and fresh lab-scope/audit-failure full snapshot rollback, terminal refusal, actual zero-WI offline intake custody/receipt assertions remain unchanged. No runtime amendment order step.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing-order WIs remain runtime-reachable zero-write refused with readonly distinct impact causes/approvednonzeroSTOP per6167740581; no automatic repair/backfill/relink."
+    },
+    {
+      "suite": "audit_1_2_offline_state.test.js",
+      "test": "a failed central audit rolls back SAVE_WORK_DRAFT, evidence and receipt together",
+      "originalFailureSha256": "0f307b1cb299e00a17954194c8c6ae70797de950c1420344982f41b99037ec15",
+      "originalObservedHeader": [
+        "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+        "    at Object.resolveOrderLine (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\orderLineResolutionService.js:30:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at insertExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workAttemptWriteService.js:63:25)",
+        "    at insertFixtureExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:36:9)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:83:9",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)"
+      ],
+      "originalCaseLineNumbers": [
+        "23",
+        "111"
+      ],
+      "classification": "NEW_OWNED_EXECUTION_CONTEXT_WITH_ORIGINAL_SYNC_FAILURES_RETAINED",
+      "sourceDecision": "Shared NEW owned retained initial6.2 witness declares one legacy NULL line for its existing numeric owner before execution. Includes APPROVED/ARCHIVED/DISPOSED retained-history fixtures without changing their statuses or executable-refusal boundaries. Original ORDER_LINE_REQUIRED occurred during positive fixture assembly. Draft base-version/audit, explicit independent CONFIRMATION repeat/new first-fill/history, stale CAS and fresh lab-scope/audit-failure full snapshot rollback, terminal refusal, actual zero-WI offline intake custody/receipt assertions remain unchanged. No runtime amendment order step.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing-order WIs remain runtime-reachable zero-write refused with readonly distinct impact causes/approvednonzeroSTOP per6167740581; no automatic repair/backfill/relink."
+    },
+    {
+      "suite": "audit_1_2_offline_state.test.js",
+      "test": "a failed central audit rolls back COMPLETE_WORK, evidence and receipt together",
+      "originalFailureSha256": "0f307b1cb299e00a17954194c8c6ae70797de950c1420344982f41b99037ec15",
+      "originalObservedHeader": [
+        "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+        "    at Object.resolveOrderLine (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\orderLineResolutionService.js:30:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at insertExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workAttemptWriteService.js:63:25)",
+        "    at insertFixtureExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:36:9)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:83:9",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)"
+      ],
+      "originalCaseLineNumbers": [
+        "23",
+        "111"
+      ],
+      "classification": "NEW_OWNED_EXECUTION_CONTEXT_WITH_ORIGINAL_SYNC_FAILURES_RETAINED",
+      "sourceDecision": "Shared NEW owned retained initial6.2 witness declares one legacy NULL line for its existing numeric owner before execution. Includes APPROVED/ARCHIVED/DISPOSED retained-history fixtures without changing their statuses or executable-refusal boundaries. Original ORDER_LINE_REQUIRED occurred during positive fixture assembly. Draft base-version/audit, explicit independent CONFIRMATION repeat/new first-fill/history, stale CAS and fresh lab-scope/audit-failure full snapshot rollback, terminal refusal, actual zero-WI offline intake custody/receipt assertions remain unchanged. No runtime amendment order step.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing-order WIs remain runtime-reachable zero-write refused with readonly distinct impact causes/approvednonzeroSTOP per6167740581; no automatic repair/backfill/relink."
+    },
+    {
+      "suite": "audit_1_2_offline_state.test.js",
+      "test": "a stale item refuses completion and rolls back the transaction without partial evidence",
+      "originalFailureSha256": "73327fd1443f2119447477ebbafb2ac5d084a6d3b6fdbe34d80c17f13ecd80db",
+      "originalObservedHeader": [
+        "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+        "    at Object.resolveOrderLine (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\orderLineResolutionService.js:30:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at insertExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workAttemptWriteService.js:63:25)",
+        "    at insertFixtureExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:36:9)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:83:9",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)"
+      ],
+      "originalCaseLineNumbers": [
+        "23",
+        "119"
+      ],
+      "classification": "NEW_OWNED_EXECUTION_CONTEXT_WITH_ORIGINAL_SYNC_FAILURES_RETAINED",
+      "sourceDecision": "Shared NEW owned retained initial6.2 witness declares one legacy NULL line for its existing numeric owner before execution. Includes APPROVED/ARCHIVED/DISPOSED retained-history fixtures without changing their statuses or executable-refusal boundaries. Original ORDER_LINE_REQUIRED occurred during positive fixture assembly. Draft base-version/audit, explicit independent CONFIRMATION repeat/new first-fill/history, stale CAS and fresh lab-scope/audit-failure full snapshot rollback, terminal refusal, actual zero-WI offline intake custody/receipt assertions remain unchanged. No runtime amendment order step.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing-order WIs remain runtime-reachable zero-write refused with readonly distinct impact causes/approvednonzeroSTOP per6167740581; no automatic repair/backfill/relink."
+    },
+    {
+      "suite": "audit_1_2_offline_state.test.js",
+      "test": "offline completion leaves final APPROVED work and all evidence unchanged",
+      "originalFailureSha256": "498ae72bbcd8208db62b06d16535e17c7180ff369de0ba9d3be53293a1d0d48d",
+      "originalObservedHeader": [
+        "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+        "    at Object.resolveOrderLine (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\orderLineResolutionService.js:30:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at insertExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workAttemptWriteService.js:63:25)",
+        "    at insertFixtureExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:36:9)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:83:9",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)"
+      ],
+      "originalCaseLineNumbers": [
+        "23",
+        "130"
+      ],
+      "classification": "NEW_OWNED_EXECUTION_CONTEXT_WITH_ORIGINAL_SYNC_FAILURES_RETAINED",
+      "sourceDecision": "Shared NEW owned retained initial6.2 witness declares one legacy NULL line for its existing numeric owner before execution. Includes APPROVED/ARCHIVED/DISPOSED retained-history fixtures without changing their statuses or executable-refusal boundaries. Original ORDER_LINE_REQUIRED occurred during positive fixture assembly. Draft base-version/audit, explicit independent CONFIRMATION repeat/new first-fill/history, stale CAS and fresh lab-scope/audit-failure full snapshot rollback, terminal refusal, actual zero-WI offline intake custody/receipt assertions remain unchanged. No runtime amendment order step.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing-order WIs remain runtime-reachable zero-write refused with readonly distinct impact causes/approvednonzeroSTOP per6167740581; no automatic repair/backfill/relink."
+    },
+    {
+      "suite": "audit_1_2_offline_state.test.js",
+      "test": "offline completion leaves final ARCHIVED work and all evidence unchanged",
+      "originalFailureSha256": "498ae72bbcd8208db62b06d16535e17c7180ff369de0ba9d3be53293a1d0d48d",
+      "originalObservedHeader": [
+        "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+        "    at Object.resolveOrderLine (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\orderLineResolutionService.js:30:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at insertExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workAttemptWriteService.js:63:25)",
+        "    at insertFixtureExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:36:9)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:83:9",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)"
+      ],
+      "originalCaseLineNumbers": [
+        "23",
+        "130"
+      ],
+      "classification": "NEW_OWNED_EXECUTION_CONTEXT_WITH_ORIGINAL_SYNC_FAILURES_RETAINED",
+      "sourceDecision": "Shared NEW owned retained initial6.2 witness declares one legacy NULL line for its existing numeric owner before execution. Includes APPROVED/ARCHIVED/DISPOSED retained-history fixtures without changing their statuses or executable-refusal boundaries. Original ORDER_LINE_REQUIRED occurred during positive fixture assembly. Draft base-version/audit, explicit independent CONFIRMATION repeat/new first-fill/history, stale CAS and fresh lab-scope/audit-failure full snapshot rollback, terminal refusal, actual zero-WI offline intake custody/receipt assertions remain unchanged. No runtime amendment order step.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing-order WIs remain runtime-reachable zero-write refused with readonly distinct impact causes/approvednonzeroSTOP per6167740581; no automatic repair/backfill/relink."
+    },
+    {
+      "suite": "audit_1_2_offline_state.test.js",
+      "test": "offline completion leaves final DISPOSED work and all evidence unchanged",
+      "originalFailureSha256": "498ae72bbcd8208db62b06d16535e17c7180ff369de0ba9d3be53293a1d0d48d",
+      "originalObservedHeader": [
+        "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+        "    at Object.resolveOrderLine (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\orderLineResolutionService.js:30:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at insertExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workAttemptWriteService.js:63:25)",
+        "    at insertFixtureExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:36:9)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:83:9",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)"
+      ],
+      "originalCaseLineNumbers": [
+        "23",
+        "130"
+      ],
+      "classification": "NEW_OWNED_EXECUTION_CONTEXT_WITH_ORIGINAL_SYNC_FAILURES_RETAINED",
+      "sourceDecision": "Shared NEW owned retained initial6.2 witness declares one legacy NULL line for its existing numeric owner before execution. Includes APPROVED/ARCHIVED/DISPOSED retained-history fixtures without changing their statuses or executable-refusal boundaries. Original ORDER_LINE_REQUIRED occurred during positive fixture assembly. Draft base-version/audit, explicit independent CONFIRMATION repeat/new first-fill/history, stale CAS and fresh lab-scope/audit-failure full snapshot rollback, terminal refusal, actual zero-WI offline intake custody/receipt assertions remain unchanged. No runtime amendment order step.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing-order WIs remain runtime-reachable zero-write refused with readonly distinct impact causes/approvednonzeroSTOP per6167740581; no automatic repair/backfill/relink."
+    }
+  ],
+  "runtimeSourceInspected": "server/services/syncService.js:706-753",
+  "productionOperations": 0
+}

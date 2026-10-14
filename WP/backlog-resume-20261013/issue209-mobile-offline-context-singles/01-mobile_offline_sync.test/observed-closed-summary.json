@@ -1,0 +1,12 @@
+{
+  "closedUtc": "2026-10-14T16:48:56.062961+00:00",
+  "suite": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\mobile_offline_sync.test.js",
+  "exit": 0,
+  "originalReportPresent": true,
+  "tests": 7,
+  "passed": 7,
+  "failed": 0,
+  "expectedTests": 7,
+  "sourceUnchanged": true,
+  "status": "PASS"
+}
