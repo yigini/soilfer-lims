@@ -1,0 +1,27 @@
+{
+  "recordedUtc": "2026-10-14T19:44:57.790224+00:00",
+  "head": "562cab2d24b25a500041a44abf384ffc4dbfad7c",
+  "nativeHandoffSentOnce": true,
+  "sentBubbleAndEmptyRightComposerObservedByUtc": "2026-10-14T19:42:27Z",
+  "window": {
+    "app": "Claude_pzs8sxrjxfjjc!Claude",
+    "id": 7867734,
+    "project": "LIMS Audit",
+    "thread": "Lab workflow audit and plan"
+  },
+  "observations": [
+    "Fresh unique returned window; right thread showed actual PR297 audit running and empty composer",
+    "Right composer click refreshed with caret; only owned evidence draft typed",
+    "Owned draft completion time corrected BEFORE sending to exact closed job19:32:08Z",
+    "Draft END and HEAD visually inspected; ONE Return; actual head/tree/base bubble and EMPTY right composer verified",
+    "Centre human draft can you go and ask Pip preserved; no card or human file modified",
+    "Subsequent actual native reply confirmed audit failed on two report points and each needs a test; no acknowledgement sent"
+  ],
+  "auditVerdict": "FAILED",
+  "auditComment": 6176831479,
+  "auditCommentUrl": "https://github.com/yigini/soilfer-lims/pull/297#issuecomment-6176831479",
+  "stockCiPass": true,
+  "finalAuditPass": false,
+  "mergePermitted": false,
+  "productionOperations": 0
+}
