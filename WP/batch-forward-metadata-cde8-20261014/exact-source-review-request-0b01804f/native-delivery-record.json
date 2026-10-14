@@ -1,0 +1,27 @@
+{
+  "status": "ACTUAL_SENT_ONCE_VISUALLY_VERIFIED",
+  "verifiedUtc": "2026-10-14T23:37:30.995Z",
+  "actualReturnedWindow": {
+    "app": "Claude_pzs8sxrjxfjjc!Claude",
+    "id": 7867734,
+    "title": "Claude"
+  },
+  "targetProject": "LIMS Audit",
+  "targetThread": "Lab workflow audit and plan",
+  "requestId": 6180795761,
+  "toolingCommit": "0b01804f9d409d74a19472c22469824e2df95005",
+  "freshTargetObserved": true,
+  "rightComposerEmptyBefore": true,
+  "caretObserved": true,
+  "ownedDraftEndAndHeadInspected": true,
+  "returnCount": 1,
+  "actualSentBubbleObserved": true,
+  "rightComposerEmptyAfter": true,
+  "actualClStatus": "Frolicking",
+  "humanCentreDraft": "can you go and ask Pip",
+  "humanDraftPreserved": true,
+  "imageEligibility": false,
+  "metadataCollectorsRun": 0,
+  "newSourceReview": null,
+  "newExecutionAuthority": null
+}

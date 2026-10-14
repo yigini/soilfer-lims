@@ -1,0 +1,96 @@
+{
+  "status": "ACTUAL_METADATA_SOURCE_REQUEST_NATIVE_DELIVERY_RETAINED",
+  "requestId": 6180795761,
+  "toolingCommit": "0b01804f9d409d74a19472c22469824e2df95005",
+  "retainedUtc": "2026-10-14T23:37:32.060947+00:00",
+  "newSourceReview": null,
+  "imageEligibility": false,
+  "newExecutionAuthority": null,
+  "files": [
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/exact-source-review-request-0b01804f/actual-reference-before-original.json",
+      "bytes": 5195,
+      "sha256": "3e5ff7910985af8de6c8294efd76612e68c2956669e8fca7b1d3ea80d353340a"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/exact-source-review-request-0b01804f/actual-request-confirmed.json",
+      "bytes": 8822,
+      "sha256": "4912c900a0f49e9a47c3dac0ec76581e9dbb858bd55a623a4dfb78564a9518c3"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/exact-source-review-request-0b01804f/actual-request-fresh-original.json",
+      "bytes": 8584,
+      "sha256": "ee11ec3944c00223f558676e952f8c85787146c6913e52588042ad0bf380b23b"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/exact-source-review-request-0b01804f/actual-review-request-body.txt",
+      "bytes": 6938,
+      "sha256": "7544b7df82e84640396b6a50c510ad2606dc960e71dceea398b4df41ff5265b5"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/exact-source-review-request-0b01804f/actual-scope-before-original.json",
+      "bytes": 6613,
+      "sha256": "1a199ef0023c5ba2315d038de4f5797831679f3382933d50e34336b92ffa7ddb"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/exact-source-review-request-0b01804f/current-main-original.json",
+      "bytes": 336,
+      "sha256": "8ab38fb8db0993cd672bbb2e6bf3b6ca8d124087fb841ecc97bad4fb1d9bfe89"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/exact-source-review-request-0b01804f/history-before-original.json",
+      "bytes": 1752227,
+      "sha256": "3e510b1a5b07f6eb2ea822c544834f7dac3edc6ae917cd7d35f789d26f99ea50"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/exact-source-review-request-0b01804f/native-actual-sent.txt",
+      "bytes": 2131,
+      "sha256": "d8c976397da44b6a63a5f5c88419f5bf670d77b79ebe2fdea2b96a601086ecbf"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/exact-source-review-request-0b01804f/native-delivery-record.json",
+      "bytes": 842,
+      "sha256": "c5c5970859cdcb544dcd6db5b9a30b9e02985a7cc7a0a9df145638990fa5418b"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/exact-source-review-request-0b01804f/post-intent.json",
+      "bytes": 248,
+      "sha256": "5039db60a817ee94a25fdcd84973545cbc2c7afe64ba92357c1c9bdcd36fbf98"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/exact-source-review-request-0b01804f/post-response-original.json",
+      "bytes": 8584,
+      "sha256": "ee11ec3944c00223f558676e952f8c85787146c6913e52588042ad0bf380b23b"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/exact-source-review-request-0b01804f/post-stderr-original.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/exact-source-review-request-0b01804f/request-payload-original.json",
+      "bytes": 7007,
+      "sha256": "5a1fa6dc37e5698e3ec4bd6b9e8627f1e5b38639f3eef4ee5adfa654483e413d"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/exact-source-review-request-0b01804f/tooling-source-index.json",
+      "bytes": 1664,
+      "sha256": "38dbb069d4c6fbb7d8aa8500a164a5bf9e7e1a1da675becd24882149f42ae483"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/request-forward-metadata-exact-source-review-once.py",
+      "bytes": 8292,
+      "sha256": "38b223a0ce41da844708c009343b09eabe199e7a6e15b2c208c4380afa76f9f8"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/retain-forward-metadata-source-request-native-once.py",
+      "bytes": 3748,
+      "sha256": "5b90d71a7bec806ef9ab2f26f5135cc5425bee63474cd75395080e209a7d30a1"
+    },
+    {
+      "path": "WP/audit-release-eb6de2e8/README.md",
+      "bytes": 417795,
+      "sha256": "55464b60ee6efb320ff00a10f58991299dd728f0a39158766c00b2066f490a0c"
+    }
+  ]
+}
