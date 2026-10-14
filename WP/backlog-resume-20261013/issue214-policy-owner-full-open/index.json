@@ -1,0 +1,22 @@
+{
+  "WP/backlog-resume-20261013/issue214-policy-owner-full-open/command.json": {
+    "sha256": "3b92cf56b0829a3c70407367ddf2c69705c36b8e4d5e9fc061b3f8c5a4fd55f2",
+    "bytes": 1004
+  },
+  "WP/backlog-resume-20261013/issue214-policy-owner-full-open/config-original.json": {
+    "sha256": "956f93ab96395948429cc6d2033b5a63f1fbf84a8c5cb48bcdb194039af9d16c",
+    "bytes": 6561
+  },
+  "WP/backlog-resume-20261013/issue214-policy-owner-full-open/inventory-original.json": {
+    "sha256": "b769002700a0bd62c855e50c201eaffa5aecf2a5fb6c74b57b2911a5397e72ae",
+    "bytes": 49008
+  },
+  "WP/backlog-resume-20261013/issue214-policy-owner-full-open/open-metadata.json": {
+    "sha256": "672add846f239f95c066aa127de219b0febd91e3cf1d47ed69af8af15b3e96b7",
+    "bytes": 445
+  },
+  "WP/backlog-resume-20261013/issue214-policy-owner-full-open/source-before.json": {
+    "sha256": "8009fe7a9cc1b7a94b2b02453e943c0208917260531899e02fe2bf0fce51b361",
+    "bytes": 53266
+  }
+}

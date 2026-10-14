@@ -1,0 +1,24 @@
+{
+  "argv": [
+    "cmd.exe",
+    "/d",
+    "/c",
+    "npm.cmd",
+    "test",
+    "--",
+    "--globalTeardown",
+    "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\WP\\backlog-resume-20261013\\issue214-policy-owner-local-retention-teardown.cjs",
+    "--testMatch",
+    "**/tests/**/*.test.js",
+    "--setupFilesAfterEnv",
+    "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\ownedSuiteSetup.js",
+    "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\setup.js",
+    "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\WP\\backlog-resume-20261013\\visible-test-storage-206.setup.cjs",
+    "--json",
+    "--outputFile",
+    "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\WP\\backlog-resume-20261013\\issue214-policy-owner-full\\report-original.json"
+  ],
+  "nodeOptions": "",
+  "ordinarySetupsAndAssertions": true,
+  "localVisiblePathFixtureOnly": true
+}

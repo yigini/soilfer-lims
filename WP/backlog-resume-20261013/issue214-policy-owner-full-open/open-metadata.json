@@ -1,0 +1,15 @@
+{
+  "observedUtc": "2026-10-14T04:39:24.493699+00:00",
+  "sessionId": 98407,
+  "status": "RUNNING",
+  "finalResult": null,
+  "frozenPathCount": 421,
+  "fullDiscovery": 366,
+  "expectedTests": 5565,
+  "sourcePRHead": "e47b842c2a7f6b4f06fa4c532f7460c01797821b",
+  "base": "6d750914d8565acdd496767a7dd935811b5a89b2",
+  "closedFocused": "8/218 PASS",
+  "scopeComment": 6160619940,
+  "localRetentionTeardownOnly": true,
+  "productionOperations": 0
+}
