@@ -318,6 +318,67 @@ function addOwnedInsertRefusal(f) {
     try { connection.exec("CREATE TRIGGER owned_order_attempt_refusal BEFORE INSERT ON WorkAttempt BEGIN SELECT RAISE(ABORT,'OWNED_GUARD_REFUSAL'); END;"); }
     finally { connection.close(); }
 }
+
+function addOwnedInitialRevisionRefusal(f) {
+    const connection=new Database(f.file,{fileMustExist:true});
+    try {connection.exec("CREATE TRIGGER owned_initial_order_refusal BEFORE INSERT ON SampleOrderRevision BEGIN SELECT RAISE(ABORT,'OWNED_INITIAL_ORDER_REFUSAL'); END;");}
+    finally {connection.close();}
+}
+function addOwnedInitialLineRefusal(f) {
+    const connection=new Database(f.file,{fileMustExist:true});
+    try {connection.exec("CREATE TRIGGER owned_initial_line_refusal BEFORE INSERT ON OrderLine BEGIN SELECT RAISE(ABORT,'OWNED_INITIAL_LINE_REFUSAL'); END;");}
+    finally {connection.close();}
+}
+
+test.each([['revision',addOwnedInitialRevisionRefusal],['line',addOwnedInitialLineRefusal]])(
+    'an actual initial %s INSERT failure rolls back all generated WorkItems, order rows and audits in the same intake transaction',async(_name,refuse)=>{
+        const f=await qcGateFixture({resolvedRules:false,fixedWindowPolicy:false});held.push(f);
+        const sample=await require('../helpers/workflowFixtures').createSampleFixture(f.db,{data:{id:randomUUID(),originalId:randomUUID(),
+            assignedLab:f.labId,status:'PROCESSING',requiredAnalyses:JSON.stringify([f.analysisCode])}});
+        refuse(f);const before=await f.snapshot();
+        await expect(f.db.$transaction(async tx=>{const intake=require('../../services/intakeWorkItemService');
+            await intake.generate(tx,sample,await intake.planForSample(tx,sample),f.actor);})) .rejects.toBeDefined();
+        expect(await f.snapshot()).toEqual(before);
+        expect(await f.db.workItem.count({where:{sampleId:sample.id}})).toBe(0);
+        expect(await f.db.sampleOrderRevision.count({where:{sampleId:sample.id}})).toBe(0);
+    });
+
+test('runtime-reachable missing revision and missing matching line remain zero-write refusals and have distinct read-only impact lists',async()=>{
+    for(const [revisions,contextCause] of [[0,'NO_ACTIVE_REVISION'],[1,'NO_MATCHING_LINE']]){
+        const f=await fixture({revisions,lines:0});installer.installOrderRevisions({dbPath:f.file,apply:true});
+        const before=await f.snapshot();
+        await expect(f.db.$transaction(tx=>resolveOrderLine(tx,f.items[0]))).rejects.toMatchObject({code:'ORDER_LINE_REQUIRED',statusCode:409,
+            details:{cause:'NO_LINE',contextCause}});
+        expect(await f.snapshot()).toEqual(before);
+        const physical=triples(f.file),impact=installer.installOrderRevisions({dbPath:f.file}).impact;
+        expect(triples(f.file)).toEqual(physical);
+        expect(impact.refusalCounts.NO_LINE).toBe(1);
+        expect(impact.noActiveRevisionCount).toBe(revisions===0?1:0);
+        expect(impact.noMatchingLineCount).toBe(revisions===1?1:0);
+        expect(impact.refusedOpenWorkItems).toEqual([expect.objectContaining({sampleId:f.items[0].sampleId,contextCause})]);
+    }
+});
+
+test('an approved orphan remains non-editable and its prospective amendment impact requires STOP with sample ids, without writes',async()=>{
+    const f=await qcGateFixture({resolvedRules:false,fixedWindowPolicy:false});held.push(f);
+    const helpers=require('../helpers/workflowFixtures');
+    const sample=await helpers.createSampleFixture(f.db,{data:{id:randomUUID(),originalId:randomUUID(),assignedLab:f.labId,
+        status:'APPROVED',requiredAnalyses:JSON.stringify([f.analysisCode])}});
+    const item=await helpers.createWorkItemFixture(f.db,{data:{id:randomUUID(),sampleId:sample.id,assignedLab:f.labId,
+        analysis:f.analysisCode,status:'ACCEPTED'}});
+    const before=await f.snapshot();
+    await expect(order.reviseAnalyses(sample.id,{analyses:[f.analysisCode],reason:'Orphan order remedy requested'},f.actor,{tx:f.db}))
+        .rejects.toMatchObject({code:'AMENDMENT_WORKFLOW_REQUIRED',statusCode:409});
+    await expect(f.db.$transaction(tx=>resolveOrderLine(tx,item))).rejects.toMatchObject({code:'ORDER_LINE_REQUIRED',statusCode:409});
+    expect(await f.snapshot()).toEqual(before);
+    const physical=triples(f.file),impact=installer.installOrderRevisions({dbPath:f.file}).impact;
+    expect(triples(f.file)).toEqual(physical);
+    expect(impact).toMatchObject({prospectiveApprovedAmendmentRefusalCount:1,prospectiveApprovedAmendmentSampleCount:1,
+        approvedAmendmentSampleIds:[sample.id],approvedAmendmentKitGate:'STOP_APPROVED_AMENDMENT_REMEDIATION_REQUIRED'});
+    expect(impact.prospectiveApprovedAmendmentRefusals).toEqual([expect.objectContaining({sampleId:sample.id,workItemId:item.id,
+        cause:'NO_LINE',contextCause:'NO_ACTIVE_REVISION'})]);
+    expect(impact.refusedOpenWorkItems.some(row=>row.workItemId===item.id)).toBe(false);
+});
 test('first execution maps an actual wrapped INSERT refusal and rolls back all result and audit writes', async () => {
     const f = await fixture(); installer.installOrderRevisions({dbPath:f.file,apply:true}); addOwnedInsertRefusal(f);
     const before = await f.snapshot();

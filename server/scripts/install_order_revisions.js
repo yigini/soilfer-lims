@@ -6,6 +6,7 @@ const { isNonMeasurement } = require('../services/workItemKinds');
 const { inspectOpenExecutionReservations } = require('../services/workAttemptReservationService');
 const { inspectTextureOwners, isFractionOwner } = require('../services/textureOrderContract');
 const { normalizedSelection } = require('../services/orderRevisionContract');
+const workflow = require('../workflowContract');
 const MARKER = '209_order_revision_contract';
 const fail = (code, message, differences = []) => Object.assign(new Error(message), { code, statusCode: 409, totalChanges: 0, differences });
 const hash = value => createHash('sha256').update(JSON.stringify(value)).digest('hex');
@@ -114,9 +115,21 @@ function impact(db) {
         if (result.cause) {
             const cause = result.cause === 'NO_LINE' && isFractionOwner(item) ? 'FRACTION_OWNER_LINE_REQUIRED' : result.cause;
             refusalCounts[cause]++; refused.push({ workItemId: item.id, sampleId: item.sampleId, analysis: item.analysis,
-                cause, orderLineCause: result.cause });
+                cause, orderLineCause: result.cause, ...(result.contextCause && {contextCause:result.contextCause}) });
         }
     }
+    const noActiveRevisionWorkItems=refused.filter(item=>item.contextCause==='NO_ACTIVE_REVISION');
+    const noMatchingLineWorkItems=refused.filter(item=>item.contextCause==='NO_MATCHING_LINE');
+    const prospectiveApprovedAmendmentRefusals=[];
+    for(const item of db.prepare('SELECT w.id,w.sampleId,w.analysis,s.status AS sampleStatus FROM WorkItem w JOIN Sample s ON s.id=w.sampleId ORDER BY w.id').iterate()) {
+        if(isNonMeasurement(item) || !(item.sampleStatus==='REPORTED' ||
+            ['APPROVED','ARCHIVED','DISPOSED'].includes(workflow.normalizeSampleState(item.sampleStatus)))) continue;
+        const result=chooseOrderLine(item,groups.get(item.sampleId)||[]);
+        if(result.cause) prospectiveApprovedAmendmentRefusals.push({workItemId:item.id,sampleId:item.sampleId,
+            sampleStatus:item.sampleStatus,analysis:item.analysis,cause:result.cause,
+            ...(result.contextCause && {contextCause:result.contextCause})});
+    }
+    const approvedAmendmentSampleIds=[...new Set(prospectiveApprovedAmendmentRefusals.map(item=>item.sampleId))].sort();
     const ownersBySample = new Map();
     for (const item of db.prepare("SELECT id,sampleId,analysis,status FROM WorkItem WHERE analysis IN ('SAND','SILT','CLAY') AND status<>'WAIVED' ORDER BY id").iterate()) {
         if (!ownersBySample.has(item.sampleId)) ownersBySample.set(item.sampleId, []);
@@ -132,6 +145,11 @@ function impact(db) {
             workItemIds: result.owners.map(item => item.id), missingFractions: result.missingFractions });
     }
     return { multipleActiveSampleCount: multipleActive.length, multipleActive, refusalCounts, refusedOpenWorkItems: refused,
+        noActiveRevisionCount:noActiveRevisionWorkItems.length,noActiveRevisionWorkItems,
+        noMatchingLineCount:noMatchingLineWorkItems.length,noMatchingLineWorkItems,
+        prospectiveApprovedAmendmentRefusalCount:prospectiveApprovedAmendmentRefusals.length,
+        prospectiveApprovedAmendmentSampleCount:approvedAmendmentSampleIds.length,approvedAmendmentSampleIds,prospectiveApprovedAmendmentRefusals,
+        approvedAmendmentKitGate:approvedAmendmentSampleIds.length?'STOP_APPROVED_AMENDMENT_REMEDIATION_REQUIRED':'NO_APPROVED_AMENDMENT_REFUSALS',
         fractionOwnerRefusalCount: refusalCounts.FRACTION_OWNER_LINE_REQUIRED,
         incompleteTextureOwnerSampleCount: incompleteTextureOwners.length, incompleteTextureOwners,
         continuingReservedOpenCount: continuingReservedOpenWorkItems.length, continuingReservedOpenWorkItems,

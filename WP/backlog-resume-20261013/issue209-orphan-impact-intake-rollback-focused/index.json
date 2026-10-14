@@ -1,0 +1,145 @@
+{
+  "retainedUtc": "2026-10-14T12:06:18.033629+00:00",
+  "status": "CLOSED_ORPHAN_IMPACT_INTAKE_ROLLBACK_PASS",
+  "summary": {
+    "closedUtc": "2026-10-14T12:03:50.067591+00:00",
+    "exit": 0,
+    "suites": 6,
+    "tests": 214,
+    "passedTests": 214,
+    "failed": 0,
+    "pending": 0,
+    "todo": 0,
+    "sourceUnchanged": true,
+    "selectedInventoryEqual": true,
+    "fullDiscovery": 370,
+    "ordinarySetups": true,
+    "workerIdleMemoryLimit": 512000000,
+    "productionOperations": 0,
+    "status": "PASS"
+  },
+  "scopeComments": [
+    6163271808,
+    6166518424,
+    6167740581
+  ],
+  "sourceDraftPaths": [
+    ".gitattributes",
+    "Dockerfile",
+    "client/src/components/sample/AnalysisUpdateModal.jsx",
+    "client/src/translations/en.json",
+    "client/src/translations/es-419.json",
+    "client/src/translations/es.json",
+    "client/src/translations/fr.json",
+    "client/src/translations/pt.json",
+    "docker-entrypoint.sh",
+    "docs/audit/209-order-revisions.md",
+    "server/controllers/sampleController.js",
+    "server/index.js",
+    "server/locales/en.json",
+    "server/locales/es-419.json",
+    "server/locales/es.json",
+    "server/locales/fr.json",
+    "server/locales/pt.json",
+    "server/prisma/migrations/20261014000100_order_revision_contract/migration.sql",
+    "server/prisma/schema.prisma",
+    "server/scripts/install_order_revisions.js",
+    "server/scripts/order_revision_impact.js",
+    "server/scripts/rehearsal_deployment_readiness.cjs",
+    "server/services/intakeWorkItemService.js",
+    "server/services/orderAttemptWriteService.js",
+    "server/services/orderLineResolutionService.js",
+    "server/services/orderRevisionContract.js",
+    "server/services/orderRevisionMigrationSource.js",
+    "server/services/orderService.js",
+    "server/services/sampleAnalysisStateService.js",
+    "server/services/scientificAmendmentService.js",
+    "server/services/textureOrderContract.js",
+    "server/services/workAttemptReservationService.js",
+    "server/services/workAttemptWriteService.js",
+    "server/services/workItemReconciliationService.js",
+    "server/services/workRepeatService.js",
+    "server/tests/contracts/audit_2_6_equipment_commit.test.js",
+    "server/tests/contracts/audit_3_1_attempt_execution.test.js",
+    "server/tests/contracts/audit_3_1_attempt_sql_guards.test.js",
+    "server/tests/contracts/audit_3_3_separate_texture.test.js",
+    "server/tests/contracts/audit_6_1_non_scientific_authorisation.test.js",
+    "server/tests/contracts/deployment_readiness_bootstrap.test.js",
+    "server/tests/contracts/edit_analyses_permission.test.js",
+    "server/tests/contracts/issue_206_sample_containers.test.js",
+    "server/tests/contracts/issue_209_order_revision_http.test.js",
+    "server/tests/contracts/issue_209_order_revision_integration.test.js",
+    "server/tests/contracts/issue_209_order_revision_request.test.js",
+    "server/tests/contracts/issue_209_order_revision_ui.test.js",
+    "server/tests/contracts/reconcile_analyses.test.js",
+    "server/tests/contracts/review_reports_amendments_p6.test.js",
+    "server/tests/contracts/texture_work_item_atomic.test.js",
+    "server/tests/globalSetup.js",
+    "server/tests/helpers/legacyWorkflowDatabase.js",
+    "server/tests/helpers/qcGateFixture.js",
+    "server/tests/helpers/qcWorksheetUi.js",
+    "server/tests/helpers/workAttemptFixtures.js",
+    "server/tests/helpers/workflowWriteScanner.js",
+    "server/tests/security/wiring.test.js"
+  ],
+  "applicationFullyVerified": false,
+  "productionOperations": 0,
+  "rawFiles": {
+    "WP/backlog-resume-20261013/issue209-orphan-impact-intake-rollback-focused/command.json": {
+      "bytes": 1967,
+      "sha256": "807496b8eeb19e0ad2991433d9cb3a14016c1b73becb66bc9a0d484491457f64"
+    },
+    "WP/backlog-resume-20261013/issue209-orphan-impact-intake-rollback-focused/config-original.json": {
+      "bytes": 6579,
+      "sha256": "ffe7281269116f479298d88a93583614c4dea598373ff5a0e9a444413ba78c4c"
+    },
+    "WP/backlog-resume-20261013/issue209-orphan-impact-intake-rollback-focused/config-stderr-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "WP/backlog-resume-20261013/issue209-orphan-impact-intake-rollback-focused/exit-original.txt": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "WP/backlog-resume-20261013/issue209-orphan-impact-intake-rollback-focused/inventory-original.json": {
+      "bytes": 49572,
+      "sha256": "4cd6a54d54f0fef51e1a33057359ebd21be09e237e7d6051cbcdf27375d19424"
+    },
+    "WP/backlog-resume-20261013/issue209-orphan-impact-intake-rollback-focused/inventory-stderr-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "WP/backlog-resume-20261013/issue209-orphan-impact-intake-rollback-focused/physical-retained-terminal-index.json": {
+      "bytes": 666,
+      "sha256": "0d11b4ffff42acc6161314a68a6fa515e264e625bb5a700a75534c4c6b06483d"
+    },
+    "WP/backlog-resume-20261013/issue209-orphan-impact-intake-rollback-focused/physical-retention-original.jsonl": {
+      "bytes": 613,
+      "sha256": "863110828665dc295c57f673aa17a8b7040de57c0617bc9b4b393b2f0754f3b9"
+    },
+    "WP/backlog-resume-20261013/issue209-orphan-impact-intake-rollback-focused/report-original.json": {
+      "bytes": 95264,
+      "sha256": "0475514f7329d628c9c5ae95bf7452a6424f44923ee9d74366a4c21dd98c1b29"
+    },
+    "WP/backlog-resume-20261013/issue209-orphan-impact-intake-rollback-focused/source-after.json": {
+      "bytes": 114945,
+      "sha256": "6adda8623c33a8830d654b9bc9dd4b2620a3a5c26b1b9ee246e9e0bac8cb5aaf"
+    },
+    "WP/backlog-resume-20261013/issue209-orphan-impact-intake-rollback-focused/source-before.json": {
+      "bytes": 114945,
+      "sha256": "6adda8623c33a8830d654b9bc9dd4b2620a3a5c26b1b9ee246e9e0bac8cb5aaf"
+    },
+    "WP/backlog-resume-20261013/issue209-orphan-impact-intake-rollback-focused/stderr-original.log": {
+      "bytes": 31260,
+      "sha256": "beaa93396882e4f6ebffd98d94b37e40f05ff89b9661d7bed291b9a475a7b00f"
+    },
+    "WP/backlog-resume-20261013/issue209-orphan-impact-intake-rollback-focused/stdout-original.log": {
+      "bytes": 1573,
+      "sha256": "e28d9894821fb6de69c4a212fceb2a195c6094ab6afc206058b56b6ced921559"
+    },
+    "WP/backlog-resume-20261013/issue209-orphan-impact-intake-rollback-focused/summary.json": {
+      "bytes": 362,
+      "sha256": "aed20eb01df976694a1b507bd23616aaa0dcc3bd238ad473d1db40337c98d47a"
+    }
+  }
+}

@@ -42,3 +42,15 @@ Either nonzero count requires YY to see its sample list before the gate. Claudio
 reviews these counts, and YY sees any refusal list before the fresh release gate.
 All retained-copy allocations must be included in disk accounting. This document
 does not authorize production collection or an installer attempt.
+
+The released 48d intake could retain WorkItems after an initial-order failure.
+Those runtime-reachable missing-order contexts remain zero-write refusals in
+#209. The kit distinguishes no ACTIVE revision from an ACTIVE revision with no
+matching line, using the execution resolver's actual decision. It also lists
+prospective refusals for measurement owners on APPROVED, REPORTED, archived or
+disposed samples. Operational tasks do not create measurement attempts.
+The approved-amendment list must be measured as zero before proceeding. A
+nonzero list requires STOP, YY's sample list and a separate Claudio-reviewed
+forward remedy. #209 adds no amendment-side order step and keeps the approved
+edit boundary. Audit requests list runtime-reachable gaps and fixture-only
+current-intake context gaps separately.

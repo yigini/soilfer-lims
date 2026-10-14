@@ -3,7 +3,7 @@ const rules = require('./workflowStateRules');
 
 function chooseOrderLine(item, revisions) {
     if (revisions.length > 1) return { cause: 'MULTIPLE_ACTIVE_REVISIONS' };
-    if (revisions.length !== 1) return { cause: 'NO_LINE' };
+    if (revisions.length !== 1) return { cause: 'NO_LINE', contextCause: 'NO_ACTIVE_REVISION' };
     const codes = normalizeAnalysisCodes([item.analysis]);
     if (codes.length !== 1) return { cause: 'AMBIGUOUS_LINE' };
     const lines = revisions[0].lines.filter(line => line.status === 'ACTIVE');
@@ -12,8 +12,9 @@ function chooseOrderLine(item, revisions) {
         const normalized = normalizeAnalysisCodes([line.analysis]);
         return line.workItemId == null && normalized.length === 1 && normalized[0] === codes[0];
     });
-    if (matches.length !== 1) return { cause: matches.length ? 'AMBIGUOUS_LINE' : 'NO_LINE' };
-    if (!normalizeAnalysisCodes([matches[0].analysis]).includes(codes[0])) return { cause: 'NO_LINE' };
+    if (matches.length !== 1) return matches.length ? { cause: 'AMBIGUOUS_LINE' }
+        : { cause: 'NO_LINE', contextCause: 'NO_MATCHING_LINE' };
+    if (!normalizeAnalysisCodes([matches[0].analysis]).includes(codes[0])) return { cause: 'NO_LINE', contextCause: 'NO_MATCHING_LINE' };
     return { orderLineId: matches[0].id, revisionId: revisions[0].id,
         resolution: linked.length ? 'LINKED' : 'LEGACY_SINGLE_MATCH' };
 }
@@ -28,7 +29,7 @@ async function resolveOrderLine(tx, item) {
     rules.requireTransaction(tx);
     const outcome = await inspectOrderLine(tx, item);
     if (outcome.cause) throw new rules.TransitionError('A reasoned order revision with the complete analysis set is required before starting this execution.',
-        409, 'ORDER_LINE_REQUIRED', { cause: outcome.cause, workItemId: item.id });
+        409, 'ORDER_LINE_REQUIRED', { cause: outcome.cause, ...(outcome.contextCause && {contextCause:outcome.contextCause}), workItemId: item.id });
     return outcome.orderLineId;
 }
 
