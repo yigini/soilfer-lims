@@ -1,0 +1,20 @@
+{
+  "preparedBoundaryUtc": "2026-10-14T07:00:24.136981+00:00",
+  "head": "5e0b32830f961b3236c7cf8f74cf8f676e98fbaa",
+  "tree": "f2152e240b355cd141612b783c6ccf04f5c8383a",
+  "base": "6d750914d8565acdd496767a7dd935811b5a89b2",
+  "run": 38524553288,
+  "requiredSuites": 366,
+  "requiredTests": 5566,
+  "sourcePathCount": 59,
+  "terminalRetainerUnused": true,
+  "auditRequestHelperUnused": true,
+  "oldFailedHeadHelpersMustNeverExecute": true,
+  "finalRequestSent": false,
+  "productionOperations": 0,
+  "helperSha256": {
+    "prepare-pr296-post-probe-ci-audit-successors-once.py": "57700dded00144e38156ce77951bc8f2fd4923c047ef32c36b8dc92263710f9e",
+    "retain-pr296-post-probe-new-ci-terminal-once.py": "0deda755c848e8b795134b58efb5b09345badf91d3e329e07ec2ba437393f455",
+    "request-pr296-post-probe-exact-head-audit-after-green-once.py": "e038c6d8cc1127d895919c4a2b4df9c1941301711b32d6218468145554a4c21a"
+  }
+}
