@@ -368,6 +368,7 @@ bash "${entryScript.replace(/\\/g, '/')}"
             .toMatchObject({classification:'COMPLETE_205',backfilledCount:0});
         require('../../scripts/install_instrument_imports').installInstrumentImports({ dbPath: targetDb, apply: true });
         require('../../scripts/install_sample_containers').installSampleContainers({ dbPath: targetDb, apply: true });
+        require('../../scripts/install_lab_policy_schema').installLabPolicySchema({ dbPath: targetDb, apply: true });
         require('../../scripts/install_control_charts').installControlCharts({ dbPath: targetDb, apply: true });
         const hashDb = () => createHash('sha256').update(fs.readFileSync(targetDb)).digest('hex');
         const beforeSha = hashDb();
@@ -428,6 +429,8 @@ bash "${entryScript.replace(/\\/g, '/')}"
                 `node "${path.join(serverDir, 'scripts/install_sample_containers.js').replace(/\\/g, '/')}"`)
             .replaceAll('node scripts/install_control_charts.js',
                 `node "${path.join(serverDir, 'scripts/install_control_charts.js').replace(/\\/g, '/')}"`)
+            .replaceAll('node scripts/install_lab_policy_schema.js',
+                `node "${path.join(serverDir, 'scripts/install_lab_policy_schema.js').replace(/\\/g, '/')}"`)
             .replaceAll('node scripts/install_result_raw_input.js',
                 `node "${path.join(serverDir, 'scripts/install_result_raw_input.js').replace(/\\/g, '/')}"`)
             .replace(/node scripts\/migrate_[^\n]+/g, '# noop migration');

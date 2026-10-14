@@ -83,3 +83,35 @@ affected before a single-use gate. No production collection or new release is
 authorised merely by the existence of this script.
 
 The issue remains open until actual deployment and Claudio's post-deploy check.
+
+## Canonical policy-schema prerequisite
+
+Claudio6160619940 accepts the prerequisite owner inside PR296. CI38467368095
+passed the server tests and builds, then failed Scenario6 on its real PRE_199
+baseline with `QC_CHART_PREREQUISITE_REQUIRED`. That baseline lacks policy
+storage required by `policyService`.
+
+`install_lab_policy_schema.js` runs before214 in the default entrypoint and
+readiness order. It binds the unchanged `20261004085500` migration to SHA256
+`fa6ef0563f80704dbc4ee08d90ceae91f632c912813ca037221b02aa03ef7b70`.
+ABSENT creates only the two empty tables and canonical indexes, plus nullable
+`Report.policyVersion` only if absent. PRESENT, including the exact Prisma
+equivalent, is NO_OP with zero changes. Partial storage, wrong definitions or
+types, and source tampering refuse with zero changes; there is no normalization,
+policy row insertion, override, backfill, or missing-table catch.
+
+Read-only classification hashes and copies the original DB/WAL/SHM into a fresh
+retained snapshot, then opens only that snapshot with SQLite. A direct SQLite
+read-only connection can create missing WAL/SHM sidecars. The snapshot path and
+original hashes are returned; a changed source refuses without retry. Include
+this retained allocation in the kit's disk accounting; do not clean it up.
+
+The eventual read-only release-kit dry run must include:
+
+```sh
+node scripts/install_lab_policy_schema.js --db /explicit/database.sqlite --dry-run
+```
+
+Production already carries219 and must classify PRESENT/NO_OP. Any other
+classification stops the kit review and must be reported without an apply.
+This source change performs no production collection or operation.
