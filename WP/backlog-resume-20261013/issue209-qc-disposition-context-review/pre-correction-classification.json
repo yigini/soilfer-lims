@@ -1,0 +1,293 @@
+{
+  "createdUtc": "2026-10-14T16:24:00.756664+00:00",
+  "reviewedBeforeChanges": true,
+  "originalFailedCases": 20,
+  "cases": [
+    {
+      "suite": "qc_disposition_release_gate.test.js",
+      "test": "QC Batch Inspection, Disposition & Release Gates Contract Tests (#118) 1. GET /api/qc/batches/:id returns canonical batch with actual control values, affected items, and scope protection",
+      "originalFailureSha256": "0902d7db81a11e2ee196c9c0a1c48c9256b94220a4527ba4f0e50f2d40cc399c",
+      "originalCaseLineNumbers": [
+        "144"
+      ],
+      "classification": "SHARED_BEFOREALL_POSITIVE_ACCEPTED_WITNESS_MISSING_ORDER; LATER_WITNESSES_AND_FUTURE_REPEAT_RESERVATIONS_SOURCE_REVIEWED",
+      "sourceDecision": "Initial accepted PH_H2O witness, seventeen direct evidence sites and two REANALYZE setups receive explicit usable legacy NULL order lines in NEW owned fixture assembly. Read actual existing canonical WIs; preserve retained line identities; append only a line for a newly assembled additional owner. Duplicate children share the unchanged exact legacy match; no new owners or historical relink. Manual-invalid/sensor/unknown/malformed/QC-only flags, all scalar values/units, terminal/published/superseded records, roles/scope/idempotency/queue/conflict/concurrency/batch-membership/history/cleanup assertions remain unchanged.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d absent-order WIs remain runtime-reachable zero-write refused; separate readonly noACTIVE/noMatching/fraction and approvednonzeroSTOP lists per6167740581. No automatic runtime correction."
+    },
+    {
+      "suite": "qc_disposition_release_gate.test.js",
+      "test": "QC Batch Inspection, Disposition & Release Gates Contract Tests (#118) 2. Unresolved QC_FAIL strictly blocks downstream sample approval and report release",
+      "originalFailureSha256": "0902d7db81a11e2ee196c9c0a1c48c9256b94220a4527ba4f0e50f2d40cc399c",
+      "originalCaseLineNumbers": [
+        "144"
+      ],
+      "classification": "SHARED_BEFOREALL_POSITIVE_ACCEPTED_WITNESS_MISSING_ORDER; LATER_WITNESSES_AND_FUTURE_REPEAT_RESERVATIONS_SOURCE_REVIEWED",
+      "sourceDecision": "Initial accepted PH_H2O witness, seventeen direct evidence sites and two REANALYZE setups receive explicit usable legacy NULL order lines in NEW owned fixture assembly. Read actual existing canonical WIs; preserve retained line identities; append only a line for a newly assembled additional owner. Duplicate children share the unchanged exact legacy match; no new owners or historical relink. Manual-invalid/sensor/unknown/malformed/QC-only flags, all scalar values/units, terminal/published/superseded records, roles/scope/idempotency/queue/conflict/concurrency/batch-membership/history/cleanup assertions remain unchanged.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d absent-order WIs remain runtime-reachable zero-write refused; separate readonly noACTIVE/noMatching/fraction and approvednonzeroSTOP lists per6167740581. No automatic runtime correction."
+    },
+    {
+      "suite": "qc_disposition_release_gate.test.js",
+      "test": "QC Batch Inspection, Disposition & Release Gates Contract Tests (#118) 3. POST /api/qc/batches/:id/disposition enforces manager role, scope, and non-empty reason",
+      "originalFailureSha256": "0902d7db81a11e2ee196c9c0a1c48c9256b94220a4527ba4f0e50f2d40cc399c",
+      "originalCaseLineNumbers": [
+        "144"
+      ],
+      "classification": "SHARED_BEFOREALL_POSITIVE_ACCEPTED_WITNESS_MISSING_ORDER; LATER_WITNESSES_AND_FUTURE_REPEAT_RESERVATIONS_SOURCE_REVIEWED",
+      "sourceDecision": "Initial accepted PH_H2O witness, seventeen direct evidence sites and two REANALYZE setups receive explicit usable legacy NULL order lines in NEW owned fixture assembly. Read actual existing canonical WIs; preserve retained line identities; append only a line for a newly assembled additional owner. Duplicate children share the unchanged exact legacy match; no new owners or historical relink. Manual-invalid/sensor/unknown/malformed/QC-only flags, all scalar values/units, terminal/published/superseded records, roles/scope/idempotency/queue/conflict/concurrency/batch-membership/history/cleanup assertions remain unchanged.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d absent-order WIs remain runtime-reachable zero-write refused; separate readonly noACTIVE/noMatching/fraction and approvednonzeroSTOP lists per6167740581. No automatic runtime correction."
+    },
+    {
+      "suite": "qc_disposition_release_gate.test.js",
+      "test": "QC Batch Inspection, Disposition & Release Gates Contract Tests (#118) 4. Resending identical manager disposition is idempotent and does not create duplicate audit entries",
+      "originalFailureSha256": "0902d7db81a11e2ee196c9c0a1c48c9256b94220a4527ba4f0e50f2d40cc399c",
+      "originalCaseLineNumbers": [
+        "144"
+      ],
+      "classification": "SHARED_BEFOREALL_POSITIVE_ACCEPTED_WITNESS_MISSING_ORDER; LATER_WITNESSES_AND_FUTURE_REPEAT_RESERVATIONS_SOURCE_REVIEWED",
+      "sourceDecision": "Initial accepted PH_H2O witness, seventeen direct evidence sites and two REANALYZE setups receive explicit usable legacy NULL order lines in NEW owned fixture assembly. Read actual existing canonical WIs; preserve retained line identities; append only a line for a newly assembled additional owner. Duplicate children share the unchanged exact legacy match; no new owners or historical relink. Manual-invalid/sensor/unknown/malformed/QC-only flags, all scalar values/units, terminal/published/superseded records, roles/scope/idempotency/queue/conflict/concurrency/batch-membership/history/cleanup assertions remain unchanged.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d absent-order WIs remain runtime-reachable zero-write refused; separate readonly noACTIVE/noMatching/fraction and approvednonzeroSTOP lists per6167740581. No automatic runtime correction."
+    },
+    {
+      "suite": "qc_disposition_release_gate.test.js",
+      "test": "QC Batch Inspection, Disposition & Release Gates Contract Tests (#118) 5. Manager disposition override unblocks sample approval and report publication eligibility",
+      "originalFailureSha256": "0902d7db81a11e2ee196c9c0a1c48c9256b94220a4527ba4f0e50f2d40cc399c",
+      "originalCaseLineNumbers": [
+        "144"
+      ],
+      "classification": "SHARED_BEFOREALL_POSITIVE_ACCEPTED_WITNESS_MISSING_ORDER; LATER_WITNESSES_AND_FUTURE_REPEAT_RESERVATIONS_SOURCE_REVIEWED",
+      "sourceDecision": "Initial accepted PH_H2O witness, seventeen direct evidence sites and two REANALYZE setups receive explicit usable legacy NULL order lines in NEW owned fixture assembly. Read actual existing canonical WIs; preserve retained line identities; append only a line for a newly assembled additional owner. Duplicate children share the unchanged exact legacy match; no new owners or historical relink. Manual-invalid/sensor/unknown/malformed/QC-only flags, all scalar values/units, terminal/published/superseded records, roles/scope/idempotency/queue/conflict/concurrency/batch-membership/history/cleanup assertions remain unchanged.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d absent-order WIs remain runtime-reachable zero-write refused; separate readonly noACTIVE/noMatching/fraction and approvednonzeroSTOP lists per6167740581. No automatic runtime correction."
+    },
+    {
+      "suite": "qc_disposition_release_gate.test.js",
+      "test": "QC Batch Inspection, Disposition & Release Gates Contract Tests (#118) 6. Dispositioned batch clears from actionable pending exception queues while remaining in history",
+      "originalFailureSha256": "0902d7db81a11e2ee196c9c0a1c48c9256b94220a4527ba4f0e50f2d40cc399c",
+      "originalCaseLineNumbers": [
+        "144"
+      ],
+      "classification": "SHARED_BEFOREALL_POSITIVE_ACCEPTED_WITNESS_MISSING_ORDER; LATER_WITNESSES_AND_FUTURE_REPEAT_RESERVATIONS_SOURCE_REVIEWED",
+      "sourceDecision": "Initial accepted PH_H2O witness, seventeen direct evidence sites and two REANALYZE setups receive explicit usable legacy NULL order lines in NEW owned fixture assembly. Read actual existing canonical WIs; preserve retained line identities; append only a line for a newly assembled additional owner. Duplicate children share the unchanged exact legacy match; no new owners or historical relink. Manual-invalid/sensor/unknown/malformed/QC-only flags, all scalar values/units, terminal/published/superseded records, roles/scope/idempotency/queue/conflict/concurrency/batch-membership/history/cleanup assertions remain unchanged.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d absent-order WIs remain runtime-reachable zero-write refused; separate readonly noACTIVE/noMatching/fraction and approvednonzeroSTOP lists per6167740581. No automatic runtime correction."
+    },
+    {
+      "suite": "qc_disposition_release_gate.test.js",
+      "test": "QC Batch Inspection, Disposition & Release Gates Contract Tests (#118) 7. Unknown disposition decision is rejected with 400 INVALID_DISPOSITION_DECISION",
+      "originalFailureSha256": "0902d7db81a11e2ee196c9c0a1c48c9256b94220a4527ba4f0e50f2d40cc399c",
+      "originalCaseLineNumbers": [
+        "144"
+      ],
+      "classification": "SHARED_BEFOREALL_POSITIVE_ACCEPTED_WITNESS_MISSING_ORDER; LATER_WITNESSES_AND_FUTURE_REPEAT_RESERVATIONS_SOURCE_REVIEWED",
+      "sourceDecision": "Initial accepted PH_H2O witness, seventeen direct evidence sites and two REANALYZE setups receive explicit usable legacy NULL order lines in NEW owned fixture assembly. Read actual existing canonical WIs; preserve retained line identities; append only a line for a newly assembled additional owner. Duplicate children share the unchanged exact legacy match; no new owners or historical relink. Manual-invalid/sensor/unknown/malformed/QC-only flags, all scalar values/units, terminal/published/superseded records, roles/scope/idempotency/queue/conflict/concurrency/batch-membership/history/cleanup assertions remain unchanged.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d absent-order WIs remain runtime-reachable zero-write refused; separate readonly noACTIVE/noMatching/fraction and approvednonzeroSTOP lists per6167740581. No automatic runtime correction."
+    },
+    {
+      "suite": "qc_disposition_release_gate.test.js",
+      "test": "QC Batch Inspection, Disposition & Release Gates Contract Tests (#118) 8. flagBatchResults preserves non-QC invalidity flags (MANUAL_INVALID) and immutable released records",
+      "originalFailureSha256": "0902d7db81a11e2ee196c9c0a1c48c9256b94220a4527ba4f0e50f2d40cc399c",
+      "originalCaseLineNumbers": [
+        "144"
+      ],
+      "classification": "SHARED_BEFOREALL_POSITIVE_ACCEPTED_WITNESS_MISSING_ORDER; LATER_WITNESSES_AND_FUTURE_REPEAT_RESERVATIONS_SOURCE_REVIEWED",
+      "sourceDecision": "Initial accepted PH_H2O witness, seventeen direct evidence sites and two REANALYZE setups receive explicit usable legacy NULL order lines in NEW owned fixture assembly. Read actual existing canonical WIs; preserve retained line identities; append only a line for a newly assembled additional owner. Duplicate children share the unchanged exact legacy match; no new owners or historical relink. Manual-invalid/sensor/unknown/malformed/QC-only flags, all scalar values/units, terminal/published/superseded records, roles/scope/idempotency/queue/conflict/concurrency/batch-membership/history/cleanup assertions remain unchanged.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d absent-order WIs remain runtime-reachable zero-write refused; separate readonly noACTIVE/noMatching/fraction and approvednonzeroSTOP lists per6167740581. No automatic runtime correction."
+    },
+    {
+      "suite": "qc_disposition_release_gate.test.js",
+      "test": "QC Batch Inspection, Disposition & Release Gates Contract Tests (#118) 9. REANALYZE_BATCH updates associated workItems to REPEAT_REQUIRED atomically",
+      "originalFailureSha256": "0902d7db81a11e2ee196c9c0a1c48c9256b94220a4527ba4f0e50f2d40cc399c",
+      "originalCaseLineNumbers": [
+        "144"
+      ],
+      "classification": "SHARED_BEFOREALL_POSITIVE_ACCEPTED_WITNESS_MISSING_ORDER; LATER_WITNESSES_AND_FUTURE_REPEAT_RESERVATIONS_SOURCE_REVIEWED",
+      "sourceDecision": "Initial accepted PH_H2O witness, seventeen direct evidence sites and two REANALYZE setups receive explicit usable legacy NULL order lines in NEW owned fixture assembly. Read actual existing canonical WIs; preserve retained line identities; append only a line for a newly assembled additional owner. Duplicate children share the unchanged exact legacy match; no new owners or historical relink. Manual-invalid/sensor/unknown/malformed/QC-only flags, all scalar values/units, terminal/published/superseded records, roles/scope/idempotency/queue/conflict/concurrency/batch-membership/history/cleanup assertions remain unchanged.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d absent-order WIs remain runtime-reachable zero-write refused; separate readonly noACTIVE/noMatching/fraction and approvednonzeroSTOP lists per6167740581. No automatic runtime correction."
+    },
+    {
+      "suite": "qc_disposition_release_gate.test.js",
+      "test": "QC Batch Inspection, Disposition & Release Gates Contract Tests (#118) 10. audit.qc queue qcFailedCount strictly excludes dispositioned batches",
+      "originalFailureSha256": "0902d7db81a11e2ee196c9c0a1c48c9256b94220a4527ba4f0e50f2d40cc399c",
+      "originalCaseLineNumbers": [
+        "144"
+      ],
+      "classification": "SHARED_BEFOREALL_POSITIVE_ACCEPTED_WITNESS_MISSING_ORDER; LATER_WITNESSES_AND_FUTURE_REPEAT_RESERVATIONS_SOURCE_REVIEWED",
+      "sourceDecision": "Initial accepted PH_H2O witness, seventeen direct evidence sites and two REANALYZE setups receive explicit usable legacy NULL order lines in NEW owned fixture assembly. Read actual existing canonical WIs; preserve retained line identities; append only a line for a newly assembled additional owner. Duplicate children share the unchanged exact legacy match; no new owners or historical relink. Manual-invalid/sensor/unknown/malformed/QC-only flags, all scalar values/units, terminal/published/superseded records, roles/scope/idempotency/queue/conflict/concurrency/batch-membership/history/cleanup assertions remain unchanged.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d absent-order WIs remain runtime-reachable zero-write refused; separate readonly noACTIVE/noMatching/fraction and approvednonzeroSTOP lists per6167740581. No automatic runtime correction."
+    },
+    {
+      "suite": "qc_disposition_release_gate.test.js",
+      "test": "QC Batch Inspection, Disposition & Release Gates Contract Tests (#118) 11. flagBatchResults preserves invalidity on QC_PASS for unflagged, unknown-flagged, and previously rejected results",
+      "originalFailureSha256": "0902d7db81a11e2ee196c9c0a1c48c9256b94220a4527ba4f0e50f2d40cc399c",
+      "originalCaseLineNumbers": [
+        "144"
+      ],
+      "classification": "SHARED_BEFOREALL_POSITIVE_ACCEPTED_WITNESS_MISSING_ORDER; LATER_WITNESSES_AND_FUTURE_REPEAT_RESERVATIONS_SOURCE_REVIEWED",
+      "sourceDecision": "Initial accepted PH_H2O witness, seventeen direct evidence sites and two REANALYZE setups receive explicit usable legacy NULL order lines in NEW owned fixture assembly. Read actual existing canonical WIs; preserve retained line identities; append only a line for a newly assembled additional owner. Duplicate children share the unchanged exact legacy match; no new owners or historical relink. Manual-invalid/sensor/unknown/malformed/QC-only flags, all scalar values/units, terminal/published/superseded records, roles/scope/idempotency/queue/conflict/concurrency/batch-membership/history/cleanup assertions remain unchanged.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d absent-order WIs remain runtime-reachable zero-write refused; separate readonly noACTIVE/noMatching/fraction and approvednonzeroSTOP lists per6167740581. No automatic runtime correction."
+    },
+    {
+      "suite": "qc_disposition_release_gate.test.js",
+      "test": "QC Batch Inspection, Disposition & Release Gates Contract Tests (#118) 12. flagBatchResults strictly preserves immutability for published reports and terminal samples (ARCHIVED/DISPOSED)",
+      "originalFailureSha256": "0902d7db81a11e2ee196c9c0a1c48c9256b94220a4527ba4f0e50f2d40cc399c",
+      "originalCaseLineNumbers": [
+        "144"
+      ],
+      "classification": "SHARED_BEFOREALL_POSITIVE_ACCEPTED_WITNESS_MISSING_ORDER; LATER_WITNESSES_AND_FUTURE_REPEAT_RESERVATIONS_SOURCE_REVIEWED",
+      "sourceDecision": "Initial accepted PH_H2O witness, seventeen direct evidence sites and two REANALYZE setups receive explicit usable legacy NULL order lines in NEW owned fixture assembly. Read actual existing canonical WIs; preserve retained line identities; append only a line for a newly assembled additional owner. Duplicate children share the unchanged exact legacy match; no new owners or historical relink. Manual-invalid/sensor/unknown/malformed/QC-only flags, all scalar values/units, terminal/published/superseded records, roles/scope/idempotency/queue/conflict/concurrency/batch-membership/history/cleanup assertions remain unchanged.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d absent-order WIs remain runtime-reachable zero-write refused; separate readonly noACTIVE/noMatching/fraction and approvednonzeroSTOP lists per6167740581. No automatic runtime correction."
+    },
+    {
+      "suite": "qc_disposition_release_gate.test.js",
+      "test": "QC Batch Inspection, Disposition & Release Gates Contract Tests (#118) 13. Conflicting disposition decision is rejected with 409 DISPOSITION_CONFLICT",
+      "originalFailureSha256": "0902d7db81a11e2ee196c9c0a1c48c9256b94220a4527ba4f0e50f2d40cc399c",
+      "originalCaseLineNumbers": [
+        "144"
+      ],
+      "classification": "SHARED_BEFOREALL_POSITIVE_ACCEPTED_WITNESS_MISSING_ORDER; LATER_WITNESSES_AND_FUTURE_REPEAT_RESERVATIONS_SOURCE_REVIEWED",
+      "sourceDecision": "Initial accepted PH_H2O witness, seventeen direct evidence sites and two REANALYZE setups receive explicit usable legacy NULL order lines in NEW owned fixture assembly. Read actual existing canonical WIs; preserve retained line identities; append only a line for a newly assembled additional owner. Duplicate children share the unchanged exact legacy match; no new owners or historical relink. Manual-invalid/sensor/unknown/malformed/QC-only flags, all scalar values/units, terminal/published/superseded records, roles/scope/idempotency/queue/conflict/concurrency/batch-membership/history/cleanup assertions remain unchanged.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d absent-order WIs remain runtime-reachable zero-write refused; separate readonly noACTIVE/noMatching/fraction and approvednonzeroSTOP lists per6167740581. No automatic runtime correction."
+    },
+    {
+      "suite": "qc_disposition_release_gate.test.js",
+      "test": "QC Batch Inspection, Disposition & Release Gates Contract Tests (#118) 14. Concurrent identical dispositions resolve idempotently; conflicting concurrent decisions fail with 409",
+      "originalFailureSha256": "0902d7db81a11e2ee196c9c0a1c48c9256b94220a4527ba4f0e50f2d40cc399c",
+      "originalCaseLineNumbers": [
+        "144"
+      ],
+      "classification": "SHARED_BEFOREALL_POSITIVE_ACCEPTED_WITNESS_MISSING_ORDER; LATER_WITNESSES_AND_FUTURE_REPEAT_RESERVATIONS_SOURCE_REVIEWED",
+      "sourceDecision": "Initial accepted PH_H2O witness, seventeen direct evidence sites and two REANALYZE setups receive explicit usable legacy NULL order lines in NEW owned fixture assembly. Read actual existing canonical WIs; preserve retained line identities; append only a line for a newly assembled additional owner. Duplicate children share the unchanged exact legacy match; no new owners or historical relink. Manual-invalid/sensor/unknown/malformed/QC-only flags, all scalar values/units, terminal/published/superseded records, roles/scope/idempotency/queue/conflict/concurrency/batch-membership/history/cleanup assertions remain unchanged.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d absent-order WIs remain runtime-reachable zero-write refused; separate readonly noACTIVE/noMatching/fraction and approvednonzeroSTOP lists per6167740581. No automatic runtime correction."
+    },
+    {
+      "suite": "qc_disposition_release_gate.test.js",
+      "test": "QC Batch Inspection, Disposition & Release Gates Contract Tests (#118) 15. REANALYZE_BATCH updates only active work items, preserving ACCEPTED history and repeating completed active work",
+      "originalFailureSha256": "0902d7db81a11e2ee196c9c0a1c48c9256b94220a4527ba4f0e50f2d40cc399c",
+      "originalCaseLineNumbers": [
+        "144"
+      ],
+      "classification": "SHARED_BEFOREALL_POSITIVE_ACCEPTED_WITNESS_MISSING_ORDER; LATER_WITNESSES_AND_FUTURE_REPEAT_RESERVATIONS_SOURCE_REVIEWED",
+      "sourceDecision": "Initial accepted PH_H2O witness, seventeen direct evidence sites and two REANALYZE setups receive explicit usable legacy NULL order lines in NEW owned fixture assembly. Read actual existing canonical WIs; preserve retained line identities; append only a line for a newly assembled additional owner. Duplicate children share the unchanged exact legacy match; no new owners or historical relink. Manual-invalid/sensor/unknown/malformed/QC-only flags, all scalar values/units, terminal/published/superseded records, roles/scope/idempotency/queue/conflict/concurrency/batch-membership/history/cleanup assertions remain unchanged.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d absent-order WIs remain runtime-reachable zero-write refused; separate readonly noACTIVE/noMatching/fraction and approvednonzeroSTOP lists per6167740581. No automatic runtime correction."
+    },
+    {
+      "suite": "qc_disposition_release_gate.test.js",
+      "test": "QC Batch Inspection, Disposition & Release Gates Contract Tests (#118) 16. Multi-step probe: initial isValid:false, flags:[] -> QC_FAIL -> QC_PASS remains isValid:false",
+      "originalFailureSha256": "0902d7db81a11e2ee196c9c0a1c48c9256b94220a4527ba4f0e50f2d40cc399c",
+      "originalCaseLineNumbers": [
+        "144"
+      ],
+      "classification": "SHARED_BEFOREALL_POSITIVE_ACCEPTED_WITNESS_MISSING_ORDER; LATER_WITNESSES_AND_FUTURE_REPEAT_RESERVATIONS_SOURCE_REVIEWED",
+      "sourceDecision": "Initial accepted PH_H2O witness, seventeen direct evidence sites and two REANALYZE setups receive explicit usable legacy NULL order lines in NEW owned fixture assembly. Read actual existing canonical WIs; preserve retained line identities; append only a line for a newly assembled additional owner. Duplicate children share the unchanged exact legacy match; no new owners or historical relink. Manual-invalid/sensor/unknown/malformed/QC-only flags, all scalar values/units, terminal/published/superseded records, roles/scope/idempotency/queue/conflict/concurrency/batch-membership/history/cleanup assertions remain unchanged.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d absent-order WIs remain runtime-reachable zero-write refused; separate readonly noACTIVE/noMatching/fraction and approvednonzeroSTOP lists per6167740581. No automatic runtime correction."
+    },
+    {
+      "suite": "qc_disposition_release_gate.test.js",
+      "test": "QC Batch Inspection, Disposition & Release Gates Contract Tests (#118) 17. Multi-step probe: initial isValid:false, flags:[] -> QC_FAIL -> PROCEED_WITH_WARNING remains isValid:false",
+      "originalFailureSha256": "0902d7db81a11e2ee196c9c0a1c48c9256b94220a4527ba4f0e50f2d40cc399c",
+      "originalCaseLineNumbers": [
+        "144"
+      ],
+      "classification": "SHARED_BEFOREALL_POSITIVE_ACCEPTED_WITNESS_MISSING_ORDER; LATER_WITNESSES_AND_FUTURE_REPEAT_RESERVATIONS_SOURCE_REVIEWED",
+      "sourceDecision": "Initial accepted PH_H2O witness, seventeen direct evidence sites and two REANALYZE setups receive explicit usable legacy NULL order lines in NEW owned fixture assembly. Read actual existing canonical WIs; preserve retained line identities; append only a line for a newly assembled additional owner. Duplicate children share the unchanged exact legacy match; no new owners or historical relink. Manual-invalid/sensor/unknown/malformed/QC-only flags, all scalar values/units, terminal/published/superseded records, roles/scope/idempotency/queue/conflict/concurrency/batch-membership/history/cleanup assertions remain unchanged.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d absent-order WIs remain runtime-reachable zero-write refused; separate readonly noACTIVE/noMatching/fraction and approvednonzeroSTOP lists per6167740581. No automatic runtime correction."
+    },
+    {
+      "suite": "qc_disposition_release_gate.test.js",
+      "test": "QC Batch Inspection, Disposition & Release Gates Contract Tests (#118) 18. Initially valid results (isValid:true, flags:[]) restore to valid upon QC_PASS and PROCEED_WITH_WARNING",
+      "originalFailureSha256": "0902d7db81a11e2ee196c9c0a1c48c9256b94220a4527ba4f0e50f2d40cc399c",
+      "originalCaseLineNumbers": [
+        "144"
+      ],
+      "classification": "SHARED_BEFOREALL_POSITIVE_ACCEPTED_WITNESS_MISSING_ORDER; LATER_WITNESSES_AND_FUTURE_REPEAT_RESERVATIONS_SOURCE_REVIEWED",
+      "sourceDecision": "Initial accepted PH_H2O witness, seventeen direct evidence sites and two REANALYZE setups receive explicit usable legacy NULL order lines in NEW owned fixture assembly. Read actual existing canonical WIs; preserve retained line identities; append only a line for a newly assembled additional owner. Duplicate children share the unchanged exact legacy match; no new owners or historical relink. Manual-invalid/sensor/unknown/malformed/QC-only flags, all scalar values/units, terminal/published/superseded records, roles/scope/idempotency/queue/conflict/concurrency/batch-membership/history/cleanup assertions remain unchanged.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d absent-order WIs remain runtime-reachable zero-write refused; separate readonly noACTIVE/noMatching/fraction and approvednonzeroSTOP lists per6167740581. No automatic runtime correction."
+    },
+    {
+      "suite": "qc_disposition_release_gate.test.js",
+      "test": "QC Batch Inspection, Disposition & Release Gates Contract Tests (#118) 19. Results with unknown or malformed flags stay invalid across FAIL -> PASS",
+      "originalFailureSha256": "0902d7db81a11e2ee196c9c0a1c48c9256b94220a4527ba4f0e50f2d40cc399c",
+      "originalCaseLineNumbers": [
+        "144"
+      ],
+      "classification": "SHARED_BEFOREALL_POSITIVE_ACCEPTED_WITNESS_MISSING_ORDER; LATER_WITNESSES_AND_FUTURE_REPEAT_RESERVATIONS_SOURCE_REVIEWED",
+      "sourceDecision": "Initial accepted PH_H2O witness, seventeen direct evidence sites and two REANALYZE setups receive explicit usable legacy NULL order lines in NEW owned fixture assembly. Read actual existing canonical WIs; preserve retained line identities; append only a line for a newly assembled additional owner. Duplicate children share the unchanged exact legacy match; no new owners or historical relink. Manual-invalid/sensor/unknown/malformed/QC-only flags, all scalar values/units, terminal/published/superseded records, roles/scope/idempotency/queue/conflict/concurrency/batch-membership/history/cleanup assertions remain unchanged.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d absent-order WIs remain runtime-reachable zero-write refused; separate readonly noACTIVE/noMatching/fraction and approvednonzeroSTOP lists per6167740581. No automatic runtime correction."
+    },
+    {
+      "suite": "qc_disposition_release_gate.test.js",
+      "test": "QC Batch Inspection, Disposition & Release Gates Contract Tests (#118) 20. flagBatchResults protects SUPERSEDED reports and fails closed on DB error",
+      "originalFailureSha256": "0902d7db81a11e2ee196c9c0a1c48c9256b94220a4527ba4f0e50f2d40cc399c",
+      "originalCaseLineNumbers": [
+        "144"
+      ],
+      "classification": "SHARED_BEFOREALL_POSITIVE_ACCEPTED_WITNESS_MISSING_ORDER; LATER_WITNESSES_AND_FUTURE_REPEAT_RESERVATIONS_SOURCE_REVIEWED",
+      "sourceDecision": "Initial accepted PH_H2O witness, seventeen direct evidence sites and two REANALYZE setups receive explicit usable legacy NULL order lines in NEW owned fixture assembly. Read actual existing canonical WIs; preserve retained line identities; append only a line for a newly assembled additional owner. Duplicate children share the unchanged exact legacy match; no new owners or historical relink. Manual-invalid/sensor/unknown/malformed/QC-only flags, all scalar values/units, terminal/published/superseded records, roles/scope/idempotency/queue/conflict/concurrency/batch-membership/history/cleanup assertions remain unchanged.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d absent-order WIs remain runtime-reachable zero-write refused; separate readonly noACTIVE/noMatching/fraction and approvednonzeroSTOP lists per6167740581. No automatic runtime correction."
+    }
+  ],
+  "witnessSitesReviewed": 17,
+  "additionalReservationSitesReviewed": [
+    9,
+    15
+  ],
+  "productionOperations": 0
+}

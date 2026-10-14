@@ -1,0 +1,141 @@
+{
+  "sourceSha256": "726e810a0576ec163376e22ee4b75e9a8930dd78a02925e0de41a0fa50779d23",
+  "sites": [
+    {
+      "line": 144,
+      "statementType": "ExpressionStatement",
+      "byteOffset": 6112,
+      "indent": "        ",
+      "sampleExpression": "sample1.id",
+      "test": "beforeAll"
+    },
+    {
+      "line": 212,
+      "statementType": "ExpressionStatement",
+      "byteOffset": 9670,
+      "indent": "        ",
+      "sampleExpression": "reportId",
+      "test": "2. Unresolved QC_FAIL strictly blocks downstream sample approval and report release"
+    },
+    {
+      "line": 425,
+      "statementType": "VariableDeclaration",
+      "byteOffset": 20076,
+      "indent": "        ",
+      "sampleExpression": "releasedSample.id",
+      "test": "8. flagBatchResults preserves non-QC invalidity flags (MANUAL_INVALID) and immutable released records"
+    },
+    {
+      "line": 440,
+      "statementType": "VariableDeclaration",
+      "byteOffset": 20644,
+      "indent": "        ",
+      "sampleExpression": "manualInvalidData.sampleId",
+      "test": "8. flagBatchResults preserves non-QC invalidity flags (MANUAL_INVALID) and immutable released records"
+    },
+    {
+      "line": 577,
+      "statementType": "VariableDeclaration",
+      "byteOffset": 27684,
+      "indent": "        ",
+      "sampleExpression": "activeSample.id",
+      "test": "11. flagBatchResults preserves invalidity on QC_PASS for unflagged, unknown-flagged, and previously rejected results"
+    },
+    {
+      "line": 595,
+      "statementType": "VariableDeclaration",
+      "byteOffset": 28511,
+      "indent": "        ",
+      "sampleExpression": "activeSample.id",
+      "test": "11. flagBatchResults preserves invalidity on QC_PASS for unflagged, unknown-flagged, and previously rejected results"
+    },
+    {
+      "line": 613,
+      "statementType": "VariableDeclaration",
+      "byteOffset": 29348,
+      "indent": "        ",
+      "sampleExpression": "activeSample.id",
+      "test": "11. flagBatchResults preserves invalidity on QC_PASS for unflagged, unknown-flagged, and previously rejected results"
+    },
+    {
+      "line": 631,
+      "statementType": "VariableDeclaration",
+      "byteOffset": 30168,
+      "indent": "        ",
+      "sampleExpression": "activeSample.id",
+      "test": "11. flagBatchResults preserves invalidity on QC_PASS for unflagged, unknown-flagged, and previously rejected results"
+    },
+    {
+      "line": 688,
+      "statementType": "VariableDeclaration",
+      "byteOffset": 32881,
+      "indent": "        ",
+      "sampleExpression": "archivedSample.id",
+      "test": "12. flagBatchResults strictly preserves immutability for published reports and terminal samples (ARCHIVED/DISPOSED)"
+    },
+    {
+      "line": 715,
+      "statementType": "VariableDeclaration",
+      "byteOffset": 34033,
+      "indent": "        ",
+      "sampleExpression": "disposedSample.id",
+      "test": "12. flagBatchResults strictly preserves immutability for published reports and terminal samples (ARCHIVED/DISPOSED)"
+    },
+    {
+      "line": 750,
+      "statementType": "VariableDeclaration",
+      "byteOffset": 35482,
+      "indent": "        ",
+      "sampleExpression": "pubSample.id",
+      "test": "12. flagBatchResults strictly preserves immutability for published reports and terminal samples (ARCHIVED/DISPOSED)"
+    },
+    {
+      "line": 983,
+      "statementType": "VariableDeclaration",
+      "byteOffset": 46332,
+      "indent": "        ",
+      "sampleExpression": "sample.id",
+      "test": "16. Multi-step probe: initial isValid:false, flags:[] -> QC_FAIL -> QC_PASS remains isValid:false"
+    },
+    {
+      "line": 1034,
+      "statementType": "VariableDeclaration",
+      "byteOffset": 48720,
+      "indent": "        ",
+      "sampleExpression": "sample.id",
+      "test": "17. Multi-step probe: initial isValid:false, flags:[] -> QC_FAIL -> PROCEED_WITH_WARNING remains isValid:false"
+    },
+    {
+      "line": 1080,
+      "statementType": "VariableDeclaration",
+      "byteOffset": 50783,
+      "indent": "        ",
+      "sampleExpression": "sample.id",
+      "test": "18. Initially valid results (isValid:true, flags:[]) restore to valid upon QC_PASS and PROCEED_WITH_WARNING"
+    },
+    {
+      "line": 1134,
+      "statementType": "VariableDeclaration",
+      "byteOffset": 53283,
+      "indent": "        ",
+      "sampleExpression": "sample.id",
+      "test": "19. Results with unknown or malformed flags stay invalid across FAIL -> PASS"
+    },
+    {
+      "line": 1152,
+      "statementType": "VariableDeclaration",
+      "byteOffset": 54070,
+      "indent": "        ",
+      "sampleExpression": "sample.id",
+      "test": "19. Results with unknown or malformed flags stay invalid across FAIL -> PASS"
+    },
+    {
+      "line": 1206,
+      "statementType": "VariableDeclaration",
+      "byteOffset": 56350,
+      "indent": "        ",
+      "sampleExpression": "histSample.id",
+      "test": "20. flagBatchResults protects SUPERSEDED reports and fails closed on DB error"
+    }
+  ]
+}

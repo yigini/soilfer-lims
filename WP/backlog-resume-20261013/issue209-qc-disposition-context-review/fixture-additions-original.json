@@ -1,0 +1,30 @@
+[
+  {
+    "path": "server/tests/contracts/qc_disposition_release_gate.test.js",
+    "beforeSha256": "726e810a0576ec163376e22ee4b75e9a8930dd78a02925e0de41a0fa50779d23",
+    "afterSha256": "76b282bfea3a9adb503b9ca7e428c530535a9978443198d43a566c760b95d501",
+    "oldSourceAndEveryAssertionExactlyRecoveredByRemovingAdditions": true,
+    "additions": [
+      "await declareOwnedQcOrderContext(histSample.id);\n        ",
+      "await declareOwnedQcOrderContext(sample.id);\n        ",
+      "await declareOwnedQcOrderContext(sample.id);\n        ",
+      "await declareOwnedQcOrderContext(sample.id);\n        ",
+      "await declareOwnedQcOrderContext(sample.id);\n        ",
+      "await declareOwnedQcOrderContext(sample.id);\n        ",
+      "await declareOwnedQcOrderContext(pubSample.id);\n        ",
+      "await declareOwnedQcOrderContext(disposedSample.id);\n        ",
+      "await declareOwnedQcOrderContext(archivedSample.id);\n        ",
+      "await declareOwnedQcOrderContext(activeSample.id);\n        ",
+      "await declareOwnedQcOrderContext(activeSample.id);\n        ",
+      "await declareOwnedQcOrderContext(activeSample.id);\n        ",
+      "await declareOwnedQcOrderContext(activeSample.id);\n        ",
+      "await declareOwnedQcOrderContext(manualInvalidData.sampleId);\n        ",
+      "await declareOwnedQcOrderContext(releasedSample.id);\n        ",
+      "await declareOwnedQcOrderContext(reportId);\n        ",
+      "await declareOwnedQcOrderContext(sample1.id);\n        ",
+      "// #209: order context belongs only to this NEW owned QC fixture assembly.\nasync function declareOwnedQcOrderContext(sampleId) {\n    require('../../services/workflowStateRules').assertFixtureContext();\n    await prisma.$transaction(async tx => {\n        const main = (await tx.$queryRawUnsafe('PRAGMA database_list')).find(row => row.name === 'main');\n        const path = require('node:path'), fs = require('node:fs');\n        if (!main?.file || !fs.existsSync(main.file) || path.dirname(fs.realpathSync(main.file)) !== path.resolve(__dirname, '../.tmp'))\n            throw Error('QC order context requires this owned test database.');\n        if (process.env.PRODUCTION_DATABASE_PATH && path.resolve(main.file).toLowerCase() === path.resolve(process.env.PRODUCTION_DATABASE_PATH).toLowerCase())\n            throw Error('QC order context refuses production.');\n        const owners = await tx.workItem.findMany({ where: { sampleId, duplicateOf: null } });\n        const codes = [...new Set(owners.map(item => item.analysis.trim()))];\n        if (!codes.length) throw Error('QC order context requires existing canonical owners.');\n        const active = await tx.sampleOrderRevision.findMany({ where: { sampleId, status: 'ACTIVE' }, include: { lines: true } });\n        if (active.length > 1) throw Error('QC owned assembly requires a single declared active order.');\n        const uuid = () => require('node:crypto').randomUUID();\n        if (!active.length) {\n            await tx.sampleOrderRevision.create({ data: { id: uuid(), sampleId, version: 1, status: 'ACTIVE',\n                reason: 'Owned retained QC execution order context', requestedBy: 'system:fixture',\n                lines: { create: codes.map(analysis => ({ id: uuid(), analysis, workItemId: null, status: 'ACTIVE', isRequired: true })) } } });\n        } else for (const analysis of codes) {\n            const matching = active[0].lines.filter(line => line.analysis === analysis && line.status === 'ACTIVE');\n            if (matching.length > 1) throw Error('QC owned assembly refuses ambiguous declared lines.');\n            if (!matching.length) await tx.orderLine.create({ data: { id: uuid(), revisionId: active[0].id,\n                analysis, workItemId: null, status: 'ACTIVE', isRequired: true } });\n        }\n    });\n}\n\n",
+      "        await declareOwnedQcOrderContext(activeSample.id);\n",
+      "        await declareOwnedQcOrderContext(activeSample.id);\n"
+    ]
+  }
+]

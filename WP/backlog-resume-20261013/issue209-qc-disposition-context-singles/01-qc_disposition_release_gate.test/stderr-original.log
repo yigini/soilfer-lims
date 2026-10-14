@@ -1,0 +1,270 @@
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l2mgr-1791995119048 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l2mgr-1791995119048 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User u_l2mgr_1791995119048 (Lab: LAB-118-B-1791995119045) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at ensureScope (services/qcRunViewService.js:159:22)
+      at controllers/qcController.js:70:75
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at exports.getBatchById (controllers/qcController.js:70:22)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l1mgr-1791995119046 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l1mgr-1791995119046 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l1mgr-1791995119046 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l1tech-1791995119049 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l1tech-1791995119049 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [AUTH] RBAC Denied: User u_l1tech_1791995119049 (LAB_TECHNICIAN) attempted APPROVE_RESULTS. Allowed roles: ["SUPER_ADMIN","MASTER_USER","LAB_MANAGER"]
+
+      151 |
+      152 |         if (!allowedRoles.includes(currentRole)) {
+    > 153 |             console.warn(`[AUTH] RBAC Denied: User ${user.username} (${currentRole}) attempted ${currentKey}. Allowed roles: ${JSON.stringify(allowedRoles)}`);
+          |                     ^
+      154 |             const payload = { error: `Access denied. Role '${currentRole}' lacks permission '${currentKey}'.` };
+      155 |             if (currentKey === 'MANAGE_WORK_ATTEMPTS') {
+      156 |                 payload.code = 'WORK_ATTEMPT_FORBIDDEN';
+
+      at warn (middleware/authMiddleware.js:153:21)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at Route.dispatch (node_modules/router/lib/route.js:117:3)
+      at handle (node_modules/router/index.js:435:11)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at node_modules/router/index.js:295:15
+      at param (node_modules/router/index.js:600:14)
+      at param (node_modules/router/index.js:610:14)
+      at processParams (node_modules/router/index.js:664:3)
+      at next (node_modules/router/index.js:291:5)
+      at next (middleware/authMiddleware.js:123:9)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l2mgr-1791995119048 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l2mgr-1791995119048 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User u_l2mgr_1791995119048 (Lab: LAB-118-B-1791995119045) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at ensureScope (services/qcRunViewService.js:159:22)
+      at services/qcDispositionStateService.js:41:9
+      at Object.inTransaction (services/workflowStateRules.js:188:97)
+      at services/qcRunAuditService.js:106:28
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at inTransaction (services/workflowStateRules.js:188:60)
+      at exports.dispositionBatch (controllers/qcController.js:133:25)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l1mgr-1791995119046 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l1mgr-1791995119046 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l1mgr-1791995119046 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l1mgr-1791995119046 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l1mgr-1791995119046 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l1mgr-1791995119046 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l1mgr-1791995119046 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l1mgr-1791995119046 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l1mgr-1791995119046 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l1mgr-1791995119046 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l1mgr-1791995119046 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l1mgr-1791995119046 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l1mgr-1791995119046 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l1mgr-1791995119046 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l1mgr-1791995119046 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l1mgr-1791995119046 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l1mgr-1791995119046 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l1mgr-1791995119046 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l1mgr-1791995119046 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l1mgr-1791995119046 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l1mgr-1791995119046 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l1mgr-1791995119046 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l1mgr-1791995119046 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l1mgr-1791995119046 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l1mgr-1791995119046 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-l1mgr-1791995119046 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/qc_disposition_release_gate.test.js
+  QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
+    √ 1. GET /api/qc/batches/:id returns canonical batch with actual control values, affected items, and scope protection (109 ms)
+    √ 2. Unresolved QC_FAIL strictly blocks downstream sample approval and report release (77 ms)
+    √ 3. POST /api/qc/batches/:id/disposition enforces manager role, scope, and non-empty reason (70 ms)
+    √ 4. Resending identical manager disposition is idempotent and does not create duplicate audit entries (12 ms)
+    √ 5. Manager disposition override unblocks sample approval and report publication eligibility (8 ms)
+    √ 6. Dispositioned batch clears from actionable pending exception queues while remaining in history (45 ms)
+    √ 7. Unknown disposition decision is rejected with 400 INVALID_DISPOSITION_DECISION (9 ms)
+    √ 8. flagBatchResults preserves non-QC invalidity flags (MANUAL_INVALID) and immutable released records (91 ms)
+    √ 9. REANALYZE_BATCH updates associated workItems to REPEAT_REQUIRED atomically (166 ms)
+    √ 10. audit.qc queue qcFailedCount strictly excludes dispositioned batches (13 ms)
+    √ 11. flagBatchResults preserves invalidity on QC_PASS for unflagged, unknown-flagged, and previously rejected results (31 ms)
+    √ 12. flagBatchResults strictly preserves immutability for published reports and terminal samples (ARCHIVED/DISPOSED) (26 ms)
+    √ 13. Conflicting disposition decision is rejected with 409 DISPOSITION_CONFLICT (64 ms)
+    √ 14. Concurrent identical dispositions resolve idempotently; conflicting concurrent decisions fail with 409 (54 ms)
+    √ 15. REANALYZE_BATCH updates only active work items, preserving ACCEPTED history and repeating completed active work (66 ms)
+    √ 16. Multi-step probe: initial isValid:false, flags:[] -> QC_FAIL -> QC_PASS remains isValid:false (10 ms)
+    √ 17. Multi-step probe: initial isValid:false, flags:[] -> QC_FAIL -> PROCEED_WITH_WARNING remains isValid:false (9 ms)
+    √ 18. Initially valid results (isValid:true, flags:[]) restore to valid upon QC_PASS and PROCEED_WITH_WARNING (11 ms)
+    √ 19. Results with unknown or malformed flags stay invalid across FAIL -> PASS (17 ms)
+    √ 20. flagBatchResults protects SUPERSEDED reports and fails closed on DB error (19 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       20 passed, 20 total
+Snapshots:   0 total
+Time:        2.484 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\qc_disposition_release_gate.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\issue209-qc-disposition-context-singles\01-qc_disposition_release_gate.test\report-original.json

@@ -1,0 +1,59 @@
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User system:fixture (Lab: b3685017-d3fc-4703-876a-1f2630c88718) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/orderService.js:89:19)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at Object.reviseAnalyses (services/orderService.js:86:16)
+      at Object.<anonymous> (tests/contracts/issue_209_order_revision_integration.test.js:253:5)
+
+PASS tests/contracts/issue_209_order_revision_integration.test.js (42.54 s)
+  √ a TEXTURE target retains all existing fraction owners including completed work and fixes four linked lines in one revision (1565 ms)
+  √ one or two retained fractions refuse a TEXTURE alias with named missing owners and zero row changes (2373 ms)
+  √ TEXTURE without explicit fraction selections still preserves all existing owners; explicit removal waives them with the reason (1219 ms)
+  √ initial generation for a new four-selection sample still creates only the logical TEXTURE measurement owner (1183 ms)
+  √ kit counts separate fraction line refusals and incomplete owner samples without touching the original triple (1275 ms)
+  √ installer dry/apply/repeat retains three ACTIVE histories, every line and a null historical OPEN identity (1344 ms)
+  √ a full reasoned revision supersedes all three ACTIVE ids while every old line and attempt stays byte-equivalent (1176 ms)
+  √ legacy single-match resolution writes only the newly inserted attempt link (1192 ms)
+  √ a legacy 0-revision/0-line context refuses with NO_LINE and no row writes (1244 ms)
+  √ a legacy 1-revision/2-line context refuses with AMBIGUOUS_LINE and no row writes (1242 ms)
+  √ a legacy 2-revision/1-line context refuses with MULTIPLE_ACTIVE_REVISIONS and no row writes (1257 ms)
+  √ a retained OPEN attempt fills with its original null order-line identity (1174 ms)
+  √ two concurrent complete revisions leave exactly one ACTIVE revision (1181 ms)
+  √ raw new-attempt insertion cannot select one ambiguous legacy line (1186 ms)
+  √ a new linked line cannot have its ownership or analysis rewritten (1178 ms)
+  √ a reasoned repeat receives its resolved legacy line at the new reservation INSERT (1183 ms)
+  √ scientific amendment authorisation links only its newly reserved attempt to the current order (1206 ms)
+  √ order revisions enforce permission and laboratory scope before changing retained rows (1231 ms)
+  √ the read-only kit collector preserves an active WAL triple and accounts for every nested retained snapshot (1353 ms)
+  √ the actual shipped post-start order programme preserves an owned WAL-mode original without sidecars (1727 ms)
+  √ the read-only owner refuses partial or mismatched schema without touching the original triple: wrong type (1159 ms)
+  √ the read-only owner refuses partial or mismatched schema without touching the original triple: unreviewed foreign key (1145 ms)
+  √ the read-only owner refuses partial or mismatched schema without touching the original triple: tampered index (1164 ms)
+  √ the read-only owner refuses partial or mismatched schema without touching the original triple: partial guard (1161 ms)
+  √ an actual Prisma-wrapped native order guard returns the service-owned stable code (1254 ms)
+  √ an actual initial revision INSERT failure rolls back all generated WorkItems, order rows and audits in the same intake transaction (1203 ms)
+  √ an actual initial line INSERT failure rolls back all generated WorkItems, order rows and audits in the same intake transaction (1182 ms)
+  √ runtime-reachable missing revision and missing matching line remain zero-write refusals and have distinct read-only impact lists (2532 ms)
+  √ an approved orphan remains non-editable and its prospective amendment impact requires STOP with sample ids, without writes (1288 ms)
+  √ first execution maps an actual wrapped INSERT refusal and rolls back all result and audit writes (1183 ms)
+  √ repeat reservation maps an actual wrapped INSERT refusal and rolls back its parent transition (1211 ms)
+  √ scientific reservation maps an actual wrapped INSERT refusal and retains its PENDING authorisation (1205 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       32 passed, 32 total
+Snapshots:   0 total
+Time:        42.952 s, estimated 43 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\issue_209_order_revision_integration.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\issue209-qc-disposition-context-singles\03-issue_209_order_revision_integration.test\report-original.json

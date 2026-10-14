@@ -1,0 +1,12 @@
+{
+  "closedUtc": "2026-10-14T16:25:20.311199+00:00",
+  "suite": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\qc_disposition_release_gate.test.js",
+  "exit": 0,
+  "originalReportPresent": true,
+  "tests": 20,
+  "passed": 20,
+  "failed": 0,
+  "expectedTests": 20,
+  "sourceUnchanged": true,
+  "status": "PASS"
+}
