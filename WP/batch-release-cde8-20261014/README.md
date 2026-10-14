@@ -1,3 +1,7 @@
+## Build-only source prepared for separate review
+
+See `build-source-review-ready.md` for the five-file source graph, closed verification and exact build-only scope. The authority draft remains unapproved and no build has launched.
+
 # Batch source authority preparation for #206, #214 and #209
 
 The three source audits, merges, and main CI are complete. This directory starts a new release authority for candidate `cde8c889`; it contains no kit or execution permission. All pending build, proof, impact, exact-kit review and gate bindings remain empty in `release-authority-draft.json`.

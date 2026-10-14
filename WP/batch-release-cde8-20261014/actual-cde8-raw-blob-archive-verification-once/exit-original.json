@@ -1,0 +1,30 @@
+{
+  "closedUtc": "2026-10-14T22:15:18.083367+00:00",
+  "exitCode": 0,
+  "head": "cde8c8896f5f9d5f1ab07b0ae16b1a765e0a6367",
+  "tree": "638580d50f61254609de3abd42d93afc676a5727",
+  "verifiedGitBlobCount": 1561,
+  "selectedApplicationBlobCount": 1560,
+  "archiveBytes": 40676098,
+  "archiveSha256": "6c54dbed48f4aab4d36286dd5e2a921587c1adae51fc4856f53cd321cf86144a",
+  "sourceSha256Before": {
+    "batch_build.py": "001fd04c7efaa31423121a53135c7beeba37352db76427c6cd8526ddd80be493",
+    "batch_build_contract.py": "43b3e9ca228c07e3ceaa7645b9ae0d87099f3779c327fa336c8fa69184b367a5",
+    "launch_batch_build.py": "7cff0a41ad5cd1d4baefbce9323554f9ea8629fd2391f129f89143a552a2a8c3",
+    "prepare_batch_build.py": "e8b862b8a5136290ee1175497d37f765a8ae1b6e1000af6df9c5cac732896fa9",
+    "verify_build_guards.py": "a0a1b17c8fdb91679ed089e2834e4664c917bd00f7ea305d0058736a83ef3b23"
+  },
+  "sourceSha256After": {
+    "batch_build.py": "001fd04c7efaa31423121a53135c7beeba37352db76427c6cd8526ddd80be493",
+    "batch_build_contract.py": "43b3e9ca228c07e3ceaa7645b9ae0d87099f3779c327fa336c8fa69184b367a5",
+    "launch_batch_build.py": "7cff0a41ad5cd1d4baefbce9323554f9ea8629fd2391f129f89143a552a2a8c3",
+    "prepare_batch_build.py": "e8b862b8a5136290ee1175497d37f765a8ae1b6e1000af6df9c5cac732896fa9",
+    "verify_build_guards.py": "a0a1b17c8fdb91679ed089e2834e4664c917bd00f7ea305d0058736a83ef3b23"
+  },
+  "sourceUnchanged": true,
+  "productionConnections": 0,
+  "dockerOperations": 0,
+  "buildsLaunched": 0,
+  "archiveExtracted": false,
+  "status": "PASS"
+}

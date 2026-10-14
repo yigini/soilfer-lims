@@ -1,0 +1,14 @@
+{
+  "status": "PUBLICATION_REFUSED_BEFORE_COMMIT_OR_PUSH",
+  "evidenceKind": "TOOL_OUTPUT_TRANSCRIPTION",
+  "literalError": "The following paths are ignored by one of your .gitignore files:",
+  "commandExitCode": 1,
+  "consumedHelper": "WP/backlog-resume-20261013/publish-batch-cde8-build-source-review-once.py",
+  "partialStagingPreserved": true,
+  "sourceUnchanged": true,
+  "remoteMutations": 0,
+  "productionConnections": 0,
+  "dockerOperations": 0,
+  "buildsLaunched": 0,
+  "resolution": "Explicitly force-add only the prehashed owned source and immutable raw evidence in this unique completion"
+}

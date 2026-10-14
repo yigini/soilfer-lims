@@ -1,0 +1,23 @@
+{
+  "closedUtc": "2026-10-14T21:59:45.814235+00:00",
+  "exit": 0,
+  "sourceBefore": {
+    "batch_build_contract.py": "205f7fbcfdc45a355edace7246fb6aff5be9b88a52d95f15739e496f1e450eea",
+    "batch_build.py": "10c810672d89a453ae335ee446125af4f7e9734506586a5ed4e0c28672fbd1cc",
+    "prepare_batch_build.py": "65d4098c49642c85b9a73093a8dd5d3deed3a6f6d9311502354a664176ddc361",
+    "launch_batch_build.py": "52190eb18c0d7320a5c6d53cff471b91f3e38cee769a1923fcb70b295dbedb1a",
+    "verify_build_guards.py": "05536498625ff4549142ef3185b50cfd99ddedd6dbed3b36bd015667389a8892"
+  },
+  "sourceAfter": {
+    "batch_build_contract.py": "205f7fbcfdc45a355edace7246fb6aff5be9b88a52d95f15739e496f1e450eea",
+    "batch_build.py": "10c810672d89a453ae335ee446125af4f7e9734506586a5ed4e0c28672fbd1cc",
+    "prepare_batch_build.py": "65d4098c49642c85b9a73093a8dd5d3deed3a6f6d9311502354a664176ddc361",
+    "launch_batch_build.py": "52190eb18c0d7320a5c6d53cff471b91f3e38cee769a1923fcb70b295dbedb1a",
+    "verify_build_guards.py": "05536498625ff4549142ef3185b50cfd99ddedd6dbed3b36bd015667389a8892"
+  },
+  "sourceUnchanged": true,
+  "testFramework": "stdlib unittest with isolated in-memory archives and structured API fixtures",
+  "productionOperations": 0,
+  "buildsLaunched": 0,
+  "newSourceReview": null
+}

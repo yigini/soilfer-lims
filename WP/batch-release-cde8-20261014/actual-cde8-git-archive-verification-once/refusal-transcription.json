@@ -1,0 +1,29 @@
+{
+  "status": "REFUSED_BEFORE_EXTRACTION",
+  "exitCode": 1,
+  "evidenceKind": "TOOL_OUTPUT_TRANSCRIPTION",
+  "literalError": "RuntimeError: Archive executable mode differs from Git",
+  "reason": "Actual git archive tar.umask default produced group-write modes; no source guard relaxation",
+  "archiveExtracted": false,
+  "productionConnections": 0,
+  "dockerOperations": 0,
+  "buildsLaunched": 0,
+  "mismatches": 1560,
+  "examples": [
+    {
+      "path": ".agent/workflows/deploy.md",
+      "archiveMode": "0o664",
+      "gitMode": "100644"
+    },
+    {
+      "path": ".claude/settings.json",
+      "archiveMode": "0o664",
+      "gitMode": "100644"
+    },
+    {
+      "path": ".commitmsg",
+      "archiveMode": "0o664",
+      "gitMode": "100644"
+    }
+  ]
+}

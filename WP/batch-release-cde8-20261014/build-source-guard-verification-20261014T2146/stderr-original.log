@@ -1,0 +1,14 @@
+test_duplicate_missing_modified_and_wrong_source_inventory_refuse (__main__.ArchiveGuards.test_duplicate_missing_modified_and_wrong_source_inventory_refuse) ... ok
+test_raw_application_file_and_ignored_dependency_link (__main__.ArchiveGuards.test_raw_application_file_and_ignored_dependency_link) ... ok
+test_unsafe_paths_and_links_refuse (__main__.ArchiveGuards.test_unsafe_paths_and_links_refuse) ... ok
+test_changed_source_graph_missing_file_and_extra_file_refuse (__main__.AuthorityGuards.test_changed_source_graph_missing_file_and_extra_file_refuse) ... ok
+test_current_bound_build_scope_passes (__main__.AuthorityGuards.test_current_bound_build_scope_passes) ... ok
+test_duplicate_json_and_unsafe_roots_refuse (__main__.AuthorityGuards.test_duplicate_json_and_unsafe_roots_refuse) ... ok
+test_historical_and_expanded_bindings_refuse (__main__.AuthorityGuards.test_historical_and_expanded_bindings_refuse) ... ok
+test_old_edited_wrong_actor_and_incomplete_reviews_refuse (__main__.AuthorityGuards.test_old_edited_wrong_actor_and_incomplete_reviews_refuse) ... ok
+test_unreviewed_individual_issue_or_main_moves_refuse (__main__.AuthorityGuards.test_unreviewed_individual_issue_or_main_moves_refuse) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.005s
+
+OK

@@ -1,0 +1,203 @@
+{
+  "status": "CLOSED_BUILD_ONLY_SOURCE_AND_VERIFICATION",
+  "parentAudit": "6e4ec5a5ce7fc52a55e175d44213dd75f57f1733",
+  "files": [
+    {
+      "path": "WP/batch-release-cde8-20261014/batch_build.py",
+      "bytes": 8071,
+      "sha256": "001fd04c7efaa31423121a53135c7beeba37352db76427c6cd8526ddd80be493"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/batch_build_contract.py",
+      "bytes": 11093,
+      "sha256": "43b3e9ca228c07e3ceaa7645b9ae0d87099f3779c327fa336c8fa69184b367a5"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/launch_batch_build.py",
+      "bytes": 7760,
+      "sha256": "7cff0a41ad5cd1d4baefbce9323554f9ea8629fd2391f129f89143a552a2a8c3"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/prepare_batch_build.py",
+      "bytes": 8640,
+      "sha256": "e8b862b8a5136290ee1175497d37f765a8ae1b6e1000af6df9c5cac732896fa9"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/verify_build_guards.py",
+      "bytes": 11530,
+      "sha256": "a0a1b17c8fdb91679ed089e2834e4664c917bd00f7ea305d0058736a83ef3b23"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-source-guard-verification-20261014T2146/command.json",
+      "bytes": 787,
+      "sha256": "1c966c54aa8c41dba45ff93301b51e02c0b45bd960ad1c3e965ad0868a2e26b9"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-source-guard-verification-20261014T2146/exit-original.json",
+      "bytes": 1306,
+      "sha256": "fdb46b09b3d37bbb0fb0e8654e4f47a53e574d3ea74c4451306936bcf7fd113c"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-source-guard-verification-20261014T2146/stderr-original.log",
+      "bytes": 1322,
+      "sha256": "44fe80aff8a262a49fdeab39410d22eea9273421c9ad8724ae517fe96728de41"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-source-guard-verification-20261014T2146/stdout-original.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-source-first-root-bound-guard-verification-once/command.json",
+      "bytes": 788,
+      "sha256": "8676c28fb6ee3c9eb03f59500246cf83895b1483be9d484245371d75edc81fc3"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-source-first-root-bound-guard-verification-once/exit-original.json",
+      "bytes": 1203,
+      "sha256": "75203ef7fc9b075aea413a92057fbd60eb0162b4c09243dc78edbc5b795234fe"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-source-first-root-bound-guard-verification-once/stderr-original.log",
+      "bytes": 1645,
+      "sha256": "66e087ecc0f99dc47f7f9ef3396367a2808c46919ec33c90387f1d1d2f953339"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-source-first-root-bound-guard-verification-once/stdout-original.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-source-disk-bound-final-guard-verification-once/command.json",
+      "bytes": 788,
+      "sha256": "7f01e8fc9e21d20d3839ad57d3b65df229adf9bf9a01fa1ce1e684e9d91895f8"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-source-disk-bound-final-guard-verification-once/exit-original.json",
+      "bytes": 1203,
+      "sha256": "276404e60ac166521b045e536c18bf6e11c74b95972b28a594af357059737fce"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-source-disk-bound-final-guard-verification-once/stderr-original.log",
+      "bytes": 1961,
+      "sha256": "5d99ca84b2cd8810806824f5daf8cfbbbf0e5da1b457def012994833d53fd19b"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-source-disk-bound-final-guard-verification-once/stdout-original.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-source-net-disk-final-guard-verification-once/command.json",
+      "bytes": 788,
+      "sha256": "db46f824d3fb0e806d7cf4dd7fcc1a901e8405a3a29698c6e891e4856dce3d00"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-source-net-disk-final-guard-verification-once/exit-original.json",
+      "bytes": 1203,
+      "sha256": "94bafcac1ba336b4a865ad74a79d26d425e21b5f317dd6295d22a14d976fea83"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-source-net-disk-final-guard-verification-once/stderr-original.log",
+      "bytes": 2093,
+      "sha256": "aa7491d9dc7e6e8f61d1dd561f7493f6b53a3004825821379dd0e9fc4259c038"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-source-net-disk-final-guard-verification-once/stdout-original.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/actual-cde8-git-archive-verification-once/archive-original.tar.gz",
+      "bytes": 40766727,
+      "sha256": "1a22b74b15ee4f4a5c39f18154880d8bafe9f4087a5a3f8e7222dfa04136ce9e"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/actual-cde8-git-archive-verification-once/refusal-transcription.json",
+      "bytes": 787,
+      "sha256": "2f9f4627aff1351e32ee9d071123fec3ca01fde5f68c898027747061c0d71517"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/actual-cde8-git-archive-verification-once/source-index-original.json",
+      "bytes": 422596,
+      "sha256": "df37ea0ccbd157e88a9bd8185fe2030afcae98f6d56d7c70a354c0a54d433a00"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/actual-cde8-explicit-tar-mode-verification-once/archive-original.tar.gz",
+      "bytes": 40766928,
+      "sha256": "6ba231997dff58788bf31f6fbf928c96da67d20aa4d1f0c37cef6f504d3f0ecd"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/actual-cde8-explicit-tar-mode-verification-once/refusal-transcription.json",
+      "bytes": 686,
+      "sha256": "70bc4557bdd20a26ed1f8ef1b344954e7eaf0447308e1935e7e0be09312ce446"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/actual-cde8-explicit-tar-mode-verification-once/source-index-original.json",
+      "bytes": 422596,
+      "sha256": "df37ea0ccbd157e88a9bd8185fe2030afcae98f6d56d7c70a354c0a54d433a00"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/actual-cde8-raw-blob-archive-verification-once/archive-original.tar.gz",
+      "bytes": 40676098,
+      "sha256": "6c54dbed48f4aab4d36286dd5e2a921587c1adae51fc4856f53cd321cf86144a"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/actual-cde8-raw-blob-archive-verification-once/command-original.json",
+      "bytes": 1128,
+      "sha256": "451249642965f95b0b64c3069fd6f5ea5f562c6936cc2e3dbfaed6399e8fa2f8"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/actual-cde8-raw-blob-archive-verification-once/exit-original.json",
+      "bytes": 1571,
+      "sha256": "9887e228a13c85b7a2ed39d10fbc8bd96ea2d483ed3b68ee598f0caa44302c02"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/actual-cde8-raw-blob-archive-verification-once/guard-stderr-original.log",
+      "bytes": 2093,
+      "sha256": "aa7491d9dc7e6e8f61d1dd561f7493f6b53a3004825821379dd0e9fc4259c038"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/actual-cde8-raw-blob-archive-verification-once/guard-stdout-original.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/actual-cde8-raw-blob-archive-verification-once/source-index-original.json",
+      "bytes": 422594,
+      "sha256": "5131f35104eb197502a4b1cadabf404da462eb1ef30f76296d21e384efd614f9"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-source-review-ready.json",
+      "bytes": 1342,
+      "sha256": "cd8b2911cd564ba94a733ea78ea2872d9703e8fd99893c2e4da79e077260b2ca"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/build-source-review-ready.md",
+      "bytes": 3507,
+      "sha256": "4b6c42483fe0e24f0c5aba71a4512131bbcb21a5d60c09ad4432a7d4d09c3b20"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/verify-batch-build-raw-archive-and-guards-once.py",
+      "bytes": 2757,
+      "sha256": "25482d3831607df23104c327885b3df1b82fdcc513e47bcfb978add39089fb55"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/publish-batch-cde8-build-source-review-once.py",
+      "bytes": 9217,
+      "sha256": "ba26b9a71101e929d1c42c41a22f259bf46093934b052f2f169b640c0e95fcc7"
+    },
+    {
+      "path": "WP/audit-release-eb6de2e8/README.md",
+      "bytes": 405215,
+      "sha256": "7c24174da53a98b71b31b896f6111e5219b32a8c76ba13af400e6855f5199b48"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/README.md",
+      "bytes": 2204,
+      "sha256": "80c4110faa4d7be75b30539305a6927cca789b860ae8e6e931473abf90d63af0"
+    }
+  ],
+  "newSourceApproval": null,
+  "productionOperations": 0
+}

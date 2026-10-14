@@ -1,0 +1,22 @@
+{
+  "closedUtc": "2026-10-14T22:03:17.018473+00:00",
+  "exit": 0,
+  "sourceBefore": {
+    "batch_build_contract.py": "1f457d25160eb02c897ed402ce2c1133cf485e9ebdb38d0a752a0407d7402988",
+    "batch_build.py": "10c810672d89a453ae335ee446125af4f7e9734506586a5ed4e0c28672fbd1cc",
+    "prepare_batch_build.py": "65d4098c49642c85b9a73093a8dd5d3deed3a6f6d9311502354a664176ddc361",
+    "launch_batch_build.py": "2dd881256d4208befa26753022873d85299c99c9702e28f6219ea101ca2bdb66",
+    "verify_build_guards.py": "b3d7e2c5851928d75cdc834ba3a3d5127c1126ab94071ec4f1da35ccc53dde49"
+  },
+  "sourceAfter": {
+    "batch_build_contract.py": "1f457d25160eb02c897ed402ce2c1133cf485e9ebdb38d0a752a0407d7402988",
+    "batch_build.py": "10c810672d89a453ae335ee446125af4f7e9734506586a5ed4e0c28672fbd1cc",
+    "prepare_batch_build.py": "65d4098c49642c85b9a73093a8dd5d3deed3a6f6d9311502354a664176ddc361",
+    "launch_batch_build.py": "2dd881256d4208befa26753022873d85299c99c9702e28f6219ea101ca2bdb66",
+    "verify_build_guards.py": "b3d7e2c5851928d75cdc834ba3a3d5127c1126ab94071ec4f1da35ccc53dde49"
+  },
+  "sourceUnchanged": true,
+  "productionOperations": 0,
+  "buildsLaunched": 0,
+  "sourceReview": null
+}

@@ -1,0 +1,27 @@
+{
+  "status": "BUILD_SOURCE_REVIEW_READY_NOT_APPROVED",
+  "preparedUtc": "2026-10-14T22:16:21.725629+00:00",
+  "candidate": "cde8c8896f5f9d5f1ab07b0ae16b1a765e0a6367",
+  "tree": "638580d50f61254609de3abd42d93afc676a5727",
+  "mainCiRun": 38636615469,
+  "scope": "BUILD_ONLY_NO_DATABASE_CONNECTION_OR_VOLUME",
+  "sourceSha256": {
+    "batch_build.py": "001fd04c7efaa31423121a53135c7beeba37352db76427c6cd8526ddd80be493",
+    "batch_build_contract.py": "43b3e9ca228c07e3ceaa7645b9ae0d87099f3779c327fa336c8fa69184b367a5",
+    "launch_batch_build.py": "7cff0a41ad5cd1d4baefbce9323554f9ea8629fd2391f129f89143a552a2a8c3",
+    "prepare_batch_build.py": "e8b862b8a5136290ee1175497d37f765a8ae1b6e1000af6df9c5cac732896fa9",
+    "verify_build_guards.py": "a0a1b17c8fdb91679ed089e2834e4664c917bd00f7ea305d0058736a83ef3b23"
+  },
+  "archiveVerification": "WP/batch-release-cde8-20261014/actual-cde8-raw-blob-archive-verification-once/exit-original.json",
+  "applicationGitBlobCount": 1561,
+  "selectedApplicationBlobCount": 1560,
+  "guardTestCount": 14,
+  "originalBatchBuildRoot": "/opt/lims/releases/workflow-batch-build-cde8c889-20261014T221500Z",
+  "buildsLaunched": 0,
+  "productionConnections": 0,
+  "proofLaunches": 0,
+  "productionDeployments": 0,
+  "newSourceApproval": null,
+  "finalKitReview": null,
+  "freshGate": null
+}

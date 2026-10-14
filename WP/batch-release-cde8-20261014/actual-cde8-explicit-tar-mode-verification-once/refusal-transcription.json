@@ -1,0 +1,18 @@
+{
+  "status": "REFUSED_BEFORE_EXTRACTION",
+  "exitCode": 1,
+  "evidenceKind": "TOOL_OUTPUT_TRANSCRIPTION",
+  "literalError": "RuntimeError: Archive byte mismatch .agent/workflows/deploy.md",
+  "reason": "git archive applied export filters; strict raw-Git byte guard retained",
+  "archiveExtracted": false,
+  "productionConnections": 0,
+  "dockerOperations": 0,
+  "buildsLaunched": 0,
+  "example": {
+    "path": ".agent/workflows/deploy.md",
+    "gitBytes": 4499,
+    "archiveBytes": 4574,
+    "gitSha256": "b3620a5666c37ea4bac2c3f298cbae0a459699868147441d304d55b663b3842f",
+    "archiveSha256": "ddc692168966206bf809ebbd85b3d27cee391498c3d1c68e60805d6ea0f6a95c"
+  }
+}
