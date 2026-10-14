@@ -1,0 +1,494 @@
+PASS tests/security/audit_1_2_migration_sources.test.js
+  √ only the pinned immutable migration sources resolve: db.exec(loadWorkflowMigrationSources().evidence.sql); (21 ms)
+  √ only the pinned immutable migration sources resolve: db.exec(loadWorkflowMigrationSources().guards.sql); (3 ms)
+  √ only the pinned immutable migration sources resolve: const sources=loadWorkflowMigrationSources(); db.exec(sources.evidence.sql); (3 ms)
+  √ only the pinned immutable migration sources resolve: const sources=loadWorkflowMigrationSources(); db.exec(evidenceCreates(sources.evidence.sql)); (2 ms)
+  √ unknown imports, members or aliases remain unresolved (2 ms)
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ unknown imports, members or aliases remain unresolved (2 ms)
+  √ unknown imports, members or aliases remain unresolved
+  √ unknown imports, members or aliases remain unresolved (2 ms)
+  √ unknown imports, members or aliases remain unresolved
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ unknown imports, members or aliases remain unresolved
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ unknown imports, members or aliases remain unresolved (1 ms)
+  √ unknown imports, members or aliases remain unresolved
+  √ tampered prisma/migrations/20261005000000_workflow_state_evidence/migration.sql bytes never become a SQL exemption (3 ms)
+  √ tampered prisma/migrations/20261005000100_workflow_state_guards/migration.sql bytes never become a SQL exemption (2 ms)
+  √ tampered prisma/migrations/20261005000000_workflow_state_evidence/migration.sql bytes never become a SQL exemption (2 ms)
+  √ tampered prisma/migrations/20261005000100_workflow_state_guards/migration.sql bytes never become a SQL exemption (2 ms)
+  √ tampered prisma/migrations/20261005000000_workflow_state_evidence/migration.sql bytes never become a SQL exemption (1 ms)
+  √ tampered prisma/migrations/20261005000100_workflow_state_guards/migration.sql bytes never become a SQL exemption (2 ms)
+  √ tampered prisma/migrations/20261005000000_workflow_state_evidence/migration.sql bytes never become a SQL exemption (1 ms)
+  √ tampered prisma/migrations/20261005000100_workflow_state_guards/migration.sql bytes never become a SQL exemption (2 ms)
+  √ tampered prisma/migrations/20261005000000_workflow_state_evidence/migration.sql bytes never become a SQL exemption (2 ms)
+  √ tampered prisma/migrations/20261005000000_workflow_state_evidence/migration.sql bytes never become a SQL exemption (1 ms)
+  √ tampered services/workflowMigrationSources.js bytes never become a SQL exemption
+  √ a third registry entry changes the loader digest and stays unresolved (1 ms)
+
+PASS tests/security/audit_1_2_state_writes.test.js (22.786 s)
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.workItem.deleteMany({where:{sampleId:id}})) (3 ms)
+  √ audit gap form is one scanner finding (tests/contracts/canary.test.js / prisma.sample.deleteMany({where:{id}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / state.removeUnstartedWorkItems(prisma, {}, {actor,reason})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.project.create({data:{samples:{create:[{status:"APPROVED"}]}}})) (8 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / const nested={create:[{status:"APPROVED"}]};prisma.project.create({data:{samples:nested}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / const key="workItems";const op="deleteMany";prisma.sample.update({data:{[key]:{[op]:{}}}})) (2 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.sample.create({data:{workItems:{connect:[{id:otherSampleItem}]}}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / const relation={set:[{id}]};prisma.project.update({data:{samples:relation}}))
+  √ audit gap form is one scanner finding (controllers/canary.js / const op="disconnect";prisma.sample.update({data:{workItems:{[op]:[{id}]}}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.sample.update({where:{id},data:{workItems:{upsert:{create:{status:"ACCEPTED"},update:{status:"ACCEPTED"}}}}}))
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.sample?.update({data:{status:"APPROVED"}}))
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.sample.update?.({data:{status:"APPROVED"}}))
+  √ audit gap form is one scanner finding (controllers/canary.js / db.prepare("UPDATE main.Sample SET status = ?")) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / db.prepare("UPDATE OR ABORT main.WorkItem SET status = ?"))
+  √ audit gap form is one scanner finding (controllers/canary.js / db.exec("REPLACE INTO Sample (id,status) VALUES (1,2)"))
+  √ audit gap form is one scanner finding (controllers/canary.js / db.exec("INSERT OR REPLACE INTO main.WorkItem (id,status) VALUES (1,2)")) (1 ms)
+  √ the original rehearsal cannot reintroduce a direct Sample deletion
+  √ nested connect association has one actual authority finding (1 ms)
+  √ nested set association has one actual authority finding
+  √ nested disconnect association has one actual authority finding
+  √ the closed FK runner refuses unknown case (117 ms)
+  √ the closed FK runner refuses configured candidate (147 ms)
+  √ the #192 loader is independently byte-bound; a changed loader remains unresolved (2 ms)
+  √ the previous #191 release digest is refused; only the exact current loader and DDL are inspected (2 ms)
+  √ the #193 source resolver inspects byte-bound sql without granting workflow writer authority (2 ms)
+  √ the #193 source resolver inspects byte-bound schemaSql without granting workflow writer authority (2 ms)
+  √ the #193 source resolver inspects byte-bound guardsSql without granting workflow writer authority (1 ms)
+  √ the #206 resolver inspects only pinned sql and retains workflow write restrictions (5 ms)
+  √ the #206 resolver inspects only pinned schemaSql and retains workflow write restrictions (2 ms)
+  √ the #206 resolver inspects only pinned prismaSql and retains workflow write restrictions (1 ms)
+  √ the #206 resolver inspects only pinned counterSql and retains workflow write restrictions (1 ms)
+  √ the #206 resolver inspects only pinned guardsSql and retains workflow write restrictions (1 ms)
+  √ the #206 resolver refuses altered bytes in services/sampleContainerMigrationSource.js (1 ms)
+  √ the #206 resolver refuses altered bytes in prisma/migrations/20261013000100_sample_containers/migration.sql (1 ms)
+  √ legacy CLI launchers cannot import any fixture or test module (1 ms)
+  √ FK OFF is confined to the exact pinned synthetic branch, export and helper file (5 ms)
+  √ the #190 source resolver inspects the exact checked-in sql asset (1 ms)
+  √ the #190 source resolver inspects the exact checked-in schemaSql asset (1 ms)
+  √ the #190 source resolver inspects the exact checked-in guardsSql asset
+  √ the #190 historical factory cannot be imported by runtime or client: services/probe.js (1 ms)
+  √ the #190 historical factory cannot be imported by runtime or client: controllers/probe.js
+  √ the #190 historical factory cannot be imported by runtime or client: routes/probe.js
+  √ the #190 historical factory cannot be imported by runtime or client: scripts/probe.js (1 ms)
+  √ the #190 historical factory cannot be imported by runtime or client: ../client/src/probe.js
+  √ the #190 factory import allowlist is exact, including the named spectral refusal (1 ms)
+  √ the #191 owned result-set export is confined to seven inventoried test files without writer exemptions (7 ms)
+  √ the #190 composite positive fixture has exactly two named publication callers (4 ms)
+  √ positive attempt fixtures cannot be imported by runtime or client: services/probe.js
+  √ positive attempt fixtures cannot be imported by runtime or client: controllers/probe.js
+  √ positive attempt fixtures cannot be imported by runtime or client: routes/probe.js
+  √ positive attempt fixtures cannot be imported by runtime or client: scripts/probe.js (1 ms)
+  √ positive attempt fixtures cannot be imported by runtime or client: ../client/src/probe.js
+  √ a direct sample write in a #190 test remains a finding outside the factory
+  √ a direct workItem write in a #190 test remains a finding outside the factory (1 ms)
+  √ a direct result write in a #190 test remains a finding outside the factory
+  √ a changed #190 historical factory digest is a scanner finding (9 ms)
+  √ a changed #190 historical DDL digest is a scanner finding (17 ms)
+  √ an altered #190 loader or SQL digest restores a failing source finding: services/workAttemptMigrationSource.js
+  √ an altered #190 loader or SQL digest restores a failing source finding: prisma/migrations/20261008000100_work_attempt_contract/migration.sql (1 ms)
+  √ the unchanged duplicate-marker prerequisite loadWorkItemDuplicateMarkerSource is inspected without writer exemptions (2 ms)
+  √ the unchanged duplicate-marker prerequisite loadActiveWorkItemIndexSource is inspected without writer exemptions (2 ms)
+  √ an altered prerequisite source is a failing finding: loadWorkItemDuplicateMarkerSource / services/workItemUniquenessMigrationSource.js (1 ms)
+  √ an altered prerequisite source is a failing finding: loadActiveWorkItemIndexSource / services/workItemUniquenessMigrationSource.js (1 ms)
+  √ an altered prerequisite source is a failing finding: loadWorkItemDuplicateMarkerSource / prisma/migrations/20261004190000_add_workitem_duplicate_marker/migration.sql
+  √ an altered prerequisite source is a failing finding: loadActiveWorkItemIndexSource / prisma/migrations/20261004190100_unique_active_workitem/migration.sql (1 ms)
+  √ all handwritten runtime, script, seed and test Sample/WorkItem writes use central authorities (22049 ms)
+  √ embedded literal programs cannot hide workflow DML: const vm=require('vm');vm.runInNewContext("db.exec('REPLACE INTO main.Sample (id,status) VALUES (1,2)')") (1 ms)
+  √ embedded literal programs cannot hide workflow DML: const {spawnSync}=require('child_process');spawnSync('node',['-e',"db.exec('INSERT OR REPLACE INTO main.WorkItem (id,status) VALUES (1,2)')"])
+  √ embedded literal programs cannot hide workflow DML: const vm=require('vm');vm.runInNewContext("db.exec('UPDATE OR ABORT main.Sample SET status = 1')") (1 ms)
+  √ embedded literal programs cannot hide workflow DML: import {execSync as launch} from 'node:child_process';launch("node -e `db.exec('DELETE FROM Sample')`") (1 ms)
+  √ embedded literal programs cannot hide workflow DML: import {writeFileSync as saveProgram} from 'node:fs';saveProgram('program.cjs',"db.exec('UPDATE WorkItem SET metadata = 1')") (1 ms)
+  √ embedded literal programs cannot hide workflow DML: const {spawnSync}=require('node:child_process');spawnSync('node',['-e',"db.exec('INSERT INTO Sample (id) VALUES (1)')"])
+  √ embedded literal programs cannot hide workflow DML: const cp=require('child_process');const code=`db.prepare('UPDATE \"WorkItem\" SET result = 1')`;cp.spawn('node',['-e',code]) (1 ms)
+  √ embedded literal programs cannot hide workflow DML: const cp=require('child_process');cp.exec(`node -e \"db.exec('delete from \\\"Sample\\\"')\"`) (1 ms)
+  √ embedded literal programs cannot hide workflow DML: const fs=require('fs');fs.writeFileSync('program.cjs',`db.exec('UPDATE \"WorkItem\" SET status = 1')`) (1 ms)
+  √ embedded literal programs cannot hide workflow DML: const fs=require('fs');fs.writeFile('program.mjs','db.exec(`insert into [WorkItem] (id) values (1)`)')
+  √ embedded literal programs cannot hide workflow DML: new Function("db.exec('INSERT INTO \"Sample\" (id) VALUES (1)')") (1 ms)
+  √ embedded literal programs cannot hide workflow DML: const vm=require('vm');vm.runInNewContext("db.exec('DELETE FROM WorkItem')") (1 ms)
+  √ embedded literal programs cannot hide workflow DML: const vm=require('vm');new vm.Script("db.exec('UPDATE Sample SET metadata = 1')")
+  √ a new physical source file with embedded node-e Sample inserts fails the inventory (84 ms)
+  √ the sole deferral is byte-bound inventory; a one-byte change becomes a failing embedded writer (89 ms)
+  √ the source guard catches aliases, data variables and spreads: prisma.sample.create({data: {originalId:'fixture'}})
+  √ the source guard catches aliases, data variables and spreads: const model=prisma.workItem; model.updateMany({data:{status:'ACCEPTED'}}) (1 ms)
+  √ the source guard catches aliases, data variables and spreads: const {sample: alias}=prisma; const data={status:'APPROVED'}; alias.update({data})
+  √ the source guard catches aliases, data variables and spreads: const data={clientName:'safe'}; data.status='APPROVED'; prisma.sample.update({data}) (1 ms)
+  √ the source guard catches aliases, data variables and spreads: const data={clientName:'safe'}; const key='status'; data[key]='APPROVED'; prisma.sample.update({data}) (1 ms)
+  √ the source guard catches aliases, data variables and spreads: const patch={status:'APPROVED'}; const data={...patch}; prisma.sample.update({data}) (1 ms)
+  √ the source guard catches aliases, data variables and spreads: const args={data:{status:'APPROVED'}}; prisma.sample.update(args)
+  √ the source guard catches aliases, data variables and spreads: const {update: write}=prisma.sample; write({data:{status:'APPROVED'}})
+  √ the source guard catches aliases, data variables and spreads: const write=prisma.sample.update.bind(prisma.sample); write({data:{status:'APPROVED'}}) (1 ms)
+  √ the source guard catches aliases, data variables and spreads: const entity='workItem'; prisma[entity].upsert({create:{sampleId:'s'},update:{status:'ACCEPTED'}})
+  √ the source guard catches aliases, data variables and spreads: const delegate=prisma[Math.random()?'sample':'workItem']; delegate.create({data:{}}) (1 ms)
+  √ the source guard catches aliases, data variables and spreads: function mutate(data) { prisma.sample.update({data:{...data}}) } (1 ms)
+  √ the source guard catches aliases, data variables and spreads: const sql='UPDATE Sample SET '+'status = ?'; db.prepare(sql).run('APPROVED')
+  √ the source guard catches aliases, data variables and spreads: const table='WorkItem'; db.exec(`INSERT INTO ${table} (id,status) VALUES ('x','ACCEPTED')`)
+  √ the source guard catches aliases, data variables and spreads: prisma.$executeRaw`UPDATE WorkItem SET status=${'ACCEPTED'}`
+  √ the source guard catches aliases, data variables and spreads: function rawWrite(statement) { db.exec(statement) }
+  √ the source guard catches aliases, data variables and spreads: const fields=['status = ?']; db.prepare(`UPDATE Sample SET ${fields.join(',')}`)
+  √ a real temporary non-allowlisted test file fails the source guard (48 ms)
+  √ a shadowed file reader cannot impersonate a known schema load (1 ms)
+  √ the two exceptions apply to the named export only, never to the caller or the rest of its file (2 ms)
+  √ runtime cannot import the test helper tests/helpers/legacyWorkflowDatabase.js (2 ms)
+  √ runtime cannot import the test helper tests/helpers/rejectedGuardWrite.js (1 ms)
+  √ metadata-only updates and other models are permitted, and guard disabling is always refused (1 ms)
+  √ native pragma calls cannot disable constraints: db.pragma('foreign_keys = OFF') (1 ms)
+  √ native pragma calls cannot disable constraints: const setting='recursive_triggers=0'; database.pragma(setting)
+  √ native pragma calls cannot disable constraints: const {pragma: configure}=db; configure('foreign_keys=0')
+  √ native pragma calls cannot disable constraints: const method='pragma'; client[method]('foreign_keys = OFF') (1 ms)
+  √ native pragma reads and enabled constraints remain permitted
+  √ loaded SQL is inspected without a caller exemption: UPDATE Consignment SET declaredExpectedCount = ? WHERE id = ? (9 ms)
+  √ loaded SQL is inspected without a caller exemption: UPDATE Sample SET status = ? WHERE id = ? (3 ms)
+  √ loaded SQL is inspected without a caller exemption: PRAGMA foreign_keys = OFF (2 ms)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User audit-state-manager (Lab: OTHER-LAB) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/reviewCommitService.js:54:45)
+      at services/reviewCommitService.js:13:28
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at commitReview (services/reviewCommitService.js:49:16)
+      at Object.<anonymous> (tests/contracts/audit_1_2_state_authority.test.js:318:5)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User audit-state-manager (Lab: OTHER-LAB) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/sampleStateService.js:21:15)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at Object.<anonymous> (tests/contracts/audit_1_2_state_authority.test.js:430:5)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab AUDIT-STATE
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab AUDIT-STATE
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab AUDIT-STATE
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab AUDIT-STATE
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab AUDIT-STATE
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab AUDIT-STATE
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab AUDIT-STATE
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab AUDIT-STATE
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab AUDIT-STATE
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab AUDIT-STATE
+
+      at log (wsServer.js:305:24)
+          at async Promise.allSettled (index 0)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab AUDIT-STATE
+
+      at log (wsServer.js:305:24)
+
+PASS tests/contracts/audit_1_2_state_authority.test.js (9.649 s)
+  √ central Sample creation retains an existing caller creation action with exactly one audit (46 ms)
+  √ create nested relation commands are refused by createSample before any writes (66 ms)
+  √ create nested relation commands are refused by createWorkItem before any writes (20 ms)
+  √ create nested relation commands are refused by transitionSample before any writes (23 ms)
+  √ create nested relation commands are refused by transitionWorkItem before any writes (30 ms)
+  √ createMany nested relation commands are refused by createSample before any writes (27 ms)
+  √ createMany nested relation commands are refused by createWorkItem before any writes (24 ms)
+  √ createMany nested relation commands are refused by transitionSample before any writes (22 ms)
+  √ createMany nested relation commands are refused by transitionWorkItem before any writes (25 ms)
+  √ connectOrCreate nested relation commands are refused by createSample before any writes (35 ms)
+  √ connectOrCreate nested relation commands are refused by createWorkItem before any writes (19 ms)
+  √ connectOrCreate nested relation commands are refused by transitionSample before any writes (18 ms)
+  √ connectOrCreate nested relation commands are refused by transitionWorkItem before any writes (22 ms)
+  √ update nested relation commands are refused by createSample before any writes (21 ms)
+  √ update nested relation commands are refused by createWorkItem before any writes (18 ms)
+  √ update nested relation commands are refused by transitionSample before any writes (26 ms)
+  √ update nested relation commands are refused by transitionWorkItem before any writes (24 ms)
+  √ updateMany nested relation commands are refused by createSample before any writes (23 ms)
+  √ updateMany nested relation commands are refused by createWorkItem before any writes (23 ms)
+  √ updateMany nested relation commands are refused by transitionSample before any writes (24 ms)
+  √ updateMany nested relation commands are refused by transitionWorkItem before any writes (22 ms)
+  √ upsert nested relation commands are refused by createSample before any writes (21 ms)
+  √ upsert nested relation commands are refused by createWorkItem before any writes (22 ms)
+  √ upsert nested relation commands are refused by transitionSample before any writes (19 ms)
+  √ upsert nested relation commands are refused by transitionWorkItem before any writes (19 ms)
+  √ delete nested relation commands are refused by createSample before any writes (18 ms)
+  √ delete nested relation commands are refused by createWorkItem before any writes (20 ms)
+  √ delete nested relation commands are refused by transitionSample before any writes (21 ms)
+  √ delete nested relation commands are refused by transitionWorkItem before any writes (19 ms)
+  √ deleteMany nested relation commands are refused by createSample before any writes (21 ms)
+  √ deleteMany nested relation commands are refused by createWorkItem before any writes (19 ms)
+  √ deleteMany nested relation commands are refused by transitionSample before any writes (27 ms)
+  √ deleteMany nested relation commands are refused by transitionWorkItem before any writes (18 ms)
+  √ connect nested relation commands are refused by createSample before any writes (24 ms)
+  √ connect nested relation commands are refused by createWorkItem before any writes (19 ms)
+  √ connect nested relation commands are refused by transitionSample before any writes (18 ms)
+  √ connect nested relation commands are refused by transitionWorkItem before any writes (18 ms)
+  √ set nested relation commands are refused by createSample before any writes (17 ms)
+  √ set nested relation commands are refused by createWorkItem before any writes (23 ms)
+  √ set nested relation commands are refused by transitionSample before any writes (22 ms)
+  √ set nested relation commands are refused by transitionWorkItem before any writes (20 ms)
+  √ disconnect nested relation commands are refused by createSample before any writes (21 ms)
+  √ disconnect nested relation commands are refused by createWorkItem before any writes (24 ms)
+  √ disconnect nested relation commands are refused by transitionSample before any writes (21 ms)
+  √ disconnect nested relation commands are refused by transitionWorkItem before any writes (18 ms)
+  √ reconciliation removal retains analysis and laboratory identity in its one audit row (79 ms)
+  √ connect cannot reassociate another sample work item through caller data (46 ms)
+  √ set cannot reassociate another sample work item through caller data (48 ms)
+  √ disconnect cannot reassociate another sample work item through caller data (35 ms)
+  √ pre-analytical sample removal retains the known laboratory on its audit row (23 ms)
+  √ analyses edits refuse a final APPROVED sample, including no-op saves, with zero writes (53 ms)
+  √ analyses edits refuse a final ARCHIVED sample, including no-op saves, with zero writes (29 ms)
+  √ analyses edits refuse a final DISPOSED sample, including no-op saves, with zero writes (30 ms)
+  √ order edits refuse a final APPROVED sample, including no-op saves, with zero writes (34 ms)
+  √ order edits refuse a final ARCHIVED sample, including no-op saves, with zero writes (31 ms)
+  √ order edits refuse a final DISPOSED sample, including no-op saves, with zero writes (29 ms)
+  √ analyses adding work to SUBMITTED_FULL atomically resumes processing (85 ms)
+  √ order adding work to SUBMITTED_FULL atomically resumes processing (43 ms)
+  √ reconciliation re-reads a stale sample before writing work items (30 ms)
+  √ removal of COMPLETED refuses the full edit before writes and lists its resolution (45 ms)
+  √ removal of ON_HOLD refuses the full edit before writes and lists its resolution (52 ms)
+  √ removal of AWAITING_VERIFICATION refuses the full edit before writes and lists its resolution (47 ms)
+  √ analyses a failed order snapshot rolls back already generated work and audits (304 ms)
+  √ order a failed order snapshot rolls back already generated work and audits (61 ms)
+  √ a failed command receipt rolls back the new order, sample processing transition and work (49 ms)
+  √ a failed analysis audit rolls back a waiver and preserves its original history and review identity (50 ms)
+  √ REANALYZE_BATCH moves active NOT_ASSIGNED work to canonical repeat required and preserves scientific values (426 ms)
+  √ REANALYZE_BATCH moves active ASSIGNED work to canonical repeat required and preserves scientific values (100 ms)
+  √ REANALYZE_BATCH moves active IN_PROGRESS work to canonical repeat required and preserves scientific values (120 ms)
+  √ REANALYZE_BATCH moves active COMPLETED work to canonical repeat required and preserves scientific values (115 ms)
+  √ REANALYZE_BATCH moves active SUBMITTED work to canonical repeat required and preserves scientific values (112 ms)
+  √ REJECT_BATCH moves active NOT_ASSIGNED work to canonical repeat required and preserves scientific values (110 ms)
+  √ REJECT_BATCH moves active ASSIGNED work to canonical repeat required and preserves scientific values (94 ms)
+  √ REJECT_BATCH moves active IN_PROGRESS work to canonical repeat required and preserves scientific values (109 ms)
+  √ REJECT_BATCH moves active COMPLETED work to canonical repeat required and preserves scientific values (109 ms)
+  √ REJECT_BATCH moves active SUBMITTED work to canonical repeat required and preserves scientific values (115 ms)
+  √ QC preserves the REPEAT_REQUIRED alias and review provenance while appending history (122 ms)
+  √ QC preserves the REANALYSIS_REQUIRED alias and review provenance while appending history (100 ms)
+  √ a batch member in ON_HOLD refuses the whole QC decision before writes (126 ms)
+  √ a batch member in AWAITING_VERIFICATION refuses the whole QC decision before writes (128 ms)
+  √ QC preserves final ACCEPTED work on a PROCESSING sample (105 ms)
+  √ QC preserves final WAIVED work on a PROCESSING sample (96 ms)
+  √ QC preserves final CANCELLED work on a PROCESSING sample (102 ms)
+  √ QC preserves final IN_PROGRESS work on a APPROVED sample (104 ms)
+  √ QC preserves final IN_PROGRESS work on a ARCHIVED sample (94 ms)
+  √ QC preserves final IN_PROGRESS work on a DISPOSED sample (96 ms)
+  √ a failed QC audit rolls back disposition, history, repeat status and result flags (141 ms)
+  √ QC also preserves a RELEASED sample that existed before the additive state guards (103 ms)
+  √ central RETURN re-reads final APPROVED parent of SUBMITTED work and refuses amendments before review writes (32 ms)
+  √ central RETURN re-reads final APPROVED parent of ACCEPTED work and refuses amendments before review writes (27 ms)
+  √ central RETURN re-reads final ARCHIVED parent of SUBMITTED work and refuses amendments before review writes (26 ms)
+  √ central RETURN re-reads final ARCHIVED parent of ACCEPTED work and refuses amendments before review writes (26 ms)
+  √ central RETURN re-reads final DISPOSED parent of SUBMITTED work and refuses amendments before review writes (22 ms)
+  √ central RETURN re-reads final DISPOSED parent of ACCEPTED work and refuses amendments before review writes (30 ms)
+  √ central RETURN checks fresh parent scope before its amendment refusal and changes no rows (157 ms)
+  √ manager RETURN of a completed gate records current-result reversion in the review transaction (65 ms)
+  √ a failed gate-review evidence append rolls back the review CAS, review identity and audit (75 ms)
+  √ ordinary creation refuses advanced states before any write, and logs canonical creation (17 ms)
+  √ historical creation keeps provenance and importer identity without inventing a reviewer (8 ms)
+  √ fixture guards refuse missing flags, production paths and the working database (7 ms)
+  √ final APPROVED cannot return to processing, with no changes (18 ms)
+  √ final ARCHIVED cannot return to processing, with no changes (22 ms)
+  √ final DISPOSED cannot return to processing, with no changes (23 ms)
+  √ final CANCELLED cannot return to processing, with no changes (29 ms)
+  √ sample and work-item holds require reasons and can restore only the recorded prior status (80 ms)
+  √ legacy holds recover from history or a scoped manager choice, never a technician guess (42 ms)
+  √ stale work-item version refuses all status, history and audit writes (33 ms)
+  √ scope refusal and status/provenance override refusal write nothing (29 ms)
+  √ operational verification is action-bound; ordinary status writes cannot bypass it (46 ms)
+  √ the reviewed legacy plan preserves original values and reverts once; unmapped rows remain unchanged (152 ms)
+  √ migration fingerprint and row CAS refuse a modified plan or changed row (24 ms)
+  √ preparation reverts preserve scientific values and block review until a valid manager clearance (66 ms)
+  √ superseding a reverted result clears only the current-result block, retaining all old evidence (32 ms)
+  √ state and audit roll back together when a subsequent transaction operation fails (21 ms)
+  √ default policy completes both gates atomically and advances ACCEPTED to PROCESSING (99 ms)
+  √ analysis policy cannot be bypassed by false input; rejected verification stays pending without revert evidence (115 ms)
+  √ a request may demand stricter drying verification; acceptance of the last gate advances the sample (45 ms)
+  √ gate verification policy refuses unrelated analyses and method-specific overrides with no policy writes (6 ms)
+  √ undo approval is an amendment-only zero-write refusal for APPROVED (89 ms)
+  √ undo approval is an amendment-only zero-write refusal for ARCHIVED (23 ms)
+  √ undo approval is an amendment-only zero-write refusal for DISPOSED (21 ms)
+  √ undo approval is an amendment-only zero-write refusal for PROCESSING (19 ms)
+  √ concurrent operational verification commits one decision and refuses the stale decision without side effects (51 ms)
+  √ failed decision insertion rolls back operational state, gate flags and both audits (63 ms)
+  √ Batch and ReviewDecision backstops reject off-contract and mutable decisions with stable conflicts (35 ms)
+  √ reasoned gate revert records each current result once and preserves all analytical values (72 ms)
+  √ gate failure holds both entities and release restores their individual prior states (169 ms)
+  √ gate reversion of APPROVED sample refuses all writes (37 ms)
+  √ gate reversion of ARCHIVED sample refuses all writes (25 ms)
+  √ gate reversion of DISPOSED sample refuses all writes (26 ms)
+  √ an accepted marked gate duplicate prevents revert of the canonical gate with no writes (34 ms)
+  √ analyses same-key replay returns the original response with all-table zero writes (126 ms)
+  √ order same-key replay returns the original response with all-table zero writes (123 ms)
+  √ analyses same key with a differing reason refuses with all-table zero writes (124 ms)
+  √ order same key with a differing reason refuses with all-table zero writes (123 ms)
+  √ analyses key cannot replay identical parameters through the other mode and changes no table (103 ms)
+  √ order key cannot replay identical parameters through the other mode and changes no table (115 ms)
+  √ analyses command without a key writes its order and work without any receipt (36 ms)
+  √ order command without a key writes its order and work without any receipt (38 ms)
+
+PASS tests/contracts/deployment_readiness_bootstrap.test.js (22.006 s)
+  Deployment Readiness Bootstrap & Packaging Verification
+    √ setup.sh rejects invalid mode with exit 1 (405 ms)
+    √ setup.sh rejects Node 18 runtime with clear guidance (710 ms)
+    √ setup.sh fails fast and aborts if schema push fails (no error swallowing) (1090 ms)
+    √ setup.sh auto-populates JWT_SECRET into existing .env with blank secret (1974 ms)
+    √ entrypoint persists auto-generated JWT_SECRET across container restarts (1394 ms)
+    √ entrypoint recovers from interrupted initial setup on restart without reseeding populated installations (2128 ms)
+    √ docker-entrypoint.sh database inspection fails closed on corrupt or unreadable database (266 ms)
+    √ docker-entrypoint.sh database inspection passes cleanly on valid populated database (11134 ms)
+    √ seed.js recovers from real partial state ({ labs: 1, users: 0 }) and does not duplicate LAB01 (1073 ms)
+    √ docker compose configuration validates cleanly across local, global, and nginx overlays (1533 ms)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User system:fixture (Lab: 6456aa44-caeb-484b-a57e-c26dfd75c086) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/orderService.js:89:19)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at Object.reviseAnalyses (services/orderService.js:86:16)
+      at Object.<anonymous> (tests/contracts/issue_209_order_revision_integration.test.js:253:5)
+
+FAIL tests/contracts/issue_209_order_revision_integration.test.js (101.169 s)
+  √ a TEXTURE target retains all existing fraction owners including completed work and fixes four linked lines in one revision (2537 ms)
+  √ one or two retained fractions refuse a TEXTURE alias with named missing owners and zero row changes (4652 ms)
+  √ TEXTURE without explicit fraction selections still preserves all existing owners; explicit removal waives them with the reason (2505 ms)
+  √ initial generation for a new four-selection sample still creates only the logical TEXTURE measurement owner (2252 ms)
+  √ kit counts separate fraction line refusals and incomplete owner samples without touching the original triple (2579 ms)
+  √ installer dry/apply/repeat retains three ACTIVE histories, every line and a null historical OPEN identity (2643 ms)
+  √ a full reasoned revision supersedes all three ACTIVE ids while every old line and attempt stays byte-equivalent (2323 ms)
+  √ legacy single-match resolution writes only the newly inserted attempt link (2269 ms)
+  √ a legacy 0-revision/0-line context refuses with NO_LINE and no row writes (2439 ms)
+  √ a legacy 1-revision/2-line context refuses with AMBIGUOUS_LINE and no row writes (2358 ms)
+  √ a legacy 2-revision/1-line context refuses with MULTIPLE_ACTIVE_REVISIONS and no row writes (2451 ms)
+  √ a retained OPEN attempt fills with its original null order-line identity (2184 ms)
+  √ two concurrent complete revisions leave exactly one ACTIVE revision (2309 ms)
+  √ raw new-attempt insertion cannot select one ambiguous legacy line (2283 ms)
+  √ a new linked line cannot have its ownership or analysis rewritten (2265 ms)
+  √ a reasoned repeat receives its resolved legacy line at the new reservation INSERT (2201 ms)
+  √ scientific amendment authorisation links only its newly reserved attempt to the current order (2271 ms)
+  √ order revisions enforce permission and laboratory scope before changing retained rows (2209 ms)
+  √ the read-only kit collector preserves an active WAL triple and accounts for every nested retained snapshot (2374 ms)
+  √ the actual shipped post-start order programme preserves an owned WAL-mode original without sidecars (3085 ms)
+  √ the read-only owner refuses partial or mismatched schema without touching the original triple: wrong type (2287 ms)
+  √ the read-only owner refuses partial or mismatched schema without touching the original triple: unreviewed foreign key (2225 ms)
+  √ the read-only owner refuses partial or mismatched schema without touching the original triple: tampered index (2345 ms)
+  √ the read-only owner refuses partial or mismatched schema without touching the original triple: partial guard (2262 ms)
+  √ an actual Prisma-wrapped native order guard returns the service-owned stable code (2527 ms)
+  √ an actual initial revision INSERT failure rolls back all generated WorkItems, order rows and audits in the same intake transaction (2218 ms)
+  √ an actual initial line INSERT failure rolls back all generated WorkItems, order rows and audits in the same intake transaction (2320 ms)
+  √ runtime-reachable missing revision and missing matching line remain zero-write refusals and have distinct read-only impact lists (5246 ms)
+  √ an approved orphan remains non-editable and its prospective amendment impact requires STOP with sample ids, without writes (2585 ms)
+  √ first execution maps an actual wrapped INSERT refusal and rolls back all result and audit writes (2285 ms)
+  × approved impact excludes unmatched WAIVED and marked duplicate work while an ACCEPTED current orphan still requires STOP (2629 ms)
+  √ malformed stored fraction analyses { are listed read-only and cannot refuse schema-ready startup (2868 ms)
+  √ malformed stored fraction analyses {"TEXTURE":true} are listed read-only and cannot refuse schema-ready startup (2781 ms)
+  √ malformed stored fraction analyses [42] are listed read-only and cannot refuse schema-ready startup (2821 ms)
+  √ malformed stored fraction analyses [null] are listed read-only and cannot refuse schema-ready startup (2761 ms)
+  √ malformed stored fraction analyses [""] are listed read-only and cannot refuse schema-ready startup (2767 ms)
+  √ malformed stored fraction analyses ["   "] are listed read-only and cannot refuse schema-ready startup (2751 ms)
+  √ repeat reservation maps an actual wrapped INSERT refusal and rolls back its parent transition (2307 ms)
+  √ scientific reservation maps an actual wrapped INSERT refusal and retains its PENDING authorisation (2516 ms)
+
+  ● approved impact excludes unmatched WAIVED and marked duplicate work while an ACCEPTED current orphan still requires STOP
+
+    PrismaClientKnownRequestError: 
+    Invalid `client.workItem.create()` invocation in
+    C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workItemStateService.js:315:42
+
+      312 }
+      313 const { result, ...creationData } = data;
+      314 if (result !== undefined && options.context !== 'fixture') throw new TransitionError('New work requires its result recording workflow.', 409, 'RESULT_CACHE_AUTHORITY_REQUIRED');
+    → 315 let item = await client.workItem.create(
+    Unique constraint failed on the fields: (`sampleId`, `analysis`)
+
+      67 |
+      68 | More Information: https://pris.ly/d/execute-raw
+    > 69 | `)}var ci=({clientMethod:e,activeProvider:t})=>r=>{let n="",i;if(mr(r))n=r.sql,i={values:et(r.values),__prismaRawParameters__:!0};else if(Array.isArray(r)){let[o,...s]=r;n=o,i={values:et(s||[]),__prismaRawParameters__:!0}}else switch(t){case"sqlite":case"mysql":{n=r.sql,i={values:et(r.values),__prismaRawParameters__:!0};break}case"cockroachdb":case"postgresql":case"postgres":{n=r.text,i={values:et(r.values),__prismaRawParameters__:!0};break}case"sqlserver":{n=cl(r),i={values:et(r.values),__prismaRawParameters__:!0};break}default:throw new Error(`The ${t} provider does not support ${e}`)}return i?.values?yl(`prisma.${e}(${n}, ${i.values})`):yl(`prisma.${e}(${n})`),{query:n,parameters:i}},wl={requestArgsToMiddlewareArgs(e){return[e.strings,...e.values]},middlewareArgsToRequestArgs(e){let[t,...r]=e;return new hl.Sql(t,r)}},bl={requestArgsToMiddlewareArgs(e){return[e]},middlewareArgsToRequestArgs(e){return e[0]}};function pi(e){return function(r,n){let i,o=(s=e)=>{try{return s===void 0||s?.kind==="itx"?i??=xl(r(s)):xl(r(s))}catch(a){return Promise.reject(a)}};return{get spec(){return n},then(s,a){return o().then(s,a)},catch(s){return o().catch(s)},finally(s){return o().finally(s)},requestTransaction(s){let a=o(s);return a.requestTransaction?a.requestTransaction(s):a},[Symbol.toStringTag]:"PrismaPromise"}}}function xl(e){return typeof e.then=="function"?e:Promise.resolve(e)}var El={name:"@prisma/instrumentation-contract",version:"7.4.0",description:"Shared types and utilities for Prisma instrumentation",main:"dist/index.js",module:"dist/index.mjs",types:"dist/index.d.ts",exports:{".":{require:{types:"./dist/index.d.ts",default:"./dist/index.js"},import:{types:"./dist/index.d.mts",default:"./dist/index.mjs"}}},license:"Apache-2.0",homepage:"https://www.prisma.io",repository:{type:"git",url:"https://github.com/prisma/prisma.git",directory:"packages/instrumentation-contract"},bugs:"https://github.com/prisma/prisma/issues",scripts:{dev:"DEV=true tsx helpers/build.ts",build:"tsx helpers/build.ts",prepublishOnly:"pnpm run build",test:"vitest run"},files:["dist"],sideEffects:!1,devDependencies:{"@opentelemetry/api":"1.9.0"},peerDependencies:{"@opentelemetry/api":"^1.8"}};var lm=El.version.split(".")[0],um="PRISMA_INSTRUMENTATION",cm=`V${lm}_PRISMA_INSTRUMENTATION`,Pl=globalThis;function Tl(){let e=Pl[cm];return e?.helper?e.helper:Pl[um]?.helper}var pm={isEnabled(){return!1},getTraceParent(){return"00-10-10-00"},dispatchEngineSpans(){},getActiveContext(){},runInChildSpan(e,t){return t()}},di=class{isEnabled(){return this.getTracingHelper().isEnabled()}getTraceParent(t){return this.getTracingHelper().getTraceParent(t)}dispatchEngineSpans(t){return this.getTracingHelper().dispatchEngineSpans(t)}getActiveContext(){return this.getTracingHelper().getActiveContext()}runInChildSpan(t,r){return this.getTracingHelper().runInChildSpan(t,r)}getTracingHelper(){return Tl()??pm}};function Sl(){return new di}function Al(e,t=()=>{}){let r,n=new Promise(i=>r=i);return{then(i){return--e===0&&r(t()),i?.(n)}}}function vl(e){return typeof e=="string"?e:e.reduce((t,r)=>{let n=typeof r=="string"?r:r.level;return n==="query"?t:t&&(r==="info"||t==="info")?"info":n},void 0)}var kl=require("@prisma/client-runtime-utils");function Cl(e){if(e.action!=="findUnique"&&e.action!=="findUniqueOrThrow")return;let t=[];return e.modelName&&t.push(e.modelName),e.query.arguments&&t.push(mi(e.query.arguments)),t.push(mi(e.query.selection)),t.join("")}function mi(e){return`(${Object.keys(e).sort().map(r=>{let n=e[r];return typeof n=="object"&&n!==null?`(${r} ${mi(n)})`:r}).join(" ")})`}var dm={aggregate:!1,aggregateRaw:!1,createMany:!0,createManyAndReturn:!0,createOne:!0,deleteMany:!0,deleteOne:!0,executeRaw:!0,findFirst:!1,findFirstOrThrow:!1,findMany:!1,findRaw:!1,findUnique:!1,findUniqueOrThrow:!1,groupBy:!1,queryRaw:!1,runCommandRaw:!0,updateMany:!0,updateManyAndReturn:!0,updateOne:!0,upsertOne:!0};function fi(e){return dm[e]}var Hr=class{constructor(t){this.options=t;this.batches={}}batches;tickActive=!1;request(t){let r=this.options.batchBy(t);return r?(this.batches[r]||(this.batches[r]=[],this.tickActive||(this.tickActive=!0,process.nextTick(()=>{this.dispatchBatches(),this.tickActive=!1}))),new Promise((n,i)=>{this.batches[r].push({request:t,resolve:n,reject:i})})):this.options.singleLoader(t)}dispatchBatches(){for(let t in this.batches){let r=this.batches[t];delete this.batches[t],r.length===1?this.options.singleLoader(r[0].request).then(n=>{n instanceof Error?r[0].reject(n):r[0].resolve(n)}).catch(n=>{r[0].reject(n)}):(r.sort((n,i)=>this.options.batchOrder(n.request,i.request)),this.options.batchLoader(r.map(n=>n.request)).then(n=>{if(n instanceof Error)for(let i=0;i<r.length;i++)r[i].reject(n);else for(let i=0;i<r.length;i++){let o=n[i];o instanceof Error?r[i].reject(o):r[i].resolve(o)}}).catch(n=>{for(let i=0;i<r.length;i++)r[i].reject(n)}))}}get[Symbol.toStringTag](){return"DataLoader"}};var Rl=require("@prisma/client-runtime-utils");function Re(e,t){if(t===null)return t;switch(e){case"bigint":return BigInt(t);case"bytes":{let{buffer:r,byteOffset:n,byteLength:i}=Buffer.from(t,"base64");return new Uint8Array(r,n,i)}case"decimal":return new Rl.Decimal(t);case"datetime":case"date":return new Date(t);case"time":return new Date(`1970-01-01T${t}Z`);case"bigint-array":return t.map(r=>Re("bigint",r));case"bytes-array":return t.map(r=>Re("bytes",r));case"decimal-array":return t.map(r=>Re("decimal",r));case"datetime-array":return t.map(r=>Re("datetime",r));case"date-array":return t.map(r=>Re("date",r));case"time-array":return t.map(r=>Re("time",r));default:return t}}function Gr(e){let t=[],r=mm(e);for(let n=0;n<e.rows.length;n++){let i=e.rows[n],o={...r};for(let s=0;s<i.length;s++)o[e.columns[s]]=Re(e.types[s],i[s]);t.push(o)}return t}function mm(e){let t={};for(let r=0;r<e.columns.length;r++)t[e.columns[r]]=null;return t}var fm=F("prisma:client:request_handler"),zr=class{client;dataloader;logEmitter;constructor(t,r){this.logEmitter=r,this.client=t,this.dataloader=new Hr({batchLoader:Zo(async({requests:n,customDataProxyFetch:i})=>{let{transaction:o,otelParentCtx:s}=n[0],a=n.map(p=>p.protocolQuery),l=this.client._tracingHelper.getTraceParent(s),u=n.some(p=>fi(p.protocolQuery.action));return(await this.client._engine.requestBatch(a,{traceparent:l,transaction:gm(o),containsWrite:u,customDataProxyFetch:i})).map((p,d)=>{if(p instanceof Error)return p;try{return this.mapQueryEngineResult(n[d],p)}catch(f){return f}})}),singleLoader:async n=>{let i=n.transaction?.kind==="itx"?Il(n.transaction):void 0,o=await this.client._engine.request(n.protocolQuery,{traceparent:this.client._tracingHelper.getTraceParent(),interactiveTransaction:i,isWrite:fi(n.protocolQuery.action),customDataProxyFetch:n.customDataProxyFetch});return this.mapQueryEngineResult(n,o)},batchBy:n=>n.transaction?.id?`transaction-${n.transaction.id}`:Cl(n.protocolQuery),batchOrder(n,i){return n.transaction?.kind==="batch"&&i.transaction?.kind==="batch"?n.transaction.index-i.transaction.index:0}})}async request(t){try{return await this.dataloader.request(t)}catch(r){let{clientMethod:n,callsite:i,transaction:o,args:s,modelName:a}=t;this.handleAndLogRequestError({error:r,clientMethod:n,callsite:i,transaction:o,args:s,modelName:a,globalOmit:t.globalOmit})}}mapQueryEngineResult({dataPath:t,unpacker:r},n){let i=n?.data,o=this.unpack(i,t,r);return process.env.PRISMA_CLIENT_GET_TIME?{data:o}:o}handleAndLogRequestError(t){try{this.handleRequestError(t)}catch(r){throw this.logEmitter&&this.logEmitter.emit("error",{message:r.message,target:t.clientMethod,timestamp:new Date}),r}}handleRequestError({error:t,clientMethod:r,callsite:n,transaction:i,args:o,modelName:s,globalOmit:a}){if(fm(t),ym(t,i))throw t;if(t instanceof w.PrismaClientKnownRequestError&&hm(t)){let u=Ol(t.meta);ar({args:o,errors:[u],callsite:n,errorFormat:this.client._errorFormat,originalMethod:r,clientVersion:this.client._clientVersion,globalOmit:a})}let l=t.message;if(n&&(l=Xt({callsite:n,originalMethod:r,isPanic:t.isPanic,showColors:this.client._errorFormat==="pretty",message:l})),l=this.sanitizeMessage(l),t.code){let u=s?{modelName:s,...t.meta}:t.meta;throw new w.PrismaClientKnownRequestError(l,{code:t.code,clientVersion:this.client._clientVersion,meta:u,batchRequestIdx:t.batchRequestIdx})}else{if(t.isPanic)throw new w.PrismaClientRustPanicError(l,this.client._clientVersion);if(t instanceof w.PrismaClientUnknownRequestError)throw new w.PrismaClientUnknownRequestError(l,{clientVersion:this.client._clientVersion,batchRequestIdx:t.batchRequestIdx});if(t instanceof w.PrismaClientInitializationError)throw new w.PrismaClientInitializationError(l,this.client._clientVersion);if(t instanceof w.PrismaClientRustPanicError)throw new w.PrismaClientRustPanicError(l,this.client._clientVersion)}throw t.clientVersion=this.client._clientVersion,t}sanitizeMessage(t){return this.client._errorFormat&&this.client._errorFormat!=="pretty"?Oe(t):t}unpack(t,r,n){if(!t||(t.data&&(t=t.data),!t))return t;let i=Object.keys(t)[0],o=Object.values(t)[0],s=r.filter(u=>u!=="select"&&u!=="include"),a=bn(o,s),l=i==="queryRaw"?Gr(a):me(a);return n?n(l):l}get[Symbol.toStringTag](){return"RequestHandler"}};function gm(e){if(e){if(e.kind==="batch")return{kind:"batch",options:{isolationLevel:e.isolationLevel}};if(e.kind==="itx")return{kind:"itx",options:Il(e)};ie(e,"Unknown transaction kind")}}function Il(e){return{id:e.id,payload:e.payload}}function ym(e,t){return(0,kl.hasBatchIndex)(e)&&t?.kind==="batch"&&e.batchRequestIdx!==t.index}function hm(e){return e.code==="P2009"||e.code==="P2012"}function Ol(e){if(e.kind==="Union")return{kind:"Union",errors:e.errors.map(Ol)};if(Array.isArray(e.selectionPath)){let[,...t]=e.selectionPath;return{...e,selectionPath:t}}return e}var gi=_r;var _l=U(cn());var R=class extends Error{constructor(t){super(t+`
+         |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            ^
+      70 | Read more at https://pris.ly/d/client-constructor`),this.name="PrismaClientConstructorValidationError"}get[Symbol.toStringTag](){return"PrismaClientConstructorValidationError"}};mt(R,"PrismaClientConstructorValidationError");var Nl=["errorFormat","adapter","accelerateUrl","log","transactionOptions","omit","comments","__internal"],Dl=["pretty","colorless","minimal"],Fl=["info","query","warn","error"],wm={adapter:()=>{},accelerateUrl:e=>{if(e!==void 0){if(typeof e!="string")throw new R(`Invalid value ${JSON.stringify(e)} for "accelerateUrl" provided to PrismaClient constructor.`);if(e.trim().length===0)throw new R('"accelerateUrl" provided to PrismaClient constructor must be a non-empty string.')}},errorFormat:e=>{if(e){if(typeof e!="string")throw new R(`Invalid value ${JSON.stringify(e)} for "errorFormat" provided to PrismaClient constructor.`);if(!Dl.includes(e)){let t=jt(e,Dl);throw new R(`Invalid errorFormat ${e} provided to PrismaClient constructor.${t}`)}}},log:e=>{if(!e)return;if(!Array.isArray(e))throw new R(`Invalid value ${JSON.stringify(e)} for "log" provided to PrismaClient constructor.`);function t(r){if(typeof r=="string"&&!Fl.includes(r)){let n=jt(r,Fl);throw new R(`Invalid log level "${r}" provided to PrismaClient constructor.${n}`)}}for(let r of e){t(r);let n={level:t,emit:i=>{let o=["stdout","event"];if(!o.includes(i)){let s=jt(i,o);throw new R(`Invalid value ${JSON.stringify(i)} for "emit" in logLevel provided to PrismaClient constructor.${s}`)}}};if(r&&typeof r=="object")for(let[i,o]of Object.entries(r))if(n[i])n[i](o);else throw new R(`Invalid property ${i} for "log" provided to PrismaClient constructor`)}},transactionOptions:e=>{if(!e)return;let t=e.maxWait;if(t!=null&&t<=0)throw new R(`Invalid value ${t} for maxWait in "transactionOptions" provided to PrismaClient constructor. maxWait needs to be greater than 0`);let r=e.timeout;if(r!=null&&r<=0)throw new R(`Invalid value ${r} for timeout in "transactionOptions" provided to PrismaClient constructor. timeout needs to be greater than 0`)},omit:(e,t)=>{if(typeof e!="object")throw new R('"omit" option is expected to be an object.');if(e===null)throw new R('"omit" option can not be `null`');let r=[];for(let[n,i]of Object.entries(e)){let o=Em(n,t.runtimeDataModel);if(!o){r.push({kind:"UnknownModel",modelKey:n});continue}for(let[s,a]of Object.entries(i)){let l=o.fields.find(u=>u.name===s);if(!l){r.push({kind:"UnknownField",modelKey:n,fieldName:s});continue}if(l.relationName){r.push({kind:"RelationInOmit",modelKey:n,fieldName:s});continue}typeof a!="boolean"&&r.push({kind:"InvalidFieldValue",modelKey:n,fieldName:s})}}if(r.length>0)throw new R(Pm(e,r))},comments:e=>{if(e!==void 0){if(!Array.isArray(e))throw new R(`Invalid value ${JSON.stringify(e)} for "comments" provided to PrismaClient constructor. Expected an array of SQL commenter plugins.`);for(let t=0;t<e.length;t++)if(typeof e[t]!="function")throw new R(`Invalid value at index ${t} for "comments" provided to PrismaClient constructor. Each plugin must be a function.`)}},__internal:e=>{if(!e)return;let t=["debug","engine","configOverride"];if(typeof e!="object")throw new R(`Invalid value ${JSON.stringify(e)} for "__internal" to PrismaClient constructor`);for(let[r]of Object.entries(e))if(!t.includes(r)){let n=jt(r,t);throw new R(`Invalid property ${JSON.stringify(r)} for "__internal" provided to PrismaClient constructor.${n}`)}}};function bm(e){let t=e.adapter!==void 0,r=e.accelerateUrl!==void 0;if(t&&r)throw new R('The "adapter" and "accelerateUrl" options are mutually exclusive. Please provide only one of them.');if(!t&&!r)throw new R('Using engine type "client" requires either "adapter" or "accelerateUrl" to be provided to PrismaClient constructor.')}function Ll(e,t){for(let[r,n]of Object.entries(e)){if(!Nl.includes(r)){let i=jt(r,Nl);throw new R(`Unknown property ${r} provided to PrismaClient constructor.${i}`)}wm[r](n,t)}bm(e)}function jt(e,t){if(t.length===0||typeof e!="string")return"";let r=xm(e,t);return r?` Did you mean "${r}"?`:""}function xm(e,t){if(t.length===0)return null;let r=t.map(i=>({value:i,distance:(0,_l.default)(e,i)}));r.sort((i,o)=>i.distance<o.distance?-1:1);let n=r[0];return n.distance<3?n.value:null}function Em(e,t){return Ml(t.models,e)??Ml(t.types,e)}function Ml(e,t){let r=Object.keys(e).find(n=>ue(n)===t);if(r)return e[r]}function Pm(e,t){let r=je(e);for(let o of t)switch(o.kind){case"UnknownModel":r.arguments.getField(o.modelKey)?.markAsError(),r.addErrorMessage(()=>`Unknown model name: ${o.modelKey}.`);break;case"UnknownField":r.arguments.getDeepField([o.modelKey,o.fieldName])?.markAsError(),r.addErrorMessage(()=>`Model "${o.modelKey}" does not have a field named "${o.fieldName}".`);break;case"RelationInOmit":r.arguments.getDeepField([o.modelKey,o.fieldName])?.markAsError(),r.addErrorMessage(()=>'Relations are already excluded by default and can not be specified in "omit".');break;case"InvalidFieldValue":r.arguments.getDeepFieldValue([o.modelKey,o.fieldName])?.markAsError(),r.addErrorMessage(()=>"Omit field option value must be a boolean.");break}let{message:n,args:i}=sr(r,"colorless");return`Error validating "omit" option:
+      71 |
+      72 | ${i}
+
+      at zr.handleRequestError (prisma_client/runtime/client.js:69:8172)
+      at zr.handleRequestError [as handleAndLogRequestError] (prisma_client/runtime/client.js:69:7467)
+      at zr.handleAndLogRequestError [as request] (prisma_client/runtime/client.js:69:7174)
+      at a (prisma_client/runtime/client.js:79:5816)
+      at services/workItemStateService.js:315:20
+      at Object.inTransaction (services/workflowStateRules.js:188:97)
+      at tests/helpers/workflowFixtures.js:16:21
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at inTransaction (services/workflowStateRules.js:188:60)
+      at Object.<anonymous> (tests/contracts/issue_209_order_revision_integration.test.js:404:22)
+
+Test Suites: 1 failed, 4 passed, 5 total
+Tests:       1 failed, 332 passed, 333 total
+Snapshots:   0 total
+Time:        156.799 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\issue_209_order_revision_integration.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\deployment_readiness_bootstrap.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_state_authority.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\security\audit_1_2_state_writes.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\security\audit_1_2_migration_sources.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\issue209-pr297-impact-audit-correction-focused-owned\report-original.json

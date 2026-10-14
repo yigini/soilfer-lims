@@ -1,0 +1,14 @@
+{
+  "onlyDeclaredMutableOutput": "server/data/help/RELEASE_MANIFEST_v1.json",
+  "beforeBytes": 94717,
+  "beforeSha256": "b6e12e39534ce4aa870769f70b38a8b1bdead75ad08903ef4f64947e683350dc",
+  "beforeOriginalCaptured": true,
+  "sourceFrozenSeparately": true,
+  "stockHelpAssertionsUnchanged": true,
+  "oldFailedRunSummaryUnchanged": true,
+  "afterBytes": 94717,
+  "afterSha256": "b6e12e39534ce4aa870769f70b38a8b1bdead75ad08903ef4f64947e683350dc",
+  "afterOriginalCaptured": true,
+  "changed": false,
+  "closedUtc": "2026-10-14T19:53:55.701599+00:00"
+}

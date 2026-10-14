@@ -1,0 +1,259 @@
+{
+  "retainedUtc": "2026-10-14T19:57:44.191539+00:00",
+  "summary": {
+    "closedUtc": "2026-10-14T19:53:55.703608+00:00",
+    "exit": 1,
+    "suites": 5,
+    "tests": 333,
+    "passedSuites": 4,
+    "passedTests": 332,
+    "failed": 1,
+    "failedSuites": 1,
+    "pending": 0,
+    "todo": 0,
+    "sourceUnchanged": true,
+    "selectedInventoryEqual": true,
+    "fullDiscovery": 370,
+    "ordinarySetups": true,
+    "workerIdleMemoryLimit": 512000000,
+    "nodeOptions": "",
+    "visibleAssetsUnchanged": true,
+    "declaredMutableOutputCapturedBeforeAndAfter": true,
+    "onlyMutableOutput": "server/data/help/RELEASE_MANIFEST_v1.json",
+    "productionOperations": 0,
+    "status": "FAILED_OR_INCOMPLETE"
+  },
+  "exactJestSummary": [
+    "Test Suites: 1 failed, 4 passed, 5 total",
+    "Tests:       1 failed, 332 passed, 333 total",
+    "Snapshots:   0 total",
+    "Time:        156.799 s"
+  ],
+  "rawFiles": {
+    "WP/backlog-resume-20261013/issue209-pr297-impact-audit-correction-focused-owned/command.json": {
+      "bytes": 2153,
+      "sha256": "ee98e32039775bbc4c4ba624c84b2ed272c27a0eaf752570c73812433d062bf9"
+    },
+    "WP/backlog-resume-20261013/issue209-pr297-impact-audit-correction-focused-owned/config-original.json": {
+      "bytes": 6893,
+      "sha256": "5b9558f4e8b10dbff99ef106112339eb07f206a20726561318b1e8bf8fc5a608"
+    },
+    "WP/backlog-resume-20261013/issue209-pr297-impact-audit-correction-focused-owned/config-stderr-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "WP/backlog-resume-20261013/issue209-pr297-impact-audit-correction-focused-owned/derived-help-manifest-after-original.json": {
+      "bytes": 94717,
+      "sha256": "b6e12e39534ce4aa870769f70b38a8b1bdead75ad08903ef4f64947e683350dc"
+    },
+    "WP/backlog-resume-20261013/issue209-pr297-impact-audit-correction-focused-owned/derived-help-manifest-before-original.json": {
+      "bytes": 94717,
+      "sha256": "b6e12e39534ce4aa870769f70b38a8b1bdead75ad08903ef4f64947e683350dc"
+    },
+    "WP/backlog-resume-20261013/issue209-pr297-impact-audit-correction-focused-owned/derived-output-policy-closed.json": {
+      "bytes": 549,
+      "sha256": "fcd1f15270ad52ad982cb9aa206b3c46a9becb5c827189258fa6373573c720be"
+    },
+    "WP/backlog-resume-20261013/issue209-pr297-impact-audit-correction-focused-owned/derived-output-policy-open.json": {
+      "bytes": 337,
+      "sha256": "8d92c8f2a590daad01fcc17889f21e6f65c0eb2aa23784240855c682fb3d9676"
+    },
+    "WP/backlog-resume-20261013/issue209-pr297-impact-audit-correction-focused-owned/exact-jest-summary-original.txt": {
+      "bytes": 130,
+      "sha256": "f3fa52673b4a7504b9b0c5fcb6cd66300b01950d785e72b4bae314d27786b6db"
+    },
+    "WP/backlog-resume-20261013/issue209-pr297-impact-audit-correction-focused-owned/exit-original.txt": {
+      "bytes": 2,
+      "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+    },
+    "WP/backlog-resume-20261013/issue209-pr297-impact-audit-correction-focused-owned/inventory-original.json": {
+      "bytes": 49572,
+      "sha256": "eae3abf212d061c0b156d9743364c13a1c52b4c8e49e0c83c3ff72f34e1fc366"
+    },
+    "WP/backlog-resume-20261013/issue209-pr297-impact-audit-correction-focused-owned/inventory-stderr-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "WP/backlog-resume-20261013/issue209-pr297-impact-audit-correction-focused-owned/open-metadata.json": {
+      "bytes": 383,
+      "sha256": "c2895322143c7bc7fc2c26aa6ea91461864ca5e3ee8484dd18e783c01762b39e"
+    },
+    "WP/backlog-resume-20261013/issue209-pr297-impact-audit-correction-focused-owned/physical-retained-terminal-index.json": {
+      "bytes": 1035,
+      "sha256": "23a717985b54cce4e467075e0063fe5318842a863f6312330366d9da60f80e5a"
+    },
+    "WP/backlog-resume-20261013/issue209-pr297-impact-audit-correction-focused-owned/physical-retention-original.jsonl": {
+      "bytes": 843,
+      "sha256": "7081c26beff89585b7b963ad1968e865b51d3a1eba8fb8c01fadd1189b1b7638"
+    },
+    "WP/backlog-resume-20261013/issue209-pr297-impact-audit-correction-focused-owned/report-original.json": {
+      "bytes": 170040,
+      "sha256": "ca0185ceaad06577d1666dcc275773caf300caa5ae6b705ecb9e4dfda87918bf"
+    },
+    "WP/backlog-resume-20261013/issue209-pr297-impact-audit-correction-focused-owned/selected-inventory-original.json": {
+      "bytes": 706,
+      "sha256": "b69c4ed6bdefd9f9d7f836a391daac897d49782d07f332e5e54f6874fe832391"
+    },
+    "WP/backlog-resume-20261013/issue209-pr297-impact-audit-correction-focused-owned/source-after.json": {
+      "bytes": 160161,
+      "sha256": "b992b0696fcb60e24bf8ef85632bf99bc4b606f8a231705225ff9c0f82dac27b"
+    },
+    "WP/backlog-resume-20261013/issue209-pr297-impact-audit-correction-focused-owned/source-before.json": {
+      "bytes": 160161,
+      "sha256": "b992b0696fcb60e24bf8ef85632bf99bc4b606f8a231705225ff9c0f82dac27b"
+    },
+    "WP/backlog-resume-20261013/issue209-pr297-impact-audit-correction-focused-owned/stderr-original.log": {
+      "bytes": 66534,
+      "sha256": "281c69483db416d136996c719b8f22e0a6a7153cff06ff76860f54834e3b5307"
+    },
+    "WP/backlog-resume-20261013/issue209-pr297-impact-audit-correction-focused-owned/stdout-original.log": {
+      "bytes": 1592,
+      "sha256": "2b75450f9b68d991f830f1f43620987ae15e2bb3305f2fb2449bf6369e325492"
+    },
+    "WP/backlog-resume-20261013/issue209-pr297-impact-audit-correction-focused-owned/summary.json": {
+      "bytes": 598,
+      "sha256": "a80f77bd6f9200bdb18431669aabbe3362c0d7716d6df6a003c98e270769420b"
+    },
+    "WP/backlog-resume-20261013/issue209-pr297-impact-audit-correction-focused-owned/visible-local-storage.json": {
+      "bytes": 10280,
+      "sha256": "d66e57bdf59c4efa3ec58f430d1d25e094c9f98800767f49f4a94697bb4165fe"
+    },
+    "WP/backlog-resume-20261013/issue209-pr297-impact-audit-correction-focused-owned/source-delta-from-audited-head-original.diff": {
+      "bytes": 9825,
+      "sha256": "612887eaf14a275ae20ffa8fb7fb2bb2448e2bf0f9c65a334eb9a39b8f57fad2"
+    }
+  },
+  "sourceDraftPaths": [
+    ".gitattributes",
+    "Dockerfile",
+    "client/src/components/sample/AnalysisUpdateModal.jsx",
+    "client/src/translations/en.json",
+    "client/src/translations/es-419.json",
+    "client/src/translations/es.json",
+    "client/src/translations/fr.json",
+    "client/src/translations/pt.json",
+    "docker-entrypoint.sh",
+    "docs/audit/209-order-revisions.md",
+    "server/controllers/sampleController.js",
+    "server/index.js",
+    "server/locales/en.json",
+    "server/locales/es-419.json",
+    "server/locales/es.json",
+    "server/locales/fr.json",
+    "server/locales/pt.json",
+    "server/prisma/migrations/20261014000100_order_revision_contract/migration.sql",
+    "server/prisma/schema.prisma",
+    "server/scripts/install_order_revisions.js",
+    "server/scripts/order_revision_impact.js",
+    "server/scripts/rehearsal_deployment_readiness.cjs",
+    "server/services/intakeWorkItemService.js",
+    "server/services/orderAttemptWriteService.js",
+    "server/services/orderLineResolutionService.js",
+    "server/services/orderRevisionContract.js",
+    "server/services/orderRevisionMigrationSource.js",
+    "server/services/orderService.js",
+    "server/services/sampleAnalysisStateService.js",
+    "server/services/scientificAmendmentService.js",
+    "server/services/textureOrderContract.js",
+    "server/services/workAttemptReservationService.js",
+    "server/services/workAttemptWriteService.js",
+    "server/services/workItemReconciliationService.js",
+    "server/services/workRepeatService.js",
+    "server/tests/contracts/audit_2_6_equipment_commit.test.js",
+    "server/tests/contracts/audit_3_1_attempt_execution.test.js",
+    "server/tests/contracts/audit_3_1_attempt_sql_guards.test.js",
+    "server/tests/contracts/audit_3_3_separate_texture.test.js",
+    "server/tests/contracts/audit_6_1_non_scientific_authorisation.test.js",
+    "server/tests/contracts/deployment_readiness_bootstrap.test.js",
+    "server/tests/contracts/edit_analyses_permission.test.js",
+    "server/tests/contracts/issue_206_sample_containers.test.js",
+    "server/tests/contracts/issue_209_order_revision_http.test.js",
+    "server/tests/contracts/issue_209_order_revision_integration.test.js",
+    "server/tests/contracts/issue_209_order_revision_request.test.js",
+    "server/tests/contracts/issue_209_order_revision_ui.test.js",
+    "server/tests/contracts/reconcile_analyses.test.js",
+    "server/tests/contracts/review_reports_amendments_p6.test.js",
+    "server/tests/contracts/texture_work_item_atomic.test.js",
+    "server/tests/globalSetup.js",
+    "server/tests/helpers/legacyWorkflowDatabase.js",
+    "server/tests/helpers/qcGateFixture.js",
+    "server/tests/helpers/qcWorksheetUi.js",
+    "server/tests/helpers/workAttemptFixtures.js",
+    "server/tests/helpers/workflowWriteScanner.js",
+    "server/tests/security/wiring.test.js",
+    "server/tests/contracts/audit_4_6_calibration.test.js",
+    "server/tests/contracts/audit_4_6_calculation_install.test.js",
+    "server/tests/contracts/audit_4_1_run_start_header.test.js",
+    "server/tests/contracts/audit_1_2_guard_installer.test.js",
+    "server/tests/contracts/audit_4_3_keyboard_playwright.test.js",
+    "server/tests/contracts/audit_4_8_cross_check_evidence.test.js",
+    "server/tests/contracts/audit_6_1_first_fill.test.js",
+    "server/tests/contracts/audit_6_3_report_content.test.js",
+    "server/tests/contracts/audit_4_8_cross_check_install.test.js",
+    "server/tests/contracts/audit_1_2_spectral_state.test.js",
+    "server/tests/contracts/audit_0_3_publication.test.js",
+    "server/tests/contracts/issue_291_texture_input_authority.test.js",
+    "server/tests/contracts/issue_213_export_equals_report.test.js",
+    "server/tests/contracts/audit_4_7_calculation_import.test.js",
+    "server/tests/contracts/audit_1_4_uuid_transactions.test.js",
+    "server/tests/contracts/audit_0_15_duplicate_loq.test.js",
+    "server/tests/contracts/audit_1_0_lab_policies.test.js",
+    "server/tests/contracts/audit_1_5_result_writes.test.js",
+    "server/tests/contracts/audit_4_7_instrument_import_install.test.js",
+    "server/tests/contracts/audit_0_2_qc_lock.test.js",
+    "server/tests/contracts/audit_1_6_intake_cancellation.test.js",
+    "server/tests/contracts/audit_1_2_state_authority.test.js",
+    "server/tests/contracts/audit_1_2_workbench_state.test.js",
+    "server/tests/contracts/audit_0_6_review_atomicity.test.js",
+    "server/tests/contracts/audit_1_2_legacy_results.test.js",
+    "server/tests/contracts/audit_0_8_report_truthfulness.test.js",
+    "server/tests/contracts/report_pdf.test.js",
+    "server/tests/contracts/audit_0_11_workbench_queue.test.js",
+    "server/tests/contracts/issue_281_cross_check_bounds.test.js",
+    "server/tests/contracts/audit_0_10_current_result_views.test.js",
+    "server/tests/contracts/audit_0_5_legacy_review.test.js",
+    "server/tests/contracts/qc_disposition_release_gate.test.js",
+    "server/tests/contracts/audit_0_7_resubmission.test.js",
+    "server/tests/contracts/audit_0_9_public_report_superseded.test.js",
+    "server/tests/contracts/audit_6_2_report_revisions.test.js",
+    "server/tests/contracts/audit_0_14_number_entry.test.js",
+    "server/tests/contracts/mandatory_reason.test.js",
+    "server/tests/contracts/matrix_blocking_diagnostics.test.js",
+    "server/tests/contracts/matrix_validation.test.js",
+    "server/tests/contracts/prerequisite_gate.test.js",
+    "server/tests/contracts/result_provenance.test.js",
+    "server/tests/scenarios/scientific_validation.test.js",
+    "server/tests/contracts/mobile_offline_sync.test.js",
+    "server/tests/contracts/audit_1_2_offline_state.test.js",
+    "server/tests/contracts/qc_controls.test.js",
+    "server/tests/contracts/issue_278_texture_closure_policy.test.js",
+    "server/tests/contracts/controlled_units_interpretation.test.js",
+    "server/tests/contracts/catalogue_result_entry.test.js",
+    "server/tests/contracts/catalogue_governance.test.js",
+    "server/tests/contracts/profile_identity_routes.test.js",
+    "server/tests/contracts/api_key_scoping_isolation.test.js",
+    "server/tests/contracts/workspace_projection_p2.test.js",
+    "server/tests/contracts/workbench_single_entry.test.js",
+    "server/tests/contracts/workbench_draft_integrity.test.js",
+    "server/tests/contracts/workbench_pipeline_twostep.test.js",
+    "server/tests/contracts/qc_disposition_flagging.test.js",
+    "server/tests/contracts/audit_1_1_reconcile_duplicates.test.js",
+    "server/tests/contracts/sample_detail.test.js",
+    "server/tests/contracts/interim_gaps_verification.test.js",
+    "server/tests/contracts/reopened_governance_scenarios.test.js",
+    "server/tests/contracts/nsis_policy_and_scoping.test.js",
+    "server/tests/contracts/exchange_error_semantics.test.js",
+    "server/tests/contracts/nsis_v2_exchange.test.js",
+    "server/tests/contracts/export_normalization.test.js",
+    "server/tests/contracts/spectral_stage_e.test.js"
+  ],
+  "independentOriginal650Ledger": "issue209-original-case-reconciliation-650/index.json",
+  "onlyDeclaredMutableOutputCapturedBeforeAndAfter": true,
+  "focusedOrdinaryVerified": false,
+  "fullCurrentLocalVerified": false,
+  "oldIntegrationBytesRecovered": true,
+  "predecessorRetainerRefusal": "Extra addition-only newline before new test; exact removal boundary corrected, old helper preserved",
+  "stockRealCIPass": false,
+  "finalClaudioAuditPass": false,
+  "productionOperations": 0
+}
