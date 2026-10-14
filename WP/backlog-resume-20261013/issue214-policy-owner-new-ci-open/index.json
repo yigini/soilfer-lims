@@ -1,0 +1,41 @@
+{
+  "observedUtc": "2026-10-14T05:09:48.911746+00:00",
+  "status": "API_METADATA_ONLY_NO_TERMINAL_LOGS",
+  "number": 296,
+  "head": "8d564c24f05a3b069bf027bbb7ba4f92cea597b0",
+  "tree": "89689295ae06c5ffac0e4c2535c149e55c090bc1",
+  "base": "6d750914d8565acdd496767a7dd935811b5a89b2",
+  "run": 38515104824,
+  "attempt": 1,
+  "runUrl": "https://github.com/yigini/soilfer-lims/actions/runs/38515104824",
+  "actualStatus": "in_progress",
+  "actualConclusion": null,
+  "ciDispatches": 0,
+  "productionOperations": 0,
+  "files": {
+    "pr-original.json": {
+      "bytes": 56648,
+      "sha256": "13676aec968460c5e8b8c931b5ee4f8714c393d92b16ce26ccdc37c73f05affc"
+    },
+    "main-original.json": {
+      "bytes": 336,
+      "sha256": "d6b707488e04e5b417de94d0c4e7a7872b66b92ade6062f4a9230f81e2564253"
+    },
+    "runs-original.json": {
+      "bytes": 12686,
+      "sha256": "8dd3739a8865bd7e8df9e56bcb595fdacf073f8bc76ab7049cb082c43b3f170d"
+    },
+    "closing-refs-original.json": {
+      "bytes": 31,
+      "sha256": "41d2c505b45e615f2361b1e657a3a9a2ec9be8dc89cee69269b8121226d416db"
+    },
+    "run-original.json": {
+      "bytes": 12650,
+      "sha256": "b9856fdb894588aa1570175e678a82089e916551a677db86aee5ddabe2ed4bae"
+    },
+    "jobs-original.json": {
+      "bytes": 3291,
+      "sha256": "0a06b6f51542cfe07bb4c54ff46c91a5113ceecb2a3d38dbf7a2cca6ad1f2426"
+    }
+  }
+}
