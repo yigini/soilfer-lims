@@ -1,0 +1,615 @@
+{
+  "retainedUtc": "2026-10-14T16:47:22.374426+00:00",
+  "summary": {
+    "closedUtc": "2026-10-14T16:46:39.388340+00:00",
+    "verificationKind": "SEQUENTIAL_ORDINARY_SINGLE_SUITE_SUCCESSOR",
+    "plannedSuites": 11,
+    "plannedTests": 354,
+    "closedSuites": 11,
+    "closedTests": 354,
+    "passedTests": 354,
+    "sourceUnchanged": true,
+    "selectedInventoryEqual": true,
+    "fullDiscovery": 370,
+    "ordinarySetups": true,
+    "stockAssertions": true,
+    "maxWorkers": 1,
+    "workerIdleMemoryLimit": 512000000,
+    "nodeOptions": "",
+    "productionOperations": 0,
+    "children": [
+      {
+        "closedUtc": "2026-10-14T16:44:58.913971+00:00",
+        "suite": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\audit_0_14_number_entry.test.js",
+        "exit": 0,
+        "originalReportPresent": true,
+        "tests": 13,
+        "passed": 13,
+        "failed": 0,
+        "expectedTests": 13,
+        "sourceUnchanged": true,
+        "status": "PASS"
+      },
+      {
+        "closedUtc": "2026-10-14T16:45:03.213475+00:00",
+        "suite": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\mandatory_reason.test.js",
+        "exit": 0,
+        "originalReportPresent": true,
+        "tests": 5,
+        "passed": 5,
+        "failed": 0,
+        "expectedTests": 5,
+        "sourceUnchanged": true,
+        "status": "PASS"
+      },
+      {
+        "closedUtc": "2026-10-14T16:45:07.816062+00:00",
+        "suite": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\matrix_blocking_diagnostics.test.js",
+        "exit": 0,
+        "originalReportPresent": true,
+        "tests": 2,
+        "passed": 2,
+        "failed": 0,
+        "expectedTests": 2,
+        "sourceUnchanged": true,
+        "status": "PASS"
+      },
+      {
+        "closedUtc": "2026-10-14T16:45:12.746932+00:00",
+        "suite": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\matrix_validation.test.js",
+        "exit": 0,
+        "originalReportPresent": true,
+        "tests": 3,
+        "passed": 3,
+        "failed": 0,
+        "expectedTests": 3,
+        "sourceUnchanged": true,
+        "status": "PASS"
+      },
+      {
+        "closedUtc": "2026-10-14T16:45:17.088648+00:00",
+        "suite": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\prerequisite_gate.test.js",
+        "exit": 0,
+        "originalReportPresent": true,
+        "tests": 5,
+        "passed": 5,
+        "failed": 0,
+        "expectedTests": 5,
+        "sourceUnchanged": true,
+        "status": "PASS"
+      },
+      {
+        "closedUtc": "2026-10-14T16:45:22.069738+00:00",
+        "suite": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\result_provenance.test.js",
+        "exit": 0,
+        "originalReportPresent": true,
+        "tests": 6,
+        "passed": 6,
+        "failed": 0,
+        "expectedTests": 6,
+        "sourceUnchanged": true,
+        "status": "PASS"
+      },
+      {
+        "closedUtc": "2026-10-14T16:45:26.357110+00:00",
+        "suite": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\scenarios\\scientific_validation.test.js",
+        "exit": 0,
+        "originalReportPresent": true,
+        "tests": 4,
+        "passed": 4,
+        "failed": 0,
+        "expectedTests": 4,
+        "sourceUnchanged": true,
+        "status": "PASS"
+      },
+      {
+        "closedUtc": "2026-10-14T16:45:34.189031+00:00",
+        "suite": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\audit_1_2_state_authority.test.js",
+        "exit": 0,
+        "originalReportPresent": true,
+        "tests": 139,
+        "passed": 139,
+        "failed": 0,
+        "expectedTests": 139,
+        "sourceUnchanged": true,
+        "status": "PASS"
+      },
+      {
+        "closedUtc": "2026-10-14T16:46:22.145613+00:00",
+        "suite": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\issue_209_order_revision_integration.test.js",
+        "exit": 0,
+        "originalReportPresent": true,
+        "tests": 32,
+        "passed": 32,
+        "failed": 0,
+        "expectedTests": 32,
+        "sourceUnchanged": true,
+        "status": "PASS"
+      },
+      {
+        "closedUtc": "2026-10-14T16:46:36.062314+00:00",
+        "suite": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\security\\audit_1_2_state_writes.test.js",
+        "exit": 0,
+        "originalReportPresent": true,
+        "tests": 112,
+        "passed": 112,
+        "failed": 0,
+        "expectedTests": 112,
+        "sourceUnchanged": true,
+        "status": "PASS"
+      },
+      {
+        "closedUtc": "2026-10-14T16:46:39.273977+00:00",
+        "suite": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\security\\audit_1_2_migration_sources.test.js",
+        "exit": 0,
+        "originalReportPresent": true,
+        "tests": 33,
+        "passed": 33,
+        "failed": 0,
+        "expectedTests": 33,
+        "sourceUnchanged": true,
+        "status": "PASS"
+      }
+    ],
+    "status": "PASS"
+  },
+  "verificationKind": "SEQUENTIAL_ORDINARY_SINGLE_SUITE_SUCCESSOR",
+  "rawFiles": {
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/config-original.json": {
+      "bytes": 6616,
+      "sha256": "7c3f647805e63ab9b595716f1b8882a5946082678448841d06735f413569e0e4"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/config-stderr-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/inventory-original.json": {
+      "bytes": 49572,
+      "sha256": "3770993c8594d7f3f931ec26c0e4e97771ef9a08c84cffb96b7ce57874ae2491"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/inventory-stderr-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/physical-retained-terminal-index.json": {
+      "bytes": 398,
+      "sha256": "30d863c95e4f4d9f05b60364a75099cc4302bab332af43cf5b77e566b36534c0"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/physical-retention-original.jsonl": {
+      "bytes": 230,
+      "sha256": "e9208b3a3a7aeb9f00ad71987cf04cde29d8b4dbce94ce51dd5df7308d734ac5"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/source-after.json": {
+      "bytes": 117506,
+      "sha256": "06ccd95e3508e23ee43d4077d7139e1d432b7e8b5d48d18c8e000f76ceece8cd"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/source-before.json": {
+      "bytes": 117506,
+      "sha256": "06ccd95e3508e23ee43d4077d7139e1d432b7e8b5d48d18c8e000f76ceece8cd"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/started-open.json": {
+      "bytes": 231,
+      "sha256": "6f785d4b2e4d1fa28605d0ba17b6cdf5d54c6c1de9717e30bbe41606216aec66"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/summary-observed.json": {
+      "bytes": 5010,
+      "sha256": "6b1b0ec39a2dbe864bdd9be169c01ad9b017c13363d8ee1e5ed6792dcd37c633"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/01-audit_0_14_number_entry.test/command.json": {
+      "bytes": 1289,
+      "sha256": "30b8723f2bbc65a73f852ee2bb3d792b66e717e3f3ba686085387ef223e90908"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/01-audit_0_14_number_entry.test/exit-original.txt": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/01-audit_0_14_number_entry.test/observed-closed-summary.json": {
+      "bytes": 361,
+      "sha256": "cd3f0036ba08b51becd90bf845640fed27dc2933544715289338b1f6ae4ad30e"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/01-audit_0_14_number_entry.test/report-original.json": {
+      "bytes": 7131,
+      "sha256": "8aa67c650824553d303a17453ac11220fbcd628bf1999dfd919e8f9e4662f245"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/01-audit_0_14_number_entry.test/stderr-original.log": {
+      "bytes": 8258,
+      "sha256": "e5e1257cac8c48005c1de7e2678b6831cdca85e40589ad87d34dd4bb2364a78f"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/01-audit_0_14_number_entry.test/stdout-original.log": {
+      "bytes": 983,
+      "sha256": "f5076f8443ed33d6a36e563a56255a0c6c4bd470b17675dba9fdfee5a864f338"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/02-mandatory_reason.test/command.json": {
+      "bytes": 1275,
+      "sha256": "09881c38c544580cf37c64411a2501f29d0561994229bcfab21ee1552006e3df"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/02-mandatory_reason.test/exit-original.txt": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/02-mandatory_reason.test/observed-closed-summary.json": {
+      "bytes": 351,
+      "sha256": "4198deae04471c868b90fd3ab1a0baabe92d874a68d0428673535ca2421c454e"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/02-mandatory_reason.test/report-original.json": {
+      "bytes": 3314,
+      "sha256": "fba9b11c6fbf4025a383c1b6a01d8daf49779c27599b60dcf7a311810c89d9c8"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/02-mandatory_reason.test/stderr-original.log": {
+      "bytes": 4372,
+      "sha256": "ed57854ef1785026c23e8e5075f194fb1bd81d1ee2663a2376a3d2a50c7941f5"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/02-mandatory_reason.test/stdout-original.log": {
+      "bytes": 969,
+      "sha256": "3a768deda0d64f405e33e5d9940623430ea2f340da8e24651b9bbde00de0f40d"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/03-matrix_blocking_diagnostics.test/command.json": {
+      "bytes": 1297,
+      "sha256": "5cb6169562da70a2d8d14839f032c1c5cfb208ae34d151488dcf31ef9282af55"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/03-matrix_blocking_diagnostics.test/exit-original.txt": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/03-matrix_blocking_diagnostics.test/observed-closed-summary.json": {
+      "bytes": 362,
+      "sha256": "6bef2de1bdda6a5f7f2f1f6198f0b9015f6bda372da82faa7990dc7cde9f98c1"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/03-matrix_blocking_diagnostics.test/report-original.json": {
+      "bytes": 1853,
+      "sha256": "a257ae1400ce39416240d5c29430e9944fcd96ee5ed465ace90d4783b6081b20"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/03-matrix_blocking_diagnostics.test/stderr-original.log": {
+      "bytes": 3500,
+      "sha256": "1d60b13cd12e124191f3a546162820133759c50472c298ff4bd72ae8e8c7f124"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/03-matrix_blocking_diagnostics.test/stdout-original.log": {
+      "bytes": 991,
+      "sha256": "42f8bc5174d75b9c9a8bc85d364b0ae6b6ed91e95e9481744f598b7d4ac5102d"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/04-matrix_validation.test/command.json": {
+      "bytes": 1277,
+      "sha256": "cb5288a964a8718078abcff2800929792874d5af2bfff96e9bb6b97c0e24531a"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/04-matrix_validation.test/exit-original.txt": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/04-matrix_validation.test/observed-closed-summary.json": {
+      "bytes": 352,
+      "sha256": "541f10025e4ce2010d951c5d6c76f029a9842d98e8f563ad9cdff4fe6b7bcc51"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/04-matrix_validation.test/report-original.json": {
+      "bytes": 2286,
+      "sha256": "3dd318d9910506f5e8359ec1842b444532ab70b1269866c05a5be0d176a5723f"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/04-matrix_validation.test/stderr-original.log": {
+      "bytes": 1830,
+      "sha256": "0e3baf70222009a6ec712616a0645dd949a623979b1c817383c47e221e4f059d"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/04-matrix_validation.test/stdout-original.log": {
+      "bytes": 971,
+      "sha256": "262fe56e66a3bf9c94af3763674529893984da32f91b37d4bf9eeb427ae3a1d8"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/05-prerequisite_gate.test/command.json": {
+      "bytes": 1277,
+      "sha256": "b0c27b121c86a37be7271a5873a18214286f1a7a1f32222dc5ff654a81cac80c"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/05-prerequisite_gate.test/exit-original.txt": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/05-prerequisite_gate.test/observed-closed-summary.json": {
+      "bytes": 352,
+      "sha256": "2a58bb1e8e44e4e05e1d3ac479c057e19656be2c95df40bc493f62152dc39811"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/05-prerequisite_gate.test/report-original.json": {
+      "bytes": 3174,
+      "sha256": "039fdbb68a39824cab1177e79c52fa0f9bb7ff1071cd077d8e1eb0b7d81efb05"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/05-prerequisite_gate.test/stderr-original.log": {
+      "bytes": 3888,
+      "sha256": "a967ee5a84da4fb24ed8b5be8deae4329e6504ba083a386eb47ad308f85612d1"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/05-prerequisite_gate.test/stdout-original.log": {
+      "bytes": 971,
+      "sha256": "e1ce09ac176b7263f1e8b95a31f92a31fdb211081d4809dfcd0806ab72827c2a"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/06-result_provenance.test/command.json": {
+      "bytes": 1277,
+      "sha256": "e9c70aa0e9b6e140a2f7091b9f64b475254b93cab462007a610941fb18370c2c"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/06-result_provenance.test/exit-original.txt": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/06-result_provenance.test/observed-closed-summary.json": {
+      "bytes": 352,
+      "sha256": "3cae5900c5632d30bfdb4fa8b243f332ee8f27c6d3d96ec39672de2321e48312"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/06-result_provenance.test/report-original.json": {
+      "bytes": 3514,
+      "sha256": "c3f0f21f4acf5c949ff614abf75a472dea5c962102d36b285eb8df1c8b869c56"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/06-result_provenance.test/stderr-original.log": {
+      "bytes": 3835,
+      "sha256": "e35ce2d1763e6cec9410aa0eced67292c11405ebdf54b410067674a4be44d2ea"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/06-result_provenance.test/stdout-original.log": {
+      "bytes": 971,
+      "sha256": "b0dcfa2d19aa8a170dd3911c7dbcf4c299c26585bcf60b52bbf544de3ce355c7"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/07-scientific_validation.test/command.json": {
+      "bytes": 1285,
+      "sha256": "6479eb35891448c6b75748ccdc8cb4df5ed0ebf5b6a23670662eb4c584aae256"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/07-scientific_validation.test/exit-original.txt": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/07-scientific_validation.test/observed-closed-summary.json": {
+      "bytes": 356,
+      "sha256": "83daa64f1ee1ea1577a975ec9a690c577b27a80900762ea74c233b1bec8c1aef"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/07-scientific_validation.test/report-original.json": {
+      "bytes": 2348,
+      "sha256": "538a26cbcc866bd38f4853aaa79df770a2061a546a81aa69d5a72c1b983ccfdf"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/07-scientific_validation.test/stderr-original.log": {
+      "bytes": 2079,
+      "sha256": "9323f5890bbcef0e56474ee18f157e6d6f44483734f1ff7425b7df4eb1fc5460"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/07-scientific_validation.test/stdout-original.log": {
+      "bytes": 979,
+      "sha256": "3c302682d6ba02f4fa3d040cbe12fe628df39d548a4e478312e493d0f1e776da"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/08-audit_1_2_state_authority.test/command.json": {
+      "bytes": 1293,
+      "sha256": "421bb9128a2b2eab770c52d0034d13dce7367bbfa9a416949b75470310a54da5"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/08-audit_1_2_state_authority.test/exit-original.txt": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/08-audit_1_2_state_authority.test/observed-closed-summary.json": {
+      "bytes": 366,
+      "sha256": "cc33b658402b90c0d6a0f366fd1815c0ed43818f163d48b046f0869caa85db48"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/08-audit_1_2_state_authority.test/report-original.json": {
+      "bytes": 55949,
+      "sha256": "684ab751ca64664426c65d5524890e699d2a38ffca8834a328f3a2fa4b7fdde6"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/08-audit_1_2_state_authority.test/stderr-original.log": {
+      "bytes": 17638,
+      "sha256": "de804876bb9b2fde0ca9a523b90c250c6f2410a0272da023bf5bf3bb323f4819"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/08-audit_1_2_state_authority.test/stdout-original.log": {
+      "bytes": 987,
+      "sha256": "b6c02ac5ecc20d64b873d206f29483555851bf73ec949fa97fb21cacba4aaa7a"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/09-issue_209_order_revision_integration.test/command.json": {
+      "bytes": 1315,
+      "sha256": "a994d2c563aa761505cb6dd812522715f7b04078e67cd3b562a013c228454d42"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/09-issue_209_order_revision_integration.test/exit-original.txt": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/09-issue_209_order_revision_integration.test/observed-closed-summary.json": {
+      "bytes": 374,
+      "sha256": "c3fca74f46eabaccf278ad4fbb925c80c54e26e87a57316eedbfa6a240e362ca"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/09-issue_209_order_revision_integration.test/report-original.json": {
+      "bytes": 14600,
+      "sha256": "57d2005f0fed2f98cf2e7ad4bed11dbd8e41a29d7b8ae3fd0125c4b5963797b0"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/09-issue_209_order_revision_integration.test/stderr-original.log": {
+      "bytes": 5385,
+      "sha256": "99439bd688bd515899853a2b067deb56521319c66b0c32bde95c982681eb7e20"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/09-issue_209_order_revision_integration.test/stdout-original.log": {
+      "bytes": 1009,
+      "sha256": "f6f8939f91f91a40f9bdfb27d335d5124fc5fc1268669119495e27b34ffb4e7d"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/10-audit_1_2_state_writes.test/command.json": {
+      "bytes": 1286,
+      "sha256": "1eb098288422a821c73729716d7dd8d0985cab89319ccf204293f16e7bf61a99"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/10-audit_1_2_state_writes.test/exit-original.txt": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/10-audit_1_2_state_writes.test/observed-closed-summary.json": {
+      "bytes": 362,
+      "sha256": "8e871267f6e668b216b5d4b1597e05789f0e1b0dd3a2440cdaa7b18883e7f1fb"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/10-audit_1_2_state_writes.test/report-original.json": {
+      "bytes": 51292,
+      "sha256": "6857071b05e9af3d28f0306f1b3baa67ffb2506a61035a10a080c224588dc287"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/10-audit_1_2_state_writes.test/stderr-original.log": {
+      "bytes": 13919,
+      "sha256": "bbad2b27865ee2e416f64f096e10b2b52f17c8834ba9f3546363b6064fa471c0"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/10-audit_1_2_state_writes.test/stdout-original.log": {
+      "bytes": 980,
+      "sha256": "bab99399b2c51f3037e4bb3337b2713201421c4dd690696a0d130f26ed09b083"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/11-audit_1_2_migration_sources.test/command.json": {
+      "bytes": 1296,
+      "sha256": "40da37d32be36cdeae731bf4d7f850d62863dfecdd843f6c445dacd8650e9151"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/11-audit_1_2_migration_sources.test/exit-original.txt": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/11-audit_1_2_migration_sources.test/observed-closed-summary.json": {
+      "bytes": 364,
+      "sha256": "b7833355a4c8bc6584fabbc457300312f69599b4fdb472f04a633480327fff30"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/11-audit_1_2_migration_sources.test/report-original.json": {
+      "bytes": 13772,
+      "sha256": "565029db3e3f64ee7ee12f403b890e731a7114c6b81f9764a132efc1defcd27b"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/11-audit_1_2_migration_sources.test/stderr-original.log": {
+      "bytes": 3571,
+      "sha256": "2cc2e0240a85b4ce216f5f9e77c39677797cf8c6d3cd42bb932e8ad7b7b5edc6"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-singles/11-audit_1_2_migration_sources.test/stdout-original.log": {
+      "bytes": 990,
+      "sha256": "35e7b778f5b3f793a9dd5acc7639f8da6730d15a265fbfb90ce09b6892e9afcd"
+    }
+  },
+  "reviewFiles": {
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-review/audit_0_14_number_entry.test.js.before-original": {
+      "bytes": 9785,
+      "sha256": "4f3cdb09efc6419c9dcdee566d3529bdc8b06810cd76eb2b18d29b89a2907182"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-review/fixture-additions-original.json": {
+      "bytes": 7880,
+      "sha256": "b4df007635d3b831e97f0c9acfa1a1b7a284ba33da31a43fc8c63ffdc47c02f4"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-review/mandatory_reason.test.js.before-original": {
+      "bytes": 7628,
+      "sha256": "cf5f7c45118ddf0cc53fcb924f340c669599640dde8f5cf3b344396d9854211b"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-review/matrix_blocking_diagnostics.test.js.before-original": {
+      "bytes": 5621,
+      "sha256": "83cb931c61e940d10bab7960d43fac236a2180ee0e3dd16268d6a800d1964a91"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-review/matrix_validation.test.js.before-original": {
+      "bytes": 6238,
+      "sha256": "acde16336d561f274c5226fac8b03eab83ccfb89cdaaf373aa02ef98f3fcd006"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-review/pre-correction-classification.json": {
+      "bytes": 39105,
+      "sha256": "7c32379ab624448ee103d1ddd3182ab3c882ead4403678b19222b01584de7083"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-review/prerequisite_gate.test.js.before-original": {
+      "bytes": 5768,
+      "sha256": "9134cc3b406f02a44df8676f8e5caf32166203c295af30ed494f617e2a897b85"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-review/result_provenance.test.js.before-original": {
+      "bytes": 12260,
+      "sha256": "3a8e5b4eb93b8ca32ef4b2e4539f72d61911bb0fed4f7b2c8f5140bc90b15336"
+    },
+    "WP/backlog-resume-20261013/issue209-validation-provenance-context-review/scientific_validation.test.js.before-original": {
+      "bytes": 4650,
+      "sha256": "a4d86248cc23c9d883636b162084c95eb9ef5d6a8c54a7d968ef9c1af3e6a040"
+    }
+  },
+  "sourceDraftPaths": [
+    ".gitattributes",
+    "Dockerfile",
+    "client/src/components/sample/AnalysisUpdateModal.jsx",
+    "client/src/translations/en.json",
+    "client/src/translations/es-419.json",
+    "client/src/translations/es.json",
+    "client/src/translations/fr.json",
+    "client/src/translations/pt.json",
+    "docker-entrypoint.sh",
+    "docs/audit/209-order-revisions.md",
+    "server/controllers/sampleController.js",
+    "server/index.js",
+    "server/locales/en.json",
+    "server/locales/es-419.json",
+    "server/locales/es.json",
+    "server/locales/fr.json",
+    "server/locales/pt.json",
+    "server/prisma/migrations/20261014000100_order_revision_contract/migration.sql",
+    "server/prisma/schema.prisma",
+    "server/scripts/install_order_revisions.js",
+    "server/scripts/order_revision_impact.js",
+    "server/scripts/rehearsal_deployment_readiness.cjs",
+    "server/services/intakeWorkItemService.js",
+    "server/services/orderAttemptWriteService.js",
+    "server/services/orderLineResolutionService.js",
+    "server/services/orderRevisionContract.js",
+    "server/services/orderRevisionMigrationSource.js",
+    "server/services/orderService.js",
+    "server/services/sampleAnalysisStateService.js",
+    "server/services/scientificAmendmentService.js",
+    "server/services/textureOrderContract.js",
+    "server/services/workAttemptReservationService.js",
+    "server/services/workAttemptWriteService.js",
+    "server/services/workItemReconciliationService.js",
+    "server/services/workRepeatService.js",
+    "server/tests/contracts/audit_2_6_equipment_commit.test.js",
+    "server/tests/contracts/audit_3_1_attempt_execution.test.js",
+    "server/tests/contracts/audit_3_1_attempt_sql_guards.test.js",
+    "server/tests/contracts/audit_3_3_separate_texture.test.js",
+    "server/tests/contracts/audit_6_1_non_scientific_authorisation.test.js",
+    "server/tests/contracts/deployment_readiness_bootstrap.test.js",
+    "server/tests/contracts/edit_analyses_permission.test.js",
+    "server/tests/contracts/issue_206_sample_containers.test.js",
+    "server/tests/contracts/issue_209_order_revision_http.test.js",
+    "server/tests/contracts/issue_209_order_revision_integration.test.js",
+    "server/tests/contracts/issue_209_order_revision_request.test.js",
+    "server/tests/contracts/issue_209_order_revision_ui.test.js",
+    "server/tests/contracts/reconcile_analyses.test.js",
+    "server/tests/contracts/review_reports_amendments_p6.test.js",
+    "server/tests/contracts/texture_work_item_atomic.test.js",
+    "server/tests/globalSetup.js",
+    "server/tests/helpers/legacyWorkflowDatabase.js",
+    "server/tests/helpers/qcGateFixture.js",
+    "server/tests/helpers/qcWorksheetUi.js",
+    "server/tests/helpers/workAttemptFixtures.js",
+    "server/tests/helpers/workflowWriteScanner.js",
+    "server/tests/security/wiring.test.js",
+    "server/tests/contracts/audit_4_6_calibration.test.js",
+    "server/tests/contracts/audit_4_6_calculation_install.test.js",
+    "server/tests/contracts/audit_4_1_run_start_header.test.js",
+    "server/tests/contracts/audit_1_2_guard_installer.test.js",
+    "server/tests/contracts/audit_4_3_keyboard_playwright.test.js",
+    "server/tests/contracts/audit_4_8_cross_check_evidence.test.js",
+    "server/tests/contracts/audit_6_1_first_fill.test.js",
+    "server/tests/contracts/audit_6_3_report_content.test.js",
+    "server/tests/contracts/audit_4_8_cross_check_install.test.js",
+    "server/tests/contracts/audit_1_2_spectral_state.test.js",
+    "server/tests/contracts/audit_0_3_publication.test.js",
+    "server/tests/contracts/issue_291_texture_input_authority.test.js",
+    "server/tests/contracts/issue_213_export_equals_report.test.js",
+    "server/tests/contracts/audit_4_7_calculation_import.test.js",
+    "server/tests/contracts/audit_1_4_uuid_transactions.test.js",
+    "server/tests/contracts/audit_0_15_duplicate_loq.test.js",
+    "server/tests/contracts/audit_1_0_lab_policies.test.js",
+    "server/tests/contracts/audit_1_5_result_writes.test.js",
+    "server/tests/contracts/audit_4_7_instrument_import_install.test.js",
+    "server/tests/contracts/audit_0_2_qc_lock.test.js",
+    "server/tests/contracts/audit_1_6_intake_cancellation.test.js",
+    "server/tests/contracts/audit_1_2_state_authority.test.js",
+    "server/tests/contracts/audit_1_2_workbench_state.test.js",
+    "server/tests/contracts/audit_0_6_review_atomicity.test.js",
+    "server/tests/contracts/audit_1_2_legacy_results.test.js",
+    "server/tests/contracts/audit_0_8_report_truthfulness.test.js",
+    "server/tests/contracts/report_pdf.test.js",
+    "server/tests/contracts/audit_0_11_workbench_queue.test.js",
+    "server/tests/contracts/issue_281_cross_check_bounds.test.js",
+    "server/tests/contracts/audit_0_10_current_result_views.test.js",
+    "server/tests/contracts/audit_0_5_legacy_review.test.js",
+    "server/tests/contracts/qc_disposition_release_gate.test.js",
+    "server/tests/contracts/audit_0_7_resubmission.test.js",
+    "server/tests/contracts/audit_0_9_public_report_superseded.test.js",
+    "server/tests/contracts/audit_6_2_report_revisions.test.js",
+    "server/tests/contracts/audit_0_14_number_entry.test.js",
+    "server/tests/contracts/mandatory_reason.test.js",
+    "server/tests/contracts/matrix_blocking_diagnostics.test.js",
+    "server/tests/contracts/matrix_validation.test.js",
+    "server/tests/contracts/prerequisite_gate.test.js",
+    "server/tests/contracts/result_provenance.test.js",
+    "server/tests/scenarios/scientific_validation.test.js"
+  ],
+  "all21OriginalCasesPassed": true,
+  "totalOriginalFailedCasesResolved": 554,
+  "remainingOriginalUnresolved": 96,
+  "futureFullExpectedTests": 5642,
+  "changedLegacyExpectations": [
+    {
+      "comment": 6169628053,
+      "oldKeyedAnalysesReceiptCount": 0,
+      "newCount": 1
+    }
+  ],
+  "applicationFullyVerified": false,
+  "productionOperations": 0
+}

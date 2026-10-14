@@ -97,6 +97,12 @@ describe('SD-10: Mandatory Reason on Rejection and Reopening Contract', () => {
     });
 
     test('2b. Calling reviewWorkItem with REJECT and note records note in reanalysisReason (HTTP 200)', async () => {
+        // #209: usable order context is declared only in this NEW owned fixture assembly.
+        require('../../services/workflowStateRules').assertFixtureContext();
+        await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: sampleId,
+            version: 1, status: 'ACTIVE', reason: 'Owned numerical execution order context', requestedBy: 'system:fixture',
+            lines: { create: ['PH_H2O'].map(analysis => ({ id: require('node:crypto').randomUUID(), analysis,
+                workItemId: null, status: 'ACTIVE', isRequired: true })) } } });
         // Pin6060110991: 6.5 is a synthetic fixture value for the rejection-note contract.
         await createExecutionResultFixture(prisma, { attemptStatus: 'SUBMITTED', data: {
             id: 'RES-SD10-PH-01', sampleId, param: 'PH_H2O', value: '6.5', unit: 'pH',

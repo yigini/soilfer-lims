@@ -1,0 +1,95 @@
+const { createExecutionResultFixture } = require('../helpers/workAttemptFixtures');
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
+const { createSampleFixture, createWorkItemsFixture } = require('../helpers/workflowFixtures');
+const request = require('supertest');
+const app = require('../../app');
+const prisma = require('../../prisma');
+const { getAuthToken } = require('../setup');
+
+describe('WP-15: Blocking vs Advisory Scientific Matrix Diagnostics', () => {
+    let token, testSampleId;
+
+    beforeAll(async () => {
+        token = await getAuthToken('LAB_MANAGER', 'GTM-LAB1', ['GTM'], ['SOILFER-US']);
+    });
+
+    beforeEach(async () => {
+        testSampleId = `SMP-MX-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+        await createSampleFixture(prisma, {
+            data: {
+                id: testSampleId,
+                originalId: `ORIG-${testSampleId}`,
+                status: 'PROCESSING',
+                dryingStatus: 'DONE', preparationStatus: 'DONE', receptionDate: new Date(),
+                assignedLab: 'GTM-LAB1',
+                labId: 'GTM-LAB1',
+                country: 'GTM'
+            }
+        });
+        const analysisDefinitions = [['SAND', '%'], ['SILT', '%'], ['CLAY', '%'], ['SOC', 'g/kg'], ['TN', 'g/kg']];
+        for (const [code, units] of analysisDefinitions) await prisma.analysis.upsert({ where: { code },
+            create: { code, name: code, units, status: 'active' }, update: { units, labId: null } });
+        await createWorkItemsFixture(prisma, { data: analysisDefinitions.map(([analysis]) => ({
+            id: `${testSampleId}-${analysis}`, sampleId: testSampleId, assignedLab: 'GTM-LAB1',
+            assignedTo: require('jsonwebtoken').decode(token).username, analysis, status: 'IN_PROGRESS'
+        })) });
+    });
+
+    afterEach(async () => {
+        if (testSampleId) {
+            await prisma.result.deleteMany({ where: { sampleId: testSampleId } }).catch(() => {});
+            await prisma.auditLog.deleteMany({ where: { sampleId: testSampleId } }).catch(() => {});
+            await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { sampleId: testSampleId } }), select: { id: true } })).map(row => row.id), { single: false }).catch(() => {});
+            await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: testSampleId } }), select: { id: true } })).map(row => row.id), { single: true }).catch(() => {});
+        }
+    });
+
+    test('1. Invalid texture closure (Sand+Silt+Clay = 87%) is strictly BLOCKED (HTTP 422)', async () => {
+        // Seed invalid texture results
+        for (const data of [
+            { id: `r1-${Date.now()}`, sampleId: testSampleId, param: 'SAND', value: '40', numericValue: 40, isCurrent: true },
+            { id: `r2-${Date.now()}`, sampleId: testSampleId, param: 'SILT', value: '30', numericValue: 30, isCurrent: true },
+            { id: `r3-${Date.now()}`, sampleId: testSampleId, param: 'CLAY', value: '17', numericValue: 17, isCurrent: true } // sum = 87%
+        ]) await createExecutionResultFixture(prisma, { data });
+
+        const res = await request(app)
+            .post(`/api/results/${testSampleId}/submit`)
+            .set('Authorization', `Bearer ${token}`);
+
+        expect(res.status).toBe(422);
+        expect(res.body.error).toBe('BLOCKING_MATRIX_DIAGNOSTICS');
+        expect(res.body.blockingErrors).toBeDefined();
+        expect(res.body.blockingErrors.some(e => e.check === 'TEXTURE_CLOSURE')).toBe(true);
+
+        // Verify sample status remains PROCESSING (not submitted)
+        const s = await prisma.sample.findUnique({ where: { id: testSampleId } });
+        expect(s.status).toBe('PROCESSING');
+    });
+
+    test('2. Valid texture with advisory C:N warning (C:N = 45) SUCCEEDS with a crossChecks C:N flag', async () => {
+        // Seed valid texture (40 + 40 + 20 = 100%) and high C:N (SOC=90, TN=2 -> C:N=45)
+        for (const data of [
+            { id: `r1-${Date.now()}`, sampleId: testSampleId, param: 'SAND', value: '40', numericValue: 40, isCurrent: true },
+            { id: `r2-${Date.now()}`, sampleId: testSampleId, param: 'SILT', value: '40', numericValue: 40, isCurrent: true },
+            { id: `r3-${Date.now()}`, sampleId: testSampleId, param: 'CLAY', value: '20', numericValue: 20, isCurrent: true },
+            { id: `r4-${Date.now()}`, sampleId: testSampleId, param: 'SOC', value: '90', numericValue: 90, unit: 'g/kg', isCurrent: true },
+            { id: `r5-${Date.now()}`, sampleId: testSampleId, param: 'TN', value: '2', numericValue: 2, unit: 'g/kg', isCurrent: true }
+        ]) await createExecutionResultFixture(prisma, { data });
+
+        const res = await request(app)
+            .post(`/api/results/${testSampleId}/submit`)
+            .set('Authorization', `Bearer ${token}`);
+
+        expect(res.status).toBe(200);
+        expect(res.body.status).toBe('SUBMITTED_FULL');
+        expect(res.body.matrixDiagnostics.cnRatio).toBeUndefined();
+        expect(res.body.matrixDiagnostics.retiredAdvisories).toEqual(['CN_RATIO', 'BASES_CEC']);
+        // #279: the C:N advisory now comes only from the registry-governed crossChecks.
+        expect(res.body.crossChecks.find(item => item.ruleCode === 'CN_RATIO')).toMatchObject({
+            outcome: 'FLAGGED', flagCode: 'CROSS_CHECK_CN_OUT_OF_RANGE', severity: 'ADVISORY' });
+
+        // Verify sample status moved to SUBMITTED_FULL
+        const s = await prisma.sample.findUnique({ where: { id: testSampleId } });
+        expect(s.status).toBe('SUBMITTED_FULL');
+    });
+});

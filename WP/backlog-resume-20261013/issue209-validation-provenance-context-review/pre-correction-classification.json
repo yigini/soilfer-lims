@@ -1,0 +1,494 @@
+{
+  "createdUtc": "2026-10-14T16:44:29.506822+00:00",
+  "reviewedBeforeChanges": true,
+  "originalFailedCases": 21,
+  "cases": [
+    {
+      "suite": "result_provenance.test.js",
+      "test": "WP-31: Result Provenance Tracking 1. Direct prisma create defaults Result.provenance to MEASURED",
+      "originalFailureSha256": "f312da1360630cf6ab27311bad54896556b1454e1b8e0b75e55f3750e4bd487f",
+      "originalObservedHeader": [
+        "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+        "    at Object.resolveOrderLine (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\orderLineResolutionService.js:30:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at insertExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workAttemptWriteService.js:63:25)",
+        "    at insertFixtureExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:36:9)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:83:9",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)"
+      ],
+      "originalCaseLineNumbers": [
+        "73"
+      ],
+      "classification": "EXPLICIT_NEW_OWNED_POSITIVE_ORDER_CONTEXT; ORIGINAL_SURFACE_FAILURE_AND_DEPENDENT_FAILURES_RETAINED",
+      "sourceDecision": "NEW four canonical entry owners receive legacy order context; only subsequently assembled PH and TEXTURE owners receive additional NULL lines before their executions, without changing retained lines. First direct fixture ORDER_LINE_REQUIRED observed. Other original failures are null results/no recorded review attempt/zero replicates; source-inferred consequence of execution preflight without usable order, not an invented observed HTTP code. Typed provenance MEASURED vs internal reasoned-repeat spectral PREDICTED, complete texture DERIVED, frozen basis/censoring and two retained replicates/report selections unchanged.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial-order WIs remain reachable zero-write refused; separate readonly impact causes/approved nonzero STOP unchanged under6167740581. No runtime backfill/relink/amendment order step."
+    },
+    {
+      "suite": "result_provenance.test.js",
+      "test": "WP-31: Result Provenance Tracking 2. typed results ignore claimed provenance and internal predictions retain PREDICTED",
+      "originalFailureSha256": "5fd1562b1dc87617b8e24d2f4b5f7f6eb4550567c918db9e27f00edb828afeb4",
+      "originalObservedHeader": [
+        "Error: expect(received).not.toBeNull()",
+        "",
+        "Received: null",
+        "    at Object.toBeNull (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\result_provenance.test.js:109:27)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)"
+      ],
+      "originalCaseLineNumbers": [
+        "109"
+      ],
+      "classification": "EXPLICIT_NEW_OWNED_POSITIVE_ORDER_CONTEXT; ORIGINAL_SURFACE_FAILURE_AND_DEPENDENT_FAILURES_RETAINED",
+      "sourceDecision": "NEW four canonical entry owners receive legacy order context; only subsequently assembled PH and TEXTURE owners receive additional NULL lines before their executions, without changing retained lines. First direct fixture ORDER_LINE_REQUIRED observed. Other original failures are null results/no recorded review attempt/zero replicates; source-inferred consequence of execution preflight without usable order, not an invented observed HTTP code. Typed provenance MEASURED vs internal reasoned-repeat spectral PREDICTED, complete texture DERIVED, frozen basis/censoring and two retained replicates/report selections unchanged.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial-order WIs remain reachable zero-write refused; separate readonly impact causes/approved nonzero STOP unchanged under6167740581. No runtime backfill/relink/amendment order step."
+    },
+    {
+      "suite": "result_provenance.test.js",
+      "test": "WP-31: Result Provenance Tracking 3. assembleReport includes provenance for each result item",
+      "originalFailureSha256": "ca6988bbab8887f015f036312a6857807155a9c788025c5743e1fb495b90828a",
+      "originalObservedHeader": [
+        "Error: Choose the attempt to review.",
+        "    at Object.resolveReviewAttempt (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\reviewAttemptService.js:24:11)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at Object.submitRecordedAttempt (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workAttemptEventService.js:70:21)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\submissionStateService.js:46:13",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)",
+        "    at reviewFixture (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\result_provenance.test.js:20:13)"
+      ],
+      "originalCaseLineNumbers": [
+        "20",
+        "127"
+      ],
+      "classification": "EXPLICIT_NEW_OWNED_POSITIVE_ORDER_CONTEXT; ORIGINAL_SURFACE_FAILURE_AND_DEPENDENT_FAILURES_RETAINED",
+      "sourceDecision": "NEW four canonical entry owners receive legacy order context; only subsequently assembled PH and TEXTURE owners receive additional NULL lines before their executions, without changing retained lines. First direct fixture ORDER_LINE_REQUIRED observed. Other original failures are null results/no recorded review attempt/zero replicates; source-inferred consequence of execution preflight without usable order, not an invented observed HTTP code. Typed provenance MEASURED vs internal reasoned-repeat spectral PREDICTED, complete texture DERIVED, frozen basis/censoring and two retained replicates/report selections unchanged.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial-order WIs remain reachable zero-write refused; separate readonly impact causes/approved nonzero STOP unchanged under6167740581. No runtime backfill/relink/amendment order step."
+    },
+    {
+      "suite": "result_provenance.test.js",
+      "test": "WP-31: Result Provenance Tracking 4. WP-40: saveResults accepts chosen basis and stores censoring correctly",
+      "originalFailureSha256": "49ab639e5e0efb02187587e2fdaa9a1e1e81201e93e1dc16b4eb3541fa915ada",
+      "originalObservedHeader": [
+        "Error: expect(received).not.toBeNull()",
+        "",
+        "Received: null",
+        "    at Object.toBeNull (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\result_provenance.test.js:170:28)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)"
+      ],
+      "originalCaseLineNumbers": [
+        "170"
+      ],
+      "classification": "EXPLICIT_NEW_OWNED_POSITIVE_ORDER_CONTEXT; ORIGINAL_SURFACE_FAILURE_AND_DEPENDENT_FAILURES_RETAINED",
+      "sourceDecision": "NEW four canonical entry owners receive legacy order context; only subsequently assembled PH and TEXTURE owners receive additional NULL lines before their executions, without changing retained lines. First direct fixture ORDER_LINE_REQUIRED observed. Other original failures are null results/no recorded review attempt/zero replicates; source-inferred consequence of execution preflight without usable order, not an invented observed HTTP code. Typed provenance MEASURED vs internal reasoned-repeat spectral PREDICTED, complete texture DERIVED, frozen basis/censoring and two retained replicates/report selections unchanged.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial-order WIs remain reachable zero-write refused; separate readonly impact causes/approved nonzero STOP unchanged under6167740581. No runtime backfill/relink/amendment order step."
+    },
+    {
+      "suite": "result_provenance.test.js",
+      "test": "WP-31: Result Provenance Tracking 5. WP-40: saveResults supports multiple replicates without overwriting previous determination",
+      "originalFailureSha256": "e7f810005ae708ffba4a28483a8ab5cd633954f3551ad7a8ae14f839169c33be",
+      "originalObservedHeader": [
+        "Error: expect(received).toBe(expected) // Object.is equality",
+        "",
+        "Expected: 2",
+        "Received: 0",
+        "    at Object.toBe (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\result_provenance.test.js:209:38)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)"
+      ],
+      "originalCaseLineNumbers": [
+        "209"
+      ],
+      "classification": "EXPLICIT_NEW_OWNED_POSITIVE_ORDER_CONTEXT; ORIGINAL_SURFACE_FAILURE_AND_DEPENDENT_FAILURES_RETAINED",
+      "sourceDecision": "NEW four canonical entry owners receive legacy order context; only subsequently assembled PH and TEXTURE owners receive additional NULL lines before their executions, without changing retained lines. First direct fixture ORDER_LINE_REQUIRED observed. Other original failures are null results/no recorded review attempt/zero replicates; source-inferred consequence of execution preflight without usable order, not an invented observed HTTP code. Typed provenance MEASURED vs internal reasoned-repeat spectral PREDICTED, complete texture DERIVED, frozen basis/censoring and two retained replicates/report selections unchanged.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial-order WIs remain reachable zero-write refused; separate readonly impact causes/approved nonzero STOP unchanged under6167740581. No runtime backfill/relink/amendment order step."
+    },
+    {
+      "suite": "result_provenance.test.js",
+      "test": "WP-31: Result Provenance Tracking 6. WP-40: assembleReport embeds basis, replicateNo, and censoring on result items",
+      "originalFailureSha256": "dee42c33cea0cf0dcae6e04ffe8927fc3c95b1701378964d2f7a68ca0ecc8b44",
+      "originalObservedHeader": [
+        "Error: Choose the attempt to review.",
+        "    at Object.resolveReviewAttempt (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\reviewAttemptService.js:24:11)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at Object.submitRecordedAttempt (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workAttemptEventService.js:70:21)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\submissionStateService.js:46:13",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)",
+        "    at reviewFixture (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\result_provenance.test.js:20:13)"
+      ],
+      "originalCaseLineNumbers": [
+        "20",
+        "218"
+      ],
+      "classification": "EXPLICIT_NEW_OWNED_POSITIVE_ORDER_CONTEXT; ORIGINAL_SURFACE_FAILURE_AND_DEPENDENT_FAILURES_RETAINED",
+      "sourceDecision": "NEW four canonical entry owners receive legacy order context; only subsequently assembled PH and TEXTURE owners receive additional NULL lines before their executions, without changing retained lines. First direct fixture ORDER_LINE_REQUIRED observed. Other original failures are null results/no recorded review attempt/zero replicates; source-inferred consequence of execution preflight without usable order, not an invented observed HTTP code. Typed provenance MEASURED vs internal reasoned-repeat spectral PREDICTED, complete texture DERIVED, frozen basis/censoring and two retained replicates/report selections unchanged.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial-order WIs remain reachable zero-write refused; separate readonly impact causes/approved nonzero STOP unchanged under6167740581. No runtime backfill/relink/amendment order step."
+    },
+    {
+      "suite": "matrix_validation.test.js",
+      "test": "Sample Matrix Cross-Parameter Validation Contract 1. saveResults validates matrix integrity and computes USDA texture; C:N and bases come from crossChecks",
+      "originalFailureSha256": "787007b530287103d0e15a41c9b8d0a0333a4b649ee6e2c95261cbf1502849c8",
+      "originalObservedHeader": [
+        "Error: expect(received).toBe(expected) // Object.is equality",
+        "",
+        "Expected: 200",
+        "Received: 409",
+        "    at Object.toBe (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\matrix_validation.test.js:59:28)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)"
+      ],
+      "originalCaseLineNumbers": [
+        "59"
+      ],
+      "classification": "EXPLICIT_NEW_OWNED_POSITIVE_ORDER_CONTEXT; ORIGINAL_SURFACE_FAILURE_AND_DEPENDENT_FAILURES_RETAINED",
+      "sourceDecision": "NEW explicitly assembled nine numeric owners get nine matching legacy NULL lines after owner assembly. Original HTTP409 observed for save cases; later submit400 follows missing measurements. Source shows current execution INSERT order preflight; candidate context declared before execution, original HTTP bodies did not capture refusal code and none is invented. USDA Sandy Loam, invalid80%closure warning, CN/base missingNa behavior and submission diagnostics unchanged.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial-order WIs remain reachable zero-write refused; separate readonly impact causes/approved nonzero STOP unchanged under6167740581. No runtime backfill/relink/amendment order step."
+    },
+    {
+      "suite": "matrix_validation.test.js",
+      "test": "Sample Matrix Cross-Parameter Validation Contract 2. Emits warning when texture fractions fail 100% closure tolerance",
+      "originalFailureSha256": "1cabec23839ededa38619f2497936fa0265c720c7a231ba2bc37be85f299ce40",
+      "originalObservedHeader": [
+        "Error: expect(received).toBe(expected) // Object.is equality",
+        "",
+        "Expected: 200",
+        "Received: 409",
+        "    at Object.toBe (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\matrix_validation.test.js:107:28)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)"
+      ],
+      "originalCaseLineNumbers": [
+        "107"
+      ],
+      "classification": "EXPLICIT_NEW_OWNED_POSITIVE_ORDER_CONTEXT; ORIGINAL_SURFACE_FAILURE_AND_DEPENDENT_FAILURES_RETAINED",
+      "sourceDecision": "NEW explicitly assembled nine numeric owners get nine matching legacy NULL lines after owner assembly. Original HTTP409 observed for save cases; later submit400 follows missing measurements. Source shows current execution INSERT order preflight; candidate context declared before execution, original HTTP bodies did not capture refusal code and none is invented. USDA Sandy Loam, invalid80%closure warning, CN/base missingNa behavior and submission diagnostics unchanged.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial-order WIs remain reachable zero-write refused; separate readonly impact causes/approved nonzero STOP unchanged under6167740581. No runtime backfill/relink/amendment order step."
+    },
+    {
+      "suite": "matrix_validation.test.js",
+      "test": "Sample Matrix Cross-Parameter Validation Contract 3. submitForApproval attaches complete matrix diagnostics to response",
+      "originalFailureSha256": "105646431a67c5f799ba5c9fe8c399f727455a24d4b7fb7b780c7fcdc593f82d",
+      "originalObservedHeader": [
+        "Error: expect(received).toBe(expected) // Object.is equality",
+        "",
+        "Expected: 200",
+        "Received: 400",
+        "    at Object.toBe (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\matrix_validation.test.js:118:28)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)"
+      ],
+      "originalCaseLineNumbers": [
+        "118"
+      ],
+      "classification": "EXPLICIT_NEW_OWNED_POSITIVE_ORDER_CONTEXT; ORIGINAL_SURFACE_FAILURE_AND_DEPENDENT_FAILURES_RETAINED",
+      "sourceDecision": "NEW explicitly assembled nine numeric owners get nine matching legacy NULL lines after owner assembly. Original HTTP409 observed for save cases; later submit400 follows missing measurements. Source shows current execution INSERT order preflight; candidate context declared before execution, original HTTP bodies did not capture refusal code and none is invented. USDA Sandy Loam, invalid80%closure warning, CN/base missingNa behavior and submission diagnostics unchanged.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial-order WIs remain reachable zero-write refused; separate readonly impact causes/approved nonzero STOP unchanged under6167740581. No runtime backfill/relink/amendment order step."
+    },
+    {
+      "suite": "audit_0_14_number_entry.test.js",
+      "test": "Audit 0.14: normalized entries and lab number policy recording 6,85 stores canonical value and exact raw input",
+      "originalFailureSha256": "bb78b70d650d8e6b5d476f2e92f92c20048b5e23f980d5ee736fb7fdc668b753",
+      "originalObservedHeader": [
+        "Error: expect(received).toMatchObject(expected)",
+        "",
+        "- Expected  - 2",
+        "+ Received  + 3",
+        "",
+        "  Object {",
+        "    \"body\": Object {",
+        "-     \"saved\": 1,"
+      ],
+      "originalCaseLineNumbers": [
+        "35"
+      ],
+      "classification": "EXPLICIT_NEW_OWNED_POSITIVE_ORDER_CONTEXT; ORIGINAL_SURFACE_FAILURE_AND_DEPENDENT_FAILURES_RETAINED",
+      "sourceDecision": "Existing single SPEC_GRS/TEXTURE owner in NEW numeric-input fixtures gets one usable legacy NULL order line. No fraction owners manufactured. Raw/canonical numeric values, censored strings, atomic four texture outputs, malformed number/policy zero-write assertions, profile audit and typed QC raw strings remain byte-identical.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial-order WIs remain reachable zero-write refused; separate readonly impact causes/approved nonzero STOP unchanged under6167740581. No runtime backfill/relink/amendment order step."
+    },
+    {
+      "suite": "audit_0_14_number_entry.test.js",
+      "test": "Audit 0.14: normalized entries and lab number policy recording <0,5 stores canonical value and exact raw input",
+      "originalFailureSha256": "bb78b70d650d8e6b5d476f2e92f92c20048b5e23f980d5ee736fb7fdc668b753",
+      "originalObservedHeader": [
+        "Error: expect(received).toMatchObject(expected)",
+        "",
+        "- Expected  - 2",
+        "+ Received  + 3",
+        "",
+        "  Object {",
+        "    \"body\": Object {",
+        "-     \"saved\": 1,"
+      ],
+      "originalCaseLineNumbers": [
+        "35"
+      ],
+      "classification": "EXPLICIT_NEW_OWNED_POSITIVE_ORDER_CONTEXT; ORIGINAL_SURFACE_FAILURE_AND_DEPENDENT_FAILURES_RETAINED",
+      "sourceDecision": "Existing single SPEC_GRS/TEXTURE owner in NEW numeric-input fixtures gets one usable legacy NULL order line. No fraction owners manufactured. Raw/canonical numeric values, censored strings, atomic four texture outputs, malformed number/policy zero-write assertions, profile audit and typed QC raw strings remain byte-identical.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial-order WIs remain reachable zero-write refused; separate readonly impact causes/approved nonzero STOP unchanged under6167740581. No runtime backfill/relink/amendment order step."
+    },
+    {
+      "suite": "audit_0_14_number_entry.test.js",
+      "test": "Audit 0.14: normalized entries and lab number policy recording < 0.5 stores canonical value and exact raw input",
+      "originalFailureSha256": "bb78b70d650d8e6b5d476f2e92f92c20048b5e23f980d5ee736fb7fdc668b753",
+      "originalObservedHeader": [
+        "Error: expect(received).toMatchObject(expected)",
+        "",
+        "- Expected  - 2",
+        "+ Received  + 3",
+        "",
+        "  Object {",
+        "    \"body\": Object {",
+        "-     \"saved\": 1,"
+      ],
+      "originalCaseLineNumbers": [
+        "35"
+      ],
+      "classification": "EXPLICIT_NEW_OWNED_POSITIVE_ORDER_CONTEXT; ORIGINAL_SURFACE_FAILURE_AND_DEPENDENT_FAILURES_RETAINED",
+      "sourceDecision": "Existing single SPEC_GRS/TEXTURE owner in NEW numeric-input fixtures gets one usable legacy NULL order line. No fraction owners manufactured. Raw/canonical numeric values, censored strings, atomic four texture outputs, malformed number/policy zero-write assertions, profile audit and typed QC raw strings remain byte-identical.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial-order WIs remain reachable zero-write refused; separate readonly impact causes/approved nonzero STOP unchanged under6167740581. No runtime backfill/relink/amendment order step."
+    },
+    {
+      "suite": "audit_0_14_number_entry.test.js",
+      "test": "Audit 0.14: normalized entries and lab number policy recording >100 stores canonical value and exact raw input",
+      "originalFailureSha256": "bb78b70d650d8e6b5d476f2e92f92c20048b5e23f980d5ee736fb7fdc668b753",
+      "originalObservedHeader": [
+        "Error: expect(received).toMatchObject(expected)",
+        "",
+        "- Expected  - 2",
+        "+ Received  + 3",
+        "",
+        "  Object {",
+        "    \"body\": Object {",
+        "-     \"saved\": 1,"
+      ],
+      "originalCaseLineNumbers": [
+        "35"
+      ],
+      "classification": "EXPLICIT_NEW_OWNED_POSITIVE_ORDER_CONTEXT; ORIGINAL_SURFACE_FAILURE_AND_DEPENDENT_FAILURES_RETAINED",
+      "sourceDecision": "Existing single SPEC_GRS/TEXTURE owner in NEW numeric-input fixtures gets one usable legacy NULL order line. No fraction owners manufactured. Raw/canonical numeric values, censored strings, atomic four texture outputs, malformed number/policy zero-write assertions, profile audit and typed QC raw strings remain byte-identical.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial-order WIs remain reachable zero-write refused; separate readonly impact causes/approved nonzero STOP unchanged under6167740581. No runtime backfill/relink/amendment order step."
+    },
+    {
+      "suite": "audit_0_14_number_entry.test.js",
+      "test": "Audit 0.14: normalized entries and lab number policy recording 1e-3 stores canonical value and exact raw input",
+      "originalFailureSha256": "bb78b70d650d8e6b5d476f2e92f92c20048b5e23f980d5ee736fb7fdc668b753",
+      "originalObservedHeader": [
+        "Error: expect(received).toMatchObject(expected)",
+        "",
+        "- Expected  - 2",
+        "+ Received  + 3",
+        "",
+        "  Object {",
+        "    \"body\": Object {",
+        "-     \"saved\": 1,"
+      ],
+      "originalCaseLineNumbers": [
+        "35"
+      ],
+      "classification": "EXPLICIT_NEW_OWNED_POSITIVE_ORDER_CONTEXT; ORIGINAL_SURFACE_FAILURE_AND_DEPENDENT_FAILURES_RETAINED",
+      "sourceDecision": "Existing single SPEC_GRS/TEXTURE owner in NEW numeric-input fixtures gets one usable legacy NULL order line. No fraction owners manufactured. Raw/canonical numeric values, censored strings, atomic four texture outputs, malformed number/policy zero-write assertions, profile audit and typed QC raw strings remain byte-identical.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial-order WIs remain reachable zero-write refused; separate readonly impact causes/approved nonzero STOP unchanged under6167740581. No runtime backfill/relink/amendment order step."
+    },
+    {
+      "suite": "audit_0_14_number_entry.test.js",
+      "test": "Audit 0.14: normalized entries and lab number policy texture stores all normalized fractions and exact individual raw inputs atomically",
+      "originalFailureSha256": "7d7939ecb185bf02d76f29f97650e6bf1dfcc5a63bd05d72eaf2af6f1b296e9f",
+      "originalObservedHeader": [
+        "Error: expect(received).toBe(expected) // Object.is equality",
+        "",
+        "Expected: 200",
+        "Received: 409",
+        "    at Object.toBe (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\audit_0_14_number_entry.test.js:49:33)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)"
+      ],
+      "originalCaseLineNumbers": [
+        "49"
+      ],
+      "classification": "EXPLICIT_NEW_OWNED_POSITIVE_ORDER_CONTEXT; ORIGINAL_SURFACE_FAILURE_AND_DEPENDENT_FAILURES_RETAINED",
+      "sourceDecision": "Existing single SPEC_GRS/TEXTURE owner in NEW numeric-input fixtures gets one usable legacy NULL order line. No fraction owners manufactured. Raw/canonical numeric values, censored strings, atomic four texture outputs, malformed number/policy zero-write assertions, profile audit and typed QC raw strings remain byte-identical.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial-order WIs remain reachable zero-write refused; separate readonly impact causes/approved nonzero STOP unchanged under6167740581. No runtime backfill/relink/amendment order step."
+    },
+    {
+      "suite": "audit_0_14_number_entry.test.js",
+      "test": "Audit 0.14: normalized entries and lab number policy lab policy is shared across analysts, explicit thousands grouping is honored and malformed policy fails before writes",
+      "originalFailureSha256": "2062fc9e9e8a94fabbc1b59470f4dbafeeb96b4cb2e9d52d7f6ec9c6d980e70b",
+      "originalObservedHeader": [
+        "Error: expect(received).toMatchObject(expected)",
+        "",
+        "- Expected  - 2",
+        "+ Received  + 3",
+        "",
+        "  Object {",
+        "    \"body\": Object {",
+        "-     \"saved\": 1,"
+      ],
+      "originalCaseLineNumbers": [
+        "62"
+      ],
+      "classification": "EXPLICIT_NEW_OWNED_POSITIVE_ORDER_CONTEXT; ORIGINAL_SURFACE_FAILURE_AND_DEPENDENT_FAILURES_RETAINED",
+      "sourceDecision": "Existing single SPEC_GRS/TEXTURE owner in NEW numeric-input fixtures gets one usable legacy NULL order line. No fraction owners manufactured. Raw/canonical numeric values, censored strings, atomic four texture outputs, malformed number/policy zero-write assertions, profile audit and typed QC raw strings remain byte-identical.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial-order WIs remain reachable zero-write refused; separate readonly impact causes/approved nonzero STOP unchanged under6167740581. No runtime backfill/relink/amendment order step."
+    },
+    {
+      "suite": "matrix_blocking_diagnostics.test.js",
+      "test": "WP-15: Blocking vs Advisory Scientific Matrix Diagnostics 1. Invalid texture closure (Sand+Silt+Clay = 87%) is strictly BLOCKED (HTTP 422)",
+      "originalFailureSha256": "35576c230ee6b0f3c1a0917a5b3626ebd9920dd54a1f3f9960e0c3e967c682f8",
+      "originalObservedHeader": [
+        "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+        "    at Object.resolveOrderLine (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\orderLineResolutionService.js:30:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at insertExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workAttemptWriteService.js:63:25)",
+        "    at insertFixtureExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:36:9)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:83:9",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)"
+      ],
+      "originalCaseLineNumbers": [
+        "53"
+      ],
+      "classification": "EXPLICIT_NEW_OWNED_POSITIVE_ORDER_CONTEXT; ORIGINAL_SURFACE_FAILURE_AND_DEPENDENT_FAILURES_RETAINED",
+      "sourceDecision": "NEW explicit five existing SAND/SILT/CLAY/SOC/TN owners get five legacy NULL matching lines before execution. Keep requiredAnalyses, all input values40/30/17 and40/40/20/90/2, strict87%closure422 and advisoryCN45flag200 unchanged. No normalization/composite/fraction ownership/runtime changes.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial-order WIs remain reachable zero-write refused; separate readonly impact causes/approved nonzero STOP unchanged under6167740581. No runtime backfill/relink/amendment order step."
+    },
+    {
+      "suite": "matrix_blocking_diagnostics.test.js",
+      "test": "WP-15: Blocking vs Advisory Scientific Matrix Diagnostics 2. Valid texture with advisory C:N warning (C:N = 45) SUCCEEDS with a crossChecks C:N flag",
+      "originalFailureSha256": "bb3720ba8b7f85c82138e90d348530155ff27b442f218729b2a0ca68d4a735ba",
+      "originalObservedHeader": [
+        "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+        "    at Object.resolveOrderLine (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\orderLineResolutionService.js:30:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at insertExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workAttemptWriteService.js:63:25)",
+        "    at insertFixtureExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:36:9)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:83:9",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)"
+      ],
+      "originalCaseLineNumbers": [
+        "77"
+      ],
+      "classification": "EXPLICIT_NEW_OWNED_POSITIVE_ORDER_CONTEXT; ORIGINAL_SURFACE_FAILURE_AND_DEPENDENT_FAILURES_RETAINED",
+      "sourceDecision": "NEW explicit five existing SAND/SILT/CLAY/SOC/TN owners get five legacy NULL matching lines before execution. Keep requiredAnalyses, all input values40/30/17 and40/40/20/90/2, strict87%closure422 and advisoryCN45flag200 unchanged. No normalization/composite/fraction ownership/runtime changes.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial-order WIs remain reachable zero-write refused; separate readonly impact causes/approved nonzero STOP unchanged under6167740581. No runtime backfill/relink/amendment order step."
+    },
+    {
+      "suite": "prerequisite_gate.test.js",
+      "test": "SD-05: Server-Side Prerequisite Gate Contract 5. Saving results now succeeds with preparation completed (HTTP 200)",
+      "originalFailureSha256": "76e22a2f13ce3ab3bf40e644f1e339a4a2b7e80120bb4310a12fb1f79e437d6c",
+      "originalObservedHeader": [
+        "Error: expect(received).toBe(expected) // Object.is equality",
+        "",
+        "Expected: 200",
+        "Received: 409",
+        "    at Object.toBe (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\prerequisite_gate.test.js:139:28)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)"
+      ],
+      "originalCaseLineNumbers": [
+        "139"
+      ],
+      "classification": "EXPLICIT_NEW_OWNED_POSITIVE_ORDER_CONTEXT; ORIGINAL_SURFACE_FAILURE_AND_DEPENDENT_FAILURES_RETAINED",
+      "sourceDecision": "Only positive fifth save after actual preparation completion gets legacy PH_H2O order context immediately before its request. Earlier assignment/start state and preparation412 refusal tests remain untouched/orderless. No prerequisite or permission/runtime change.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial-order WIs remain reachable zero-write refused; separate readonly impact causes/approved nonzero STOP unchanged under6167740581. No runtime backfill/relink/amendment order step."
+    },
+    {
+      "suite": "scientific_validation.test.js",
+      "test": "Scenario H: Scientific Validation should ACCEPT valid result within range",
+      "originalFailureSha256": "8e5d490bae727a0d6193f329fcc3034ada3c11ffac607b33c5c1013ecb446370",
+      "originalObservedHeader": [
+        "Error: expect(received).toBe(expected) // Object.is equality",
+        "",
+        "Expected: 200",
+        "Received: 409",
+        "    at Object.toBe (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\scenarios\\scientific_validation.test.js:115:28)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)"
+      ],
+      "originalCaseLineNumbers": [
+        "115"
+      ],
+      "classification": "EXPLICIT_NEW_OWNED_POSITIVE_ORDER_CONTEXT; ORIGINAL_SURFACE_FAILURE_AND_DEPENDENT_FAILURES_RETAINED",
+      "sourceDecision": "Only valid7.2 positive scenario gets PH_H2O legacy order before actual batch-save. Earlier ABOVE_MAX/BELOW_MIN/non-numeric422 with zero Results remain untouched/orderless. Observed old409 without body code; no diagnostic invented, current writer order preflight inspected. All numeric policy/source data unchanged.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial-order WIs remain reachable zero-write refused; separate readonly impact causes/approved nonzero STOP unchanged under6167740581. No runtime backfill/relink/amendment order step."
+    },
+    {
+      "suite": "mandatory_reason.test.js",
+      "test": "SD-10: Mandatory Reason on Rejection and Reopening Contract 2b. Calling reviewWorkItem with REJECT and note records note in reanalysisReason (HTTP 200)",
+      "originalFailureSha256": "3330f67ef5d1a2a45d6daa47514f3456499cc9c99ee65861bfb51d20a203cdf1",
+      "originalObservedHeader": [
+        "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+        "    at Object.resolveOrderLine (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\orderLineResolutionService.js:30:30)",
+        "    at processTicksAndRejections (node:internal/process/task_queues:103:5)",
+        "    at insertFixtureExecution (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:28:29)",
+        "    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\helpers\\workAttemptFixtures.js:83:9",
+        "    at Proxy._transactionWithCallback (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\prisma_client\\runtime\\client.js:79:4390)",
+        "    at Object.inTransaction (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\services\\workflowStateRules.js:188:60)",
+        "    at Object.<anonymous> (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\mandatory_reason.test.js:101:9)"
+      ],
+      "originalCaseLineNumbers": [
+        "101"
+      ],
+      "classification": "EXPLICIT_NEW_OWNED_POSITIVE_ORDER_CONTEXT; ORIGINAL_SURFACE_FAILURE_AND_DEPENDENT_FAILURES_RETAINED",
+      "sourceDecision": "Only positive2b SUBMITTED synthetic6.5 execution gets a declared PH_H2O legacy order before its witness. Earlier no-attempt409/no-note400 remain orderless. Approved undo-approval refusals/sample+audit equality, reason and retained duplicate-disagreement request remain byte-identical.",
+      "assertionChanges": 0,
+      "runtimeChanges": 0,
+      "productionInspections": 0,
+      "runtimeVariant": "Released48d missing/partial-order WIs remain reachable zero-write refused; separate readonly impact causes/approved nonzero STOP unchanged under6167740581. No runtime backfill/relink/amendment order step."
+    }
+  ],
+  "productionOperations": 0
+}

@@ -1,0 +1,67 @@
+[
+  {
+    "path": "server/tests/contracts/audit_0_14_number_entry.test.js",
+    "beforeSha256": "4f3cdb09efc6419c9dcdee566d3529bdc8b06810cd76eb2b18d29b89a2907182",
+    "afterSha256": "47d2071063d130ae5e49f7476dbf503d8d137f622d7f13a38838c484da2ccfaf",
+    "oldSourceAndEveryAssertionExactlyRecoveredByRemovingAdditions": true,
+    "additions": [
+      "        // #209: usable order context is declared only in this NEW owned fixture assembly.\n        require('../../services/workflowStateRules').assertFixtureContext();\n        await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: sampleId,\n            version: 1, status: 'ACTIVE', reason: 'Owned numerical execution order context', requestedBy: 'system:fixture',\n            lines: { create: [analysis].map(analysis => ({ id: require('node:crypto').randomUUID(), analysis,\n                workItemId: null, status: 'ACTIVE', isRequired: true })) } } });\n"
+    ]
+  },
+  {
+    "path": "server/tests/contracts/mandatory_reason.test.js",
+    "beforeSha256": "cf5f7c45118ddf0cc53fcb924f340c669599640dde8f5cf3b344396d9854211b",
+    "afterSha256": "0f4cace8b4bf2ca9bf18b49c6c3826823cf3305205571f54687b0ae19a93001c",
+    "oldSourceAndEveryAssertionExactlyRecoveredByRemovingAdditions": true,
+    "additions": [
+      "        // #209: usable order context is declared only in this NEW owned fixture assembly.\n        require('../../services/workflowStateRules').assertFixtureContext();\n        await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: sampleId,\n            version: 1, status: 'ACTIVE', reason: 'Owned numerical execution order context', requestedBy: 'system:fixture',\n            lines: { create: ['PH_H2O'].map(analysis => ({ id: require('node:crypto').randomUUID(), analysis,\n                workItemId: null, status: 'ACTIVE', isRequired: true })) } } });\n"
+    ]
+  },
+  {
+    "path": "server/tests/contracts/matrix_blocking_diagnostics.test.js",
+    "beforeSha256": "83cb931c61e940d10bab7960d43fac236a2180ee0e3dd16268d6a800d1964a91",
+    "afterSha256": "2312b3d846357d1686a3d386e77d3edacdfc139ace74ddc55054bd05a4b45ef6",
+    "oldSourceAndEveryAssertionExactlyRecoveredByRemovingAdditions": true,
+    "additions": [
+      "        // #209: usable order context is declared only in this NEW owned fixture assembly.\n        require('../../services/workflowStateRules').assertFixtureContext();\n        await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: testSampleId,\n            version: 1, status: 'ACTIVE', reason: 'Owned numerical execution order context', requestedBy: 'system:fixture',\n            lines: { create: analysisDefinitions.map(([code]) => code).map(analysis => ({ id: require('node:crypto').randomUUID(), analysis,\n                workItemId: null, status: 'ACTIVE', isRequired: true })) } } });\n"
+    ]
+  },
+  {
+    "path": "server/tests/contracts/matrix_validation.test.js",
+    "beforeSha256": "acde16336d561f274c5226fac8b03eab83ccfb89cdaaf373aa02ef98f3fcd006",
+    "afterSha256": "205e43acc70b22c96467d69d7fc0cad2dfa59ceecef619d04f893bbfca5f79ad",
+    "oldSourceAndEveryAssertionExactlyRecoveredByRemovingAdditions": true,
+    "additions": [
+      "    // #209: usable order context is declared only in this NEW owned fixture assembly.\n    require('../../services/workflowStateRules').assertFixtureContext();\n    await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: sampleId,\n        version: 1, status: 'ACTIVE', reason: 'Owned numerical execution order context', requestedBy: 'system:fixture',\n        lines: { create: parameters.map(([code]) => code).map(analysis => ({ id: require('node:crypto').randomUUID(), analysis,\n            workItemId: null, status: 'ACTIVE', isRequired: true })) } } });\n"
+    ]
+  },
+  {
+    "path": "server/tests/contracts/prerequisite_gate.test.js",
+    "beforeSha256": "9134cc3b406f02a44df8676f8e5caf32166203c295af30ed494f617e2a897b85",
+    "afterSha256": "2c1f9e920b80b3943a23443c49d00dd6214d701e47a97600aecdcdac695fe019",
+    "oldSourceAndEveryAssertionExactlyRecoveredByRemovingAdditions": true,
+    "additions": [
+      "        // #209: usable order context is declared only in this NEW owned fixture assembly.\n        require('../../services/workflowStateRules').assertFixtureContext();\n        await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: sampleId,\n            version: 1, status: 'ACTIVE', reason: 'Owned numerical execution order context', requestedBy: 'system:fixture',\n            lines: { create: ['PH_H2O'].map(analysis => ({ id: require('node:crypto').randomUUID(), analysis,\n                workItemId: null, status: 'ACTIVE', isRequired: true })) } } });\n"
+    ]
+  },
+  {
+    "path": "server/tests/contracts/result_provenance.test.js",
+    "beforeSha256": "3a8e5b4eb93b8ca32ef4b2e4539f72d61911bb0fed4f7b2c8f5140bc90b15336",
+    "afterSha256": "69268a2cb02d45700524f498d876242b165c213ac7b6aaf34aaca357344744bc",
+    "oldSourceAndEveryAssertionExactlyRecoveredByRemovingAdditions": true,
+    "additions": [
+      "        // #209: usable order context is declared only in this NEW owned fixture assembly.\n        require('../../services/workflowStateRules').assertFixtureContext();\n        await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: testSampleId,\n            version: 1, status: 'ACTIVE', reason: 'Owned numerical execution order context', requestedBy: 'system:fixture',\n            lines: { create: ['EC', 'CLAY_PRED', 'SOC', 'TOTAL_N'].map(analysis => ({ id: require('node:crypto').randomUUID(), analysis,\n                workItemId: null, status: 'ACTIVE', isRequired: true })) } } });\n",
+      "        // #209: append only the newly assembled owner's line; retain every prior line.\n        require('../../services/workflowStateRules').assertFixtureContext();\n        const declaredOrder = await prisma.sampleOrderRevision.findFirst({ where: { sampleId: testSampleId, status: 'ACTIVE' } });\n        await prisma.orderLine.create({ data: { id: require('node:crypto').randomUUID(), revisionId: declaredOrder.id,\n            analysis: 'PH', workItemId: null, status: 'ACTIVE', isRequired: true } });\n",
+      "        // #209: append only the newly assembled owner's line; retain every prior line.\n        require('../../services/workflowStateRules').assertFixtureContext();\n        const declaredOrder = await prisma.sampleOrderRevision.findFirst({ where: { sampleId: testSampleId, status: 'ACTIVE' } });\n        await prisma.orderLine.create({ data: { id: require('node:crypto').randomUUID(), revisionId: declaredOrder.id,\n            analysis: 'TEXTURE', workItemId: null, status: 'ACTIVE', isRequired: true } });\n"
+    ]
+  },
+  {
+    "path": "server/tests/scenarios/scientific_validation.test.js",
+    "beforeSha256": "a4d86248cc23c9d883636b162084c95eb9ef5d6a8c54a7d968ef9c1af3e6a040",
+    "afterSha256": "d85c456daf6608e9313c8fe6da899e09ce4f4550c03523726aa99e50c58037c4",
+    "oldSourceAndEveryAssertionExactlyRecoveredByRemovingAdditions": true,
+    "additions": [
+      "        // #209: usable order context is declared only in this NEW owned fixture assembly.\n        require('../../services/workflowStateRules').assertFixtureContext();\n        await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: sampleId,\n            version: 1, status: 'ACTIVE', reason: 'Owned numerical execution order context', requestedBy: 'system:fixture',\n            lines: { create: ['PH_H2O'].map(analysis => ({ id: require('node:crypto').randomUUID(), analysis,\n                workItemId: null, status: 'ACTIVE', isRequired: true })) } } });\n"
+    ]
+  }
+]

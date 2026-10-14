@@ -1,0 +1,28 @@
+{
+  "argv": [
+    "cmd.exe",
+    "/d",
+    "/c",
+    "npm.cmd",
+    "test",
+    "--",
+    "--setupFilesAfterEnv",
+    "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\ownedSuiteSetup.js",
+    "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\setup.js",
+    "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\WP\\backlog-resume-20261013\\issue209-local-owned-physical-retention-spectral-finalizer.cjs",
+    "--globalTeardown",
+    "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\WP\\backlog-resume-20261013\\issue214-policy-owner-local-retention-teardown.cjs",
+    "--testMatch",
+    "**/tests/**/*.test.js",
+    "--runTestsByPath",
+    "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\mandatory_reason.test.js",
+    "--json",
+    "--outputFile",
+    "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\WP\\backlog-resume-20261013\\issue209-validation-provenance-context-singles\\02-mandatory_reason.test\\report-original.json"
+  ],
+  "nodeOptions": "",
+  "ordinarySetups": true,
+  "stockAssertions": true,
+  "workerIdleMemoryLimit": 512000000,
+  "productionOperations": 0
+}

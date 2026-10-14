@@ -27,6 +27,12 @@ describe('Audit 0.14: normalized entries and lab number policy', () => {
         const sampleId = id('SMP014'), workItemId = id('WI014');
         await createSampleFixture(prisma, { data: { id: sampleId, originalId: sampleId, assignedLab: lab, labId: sampleId, status: 'PROCESSING', dryingStatus: 'DONE', preparationStatus: 'DONE', requiredAnalyses: JSON.stringify([analysis]) } });
         await createWorkItemFixture(prisma, { data: { id: workItemId, sampleId, labId: lab, assignedLab: lab, analysis, assignedTo: actor.username, status: 'IN_PROGRESS', version: 0 } });
+        // #209: usable order context is declared only in this NEW owned fixture assembly.
+        require('../../services/workflowStateRules').assertFixtureContext();
+        await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: sampleId,
+            version: 1, status: 'ACTIVE', reason: 'Owned numerical execution order context', requestedBy: 'system:fixture',
+            lines: { create: [analysis].map(analysis => ({ id: require('node:crypto').randomUUID(), analysis,
+                workItemId: null, status: 'ACTIVE', isRequired: true })) } } });
         return { sampleId, workItemId };
     }
     const record = (f, value, extra = {}) => request(app).post('/api/workbench/batch-save').set('Authorization', `Bearer ${token}`).send({ draft: false, entries: [{ workItemId: f.workItemId, value, version: 0, ...extra }] });

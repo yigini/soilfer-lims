@@ -1,0 +1,231 @@
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8ae0f514-cca9-47b5-9b4c-0ae5765ffd11 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8ae0f514-cca9-47b5-9b4c-0ae5765ffd11 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-AUDIT-014
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 8ae0f514-cca9-47b5-9b4c-0ae5765ffd11 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8ae0f514-cca9-47b5-9b4c-0ae5765ffd11 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-AUDIT-014
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 8ae0f514-cca9-47b5-9b4c-0ae5765ffd11 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8ae0f514-cca9-47b5-9b4c-0ae5765ffd11 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-AUDIT-014
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 8ae0f514-cca9-47b5-9b4c-0ae5765ffd11 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8ae0f514-cca9-47b5-9b4c-0ae5765ffd11 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-AUDIT-014
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 8ae0f514-cca9-47b5-9b4c-0ae5765ffd11 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8ae0f514-cca9-47b5-9b4c-0ae5765ffd11 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-AUDIT-014
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 8ae0f514-cca9-47b5-9b4c-0ae5765ffd11 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8ae0f514-cca9-47b5-9b4c-0ae5765ffd11 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8ae0f514-cca9-47b5-9b4c-0ae5765ffd11 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8ae0f514-cca9-47b5-9b4c-0ae5765ffd11 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8ae0f514-cca9-47b5-9b4c-0ae5765ffd11 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8ae0f514-cca9-47b5-9b4c-0ae5765ffd11 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8ae0f514-cca9-47b5-9b4c-0ae5765ffd11 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8ae0f514-cca9-47b5-9b4c-0ae5765ffd11 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-AUDIT-014
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 8ae0f514-cca9-47b5-9b4c-0ae5765ffd11 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8ae0f514-cca9-47b5-9b4c-0ae5765ffd11 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_CHANGED to 0 socket(s) in lab LAB-AUDIT-014
+
+      at log (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 8ae0f514-cca9-47b5-9b4c-0ae5765ffd11 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8ae0f514-cca9-47b5-9b4c-0ae5765ffd11 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [workbench.batchSave] Error: Error: Invalid laboratory number settings.
+        at getNumberFormat (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\numberFormatService.js:7:29)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at exports.batchSave (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workbenchController.js:865:55) {
+      statusCode: 409,
+      code: 'NUMBER_FORMAT_POLICY_INVALID'
+    }
+
+      1330 |         });
+      1331 |     } catch (error) {
+    > 1332 |         console.error('[workbench.batchSave] Error:', error);
+           |                 ^
+      1333 |         if (error.statusCode) return res.status(error.statusCode).json({ code: error.code, error: error.message });
+      1334 |         res.status(500).json({ error: 'Failed to save batch results' });
+      1335 |     }
+
+      at error (controllers/workbenchController.js:1332:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2ab46d30-7d2a-4419-810d-2994f7b9459b (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2ab46d30-7d2a-4419-810d-2994f7b9459b (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2ab46d30-7d2a-4419-810d-2994f7b9459b (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2ab46d30-7d2a-4419-810d-2994f7b9459b (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8ae0f514-cca9-47b5-9b4c-0ae5765ffd11 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8ae0f514-cca9-47b5-9b4c-0ae5765ffd11 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8ae0f514-cca9-47b5-9b4c-0ae5765ffd11 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8ae0f514-cca9-47b5-9b4c-0ae5765ffd11 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/audit_0_14_number_entry.test.js
+  Audit 0.14: normalized entries and lab number policy
+    √ recording 6,85 stores canonical value and exact raw input (201 ms)
+    √ recording <0,5 stores canonical value and exact raw input (49 ms)
+    √ recording < 0.5 stores canonical value and exact raw input (45 ms)
+    √ recording >100 stores canonical value and exact raw input (54 ms)
+    √ recording 1e-3 stores canonical value and exact raw input (53 ms)
+    √ invalid 1,234 cannot be committed, even with a manager override reason (24 ms)
+    √ invalid 1.234 cannot be committed, even with a manager override reason (23 ms)
+    √ invalid 6 ,42 cannot be committed, even with a manager override reason (23 ms)
+    √ texture stores all normalized fractions and exact individual raw inputs atomically (64 ms)
+    √ lab policy is shared across analysts, explicit thousands grouping is honored and malformed policy fails before writes (111 ms)
+    √ existing profile update persists only valid flat separators, retains unrelated settings and audits the change (29 ms)
+    √ QC uses the same comma parsing and typed new QC details preserve original strings (147 ms)
+    √ an ambiguous QC value fails before any batch, typed QC or audit writes (49 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       13 passed, 13 total
+Snapshots:   0 total
+Time:        2.431 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_0_14_number_entry.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\issue209-validation-provenance-context-singles\01-audit_0_14_number_entry.test\report-original.json

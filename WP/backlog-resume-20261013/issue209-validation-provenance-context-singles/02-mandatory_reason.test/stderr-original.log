@@ -1,0 +1,91 @@
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8d48ae92-a385-4972-8ed2-c4655eee15f4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8d48ae92-a385-4972-8ed2-c4655eee15f4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8d48ae92-a385-4972-8ed2-c4655eee15f4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8d48ae92-a385-4972-8ed2-c4655eee15f4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.error
+    [reviewWorkItem] Error: TransitionError: Choose the attempt to review.
+        at Object.resolveReviewAttempt (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewAttemptService.js:24:11)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Object.preflightRepeat (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workRepeatService.js:40:35)
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewCommitService.js:62:28
+        at C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewCommitService.js:13:28
+        at Proxy._transactionWithCallback (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\prisma_client\runtime\client.js:79:4390)
+        at Object.inTransaction (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\workflowStateRules.js:188:60)
+        at commitReview (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\services\reviewCommitService.js:49:16)
+        at exports.reviewWorkItem (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\controllers\workItemController.js:1016:25) {
+      statusCode: 409,
+      status: 409,
+      code: 'REVIEW_ATTEMPT_REQUIRED',
+      details: { workItemIds: [ 'WI-SD10-PH-01' ] }
+    }
+
+      1048 |         });
+      1049 |     } catch (error) {
+    > 1050 |         console.error('[reviewWorkItem] Error:', error);
+           |                 ^
+      1051 |         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to review work item', ...(error.code && { code: error.code }), ...(error.details || {}) });
+      1052 |     }
+      1053 | };
+
+      at error (controllers/workItemController.js:1050:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8d48ae92-a385-4972-8ed2-c4655eee15f4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8d48ae92-a385-4972-8ed2-c4655eee15f4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab LAB-GTM
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: 8d48ae92-a385-4972-8ed2-c4655eee15f4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 8d48ae92-a385-4972-8ed2-c4655eee15f4 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/mandatory_reason.test.js
+  SD-10: Mandatory Reason on Rejection and Reopening Contract
+    √ 1. Calling reviewWorkItem with REJECT and no note/reason returns HTTP 400 (43 ms)
+    √ 2a. REJECT with a note and no analytical attempt refuses with zero writes (182 ms)
+    √ 2b. Calling reviewWorkItem with REJECT and note records note in reanalysisReason (HTTP 200) (73 ms)
+    √ 3. Calling undoApproval without a reason requires an amendment (5 ms)
+    √ 4. Calling undoApproval with a reason preserves approval and audit evidence (7 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       5 passed, 5 total
+Snapshots:   0 total
+Time:        1.815 s, estimated 2 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\mandatory_reason.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\issue209-validation-provenance-context-singles\02-mandatory_reason.test\report-original.json
