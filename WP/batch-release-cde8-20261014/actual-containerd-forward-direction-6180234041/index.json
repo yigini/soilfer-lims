@@ -1,0 +1,37 @@
+{
+  "status": "ACTUAL_SCOPE_IN_SCOPE_NO_EXECUTION_MISSING_ORIGINAL_INSPECT_NEEDS_REFERENCE_CLARIFICATION",
+  "directionId": 6180234041,
+  "files": [
+    {
+      "path": "WP/batch-release-cde8-20261014/actual-containerd-forward-direction-6180234041/actual-direction-original.json",
+      "bytes": 6613,
+      "sha256": "1a199ef0023c5ba2315d038de4f5797831679f3382933d50e34336b92ffa7ddb"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/actual-containerd-forward-direction-6180234041/actual-direction-readable.txt",
+      "bytes": 2888,
+      "sha256": "d36c75f5c4127fdf3f3165a307a25abdc052a991a024d4591bc729b608b8fd1b"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/actual-containerd-forward-direction-6180234041/current-main-original.json",
+      "bytes": 336,
+      "sha256": "8ab38fb8db0993cd672bbb2e6bf3b6ca8d124087fb841ecc97bad4fb1d9bfe89"
+    },
+    {
+      "path": "WP/batch-release-cde8-20261014/actual-containerd-forward-direction-6180234041/original-inspect-reference-boundary.json",
+      "bytes": 1485,
+      "sha256": "62a190b03cd4b78c3bc3487f4dc7178c5804b32533f25a0381ac6877cfa43cd9"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/retain-containerd-forward-direction-6180234041-once.py",
+      "bytes": 5477,
+      "sha256": "148670ae47315aa3be39970e7b40d0faaeb71b538bc1edf32e20d9bfbe600e31"
+    },
+    {
+      "path": "WP/audit-release-eb6de2e8/README.md",
+      "bytes": 414156,
+      "sha256": "d834153c8021f9c8083440e2ec686bd7c4cbcdcb6c1a0174667217c70ff055d3"
+    }
+  ],
+  "newExecutionAuthority": null
+}

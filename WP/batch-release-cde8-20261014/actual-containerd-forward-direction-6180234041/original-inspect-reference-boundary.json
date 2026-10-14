@@ -1,0 +1,32 @@
+{
+  "status": "ACTUAL_SCOPE_IN_SCOPE_NO_EXECUTION_MISSING_ORIGINAL_INSPECT_NEEDS_REFERENCE_CLARIFICATION",
+  "directionId": 6180234041,
+  "directionUtc": "2026-10-14T22:49:57Z",
+  "originalRoot": "/opt/lims/releases/workflow-batch-build-cde8c889-20261014T221500Z",
+  "originalClosedInspectionUtc": "2026-10-14T22:40:05.107035+00:00",
+  "originalImageInspectFilePresent": false,
+  "originalBuildCodeAbortedBeforeImageInspectStep": true,
+  "originalCandidateIdFact": {
+    "bytes": 71,
+    "sha256": "6bb4227f82debcf97845874330ae261d044b749819d2f2193a0fc0c3935967e3",
+    "mode": "0o600"
+  },
+  "originalBuildLogFact": {
+    "bytes": 28713,
+    "sha256": "5a7736d9d36aaccafa9d98d84c3d1a537af4ee29b5255022d2565d78792db0f4",
+    "mode": "0o400"
+  },
+  "firstRetainedForensicInspectPath": "WP/batch-release-cde8-20261014/first-build-221500-closed-terminal/candidate-image-fresh-inspect-original.json",
+  "firstRetainedForensicInspectSha256": "c4b4d2fabe2783adf0eb6f842bb424982fcb6a7d53753b3dde2c79800f821c14",
+  "firstRetainedForensicInspectGitAudit": "a514c0a49a7487f44b33e27a7390972926a56307",
+  "forensicInspectIsOriginalFailedRootFile": false,
+  "originalRootWrites": 0,
+  "newSourceReview": null,
+  "newExecutionAuthority": null,
+  "newReceipt": null,
+  "attributionRequiredBytes": 3609116672,
+  "unexplainedStopThresholdBytes": 500000000,
+  "recursiveDuAllowed": false,
+  "containerdAndDockerRequiredInFutureFilesystemSet": true,
+  "ifConditions2to4Unproved": "STOP_IMAGE_EXCLUDED"
+}
