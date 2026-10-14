@@ -1,0 +1,630 @@
+{
+  "retainedUtc": "2026-10-14T13:29:59.246416+00:00",
+  "summary": {
+    "closedUtc": "2026-10-14T13:28:04.775170+00:00",
+    "verificationKind": "SEQUENTIAL_ORDINARY_SINGLE_SUITE_SUCCESSOR",
+    "plannedSuites": 9,
+    "plannedTests": 536,
+    "closedSuites": 3,
+    "closedTests": 155,
+    "passedTests": 154,
+    "sourceUnchanged": true,
+    "selectedInventoryEqual": false,
+    "fullDiscovery": 370,
+    "ordinarySetups": true,
+    "stockAssertions": true,
+    "maxWorkers": 1,
+    "workerIdleMemoryLimit": 512000000,
+    "nodeOptions": "",
+    "productionOperations": 0,
+    "children": [
+      {
+        "closedUtc": "2026-10-14T13:27:47.345021+00:00",
+        "suite": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\audit_0_15_duplicate_loq.test.js",
+        "exit": 0,
+        "originalReportPresent": true,
+        "tests": 63,
+        "passed": 63,
+        "failed": 0,
+        "expectedTests": 63,
+        "sourceUnchanged": true,
+        "status": "PASS"
+      },
+      {
+        "closedUtc": "2026-10-14T13:27:56.413329+00:00",
+        "suite": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\audit_1_0_lab_policies.test.js",
+        "exit": 0,
+        "originalReportPresent": true,
+        "tests": 36,
+        "passed": 36,
+        "failed": 0,
+        "expectedTests": 36,
+        "sourceUnchanged": true,
+        "status": "PASS"
+      },
+      {
+        "closedUtc": "2026-10-14T13:28:04.660972+00:00",
+        "suite": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\audit_1_5_result_writes.test.js",
+        "exit": 1,
+        "originalReportPresent": true,
+        "tests": 56,
+        "passed": 55,
+        "failed": 1,
+        "expectedTests": 56,
+        "sourceUnchanged": true,
+        "status": "FAILED_OR_INCOMPLETE"
+      }
+    ],
+    "status": "FAILED_OR_INCOMPLETE"
+  },
+  "applicationFullyVerified": false,
+  "sourceDraftPaths": [
+    ".gitattributes",
+    "Dockerfile",
+    "client/src/components/sample/AnalysisUpdateModal.jsx",
+    "client/src/translations/en.json",
+    "client/src/translations/es-419.json",
+    "client/src/translations/es.json",
+    "client/src/translations/fr.json",
+    "client/src/translations/pt.json",
+    "docker-entrypoint.sh",
+    "docs/audit/209-order-revisions.md",
+    "server/controllers/sampleController.js",
+    "server/index.js",
+    "server/locales/en.json",
+    "server/locales/es-419.json",
+    "server/locales/es.json",
+    "server/locales/fr.json",
+    "server/locales/pt.json",
+    "server/prisma/migrations/20261014000100_order_revision_contract/migration.sql",
+    "server/prisma/schema.prisma",
+    "server/scripts/install_order_revisions.js",
+    "server/scripts/order_revision_impact.js",
+    "server/scripts/rehearsal_deployment_readiness.cjs",
+    "server/services/intakeWorkItemService.js",
+    "server/services/orderAttemptWriteService.js",
+    "server/services/orderLineResolutionService.js",
+    "server/services/orderRevisionContract.js",
+    "server/services/orderRevisionMigrationSource.js",
+    "server/services/orderService.js",
+    "server/services/sampleAnalysisStateService.js",
+    "server/services/scientificAmendmentService.js",
+    "server/services/textureOrderContract.js",
+    "server/services/workAttemptReservationService.js",
+    "server/services/workAttemptWriteService.js",
+    "server/services/workItemReconciliationService.js",
+    "server/services/workRepeatService.js",
+    "server/tests/contracts/audit_2_6_equipment_commit.test.js",
+    "server/tests/contracts/audit_3_1_attempt_execution.test.js",
+    "server/tests/contracts/audit_3_1_attempt_sql_guards.test.js",
+    "server/tests/contracts/audit_3_3_separate_texture.test.js",
+    "server/tests/contracts/audit_6_1_non_scientific_authorisation.test.js",
+    "server/tests/contracts/deployment_readiness_bootstrap.test.js",
+    "server/tests/contracts/edit_analyses_permission.test.js",
+    "server/tests/contracts/issue_206_sample_containers.test.js",
+    "server/tests/contracts/issue_209_order_revision_http.test.js",
+    "server/tests/contracts/issue_209_order_revision_integration.test.js",
+    "server/tests/contracts/issue_209_order_revision_request.test.js",
+    "server/tests/contracts/issue_209_order_revision_ui.test.js",
+    "server/tests/contracts/reconcile_analyses.test.js",
+    "server/tests/contracts/review_reports_amendments_p6.test.js",
+    "server/tests/contracts/texture_work_item_atomic.test.js",
+    "server/tests/globalSetup.js",
+    "server/tests/helpers/legacyWorkflowDatabase.js",
+    "server/tests/helpers/qcGateFixture.js",
+    "server/tests/helpers/qcWorksheetUi.js",
+    "server/tests/helpers/workAttemptFixtures.js",
+    "server/tests/helpers/workflowWriteScanner.js",
+    "server/tests/security/wiring.test.js",
+    "server/tests/contracts/audit_4_6_calibration.test.js",
+    "server/tests/contracts/audit_4_6_calculation_install.test.js",
+    "server/tests/contracts/audit_4_1_run_start_header.test.js",
+    "server/tests/contracts/audit_1_2_guard_installer.test.js",
+    "server/tests/contracts/audit_4_3_keyboard_playwright.test.js",
+    "server/tests/contracts/audit_4_8_cross_check_evidence.test.js",
+    "server/tests/contracts/audit_6_1_first_fill.test.js",
+    "server/tests/contracts/audit_6_3_report_content.test.js",
+    "server/tests/contracts/audit_4_8_cross_check_install.test.js",
+    "server/tests/contracts/audit_1_2_spectral_state.test.js",
+    "server/tests/contracts/audit_0_3_publication.test.js",
+    "server/tests/contracts/issue_291_texture_input_authority.test.js",
+    "server/tests/contracts/issue_213_export_equals_report.test.js",
+    "server/tests/contracts/audit_4_7_calculation_import.test.js",
+    "server/tests/contracts/audit_1_4_uuid_transactions.test.js",
+    "server/tests/contracts/audit_0_15_duplicate_loq.test.js",
+    "server/tests/contracts/audit_1_0_lab_policies.test.js",
+    "server/tests/contracts/audit_1_5_result_writes.test.js",
+    "server/tests/contracts/audit_4_7_instrument_import_install.test.js",
+    "server/tests/contracts/audit_0_2_qc_lock.test.js",
+    "server/tests/contracts/audit_1_6_intake_cancellation.test.js"
+  ],
+  "rawFiles": {
+    "WP/backlog-resume-20261013/issue209-result-policy-qc-cancellation-serial-singles/config-original.json": {
+      "bytes": 6617,
+      "sha256": "c299164fd62690786215296c0bf530559d09df3e7614b3f51ee5ff4ae2587307"
+    },
+    "WP/backlog-resume-20261013/issue209-result-policy-qc-cancellation-serial-singles/config-stderr-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "WP/backlog-resume-20261013/issue209-result-policy-qc-cancellation-serial-singles/inventory-original.json": {
+      "bytes": 49572,
+      "sha256": "687c9f93f9a85c943def36b1cb2bc0b6154704cd87316c2dce8c4617880cdabd"
+    },
+    "WP/backlog-resume-20261013/issue209-result-policy-qc-cancellation-serial-singles/inventory-stderr-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "WP/backlog-resume-20261013/issue209-result-policy-qc-cancellation-serial-singles/physical-retained-terminal-index.json": {
+      "bytes": 1821,
+      "sha256": "cc469ce383eba8b17b4430feb714e6df9aeede1f1ea29b1828c877278d992ac7"
+    },
+    "WP/backlog-resume-20261013/issue209-result-policy-qc-cancellation-serial-singles/physical-retention-original.jsonl": {
+      "bytes": 1398,
+      "sha256": "bc28f87ceda11f562568d30e0cddbbaaa3f2e7817970f554ad38bb2e178125a3"
+    },
+    "WP/backlog-resume-20261013/issue209-result-policy-qc-cancellation-serial-singles/source-after.json": {
+      "bytes": 117040,
+      "sha256": "dce5be3863dfd87c240831a2679e95e9f984b683548045c6fcf3e939ce79dc63"
+    },
+    "WP/backlog-resume-20261013/issue209-result-policy-qc-cancellation-serial-singles/source-before.json": {
+      "bytes": 117040,
+      "sha256": "dce5be3863dfd87c240831a2679e95e9f984b683548045c6fcf3e939ce79dc63"
+    },
+    "WP/backlog-resume-20261013/issue209-result-policy-qc-cancellation-serial-singles/started-open.json": {
+      "bytes": 230,
+      "sha256": "1f0d6499d173ec8520a05980b6f725b7eb3af50304bf2c67948954745584ea14"
+    },
+    "WP/backlog-resume-20261013/issue209-result-policy-qc-cancellation-serial-singles/summary-observed.json": {
+      "bytes": 1780,
+      "sha256": "41399f0d0a69a074fa36025bb03518e5cc8c77cbab8a6441b727af1b9e244eec"
+    },
+    "WP/backlog-resume-20261013/issue209-result-policy-qc-cancellation-serial-singles/01-audit_0_15_duplicate_loq.test/command.json": {
+      "bytes": 1298,
+      "sha256": "be3a24ee7dadaf0a4265476ccb564e4709a2c71a23b6a352aaa3a4e75f9dccc8"
+    },
+    "WP/backlog-resume-20261013/issue209-result-policy-qc-cancellation-serial-singles/01-audit_0_15_duplicate_loq.test/exit-original.txt": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "WP/backlog-resume-20261013/issue209-result-policy-qc-cancellation-serial-singles/01-audit_0_15_duplicate_loq.test/observed-closed-summary.json": {
+      "bytes": 362,
+      "sha256": "322446f9897097cb656f64937fe5ebc753c60a20be4863e66b919dd454248b35"
+    },
+    "WP/backlog-resume-20261013/issue209-result-policy-qc-cancellation-serial-singles/01-audit_0_15_duplicate_loq.test/report-original.json": {
+      "bytes": 31909,
+      "sha256": "ed9198ab149e2c773c991ea5b99a1b9ae9f057844945bfb649619a80b86f342c"
+    },
+    "WP/backlog-resume-20261013/issue209-result-policy-qc-cancellation-serial-singles/01-audit_0_15_duplicate_loq.test/stderr-original.log": {
+      "bytes": 13864,
+      "sha256": "bf033c8f06edf2739da60eb24ee33c2ef1bbbf43beef265157e3eb467353d5f4"
+    },
+    "WP/backlog-resume-20261013/issue209-result-policy-qc-cancellation-serial-singles/01-audit_0_15_duplicate_loq.test/stdout-original.log": {
+      "bytes": 992,
+      "sha256": "79785d867eef081fa1087d588c95f742f683ab2872745b3c4de5c199ba065dc2"
+    },
+    "WP/backlog-resume-20261013/issue209-result-policy-qc-cancellation-serial-singles/02-audit_1_0_lab_policies.test/command.json": {
+      "bytes": 1294,
+      "sha256": "c01fccb23783403a4d90ec83e6bb18e2edad53c297d4887ffd240860a2aa042d"
+    },
+    "WP/backlog-resume-20261013/issue209-result-policy-qc-cancellation-serial-singles/02-audit_1_0_lab_policies.test/exit-original.txt": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "WP/backlog-resume-20261013/issue209-result-policy-qc-cancellation-serial-singles/02-audit_1_0_lab_policies.test/observed-closed-summary.json": {
+      "bytes": 360,
+      "sha256": "0b380df5d25dd3670b86737c5076cdb34befbc2e35a5546b541ac7b98ae1579d"
+    },
+    "WP/backlog-resume-20261013/issue209-result-policy-qc-cancellation-serial-singles/02-audit_1_0_lab_policies.test/report-original.json": {
+      "bytes": 17429,
+      "sha256": "3372b8af6369ba3e852b47f86eaeb225e881781b5669f97ab7ca6403a137d3dd"
+    },
+    "WP/backlog-resume-20261013/issue209-result-policy-qc-cancellation-serial-singles/02-audit_1_0_lab_policies.test/stderr-original.log": {
+      "bytes": 11375,
+      "sha256": "142337b6a3dc63c296e293ce4b19b45bb76b8b413236f7dc698f27f94d328a83"
+    },
+    "WP/backlog-resume-20261013/issue209-result-policy-qc-cancellation-serial-singles/02-audit_1_0_lab_policies.test/stdout-original.log": {
+      "bytes": 988,
+      "sha256": "dc5cf9d9f6a24c2013e78149da5520b711d06dac75be87ed4eeecacf6e23d83b"
+    },
+    "WP/backlog-resume-20261013/issue209-result-policy-qc-cancellation-serial-singles/03-audit_1_5_result_writes.test/command.json": {
+      "bytes": 1296,
+      "sha256": "8f13e45a75f5bcee45a5c78e121e4bd31690d670e5565ae303c883bc11e55ecf"
+    },
+    "WP/backlog-resume-20261013/issue209-result-policy-qc-cancellation-serial-singles/03-audit_1_5_result_writes.test/exit-original.txt": {
+      "bytes": 2,
+      "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+    },
+    "WP/backlog-resume-20261013/issue209-result-policy-qc-cancellation-serial-singles/03-audit_1_5_result_writes.test/observed-closed-summary.json": {
+      "bytes": 377,
+      "sha256": "f004c775f726e4cbd9987ef55ebb968c1e1259acbb8da7d7ed9cfe59db6f0bdd"
+    },
+    "WP/backlog-resume-20261013/issue209-result-policy-qc-cancellation-serial-singles/03-audit_1_5_result_writes.test/report-original.json": {
+      "bytes": 121174,
+      "sha256": "55984343f044ef00ce885428e16645f5def860e8ea2152a845a936320d236cd3"
+    },
+    "WP/backlog-resume-20261013/issue209-result-policy-qc-cancellation-serial-singles/03-audit_1_5_result_writes.test/stderr-original.log": {
+      "bytes": 137463,
+      "sha256": "b7561b7b918f20781d6d93ff0f5b000da389302901897d5fab6753cf77fea0b5"
+    },
+    "WP/backlog-resume-20261013/issue209-result-policy-qc-cancellation-serial-singles/03-audit_1_5_result_writes.test/stdout-original.log": {
+      "bytes": 990,
+      "sha256": "f4385f31565069824a96f0cfbd27572cda33187da1d973dac13059a330070a86"
+    }
+  },
+  "reviewFiles": {
+    "WP/backlog-resume-20261013/issue209-result-policy-qc-cancellation-context-review/audit_0_15_duplicate_loq.test.js.before-original": {
+      "bytes": 25161,
+      "sha256": "537e0d83a2e461f23546399f44b11d0bd99e2b995fa2ca1b11f836a4ac01e26b"
+    },
+    "WP/backlog-resume-20261013/issue209-result-policy-qc-cancellation-context-review/audit_0_2_qc_lock.test.js.before-original": {
+      "bytes": 16461,
+      "sha256": "38fccbeb62c6ae10b687eb3cebb836fca39f137c9dcca6a50f8677ec4cc3c18b"
+    },
+    "WP/backlog-resume-20261013/issue209-result-policy-qc-cancellation-context-review/audit_1_0_lab_policies.test.js.before-original": {
+      "bytes": 29592,
+      "sha256": "3984d023b85eef9f8f15a287a1693d5a2718ce111650cebd47a017ca0af3baaa"
+    },
+    "WP/backlog-resume-20261013/issue209-result-policy-qc-cancellation-context-review/audit_1_5_result_writes.test.js.before-original": {
+      "bytes": 34442,
+      "sha256": "c728dfac2a86f46ee09b037a8a5c17c820463a0fecaada3f46c7ad7dacbecd51"
+    },
+    "WP/backlog-resume-20261013/issue209-result-policy-qc-cancellation-context-review/audit_1_6_intake_cancellation.test.js.before-original": {
+      "bytes": 23502,
+      "sha256": "869ce98e1dd4cb550927ee5b89dcf22e74fadd296f7be2c8dc9540cabb865e47"
+    },
+    "WP/backlog-resume-20261013/issue209-result-policy-qc-cancellation-context-review/audit_4_7_instrument_import_install.test.js.before-original": {
+      "bytes": 29700,
+      "sha256": "9478f9ca362ec2994d7d218cdea37a8fe57aa7e06c33e266965ee8b2d22f363d"
+    },
+    "WP/backlog-resume-20261013/issue209-result-policy-qc-cancellation-context-review/fixture-additions-dispatch-bound.json": {
+      "bytes": 7692,
+      "sha256": "f1523ea73941853c4552d29cfb0a794c57ac2eb01d1899b7d6c4a28c3f2b4387"
+    },
+    "WP/backlog-resume-20261013/issue209-result-policy-qc-cancellation-context-review/fixture-additions-original.json": {
+      "bytes": 7559,
+      "sha256": "e19660b186774cd447b9994be82f4350d442058f8fff4f1d26a63197bd570f52"
+    },
+    "WP/backlog-resume-20261013/issue209-result-policy-qc-cancellation-context-review/fixture-additions-reviewed.json": {
+      "bytes": 7562,
+      "sha256": "d6577eaad052889c2825058c968fbe0b769c62e043547a02ec0b53bd72cee644"
+    },
+    "WP/backlog-resume-20261013/issue209-result-policy-qc-cancellation-context-review/pre-correction-classification.json": {
+      "bytes": 52770,
+      "sha256": "2d63a6b4be6a255a375e99f17a474b43427998d8ce0b94ac9cab2653628ae191"
+    },
+    "WP/backlog-resume-20261013/issue209-result-policy-qc-cancellation-context-review/pre-test-loader-path-correction.json": {
+      "bytes": 241,
+      "sha256": "f90e1ed2e105cec9df33ed89792881e8f94e596e28987be5471abe904f2c0b48"
+    }
+  },
+  "originalCasesResolvedInThisPartialRun": [
+    {
+      "suite": "audit_0_15_duplicate_loq.test.js",
+      "test": "Audit 0.15: both HTTP evaluation paths preserve LOQ and raw censoring evidence an invalid nonpositive pair flags analytical results without deleting or changing their measured values",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_POSITIVE_CONTEXT; RELEASED_48D_MISSING_ORDER_VARIANT_SEPARATELY_RUNTIME_REACHABLE_AND_ZERO_WRITE_REFUSED",
+      "classification": "NEW_OWNED_POSITIVE_CONTEXT_OR_INDEPENDENT_GUARD_WITNESS",
+      "sourceDecision": "Fresh PROCESSING sample owners in both LOQ builders receive declared usable orders before execution. Recorded/cached methodology distinction, nonpositive values, flags, QC verdict, and raw evidence stay unchanged. Generated legacy closure already has the column; no schema alteration.",
+      "originalFailureSha256": "3f40773372ae3f00f95213000cc1d1337aecdfe5689a30d9f38dc804ae88d67b",
+      "originalTestFrames": [
+        "at Object.<anonymous> (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\audit_0_15_duplicate_loq.test.js:153:21)"
+      ],
+      "releasedRuntimeEvidence": "issue209-closed-runtime-boundary-analysis/source-analysis.json; current main2242 initial order exists; baseline48d catches order creation errors after WI writes",
+      "runtimeVariantTreatment": "No automatic repair/backfill/relink/wider fallback; readonly noACTIVE/noMatching/ambiguous/multiple/fraction lists and prospective approved STOP per6167740581",
+      "assertionChanges": 0,
+      "productionInspections": 0
+    },
+    {
+      "suite": "audit_0_15_duplicate_loq.test.js",
+      "test": "Audit 0.15: real batch method and analysis evidence current Result selects its recorded methodology rather than the cached work item",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_POSITIVE_CONTEXT; RELEASED_48D_MISSING_ORDER_VARIANT_SEPARATELY_RUNTIME_REACHABLE_AND_ZERO_WRITE_REFUSED",
+      "classification": "NEW_OWNED_POSITIVE_CONTEXT_OR_INDEPENDENT_GUARD_WITNESS",
+      "sourceDecision": "Fresh PROCESSING sample owners in both LOQ builders receive declared usable orders before execution. Recorded/cached methodology distinction, nonpositive values, flags, QC verdict, and raw evidence stay unchanged. Generated legacy closure already has the column; no schema alteration.",
+      "originalFailureSha256": "d9681605fb725c2b91da0f74f9ec1db522efc67274758d9a6755098e01efecfa",
+      "originalTestFrames": [
+        "at Object.<anonymous> (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\audit_0_15_duplicate_loq.test.js:251:9)"
+      ],
+      "releasedRuntimeEvidence": "issue209-closed-runtime-boundary-analysis/source-analysis.json; current main2242 initial order exists; baseline48d catches order creation errors after WI writes",
+      "runtimeVariantTreatment": "No automatic repair/backfill/relink/wider fallback; readonly noACTIVE/noMatching/ambiguous/multiple/fraction lists and prospective approved STOP per6167740581",
+      "assertionChanges": 0,
+      "productionInspections": 0
+    },
+    {
+      "suite": "audit_1_0_lab_policies.test.js",
+      "test": "Audit 1.0: persistent lab policies reported-value export stores the exact resolved version and selection rule without changing old selections",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_POSITIVE_CONTEXT; RELEASED_48D_MISSING_ORDER_VARIANT_SEPARATELY_RUNTIME_REACHABLE_AND_ZERO_WRITE_REFUSED",
+      "classification": "NEW_OWNED_POSITIVE_CONTEXT_OR_INDEPENDENT_GUARD_WITNESS",
+      "sourceDecision": "The export owner receives its initial current order. The freshly assembled APPROVED report context declares an already retained ACTIVE legacy NULL PH line before accepted fixture evidence; no approved edit, approval metadata, policy version, or report content change.",
+      "originalFailureSha256": "89c856a0bcce1398af5e616205ae2eaa8d157b2c52dc5948d14d4fa81566faa3",
+      "originalTestFrames": [
+        "at Object.<anonymous> (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\audit_1_0_lab_policies.test.js:248:21)"
+      ],
+      "releasedRuntimeEvidence": "issue209-closed-runtime-boundary-analysis/source-analysis.json; current main2242 initial order exists; baseline48d catches order creation errors after WI writes",
+      "runtimeVariantTreatment": "No automatic repair/backfill/relink/wider fallback; readonly noACTIVE/noMatching/ambiguous/multiple/fraction lists and prospective approved STOP per6167740581",
+      "assertionChanges": 0,
+      "productionInspections": 0
+    },
+    {
+      "suite": "audit_1_0_lab_policies.test.js",
+      "test": "Audit 1.0: persistent lab policies report generation freezes the lab policy version and content across later changes",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_POSITIVE_CONTEXT; RELEASED_48D_MISSING_ORDER_VARIANT_SEPARATELY_RUNTIME_REACHABLE_AND_ZERO_WRITE_REFUSED",
+      "classification": "NEW_OWNED_POSITIVE_CONTEXT_OR_INDEPENDENT_GUARD_WITNESS",
+      "sourceDecision": "The export owner receives its initial current order. The freshly assembled APPROVED report context declares an already retained ACTIVE legacy NULL PH line before accepted fixture evidence; no approved edit, approval metadata, policy version, or report content change.",
+      "originalFailureSha256": "0afcdea72ce5c437a93225039f2dcc363b4905cfeee88bd0d78381bfecab4831",
+      "originalTestFrames": [
+        "at Object.<anonymous> (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\audit_1_0_lab_policies.test.js:296:9)"
+      ],
+      "releasedRuntimeEvidence": "issue209-closed-runtime-boundary-analysis/source-analysis.json; current main2242 initial order exists; baseline48d catches order creation errors after WI writes",
+      "runtimeVariantTreatment": "No automatic repair/backfill/relink/wider fallback; readonly noACTIVE/noMatching/ambiguous/multiple/fraction lists and prospective approved STOP per6167740581",
+      "assertionChanges": 0,
+      "productionInspections": 0
+    },
+    {
+      "suite": "audit_1_5_result_writes.test.js",
+      "test": "workbench, offline sync, results API and import have a common shape and server batch",
+      "observedCategory": "REQUIRES_CASE_INSPECTION",
+      "firstMessage": "Error: expect(received).toMatchObject(expected)",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_POSITIVE_CONTEXT; RELEASED_48D_MISSING_ORDER_VARIANT_SEPARATELY_RUNTIME_REACHABLE_AND_ZERO_WRITE_REFUSED",
+      "classification": "NEW_OWNED_POSITIVE_CONTEXT_OR_INDEPENDENT_GUARD_WITNESS",
+      "sourceDecision": "Fresh controlled measurement owners receive usable legacy NULL order lines (PSA canonical TEXTURE). Orphan and duplicate-child historical import builders stay untouched and unlinked. The raw conflicting-batch attempt receives only a valid orderLineId, leaving the batch fault and all-table refusal assertion intact. Parser smuggling, provenance, sealed work, replay and numerical assertions unchanged.",
+      "originalFailureSha256": "35f90f06f54d5f6815044289637ac1041ccb6b7c7db833cf06577dde4fcd341e",
+      "originalTestFrames": [
+        "at Object.toMatchObject (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\audit_1_5_result_writes.test.js:61:30)"
+      ],
+      "releasedRuntimeEvidence": "issue209-closed-runtime-boundary-analysis/source-analysis.json; current main2242 initial order exists; baseline48d catches order creation errors after WI writes",
+      "runtimeVariantTreatment": "No automatic repair/backfill/relink/wider fallback; readonly noACTIVE/noMatching/ambiguous/multiple/fraction lists and prospective approved STOP per6167740581",
+      "assertionChanges": 0,
+      "productionInspections": 0
+    },
+    {
+      "suite": "audit_1_5_result_writes.test.js",
+      "test": "unbatched measurement gets an attempt; the orphan historical import remains unlinked",
+      "observedCategory": "REQUIRES_CASE_INSPECTION",
+      "firstMessage": "Error: expect(received).toBe(expected) // Object.is equality",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_POSITIVE_CONTEXT; RELEASED_48D_MISSING_ORDER_VARIANT_SEPARATELY_RUNTIME_REACHABLE_AND_ZERO_WRITE_REFUSED",
+      "classification": "NEW_OWNED_POSITIVE_CONTEXT_OR_INDEPENDENT_GUARD_WITNESS",
+      "sourceDecision": "Fresh controlled measurement owners receive usable legacy NULL order lines (PSA canonical TEXTURE). Orphan and duplicate-child historical import builders stay untouched and unlinked. The raw conflicting-batch attempt receives only a valid orderLineId, leaving the batch fault and all-table refusal assertion intact. Parser smuggling, provenance, sealed work, replay and numerical assertions unchanged.",
+      "originalFailureSha256": "eac749b9802917f7515a16ae0cca428f7ebb1df7be3c7a11f937501bd04887b4",
+      "originalTestFrames": [
+        "at Object.toBe (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\audit_1_5_result_writes.test.js:93:66)"
+      ],
+      "releasedRuntimeEvidence": "issue209-closed-runtime-boundary-analysis/source-analysis.json; current main2242 initial order exists; baseline48d catches order creation errors after WI writes",
+      "runtimeVariantTreatment": "No automatic repair/backfill/relink/wider fallback; readonly noACTIVE/noMatching/ambiguous/multiple/fraction lists and prospective approved STOP per6167740581",
+      "assertionChanges": 0,
+      "productionInspections": 0
+    },
+    {
+      "suite": "audit_1_5_result_writes.test.js",
+      "test": "a reasonless canonical historical import refuses and preserves every table exactly",
+      "observedCategory": "REQUIRES_CASE_INSPECTION",
+      "firstMessage": "Error: expect(received).toBe(expected) // Object.is equality",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_POSITIVE_CONTEXT; RELEASED_48D_MISSING_ORDER_VARIANT_SEPARATELY_RUNTIME_REACHABLE_AND_ZERO_WRITE_REFUSED",
+      "classification": "NEW_OWNED_POSITIVE_CONTEXT_OR_INDEPENDENT_GUARD_WITNESS",
+      "sourceDecision": "Fresh controlled measurement owners receive usable legacy NULL order lines (PSA canonical TEXTURE). Orphan and duplicate-child historical import builders stay untouched and unlinked. The raw conflicting-batch attempt receives only a valid orderLineId, leaving the batch fault and all-table refusal assertion intact. Parser smuggling, provenance, sealed work, replay and numerical assertions unchanged.",
+      "originalFailureSha256": "0e41afedee1f52202dde71cf6b53d71397c347165e93f1c6cb464aadfa4b6a62",
+      "originalTestFrames": [
+        "at Object.toBe (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\audit_1_5_result_writes.test.js:180:65)"
+      ],
+      "releasedRuntimeEvidence": "issue209-closed-runtime-boundary-analysis/source-analysis.json; current main2242 initial order exists; baseline48d catches order creation errors after WI writes",
+      "runtimeVariantTreatment": "No automatic repair/backfill/relink/wider fallback; readonly noACTIVE/noMatching/ambiguous/multiple/fraction lists and prospective approved STOP per6167740581",
+      "assertionChanges": 0,
+      "productionInspections": 0
+    },
+    {
+      "suite": "audit_1_5_result_writes.test.js",
+      "test": "texture creates one derived row per existing attempt, with original source provenance, and retry adds none",
+      "observedCategory": "REQUIRES_CASE_INSPECTION",
+      "firstMessage": "Error: expect(received).toMatchObject(expected)",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_POSITIVE_CONTEXT; RELEASED_48D_MISSING_ORDER_VARIANT_SEPARATELY_RUNTIME_REACHABLE_AND_ZERO_WRITE_REFUSED",
+      "classification": "NEW_OWNED_POSITIVE_CONTEXT_OR_INDEPENDENT_GUARD_WITNESS",
+      "sourceDecision": "Fresh controlled measurement owners receive usable legacy NULL order lines (PSA canonical TEXTURE). Orphan and duplicate-child historical import builders stay untouched and unlinked. The raw conflicting-batch attempt receives only a valid orderLineId, leaving the batch fault and all-table refusal assertion intact. Parser smuggling, provenance, sealed work, replay and numerical assertions unchanged.",
+      "originalFailureSha256": "df5eed73d4041befda36d2d2cb1826cf7b4b17f4b62752c6e4c9ea976ad3c0e3",
+      "originalTestFrames": [
+        "at Object.toMatchObject (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\audit_1_5_result_writes.test.js:242:22)"
+      ],
+      "releasedRuntimeEvidence": "issue209-closed-runtime-boundary-analysis/source-analysis.json; current main2242 initial order exists; baseline48d catches order creation errors after WI writes",
+      "runtimeVariantTreatment": "No automatic repair/backfill/relink/wider fallback; readonly noACTIVE/noMatching/ambiguous/multiple/fraction lists and prospective approved STOP per6167740581",
+      "assertionChanges": 0,
+      "productionInspections": 0
+    },
+    {
+      "suite": "audit_1_5_result_writes.test.js",
+      "test": "offline CommandReceipt replay reuses its attempt and results with zero writes",
+      "observedCategory": "REQUIRES_CASE_INSPECTION",
+      "firstMessage": "Error: expect(received).toMatchObject(expected)",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_POSITIVE_CONTEXT; RELEASED_48D_MISSING_ORDER_VARIANT_SEPARATELY_RUNTIME_REACHABLE_AND_ZERO_WRITE_REFUSED",
+      "classification": "NEW_OWNED_POSITIVE_CONTEXT_OR_INDEPENDENT_GUARD_WITNESS",
+      "sourceDecision": "Fresh controlled measurement owners receive usable legacy NULL order lines (PSA canonical TEXTURE). Orphan and duplicate-child historical import builders stay untouched and unlinked. The raw conflicting-batch attempt receives only a valid orderLineId, leaving the batch fault and all-table refusal assertion intact. Parser smuggling, provenance, sealed work, replay and numerical assertions unchanged.",
+      "originalFailureSha256": "adb98c1633d8f6ec2e45d0037ecaf4ae596dbe84bbd0a7c60a59f22cbbd7a8c1",
+      "originalTestFrames": [
+        "at Object.toMatchObject (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\audit_1_5_result_writes.test.js:260:97)"
+      ],
+      "releasedRuntimeEvidence": "issue209-closed-runtime-boundary-analysis/source-analysis.json; current main2242 initial order exists; baseline48d catches order creation errors after WI writes",
+      "runtimeVariantTreatment": "No automatic repair/backfill/relink/wider fallback; readonly noACTIVE/noMatching/ambiguous/multiple/fraction lists and prospective approved STOP per6167740581",
+      "assertionChanges": 0,
+      "productionInspections": 0
+    },
+    {
+      "suite": "audit_1_5_result_writes.test.js",
+      "test": "numeric MIR predictions retain PREDICTED provenance",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_POSITIVE_CONTEXT; RELEASED_48D_MISSING_ORDER_VARIANT_SEPARATELY_RUNTIME_REACHABLE_AND_ZERO_WRITE_REFUSED",
+      "classification": "NEW_OWNED_POSITIVE_CONTEXT_OR_INDEPENDENT_GUARD_WITNESS",
+      "sourceDecision": "Fresh controlled measurement owners receive usable legacy NULL order lines (PSA canonical TEXTURE). Orphan and duplicate-child historical import builders stay untouched and unlinked. The raw conflicting-batch attempt receives only a valid orderLineId, leaving the batch fault and all-table refusal assertion intact. Parser smuggling, provenance, sealed work, replay and numerical assertions unchanged.",
+      "originalFailureSha256": "2914279da111b405956b300b5e803a8271b7fa844cb339192fd09e0435166cc7",
+      "originalTestFrames": [
+        "at Object.<anonymous> (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\audit_1_5_result_writes.test.js:284:5)"
+      ],
+      "releasedRuntimeEvidence": "issue209-closed-runtime-boundary-analysis/source-analysis.json; current main2242 initial order exists; baseline48d catches order creation errors after WI writes",
+      "runtimeVariantTreatment": "No automatic repair/backfill/relink/wider fallback; readonly noACTIVE/noMatching/ambiguous/multiple/fraction lists and prospective approved STOP per6167740581",
+      "assertionChanges": 0,
+      "productionInspections": 0
+    },
+    {
+      "suite": "audit_1_5_result_writes.test.js",
+      "test": "the results API ignores smuggled id=\"colliding-result\" and preserves the actual parser evidence",
+      "observedCategory": "REQUIRES_CASE_INSPECTION",
+      "firstMessage": "Error: expect(received).toBe(expected) // Object.is equality",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_POSITIVE_CONTEXT; RELEASED_48D_MISSING_ORDER_VARIANT_SEPARATELY_RUNTIME_REACHABLE_AND_ZERO_WRITE_REFUSED",
+      "classification": "NEW_OWNED_POSITIVE_CONTEXT_OR_INDEPENDENT_GUARD_WITNESS",
+      "sourceDecision": "Fresh controlled measurement owners receive usable legacy NULL order lines (PSA canonical TEXTURE). Orphan and duplicate-child historical import builders stay untouched and unlinked. The raw conflicting-batch attempt receives only a valid orderLineId, leaving the batch fault and all-table refusal assertion intact. Parser smuggling, provenance, sealed work, replay and numerical assertions unchanged.",
+      "originalFailureSha256": "fe769d5a976d77ea4432000b68d224b577c82d970021f7a5f934696b42decb82",
+      "originalTestFrames": [
+        "at toBe (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\audit_1_5_result_writes.test.js:294:66)"
+      ],
+      "releasedRuntimeEvidence": "issue209-closed-runtime-boundary-analysis/source-analysis.json; current main2242 initial order exists; baseline48d catches order creation errors after WI writes",
+      "runtimeVariantTreatment": "No automatic repair/backfill/relink/wider fallback; readonly noACTIVE/noMatching/ambiguous/multiple/fraction lists and prospective approved STOP per6167740581",
+      "assertionChanges": 0,
+      "productionInspections": 0
+    },
+    {
+      "suite": "audit_1_5_result_writes.test.js",
+      "test": "the results API ignores smuggled rawInput=\"invented parser evidence\" and preserves the actual parser evidence",
+      "observedCategory": "REQUIRES_CASE_INSPECTION",
+      "firstMessage": "Error: expect(received).toBe(expected) // Object.is equality",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_POSITIVE_CONTEXT; RELEASED_48D_MISSING_ORDER_VARIANT_SEPARATELY_RUNTIME_REACHABLE_AND_ZERO_WRITE_REFUSED",
+      "classification": "NEW_OWNED_POSITIVE_CONTEXT_OR_INDEPENDENT_GUARD_WITNESS",
+      "sourceDecision": "Fresh controlled measurement owners receive usable legacy NULL order lines (PSA canonical TEXTURE). Orphan and duplicate-child historical import builders stay untouched and unlinked. The raw conflicting-batch attempt receives only a valid orderLineId, leaving the batch fault and all-table refusal assertion intact. Parser smuggling, provenance, sealed work, replay and numerical assertions unchanged.",
+      "originalFailureSha256": "fe769d5a976d77ea4432000b68d224b577c82d970021f7a5f934696b42decb82",
+      "originalTestFrames": [
+        "at toBe (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\audit_1_5_result_writes.test.js:294:66)"
+      ],
+      "releasedRuntimeEvidence": "issue209-closed-runtime-boundary-analysis/source-analysis.json; current main2242 initial order exists; baseline48d catches order creation errors after WI writes",
+      "runtimeVariantTreatment": "No automatic repair/backfill/relink/wider fallback; readonly noACTIVE/noMatching/ambiguous/multiple/fraction lists and prospective approved STOP per6167740581",
+      "assertionChanges": 0,
+      "productionInspections": 0
+    },
+    {
+      "suite": "audit_1_5_result_writes.test.js",
+      "test": "the results API ignores smuggled flags=[\"MANAGER_OVERRIDE\",\"BELOW_LOQ\"] and preserves the actual parser evidence",
+      "observedCategory": "REQUIRES_CASE_INSPECTION",
+      "firstMessage": "Error: expect(received).toBe(expected) // Object.is equality",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_POSITIVE_CONTEXT; RELEASED_48D_MISSING_ORDER_VARIANT_SEPARATELY_RUNTIME_REACHABLE_AND_ZERO_WRITE_REFUSED",
+      "classification": "NEW_OWNED_POSITIVE_CONTEXT_OR_INDEPENDENT_GUARD_WITNESS",
+      "sourceDecision": "Fresh controlled measurement owners receive usable legacy NULL order lines (PSA canonical TEXTURE). Orphan and duplicate-child historical import builders stay untouched and unlinked. The raw conflicting-batch attempt receives only a valid orderLineId, leaving the batch fault and all-table refusal assertion intact. Parser smuggling, provenance, sealed work, replay and numerical assertions unchanged.",
+      "originalFailureSha256": "fe769d5a976d77ea4432000b68d224b577c82d970021f7a5f934696b42decb82",
+      "originalTestFrames": [
+        "at toBe (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\audit_1_5_result_writes.test.js:294:66)"
+      ],
+      "releasedRuntimeEvidence": "issue209-closed-runtime-boundary-analysis/source-analysis.json; current main2242 initial order exists; baseline48d catches order creation errors after WI writes",
+      "runtimeVariantTreatment": "No automatic repair/backfill/relink/wider fallback; readonly noACTIVE/noMatching/ambiguous/multiple/fraction lists and prospective approved STOP per6167740581",
+      "assertionChanges": 0,
+      "productionInspections": 0
+    },
+    {
+      "suite": "audit_1_5_result_writes.test.js",
+      "test": "the results API ignores smuggled flags=\"not-an-array\" and preserves the actual parser evidence",
+      "observedCategory": "REQUIRES_CASE_INSPECTION",
+      "firstMessage": "Error: expect(received).toBe(expected) // Object.is equality",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_POSITIVE_CONTEXT; RELEASED_48D_MISSING_ORDER_VARIANT_SEPARATELY_RUNTIME_REACHABLE_AND_ZERO_WRITE_REFUSED",
+      "classification": "NEW_OWNED_POSITIVE_CONTEXT_OR_INDEPENDENT_GUARD_WITNESS",
+      "sourceDecision": "Fresh controlled measurement owners receive usable legacy NULL order lines (PSA canonical TEXTURE). Orphan and duplicate-child historical import builders stay untouched and unlinked. The raw conflicting-batch attempt receives only a valid orderLineId, leaving the batch fault and all-table refusal assertion intact. Parser smuggling, provenance, sealed work, replay and numerical assertions unchanged.",
+      "originalFailureSha256": "fe769d5a976d77ea4432000b68d224b577c82d970021f7a5f934696b42decb82",
+      "originalTestFrames": [
+        "at toBe (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\audit_1_5_result_writes.test.js:294:66)"
+      ],
+      "releasedRuntimeEvidence": "issue209-closed-runtime-boundary-analysis/source-analysis.json; current main2242 initial order exists; baseline48d catches order creation errors after WI writes",
+      "runtimeVariantTreatment": "No automatic repair/backfill/relink/wider fallback; readonly noACTIVE/noMatching/ambiguous/multiple/fraction lists and prospective approved STOP per6167740581",
+      "assertionChanges": 0,
+      "productionInspections": 0
+    },
+    {
+      "suite": "audit_1_5_result_writes.test.js",
+      "test": "the results API ignores smuggled provenance=\"PREDICTED\" and preserves the actual parser evidence",
+      "observedCategory": "REQUIRES_CASE_INSPECTION",
+      "firstMessage": "Error: expect(received).toBe(expected) // Object.is equality",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_POSITIVE_CONTEXT; RELEASED_48D_MISSING_ORDER_VARIANT_SEPARATELY_RUNTIME_REACHABLE_AND_ZERO_WRITE_REFUSED",
+      "classification": "NEW_OWNED_POSITIVE_CONTEXT_OR_INDEPENDENT_GUARD_WITNESS",
+      "sourceDecision": "Fresh controlled measurement owners receive usable legacy NULL order lines (PSA canonical TEXTURE). Orphan and duplicate-child historical import builders stay untouched and unlinked. The raw conflicting-batch attempt receives only a valid orderLineId, leaving the batch fault and all-table refusal assertion intact. Parser smuggling, provenance, sealed work, replay and numerical assertions unchanged.",
+      "originalFailureSha256": "fe769d5a976d77ea4432000b68d224b577c82d970021f7a5f934696b42decb82",
+      "originalTestFrames": [
+        "at toBe (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\audit_1_5_result_writes.test.js:294:66)"
+      ],
+      "releasedRuntimeEvidence": "issue209-closed-runtime-boundary-analysis/source-analysis.json; current main2242 initial order exists; baseline48d catches order creation errors after WI writes",
+      "runtimeVariantTreatment": "No automatic repair/backfill/relink/wider fallback; readonly noACTIVE/noMatching/ambiguous/multiple/fraction lists and prospective approved STOP per6167740581",
+      "assertionChanges": 0,
+      "productionInspections": 0
+    },
+    {
+      "suite": "audit_1_5_result_writes.test.js",
+      "test": "the results API ignores smuggled provenance=\"IMPORTED\" and preserves the actual parser evidence",
+      "observedCategory": "REQUIRES_CASE_INSPECTION",
+      "firstMessage": "Error: expect(received).toBe(expected) // Object.is equality",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_POSITIVE_CONTEXT; RELEASED_48D_MISSING_ORDER_VARIANT_SEPARATELY_RUNTIME_REACHABLE_AND_ZERO_WRITE_REFUSED",
+      "classification": "NEW_OWNED_POSITIVE_CONTEXT_OR_INDEPENDENT_GUARD_WITNESS",
+      "sourceDecision": "Fresh controlled measurement owners receive usable legacy NULL order lines (PSA canonical TEXTURE). Orphan and duplicate-child historical import builders stay untouched and unlinked. The raw conflicting-batch attempt receives only a valid orderLineId, leaving the batch fault and all-table refusal assertion intact. Parser smuggling, provenance, sealed work, replay and numerical assertions unchanged.",
+      "originalFailureSha256": "fe769d5a976d77ea4432000b68d224b577c82d970021f7a5f934696b42decb82",
+      "originalTestFrames": [
+        "at toBe (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\audit_1_5_result_writes.test.js:294:66)"
+      ],
+      "releasedRuntimeEvidence": "issue209-closed-runtime-boundary-analysis/source-analysis.json; current main2242 initial order exists; baseline48d catches order creation errors after WI writes",
+      "runtimeVariantTreatment": "No automatic repair/backfill/relink/wider fallback; readonly noACTIVE/noMatching/ambiguous/multiple/fraction lists and prospective approved STOP per6167740581",
+      "assertionChanges": 0,
+      "productionInspections": 0
+    },
+    {
+      "suite": "audit_1_5_result_writes.test.js",
+      "test": "the results API ignores smuggled provenance=\"DERIVED\" and preserves the actual parser evidence",
+      "observedCategory": "REQUIRES_CASE_INSPECTION",
+      "firstMessage": "Error: expect(received).toBe(expected) // Object.is equality",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_POSITIVE_CONTEXT; RELEASED_48D_MISSING_ORDER_VARIANT_SEPARATELY_RUNTIME_REACHABLE_AND_ZERO_WRITE_REFUSED",
+      "classification": "NEW_OWNED_POSITIVE_CONTEXT_OR_INDEPENDENT_GUARD_WITNESS",
+      "sourceDecision": "Fresh controlled measurement owners receive usable legacy NULL order lines (PSA canonical TEXTURE). Orphan and duplicate-child historical import builders stay untouched and unlinked. The raw conflicting-batch attempt receives only a valid orderLineId, leaving the batch fault and all-table refusal assertion intact. Parser smuggling, provenance, sealed work, replay and numerical assertions unchanged.",
+      "originalFailureSha256": "fe769d5a976d77ea4432000b68d224b577c82d970021f7a5f934696b42decb82",
+      "originalTestFrames": [
+        "at toBe (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\audit_1_5_result_writes.test.js:294:66)"
+      ],
+      "releasedRuntimeEvidence": "issue209-closed-runtime-boundary-analysis/source-analysis.json; current main2242 initial order exists; baseline48d catches order creation errors after WI writes",
+      "runtimeVariantTreatment": "No automatic repair/backfill/relink/wider fallback; readonly noACTIVE/noMatching/ambiguous/multiple/fraction lists and prospective approved STOP per6167740581",
+      "assertionChanges": 0,
+      "productionInspections": 0
+    },
+    {
+      "suite": "audit_1_5_result_writes.test.js",
+      "test": "offline texture supersedes legacy non-numeric PSA classes, preserves numeric rows, and replays without writes",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_POSITIVE_CONTEXT; RELEASED_48D_MISSING_ORDER_VARIANT_SEPARATELY_RUNTIME_REACHABLE_AND_ZERO_WRITE_REFUSED",
+      "classification": "NEW_OWNED_POSITIVE_CONTEXT_OR_INDEPENDENT_GUARD_WITNESS",
+      "sourceDecision": "Fresh controlled measurement owners receive usable legacy NULL order lines (PSA canonical TEXTURE). Orphan and duplicate-child historical import builders stay untouched and unlinked. The raw conflicting-batch attempt receives only a valid orderLineId, leaving the batch fault and all-table refusal assertion intact. Parser smuggling, provenance, sealed work, replay and numerical assertions unchanged.",
+      "originalFailureSha256": "1306287aadc7ec10a4f380100b5600a77f9fa4dc304322f7663e5fdfbc678a9e",
+      "originalTestFrames": [
+        "at Object.<anonymous> (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\audit_1_5_result_writes.test.js:342:30)"
+      ],
+      "releasedRuntimeEvidence": "issue209-closed-runtime-boundary-analysis/source-analysis.json; current main2242 initial order exists; baseline48d catches order creation errors after WI writes",
+      "runtimeVariantTreatment": "No automatic repair/backfill/relink/wider fallback; readonly noACTIVE/noMatching/ambiguous/multiple/fraction lists and prospective approved STOP per6167740581",
+      "assertionChanges": 0,
+      "productionInspections": 0
+    },
+    {
+      "suite": "audit_1_5_result_writes.test.js",
+      "test": "attempt insert/update and delete guards preserve every table and map stable 409s",
+      "observedCategory": "ORDER_LINE_REFUSAL",
+      "firstMessage": "Error: A reasoned order revision with the complete analysis set is required before starting this execution.",
+      "productionReachabilityClassification": "CURRENT_INTAKE_EQUIVALENT_POSITIVE_CONTEXT; RELEASED_48D_MISSING_ORDER_VARIANT_SEPARATELY_RUNTIME_REACHABLE_AND_ZERO_WRITE_REFUSED",
+      "classification": "NEW_OWNED_POSITIVE_CONTEXT_OR_INDEPENDENT_GUARD_WITNESS",
+      "sourceDecision": "Fresh controlled measurement owners receive usable legacy NULL order lines (PSA canonical TEXTURE). Orphan and duplicate-child historical import builders stay untouched and unlinked. The raw conflicting-batch attempt receives only a valid orderLineId, leaving the batch fault and all-table refusal assertion intact. Parser smuggling, provenance, sealed work, replay and numerical assertions unchanged.",
+      "originalFailureSha256": "0d2216e5df07c046f2dbfc93da6bff77b5623c10be6f320aab1540790161a84d",
+      "originalTestFrames": [
+        "at Object.<anonymous> (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\audit_1_5_result_writes.test.js:393:17)"
+      ],
+      "releasedRuntimeEvidence": "issue209-closed-runtime-boundary-analysis/source-analysis.json; current main2242 initial order exists; baseline48d catches order creation errors after WI writes",
+      "runtimeVariantTreatment": "No automatic repair/backfill/relink/wider fallback; readonly noACTIVE/noMatching/ambiguous/multiple/fraction lists and prospective approved STOP per6167740581",
+      "assertionChanges": 0,
+      "productionInspections": 0
+    }
+  ],
+  "totalOriginalFailedCasesResolved": 309,
+  "remainingOriginalUnresolved": 341,
+  "productionOperations": 0,
+  "failureCause": "New fixture lookup used unknown Prisma relation orderRevision; actual field is revision. No runtime change or guard failure. Four selected fixture suites and core/scanners were not executed."
+}

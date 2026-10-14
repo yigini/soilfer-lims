@@ -245,6 +245,9 @@ describe('Audit 1.0: persistent lab policies', () => {
             status: 'PROCESSING', receptionDate: new Date(), preparationStatus: 'DONE', dryingStatus: 'DONE', requiredAnalyses: '["SOC"]' } });
         const item = await createWorkItemFixture(prisma, { data: { id: id('POL-EXPORT-WI'), sampleId, assignedLab: labId,
             assignedTo: actor.username, analysis: 'SOC', status: 'IN_PROGRESS', result: '9999' } });
+        // #209: current intake creates this order before the first export witness.
+        await prisma.$transaction(tx => require('../../services/orderService').createInitialOrder(tx,
+            { id: sampleId }, ['SOC'], actor));
         const old = await createExecutionResultFixture(prisma, { data: { id: id('POL-EXPORT-RES'), sampleId, param: 'SOC',
             value: '10', unit: 'g/kg', isValid: true, isCurrent: true, createdAt: new Date('2026-10-01T12:00:00Z') } });
         await correctAndApproveReportedValue(prisma, { app, token: manager, labId, item, original: old, value: 20 });
@@ -293,6 +296,10 @@ describe('Audit 1.0: persistent lab policies', () => {
         await createSampleFixture(prisma, { data: { id: sampleId, originalId: sampleId, labId: sampleId, assignedLab: labId, status: 'APPROVED',
             approvedBy: actor.username, approvedAt: new Date() } });
         await createWorkItemFixture(prisma, { data: { id: id('POL-REPORT-WI'), sampleId, assignedLab: labId, analysis: 'PH_H2O', status: 'ACCEPTED', result: '7.2' } });
+        // #209: declare the usable retained order during NEW owned fixture assembly.
+        await prisma.$transaction(tx => tx.sampleOrderRevision.create({ data: { id: id('POL-REPORT-ORDER'), sampleId: sampleId,
+            version: 1, status: 'ACTIVE', reason: 'Owned execution context with a retained usable order', requestedBy: actor.username,
+            lines: { create: [{ id: id('POL-REPORT-LINE'), analysis: 'PH_H2O', workItemId: null, status: 'ACTIVE', isRequired: true }] } } }));
         await createExecutionResultFixture(prisma, { attemptStatus: 'ACCEPTED', data: { id: id('POL-REPORT-RES'), sampleId, param: 'PH_H2O', value: '7.2', numericValue: 7.2, isValid: true, isCurrent: true } });
         await require('../helpers/reportedSelectionFixture').selectReviewedFixtureItem(prisma,
             (await prisma.workItem.findFirst({where:{sampleId,analysis:'PH_H2O'}})).id,manager);

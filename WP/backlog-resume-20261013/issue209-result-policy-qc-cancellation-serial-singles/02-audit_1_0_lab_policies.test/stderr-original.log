@@ -1,0 +1,265 @@
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b5d503a9-e1ed-44d3-b61a-b38317212c5e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b5d503a9-e1ed-44d3-b61a-b38317212c5e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 799b1c4c-25b0-4a2c-8864-d47f509fde10 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 799b1c4c-25b0-4a2c-8864-d47f509fde10 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 07f9cb2f-a378-4636-a958-669aca1b43d9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 07f9cb2f-a378-4636-a958-669aca1b43d9 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: fdd12d60-58be-44de-ab44-bd831d468466 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: fdd12d60-58be-44de-ab44-bd831d468466 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 98f7a3de-b827-43c0-a063-c2696b8b7e46 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 98f7a3de-b827-43c0-a063-c2696b8b7e46 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2bf819a5-3e98-449b-b67c-afe2b356038b (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2bf819a5-3e98-449b-b67c-afe2b356038b (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2e3c4d4f-70e1-40d8-9cce-31d4443b2d90 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 2e3c4d4f-70e1-40d8-9cce-31d4443b2d90 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 46f94980-47a4-4bdd-b18c-484ef7dc0f4e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 46f94980-47a4-4bdd-b18c-484ef7dc0f4e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 6df66b9f-0f88-49c2-acff-b4948dc2be8d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 6df66b9f-0f88-49c2-acff-b4948dc2be8d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 6df66b9f-0f88-49c2-acff-b4948dc2be8d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 6df66b9f-0f88-49c2-acff-b4948dc2be8d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [AUTH] RBAC Denied: User test_lab_technician_pollab3d4c572f36b24aa78cef0a3b546b6a11 (LAB_TECHNICIAN) attempted MANAGE_LAB_POLICIES. Allowed roles: ["SUPER_ADMIN","LAB_MANAGER"]
+
+      151 |
+      152 |         if (!allowedRoles.includes(currentRole)) {
+    > 153 |             console.warn(`[AUTH] RBAC Denied: User ${user.username} (${currentRole}) attempted ${currentKey}. Allowed roles: ${JSON.stringify(allowedRoles)}`);
+          |                     ^
+      154 |             const payload = { error: `Access denied. Role '${currentRole}' lacks permission '${currentKey}'.` };
+      155 |             if (currentKey === 'MANAGE_WORK_ATTEMPTS') {
+      156 |                 payload.code = 'WORK_ATTEMPT_FORBIDDEN';
+
+      at warn (middleware/authMiddleware.js:153:21)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at Route.dispatch (node_modules/router/lib/route.js:117:3)
+      at handle (node_modules/router/index.js:435:11)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at node_modules/router/index.js:295:15
+      at param (node_modules/router/index.js:600:14)
+      at param (node_modules/router/index.js:610:14)
+      at processParams (node_modules/router/index.js:664:3)
+      at next (node_modules/router/index.js:291:5)
+      at next (middleware/authMiddleware.js:123:9)
+
+  console.log
+    [AUTH] Verifying token for ID: 53e8751d-9cde-45fb-8686-89e79f217dcf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 53e8751d-9cde-45fb-8686-89e79f217dcf (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f6776f6d-a502-4895-926c-f59cd0446e8e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f6776f6d-a502-4895-926c-f59cd0446e8e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f6776f6d-a502-4895-926c-f59cd0446e8e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f6776f6d-a502-4895-926c-f59cd0446e8e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f6776f6d-a502-4895-926c-f59cd0446e8e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f6776f6d-a502-4895-926c-f59cd0446e8e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: c17862a4-1c82-4e39-812d-3ce1ae0e9eda (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: c17862a4-1c82-4e39-812d-3ce1ae0e9eda (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: c17862a4-1c82-4e39-812d-3ce1ae0e9eda (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [WS] Broadcast WORKITEM_UPDATE to 0 socket(s) in lab POL-LAB-4c1f83ab-eaad-4597-abac-096cdc20a207
+
+      at Object.log [as broadcastToLab] (wsServer.js:305:24)
+
+  console.log
+    [AUTH] Verifying token for ID: c17862a4-1c82-4e39-812d-3ce1ae0e9eda (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: c17862a4-1c82-4e39-812d-3ce1ae0e9eda (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: c17862a4-1c82-4e39-812d-3ce1ae0e9eda (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 3cd7103b-06c6-4503-8510-955f30c7e775 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 3cd7103b-06c6-4503-8510-955f30c7e775 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 18b79486-1a87-4e9a-84f3-82bdc62a858e (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/audit_1_0_lab_policies.test.js (6.24 s)
+  Audit 1.0: persistent lab policies
+    √ untouched lab defines every key and does not create a policy row (359 ms)
+    √ resolution follows method, analysis, lab, preset, profile, Strict (145 ms)
+    √ cross-check thresholds persist for one lab, while an earlier policy snapshot stays frozen (133 ms)
+    √ invalid cross-check bounds refuse the whole policy change with no writes: {"key":"crossCheck.basesCecFactor","value":0.99} (112 ms)
+    √ invalid cross-check bounds refuse the whole policy change with no writes: {"key":"crossCheck.cnMin","value":25} (117 ms)
+    √ invalid cross-check bounds refuse the whole policy change with no writes: {"key":"crossCheck.cnMax","value":8} (118 ms)
+    √ invalid cross-check bounds refuse the whole policy change with no writes: {"key":"crossCheck.cnMin","value":26} (113 ms)
+    √ cross-check keys refuse analysis/method overrides and invalid profile C:N pairs (147 ms)
+    √ first override preserves profile inheritance, explicit preset wins, reset restores inheritance and preserves overrides (124 ms)
+    √ changes append immutable overrides, increment once and write one reasoned before/after audit (121 ms)
+    √ invalid qc.maxBatchSize returns 400 without writes (140 ms)
+    √ invalid qc.duplicateEvery returns 400 without writes (120 ms)
+    √ invalid qc.mode returns 400 without writes (120 ms)
+    √ invalid numbers.decimalSeparator returns 400 without writes (119 ms)
+    √ invalid qc.westgardRules returns 400 without writes (119 ms)
+    √ invalid qc.runProfiles returns 400 without writes (119 ms)
+    √ invalid qc.runProfiles returns 400 without writes (116 ms)
+    √ invalid qc.runProfiles returns 400 without writes (127 ms)
+    √ missing reason refuses; analysis-only works; invalid methodology and lab-only scopes refuse (118 ms)
+    √ lab scope isolation and technician read-only permission apply to API and service (152 ms)
+    √ profile editor writes policies, keeps compatibility metadata, requires reason and rejects stale version (151 ms)
+    √ legacy migration is dry-run by default, additive, inherited and idempotent (138 ms)
+    √ audit write failure rolls back version, revocation and replacement together (218 ms)
+    √ Policies number override and clear share the write-only rollback copy and one audit (122 ms)
+    √ a frozen parsing decision keeps both separators from its policy version (121 ms)
+    √ preset change copies an altered inherited format and leaves unchanged settings byte-identical (122 ms)
+    √ malformed settings not-json fail with no policy, audit or legacy writes (115 ms)
+    √ malformed settings [] fail with no policy, audit or legacy writes (114 ms)
+    √ malformed settings null fail with no policy, audit or legacy writes (116 ms)
+    √ malformed settings  fail with no policy, audit or legacy writes (113 ms)
+    √ reported-value export stores the exact resolved version and selection rule without changing old selections (502 ms)
+    √ QC evaluates persisted lab and method limits and leaves old evaluations unchanged on a policy edit (249 ms)
+    √ stored profile run uses the lab tray layout and keeps analytical batch size separate (127 ms)
+    √ report generation freezes the lab policy version and content across later changes (215 ms)
+  Audit 1.0: registry and pure evaluator defaults
+    √ every preset validates every key and retains shipped physical profiles (10 ms)
+    √ QC consumers contain no inline acceptance limits
+
+Test Suites: 1 passed, 1 total
+Tests:       36 passed, 36 total
+Snapshots:   0 total
+Time:        6.525 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_0_lab_policies.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\issue209-result-policy-qc-cancellation-serial-singles\02-audit_1_0_lab_policies.test\report-original.json

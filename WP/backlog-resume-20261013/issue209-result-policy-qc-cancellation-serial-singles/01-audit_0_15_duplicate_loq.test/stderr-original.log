@@ -1,0 +1,341 @@
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f59a3cf5-b025-4e1c-8c29-0c458531d184 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f59a3cf5-b025-4e1c-8c29-0c458531d184 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f59a3cf5-b025-4e1c-8c29-0c458531d184 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f59a3cf5-b025-4e1c-8c29-0c458531d184 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f59a3cf5-b025-4e1c-8c29-0c458531d184 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f59a3cf5-b025-4e1c-8c29-0c458531d184 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f59a3cf5-b025-4e1c-8c29-0c458531d184 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f59a3cf5-b025-4e1c-8c29-0c458531d184 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f59a3cf5-b025-4e1c-8c29-0c458531d184 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f59a3cf5-b025-4e1c-8c29-0c458531d184 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f59a3cf5-b025-4e1c-8c29-0c458531d184 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f59a3cf5-b025-4e1c-8c29-0c458531d184 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f59a3cf5-b025-4e1c-8c29-0c458531d184 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f59a3cf5-b025-4e1c-8c29-0c458531d184 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f59a3cf5-b025-4e1c-8c29-0c458531d184 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f59a3cf5-b025-4e1c-8c29-0c458531d184 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f59a3cf5-b025-4e1c-8c29-0c458531d184 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f59a3cf5-b025-4e1c-8c29-0c458531d184 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f59a3cf5-b025-4e1c-8c29-0c458531d184 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f59a3cf5-b025-4e1c-8c29-0c458531d184 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f59a3cf5-b025-4e1c-8c29-0c458531d184 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f59a3cf5-b025-4e1c-8c29-0c458531d184 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f59a3cf5-b025-4e1c-8c29-0c458531d184 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f59a3cf5-b025-4e1c-8c29-0c458531d184 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f59a3cf5-b025-4e1c-8c29-0c458531d184 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f59a3cf5-b025-4e1c-8c29-0c458531d184 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f59a3cf5-b025-4e1c-8c29-0c458531d184 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f59a3cf5-b025-4e1c-8c29-0c458531d184 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f59a3cf5-b025-4e1c-8c29-0c458531d184 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f59a3cf5-b025-4e1c-8c29-0c458531d184 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f59a3cf5-b025-4e1c-8c29-0c458531d184 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f59a3cf5-b025-4e1c-8c29-0c458531d184 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f59a3cf5-b025-4e1c-8c29-0c458531d184 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f59a3cf5-b025-4e1c-8c29-0c458531d184 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f59a3cf5-b025-4e1c-8c29-0c458531d184 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f59a3cf5-b025-4e1c-8c29-0c458531d184 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f59a3cf5-b025-4e1c-8c29-0c458531d184 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f59a3cf5-b025-4e1c-8c29-0c458531d184 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f59a3cf5-b025-4e1c-8c29-0c458531d184 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f59a3cf5-b025-4e1c-8c29-0c458531d184 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f59a3cf5-b025-4e1c-8c29-0c458531d184 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f59a3cf5-b025-4e1c-8c29-0c458531d184 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f59a3cf5-b025-4e1c-8c29-0c458531d184 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f59a3cf5-b025-4e1c-8c29-0c458531d184 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f59a3cf5-b025-4e1c-8c29-0c458531d184 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f59a3cf5-b025-4e1c-8c29-0c458531d184 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f59a3cf5-b025-4e1c-8c29-0c458531d184 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f59a3cf5-b025-4e1c-8c29-0c458531d184 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f59a3cf5-b025-4e1c-8c29-0c458531d184 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f59a3cf5-b025-4e1c-8c29-0c458531d184 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f59a3cf5-b025-4e1c-8c29-0c458531d184 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f59a3cf5-b025-4e1c-8c29-0c458531d184 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/audit_0_15_duplicate_loq.test.js (7.21 s)
+  Audit 0.15: censored observations use the shared number parser
+    √ <0,05 is an explicit below-limit observation (3 ms)
+    √ < 0.05 is an explicit below-limit observation (1 ms)
+    √ <=0.05 is an explicit below-limit observation
+    √ ≤0.05 is an explicit below-limit observation
+    √ <LOQ is an explicit below-limit observation
+    √  <loq  is an explicit below-limit observation
+    √ >100 is an above-range observation, never a finite measurement
+    √ >=100 is an above-range observation, never a finite measurement
+    √ ≥100 is an above-range observation, never a finite measurement
+    √ invalid or ambiguous  is not an observation (1 ms)
+    √ invalid or ambiguous ?0.1 is not an observation
+    √ invalid or ambiguous <bad is not an observation
+    √ invalid or ambiguous <1,234 is not an observation
+    √ <LOQ and <0.05 produce PASS (1 ms)
+    √ <0.1 and 0.05 produce INVALID
+    √ >100 and 100 produce INVALID
+    √ <0.1 and >100 produce INVALID
+    √ different below-limit censoring values both remain null measured values with their limits recorded (1 ms)
+  Audit 0.15: both HTTP evaluation paths preserve LOQ and raw censoring evidence
+    √ post resolves the recorded methodology LOQ and persists all decision evidence (247 ms)
+    √ put resolves the recorded methodology LOQ and persists all decision evidence (82 ms)
+    √ <LOQ / <0.05 records PASS without replacing censored limits with measured values (84 ms)
+    √  <loq / ≤0,05  records PASS without replacing censored limits with measured values (79 ms)
+    √ <0.1 / <0.2 records PASS without replacing censored limits with measured values (83 ms)
+    √ <0.1 / 0.05 records INVALID without replacing censored limits with measured values (79 ms)
+    √ >100 / 100 records INVALID without replacing censored limits with measured values (90 ms)
+    √ -1 / 1 records INVALID without replacing censored limits with measured values (85 ms)
+    √ one analysis fallback is authoritative and mixed methods are audited as NO_LOQ without rejection (167 ms)
+    √ raw localized censoring syntax is reparsed once with its lab format, never with a canonical grouping separator (96 ms)
+    √ an invalid nonpositive pair flags analytical results without deleting or changing their measured values (119 ms)
+    √ censored blank <0.1 remains missing and leaves stored evidence untouched (72 ms)
+    √ censored blank <LOQ remains missing and leaves stored evidence untouched (74 ms)
+    √ post qualified blanks.value <0.01 is rejected before QC, status, history or audit writes (736 ms)
+    √ put qualified blanks.value <0.01 is rejected before QC, status, history or audit writes (604 ms)
+    √ post qualified controls.measured <5 is rejected before QC, status, history or audit writes (618 ms)
+    √ put qualified controls.measured <5 is rejected before QC, status, history or audit writes (591 ms)
+    √ post qualified controls.expected ≤7 is rejected before QC, status, history or audit writes (591 ms)
+    √ put qualified controls.expected ≤7 is rejected before QC, status, history or audit writes (583 ms)
+    √ missing, malformed or unknown duplicate null is refused as missing with no writes (77 ms)
+    √ missing, malformed or unknown duplicate  is refused as missing with no writes (69 ms)
+    √ missing, malformed or unknown duplicate <LOQjunk is refused as missing with no writes (76 ms)
+    √ missing, malformed or unknown duplicate ?0.1 is refused as missing with no writes (89 ms)
+    √ missing, malformed or unknown duplicate 6 ,42 is refused as missing with no writes (70 ms)
+    √ ambiguous duplicate syntax retains the shared typed refusal without changing evidence (67 ms)
+  Audit 0.15: independent duplicate numeric criteria
+    √ -1 / 1 cannot pass (1 ms)
+    √ 0 / 0 cannot pass
+    √ -1 / -1 cannot pass
+    √ 0 / 1 cannot pass
+    √ 1 / 0 cannot pass
+    √ positive near-LOQ pair passes on absolute difference, retaining its LOQ provenance (1 ms)
+    √ near-LOQ pair fails when its absolute difference exceeds LOQ
+    √ both readings at 5 LOQ use RPD, including the exact boundary
+    √ no LOQ falls back to RPD with an auditable note
+    √ an invalid duplicate contributes a QC_FAIL verdict, never a batch pass
+  Audit 0.15: real batch method and analysis evidence
+    √ current Result selects its recorded methodology rather than the cached work item (13 ms)
+    √ analysis fallback is used with no method recorded even if an isDefault method exists (2 ms)
+    √ analysis validation is the final known limit source (2 ms)
+    √ real mixed-method membership is recorded as NO_LOQ / METHOD_AMBIGUOUS (8 ms)
+  Audit 0.15: recorded methodology resolution
+    √ actual current Result methodology wins over its cached WorkItem and generic limits (1 ms)
+    √ recorded WorkItem methodology is the fallback when no current Result records a method
+    √ analysis fallback 0.2 / {"loq":0.3} is used without guessing a default method (1 ms)
+    √ analysis fallback null / {"loq":0.3} is used without guessing a default method
+    √ mixed recorded methodologies do not choose a common or default limit
+    √ policy reads carry lab, analysis, actual methodology and transaction context (1 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       63 passed, 63 total
+Snapshots:   0 total
+Time:        7.514 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_0_15_duplicate_loq.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\issue209-result-policy-qc-cancellation-serial-singles\01-audit_0_15_duplicate_loq.test\report-original.json

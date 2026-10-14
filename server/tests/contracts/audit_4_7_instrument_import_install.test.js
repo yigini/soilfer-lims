@@ -177,6 +177,12 @@ test.each(['Prisma', 'native workbench'])('a populated %s predecessor retains ev
     const read = operation => { const raw = new Database(f.file, { fileMustExist: true }); try { return operation(raw); } finally { raw.close(); } };
     const quote = name => '"' + name.replaceAll('"', '""') + '"';
     try {
+        // #209: this NEW literal PRE200 copy lacks only the current model's nullable line identity.
+        const { loadOrderRevisionMigrationSource } = require('../../services/orderRevisionMigrationSource');
+        const orderShape = loadOrderRevisionMigrationSource();
+        read(raw => raw.exec(orderShape.schemaSql));
+        for (const item of f.items) await f.db.$transaction(tx => require('../../services/orderService').createInitialOrder(tx,
+            { id: item.sampleId }, [item.analysis], f.actor));
         const run = await startNativeRun(f.db, (await buildNativeRun(f.db, f.actor, f.input)).id, f.actor);
         await writeNativeMeasurements(f.db, run.id, f.actor, { analysisCode: f.analysisCode,
             measurements: [{ positionId: run.positions.find(row => row.kind === 'BLANK').id, value: ' 0.0000 ' }] });

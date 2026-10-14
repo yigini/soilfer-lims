@@ -31,6 +31,12 @@ async function fixture({ analysis = code, batch = batchId, equipmentId = null, s
     const item = await createWorkItemFixture(prisma, { data: { id: itemId, sampleId, analysis, assignedLab: labId, labId,
         status: itemStatus, assignedTo: actor.username, batchId: batch, equipmentId,
         methodologyId: analysis === code ? methodId : null, version: 0 } });
+    if (!["SPEC_MIR", "DRYING"].includes(analysis)) {
+        // #209: declare the usable retained order during NEW owned fixture assembly.
+        await prisma.$transaction(tx => tx.sampleOrderRevision.create({ data: { id: randomUUID(), sampleId: sampleId,
+            version: 1, status: 'ACTIVE', reason: 'Owned execution context with a retained usable order', requestedBy: actor.username,
+            lines: { create: [{ id: randomUUID(), analysis: analysis === 'PSA' ? 'TEXTURE' : analysis, workItemId: null, status: 'ACTIVE', isRequired: true }] } } }));
+    }
     return { sample, item };
 }
 
@@ -207,7 +213,8 @@ test.each([null, 'assigned'])('client batch mismatch (%s) rolls back every table
 
 test('conflicting attempt and work item batches refuse with all-table zero writes', async () => {
     const f = await fixture(), attemptId = randomUUID();
-    await prisma.workAttempt.create({ data: { id: attemptId, workItemId: f.item.id, author: actor.username, qcBatchId: 'different-server-batch' } });
+    const orderLine = await prisma.orderLine.findFirstOrThrow({ where: { orderRevision: { sampleId: f.sample.id, status: 'ACTIVE' } } });
+    await prisma.workAttempt.create({ data: { id: attemptId, workItemId: f.item.id, orderLineId: orderLine.id, author: actor.username, qcBatchId: 'different-server-batch' } });
     const before = snapshot();
     await expect(prisma.$transaction(tx => writer.writeResult(tx, { sampleId: f.sample.id, workItemId: f.item.id, attemptId, actor, measurement: measurement() })))
         .rejects.toMatchObject({ statusCode: 409, code: 'RESULT_BATCH_CONFLICT' });

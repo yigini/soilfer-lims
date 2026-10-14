@@ -101,6 +101,8 @@ describe('Audit 0.2: batch QC lock and durable evidence', () => {
                 expect(approved.status).toBe(200);
             }
         }
+        if (seedCachedEvidence) await prisma.$transaction(tx => require('../../services/orderService').createInitialOrder(tx,
+            { id: sampleId }, ['PH_H2O'], jwt.decode(tokens.LAB_MANAGER)));
         // Pin6060005962: only the three successful warning reviews opt in.
         if (seedCachedEvidence) await createExecutionResultFixture(prisma, { attemptStatus: 'SUBMITTED',
             data: { id: id('RESULT'), sampleId, param: 'PH_H2O', value: '7', numericValue: 7,

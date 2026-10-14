@@ -59,13 +59,20 @@ test.each(['result', 'scan', 'attempt', 'draft', 'evidence-event', 'equipment-us
     const f = await fixture('IN_PROGRESS');
     const unstarted = await createWorkItemFixture(prisma, { data: { id: randomUUID(), sampleId: f.sample.id,
         analysis: 'SOC', status: 'NOT_ASSIGNED', assignedLab: labId } });
+    if (['result', 'attempt', 'evidence-event'].includes(evidence)) {
+        // #209: declare the usable retained order during NEW owned fixture assembly.
+        await prisma.$transaction(tx => tx.sampleOrderRevision.create({ data: { id: randomUUID(), sampleId: f.sample.id,
+            version: 1, status: 'ACTIVE', reason: 'Owned execution context with a retained usable order', requestedBy: actor.username,
+            lines: { create: [{ id: randomUUID(), analysis: f.item.analysis, workItemId: null, status: 'ACTIVE', isRequired: true }] } } }));
+    }
     if (['result', 'evidence-event'].includes(evidence)) {
         const result = await createExecutionResultFixture(prisma, { data: { id: randomUUID(), sampleId: f.sample.id, param: f.item.analysis, value: '1.2', numericValue: 1.2 } });
         if (evidence === 'evidence-event') await prisma.resultEvidenceEvent.create({ data: { id: randomUUID(), resultId: result.id,
             sampleId: f.sample.id, eventType: 'PREP_REVERTED', gate: 'PREPARATION', reason: 'Reverted preparation evidence', actor: actor.username } });
     }
     if (evidence === 'scan') await prisma.spectralData.create({ data: { id: randomUUID(), sampleId: f.sample.id, workItemId: f.item.id, modality: 'MIR', filename: 'custody-spectrum.csv', sourceFile: '/test/spectrum.csv' } });
-    if (evidence === 'attempt') await prisma.workAttempt.create({ data: { id: randomUUID(), workItemId: f.item.id, author: actor.username } });
+    const orderLine = evidence === 'attempt' ? await prisma.orderLine.findFirstOrThrow({ where: { orderRevision: { sampleId: f.sample.id, status: 'ACTIVE' } } }) : null;
+    if (evidence === 'attempt') await prisma.workAttempt.create({ data: { id: randomUUID(), workItemId: f.item.id, orderLineId: orderLine.id, author: actor.username } });
     if (evidence === 'draft') await prisma.workItemDraft.create({ data: { id: randomUUID(), workItemId: f.item.id,
         sampleId: f.sample.id, analysis: f.item.analysis, userId: actor.username, value: '1.2' } });
     if (evidence === 'equipment-use') {
@@ -167,6 +174,10 @@ test('re-acceptance normalizes expanding and alias analysis codes before reactiv
 
 test('generic rejection of accepted work with a result is refused without changing any table', async () => {
     const f = await fixture('IN_PROGRESS');
+    // #209: declare the usable retained order during NEW owned fixture assembly.
+    await prisma.$transaction(tx => tx.sampleOrderRevision.create({ data: { id: randomUUID(), sampleId: f.sample.id,
+        version: 1, status: 'ACTIVE', reason: 'Owned execution context with a retained usable order', requestedBy: actor.username,
+        lines: { create: [{ id: randomUUID(), analysis: f.item.analysis, workItemId: null, status: 'ACTIVE', isRequired: true }] } } }));
     await createExecutionResultFixture(prisma, { data: { id: randomUUID(), sampleId: f.sample.id, param: f.item.analysis, value: '1.2', numericValue: 1.2 } });
     const before = snapshot();
     const response = await request(routes(actor)).put(`/api/samples/${f.sample.id}/status`).send({ status: 'RECEIVED_REJECTED', reason: 'Reject' });
@@ -298,6 +309,10 @@ test('the scanner confines reactivation to the central sample re-acceptance tran
 
 test('undo-intake HTTP route refuses analytical evidence with 409 and no table writes', async () => {
     const f = await fixture('IN_PROGRESS');
+    // #209: declare the usable retained order during NEW owned fixture assembly.
+    await prisma.$transaction(tx => tx.sampleOrderRevision.create({ data: { id: randomUUID(), sampleId: f.sample.id,
+        version: 1, status: 'ACTIVE', reason: 'Owned execution context with a retained usable order', requestedBy: actor.username,
+        lines: { create: [{ id: randomUUID(), analysis: f.item.analysis, workItemId: null, status: 'ACTIVE', isRequired: true }] } } }));
     await createExecutionResultFixture(prisma, { data: { id: randomUUID(), sampleId: f.sample.id, param: f.item.analysis, value: '1.2', numericValue: 1.2 } });
     const app = express();
     app.use(express.json());

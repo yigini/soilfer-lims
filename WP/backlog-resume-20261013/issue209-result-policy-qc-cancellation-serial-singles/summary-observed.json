@@ -1,0 +1,57 @@
+{
+  "closedUtc": "2026-10-14T13:28:04.775170+00:00",
+  "verificationKind": "SEQUENTIAL_ORDINARY_SINGLE_SUITE_SUCCESSOR",
+  "plannedSuites": 9,
+  "plannedTests": 536,
+  "closedSuites": 3,
+  "closedTests": 155,
+  "passedTests": 154,
+  "sourceUnchanged": true,
+  "selectedInventoryEqual": false,
+  "fullDiscovery": 370,
+  "ordinarySetups": true,
+  "stockAssertions": true,
+  "maxWorkers": 1,
+  "workerIdleMemoryLimit": 512000000,
+  "nodeOptions": "",
+  "productionOperations": 0,
+  "children": [
+    {
+      "closedUtc": "2026-10-14T13:27:47.345021+00:00",
+      "suite": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\audit_0_15_duplicate_loq.test.js",
+      "exit": 0,
+      "originalReportPresent": true,
+      "tests": 63,
+      "passed": 63,
+      "failed": 0,
+      "expectedTests": 63,
+      "sourceUnchanged": true,
+      "status": "PASS"
+    },
+    {
+      "closedUtc": "2026-10-14T13:27:56.413329+00:00",
+      "suite": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\audit_1_0_lab_policies.test.js",
+      "exit": 0,
+      "originalReportPresent": true,
+      "tests": 36,
+      "passed": 36,
+      "failed": 0,
+      "expectedTests": 36,
+      "sourceUnchanged": true,
+      "status": "PASS"
+    },
+    {
+      "closedUtc": "2026-10-14T13:28:04.660972+00:00",
+      "suite": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\audit_1_5_result_writes.test.js",
+      "exit": 1,
+      "originalReportPresent": true,
+      "tests": 56,
+      "passed": 55,
+      "failed": 1,
+      "expectedTests": 56,
+      "sourceUnchanged": true,
+      "status": "FAILED_OR_INCOMPLETE"
+    }
+  ],
+  "status": "FAILED_OR_INCOMPLETE"
+}

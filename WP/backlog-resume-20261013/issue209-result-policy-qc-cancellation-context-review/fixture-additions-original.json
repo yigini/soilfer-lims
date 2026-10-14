@@ -1,0 +1,65 @@
+[
+  {
+    "path": "server/tests/contracts/audit_0_15_duplicate_loq.test.js",
+    "beforeSha256": "537e0d83a2e461f23546399f44b11d0bd99e2b995fa2ca1b11f836a4ac01e26b",
+    "afterSha256": "d6f67f880db83d93344403943f404d5798077523a58a01d6299758bf4e82fb98",
+    "oldSourceAndAssertionsExactlyRecoveredByRemovingOnlyAdditions": true,
+    "additions": [
+      "            // #209: declare the usable retained order during NEW owned fixture assembly.\n            await prisma.$transaction(tx => tx.sampleOrderRevision.create({ data: { id: id('ORDER015'), sampleId: sampleId,\n                version: 1, status: 'ACTIVE', reason: 'Owned execution context with a retained usable order', requestedBy: 'system:fixture',\n                lines: { create: [{ id: id('LINE015'), analysis: analysis, workItemId: null, status: 'ACTIVE', isRequired: true }] } } }));\n",
+      "            // #209: declare the usable retained order during NEW owned fixture assembly.\n            await prisma.$transaction(tx => tx.sampleOrderRevision.create({ data: { id: id('ORDER015'), sampleId: sampleId,\n                version: 1, status: 'ACTIVE', reason: 'Owned execution context with a retained usable order', requestedBy: 'system:fixture',\n                lines: { create: [{ id: id('LINE015'), analysis: analysis, workItemId: null, status: 'ACTIVE', isRequired: true }] } } }));\n",
+      "            // #209: declare the usable retained order during NEW owned fixture assembly.\n            await prisma.$transaction(tx => tx.sampleOrderRevision.create({ data: { id: id('ORDER015'), sampleId: sampleId,\n                version: 1, status: 'ACTIVE', reason: 'Owned execution context with a retained usable order', requestedBy: 'system:fixture',\n                lines: { create: [{ id: id('LINE015'), analysis: analysis, workItemId: null, status: 'ACTIVE', isRequired: true }] } } }));\n"
+    ]
+  },
+  {
+    "path": "server/tests/contracts/audit_1_0_lab_policies.test.js",
+    "beforeSha256": "3984d023b85eef9f8f15a287a1693d5a2718ce111650cebd47a017ca0af3baaa",
+    "afterSha256": "22aea135317df352961d71db9413caa666d35f814e5ad41f62f26b59efaf5337",
+    "oldSourceAndAssertionsExactlyRecoveredByRemovingOnlyAdditions": true,
+    "additions": [
+      "        // #209: current intake creates this order before the first export witness.\n        await prisma.$transaction(tx => require('../../services/orderService').createInitialOrder(tx,\n            { id: sampleId }, ['SOC'], actor));\n",
+      "        // #209: declare the usable retained order during NEW owned fixture assembly.\n        await prisma.$transaction(tx => tx.sampleOrderRevision.create({ data: { id: id('POL-REPORT-ORDER'), sampleId: sampleId,\n            version: 1, status: 'ACTIVE', reason: 'Owned execution context with a retained usable order', requestedBy: actor.username,\n            lines: { create: [{ id: id('POL-REPORT-LINE'), analysis: 'PH_H2O', workItemId: null, status: 'ACTIVE', isRequired: true }] } } }));\n"
+    ]
+  },
+  {
+    "path": "server/tests/contracts/audit_1_5_result_writes.test.js",
+    "beforeSha256": "c728dfac2a86f46ee09b037a8a5c17c820463a0fecaada3f46c7ad7dacbecd51",
+    "afterSha256": "1f2c269b24090981562b670e750aecc595a68da7d25b6312fc13613cff33f50d",
+    "oldSourceAndAssertionsExactlyRecoveredByRemovingOnlyAdditions": true,
+    "additions": [
+      "    if (![\"SPEC_MIR\", \"DRYING\"].includes(analysis)) {\n        // #209: declare the usable retained order during NEW owned fixture assembly.\n        await prisma.$transaction(tx => tx.sampleOrderRevision.create({ data: { id: randomUUID(), sampleId: sampleId,\n            version: 1, status: 'ACTIVE', reason: 'Owned execution context with a retained usable order', requestedBy: actor.username,\n            lines: { create: [{ id: randomUUID(), analysis: analysis === 'PSA' ? 'TEXTURE' : analysis, workItemId: null, status: 'ACTIVE', isRequired: true }] } } }));\n    }\n",
+      "    const orderLine = await prisma.orderLine.findFirstOrThrow({ where: { orderRevision: { sampleId: f.sample.id, status: 'ACTIVE' } } });\n",
+      "orderLineId: orderLine.id, "
+    ]
+  },
+  {
+    "path": "server/tests/contracts/audit_4_7_instrument_import_install.test.js",
+    "beforeSha256": "9478f9ca362ec2994d7d218cdea37a8fe57aa7e06c33e266965ee8b2d22f363d",
+    "afterSha256": "f7d40874d8c210fd0989a7c43b1f35762acdb570c91dd8036f0a0250354051af",
+    "oldSourceAndAssertionsExactlyRecoveredByRemovingOnlyAdditions": true,
+    "additions": [
+      "        // #209: this NEW literal PRE200 copy lacks only the current model's nullable line identity.\n        read(raw => raw.exec(require('../../utils/orderRevisionMigrationSource').schemaSql));\n        for (const item of f.items) await f.db.$transaction(tx => require('../../services/orderService').createInitialOrder(tx,\n            { id: item.sampleId }, [item.analysis], f.actor));\n"
+    ]
+  },
+  {
+    "path": "server/tests/contracts/audit_0_2_qc_lock.test.js",
+    "beforeSha256": "38fccbeb62c6ae10b687eb3cebb836fca39f137c9dcca6a50f8677ec4cc3c18b",
+    "afterSha256": "ab929a421f60a825f09d01ed6c04153f5d56bd26597e70de5f6787b5fe24cf2d",
+    "oldSourceAndAssertionsExactlyRecoveredByRemovingOnlyAdditions": true,
+    "additions": [
+      "        if (seedCachedEvidence) await prisma.$transaction(tx => require('../../services/orderService').createInitialOrder(tx,\n            { id: sampleId }, ['PH_H2O'], jwt.decode(tokens.LAB_MANAGER)));\n"
+    ]
+  },
+  {
+    "path": "server/tests/contracts/audit_1_6_intake_cancellation.test.js",
+    "beforeSha256": "869ce98e1dd4cb550927ee5b89dcf22e74fadd296f7be2c8dc9540cabb865e47",
+    "afterSha256": "641602724763c2b67cfa078151226cd5c1a13b5c49cc367f53aa105337298f08",
+    "oldSourceAndAssertionsExactlyRecoveredByRemovingOnlyAdditions": true,
+    "additions": [
+      "    if (['result', 'attempt', 'evidence-event'].includes(evidence)) {\n        // #209: declare the usable retained order during NEW owned fixture assembly.\n        await prisma.$transaction(tx => tx.sampleOrderRevision.create({ data: { id: randomUUID(), sampleId: f.sample.id,\n            version: 1, status: 'ACTIVE', reason: 'Owned execution context with a retained usable order', requestedBy: actor.username,\n            lines: { create: [{ id: randomUUID(), analysis: f.item.analysis, workItemId: null, status: 'ACTIVE', isRequired: true }] } } }));\n    }\n",
+      "    const orderLine = evidence === 'attempt' ? await prisma.orderLine.findFirstOrThrow({ where: { orderRevision: { sampleId: f.sample.id, status: 'ACTIVE' } } }) : null;\n",
+      "orderLineId: orderLine.id, ",
+      "    // #209: declare the usable retained order during NEW owned fixture assembly.\n    await prisma.$transaction(tx => tx.sampleOrderRevision.create({ data: { id: randomUUID(), sampleId: f.sample.id,\n        version: 1, status: 'ACTIVE', reason: 'Owned execution context with a retained usable order', requestedBy: actor.username,\n        lines: { create: [{ id: randomUUID(), analysis: f.item.analysis, workItemId: null, status: 'ACTIVE', isRequired: true }] } } }));\n",
+      "    // #209: declare the usable retained order during NEW owned fixture assembly.\n    await prisma.$transaction(tx => tx.sampleOrderRevision.create({ data: { id: randomUUID(), sampleId: f.sample.id,\n        version: 1, status: 'ACTIVE', reason: 'Owned execution context with a retained usable order', requestedBy: actor.username,\n        lines: { create: [{ id: randomUUID(), analysis: f.item.analysis, workItemId: null, status: 'ACTIVE', isRequired: true }] } } }));\n"
+    ]
+  }
+]

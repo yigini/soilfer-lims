@@ -1,0 +1,6 @@
+{
+  "recordedUtc": "2026-10-14T13:26:14.106358+00:00",
+  "scope": "Correct only the new model-shape loader reference from utils to actual services before any test dispatch",
+  "runtimeChanges": 0,
+  "oldSourceAndAssertionsRecovered": true
+}
