@@ -1,0 +1,42 @@
+[
+  {
+    "path": "server/tests/contracts/workbench_draft_integrity.test.js",
+    "beforeSha256": "7028f2c638fa5fb8cdf92588408050019a382decdd44df4ca75b3d2ef80691f9",
+    "afterSha256": "9ed6867e490ff6be39650be36ff71d1e801103dd07ee60fa846bba815544de52",
+    "oldSourceAndEveryAssertionExactlyRecoveredByRemovingAdditions": true,
+    "newDiagnosticConsoleRemoved": false,
+    "additions": [
+      "        // #209: usable legacy order context only for this NEW owned positive execution assembly.\n        require('../../services/workflowStateRules').assertFixtureContext();\n        await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: testSampleId,\n            version: 1, status: 'ACTIVE', reason: 'Owned workbench/QC execution order context', requestedBy: 'system:fixture',\n            lines: { create: ['PH'].map(analysis => ({ id: require('node:crypto').randomUUID(), analysis,\n                workItemId: null, status: 'ACTIVE', isRequired: true })) } } });\n"
+    ]
+  },
+  {
+    "path": "server/tests/contracts/workbench_pipeline_twostep.test.js",
+    "beforeSha256": "b6e7c33e5d522cd9551c186b875672d4571cc445a8da63bd2f2a15c0b3d8ee00",
+    "afterSha256": "fc775ae52706488d6b040635616827c2b0334b1e11ef267473d1904e628a56eb",
+    "oldSourceAndEveryAssertionExactlyRecoveredByRemovingAdditions": true,
+    "newDiagnosticConsoleRemoved": false,
+    "additions": [
+      "        // #209: usable legacy order context only for this NEW owned positive execution assembly.\n        require('../../services/workflowStateRules').assertFixtureContext();\n        await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: testSampleId,\n            version: 1, status: 'ACTIVE', reason: 'Owned workbench/QC execution order context', requestedBy: 'system:fixture',\n            lines: { create: ['PH', 'EC'].map(analysis => ({ id: require('node:crypto').randomUUID(), analysis,\n                workItemId: null, status: 'ACTIVE', isRequired: true })) } } });\n"
+    ]
+  },
+  {
+    "path": "server/tests/contracts/qc_disposition_flagging.test.js",
+    "beforeSha256": "46557757f86ee32a5152dc7de0cdac2ad6d5e97281958043a4a4e2b7792551a1",
+    "afterSha256": "0a557d95a1a06f856b439b0f7cc14645f6f2ad9ae13a801295d9d5576f2d6f74",
+    "oldSourceAndEveryAssertionExactlyRecoveredByRemovingAdditions": true,
+    "newDiagnosticConsoleRemoved": false,
+    "additions": [
+      "        // #209: usable legacy order context only for this NEW owned positive execution assembly.\n        require('../../services/workflowStateRules').assertFixtureContext();\n        await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: testSampleId,\n            version: 1, status: 'ACTIVE', reason: 'Owned workbench/QC execution order context', requestedBy: 'system:fixture',\n            lines: { create: ['PH'].map(analysis => ({ id: require('node:crypto').randomUUID(), analysis,\n                workItemId: null, status: 'ACTIVE', isRequired: true })) } } });\n"
+    ]
+  },
+  {
+    "path": "server/tests/contracts/workbench_single_entry.test.js",
+    "beforeSha256": "bcbc290a0cd9d5c07fe0e8fb965d05d97a37a7986757996aa12edbc22b0aa41f",
+    "afterSha256": "d3dc57fcb1973ad570eabee85232495922fb4f6c1e79cfb1806f49927b532ac0",
+    "oldSourceAndEveryAssertionExactlyRecoveredByRemovingAdditions": true,
+    "newDiagnosticConsoleRemoved": true,
+    "additions": [
+      "            // #209: this direct controller mock has the headers object supplied by the actual HTTP route.\n            req.headers = {};\n"
+    ]
+  }
+]

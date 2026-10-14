@@ -442,8 +442,9 @@ describe('Workbench Single-Entry Architecture & Operational Lifecycle Contract',
                 status: (s) => { statusVal = s; return res; }
             };
 
+            // #209: this direct controller mock has the headers object supplied by the actual HTTP route.
+            req.headers = {};
             await sampleController.updateSampleAnalyses(req, res);
-            console.info('[issue209-single-entry-actual-response]', JSON.stringify({ status: statusVal, body: jsonVal }));
             expect(jsonVal.success).toBe(true);
 
             // Verify active revision is v2

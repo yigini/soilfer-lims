@@ -224,6 +224,12 @@ describe('Workbench Draft Integrity Contract (P0)', () => {
     });
 
     test('5. Non-draft batchSave records determinations into Result and purges draft', async () => {
+        // #209: usable legacy order context only for this NEW owned positive execution assembly.
+        require('../../services/workflowStateRules').assertFixtureContext();
+        await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: testSampleId,
+            version: 1, status: 'ACTIVE', reason: 'Owned workbench/QC execution order context', requestedBy: 'system:fixture',
+            lines: { create: ['PH'].map(analysis => ({ id: require('node:crypto').randomUUID(), analysis,
+                workItemId: null, status: 'ACTIVE', isRequired: true })) } } });
         const req = {
             user: testUser,
             body: {

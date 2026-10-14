@@ -1,0 +1,33 @@
+{
+  "closedUtc": "2026-10-14T17:21:20.951987+00:00",
+  "verificationKind": "SEQUENTIAL_ORDINARY_SINGLE_SUITE_SUCCESSOR",
+  "plannedSuites": 8,
+  "plannedTests": 343,
+  "closedSuites": 1,
+  "closedTests": 13,
+  "passedTests": 13,
+  "sourceUnchanged": true,
+  "selectedInventoryEqual": false,
+  "fullDiscovery": 370,
+  "ordinarySetups": true,
+  "stockAssertions": true,
+  "maxWorkers": 1,
+  "workerIdleMemoryLimit": 512000000,
+  "nodeOptions": "",
+  "productionOperations": 0,
+  "children": [
+    {
+      "closedUtc": "2026-10-14T17:21:20.827788+00:00",
+      "suite": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\workbench_single_entry.test.js",
+      "exit": 1,
+      "originalReportPresent": true,
+      "tests": 13,
+      "passed": 13,
+      "failed": 0,
+      "expectedTests": 13,
+      "sourceUnchanged": true,
+      "status": "FAILED_OR_INCOMPLETE"
+    }
+  ],
+  "status": "FAILED_OR_INCOMPLETE"
+}

@@ -1,0 +1,9 @@
+{
+  "filesystemCleanupLedgerPresent": false,
+  "recordedTargets": 0,
+  "allRecordedTargetsRetained": true,
+  "files": [],
+  "suitePhysicalIdentityNotLoggedWhenLedgerAbsent": true,
+  "localGlobalTeardownExplicitNoOp": true,
+  "originalHeldTemplateUnchanged": true
+}

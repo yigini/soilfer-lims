@@ -1,0 +1,9 @@
+{
+  "recordedUtc": "2026-10-14T17:24:48.861628+00:00",
+  "status": "ALL13_ASSERTIONS_PASS_BUT_AFTERALL_PARENT_DELETION_REFUSED",
+  "afterAllCall": "prisma.orderLine.deleteMany({where:{revision:{sampleId:testSampleId}}})",
+  "actualProtection": "WorkAttempt retains its first legacy orderLineId; fixture cleanup must retain order parents, not weaken FK/history guards.",
+  "plannedCorrection": "Wrap only two original afterAll orderLine/sampleOrderRevision deletion calls in a no-retained-attempt guard; keep their literal statements and every assertion unchanged. Current header-only correction solved both original single-entry failures; no aggregate PASS or resolved-count increase until new closed successful successor.",
+  "remainingSevenSuitesNotExecuted": true,
+  "productionOperations": 0
+}

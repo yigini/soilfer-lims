@@ -114,6 +114,12 @@ describe('Workbench Two-Step Record & Submit Pipeline (Phase 4)', () => {
     });
 
     test('2. commitCompletion records determinations, completes items and returns receipt', async () => {
+        // #209: usable legacy order context only for this NEW owned positive execution assembly.
+        require('../../services/workflowStateRules').assertFixtureContext();
+        await prisma.sampleOrderRevision.create({ data: { id: require('node:crypto').randomUUID(), sampleId: testSampleId,
+            version: 1, status: 'ACTIVE', reason: 'Owned workbench/QC execution order context', requestedBy: 'system:fixture',
+            lines: { create: ['PH', 'EC'].map(analysis => ({ id: require('node:crypto').randomUUID(), analysis,
+                workItemId: null, status: 'ACTIVE', isRequired: true })) } } });
         const req = {
             user: testUser,
             body: {

@@ -1,0 +1,259 @@
+{
+  "summary": {
+    "closedUtc": "2026-10-14T17:21:20.951987+00:00",
+    "verificationKind": "SEQUENTIAL_ORDINARY_SINGLE_SUITE_SUCCESSOR",
+    "plannedSuites": 8,
+    "plannedTests": 343,
+    "closedSuites": 1,
+    "closedTests": 13,
+    "passedTests": 13,
+    "sourceUnchanged": true,
+    "selectedInventoryEqual": false,
+    "fullDiscovery": 370,
+    "ordinarySetups": true,
+    "stockAssertions": true,
+    "maxWorkers": 1,
+    "workerIdleMemoryLimit": 512000000,
+    "nodeOptions": "",
+    "productionOperations": 0,
+    "children": [
+      {
+        "closedUtc": "2026-10-14T17:21:20.827788+00:00",
+        "suite": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\workbench_single_entry.test.js",
+        "exit": 1,
+        "originalReportPresent": true,
+        "tests": 13,
+        "passed": 13,
+        "failed": 0,
+        "expectedTests": 13,
+        "sourceUnchanged": true,
+        "status": "FAILED_OR_INCOMPLETE"
+      }
+    ],
+    "status": "FAILED_OR_INCOMPLETE"
+  },
+  "rawFiles": {
+    "WP/backlog-resume-20261013/issue209-workbench-request-order-context-singles/config-original.json": {
+      "bytes": 6617,
+      "sha256": "69ec72cbf3e434c5dc8dcc9025eab419a3e70368d427e6bc1eed5635b955657c"
+    },
+    "WP/backlog-resume-20261013/issue209-workbench-request-order-context-singles/config-stderr-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "WP/backlog-resume-20261013/issue209-workbench-request-order-context-singles/inventory-original.json": {
+      "bytes": 49572,
+      "sha256": "764af811185c8f66e438bf295e0b700a72d0a8dcc3c976d48a022c1b8c6587b1"
+    },
+    "WP/backlog-resume-20261013/issue209-workbench-request-order-context-singles/inventory-stderr-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "WP/backlog-resume-20261013/issue209-workbench-request-order-context-singles/physical-retained-terminal-index.json": {
+      "bytes": 265,
+      "sha256": "4d0ca0a0df779bf7bb4249c83b85ef5f16ac090894ab17310e5db2005a9ff351"
+    },
+    "WP/backlog-resume-20261013/issue209-workbench-request-order-context-singles/source-after.json": {
+      "bytes": 117506,
+      "sha256": "92d7332da9f58b589815bfc03024fcd678fc6ae9ea069f43f7a0be965b2eb7e1"
+    },
+    "WP/backlog-resume-20261013/issue209-workbench-request-order-context-singles/source-before.json": {
+      "bytes": 117506,
+      "sha256": "92d7332da9f58b589815bfc03024fcd678fc6ae9ea069f43f7a0be965b2eb7e1"
+    },
+    "WP/backlog-resume-20261013/issue209-workbench-request-order-context-singles/started-open.json": {
+      "bytes": 230,
+      "sha256": "e2afa8605b63e8995b7db4634e14f635b36e20c8273d57eb098071d85dd28811"
+    },
+    "WP/backlog-resume-20261013/issue209-workbench-request-order-context-singles/summary-observed.json": {
+      "bytes": 957,
+      "sha256": "b00657bf63dd8058882ab633da691cbe9fe31499588e5587d3f062bc2b4f5d41"
+    },
+    "WP/backlog-resume-20261013/issue209-workbench-request-order-context-singles/01-workbench_single_entry.test/command.json": {
+      "bytes": 1289,
+      "sha256": "5b360d4ba6218963178b70d68f4391c80ddfc77fbe3cce4c5e8cfe5e9925b49c"
+    },
+    "WP/backlog-resume-20261013/issue209-workbench-request-order-context-singles/01-workbench_single_entry.test/exit-original.txt": {
+      "bytes": 2,
+      "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+    },
+    "WP/backlog-resume-20261013/issue209-workbench-request-order-context-singles/01-workbench_single_entry.test/observed-closed-summary.json": {
+      "bytes": 376,
+      "sha256": "f2da382f58ffa8796817deb8d5c5a4215e6867677ae97b7e06f19dc084abbc5e"
+    },
+    "WP/backlog-resume-20261013/issue209-workbench-request-order-context-singles/01-workbench_single_entry.test/report-original.json": {
+      "bytes": 33690,
+      "sha256": "8c98b38a6ac83a17c9fbf1724876d8fa5abde41493c158b13d4574f63943cdc7"
+    },
+    "WP/backlog-resume-20261013/issue209-workbench-request-order-context-singles/01-workbench_single_entry.test/stderr-original.log": {
+      "bytes": 27160,
+      "sha256": "9b4f6493eb325bddfa09a55e7756d10754faab81307c63bbe1d557d791538917"
+    },
+    "WP/backlog-resume-20261013/issue209-workbench-request-order-context-singles/01-workbench_single_entry.test/stdout-original.log": {
+      "bytes": 983,
+      "sha256": "32c8ebbed2382bdc7485521387add50985adfa8e6353198a66cebf001217b69c"
+    }
+  },
+  "reviewFiles": {
+    "WP/backlog-resume-20261013/issue209-workbench-request-order-context-review/actual-teardown-refusal-classification.json": {
+      "bytes": 798,
+      "sha256": "cd2be50ba9579a48d9770c69c3ce1c7b816fc1937ae175566f57742b8f94f86e"
+    },
+    "WP/backlog-resume-20261013/issue209-workbench-request-order-context-review/fixture-additions-original.json": {
+      "bytes": 3625,
+      "sha256": "d610e2080fbf1133bf519ddff032e849faddde3a9ef4daf27e46322c3b55194e"
+    },
+    "WP/backlog-resume-20261013/issue209-workbench-request-order-context-review/pre-correction-classification.json": {
+      "bytes": 22120,
+      "sha256": "b0e01fdaf21d2c48c826d9944eb596ac5c49be0fe916e949ff5ff54bc7c223fd"
+    },
+    "WP/backlog-resume-20261013/issue209-workbench-request-order-context-review/qc_disposition_flagging.test.js.before-original": {
+      "bytes": 6340,
+      "sha256": "46557757f86ee32a5152dc7de0cdac2ad6d5e97281958043a4a4e2b7792551a1"
+    },
+    "WP/backlog-resume-20261013/issue209-workbench-request-order-context-review/single-entry-diagnostic-dispatched-source-original.js": {
+      "bytes": 22456,
+      "sha256": "2859c1ca4bc0e02945c0a49b79292552ba1c87384221bba80fb5510340e310b8"
+    },
+    "WP/backlog-resume-20261013/issue209-workbench-request-order-context-review/workbench_draft_integrity.test.js.before-original": {
+      "bytes": 12232,
+      "sha256": "7028f2c638fa5fb8cdf92588408050019a382decdd44df4ca75b3d2ef80691f9"
+    },
+    "WP/backlog-resume-20261013/issue209-workbench-request-order-context-review/workbench_pipeline_twostep.test.js.before-original": {
+      "bytes": 8706,
+      "sha256": "b6e7c33e5d522cd9551c186b875672d4571cc445a8da63bd2f2a15c0b3d8ee00"
+    },
+    "WP/backlog-resume-20261013/issue209-workbench-request-order-context-review/workbench_single_entry.test.js.before-original": {
+      "bytes": 22333,
+      "sha256": "bcbc290a0cd9d5c07fe0e8fb965d05d97a37a7986757996aa12edbc22b0aa41f"
+    }
+  },
+  "sourceDraftPaths": [
+    ".gitattributes",
+    "Dockerfile",
+    "client/src/components/sample/AnalysisUpdateModal.jsx",
+    "client/src/translations/en.json",
+    "client/src/translations/es-419.json",
+    "client/src/translations/es.json",
+    "client/src/translations/fr.json",
+    "client/src/translations/pt.json",
+    "docker-entrypoint.sh",
+    "docs/audit/209-order-revisions.md",
+    "server/controllers/sampleController.js",
+    "server/index.js",
+    "server/locales/en.json",
+    "server/locales/es-419.json",
+    "server/locales/es.json",
+    "server/locales/fr.json",
+    "server/locales/pt.json",
+    "server/prisma/migrations/20261014000100_order_revision_contract/migration.sql",
+    "server/prisma/schema.prisma",
+    "server/scripts/install_order_revisions.js",
+    "server/scripts/order_revision_impact.js",
+    "server/scripts/rehearsal_deployment_readiness.cjs",
+    "server/services/intakeWorkItemService.js",
+    "server/services/orderAttemptWriteService.js",
+    "server/services/orderLineResolutionService.js",
+    "server/services/orderRevisionContract.js",
+    "server/services/orderRevisionMigrationSource.js",
+    "server/services/orderService.js",
+    "server/services/sampleAnalysisStateService.js",
+    "server/services/scientificAmendmentService.js",
+    "server/services/textureOrderContract.js",
+    "server/services/workAttemptReservationService.js",
+    "server/services/workAttemptWriteService.js",
+    "server/services/workItemReconciliationService.js",
+    "server/services/workRepeatService.js",
+    "server/tests/contracts/audit_2_6_equipment_commit.test.js",
+    "server/tests/contracts/audit_3_1_attempt_execution.test.js",
+    "server/tests/contracts/audit_3_1_attempt_sql_guards.test.js",
+    "server/tests/contracts/audit_3_3_separate_texture.test.js",
+    "server/tests/contracts/audit_6_1_non_scientific_authorisation.test.js",
+    "server/tests/contracts/deployment_readiness_bootstrap.test.js",
+    "server/tests/contracts/edit_analyses_permission.test.js",
+    "server/tests/contracts/issue_206_sample_containers.test.js",
+    "server/tests/contracts/issue_209_order_revision_http.test.js",
+    "server/tests/contracts/issue_209_order_revision_integration.test.js",
+    "server/tests/contracts/issue_209_order_revision_request.test.js",
+    "server/tests/contracts/issue_209_order_revision_ui.test.js",
+    "server/tests/contracts/reconcile_analyses.test.js",
+    "server/tests/contracts/review_reports_amendments_p6.test.js",
+    "server/tests/contracts/texture_work_item_atomic.test.js",
+    "server/tests/globalSetup.js",
+    "server/tests/helpers/legacyWorkflowDatabase.js",
+    "server/tests/helpers/qcGateFixture.js",
+    "server/tests/helpers/qcWorksheetUi.js",
+    "server/tests/helpers/workAttemptFixtures.js",
+    "server/tests/helpers/workflowWriteScanner.js",
+    "server/tests/security/wiring.test.js",
+    "server/tests/contracts/audit_4_6_calibration.test.js",
+    "server/tests/contracts/audit_4_6_calculation_install.test.js",
+    "server/tests/contracts/audit_4_1_run_start_header.test.js",
+    "server/tests/contracts/audit_1_2_guard_installer.test.js",
+    "server/tests/contracts/audit_4_3_keyboard_playwright.test.js",
+    "server/tests/contracts/audit_4_8_cross_check_evidence.test.js",
+    "server/tests/contracts/audit_6_1_first_fill.test.js",
+    "server/tests/contracts/audit_6_3_report_content.test.js",
+    "server/tests/contracts/audit_4_8_cross_check_install.test.js",
+    "server/tests/contracts/audit_1_2_spectral_state.test.js",
+    "server/tests/contracts/audit_0_3_publication.test.js",
+    "server/tests/contracts/issue_291_texture_input_authority.test.js",
+    "server/tests/contracts/issue_213_export_equals_report.test.js",
+    "server/tests/contracts/audit_4_7_calculation_import.test.js",
+    "server/tests/contracts/audit_1_4_uuid_transactions.test.js",
+    "server/tests/contracts/audit_0_15_duplicate_loq.test.js",
+    "server/tests/contracts/audit_1_0_lab_policies.test.js",
+    "server/tests/contracts/audit_1_5_result_writes.test.js",
+    "server/tests/contracts/audit_4_7_instrument_import_install.test.js",
+    "server/tests/contracts/audit_0_2_qc_lock.test.js",
+    "server/tests/contracts/audit_1_6_intake_cancellation.test.js",
+    "server/tests/contracts/audit_1_2_state_authority.test.js",
+    "server/tests/contracts/audit_1_2_workbench_state.test.js",
+    "server/tests/contracts/audit_0_6_review_atomicity.test.js",
+    "server/tests/contracts/audit_1_2_legacy_results.test.js",
+    "server/tests/contracts/audit_0_8_report_truthfulness.test.js",
+    "server/tests/contracts/report_pdf.test.js",
+    "server/tests/contracts/audit_0_11_workbench_queue.test.js",
+    "server/tests/contracts/issue_281_cross_check_bounds.test.js",
+    "server/tests/contracts/audit_0_10_current_result_views.test.js",
+    "server/tests/contracts/audit_0_5_legacy_review.test.js",
+    "server/tests/contracts/qc_disposition_release_gate.test.js",
+    "server/tests/contracts/audit_0_7_resubmission.test.js",
+    "server/tests/contracts/audit_0_9_public_report_superseded.test.js",
+    "server/tests/contracts/audit_6_2_report_revisions.test.js",
+    "server/tests/contracts/audit_0_14_number_entry.test.js",
+    "server/tests/contracts/mandatory_reason.test.js",
+    "server/tests/contracts/matrix_blocking_diagnostics.test.js",
+    "server/tests/contracts/matrix_validation.test.js",
+    "server/tests/contracts/prerequisite_gate.test.js",
+    "server/tests/contracts/result_provenance.test.js",
+    "server/tests/scenarios/scientific_validation.test.js",
+    "server/tests/contracts/mobile_offline_sync.test.js",
+    "server/tests/contracts/audit_1_2_offline_state.test.js",
+    "server/tests/contracts/qc_controls.test.js",
+    "server/tests/contracts/issue_278_texture_closure_policy.test.js",
+    "server/tests/contracts/controlled_units_interpretation.test.js",
+    "server/tests/contracts/catalogue_result_entry.test.js",
+    "server/tests/contracts/catalogue_governance.test.js",
+    "server/tests/contracts/profile_identity_routes.test.js",
+    "server/tests/contracts/api_key_scoping_isolation.test.js",
+    "server/tests/contracts/workspace_projection_p2.test.js",
+    "server/tests/contracts/workbench_single_entry.test.js",
+    "server/tests/contracts/workbench_draft_integrity.test.js",
+    "server/tests/contracts/workbench_pipeline_twostep.test.js",
+    "server/tests/contracts/qc_disposition_flagging.test.js"
+  ],
+  "applicationFullyVerified": false,
+  "totalOriginalFailedCasesResolved": 597,
+  "remainingOriginalUnresolved": 53,
+  "actualTeardownClassification": {
+    "recordedUtc": "2026-10-14T17:24:48.861628+00:00",
+    "status": "ALL13_ASSERTIONS_PASS_BUT_AFTERALL_PARENT_DELETION_REFUSED",
+    "afterAllCall": "prisma.orderLine.deleteMany({where:{revision:{sampleId:testSampleId}}})",
+    "actualProtection": "WorkAttempt retains its first legacy orderLineId; fixture cleanup must retain order parents, not weaken FK/history guards.",
+    "plannedCorrection": "Wrap only two original afterAll orderLine/sampleOrderRevision deletion calls in a no-retained-attempt guard; keep their literal statements and every assertion unchanged. Current header-only correction solved both original single-entry failures; no aggregate PASS or resolved-count increase until new closed successful successor.",
+    "remainingSevenSuitesNotExecuted": true,
+    "productionOperations": 0
+  },
+  "productionOperations": 0
+}
