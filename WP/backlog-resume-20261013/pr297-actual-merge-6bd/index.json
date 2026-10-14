@@ -1,0 +1,111 @@
+{
+  "observedUtc": "2026-10-14T20:59:00.526322+00:00",
+  "status": "MERGED_ACTUAL_AUDITED_HEAD",
+  "number": 297,
+  "issue": 209,
+  "sourceHead": "6bd516c42a07332d0b0653ed150d1526bf7e424e",
+  "sourceTree": "638580d50f61254609de3abd42d93afc676a5727",
+  "priorMain": "2242bcb4861a7085bb95e78e0e7b1e4edf11d1b8",
+  "actualMerge": "cde8c8896f5f9d5f1ab07b0ae16b1a765e0a6367",
+  "mergedAt": "2026-10-14T20:58:55Z",
+  "parents": [
+    "2242bcb4861a7085bb95e78e0e7b1e4edf11d1b8",
+    "6bd516c42a07332d0b0653ed150d1526bf7e424e"
+  ],
+  "mergedTreeEqualsAuditedSource": true,
+  "actualAuditCommentId": 6178123314,
+  "actualAuditEvidenceCommit": "761990bc30696aea375981ad1ebfdceca23c0a50",
+  "prCi": 38629458186,
+  "mainCi": [
+    {
+      "id": 38636615469,
+      "head": "cde8c8896f5f9d5f1ab07b0ae16b1a765e0a6367",
+      "attempt": 1,
+      "status": "queued",
+      "conclusion": null,
+      "url": "https://github.com/yigini/soilfer-lims/actions/runs/38636615469"
+    }
+  ],
+  "mainCiLogsCollected": false,
+  "issue209State": "open",
+  "closingIssuesReferences": [],
+  "nativeAcknowledgementSent": false,
+  "deploymentPerformed": false,
+  "productionOperations": 0,
+  "productionCountsCollected": false,
+  "kitReminder": "Print invalidStoredAnalysisSampleCount and actual sample/owner lists, show any nonzero to YY; approved nonzero STOP. Actual214/209 lists, policy PRESENT/NO_OP0 or STOP and retained-snapshot disk require exact-kit review/fresh gate.",
+  "files": {
+    "actual-merge-commit-original.json": {
+      "bytes": 2722,
+      "sha256": "b79c408fb44af08312f0c64afd3a4cbedf9b6d1066f76b23567f92f28078b514"
+    },
+    "checks-immediate-original.json": {
+      "bytes": 3565,
+      "sha256": "67c55055f71e5bf4dfb08517f3e4a0b249a485f606b1212ec01a8e849218f672"
+    },
+    "ci-immediate-original.json": {
+      "bytes": 12554,
+      "sha256": "ea35864828a30f2fabf782f5025b94deda7b718ec3a07e5e818cea4137fbb2e8"
+    },
+    "closing-references-after-original.json": {
+      "bytes": 104,
+      "sha256": "ef71677e611d83ee27a372b8898ce7853c20286f204b0110e38cb17b19653891"
+    },
+    "closing-references-immediate-original.json": {
+      "bytes": 158,
+      "sha256": "9ccd051b550a7f50dc0a30cf0b22c44e3572bb5d35f499e0b828975572810235"
+    },
+    "comments-immediate-original.json": {
+      "bytes": 19805,
+      "sha256": "e0959ddaacf8fe39dd488f7f86ae0a9ae30c451bc8d27fea2a88035cc5a1aee9"
+    },
+    "issue209-after-original.json": {
+      "bytes": 8349,
+      "sha256": "2f1adbd929297ceea9adbd3346dbe7fdaed8fefb0ad62cdf9940993d8286a3a0"
+    },
+    "jobs-immediate-original.json": {
+      "bytes": 4336,
+      "sha256": "b685680bc00fad5b5c524d9a669674cf64e0ce71c004ff2930e6ea9289d9eb63"
+    },
+    "main-ci-open-original.json": {
+      "bytes": 12139,
+      "sha256": "82ae5fa2c2f8f05c47dad6a7e329f0c03bc2c91c7ad0cd2dde35e6dd21b935fb"
+    },
+    "main-immediate-original.json": {
+      "bytes": 336,
+      "sha256": "e0c8d4117149b05e499ad0abfd6f0456aed24d869f784317aa0c1072415e39c9"
+    },
+    "main-merged-original.json": {
+      "bytes": 336,
+      "sha256": "8ab38fb8db0993cd672bbb2e6bf3b6ca8d124087fb841ecc97bad4fb1d9bfe89"
+    },
+    "merge-request.json": {
+      "bytes": 77,
+      "sha256": "0a16a0286a9f1b8351e356736d6ae5e20e0fbf607d2d4c5141dd4945b2c93d88"
+    },
+    "merge-response-original.json": {
+      "bytes": 109,
+      "sha256": "f833a668a85117c69e112344c7d277149adeea2eb7001adf3d40024b7ac9cbb1"
+    },
+    "merge-response-stderr.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "mutation-started.json": {
+      "bytes": 116,
+      "sha256": "8b663be4e6a888da70f132d588f9b0c5519a6fa47b2821877a460f7ac67562fc"
+    },
+    "pr-immediate-original.json": {
+      "bytes": 32558,
+      "sha256": "d4ec4f2e6bd9e2daf4c818bf41176a548db0468cfd9c87e274c58674a4385f12"
+    },
+    "pr-merged-original.json": {
+      "bytes": 33502,
+      "sha256": "d4084ab06c113c94512c41db0605b91a5766951a74779b52ae491b7b45faa274"
+    },
+    "verdict-immediate-original.json": {
+      "bytes": 5571,
+      "sha256": "2272d318b7d824d7341e90cd340b53bfeb81dc5cbec26150f857b4db8251a167"
+    }
+  }
+}
