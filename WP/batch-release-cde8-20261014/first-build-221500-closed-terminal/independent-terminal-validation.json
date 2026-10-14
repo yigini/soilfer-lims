@@ -1,0 +1,21 @@
+{
+  "status": "FAILED_OR_UNCERTAIN_BUILD_ONLY_RETAIN_ALL",
+  "validationError": "No successful terminal receipt; retain failure or uncertain unit honestly",
+  "closedUtc": "2026-10-14T22:40:05.107035+00:00",
+  "sourceReviewId": 6179940139,
+  "toolingCommit": "2afd192872ce38bfabbaf5c69404d0aa7e679123",
+  "root": "/opt/lims/releases/workflow-batch-build-cde8c889-20261014T221500Z",
+  "unit": "lims-workflow-batch-build-cde8c889-20261014t221500z",
+  "invocationId": "2da8e4edfe95494c8c60263ae1b1578b",
+  "image": null,
+  "receiptSha256": null,
+  "currentMain": "cde8c8896f5f9d5f1ab07b0ae16b1a765e0a6367",
+  "candidateStillCurrentMain": true,
+  "originalUploadedInputsUnchanged": true,
+  "extractedApplicationStatus": "EXTRACTED_RAW_SOURCE_VERIFIED",
+  "verifiedApplicationBlobCount": 1560,
+  "productionConnections": 0,
+  "proofLaunches": 0,
+  "productionDeployments": 0,
+  "forwardOnlyNeverReplay": true
+}
