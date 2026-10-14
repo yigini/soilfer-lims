@@ -1,0 +1,270 @@
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User authoriser (Lab: foreign-laboratory) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/nonScientificAmendmentService.js:16:8)
+      at services/nonScientificAmendmentService.js:50:16
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at Object.<anonymous> (tests/contracts/audit_6_1_non_scientific_authorisation.test.js:94:3)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User authoriser (Lab: foreign-laboratory) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/nonScientificAmendmentService.js:16:8)
+      at services/nonScientificAmendmentService.js:75:16
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at Object.<anonymous> (tests/contracts/audit_6_1_non_scientific_authorisation.test.js:95:3)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User requester (Lab: foreign-lab) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/scientificAmendmentService.js:43:9)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at tests/contracts/audit_6_1_non_scientific_authorisation.test.js:224:2
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User authoriser (Lab: foreign-lab) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:62:26)
+      at assertScope (services/scientificAmendmentService.js:79:9)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:188:60)
+      at tests/contracts/audit_6_1_non_scientific_authorisation.test.js:305:2
+
+  console.log
+    [AUTH] Verifying token for ID: authoriser (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/audit_6_1_non_scientific_authorisation.test.js (103.721 s)
+  √ a profile request is PENDING and cannot change sample identity, approval or existing work (2340 ms)
+  √ a distinct approver applies a clerical correction once and retains prior approval and immutable request evidence (1438 ms)
+  √ Strict refuses self-authorisation and stale versions without any persisted changes (1397 ms)
+  √ authorisation re-reads actual lab policy; ADVISORY self-authorisation is explicit in the audit (1412 ms)
+  √ a different pending correction changing the profile makes this authorisation a zero-write conflict (1411 ms)
+  √ both request and authorisation enforce approval permission and current sample scope (1631 ms)
+  √ CLERICAL correction on ARCHIVED leaves physical status and prior approval unchanged (1323 ms)
+  √ CLERICAL correction on DISPOSED leaves physical status and prior approval unchanged (1364 ms)
+  √ ORDER authorisation records affected evidence and reason without changing orders, work, reports or sample (1384 ms)
+  √ REPORT authorisation records affected evidence and reason without changing orders, work, reports or sample (1416 ms)
+  √ foreign evidence, injected authorisation fields and invalid versions refuse without writes (1430 ms)
+  √ legacy NULL-version rows cannot enter the new authorisation workflow (1382 ms)
+  √ a late audit failure rolls back both authorisation and clerical profile changes (1444 ms)
+  √ the link guard accepts its exact authorised scientific context without changing any retained evidence (1348 ms)
+  √ the link guard refuses pending with zero writes (1580 ms)
+  √ the link guard refuses legacy with zero writes (1483 ms)
+  √ the link guard refuses clerical with zero writes (1429 ms)
+  √ the link guard refuses unselected with zero writes (1442 ms)
+  √ the link guard refuses recorded-parent with zero writes (1457 ms)
+  √ the link guard refuses recorded-child with zero writes (1524 ms)
+  √ the link guard refuses reason-mismatch with zero writes (1440 ms)
+  √ an unrelated parentAttemptId cannot produce a link (1580 ms)
+  √ an unrelated childAttemptId cannot produce a link (1460 ms)
+  √ an unrelated workItemId cannot produce a link (1446 ms)
+  √ an unrelated amendmentId cannot produce a link (1449 ms)
+  √ an unrelated reason cannot produce a link (1489 ms)
+  √ all seven link columns are immutable and links and referenced attempts cannot be deleted (1595 ms)
+  √ a scientific CLIENT_RETEST request remains pending and preserves every existing row (1518 ms)
+  √ a scientific CONFIRMATION request remains pending and preserves every existing row (1427 ms)
+  √ scientific requests on ARCHIVED refuse without writes (1473 ms)
+  √ scientific requests on DISPOSED refuse without writes (1438 ms)
+  √ scientific requests on PROCESSING refuse without writes (1557 ms)
+  √ scientific requests reject permission before any writes (2216 ms)
+  √ scientific requests reject tenant before any writes (1434 ms)
+  √ scientific requests reject empty-lines before any writes (1502 ms)
+  √ scientific requests reject duplicate-lines before any writes (1457 ms)
+  √ scientific requests reject foreign-line before any writes (1493 ms)
+  √ scientific requests reject reason before any writes (1468 ms)
+  √ scientific requests reject forged-capability before any writes (1474 ms)
+  √ scientific requests refuse nonaccepted work without writes (1428 ms)
+  √ scientific requests refuse nonmeasurement work without writes (1542 ms)
+  √ scientific requests refuse duplicate-marker work without writes (1417 ms)
+  √ scientific requests retain scope for affectedResults (1467 ms)
+  √ scientific requests retain scope for affectedReports (1393 ms)
+  √ a late scientific request audit failure rolls back the request without changing retained evidence (1440 ms)
+  √ scientific CLIENT_RETEST authorisation reopens only selected work, seals the accepted parent and withdraws the exact report (1553 ms)
+  √ scientific CONFIRMATION authorisation reopens only selected work, seals the accepted parent and withdraws the exact report (1459 ms)
+  √ scientific authorisation re-reads second-person policy and explicitly records ADVISORY self-authorisation (1493 ms)
+  √ scientific authorisation rejects permission with zero writes (1412 ms)
+  √ scientific authorisation rejects tenant with zero writes (1451 ms)
+  √ scientific authorisation rejects stale-version with zero writes (1464 ms)
+  √ scientific authorisation rejects forged-capability with zero writes (1490 ms)
+  √ an action string or forged capability cannot reopen a released Sample (1392 ms)
+  √ an action string or forged capability cannot reopen a released WorkItem (1429 ms)
+  √ a late scientific authorisation audit failure rolls back every reopen, child, binding and report change (1603 ms)
+  √ withdrawal binding and every report content field stay sealed after authorisation (1472 ms)
+  √ scientific repeats preserve the existing configured attempt limit and NCR refusal (1474 ms)
+  √ authorisation revalidates parent-no-longer-accepted after a valid request and refuses the whole transaction (1475 ms)
+  √ authorisation revalidates new-open-child after a valid request and refuses the whole transaction (1590 ms)
+  √ an explicit selected-line CLIENT_RETEST limit override raises the existing REPEAT_LIMIT NCR and preserves the accepted parent (1554 ms)
+  √ an explicit selected-line CONFIRMATION limit override raises the existing REPEAT_LIMIT NCR and preserves the accepted parent (1454 ms)
+  √ a line override without the existing NCR assessment refuses the request atomically (1492 ms)
+  √ a pending scientific amendment cannot reopen a subsequently ARCHIVED sample (1464 ms)
+  √ a pending scientific amendment cannot reopen a subsequently DISPOSED sample (1471 ms)
+  √ the actual report HTTP routes retain internal access and refuse both public formats before expiry or revocation (1791 ms)
+  √ withdrawn report numbering remains reserved and the next issuance preserves its row and takes the next revision (1616 ms)
+  √ scientific request refuses unregistered laboratory authority without policy fallback or writes (1518 ms)
+  √ scientific authorise refuses unregistered laboratory authority without policy fallback or writes (1449 ms)
+  √ a pending request cannot grant withdrawal authority and a report cannot become withdrawn without its binding (1431 ms)
+
+PASS tests/security/audit_1_2_state_writes.test.js (11.969 s)
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.workItem.deleteMany({where:{sampleId:id}})) (6 ms)
+  √ audit gap form is one scanner finding (tests/contracts/canary.test.js / prisma.sample.deleteMany({where:{id}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / state.removeUnstartedWorkItems(prisma, {}, {actor,reason}))
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.project.create({data:{samples:{create:[{status:"APPROVED"}]}}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / const nested={create:[{status:"APPROVED"}]};prisma.project.create({data:{samples:nested}})) (3 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / const key="workItems";const op="deleteMany";prisma.sample.update({data:{[key]:{[op]:{}}}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.sample.create({data:{workItems:{connect:[{id:otherSampleItem}]}}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / const relation={set:[{id}]};prisma.project.update({data:{samples:relation}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / const op="disconnect";prisma.sample.update({data:{workItems:{[op]:[{id}]}}}))
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.sample.update({where:{id},data:{workItems:{upsert:{create:{status:"ACCEPTED"},update:{status:"ACCEPTED"}}}}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.sample?.update({data:{status:"APPROVED"}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.sample.update?.({data:{status:"APPROVED"}}))
+  √ audit gap form is one scanner finding (controllers/canary.js / db.prepare("UPDATE main.Sample SET status = ?")) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / db.prepare("UPDATE OR ABORT main.WorkItem SET status = ?")) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / db.exec("REPLACE INTO Sample (id,status) VALUES (1,2)")) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / db.exec("INSERT OR REPLACE INTO main.WorkItem (id,status) VALUES (1,2)"))
+  √ the original rehearsal cannot reintroduce a direct Sample deletion
+  √ nested connect association has one actual authority finding (1 ms)
+  √ nested set association has one actual authority finding
+  √ nested disconnect association has one actual authority finding (1 ms)
+  √ the closed FK runner refuses unknown case (83 ms)
+  √ the closed FK runner refuses configured candidate (89 ms)
+  √ the #192 loader is independently byte-bound; a changed loader remains unresolved (5 ms)
+  √ the previous #191 release digest is refused; only the exact current loader and DDL are inspected (2 ms)
+  √ the #193 source resolver inspects byte-bound sql without granting workflow writer authority (2 ms)
+  √ the #193 source resolver inspects byte-bound schemaSql without granting workflow writer authority (1 ms)
+  √ the #193 source resolver inspects byte-bound guardsSql without granting workflow writer authority (1 ms)
+  √ the #206 resolver inspects only pinned sql and retains workflow write restrictions (1 ms)
+  √ the #206 resolver inspects only pinned schemaSql and retains workflow write restrictions (1 ms)
+  √ the #206 resolver inspects only pinned prismaSql and retains workflow write restrictions (1 ms)
+  √ the #206 resolver inspects only pinned counterSql and retains workflow write restrictions (1 ms)
+  √ the #206 resolver inspects only pinned guardsSql and retains workflow write restrictions (1 ms)
+  √ the #206 resolver refuses altered bytes in services/sampleContainerMigrationSource.js
+  √ the #206 resolver refuses altered bytes in prisma/migrations/20261013000100_sample_containers/migration.sql (1 ms)
+  √ legacy CLI launchers cannot import any fixture or test module (3 ms)
+  √ FK OFF is confined to the exact pinned synthetic branch, export and helper file (5 ms)
+  √ the #190 source resolver inspects the exact checked-in sql asset
+  √ the #190 source resolver inspects the exact checked-in schemaSql asset (1 ms)
+  √ the #190 source resolver inspects the exact checked-in guardsSql asset
+  √ the #190 historical factory cannot be imported by runtime or client: services/probe.js (1 ms)
+  √ the #190 historical factory cannot be imported by runtime or client: controllers/probe.js
+  √ the #190 historical factory cannot be imported by runtime or client: routes/probe.js
+  √ the #190 historical factory cannot be imported by runtime or client: scripts/probe.js
+  √ the #190 historical factory cannot be imported by runtime or client: ../client/src/probe.js
+  √ the #190 factory import allowlist is exact, including the named spectral refusal (2 ms)
+  √ the #191 owned result-set export is confined to seven inventoried test files without writer exemptions (6 ms)
+  √ the #190 composite positive fixture has exactly two named publication callers (4 ms)
+  √ positive attempt fixtures cannot be imported by runtime or client: services/probe.js
+  √ positive attempt fixtures cannot be imported by runtime or client: controllers/probe.js (1 ms)
+  √ positive attempt fixtures cannot be imported by runtime or client: routes/probe.js
+  √ positive attempt fixtures cannot be imported by runtime or client: scripts/probe.js
+  √ positive attempt fixtures cannot be imported by runtime or client: ../client/src/probe.js
+  √ a direct sample write in a #190 test remains a finding outside the factory
+  √ a direct workItem write in a #190 test remains a finding outside the factory (1 ms)
+  √ a direct result write in a #190 test remains a finding outside the factory
+  √ a changed #190 historical factory digest is a scanner finding (8 ms)
+  √ a changed #190 historical DDL digest is a scanner finding (9 ms)
+  √ an altered #190 loader or SQL digest restores a failing source finding: services/workAttemptMigrationSource.js (1 ms)
+  √ an altered #190 loader or SQL digest restores a failing source finding: prisma/migrations/20261008000100_work_attempt_contract/migration.sql (1 ms)
+  √ the unchanged duplicate-marker prerequisite loadWorkItemDuplicateMarkerSource is inspected without writer exemptions (1 ms)
+  √ the unchanged duplicate-marker prerequisite loadActiveWorkItemIndexSource is inspected without writer exemptions (1 ms)
+  √ an altered prerequisite source is a failing finding: loadWorkItemDuplicateMarkerSource / services/workItemUniquenessMigrationSource.js (1 ms)
+  √ an altered prerequisite source is a failing finding: loadActiveWorkItemIndexSource / services/workItemUniquenessMigrationSource.js (1 ms)
+  √ an altered prerequisite source is a failing finding: loadWorkItemDuplicateMarkerSource / prisma/migrations/20261004190000_add_workitem_duplicate_marker/migration.sql
+  √ an altered prerequisite source is a failing finding: loadActiveWorkItemIndexSource / prisma/migrations/20261004190100_unique_active_workitem/migration.sql (1 ms)
+  √ all handwritten runtime, script, seed and test Sample/WorkItem writes use central authorities (11431 ms)
+  √ embedded literal programs cannot hide workflow DML: const vm=require('vm');vm.runInNewContext("db.exec('REPLACE INTO main.Sample (id,status) VALUES (1,2)')")
+  √ embedded literal programs cannot hide workflow DML: const {spawnSync}=require('child_process');spawnSync('node',['-e',"db.exec('INSERT OR REPLACE INTO main.WorkItem (id,status) VALUES (1,2)')"])
+  √ embedded literal programs cannot hide workflow DML: const vm=require('vm');vm.runInNewContext("db.exec('UPDATE OR ABORT main.Sample SET status = 1')") (1 ms)
+  √ embedded literal programs cannot hide workflow DML: import {execSync as launch} from 'node:child_process';launch("node -e `db.exec('DELETE FROM Sample')`")
+  √ embedded literal programs cannot hide workflow DML: import {writeFileSync as saveProgram} from 'node:fs';saveProgram('program.cjs',"db.exec('UPDATE WorkItem SET metadata = 1')") (1 ms)
+  √ embedded literal programs cannot hide workflow DML: const {spawnSync}=require('node:child_process');spawnSync('node',['-e',"db.exec('INSERT INTO Sample (id) VALUES (1)')"])
+  √ embedded literal programs cannot hide workflow DML: const cp=require('child_process');const code=`db.prepare('UPDATE \"WorkItem\" SET result = 1')`;cp.spawn('node',['-e',code])
+  √ embedded literal programs cannot hide workflow DML: const cp=require('child_process');cp.exec(`node -e \"db.exec('delete from \\\"Sample\\\"')\"`)
+  √ embedded literal programs cannot hide workflow DML: const fs=require('fs');fs.writeFileSync('program.cjs',`db.exec('UPDATE \"WorkItem\" SET status = 1')`) (1 ms)
+  √ embedded literal programs cannot hide workflow DML: const fs=require('fs');fs.writeFile('program.mjs','db.exec(`insert into [WorkItem] (id) values (1)`)') (1 ms)
+  √ embedded literal programs cannot hide workflow DML: new Function("db.exec('INSERT INTO \"Sample\" (id) VALUES (1)')")
+  √ embedded literal programs cannot hide workflow DML: const vm=require('vm');vm.runInNewContext("db.exec('DELETE FROM WorkItem')")
+  √ embedded literal programs cannot hide workflow DML: const vm=require('vm');new vm.Script("db.exec('UPDATE Sample SET metadata = 1')") (1 ms)
+  √ a new physical source file with embedded node-e Sample inserts fails the inventory (42 ms)
+  √ the sole deferral is byte-bound inventory; a one-byte change becomes a failing embedded writer (45 ms)
+  √ the source guard catches aliases, data variables and spreads: prisma.sample.create({data: {originalId:'fixture'}})
+  √ the source guard catches aliases, data variables and spreads: const model=prisma.workItem; model.updateMany({data:{status:'ACCEPTED'}}) (1 ms)
+  √ the source guard catches aliases, data variables and spreads: const {sample: alias}=prisma; const data={status:'APPROVED'}; alias.update({data})
+  √ the source guard catches aliases, data variables and spreads: const data={clientName:'safe'}; data.status='APPROVED'; prisma.sample.update({data})
+  √ the source guard catches aliases, data variables and spreads: const data={clientName:'safe'}; const key='status'; data[key]='APPROVED'; prisma.sample.update({data}) (1 ms)
+  √ the source guard catches aliases, data variables and spreads: const patch={status:'APPROVED'}; const data={...patch}; prisma.sample.update({data})
+  √ the source guard catches aliases, data variables and spreads: const args={data:{status:'APPROVED'}}; prisma.sample.update(args)
+  √ the source guard catches aliases, data variables and spreads: const {update: write}=prisma.sample; write({data:{status:'APPROVED'}}) (1 ms)
+  √ the source guard catches aliases, data variables and spreads: const write=prisma.sample.update.bind(prisma.sample); write({data:{status:'APPROVED'}})
+  √ the source guard catches aliases, data variables and spreads: const entity='workItem'; prisma[entity].upsert({create:{sampleId:'s'},update:{status:'ACCEPTED'}})
+  √ the source guard catches aliases, data variables and spreads: const delegate=prisma[Math.random()?'sample':'workItem']; delegate.create({data:{}})
+  √ the source guard catches aliases, data variables and spreads: function mutate(data) { prisma.sample.update({data:{...data}}) } (1 ms)
+  √ the source guard catches aliases, data variables and spreads: const sql='UPDATE Sample SET '+'status = ?'; db.prepare(sql).run('APPROVED')
+  √ the source guard catches aliases, data variables and spreads: const table='WorkItem'; db.exec(`INSERT INTO ${table} (id,status) VALUES ('x','ACCEPTED')`)
+  √ the source guard catches aliases, data variables and spreads: prisma.$executeRaw`UPDATE WorkItem SET status=${'ACCEPTED'}`
+  √ the source guard catches aliases, data variables and spreads: function rawWrite(statement) { db.exec(statement) }
+  √ the source guard catches aliases, data variables and spreads: const fields=['status = ?']; db.prepare(`UPDATE Sample SET ${fields.join(',')}`)
+  √ a real temporary non-allowlisted test file fails the source guard (3 ms)
+  √ a shadowed file reader cannot impersonate a known schema load
+  √ the two exceptions apply to the named export only, never to the caller or the rest of its file (1 ms)
+  √ runtime cannot import the test helper tests/helpers/legacyWorkflowDatabase.js (1 ms)
+  √ runtime cannot import the test helper tests/helpers/rejectedGuardWrite.js (1 ms)
+  √ metadata-only updates and other models are permitted, and guard disabling is always refused (2 ms)
+  √ native pragma calls cannot disable constraints: db.pragma('foreign_keys = OFF')
+  √ native pragma calls cannot disable constraints: const setting='recursive_triggers=0'; database.pragma(setting) (1 ms)
+  √ native pragma calls cannot disable constraints: const {pragma: configure}=db; configure('foreign_keys=0')
+  √ native pragma calls cannot disable constraints: const method='pragma'; client[method]('foreign_keys = OFF')
+  √ native pragma reads and enabled constraints remain permitted (1 ms)
+  √ loaded SQL is inspected without a caller exemption: UPDATE Consignment SET declaredExpectedCount = ? WHERE id = ? (2 ms)
+  √ loaded SQL is inspected without a caller exemption: UPDATE Sample SET status = ? WHERE id = ? (1 ms)
+  √ loaded SQL is inspected without a caller exemption: PRAGMA foreign_keys = OFF (2 ms)
+
+Test Suites: 2 passed, 2 total
+Tests:       181 passed, 181 total
+Snapshots:   0 total
+Time:        116.023 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_6_1_non_scientific_authorisation.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\security\audit_1_2_state_writes.test.js".
+Test results written to: ..\WP\backlog-resume-20261013\issue209-approved-history-order-context-focused\report-original.json

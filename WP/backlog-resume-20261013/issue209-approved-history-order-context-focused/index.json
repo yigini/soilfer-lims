@@ -1,0 +1,135 @@
+{
+  "retainedUtc": "2026-10-14T10:43:34.021315+00:00",
+  "status": "CLOSED_APPROVED_HISTORY_ORDER_CONTEXT_FOCUSED_PASS",
+  "summary": {
+    "closedUtc": "2026-10-14T10:39:12.577192+00:00",
+    "exit": 0,
+    "suites": 2,
+    "tests": 181,
+    "passedTests": 181,
+    "failed": 0,
+    "pending": 0,
+    "todo": 0,
+    "sourceUnchanged": true,
+    "selectedInventoryEqual": true,
+    "fullDiscovery": 370,
+    "ordinarySetups": true,
+    "workerIdleMemoryLimit": 512000000,
+    "productionOperations": 0,
+    "status": "PASS"
+  },
+  "cause": "Bothsuites181testsPASS; the fresh owned approved-history fixture now declares an explicit retainedACTIVE legacyorderline withNULLworkItemId. Oldassertions unchanged; actualscientific request/authorisation/linkedguards/historypreservation/role/refusal cases andstrictscanner pass. No runtime/schema/sourceguard/scientific change; fraction question6166098211 stillpending.",
+  "sourceDraftPaths": [
+    "server/services/orderService.js",
+    "server/services/orderLineResolutionService.js",
+    "server/services/orderRevisionMigrationSource.js",
+    "server/scripts/install_order_revisions.js",
+    "server/services/sampleAnalysisStateService.js",
+    "server/services/intakeWorkItemService.js",
+    "server/services/workAttemptWriteService.js",
+    "server/services/workRepeatService.js",
+    "server/services/scientificAmendmentService.js",
+    "server/prisma/schema.prisma",
+    "server/prisma/migrations/20261014000100_order_revision_contract/migration.sql",
+    "server/tests/contracts/issue_209_order_revision_integration.test.js",
+    "server/tests/helpers/legacyWorkflowDatabase.js",
+    "server/services/workAttemptReservationService.js",
+    "server/tests/contracts/issue_209_order_revision_ui.test.js",
+    "server/index.js",
+    "server/tests/globalSetup.js",
+    "Dockerfile",
+    "docker-entrypoint.sh",
+    ".gitattributes",
+    "server/controllers/sampleController.js",
+    "server/tests/helpers/workflowWriteScanner.js",
+    "server/tests/helpers/qcGateFixture.js",
+    "server/tests/helpers/workAttemptFixtures.js",
+    "client/src/components/sample/AnalysisUpdateModal.jsx",
+    "docs/audit/209-order-revisions.md",
+    "server/tests/contracts/audit_6_1_non_scientific_authorisation.test.js",
+    "server/tests/security/wiring.test.js",
+    "server/tests/contracts/audit_2_6_equipment_commit.test.js",
+    "server/tests/contracts/review_reports_amendments_p6.test.js",
+    "server/tests/contracts/audit_3_1_attempt_sql_guards.test.js",
+    "server/tests/contracts/issue_206_sample_containers.test.js",
+    "server/services/orderAttemptWriteService.js",
+    "server/tests/helpers/qcWorksheetUi.js",
+    "server/scripts/order_revision_impact.js",
+    "server/tests/contracts/issue_209_order_revision_http.test.js",
+    "server/scripts/rehearsal_deployment_readiness.cjs",
+    "server/tests/contracts/deployment_readiness_bootstrap.test.js",
+    "server/tests/contracts/reconcile_analyses.test.js",
+    "server/tests/contracts/edit_analyses_permission.test.js",
+    "client/src/translations/en.json",
+    "client/src/translations/es.json",
+    "client/src/translations/es-419.json",
+    "client/src/translations/fr.json",
+    "client/src/translations/pt.json",
+    "server/locales/en.json",
+    "server/locales/es.json",
+    "server/locales/es-419.json",
+    "server/locales/fr.json",
+    "server/locales/pt.json"
+  ],
+  "scopeComment": 6163271808,
+  "applicationFullyVerified": false,
+  "productionOperations": 0,
+  "rawFiles": {
+    "WP/backlog-resume-20261013/issue209-approved-history-order-context-focused/command.json": {
+      "bytes": 1393,
+      "sha256": "924d651666c370dc15f407da842f2bf65f5eefc2b0da07faee321b027cd37ea5"
+    },
+    "WP/backlog-resume-20261013/issue209-approved-history-order-context-focused/config-original.json": {
+      "bytes": 6579,
+      "sha256": "2d28cc8ecc00ce2bb20b5ec973388e044daa3a02b4d505fa2d80a2ee22221b8c"
+    },
+    "WP/backlog-resume-20261013/issue209-approved-history-order-context-focused/config-stderr-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "WP/backlog-resume-20261013/issue209-approved-history-order-context-focused/exit-original.txt": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "WP/backlog-resume-20261013/issue209-approved-history-order-context-focused/inventory-original.json": {
+      "bytes": 49572,
+      "sha256": "186babd69ceaca892846ef12d5759fcc80ece296f7a2efe6a9ff3585b32d62df"
+    },
+    "WP/backlog-resume-20261013/issue209-approved-history-order-context-focused/inventory-stderr-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "WP/backlog-resume-20261013/issue209-approved-history-order-context-focused/physical-retained-terminal-index.json": {
+      "bytes": 20742,
+      "sha256": "cc458907260f003c75568af1ccb8cea8af142cfa67b7438c69dde242cdcca747"
+    },
+    "WP/backlog-resume-20261013/issue209-approved-history-order-context-focused/physical-retention-original.jsonl": {
+      "bytes": 17112,
+      "sha256": "7ef9cebea01b07b97ed5eb0590e9b79bae745ab70160104fbfee7c936310ffef"
+    },
+    "WP/backlog-resume-20261013/issue209-approved-history-order-context-focused/report-original.json": {
+      "bytes": 78237,
+      "sha256": "6c9fb6b8f53d7db903a7ee42fc4755aa9384593d67e4fba5cbb10d48990aff58"
+    },
+    "WP/backlog-resume-20261013/issue209-approved-history-order-context-focused/source-after.json": {
+      "bytes": 114832,
+      "sha256": "248aa1773a28d257405faf25b3e28c44152e4ef34b85a63de5631af91bab1a94"
+    },
+    "WP/backlog-resume-20261013/issue209-approved-history-order-context-focused/source-before.json": {
+      "bytes": 114832,
+      "sha256": "248aa1773a28d257405faf25b3e28c44152e4ef34b85a63de5631af91bab1a94"
+    },
+    "WP/backlog-resume-20261013/issue209-approved-history-order-context-focused/stderr-original.log": {
+      "bytes": 25137,
+      "sha256": "bde3a98d73ea523523098f77535f4a186a892be0db6cb95704b56502e38867f5"
+    },
+    "WP/backlog-resume-20261013/issue209-approved-history-order-context-focused/stdout-original.log": {
+      "bytes": 1067,
+      "sha256": "33756e4cac31d64b140b7d584682e0c027bdf1879d5ef56d0b86093b3f7181bd"
+    },
+    "WP/backlog-resume-20261013/issue209-approved-history-order-context-focused/summary.json": {
+      "bytes": 362,
+      "sha256": "a71a3a43ea2ba5d1db88927b18c47a365d8f332c54ce0d6870a7c6098b87cd5e"
+    }
+  }
+}

@@ -25,6 +25,10 @@ async function fixture(status='APPROVED',itemStatus='ACCEPTED'){
  f.item=await createWorkItemFixture(f.db,{data:{id:randomUUID(),sampleId:f.sample.id,assignedLab:f.labId,analysis:'PH_H2O',status:itemStatus,result:'retained display cache'}});
  installWorkflowStateGuards({dbPath:file,apply:true});installSampleAmendmentAuthorisation({dbPath:file,apply:true});
  require('../../scripts/install_report_revisions').installReportRevisions({dbPath:file,apply:true});
+ // Explicit retained order facts in this fresh owned approved-history fixture.
+ // Legacy line ownership stays NULL; new scientific reservations resolve it.
+ await f.db.sampleOrderRevision.create({data:{id:randomUUID(),sampleId:f.sample.id,version:1,status:'ACTIVE',reason:'Retained approved-history order context',
+  lines:{create:{id:randomUUID(),analysis:'PH_H2O',workItemId:null,isRequired:true,status:'ACTIVE'}}}});
  f.input={type:'CLERICAL',reason:'Verified original field record',profileCorrection:{code:'CORRECTED-PIT',relation:'CONFIRMED_PROFILE'},expectedProfileRevision:0};
  f.snapshot=()=>{const db=new Database(file,{readonly:true,fileMustExist:true});try{return{
   rows:Object.fromEntries(db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name").all()
