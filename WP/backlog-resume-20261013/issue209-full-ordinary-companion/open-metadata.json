@@ -1,0 +1,10 @@
+{
+  "startedUtc": "2026-10-14T11:08:15.972198+00:00",
+  "status": "RUNNING_METADATA_ONLY",
+  "inventory": 370,
+  "frozenInputCount": 1310,
+  "sourceAudit": "27477ea8b241de3f43dce94dd110257b199b295f",
+  "expectedTests": 5630,
+  "closedLogsExist": false,
+  "productionOperations": 0
+}

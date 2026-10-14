@@ -1,0 +1,56 @@
+{
+  "retainedUtc": "2026-10-14T11:11:50.401923+00:00",
+  "status": "OPEN_METADATA_ONLY",
+  "sourceAudit": "27477ea8b241de3f43dce94dd110257b199b295f",
+  "runnerSession": 64340,
+  "closedLogsRetained": false,
+  "unusedTerminalHelper": "retain-issue209-full-companion-terminal-once.py",
+  "terminalRequiresActualClosure": true,
+  "productionOperations": 0,
+  "rawFiles": {
+    "WP/backlog-resume-20261013/issue209-full-ordinary-companion/open-metadata.json": {
+      "bytes": 283,
+      "sha256": "1e3caab493d5e1bcb01cae885c5add1851a8c7ca0c42545b9d08ee146891db43"
+    },
+    "WP/backlog-resume-20261013/issue209-full-ordinary-companion/command.json": {
+      "bytes": 1252,
+      "sha256": "04a0a4dff56b0fd3cd83956283cdbd1953a5710e09157d35e173460f795c2ca8"
+    },
+    "WP/backlog-resume-20261013/issue209-full-ordinary-companion/config-original.json": {
+      "bytes": 6856,
+      "sha256": "9786045eadd82b4f4461be3944981503b0d27c440e6685d7bc1840f1e58c91bb"
+    },
+    "WP/backlog-resume-20261013/issue209-full-ordinary-companion/config-stderr-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "WP/backlog-resume-20261013/issue209-full-ordinary-companion/inventory-original.json": {
+      "bytes": 49572,
+      "sha256": "90dd751609ef514b811025afbcfc7cc4b23c4560a3c8698bfab284ed876e9b2b"
+    },
+    "WP/backlog-resume-20261013/issue209-full-ordinary-companion/inventory-stderr-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "WP/backlog-resume-20261013/issue209-full-ordinary-companion/source-before.json": {
+      "bytes": 158306,
+      "sha256": "60f11a465cdd7eeef91f0c8b1bb9865a75fe6e85ec7e0c8c9030bc87200d5fad"
+    },
+    "WP/backlog-resume-20261013/issue209-full-ordinary-companion/visible-local-storage.json": {
+      "bytes": 10276,
+      "sha256": "1165473ba861906bd757950e8ec81ac29201d8c76892f176959cc3476be76d41"
+    },
+    "WP/backlog-resume-20261013/retain-issue209-full-companion-open-boundary-once.py": {
+      "bytes": 4629,
+      "sha256": "76b07cb6d3abad66c01f7abc348087f4fbf149a8fe9cb85d9e4aad7b81c76b55"
+    },
+    "WP/backlog-resume-20261013/verify-issue209-full-ordinary-companion-once.py": {
+      "bytes": 7103,
+      "sha256": "144e404f80493609ad26e6ab64590a259472684ac1e0516f1a0ce88c6159c8fb"
+    },
+    "WP/backlog-resume-20261013/retain-issue209-full-companion-terminal-once.py": {
+      "bytes": 5573,
+      "sha256": "fc5020ed7858c1b60e4fd92e9831e602816c080832215dc6703014a80d07e831"
+    }
+  }
+}
