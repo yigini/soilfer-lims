@@ -1,0 +1,94 @@
+{
+  "WP/backlog-resume-20261013/issue214-post-probe-native-final-handoff/actual-native-handoff.txt": {
+    "bytes": 1726,
+    "sha256": "2d2cb8c5c119fe2738e2f0f391e0f5251b3fa8b8a78a17e761a6bf9a3fc7e639"
+  },
+  "WP/backlog-resume-20261013/issue214-post-probe-native-final-handoff/native-delivery-record.json": {
+    "bytes": 1064,
+    "sha256": "08837be9bad9e557c8f637075c3e4a3efe69374f62a198374e6e263e18531843"
+  },
+  "WP/backlog-resume-20261013/issue209-current-source-scope-boundary/actual-posted-comment-original.json": {
+    "bytes": 4848,
+    "sha256": "10861224da4ea308fc5345f932e3b7bd583d0375c84707e3c8e7a50b4151a52a"
+  },
+  "WP/backlog-resume-20261013/issue209-current-source-scope-boundary/comment-request.json": {
+    "bytes": 3275,
+    "sha256": "fccb0795038428d11e5ed07feb0bdf4603f6dbc8333aded0c0589c3b0d0dfc46"
+  },
+  "WP/backlog-resume-20261013/issue209-current-source-scope-boundary/comment-response-original.json": {
+    "bytes": 4848,
+    "sha256": "10861224da4ea308fc5345f932e3b7bd583d0375c84707e3c8e7a50b4151a52a"
+  },
+  "WP/backlog-resume-20261013/issue209-current-source-scope-boundary/comment-response-stderr.txt": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "WP/backlog-resume-20261013/issue209-current-source-scope-boundary/comments209-original.json": {
+    "bytes": 4,
+    "sha256": "cf1cbb66a638b4860a516671fb74850e6ccf787fe6c4c8d29e9c04efe880bd05"
+  },
+  "WP/backlog-resume-20261013/issue209-current-source-scope-boundary/dependency178-original.json": {
+    "bytes": 11801,
+    "sha256": "ac3b563e4b70b9644c654c61d73b8aa2e18d20e5346a3ddaca69665ce1e01827"
+  },
+  "WP/backlog-resume-20261013/issue209-current-source-scope-boundary/issue209-original.json": {
+    "bytes": 8349,
+    "sha256": "0d3b6ad62a1c894fc428e22dc70af2095ffa708af862074a184b937fd845a849"
+  },
+  "WP/backlog-resume-20261013/issue209-current-source-scope-boundary/main-original.json": {
+    "bytes": 336,
+    "sha256": "d6b707488e04e5b417de94d0c4e7a7872b66b92ade6062f4a9230f81e2564253"
+  },
+  "WP/backlog-resume-20261013/issue209-current-source-scope-boundary/mutation-started.json": {
+    "bytes": 117,
+    "sha256": "991112cd4192ba0e60cd8dba543f110e5cd5cd3c2dc279d2425ce2f1a048a5f9"
+  },
+  "WP/backlog-resume-20261013/issue209-current-source-scope-boundary/pr296-original.json": {
+    "bytes": 64906,
+    "sha256": "e387134ecc2b81f5873b014815b1a4317fb9a008dcb745ca2afaecc4886fd631"
+  },
+  "WP/backlog-resume-20261013/issue209-current-source-scope-boundary/questions.md": {
+    "bytes": 3245,
+    "sha256": "377a330a5fe2434c4f30d63b74c8bda66651401ee4ac18c5866a2dd6b81ab640"
+  },
+  "WP/backlog-resume-20261013/issue209-current-source-scope-boundary/scope-record.json": {
+    "bytes": 2146,
+    "sha256": "c8a9c37bd7f2d246fb454c317b5ed7bbae3b44e0cd91849afbdea78499734812"
+  },
+  "WP/backlog-resume-20261013/issue209-current-source-scope-boundary/server__prisma__migrations__20261008000100_work_attempt_contract__migration.sql.txt": {
+    "bytes": 7020,
+    "sha256": "7e7d5679c9aeeea45ac3c2bac09e4db31dd15b52fe37c743080aa0e3473c8fe2"
+  },
+  "WP/backlog-resume-20261013/issue209-current-source-scope-boundary/server__prisma__schema.prisma.txt": {
+    "bytes": 89458,
+    "sha256": "e9b47bf6b3c373b4e2dfb1c5abfc2c623fd67e25201f38cc5bd5e49ea4d32a76"
+  },
+  "WP/backlog-resume-20261013/issue209-current-source-scope-boundary/server__services__analysisCodesService.js.txt": {
+    "bytes": 1449,
+    "sha256": "5370a5a6e738f2be7ca9b3222f130cd2a41a34fd6bcc510853048c10344dfe39"
+  },
+  "WP/backlog-resume-20261013/issue209-current-source-scope-boundary/server__services__intakeWorkItemService.js.txt": {
+    "bytes": 4107,
+    "sha256": "3970cec66972af57a55a8a022569236642aea26e81a9807d3c8246be0df3b951"
+  },
+  "WP/backlog-resume-20261013/issue209-current-source-scope-boundary/server__services__resultEvidenceService.js.txt": {
+    "bytes": 5429,
+    "sha256": "97e717df731f48fc4ab89a6bfeb96fef9c30ceb4ede2c4a2e131e36f980b5b37"
+  },
+  "WP/backlog-resume-20261013/issue209-current-source-scope-boundary/server__services__sampleAnalysisStateService.js.txt": {
+    "bytes": 6980,
+    "sha256": "14898fcd5051139fa485ae5147b1e71875126560d3a6dce69843f3eaa9797e37"
+  },
+  "WP/backlog-resume-20261013/issue209-current-source-scope-boundary/server__services__scientificAmendmentService.js.txt": {
+    "bytes": 15134,
+    "sha256": "d821243b7b6a79ea94dc5fa8e63073d7140d5d8653585adda6167fc9cc38559b"
+  },
+  "WP/backlog-resume-20261013/issue209-current-source-scope-boundary/server__services__workAttemptWriteService.js.txt": {
+    "bytes": 5773,
+    "sha256": "431ebb7d81cec6a930ae4174bdf9959116a83fc0012486d9f917552a8800eacf"
+  },
+  "WP/backlog-resume-20261013/issue209-current-source-scope-boundary/server__services__workRepeatService.js.txt": {
+    "bytes": 7543,
+    "sha256": "4695fb34e37cb2cfd24f4fd5d12949a16811c6ac0a533a2d8f0f02983cd42826"
+  }
+}

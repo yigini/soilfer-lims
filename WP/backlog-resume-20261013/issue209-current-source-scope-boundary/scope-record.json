@@ -1,0 +1,52 @@
+{
+  "startedUtc": "2026-10-14T07:25:43.589187+00:00",
+  "status": "STARTED_CURRENT_SOURCE_INSPECTED_DATA_MODEL_DIRECTION_PENDING",
+  "issue": 209,
+  "preceding214AuditRequest": 6163082548,
+  "preceding214Head": "5e0b32830f961b3236c7cf8f74cf8f676e98fbaa",
+  "commentId": 6163178638,
+  "commentUrl": "https://github.com/yigini/soilfer-lims/issues/209#issuecomment-6163178638",
+  "commentCreatedUtc": "2026-10-14T07:25:42Z",
+  "sourcePins": {
+    "server/services/sampleAnalysisStateService.js": {
+      "bytes": 6980,
+      "sha256": "14898fcd5051139fa485ae5147b1e71875126560d3a6dce69843f3eaa9797e37"
+    },
+    "server/services/intakeWorkItemService.js": {
+      "bytes": 4107,
+      "sha256": "3970cec66972af57a55a8a022569236642aea26e81a9807d3c8246be0df3b951"
+    },
+    "server/services/workAttemptWriteService.js": {
+      "bytes": 5773,
+      "sha256": "431ebb7d81cec6a930ae4174bdf9959116a83fc0012486d9f917552a8800eacf"
+    },
+    "server/services/workRepeatService.js": {
+      "bytes": 7543,
+      "sha256": "4695fb34e37cb2cfd24f4fd5d12949a16811c6ac0a533a2d8f0f02983cd42826"
+    },
+    "server/services/scientificAmendmentService.js": {
+      "bytes": 15134,
+      "sha256": "d821243b7b6a79ea94dc5fa8e63073d7140d5d8653585adda6167fc9cc38559b"
+    },
+    "server/services/resultEvidenceService.js": {
+      "bytes": 5429,
+      "sha256": "97e717df731f48fc4ab89a6bfeb96fef9c30ceb4ede2c4a2e131e36f980b5b37"
+    },
+    "server/services/analysisCodesService.js": {
+      "bytes": 1449,
+      "sha256": "5370a5a6e738f2be7ca9b3222f130cd2a41a34fd6bcc510853048c10344dfe39"
+    },
+    "server/prisma/schema.prisma": {
+      "bytes": 89458,
+      "sha256": "e9b47bf6b3c373b4e2dfb1c5abfc2c623fd67e25201f38cc5bd5e49ea4d32a76"
+    },
+    "server/prisma/migrations/20261008000100_work_attempt_contract/migration.sql": {
+      "bytes": 7020,
+      "sha256": "7e7d5679c9aeeea45ac3c2bac09e4db31dd15b52fe37c743080aa0e3473c8fe2"
+    }
+  },
+  "applicationChanges": 0,
+  "historicalDataChanges": 0,
+  "productionOperations": 0,
+  "nextIndependentWork": "Request validation, current-source test planning; defer schema/history choices until actual Claudio answer"
+}
