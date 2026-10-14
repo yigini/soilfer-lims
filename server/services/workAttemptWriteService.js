@@ -59,7 +59,8 @@ async function insertExecution(tx,ctx,allocation,evidence,now,metadata={}) {
         return existing.id;
     }
     const aliquotId = await require('./sampleContainerService').validateAliquot(tx, ctx.item.sampleId, requestedAliquot);
-    await tx.workAttempt.create({data:{id:allocation.id,workItemId:ctx.item.id,attemptNo:allocation.attemptNo,
+    const orderLineId = await require('./orderLineResolutionService').resolveOrderLine(tx, ctx.item);
+    await tx.workAttempt.create({data:{id:allocation.id,workItemId:ctx.item.id,orderLineId,attemptNo:allocation.attemptNo,
         status:assertWorkAttemptStatus('RECORDED'),aliquotId,reason:allocation.reason,author:ctx.performedBy,
         authorName:ctx.actor?.name || ctx.performedBy,batchId:ctx.batchId,qcBatchId:ctx.batchId,
         instrumentId:equipmentReadiness?.equipmentId || null,

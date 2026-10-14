@@ -1,0 +1,89 @@
+{
+  "retainedUtc": "2026-10-14T08:00:40.050092+00:00",
+  "status": "CLOSED_FAILED_BEFORE_INTEGRATION_FIXTURE",
+  "summary": {
+    "closedUtc": "2026-10-14T07:59:04.737649+00:00",
+    "exit": 1,
+    "suites": 2,
+    "tests": 25,
+    "passedTests": 17,
+    "failed": 8,
+    "pending": 0,
+    "todo": 0,
+    "sourceUnchanged": true,
+    "selectedInventoryEqual": true,
+    "fullDiscovery": 368,
+    "ordinarySetups": true,
+    "workerIdleMemoryLimit": 512000000,
+    "productionOperations": 0,
+    "status": "FAILED_OR_INCOMPLETE"
+  },
+  "cause": "Historical generated-schema oracle does not yet declare added nullable OrderLine.workItemId; all eight fixtures refused before their construction.",
+  "sourceDraftPaths": [
+    "server/services/orderService.js",
+    "server/services/orderLineResolutionService.js",
+    "server/services/orderRevisionMigrationSource.js",
+    "server/scripts/install_order_revisions.js",
+    "server/services/sampleAnalysisStateService.js",
+    "server/services/intakeWorkItemService.js",
+    "server/services/workAttemptWriteService.js",
+    "server/services/workRepeatService.js",
+    "server/services/scientificAmendmentService.js",
+    "server/prisma/schema.prisma",
+    "server/prisma/migrations/20261014000100_order_revision_contract/migration.sql",
+    "server/tests/contracts/issue_209_order_revision_integration.test.js"
+  ],
+  "scopeComment": 6163271808,
+  "applicationFullyVerified": false,
+  "productionOperations": 0,
+  "rawFiles": {
+    "WP/backlog-resume-20261013/issue209-order-service-first-focused/command.json": {
+      "bytes": 992,
+      "sha256": "afc597f42bb06fc6f258ee4560c3c861412938bbac4aada4391fd022efb49776"
+    },
+    "WP/backlog-resume-20261013/issue209-order-service-first-focused/config-original.json": {
+      "bytes": 6078,
+      "sha256": "efbbeadb9ec18c30f315d31bc0b0f272531d12ddbdaa5b0ca71ebf217c410f53"
+    },
+    "WP/backlog-resume-20261013/issue209-order-service-first-focused/config-stderr-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "WP/backlog-resume-20261013/issue209-order-service-first-focused/exit-original.txt": {
+      "bytes": 2,
+      "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+    },
+    "WP/backlog-resume-20261013/issue209-order-service-first-focused/inventory-original.json": {
+      "bytes": 49296,
+      "sha256": "f0595fff54911eb5faa4687c0944500b0073014602f70b738ce30fc835ee6481"
+    },
+    "WP/backlog-resume-20261013/issue209-order-service-first-focused/inventory-stderr-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "WP/backlog-resume-20261013/issue209-order-service-first-focused/report-original.json": {
+      "bytes": 567606,
+      "sha256": "f8167fb0d2d9b6cb694d2401b409821d49e95e3946ac75d234302911b8be1048"
+    },
+    "WP/backlog-resume-20261013/issue209-order-service-first-focused/source-after.json": {
+      "bytes": 2881,
+      "sha256": "7a67ba15edda187e4c5d25dd9d848c200b97782ab280c8d0905ec12b0f85d916"
+    },
+    "WP/backlog-resume-20261013/issue209-order-service-first-focused/source-before.json": {
+      "bytes": 2881,
+      "sha256": "7a67ba15edda187e4c5d25dd9d848c200b97782ab280c8d0905ec12b0f85d916"
+    },
+    "WP/backlog-resume-20261013/issue209-order-service-first-focused/stderr-original.log": {
+      "bytes": 154389,
+      "sha256": "0d730a10089326d7376cf690789356677d0ee4de78d8bdeee5503248c92f20e3"
+    },
+    "WP/backlog-resume-20261013/issue209-order-service-first-focused/stdout-original.log": {
+      "bytes": 721,
+      "sha256": "288de9068a0645255b45357da7a1afe7e08489603d0e3b39ce04cf149666bed0"
+    },
+    "WP/backlog-resume-20261013/issue209-order-service-first-focused/summary.json": {
+      "bytes": 376,
+      "sha256": "5b969c3163d51fd1bafebf05eaf932907525ecaa5fc1fe49e596d7f8b554c22f"
+    }
+  }
+}
