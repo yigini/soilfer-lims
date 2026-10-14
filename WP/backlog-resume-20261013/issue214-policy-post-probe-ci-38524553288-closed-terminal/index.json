@@ -1,0 +1,379 @@
+{
+  "retainedUtc": "2026-10-14T07:18:53.788050+00:00",
+  "status": "CLOSED_SUCCESS",
+  "run": 38524553288,
+  "runUrl": "https://github.com/yigini/soilfer-lims/actions/runs/38524553288",
+  "attempt": 1,
+  "conclusion": "success",
+  "job": 115721716700,
+  "jobConclusion": "success",
+  "completedUtc": "2026-10-14T07:17:09Z",
+  "number": 296,
+  "head": "5e0b32830f961b3236c7cf8f74cf8f676e98fbaa",
+  "tree": "f2152e240b355cd141612b783c6ccf04f5c8383a",
+  "base": "6d750914d8565acdd496767a7dd935811b5a89b2",
+  "sourcePaths": [
+    ".gitattributes",
+    "Dockerfile",
+    "client/src/components/admin/ReferenceMaterials.jsx",
+    "client/src/components/lab/LabPolicies.jsx",
+    "client/src/components/qc/BatchInspectionModal.jsx",
+    "client/src/components/qc/ControlCharts.jsx",
+    "client/src/components/workbench/NativeRunPanel.jsx",
+    "client/src/components/workbench/StartRunForm.jsx",
+    "client/src/context/AuthContext.jsx",
+    "client/src/translations/en.json",
+    "client/src/translations/es-419.json",
+    "client/src/translations/es.json",
+    "client/src/translations/fr.json",
+    "client/src/translations/pt.json",
+    "docker-entrypoint.sh",
+    "docs/audit/214-control-charts.md",
+    "server/config/policyRegistry.js",
+    "server/config/roles.js",
+    "server/controllers/controlChartController.js",
+    "server/index.js",
+    "server/locales/en.json",
+    "server/locales/es-419.json",
+    "server/locales/es.json",
+    "server/locales/fr.json",
+    "server/locales/pt.json",
+    "server/prisma/migrations/20261013000200_control_charts/migration.sql",
+    "server/prisma/schema.prisma",
+    "server/routes/qcRoutes.js",
+    "server/scripts/control_chart_prebinding_impact.js",
+    "server/scripts/install_control_charts.js",
+    "server/scripts/install_lab_policy_schema.js",
+    "server/scripts/rehearsal_deployment_readiness.cjs",
+    "server/services/controlChartMigrationSource.js",
+    "server/services/controlChartRules.js",
+    "server/services/controlChartService.js",
+    "server/services/labPolicyMigrationSource.js",
+    "server/services/policyService.js",
+    "server/services/qcNativeEvaluationService.js",
+    "server/services/qcNativeMeasurementService.js",
+    "server/services/qcNativeRunService.js",
+    "server/services/qcRunReferenceService.js",
+    "server/services/workbenchRunService.js",
+    "server/tests/contracts/audit_1_0_policy_components.test.js",
+    "server/tests/contracts/audit_1_2_guard_installer.test.js",
+    "server/tests/contracts/audit_2_1_reference_ui.test.js",
+    "server/tests/contracts/audit_2_3_compatibility_runs.test.js",
+    "server/tests/contracts/audit_2_3_native_runs.test.js",
+    "server/tests/contracts/audit_2_3_native_ui.test.js",
+    "server/tests/contracts/audit_4_1_run_first_ui.test.js",
+    "server/tests/contracts/deployment_readiness_bootstrap.test.js",
+    "server/tests/contracts/issue_214_control_chart_integration.test.js",
+    "server/tests/contracts/issue_214_control_chart_rules.test.js",
+    "server/tests/contracts/issue_214_control_chart_ui.test.js",
+    "server/tests/contracts/issue_214_lab_policy_schema.test.js",
+    "server/tests/fixtures/pre214-native-run-source.cjs",
+    "server/tests/globalSetup.js",
+    "server/tests/helpers/legacyWorkflowDatabase.js",
+    "server/tests/helpers/qcGateFixture.js",
+    "server/tests/helpers/workflowWriteScanner.js"
+  ],
+  "exactJestSummary": [
+    "Test Suites: 366 passed, 366 total",
+    "Tests:       5566 passed, 5566 total"
+  ],
+  "serverAllPassedIndependently": true,
+  "uniquePassPathsObserved": 366,
+  "exactFullInventoryMatch": true,
+  "passedSuites": 366,
+  "passedTests": 5566,
+  "policyChartEntrypointProof": {
+    "scenario": "PRE_199-default-entrypoint-COMPLETE_214",
+    "before": {
+      "dry": {
+        "classification": "ABSENT",
+        "sourceSha256": "fa6ef0563f80704dbc4ee08d90ceae91f632c912813ca037221b02aa03ef7b70",
+        "addReportPolicyVersion": true,
+        "plannedSql": "CREATE TABLE \"LabPolicy\" (\n  \"id\" TEXT NOT NULL PRIMARY KEY,\n  \"labId\" TEXT NOT NULL,\n  \"presetCode\" TEXT CHECK (\"presetCode\" IS NULL OR \"presetCode\" IN ('ISO17025_STRICT','BASIC','ADVISORY')),\n  \"version\" INTEGER NOT NULL DEFAULT 1 CHECK (\"version\" >= 1),\n  \"updatedBy\" TEXT NOT NULL,\n  \"updatedAt\" DATETIME NOT NULL,\n  FOREIGN KEY (\"labId\") REFERENCES \"Lab\"(\"id\") ON DELETE RESTRICT ON UPDATE CASCADE\n);\nCREATE UNIQUE INDEX \"LabPolicy_labId_key\" ON \"LabPolicy\"(\"labId\");\nCREATE TABLE \"LabPolicyOverride\" (\n  \"id\" TEXT NOT NULL PRIMARY KEY,\n  \"labId\" TEXT NOT NULL,\n  \"key\" TEXT NOT NULL,\n  \"analysisCode\" TEXT,\n  \"methodologyId\" TEXT,\n  \"value\" TEXT NOT NULL CHECK (json_valid(\"value\")),\n  \"reason\" TEXT NOT NULL CHECK (length(trim(\"reason\")) > 0),\n  \"setBy\" TEXT NOT NULL,\n  \"setAt\" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  \"revokedAt\" DATETIME,\n  \"revokedBy\" TEXT,\n  FOREIGN KEY (\"labId\") REFERENCES \"Lab\"(\"id\") ON DELETE RESTRICT ON UPDATE CASCADE\n);\nCREATE INDEX \"LabPolicyOverride_labId_key_idx\" ON \"LabPolicyOverride\"(\"labId\",\"key\");\nCREATE UNIQUE INDEX \"LabPolicyOverride_one_current_scope\" ON \"LabPolicyOverride\"(\n  \"labId\",\"key\",COALESCE(\"analysisCode\",''),COALESCE(\"methodologyId\",'')\n) WHERE \"revokedAt\" IS NULL;\nALTER TABLE \"Report\" ADD COLUMN \"policyVersion\" INTEGER;\n",
+        "plannedDdlCount": 6,
+        "readonlySnapshot": {
+          "path": "/tmp/lims-policy-schema-readonly-inBjfB/snapshot.db",
+          "originalDbWalShmSha256": {
+            "": "47c4544042fd2807374ef931385ba456cdf53df1d3cf834ca17fd553745ceb11",
+            "-wal": "e26b5f2fe9076dc778c0e776fd1dbce191f6d8fa41aac1e2ea03d8667db66a28",
+            "-shm": "cae691b39a572e0faa362cfb7d59b730a137afb73b39f426b8ec92c0448b2b57"
+          },
+          "originalFilesPreserved": true
+        },
+        "mode": "DRY_RUN",
+        "totalChanges": 0,
+        "dataWrites": 0
+      },
+      "dbWalShmPreserved": true
+    },
+    "after": {
+      "ready": {
+        "classification": "PRESENT",
+        "shape": "CANONICAL",
+        "sourceSha256": "fa6ef0563f80704dbc4ee08d90ceae91f632c912813ca037221b02aa03ef7b70",
+        "addReportPolicyVersion": false,
+        "plannedSql": "",
+        "plannedDdlCount": 0,
+        "readonlySnapshot": {
+          "path": "/tmp/lims-policy-schema-readonly-eCbnHh/snapshot.db",
+          "originalDbWalShmSha256": {
+            "": "94e175c56692dbc0cced0e904b7b9b03e3815d2cc0dc3efef61f2950ef5c31c9",
+            "-wal": null,
+            "-shm": null
+          },
+          "originalFilesPreserved": true
+        },
+        "mode": "NO_OP",
+        "totalChanges": 0,
+        "dataWrites": 0
+      },
+      "again": {
+        "classification": "PRESENT",
+        "shape": "CANONICAL",
+        "sourceSha256": "fa6ef0563f80704dbc4ee08d90ceae91f632c912813ca037221b02aa03ef7b70",
+        "addReportPolicyVersion": false,
+        "plannedSql": "",
+        "plannedDdlCount": 0,
+        "readonlySnapshot": {
+          "path": "/tmp/lims-policy-schema-readonly-dAalph/snapshot.db",
+          "originalDbWalShmSha256": {
+            "": "94e175c56692dbc0cced0e904b7b9b03e3815d2cc0dc3efef61f2950ef5c31c9",
+            "-wal": null,
+            "-shm": null
+          },
+          "originalFilesPreserved": true
+        },
+        "mode": "NO_OP",
+        "totalChanges": 0,
+        "dataWrites": 0
+      },
+      "charts": {
+        "classification": "COMPLETE_214",
+        "sources": {
+          "migrationSha256": "49b378296a8a0ede3318ae1e543060478b55827db0ec981d8cc4bd6180a56df6",
+          "contractVersion": "214-v1"
+        },
+        "receipt": {
+          "sources": {
+            "migrationSha256": "49b378296a8a0ede3318ae1e543060478b55827db0ec981d8cc4bd6180a56df6",
+            "contractVersion": "214-v1"
+          },
+          "originalRowsSha256": "d37f3bfb41ffd933d2ce4d96d238e3cb057d70f4715072f2ef8ac3f5c5bc0baa",
+          "originalRowsPreserved": true,
+          "backfilledCount": 0,
+          "receiptSha256": "2aef2d7d28f0fe208602fffac7985979ec816028252fe552c7872fef99d454a6"
+        },
+        "mode": "DRY_RUN",
+        "totalChanges": 0,
+        "backfilledCount": 0
+      },
+      "counts": {
+        "LabPolicy": 0,
+        "LabPolicyOverride": 0
+      },
+      "dbWalShmPreserved": true,
+      "secondaryInspectionsOnRetainedSnapshot": true
+    }
+  },
+  "requiredSteps": {
+    "Set up job": "success",
+    "Checkout repository": "success",
+    "Setup Node.js": "success",
+    "Install server dependencies": "success",
+    "Install client dependencies": "success",
+    "Verify theme catalog and tokens drift": "success",
+    "Build client production bundle": "success",
+    "Setup test database and generate Prisma client": "success",
+    "Install Chromium for keyboard-only recording contract": "success",
+    "Run server test suite": "success",
+    "Set up Docker Buildx": "success",
+    "Build Docker image": "success",
+    "Build Supported Baseline Docker Image (v3.5.30 / 48d0e52)": "success",
+    "Run Real Disposable Docker Boundary Rehearsal": "success",
+    "Run Real Docker Deployment Readiness Acceptance": "success",
+    "Post Build Docker image": "success",
+    "Post Set up Docker Buildx": "success",
+    "Post Setup Node.js": "success",
+    "Post Checkout repository": "success",
+    "Complete job": "success"
+  },
+  "standardWorkflowUnchanged": true,
+  "localFixturesUsedInCI": false,
+  "archiveEntries": [
+    {
+      "name": "0_Test & Build.txt",
+      "bytes": 4094016,
+      "sha256": "420998dd7427b20a0b00f407954c84c7b4179fd518a65fce4355d2a309562c03"
+    },
+    {
+      "name": "Test & Build/system.txt",
+      "bytes": 581,
+      "sha256": "16dfbac1f50d4121271271b1dc7fc6626ec7d306beaff2c4dfd2069a552a4699"
+    },
+    {
+      "name": "Test & Build/1_Set up job.txt",
+      "bytes": 2340,
+      "sha256": "e1685d7dc3b658232470b5bc3595d3e7740bdb0535b3dddbdee64510461b42b5"
+    },
+    {
+      "name": "Test & Build/2_Checkout repository.txt",
+      "bytes": 20815,
+      "sha256": "7679b158db611ff136f799834737603864c4eff0f06b59d4c9bfde4c0f2951bf"
+    },
+    {
+      "name": "Test & Build/3_Setup Node.js.txt",
+      "bytes": 903,
+      "sha256": "cf55b096307450c82e9d16fffed95ade0982dc039dca043ba26200561feb6ab0"
+    },
+    {
+      "name": "Test & Build/4_Install server dependencies.txt",
+      "bytes": 3166,
+      "sha256": "2f71ad1a6062711d6bd00284e673caa07107c4f5285423f9abbfab773d225274"
+    },
+    {
+      "name": "Test & Build/5_Install client dependencies.txt",
+      "bytes": 2620,
+      "sha256": "468937cda50f2ac9058a4c73855efdaa9a7a02c9c39f46ff9c1f0c30c0436b43"
+    },
+    {
+      "name": "Test & Build/6_Verify theme catalog and tokens drift.txt",
+      "bytes": 617,
+      "sha256": "9ead13b14f83faceea0afb684ad531ffa148daeadae1afca54dd9c75571eb155"
+    },
+    {
+      "name": "Test & Build/7_Build client production bundle.txt",
+      "bytes": 12791,
+      "sha256": "8b33caf2823831e1dc01f5bf790aea13e9a4db0fdb78633a8f4b25234ae6b5ac"
+    },
+    {
+      "name": "Test & Build/8_Setup test database and generate Prisma client.txt",
+      "bytes": 5754,
+      "sha256": "9cc9bd1ea9d7fa978a0c61f8c488c288f2cff4c96f9e64069bfaed0a6f799790"
+    },
+    {
+      "name": "Test & Build/9_Install Chromium for keyboard-only recording contract.txt",
+      "bytes": 25111,
+      "sha256": "602ba64fd0c6ba68e3139e5fafcb01e71cfe3398f4fbf6f5e7c8f9c35b38b782"
+    },
+    {
+      "name": "Test & Build/10_Run server test suite.txt",
+      "bytes": 3776029,
+      "sha256": "4405177ea7714dde782f64fec3e72ac1f3a7d8e6a017cf14b18d31f77fe83714"
+    },
+    {
+      "name": "Test & Build/11_Set up Docker Buildx.txt",
+      "bytes": 14673,
+      "sha256": "cfcb363d005881a719bf370edb70ddca0f45ae9dc63099dae45e4df6f03b65ff"
+    },
+    {
+      "name": "Test & Build/12_Build Docker image.txt",
+      "bytes": 162881,
+      "sha256": "b9ec77a80db17ed9e3302280f98976761751a5c74d80d6dc654dbac21c2577c6"
+    },
+    {
+      "name": "Test & Build/13_Build Supported Baseline Docker Image (v3.5.30 _ 48d0e52).txt",
+      "bytes": 28925,
+      "sha256": "48aa06bca10de36b829831225e8a4643f5410262fd25055847ca0c2384828cff"
+    },
+    {
+      "name": "Test & Build/14_Run Real Disposable Docker Boundary Rehearsal.txt",
+      "bytes": 3784,
+      "sha256": "183fbbd9bfbb0be35022ddb64485b3d399c8651ca2e69ddcaf724216ebff294c"
+    },
+    {
+      "name": "Test & Build/15_Run Real Docker Deployment Readiness Acceptance.txt",
+      "bytes": 29780,
+      "sha256": "8b15f8bc605ae9baffd87be4c3cbff2f95144ac7e8ba5496205b919ec8792e3e"
+    },
+    {
+      "name": "Test & Build/27_Post Build Docker image.txt",
+      "bytes": 595,
+      "sha256": "c10d0a2fadc11d17a609b24868a38f59fb64cd9a5fb65753c529fa490b35cf4c"
+    },
+    {
+      "name": "Test & Build/28_Post Set up Docker Buildx.txt",
+      "bytes": 833,
+      "sha256": "f7675bf9692d5c975c5a0e292ced05ccb10d7e065a56d12fb4b7b03ede4bd021"
+    },
+    {
+      "name": "Test & Build/29_Post Setup Node.js.txt",
+      "bytes": 306,
+      "sha256": "c353bc1552b1971f15db2471ba9d766ba16f6484bfed84123189e6a29fda9b49"
+    },
+    {
+      "name": "Test & Build/30_Post Checkout repository.txt",
+      "bytes": 1719,
+      "sha256": "c77c8c428a438b451f6da4293a722982c59af57d852ef4182e865520ed3cc2d5"
+    },
+    {
+      "name": "Test & Build/31_Complete job.txt",
+      "bytes": 431,
+      "sha256": "ea20c281ef5832dedf9cf522c35738ec9e4cf62b06d1f07c21764d37deb58d0a"
+    }
+  ],
+  "files": {
+    "run-original.json": {
+      "bytes": 12666,
+      "sha256": "3bd6076449d0820e09ef2e1459f82a2f7edfae2dbef4853b257d6ddb5a2a6244"
+    },
+    "jobs-original.json": {
+      "bytes": 4335,
+      "sha256": "71a9734f6df78ef1b131acafda74ca1ff94ccfd3cb47ea0721ad7cfb6e1f466e"
+    },
+    "pr-original.json": {
+      "bytes": 64906,
+      "sha256": "67db8833654fcf33e9cfaa129dfc11af3ddfc47bc63a7451b2ef4c43ce6cbff0"
+    },
+    "main-original.json": {
+      "bytes": 336,
+      "sha256": "d6b707488e04e5b417de94d0c4e7a7872b66b92ade6062f4a9230f81e2564253"
+    },
+    "issue214-original.json": {
+      "bytes": 8805,
+      "sha256": "09a09d239ef798edb131eb5aeafa0085258d04c3192d5bad6c9388445438f481"
+    },
+    "closing-refs-original.json": {
+      "bytes": 31,
+      "sha256": "41d2c505b45e615f2361b1e657a3a9a2ec9be8dc89cee69269b8121226d416db"
+    },
+    "workflow-original.yml": {
+      "bytes": 2785,
+      "sha256": "602236753ac1d7096c257927f6192b93800f8a8da96af1cc0a1580251950fcf5"
+    },
+    "logs-original.zip": {
+      "bytes": 1374010,
+      "sha256": "83cbe47516c678f4f2c8b2fe5b27e3970094ea76b44017a66d046760ae2dac66"
+    },
+    "server-tests-original.log": {
+      "bytes": 3776029,
+      "sha256": "4405177ea7714dde782f64fec3e72ac1f3a7d8e6a017cf14b18d31f77fe83714"
+    },
+    "client-build-original.log": {
+      "bytes": 12791,
+      "sha256": "8b33caf2823831e1dc01f5bf790aea13e9a4db0fdb78633a8f4b25234ae6b5ac"
+    },
+    "candidate-docker-build-original.log": {
+      "bytes": 162881,
+      "sha256": "b9ec77a80db17ed9e3302280f98976761751a5c74d80d6dc654dbac21c2577c6"
+    },
+    "baseline-docker-build-original.log": {
+      "bytes": 28925,
+      "sha256": "48aa06bca10de36b829831225e8a4643f5410262fd25055847ca0c2384828cff"
+    },
+    "docker-boundary-original.log": {
+      "bytes": 3784,
+      "sha256": "183fbbd9bfbb0be35022ddb64485b3d399c8651ca2e69ddcaf724216ebff294c"
+    },
+    "docker-readiness-original.log": {
+      "bytes": 29780,
+      "sha256": "8b15f8bc605ae9baffd87be4c3cbff2f95144ac7e8ba5496205b919ec8792e3e"
+    }
+  },
+  "disposableCiImagesAreNotProductionImages": true,
+  "originalFailedRunReplayed": false,
+  "ciDispatches": 0,
+  "readyNoticeSent": false,
+  "finalNativeAuditRequestSent": false,
+  "actualFinalAuditPass": false,
+  "productionOperations": 0
+}

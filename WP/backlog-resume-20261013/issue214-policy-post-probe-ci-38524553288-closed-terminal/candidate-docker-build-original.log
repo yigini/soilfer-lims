@@ -1,0 +1,1403 @@
+﻿2026-10-14T07:10:43.9338278Z ##[group]Run docker/build-push-action@v5
+2026-10-14T07:10:43.9338446Z with:
+2026-10-14T07:10:43.9338547Z   context: .
+2026-10-14T07:10:43.9338648Z   load: true
+2026-10-14T07:10:43.9338748Z   push: false
+2026-10-14T07:10:43.9338853Z   tags: soilfer-lims:ci
+2026-10-14T07:10:43.9338968Z   no-cache: false
+2026-10-14T07:10:43.9339071Z   pull: false
+2026-10-14T07:10:43.9340413Z   github-token: ***
+2026-10-14T07:10:43.9340530Z ##[endgroup]
+2026-10-14T07:10:44.0775173Z (node:16068) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-14T07:10:44.0775909Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-14T07:10:44.0785434Z ##[group]GitHub Actions runtime token ACs
+2026-10-14T07:10:44.0789598Z refs/pull/296/merge: read/write
+2026-10-14T07:10:44.0789777Z refs/heads/main: read
+2026-10-14T07:10:44.0790179Z ##[endgroup]
+2026-10-14T07:10:44.0790371Z ##[group]Docker info
+2026-10-14T07:10:44.0812430Z [command]/usr/bin/docker version
+2026-10-14T07:10:44.0991618Z Client: Docker Engine - Community
+2026-10-14T07:10:44.0992096Z  Version:           28.0.4
+2026-10-14T07:10:44.0992977Z  API version:       1.48
+2026-10-14T07:10:44.0993199Z  Go version:        go1.23.7
+2026-10-14T07:10:44.0993407Z  Git commit:        b8034c0
+2026-10-14T07:10:44.0993699Z  Built:             Tue Mar 25 15:07:16 2025
+2026-10-14T07:10:44.0993959Z  OS/Arch:           linux/amd64
+2026-10-14T07:10:44.0994166Z  Context:           default
+2026-10-14T07:10:44.0994293Z 
+2026-10-14T07:10:44.0994426Z Server: Docker Engine - Community
+2026-10-14T07:10:44.0994636Z  Engine:
+2026-10-14T07:10:44.0994802Z   Version:          28.0.4
+2026-10-14T07:10:44.0995412Z   API version:      1.48 (minimum version 1.24)
+2026-10-14T07:10:44.0995665Z   Go version:       go1.23.7
+2026-10-14T07:10:44.0995866Z   Git commit:       6430e49
+2026-10-14T07:10:44.0996094Z   Built:            Tue Mar 25 15:07:16 2025
+2026-10-14T07:10:44.0996340Z   OS/Arch:          linux/amd64
+2026-10-14T07:10:44.0996560Z   Experimental:     false
+2026-10-14T07:10:44.0996754Z  containerd:
+2026-10-14T07:10:44.0996929Z   Version:          v2.3.6
+2026-10-14T07:10:44.0997201Z   GitCommit:        ee2735368117d2eb259779949d5e75cdafec9761
+2026-10-14T07:10:44.0997465Z  runc:
+2026-10-14T07:10:44.1014078Z   Version:          1.5.1
+2026-10-14T07:10:44.1014656Z   GitCommit:        v1.5.1-0-g8f2685a4
+2026-10-14T07:10:44.1014905Z  docker-init:
+2026-10-14T07:10:44.1015091Z   Version:          0.19.0
+2026-10-14T07:10:44.1015297Z   GitCommit:        de40ad0
+2026-10-14T07:10:44.1025179Z [command]/usr/bin/docker info
+2026-10-14T07:10:44.1465063Z Client: Docker Engine - Community
+2026-10-14T07:10:44.1466074Z  Version:    28.0.4
+2026-10-14T07:10:44.1466548Z  Context:    default
+2026-10-14T07:10:44.1466811Z  Debug Mode: false
+2026-10-14T07:10:44.1467011Z  Plugins:
+2026-10-14T07:10:44.1467235Z   buildx: Docker Buildx (Docker Inc.)
+2026-10-14T07:10:44.1467487Z     Version:  v0.37.2
+2026-10-14T07:10:44.1467783Z     Path:     /usr/libexec/docker/cli-plugins/docker-buildx
+2026-10-14T07:10:44.1468143Z   compose: Docker Compose (Docker Inc.)
+2026-10-14T07:10:44.1468385Z     Version:  v2.38.2
+2026-10-14T07:10:44.1469655Z     Path:     /usr/libexec/docker/cli-plugins/docker-compose
+2026-10-14T07:10:44.1469858Z 
+2026-10-14T07:10:44.1469940Z Server:
+2026-10-14T07:10:44.1470105Z  Containers: 1
+2026-10-14T07:10:44.1470278Z   Running: 1
+2026-10-14T07:10:44.1470445Z   Paused: 0
+2026-10-14T07:10:44.1470618Z   Stopped: 0
+2026-10-14T07:10:44.1470787Z  Images: 7
+2026-10-14T07:10:44.1471090Z  Server Version: 28.0.4
+2026-10-14T07:10:44.1471287Z  Storage Driver: overlay2
+2026-10-14T07:10:44.1471498Z   Backing Filesystem: extfs
+2026-10-14T07:10:44.1471722Z   Supports d_type: true
+2026-10-14T07:10:44.1471934Z   Using metacopy: false
+2026-10-14T07:10:44.1472152Z   Native Overlay Diff: false
+2026-10-14T07:10:44.1472377Z   userxattr: false
+2026-10-14T07:10:44.1472573Z  Logging Driver: json-file
+2026-10-14T07:10:44.1472789Z  Cgroup Driver: systemd
+2026-10-14T07:10:44.1473320Z  Cgroup Version: 2
+2026-10-14T07:10:44.1473491Z  Plugins:
+2026-10-14T07:10:44.1473659Z   Volume: local
+2026-10-14T07:10:44.1473900Z   Network: bridge host ipvlan macvlan null overlay
+2026-10-14T07:10:44.1474295Z   Log: awslogs fluentd gcplogs gelf journald json-file local splunk syslog
+2026-10-14T07:10:44.1474621Z  Swarm: inactive
+2026-10-14T07:10:44.1474841Z  Runtimes: io.containerd.runc.v2 runc
+2026-10-14T07:10:44.1475085Z  Default Runtime: runc
+2026-10-14T07:10:44.1475289Z  Init Binary: docker-init
+2026-10-14T07:10:44.1475581Z  containerd version: ee2735368117d2eb259779949d5e75cdafec9761
+2026-10-14T07:10:44.1475914Z  runc version: v1.5.1-0-g8f2685a4
+2026-10-14T07:10:44.1476157Z  init version: de40ad0
+2026-10-14T07:10:44.1476354Z  Security Options:
+2026-10-14T07:10:44.1476550Z   apparmor
+2026-10-14T07:10:44.1476720Z   seccomp
+2026-10-14T07:10:44.1476916Z    Profile: builtin
+2026-10-14T07:10:44.1477104Z   cgroupns
+2026-10-14T07:10:44.1477306Z  Kernel Version: 6.17.0-1022-azure
+2026-10-14T07:10:44.1477559Z  Operating System: Ubuntu 24.04.5 LTS
+2026-10-14T07:10:44.1477799Z  OSType: linux
+2026-10-14T07:10:44.1477979Z  Architecture: x86_64
+2026-10-14T07:10:44.1478166Z  CPUs: 4
+2026-10-14T07:10:44.1478338Z  Total Memory: 15.61GiB
+2026-10-14T07:10:44.1478532Z  Name: runnervmmprz5
+2026-10-14T07:10:44.1478752Z  ID: 07f0e779-c305-4162-b8ec-c48c30f52fbe
+2026-10-14T07:10:44.1479026Z  Docker Root Dir: /var/lib/docker
+2026-10-14T07:10:44.1479252Z  Debug Mode: false
+2026-10-14T07:10:44.1479445Z  Username: githubactions
+2026-10-14T07:10:44.1479652Z  Experimental: false
+2026-10-14T07:10:44.1479844Z  Insecure Registries:
+2026-10-14T07:10:44.1480070Z   ::1/128
+2026-10-14T07:10:44.1480382Z   127.0.0.0/8
+2026-10-14T07:10:44.1480567Z  Live Restore Enabled: false
+2026-10-14T07:10:44.1480702Z 
+2026-10-14T07:10:44.1491596Z ##[endgroup]
+2026-10-14T07:10:44.1492069Z ##[group]Proxy configuration
+2026-10-14T07:10:44.1494664Z No proxy configuration found
+2026-10-14T07:10:44.1495121Z ##[endgroup]
+2026-10-14T07:10:44.1943493Z ##[group]Buildx version
+2026-10-14T07:10:44.1956928Z [command]/usr/bin/docker buildx version
+2026-10-14T07:10:44.2316044Z github.com/docker/buildx v0.37.2 2d379c0c3f22da0d2759d132a0ec81ca949098f0
+2026-10-14T07:10:44.2352600Z ##[endgroup]
+2026-10-14T07:10:44.2353149Z ##[group]Builder info
+2026-10-14T07:10:44.3034207Z {
+2026-10-14T07:10:44.3034674Z   "nodes": [
+2026-10-14T07:10:44.3034963Z     {
+2026-10-14T07:10:44.3035523Z       "name": "builder-92ab0a1f-d547-40c8-b4e7-7488b1e624010",
+2026-10-14T07:10:44.3035863Z       "endpoint": "unix:///var/run/docker.sock",
+2026-10-14T07:10:44.3036087Z       "status": "running",
+2026-10-14T07:10:44.3036398Z       "buildkitd-flags": "--allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host",
+2026-10-14T07:10:44.3037187Z       "buildkit": "v0.33.1",
+2026-10-14T07:10:44.3037538Z       "platforms": "linux/amd64,linux/amd64/v2,linux/amd64/v3,linux/amd64/v4,linux/386",
+2026-10-14T07:10:44.3037910Z       "features": {
+2026-10-14T07:10:44.3038202Z         "Automatically load images to the Docker Engine image store": true,
+2026-10-14T07:10:44.3038541Z         "Cache export": true,
+2026-10-14T07:10:44.3038702Z         "Direct push": true,
+2026-10-14T07:10:44.3038851Z         "Docker exporter": true,
+2026-10-14T07:10:44.3039006Z         "Multi-platform build": true,
+2026-10-14T07:10:44.3039156Z         "OCI exporter": true
+2026-10-14T07:10:44.3039279Z       },
+2026-10-14T07:10:44.3039385Z       "labels": {
+2026-10-14T07:10:44.3039562Z         "org.mobyproject.buildkit.worker.executor": "oci",
+2026-10-14T07:10:44.3039805Z         "org.mobyproject.buildkit.worker.hostname": "0e64567054e5",
+2026-10-14T07:10:44.3040040Z         "org.mobyproject.buildkit.worker.network": "host",
+2026-10-14T07:10:44.3040290Z         "org.mobyproject.buildkit.worker.oci.process-mode": "sandbox",
+2026-10-14T07:10:44.3040575Z         "org.mobyproject.buildkit.worker.selinux.enabled": "false",
+2026-10-14T07:10:44.3040830Z         "org.mobyproject.buildkit.worker.snapshotter": "overlayfs"
+2026-10-14T07:10:44.3041410Z       },
+2026-10-14T07:10:44.3041516Z       "gcPolicy": [
+2026-10-14T07:10:44.3041631Z         {
+2026-10-14T07:10:44.3041741Z           "all": false,
+2026-10-14T07:10:44.3041872Z           "filter": [
+2026-10-14T07:10:44.3042074Z             "type==source.local type==exec.cachemount type==source.git.checkout"
+2026-10-14T07:10:44.3042288Z           ],
+2026-10-14T07:10:44.3042419Z           "keepDuration": "48h0m0s"
+2026-10-14T07:10:44.3042556Z         },
+2026-10-14T07:10:44.3042667Z         {
+2026-10-14T07:10:44.3042767Z           "all": false,
+2026-10-14T07:10:44.3042904Z           "keepDuration": "1440h0m0s"
+2026-10-14T07:10:44.3043038Z         },
+2026-10-14T07:10:44.3043138Z         {
+2026-10-14T07:10:44.3043236Z           "all": false
+2026-10-14T07:10:44.3043346Z         },
+2026-10-14T07:10:44.3043453Z         {
+2026-10-14T07:10:44.3043562Z           "all": true
+2026-10-14T07:10:44.3043669Z         }
+2026-10-14T07:10:44.3043763Z       ]
+2026-10-14T07:10:44.3043867Z     }
+2026-10-14T07:10:44.3043967Z   ],
+2026-10-14T07:10:44.3044121Z   "name": "builder-92ab0a1f-d547-40c8-b4e7-7488b1e62401",
+2026-10-14T07:10:44.3044305Z   "driver": "docker-container",
+2026-10-14T07:10:44.3044466Z   "lastActivity": "2026-10-14T07:10:39.000Z"
+2026-10-14T07:10:44.3044619Z }
+2026-10-14T07:10:44.3044977Z ##[endgroup]
+2026-10-14T07:10:44.4178425Z [command]/usr/bin/docker buildx build --iidfile /home/runner/work/_temp/docker-actions-toolkit-4sdiHW/build-iidfile-987671bf9e.txt --tag soilfer-lims:ci --load --metadata-file /home/runner/work/_temp/docker-actions-toolkit-4sdiHW/build-metadata-cdecddd8ad.json .
+2026-10-14T07:10:44.6408649Z #0 building with "builder-92ab0a1f-d547-40c8-b4e7-7488b1e62401" instance using docker-container driver
+2026-10-14T07:10:44.6409203Z 
+2026-10-14T07:10:44.6409316Z #1 [internal] load build definition from Dockerfile
+2026-10-14T07:10:44.6409520Z #1 transferring dockerfile: 9.24kB done
+2026-10-14T07:10:44.6409670Z #1 DONE 0.0s
+2026-10-14T07:10:44.6409771Z 
+2026-10-14T07:10:44.6409941Z #2 [auth] library/node:pull token for registry-1.docker.io
+2026-10-14T07:10:44.7914557Z #2 DONE 0.0s
+2026-10-14T07:10:44.7914744Z 
+2026-10-14T07:10:44.7914940Z #3 [internal] load metadata for docker.io/library/node:24-alpine
+2026-10-14T07:10:45.1637122Z #3 DONE 0.6s
+2026-10-14T07:10:45.2887449Z 
+2026-10-14T07:10:45.2888405Z #4 [internal] load .dockerignore
+2026-10-14T07:10:45.2888824Z #4 transferring context: 872B done
+2026-10-14T07:10:45.2888976Z #4 DONE 0.0s
+2026-10-14T07:10:45.2889049Z 
+2026-10-14T07:10:45.2889521Z #5 [builder  1/12] FROM docker.io/library/node:24-alpine@sha256:ebfe2f90462722a7a4de65e91990e97fe0d401c70e0e762c5b53302f905ec1c1
+2026-10-14T07:10:45.2890396Z #5 resolve docker.io/library/node:24-alpine@sha256:ebfe2f90462722a7a4de65e91990e97fe0d401c70e0e762c5b53302f905ec1c1 done
+2026-10-14T07:10:45.2891394Z #5 sha256:7ce7dcbafb7f750cf0c6be3c30e34372b06dd1182fa67f6ae30782c8150c5444 444B / 444B 0.1s done
+2026-10-14T07:10:45.4511968Z #5 sha256:02f40d53b06f6b91fec0cd6a6719656da99270bff8ee54ed8dcdf4c157763fc1 1.26MB / 1.26MB 0.2s done
+2026-10-14T07:10:45.4514111Z #5 sha256:3c504d5a797be28f9de43147d49cd8ecb2eea46dfaf7beb8715db695d5f0a7f0 0B / 56.52MB 0.2s
+2026-10-14T07:10:45.4515044Z #5 sha256:e2de96513ba9eb53b431787ec8a65cdde380ac4772a3e4c4b714dcfde2a102b5 0B / 3.85MB 0.2s
+2026-10-14T07:10:45.6515489Z #5 ...
+2026-10-14T07:10:45.6515847Z 
+2026-10-14T07:10:45.6516356Z #6 [internal] load build context
+2026-10-14T07:10:45.6516646Z #6 transferring context: 44.87MB 0.3s done
+2026-10-14T07:10:45.6516895Z #6 DONE 0.3s
+2026-10-14T07:10:45.6516960Z 
+2026-10-14T07:10:45.6517253Z #5 [builder  1/12] FROM docker.io/library/node:24-alpine@sha256:ebfe2f90462722a7a4de65e91990e97fe0d401c70e0e762c5b53302f905ec1c1
+2026-10-14T07:10:45.6517842Z #5 sha256:3c504d5a797be28f9de43147d49cd8ecb2eea46dfaf7beb8715db695d5f0a7f0 56.52MB / 56.52MB 0.5s
+2026-10-14T07:10:45.6518241Z #5 sha256:e2de96513ba9eb53b431787ec8a65cdde380ac4772a3e4c4b714dcfde2a102b5 3.85MB / 3.85MB 0.3s done
+2026-10-14T07:10:45.6518690Z #5 extracting sha256:e2de96513ba9eb53b431787ec8a65cdde380ac4772a3e4c4b714dcfde2a102b5
+2026-10-14T07:10:45.9686674Z #5 sha256:3c504d5a797be28f9de43147d49cd8ecb2eea46dfaf7beb8715db695d5f0a7f0 56.52MB / 56.52MB 0.6s done
+2026-10-14T07:10:45.9687192Z #5 extracting sha256:e2de96513ba9eb53b431787ec8a65cdde380ac4772a3e4c4b714dcfde2a102b5 0.3s done
+2026-10-14T07:10:45.9687563Z #5 extracting sha256:3c504d5a797be28f9de43147d49cd8ecb2eea46dfaf7beb8715db695d5f0a7f0
+2026-10-14T07:10:46.5183840Z #5 extracting sha256:3c504d5a797be28f9de43147d49cd8ecb2eea46dfaf7beb8715db695d5f0a7f0 0.7s done
+2026-10-14T07:10:46.5184255Z #5 DONE 1.3s
+2026-10-14T07:10:46.6910812Z 
+2026-10-14T07:10:46.6911985Z #5 [builder  1/12] FROM docker.io/library/node:24-alpine@sha256:ebfe2f90462722a7a4de65e91990e97fe0d401c70e0e762c5b53302f905ec1c1
+2026-10-14T07:10:46.6912533Z #5 extracting sha256:02f40d53b06f6b91fec0cd6a6719656da99270bff8ee54ed8dcdf4c157763fc1 0.0s done
+2026-10-14T07:10:46.6912925Z #5 extracting sha256:7ce7dcbafb7f750cf0c6be3c30e34372b06dd1182fa67f6ae30782c8150c5444 done
+2026-10-14T07:10:46.6913169Z #5 DONE 1.4s
+2026-10-14T07:10:46.6913242Z 
+2026-10-14T07:10:46.6913319Z #7 [builder  2/12] WORKDIR /app
+2026-10-14T07:10:47.5732640Z #7 DONE 1.0s
+2026-10-14T07:10:47.7359066Z 
+2026-10-14T07:10:47.7359891Z #8 [builder  3/12] COPY client/package.json client/package-lock.json ./client/
+2026-10-14T07:10:47.7360279Z #8 DONE 0.0s
+2026-10-14T07:10:47.7360388Z 
+2026-10-14T07:10:47.7360596Z #9 [builder  4/12] RUN cd client && npm ci --ignore-scripts
+2026-10-14T07:10:48.9739248Z #9 1.387 npm warn deprecated rimraf@3.0.2: Rimraf versions prior to v4 are no longer supported
+2026-10-14T07:10:49.3252529Z #9 1.738 npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+2026-10-14T07:10:49.4402340Z #9 1.830 npm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+2026-10-14T07:10:50.1733820Z #9 2.403 npm warn deprecated @humanwhocodes/config-array@0.13.0: Use @eslint/config-array instead
+2026-10-14T07:10:50.1734787Z #9 2.436 npm warn deprecated @humanwhocodes/object-schema@2.0.3: Use @eslint/object-schema instead
+2026-10-14T07:10:52.0004719Z #9 4.414 npm warn deprecated eslint@8.57.1: This version is no longer supported. Please see https://eslint.org/version-support for other options.
+2026-10-14T07:10:52.6176453Z #9 ...
+2026-10-14T07:10:52.6177120Z 
+2026-10-14T07:10:52.6177418Z #10 [stage-1  3/55] RUN apk add --no-cache python3 make g++
+2026-10-14T07:10:52.6177824Z #10 0.487 ( 1/30) Installing libstdc++-dev (15.2.0-r5)
+2026-10-14T07:10:52.6178193Z #10 0.647 ( 2/30) Installing jansson (2.15.0-r0)
+2026-10-14T07:10:52.6178685Z #10 0.663 ( 3/30) Installing zstd-libs (1.5.7-r2)
+2026-10-14T07:10:52.6178995Z #10 0.682 ( 4/30) Installing binutils (2.45.1-r1)
+2026-10-14T07:10:52.6179313Z #10 0.756 ( 5/30) Installing libgcc-static (15.2.0-r5)
+2026-10-14T07:10:52.6179633Z #10 0.793 ( 6/30) Installing libgomp (15.2.0-r5)
+2026-10-14T07:10:52.6179896Z #10 0.810 ( 7/30) Installing libatomic (15.2.0-r5)
+2026-10-14T07:10:52.6180090Z #10 0.824 ( 8/30) Installing gmp (6.3.0-r4)
+2026-10-14T07:10:52.6180274Z #10 0.842 ( 9/30) Installing isl26 (0.26-r2)
+2026-10-14T07:10:52.6180457Z #10 0.867 (10/30) Installing mpfr4 (4.2.2-r0)
+2026-10-14T07:10:52.6180637Z #10 0.886 (11/30) Installing mpc1 (1.3.1-r1)
+2026-10-14T07:10:52.6180811Z #10 0.904 (12/30) Installing gcc (15.2.0-r5)
+2026-10-14T07:10:52.6181238Z #10 1.593 (13/30) Installing musl-dev (1.2.6-r2)
+2026-10-14T07:10:52.6181467Z #10 1.654 (14/30) Installing g++ (15.2.0-r5)
+2026-10-14T07:10:52.6181727Z #10 1.866 (15/30) Installing make (4.4.1-r4)
+2026-10-14T07:10:52.6182059Z #10 1.882 (16/30) Installing libexpat (2.8.5-r0)
+2026-10-14T07:10:52.6182345Z #10 1.899 (17/30) Installing libbz2 (1.0.8-r6)
+2026-10-14T07:10:52.6182623Z #10 1.914 (18/30) Installing libffi (3.5.2-r1)
+2026-10-14T07:10:52.6182891Z #10 1.929 (19/30) Installing gdbm (1.26-r0)
+2026-10-14T07:10:52.6187068Z #10 1.944 (20/30) Installing xz-libs (5.8.4-r0)
+2026-10-14T07:10:52.6187364Z #10 1.960 (21/30) Installing mpdecimal (4.0.1-r0)
+2026-10-14T07:10:52.6187726Z #10 1.976 (22/30) Installing ncurses-terminfo-base (6.6_p20260516-r0)
+2026-10-14T07:10:52.6188104Z #10 1.994 (23/30) Installing libncursesw (6.6_p20260516-r0)
+2026-10-14T07:10:52.6188445Z #10 2.012 (24/30) Installing libpanelw (6.6_p20260516-r0)
+2026-10-14T07:10:52.6188766Z #10 2.027 (25/30) Installing readline (8.3.3-r1)
+2026-10-14T07:10:52.6189054Z #10 2.043 (26/30) Installing sqlite-libs (3.53.4-r0)
+2026-10-14T07:10:52.6189252Z #10 2.066 (27/30) Installing python3 (3.14.8-r0)
+2026-10-14T07:10:52.6189474Z #10 2.253 (28/30) Installing python3-pycache-pyc0 (3.14.8-r0)
+2026-10-14T07:10:52.6189768Z #10 2.356 (29/30) Installing pyc (3.14.8-r0)
+2026-10-14T07:10:52.6190030Z #10 2.356 (30/30) Installing python3-pyc (3.14.8-r0)
+2026-10-14T07:10:52.6190344Z #10 2.356 Executing busybox-1.37.0-r31.trigger
+2026-10-14T07:10:52.6190641Z #10 2.409 OK: 301.6 MiB in 48 packages
+2026-10-14T07:10:52.6190857Z #10 DONE 5.0s
+2026-10-14T07:10:52.8494126Z 
+2026-10-14T07:10:52.8495248Z #11 [stage-1  4/55] COPY server/package.json server/package-lock.json ./server/
+2026-10-14T07:10:52.8498588Z #11 DONE 0.1s
+2026-10-14T07:10:52.8498988Z 
+2026-10-14T07:10:52.8499421Z #12 [stage-1  5/55] RUN cd server && npm ci --omit=dev --ignore-scripts
+2026-10-14T07:10:54.4350698Z #12 ...
+2026-10-14T07:10:54.4357701Z 
+2026-10-14T07:10:54.4359246Z #9 [builder  4/12] RUN cd client && npm ci --ignore-scripts
+2026-10-14T07:10:54.4360282Z #9 6.693 
+2026-10-14T07:10:54.4361582Z #9 6.693 added 461 packages, and audited 462 packages in 7s
+2026-10-14T07:10:54.4362550Z #9 6.694 
+2026-10-14T07:10:54.4362811Z #9 6.695 128 packages are looking for funding
+2026-10-14T07:10:54.4363136Z #9 6.695   run `npm fund` for details
+2026-10-14T07:10:54.4363373Z #9 6.761 
+2026-10-14T07:10:54.4363681Z #9 6.761 24 vulnerabilities (1 low, 6 moderate, 17 high)
+2026-10-14T07:10:54.4363953Z #9 6.761 
+2026-10-14T07:10:54.4364243Z #9 6.761 To address issues that do not require attention, run:
+2026-10-14T07:10:54.4364578Z #9 6.761   npm audit fix
+2026-10-14T07:10:54.4364770Z #9 6.761 
+2026-10-14T07:10:54.4365098Z #9 6.761 To address all issues possible (including breaking changes), run:
+2026-10-14T07:10:54.4365476Z #9 6.761   npm audit fix --force
+2026-10-14T07:10:54.4365863Z #9 6.761 
+2026-10-14T07:10:54.4366130Z #9 6.761 Some issues need review, and may require choosing
+2026-10-14T07:10:54.4366444Z #9 6.761 a different dependency.
+2026-10-14T07:10:54.4366754Z #9 6.761 
+2026-10-14T07:10:54.4367154Z #9 6.761 Run `npm audit` for details.
+2026-10-14T07:10:54.4367406Z #9 6.766 npm notice
+2026-10-14T07:10:54.4367913Z #9 6.766 npm notice New major version of npm available! 11.19.0 -> 12.2.0
+2026-10-14T07:10:54.4368415Z #9 6.766 npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.0
+2026-10-14T07:10:54.4369049Z #9 6.766 npm notice To update run: npm install -g npm@12.2.0
+2026-10-14T07:10:54.4369344Z #9 6.766 npm notice
+2026-10-14T07:10:54.4369529Z #9 DONE 6.8s
+2026-10-14T07:10:54.5871594Z 
+2026-10-14T07:10:54.5872600Z #13 [builder  5/12] COPY server/package.json server/package-lock.json ./server/
+2026-10-14T07:10:55.4176447Z #13 DONE 1.0s
+2026-10-14T07:10:55.4180889Z 
+2026-10-14T07:10:55.4184327Z #12 [stage-1  5/55] RUN cd server && npm ci --omit=dev --ignore-scripts
+2026-10-14T07:10:57.7982217Z #12 ...
+2026-10-14T07:10:57.7982447Z 
+2026-10-14T07:10:57.7982687Z #14 [builder  6/12] RUN cd server && npm ci --ignore-scripts
+2026-10-14T07:10:57.7983634Z #14 2.003 npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+2026-10-14T07:10:57.7984462Z #14 2.230 npm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+2026-10-14T07:10:58.5497796Z #14 3.132 npm warn deprecated whatwg-encoding@3.1.1: Use @exodus/bytes instead for a more spec-conformant and faster implementation
+2026-10-14T07:11:00.4423469Z #14 ...
+2026-10-14T07:11:00.4424739Z 
+2026-10-14T07:11:00.4425115Z #12 [stage-1  5/55] RUN cd server && npm ci --omit=dev --ignore-scripts
+2026-10-14T07:11:00.4425498Z #12 7.741 
+2026-10-14T07:11:00.4425817Z #12 7.741 added 310 packages, and audited 311 packages in 8s
+2026-10-14T07:11:00.4426119Z #12 7.741 
+2026-10-14T07:11:00.6781261Z #12 7.741 54 packages are looking for funding
+2026-10-14T07:11:00.6781897Z #12 7.742   run `npm fund` for details
+2026-10-14T07:11:00.6782179Z #12 7.827 
+2026-10-14T07:11:00.6782436Z #12 7.827 5 vulnerabilities (4 high, 1 critical)
+2026-10-14T07:11:00.6782801Z #12 7.827 
+2026-10-14T07:11:00.6783149Z #12 7.827 To address issues that do not require attention, run:
+2026-10-14T07:11:00.6783531Z #12 7.827   npm audit fix
+2026-10-14T07:11:00.6783790Z #12 7.827 
+2026-10-14T07:11:00.6784156Z #12 7.827 To address all issues (including breaking changes), run:
+2026-10-14T07:11:00.6784602Z #12 7.827   npm audit fix --force
+2026-10-14T07:11:00.6784895Z #12 7.827 
+2026-10-14T07:11:00.6785150Z #12 7.827 Run `npm audit` for details.
+2026-10-14T07:11:00.6785414Z #12 7.829 npm notice
+2026-10-14T07:11:00.6785792Z #12 7.829 npm notice New major version of npm available! 11.19.0 -> 12.2.0
+2026-10-14T07:11:00.6786357Z #12 7.829 npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.0
+2026-10-14T07:11:00.6786880Z #12 7.829 npm notice To update run: npm install -g npm@12.2.0
+2026-10-14T07:11:00.6787211Z #12 7.829 npm notice
+2026-10-14T07:11:04.5271924Z #12 DONE 11.8s
+2026-10-14T07:11:04.5272921Z 
+2026-10-14T07:11:04.5273330Z #14 [builder  6/12] RUN cd server && npm ci --ignore-scripts
+2026-10-14T07:11:04.6785367Z #14 ...
+2026-10-14T07:11:04.6785782Z 
+2026-10-14T07:11:04.6786176Z #15 [stage-1  6/55] RUN cd server && npm rebuild better-sqlite3
+2026-10-14T07:11:05.5250872Z #15 0.997 npm warn rebuild 3 packages have install scripts not yet covered by allowScripts. Run `npm install-scripts ls` to review.
+2026-10-14T07:11:05.6761563Z #15 0.997 rebuilt dependencies successfully
+2026-10-14T07:11:05.8668234Z #15 DONE 1.3s
+2026-10-14T07:11:05.8668973Z 
+2026-10-14T07:11:05.8669476Z #14 [builder  6/12] RUN cd server && npm ci --ignore-scripts
+2026-10-14T07:11:06.0150710Z #14 10.50 
+2026-10-14T07:11:06.0152751Z #14 10.50 added 640 packages, and audited 641 packages in 10s
+2026-10-14T07:11:06.0153081Z #14 10.50 
+2026-10-14T07:11:06.0153580Z #14 10.50 105 packages are looking for funding
+2026-10-14T07:11:06.0154091Z #14 10.50   run `npm fund` for details
+2026-10-14T07:11:06.0154312Z #14 10.60 
+2026-10-14T07:11:06.0154627Z #14 10.60 41 vulnerabilities (1 low, 3 moderate, 36 high, 1 critical)
+2026-10-14T07:11:06.0155278Z #14 10.60 
+2026-10-14T07:11:06.0155565Z #14 10.60 To address issues that do not require attention, run:
+2026-10-14T07:11:06.0155866Z #14 10.60   npm audit fix
+2026-10-14T07:11:06.0156051Z #14 10.60 
+2026-10-14T07:11:06.0156334Z #14 10.60 To address all issues (including breaking changes), run:
+2026-10-14T07:11:06.0156666Z #14 10.60   npm audit fix --force
+2026-10-14T07:11:06.0156890Z #14 10.60 
+2026-10-14T07:11:06.0157093Z #14 10.60 Run `npm audit` for details.
+2026-10-14T07:11:06.1717577Z #14 DONE 10.7s
+2026-10-14T07:11:06.1717995Z 
+2026-10-14T07:11:06.1718369Z #16 [builder  7/12] COPY client/ ./client/
+2026-10-14T07:11:06.5664201Z #16 DONE 0.4s
+2026-10-14T07:11:06.5664579Z 
+2026-10-14T07:11:06.5665850Z #17 [stage-1  7/55] RUN apk del python3 make g++
+2026-10-14T07:11:06.5669292Z #17 0.304 ( 1/30) Purging g++ (15.2.0-r5)
+2026-10-14T07:11:06.5669901Z #17 0.315 ( 2/30) Purging libstdc++-dev (15.2.0-r5)
+2026-10-14T07:11:06.5670553Z #17 0.360 ( 3/30) Purging gcc (15.2.0-r5)
+2026-10-14T07:11:06.5671396Z #17 0.406 ( 4/30) Purging binutils (2.45.1-r1)
+2026-10-14T07:11:06.5671759Z #17 0.413 ( 5/30) Purging libgcc-static (15.2.0-r5)
+2026-10-14T07:11:06.5672142Z #17 0.414 ( 6/30) Purging libatomic (15.2.0-r5)
+2026-10-14T07:11:06.5672370Z #17 0.414 ( 7/30) Purging libgomp (15.2.0-r5)
+2026-10-14T07:11:06.5672627Z #17 0.414 ( 8/30) Purging musl-dev (1.2.6-r2)
+2026-10-14T07:11:06.5673160Z #17 0.423 ( 9/30) Purging isl26 (0.26-r2)
+2026-10-14T07:11:06.5673346Z #17 0.423 (10/30) Purging jansson (2.15.0-r0)
+2026-10-14T07:11:06.5673527Z #17 0.423 (11/30) Purging make (4.4.1-r4)
+2026-10-14T07:11:06.5673765Z #17 0.423 (12/30) Purging mpc1 (1.3.1-r1)
+2026-10-14T07:11:06.5674055Z #17 0.423 (13/30) Purging mpfr4 (4.2.2-r0)
+2026-10-14T07:11:06.5674390Z #17 0.423 (14/30) Purging python3-pyc (3.14.8-r0)
+2026-10-14T07:11:06.5674787Z #17 0.423 (15/30) Purging python3-pycache-pyc0 (3.14.8-r0)
+2026-10-14T07:11:06.5675119Z #17 0.477 (16/30) Purging pyc (3.14.8-r0)
+2026-10-14T07:11:06.5675412Z #17 0.477 (17/30) Purging python3 (3.14.8-r0)
+2026-10-14T07:11:06.5675651Z #17 0.589 (18/30) Purging readline (8.3.3-r1)
+2026-10-14T07:11:06.5675863Z #17 0.590 (19/30) Purging sqlite-libs (3.53.4-r0)
+2026-10-14T07:11:06.5676155Z #17 0.590 (20/30) Purging xz-libs (5.8.4-r0)
+2026-10-14T07:11:06.5676504Z #17 0.590 (21/30) Purging zstd-libs (1.5.7-r2)
+2026-10-14T07:11:06.5676813Z #17 0.590 (22/30) Purging gdbm (1.26-r0)
+2026-10-14T07:11:06.5677124Z #17 0.590 (23/30) Purging gmp (6.3.0-r4)
+2026-10-14T07:11:06.5677425Z #17 0.590 (24/30) Purging libbz2 (1.0.8-r6)
+2026-10-14T07:11:06.5677730Z #17 0.590 (25/30) Purging libexpat (2.8.5-r0)
+2026-10-14T07:11:06.5678008Z #17 0.590 (26/30) Purging libffi (3.5.2-r1)
+2026-10-14T07:11:06.5678286Z #17 0.590 (27/30) Purging libpanelw (6.6_p20260516-r0)
+2026-10-14T07:11:06.5678650Z #17 0.591 (28/30) Purging libncursesw (6.6_p20260516-r0)
+2026-10-14T07:11:06.5679062Z #17 0.591 (29/30) Purging ncurses-terminfo-base (6.6_p20260516-r0)
+2026-10-14T07:11:06.5679434Z #17 0.643 (30/30) Purging mpdecimal (4.0.1-r0)
+2026-10-14T07:11:06.5679869Z #17 0.643 Executing busybox-1.37.0-r31.trigger
+2026-10-14T07:11:06.5680156Z #17 0.650 OK: 10.9 MiB in 18 packages
+2026-10-14T07:11:06.5680340Z #17 DONE 0.7s
+2026-10-14T07:11:06.5680410Z 
+2026-10-14T07:11:06.5680499Z #18 [builder  8/12] COPY server/ ./server/
+2026-10-14T07:11:06.6717148Z #18 DONE 0.2s
+2026-10-14T07:11:06.6717781Z 
+2026-10-14T07:11:06.6718143Z #19 [stage-1  8/55] COPY server/ ./server/
+2026-10-14T07:11:06.8158712Z #19 DONE 0.2s
+2026-10-14T07:11:06.8159004Z 
+2026-10-14T07:11:06.8159175Z #20 [builder  9/12] COPY shared/ ./shared/
+2026-10-14T07:11:07.0296143Z #20 DONE 0.1s
+2026-10-14T07:11:07.0296383Z 
+2026-10-14T07:11:07.0296546Z #21 [stage-1  9/55] COPY shared/ ./shared/
+2026-10-14T07:11:07.0296796Z #21 DONE 0.0s
+2026-10-14T07:11:07.0296895Z 
+2026-10-14T07:11:07.0297044Z #22 [builder 10/12] COPY profiles/ ./profiles/
+2026-10-14T07:11:07.0297287Z #22 DONE 0.0s
+2026-10-14T07:11:07.0297378Z 
+2026-10-14T07:11:07.0297545Z #23 [builder 11/12] RUN cd server && npx prisma generate
+2026-10-14T07:11:07.8845317Z #23 1.005 Loaded Prisma config from prisma.config.ts.
+2026-10-14T07:11:07.8845778Z #23 1.005 
+2026-10-14T07:11:08.4310084Z #23 1.552 Prisma schema loaded from prisma/schema.prisma.
+2026-10-14T07:11:09.5201320Z #23 2.641 
+2026-10-14T07:11:09.5202154Z #23 2.641 ✔ Generated Prisma Client (v7.10.0) to ./prisma_client in 732ms
+2026-10-14T07:11:09.5202457Z #23 2.641 
+2026-10-14T07:11:09.5202858Z #23 2.641 Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+2026-10-14T07:11:09.5203121Z #23 2.641 
+2026-10-14T07:11:09.5203232Z #23 2.641 
+2026-10-14T07:11:09.7998912Z #23 DONE 2.9s
+2026-10-14T07:11:09.9332741Z 
+2026-10-14T07:11:09.9333502Z #24 [builder 12/12] RUN cd client && npm run build
+2026-10-14T07:11:09.9333739Z #24 0.133 
+2026-10-14T07:11:09.9333893Z #24 0.133 > client@1.9.0 prebuild
+2026-10-14T07:11:09.9334123Z #24 0.133 > node scripts/generate-workflow-contract.cjs
+2026-10-14T07:11:09.9334299Z #24 0.133 
+2026-10-14T07:11:10.1126188Z #24 0.162 
+2026-10-14T07:11:10.1126932Z #24 0.162 > client@1.9.0 build
+2026-10-14T07:11:10.1127477Z #24 0.162 > vite build
+2026-10-14T07:11:10.1127740Z #24 0.162 
+2026-10-14T07:11:10.1285329Z #24 0.327 vite v5.4.21 building for production...
+2026-10-14T07:11:10.3207802Z #24 0.370 transforming...
+2026-10-14T07:11:10.3783750Z #24 0.578 Browserslist: browsers data (caniuse-lite) is 10 months old. Please run:
+2026-10-14T07:11:10.3784668Z #24 0.578   npx update-browserslist-db@latest
+2026-10-14T07:11:10.3785003Z #24 0.578   Why you should do it regularly: https://github.com/browserslist/update-db#readme
+2026-10-14T07:11:17.0445347Z #24 7.244 ✓ 2715 modules transformed.
+2026-10-14T07:11:18.4428514Z #24 8.641 rendering chunks...
+2026-10-14T07:11:18.8583497Z #24 9.058 computing gzip size...
+2026-10-14T07:11:18.9946387Z #24 9.194 dist/index.html                                   1.69 kB │ gzip:   0.64 kB
+2026-10-14T07:11:18.9947562Z #24 9.194 dist/assets/SampleWorkflowMap-DxFfliMr.css       14.34 kB │ gzip:   3.55 kB
+2026-10-14T07:11:18.9948452Z #24 9.194 dist/assets/index-CGes9DlH.css                  215.67 kB │ gzip:  35.43 kB
+2026-10-14T07:11:19.1493425Z #24 9.194 dist/assets/play-CsPSfMoo.js                      0.30 kB │ gzip:   0.25 kB
+2026-10-14T07:11:19.1498946Z #24 9.194 dist/assets/pen-line-BnunQDXT.js                  0.36 kB │ gzip:   0.28 kB
+2026-10-14T07:11:19.1499752Z #24 9.194 dist/assets/plus-circle-D24jZFHP.js               0.37 kB │ gzip:   0.28 kB
+2026-10-14T07:11:19.1500449Z #24 9.194 dist/assets/check-square-CfjjQojs.js              0.38 kB │ gzip:   0.28 kB
+2026-10-14T07:11:19.1501260Z #24 9.194 dist/assets/key-round-DgSPK0Us.js                 0.41 kB │ gzip:   0.32 kB
+2026-10-14T07:11:19.1501926Z #24 9.194 dist/assets/wrench-NL1MbSBL.js                    0.43 kB │ gzip:   0.31 kB
+2026-10-14T07:11:19.1502580Z #24 9.194 dist/assets/tag-D8k1af0r.js                       0.50 kB │ gzip:   0.35 kB
+2026-10-14T07:11:19.1503253Z #24 9.194 dist/assets/share-2-TDOEzjvw.js                   0.52 kB │ gzip:   0.33 kB
+2026-10-14T07:11:19.1504512Z #24 9.194 dist/assets/layout-list-t47eF-Bh.js               0.53 kB │ gzip:   0.32 kB
+2026-10-14T07:11:19.1505249Z #24 9.194 dist/assets/scale-BU8PEJwv.js                     0.53 kB │ gzip:   0.34 kB
+2026-10-14T07:11:19.1505905Z #24 9.194 dist/assets/sparkles-C5Ia1zCF.js                  0.59 kB │ gzip:   0.35 kB
+2026-10-14T07:11:19.1506558Z #24 9.194 dist/assets/cpu-CxzG5WUe.js                       0.66 kB │ gzip:   0.36 kB
+2026-10-14T07:11:19.1507220Z #24 9.194 dist/assets/panels-top-left-ge7bjCbK.js           0.72 kB │ gzip:   0.36 kB
+2026-10-14T07:11:19.1507868Z #24 9.194 dist/assets/loader-B-iScF26.js                    0.73 kB │ gzip:   0.37 kB
+2026-10-14T07:11:19.1508496Z #24 9.194 dist/assets/thumbs-up-rxWsww8i.js                 0.90 kB │ gzip:   0.44 kB
+2026-10-14T07:11:19.1509115Z #24 9.194 dist/assets/vendor-flow-BTkdDkRO.js               0.96 kB │ gzip:   0.60 kB
+2026-10-14T07:11:19.1509738Z #24 9.194 dist/assets/vendor-pdf-D7HrI6pR.js                1.02 kB │ gzip:   0.62 kB
+2026-10-14T07:11:19.1510611Z #24 9.194 dist/assets/LabPolicies-BfR2HSw2.js               1.11 kB │ gzip:   0.63 kB
+2026-10-14T07:11:19.1511568Z #24 9.194 dist/assets/settings-2-DKKb9Ew3.js                1.30 kB │ gzip:   0.51 kB
+2026-10-14T07:11:19.1512222Z #24 9.194 dist/assets/spreadsheetImport-B7K8n_-a.js         1.48 kB │ gzip:   0.67 kB
+2026-10-14T07:11:19.1512908Z #24 9.194 dist/assets/useRealtimeData-BY7t8Tqm.js           2.61 kB │ gzip:   1.16 kB
+2026-10-14T07:11:19.1513563Z #24 9.194 dist/assets/NotFound-CpaUEjpv.js                  2.81 kB │ gzip:   1.17 kB
+2026-10-14T07:11:19.1514210Z #24 9.194 dist/assets/CountryData-B8Cv5-S-.js               4.20 kB │ gzip:   1.34 kB
+2026-10-14T07:11:19.1514886Z #24 9.194 dist/assets/TopicExplorer-C6WuXSxn.js             4.36 kB │ gzip:   1.77 kB
+2026-10-14T07:11:19.1515552Z #24 9.194 dist/assets/DataSheet-DBLBKiPe.js                 5.12 kB │ gzip:   1.83 kB
+2026-10-14T07:11:19.1516213Z #24 9.194 dist/assets/PublicReport-C4iHn5kk.js              5.21 kB │ gzip:   1.86 kB
+2026-10-14T07:11:19.1516892Z #24 9.194 dist/assets/FAQPage-B_6dYbIY.js                   6.14 kB │ gzip:   2.29 kB
+2026-10-14T07:11:19.1517523Z #24 9.194 dist/assets/ResetPassword-C-mrAIG-.js             6.36 kB │ gzip:   1.87 kB
+2026-10-14T07:11:19.1518186Z #24 9.194 dist/assets/ActivateAccount-BCK2G-yz.js           7.42 kB │ gzip:   2.03 kB
+2026-10-14T07:11:19.1519303Z #24 9.194 dist/assets/ScanPage-f2tDxVWp.js                  7.64 kB │ gzip:   2.99 kB
+2026-10-14T07:11:19.1519911Z #24 9.195 dist/assets/AuditLogs-C5dAwu3A.js                 8.30 kB │ gzip:   2.86 kB
+2026-10-14T07:11:19.1520565Z #24 9.195 dist/assets/LegacyImport-B9x3tUkt.js             10.41 kB │ gzip:   3.32 kB
+2026-10-14T07:11:19.1521475Z #24 9.195 dist/assets/LabMethods-BDK1X1eG.js               11.50 kB │ gzip:   3.59 kB
+2026-10-14T07:11:19.1522108Z #24 9.195 dist/assets/MyWork-DTeVqAjZ.js                   14.57 kB │ gzip:   3.88 kB
+2026-10-14T07:11:19.1522735Z #24 9.195 dist/assets/Users-CxuK13dK.js                    15.34 kB │ gzip:   4.64 kB
+2026-10-14T07:11:19.1523398Z #24 9.195 dist/assets/ResultReports-C1uE1BAV.js            16.20 kB │ gzip:   5.02 kB
+2026-10-14T07:11:19.1524049Z #24 9.195 dist/assets/DataResults-MDYtLPVp.js              16.78 kB │ gzip:   5.25 kB
+2026-10-14T07:11:19.1524690Z #24 9.195 dist/assets/QADashboard-DNfdo5Kn.js              17.31 kB │ gzip:   4.26 kB
+2026-10-14T07:11:19.1525370Z #24 9.195 dist/assets/ManagerQueue-CZTJmAmT.js             17.98 kB │ gzip:   6.08 kB
+2026-10-14T07:11:19.1526013Z #24 9.195 dist/assets/LabPolicies-BmyACxST.js              18.17 kB │ gzip:   5.13 kB
+2026-10-14T07:11:19.1526638Z #24 9.195 dist/assets/About-BZPqABg8.js                    20.84 kB │ gzip:   4.89 kB
+2026-10-14T07:11:19.1527281Z #24 9.195 dist/assets/Projects-CVgeiaAt.js                 21.67 kB │ gzip:   6.29 kB
+2026-10-14T07:11:19.1527913Z #24 9.195 dist/assets/TechStack-CnMZDLr3.js                22.88 kB │ gzip:   8.63 kB
+2026-10-14T07:11:19.1528568Z #24 9.195 dist/assets/SampleWorkflowMap-EAOL0wXW.js        23.60 kB │ gzip:   7.13 kB
+2026-10-14T07:11:19.1529493Z #24 9.195 dist/assets/ArticleReader-CTEIC16X.js            23.91 kB │ gzip:   5.76 kB
+2026-10-14T07:11:19.1530130Z #24 9.195 dist/assets/ThemeGallery-qM7utis_.js             25.93 kB │ gzip:   6.48 kB
+2026-10-14T07:11:19.1530860Z #24 9.195 dist/assets/AdminHelpEditor-CXuaTlK7.js          28.56 kB │ gzip:   6.83 kB
+2026-10-14T07:11:19.1531785Z #24 9.195 dist/assets/SuspendUserModal-DiNQlPSK.js         30.92 kB │ gzip:   7.11 kB
+2026-10-14T07:11:19.1532446Z #24 9.195 dist/assets/Profile-Cm9Xkg5X.js                  32.30 kB │ gzip:   8.33 kB
+2026-10-14T07:11:19.1533083Z #24 9.195 dist/assets/BatchInspectionModal-CP_Ge2lY.js     32.72 kB │ gzip:   8.34 kB
+2026-10-14T07:11:19.1533736Z #24 9.195 dist/assets/SpectralLibrary-C3dVU2I0.js          37.05 kB │ gzip:   8.73 kB
+2026-10-14T07:11:19.1534384Z #24 9.195 dist/assets/HelpCentre-B7LqU3RE.js               37.95 kB │ gzip:  10.45 kB
+2026-10-14T07:11:19.1535011Z #24 9.195 dist/assets/Inventory-BfDbMmoE.js                41.43 kB │ gzip:   9.61 kB
+2026-10-14T07:11:19.1535852Z #24 9.195 dist/assets/Equipment-aybc-fnA.js                41.60 kB │ gzip:   8.95 kB
+2026-10-14T07:11:19.1536499Z #24 9.195 dist/assets/LabManagement-JWUHWtxu.js            82.65 kB │ gzip:  17.54 kB
+2026-10-14T07:11:19.1537154Z #24 9.195 dist/assets/ProjectWorkspace-D4WvtmXJ.js        128.70 kB │ gzip:  27.91 kB
+2026-10-14T07:11:19.1537803Z #24 9.195 dist/assets/vendor-maps-DwGOs-Il.js             156.28 kB │ gzip:  45.73 kB
+2026-10-14T07:11:19.1538442Z #24 9.195 dist/assets/vendor-react-DoAq6ymf.js            163.50 kB │ gzip:  53.43 kB
+2026-10-14T07:11:19.1539060Z #24 9.195 dist/assets/AdminPanel-1eJ5ywSV.js              193.89 kB │ gzip:  46.06 kB
+2026-10-14T07:11:19.1539696Z #24 9.195 dist/assets/TechWorkbench-DQlBaIFt.js           247.74 kB │ gzip:  66.86 kB
+2026-10-14T07:11:19.1540352Z #24 9.195 dist/assets/vendor-charts-CqgcOpg6.js           383.30 kB │ gzip: 105.42 kB
+2026-10-14T07:11:19.1541125Z #24 9.195 dist/assets/vendor-excel-CKN5doRT.js            424.23 kB │ gzip: 141.75 kB
+2026-10-14T07:11:19.1541733Z #24 9.195 dist/assets/Reception-Cb2KlZ-H.js               565.67 kB │ gzip: 162.60 kB
+2026-10-14T07:11:19.1542305Z #24 9.195 dist/assets/index-C3NNNmLz.js                 1,650.86 kB │ gzip: 487.79 kB
+2026-10-14T07:11:19.1542669Z #24 9.196 
+2026-10-14T07:11:19.1543301Z #24 9.196 (!) Some chunks are larger than 1000 kB after minification. Consider:
+2026-10-14T07:11:19.1543804Z #24 9.196 - Using dynamic import() to code-split the application
+2026-10-14T07:11:19.1544598Z #24 9.196 - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+2026-10-14T07:11:19.1545397Z #24 9.196 - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+2026-10-14T07:11:19.1545828Z #24 9.196 ✓ built in 8.85s
+2026-10-14T07:11:19.3173445Z #24 DONE 9.5s
+2026-10-14T07:11:19.6193937Z 
+2026-10-14T07:11:19.6195184Z #25 [stage-1 10/55] COPY --from=builder /app/server/prisma_client ./server/prisma_client/
+2026-10-14T07:11:19.7215061Z #25 DONE 0.1s
+2026-10-14T07:11:19.7216124Z 
+2026-10-14T07:11:19.7216324Z #26 [stage-1 11/55] COPY profiles/ ./profiles/
+2026-10-14T07:11:19.7216608Z #26 DONE 0.0s
+2026-10-14T07:11:19.9561735Z 
+2026-10-14T07:11:19.9562662Z #27 [stage-1 12/55] COPY --from=builder /app/client/dist ./client/dist/
+2026-10-14T07:11:20.1004190Z #27 DONE 0.1s
+2026-10-14T07:11:20.2037862Z 
+2026-10-14T07:11:20.2038810Z #28 [stage-1 13/55] RUN mkdir -p /app/server/.schema-backup &&     cp /app/server/prisma/schema.prisma /app/server/.schema-backup/schema.prisma
+2026-10-14T07:11:20.2039185Z #28 DONE 0.0s
+2026-10-14T07:11:20.2039259Z 
+2026-10-14T07:11:20.2039705Z #29 [stage-1 14/55] COPY server/prisma/migrations/20261005000000_workflow_state_evidence/migration.sql /app/server/.migrations-backup/179/20261005000000_workflow_state_evidence/migration.sql
+2026-10-14T07:11:20.2040133Z #29 DONE 0.0s
+2026-10-14T07:11:20.2040200Z 
+2026-10-14T07:11:20.2040827Z #30 [stage-1 15/55] COPY server/prisma/migrations/20261005000100_workflow_state_guards/migration.sql /app/server/.migrations-backup/179/20261005000100_workflow_state_guards/migration.sql
+2026-10-14T07:11:20.2041830Z #30 DONE 0.0s
+2026-10-14T07:11:20.2042263Z 
+2026-10-14T07:11:20.2042979Z #31 [stage-1 16/55] COPY server/prisma/migrations/20261006000000_result_attempt_link/migration.sql /app/server/.migrations-backup/182/20261006000000_result_attempt_link/migration.sql
+2026-10-14T07:11:20.2043628Z #31 DONE 0.0s
+2026-10-14T07:11:20.2043732Z 
+2026-10-14T07:11:20.2044381Z #32 [stage-1 17/55] COPY server/prisma/migrations/20261004064500_add_result_raw_input/migration.sql /app/server/.migrations-backup/272/20261004064500_add_result_raw_input/migration.sql
+2026-10-14T07:11:20.2044908Z #32 DONE 0.0s
+2026-10-14T07:11:20.2045346Z 
+2026-10-14T07:11:20.2046167Z #33 [stage-1 18/55] COPY server/prisma/migrations/20261006000100_sample_holds_cancellation/migration.sql /app/server/.migrations-backup/183/20261006000100_sample_holds_cancellation/migration.sql
+2026-10-14T07:11:20.2046818Z #33 DONE 0.0s
+2026-10-14T07:11:20.2046912Z 
+2026-10-14T07:11:20.2047604Z #34 [stage-1 19/55] COPY server/prisma/migrations/20261006000200_reference_material_catalogue/migration.sql /app/server/.migrations-backup/184/20261006000200_reference_material_catalogue/migration.sql
+2026-10-14T07:11:20.2048265Z #34 DONE 0.0s
+2026-10-14T07:11:20.2048341Z 
+2026-10-14T07:11:20.2048815Z #35 [stage-1 20/55] COPY server/prisma/migrations/20261006000200_reference_material_catalogue/fresh-prisma-tables.json /app/server/.migrations-backup/184/20261006000200_reference_material_catalogue/fresh-prisma-tables.json
+2026-10-14T07:11:20.2049277Z #35 DONE 0.0s
+2026-10-14T07:11:20.2049338Z 
+2026-10-14T07:11:20.2049663Z #36 [stage-1 21/55] COPY server/prisma/migrations/20261006000300_qc_rules/migration.sql /app/server/.migrations-backup/185/20261006000300_qc_rules/migration.sql
+2026-10-14T07:11:20.2049999Z #36 DONE 0.0s
+2026-10-14T07:11:20.2050061Z 
+2026-10-14T07:11:20.2050438Z #37 [stage-1 22/55] COPY server/prisma/migrations/20261006000300_qc_rules/fresh-prisma-tables.json /app/server/.migrations-backup/185/20261006000300_qc_rules/fresh-prisma-tables.json
+2026-10-14T07:11:20.2050826Z #37 DONE 0.0s
+2026-10-14T07:11:20.3093313Z 
+2026-10-14T07:11:20.3094483Z #38 [stage-1 23/55] COPY server/prisma/migrations/20261006000400_normalized_qc_runs/migration.sql /app/server/.migrations-backup/186/20261006000400_normalized_qc_runs/migration.sql
+2026-10-14T07:11:20.3095569Z #38 DONE 0.0s
+2026-10-14T07:11:20.3095689Z 
+2026-10-14T07:11:20.3096479Z #39 [stage-1 24/55] COPY server/prisma/migrations/20261006000400_normalized_qc_runs/fresh-prisma-tables.json /app/server/.migrations-backup/186/20261006000400_normalized_qc_runs/fresh-prisma-tables.json
+2026-10-14T07:11:20.3097200Z #39 DONE 0.0s
+2026-10-14T07:11:20.3097278Z 
+2026-10-14T07:11:20.3097832Z #40 [stage-1 25/55] COPY server/prisma/migrations/20261007000100_qc_gate_scope/migration.sql /app/server/.migrations-backup/187/20261007000100_qc_gate_scope/migration.sql
+2026-10-14T07:11:20.3098289Z #40 DONE 0.0s
+2026-10-14T07:11:20.3098355Z 
+2026-10-14T07:11:20.3098839Z #41 [stage-1 26/55] COPY server/prisma/migrations/20261007000200_qc_bracket_membership/migration.sql /app/server/.migrations-backup/187/20261007000200_qc_bracket_membership/migration.sql
+2026-10-14T07:11:20.3099223Z #41 DONE 0.0s
+2026-10-14T07:11:20.3099291Z 
+2026-10-14T07:11:20.3099680Z #42 [stage-1 27/55] COPY server/prisma/migrations/20261007000300_proficiency_evidence/migration.sql /app/server/.migrations-backup/189/20261007000300_proficiency_evidence/migration.sql
+2026-10-14T07:11:20.3100060Z #42 DONE 0.0s
+2026-10-14T07:11:20.3100123Z 
+2026-10-14T07:11:20.3100517Z #43 [stage-1 28/55] COPY server/prisma/migrations/20261007000400_result_equipment_evidence/migration.sql /app/server/.migrations-backup/189/20261007000400_result_equipment_evidence/migration.sql
+2026-10-14T07:11:20.3101196Z #43 DONE 0.0s
+2026-10-14T07:11:20.3101300Z 
+2026-10-14T07:11:20.3101922Z #44 [stage-1 29/55] COPY server/prisma/migrations/20261009000100_nonconformity_reports/migration.sql /app/server/.migrations-backup/193/20261009000100_nonconformity_reports/migration.sql
+2026-10-14T07:11:20.3102600Z #44 DONE 0.0s
+2026-10-14T07:11:20.3102660Z 
+2026-10-14T07:11:20.3103210Z #45 [stage-1 30/55] COPY server/prisma/migrations/20261004190000_add_workitem_duplicate_marker/migration.sql /app/server/.migrations-backup/178/20261004190000_add_workitem_duplicate_marker/migration.sql
+2026-10-14T07:11:20.3103662Z #45 DONE 0.0s
+2026-10-14T07:11:20.3103740Z 
+2026-10-14T07:11:20.3104595Z #46 [stage-1 31/55] COPY server/prisma/migrations/20261004190100_unique_active_workitem/migration.sql /app/server/.migrations-backup/178/20261004190100_unique_active_workitem/migration.sql
+2026-10-14T07:11:20.3105261Z #46 DONE 0.0s
+2026-10-14T07:11:20.3105413Z 
+2026-10-14T07:11:20.3106059Z #47 [stage-1 32/55] COPY server/prisma/migrations/20261008000100_work_attempt_contract/migration.sql /app/server/.migrations-backup/190/20261008000100_work_attempt_contract/migration.sql
+2026-10-14T07:11:20.3106595Z #47 DONE 0.0s
+2026-10-14T07:11:20.3106659Z 
+2026-10-14T07:11:20.3107058Z #48 [stage-1 33/55] COPY server/prisma/migrations/20261008000200_repeat_correction_contract/migration.sql /app/server/.migrations-backup/191/20261008000200_repeat_correction_contract/migration.sql
+2026-10-14T07:11:20.3107452Z #48 DONE 0.0s
+2026-10-14T07:11:20.3107515Z 
+2026-10-14T07:11:20.3107908Z #49 [stage-1 34/55] COPY server/prisma/migrations/20261009000100_reported_value_selection/migration.sql /app/server/.migrations-backup/192/20261009000100_reported_value_selection/migration.sql
+2026-10-14T07:11:20.3108294Z #49 DONE 0.0s
+2026-10-14T07:11:20.3108355Z 
+2026-10-14T07:11:20.3108717Z #50 [stage-1 35/55] COPY server/prisma/migrations/20261009000200_batch_reagent_lots/migration.sql /app/server/.migrations-backup/194/20261009000200_batch_reagent_lots/migration.sql
+2026-10-14T07:11:20.3109077Z #50 DONE 0.0s
+2026-10-14T07:11:20.3109137Z 
+2026-10-14T07:11:20.3109609Z #51 [stage-1 36/55] COPY server/prisma/migrations/20261009000300_result_override_requests/migration.sql /app/server/.migrations-backup/197/20261009000300_result_override_requests/migration.sql
+2026-10-14T07:11:20.3109998Z #51 DONE 0.0s
+2026-10-14T07:11:20.4100272Z 
+2026-10-14T07:11:20.4101950Z #52 [stage-1 37/55] COPY server/prisma/migrations/20261009000400_calculation_templates/migration.sql /app/server/.migrations-backup/199/20261009000400_calculation_templates/migration.sql
+2026-10-14T07:11:20.4102808Z #52 DONE 0.0s
+2026-10-14T07:11:20.4102890Z 
+2026-10-14T07:11:20.4103391Z #53 [stage-1 38/55] COPY server/prisma/migrations/20261009000400_calculation_templates/fresh-prisma-tables.json /app/server/.migrations-backup/199/20261009000400_calculation_templates/fresh-prisma-tables.json
+2026-10-14T07:11:20.4103851Z #53 DONE 0.0s
+2026-10-14T07:11:20.4103920Z 
+2026-10-14T07:11:20.4104327Z #54 [stage-1 39/55] COPY server/prisma/migrations/20261010000100_cross_check_evaluation/migration.sql /app/server/.migrations-backup/201/20261010000100_cross_check_evaluation/migration.sql
+2026-10-14T07:11:20.4104724Z #54 DONE 0.0s
+2026-10-14T07:11:20.4104788Z 
+2026-10-14T07:11:20.4105256Z #55 [stage-1 40/55] COPY server/prisma/migrations/20261010000100_cross_check_evaluation/fresh-prisma-tables.json /app/server/.migrations-backup/201/20261010000100_cross_check_evaluation/fresh-prisma-tables.json
+2026-10-14T07:11:20.4105696Z #55 DONE 0.0s
+2026-10-14T07:11:20.4105762Z 
+2026-10-14T07:11:20.4106214Z #56 [stage-1 41/55] COPY server/prisma/migrations/20261010000000_sample_amendment_authorisation/migration.sql /app/server/.migrations-backup/210/20261010000000_sample_amendment_authorisation/migration.sql
+2026-10-14T07:11:20.4106643Z #56 DONE 0.0s
+2026-10-14T07:11:20.4106713Z 
+2026-10-14T07:11:20.4107201Z #57 [stage-1 42/55] COPY server/prisma/migrations/20261010000000_sample_amendment_authorisation/fresh-prisma-tables.json /app/server/.migrations-backup/210/20261010000000_sample_amendment_authorisation/fresh-prisma-tables.json
+2026-10-14T07:11:20.4107713Z #57 DONE 0.0s
+2026-10-14T07:11:20.4107920Z 
+2026-10-14T07:11:20.4108339Z #58 [stage-1 43/55] COPY server/prisma/migrations/20261010000200_report_revision_amendment/migration.sql /app/server/.migrations-backup/211/20261010000200_report_revision_amendment/migration.sql
+2026-10-14T07:11:20.4108754Z #58 DONE 0.0s
+2026-10-14T07:11:20.4108817Z 
+2026-10-14T07:11:20.4109210Z #59 [stage-1 44/55] COPY server/prisma/migrations/20261010000300_bench_credentials/migration.sql /app/server/.migrations-backup/202/20261010000300_bench_credentials/migration.sql
+2026-10-14T07:11:20.4109593Z #59 DONE 0.0s
+2026-10-14T07:11:20.4109656Z 
+2026-10-14T07:11:20.4110049Z #60 [stage-1 45/55] COPY server/prisma/migrations/20261010000400_preparation_records/migration.sql /app/server/.migrations-backup/205/20261010000400_preparation_records/migration.sql
+2026-10-14T07:11:20.4110426Z #60 DONE 0.0s
+2026-10-14T07:11:20.4110488Z 
+2026-10-14T07:11:20.4111153Z #61 [stage-1 46/55] COPY server/prisma/migrations/20261010000100_instrument_import_templates/migration.sql /app/server/.migrations-backup/200/20261010000100_instrument_import_templates/migration.sql
+2026-10-14T07:11:20.4111729Z #61 DONE 0.0s
+2026-10-14T07:11:20.4111792Z 
+2026-10-14T07:11:20.4112253Z #62 [stage-1 47/55] COPY server/prisma/migrations/20261010000100_instrument_import_templates/fresh-prisma-tables.json /app/server/.migrations-backup/200/20261010000100_instrument_import_templates/fresh-prisma-tables.json
+2026-10-14T07:11:20.4112706Z #62 DONE 0.0s
+2026-10-14T07:11:20.4112769Z 
+2026-10-14T07:11:20.4113401Z #63 [stage-1 48/55] COPY server/prisma/migrations/20261010000100_instrument_import_templates/pre-prisma-draft-table.sql /app/server/.migrations-backup/200/20261010000100_instrument_import_templates/pre-prisma-draft-table.sql
+2026-10-14T07:11:20.4113873Z #63 DONE 0.0s
+2026-10-14T07:11:20.4113935Z 
+2026-10-14T07:11:20.4114558Z #64 [stage-1 49/55] COPY server/prisma/migrations/20261010000100_instrument_import_templates/upgraded-prisma-draft-table.sql /app/server/.migrations-backup/200/20261010000100_instrument_import_templates/upgraded-prisma-draft-table.sql
+2026-10-14T07:11:20.6526536Z #64 DONE 0.0s
+2026-10-14T07:11:20.6529035Z 
+2026-10-14T07:11:20.6530429Z #65 [stage-1 50/55] COPY server/prisma/migrations/20261010000100_instrument_import_templates/post205-draft-tables.json /app/server/.migrations-backup/200/20261010000100_instrument_import_templates/post205-draft-tables.json
+2026-10-14T07:11:20.6531698Z #65 DONE 0.0s
+2026-10-14T07:11:20.6531804Z 
+2026-10-14T07:11:20.6532422Z #66 [stage-1 51/55] COPY server/prisma/migrations/20261013000100_sample_containers/migration.sql /app/server/.migrations-backup/206/20261013000100_sample_containers/migration.sql
+2026-10-14T07:11:20.6533019Z #66 DONE 0.0s
+2026-10-14T07:11:20.6533116Z 
+2026-10-14T07:11:20.6533695Z #67 [stage-1 52/55] COPY server/prisma/migrations/20261013000200_control_charts/migration.sql /app/server/.migrations-backup/214/20261013000200_control_charts/migration.sql
+2026-10-14T07:11:20.6534243Z #67 DONE 0.0s
+2026-10-14T07:11:20.6534335Z 
+2026-10-14T07:11:20.6535015Z #68 [stage-1 53/55] COPY server/prisma/migrations/20261004085500_add_lab_policy_settings/migration.sql /app/server/.migrations-backup/policy/20261004085500_add_lab_policy_settings/migration.sql
+2026-10-14T07:11:20.6535600Z #68 DONE 0.0s
+2026-10-14T07:11:20.6535699Z 
+2026-10-14T07:11:20.6535933Z #69 [stage-1 54/55] COPY docker-entrypoint.sh /app/docker-entrypoint.sh
+2026-10-14T07:11:20.6536235Z #69 DONE 0.0s
+2026-10-14T07:11:20.6536330Z 
+2026-10-14T07:11:20.6536681Z #70 [stage-1 55/55] RUN sed -i 's/\r$//' /app/docker-entrypoint.sh && chmod +x /app/docker-entrypoint.sh
+2026-10-14T07:11:20.6536919Z #70 DONE 0.0s
+2026-10-14T07:11:20.6536998Z 
+2026-10-14T07:11:20.6537075Z #71 exporting to docker image format
+2026-10-14T07:11:20.6537252Z #71 exporting layers
+2026-10-14T07:11:31.2551914Z #71 exporting layers 10.8s done
+2026-10-14T07:11:31.4124083Z #71 exporting manifest sha256:6214fa6ed5d9d4e47a4b482c2536c02ae700df84c08787cc465f0f2230e21029 done
+2026-10-14T07:11:31.4131195Z #71 exporting config sha256:7688e8f5c7658236ee0b446ffc202177dbd19cf79bcc16d937ab4f5150a190a9 done
+2026-10-14T07:11:31.4135722Z #71 sending tarball
+2026-10-14T07:11:32.3244273Z #71 ...
+2026-10-14T07:11:32.3246320Z 
+2026-10-14T07:11:32.3246763Z #72 importing to docker
+2026-10-14T07:11:32.4749737Z #72 loading layer 7c732ed82ebd 557.06kB / 56.52MB
+2026-10-14T07:11:36.0019668Z #72 loading layer 6f3bd0caa7c2 32.77kB / 1.26MB
+2026-10-14T07:11:36.2252454Z #72 loading layer a3b40bc0bbc6 444B / 444B
+2026-10-14T07:11:36.2253116Z #72 loading layer 9427ebe54317 93B / 93B
+2026-10-14T07:11:36.2253519Z #72 loading layer 8fb44a665e5f 557.06kB / 111.82MB
+2026-10-14T07:11:38.8517044Z #72 loading layer 482d17617a1e 32.77kB / 75.86kB
+2026-10-14T07:11:39.0198524Z #72 loading layer 3e44f0b64142 557.06kB / 202.53MB
+2026-10-14T07:11:40.9290148Z #72 loading layer 3e44f0b64142 74.09MB / 202.53MB 2.1s
+2026-10-14T07:11:44.8858519Z #72 loading layer 890c3718b49e 32.77kB / 2.40MB
+2026-10-14T07:11:45.0655263Z #72 loading layer 257640704bb5 13.50kB / 13.50kB
+2026-10-14T07:11:45.0890091Z #72 loading layer 27b3283b262e 32.77kB / 2.01MB
+2026-10-14T07:11:45.2607966Z #72 loading layer a720f628a21e 7.38kB / 7.38kB
+2026-10-14T07:11:45.4114914Z #72 loading layer 68785dddd95e 65.54kB / 4.25MB
+2026-10-14T07:11:45.4115291Z #72 loading layer 92824cc8cf63 1.20kB / 1.20kB
+2026-10-14T07:11:45.5791969Z #72 loading layer 708ea580cfdf 294.91kB / 28.98MB
+2026-10-14T07:11:45.6421676Z #72 loading layer f61a6b020c09 20.94kB / 20.94kB
+2026-10-14T07:11:45.7435093Z #72 loading layer 88a58c17b7e2 654B / 654B
+2026-10-14T07:11:45.7435679Z #72 loading layer ad6c5d74422e 1.01kB / 1.01kB
+2026-10-14T07:11:45.7438435Z #72 loading layer 4ce84d39313e 630B / 630B
+2026-10-14T07:11:45.7438869Z #72 loading layer 78275b0239b5 293B / 293B
+2026-10-14T07:11:45.7439219Z #72 loading layer 6d45b9af973c 1.41kB / 1.41kB
+2026-10-14T07:11:45.7439523Z #72 loading layer e85d00f2f6d0 2.00kB / 2.00kB
+2026-10-14T07:11:45.7439805Z #72 loading layer c613e80e3251 796B / 796B
+2026-10-14T07:11:45.7440092Z #72 loading layer 12ecde09e03f 2.00kB / 2.00kB
+2026-10-14T07:11:45.7440407Z #72 loading layer 18a15ea3d406 772B / 772B
+2026-10-14T07:11:45.7440687Z #72 loading layer ad9ad4813182 5.02kB / 5.02kB
+2026-10-14T07:11:45.7441119Z #72 loading layer 7bddfdf75960 1.20kB / 1.20kB
+2026-10-14T07:11:45.7441396Z #72 loading layer e104a62494f2 501B / 501B
+2026-10-14T07:11:45.7441669Z #72 loading layer 5397ca006066 1.05kB / 1.05kB
+2026-10-14T07:11:45.7442174Z #72 loading layer 2435e4b4629f 579B / 579B
+2026-10-14T07:11:45.7442447Z #72 loading layer 6f63a1a5476d 563B / 563B
+2026-10-14T07:11:45.7442722Z #72 loading layer 8a696a6caa11 1.43kB / 1.43kB
+2026-10-14T07:11:45.7442993Z #72 loading layer 790b0d099581 349B / 349B
+2026-10-14T07:11:45.8453951Z #72 loading layer e77a82c5fc7e 403B / 403B
+2026-10-14T07:11:45.8455831Z #72 loading layer 3f42029b114d 1.98kB / 1.98kB
+2026-10-14T07:11:45.8456146Z #72 loading layer f468e1dc1b31 3.21kB / 3.21kB
+2026-10-14T07:11:45.8456341Z #72 loading layer 4a1301c5d606 1.93kB / 1.93kB
+2026-10-14T07:11:45.8456635Z #72 loading layer e78ed0e7fdb8 677B / 677B
+2026-10-14T07:11:45.8456859Z #72 loading layer 40ed097e645a 1.98kB / 1.98kB
+2026-10-14T07:11:45.8457049Z #72 loading layer 71f3ca59f295 4.57kB / 4.57kB
+2026-10-14T07:11:45.8457239Z #72 loading layer 8161daa06abc 1.33kB / 1.33kB
+2026-10-14T07:11:45.8457415Z #72 loading layer d20affcaaf66 664B / 664B
+2026-10-14T07:11:45.8457603Z #72 loading layer 949806813cf0 544B / 544B
+2026-10-14T07:11:45.8457775Z #72 loading layer 5b15959804a0 2.02kB / 2.02kB
+2026-10-14T07:11:45.8457945Z #72 loading layer 64905cfa9a24 614B / 614B
+2026-10-14T07:11:45.8458112Z #72 loading layer d45106a8a91b 968B / 968B
+2026-10-14T07:11:45.8458277Z #72 loading layer 92ef4739bc39 573B / 573B
+2026-10-14T07:11:45.8458501Z #72 loading layer 1d2bff12907b 1.18kB / 1.18kB
+2026-10-14T07:11:45.8458681Z #72 loading layer 72a515fa6bbe 1.27kB / 1.27kB
+2026-10-14T07:11:45.9514003Z #72 loading layer 5397ca006066 1.05kB / 1.05kB 0.2s done
+2026-10-14T07:11:45.9515004Z #72 loading layer 969bc13d84d4 858B / 858B
+2026-10-14T07:11:45.9516043Z #72 loading layer 695fc755aaee 594B / 594B
+2026-10-14T07:11:45.9516564Z #72 loading layer ad39c0d0d7e4 632B / 632B
+2026-10-14T07:11:45.9516848Z #72 loading layer 7a6b1c3a3b57 919B / 919B
+2026-10-14T07:11:45.9517114Z #72 loading layer 940506bb23ce 1.51kB / 1.51kB
+2026-10-14T07:11:45.9517536Z #72 loading layer b8bbe1096512 1.94kB / 1.94kB
+2026-10-14T07:11:45.9517817Z #72 loading layer a93efd714c63 752B / 752B
+2026-10-14T07:11:45.9518357Z #72 loading layer 902c8615e334 3.04kB / 3.04kB
+2026-10-14T07:11:45.9518633Z #72 loading layer a81404f3d8ed 3.03kB / 3.03kB
+2026-10-14T07:11:46.0165753Z #72 loading layer 7c732ed82ebd 56.52MB / 56.52MB 13.6s done
+2026-10-14T07:11:46.0166421Z #72 loading layer 6f3bd0caa7c2 1.26MB / 1.26MB 9.9s done
+2026-10-14T07:11:46.0166926Z #72 loading layer a3b40bc0bbc6 444B / 444B 9.9s done
+2026-10-14T07:11:46.0167324Z #72 loading layer 9427ebe54317 93B / 93B 9.9s done
+2026-10-14T07:11:46.0167688Z #72 loading layer 8fb44a665e5f 111.82MB / 111.82MB 9.9s done
+2026-10-14T07:11:46.0168086Z #72 loading layer 482d17617a1e 75.86kB / 75.86kB 7.1s done
+2026-10-14T07:11:46.0168462Z #72 loading layer 3e44f0b64142 202.53MB / 202.53MB 7.1s done
+2026-10-14T07:11:46.0168818Z #72 loading layer 890c3718b49e 2.40MB / 2.40MB 1.1s done
+2026-10-14T07:11:46.0169170Z #72 loading layer 257640704bb5 13.50kB / 13.50kB 1.0s done
+2026-10-14T07:11:46.0169530Z #72 loading layer 27b3283b262e 2.01MB / 2.01MB 0.9s done
+2026-10-14T07:11:46.0169875Z #72 loading layer a720f628a21e 7.38kB / 7.38kB 0.7s done
+2026-10-14T07:11:46.0170213Z #72 loading layer 68785dddd95e 4.25MB / 4.25MB 0.7s done
+2026-10-14T07:11:46.0170553Z #72 loading layer 92824cc8cf63 1.20kB / 1.20kB 0.5s done
+2026-10-14T07:11:46.0171112Z #72 loading layer 708ea580cfdf 28.98MB / 28.98MB 0.5s done
+2026-10-14T07:11:46.0171481Z #72 loading layer f61a6b020c09 20.94kB / 20.94kB 0.3s done
+2026-10-14T07:11:46.0171817Z #72 loading layer 88a58c17b7e2 654B / 654B 0.3s done
+2026-10-14T07:11:46.0172191Z #72 loading layer ad6c5d74422e 1.01kB / 1.01kB 0.3s done
+2026-10-14T07:11:46.0172538Z #72 loading layer 4ce84d39313e 630B / 630B 0.3s done
+2026-10-14T07:11:46.0172856Z #72 loading layer 78275b0239b5 293B / 293B 0.3s done
+2026-10-14T07:11:46.0173186Z #72 loading layer 6d45b9af973c 1.41kB / 1.41kB 0.3s done
+2026-10-14T07:11:46.0173526Z #72 loading layer e85d00f2f6d0 2.00kB / 2.00kB 0.3s done
+2026-10-14T07:11:46.0174162Z #72 loading layer c613e80e3251 796B / 796B 0.3s done
+2026-10-14T07:11:46.0174494Z #72 loading layer 12ecde09e03f 2.00kB / 2.00kB 0.3s done
+2026-10-14T07:11:46.0174822Z #72 loading layer 18a15ea3d406 772B / 772B 0.3s done
+2026-10-14T07:11:46.0175153Z #72 loading layer ad9ad4813182 5.02kB / 5.02kB 0.3s done
+2026-10-14T07:11:46.0175492Z #72 loading layer 7bddfdf75960 1.20kB / 1.20kB 0.2s done
+2026-10-14T07:11:46.0175820Z #72 loading layer e104a62494f2 501B / 501B 0.2s done
+2026-10-14T07:11:46.0176141Z #72 loading layer 2435e4b4629f 579B / 579B 0.2s done
+2026-10-14T07:11:46.0176459Z #72 loading layer 6f63a1a5476d 563B / 563B 0.2s done
+2026-10-14T07:11:46.0176791Z #72 loading layer 8a696a6caa11 1.43kB / 1.43kB 0.2s done
+2026-10-14T07:11:46.0177143Z #72 loading layer 790b0d099581 349B / 349B 0.2s done
+2026-10-14T07:11:46.0177462Z #72 loading layer e77a82c5fc7e 403B / 403B 0.2s done
+2026-10-14T07:11:46.0177795Z #72 loading layer 3f42029b114d 1.98kB / 1.98kB 0.2s done
+2026-10-14T07:11:46.0178142Z #72 loading layer f468e1dc1b31 3.21kB / 3.21kB 0.2s done
+2026-10-14T07:11:46.0178489Z #72 loading layer 4a1301c5d606 1.93kB / 1.93kB 0.2s done
+2026-10-14T07:11:46.0178818Z #72 loading layer e78ed0e7fdb8 677B / 677B 0.2s done
+2026-10-14T07:11:46.0179147Z #72 loading layer 40ed097e645a 1.98kB / 1.98kB 0.2s done
+2026-10-14T07:11:46.0179482Z #72 loading layer 71f3ca59f295 4.57kB / 4.57kB 0.2s done
+2026-10-14T07:11:46.0179822Z #72 loading layer 8161daa06abc 1.33kB / 1.33kB 0.2s done
+2026-10-14T07:11:46.0180155Z #72 loading layer d20affcaaf66 664B / 664B 0.2s done
+2026-10-14T07:11:46.0180473Z #72 loading layer 949806813cf0 544B / 544B 0.1s done
+2026-10-14T07:11:46.0180803Z #72 loading layer 5b15959804a0 2.02kB / 2.02kB 0.1s done
+2026-10-14T07:11:46.0181486Z #72 loading layer 64905cfa9a24 614B / 614B 0.1s done
+2026-10-14T07:11:46.0181777Z #72 loading layer d45106a8a91b 968B / 968B 0.1s done
+2026-10-14T07:11:46.0182068Z #72 loading layer 92ef4739bc39 573B / 573B 0.1s done
+2026-10-14T07:11:46.0182376Z #72 loading layer 1d2bff12907b 1.18kB / 1.18kB 0.1s done
+2026-10-14T07:11:46.0182702Z #72 loading layer 72a515fa6bbe 1.27kB / 1.27kB 0.1s done
+2026-10-14T07:11:46.0183005Z #72 loading layer 969bc13d84d4 858B / 858B 0.1s done
+2026-10-14T07:11:46.0183259Z #72 loading layer 695fc755aaee 594B / 594B 0.1s done
+2026-10-14T07:11:46.0183452Z #72 loading layer ad39c0d0d7e4 632B / 632B 0.1s done
+2026-10-14T07:11:46.0183650Z #72 loading layer 7a6b1c3a3b57 919B / 919B 0.1s done
+2026-10-14T07:11:46.0183846Z #72 loading layer 940506bb23ce 1.51kB / 1.51kB 0.1s done
+2026-10-14T07:11:46.0184046Z #72 loading layer b8bbe1096512 1.94kB / 1.94kB 0.1s done
+2026-10-14T07:11:46.0184238Z #72 loading layer a93efd714c63 752B / 752B 0.1s done
+2026-10-14T07:11:46.0184441Z #72 loading layer 902c8615e334 3.04kB / 3.04kB 0.0s done
+2026-10-14T07:11:46.0184641Z #72 loading layer a81404f3d8ed 3.03kB / 3.03kB 0.0s done
+2026-10-14T07:11:46.0184885Z #72 DONE 13.6s
+2026-10-14T07:11:46.0184952Z 
+2026-10-14T07:11:46.0185091Z #71 exporting to docker image format
+2026-10-14T07:11:46.0185316Z #71 sending tarball 14.7s done
+2026-10-14T07:11:46.0185449Z #71 DONE 25.5s
+2026-10-14T07:11:46.0185516Z 
+2026-10-14T07:11:46.0185601Z #73 resolving provenance for metadata file
+2026-10-14T07:11:46.0185749Z #73 DONE 0.0s
+2026-10-14T07:11:46.0281482Z ##[group]ImageID
+2026-10-14T07:11:46.0281847Z sha256:7688e8f5c7658236ee0b446ffc202177dbd19cf79bcc16d937ab4f5150a190a9
+2026-10-14T07:11:46.0282571Z ##[endgroup]
+2026-10-14T07:11:46.0282777Z ##[group]Digest
+2026-10-14T07:11:46.0283096Z sha256:6214fa6ed5d9d4e47a4b482c2536c02ae700df84c08787cc465f0f2230e21029
+2026-10-14T07:11:46.0283398Z ##[endgroup]
+2026-10-14T07:11:46.0283606Z ##[group]Metadata
+2026-10-14T07:11:46.0288900Z {
+2026-10-14T07:11:46.0289171Z   "buildx.build.provenance": {
+2026-10-14T07:11:46.0289418Z     "builder": {
+2026-10-14T07:11:46.0289584Z       "id": ""
+2026-10-14T07:11:46.0289769Z     },
+2026-10-14T07:11:46.0290043Z     "buildType": "https://mobyproject.org/buildkit@v1",
+2026-10-14T07:11:46.0290320Z     "materials": [
+2026-10-14T07:11:46.0290618Z       {
+2026-10-14T07:11:46.0290790Z         "uri": "pkg:docker/node@24-alpine?platform=linux%2Famd64",
+2026-10-14T07:11:46.0291261Z         "digest": {
+2026-10-14T07:11:46.0291588Z           "sha256": "ebfe2f90462722a7a4de65e91990e97fe0d401c70e0e762c5b53302f905ec1c1"
+2026-10-14T07:11:46.0291919Z         }
+2026-10-14T07:11:46.0292072Z       }
+2026-10-14T07:11:46.0292203Z     ],
+2026-10-14T07:11:46.0292306Z     "invocation": {
+2026-10-14T07:11:46.0292466Z       "configSource": {
+2026-10-14T07:11:46.0292685Z         "entryPoint": "Dockerfile"
+2026-10-14T07:11:46.0292887Z       },
+2026-10-14T07:11:46.0293057Z       "parameters": {
+2026-10-14T07:11:46.0293277Z         "frontend": "dockerfile.v0",
+2026-10-14T07:11:46.0293500Z         "locals": [
+2026-10-14T07:11:46.0293666Z           {
+2026-10-14T07:11:46.0293838Z             "name": "context"
+2026-10-14T07:11:46.0294033Z           },
+2026-10-14T07:11:46.0294194Z           {
+2026-10-14T07:11:46.0294380Z             "name": "dockerfile"
+2026-10-14T07:11:46.0294582Z           }
+2026-10-14T07:11:46.0294735Z         ],
+2026-10-14T07:11:46.0294892Z         "root": {
+2026-10-14T07:11:46.0295074Z           "configSource": {
+2026-10-14T07:11:46.0295294Z             "path": "Dockerfile"
+2026-10-14T07:11:46.0295491Z           },
+2026-10-14T07:11:46.0295656Z           "request": {
+2026-10-14T07:11:46.0295834Z             "args": {
+2026-10-14T07:11:46.0296047Z               "vcs:localdir:context": ".",
+2026-10-14T07:11:46.0296285Z               "vcs:localdir:dockerfile": ".",
+2026-10-14T07:11:46.0296500Z               "vcs:revision": "71380b0ab1cbd1befe1f791c0f67dc0bf2d4b8d1",
+2026-10-14T07:11:46.0296748Z               "vcs:source": "https://github.com/yigini/soilfer-lims"
+2026-10-14T07:11:46.0297084Z             }
+2026-10-14T07:11:46.0297185Z           }
+2026-10-14T07:11:46.0297286Z         },
+2026-10-14T07:11:46.0297408Z         "compatibilityVersion": 30
+2026-10-14T07:11:46.0297540Z       },
+2026-10-14T07:11:46.0297643Z       "environment": {
+2026-10-14T07:11:46.0297781Z         "dockerfileVersion": "1.27.0",
+2026-10-14T07:11:46.0297933Z         "github_actor": "yigini",
+2026-10-14T07:11:46.0298080Z         "github_actor_id": "32960535",
+2026-10-14T07:11:46.0298241Z         "github_event_name": "pull_request",
+2026-10-14T07:11:46.0298400Z         "github_event_payload": {
+2026-10-14T07:11:46.0298547Z           "action": "synchronize",
+2026-10-14T07:11:46.0298723Z           "after": "5e0b32830f961b3236c7cf8f74cf8f676e98fbaa",
+2026-10-14T07:11:46.0298935Z           "before": "8d564c24f05a3b069bf027bbb7ba4f92cea597b0",
+2026-10-14T07:11:46.0299107Z           "number": 296,
+2026-10-14T07:11:46.0299232Z           "pull_request": {
+2026-10-14T07:11:46.0299361Z             "_links": {
+2026-10-14T07:11:46.0299481Z               "comments": {
+2026-10-14T07:11:46.0299704Z                 "href": "https://api.github.com/repos/yigini/soilfer-lims/issues/296/comments"
+2026-10-14T07:11:46.0299915Z               },
+2026-10-14T07:11:46.0300028Z               "commits": {
+2026-10-14T07:11:46.0300244Z                 "href": "https://api.github.com/repos/yigini/soilfer-lims/pulls/296/commits"
+2026-10-14T07:11:46.0300444Z               },
+2026-10-14T07:11:46.0300551Z               "html": {
+2026-10-14T07:11:46.0300724Z                 "href": "https://github.com/yigini/soilfer-lims/pull/296"
+2026-10-14T07:11:46.0301091Z               },
+2026-10-14T07:11:46.0301204Z               "issue": {
+2026-10-14T07:11:46.0301600Z                 "href": "https://api.github.com/repos/yigini/soilfer-lims/issues/296"
+2026-10-14T07:11:46.0301911Z               },
+2026-10-14T07:11:46.0302105Z               "review_comment": {
+2026-10-14T07:11:46.0302467Z                 "href": "https://api.github.com/repos/yigini/soilfer-lims/pulls/comments{/number}"
+2026-10-14T07:11:46.0302764Z               },
+2026-10-14T07:11:46.0302885Z               "review_comments": {
+2026-10-14T07:11:46.0303107Z                 "href": "https://api.github.com/repos/yigini/soilfer-lims/pulls/296/comments"
+2026-10-14T07:11:46.0303306Z               },
+2026-10-14T07:11:46.0303532Z               "self": {
+2026-10-14T07:11:46.0303723Z                 "href": "https://api.github.com/repos/yigini/soilfer-lims/pulls/296"
+2026-10-14T07:11:46.0303917Z               },
+2026-10-14T07:11:46.0304025Z               "statuses": {
+2026-10-14T07:11:46.0304305Z                 "href": "https://api.github.com/repos/yigini/soilfer-lims/statuses/5e0b32830f961b3236c7cf8f74cf8f676e98fbaa"
+2026-10-14T07:11:46.0304668Z               }
+2026-10-14T07:11:46.0304771Z             },
+2026-10-14T07:11:46.0304898Z             "active_lock_reason": null,
+2026-10-14T07:11:46.0305050Z             "additions": 2972,
+2026-10-14T07:11:46.0305183Z             "assignee": null,
+2026-10-14T07:11:46.0305323Z             "assignees": [],
+2026-10-14T07:11:46.0305467Z             "author_association": "OWNER",
+2026-10-14T07:11:46.0305619Z             "auto_merge": null,
+2026-10-14T07:11:46.0305748Z             "base": {
+2026-10-14T07:11:46.0305881Z               "label": "yigini:main",
+2026-10-14T07:11:46.0306021Z               "ref": "main",
+2026-10-14T07:11:46.0306145Z               "repo": {
+2026-10-14T07:11:46.0306281Z                 "allow_auto_merge": false,
+2026-10-14T07:11:46.0306436Z                 "allow_forking": true,
+2026-10-14T07:11:46.0306592Z                 "allow_merge_commit": true,
+2026-10-14T07:11:46.0306750Z                 "allow_rebase_merge": true,
+2026-10-14T07:11:46.0306902Z                 "allow_squash_merge": true,
+2026-10-14T07:11:46.0307059Z                 "allow_update_branch": false,
+2026-10-14T07:11:46.0307320Z                 "archive_url": "https://api.github.com/repos/yigini/soilfer-lims/{archive_format}{/ref}",
+2026-10-14T07:11:46.0307665Z                 "archived": false,
+2026-10-14T07:11:46.0307903Z                 "assignees_url": "https://api.github.com/repos/yigini/soilfer-lims/assignees{/user}",
+2026-10-14T07:11:46.0308214Z                 "blobs_url": "https://api.github.com/repos/yigini/soilfer-lims/git/blobs{/sha}",
+2026-10-14T07:11:46.0308551Z                 "branches_url": "https://api.github.com/repos/yigini/soilfer-lims/branches{/branch}",
+2026-10-14T07:11:46.0308831Z                 "clone_url": "https://github.com/yigini/soilfer-lims.git",
+2026-10-14T07:11:46.0309174Z                 "collaborators_url": "https://api.github.com/repos/yigini/soilfer-lims/collaborators{/collaborator}",
+2026-10-14T07:11:46.0309529Z                 "comments_url": "https://api.github.com/repos/yigini/soilfer-lims/comments{/number}",
+2026-10-14T07:11:46.0309839Z                 "commits_url": "https://api.github.com/repos/yigini/soilfer-lims/commits{/sha}",
+2026-10-14T07:11:46.0310157Z                 "compare_url": "https://api.github.com/repos/yigini/soilfer-lims/compare/{base}...{head}",
+2026-10-14T07:11:46.0310491Z                 "contents_url": "https://api.github.com/repos/yigini/soilfer-lims/contents/{+path}",
+2026-10-14T07:11:46.0310807Z                 "contributors_url": "https://api.github.com/repos/yigini/soilfer-lims/contributors",
+2026-10-14T07:11:46.0311217Z                 "created_at": "2026-02-11T20:35:39Z",
+2026-10-14T07:11:46.0311432Z                 "default_branch": "main",
+2026-10-14T07:11:46.0311594Z                 "delete_branch_on_merge": false,
+2026-10-14T07:11:46.0311844Z                 "deployments_url": "https://api.github.com/repos/yigini/soilfer-lims/deployments",
+2026-10-14T07:11:46.0312169Z                 "description": "Laboratory Information Management System for Soil Analysis",
+2026-10-14T07:11:46.0312405Z                 "disabled": false,
+2026-10-14T07:11:46.0312643Z                 "downloads_url": "https://api.github.com/repos/yigini/soilfer-lims/downloads",
+2026-10-14T07:11:46.0312954Z                 "events_url": "https://api.github.com/repos/yigini/soilfer-lims/events",
+2026-10-14T07:11:46.0313169Z                 "fork": false,
+2026-10-14T07:11:46.0313297Z                 "forks": 0,
+2026-10-14T07:11:46.0313435Z                 "forks_count": 0,
+2026-10-14T07:11:46.0313641Z                 "forks_url": "https://api.github.com/repos/yigini/soilfer-lims/forks",
+2026-10-14T07:11:46.0314007Z                 "full_name": "yigini/soilfer-lims",
+2026-10-14T07:11:46.0314304Z                 "git_commits_url": "https://api.github.com/repos/yigini/soilfer-lims/git/commits{/sha}",
+2026-10-14T07:11:46.0314650Z                 "git_refs_url": "https://api.github.com/repos/yigini/soilfer-lims/git/refs{/sha}",
+2026-10-14T07:11:46.0314986Z                 "git_tags_url": "https://api.github.com/repos/yigini/soilfer-lims/git/tags{/sha}",
+2026-10-14T07:11:46.0315264Z                 "git_url": "git://github.com/yigini/soilfer-lims.git",
+2026-10-14T07:11:46.0315469Z                 "has_discussions": false,
+2026-10-14T07:11:46.0315629Z                 "has_downloads": false,
+2026-10-14T07:11:46.0315779Z                 "has_issues": true,
+2026-10-14T07:11:46.0315927Z                 "has_pages": true,
+2026-10-14T07:11:46.0316091Z                 "has_projects": true,
+2026-10-14T07:11:46.0316243Z                 "has_pull_requests": true,
+2026-10-14T07:11:46.0316413Z                 "has_wiki": true,
+2026-10-14T07:11:46.0316569Z                 "homepage": null,
+2026-10-14T07:11:46.0316790Z                 "hooks_url": "https://api.github.com/repos/yigini/soilfer-lims/hooks",
+2026-10-14T07:11:46.0317042Z                 "html_url": "https://github.com/yigini/soilfer-lims",
+2026-10-14T07:11:46.0317239Z                 "id": 1155719496,
+2026-10-14T07:11:46.0317396Z                 "is_template": false,
+2026-10-14T07:11:46.0317694Z                 "issue_comment_url": "https://api.github.com/repos/yigini/soilfer-lims/issues/comments{/number}",
+2026-10-14T07:11:46.0318083Z                 "issue_events_url": "https://api.github.com/repos/yigini/soilfer-lims/issues/events{/number}",
+2026-10-14T07:11:46.0318512Z                 "issues_url": "https://api.github.com/repos/yigini/soilfer-lims/issues{/number}",
+2026-10-14T07:11:46.0318812Z                 "keys_url": "https://api.github.com/repos/yigini/soilfer-lims/keys{/key_id}",
+2026-10-14T07:11:46.0319114Z                 "labels_url": "https://api.github.com/repos/yigini/soilfer-lims/labels{/name}",
+2026-10-14T07:11:46.0319341Z                 "language": "JavaScript",
+2026-10-14T07:11:46.0319573Z                 "languages_url": "https://api.github.com/repos/yigini/soilfer-lims/languages",
+2026-10-14T07:11:46.0319826Z                 "license": {
+2026-10-14T07:11:46.0319967Z                   "key": "other",
+2026-10-14T07:11:46.0320106Z                   "name": "Other",
+2026-10-14T07:11:46.0320263Z                   "node_id": "MDc6TGljZW5zZTA=",
+2026-10-14T07:11:46.0320430Z                   "spdx_id": "NOASSERTION",
+2026-10-14T07:11:46.0320577Z                   "url": null
+2026-10-14T07:11:46.0320702Z                 },
+2026-10-14T07:11:46.0320840Z                 "merge_commit_message": "PR_TITLE",
+2026-10-14T07:11:46.0321192Z                 "merge_commit_title": "MERGE_MESSAGE",
+2026-10-14T07:11:46.0321553Z                 "merges_url": "https://api.github.com/repos/yigini/soilfer-lims/merges",
+2026-10-14T07:11:46.0321936Z                 "milestones_url": "https://api.github.com/repos/yigini/soilfer-lims/milestones{/number}",
+2026-10-14T07:11:46.0322230Z                 "mirror_url": null,
+2026-10-14T07:11:46.0322413Z                 "name": "soilfer-lims",
+2026-10-14T07:11:46.0322586Z                 "node_id": "R_kgDOROLhSA",
+2026-10-14T07:11:46.0322901Z                 "notifications_url": "https://api.github.com/repos/yigini/soilfer-lims/notifications{?since,all,participating}",
+2026-10-14T07:11:46.0323203Z                 "open_issues": 25,
+2026-10-14T07:11:46.0323365Z                 "open_issues_count": 25,
+2026-10-14T07:11:46.0323522Z                 "owner": {
+2026-10-14T07:11:46.0323745Z                   "avatar_url": "https://avatars.githubusercontent.com/u/32960535?v=4",
+2026-10-14T07:11:46.0324041Z                   "events_url": "https://api.github.com/users/yigini/events{/privacy}",
+2026-10-14T07:11:46.0324325Z                   "followers_url": "https://api.github.com/users/yigini/followers",
+2026-10-14T07:11:46.0324744Z                   "following_url": "https://api.github.com/users/yigini/following{/other_user}",
+2026-10-14T07:11:46.0325038Z                   "gists_url": "https://api.github.com/users/yigini/gists{/gist_id}",
+2026-10-14T07:11:46.0325260Z                   "gravatar_id": "",
+2026-10-14T07:11:46.0325445Z                   "html_url": "https://github.com/yigini",
+2026-10-14T07:11:46.0325625Z                   "id": 32960535,
+2026-10-14T07:11:46.0325770Z                   "login": "yigini",
+2026-10-14T07:11:46.0325948Z                   "node_id": "MDQ6VXNlcjMyOTYwNTM1",
+2026-10-14T07:11:46.0326186Z                   "organizations_url": "https://api.github.com/users/yigini/orgs",
+2026-10-14T07:11:46.0326532Z                   "received_events_url": "https://api.github.com/users/yigini/received_events",
+2026-10-14T07:11:46.0326853Z                   "repos_url": "https://api.github.com/users/yigini/repos",
+2026-10-14T07:11:46.0327066Z                   "site_admin": false,
+2026-10-14T07:11:46.0327310Z                   "starred_url": "https://api.github.com/users/yigini/starred{/owner}{/repo}",
+2026-10-14T07:11:46.0327619Z                   "subscriptions_url": "https://api.github.com/users/yigini/subscriptions",
+2026-10-14T07:11:46.0327850Z                   "type": "User",
+2026-10-14T07:11:46.0328035Z                   "url": "https://api.github.com/users/yigini",
+2026-10-14T07:11:46.0328259Z                   "user_view_type": "public"
+2026-10-14T07:11:46.0328412Z                 },
+2026-10-14T07:11:46.0328538Z                 "private": false,
+2026-10-14T07:11:46.0328714Z                 "pull_request_creation_policy": "all",
+2026-10-14T07:11:46.0329084Z                 "pulls_url": "https://api.github.com/repos/yigini/soilfer-lims/pulls{/number}",
+2026-10-14T07:11:46.0329337Z                 "pushed_at": "2026-10-14T06:50:02Z",
+2026-10-14T07:11:46.0329595Z                 "releases_url": "https://api.github.com/repos/yigini/soilfer-lims/releases{/id}",
+2026-10-14T07:11:46.0329835Z                 "size": 105732,
+2026-10-14T07:11:46.0330014Z                 "squash_merge_commit_message": "COMMIT_MESSAGES",
+2026-10-14T07:11:46.0330223Z                 "squash_merge_commit_title": "COMMIT_OR_PR_TITLE",
+2026-10-14T07:11:46.0330448Z                 "ssh_url": "git@github.com:yigini/soilfer-lims.git",
+2026-10-14T07:11:46.0330647Z                 "stargazers_count": 0,
+2026-10-14T07:11:46.0331007Z                 "stargazers_url": "https://api.github.com/repos/yigini/soilfer-lims/stargazers",
+2026-10-14T07:11:46.0331343Z                 "statuses_url": "https://api.github.com/repos/yigini/soilfer-lims/statuses/{sha}",
+2026-10-14T07:11:46.0331690Z                 "subscribers_url": "https://api.github.com/repos/yigini/soilfer-lims/subscribers",
+2026-10-14T07:11:46.0332021Z                 "subscription_url": "https://api.github.com/repos/yigini/soilfer-lims/subscription",
+2026-10-14T07:11:46.0332302Z                 "svn_url": "https://github.com/yigini/soilfer-lims",
+2026-10-14T07:11:46.0332559Z                 "tags_url": "https://api.github.com/repos/yigini/soilfer-lims/tags",
+2026-10-14T07:11:46.0332856Z                 "teams_url": "https://api.github.com/repos/yigini/soilfer-lims/teams",
+2026-10-14T07:11:46.0333055Z                 "topics": [],
+2026-10-14T07:11:46.0333290Z                 "trees_url": "https://api.github.com/repos/yigini/soilfer-lims/git/trees{/sha}",
+2026-10-14T07:11:46.0333545Z                 "updated_at": "2026-10-13T13:57:18Z",
+2026-10-14T07:11:46.0333763Z                 "url": "https://api.github.com/repos/yigini/soilfer-lims",
+2026-10-14T07:11:46.0333986Z                 "use_squash_pr_title_as_default": false,
+2026-10-14T07:11:46.0334173Z                 "visibility": "public",
+2026-10-14T07:11:46.0334339Z                 "watchers": 0,
+2026-10-14T07:11:46.0334478Z                 "watchers_count": 0,
+2026-10-14T07:11:46.0334657Z                 "web_commit_signoff_required": false
+2026-10-14T07:11:46.0334817Z               },
+2026-10-14T07:11:46.0335080Z               "sha": "6d750914d8565acdd496767a7dd935811b5a89b2",
+2026-10-14T07:11:46.0335253Z               "user": {
+2026-10-14T07:11:46.0335466Z                 "avatar_url": "https://avatars.githubusercontent.com/u/32960535?v=4",
+2026-10-14T07:11:46.0335757Z                 "events_url": "https://api.github.com/users/yigini/events{/privacy}",
+2026-10-14T07:11:46.0336038Z                 "followers_url": "https://api.github.com/users/yigini/followers",
+2026-10-14T07:11:46.0336346Z                 "following_url": "https://api.github.com/users/yigini/following{/other_user}",
+2026-10-14T07:11:46.0336641Z                 "gists_url": "https://api.github.com/users/yigini/gists{/gist_id}",
+2026-10-14T07:11:46.0336864Z                 "gravatar_id": "",
+2026-10-14T07:11:46.0337049Z                 "html_url": "https://github.com/yigini",
+2026-10-14T07:11:46.0337228Z                 "id": 32960535,
+2026-10-14T07:11:46.0337378Z                 "login": "yigini",
+2026-10-14T07:11:46.0337535Z                 "node_id": "MDQ6VXNlcjMyOTYwNTM1",
+2026-10-14T07:11:46.0337788Z                 "organizations_url": "https://api.github.com/users/yigini/orgs",
+2026-10-14T07:11:46.0338089Z                 "received_events_url": "https://api.github.com/users/yigini/received_events",
+2026-10-14T07:11:46.0338380Z                 "repos_url": "https://api.github.com/users/yigini/repos",
+2026-10-14T07:11:46.0338587Z                 "site_admin": false,
+2026-10-14T07:11:46.0338825Z                 "starred_url": "https://api.github.com/users/yigini/starred{/owner}{/repo}",
+2026-10-14T07:11:46.0339130Z                 "subscriptions_url": "https://api.github.com/users/yigini/subscriptions",
+2026-10-14T07:11:46.0339463Z                 "type": "User",
+2026-10-14T07:11:46.0339643Z                 "url": "https://api.github.com/users/yigini",
+2026-10-14T07:11:46.0339825Z                 "user_view_type": "public"
+2026-10-14T07:11:46.0339978Z               }
+2026-10-14T07:11:46.0340096Z             },
+2026-10-14T07:11:46.0463397Z             "body": "Post-start preservation probe correction, exact current head `5e0b32830f961b3236c7cf8f74cf8f676e98fbaa`, tree `f2152e240b355cd141612b783c6ccf04f5c8383a`, base `6d750914d8565acdd496767a7dd935811b5a89b2`;59 application paths, no WP/audit attribute changes. Only2 paths differ from previous8d564c24: real readiness rehearsal and one appended policy-schema regression. All runtime owner/schema/scientific/prebinding/history/policy/scanner source remains byte-identical.\n\nOriginal new CI38515104824 attempt1 remains **FAILED** and was never retried: actual closed server366/5565, client, both real Docker builds and boundary passed. PRE_199 shipped entrypoint reachedhealth and policy-before-chart checks; the following new post-start proof failed its composite preservation assertion. [Original ZIP/API/every archive-entry hash and exact step logs](https://github.com/yigini/soilfer-lims/tree/b2558c6ebab17d0453373fb057d6640ae0418f7a/WP/backlog-resume-20261013/issue214-policy-ci38515104824-closed-step-analysis). A retained new owned reproduction proves secondary original-file readonly chart/count inspections create WAL/SHM while all P/NO_OP0/COMPLETE_214/empty-row assertions pass. This is an owned reproduction, not independent inspection of the discarded CI volume.\n\nThe corrected probe runs secondary chart/count inspections on the exact retained snapshot already returned by the policy owner. It keeps EVERY existing classification, zero-change, empty-row and original DB/WAL/SHM equality predicate, and additionally binds the snapshot's original triple hashes to the initial observation. The actual shipped entrypoint still runs on the genuine PRE_199 volume and must reach health/guard order; no preprocessing or weakened gate. The appended regression extracts and runs the ACTUAL embedded rehearsal programme against a new owned WAL-mode database without sidecars, verifying the complete original triple stays unchanged. Existing18 policy-schema cases and all stock assertions remain unchanged.\n\nClosed focused **8/8 suites219/219 tests PASS**, both scanners and stock bootstrap, exact8path inventory/full366discovery, all421 frozen inputs unchanged; all other419 inputs identical to previous full stock CI. Prior full local366/5565 and actual stockCI366/5565 remain historical evidence for their exact8d source; no fresh local full5566 claim. New automatic real CI must independently pass **366/5566** plus client/bothDockerbuilds/boundary/readiness and fresh exact-head Claudio audit before merge. [Closed owned diagnostic and regression originals/hashes](https://github.com/yigini/soilfer-lims/tree/b2558c6ebab17d0453373fb057d6640ae0418f7a/WP/backlog-resume-20261013/issue214-policy-ci38515104824-closed-step-analysis/closed-index.json).\n\nAccepted6160619940 scope is unchanged: canonical policy DDL only, no normalization/data rows/backfill/catch/guard weakening; production kit readonly must PRESENT/NO_OP0 with retainedsnapshotdiskaccounting, otherwiseSTOP/noapply. No production collection or operation. Both failed runs38467368095/e47b and38515104824/8d remain immutable. Final source audit request follows actual newgreenCI, then #209.\n\nCurrent probe and added regression diff:\n```diff\ndiff --git a/server/scripts/rehearsal_deployment_readiness.cjs b/server/scripts/rehearsal_deployment_readiness.cjs\nindex 51396679..b0cbd916 100644\n--- a/server/scripts/rehearsal_deployment_readiness.cjs\n+++ b/server/scripts/rehearsal_deployment_readiness.cjs\n@@ -1372,12 +1372,14 @@ async function runSuite() {\n            fs.existsSync(dbPath+suffix)?crypto.createHash('sha256').update(fs.readFileSync(dbPath+suffix)).digest('hex'):null]));\n          const before=hash(),installer=require('./scripts/install_lab_policy_schema');\n          const ready=installer.assertLabPolicyStartupReady(dbPath),again=installer.installLabPolicySchema({dbPath,apply:true});\n-         const charts=require('./scripts/install_control_charts').assertControlChartStartupReady(dbPath);\n-         const db=new Database(dbPath,{readonly:true,fileMustExist:true});\n+         const inspected=ready.readonlySnapshot.path;\n+         const charts=require('./scripts/install_control_charts').assertControlChartStartupReady(inspected);\n+         const db=new Database(inspected,{readonly:true,fileMustExist:true});\n          const counts=Object.fromEntries(['LabPolicy','LabPolicyOverride'].map(name=>[name,db.prepare('SELECT count(*) n FROM \"'+name+'\"').get().n]));db.close();\n          if(ready.classification!=='PRESENT'||again.mode!=='NO_OP'||again.totalChanges!==0||charts.classification!=='COMPLETE_214'||charts.totalChanges!==0||\n-           Object.values(counts).some(Boolean)||JSON.stringify(hash())!==JSON.stringify(before))throw Error('Policy/214 startup or repeat preservation differs');\n-         console.log(JSON.stringify({ready,again,charts,counts,dbWalShmPreserved:true}));`\n+           Object.values(counts).some(Boolean)||JSON.stringify(ready.readonlySnapshot.originalDbWalShmSha256)!==JSON.stringify(before)||\n+           JSON.stringify(hash())!==JSON.stringify(before))throw Error('Policy/214 startup or repeat preservation differs');\n+         console.log(JSON.stringify({ready,again,charts,counts,dbWalShmPreserved:true,secondaryInspectionsOnRetainedSnapshot:true}));`\n     ],{encoding:'utf8'}).trim();\n     const policyAfter=JSON.parse(policyAfterOutput);\n     console.log(JSON.stringify({policyChartEntrypointProof:{scenario:'PRE_199-default-entrypoint-COMPLETE_214',before:policyBefore,after:policyAfter}}));\ndiff --git a/server/tests/contracts/issue_214_lab_policy_schema.test.js b/server/tests/contracts/issue_214_lab_policy_schema.test.js\nindex 75ccd825..a2940703 100644\n--- a/server/tests/contracts/issue_214_lab_policy_schema.test.js\n+++ b/server/tests/contracts/issue_214_lab_policy_schema.test.js\n@@ -125,3 +125,27 @@ test('policy installation and read-only readiness precede214; Docker packages th\n     expect(startup.indexOf('assertLabPolicyStartupReady')).toBeLessThan(startup.indexOf('assertControlChartStartupReady'));\n     expect(fs.readFileSync(path.join(root,'Dockerfile'),'utf8')).toContain('/app/server/.migrations-backup/policy/20261004085500_add_lab_policy_settings/migration.sql');\n });\n+test('the actual shipped Docker post-start policy/chart probe preserves an original WAL-mode database without sidecars', async () => {\n+    const { qcGateFixture } = require('../helpers/qcGateFixture');\n+    const f = await qcGateFixture({ fixedWindowPolicy: false, resolvedRules: false });\n+    await f.db.$disconnect();\n+    const target = file();\n+    for (const suffix of ['', '-wal', '-shm']) if (fs.existsSync(f.file + suffix))\n+        fs.copyFileSync(f.file + suffix, target + suffix, fs.constants.COPYFILE_EXCL);\n+    const writer = new Database(target, { fileMustExist: true });\n+    try { writer.pragma('journal_mode=WAL'); } finally { writer.close(); }\n+    const before = bytes(target);\n+    expect(before['-wal']).toBeNull(); expect(before['-shm']).toBeNull();\n+    const root = path.resolve(__dirname, '../../..');\n+    const rehearsal = fs.readFileSync(path.join(root, 'server/scripts/rehearsal_deployment_readiness.cjs'), 'utf8');\n+    const section = rehearsal.slice(rehearsal.indexOf('const policyAfterOutput='), rehearsal.indexOf('const policyAfter=JSON.parse'));\n+    const program = section.match(/IMAGE_TAG,'node','-e',\\s*`([\\s\\S]*?)`\\s*\\]/)[1]\n+        .replace(\"'/owned-policy/dev.db'\", JSON.stringify(target));\n+    const actual = JSON.parse(require('node:child_process').execFileSync(process.execPath, ['-e', program],\n+        { cwd: path.join(root, 'server'), encoding: 'utf8' }).trim());\n+    expect(actual).toMatchObject({ ready: { classification: 'PRESENT', totalChanges: 0 },\n+        again: { mode: 'NO_OP', totalChanges: 0 }, charts: { classification: 'COMPLETE_214', totalChanges: 0 },\n+        counts: { LabPolicy: 0, LabPolicyOverride: 0 }, dbWalShmPreserved: true, secondaryInspectionsOnRetainedSnapshot: true });\n+    expect(actual.ready.readonlySnapshot.originalDbWalShmSha256).toEqual(before);\n+    expect(bytes(target)).toEqual(before);\n+});\n\n```\n\nPrior implementation/scientific description and historical evidence follows:\n\nSchema prerequisite correction accepted by Claudio in [6160619940](https://github.com/yigini/soilfer-lims/issues/214#issuecomment-6160619940) is included in this same PR. The original CI38467368095 attempt1 remains FAILED: server365/5547, client and both Docker builds/boundary passed; real readiness Scenario6 on PRE_199 refused `QC_CHART_PREREQUISITE_REQUIRED`. It was never retried.\n\nThe owner reuses ONLY unchanged canonical20261004085500 DDL, SHA256 fa6ef0563f80704dbc4ee08d90ceae91f632c912813ca037221b02aa03ef7b70, before214 in the default entrypoint and startup readiness. ABSENT creates empty LabPolicy/Override and canonical indexes, plus nullable Report.policyVersion only if absent. PRESENT exact canonical or Prisma-created equivalent is NO_OP0. Every partial table/index/column, wrong Report type, and source tamper refuses0; **no normalization**, policy data writes, presets, overrides, backfill, or missing-table catches. Read-only classification hashes/copies the original DB/WAL/SHM into a retained snapshot and opens only that copy, because ordinary SQLite readonly opens can create sidecars. Existing policy/override/report/history bytes stay unchanged. Actual policyService with empty tables resolves shipped Strict CONTROL_CHART and minimum20 without inserting rows. Scientific rules, prebinding and frozen history are unchanged.\n\nPrevious head `8d564c24f05a3b069bf027bbb7ba4f92cea597b0`, tree `89689295ae06c5ffac0e4c2535c149e55c090bc1`, base `6d750914d8565acdd496767a7dd935811b5a89b2`: full local **366/366 suites and5565/5565 tests PASS**, no failures/skips/pending/todo, all366 unique paths exactly match discovery and all421 frozen inputs unchanged. Focused8/8 suites218/218 tests PASS includes actual active-WAL refusal and exact row/sidecar preservation. Both ordinary setups/assertions and approved worker512MB/blank local NODE_OPTIONS remain. Local visible-assets and retention-only teardown fixtures preserve held evidence; standard real CI retains its unchanged hooks and uses neither fixture. The two earlier focused failures are retained honestly. A new automatic PR CI, all real Docker checks, and fresh exact-head Claudio audit PASS remain mandatory before merge.\n\nThe real Docker acceptance now asserts PRE_199 policy ABSENT/DRY0, the shipped default entrypoint reaching COMPLETE_214 in policy-before-chart order, empty policy tables and immediate module NO_OP0 with original DB/WAL/SHM equality. The eventual production kit must include a read-only policy dry run showing PRESENT/NO_OP0 (production carries219), account for its retained snapshot allocation, and STOP/report any other classification without apply. No production collection or operation occurred. Existing actual chart-context/prebinding impact counts remain required before the kit gate.\n\n[Closed source-bound local originals and hashes](https://github.com/yigini/soilfer-lims/tree/6dbad1a14ccd29e137408af077d5803a8c94b956/WP/backlog-resume-20261013/issue214-policy-owner-full-pass).\n\nAdditional retained fixture/scanner lines are explicit; no scanner predicate or writer exemption was weakened:\n\n```diff\ndiff --git a/server/tests/contracts/deployment_readiness_bootstrap.test.js b/server/tests/contracts/deployment_readiness_bootstrap.test.js\nindex 4c7e3911..7f90215e 100644\n--- a/server/tests/contracts/deployment_readiness_bootstrap.test.js\n+++ b/server/tests/contracts/deployment_readiness_bootstrap.test.js\n@@ -368,6 +368,7 @@ bash \"${entryScript.replace(/\\\\/g, '/')}\"\n             .toMatchObject({classification:'COMPLETE_205',backfilledCount:0});\n         require('../../scripts/install_instrument_imports').installInstrumentImports({ dbPath: targetDb, apply: true });\n         require('../../scripts/install_sample_containers').installSampleContainers({ dbPath: targetDb, apply: true });\n+        require('../../scripts/install_lab_policy_schema').installLabPolicySchema({ dbPath: targetDb, apply: true });\n         require('../../scripts/install_control_charts').installControlCharts({ dbPath: targetDb, apply: true });\n         const hashDb = () => createHash('sha256').update(fs.readFileSync(targetDb)).digest('hex');\n         const beforeSha = hashDb();\n@@ -428,6 +429,8 @@ bash \"${entryScript.replace(/\\\\/g, '/')}\"\n                 `node \"${path.join(serverDir, 'scripts/install_sample_containers.js').replace(/\\\\/g, '/')}\"`)\n             .replaceAll('node scripts/install_control_charts.js',\n                 `node \"${path.join(serverDir, 'scripts/install_control_charts.js').replace(/\\\\/g, '/')}\"`)\n+            .replaceAll('node scripts/install_lab_policy_schema.js',\n+                `node \"${path.join(serverDir, 'scripts/install_lab_policy_schema.js').replace(/\\\\/g, '/')}\"`)\n             .replaceAll('node scripts/install_result_raw_input.js',\n                 `node \"${path.join(serverDir, 'scripts/install_result_raw_input.js').replace(/\\\\/g, '/')}\"`)\n             .replace(/node scripts\\/migrate_[^\\n]+/g, '# noop migration');\ndiff --git a/server/tests/helpers/workflowWriteScanner.js b/server/tests/helpers/workflowWriteScanner.js\nindex 372ea9ba..6e7c5398 100644\n--- a/server/tests/helpers/workflowWriteScanner.js\n+++ b/server/tests/helpers/workflowWriteScanner.js\n@@ -31,6 +31,11 @@ const QC_MEMBERSHIP_LOADER_SHA256 = '40c0af827c4d22b6fce1ee5b770f2c0146f456cfeea\n const QC_MEMBERSHIP_SQL_SHA256 = '1bc85113a3b6b7da327265bc7005eb4a1c97855943c599b1fe5ed8b126cf8572';\n // #189 additive evidence sources are inspected, never exempted as writers.\n const QC_EVIDENCE_SOURCES = Object.freeze([\n+    // Claudio6160619940: inspect the existing canonical policy DDL; no writer exemption.\n+    Object.freeze({ functionName: 'loadLabPolicyMigrationSource', loader: 'services/labPolicyMigrationSource.js',\n+        loaderSha256: 'ff0e4a69226b442e97f91b5e569ec4e5c129b6aaef65a0490722e1ba82037bc1',\n+        directory: '20261004085500_add_lab_policy_settings', sqlSha256: 'fa6ef0563f80704dbc4ee08d90ceae91f632c912813ca037221b02aa03ef7b70',\n+        boundary: 'ALTER TABLE \"Report\" ADD COLUMN \"policyVersion\" INTEGER;' }),\n     // #214: inspect only the exact additive chart evidence/guard source.\n     // This adds no workflow writer exemption.\n     Object.freeze({ functionName: 'loadControlChartMigrationSource', loader: 'services/controlChartMigrationSource.js',\n\n```\n\nAdds #214 control charts with immutable run-time scientific inputs, deliberate limit proposals, second-person approval and separate QC review obligations.\n\n**Operational change:** Strict laboratories, and any context resolving to `CONTROL_CHART`, must bind served LRM lots before starting new runs, including Provisional series. An unbound position returns `422 QC_CHART_LOT_REQUIRED` naming the position; the same run can start once bound. `FIXED_WINDOW` laboratories and genuinely pre-release already-started runs retain their existing path. A started chart run cannot change its frozen lot or reference value.\n\nThe implementation follows Claudio's actual [scientific direction](https://github.com/yigini/soilfer-lims/issues/214#issuecomment-6148143929), [lot-binding direction](https://github.com/yigini/soilfer-lims/issues/214#issuecomment-6152114918) and [retained-fixture direction](https://github.com/yigini/soilfer-lims/issues/214#issuecomment-6152507558). Series are scoped by lab, analyte, method and reference lot. New starts freeze approved or provisional basis, policy/rule classification, deterministic observation order and exact measurement/value/reference identities. Corrections replace effective observations for future starts; historical evaluations and proposals retain their original inputs. R-4s evaluates only within one run; sequence rules use the frozen eligible chronology across runs. Provisional evaluations retain the fixed window and record multi-rules as not evaluated.\n\nBaseline proposals use the arithmetic mean and sample SD (n-1), the frozen `qc.controlChartMinPoints` registry/policy value (shipped default 20), eligible passing observations and explicit excluded IDs with reasons. There is no automatic outlier removal. A named eligible approver must differ from the proposer; superseded sets and old evaluations remain readable. Strict adds review actions for 4-1s/10x; other presets use an empty review set. Stored legacy overrides missing `review` are read as [] without rewriting rows. Review obligations are idempotent by immutable evaluation and rule, scoped by laboratory, and resolved through append-only noted outcomes; they do not alter verdicts, block release, or reuse CRM NCR/sample-closure tasks.\n\nThe additive installer creates four tables, binds its migration source by digest and refuses partial, populated-unmarked or tampered states. Tests verify DRY 0/APPLY 1/immediate NO_OP 0, unchanged old rows and policies, immutable evidence guards, approved-set supersession, startup readiness before jobs/listen and fresh-Prisma normalization. The historical regression actually starts a run using the byte-pinned released pre214 service, then installs 214 normally; it does not fabricate old criteria.\n\nThe read-only impact collector uses an explicit read-only SQLite connection and injected policy/rule evaluation, with no default Prisma connection or pragmas. It has been tested only against owned disposable data. Before any eventual deployment gate, the kit must retain the **actual** lab/analyte/method contexts resolving to CONTROL_CHART and created-but-unstarted runs with unbound served LRM positions, for Claudio's review and YY's impact visibility. No production collection or operation occurred in this PR preparation.\n\nHistorical validation before the policy-owner correction on source-only head `e47b842c2a7f6b4f06fa4c532f7460c01797821b` (tree `7269379790ada4e9766cae14e33abd3c91eb59fd`, base `6d750914d8565acdd496767a7dd935811b5a89b2`):\n- Complete closed local server run: **Test Suites: 365 passed, 365 total** / **Tests:       5547 passed, 5547 total**, zero failed/skipped/pending. All 365 unique paths match the full discovery inventory; all 415 frozen source/fixture hashes stayed unchanged. Both ordinary database setups, stock assertions, single worker 512MB and blank local NODE_OPTIONS remained enabled. The retained local filesystem fixture serves byte-identical built assets and disposable uploads outside the hidden Windows checkout. Standard real PR CI must pass ordinary `npm test` without this fixture, then build the candidate and supported baseline 48d0e52 Docker images and run real disposable boundary/readiness acceptance.\n- Corrected focused run: 14/14 suites and 293/293 tests pass, including all formerly failing suites and new chart/Strict-default contracts. Earlier failures and configuration refusals remain retained honestly and are never relabelled or replayed.\n- Client production build and canonical lint pass: 0 errors and the same 14 baseline warnings. Actual detached Chromium inspections cover desktop 1440×1050 and mobile 390×844, plus keyboard lot selection/start, second-person approval and noted review resolution. These use the production components/CSS with injected owned synthetic API data. The first mobile overflow is retained; the corrected document 375px fits its 390px viewport.\n\n[Closed originals, final summary, exact source/report hashes and browser evidence](https://github.com/yigini/soilfer-lims/tree/2cc71b2b11526c10f2a5a41ea307d3193feb32fa/WP/backlog-resume-20261013); `issue214-scanner-call-form-full-pass/index.json` indexes the complete local result. The approved Jest harness, existing CI heap, discovery and ordinary setup files remain enabled. No #214 final audit PASS is claimed; actual complete real CI and a new exact-head Claudio audit PASS are required before merge.\n\nRetained fixture adjustments are explicit. The Native factory uses an ordinary FIXED_WINDOW override for its historical LRM assertions. `qcGateFixture` uses that context only for retained LRM cases; no-LRM cases keep their original policy version, and the new Strict/default test opts out of the override. The compatibility factory installs the normal 190/191/calculation/200/206/214 predecessors only for its Native current-schema case. Removing that conditional fixture context reproduces every original compatibility statement byte-for-byte. Original Native and compatibility assertions are unchanged. The compatibility Native fixture is the only newly registered caller of the existing digest-pinned owned-file calculation prerequisite helper. Its destructured import, immutable direct call and owned-file identifier satisfy the existing scanner predicates; no predicate or runtime writer exemption is relaxed. The prior complete full run remains FAILED (364/365 suites,5546/5547 tests,one scanner finding), and the first registration-only focused run remains FAILED (13/14 suites,292/293 tests). Both closed originals are retained in the evidence directory. The policy editor expectation additionally checks the new empty `review` field; startup tests add 214 readiness/preservation assertions. The exact changed fixture and retained-test lines are below, including global setup, historical schema-gap and scanner-source registration.\n\n<details><summary>Every changed retained fixture/test line</summary>\n\n```diff\ndiff --git a/server/tests/contracts/audit_1_0_policy_components.test.js b/server/tests/contracts/audit_1_0_policy_components.test.js\nindex cfb80f5c..2e19eee2 100644\n--- a/server/tests/contracts/audit_1_0_policy_components.test.js\n+++ b/server/tests/contracts/audit_1_0_policy_components.test.js\n@@ -82,7 +82,7 @@ describe('Audit 1.0: real policy page controls', () => {\n         const h = await fixture(), change = jest.fn();\n         const tree = h.editor({ definition: registry['qc.westgardRules'], value: { reject: [], warn: ['1-2s'] }, t, onChange: change });\n         elements(tree).find(node => node.type === 'input').props.onChange({ target: { checked: true } });\n-        expect(change).toHaveBeenCalledWith({ reject: ['1-2s'], warn: [] });\n+        expect(change).toHaveBeenCalledWith({ reject: ['1-2s'], warn: [], review: [] });\n     });\n     test('calibration action editor offers bracket repeats only for continuing checks and preserves other kinds', async () => {\n         const h = await fixture(), change = jest.fn();\ndiff --git a/server/tests/contracts/audit_1_2_guard_installer.test.js b/server/tests/contracts/audit_1_2_guard_installer.test.js\nindex 4a82e4e7..6894eebc 100644\n--- a/server/tests/contracts/audit_1_2_guard_installer.test.js\n+++ b/server/tests/contracts/audit_1_2_guard_installer.test.js\n@@ -440,6 +440,12 @@ test('a complete guarded database passes the read-only gate, listens and answers\n     expect(fingerprint(fixture.file)).toBe(beforeContainers);\n     expect(require('../../scripts/install_sample_containers').installSampleContainers({dbPath:fixture.file,apply:true}))\n         .toMatchObject({classification:'COMPLETE_206',previousClassification:'FRESH_PRISMA_206',backfilledCount:0,totalChanges:1});\n+    const beforeCharts=fingerprint(fixture.file), missingCharts=await realStartup(fixture.file,false);\n+    expect(missingCharts.code).toBe(1); expect(JSON.parse(missingCharts.stderr).error).toBe('QC_CHART_STARTUP_REQUIRED');\n+    expect(missingCharts.stdout).not.toMatch(/Enterprise Server running on|\\[PRISMA\\]|SCHEDULER/);\n+    expect(fingerprint(fixture.file)).toBe(beforeCharts);\n+    expect(require('../../scripts/install_control_charts').installControlCharts({dbPath:fixture.file,apply:true}))\n+        .toMatchObject({classification:'COMPLETE_214',previousClassification:'FRESH_PRISMA_214',backfilledCount:0,totalChanges:1});\n     const child = await realStartup(fixture.file, true);\n     expect(child.accepted).toBe(true);\n     const benchReady=JSON.parse(child.stdout.split('\\n').find(line=>line.startsWith('{\"event\":\"BENCH_CREDENTIAL_STARTUP_READY\"')));\n@@ -466,6 +472,9 @@ test('a complete guarded database passes the read-only gate, listens and answers\n     const containersReady=JSON.parse(child.stdout.split('\\n').find(line=>line.startsWith('{\"event\":\"SAMPLE_CONTAINER_STARTUP_READY\"')));\n     expect(containersReady).toMatchObject({classification:'COMPLETE_206',totalChanges:0});\n     expect(child.stdout.indexOf('SAMPLE_CONTAINER_STARTUP_READY')).toBeLessThan(child.stdout.indexOf('Enterprise Server running on'));\n+    const chartsReady=JSON.parse(child.stdout.split('\\n').find(line=>line.startsWith('{\"event\":\"CONTROL_CHART_STARTUP_READY\"')));\n+    expect(chartsReady).toMatchObject({classification:'COMPLETE_214',totalChanges:0});\n+    expect(child.stdout.indexOf('CONTROL_CHART_STARTUP_READY')).toBeLessThan(child.stdout.indexOf('Enterprise Server running on'));\n     const holdsReady = JSON.parse(child.stdout.split('\\n').find(line => line.startsWith('{\"event\":\"SAMPLE_HOLD_STARTUP_READY\"')));\n     expect(holdsReady).toMatchObject({ classification: 'COMPLETE', totalChanges: 0 });\n     expect(child.stdout.indexOf('SAMPLE_HOLD_STARTUP_READY')).toBeLessThan(child.stdout.indexOf('Enterprise Server running on'));\ndiff --git a/server/tests/contracts/audit_2_1_reference_ui.test.js b/server/tests/contracts/audit_2_1_reference_ui.test.js\nindex 1c2d49a6..999f21d1 100644\n--- a/server/tests/contracts/audit_2_1_reference_ui.test.js\n+++ b/server/tests/contracts/audit_2_1_reference_ui.test.js\n@@ -40,6 +40,7 @@ function host(file, { canEdit = true, savedControl = null, materials = [material\n             if (name === '@lims/number-parse') return require('../../../shared/numberParse');\n             if (name === './NumberPreview') return () => null;\n             if (name === './NativeRunPanel') return () => null; // These retained contracts exercise the profile form.\n+            if (name === '../qc/ControlCharts') return () => null; // Chart interactions have their own contracts.\n             throw new Error(`Unexpected reference component dependency: ${name}`);\n         } });\n     return { axios,\ndiff --git a/server/tests/contracts/audit_2_3_compatibility_runs.test.js b/server/tests/contracts/audit_2_3_compatibility_runs.test.js\nindex 592e9457..98360158 100644\n--- a/server/tests/contracts/audit_2_3_compatibility_runs.test.js\n+++ b/server/tests/contracts/audit_2_3_compatibility_runs.test.js\n@@ -25,7 +25,7 @@ const owned = [];\n const input = (blank = 0.0123456789) => ({ blanks: [{ value: blank }], controls: [{ expected: 7.123456789, measured: 7.123456780 }],\n     duplicates: [{ value1: 2.123456789, value2: 2.123456780 }, { value1: 2.123456789, value2: 2.123456780 }] });\n \n-async function fixture({ migrated = false, sampleMember = false, finalClear = false, legacyRepeat = false, multiAnalyte = false } = {}) {\n+async function fixture({ migrated = false, sampleMember = false, finalClear = false, legacyRepeat = false, multiAnalyte = false, nativeCurrentSchema = false } = {}) {\n     const labId = randomUUID(), analysisCode = randomUUID(), username = 'system:fixture', batchId = randomUUID();\n     const sampleId = randomUUID(), workItemId = randomUUID(), secondCode = randomUUID(), secondItemId = randomUUID();\n     const members = sampleMember ? [{ id: workItemId, sampleId, labId, analysis: analysisCode, batchId, rackPosition: 3,\n@@ -57,6 +57,17 @@ async function fixture({ migrated = false, sampleMember = false, finalClear = fa\n     require('../../scripts/install_nonconformity_reports').installNonconformityReports({ dbPath: record.file, apply: true });\n     require('../../scripts/install_batch_reagent_lots').installBatchReagentLots({ dbPath: record.file, apply: true });\n     require('../../scripts/install_result_equipment_evidence').installResultEquipmentEvidence({ dbPath: record.file, apply: true });\n+    if (nativeCurrentSchema) {\n+        // Only the new Native case needs the current normal installation; all assertions are retained.\n+        require('../../scripts/install_work_attempt_contract').installWorkAttemptContract({ dbPath: record.file, apply: true });\n+        require('../../scripts/install_work_repeat_contract').installWorkRepeatContract({ dbPath: record.file, apply: true });\n+        const { installCalculationReleasePrerequisites } = require('../helpers/calculationReleasePrerequisites');\n+        const ownedDatabaseFile = record.file;\n+        installCalculationReleasePrerequisites(ownedDatabaseFile);\n+        require('../../scripts/install_instrument_imports').installInstrumentImports({ dbPath: record.file, apply: true });\n+        require('../../scripts/install_sample_containers').installSampleContainers({ dbPath: record.file, apply: true });\n+        require('../../scripts/install_control_charts').installControlCharts({ dbPath: record.file, apply: true });\n+    }\n     const db = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${record.file}` }) }); record.db = db;\n     const actor = { id: username, username, role: 'LAB_MANAGER', labId }, f = { db, file: record.file, actor, labId, analysisCode };\n     await db.analysis.create({ data: { code: analysisCode, name: 'Compatibility fixture analysis' } });\n@@ -139,7 +150,7 @@ test.each([null, 'REPEAT_BATCH', 'REJECT'])('a migrated sibling status change pr\n });\n \n test.each(['PROFILE', 'NATIVE'])('a migrated REJECT_REANALYSIS item joins a new %s run while preserving its old evidence and membership', async targetKind => {\n-    const f = await fixture({ migrated: true, sampleMember: true, legacyRepeat: true });\n+    const f = await fixture({ migrated: true, sampleMember: true, legacyRepeat: true, nativeCurrentSchema: targetKind === 'NATIVE' });\n     const old = await f.db.batch.findUnique({ where: { id: f.batch.id }, include: QC_RUN_INCLUDE });\n     const workItemId = f.batch.workItems[0].id;\n     expect(old.analytes[0].status).toBe('REPEAT_ORDERED');\ndiff --git a/server/tests/contracts/audit_2_3_native_runs.test.js b/server/tests/contracts/audit_2_3_native_runs.test.js\nindex bce6408e..ffd6bf80 100644\n--- a/server/tests/contracts/audit_2_3_native_runs.test.js\n+++ b/server/tests/contracts/audit_2_3_native_runs.test.js\n@@ -35,6 +35,28 @@ const request = require('supertest');\n const { withQcRunHttp } = require('../helpers/qcRunHttpHarness');\n const owned = [];\n \n+test('#214 new Provisional chart-mode start refuses an unbound served LRM lot atomically', async () => {\n+    const f = await require('../helpers/qcGateFixture').qcGateFixture({ fixedWindowPolicy: false, criteria: {\n+        blankPerBatch: 0, duplicateEvery: 0, lrmPerBatch: 1\n+    } });\n+    try {\n+        const built = await buildNativeRun(f.db, f.actor, f.input), before = await f.snapshot();\n+        const position = built.positions.find(row => row.kind === 'LRM');\n+        await expect(startNativeRun(f.db, built.id, f.actor)).rejects.toMatchObject({\n+            statusCode: 422, code: 'QC_CHART_LOT_REQUIRED', message: expect.stringContaining(position.id)\n+        });\n+        expect(await f.snapshot()).toEqual(before);\n+        expect(await f.db.controlLimitSet.count()).toBe(0);\n+        expect((await f.db.batch.findUnique({ where: { id: built.id } })).startedAt).toBeNull();\n+        expect(await policies.get(f.labId, 'qc.lrmLimitMode', {db:f.db,analysisCode:f.analysisCode,methodologyId:f.method.id})).toBe('CONTROL_CHART');\n+        expect(await f.db.labPolicyOverride.count()).toBe(0);\n+        const lot = await referenceLot(f);\n+        const started = await startNativeRun(f.db, built.id, f.actor, { references: [{ positionId: position.id, referenceMaterialId: lot.id }] });\n+        expect(started.startedAt).not.toBeNull();\n+        expect(JSON.parse((await f.db.batchAnalyte.findFirst()).criteriaSnapshot).controlCharts[0].basis.mode).toBe('PROVISIONAL');\n+    } finally { await f.close(); }\n+});\n+\n async function fixture(count = 1, criteria = { crmEveryNBatches: 0 }, recordedAnalysisCode = null) {\n     const labId = randomUUID(), analysisCode = recordedAnalysisCode || `NATIVE-${randomUUID()}`, username = 'system:fixture';\n     const historical = beforeGuards({ actor: username, schemaVariant: 'PRE_1_3_SAMPLE_CODES', relatedRows: {\n@@ -63,6 +85,10 @@ async function fixture(count = 1, criteria = { crmEveryNBatches: 0 }, recordedAn\n     const method = await db.methodology.create({ data: { analysisCode, name: 'Recorded native method', loq: 0.123456789 } });\n     const instrument = await db.equipmentAsset.create({ data: { id: randomUUID(), labId, name: 'Fixture instrument', assetType: 'OTHER', status: 'IN_SERVICE', criticality: 'NON_CRITICAL' } });\n     const actor = { username, role: 'SUPER_ADMIN', labId }, f = { db, file, actor, labId, analysisCode, method, instrument };\n+    // Claudio6152507558: retain these pre-chart assertions in their explicit\n+    // fixed-window policy context; production Strict remains CONTROL_CHART.\n+    await policies.change(actor, labId, { changes: [{ key: 'qc.lrmLimitMode', value: 'FIXED_WINDOW' }],\n+        reason: 'Retained pre-chart Native fixture context' }, { db });\n     await rules.change(actor, { labId, analysisCode, methodologyId: method.id, criteria, expectedVersion: 0, reason: 'Reviewed fixture criteria' }, { db });\n     f.workItemIds = await members(f, count);\n     f.input = { instrumentId: instrument.id, workItemIds: f.workItemIds, seed: 'native-integration-fixture' };\ndiff --git a/server/tests/contracts/audit_2_3_native_ui.test.js b/server/tests/contracts/audit_2_3_native_ui.test.js\nindex d3eb29fd..36beaba8 100644\n--- a/server/tests/contracts/audit_2_3_native_ui.test.js\n+++ b/server/tests/contracts/audit_2_3_native_ui.test.js\n@@ -51,6 +51,17 @@ function mount(batch) {\n         tree = module.exports.default(props); effects.splice(0).forEach(effect => effect()); await new Promise(resolve => setImmediate(resolve)); } },\n     find: id => nodes(tree).find(node => node.props?.['data-testid'] === id), all: () => nodes(tree) };\n }\n+\n+test('#214 lot selections are bound by the actual start request; frozen chart lots cannot be changed in the UI', async () => {\n+    const unstarted = mount(fixture({ started: false })); await unstarted.render();\n+    unstarted.find('native-lot-lrm').props.onChange({ target: { value: 'lot-a' } }); await unstarted.render();\n+    await unstarted.find('native-run-start').props.onClick();\n+    expect(unstarted.axios.post).toHaveBeenCalledWith('/api/qc/batches/native-run/start', { references: [{ positionId: 'lrm', referenceMaterialId: 'lot-a' }] });\n+    const batch = fixture();\n+    batch.analytes[0].criteriaSnapshot = JSON.stringify({qcRule:{resolved:{lrmMode:{value:'CONTROL_CHART'}}},controlCharts:[{positions:[{positionId:'lrm',referenceMaterialId:'lot-a'}]}]});\n+    const started = mount(batch); await started.render();\n+    expect(started.find('native-lot-lrm').props.disabled).toBe(true);\n+});\n function fixture({ started = true, mode = 'REQUIRED_BLOCKING', measured = false } = {}) {\n     const sample = { id: 'sample', position: 3, kind: 'SAMPLE', sampleId: 's' }, duplicate = { id: 'duplicate', position: 4, kind: 'DUPLICATE', sampleId: 's', duplicateOfPositionId: 'sample' };\n     const positions = mode === 'OFF' ? [sample] : [{ id: 'blank', position: 1, kind: 'BLANK' }, { id: 'lrm', position: 2, kind: 'LRM', references: [] }, sample, duplicate];\ndiff --git a/server/tests/contracts/audit_4_1_run_first_ui.test.js b/server/tests/contracts/audit_4_1_run_first_ui.test.js\nindex 6058342f..0a68792a 100644\n--- a/server/tests/contracts/audit_4_1_run_first_ui.test.js\n+++ b/server/tests/contracts/audit_4_1_run_first_ui.test.js\n@@ -6,6 +6,20 @@ const group = count => ({ analysis: 'A', analysisName: 'Owned analysis', items:\n })) });\n const options = { labId: 'owned-lab', defaultMethodologyId: 'method', methodologyId: 'method', maxBatchSize: 40, equipmentRequired: true,\n     methods: [{ id: 'method', analysisCode: 'A', name: 'Owned method' }], eligibleEquipment: [{ id: 'instrument', name: 'Qualified instrument' }] };\n+\n+test('#214 chart-mode start visibly requires an offered LRM lot and sends its identity with the run', async () => {\n+    const { view, axios } = await form(1, { ...options, chartLotRequired: true,\n+        eligibleLrmLots: [{ id: 'lot-a', code: 'LRM-A', lotNumber: 'LOT-A' }] });\n+    view.find('start-run-instrument').props.onChange({ target: { value: 'instrument' } }); await view.render();\n+    expect(view.find('start-run-select-all').props.disabled).toBeTruthy();\n+    expect(view.find('start-run-lrm-lot').props.required).toBe(true);\n+    view.find('start-run-lrm-lot').props.onChange({ target: { value: 'lot-a' } }); await view.render();\n+    view.find('start-run-select-all').props.onClick(); await view.render();\n+    expect(view.find('start-run-confirm').props.disabled).toBeFalsy();\n+    await view.find('start-run-form').props.onSubmit({ preventDefault() {} });\n+    expect(axios.post).toHaveBeenCalledWith('/api/qc/runs/start', { analysisCode: 'A', labId: 'owned-lab', methodologyId: 'method',\n+        instrumentId: 'instrument', workItemIds: ['item-0'], referenceMaterialLotId: 'lot-a' });\n+});\n function api(data = options) { return { get: jest.fn(async () => ({ data })), post: jest.fn(async () => ({ data: { batch: { id: 'started-run' } } })) }; }\n async function form(count = 40, data = options) {\n     const axios = api(data), onStarted = jest.fn(), groups = [group(count)];\ndiff --git a/server/tests/contracts/deployment_readiness_bootstrap.test.js b/server/tests/contracts/deployment_readiness_bootstrap.test.js\nindex ee47fbef..4c7e3911 100644\n--- a/server/tests/contracts/deployment_readiness_bootstrap.test.js\n+++ b/server/tests/contracts/deployment_readiness_bootstrap.test.js\n@@ -368,6 +368,7 @@ bash \"${entryScript.replace(/\\\\/g, '/')}\"\n             .toMatchObject({classification:'COMPLETE_205',backfilledCount:0});\n         require('../../scripts/install_instrument_imports').installInstrumentImports({ dbPath: targetDb, apply: true });\n         require('../../scripts/install_sample_containers').installSampleContainers({ dbPath: targetDb, apply: true });\n+        require('../../scripts/install_control_charts').installControlCharts({ dbPath: targetDb, apply: true });\n         const hashDb = () => createHash('sha256').update(fs.readFileSync(targetDb)).digest('hex');\n         const beforeSha = hashDb();\n         fs.writeFileSync(path.join(testDir, 'prisma', '.seed_complete'), 'done');\n@@ -425,6 +426,8 @@ bash \"${entryScript.replace(/\\\\/g, '/')}\"\n                 `node \"${path.join(serverDir, 'scripts/install_instrument_imports.js').replace(/\\\\/g, '/')}\"`)\n             .replaceAll('node scripts/install_sample_containers.js',\n                 `node \"${path.join(serverDir, 'scripts/install_sample_containers.js').replace(/\\\\/g, '/')}\"`)\n+            .replaceAll('node scripts/install_control_charts.js',\n+                `node \"${path.join(serverDir, 'scripts/install_control_charts.js').replace(/\\\\/g, '/')}\"`)\n             .replaceAll('node scripts/install_result_raw_input.js',\n                 `node \"${path.join(serverDir, 'scripts/install_result_raw_input.js').replace(/\\\\/g, '/')}\"`)\n             .replace(/node scripts\\/migrate_[^\\n]+/g, '# noop migration');\ndiff --git a/server/tests/globalSetup.js b/server/tests/globalSetup.js\nindex 1aaddb7c..e6315af9 100644\n--- a/server/tests/globalSetup.js\n+++ b/server/tests/globalSetup.js\n@@ -90,6 +90,7 @@ module.exports = async function globalSetup() {\n         require('../scripts/install_preparation_records').installPreparationRecords({dbPath:testDbPath,apply:true});\n         require('../scripts/install_instrument_imports').installInstrumentImports({dbPath:testDbPath,apply:true});\n         require('../scripts/install_sample_containers').installSampleContainers({dbPath:testDbPath,apply:true});\n+        require('../scripts/install_control_charts').installControlCharts({dbPath:testDbPath,apply:true});\n     }\n \n     process.env.DATABASE_PATH = testDbPath;\ndiff --git a/server/tests/helpers/legacyWorkflowDatabase.js b/server/tests/helpers/legacyWorkflowDatabase.js\nindex ec488e0c..6bf76312 100644\n--- a/server/tests/helpers/legacyWorkflowDatabase.js\n+++ b/server/tests/helpers/legacyWorkflowDatabase.js\n@@ -242,6 +242,12 @@ function beforeGuards(options) {\n             expected.push({table:'UserBenchCredential',missingTable:true});\n             // #205 adds exactly one append-only evidence table and one nullable draft column; its installer creates both.\n             expected.push({table:'WorkItemDraft',fields:['records']},{table:'PreparationRecord',missingTable:true});\n+            // #214 is four additive tables. Preserve the captured historical\n+            // schema and continue refusing every other generated-model gap.\n+            const chartTables = ['ControlLimitProposal', 'ControlLimitSet', 'QcReviewObligation', 'QcReviewResolution'];\n+            const chartModels = chartTables.filter(table => modelNames.includes(table));\n+            assert.ok(chartModels.length === 0 || chartModels.length === chartTables.length, 'Generated chart datamodel is partial.');\n+            if (chartModels.length) expected.push(...chartTables.map(table => ({ table, missingTable: true })));\n             // #200 adds only these two models and one nullable draft pointer.\n             // The historical literals and every earlier expected gap stay fixed.\n             const importTables = ['ImportTemplate', 'InstrumentImportReceipt'];\n@@ -333,7 +339,7 @@ function beforeGuards(options) {\n             const tables = source.prepare(\"SELECT name, sql FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name NOT LIKE '_prisma_%' AND name NOT IN ('ResultEvidenceEvent','ContainerSequence')\").all();\n             // Copy schema-only indexes, leaving every additive release guard\n             // and partial index for its actual installer on this new file.\n-            const indexes = source.prepare(\"SELECT sql FROM sqlite_master WHERE type='index' AND sql IS NOT NULL AND tbl_name != 'ResultEvidenceEvent' AND name NOT IN ('ReferenceValue_current_generic','ReferenceValue_current_method','QcRule_scope_version_unique','BatchAnalyte_crm_ordinal_unique','BatchPositionReference_current_unique','QcMeasurement_current_unique','WorkAttempt_workItemId_attemptNo_unique','result_one_current','ReportedValueSelection_one_root','ResultOverrideRequest_one_active_cell','Report_amendmentId_key')\").all();\n+            const indexes = source.prepare(\"SELECT sql FROM sqlite_master WHERE type='index' AND sql IS NOT NULL AND tbl_name != 'ResultEvidenceEvent' AND name NOT IN ('ReferenceValue_current_generic','ReferenceValue_current_method','QcRule_scope_version_unique','BatchAnalyte_crm_ordinal_unique','BatchPositionReference_current_unique','QcMeasurement_current_unique','WorkAttempt_workItemId_attemptNo_unique','result_one_current','ReportedValueSelection_one_root','ResultOverrideRequest_one_active_cell','Report_amendmentId_key','ControlLimitSet_one_approved_series')\").all();\n             source.close();\n             for (const table of tables) db.exec(['Sample', 'WorkItem'].includes(table.name)\n                 ? table.sql.replace(/,\\s*\"(?:holdPriorStatus|legacyStatus)\"\\s+TEXT(?=\\s*[,)])/g, '') : table.sql);\ndiff --git a/server/tests/helpers/qcGateFixture.js b/server/tests/helpers/qcGateFixture.js\nindex 30c22b6f..7589ddc4 100644\n--- a/server/tests/helpers/qcGateFixture.js\n+++ b/server/tests/helpers/qcGateFixture.js\n@@ -8,7 +8,7 @@ const { beforeGuards } = require('./legacyWorkflowDatabase');\n const { createSampleFixture, createWorkItemFixture } = require('./workflowFixtures');\n const { installCalculationReleasePrerequisites } = require('./calculationReleasePrerequisites');\n \n-async function qcGateFixture({ count = 1, criteria = {}, status = 'IN_PROGRESS', sharedSample = false, resolvedRules = true, installSelectionEvidence = true, installOverrideRequests = true, installInstrumentImports = true, installSampleContainers = true } = {}) {\n+async function qcGateFixture({ count = 1, criteria = {}, status = 'IN_PROGRESS', sharedSample = false, resolvedRules = true, installSelectionEvidence = true, installOverrideRequests = true, installInstrumentImports = true, installSampleContainers = true, installControlCharts = true, fixedWindowPolicy = criteria.lrmMode !== 'CONTROL_CHART' && criteria.lrmPerBatch !== 0 } = {}) {\n     const labId = randomUUID(), analysisCode = `QC-GATE-${randomUUID()}`, username = 'system:fixture';\n     const historical = beforeGuards({ actor: username, schemaVariant: 'PRE_1_3_SAMPLE_CODES', relatedRows: {\n         Lab: [{ id: labId, code: labId, name: 'QC gate fixture', country: 'TEST', updatedAt: Date.now() }],\n@@ -37,12 +37,16 @@ async function qcGateFixture({ count = 1, criteria = {}, status = 'IN_PROGRESS',\n     require('../../scripts/install_preparation_records').installPreparationRecords({dbPath:file,apply:true});\n     if (installInstrumentImports) require('../../scripts/install_instrument_imports').installInstrumentImports({ dbPath: file, apply: true });\n     if (installInstrumentImports && installSampleContainers) require('../../scripts/install_sample_containers').installSampleContainers({ dbPath: file, apply: true });\n+    if (installInstrumentImports && installSampleContainers && installControlCharts) require('../../scripts/install_control_charts').installControlCharts({ dbPath: file, apply: true });\n     const db = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${file}` }) });\n     const actor = { username, role: 'SUPER_ADMIN', labId };\n     await db.unit.create({ data: { code: 'fixture-unit', display: 'Fixture unit', quantityKind: 'MASS_FRACTION', factorToBase: 1 } });\n     const instrument = await db.equipmentAsset.create({ data: { id: randomUUID(), labId, name: 'Fixture instrument', assetType: 'OTHER',\n         status: 'IN_SERVICE', criticality: 'NON_CRITICAL' } });\n     const items = [], methods = [];\n+    if (fixedWindowPolicy) await require('../../services/policyService').change(actor, labId, {\n+        changes: [{ key: 'qc.lrmLimitMode', value: 'FIXED_WINDOW' }], reason: 'Explicit retained pre-chart gate fixture context'\n+    }, { db });\n     let sample;\n     for (let i = 0; i < count; i++) {\n         const code = sharedSample ? `${analysisCode}-${i}` : analysisCode;\ndiff --git a/server/tests/helpers/workflowWriteScanner.js b/server/tests/helpers/workflowWriteScanner.js\nindex 1e06d429..372ea9ba 100644\n--- a/server/tests/helpers/workflowWriteScanner.js\n+++ b/server/tests/helpers/workflowWriteScanner.js\n@@ -31,6 +31,12 @@ const QC_MEMBERSHIP_LOADER_SHA256 = '40c0af827c4d22b6fce1ee5b770f2c0146f456cfeea\n const QC_MEMBERSHIP_SQL_SHA256 = '1bc85113a3b6b7da327265bc7005eb4a1c97855943c599b1fe5ed8b126cf8572';\n // #189 additive evidence sources are inspected, never exempted as writers.\n const QC_EVIDENCE_SOURCES = Object.freeze([\n+    // #214: inspect only the exact additive chart evidence/guard source.\n+    // This adds no workflow writer exemption.\n+    Object.freeze({ functionName: 'loadControlChartMigrationSource', loader: 'services/controlChartMigrationSource.js',\n+        loaderSha256: '2e79cdf57bb09eed9f5e2e8721aa5c0ab540c16a7312d4ff02d138a20e604df6',\n+        directory: '20261013000200_control_charts', sqlSha256: '49b378296a8a0ede3318ae1e543060478b55827db0ec981d8cc4bd6180a56df6',\n+        boundary: '-- Contract guards' }),\n     // #206: resolve only digest-bound additive container/counter DDL. No writer exception.\n     Object.freeze({ functionName: 'loadSampleContainerMigrationSource', loader: 'services/sampleContainerMigrationSource.js',\n         loaderSha256: 'ab223052522a5d74e899c4c372204a4a68574819a3f6b3c7bd8837f8ad7bb8d4',\n@@ -216,6 +222,8 @@ const CALCULATION_PREREQUISITES = Object.freeze({\n     file: 'tests/helpers/calculationReleasePrerequisites.js', exportName: 'installCalculationReleasePrerequisites',\n     sha256: '5b091435c1e3ce5468a5dedcddf1f278fe3d6f6238c129804959f1826287ac57',\n     callers: ['tests/helpers/qcGateFixture.js', 'tests/helpers/normalizedQcFixture.js', 'tests/helpers/repeatQcPredecessors.js',\n+        // Claudio6152507558: current-schema Native case in this owned compatibility fixture only.\n+        'tests/contracts/audit_2_3_compatibility_runs.test.js',\n         'tests/contracts/audit_2_3_native_runs.test.js', 'tests/contracts/audit_1_2_guard_installer.test.js',\n         'tests/contracts/deployment_readiness_bootstrap.test.js', 'tests/contracts/audit_3_1_attempt_sql_guards.test.js']\n });\n```\n\n</details>\n\nRefs #214. The issue stays open for deployment and Claudio's actual post-deploy check; this PR deliberately has no closing keyword. Existing #206 source merge remains undeployed. A later batch requires each exact-head audit PASS, one exact-kit audit and a fresh single-use gate under the standing go. This PR authorizes no historical production replay and no #103 apply.\n",
+2026-10-14T07:11:46.0541401Z             "changed_files": 59,
+2026-10-14T07:11:46.0541556Z             "closed_at": null,
+2026-10-14T07:11:46.0541689Z             "comments": 0,
+2026-10-14T07:11:46.0541928Z             "comments_url": "https://api.github.com/repos/yigini/soilfer-lims/issues/296/comments",
+2026-10-14T07:11:46.0542158Z             "commits": 3,
+2026-10-14T07:11:46.0542382Z             "commits_url": "https://api.github.com/repos/yigini/soilfer-lims/pulls/296/commits",
+2026-10-14T07:11:46.0542632Z             "created_at": "2026-10-13T21:01:00Z",
+2026-10-14T07:11:46.0542785Z             "deletions": 45,
+2026-10-14T07:11:46.0542983Z             "diff_url": "https://github.com/yigini/soilfer-lims/pull/296.diff",
+2026-10-14T07:11:46.0543174Z             "draft": false,
+2026-10-14T07:11:46.0543298Z             "head": {
+2026-10-14T07:11:46.0543462Z               "label": "yigini:codex/issue-214-control-charts",
+2026-10-14T07:11:46.0543660Z               "ref": "codex/issue-214-control-charts",
+2026-10-14T07:11:46.0543813Z               "repo": {
+2026-10-14T07:11:46.0543952Z                 "allow_auto_merge": false,
+2026-10-14T07:11:46.0544107Z                 "allow_forking": true,
+2026-10-14T07:11:46.0544260Z                 "allow_merge_commit": true,
+2026-10-14T07:11:46.0544419Z                 "allow_rebase_merge": true,
+2026-10-14T07:11:46.0544573Z                 "allow_squash_merge": true,
+2026-10-14T07:11:46.0544731Z                 "allow_update_branch": false,
+2026-10-14T07:11:46.0544992Z                 "archive_url": "https://api.github.com/repos/yigini/soilfer-lims/{archive_format}{/ref}",
+2026-10-14T07:11:46.0545230Z                 "archived": false,
+2026-10-14T07:11:46.0545470Z                 "assignees_url": "https://api.github.com/repos/yigini/soilfer-lims/assignees{/user}",
+2026-10-14T07:11:46.0545888Z                 "blobs_url": "https://api.github.com/repos/yigini/soilfer-lims/git/blobs{/sha}",
+2026-10-14T07:11:46.0546200Z                 "branches_url": "https://api.github.com/repos/yigini/soilfer-lims/branches{/branch}",
+2026-10-14T07:11:46.0546472Z                 "clone_url": "https://github.com/yigini/soilfer-lims.git",
+2026-10-14T07:11:46.0546793Z                 "collaborators_url": "https://api.github.com/repos/yigini/soilfer-lims/collaborators{/collaborator}",
+2026-10-14T07:11:46.0547142Z                 "comments_url": "https://api.github.com/repos/yigini/soilfer-lims/comments{/number}",
+2026-10-14T07:11:46.0547450Z                 "commits_url": "https://api.github.com/repos/yigini/soilfer-lims/commits{/sha}",
+2026-10-14T07:11:46.0547772Z                 "compare_url": "https://api.github.com/repos/yigini/soilfer-lims/compare/{base}...{head}",
+2026-10-14T07:11:46.0548098Z                 "contents_url": "https://api.github.com/repos/yigini/soilfer-lims/contents/{+path}",
+2026-10-14T07:11:46.0548416Z                 "contributors_url": "https://api.github.com/repos/yigini/soilfer-lims/contributors",
+2026-10-14T07:11:46.0548658Z                 "created_at": "2026-02-11T20:35:39Z",
+2026-10-14T07:11:46.0548823Z                 "default_branch": "main",
+2026-10-14T07:11:46.0548985Z                 "delete_branch_on_merge": false,
+2026-10-14T07:11:46.0549232Z                 "deployments_url": "https://api.github.com/repos/yigini/soilfer-lims/deployments",
+2026-10-14T07:11:46.0549540Z                 "description": "Laboratory Information Management System for Soil Analysis",
+2026-10-14T07:11:46.0549758Z                 "disabled": false,
+2026-10-14T07:11:46.0550064Z                 "downloads_url": "https://api.github.com/repos/yigini/soilfer-lims/downloads",
+2026-10-14T07:11:46.0550349Z                 "events_url": "https://api.github.com/repos/yigini/soilfer-lims/events",
+2026-10-14T07:11:46.0550558Z                 "fork": false,
+2026-10-14T07:11:46.0550688Z                 "forks": 0,
+2026-10-14T07:11:46.0550823Z                 "forks_count": 0,
+2026-10-14T07:11:46.0551100Z                 "forks_url": "https://api.github.com/repos/yigini/soilfer-lims/forks",
+2026-10-14T07:11:46.0551318Z                 "full_name": "yigini/soilfer-lims",
+2026-10-14T07:11:46.0551577Z                 "git_commits_url": "https://api.github.com/repos/yigini/soilfer-lims/git/commits{/sha}",
+2026-10-14T07:11:46.0551895Z                 "git_refs_url": "https://api.github.com/repos/yigini/soilfer-lims/git/refs{/sha}",
+2026-10-14T07:11:46.0552200Z                 "git_tags_url": "https://api.github.com/repos/yigini/soilfer-lims/git/tags{/sha}",
+2026-10-14T07:11:46.0552461Z                 "git_url": "git://github.com/yigini/soilfer-lims.git",
+2026-10-14T07:11:46.0552647Z                 "has_discussions": false,
+2026-10-14T07:11:46.0552800Z                 "has_downloads": false,
+2026-10-14T07:11:46.0552951Z                 "has_issues": true,
+2026-10-14T07:11:46.0553096Z                 "has_pages": true,
+2026-10-14T07:11:46.0553244Z                 "has_projects": true,
+2026-10-14T07:11:46.0553397Z                 "has_pull_requests": true,
+2026-10-14T07:11:46.0553548Z                 "has_wiki": true,
+2026-10-14T07:11:46.0553688Z                 "homepage": null,
+2026-10-14T07:11:46.0553899Z                 "hooks_url": "https://api.github.com/repos/yigini/soilfer-lims/hooks",
+2026-10-14T07:11:46.0554145Z                 "html_url": "https://github.com/yigini/soilfer-lims",
+2026-10-14T07:11:46.0554323Z                 "id": 1155719496,
+2026-10-14T07:11:46.0554465Z                 "is_template": false,
+2026-10-14T07:11:46.0554730Z                 "issue_comment_url": "https://api.github.com/repos/yigini/soilfer-lims/issues/comments{/number}",
+2026-10-14T07:11:46.0555099Z                 "issue_events_url": "https://api.github.com/repos/yigini/soilfer-lims/issues/events{/number}",
+2026-10-14T07:11:46.0555427Z                 "issues_url": "https://api.github.com/repos/yigini/soilfer-lims/issues{/number}",
+2026-10-14T07:11:46.0555819Z                 "keys_url": "https://api.github.com/repos/yigini/soilfer-lims/keys{/key_id}",
+2026-10-14T07:11:46.0556118Z                 "labels_url": "https://api.github.com/repos/yigini/soilfer-lims/labels{/name}",
+2026-10-14T07:11:46.0556349Z                 "language": "JavaScript",
+2026-10-14T07:11:46.0556581Z                 "languages_url": "https://api.github.com/repos/yigini/soilfer-lims/languages",
+2026-10-14T07:11:46.0556793Z                 "license": {
+2026-10-14T07:11:46.0556927Z                   "key": "other",
+2026-10-14T07:11:46.0557065Z                   "name": "Other",
+2026-10-14T07:11:46.0557222Z                   "node_id": "MDc6TGljZW5zZTA=",
+2026-10-14T07:11:46.0557388Z                   "spdx_id": "NOASSERTION",
+2026-10-14T07:11:46.0557529Z                   "url": null
+2026-10-14T07:11:46.0557652Z                 },
+2026-10-14T07:11:46.0557788Z                 "merge_commit_message": "PR_TITLE",
+2026-10-14T07:11:46.0557966Z                 "merge_commit_title": "MERGE_MESSAGE",
+2026-10-14T07:11:46.0558197Z                 "merges_url": "https://api.github.com/repos/yigini/soilfer-lims/merges",
+2026-10-14T07:11:46.0558504Z                 "milestones_url": "https://api.github.com/repos/yigini/soilfer-lims/milestones{/number}",
+2026-10-14T07:11:46.0558742Z                 "mirror_url": null,
+2026-10-14T07:11:46.0558889Z                 "name": "soilfer-lims",
+2026-10-14T07:11:46.0559043Z                 "node_id": "R_kgDOROLhSA",
+2026-10-14T07:11:46.0559343Z                 "notifications_url": "https://api.github.com/repos/yigini/soilfer-lims/notifications{?since,all,participating}",
+2026-10-14T07:11:46.0559712Z                 "open_issues": 25,
+2026-10-14T07:11:46.0559858Z                 "open_issues_count": 25,
+2026-10-14T07:11:46.0559997Z                 "owner": {
+2026-10-14T07:11:46.0560203Z                   "avatar_url": "https://avatars.githubusercontent.com/u/32960535?v=4",
+2026-10-14T07:11:46.0560484Z                   "events_url": "https://api.github.com/users/yigini/events{/privacy}",
+2026-10-14T07:11:46.0560752Z                   "followers_url": "https://api.github.com/users/yigini/followers",
+2026-10-14T07:11:46.0561114Z                   "following_url": "https://api.github.com/users/yigini/following{/other_user}",
+2026-10-14T07:11:46.0561395Z                   "gists_url": "https://api.github.com/users/yigini/gists{/gist_id}",
+2026-10-14T07:11:46.0561600Z                   "gravatar_id": "",
+2026-10-14T07:11:46.0561774Z                   "html_url": "https://github.com/yigini",
+2026-10-14T07:11:46.0561940Z                   "id": 32960535,
+2026-10-14T07:11:46.0562080Z                   "login": "yigini",
+2026-10-14T07:11:46.0562244Z                   "node_id": "MDQ6VXNlcjMyOTYwNTM1",
+2026-10-14T07:11:46.0562466Z                   "organizations_url": "https://api.github.com/users/yigini/orgs",
+2026-10-14T07:11:46.0562752Z                   "received_events_url": "https://api.github.com/users/yigini/received_events",
+2026-10-14T07:11:46.0563020Z                   "repos_url": "https://api.github.com/users/yigini/repos",
+2026-10-14T07:11:46.0563212Z                   "site_admin": false,
+2026-10-14T07:11:46.0563436Z                   "starred_url": "https://api.github.com/users/yigini/starred{/owner}{/repo}",
+2026-10-14T07:11:46.0563727Z                   "subscriptions_url": "https://api.github.com/users/yigini/subscriptions",
+2026-10-14T07:11:46.0563944Z                   "type": "User",
+2026-10-14T07:11:46.0564114Z                   "url": "https://api.github.com/users/yigini",
+2026-10-14T07:11:46.0564316Z                   "user_view_type": "public"
+2026-10-14T07:11:46.0564456Z                 },
+2026-10-14T07:11:46.0564579Z                 "private": false,
+2026-10-14T07:11:46.0564739Z                 "pull_request_creation_policy": "all",
+2026-10-14T07:11:46.0564985Z                 "pulls_url": "https://api.github.com/repos/yigini/soilfer-lims/pulls{/number}",
+2026-10-14T07:11:46.0565220Z                 "pushed_at": "2026-10-14T06:50:02Z",
+2026-10-14T07:11:46.0565555Z                 "releases_url": "https://api.github.com/repos/yigini/soilfer-lims/releases{/id}",
+2026-10-14T07:11:46.0565775Z                 "size": 105732,
+2026-10-14T07:11:46.0565943Z                 "squash_merge_commit_message": "COMMIT_MESSAGES",
+2026-10-14T07:11:46.0566149Z                 "squash_merge_commit_title": "COMMIT_OR_PR_TITLE",
+2026-10-14T07:11:46.0566359Z                 "ssh_url": "git@github.com:yigini/soilfer-lims.git",
+2026-10-14T07:11:46.0566540Z                 "stargazers_count": 0,
+2026-10-14T07:11:46.0566772Z                 "stargazers_url": "https://api.github.com/repos/yigini/soilfer-lims/stargazers",
+2026-10-14T07:11:46.0567081Z                 "statuses_url": "https://api.github.com/repos/yigini/soilfer-lims/statuses/{sha}",
+2026-10-14T07:11:46.0567394Z                 "subscribers_url": "https://api.github.com/repos/yigini/soilfer-lims/subscribers",
+2026-10-14T07:11:46.0567709Z                 "subscription_url": "https://api.github.com/repos/yigini/soilfer-lims/subscription",
+2026-10-14T07:11:46.0567972Z                 "svn_url": "https://github.com/yigini/soilfer-lims",
+2026-10-14T07:11:46.0568210Z                 "tags_url": "https://api.github.com/repos/yigini/soilfer-lims/tags",
+2026-10-14T07:11:46.0568476Z                 "teams_url": "https://api.github.com/repos/yigini/soilfer-lims/teams",
+2026-10-14T07:11:46.0568673Z                 "topics": [],
+2026-10-14T07:11:46.0568892Z                 "trees_url": "https://api.github.com/repos/yigini/soilfer-lims/git/trees{/sha}",
+2026-10-14T07:11:46.0569124Z                 "updated_at": "2026-10-13T13:57:18Z",
+2026-10-14T07:11:46.0569369Z                 "url": "https://api.github.com/repos/yigini/soilfer-lims",
+2026-10-14T07:11:46.0569621Z                 "use_squash_pr_title_as_default": false,
+2026-10-14T07:11:46.0569788Z                 "visibility": "public",
+2026-10-14T07:11:46.0569936Z                 "watchers": 0,
+2026-10-14T07:11:46.0570074Z                 "watchers_count": 0,
+2026-10-14T07:11:46.0570235Z                 "web_commit_signoff_required": false
+2026-10-14T07:11:46.0570378Z               },
+2026-10-14T07:11:46.0570530Z               "sha": "5e0b32830f961b3236c7cf8f74cf8f676e98fbaa",
+2026-10-14T07:11:46.0570690Z               "user": {
+2026-10-14T07:11:46.0570887Z                 "avatar_url": "https://avatars.githubusercontent.com/u/32960535?v=4",
+2026-10-14T07:11:46.0571222Z                 "events_url": "https://api.github.com/users/yigini/events{/privacy}",
+2026-10-14T07:11:46.0571483Z                 "followers_url": "https://api.github.com/users/yigini/followers",
+2026-10-14T07:11:46.0571764Z                 "following_url": "https://api.github.com/users/yigini/following{/other_user}",
+2026-10-14T07:11:46.0572045Z                 "gists_url": "https://api.github.com/users/yigini/gists{/gist_id}",
+2026-10-14T07:11:46.0572247Z                 "gravatar_id": "",
+2026-10-14T07:11:46.0572412Z                 "html_url": "https://github.com/yigini",
+2026-10-14T07:11:46.0572575Z                 "id": 32960535,
+2026-10-14T07:11:46.0572714Z                 "login": "yigini",
+2026-10-14T07:11:46.0572870Z                 "node_id": "MDQ6VXNlcjMyOTYwNTM1",
+2026-10-14T07:11:46.0573090Z                 "organizations_url": "https://api.github.com/users/yigini/orgs",
+2026-10-14T07:11:46.0573370Z                 "received_events_url": "https://api.github.com/users/yigini/received_events",
+2026-10-14T07:11:46.0573631Z                 "repos_url": "https://api.github.com/users/yigini/repos",
+2026-10-14T07:11:46.0573823Z                 "site_admin": false,
+2026-10-14T07:11:46.0574042Z                 "starred_url": "https://api.github.com/users/yigini/starred{/owner}{/repo}",
+2026-10-14T07:11:46.0574332Z                 "subscriptions_url": "https://api.github.com/users/yigini/subscriptions",
+2026-10-14T07:11:46.0574543Z                 "type": "User",
+2026-10-14T07:11:46.0574711Z                 "url": "https://api.github.com/users/yigini",
+2026-10-14T07:11:46.0574890Z                 "user_view_type": "public"
+2026-10-14T07:11:46.0575118Z               }
+2026-10-14T07:11:46.0575223Z             },
+2026-10-14T07:11:46.0575390Z             "html_url": "https://github.com/yigini/soilfer-lims/pull/296",
+2026-10-14T07:11:46.0575571Z             "id": 4849420339,
+2026-10-14T07:11:46.0575779Z             "issue_url": "https://api.github.com/repos/yigini/soilfer-lims/issues/296",
+2026-10-14T07:11:46.0575985Z             "labels": [],
+2026-10-14T07:11:46.0576106Z             "locked": false,
+2026-10-14T07:11:46.0576250Z             "maintainer_can_modify": false,
+2026-10-14T07:11:46.0576457Z             "merge_commit_sha": "facc9ae03fadbc33e62304db4d29a50869ee21ed",
+2026-10-14T07:11:46.0576651Z             "mergeable": null,
+2026-10-14T07:11:46.0576855Z             "mergeable_state": "unknown",
+2026-10-14T07:11:46.0576993Z             "merged": false,
+2026-10-14T07:11:46.0577126Z             "merged_at": null,
+2026-10-14T07:11:46.0577262Z             "merged_by": null,
+2026-10-14T07:11:46.0577397Z             "milestone": null,
+2026-10-14T07:11:46.0577553Z             "node_id": "PR_kwDOROLhSM8AAAABIQxIMw",
+2026-10-14T07:11:46.0577707Z             "number": 296,
+2026-10-14T07:11:46.0577901Z             "patch_url": "https://github.com/yigini/soilfer-lims/pull/296.patch",
+2026-10-14T07:11:46.0578104Z             "rebaseable": null,
+2026-10-14T07:11:46.0578249Z             "requested_reviewers": [],
+2026-10-14T07:11:46.0578398Z             "requested_teams": [],
+2026-10-14T07:11:46.0578653Z             "review_comment_url": "https://api.github.com/repos/yigini/soilfer-lims/pulls/comments{/number}",
+2026-10-14T07:11:46.0578905Z             "review_comments": 0,
+2026-10-14T07:11:46.0579239Z             "review_comments_url": "https://api.github.com/repos/yigini/soilfer-lims/pulls/296/comments",
+2026-10-14T07:11:46.0579470Z             "state": "open",
+2026-10-14T07:11:46.0579759Z             "statuses_url": "https://api.github.com/repos/yigini/soilfer-lims/statuses/5e0b32830f961b3236c7cf8f74cf8f676e98fbaa",
+2026-10-14T07:11:46.0580104Z             "title": "feat(qc): freeze control chart limits and QC review evidence",
+2026-10-14T07:11:46.0580318Z             "updated_at": "2026-10-14T06:50:04Z",
+2026-10-14T07:11:46.0580532Z             "url": "https://api.github.com/repos/yigini/soilfer-lims/pulls/296",
+2026-10-14T07:11:46.0580724Z             "user": {
+2026-10-14T07:11:46.0581033Z               "avatar_url": "https://avatars.githubusercontent.com/u/32960535?v=4",
+2026-10-14T07:11:46.0581343Z               "events_url": "https://api.github.com/users/yigini/events{/privacy}",
+2026-10-14T07:11:46.0581603Z               "followers_url": "https://api.github.com/users/yigini/followers",
+2026-10-14T07:11:46.0581881Z               "following_url": "https://api.github.com/users/yigini/following{/other_user}",
+2026-10-14T07:11:46.0582158Z               "gists_url": "https://api.github.com/users/yigini/gists{/gist_id}",
+2026-10-14T07:11:46.0582355Z               "gravatar_id": "",
+2026-10-14T07:11:46.0582518Z               "html_url": "https://github.com/yigini",
+2026-10-14T07:11:46.0582672Z               "id": 32960535,
+2026-10-14T07:11:46.0582806Z               "login": "yigini",
+2026-10-14T07:11:46.0582961Z               "node_id": "MDQ6VXNlcjMyOTYwNTM1",
+2026-10-14T07:11:46.0583176Z               "organizations_url": "https://api.github.com/users/yigini/orgs",
+2026-10-14T07:11:46.0583454Z               "received_events_url": "https://api.github.com/users/yigini/received_events",
+2026-10-14T07:11:46.0583714Z               "repos_url": "https://api.github.com/users/yigini/repos",
+2026-10-14T07:11:46.0583901Z               "site_admin": false,
+2026-10-14T07:11:46.0584120Z               "starred_url": "https://api.github.com/users/yigini/starred{/owner}{/repo}",
+2026-10-14T07:11:46.0584405Z               "subscriptions_url": "https://api.github.com/users/yigini/subscriptions",
+2026-10-14T07:11:46.0584607Z               "type": "User",
+2026-10-14T07:11:46.0584771Z               "url": "https://api.github.com/users/yigini",
+2026-10-14T07:11:46.0585039Z               "user_view_type": "public"
+2026-10-14T07:11:46.0585175Z             }
+2026-10-14T07:11:46.0585276Z           },
+2026-10-14T07:11:46.0585384Z           "repository": {
+2026-10-14T07:11:46.0585521Z             "allow_forking": true,
+2026-10-14T07:11:46.0585767Z             "archive_url": "https://api.github.com/repos/yigini/soilfer-lims/{archive_format}{/ref}",
+2026-10-14T07:11:46.0586000Z             "archived": false,
+2026-10-14T07:11:46.0586229Z             "assignees_url": "https://api.github.com/repos/yigini/soilfer-lims/assignees{/user}",
+2026-10-14T07:11:46.0586536Z             "blobs_url": "https://api.github.com/repos/yigini/soilfer-lims/git/blobs{/sha}",
+2026-10-14T07:11:46.0586843Z             "branches_url": "https://api.github.com/repos/yigini/soilfer-lims/branches{/branch}",
+2026-10-14T07:11:46.0587134Z             "clone_url": "https://github.com/yigini/soilfer-lims.git",
+2026-10-14T07:11:46.0587442Z             "collaborators_url": "https://api.github.com/repos/yigini/soilfer-lims/collaborators{/collaborator}",
+2026-10-14T07:11:46.0587785Z             "comments_url": "https://api.github.com/repos/yigini/soilfer-lims/comments{/number}",
+2026-10-14T07:11:46.0588087Z             "commits_url": "https://api.github.com/repos/yigini/soilfer-lims/commits{/sha}",
+2026-10-14T07:11:46.0588399Z             "compare_url": "https://api.github.com/repos/yigini/soilfer-lims/compare/{base}...{head}",
+2026-10-14T07:11:46.0588718Z             "contents_url": "https://api.github.com/repos/yigini/soilfer-lims/contents/{+path}",
+2026-10-14T07:11:46.0589032Z             "contributors_url": "https://api.github.com/repos/yigini/soilfer-lims/contributors",
+2026-10-14T07:11:46.0589350Z             "created_at": "2026-02-11T20:35:39Z",
+2026-10-14T07:11:46.0589512Z             "default_branch": "main",
+2026-10-14T07:11:46.0589743Z             "deployments_url": "https://api.github.com/repos/yigini/soilfer-lims/deployments",
+2026-10-14T07:11:46.0590039Z             "description": "Laboratory Information Management System for Soil Analysis",
+2026-10-14T07:11:46.0590257Z             "disabled": false,
+2026-10-14T07:11:46.0590472Z             "downloads_url": "https://api.github.com/repos/yigini/soilfer-lims/downloads",
+2026-10-14T07:11:46.0590752Z             "events_url": "https://api.github.com/repos/yigini/soilfer-lims/events",
+2026-10-14T07:11:46.0591018Z             "fork": false,
+2026-10-14T07:11:46.0591139Z             "forks": 0,
+2026-10-14T07:11:46.0591259Z             "forks_count": 0,
+2026-10-14T07:11:46.0591458Z             "forks_url": "https://api.github.com/repos/yigini/soilfer-lims/forks",
+2026-10-14T07:11:46.0591676Z             "full_name": "yigini/soilfer-lims",
+2026-10-14T07:11:46.0591927Z             "git_commits_url": "https://api.github.com/repos/yigini/soilfer-lims/git/commits{/sha}",
+2026-10-14T07:11:46.0592237Z             "git_refs_url": "https://api.github.com/repos/yigini/soilfer-lims/git/refs{/sha}",
+2026-10-14T07:11:46.0592539Z             "git_tags_url": "https://api.github.com/repos/yigini/soilfer-lims/git/tags{/sha}",
+2026-10-14T07:11:46.0592796Z             "git_url": "git://github.com/yigini/soilfer-lims.git",
+2026-10-14T07:11:46.0592979Z             "has_discussions": false,
+2026-10-14T07:11:46.0593128Z             "has_downloads": false,
+2026-10-14T07:11:46.0593270Z             "has_issues": true,
+2026-10-14T07:11:46.0593411Z             "has_pages": true,
+2026-10-14T07:11:46.0593549Z             "has_projects": true,
+2026-10-14T07:11:46.0593696Z             "has_pull_requests": true,
+2026-10-14T07:11:46.0593830Z             "has_wiki": true,
+2026-10-14T07:11:46.0593955Z             "homepage": null,
+2026-10-14T07:11:46.0594157Z             "hooks_url": "https://api.github.com/repos/yigini/soilfer-lims/hooks",
+2026-10-14T07:11:46.0594398Z             "html_url": "https://github.com/yigini/soilfer-lims",
+2026-10-14T07:11:46.0594566Z             "id": 1155719496,
+2026-10-14T07:11:46.0594700Z             "is_template": false,
+2026-10-14T07:11:46.0594952Z             "issue_comment_url": "https://api.github.com/repos/yigini/soilfer-lims/issues/comments{/number}",
+2026-10-14T07:11:46.0595398Z             "issue_events_url": "https://api.github.com/repos/yigini/soilfer-lims/issues/events{/number}",
+2026-10-14T07:11:46.0595721Z             "issues_url": "https://api.github.com/repos/yigini/soilfer-lims/issues{/number}",
+2026-10-14T07:11:46.0596014Z             "keys_url": "https://api.github.com/repos/yigini/soilfer-lims/keys{/key_id}",
+2026-10-14T07:11:46.0596302Z             "labels_url": "https://api.github.com/repos/yigini/soilfer-lims/labels{/name}",
+2026-10-14T07:11:46.0596524Z             "language": "JavaScript",
+2026-10-14T07:11:46.0596752Z             "languages_url": "https://api.github.com/repos/yigini/soilfer-lims/languages",
+2026-10-14T07:11:46.0596958Z             "license": {
+2026-10-14T07:11:46.0597077Z               "key": "other",
+2026-10-14T07:11:46.0597211Z               "name": "Other",
+2026-10-14T07:11:46.0597356Z               "node_id": "MDc6TGljZW5zZTA=",
+2026-10-14T07:11:46.0597515Z               "spdx_id": "NOASSERTION",
+2026-10-14T07:11:46.0597655Z               "url": null
+2026-10-14T07:11:46.0597769Z             },
+2026-10-14T07:11:46.0597954Z             "merges_url": "https://api.github.com/repos/yigini/soilfer-lims/merges",
+2026-10-14T07:11:46.0598260Z             "milestones_url": "https://api.github.com/repos/yigini/soilfer-lims/milestones{/number}",
+2026-10-14T07:11:46.0598492Z             "mirror_url": null,
+2026-10-14T07:11:46.0598642Z             "name": "soilfer-lims",
+2026-10-14T07:11:46.0606978Z             "node_id": "R_kgDOROLhSA",
+2026-10-14T07:11:46.0607296Z             "notifications_url": "https://api.github.com/repos/yigini/soilfer-lims/notifications{?since,all,participating}",
+2026-10-14T07:11:46.0607708Z             "open_issues": 25,
+2026-10-14T07:11:46.0607852Z             "open_issues_count": 25,
+2026-10-14T07:11:46.0607987Z             "owner": {
+2026-10-14T07:11:46.0608188Z               "avatar_url": "https://avatars.githubusercontent.com/u/32960535?v=4",
+2026-10-14T07:11:46.0608463Z               "events_url": "https://api.github.com/users/yigini/events{/privacy}",
+2026-10-14T07:11:46.0608723Z               "followers_url": "https://api.github.com/users/yigini/followers",
+2026-10-14T07:11:46.0608999Z               "following_url": "https://api.github.com/users/yigini/following{/other_user}",
+2026-10-14T07:11:46.0609270Z               "gists_url": "https://api.github.com/users/yigini/gists{/gist_id}",
+2026-10-14T07:11:46.0609466Z               "gravatar_id": "",
+2026-10-14T07:11:46.0609626Z               "html_url": "https://github.com/yigini",
+2026-10-14T07:11:46.0609780Z               "id": 32960535,
+2026-10-14T07:11:46.0609913Z               "login": "yigini",
+2026-10-14T07:11:46.0610065Z               "node_id": "MDQ6VXNlcjMyOTYwNTM1",
+2026-10-14T07:11:46.0610283Z               "organizations_url": "https://api.github.com/users/yigini/orgs",
+2026-10-14T07:11:46.0610562Z               "received_events_url": "https://api.github.com/users/yigini/received_events",
+2026-10-14T07:11:46.0610826Z               "repos_url": "https://api.github.com/users/yigini/repos",
+2026-10-14T07:11:46.0611175Z               "site_admin": false,
+2026-10-14T07:11:46.0611396Z               "starred_url": "https://api.github.com/users/yigini/starred{/owner}{/repo}",
+2026-10-14T07:11:46.0611682Z               "subscriptions_url": "https://api.github.com/users/yigini/subscriptions",
+2026-10-14T07:11:46.0611888Z               "type": "User",
+2026-10-14T07:11:46.0612053Z               "url": "https://api.github.com/users/yigini",
+2026-10-14T07:11:46.0612229Z               "user_view_type": "public"
+2026-10-14T07:11:46.0612367Z             },
+2026-10-14T07:11:46.0612477Z             "private": false,
+2026-10-14T07:11:46.0612632Z             "pull_request_creation_policy": "all",
+2026-10-14T07:11:46.0612872Z             "pulls_url": "https://api.github.com/repos/yigini/soilfer-lims/pulls{/number}",
+2026-10-14T07:11:46.0613100Z             "pushed_at": "2026-10-14T06:50:02Z",
+2026-10-14T07:11:46.0613436Z             "releases_url": "https://api.github.com/repos/yigini/soilfer-lims/releases{/id}",
+2026-10-14T07:11:46.0613648Z             "size": 105732,
+2026-10-14T07:11:46.0613819Z             "ssh_url": "git@github.com:yigini/soilfer-lims.git",
+2026-10-14T07:11:46.0613999Z             "stargazers_count": 0,
+2026-10-14T07:11:46.0614223Z             "stargazers_url": "https://api.github.com/repos/yigini/soilfer-lims/stargazers",
+2026-10-14T07:11:46.0614527Z             "statuses_url": "https://api.github.com/repos/yigini/soilfer-lims/statuses/{sha}",
+2026-10-14T07:11:46.0614833Z             "subscribers_url": "https://api.github.com/repos/yigini/soilfer-lims/subscribers",
+2026-10-14T07:11:46.0615148Z             "subscription_url": "https://api.github.com/repos/yigini/soilfer-lims/subscription",
+2026-10-14T07:11:46.0615408Z             "svn_url": "https://github.com/yigini/soilfer-lims",
+2026-10-14T07:11:46.0615643Z             "tags_url": "https://api.github.com/repos/yigini/soilfer-lims/tags",
+2026-10-14T07:11:46.0615905Z             "teams_url": "https://api.github.com/repos/yigini/soilfer-lims/teams",
+2026-10-14T07:11:46.0616097Z             "topics": [],
+2026-10-14T07:11:46.0616309Z             "trees_url": "https://api.github.com/repos/yigini/soilfer-lims/git/trees{/sha}",
+2026-10-14T07:11:46.0616536Z             "updated_at": "2026-10-13T13:57:18Z",
+2026-10-14T07:11:46.0616736Z             "url": "https://api.github.com/repos/yigini/soilfer-lims",
+2026-10-14T07:11:46.0616927Z             "visibility": "public",
+2026-10-14T07:11:46.0617064Z             "watchers": 0,
+2026-10-14T07:11:46.0617197Z             "watchers_count": 0,
+2026-10-14T07:11:46.0617470Z             "web_commit_signoff_required": false
+2026-10-14T07:11:46.0617611Z           },
+2026-10-14T07:11:46.0617715Z           "sender": {
+2026-10-14T07:11:46.0617907Z             "avatar_url": "https://avatars.githubusercontent.com/u/32960535?v=4",
+2026-10-14T07:11:46.0618174Z             "events_url": "https://api.github.com/users/yigini/events{/privacy}",
+2026-10-14T07:11:46.0618432Z             "followers_url": "https://api.github.com/users/yigini/followers",
+2026-10-14T07:11:46.0618705Z             "following_url": "https://api.github.com/users/yigini/following{/other_user}",
+2026-10-14T07:11:46.0618976Z             "gists_url": "https://api.github.com/users/yigini/gists{/gist_id}",
+2026-10-14T07:11:46.0619171Z             "gravatar_id": "",
+2026-10-14T07:11:46.0619328Z             "html_url": "https://github.com/yigini",
+2026-10-14T07:11:46.0619483Z             "id": 32960535,
+2026-10-14T07:11:46.0619612Z             "login": "yigini",
+2026-10-14T07:11:46.0619765Z             "node_id": "MDQ6VXNlcjMyOTYwNTM1",
+2026-10-14T07:11:46.0619978Z             "organizations_url": "https://api.github.com/users/yigini/orgs",
+2026-10-14T07:11:46.0620250Z             "received_events_url": "https://api.github.com/users/yigini/received_events",
+2026-10-14T07:11:46.0620512Z             "repos_url": "https://api.github.com/users/yigini/repos",
+2026-10-14T07:11:46.0620698Z             "site_admin": false,
+2026-10-14T07:11:46.0621024Z             "starred_url": "https://api.github.com/users/yigini/starred{/owner}{/repo}",
+2026-10-14T07:11:46.0621349Z             "subscriptions_url": "https://api.github.com/users/yigini/subscriptions",
+2026-10-14T07:11:46.0621548Z             "type": "User",
+2026-10-14T07:11:46.0621709Z             "url": "https://api.github.com/users/yigini",
+2026-10-14T07:11:46.0621882Z             "user_view_type": "public"
+2026-10-14T07:11:46.0622013Z           }
+2026-10-14T07:11:46.0622115Z         },
+2026-10-14T07:11:46.0622235Z         "github_job": "test-and-build",
+2026-10-14T07:11:46.0622397Z         "github_ref": "refs/pull/296/merge",
+2026-10-14T07:11:46.0622554Z         "github_ref_name": "296/merge",
+2026-10-14T07:11:46.0622705Z         "github_ref_protected": "false",
+2026-10-14T07:11:46.0622859Z         "github_ref_type": "branch",
+2026-10-14T07:11:46.0623021Z         "github_repository": "yigini/soilfer-lims",
+2026-10-14T07:11:46.0623289Z         "github_repository_id": "1155719496",
+2026-10-14T07:11:46.0623451Z         "github_repository_owner": "yigini",
+2026-10-14T07:11:46.0623616Z         "github_repository_owner_id": "32960535",
+2026-10-14T07:11:46.0623777Z         "github_run_attempt": "1",
+2026-10-14T07:11:46.0623923Z         "github_run_id": "38524553288",
+2026-10-14T07:11:46.0624070Z         "github_run_number": "712",
+2026-10-14T07:11:46.0624215Z         "github_runner_arch": "X64",
+2026-10-14T07:11:46.0624386Z         "github_runner_environment": "github-hosted",
+2026-10-14T07:11:46.0624561Z         "github_runner_image_os": "ubuntu24",
+2026-10-14T07:11:46.0624740Z         "github_runner_image_version": "20261004.327.1",
+2026-10-14T07:11:46.0624931Z         "github_runner_name": "GitHub Actions 1000000749",
+2026-10-14T07:11:46.0625100Z         "github_runner_os": "Linux",
+2026-10-14T07:11:46.0625311Z         "github_runner_tracking_id": "github_fc480086-3617-482c-8aa7-0bf6d4d6a1e4",
+2026-10-14T07:11:46.0625543Z         "github_server_url": "https://github.com",
+2026-10-14T07:11:46.0625713Z         "github_triggering_actor": "yigini",
+2026-10-14T07:11:46.0625866Z         "github_workflow": "CI",
+2026-10-14T07:11:46.0626105Z         "github_workflow_ref": "yigini/soilfer-lims/.github/workflows/ci.yml@refs/pull/296/merge",
+2026-10-14T07:11:46.0626392Z         "github_workflow_sha": "71380b0ab1cbd1befe1f791c0f67dc0bf2d4b8d1",
+2026-10-14T07:11:46.0626595Z         "platform": "linux/amd64"
+2026-10-14T07:11:46.0626722Z       }
+2026-10-14T07:11:46.0626817Z     }
+2026-10-14T07:11:46.0626910Z   },
+2026-10-14T07:11:46.0627228Z   "buildx.build.ref": "builder-92ab0a1f-d547-40c8-b4e7-7488b1e62401/builder-92ab0a1f-d547-40c8-b4e7-7488b1e624010/xcb8aq5bbpuot0rr9u8mumz63",
+2026-10-14T07:11:46.0627783Z   "containerimage.config.digest": "sha256:7688e8f5c7658236ee0b446ffc202177dbd19cf79bcc16d937ab4f5150a190a9",
+2026-10-14T07:11:46.0628059Z   "containerimage.descriptor": {
+2026-10-14T07:11:46.0628253Z     "mediaType": "application/vnd.oci.image.manifest.v1+json",
+2026-10-14T07:11:46.0628529Z     "digest": "sha256:6214fa6ed5d9d4e47a4b482c2536c02ae700df84c08787cc465f0f2230e21029",
+2026-10-14T07:11:46.0628739Z     "size": 11264,
+2026-10-14T07:11:46.0628850Z     "annotations": {
+2026-10-14T07:11:46.0629022Z       "org.opencontainers.image.created": "2026-10-14T07:11:31Z"
+2026-10-14T07:11:46.0629193Z     },
+2026-10-14T07:11:46.0629293Z     "platform": {
+2026-10-14T07:11:46.0629415Z       "architecture": "amd64",
+2026-10-14T07:11:46.0629538Z       "os": "linux"
+2026-10-14T07:11:46.0629647Z     }
+2026-10-14T07:11:46.0629740Z   },
+2026-10-14T07:11:46.0629964Z   "containerimage.digest": "sha256:6214fa6ed5d9d4e47a4b482c2536c02ae700df84c08787cc465f0f2230e21029",
+2026-10-14T07:11:46.0630238Z   "image.name": "docker.io/library/soilfer-lims:ci"
+2026-10-14T07:11:46.0630391Z }
+2026-10-14T07:11:46.0630686Z ##[endgroup]
