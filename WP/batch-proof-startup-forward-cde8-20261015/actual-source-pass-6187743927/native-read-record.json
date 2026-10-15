@@ -1,0 +1,18 @@
+{
+  "status": "ACTUAL_COMPLETED_NATIVE0541865B_SOURCE_PASS_READ_NO_INPUT",
+  "recordedUtc": "2026-10-15T08:24:35.956Z",
+  "window": {
+    "app": "Claude_pzs8sxrjxfjjc!Claude",
+    "id": 7867734,
+    "title": "Claude"
+  },
+  "project": "LIMS Audit",
+  "thread": "Lab workflow audit and plan",
+  "sourcePass": 6187743927,
+  "sourceHead": "0541865b67af0fbf3232d7cb077ab505896a2ced",
+  "fullCompletedReplyRead": true,
+  "bothComposersObservedEmpty": true,
+  "humanListDecisionNotAnsweredByAgent": true,
+  "noAckSent": true,
+  "meaning": "One conditional new two-startup jobsOFF attempt only; removal list separate and nothing deleted without exact approval"
+}
