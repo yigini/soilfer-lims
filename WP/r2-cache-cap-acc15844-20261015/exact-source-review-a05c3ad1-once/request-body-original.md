@@ -1,0 +1,59 @@
+@claude Please review this COMPLETE NEW five-file R2 cache-maintenance graph. This single source handoff also acknowledges that I have read your actual unedited6200547786/19:29:35UTC answer following YY's request. I retain the prospective harmless-glitch build/proof re-run conditions and the remaining-issues direction, including the explicit hold on ALL main merges until be837974 deploys and passes post-deploy check. Production stays forward-only; this R2 cleanup graph has NO re-run allowance. No old build/proof is replayed or reclassified. No duplicate acknowledgement of6200145007/6200229685 or qualified-build notice6200455534 is being sent.
+
+**Exact source:** commit a05c3ad10bb7c7e678abe91ce444b5f5dba24dd4, directory `WP/r2-cache-cap-acc15844-20261015/`, complete `README.md` and `source-publication-index.json` (81 indexed raw-OID/SHA/length bindings plus the index). Files: r2_contract.py, r2_cache.py, prepare_r2.py, launch_r2.py, verify_r2.py. Self-contained authority: no old operator imported. Final CLOSED44/44local+44/44 ACTUAL host Python3.9.23 pure guards/all5compile/source unchanged at19:40:38.474546UTC. Earlier42/42both and exact before bytes are retained. Host guard execution was in memory with ZERO remote source files, real Docker calls, cache operators or production connections. All1333 frozen application inputs unchanged; fresh mainbe837974/mainCI38772398721/allFOUR actual app audits/merges/all rule semantic pins verified.
+
+**Qualified build binding only:** actual NEWacc158447f5571068bf150fc0e8fa6f0889aeb38f9aec8be08978d903bd5be6a, original0400 receiptcd3a2757d8ecb0bf933f49231031eb7fb61eb5abaac17d05f3585c1baaf89f0a, full closed publication5f86a1966af536f83a345ebdb02983bbe2a166ad.190000 is complete and consumed. Failed180000/a61 and every old root/image/helper stay excluded/immutable. This source requires original successful receipt and entire qualified image inspection equality before/after maintenance, and cannot build/rebuild/retag/prove/deploy.
+
+**Actual R2 cap and protections:** fresh read-only host19:34:21UTC confirms Buildx0.30.1/9e66234a, BuildKit0.26.2, one default Docker builder/local Unix endpoint and installed max-used-space flag. Uses `--max-used-space=5000000000` on EACH full-ID anchored prune, never keep-storage/reserved-space as a cap; also daemon-side `shared=false` and `inuse=false`. No blanket prune. In-use and image-shared records remain even if they alone exceed5GB; ancestors with protected children stay. Max32 initially planned IDs, leaf-first/LRU, no substitution. Fresh complete API integer/protection/parent/time/usage inventory and exact Buildx du agree before each mutation; second fresh API immediately before intent. Changed/missing/protected/referenced records SKIP. One command consumes that item even on error/timeout; unknown outcome never retried. Reported and observed removals must agree and be a subset of the one ID; outside changes STOP. Buildx0.30.1 id filter mapping and reserved-space/cap semantics were checked against its pinned upstream source. Its max-used-space capability check is an internal Buildx query, not an application build.
+
+**Preservation and receipts:** full selected container identities/all unordered mount objects/status/start/restart/OOM and all image/tag/digest/manifest identities before/after each mutation; known normal8109 and qualified candidate mandatory. Raw container config/env is not retained; selected projections labelled derived. All API cache/CLI raw outputs/intents/results retained under new owned root. Every item gets exclusive/fsynced0400 receipt with ID/logical bytes/digest-not-applicable explanation/reference checks/dfbeforeafter; unknown post-observations remain honestly null and a failure receipt is retained. No image/container/volume/proof-file/backup deletion, daemon config/restart or DB operation exists in this graph. Summed cache record bytes are logical and may overlap, never claimed as exact physical reclaim. If cap is not reached, status says CAP_NOT_REACHED, all remaining records stay, no hidden additional prune or forced deletion.
+
+**Bounds / one future root:** `/opt/lims/cleanup-receipts/r2-cache-acc15844-20261015T210000Z`, unitlims-r2-cache-acc15844-20261015t210000z. NO operational package/upload/root/unit/prune has been created/executed. Unused root/unit and complete exact-package/raw-Git/current-authority checks before creation and immediately before one launch, source revalidated by controller. Controller1800/unit2400/MemoryMax805306368/Swap0/Restartno; max32 prune commands,4096 cache records/256 containers/1024 images/APIcall12000; APIread32MiB, command2MiB streaming bound/timeout30or120, evidence512MiB. Fresh real nonalias4096 paths and floor10556150894+1GiB evidence reserve before root/unit/eachoperation; same-filesystem free never additive. This R2 reserve is not the future build/proof R4 model: future proof still needs NEWacc158-bound COMPLETE source-derived copy budget/tooling, meaningful local+host guards, NEW exact SourcePASS, freshly computed R4+ADDITIONAL10GB and genuinelyNEWproofroot. Closed19000028.510GB is observation only, not fit authority.
+
+Actual standingrule6189658753/activation6189669837/acceptedR2amendment6191219093/currentR1amendment6198899941 plus new6200547786 are semantically pinned in full. R1 separate/no proof-folder cleanup here; R3imageslistONLY/R5nobackupremoval. All science214/four209/refusal CODES+CONDITIONS/full reports/impact/approved-nonzero STOP/YYlists/invalidStoredsampleownerIDs/fullhash/copyrace/600/805/forwardonly/no103/history/human drafts held. Same release writer/branch; no agents/newchat/worktree/concurrentwriter were started. Native source handoff remains deferred while fresh screenshot shows another app; I have not interrupted human activity.
+
+Please post actual `Source review: PASS` bound to ALL five hashes and ALL literals below, or specific findings/conditions. Guard results are not an operational approval. The source preparer, launcher and cache operator remain UNEXECUTED pending that exact new verdict.
+
+```
+a05c3ad10bb7c7e678abe91ce444b5f5dba24dd4
+be8379745bdfae52ce46496ff26514dc7d729640
+676b01e71211786d1aeace50f19a0b2c9f9c482e
+sha256:acc158447f5571068bf150fc0e8fa6f0889aeb38f9aec8be08978d903bd5be6a
+qualifiedBuildReceiptSha256=cd3a2757d8ecb0bf933f49231031eb7fb61eb5abaac17d05f3585c1baaf89f0a
+qualifiedBuildAudit=5f86a1966af536f83a345ebdb02983bbe2a166ad
+r2Scope=R2_EXACT_CACHE_IDS_ONLY_AFTER_QUALIFIED190000_BUILD
+r2Root=/opt/lims/cleanup-receipts/r2-cache-acc15844-20261015T210000Z
+r2Unit=lims-r2-cache-acc15844-20261015t210000z
+actualMaxUsedSpaceBytes=5000000000
+reservedSpaceIsNotACap=true
+inUseAndImageSharedAlwaysProtectedEvenAboveCap=true
+exactAnchoredIdAndSharedFalseAndInuseFalseFilters=true
+maximumPruneInvocations=32
+controllerSeconds=1800
+unitSeconds=2400
+memoryMaxBytes=805306368
+memorySwapMaxBytes=0
+noDaemonConfigOrRestart=true
+noBlanketPrune=true
+noImageContainerVolumeBackupProofFileRemoval=true
+immutablePerItemReceiptAndDfBeforeAfter=true
+unknownOutcomeNeverRetry=true
+sameBuilderDockerDriverDefaultUnixEndpoint=true
+logicalCacheBytesNotPhysicalReclaim=true
+allChangedOrProtectedItemsSkipNoSubstitution=true
+labAndHubBuildsOwnedByYY=true
+releaseWindowControl=RELEASE_DAY_DISK_ABORTS_ACCEPTED
+authority6189025975=071b37b60b7489fc47f53aee5d5a91726e967730ebdf40adbc22aef4b047ee7e
+authority6189658753=1b293cf3d6b7108293599ffabfc1273ebd5f158f69a6e11f58e467d7ffa42708
+authority6189669837=2821ccc164bbf344201e6569f707314a168ae6f308cbece73cc5065d9ad3ac7e
+authority6191219093=84289b1c85e65973f26d52199f539e13423d5803c83c38be34a515b089505f8f
+authority6198899941=9d7e1490880d76d4bbae73851e4a441a8ea7c9dcd3c16383e79250f94fc6e613
+authority6200547786=05604935975efc784fe8d7c52f3a820599c2365de1121370cd345e2eabb0c250
+launch_r2.py=1cdd074ff05d17e8b251e8c39311b1098f31f4bfc1e664715883262490a7a698
+prepare_r2.py=38c50dca438a45cafa3b240ece9fc07027e2f9596110db46d206a08c3660dbd9
+r2_cache.py=3cc5d1daf6c1d9a7101c4f676c6c2dc866d0bc3e5d6cc9bb036913fe248e5a6c
+r2_contract.py=1ecf270e27fd1f08e090916da5184c3822fcd3adbd11d04de87d44c4dbe5ce4f
+verify_r2.py=295dfce8f831324e0e4fe142453be0709dbfbff4eb8c13d4265fed98c5cc22f8
+```
+
+<!-- r2-cache-cap44-acc15844-a05c3ad1 -->
