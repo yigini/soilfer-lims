@@ -1,0 +1,1 @@
+{"actualNewCommentsAtSuccessfulRead":[],"error":"Local cp1252 UnicodeEncodeError printing README replacement character before GitHub reads.","evidenceKind":"TOOL_OUTPUT_TRANSCRIPTION_NOT_REMOTE_RAW","firstReadFailedBeforeGh":true,"freshAsciiSafeGhReadSucceededUtc":"2026-10-15T22:01:58.032547+00:00","remoteOperationsByFailedRead":0,"sourceChanges":0}
