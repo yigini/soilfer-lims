@@ -1,4 +1,10 @@
 #!/usr/bin/env node
+// The optional startup context must not become a default CLI/image-copy dependency.
+function openReadonlyDatabase(Database, target, options, startupContext) {
+    return startupContext
+        ? require('../utils/startupReadinessContext').openReadonlyDatabase(Database, target, options, startupContext)
+        : new Database(target, options);
+}
 const path = require('node:path');
 const Database = require('better-sqlite3');
 const { createHash } = require('node:crypto');
@@ -61,10 +67,10 @@ function classify(db, source) {
         roundCount: db.prepare('SELECT count(*) n FROM "ProficiencyRound"').get().n, scoreOutcomeSha256: scores(db) };
 }
 
-function installProficiencyEvidence({ dbPath, apply = false } = {}) {
+function installProficiencyEvidence({ dbPath, apply = false, startupContext} = {}) {
     if (typeof dbPath !== 'string' || !dbPath.trim()) throw fail('PT_DATABASE_REQUIRED', 'An explicit database path is required.');
     const target = path.resolve(dbPath), source = loadProficiencyMigrationSource();
-    const reader = new Database(target, { readonly: true, fileMustExist: true });
+    const reader = openReadonlyDatabase(Database, target, { readonly: true, fileMustExist: true }, apply ? undefined : startupContext);
     let plan;
     try { plan = reader.transaction(() => classify(reader, { sql: source.sql, sha256: source.sha256 }))(); }
     finally { reader.close(); }
@@ -88,8 +94,8 @@ function installProficiencyEvidence({ dbPath, apply = false } = {}) {
     } finally { db.close(); }
 }
 
-function assertProficiencyStartupReady(dbPath) {
-    const plan = installProficiencyEvidence({ dbPath });
+function assertProficiencyStartupReady(dbPath, startupContext) {
+    const plan = installProficiencyEvidence({ dbPath, startupContext });
     if (plan.classification !== 'COMPLETE') throw fail('PT_NOT_INSTALLED', 'Install reviewed PT evidence before starting the lab.');
     return plan;
 }

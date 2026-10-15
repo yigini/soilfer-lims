@@ -1,4 +1,10 @@
 #!/usr/bin/env node
+// The optional startup context must not become a default CLI/image-copy dependency.
+function openReadonlyDatabase(Database, target, options, startupContext) {
+    return startupContext
+        ? require('../utils/startupReadinessContext').openReadonlyDatabase(Database, target, options, startupContext)
+        : new Database(target, options);
+}
 const fs = require('node:fs'), path = require('node:path');
 const Database = require('better-sqlite3');
 const { loadCalculationTemplateMigrationSource } = require('../services/calculationTemplateMigrationSource');
@@ -19,10 +25,10 @@ function plan(db, source) {
     return { ...schema, unit, references, ready: schema.classification === 'COMPLETE' && references.classification === 'COMPLETE', plannedUnitInsertCount: 0,
         plannedReferenceInsertCount: references.missingReferenceIds.length, activationInsertCount: 0 };
 }
-function installCalculationTemplates({ dbPath, apply = false } = {}) {
+function installCalculationTemplates({ dbPath, apply = false, startupContext} = {}) {
     if (typeof dbPath !== 'string' || !dbPath.trim()) throw fail('CALC_DATABASE_REQUIRED', 'Provide an explicit database path.');
     const source = loadCalculationTemplateMigrationSource(), target = path.resolve(dbPath);
-    const reader = new Database(target, { readonly: true, fileMustExist: true });
+    const reader = openReadonlyDatabase(Database, target, { readonly: true, fileMustExist: true }, apply ? undefined : startupContext);
     let planned; try { planned = reader.transaction(() => plan(reader, source))(); } finally { reader.close(); }
     if (!apply || planned.ready) return { ...planned, mode: apply ? 'NO_OP' : 'DRY_RUN', totalChanges: 0, unitInsertCount: 0, referenceInsertCount: 0, referenceReceiptInsertCount: 0, schemaReceiptInsertCount: 0 };
     const db = new Database(target, { fileMustExist: true, timeout: 5000 });
@@ -49,9 +55,9 @@ function installCalculationTemplates({ dbPath, apply = false } = {}) {
         }).immediate();
     } finally { db.close(); }
 }
-function assertCalculationStartupReady(dbPath) {
+function assertCalculationStartupReady(dbPath, startupContext) {
     if (!fs.existsSync(dbPath)) throw fail('CALC_DATABASE_REQUIRED', 'The lab database does not exist.');
-    const outcome = installCalculationTemplates({ dbPath });
+    const outcome = installCalculationTemplates({ dbPath, startupContext });
     if (!outcome.ready) throw fail('CALC_NOT_INSTALLED', 'Run the reviewed calculation installer before starting the lab.');
     return outcome;
 }

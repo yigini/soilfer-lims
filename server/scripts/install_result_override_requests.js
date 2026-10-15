@@ -1,4 +1,10 @@
 #!/usr/bin/env node
+// The optional startup context must not become a default CLI/image-copy dependency.
+function openReadonlyDatabase(Database, target, options, startupContext) {
+    return startupContext
+        ? require('../utils/startupReadinessContext').openReadonlyDatabase(Database, target, options, startupContext)
+        : new Database(target, options);
+}
 const path = require('node:path');
 const { createHash } = require('node:crypto');
 const Database = require('better-sqlite3');
@@ -75,10 +81,10 @@ function classify(db) {
 function retainedRows(db) {
     return fingerprintRetainedTables(db, { excludeTables: ['ResultOverrideRequest', '_schema_migrations'] });
 }
-function installResultOverrideRequests({ dbPath, apply = false } = {}) {
+function installResultOverrideRequests({ dbPath, apply = false, startupContext} = {}) {
     if (typeof dbPath !== 'string' || !dbPath.trim()) throw fail('OVERRIDE_DATABASE_REQUIRED', 'Provide an explicit database path.');
     const target = path.resolve(dbPath), source = loadResultOverrideMigrationSource();
-    const reader = new Database(target, { readonly: true, fileMustExist: true }); let reviewed;
+    const reader = openReadonlyDatabase(Database, target, { readonly: true, fileMustExist: true }, apply ? undefined : startupContext); let reviewed;
     try { reviewed = reader.transaction(() => classify(reader))(); } finally { reader.close(); }
     if (!apply || reviewed.classification === 'COMPLETE_197') return { ...reviewed, mode: apply ? 'NO_OP' : 'DRY_RUN', totalChanges: 0, backfilledCount: 0 };
     const db = new Database(target, { fileMustExist: true, timeout: 5000 });
@@ -104,8 +110,8 @@ function installResultOverrideRequests({ dbPath, apply = false } = {}) {
         }).immediate();
     } finally { db.close(); }
 }
-function assertResultOverrideRequestsStartupReady(dbPath) {
-    const plan = installResultOverrideRequests({ dbPath });
+function assertResultOverrideRequestsStartupReady(dbPath, startupContext) {
+    const plan = installResultOverrideRequests({ dbPath, startupContext });
     if (plan.classification !== 'COMPLETE_197') throw fail('OVERRIDE_NOT_INSTALLED', 'Install the reviewed override-request schema before startup.');
     return plan;
 }

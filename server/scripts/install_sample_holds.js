@@ -1,4 +1,10 @@
 #!/usr/bin/env node
+// The optional startup context must not become a default CLI/image-copy dependency.
+function openReadonlyDatabase(Database, target, options, startupContext) {
+    return startupContext
+        ? require('../utils/startupReadinessContext').openReadonlyDatabase(Database, target, options, startupContext)
+        : new Database(target, options);
+}
 const fs = require('node:fs');
 const path = require('node:path');
 const Database = require('better-sqlite3');
@@ -85,10 +91,10 @@ function classify(db, sql, sha256) {
         counts: { workItems: db.prepare('SELECT count(*) n FROM WorkItem').get().n, holds: table ? db.prepare('SELECT count(*) n FROM SampleHold').get().n : 0 }, backfillCount: 0 };
 }
 
-function installSampleHolds({ dbPath, apply = false } = {}) {
+function installSampleHolds({ dbPath, apply = false, startupContext} = {}) {
     if (typeof dbPath !== 'string' || !dbPath.trim()) throw fail('SAMPLE_HOLD_DATABASE_REQUIRED', 'An explicit database path is required.');
     const source = loadSampleHoldMigrationSource(), target = path.resolve(dbPath);
-    const reader = new Database(target, { readonly: true, fileMustExist: true });
+    const reader = openReadonlyDatabase(Database, target, { readonly: true, fileMustExist: true }, apply ? undefined : startupContext);
     let plan;
     try { plan = reader.transaction(() => classify(reader, source.sql, source.sha256))(); }
     finally { reader.close(); }
@@ -116,9 +122,9 @@ function installSampleHolds({ dbPath, apply = false } = {}) {
     } finally { db.close(); }
 }
 
-function assertSampleHoldStartupReady(dbPath) {
+function assertSampleHoldStartupReady(dbPath, startupContext) {
     if (!fs.existsSync(dbPath)) throw fail('DATABASE_NOT_FOUND', 'The lab database does not exist.');
-    const result = installSampleHolds({ dbPath });
+    const result = installSampleHolds({ dbPath, startupContext });
     if (result.classification !== 'COMPLETE') throw fail('SAMPLE_HOLD_NOT_INSTALLED', 'Run the reviewed sample hold installer before starting the lab.');
     return result;
 }
