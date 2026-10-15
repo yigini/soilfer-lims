@@ -1,0 +1,32 @@
+{
+  "status": "RUNNING_METADATA_ONLY",
+  "observedUtc": "2026-10-15T12:05:52.798212+00:00",
+  "session": 29474,
+  "helper": "verify-startup-pinned-copy-retention-bound-full-ordinary-once.py",
+  "openMetadata": {
+    "status": "RUNNING_METADATA_ONLY",
+    "startedUtc": "2026-10-15T12:05:04.708938+00:00",
+    "inventory": 373,
+    "expectedTests": 5679,
+    "frozenPaths": 1333,
+    "sourceAudit": "3b0460b803589f280721f8d7ccc1b72f4b2fa507",
+    "notCiOrRuntimeStartupQualification": true,
+    "closedLogsExist": false,
+    "productionOperations": 0
+  },
+  "appSourceAudit": "7611ae485d1a29818d62fb53c32825abaac409f1",
+  "observedSuiteHeaders": 6,
+  "observedFailHeaders": [],
+  "all1333FrozenInputsUnchanged": true,
+  "closedResultNotObserved": true,
+  "activeLogsOrLedgerNotPublishedAsClosed": true,
+  "localSetupExactRootPreflights": [
+    0,
+    1,
+    1
+  ],
+  "priorZeroTestRefusalRetained": "full-retention-refusal-closed-once/publication-index.json",
+  "actualCleanupComplianceReview": 6191219093,
+  "r1NoProofDbRemovalPendingYY": true,
+  "productionOperations": 0
+}

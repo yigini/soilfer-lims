@@ -1,0 +1,87 @@
+{
+  "baseAudit": "3b0460b803589f280721f8d7ccc1b72f4b2fa507",
+  "status": "FULL_RUNNING_OPEN_METADATA_ONLY",
+  "session": 29474,
+  "appSourceAudit": "7611ae485d1a29818d62fb53c32825abaac409f1",
+  "files": [
+    {
+      "path": "WP/startup-order-readiness-20261015/full-pinned-copy-retention-bound-ordinary-once/open-metadata.json",
+      "length": 333,
+      "sha256": "71c8cdadc923a4ae0f7f9b1f021649e46837d13f1dfb82d8411ea840b2ced47d",
+      "gitBlobOid": "443a13a56b757ce8659b9aa9c7d1d866afee7111"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/full-pinned-copy-retention-bound-ordinary-once/source-before.json",
+      "length": 162265,
+      "sha256": "96046ac4b3e9136e92d74f01595df69127377f5fa1f1cb90cba8636b92d72d7f",
+      "gitBlobOid": "721a5130023ad66d5a6928869f24abf8fbfa68f3"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/full-pinned-copy-retention-bound-ordinary-once/existing-policy-chart-order-tests-unchanged.json",
+      "length": 48227,
+      "sha256": "2124411b1b751e8842ec8314084b97bf5b9bc03af8409ef61acd4675f4b0b8c3",
+      "gitBlobOid": "76d6e7e0f3ec9d6e71325661c11a4abfeb555793"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/full-pinned-copy-retention-bound-ordinary-once/config-original.json",
+      "length": 6885,
+      "sha256": "ce0e46e99ddb97d471a0a1611261a864b0ec6bb69cd4e86416f1381864495705",
+      "gitBlobOid": "af1d724b6a0ca97150b76d36596d1dd7adb52910"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/full-pinned-copy-retention-bound-ordinary-once/config-stderr-original.log",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/full-pinned-copy-retention-bound-ordinary-once/command.json",
+      "length": 1376,
+      "sha256": "99794847759283067cbd9606a22043d202a72fb048449782762e7d4e3049fa6f",
+      "gitBlobOid": "5f941884c4f3c509ae5d46c78ee8db8903b8b888"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/full-pinned-copy-retention-bound-ordinary-once/inventory-original.json",
+      "length": 49985,
+      "sha256": "18711e6b85e1fd1c4eb31f9ba6529e6950df1abfa01f74830349583057ebd134",
+      "gitBlobOid": "0d06b222e705fb99258612f1dcf46eba92c13efe"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/full-pinned-copy-retention-bound-ordinary-once/inventory-stderr-original.log",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/full-pinned-copy-retention-bound-ordinary-once/visible-local-storage.json",
+      "length": 10437,
+      "sha256": "c3f89da889d62315120f40074b21e54969638aa23b2b922802d37c3ce846e502",
+      "gitBlobOid": "f86e5e0adb3bac00c138cb01760f4caa51f125d2"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/full-pinned-copy-retention-bound-ordinary-once/derived-help-manifest-before-original.json",
+      "length": 94717,
+      "sha256": "78dcc1f7e563c37b8c8d58fa20c5e5558e0d64019b8d02ed052dd4fb273c80ff",
+      "gitBlobOid": "aaa6023fc997d2870a8b7db24f36a78832792366"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/retention-bound-full-opening-once/opening-observation.json",
+      "length": 1105,
+      "sha256": "997165ec2021c81f708e5f579590f9d6fd63006a600654afe8daf3aeb16f89e7",
+      "gitBlobOid": "a8acc3cbbd13016b0322bbd20ac7a319b1724673"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/publish-startup-retention-bound-full-opening-once.py",
+      "length": 6067,
+      "sha256": "68325ef3f77f5f065bf65d5a64ce83162b361cb003eedcefc4efc655617da591",
+      "gitBlobOid": "75b4b8e6e60d6309805d46a214775a707b206288"
+    },
+    {
+      "path": "WP/audit-release-eb6de2e8/README.md",
+      "length": 626312,
+      "sha256": "11d8ce4e0b3c84d08536f80f1b83196570179d9f3e11db019219350fb9e77da6",
+      "gitBlobOid": "a32cb21aa8fbd7ab7db8a6ee4f86dbdf12a0ead6"
+    }
+  ],
+  "productionOperations": 0
+}
