@@ -1,0 +1,2018 @@
+const crypto = require('crypto');
+const cataloguePolicy = require('../services/cataloguePolicy');
+const prisma = require('../prisma');
+const { success, error } = require('../i18n/response');
+const idGenerator = require('../services/idGenerator');
+const sampleCodes = require('../services/sampleCodeService');
+const workflow = require('../workflowContract');
+const { hasPermission } = require('../config/roles');
+const scopeGuard = require('../utils/scopeGuard');
+const sampleWorkspaceService = require('../services/sampleWorkspaceService');
+const commandReceiptService = require('../services/commandReceiptService');
+const sampleOriginService = require('../services/sampleOriginService');
+const sampleStateService = require('../services/sampleStateService');
+const sampleAnalysisStateService = require('../services/sampleAnalysisStateService');
+const profileIdentity = require('../services/profileIdentityService');
+const sampleHolds = require('../services/sampleHoldService');
+const policyService = require('../services/policyService');
+
+exports.getSampleHolds = async (req, res) => {
+    try {
+        const sample = await prisma.sample.findUnique({ where: { id: String(req.params.id) } });
+        if (!sample) return res.status(404).json({ code: 'SAMPLE_NOT_FOUND', error: 'Sample not found.' });
+        require('../services/workflowStateRules').assertScope(req.user, sample);
+        const holds = await prisma.sampleHold.findMany({ where: { sampleId: sample.id }, orderBy: [{ raisedAt: 'asc' }, { id: 'asc' }] });
+        return res.json({ holds: holds.map(sampleHolds.presentHold), held: await sampleHolds.isHeld(prisma, sample),
+            metadataRepairNeeded: sampleHolds.legacyHoldState(sample).metadataRepairNeeded, canResolve: hasPermission(req.user, 'APPROVE_RESULTS') });
+    } catch (err) {
+        const mapped = require('../services/workflowStateRules').mapStateError(err);
+        return res.status(mapped.statusCode || 500).json({ code: mapped.code || 'HOLD_FETCH_ERROR', error: mapped.message });
+    }
+};
+
+exports.resolveSampleHold = async (req, res) => {
+    try {
+        const hold = await prisma.$transaction(tx => sampleHolds.resolveHold(tx, {
+            sampleId: req.params.id, holdId: req.params.holdId, actor: req.user, reason: req.body.reason
+        }));
+        return res.json({ hold: sampleHolds.presentHold(hold) });
+    } catch (err) {
+        const mapped = require('../services/workflowStateRules').mapStateError(err);
+        return res.status(mapped.statusCode || 500).json({ code: mapped.code || 'HOLD_RESOLVE_ERROR', error: mapped.message });
+    }
+};
+
+// Printed labels and imported field barcodes encode a lab/original identifier.
+// Apply scope before matching so neither missing nor ambiguous responses leak
+// samples from another lab. Never prefer one identifier type over another.
+exports.lookupSample = async (req, res) => {
+    const code = typeof req.query.code === 'string' ? req.query.code.trim() : '';
+    if (!code) return res.status(400).json({ code: 'LOOKUP_CODE_REQUIRED', error: 'A sample identifier is required.' });
+    try {
+        const scopedRows = await prisma.sample.findMany({
+            where: scopeGuard.buildScopedWhere(req.user, { OR: [{ id: code }, { labSampleCode: code }, { labId: code }, { originalId: code }] },
+                { entityType: 'Sample', labField: 'labId', altLabField: 'assignedLab' }),
+            orderBy: { id: 'asc' }
+        });
+        const matches = scopedRows.filter(sample => scopeGuard.canAccessEntity(req.user, sample,
+            { entityType: 'Sample', labField: 'labId', altLabField: 'assignedLab' }));
+        if (!matches.length) {
+            let failureCode = 'SAMPLE_NOT_FOUND';
+            // Diagnose only a failed lookup. Issued labels and original IDs
+            // above remain valid independently of today's numbering policy.
+            const labReference = scopeGuard.hasGlobalAccess(req.user)
+                ? (typeof req.query.scanLabId === 'string' ? req.query.scanLabId : null)
+                : req.user.labId ? scopeGuard.getLabScope(req.user) : null;
+            if (labReference) {
+                try {
+                    const lab = await policyService.resolveLab(labReference, prisma);
+                    if (lab) {
+                        const format = await policyService.get(lab.id, 'sample.codeFormat', { db: prisma });
+                        if (format.endsWith('{CHK}') && (format.match(/\{CHK\}/g) || []).length === 1 &&
+                            !sampleCodes.verifyCheckCharacter(code)) failureCode = 'SCAN_CHECK_CHARACTER_INVALID';
+                    }
+                } catch {
+                    // A missing/unreadable diagnostic policy must preserve
+                    // the existing scoped not-found response.
+                }
+            }
+            return res.status(404).json({ code: failureCode, error: 'Sample not found.' });
+        }
+        if (matches.length > 1) return res.status(409).json({ code: 'SAMPLE_LOOKUP_AMBIGUOUS', error: 'This identifier matches several samples.',
+            candidates: matches.map(sample => ({ id: sample.id, displayId: sample.originalId || sample.labId || sample.id, labId: sample.labId, originalId: sample.originalId })) });
+        return res.json({ ...matches[0], held: await sampleHolds.isHeld(prisma, matches[0]) });
+    } catch (err) {
+        console.error('[Sample lookup]', err);
+        return res.status(500).json({ code: 'SAMPLE_LOOKUP_ERROR', error: 'Sample lookup failed.' });
+    }
+};
+
+
+/**
+ * SEARCH EXPECTED SAMPLES - For Reception Autocomplete
+ * GET /api/samples/expected?q=searchTerm&projectId=optional
+ * 
+ * Returns lightweight list of EXPECTED samples matching search term
+ * for fast autocomplete in the reception interface.
+ */
+exports.searchExpectedSamples = async (req, res) => {
+    const { q, projectId, limit = 10 } = req.query;
+    const user = req.user;
+
+    console.log(`[DEBUG] searchExpectedSamples: START. q="${q}", projectId="${projectId}", user="${user?.username}"`);
+
+    try {
+        const scopeGuard = require('../utils/scopeGuard');
+
+        // Final conditions array
+        const andConditions = [];
+
+        // 1. Status Filter
+        andConditions.push({ status: 'EXPECTED' });
+
+        // 2. Lab Scope
+        console.log(`[DEBUG] Building scope for user: ${user?.username}`);
+        const scopedWhere = scopeGuard.buildScopedWhere(user, {}, { entityType: 'Sample', labField: 'assignedLab', altLabField: 'labId' });
+        if (scopedWhere.OR) {
+            andConditions.push({ OR: scopedWhere.OR });
+        } else if (Object.keys(scopedWhere).length > 0) {
+            andConditions.push(scopedWhere);
+        }
+
+        // 3. Project Filter
+        if (projectId) {
+            andConditions.push({
+                OR: [
+                    { projectId },
+                    { projectCode: projectId }
+                ]
+            });
+        }
+
+        // 4. Search Filter
+        if (q && q.trim()) {
+            const searchTerm = q.trim();
+            // Use both originalId and potentially other fields if needed, but originalId is primary
+            andConditions.push({
+                originalId: { contains: searchTerm }
+            });
+        }
+
+        const where = { AND: andConditions };
+
+        const samples = await prisma.sample.findMany({
+            where,
+            select: {
+                id: true,
+                originalId: true,
+                projectId: true,
+                projectCode: true,
+                status: true,
+                fieldMetadata: true,
+                metadata: true,
+                holds: true,
+                country: true
+            },
+            take: parseInt(limit),
+            orderBy: { originalId: 'asc' }
+        });
+
+        // Use canonical coordinateResolver
+        const { resolveCoordinates } = require('../utils/coordinateResolver');
+        const results = samples.map(s => {
+            const resolved = resolveCoordinates(s);
+            return {
+                id: s.id,
+                originalId: s.originalId,
+                projectId: s.projectId,
+                projectCode: s.projectCode,
+                status: s.status,
+                held: sampleHolds.isHeldSnapshot(s),
+                country: s.country,
+                coordinates: resolved.isRecorded ? {
+                    lat: resolved.lat,
+                    lng: resolved.lng,
+                    accuracy: resolved.accuracy,
+                    elevation: resolved.elevation
+                } : null,
+                location: resolved.locationDescription
+            };
+        });
+
+        res.json(results);
+    } catch (err) {
+        console.error('[DEBUG] searchExpectedSamples CRASH:', err);
+        return error(res, 500, 'SAMPLE_SEARCH_ERROR', null, err.message || 'Internal Server Error');
+    }
+};
+
+exports.getSamples = async (req, res) => {
+    const {
+        page = 1, limit = 50, sort = 'attention', order = 'desc', search: qSearch,
+        status: qStatus, originalId: qOriginalId,
+        view: qView
+    } = req.query;
+
+    const qProjects = req.query.projects || req.query.project || req.query.projectId;
+    const qLabs = req.query.labs || req.query.lab || req.query.labId || req.query.assignedLab;
+    const qCountries = req.query.countries || req.query.country;
+
+    try {
+        const user = req.user;
+        const pageNum = parseInt(page);
+        const limitNum = Math.min(parseInt(limit), 100); // Cap at 100
+        const skip = (pageNum - 1) * limitNum;
+
+        // --- 1. BUILD BASE WHERE CLAUSE ---
+        const scopeGuard = require('../utils/scopeGuard');
+
+        // Base lab-scoped query
+        let baseWhere = scopeGuard.buildScopedWhere(user, {}, {
+            entityType: 'Sample',
+            labField: 'labId',
+            altLabField: 'assignedLab'
+        });
+
+        // Lab filter - explicit override (supports labs, lab, labId, assignedLab)
+        if (qLabs) {
+            const list = qLabs.split(',').map(s => s.trim());
+            if (!baseWhere.AND) baseWhere.AND = [];
+            baseWhere.AND.push({
+                OR: [
+                    { assignedLab: { in: list } },
+                    { labId: { in: list } }
+                ]
+            });
+        }
+
+        // Project filter (supports projects, project, projectId)
+        if (qProjects) {
+            const list = qProjects.split(',').map(s => s.trim());
+            if (!baseWhere.AND) baseWhere.AND = [];
+            baseWhere.AND.push({
+                OR: [
+                    { projectCode: { in: list } },
+                    { projectId: { in: list } }
+                ]
+            });
+        }
+
+        // Country filter (supports countries, country)
+        if (qCountries) {
+            const list = qCountries.split(',').map(s => s.trim());
+            baseWhere.country = { in: list };
+        }
+
+        // Original ID exact match
+        if (qOriginalId) {
+            baseWhere.originalId = qOriginalId;
+        }
+
+        // Search by originalId OR labId
+        // SECURITY FIX: Wrap in AND to preserve scope guard OR conditions
+        if (qSearch && qSearch.trim()) {
+            const term = qSearch.trim();
+            if (!baseWhere.AND) baseWhere.AND = [];
+            baseWhere.AND.push({
+                OR: [
+                    { originalId: { contains: term } },
+                    { labId: { contains: term } }
+                ]
+            });
+        }
+
+        let where = { ...baseWhere };
+
+        // Operational Views vs Status Separation (#120)
+        // Canonical operational views:
+        // - 'daily': Physically received & active lab samples (RECEIVED, ACCEPTED, PROCESSING, etc.)
+        // - 'expected': Field records awaiting reception (EXPECTED, COLLECTED)
+        // - 'registry': Full field registry across all lifecycle stages
+        // Explicit status filter overrides view.
+        const ACTIVE_LAB_STATUSES = [
+            'RECEIVED', 'ACCEPTED', 'PROCESSING',
+            'SUBMITTED_PARTIAL'
+        ];
+        const EXPECTED_STATUSES = ['EXPECTED', 'COLLECTED'];
+
+        if (qStatus) {
+            where.status = { in: qStatus.split(',').map(s => s.trim()) };
+        } else if (qView === 'daily') {
+            where.status = { in: ACTIVE_LAB_STATUSES };
+        } else if (qView === 'expected') {
+            where.status = { in: EXPECTED_STATUSES };
+        } else if (qView === 'registry') {
+            // Full registry: expose all statuses without filtering
+        } else {
+            // Default when neither status nor view is specified:
+            // Auto-hide uncollected EXPECTED samples (never sampled in field)
+            where.NOT = {
+                AND: [
+                    { status: 'EXPECTED' },
+                    { fieldMetadata: null },
+                    { metadata: null }
+                ]
+            };
+        }
+
+        // --- 2. SORT ALLOWLIST & ATTENTION-FIRST ORDERING ---
+        const ALLOWED_SORTS = ['labId', 'projectCode', 'status', 'updatedAt', 'createdAt', 'attention'];
+        const safeSort = ALLOWED_SORTS.includes(sort) ? sort : 'createdAt';
+        const safeOrder = order === 'asc' ? 'asc' : 'desc';
+
+        // For attention sort, we need work item statuses to compute rank
+        const needsAttentionSort = safeSort === 'attention';
+
+        const [total, samples, baseStatusCounts, projectCounts, countryCounts, labCounts] = await Promise.all([
+            prisma.sample.count({ where }),
+            // --- Phase 1: Lightweight ranking query (ALL matching rows, minimal fields) ---
+            prisma.sample.findMany({
+                where,
+                select: { id: true, status: true, updatedAt: true, workItems: {  select: { status: true } } },
+                orderBy: { updatedAt: 'desc' }
+            }),
+            prisma.sample.groupBy({
+                by: ['status'],
+                where: baseWhere,
+                _count: true
+            }),
+            // P1: Facets for project/country/lab
+            prisma.sample.groupBy({
+                by: ['projectCode'],
+                where: baseWhere,
+                _count: true
+            }),
+            prisma.sample.groupBy({
+                by: ['country'],
+                where: baseWhere,
+                _count: true
+            }),
+            prisma.sample.groupBy({
+                by: ['assignedLab'],
+                where: baseWhere,
+                _count: true
+            })
+        ]);
+
+        // --- 3. BUILD FACETS & VIEW COUNTS ---
+        const lifecycle = { EXPECTED: 0, RECEIVED: 0, ACCEPTED: 0, ONGOING: 0, COMPLETED: 0, HISTORY: 0, REJECTED: 0 };
+        const views = { daily: 0, expected: 0, registry: 0 };
+
+        baseStatusCounts.forEach(sc => {
+            views.registry += sc._count;
+            if (sc.status === 'EXPECTED' || sc.status === 'COLLECTED') {
+                lifecycle.EXPECTED = (lifecycle.EXPECTED || 0) + sc._count;
+                views.expected += sc._count;
+            } else if (sc.status === 'RECEIVED') {
+                lifecycle.RECEIVED = sc._count;
+                views.daily += sc._count;
+            } else if (sc.status === 'ACCEPTED') {
+                lifecycle.ACCEPTED = sc._count;
+                views.daily += sc._count;
+            } else if (sc.status === 'RECEIVED_REJECTED' || sc.status === 'REJECTED') {
+                lifecycle.REJECTED = (lifecycle.REJECTED || 0) + sc._count;
+            } else if (['PROCESSING', 'SUBMITTED_PARTIAL'].includes(sc.status)) {
+                lifecycle.ONGOING += sc._count;
+                views.daily += sc._count;
+            } else if (['SUBMITTED_FULL', 'APPROVED'].includes(sc.status)) {
+                lifecycle.COMPLETED = (lifecycle.COMPLETED || 0) + sc._count;
+            } else if (['ARCHIVED', 'DISPOSED'].includes(sc.status)) {
+                lifecycle.HISTORY += sc._count;
+            }
+        });
+
+        // P1: Project/Country/Lab facets for advanced filters
+        const projects = {};
+        projectCounts.forEach(pc => { if (pc.projectCode) projects[pc.projectCode] = pc._count; });
+        const countries = {};
+        countryCounts.forEach(cc => { if (cc.country) countries[cc.country] = cc._count; });
+        const labs = {};
+        labCounts.forEach(lc => { if (lc.assignedLab) labs[lc.assignedLab] = lc._count; });
+
+        // --- 4. RESOLVE PAGE DATA ---
+        // For attention sort: rank ALL lightweight rows, sort, slice page IDs, then fetch full data.
+        // For normal sort: Phase 1 already has all rows but we need a separate full fetch with proper pagination.
+        let pageSamples; // Full records for this page
+        let attentionRanks = {}; // id → rank map (only for attention sort)
+
+        if (needsAttentionSort) {
+            // Phase 1b: Compute attention rank on lightweight data (no cap — operates on ALL matching rows)
+            const ranked = samples.map(s => {
+                const wis = s.workItems || [];
+                const hasInProgress = wis.some(wi => wi.status === 'IN_PROGRESS');
+                const hasAssigned = wis.some(wi => wi.status === 'ASSIGNED');
+                const hasReanalysis = wis.some(wi => wi.status === 'REANALYSIS_REQUIRED');
+                const pendingReview = ['SUBMITTED_PARTIAL', 'SUBMITTED_FULL'].includes(s.status);
+                let rank = 5;
+                if (hasInProgress) rank = 0;
+                else if (hasAssigned || hasReanalysis) rank = 1;
+                else if (pendingReview) rank = 2;
+                else if (s.status === 'PROCESSING') rank = 3;
+                else if (['RECEIVED', 'COLLECTED', 'ACCEPTED'].includes(s.status)) rank = 4;
+                return { id: s.id, rank, updatedAt: s.updatedAt };
+            });
+
+            // Sort all rows by attention rank, then updatedAt desc
+            ranked.sort((a, b) => {
+                if (a.rank !== b.rank) return a.rank - b.rank;
+                return new Date(b.updatedAt) - new Date(a.updatedAt);
+            });
+
+            // Slice for current page
+            const pageSlice = ranked.slice(skip, skip + limitNum);
+            const pageIds = pageSlice.map(r => r.id);
+
+            // Save ranks for re-ordering after Phase 2
+            pageSlice.forEach((r, idx) => { attentionRanks[r.id] = idx; });
+
+            // Phase 2: Fetch full data for just this page's IDs
+            pageSamples = pageIds.length > 0 ? await prisma.sample.findMany({
+                where: { id: { in: pageIds } },
+                select: {
+                    id: true, originalId: true, labId: true, assignedLab: true,
+                    projectCode: true, country: true, countryName: true,
+                    status: true, dryingStatus: true, preparationStatus: true,
+                    depthTop: true, depthBottom: true, horizon: true,
+                    receptionDate: true, createdAt: true, updatedAt: true,
+                    fieldMetadata: true, metadata: true, rejectionReason: true,
+                    custodyHandoverAt: true, custodyCarrierName: true, custodyTrackingNumber: true, receivingOfficerName: true,
+                    holds: true,
+                    workItems: {  select: { analysis: true, status: true, category: true } }
+                }
+            }) : [];
+
+            // Re-order to match the ranked sort order
+            pageSamples.sort((a, b) => attentionRanks[a.id] - attentionRanks[b.id]);
+        } else {
+            // Non-attention sort: standard paginated query with full data
+            pageSamples = await prisma.sample.findMany({
+                where,
+                select: {
+                    id: true, originalId: true, labId: true, assignedLab: true,
+                    projectCode: true, country: true, countryName: true,
+                    status: true, dryingStatus: true, preparationStatus: true,
+                    depthTop: true, depthBottom: true, horizon: true,
+                    receptionDate: true, createdAt: true, updatedAt: true,
+                    fieldMetadata: true, metadata: true, rejectionReason: true,
+                    custodyHandoverAt: true, custodyCarrierName: true, custodyTrackingNumber: true, receivingOfficerName: true,
+                    holds: true,
+                    workItems: {  select: { analysis: true, status: true, category: true } }
+                },
+                orderBy: { [safeSort]: safeOrder },
+                skip,
+                take: limitNum
+            });
+        }
+
+        // --- 5. ENRICH page data ---
+        const enriched = pageSamples.map(s => {
+            let siteId = null;
+            try {
+                const fm = typeof s.fieldMetadata === 'string' ? JSON.parse(s.fieldMetadata) : s.fieldMetadata;
+                if (fm?.site_id) siteId = fm.site_id.value || fm.site_id;
+            } catch (e) { }
+            let metadata = null;
+            try {
+                metadata = typeof s.metadata === 'string' ? JSON.parse(s.metadata) : s.metadata;
+            } catch (e) { }
+
+            const workItems = s.workItems || [];
+            const categorizeWI = (analysis) => {
+                if (!analysis) return null;
+                const a = analysis.toUpperCase();
+                if (['DRYING', 'PREPARATION'].includes(a)) return 'Operational Gates';
+                if (['ARCHIVING', 'DISPOSING', 'ARCHIVE', 'DISPOSE'].includes(a)) return null;
+                if (a.startsWith('SPEC_') || a.startsWith('SPECTRAL') || ['MIR', 'NIR', 'VIS_NIR', 'XRF'].includes(a)) return 'Spectroscopy';
+                if (['SAND', 'SILT', 'CLAY', 'TEXTURE'].includes(a)) return 'Texture';
+                return 'Wet Chemistry';
+            };
+            const progressItems = workItems
+                .map(wi => ({ analysis: wi.analysis, category: categorizeWI(wi.analysis), status: wi.status }))
+                .filter(wi => wi.category !== null);
+            const totalWI = progressItems.length;
+            const completedWI = progressItems.filter(wi => ['COMPLETED', 'ACCEPTED', 'SUBMITTED'].includes(wi.status)).length;
+
+            const hasInProgressWork = workItems.some(wi => wi.status === 'IN_PROGRESS');
+            const hasAssignedWork = workItems.some(wi => wi.status === 'ASSIGNED');
+            const hasReanalysisWork = workItems.some(wi => wi.status === 'REANALYSIS_REQUIRED');
+            const pendingReview = ['SUBMITTED_PARTIAL', 'SUBMITTED_FULL'].includes(s.status);
+            let attentionRank = 5;
+            if (hasInProgressWork) attentionRank = 0;
+            else if (hasAssignedWork || hasReanalysisWork) attentionRank = 1;
+            else if (pendingReview) attentionRank = 2;
+            else if (s.status === 'PROCESSING') attentionRank = 3;
+            else if (['RECEIVED', 'COLLECTED', 'ACCEPTED'].includes(s.status)) attentionRank = 4;
+
+            return {
+                ...s,
+                workItems: undefined,
+                fieldMetadata: undefined,
+                metadata,
+                siteId,
+                workItemProgress: { total: totalWI, completed: completedWI, items: progressItems },
+                hasInProgressWork, hasAssignedWork, hasReanalysisWork, pendingReview, attentionRank,
+                held: sampleHolds.isHeldSnapshot(s),
+                holds: s.holds.map(sampleHolds.presentHold),
+                gatesComplete: s.dryingStatus === 'DONE' && s.preparationStatus === 'DONE',
+                nextAction: sampleHolds.isHeldSnapshot(s) ? 'Reconcile' : s.status === 'EXPECTED' ? 'Receive' :
+                    s.status === 'RECEIVED' ? 'Accept' :
+                        s.status === 'ACCEPTED' ? 'Process' : 'View'
+            };
+        });
+
+        res.json({
+            data: enriched,
+            meta: { page: pageNum, limit: limitNum, total, pages: Math.ceil(total / limitNum) },
+            views,
+            facets: { lifecycle, projects, countries, labs, views }
+        });
+    } catch (err) {
+        console.error("[getSamples] ERROR:", err);
+        return error(res, 500, 'SAMPLE_FETCH_ERROR', null, "Internal Server Error", { message: err.message });
+    }
+};
+
+const STATUS_REQUIRED_PERMISSIONS = {
+    'RECEIVED': 'RECEIVE_SAMPLE',
+    'ACCEPTED': 'APPROVE_RESULTS',
+    'PROCESSING': 'CHANGE_STATUS',
+    'ANALYZED': 'ENTER_RESULTS',
+    'APPROVED': 'APPROVE_RESULTS',
+    'RELEASED': 'APPROVE_RESULTS',
+    'ARCHIVED': 'ARCHIVE_SAMPLE',
+    'DISPOSED': 'DISPOSE_SAMPLE'
+};
+
+exports.updateStatus = async (req, res) => {
+    const { status } = req.body;
+    const user = req.user;
+    try {
+        const rules = require('../services/workflowStateRules');
+        const sample = await prisma.sample.findUnique({ where: { id: String(req.params.id) } });
+        if (!sample) return error(res, 404, 'SAMPLE_NOT_FOUND', { id: req.params.id }, 'Sample not found');
+        rules.assertScope(user, sample);
+        if (workflow.isLegacySampleState(status)) return res.status(409).json({
+            error: `Legacy status '${status}' is not allowed.`, code: 'ILLEGAL_LEGACY_STATUS', validStates: workflow.SAMPLE_STATE_LIST
+        });
+        if (!workflow.isValidSampleState(status)) return res.status(400).json({ error: `Unknown status '${status}'.`, code: 'UNKNOWN_SAMPLE_STATUS' });
+        if (['ACCEPTED', 'APPROVED', 'ARCHIVED', 'DISPOSED'].includes(status)) return res.status(400).json({
+            error: `Direct transition to '${status}' via generic status update is prohibited. Use the authorized intake, review or custody action.`,
+            code: 'DIRECT_TRANSITION_PROHIBITED'
+        });
+        const permission = STATUS_REQUIRED_PERMISSIONS[status] || 'CHANGE_STATUS';
+        if (!hasPermission(user, permission)) return res.status(403).json({ error: 'Insufficient permissions', code: 'STATUS_PERMISSION_DENIED' });
+        const updated = await rules.inTransaction(prisma, async tx => {
+            if (status === 'RECEIVED') return require('../services/intakeService').receiveSample(tx,
+                { sampleId: sample.id, body: req.body, user });
+            if (status === 'RECEIVED_REJECTED') {
+                const current = await tx.sample.findUnique({ where: { id: sample.id } });
+                return (await require('../services/intakeService').rejectSample(tx, {
+                    body: { ...req.body, sampleId: current.id, originalId: current.originalId, ncReason: req.body.ncReason || req.body.reason }, user
+                })).sample;
+            }
+            return sampleStateService.transitionSample(sample.id, status, user, req.body.reason || req.body.notes || null, {}, tx,
+                { action: 'STATUS_CHANGE', expectedStatus: sample.status });
+        });
+        return res.json(updated);
+    } catch (err) {
+        const mapped = require('../services/workflowStateRules').mapStateError(err);
+        if (mapped.statusCode) return res.status(mapped.statusCode).json({ code: mapped.code, error: mapped.message, ...(mapped.details && { details: mapped.details }) });
+        console.error('[updateStatus] Error:', err);
+        return error(res, 500, 'SAMPLE_UPDATE_ERROR', null, 'Failed to update status');
+    }
+};
+exports.updatePhaseStatus = async (req, res) => {
+    const gate = typeof req.body.phase === 'string' ? req.body.phase.toUpperCase() : '';
+    const status = typeof req.body.status === 'string' ? req.body.status.toUpperCase() : '';
+    try {
+        if (!hasPermission(req.user, 'ENTER_RESULTS')) {
+            return res.status(403).json({ code: 'OPERATIONAL_PERMISSION_DENIED', error: 'Operational gate permission required.' });
+        }
+        if (!['DRYING', 'PREPARATION'].includes(gate) ||
+            !(gate === 'DRYING' ? workflow.isValidDryingStatus(status) : workflow.isValidPreparationStatus(status))) {
+            return res.status(400).json({ code: 'INVALID_PREPARATION_GATE', error: `Invalid operational gate or status: ${gate}=${status}.` });
+        }
+        if (status === 'DONE') {
+            const sample = await prisma.sample.findUnique({ where: { id: String(req.params.id) } });
+            if (!sample) return res.status(404).json({ code: 'SAMPLE_NOT_FOUND', error: 'Sample not found.' });
+            scopeGuard.ensureScope(req.user, sample, { altLabField: 'assignedLab' });
+            if (!Array.isArray(req.body.checklist)) return res.status(422).json({
+                code: 'CHECKLIST_REQUIRED', error: 'Operational completion requires its verified procedural checklist.', destination: '/workbench'
+            });
+            const item = await prisma.workItem.findFirst({ where: { sampleId: sample.id, analysis: gate, duplicateOf: null } });
+            if (!item) return res.status(404).json({ code: 'WORK_ITEM_NOT_FOUND', error: 'Operational gate work item not found.' });
+            const outcome = await require('../services/operationalConfirmationService').confirmOperation({
+                actor: req.user, workItemId: item.id, checklist: req.body.checklist, observations: req.body.observations, records: req.body.records,
+                idempotencyKey: req.body.idempotencyKey, verificationRequired: req.body.verificationRequired
+            });
+            return res.json({
+                message: outcome.receipt.gatePassed ? `${gate} completed with its procedural checklist` : `${gate} awaits manager verification`,
+                sample: outcome.sample, workItem: outcome.workItem, receipt: outcome.receipt
+            });
+        }
+        const outcome = await require('../services/operationalGateStateService').changeGate({
+            sampleId: req.params.id, gate, status, reason: req.body.reason, actor: req.user,
+            resumeSampleStatus: req.body.resumeSampleStatus, resumeWorkItemStatus: req.body.resumeWorkItemStatus
+        });
+        return res.json(outcome.sample);
+    } catch (err) {
+        if (err.statusCode || err.status) return res.status(err.statusCode || err.status).json({ code: err.code, error: err.message, details: err.details });
+        console.error('[updatePhaseStatus] Error:', err);
+        return error(res, 500, 'PHASE_UPDATE_ERROR', null, 'Failed to update phase status');
+    }
+};
+
+// =============================================================================
+// STEP 2: RECEPTION → ACCEPTANCE WORKFLOW
+// =============================================================================
+
+const workItemController = require('./workItemController');
+
+const userHasScopeForSample = async (user, sample) => {
+    if (scopeGuard.hasGlobalAccess(user)) return true;
+
+    // 1. Mandatory Lab Match for Lab Staff
+    if (hasPermission(user, 'CHANGE_STATUS')) {
+        if (user.labId && (sample.assignedLab === user.labId || sample.labId === user.labId)) {
+            return true;
+        }
+
+        if (user.role === 'LAB_TECHNICIAN') {
+            const hasAssignment = await prisma.workItem.findFirst({
+                where: {
+                    sampleId: String(sample.id),
+                    assignedTo: user.username,
+                    labId: user.labId // Must be in their CURRENT lab
+                }
+            });
+            if (hasAssignment) return true;
+        }
+
+        return false; // If lab staff and context doesn't match, DENIED.
+    }
+
+    // 2. High Level Roles (Country / Project scope)
+    const userCountries = user.countries || [];
+    const sampleCountry = sample.projectCode || sample.country;
+    if (userCountries.includes(sampleCountry)) return true;
+
+    const userProjects = user.projects || [];
+    if (userProjects.includes(sample.projectCode)) return true;
+
+    return false;
+};
+
+/**
+ * RECEIVE SAMPLE - Transition to RECEIVED state
+ * POST /api/samples/:id/receive
+ */
+exports.receiveSample = async (req, res) => {
+    if (!hasPermission(req.user, 'RECEIVE_SAMPLE')) return res.status(403).json({ error: 'Only Intake Officers and Managers can receive samples' });
+    try {
+        const sample = await prisma.$transaction(tx => require('../services/intakeService').receiveSample(tx, { sampleId: req.params.id, body: req.body, user: req.user }));
+        return res.json(sample);
+    } catch (error) { return require('../services/intakeErrors').respond(res, error); }
+};
+
+/**
+ * CREATE WALK-IN SAMPLE - For samples not in project/Google Sheet
+ * POST /api/samples/walkin
+ * Body: { submitter, submitterContact, description, analyses: [...], countryCode? }
+ */
+exports.createWalkInSample = async (req, res) => {
+    const { submitter, submitterContact, description, sampleType, ptRound, expectedValues } = req.body;
+    const user = req.user;
+    if (!hasPermission(user, 'CREATE_SAMPLE')) return res.status(403).json({ error: 'Only Intake Officers and Managers can create walk-in samples' });
+    if (!submitter) return res.status(400).json({ error: 'submitter is required' });
+    if (sampleType === 'PT' && !ptRound) return res.status(400).json({ error: 'ptRound is required for PT samples' });
+    const assignedLab = user.labId || (scopeGuard.hasGlobalAccess(user) ? req.body.assignedLab : null);
+    if (req.body.assignedLab && req.body.assignedLab !== assignedLab) return res.status(403).json({ error: 'TARGET_OUTSIDE_SCOPE' });
+    const sampleMeta = { sampleType: sampleType || 'WALKIN', ptRound: ptRound || null, expectedValues: expectedValues || null };
+    try {
+        const sample = await prisma.$transaction(tx => require('../services/intakeService').receiveSample(tx, {
+            body: { ...req.body, assignedLab }, user: { ...user, labId: assignedLab },
+            createDataFactory: async (db, lab) => {
+                const autoId = await idGenerator.generateWalkInId(lab.country, sampleType === 'PT' ? 'P' : 'W', db);
+                const now = new Date();
+                const field = await require('../services/intakeProfileService').captureConfigured({ assignedLab: lab.id, country: lab.country }, {}, req.body, { actor: user.id || user.username, source: 'WALK_IN_INTAKE', isNew: true }, db);
+                for (const [key, value] of Object.entries({ submitterName: submitter, submitterContact, description, sampleType: sampleMeta.sampleType })) field[key] = { value, source: 'WALK_IN_INTAKE', lastUpdatedAt: now, lastUpdatedBy: user.username };
+                return { id: autoId, originalId: sampleType === 'PT' && ptRound ? `PT-${ptRound}-${autoId}` : autoId,
+                    projectCode: null, country: lab.country, countryName: lab.country, metadata: JSON.stringify(sampleMeta), fieldMetadata: JSON.stringify(field), history: '[]' };
+            }
+        }), { timeout: 30000 });
+        return res.status(201).json({ sample: { ...sample, ...sampleMeta } });
+    } catch (error) { return require('../services/intakeErrors').respond(res, error); }
+};
+
+/**
+ * UNDO INTAKE - Revert from ACCEPTED to RECEIVED
+ * POST /api/samples/:id/undo-intake
+ */
+exports.undoIntake = async (req, res) => {
+    const { id } = req.params;
+    const user = req.user;
+
+    // RBAC: Only Managers/Admins
+    if (!hasPermission(user, 'APPROVE_RESULTS')) {
+        return res.status(403).json({ error: 'Only Managers can undo intake' });
+    }
+
+    try {
+        const updatedSample = await prisma.$transaction(async tx => {
+            const sample = await tx.sample.findUnique({ where: { id: String(id) } });
+            if (!sample) throw new sampleStateService.TransitionError('Sample not found', 404, 'SAMPLE_NOT_FOUND');
+            if (!scopeGuard.hasGlobalAccess(user) && sample.assignedLab && sample.assignedLab !== user.labId) {
+                throw new sampleStateService.TransitionError('Access denied: this sample belongs to another lab.', 403, 'ACCESS_DENIED_LAB');
+            }
+            if (sample.status !== 'ACCEPTED' && sample.status !== 'LAB_ID_ASSIGNED') {
+                throw new sampleStateService.TransitionError(
+                    `Cannot undo intake. Sample must be ACCEPTED or LAB_ID_ASSIGNED. Current: ${sample.status}`,
+                    400, 'UNDO_INTAKE_STATE_INVALID');
+            }
+            const items = await tx.workItem.findMany({ where: { sampleId: String(id) } });
+            const reason = req.body?.reason?.trim() || `Intake undone. Status reverted to RECEIVED. ${items.length} work items cancelled and retained.`;
+            // Validate and retain every task before changing the sample's intake
+            // state. A later failure rolls back all cancellations and audits.
+            await require('../services/workItemStateService').cancelForIntakeUndo(tx, { sampleId: String(id), actor: user, reason });
+            await sampleStateService.transitionSample(id, 'RECEIVED', user, reason, {
+                dryingStatus: null, preparationStatus: null, acceptedBy: null, acceptedAt: null
+            }, tx);
+            await tx.auditLog.create({ data: {
+                id: crypto.randomUUID(), entity: 'SAMPLE', entityId: id,
+                action: 'UNDO_INTAKE', details: reason, performedBy: user.username,
+                timestamp: new Date(), sampleId: String(id)
+            } });
+            return tx.sample.findUnique({ where: { id: String(id) } });
+        });
+        res.json({ message: 'Intake undone successfully', sample: updatedSample });
+
+    } catch (error) {
+        const mapped = require('../services/workflowStateRules').mapStateError(error);
+        if (!mapped.statusCode) console.error('[undoIntake] Error:', error);
+        res.status(mapped.statusCode || 500).json({ error: mapped.statusCode ? mapped.message : 'Failed to undo intake',
+            ...(mapped.code && { code: mapped.code }), ...(mapped.details && { details: mapped.details }) });
+    }
+};
+
+
+/**
+ * GET SAMPLE DETAIL - Extended view with work items
+ * GET /api/samples/:id/detail
+ */
+exports.getSampleDetail = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        let sample = await prisma.sample.findUnique({
+            where: { id: String(id) },
+            include: {
+                workItems: true
+            }
+        });
+
+        if (!sample) {
+            sample = await prisma.sample.findFirst({
+                where: {
+                    OR: [
+                        { labId: String(id) },
+                        { labSampleCode: String(id) },
+                        { originalId: String(id) }
+                    ]
+                },
+                include: {
+                    workItems: true
+                }
+            });
+        }
+
+        if (!sample) return res.status(404).json({ error: 'Sample not found' });
+
+        // Lab Isolation Check (Phase 1 - Scope Guard)
+        const scopeGuard = require('../utils/scopeGuard');
+        if (!scopeGuard.canAccessEntity(req.user, sample, { labField: 'labId', altLabField: 'assignedLab' })) {
+            return res.status(403).json({ error: 'Access denied: Sample belongs to another lab.' });
+        }
+
+        // Get Audit Log
+        const auditLog = await prisma.auditLog.findMany({
+            where: {
+                OR: [
+                    { entityId: String(id) },
+                    { sampleId: String(id) }
+                ]
+            },
+            orderBy: { timestamp: 'desc' }
+        });
+
+        // Parse JSON fields
+        const parseJson = (str) => {
+            try { return typeof str === 'string' ? JSON.parse(str) : (str || null); }
+            catch (e) { return null; }
+        };
+
+        // Parse JSON in Audit Log
+        const parsedAuditLog = auditLog.map(a => ({
+            ...a,
+            before: parseJson(a.before),
+            after: parseJson(a.after)
+        }));
+
+        const parsedWorkItems = sample.workItems.map(wi => {
+            let status = wi.status;
+            let assignedLab = wi.assignedLab;
+
+            // Display legacy assignment inconsistencies without writing in GET.
+            if (status === 'ASSIGNED' && !wi.assignedTo) {
+                status = 'NOT_ASSIGNED';
+            }
+
+            // Display the sample's lab fallback without persisting it in GET.
+            if (!assignedLab && sample.assignedLab) {
+                assignedLab = sample.assignedLab;
+            }
+
+            return {
+                ...wi,
+                status,
+                assignedLab,
+                labId: sample.labId,  // Include labId for spectral lookups
+                history: parseJson(wi.history)
+            };
+        });
+
+        // Enrich work items with analysis metadata (display names + units)
+        const wiAnalysisCodes = [...new Set(parsedWorkItems.map(wi => wi.analysis).filter(Boolean))];
+        const analysisMetadata = await prisma.analysis.findMany({
+            where: { code: { in: wiAnalysisCodes } },
+            select: { code: true, name: true, units: true }
+        });
+        const analysisMap = {};
+        analysisMetadata.forEach(a => { analysisMap[a.code] = a; });
+        parsedWorkItems.forEach(wi => {
+            const meta = analysisMap[wi.analysis];
+            wi.unit = meta?.units || null;
+            wi.analysisName = meta?.name || null;
+        });
+
+        // WP-26: Derive operational gate statuses directly from WorkItems (Single Source of Truth)
+        const dryingItem = parsedWorkItems.find(w => w.analysis === 'DRYING');
+        const prepItem = parsedWorkItems.find(w => w.analysis === 'PREPARATION');
+
+        const derivedDryingStatus = dryingItem
+            ? (['ACCEPTED', 'COMPLETED'].includes(dryingItem.status) ? 'DONE' : (dryingItem.status === 'ON_HOLD' ? 'FAILED' : 'PENDING'))
+            : (sample.dryingStatus !== undefined ? sample.dryingStatus : null);
+
+        const derivedPrepStatus = prepItem
+            ? (['ACCEPTED', 'COMPLETED'].includes(prepItem.status) ? 'DONE' : 'PENDING')
+            : (sample.preparationStatus !== undefined ? sample.preparationStatus : null);
+
+        // SD-17: Compute analytical episodes for reopened samples
+        const undoLogs = parsedAuditLog.filter(a => a.action === 'UNDO_APPROVAL' || a.action === 'SAMPLE_REOPENED');
+        const approvalLogs = parsedAuditLog.filter(a => a.action === 'SAMPLE_APPROVED' || (a.action === 'STATUS_CHANGE' && a.details && a.details.includes('APPROVED')));
+
+        const episodes = [];
+        if (undoLogs.length > 0) {
+            episodes.push({
+                episodeNumber: 1,
+                label: 'Pass 1 (Initial Analysis)',
+                approvedAt: approvalLogs[0]?.timestamp || null,
+                approvedBy: approvalLogs[0]?.performedBy || null
+            });
+            undoLogs.forEach((undo, idx) => {
+                episodes.push({
+                    episodeNumber: idx + 2,
+                    label: `Pass ${idx + 2} (Reopened)`,
+                    reopenedAt: undo.timestamp,
+                    reopenReason: undo.details,
+                    approvedAt: approvalLogs[idx + 1]?.timestamp || (sample.status === 'APPROVED' ? sample.approvedAt : null),
+                    approvedBy: approvalLogs[idx + 1]?.performedBy || (sample.status === 'APPROVED' ? sample.approvedBy : null)
+                });
+            });
+        } else if (sample.approvedAt) {
+            episodes.push({
+                episodeNumber: 1,
+                label: 'Pass 1 (Initial Analysis)',
+                approvedAt: sample.approvedAt,
+                approvedBy: sample.approvedBy
+            });
+        }
+
+        const enrichedSample = {
+            ...sample,
+            dryingStatus: derivedDryingStatus,
+            preparationStatus: derivedPrepStatus,
+            episodes,
+            metadata: parseJson(sample.metadata),
+            fieldMetadata: parseJson(sample.fieldMetadata),
+            requiredAnalyses: parseJson(sample.requiredAnalyses),
+            analysisGroupIds: parseJson(sample.analysisGroupIds),
+            receptionData: parseJson(sample.receptionData)
+        };
+
+        // Calculate workflow summary using the Workflow Engine
+        const workflowEngine = require('../utils/workflowEngine');
+        const workflowSummary = await workflowEngine.withCatalogue(prisma, () => workflowEngine.getWorkflowSummary(sample, parsedWorkItems));
+
+        // Check if this sample has a Kobo connection
+        // Walk-in samples should NEVER show Kobo sync — they are manual by definition
+        let hasKoboConnection = false;
+
+        // Detect walk-in samples: null/empty projectCode, or isWalkIn flag in receptionData
+        let isWalkInSample = !sample.projectCode;
+        if (!isWalkInSample) {
+            try {
+                const rd = typeof sample.receptionData === 'string' ? JSON.parse(sample.receptionData) : sample.receptionData;
+                isWalkInSample = rd?.isWalkIn === true;
+            } catch (e) { }
+        }
+
+        if (sample.assignedLab && !isWalkInSample) {
+            // Check if fieldMetadata was created by DRAFT (intake) — if so, it's manual
+            let isDraft = false;
+            try {
+                const fm = typeof sample.fieldMetadata === 'string' ? JSON.parse(sample.fieldMetadata) : sample.fieldMetadata;
+                if (fm) {
+                    const firstVal = Object.values(fm)[0];
+                    isDraft = firstVal?.source === 'DRAFT' || firstVal?.source === 'WALK_IN_INTAKE';
+                }
+            } catch (e) { }
+
+            if (!isDraft && (sample.projectCode || sample.projectId)) {
+                const koboConfig = await prisma.koboConfig.findFirst({
+                    where: {
+                        labId: sample.assignedLab,
+                        isActive: true,
+                        OR: [
+                            { projectCode: sample.projectCode || '' },
+                            { projectCode: sample.projectId || '' }
+                        ]
+                    },
+                    select: { id: true }
+                });
+                hasKoboConnection = !!koboConfig;
+            }
+        }
+
+        // Fetch equipment eligibility for this lab
+        const equipmentEligibility = await prisma.equipmentMethodEligibility.findMany({
+            where: { labId: sample.assignedLab || sample.labId }
+        });
+
+        res.json({
+            sample: enrichedSample,
+            workItems: parsedWorkItems,
+            auditLog: parsedAuditLog,
+            workflowSummary,  // Phase 2: Centralized workflow state
+            hasKoboConnection,
+            equipmentEligibility, // Phase 5: Workflow Integration
+            identifiers: {
+                sampleId: sample.id,
+                labId: sample.labId,
+                originalId: sample.originalId
+            }
+        });
+    } catch (error) {
+        console.error('[getSampleDetail] Error:', error);
+        res.status(500).json({ error: 'Failed to fetch sample details' });
+    }
+};
+
+/**
+ * GET /api/samples/:id/map-state
+ * 
+ * Returns the unified map-state contract for the workflow map.
+ * This is the SINGLE SOURCE OF TRUTH — the client renders from this payload only.
+ */
+exports.getMapState = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const sample = await prisma.sample.findUnique({
+            where: { id: String(id) },
+            include: { workItems: true }
+        });
+
+        if (!sample) return res.status(404).json({ error: 'Sample not found' });
+
+        // Lab Isolation Check
+        const scopeGuard = require('../utils/scopeGuard');
+        if (!scopeGuard.canAccessEntity(req.user, sample, { labField: 'labId', altLabField: 'assignedLab' })) {
+            return res.status(403).json({ error: 'Access denied: Sample belongs to another lab.' });
+        }
+
+        // Get Audit Log (for SLA computation)
+        const auditLog = await prisma.auditLog.findMany({
+            where: {
+                OR: [
+                    { entityId: String(id) },
+                    { sampleId: String(id) }
+                ]
+            },
+            orderBy: { timestamp: 'desc' }
+        });
+
+        // Self-heal work item statuses
+        const workItems = sample.workItems.map(wi => {
+            let status = wi.status;
+            if (status === 'ASSIGNED' && !wi.assignedTo) status = 'NOT_ASSIGNED';
+            return { ...wi, status };
+        });
+
+        // Build map-state from engine
+        const workflowEngine = require('../utils/workflowEngine');
+        const mapState = await workflowEngine.withCatalogue(prisma, () => workflowEngine.buildMapState(sample, workItems, auditLog));
+
+        res.json({
+            snapshot: {
+                version: '2.0',
+                generatedAt: new Date().toISOString(),
+            },
+            sample: {
+                id: sample.id,
+                originalId: sample.originalId || sample.id,
+                labId: sample.labId || sample.assignedLab,
+                projectCode: sample.projectCode || '—',
+                sampleType: sample.sampleType || 'SOIL',
+                status: sample.status,
+            },
+            ...mapState
+        });
+    } catch (error) {
+        console.error('[getMapState] Error:', error);
+        res.status(500).json({ error: 'Failed to build map state' });
+    }
+};
+
+// =============================================================================
+// STEP 6: FINAL APPROVAL + CLOSURE
+// =============================================================================
+
+// [REMOVED DUPLICATE APPROVE/ARCHIVE/DISPOSE FUNCTIONS - See end of file]
+
+/**
+ * ACCEPT INTAKE - Phase 1 Atomic Transaction
+ * POST /api/samples/:id/accept
+ * - Verifies Manager
+ * - Assigns Lab ID
+ * - Inits Gates
+ * - Generates WorkItems
+ */
+exports.acceptSample = async (req, res) => {
+    if (!hasPermission(req.user, 'APPROVE_RESULTS')) return res.status(403).json({ error: 'Only Managers can accept intakes.' });
+    try {
+        const result = await prisma.$transaction(async tx => {
+            const sample = await tx.sample.findUnique({ where: { id: String(req.params.id) } });
+            if (!sample) return null;
+            scopeGuard.ensureScope(req.user, sample, { altLabField: 'assignedLab' });
+            if (!['RECEIVED', 'COLLECTED', 'RECEIVED_REJECTED'].includes(sample.status)) throw new (require('../services/intakeErrors').IntakeError)(400, { error: `Sample must be in RECEIVED state to accept. Current: ${sample.status}` });
+            const result = await require('../services/intakeService').acceptSample(tx, { user: req.user, body: { ...req.body, sampleId: sample.id, originalId: sample.originalId,
+                isWalkIn: require('../services/sampleOriginService').resolveOriginForSave(sample, false, {}).isWalkIn } });
+            const workItems = await tx.workItem.findMany({ where: { sampleId: sample.id, duplicateOf: null } });
+            return { ...result.sample, workItems };
+        }, { timeout: 30000 });
+        if (!result) return res.status(404).json({ error: 'Sample not found' });
+        return res.json(result);
+    } catch (error) { return require('../services/intakeErrors').respond(res, error); }
+};
+exports.deleteSample = async (req, res) => {
+    const { id } = req.params;
+    const user = req.user;
+
+    try {
+        // PERMISSION CHECK
+        // SUPER_ADMIN/MASTER_USER (DELETE_SAMPLE) can delete anything.
+        // LAB_MANAGER and SAMPLE_RECEPTION (RECEIVE_SAMPLE) can delete drafts/errors.
+        const canDelete = hasPermission(user, 'DELETE_SAMPLE') || hasPermission(user, 'RECEIVE_SAMPLE');
+
+        if (!canDelete) {
+            return res.status(403).json({ error: 'You do not have permission to delete samples.' });
+        }
+
+        const sample = await prisma.sample.findUnique({ where: { id: String(id) } });
+        if (!sample) return res.status(404).json({ error: 'Sample not found' });
+
+        // LIFECYCLE CHECK: Deny generic deletion/reset of released, approved, or in-progress samples (I04)
+        // This applies to ALL users, including SUPER_ADMIN (cannot bypass lifecycle state via generic delete)
+        const deletableStatuses = ['DRAFT', 'EXPECTED', 'RECEIVED', 'COLLECTED'];
+        if (!deletableStatuses.includes(sample.status)) {
+            return res.status(409).json({
+                error: 'ILLEGAL_STATUS_TRANSITION',
+                message: `Cannot delete or discard sample in status '${sample.status}'. Samples that are approved, released, or in progress cannot be deleted or reset outside a controlled amendment.`
+            });
+        }
+
+        // ROLE-BASED LAB ISOLATION CHECK
+        if (!hasPermission(user, 'DELETE_SAMPLE')) {
+            // Lab isolation: Managers/Reception can only delete their own lab's samples
+            if (user.labId && sample.labId && user.labId !== sample.labId) {
+                return res.status(403).json({ error: 'Access denied: Sample belongs to another lab.' });
+            }
+        }
+
+        const metadata = typeof sample.metadata === 'string' ? JSON.parse(sample.metadata) : (sample.metadata || {});
+        if (metadata._uuid || metadata['Country']) {
+            return res.status(403).json({ error: 'Cannot delete protected SoilFER project samples.' });
+        }
+
+        // Canonical provenance evaluation: only genuine unattached desk walk-ins may be hard deleted
+        const isPreRegistered = !sampleOriginService.isDisposableDeskDraft(sample);
+
+        if (isPreRegistered) {
+            // REVERT to EXPECTED — fully atomic transaction with domain workflow validation (I04)
+            await prisma.$transaction(async (tx) => {
+                const current = await tx.sample.findUnique({ where: { id: String(id) } });
+                if (!current) throw new sampleStateService.TransitionError('Sample not found', 404, 'SAMPLE_NOT_FOUND');
+
+                if (!deletableStatuses.includes(current.status)) {
+                    throw new sampleStateService.TransitionError(
+                        `Cannot discard sample in status '${current.status}'. Samples in progress or completed cannot be reset.`,
+                        409,
+                        'ILLEGAL_STATUS_TRANSITION'
+                    );
+                }
+
+                const resultCount = await tx.result.count({ where: { sampleId: String(id) } });
+                if (resultCount > 0) {
+                    throw new sampleStateService.TransitionError('Cannot discard sample with existing analytical results.', 409, 'CANNOT_DELETE_SAMPLE_WITH_RESULTS');
+                }
+                const activeWork = await tx.workItem.findMany({
+                    where: {
+                        sampleId: String(id),
+                        status: { in: ['COMPLETED', 'SUBMITTED', 'ACCEPTED'] }
+                    }
+                });
+                if (activeWork.length > 0) {
+                    throw new sampleStateService.TransitionError('Cannot discard sample with analytical work completed or submitted.', 409, 'ACTIVE_WORK_IN_PROGRESS');
+                }
+
+                await require('../services/workItemStateService').removeUnstartedWorkItems(tx, { sampleId: String(id) },
+                    { actor: user, reason: 'Sample intake discarded by manager' });
+                await tx.submission.deleteMany({ where: { sampleId: String(id) } });
+                await tx.spectralData.deleteMany({ where: { sampleId: String(id) } });
+                await tx.result.deleteMany({ where: { sampleId: String(id) } });
+
+                const sampleHistory = typeof current.history === 'string'
+                    ? JSON.parse(current.history)
+                    : (current.history || []);
+                sampleHistory.push({
+                    status: 'EXPECTED',
+                    action: 'REVERT_TO_EXPECTED',
+                    changedBy: user.username,
+                    timestamp: new Date(),
+                    note: 'Sample reset/reverted to EXPECTED by manager'
+                });
+
+                // Canonical transition inside transaction (enforces workflowContract graph and logs transition audit)
+                await sampleStateService.transitionSample(
+                    id,
+                    'EXPECTED',
+                    user,
+                    'Sample reset/reverted to EXPECTED by manager',
+                    {
+                        labId: null,
+                        receptionData: null,
+                        receptionDate: null,
+                        receivedBy: null,
+                        dryingStatus: null,
+                        preparationStatus: null,
+                        acceptedBy: null,
+                        acceptedAt: null,
+                        approvedBy: null,
+                        approvedAt: null,
+                        requiredAnalyses: null,
+                        analysisGroupIds: null,
+                        lastSubmissionId: null,
+                        lastSubmissionType: null,
+                        lastSubmissionAt: null,
+                        assignedLab: current.assignedLab,
+                        history: JSON.stringify(sampleHistory)
+                    },
+                    tx
+                );
+
+                await tx.auditLog.create({
+                    data: {
+                        id: crypto.randomUUID(),
+                        entity: 'SAMPLE',
+                        entityId: id,
+                        action: 'REVERT_TO_EXPECTED',
+                        performedBy: user.username,
+                        details: `Reverted pre-registered sample ${sample.originalId} back to EXPECTED (cleared intake data). Sample record preserved.`,
+                        timestamp: new Date(),
+                        sampleId: String(id)
+                    }
+                });
+            });
+
+            return res.json({ message: 'Sample intake discarded. Sample reverted to EXPECTED status.', reverted: true });
+        }
+
+        // HARD DELETE for walk-in samples — fully atomic transaction with safety validation
+        await prisma.$transaction(async (tx) => {
+            const current = await tx.sample.findUnique({ where: { id: String(id) } });
+            if (!current) throw new sampleStateService.TransitionError('Sample not found', 404, 'SAMPLE_NOT_FOUND');
+
+            if (!deletableStatuses.includes(current.status)) {
+                throw new sampleStateService.TransitionError(
+                    `Cannot delete sample in status '${current.status}'.`,
+                    409,
+                    'ILLEGAL_STATUS_TRANSITION'
+                );
+            }
+
+            const resultCount = await tx.result.count({ where: { sampleId: String(id) } });
+            if (resultCount > 0) {
+                throw new sampleStateService.TransitionError('Cannot delete sample with existing analytical results.', 409, 'CANNOT_DELETE_SAMPLE_WITH_RESULTS');
+            }
+
+            await require('../services/workItemStateService').removeUnstartedWorkItems(tx, { sampleId: String(id) },
+                { actor: user, reason: 'Walk-in sample removed by manager' });
+            await tx.submission.deleteMany({ where: { sampleId: String(id) } });
+            await tx.spectralData.deleteMany({ where: { sampleId: String(id) } });
+            await tx.result.deleteMany({ where: { sampleId: String(id) } });
+
+            await tx.auditLog.create({
+                data: {
+                    id: crypto.randomUUID(),
+                    entity: 'SAMPLE',
+                    entityId: id,
+                    action: 'DELETE',
+                    performedBy: user.username,
+                    details: `Hard deleted sample ${sample.labId || sample.originalId} and associated data.`,
+                    timestamp: new Date()
+                }
+            });
+
+            await sampleStateService.removePreAnalyticSample(tx, [String(id)], { actor: user,
+                reason: 'Walk-in sample removed by manager', code: 'PREANALYTIC_SAMPLE_REMOVED' });
+        });
+
+        res.json({ message: 'Sample deleted successfully' });
+    } catch (error) {
+        if (error.name === 'TransitionError' || error.code === 'ILLEGAL_STATUS_TRANSITION' || error.statusCode) {
+            return res.status(error.statusCode || 409).json({
+                error: error.code || 'ILLEGAL_STATUS_TRANSITION',
+                message: error.message
+            });
+        }
+        console.error('[deleteSample] Error:', error);
+        res.status(500).json({ error: 'Failed to delete sample' });
+    }
+};
+
+exports.batchDeleteSamples = async (req, res) => {
+    const { ids } = req.body;
+    const user = req.user;
+
+    if (!Array.isArray(ids) || ids.length === 0) {
+        return res.status(400).json({ error: 'No sample IDs provided' });
+    }
+
+    try {
+        const isSuperAdmin = hasPermission(user, 'DELETE_SAMPLE');
+        const isLabStaff = hasPermission(user, 'RECEIVE_SAMPLE') || hasPermission(user, 'CHANGE_STATUS');
+
+        const samples = await prisma.sample.findMany({
+            where: { id: { in: ids.map(id => String(id)) } }
+        });
+
+        if (samples.length === 0) {
+            return res.status(404).json({ error: 'No valid samples found for the provided IDs.' });
+        }
+
+        // LIFECYCLE CHECK: Deny generic deletion/reset of released, approved, or in-progress samples (I04)
+        // This applies to ALL users, including SUPER_ADMIN (cannot bypass lifecycle state via generic delete)
+        const deletableStatuses = ['DRAFT', 'EXPECTED', 'RECEIVED', 'COLLECTED'];
+        const nonDeletable = samples.filter(s => !deletableStatuses.includes(s.status));
+        if (nonDeletable.length > 0) {
+            const blocked = nonDeletable.map(s => `${s.originalId || s.id} (${s.status})`).join(', ');
+            return res.status(409).json({
+                error: 'ILLEGAL_STATUS_TRANSITION',
+                message: `Cannot delete or discard samples outside initial intake stages. Samples that are approved, released, or in progress cannot be deleted or reset outside a controlled amendment. Blocked: ${blocked}`
+            });
+        }
+
+        // Lab staff can only discard DRAFT or RECEIVED samples from their own lab
+        if (!isSuperAdmin) {
+            if (!isLabStaff) {
+                return res.status(403).json({ error: 'Permission Denied: You do not have permission to delete samples.' });
+            }
+
+            const invalidSamples = samples.filter(s => {
+                const isOwnLab = !s.assignedLab || s.assignedLab === user.labId;
+                return !isOwnLab;
+            });
+
+            if (invalidSamples.length > 0) {
+                const lockedIds = invalidSamples.map(s => s.id || s.originalId).join(', ');
+                return res.status(403).json({
+                    error: `Permission Denied: You can only discard samples from your own lab. Blocked: ${lockedIds}`
+                });
+            }
+        }
+
+        // Check if any sample is protected (SoilFER)
+        const protectedSamples = samples.filter(s => {
+            const metadata = typeof s.metadata === 'string' ? JSON.parse(s.metadata) : (s.metadata || {});
+            return metadata._uuid || metadata['Country'];
+        });
+
+        if (protectedSamples.length > 0) {
+            return res.status(403).json({
+                error: `Action blocked: ${protectedSamples.length} samples in your selection are protected SoilFER project records. Please deselect them.`
+            });
+        }
+
+        // Separate samples: project-linked (revert to EXPECTED) vs walk-in/open (hard delete)
+        // using canonical sampleOriginService (I02, I03)
+        const toRevert = [];
+        const toDelete = [];
+
+        for (const sample of samples) {
+            if (sampleOriginService.isDisposableDeskDraft(sample)) {
+                toDelete.push(sample);
+            } else {
+                toRevert.push(sample);
+            }
+        }
+
+        // Execute batch revert and delete in a single atomic transaction
+        await prisma.$transaction(async (tx) => {
+            const allIds = samples.map(s => String(s.id));
+            const currentSamples = await tx.sample.findMany({
+                where: { id: { in: allIds } }
+            });
+
+            if (currentSamples.length !== samples.length) {
+                throw new sampleStateService.TransitionError('One or more samples were concurrently modified or deleted.', 404, 'SAMPLE_NOT_FOUND');
+            }
+
+            for (const current of currentSamples) {
+                if (!deletableStatuses.includes(current.status)) {
+                    throw new sampleStateService.TransitionError(
+                        `Cannot discard sample ${current.originalId || current.id} in status '${current.status}'. Samples in progress or completed cannot be reset.`,
+                        409,
+                        'ILLEGAL_STATUS_TRANSITION'
+                    );
+                }
+            }
+
+            // Verify no analytical results exist
+            const resultCount = await tx.result.count({
+                where: { sampleId: { in: allIds } }
+            });
+            if (resultCount > 0) {
+                throw new sampleStateService.TransitionError('Cannot delete or discard samples with existing analytical results.', 409, 'CANNOT_DELETE_SAMPLE_WITH_RESULTS');
+            }
+
+            // Verify no completed or submitted work items exist
+            const activeWork = await tx.workItem.findMany({
+                where: {
+                    sampleId: { in: allIds },
+                    status: { in: ['COMPLETED', 'SUBMITTED', 'ACCEPTED'] }
+                }
+            });
+            if (activeWork.length > 0) {
+                throw new sampleStateService.TransitionError('Cannot delete or discard samples with analytical work completed or submitted.', 409, 'ACTIVE_WORK_IN_PROGRESS');
+            }
+
+            // Clean up related records
+            await require('../services/workItemStateService').removeUnstartedWorkItems(tx, { sampleId: { in: allIds } },
+                { actor: user, reason: 'Sample intake discarded in batch' });
+            await tx.submission.deleteMany({ where: { sampleId: { in: allIds } } });
+            await tx.spectralData.deleteMany({ where: { sampleId: { in: allIds } } });
+            await tx.result.deleteMany({ where: { sampleId: { in: allIds } } });
+
+            if (toRevert.length > 0) {
+                for (const sample of toRevert) {
+                    const current = currentSamples.find(c => String(c.id) === String(sample.id)) || sample;
+                    const sampleHistory = typeof current.history === 'string'
+                        ? JSON.parse(current.history)
+                        : (current.history || []);
+                    sampleHistory.push({
+                        status: 'EXPECTED',
+                        action: 'REVERT_TO_EXPECTED',
+                        changedBy: user.username,
+                        timestamp: new Date(),
+                        note: 'Draft/intake discarded in batch. Sample reverted to EXPECTED status.'
+                    });
+
+                    // Canonical transition inside transaction (enforces workflowContract graph and logs transition audit)
+                    await sampleStateService.transitionSample(
+                        current.id,
+                        'EXPECTED',
+                        user,
+                        'Draft/intake discarded in batch. Sample reverted to EXPECTED status.',
+                        {
+                            labId: null,
+                            receptionData: null,
+                            receptionDate: null,
+                            receivedBy: null,
+                            dryingStatus: null,
+                            preparationStatus: null,
+                            acceptedBy: null,
+                            acceptedAt: null,
+                            approvedBy: null,
+                            approvedAt: null,
+                            requiredAnalyses: null,
+                            analysisGroupIds: null,
+                            lastSubmissionId: null,
+                            lastSubmissionType: null,
+                            lastSubmissionAt: null,
+                            assignedLab: current.assignedLab,
+                            history: JSON.stringify(sampleHistory)
+                        },
+                        tx
+                    );
+                }
+            }
+
+            if (toDelete.length > 0) {
+                const deleteIds = toDelete.map(s => String(s.id));
+                await sampleStateService.removePreAnalyticSample(tx, deleteIds, { actor: user,
+                    reason: 'Walk-in samples removed in batch', code: 'PREANALYTIC_SAMPLE_REMOVED' });
+            }
+
+            await tx.auditLog.create({
+                data: {
+                    id: crypto.randomUUID(),
+                    entity: 'SAMPLE',
+                    entityId: 'BATCH',
+                    action: toRevert.length > 0 ? 'BATCH_DISCARD' : 'BATCH_DELETE',
+                    performedBy: user.username,
+                    details: `Discarded ${samples.length} samples (${toRevert.length} reverted to EXPECTED, ${toDelete.length} hard deleted).`,
+                    timestamp: new Date(),
+                    before: JSON.stringify(samples.map(s => s.id))
+                }
+            });
+        });
+
+        const msg = toRevert.length > 0
+            ? `${samples.length} samples discarded (${toRevert.length} reverted to EXPECTED, ${toDelete.length} removed).`
+            : `${samples.length} samples deleted successfully.`;
+
+        res.json({ message: msg, reverted: toRevert.length, deleted: toDelete.length });
+    } catch (error) {
+        if (error.name === 'TransitionError' || error.code === 'ILLEGAL_STATUS_TRANSITION' || error.statusCode) {
+            return res.status(error.statusCode || 409).json({
+                error: error.code || 'ILLEGAL_STATUS_TRANSITION',
+                message: error.message
+            });
+        }
+        console.error('[batchDeleteSamples] Error:', error);
+        res.status(500).json({ error: 'Failed to batch delete samples: ' + error.message });
+    }
+};
+
+/**
+ * UPDATE SAMPLE METADATA
+ 
+     * UPDATE SAMPLE METADATA
+     * PUT /api/samples/:id/metadata
+     * Body: { metadata: { key: value, ... } }
+     */
+exports.updateSampleMetadata = async (req, res) => {
+    const { id } = req.params;
+    const { metadata } = req.body;
+    const user = req.user;
+
+    try {
+        if (!hasPermission(user, 'RECEIVE_SAMPLE') && !hasPermission(user, 'APPROVE_RESULTS')) {
+            return res.status(403).json({ error: 'Insufficient permissions to edit metadata.' });
+        }
+
+        const sample = await prisma.sample.findUnique({ where: { id: String(id) } });
+        if (!sample) return res.status(404).json({ error: 'Sample not found' });
+
+        if (!(await userHasScopeForSample(user, sample))) {
+            return res.status(403).json({ error: 'Sample is outside your scope' });
+        }
+
+        if (!metadata || typeof metadata !== 'object' || Array.isArray(metadata) || Object.keys(metadata).some(key => ['__proto__','constructor','prototype','profileCompatibility'].includes(key))) {
+            return res.status(400).json({ error: 'Metadata must contain supported fields. Compatibility references are server-managed.' });
+        }
+        if (Object.hasOwn(metadata, 'provenanceHold')) {
+            return res.status(409).json({ code: 'HOLD_MARKER_MANAGED', error: 'Use the sample hold resolution action to change a provenance hold.' });
+        }
+        const identityKeys = Object.keys(metadata).filter(key => profileIdentity.IDENTITY_KEYS.has(key));
+        const released = !!sample.approvedAt || ['APPROVED','RELEASED','ARCHIVED','DISPOSED'].includes(sample.status);
+        if (released && identityKeys.length) {
+            return res.status(409).json({ code: 'PROFILE_AMENDMENT_REQUIRED', error: 'Use a reasoned clerical amendment to correct a released soil profile reference.' });
+        }
+        const currentMeta = typeof sample.fieldMetadata === 'string' ? JSON.parse(sample.fieldMetadata) : (sample.fieldMetadata || {});
+        if (!currentMeta || typeof currentMeta !== 'object' || Array.isArray(currentMeta)) throw new profileIdentity.ProfileReferenceConflictError('INVALID_STORED_PROVENANCE');
+        const oldMeta = JSON.stringify(currentMeta);
+        const now = new Date();
+
+        if (identityKeys.length) {
+            const existing = Object.hasOwn(currentMeta,'profileReference') ? profileIdentity.validateReference(currentMeta.profileReference) : null;
+            if (req.body.expectedProfileRevision !== undefined && (!Number.isSafeInteger(req.body.expectedProfileRevision) || req.body.expectedProfileRevision !== (existing?.revision || 0))) {
+                return res.status(409).json({code:'PROFILE_REVISION_CONFLICT', error:'The soil profile reference has changed. Review the current value; your correction has not been discarded.'});
+            }
+            if (existing && !Object.hasOwn(metadata,'profileReference') && identityKeys.some(key => profileIdentity.PIT_KEYS.includes(key) || ['profileConfirmed','isComposite','composite'].includes(key))) {
+                return res.status(409).json({ code: 'PROFILE_REFERENCE_REQUIRED', error: 'Supply the complete soil profile correction so its meaning can be reviewed.' });
+            }
+            if (Object.hasOwn(metadata,'profileReference') || !existing) {
+                const input = Object.hasOwn(metadata,'profileReference') ? metadata : {...currentMeta,...metadata};
+                const captured = await require('../services/intakeProfileService').captureConfigured(sample, Object.hasOwn(metadata, 'profileReference') ? currentMeta : input, Object.hasOwn(metadata, 'profileReference') ? {profileReference: metadata.profileReference} : {}, {actor: user.username, source: 'MANUAL_EDIT', recordedAt: now.toISOString(), isNew: !existing && !Object.hasOwn(metadata, 'profileReference')}, prisma);
+                currentMeta.profileReference = captured.profileReference;
+            }
+        }
+
+        Object.keys(metadata).forEach(key => {
+            if (key === 'profileReference') return;
+            currentMeta[key] = {
+                value: metadata[key],
+                source: 'MANUAL_EDIT',
+                lastUpdatedBy: user.username,
+                lastUpdatedAt: now
+            };
+        });
+
+        const updated = await prisma.$transaction(async tx => {
+            const changed = await tx.sample.updateMany({where:{id:String(id),updatedAt:sample.updatedAt},data:{fieldMetadata:JSON.stringify(currentMeta)}});
+            if (changed.count !== 1) throw new profileIdentity.ProfileReferenceConflictError('CONCURRENT_SAMPLE_EDIT');
+            await tx.auditLog.create({
+            data: {
+                id: crypto.randomUUID(),
+                entity: 'SAMPLE',
+                entityId: id,
+                action: 'METADATA_UPDATE',
+                details: identityKeys.length ? JSON.stringify({fields:Object.keys(metadata),old:Object.fromEntries(Object.entries(JSON.parse(oldMeta)).filter(([key])=>profileIdentity.IDENTITY_KEYS.has(key))),new:Object.fromEntries(Object.entries(currentMeta).filter(([key])=>profileIdentity.IDENTITY_KEYS.has(key)))}) : `Updated metadata fields: ${Object.keys(metadata).join(', ')}`,
+                performedBy: user.username,
+                timestamp: now,
+                sampleId: String(id)
+            }
+            });
+            return tx.sample.findUnique({where:{id:String(id)}});
+        });
+
+        res.json(updated);
+    } catch (error) {
+        if (error instanceof profileIdentity.ProfileReferenceConflictError) return res.status(409).json({code:error.code,error:error.message,reason:error.reason});
+        console.error('[updateSampleMetadata] Error:', error);
+        res.status(500).json({ error: 'Failed to update metadata' });
+    }
+};
+
+/**
+ * UPDATE SAMPLE PROJECT
+ * PUT /api/samples/:id/project
+ * Body: { projectId, projectCode }
+ */
+exports.updateSampleProject = async (req, res) => {
+    const { id } = req.params;
+    const { projectId, projectCode } = req.body;
+    const user = req.user;
+
+    try {
+        if (!hasPermission(user, 'MANAGE_PROJECTS')) {
+            return res.status(403).json({ error: 'Only Managers can move samples between projects.' });
+        }
+
+        const sample = await prisma.sample.findUnique({ where: { id: String(id) } });
+        if (!sample) return res.status(404).json({ error: 'Sample not found' });
+
+        const scopeGuard = require('../utils/scopeGuard');
+        if (!scopeGuard.canAccessEntity(user, sample, { labField: 'assignedLab', altLabField: 'labId' })) {
+            return res.status(403).json({ error: 'Sample is outside your scope' });
+        }
+
+        // Validate target project admission policy and resolve one consistent identity.
+        let targetProject = null;
+        if (projectId || projectCode) {
+            targetProject = await prisma.project.findUnique({where:projectId ? {id:projectId} : {code:projectCode}});
+            if (!targetProject) {
+                return res.status(404).json({ error: 'TARGET_PROJECT_NOT_FOUND', message: 'Target project not found' });
+            }
+            if (projectId && projectCode && targetProject.code !== projectCode) return res.status(409).json({code:'PROJECT_REFERENCE_CONFLICT',error:'The project ID and code do not identify the same project.'});
+            const membership = await require('../services/projectMembershipService').resolveProjectLabs(targetProject);
+            if (!require('../services/projectPolicyService').canReadProject(user,targetProject,{memberLabIds:membership.allMemberLabIds})) return res.status(403).json({error:'Target project is outside your scope'});
+            if (['PAUSED', 'COMPLETED', 'ARCHIVED', 'CLOSED', 'DELETED'].includes(targetProject.status)) {
+                return res.status(422).json({
+                    error: 'PROJECT_ADMISSIONS_PAUSED',
+                    message: `Cannot move sample into project ${targetProject.code}: Admissions are ${targetProject.status.toLowerCase()}.`
+                });
+            }
+        }
+        if (!targetProject) return res.status(400).json({error:'A target project is required'});
+
+        const now = new Date();
+        const history = typeof sample.history === 'string' ? JSON.parse(sample.history) : (sample.history || []);
+        history.push({
+            status: sample.status,
+            timestamp: now,
+            user: user.username,
+            note: `Project changed from ${sample.projectId || sample.projectCode} to ${projectId || projectCode}`
+        });
+
+        const field = typeof sample.fieldMetadata === 'string' ? JSON.parse(sample.fieldMetadata) : sample.fieldMetadata || {};
+        const meta = typeof sample.metadata === 'string' ? JSON.parse(sample.metadata) : sample.metadata || {};
+        const preserved = profileIdentity.preserveLegacyBeforeContextChange(sample,field,meta,require('../services/sisAdapterService').extractLegacyProfileReference,{actor:user.username,recordedAt:now.toISOString()});
+        const updated = await prisma.$transaction(async tx => {
+            const changed = await tx.sample.updateMany({where:{id:String(id),updatedAt:sample.updatedAt},data:{projectId:targetProject.id,projectCode:targetProject.code,history:JSON.stringify(history),fieldMetadata:JSON.stringify(preserved)}});
+            if (changed.count !== 1) throw new profileIdentity.ProfileReferenceConflictError('CONCURRENT_SAMPLE_EDIT');
+            await tx.auditLog.create({
+            data: {
+                id: crypto.randomUUID(),
+                entity: 'SAMPLE',
+                entityId: id,
+                action: 'PROJECT_CHANGE',
+                details: JSON.stringify({from:sample.projectCode,to:targetProject.code,profilePreservation:preserved.profileCompatibility || null}),
+                performedBy: user.username,
+                timestamp: now,
+                sampleId: String(id)
+            }
+            });
+            return tx.sample.findUnique({where:{id:String(id)}});
+        });
+
+        res.json(updated);
+    } catch (error) {
+        if (error instanceof profileIdentity.ProfileReferenceConflictError) return res.status(409).json({code:error.code,error:error.message,reason:error.reason});
+        console.error('[updateSampleProject] Error:', error);
+        res.status(500).json({ error: 'Failed to update sample project' });
+    }
+};
+
+/**
+ * UPDATE SAMPLE ANALYSES
+ * PUT /api/samples/:id/analyses
+ * Body: { analyses, analysisGroupIds }
+ * Changed orders require a reason; issued work uses the amendment workflow.
+ */
+exports.updateSampleAnalyses = async (req, res) => {
+    try {
+        const { analyses, analysisGroupIds, reason, waiverReason } = req.body;
+        const outcome = await sampleAnalysisStateService.reviseAnalyses(req.params.id,
+            { analyses, analysisGroupIds, reason: reason || waiverReason }, req.user,
+            { idempotencyKey: req.body.idempotencyKey || req.headers['x-idempotency-key'] });
+        return res.json(outcome);
+    } catch (err) {
+        if (!err.statusCode) console.error('[updateSampleAnalyses] Error:', err);
+        return res.status(err.statusCode || 500).json({ error: err.statusCode ? err.message : 'Failed to update analyses',
+            code: err.code, ...(err.details || {}) });
+    }
+};
+
+exports.approveSample = async (req, res) => {
+    const { id } = req.params;
+    const user = req.user;
+
+    try {
+        if (!hasPermission(user, 'APPROVE_RESULTS')) {
+            return res.status(403).json({ error: 'Only Managers can approve samples.' });
+        }
+
+        const sample = await prisma.sample.findUnique({ where: { id: String(id) } });
+        if (!sample) return res.status(404).json({ error: 'Sample not found' });
+
+        // S04: Lab scope check
+        const scopeGuard = require('../utils/scopeGuard');
+        try {
+            scopeGuard.ensureScope(user, sample, { altLabField: 'assignedLab' });
+        } catch (e) {
+            return res.status(403).json({ error: 'Access Denied: Sample not in your lab scope.', code: 'ACCESS_DENIED_LAB' });
+        }
+
+        // Read the gate and its durable review acknowledgement in the same
+        // transaction that commits approval; request data cannot authorize QC.
+        const outcome = await prisma.$transaction(async tx => {
+            const current = await tx.sample.findUnique({ where: { id: String(id) },
+                include: { workItems: true, results: { where: { isCurrent: true } } } });
+            if (!current) throw Object.assign(new Error('Sample not found'), { statusCode: 404, code: 'SAMPLE_NOT_FOUND' });
+            scopeGuard.ensureScope(user, current, { altLabField: 'assignedLab' });
+            if (req.body?.expectedUpdatedAt && new Date(current.updatedAt).getTime() !== new Date(req.body.expectedUpdatedAt).getTime()) {
+                throw Object.assign(new Error('Sample was modified concurrently. Please reload the current record before approving.'),
+                    { statusCode: 409, code: 'CONCURRENCY_CONFLICT' });
+            }
+            const { linkedBatchIds, resolveReportingModes } = require('../services/reportResultGovernance');
+            const batchIds = [...new Set([...current.workItems.map(item => item.batchId),
+                ...current.results.flatMap(result => linkedBatchIds(result, current.workItems))].filter(Boolean))];
+            const qcBatches = await tx.batch.findMany({ where: { id: { in: batchIds } },
+                include: require('../services/qcRunViewService').QC_RUN_INCLUDE });
+            const orderRevision = await tx.sampleOrderRevision.findFirst({ where: { sampleId: String(id), status: 'ACTIVE' },
+                include: { lines: true }, orderBy: { version: 'desc' } });
+            const modes = await resolveReportingModes(current, qcBatches, { db: tx });
+            const gates = await require('../services/qcGateService').resolveForSample(current, qcBatches, tx);
+            const eligibility = require('../services/workEligibility').canFinalApprove(current, current.workItems,
+                orderRevision?.lines || [], user, { qcBatches, ...modes, ...gates });
+            if (!eligibility.allowed) return { eligibility };
+            const now = new Date();
+            const updated = await require('../services/sampleStateService').transitionSample(id, 'APPROVED', user,
+                'Final Approval by Manager', { approvedBy: user.username, approvedAt: now }, tx);
+            await tx.auditLog.create({ data: {
+                id: crypto.randomUUID(), entity: 'SAMPLE', entityId: String(id), action: 'SAMPLE_APPROVED',
+                details: 'Final Approval by Manager', performedBy: user.username, timestamp: now, sampleId: String(id),
+                after: JSON.stringify({ approval: { username: user.username, name: user.name || user.username,
+                    role: user.role || null, approvedAt: now.toISOString() } })
+            } });
+            return { eligibility, updated };
+        });
+        const { eligibility, updated } = outcome;
+
+        if (!eligibility.allowed) {
+            const isNoWork = eligibility.blockers.some(b => b.startsWith('NO_ANALYTICAL_WORK') || b.startsWith('ALL_WORK_OMITTED'));
+            return res.status(isNoWork ? 400 : 409).json({
+                error: eligibility.reason || 'Sample is not eligible for final approval',
+                code: isNoWork ? 'NO_WORK_ITEMS' : eligibility.code || 'UNAPPROVED_WORK_ITEMS',
+                blockers: eligibility.blockers,
+                ...(eligibility.gate && { gate: eligibility.gate, acknowledgementRequired: eligibility.acknowledgementRequired })
+            });
+        }
+
+        // S05: Do not perform blanket spectralData approval cascade for entire sample.
+        // Spectral scans are approved per work item during work item review.
+
+        res.json({ ...updated, success: true, status: 'APPROVED' });
+    } catch (error) {
+        const mapped = require('../services/workflowStateRules').mapStateError(error);
+        if (!mapped.statusCode) console.error('[approveSample] Error:', error);
+        res.status(mapped.statusCode || 500).json({ error: mapped.statusCode ? mapped.message : 'Failed to approve sample',
+            ...(mapped.code && { code: mapped.code }), ...(mapped.details && { details: mapped.details }) });
+    }
+};
+
+exports.undoApproval = async (req, res) => {
+    return res.status(409).json({
+        code: 'AMENDMENT_WORKFLOW_REQUIRED',
+        error: 'Reopening an approved sample requires the manager amendment workflow.'
+    });
+};
+
+exports.clearPreparationEvidence = async (req, res) => {
+    try {
+        const outcome = await require('../services/resultEvidenceService').clearPreparationRevert(
+            req.params.id, req.params.resultId, req.body.gate, req.body.reason, req.user
+        );
+        return res.json(outcome);
+    } catch (err) {
+        if (err.statusCode) return res.status(err.statusCode).json({ code: err.code, error: err.message, details: err.details });
+        console.error('[clearPreparationEvidence] Error:', err);
+        return res.status(500).json({ code: 'PREPARATION_CLEARANCE_FAILED', error: 'Failed to clear preparation evidence.' });
+    }
+};
+
+exports.archiveSample = async (req, res) => {
+    try {
+        const result = await require('../services/closureTaskService').requestClosure(req.params.id, 'ARCHIVING', req.body, req.user);
+        return res.json({ success: true, message: 'Archiving task created. Please assign a technician in the work items table.', ...result });
+    } catch (error) {
+        const mapped = require('../services/workflowStateRules').mapStateError(error);
+        if (!mapped.statusCode) console.error('[archiveSample] Error:', error);
+        return res.status(mapped.statusCode || 500).json({ error: mapped.statusCode ? mapped.message : 'Failed to archive sample',
+            ...(mapped.code && { code: mapped.code }), ...(mapped.details || {}) });
+    }
+};
+
+exports.disposeSample = async (req, res) => {
+    try {
+        const result = await require('../services/closureTaskService').requestClosure(req.params.id, 'DISPOSAL', req.body, req.user);
+        return res.json({ success: true, message: 'Disposal task created. Please assign a technician in the work items table.', ...result });
+    } catch (error) {
+        const mapped = require('../services/workflowStateRules').mapStateError(error);
+        if (!mapped.statusCode) console.error('[disposeSample] Error:', error);
+        return res.status(mapped.statusCode || 500).json({ error: mapped.statusCode ? mapped.message : 'Failed to dispose sample',
+            ...(mapped.code && { code: mapped.code }), ...(mapped.details || {}) });
+    }
+};
+// ─── GET /api/samples/locations ─── (Globe GPS data)
+exports.getSampleLocations = async (req, res) => {
+    try {
+        const user = req.user;
+        const { project, status } = req.query;
+        const where = {};
+
+        // Lab isolation
+        if (user.labId) {
+            where.assignedLab = user.labId;
+        }
+        if (project) where.projectCode = project;
+        if (status) where.status = status;
+
+        const samples = await prisma.sample.findMany({
+            where,
+            select: {
+                id: true,
+                originalId: true,
+                projectCode: true,
+                status: true,
+                country: true,
+                fieldMetadata: true
+            }
+        });
+
+        const v = (obj) => obj && typeof obj === 'object' ? obj.value : obj;
+
+        const results = samples.map(s => {
+            let lat = null, lng = null, location = null;
+            try {
+                const fm = typeof s.fieldMetadata === 'string' ? JSON.parse(s.fieldMetadata) : s.fieldMetadata;
+                if (fm) {
+                    lat = parseFloat(v(fm.latitude) || v(fm.lat) || v(fm.gps_latitude)) || null;
+                    lng = parseFloat(v(fm.longitude) || v(fm.lng) || v(fm.gps_longitude) || v(fm.lon)) || null;
+                    location = v(fm.location) || v(fm.site) || v(fm.village) || v(fm.district) || null;
+                }
+            } catch (e) { }
+
+            return {
+                id: s.id,
+                originalId: s.originalId,
+                projectCode: s.projectCode,
+                status: s.status,
+                country: s.country,
+                lat,
+                lng,
+                location
+            };
+        }).filter(s => s.lat && s.lng); // Only return samples with coordinates
+
+        res.json(results);
+    } catch (error) {
+        console.error('[getSampleLocations] Error:', error);
+        res.status(500).json({ error: 'Failed to fetch locations' });
+    }
+};
+
+/**
+ * GET SAMPLE WORKSPACE PROJECTION
+ * GET /api/samples/:id/workspace
+ */
+exports.getSampleWorkspace = async (req, res) => {
+    const { id } = req.params;
+    const user = req.user;
+
+    try {
+        const workspace = await sampleWorkspaceService.getWorkspace(id, user);
+        res.json(workspace);
+    } catch (err) {
+        if (err.statusCode) {
+            return res.status(err.statusCode).json({ error: err.message, code: err.code });
+        }
+        console.error('[getSampleWorkspace] Error:', err);
+        res.status(500).json({ error: 'Failed to fetch sample workspace' });
+    }
+};
+
+/**
+ * PREVIEW ORDER REVISION
+ * GET or POST /api/samples/:id/orders/preview
+ */
+exports.previewOrderRevision = async (req, res) => {
+    const { id } = req.params;
+    const { analyses, reason } = (req.method === 'POST' ? req.body : req.query) || {};
+    const user = req.user;
+
+    try {
+        const sample = await prisma.sample.findUnique({
+            where: { id: String(id) },
+            include: {
+                workItems: true
+            }
+        });
+        if (!sample) return res.status(404).json({ error: 'Sample not found' });
+
+        if (user && user.role && !scopeGuard.canAccessEntity(user, sample, { labField: 'labId', altLabField: 'assignedLab' })) {
+            return res.status(403).json({ error: 'Sample is outside your authorized scope' });
+        }
+
+        if (sample.status === 'DISPOSED') {
+            return res.status(400).json({
+                error: 'Cannot modify analyses for disposed sample material.',
+                code: 'DISPOSED_MATERIAL_IMMUTABLE'
+            });
+        }
+
+        let currentList = [];
+        try {
+            if (sample.requiredAnalyses) currentList = JSON.parse(sample.requiredAnalyses);
+        } catch (e) {
+            currentList = [];
+        }
+
+        const targetList = Array.isArray(analyses) ? analyses : (typeof analyses === 'string' ? analyses.split(',') : currentList);
+        if (analyses !== undefined && !Array.isArray(analyses) && req.method !== 'GET') return res.status(400).json({ error: 'Analyses must be an array of catalogue selections.' });
+        const selectionCheck = await cataloguePolicy.validateSelection(targetList, { labId: sample.assignedLab || user.labId, existing: currentList });
+        if (!selectionCheck.valid) return res.status(400).json({ error: selectionCheck.error, issues: selectionCheck.issues, code: 'INVALID_ANALYSIS_SELECTION' });
+        const added = targetList.filter(a => !currentList.includes(a));
+        const removed = currentList.filter(a => !targetList.includes(a));
+        const unchanged = currentList.filter(a => targetList.includes(a));
+
+        // Check for conflicts on removed items (e.g. recorded results or accepted work)
+        const conflicts = [];
+        for (const code of removed) {
+            const item = sample.workItems.find(w => w.analysis === code);
+            if (item) {
+                if (['ACCEPTED', 'SUBMITTED'].includes(item.status)) {
+                    conflicts.push({
+                        analysis: code,
+                        status: item.status,
+                        reason: `Analysis has status ${item.status} and cannot be removed without an authorized waiver/amendment.`
+                    });
+                }
+            }
+        }
+
+        const reportsCount = await prisma.report.count({
+            where: { sampleId: sample.id, status: 'PUBLISHED' }
+        });
+
+        const crypto = require('crypto');
+        const previewHash = crypto.createHash('sha256')
+            .update(sample.id + JSON.stringify(targetList) + Date.now().toString())
+            .digest('hex');
+
+        res.json({
+            sampleId: sample.id,
+            currentAnalyses: currentList,
+            proposedAnalyses: targetList,
+            added,
+            removed,
+            unchanged,
+            conflicts,
+            canApply: conflicts.length === 0,
+            affectedReportsCount: reportsCount,
+            previewHash,
+            requiresReportAmendment: reportsCount > 0
+        });
+    } catch (err) {
+        console.error('[previewOrderRevision] Error:', err);
+        res.status(500).json({ error: 'Failed to preview order revision' });
+    }
+};
+
+/**
+ * APPLY ORDER REVISION
+ * POST /api/samples/:id/orders
+ */
+exports.applyOrderRevision = async (req, res) => {
+    try {
+        const { analyses, reason, idempotencyKey } = req.body;
+        const outcome = await sampleAnalysisStateService.reviseAnalyses(req.params.id, { analyses, reason }, req.user,
+            { mode: 'order', idempotencyKey: idempotencyKey || req.headers['x-idempotency-key'] });
+        return res.json(outcome);
+    } catch (err) {
+        if (!err.statusCode) console.error('[applyOrderRevision] Error:', err);
+        return res.status(err.statusCode || 500).json({ error: err.statusCode ? err.message : 'Failed to apply order revision',
+            code: err.code, ...(err.details || {}) });
+    }
+};
+
+/**
+ * CREATE AMENDMENT
+ * POST /api/samples/:id/amendments
+ */
+exports.createAmendment = require('./sampleAmendmentController').request;
+
+/**
+ * RECORD STORAGE MOVEMENT
+ * POST /api/samples/:id/custody/move
+ */
+exports.recordStorageMovement = async (req, res) => {
+    const { id } = req.params;
+    const { location, reason, containerId, quantityGrams } = req.body;
+    const user = req.user;
+
+    try {
+        const rules = require('../services/workflowStateRules');
+        const outcome = await prisma.$transaction(async tx => {
+            const sample = await tx.sample.findUnique({ where: { id: String(id) } });
+            if (!sample) throw new rules.TransitionError('Sample not found.', 404, 'SAMPLE_NOT_FOUND');
+            rules.assertScope(user, sample);
+            if (sample.status === 'DISPOSED') throw new rules.TransitionError('Cannot move disposed sample material.', 400, 'DISPOSED_MATERIAL_IMMUTABLE');
+            const meta = sampleHolds.legacyHoldState(sample).metadata;
+            if (!meta) throw new rules.TransitionError('Stored sample metadata needs review before storage movement.', 409, 'SAMPLE_METADATA_INVALID');
+            const oldLocation = meta.archiveLocation || 'Not recorded';
+            const movedAt = new Date();
+            const changed = await tx.sample.updateMany({ where: { id: sample.id, updatedAt: sample.updatedAt }, data: {
+                metadata: JSON.stringify({ ...meta, archiveLocation: location || oldLocation, lastMovementReason: reason || 'Storage movement',
+                    lastMovementAt: movedAt.toISOString(), lastMovementBy: user.username }),
+                updatedAt: new Date(Math.max(movedAt.getTime(), sample.updatedAt.getTime() + 1))
+            } });
+            if (changed.count !== 1) throw new rules.TransitionError('Sample changed. Reload before retrying.', 409, 'SAMPLE_STATE_CHANGED');
+            await tx.auditLog.create({ data: {
+                id: crypto.randomUUID(), entity: 'SAMPLE', entityId: sample.id, action: 'STORAGE_MOVEMENT',
+                details: `Sample material moved from '${oldLocation}' to '${location}' (${reason || 'Storage movement'})`,
+                performedBy: user.username, sampleId: sample.id
+            } });
+            return { success: true, location, oldLocation, sample: await tx.sample.findUnique({ where: { id: sample.id } }) };
+        });
+        res.json(outcome);
+    } catch (err) {
+        const mapped = require('../services/workflowStateRules').mapStateError(err, 'SAMPLE_STATE_CHANGED');
+        if (mapped.statusCode) return res.status(mapped.statusCode).json({ code: mapped.code, error: mapped.message });
+        console.error('[recordStorageMovement] Error:', err);
+        res.status(500).json({ code: 'SAMPLE_MOVEMENT_ERROR', error: 'Failed to record storage movement' });
+    }
+};
+
+/**
+ * REPAIR WORK ITEMS (Idempotent Regeneration)
+ * POST /api/samples/:id/repair-work-items
+ */
+exports.repairWorkItems = async (req, res) => {
+    const { id } = req.params;
+    const user = req.user;
+
+    try {
+        const sample = await prisma.sample.findUnique({ where: { id: String(id) } });
+        if (!sample) return res.status(404).json({ error: 'Sample not found' });
+
+        if (user && user.role && !scopeGuard.canAccessEntity(user, sample, { labField: 'labId', altLabField: 'assignedLab' })) {
+            return res.status(403).json({ error: 'Sample is outside your authorized scope' });
+        }
+
+        const workItemController = require('./workItemController');
+        const generated = await workItemController.generateWorkItemsForSample(sample, null, user);
+
+        res.json({
+            success: true,
+            message: `Generated ${generated.length} work items`,
+            workItems: generated
+        });
+    } catch (err) {
+        console.error('[repairWorkItems] Error:', err);
+        res.status(err.statusCode || 500).json({ error: err.statusCode ? err.message : 'Failed to repair work items', ...(err.code && { code: err.code }) });
+    }
+};
+
