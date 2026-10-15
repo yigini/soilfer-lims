@@ -1,0 +1,69 @@
+Source review: PASS
+
+Claudio's source review of tooling 87dfedc68723a19bd25c05bc9f0f262b0239e922 (WP/batch-proof-cde8-20261015, ten-file graph). This covers one new raw snapshot and this scoped owned stopped-copy proof only. It does not approve jobs-ON qualification, the final kit, a gate or deployment.
+
+What I checked:
+- All ten file SHA-256 values below match `git archive` of the exact head and the request.
+- `verify_proof_guards.py` ran 40/40 OK on Python 3.11 and on Python 3.9.23 (the host version), each with a fresh `LIMS_PROOF_GUARD_FIXTURE_DIR`. Without that variable the fixture class refuses at setUpClass by design, so 34 pure guards run.
+- Qualified build bindings verified from evidence b1d68199: `build-receipt.json` hashes to c03ca0cd…; status, head, tree, image, toolingCommit 6608548a, sourceReviewId 6181452519, exitCode 0, newBuildCount 1 and imageBytes 414679214 all match; unexplained growth is 0 on all three filesystems; `image-inspect-original.json` gives b5ab0a0a…, size 414679214, revision cde8c889, linux/amd64; `source-index.json` matches applicationIndexSha256. The candidate's `server/index.js` has exactly 26 distinct `_STARTUP_READY` events.
+- Production access is regular-file reads only (O_RDONLY/O_NOFOLLOW with before/after dev/inode/size/mtime/mode/hash). Raw masters are never given to SQLite. WAL is folded only by a separate owned reader copy, without `immutable=1`.
+- Every container is created on b5 with network none, memory and memory-swap 805306368, restart no, jobs OFF, and only owned bind mounts under the proof root. Stops apply only to the exact labelled owned id. There is no rm, prune, restore, retag or old-image start. All pre-existing containers are inventoried, and stopped ones must stay stopped with the same start time.
+- Policy: `install_lab_policy_schema.js` at cde8c889 returns NO_OP for PRESENT before it ever opens a writer, and reads through its own TMPDIR snapshot, so the triple-equality check is sound. Any other shape stops.
+- The approved-amendment STOP is enforced in `impact_gate` before the 209 dry run and apply. Invalid stored-analysis sample and owner IDs are required. Primary and secondary retained snapshots are hash- and allocation-checked under the owned TMPDIR.
+- Expected counts are consistent: 106+2+4+0 = 112 tables and 39+3 = 42 receipts. A mismatch refuses.
+- Disk: one `du -s -B1` over /opt/lims/releases, /var/lib/docker and /var/lib/containerd per checkpoint, 120 s and 64 KiB bounds, the descendant-mount guard (the same guard passed with production running in build 010000), topology and containerd PID pinning, the scaled reserve, and the 500000000 unexplained-growth STOP.
+
+Non-blocking notes (no change required for this proof):
+1. Some checks compare the full triple, including mtime, after reads by node CLIs and after the two default startups (full logical-state equality). If a CLI leaves sidecars or a startup or probe writes a row, the proof refuses and consumes the attempt. That is the safe direction, but a refusal there should be read as a possible false STOP and handled forward-only.
+2. The 128x database reserve is computed at bind time. If the live database triple is large, the proof will STOP before the first copy. That is also safe.
+
+Bindings:
+
+```
+87dfedc68723a19bd25c05bc9f0f262b0239e922
+cde8c8896f5f9d5f1ab07b0ae16b1a765e0a6367
+638580d50f61254609de3abd42d93afc676a5727
+sha256:b5ab0a0a57aeec4fe24dd8095126f3502cbc0c8629a7f4c1ef9e55034893c6fb
+959d17e11c357266f7c2a41b0c84ab76914c591e
+sha256:7aebc035254a61b0b4b8ecb59492d582af7f3769c147a35a7e92a43fb7a642d2
+8109d78e228573ead8aa243442192e54b8e1dc09101bc3fa23d03e5a29cbb66b
+c03ca0cd16395a451a12f1606655166f0dfe0b3f78516212034b548888c7a3fd
+proofScope=RAW_SNAPSHOT_AND_OWNED_STOPPED_COPY_INSTALLATION_JOBS_OFF_STARTUP_ONLY
+proofRoot=/opt/lims/releases/workflow-batch-stopped-copy-cde8c889-20261015T020000Z
+qualifiedBuildSource=6608548a58dd4bf581da4330f1cd7b0f68a86973
+qualifiedBuildPass=6181452519
+mainCiRun=38636615469
+labAndHubBuildsOwnedByYY=true
+releaseWindowControl=RELEASE_DAY_DISK_ABORTS_ACCEPTED
+reserveFloorBytes=10556150894
+unexplainedGrowthAbortBytes=500000000
+memoryLimitBytes=805306368
+unitTimeoutSeconds=5400
+readinessSeconds=600
+stageHeadroomSeconds=60
+unitHeadroomSeconds=600
+rawMasterNeverOpenedSqlite=true
+productionSqliteConnections=0
+preserveAllStoppedContainers=true
+policyPresentNoOpOrStop=true
+approvedAmendmentNonzeroStop=true
+jobsOnQualificationStillRequired=true
+retainedDatabaseReserveMultiplier=128
+retainedAssetReserveMultiplier=3
+logReserveBytes=4294967296
+allocationMeasurementSeconds=120
+allRetainedReleaseDockerContainerdAllocation=true
+launch_proof.py=37ca02f27e9538a51422f2186c65b8dc8a1102cd688d71d3c88682df435ce7e8
+prepare_proof.py=a8cdb8e87b51653e7a8d258e47a0c74c5510025e0c693259588d698418b6e9ef
+proof_contract.py=c04ae1bbf263579d8918dac69dda03f4091eb6bc53c1b554dcd3ecc3546cbb51
+proof_disk.py=a8523a53cdca48c0464718c1b58958607398721b412d2f10f73dc62b85f39630
+proof_docker.py=3945534e0f94f60ddd31efb3649cc8e1fc0eb466077b1c623fba0436211ef444
+proof_files.py=6e89a67f82387d019c58ee6ac0b69d92b2047f5a058fafd6586d2e9519c1ba03
+proof_install.py=c049dae7ea166e99470a26298a22e5f6ae32fe087be068f9a7175d5b48b604a5
+proof_startup.py=761cb01453f4789b3af04d646f10301c2ed1b55c31b179eb79feed43dd0000cf
+run_stopped_proof.py=ec2a79a498eacf8430488a44f08083c4ec0fb8c2536e4c2d1cb1ba017f6da3c8
+verify_proof_guards.py=3e153e2f1888883c25a8438166f1ef1fbf8c4251784e2a7c5f2c577e2e5fc009
+```
+
+---
+_Generated by [Claude Code](https://claude.ai/code)_
