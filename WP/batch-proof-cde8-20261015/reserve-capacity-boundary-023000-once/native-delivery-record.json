@@ -1,0 +1,19 @@
+{
+  "status": "ACTUAL_CAPACITY_BOUNDARY_HANDOFF_DELIVERED_ONCE",
+  "observedUtc": "2026-10-15T02:44:11.499Z",
+  "reviewBoundaryId": 6183190175,
+  "windowId": 7867734,
+  "project": "LIMS Audit",
+  "thread": "Lab workflow audit and plan",
+  "rightEmptyBefore": true,
+  "rightCaretObserved": true,
+  "ownEndInspected": true,
+  "ownHeadInspected": true,
+  "returnPressCount": 1,
+  "actualSentBubbleVerified": true,
+  "rightEmptyAfterSend": true,
+  "claudioResponding": "Churning",
+  "humanDraftAndCardsUntouched": true,
+  "centreHumanDraft": "can you go and ask Pip",
+  "newOperations": 0
+}
