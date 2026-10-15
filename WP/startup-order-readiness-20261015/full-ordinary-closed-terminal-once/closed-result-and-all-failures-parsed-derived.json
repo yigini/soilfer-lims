@@ -1,0 +1,322 @@
+{
+  "status": "CLOSED_ORIGINALS_RETAINED_WITH_ACTUAL_RESULT",
+  "retainedUtc": "2026-10-15T11:44:45.508723+00:00",
+  "runnerSession": 76923,
+  "runnerHelper": "verify-startup-context-full-ordinary-once.py",
+  "actualSummary": {
+    "closedUtc": "2026-10-15T11:44:21.283845+00:00",
+    "exitCode": 1,
+    "suites": 373,
+    "tests": 5672,
+    "passedSuites": 371,
+    "passedTests": 5670,
+    "failed": 2,
+    "pending": 0,
+    "sourceUnchanged": true,
+    "exactInventory": true,
+    "visibleAssetsUnchanged": true,
+    "expectedTests": 5672,
+    "bothOrdinarySetups": true,
+    "onlyDeclaredMutableOutput": "server/data/help/RELEASE_MANIFEST_v1.json",
+    "declaredOutputCapturedBeforeAfter": true,
+    "productionOperations": 0,
+    "status": "FAILED_OR_INCOMPLETE"
+  },
+  "reportSuccess": false,
+  "exactInventoryIndependentlyVerified": true,
+  "all1332FrozenInputsUnchanged": true,
+  "allFailures": [
+    {
+      "name": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\audit_1_2_guard_installer.test.js",
+      "status": "failed",
+      "message": "  \u25cf image-copy hashes are checked and the overlaid volume sources are never read\n\n    SyntaxError: Unexpected token 'o', \"node:intern\"... is not valid JSON\n        at JSON.parse (<anonymous>)\n\n      57 |     const before = fingerprint(file), child = cli(file, ['--apply', ...args], entry, preload);\n      58 |     expect(child.status).not.toBe(0);\n    > 59 |     const error = JSON.parse(child.stderr);\n         |                        ^\n      60 |     expect(error.error).toBe(code);\n      61 |     expect(fingerprint(file)).toBe(before);\n      62 |     expect(child.stdout).toBe('');\n\n      at parse (tests/contracts/audit_1_2_guard_installer.test.js:59:24)\n      at Object.assertRefusal (tests/contracts/audit_1_2_guard_installer.test.js:529:5)\n",
+      "failedAssertions": [
+        {
+          "ancestorTitles": [],
+          "duration": 1448,
+          "failing": false,
+          "failureDetails": [
+            {}
+          ],
+          "failureMessages": [
+            "SyntaxError: Unexpected token 'o', \"node:intern\"... is not valid JSON\n    at JSON.parse (<anonymous>)\n    at parse (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\audit_1_2_guard_installer.test.js:59:24)\n    at Object.assertRefusal (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\audit_1_2_guard_installer.test.js:529:5)\n    at Promise.finally.completed (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\node_modules\\jest-circus\\build\\jestAdapterInit.js:1557:28)\n    at new Promise (<anonymous>)\n    at callAsyncCircusFn (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\node_modules\\jest-circus\\build\\jestAdapterInit.js:1497:10)\n    at _callCircusTest (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\node_modules\\jest-circus\\build\\jestAdapterInit.js:1007:40)\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at _runTest (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\node_modules\\jest-circus\\build\\jestAdapterInit.js:947:3)\n    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\node_modules\\jest-circus\\build\\jestAdapterInit.js:849:7\n    at _runTestsForDescribeBlock (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\node_modules\\jest-circus\\build\\jestAdapterInit.js:862:11)\n    at run (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\node_modules\\jest-circus\\build\\jestAdapterInit.js:761:3)\n    at runAndTransformResultsToJestFormat (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\node_modules\\jest-circus\\build\\jestAdapterInit.js:1918:21)\n    at jestAdapter (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\node_modules\\jest-circus\\build\\runner.js:101:19)\n    at runTestInternal (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\node_modules\\jest-runner\\build\\testWorker.js:275:16)\n    at runTest (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\node_modules\\jest-runner\\build\\testWorker.js:343:7)\n    at Object.worker (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\node_modules\\jest-runner\\build\\testWorker.js:497:12)"
+          ],
+          "fullName": "image-copy hashes are checked and the overlaid volume sources are never read",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 9,
+          "retryReasons": [],
+          "startAt": 1792063758743,
+          "status": "failed",
+          "title": "image-copy hashes are checked and the overlaid volume sources are never read"
+        }
+      ]
+    },
+    {
+      "name": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\security\\audit_1_2_state_writes.test.js",
+      "status": "failed",
+      "message": "  \u25cf all handwritten runtime, script, seed and test Sample/WorkItem writes use central authorities\n\n    expect(received).toEqual(expected) // deep equality\n\n    - Expected  -  1\n    + Received  + 74\n\n    - Array []\n    + Array [\n    +   Object {\n    +     \"code\": \"RAW_WORKFLOW_SQL\",\n    +     \"detail\": \"prepare\",\n    +     \"file\": \"tests/contracts/order_revision_impact_set_query.test.js\",\n    +     \"line\": 33,\n    +   },\n    +   Object {\n    +     \"code\": \"RAW_WORKFLOW_SQL\",\n    +     \"detail\": \"prepare\",\n    +     \"file\": \"tests/contracts/order_revision_impact_set_query.test.js\",\n    +     \"line\": 34,\n    +   },\n    +   Object {\n    +     \"code\": \"UNRESOLVED_WORKFLOW_SQL\",\n    +     \"detail\": \"prepare\",\n    +     \"file\": \"tests/contracts/order_revision_impact_set_query.test.js\",\n    +     \"line\": 72,\n    +   },\n    +   Object {\n    +     \"code\": \"UNRESOLVED_WORKFLOW_SQL\",\n    +     \"detail\": \"prepare\",\n    +     \"file\": \"tests/contracts/order_revision_impact_set_query.test.js\",\n    +     \"line\": 76,\n    +   },\n    +   Object {\n    +     \"code\": \"UNRESOLVED_WORKFLOW_SQL\",\n    +     \"detail\": \"pragma\",\n    +     \"file\": \"tests/contracts/startup_readiness_context.test.js\",\n    +     \"line\": 45,\n    +   },\n    +   Object {\n    +     \"code\": \"UNRESOLVED_WORKFLOW_SQL\",\n    +     \"detail\": \"prepare\",\n    +     \"file\": \"tests/contracts/startup_readiness_context.test.js\",\n    +     \"line\": 47,\n    +   },\n    +   Object {\n    +     \"code\": \"UNRESOLVED_WORKFLOW_SQL\",\n    +     \"detail\": \"exec\",\n    +     \"file\": \"tests/contracts/startup_readiness_context.test.js\",\n    +     \"line\": 88,\n    +   },\n    +   Object {\n    +     \"code\": \"RAW_WORKFLOW_SQL\",\n    +     \"detail\": \"prepare\",\n    +     \"file\": \"tests/contracts/startup_readiness_context.test.js\",\n    +     \"line\": 169,\n    +   },\n    +   Object {\n    +     \"code\": \"UNRESOLVED_WORKFLOW_SQL\",\n    +     \"detail\": \"pragma\",\n    +     \"file\": \"tests/contracts/startup_readiness_context.test.js\",\n    +     \"line\": 188,\n    +   },\n    +   Object {\n    +     \"code\": \"UNRESOLVED_WORKFLOW_SQL\",\n    +     \"detail\": \"pragma\",\n    +     \"file\": \"utils/startupReadinessContext.js\",\n    +     \"line\": 58,\n    +   },\n    +   Object {\n    +     \"code\": \"UNRESOLVED_WORKFLOW_SQL\",\n    +     \"detail\": \"pragma\",\n    +     \"file\": \"utils/startupReadinessContext.js\",\n    +     \"line\": 61,\n    +   },\n    +   Object {\n    +     \"code\": \"UNRESOLVED_WORKFLOW_SQL\",\n    +     \"detail\": \"prepare\",\n    +     \"file\": \"utils/startupReadinessContext.js\",\n    +     \"line\": 71,\n    +   },\n    + ]\n\n      290 |     expect(deferred.length).toBeGreaterThan(0);\n      291 |     expect(deferred.every(finding => finding.file === 'scripts/rehearsal_docker_boundary.cjs' && finding.detail.includes('#245'))).toBe(true);\n    > 292 |     expect(violations.filter(finding => finding.code !== 'DEFERRED_SYNTHETIC_FAULT_FIXTURE')).toEqual([]);\n          |                                                                                               ^\n      293 | });\n      294 |\n      295 | test.each([\n\n      at Object.toEqual (tests/security/audit_1_2_state_writes.test.js:292:95)\n",
+      "failedAssertions": [
+        {
+          "ancestorTitles": [],
+          "duration": 10562,
+          "failing": false,
+          "failureDetails": [
+            {
+              "matcherResult": {
+                "actual": [
+                  {
+                    "file": "tests/contracts/order_revision_impact_set_query.test.js",
+                    "line": 33,
+                    "code": "RAW_WORKFLOW_SQL",
+                    "detail": "prepare"
+                  },
+                  {
+                    "file": "tests/contracts/order_revision_impact_set_query.test.js",
+                    "line": 34,
+                    "code": "RAW_WORKFLOW_SQL",
+                    "detail": "prepare"
+                  },
+                  {
+                    "file": "tests/contracts/order_revision_impact_set_query.test.js",
+                    "line": 72,
+                    "code": "UNRESOLVED_WORKFLOW_SQL",
+                    "detail": "prepare"
+                  },
+                  {
+                    "file": "tests/contracts/order_revision_impact_set_query.test.js",
+                    "line": 76,
+                    "code": "UNRESOLVED_WORKFLOW_SQL",
+                    "detail": "prepare"
+                  },
+                  {
+                    "file": "tests/contracts/startup_readiness_context.test.js",
+                    "line": 45,
+                    "code": "UNRESOLVED_WORKFLOW_SQL",
+                    "detail": "pragma"
+                  },
+                  {
+                    "file": "tests/contracts/startup_readiness_context.test.js",
+                    "line": 47,
+                    "code": "UNRESOLVED_WORKFLOW_SQL",
+                    "detail": "prepare"
+                  },
+                  {
+                    "file": "tests/contracts/startup_readiness_context.test.js",
+                    "line": 88,
+                    "code": "UNRESOLVED_WORKFLOW_SQL",
+                    "detail": "exec"
+                  },
+                  {
+                    "file": "tests/contracts/startup_readiness_context.test.js",
+                    "line": 169,
+                    "code": "RAW_WORKFLOW_SQL",
+                    "detail": "prepare"
+                  },
+                  {
+                    "file": "tests/contracts/startup_readiness_context.test.js",
+                    "line": 188,
+                    "code": "UNRESOLVED_WORKFLOW_SQL",
+                    "detail": "pragma"
+                  },
+                  {
+                    "file": "utils/startupReadinessContext.js",
+                    "line": 58,
+                    "code": "UNRESOLVED_WORKFLOW_SQL",
+                    "detail": "pragma"
+                  },
+                  {
+                    "file": "utils/startupReadinessContext.js",
+                    "line": 61,
+                    "code": "UNRESOLVED_WORKFLOW_SQL",
+                    "detail": "pragma"
+                  },
+                  {
+                    "file": "utils/startupReadinessContext.js",
+                    "line": 71,
+                    "code": "UNRESOLVED_WORKFLOW_SQL",
+                    "detail": "prepare"
+                  }
+                ],
+                "expected": [],
+                "message": "expect(received).toEqual(expected) // deep equality\n\n- Expected  -  1\n+ Received  + 74\n\n- Array []\n+ Array [\n+   Object {\n+     \"code\": \"RAW_WORKFLOW_SQL\",\n+     \"detail\": \"prepare\",\n+     \"file\": \"tests/contracts/order_revision_impact_set_query.test.js\",\n+     \"line\": 33,\n+   },\n+   Object {\n+     \"code\": \"RAW_WORKFLOW_SQL\",\n+     \"detail\": \"prepare\",\n+     \"file\": \"tests/contracts/order_revision_impact_set_query.test.js\",\n+     \"line\": 34,\n+   },\n+   Object {\n+     \"code\": \"UNRESOLVED_WORKFLOW_SQL\",\n+     \"detail\": \"prepare\",\n+     \"file\": \"tests/contracts/order_revision_impact_set_query.test.js\",\n+     \"line\": 72,\n+   },\n+   Object {\n+     \"code\": \"UNRESOLVED_WORKFLOW_SQL\",\n+     \"detail\": \"prepare\",\n+     \"file\": \"tests/contracts/order_revision_impact_set_query.test.js\",\n+     \"line\": 76,\n+   },\n+   Object {\n+     \"code\": \"UNRESOLVED_WORKFLOW_SQL\",\n+     \"detail\": \"pragma\",\n+     \"file\": \"tests/contracts/startup_readiness_context.test.js\",\n+     \"line\": 45,\n+   },\n+   Object {\n+     \"code\": \"UNRESOLVED_WORKFLOW_SQL\",\n+     \"detail\": \"prepare\",\n+     \"file\": \"tests/contracts/startup_readiness_context.test.js\",\n+     \"line\": 47,\n+   },\n+   Object {\n+     \"code\": \"UNRESOLVED_WORKFLOW_SQL\",\n+     \"detail\": \"exec\",\n+     \"file\": \"tests/contracts/startup_readiness_context.test.js\",\n+     \"line\": 88,\n+   },\n+   Object {\n+     \"code\": \"RAW_WORKFLOW_SQL\",\n+     \"detail\": \"prepare\",\n+     \"file\": \"tests/contracts/startup_readiness_context.test.js\",\n+     \"line\": 169,\n+   },\n+   Object {\n+     \"code\": \"UNRESOLVED_WORKFLOW_SQL\",\n+     \"detail\": \"pragma\",\n+     \"file\": \"tests/contracts/startup_readiness_context.test.js\",\n+     \"line\": 188,\n+   },\n+   Object {\n+     \"code\": \"UNRESOLVED_WORKFLOW_SQL\",\n+     \"detail\": \"pragma\",\n+     \"file\": \"utils/startupReadinessContext.js\",\n+     \"line\": 58,\n+   },\n+   Object {\n+     \"code\": \"UNRESOLVED_WORKFLOW_SQL\",\n+     \"detail\": \"pragma\",\n+     \"file\": \"utils/startupReadinessContext.js\",\n+     \"line\": 61,\n+   },\n+   Object {\n+     \"code\": \"UNRESOLVED_WORKFLOW_SQL\",\n+     \"detail\": \"prepare\",\n+     \"file\": \"utils/startupReadinessContext.js\",\n+     \"line\": 71,\n+   },\n+ ]",
+                "name": "toEqual",
+                "pass": false
+              }
+            }
+          ],
+          "failureMessages": [
+            "Error: expect(received).toEqual(expected) // deep equality\n\n- Expected  -  1\n+ Received  + 74\n\n- Array []\n+ Array [\n+   Object {\n+     \"code\": \"RAW_WORKFLOW_SQL\",\n+     \"detail\": \"prepare\",\n+     \"file\": \"tests/contracts/order_revision_impact_set_query.test.js\",\n+     \"line\": 33,\n+   },\n+   Object {\n+     \"code\": \"RAW_WORKFLOW_SQL\",\n+     \"detail\": \"prepare\",\n+     \"file\": \"tests/contracts/order_revision_impact_set_query.test.js\",\n+     \"line\": 34,\n+   },\n+   Object {\n+     \"code\": \"UNRESOLVED_WORKFLOW_SQL\",\n+     \"detail\": \"prepare\",\n+     \"file\": \"tests/contracts/order_revision_impact_set_query.test.js\",\n+     \"line\": 72,\n+   },\n+   Object {\n+     \"code\": \"UNRESOLVED_WORKFLOW_SQL\",\n+     \"detail\": \"prepare\",\n+     \"file\": \"tests/contracts/order_revision_impact_set_query.test.js\",\n+     \"line\": 76,\n+   },\n+   Object {\n+     \"code\": \"UNRESOLVED_WORKFLOW_SQL\",\n+     \"detail\": \"pragma\",\n+     \"file\": \"tests/contracts/startup_readiness_context.test.js\",\n+     \"line\": 45,\n+   },\n+   Object {\n+     \"code\": \"UNRESOLVED_WORKFLOW_SQL\",\n+     \"detail\": \"prepare\",\n+     \"file\": \"tests/contracts/startup_readiness_context.test.js\",\n+     \"line\": 47,\n+   },\n+   Object {\n+     \"code\": \"UNRESOLVED_WORKFLOW_SQL\",\n+     \"detail\": \"exec\",\n+     \"file\": \"tests/contracts/startup_readiness_context.test.js\",\n+     \"line\": 88,\n+   },\n+   Object {\n+     \"code\": \"RAW_WORKFLOW_SQL\",\n+     \"detail\": \"prepare\",\n+     \"file\": \"tests/contracts/startup_readiness_context.test.js\",\n+     \"line\": 169,\n+   },\n+   Object {\n+     \"code\": \"UNRESOLVED_WORKFLOW_SQL\",\n+     \"detail\": \"pragma\",\n+     \"file\": \"tests/contracts/startup_readiness_context.test.js\",\n+     \"line\": 188,\n+   },\n+   Object {\n+     \"code\": \"UNRESOLVED_WORKFLOW_SQL\",\n+     \"detail\": \"pragma\",\n+     \"file\": \"utils/startupReadinessContext.js\",\n+     \"line\": 58,\n+   },\n+   Object {\n+     \"code\": \"UNRESOLVED_WORKFLOW_SQL\",\n+     \"detail\": \"pragma\",\n+     \"file\": \"utils/startupReadinessContext.js\",\n+     \"line\": 61,\n+   },\n+   Object {\n+     \"code\": \"UNRESOLVED_WORKFLOW_SQL\",\n+     \"detail\": \"prepare\",\n+     \"file\": \"utils/startupReadinessContext.js\",\n+     \"line\": 71,\n+   },\n+ ]\n    at Object.toEqual (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\security\\audit_1_2_state_writes.test.js:292:95)\n    at Promise.finally.completed (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\node_modules\\jest-circus\\build\\jestAdapterInit.js:1557:28)\n    at new Promise (<anonymous>)\n    at callAsyncCircusFn (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\node_modules\\jest-circus\\build\\jestAdapterInit.js:1497:10)\n    at _callCircusTest (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\node_modules\\jest-circus\\build\\jestAdapterInit.js:1007:40)\n    at _runTest (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\node_modules\\jest-circus\\build\\jestAdapterInit.js:947:3)\n    at C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\node_modules\\jest-circus\\build\\jestAdapterInit.js:849:7\n    at _runTestsForDescribeBlock (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\node_modules\\jest-circus\\build\\jestAdapterInit.js:862:11)\n    at run (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\node_modules\\jest-circus\\build\\jestAdapterInit.js:761:3)\n    at runAndTransformResultsToJestFormat (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\node_modules\\jest-circus\\build\\jestAdapterInit.js:1918:21)\n    at jestAdapter (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\node_modules\\jest-circus\\build\\runner.js:101:19)\n    at runTestInternal (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\node_modules\\jest-runner\\build\\testWorker.js:275:16)\n    at runTest (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\node_modules\\jest-runner\\build\\testWorker.js:343:7)\n    at Object.worker (C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\node_modules\\jest-runner\\build\\testWorker.js:497:12)"
+          ],
+          "fullName": "all handwritten runtime, script, seed and test Sample/WorkItem writes use central authorities",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 3,
+          "retryReasons": [],
+          "startAt": 1792063866583,
+          "status": "failed",
+          "title": "all handwritten runtime, script, seed and test Sample/WorkItem writes use central authorities"
+        }
+      ]
+    }
+  ],
+  "scannerFindingsParsedDerivedFromFullClosedStderr": [
+    {
+      "code": "RAW_WORKFLOW_SQL",
+      "detail": "prepare",
+      "file": "tests/contracts/order_revision_impact_set_query.test.js",
+      "line": 33
+    },
+    {
+      "code": "RAW_WORKFLOW_SQL",
+      "detail": "prepare",
+      "file": "tests/contracts/order_revision_impact_set_query.test.js",
+      "line": 34
+    },
+    {
+      "code": "UNRESOLVED_WORKFLOW_SQL",
+      "detail": "prepare",
+      "file": "tests/contracts/order_revision_impact_set_query.test.js",
+      "line": 72
+    },
+    {
+      "code": "UNRESOLVED_WORKFLOW_SQL",
+      "detail": "prepare",
+      "file": "tests/contracts/order_revision_impact_set_query.test.js",
+      "line": 76
+    },
+    {
+      "code": "UNRESOLVED_WORKFLOW_SQL",
+      "detail": "pragma",
+      "file": "tests/contracts/startup_readiness_context.test.js",
+      "line": 45
+    },
+    {
+      "code": "UNRESOLVED_WORKFLOW_SQL",
+      "detail": "prepare",
+      "file": "tests/contracts/startup_readiness_context.test.js",
+      "line": 47
+    },
+    {
+      "code": "UNRESOLVED_WORKFLOW_SQL",
+      "detail": "exec",
+      "file": "tests/contracts/startup_readiness_context.test.js",
+      "line": 88
+    },
+    {
+      "code": "RAW_WORKFLOW_SQL",
+      "detail": "prepare",
+      "file": "tests/contracts/startup_readiness_context.test.js",
+      "line": 169
+    },
+    {
+      "code": "UNRESOLVED_WORKFLOW_SQL",
+      "detail": "pragma",
+      "file": "tests/contracts/startup_readiness_context.test.js",
+      "line": 188
+    },
+    {
+      "code": "UNRESOLVED_WORKFLOW_SQL",
+      "detail": "pragma",
+      "file": "utils/startupReadinessContext.js",
+      "line": 58
+    },
+    {
+      "code": "UNRESOLVED_WORKFLOW_SQL",
+      "detail": "pragma",
+      "file": "utils/startupReadinessContext.js",
+      "line": 61
+    },
+    {
+      "code": "UNRESOLVED_WORKFLOW_SQL",
+      "detail": "prepare",
+      "file": "utils/startupReadinessContext.js",
+      "line": 71
+    },
+    {
+      "code": "RAW_WORKFLOW_SQL",
+      "detail": "prepare",
+      "file": "tests/contracts/order_revision_impact_set_query.test.js",
+      "line": 33
+    },
+    {
+      "code": "RAW_WORKFLOW_SQL",
+      "detail": "prepare",
+      "file": "tests/contracts/order_revision_impact_set_query.test.js",
+      "line": 34
+    },
+    {
+      "code": "UNRESOLVED_WORKFLOW_SQL",
+      "detail": "prepare",
+      "file": "tests/contracts/order_revision_impact_set_query.test.js",
+      "line": 72
+    },
+    {
+      "code": "UNRESOLVED_WORKFLOW_SQL",
+      "detail": "prepare",
+      "file": "tests/contracts/order_revision_impact_set_query.test.js",
+      "line": 76
+    },
+    {
+      "code": "UNRESOLVED_WORKFLOW_SQL",
+      "detail": "pragma",
+      "file": "tests/contracts/startup_readiness_context.test.js",
+      "line": 45
+    },
+    {
+      "code": "UNRESOLVED_WORKFLOW_SQL",
+      "detail": "prepare",
+      "file": "tests/contracts/startup_readiness_context.test.js",
+      "line": 47
+    },
+    {
+      "code": "UNRESOLVED_WORKFLOW_SQL",
+      "detail": "exec",
+      "file": "tests/contracts/startup_readiness_context.test.js",
+      "line": 88
+    },
+    {
+      "code": "RAW_WORKFLOW_SQL",
+      "detail": "prepare",
+      "file": "tests/contracts/startup_readiness_context.test.js",
+      "line": 169
+    },
+    {
+      "code": "UNRESOLVED_WORKFLOW_SQL",
+      "detail": "pragma",
+      "file": "tests/contracts/startup_readiness_context.test.js",
+      "line": 188
+    },
+    {
+      "code": "UNRESOLVED_WORKFLOW_SQL",
+      "detail": "pragma",
+      "file": "utils/startupReadinessContext.js",
+      "line": 58
+    },
+    {
+      "code": "UNRESOLVED_WORKFLOW_SQL",
+      "detail": "pragma",
+      "file": "utils/startupReadinessContext.js",
+      "line": 61
+    },
+    {
+      "code": "UNRESOLVED_WORKFLOW_SQL",
+      "detail": "prepare",
+      "file": "utils/startupReadinessContext.js",
+      "line": 71
+    }
+  ],
+  "closedOriginalsDirectory": "WP/startup-order-readiness-20261015/full-ordinary-once",
+  "earlierOpenExcerptsRemainUntouched": true,
+  "noTestRedispatchOrProductionOperations": true,
+  "notCiBuildOrStartupQualification": true,
+  "sourceCorrectionsStillRequired": true,
+  "requiredSuccessors": [
+    "Inspect every closed failure before correcting new performance source/tests.",
+    "Verify isolated CLI missing-context dependency cause, then lazy-load context only on explicit opt-in; default CLI stays independent.",
+    "Keep stock scanner/assertions and original policy/chart/order tests unchanged. Use literal integrity/FK queries, private cached rows, ordinary prepared-method binding and narrow closed test fixture authority.",
+    "Add actual earlier order-policy snapshot race equivalence before fixing nested copy alias handling; preserve final ORDER_REVISION_SNAPSHOT_CHANGED and all original copy/hash guards.",
+    "Add owned WAL-mode absent/empty and genuinely nonempty WAL fixtures; compare all26 reports and exactly-once checks without inventing an unobserved failure or relaxing original guards.",
+    "Run new uniquely named focused/full successors as warranted. No source PR readiness, CI, image or proof qualification inferred from this retention."
+  ]
+}
