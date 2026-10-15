@@ -1,0 +1,15 @@
+{
+  "postedId": 6191670687,
+  "url": "https://github.com/yigini/soilfer-lims/issues/162#issuecomment-6191670687",
+  "marker": "startup-context-7611-focused167-full29474",
+  "fullSession": 29474,
+  "observedHeaders": 65,
+  "observedFailHeaders": [],
+  "sourceUnchanged": true,
+  "testHashCountClarification": {
+    "preexistingCurrentMain": 370,
+    "unchangedNewTelemetry": 1,
+    "manifestTotal": 371
+  },
+  "productionOperations": 0
+}

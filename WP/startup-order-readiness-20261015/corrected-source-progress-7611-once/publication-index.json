@@ -1,0 +1,56 @@
+{
+  "baseAudit": "8f081b5b7a1eb816bd29109500656776bfcb555d",
+  "postedId": 6191670687,
+  "marker": "startup-context-7611-focused167-full29474",
+  "files": [
+    {
+      "path": "WP/startup-order-readiness-20261015/corrected-source-progress-7611-once/gh162-before-original.json",
+      "length": 5402,
+      "sha256": "89f10d0c152b66ebcb4177d0cc3bb27bae24c8b0d5ed5838cbf5bf1e4a9f0ba4",
+      "gitBlobOid": "69d20dbe67f711a3ced51a07bf84f96673570f37"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/corrected-source-progress-7611-once/post-intent.json",
+      "length": 156,
+      "sha256": "0010bebe649b0b46a9d4698620b5ae937e6c3e188f9915c367d0f5548bdb4a87",
+      "gitBlobOid": "41feafc619991695f042f421029bcac1143695f1"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/corrected-source-progress-7611-once/post-payload.json",
+      "length": 3199,
+      "sha256": "46ee2f1badf7f009b446fc221fc995ac78cbbad32866654466c4ecc4b8c43077",
+      "gitBlobOid": "745ca0025fe7395f669b2a388b616ed07159c9d8"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/corrected-source-progress-7611-once/post-response-original.json",
+      "length": 4774,
+      "sha256": "4951d342e01ff2bc0790c307aaebf1241602ea2d6ea4b1294dddaaec730f244e",
+      "gitBlobOid": "42814e20165677776a8f50822428c0da2c3f47b5"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/corrected-source-progress-7611-once/posted-body.txt",
+      "length": 3184,
+      "sha256": "2054157571500c927128118f2ce8f05b5addc5fb9cd7c4b10b5022b80d5a9860",
+      "gitBlobOid": "1be49016db6c0ad4381517d1ed5d288259e1d005"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/corrected-source-progress-7611-once/progress-record.json",
+      "length": 450,
+      "sha256": "da99b7e339e7e1f84aa0f1b273fc7f002e28a5353429bf602067f63d3b6c2fe7",
+      "gitBlobOid": "0bfc0a138aac9aa0be2b6e140fbc0000bf594204"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/post-startup-corrected-source-progress-7611-once.py",
+      "length": 8646,
+      "sha256": "4630a338d99e189973f9dbec3a2bd23a5c5b391668d1da5e51546fcc78634f5e",
+      "gitBlobOid": "54e9e90b4b23397777b4fb163e589ffba004e58d"
+    },
+    {
+      "path": "WP/audit-release-eb6de2e8/README.md",
+      "length": 627350,
+      "sha256": "f4866c833ec9a7a633d8c92fc605e060c71349b728e02b02f827c251b83e2288",
+      "gitBlobOid": "3898abf8de4ed160a9c4f54ff731795f5b0bd685"
+    }
+  ],
+  "productionOperations": 0
+}
