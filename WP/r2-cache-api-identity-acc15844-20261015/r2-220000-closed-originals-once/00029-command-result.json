@@ -1,0 +1,1 @@
+{"argv":["docker","buildx","--builder","default","prune","--force","--all","--verbose","--max-used-space=5000000000","--filter","id=^m9vvg49d732cuosbze2cou31j$","--filter","shared=false","--filter","inuse=false"],"error":null,"exitCode":0,"outputTruncated":false,"stderr":"","stdout":"Total:\t0B\n","utc":"2026-10-15T20:48:33.195836+00:00"}

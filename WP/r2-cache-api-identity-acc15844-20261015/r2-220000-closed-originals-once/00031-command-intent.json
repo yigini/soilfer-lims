@@ -1,0 +1,1 @@
+{"argv":["df","-B1","--output=source,fstype,size,used,avail,target","/opt/lims","/var/lib/docker","/var/lib/containerd"],"neverRetry":true,"timeoutSeconds":30,"utc":"2026-10-15T20:48:39.376809+00:00"}
