@@ -1,0 +1,21 @@
+{
+  "appHead": "cde8c8896f5f9d5f1ab07b0ae16b1a765e0a6367",
+  "pins": [
+    {
+      "path": "server/index.js",
+      "blob": "bd58cf20aee5f1de757a0ffc6544e50ff1173c19",
+      "sha256": "012b45e634cc6883f0a8c672890cf5516fdeccd5ef399e7d32c5cbcfbfe28590",
+      "bytes": 10311
+    },
+    {
+      "path": "server/scripts/install_order_revisions.js",
+      "blob": "40f214b3d46e71371d8e346b8023507b431e4ed5",
+      "sha256": "756a720c3351b87e9b6dd2a57fb109874952e2d3a4c5496472120d08c7b6552e",
+      "bytes": 18100
+    }
+  ],
+  "finding": "index.js invokes assertOrderRevisionStartupReady after CONTROL_CHART_STARTUP_READY and before ORDER_REVISION_STARTUP_READY; that function calls installOrderRevisions with apply=false, which performs retained policy/chart classification and impact before returning. The missing event only bounds the uncompleted region; it does not identify its exact slow operation or prove eventual success.",
+  "noSql": true,
+  "noRuntimeProbe": true,
+  "noSourceChanges": true
+}
