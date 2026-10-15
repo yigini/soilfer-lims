@@ -1,0 +1,47 @@
+{
+  "status": "NATIVE_AUDIT_PROGRESS_OBSERVED_NO_FINAL_VERDICT",
+  "recordedUtc": "2026-10-15T13:53:08.480022+00:00",
+  "observationTimeLabel": "2026-10-15 13:51-13:52 UTC; tool observation, not producer timestamp",
+  "head": "eba02837eaa2ab797cad0572fecada686f660346",
+  "baseAndMain": "cde8c8896f5f9d5f1ab07b0ae16b1a765e0a6367",
+  "nativeTarget": {
+    "returnedWindowId": 7867734,
+    "project": "LIMS Audit",
+    "thread": "Lab workflow audit and plan"
+  },
+  "method": "Read-only @oai/sky list_apps/get_window/get_window_state; screenshot and accessibility agree on current audit checklist. No activation, navigation, click, typing, Return or message.",
+  "nativeChecklistVerbatim": [
+    {
+      "state": "done",
+      "text": "Read Pip's request and the 36-file change"
+    },
+    {
+      "state": "done",
+      "text": "Client build and lint passed"
+    },
+    {
+      "state": "done",
+      "text": "Reviewed the startup context: refusal rules and reports unchanged"
+    },
+    {
+      "state": "in progress",
+      "text": "Running the full server test suite (5,679 tests)"
+    },
+    {
+      "state": "not done",
+      "text": "Post the verdict on PR 298"
+    }
+  ],
+  "qualification": "This is the displayed checklist, not independent proof of an active process or completed full audit. Accessibility also says Claude finished the response. No actual final audit verdict is present in the observed native thread or fresh GitHub comments/reviews.",
+  "nativePixelEvidence": "Original screenshot exists in conversation tool output. No local pixel-byte artifact or exact producer-time claim.",
+  "humanState": "Both composers visually empty. Existing old-proof-database deletion card remains unanswered; no human input/card changed. Its old 42GB estimate is not a fresh computed capacity requirement.",
+  "githubCommentIds": [
+    6193369476
+  ],
+  "reviews": 0,
+  "actualFinalAuditPass": false,
+  "mergeCount": 0,
+  "nativeMessagesSent": 0,
+  "productionOperations": 0,
+  "nextBoundary": "Observe actual final exact-head Claudio verdict/findings; exact-head PASS plus fresh source/body/head/base/main/complete-CI guards before one guarded merge. New image/tooling all-hash review/fresh computed requirement plus 10GB/new proof root later. No cde8/B5/100000 retry or proof DB removal pending YY."
+}

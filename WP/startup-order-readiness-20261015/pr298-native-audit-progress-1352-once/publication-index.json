@@ -1,0 +1,67 @@
+{
+  "baseAudit": "baaebf54f74fc244b3705613768a225a88b5f361",
+  "status": "NATIVE_AUDIT_PROGRESS_OBSERVED_NO_FINAL_VERDICT",
+  "files": [
+    {
+      "path": "WP/startup-order-readiness-20261015/pr298-native-audit-progress-1352-once/ci-original.json",
+      "length": 12555,
+      "sha256": "dcedf94b01774fbd85ac36a4851848c5d05d10231883b8a87e9d66ac42d76c99",
+      "gitBlobOid": "c16f6b9b7b4253fe467646958acbfc66201cffc7"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/pr298-native-audit-progress-1352-once/coordination-since-1343-original.json",
+      "length": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "gitBlobOid": "0637a088a01e8ddab3bf3fa98dbe804cbde1a0dc"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/pr298-native-audit-progress-1352-once/issue191-original.json",
+      "length": 9900,
+      "sha256": "bc4738533768c757f88b972f09cccc22cff5b847d4128bbc0b730b4f7e93e352",
+      "gitBlobOid": "90f0e8b2cb84a0ac8acacefdf3cab9b09f7dfb54"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/pr298-native-audit-progress-1352-once/main-original.json",
+      "length": 336,
+      "sha256": "8ab38fb8db0993cd672bbb2e6bf3b6ca8d124087fb841ecc97bad4fb1d9bfe89",
+      "gitBlobOid": "dc45c7625305c3a43f77f46efbc91993affaa349"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/pr298-native-audit-progress-1352-once/observation-derived.json",
+      "length": 2353,
+      "sha256": "592a9e89e56f793851b896cf91297222a5c675dcab83597cebbf048bb4be84a1",
+      "gitBlobOid": "59ea10e09727295e25ad27599bbbae79110142a5"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/pr298-native-audit-progress-1352-once/pr-comments-original.json",
+      "length": 6324,
+      "sha256": "2c7dd7d3ec686957eadb950fed35660249db50337548275ed60a8a897ae5d008",
+      "gitBlobOid": "2d2f94b858eb82d6e7237f846af3f941a53ac929"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/pr298-native-audit-progress-1352-once/pr-original.json",
+      "length": 31305,
+      "sha256": "8a84929bd9c7e19a965fd104b12c665af3509d2a3d06b81500749e5f3456b5d8",
+      "gitBlobOid": "4c6a069e3067b9aa1debf77153c756324b327a3f"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/pr298-native-audit-progress-1352-once/pr-reviews-original.json",
+      "length": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "gitBlobOid": "0637a088a01e8ddab3bf3fa98dbe804cbde1a0dc"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/retain-startup-pr298-native-audit-progress-1352-once.py",
+      "length": 7639,
+      "sha256": "01dd49eaeab8796ccce7e43509ea046a9cbfb9e132d40adef208ade46d3f5687",
+      "gitBlobOid": "42cb7332d709809e2c15418003531ef138a79122"
+    },
+    {
+      "path": "WP/audit-release-eb6de2e8/README.md",
+      "length": 636403,
+      "sha256": "0bcbf2c4a2bb38ec7ffd862d0d649acf7ecd408e0ea1a39399519f925c8207f6",
+      "gitBlobOid": "1e45f23d9fb3272408fbcf3b051b780ad6f198c4"
+    }
+  ],
+  "productionOperations": 0
+}
