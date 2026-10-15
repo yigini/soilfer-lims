@@ -1,0 +1,51 @@
+{
+  "name": "server",
+  "version": "1.9.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node index.js",
+    "seed": "node seed.js",
+    "provision:admin": "node scripts/provision_super_admin.js",
+    "test": "jest --maxWorkers=1 --workerIdleMemoryLimit=512MB",
+    "test:watch": "jest --watch",
+    "test:workflow": "jest --runInBand tests/security/ tests/contracts/ tests/scenarios/",
+    "check:theme-catalog": "node scripts/generate_theme_catalog.js --check",
+    "generate:theme-catalog": "node scripts/generate_theme_catalog.js",
+    "postinstall": "prisma generate"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@prisma/adapter-better-sqlite3": "^7.4.0",
+    "@prisma/client": "^7.4.0",
+    "axios": "^1.13.2",
+    "bcryptjs": "^3.0.3",
+    "better-sqlite3": "^12.6.2",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.2.1",
+    "helmet": "^8.1.0",
+    "intl-messageformat": "^10.5.14",
+    "jsonwebtoken": "^9.0.3",
+    "multer": "^2.3.0",
+    "papaparse": "^5.5.3",
+    "pdfkit": "^0.20.2",
+    "saxes": "6.0.0",
+    "uuid": "^13.0.1",
+    "ws": "^8.22.0"
+  },
+  "devDependencies": {
+    "@babel/parser": "^7.29.9",
+    "@babel/traverse": "^7.29.8",
+    "jest": "^30.2.0",
+    "jsdom": "^26.1.0",
+    "playwright": "1.64.0",
+    "prisma": "^7.4.0",
+    "supertest": "^7.2.2"
+  }
+}

@@ -1,0 +1,1 @@
+{"exitCode":1,"kind":"LOCAL_PUBLICATION_ROLE_ASSERTION_REFUSAL","stderr":"AssertionError at local read_bytes==published blob comparison; only the two later-updated README leads differ. Before any output directory or host call. Failed helper immutable; successor verifies all historical raw Git bytes and current README bytes against current HEAD separately.","stdout":""}

@@ -1,0 +1,10 @@
+const router = require('express').Router();
+const { verifyToken, checkPermission } = require('../middleware/authMiddleware');
+const controller = require('../controllers/calculationTemplateController');
+router.use(verifyToken);
+router.get('/', checkPermission('VIEW_ANALYTICAL_RESULTS'), controller.list);
+router.get('/activation', checkPermission('MANAGE_CALC_TEMPLATES'), controller.activationState);
+router.post('/:id/clone', checkPermission('MANAGE_CALC_TEMPLATES'), controller.clone);
+router.post('/:id/versions', checkPermission('MANAGE_CALC_TEMPLATES'), controller.revise);
+router.post('/:id/activation', checkPermission('MANAGE_CALC_TEMPLATES'), controller.activation);
+module.exports = router;

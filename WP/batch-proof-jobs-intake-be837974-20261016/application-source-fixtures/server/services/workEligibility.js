@@ -1,0 +1,412 @@
+/**
+ * Work and Approval Eligibility Service
+ * 
+ * Central pure evaluation functions called across dashboard selectors,
+ * technician workbench, sample workspace, and command controllers.
+ * Complies with Section 1 of implementation-plan.md, contracts.md, and Review R4.
+ */
+'use strict';
+
+const { TEXTURE_ALIASES, DERIVED_TEXTURE_FRACTIONS, NON_ANALYTICAL, matchingItems,
+    governsResult, isCurrentValidAnalyticalResult, getReportingMode, reportingQc,
+    SPECTRAL_ACQUISITION_CODES, hasApprovedSpectralEvidence } = require('./reportResultGovernance');
+
+const GATE_ANALYSES = ['DRYING', 'PREPARATION'];
+
+/**
+ * Evaluates whether a work item is ready for result/checklist entry by the technician.
+ */
+function canRecord(workItem, sample, user, options = {}) {
+    const blockers = [];
+
+    if (!sample) {
+        return { allowed: false, blockers: ['SAMPLE_NOT_FOUND'], reason: 'Sample not found' };
+    }
+
+    // 1. Material arrival and status checks
+    if (['EXPECTED', 'DRAFT'].includes(sample.status) || !sample.receptionDate) {
+        blockers.push('NOT_RECEIVED: Sample has not been physically received at the laboratory');
+    }
+    if (['RECEIVED_REJECTED', 'REJECTED'].includes(sample.status)) {
+        blockers.push('SAMPLE_REJECTED: Sample intake was rejected');
+    }
+    if (['DISPOSED', 'ARCHIVED'].includes(sample.status)) {
+        blockers.push('SAMPLE_CLOSED: Sample material is archived or disposed');
+    }
+
+    const isGateItem = GATE_ANALYSES.includes(workItem?.analysis);
+
+    // 2. Operational gate prerequisites (for analytical work items)
+    if (!isGateItem) {
+        const isDryingApplicable = options.isDryingApplicable !== false;
+        const isPrepApplicable = options.isPrepApplicable !== false;
+
+        if (isDryingApplicable && sample.dryingStatus !== 'DONE') {
+            blockers.push('DRYING_PENDING: Air drying must be completed before result entry');
+        }
+        if (isPrepApplicable && sample.preparationStatus !== 'DONE') {
+            blockers.push('PREPARATION_PENDING: Sample preparation (sieving/milling) must be completed');
+        }
+    } else if (workItem.analysis === 'PREPARATION') {
+        const isDryingApplicable = options.isDryingApplicable !== false;
+        if (isDryingApplicable && sample.dryingStatus !== 'DONE') {
+            blockers.push('DRYING_PENDING: Air drying must be completed before preparation');
+        }
+    }
+
+    // 3. Assignment check
+    if (user && user.role === 'LAB_TECHNICIAN') {
+        if (workItem?.assignedTo && workItem.assignedTo !== user.username && workItem.assignedTo !== user.id) {
+            blockers.push(`NOT_ASSIGNED_TO_ACTOR: Item assigned to ${workItem.assignedTo}`);
+        }
+    }
+
+    // 4. Lifecycle state check
+    if (workItem) {
+        if (['COMPLETED', 'RECORDED'].includes(workItem.status)) {
+            blockers.push('ALREADY_RECORDED: Result recorded and awaiting review/submission');
+        } else if (workItem.status === 'SUBMITTED') {
+            blockers.push('SUBMITTED: Work is currently under manager review');
+        } else if (workItem.status === 'ACCEPTED') {
+            blockers.push('ACCEPTED: Analysis already approved by laboratory manager');
+        } else if (['WAIVED', 'CANCELLED'].includes(workItem.status)) {
+            blockers.push(`OMITTED: Analysis was ${workItem.status.toLowerCase()}`);
+        }
+    }
+
+    const allowed = blockers.length === 0;
+    return {
+        allowed,
+        blockers,
+        reason: allowed ? null : blockers[0]
+    };
+}
+
+/**
+ * Evaluates whether a work item can be submitted by the technician for manager review.
+ */
+function canSubmit(workItem, sample, user) {
+    const blockers = [];
+
+    if (!workItem) {
+        return { allowed: false, blockers: ['NO_WORK_ITEM'], reason: 'No work item' };
+    }
+
+    if (!['RECORDED', 'COMPLETED'].includes(workItem.status)) {
+        blockers.push(`INVALID_STATUS: Work item is in status ${workItem.status}, not RECORDED/COMPLETED`);
+    }
+
+    if (sample && ['DISPOSED', 'ARCHIVED', 'RECEIVED_REJECTED'].includes(sample.status)) {
+        blockers.push('SAMPLE_CLOSED: Sample is closed, archived or rejected');
+    }
+
+    if (user && user.role === 'LAB_TECHNICIAN') {
+        if (workItem.assignedTo && workItem.assignedTo !== user.username && workItem.assignedTo !== user.id) {
+            blockers.push('NOT_ASSIGNED_TO_ACTOR: Only the assigned technician can submit this work');
+        }
+    }
+
+    const allowed = blockers.length === 0;
+    return {
+        allowed,
+        blockers,
+        reason: allowed ? null : blockers[0]
+    };
+}
+
+/**
+ * Evaluates review readiness and approval eligibility for manager review of submissions.
+ */
+function canReview(submission, sample, user, options = {}) {
+    const blockers = [];
+    let canAccept = true;
+
+    if (!user || !['LAB_MANAGER', 'MASTER_USER', 'SUPER_ADMIN'].includes(user.role)) {
+        return { allowed: false, canAccept: false, blockers: ['UNAUTHORIZED_ROLE'], reason: 'Requires manager review authority' };
+    }
+
+    if (!submission || submission.status !== 'PENDING_REVIEW') {
+        return { allowed: false, canAccept: false, blockers: ['NOT_PENDING_REVIEW'], reason: 'Submission is not pending review' };
+    }
+
+    const qcGate = require('./qcGateService');
+    const gates = options.qcGates || (sample?.results || []).filter(result => result.isCurrent &&
+        !require('./resultEntryPolicy').isNonMeasurement({ analysis: result.param })).map(result =>
+        qcGate.gateFromEvidence(result, sample.workItems || [], options.qcBatches || [], {
+            mode: getReportingMode(sample, result, options) }));
+    const checks = (Array.isArray(gates) ? gates : Object.values(gates)).map(row =>
+        qcGate.decision(row.gate || row, { acknowledgement: options.qcAcknowledgement }));
+    const refused = checks.filter(row => !row.allowed);
+    if (refused.length) { canAccept = false; blockers.push(...refused.map(row => row.code)); }
+
+    // Submission can be opened/inspected even if QC is blocked
+    return {
+        allowed: true, // can inspect
+        canAccept,     // can manager accept
+        gate: checks.map(row => row.gate),
+        acknowledgementRequired: checks.some(row => row.acknowledgementRequired),
+        blockers,
+        reason: canAccept ? null : blockers[0]
+    };
+}
+
+/**
+ * Evaluates whether a sample is fully eligible for final managerial approval.
+ * Fulfills Acceptance criteria A17, A18, A19 and Audit finding D09, D24.
+ */
+function canFinalApprove(sample, workItems = [], orderLines = [], user = null, options = {}) {
+    const blockers = [];
+
+    // 1. Authorization check
+    if (user && !['LAB_MANAGER', 'MASTER_USER', 'SUPER_ADMIN'].includes(user.role)) {
+        return { allowed: false, blockers: ['UNAUTHORIZED_ROLE'], reason: 'Final approval requires laboratory manager authority' };
+    }
+
+    if (!sample) {
+        return { allowed: false, blockers: ['SAMPLE_NOT_FOUND'], reason: 'Sample record not found' };
+    }
+
+    // 2. Physical arrival and intake disposition
+    if (['EXPECTED', 'DRAFT'].includes(sample.status) || !sample.receptionDate) {
+        blockers.push('NOT_RECEIVED: Sample has not been physically received');
+    }
+    if (['RECEIVED_REJECTED', 'REJECTED'].includes(sample.status)) {
+        blockers.push('SAMPLE_REJECTED: Sample intake was rejected');
+    }
+    if (['DISPOSED', 'ARCHIVED'].includes(sample.status)) {
+        blockers.push('SAMPLE_CLOSED: Sample is archived or disposed');
+    }
+    if (sample.status === 'APPROVED') {
+        blockers.push('ALREADY_APPROVED: Sample is already approved');
+    }
+
+    // 2b. Operational gate prerequisites
+    const gateWorkItems = workItems.filter(w => GATE_ANALYSES.includes(w.analysis));
+    const dryingItem = gateWorkItems.find(w => w.analysis === 'DRYING');
+    const prepItem = gateWorkItems.find(w => w.analysis === 'PREPARATION');
+
+    const SATISFIED_GATE_STATUSES = ['DONE', 'COMPLETED', 'ACCEPTED', 'SKIPPED', 'WAIVED', 'NOT_APPLICABLE'];
+
+    // Evaluate Drying gate independently:
+    const isDryingRequired = Boolean(dryingItem) || (sample.dryingStatus && !['SKIPPED', 'WAIVED', 'NOT_APPLICABLE'].includes(sample.dryingStatus));
+    if (isDryingRequired) {
+        const sampleDryingSatisfied = SATISFIED_GATE_STATUSES.includes(sample.dryingStatus);
+        const itemDryingSatisfied = dryingItem && SATISFIED_GATE_STATUSES.includes(dryingItem.status);
+        if (!sampleDryingSatisfied && !itemDryingSatisfied) {
+            blockers.push('PREREQUISITE_GATE_INCOMPLETE: Prerequisite Drying gate has not been completed');
+        }
+    }
+
+    // Evaluate Preparation gate independently:
+    const isPrepRequired = Boolean(prepItem) || (sample.preparationStatus && !['SKIPPED', 'WAIVED', 'NOT_APPLICABLE'].includes(sample.preparationStatus));
+    if (isPrepRequired) {
+        const samplePrepSatisfied = SATISFIED_GATE_STATUSES.includes(sample.preparationStatus);
+        const itemPrepSatisfied = prepItem && SATISFIED_GATE_STATUSES.includes(prepItem.status);
+        if (!samplePrepSatisfied && !itemPrepSatisfied) {
+            blockers.push('PREREQUISITE_GATE_INCOMPLETE: Prerequisite Sample Preparation gate has not been completed');
+        }
+    }
+
+    // 3. Analytical items check (must have ordered analytical work; gate-only work does NOT qualify)
+    const analyticalItems = workItems.filter(w => !NON_ANALYTICAL.includes(w.analysis));
+    if (analyticalItems.length === 0) {
+        blockers.push('NO_ANALYTICAL_WORK: No analytical determinations were ordered for this sample');
+    }
+
+    // 4. Work item completion & review status
+    const pendingItems = analyticalItems.filter(w => !['ACCEPTED', 'WAIVED', 'CANCELLED'].includes(w.status));
+    if (pendingItems.length > 0) {
+        const itemSummaries = pendingItems.map(w => `${w.analysis} (${w.status})`).join(', ');
+        blockers.push(`UNACCEPTED_WORK: Work items pending approval or completion: ${itemSummaries}`);
+    }
+
+    // 5. All-omitted guard: if all analytical items are waived/cancelled/omitted, normal result approval is rejected
+    const nonOmitted = analyticalItems.filter(w => !['WAIVED', 'CANCELLED', 'OMITTED'].includes(w.status));
+    if (analyticalItems.length > 0 && nonOmitted.length === 0) {
+        blockers.push('ALL_WORK_OMITTED: All ordered analyses were omitted/cancelled; requires formal administrative closure, not analytical approval');
+    }
+
+    // 6. Active order lines parity / required analyses completeness
+    let requiredAnalysesToCheck = [];
+    if (Array.isArray(orderLines) && orderLines.length > 0) {
+        requiredAnalysesToCheck = orderLines.filter(l => l.status === 'ACTIVE' && l.isRequired !== false).map(l => l.analysis);
+    } else if (sample.requiredAnalyses) {
+        try {
+            const parsed = typeof sample.requiredAnalyses === 'string' ? JSON.parse(sample.requiredAnalyses) : sample.requiredAnalyses;
+            if (Array.isArray(parsed)) {
+                requiredAnalysesToCheck = parsed.filter(code => !GATE_ANALYSES.includes(code));
+            }
+        } catch (e) {}
+    }
+
+    if (requiredAnalysesToCheck.length > 0) {
+        for (const reqCode of requiredAnalysesToCheck) {
+            // Check direct match
+            const linked = analyticalItems.find(w => w.analysis === reqCode);
+            if (linked) {
+                if (!['ACCEPTED', 'WAIVED'].includes(linked.status)) {
+                    blockers.push(`ORDER_LINE_INCOMPLETE: Required ordered analysis ${reqCode} is not accepted (status: ${linked.status})`);
+                }
+            } else if (TEXTURE_ALIASES.has(reqCode)) {
+                // If TEXTURE was required, check if TEXTURE or all 3 fractions (SAND, SILT, CLAY) are accepted
+                const textureItem = analyticalItems.find(w => TEXTURE_ALIASES.has(w.analysis));
+                if (textureItem && ['ACCEPTED', 'WAIVED'].includes(textureItem.status)) {
+                    // satisfied
+                } else {
+                    const fractionItems = analyticalItems.filter(w => DERIVED_TEXTURE_FRACTIONS.includes(w.analysis));
+                    const allFractionsAccepted = DERIVED_TEXTURE_FRACTIONS.every(frac => {
+                        const fi = fractionItems.find(w => w.analysis === frac);
+                        return fi && ['ACCEPTED', 'WAIVED'].includes(fi.status);
+                    });
+                    if (!allFractionsAccepted) {
+                        blockers.push(`ORDER_LINE_INCOMPLETE: Required ordered analysis ${reqCode} (or derived texture fractions) is not accepted`);
+                    }
+                }
+            } else if (DERIVED_TEXTURE_FRACTIONS.includes(reqCode)) {
+                // If individual fraction was required, check if that fraction OR composite TEXTURE is accepted
+                const textureItem = analyticalItems.find(w => TEXTURE_ALIASES.has(w.analysis));
+                if (textureItem && ['ACCEPTED', 'WAIVED'].includes(textureItem.status)) {
+                    // satisfied by composite TEXTURE
+                } else {
+                    blockers.push(`ORDER_LINE_INCOMPLETE: Required ordered analysis ${reqCode} (or composite TEXTURE) is not accepted`);
+                }
+            } else {
+                blockers.push(`ORDER_LINE_INCOMPLETE: Required ordered analysis ${reqCode} has no corresponding laboratory work item`);
+            }
+        }
+    }
+
+    // 7. Use the same result identity, frozen mode and durable acknowledgement
+    // as publication. A bracket disposition does not fail unrelated results.
+    const qc = reportingQc(sample, { ...options, workItems });
+    const qcFailure = qc.blocker?.gate;
+    if (qcFailure) blockers.push(qcFailure.code ||
+        (['QC_FAIL', 'FAILED'].includes(qc.blocker.batch.status) ? 'QC_BATCH_FAILED' : 'QC_BATCH_PENDING'));
+
+    // 8. Holds and historical evidence gaps
+    if (sample.holdReason || options.hasActiveHold) {
+        blockers.push('SAMPLE_ON_HOLD: Sample is on administrative or quality hold');
+    }
+    if (options.hasHistoricalGap) {
+        blockers.push('HISTORICAL_EVIDENCE_GAP: Sample results lack recorded analytical or spectral evidence');
+    }
+
+    const allowed = blockers.length === 0;
+    return {
+        allowed,
+        blockers,
+        reason: allowed ? null : blockers[0],
+        ...(qcFailure && { code: qcFailure.code, gate: qcFailure.gate,
+            acknowledgementRequired: qcFailure.acknowledgementRequired })
+    };
+}
+
+/**
+ * Evaluates whether an official report can be released / published.
+ */
+function canPublish(sample, report, user, options = {}) {
+    if (!user || !['LAB_MANAGER', 'MASTER_USER', 'SUPER_ADMIN'].includes(user.role)) {
+        return { allowed: false, code: 'PERMISSION_DENIED', reason: 'Report publication requires laboratory manager authority (AUDIT_USER is strictly read-only)' };
+    }
+
+    if (!sample) {
+        return { allowed: false, code: 'NOT_FOUND', reason: 'Sample record not found' };
+    }
+
+    if (!['APPROVED', 'PUBLISHED', 'ARCHIVED'].includes(sample.status)) {
+        return { allowed: false, code: 'SAMPLE_NOT_APPROVED', reason: `Sample must be approved before publishing (current: ${sample.status})` };
+    }
+
+    const workItems = options.workItems || sample.workItems || [];
+    const analyticalItems = workItems.filter(item => !NON_ANALYTICAL.includes(item.analysis));
+    const pending = analyticalItems.filter(item => !['ACCEPTED', 'WAIVED', 'CANCELLED'].includes(item.status));
+    if (pending.length) {
+        return { allowed: false, code: 'ITEMS_NOT_ACCEPTED', reason: 'Every analytical work item must be reviewed before publication.',
+            workItemIds: pending.map(item => item.id) };
+    }
+
+    const qc = reportingQc(sample, {...options,reportedSelectionProof:undefined});
+    const selectedQc = options.reportedSelectionProof ? reportingQc(sample,options) : {warnings:[]};
+    if (qc.blocker || selectedQc.blocker) {
+        const { batch, gate } = qc.blocker || selectedQc.blocker;
+        return { allowed: false, code: gate.code || (batch.status === 'QC_FAIL' ? 'QC_BATCH_FAILED' : 'QC_BATCH_PENDING'),
+            reason: gate.code || `Cannot publish report: ${gate.error}`, gate: gate.gate,
+            acknowledgementRequired: gate.acknowledgementRequired };
+    }
+
+    const validResults = (options.results || sample.results || []).filter(result =>
+        isCurrentValidAnalyticalResult(result, getReportingMode(sample, result, options)));
+    const ungoverned = validResults.filter(result => matchingItems(result, workItems).length === 0);
+    if (ungoverned.length) {
+        return { allowed: false, code: 'RESULT_UNGOVERNED', reason: 'Current results lack a governing work item.',
+            params: [...new Set(ungoverned.map(result => result.param))] };
+    }
+    const missingSpectral = analyticalItems.filter(item => item.status === 'ACCEPTED' &&
+        SPECTRAL_ACQUISITION_CODES.includes(item.analysis) &&
+        !hasApprovedSpectralEvidence(item, options.spectralScans));
+    if (missingSpectral.length) {
+        return { allowed: false, code: 'ACCEPTED_ITEM_WITHOUT_EVIDENCE', reason: 'Accepted spectral acquisition lacks an approved linked scan.',
+            workItemIds: missingSpectral.map(item => item.id) };
+    }
+    const missing = analyticalItems.filter(item => item.status === 'ACCEPTED' &&
+        !SPECTRAL_ACQUISITION_CODES.includes(item.analysis) &&
+        // IO supplies this proof only after checking current selection lineage
+        // and every retained source gate. NOT_REPORTABLE is a reviewed outcome.
+        !options.reportedSelectionProof?.groups.some(group => group.workItemId === item.id) &&
+        !validResults.some(result => governsResult(item, result)));
+    if (missing.length) {
+        return { allowed: false, code: 'ACCEPTED_ITEM_WITHOUT_VALID_RESULT', reason: 'Accepted analytical work lacks a current valid result.',
+            workItemIds: missing.map(item => item.id) };
+    }
+
+    return { allowed: true, reason: null, qcWarnings: [...new Map([...qc.warnings,...selectedQc.warnings]
+        .map(row=>[row.resultId,row])).values()] };
+}
+
+const UNFINISHED_WORK_STATUSES = [
+    'ASSIGNED',
+    'IN_PROGRESS',
+    'REPEAT_REQUIRED',
+    'REANALYSIS_REQUIRED',
+    'ON_HOLD',
+    'AWAITING_VERIFICATION',
+    'RECORDED',
+    'SUBMITTED',
+    'PENDING_REVIEW',
+    'RETURNED',
+    'DRAFT'
+];
+
+/**
+ * Canonical predicate building Prisma WHERE clause for unfinished work items.
+ * Accounts for analytical work in progress, held, awaiting verification, or needing a repeat,
+ * as well as completed determinations awaiting technician submission.
+ */
+function getUnfinishedWorkWhere(username = null, labId = null) {
+    const conditions = [
+        {
+            status: { in: UNFINISHED_WORK_STATUSES }
+        },
+        {
+            status: 'COMPLETED',
+            submissionId: null
+        }
+    ];
+    const where = { OR: conditions };
+    if (username) where.assignedTo = username;
+    if (labId) where.labId = labId;
+    return where;
+}
+
+module.exports = {
+    GATE_ANALYSES,
+    NON_ANALYTICAL,
+    UNFINISHED_WORK_STATUSES,
+    getUnfinishedWorkWhere,
+    canRecord,
+    canSubmit,
+    canReview,
+    canFinalApprove,
+    canPublish
+};
+

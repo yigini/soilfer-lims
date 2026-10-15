@@ -1,0 +1,4 @@
+  File "<string>", line 6
+    base=os.environ['LIMS_PROOF_GUARD_FIXTURE_DIR'].replace('\','/')
+                                                                  ^
+SyntaxError: unterminated string literal (detected at line 6)
