@@ -1,0 +1,23 @@
+{
+  "status": "COMPLETE_HEALTH_TRANSITION_SOURCE_PREPARED_NOT_YET_TESTED_OR_APPROVED",
+  "direction": 6188190365,
+  "predecessorSource": "0541865b67af0fbf3232d7cb077ab505896a2ced",
+  "newRoot": "/opt/lims/releases/workflow-batch-startup-forward-cde8c889-20261015T100000Z",
+  "productionMutations": 0,
+  "operators": 0,
+  "oldSourceUnchanged": true,
+  "files": {
+    "launch_proof.py": "9e33ea86c16c4018a1a94991c6969323d16958bb4e5094219ddd2fdfd9ad708f",
+    "prepare_proof.py": "cb9eeb8168f44bd20ecd1d829caf30a7fba1ecc92a0924b73f610d78c58329e7",
+    "proof_budget.py": "1bbb4e83d714031cab8567dbca6db3904e7dfc2cd0bdaa92dc19831a2e1c389a",
+    "proof_contract.py": "b147fee1bb5007c3baa59c16ecebf9a0a85dea8b197eb8de4a4a032a2615e4bc",
+    "proof_disk.py": "d1b676dbd23bc9f88b51c222994639ac3c14b3b1b49f096d95eb24a7de2eab6d",
+    "proof_docker.py": "72e7c85012f908ae8d1fcb963d9400a8242d90e01348d73b9cb09a9f33c5886d",
+    "proof_files.py": "6bd7adb616218b8add259eaf61c2922cfc3d05d88e8dbae4dbf5dda386e1241c",
+    "proof_health.py": "ada964f3d86453f61d082961e78b76f7dfb3cd3976ca361e5aadf863f227f846",
+    "proof_inputs.py": "534c4058f2c1bdd35e21ff431fa58a5293e93fd87eb302d2db2c912638381c75",
+    "proof_startup.py": "2b16cfe0ddce4e47d76316c02424399e2089e9e129be11aab23f603e22ea3c48",
+    "run_stopped_proof.py": "0f0a395b4763ba19ca4c1fc6185eb9f118d5a5ddd2d5efaf02cedfdb7aa57c08",
+    "verify_proof_guards.py": "00331939600574b31b56f4c13983524d9ddfc07f82442eda8d1ce0dc8e71aaae"
+  }
+}
