@@ -1,0 +1,219 @@
+{
+  "status": "REVIEWED_STARTUP_BUILD_PACKAGE_PREPARED_NOT_LAUNCHED",
+  "package": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\WP\\batch-build-startup-be837974-20261015\\build-package-workflow-batch-build-be837974-20261015T180000Z",
+  "preparedUtc": "2026-10-15T18:27:27.139917+00:00",
+  "root": "/opt/lims/releases/workflow-batch-build-be837974-20261015T180000Z",
+  "toolingCommit": "2c0cebca0e9e191d2062c2f43756aa1d46e98c85",
+  "sourceReviewId": 6199128746,
+  "capacityPlan": {
+    "model": "RAW_GIT_SOURCE_BLOCKS_PLUS25PCT_PACKAGE_4GIB_BUILD_PLUS_FIXED_FLOOR_PLUS10GB",
+    "blockBytes": 4096,
+    "packageInputLengths": {
+      "authority-6189025975-original.json": 6545,
+      "authority-6189658753-original.json": 6654,
+      "authority-6189669837-original.json": 4262,
+      "authority-6191219093-original.json": 5365,
+      "batch_build.py": 13688,
+      "batch_build_contract.py": 22451,
+      "fallback-direction-original.json": 6613,
+      "launch_batch_build.py": 10416,
+      "main-ci-original.json": 12122,
+      "main-original.json": 336,
+      "metadata-analysis-original.json": 48734,
+      "original-build-failure.json": 2047,
+      "pr295-actual-pass-original.json": 6787,
+      "pr295-comments-original.json": 10644,
+      "pr295-original.json": 23239,
+      "pr296-actual-pass-original.json": 8178,
+      "pr296-comments-original.json": 13709,
+      "pr296-original.json": 65850,
+      "pr297-actual-pass-original.json": 5571,
+      "pr297-comments-original.json": 20259,
+      "pr297-original.json": 33502,
+      "pr298-actual-pass-original.json": 8010,
+      "pr298-comments-original.json": 14628,
+      "pr298-original.json": 31968,
+      "prepare_batch_build.py": 9982,
+      "source-index.json": 413542,
+      "source-review-original.json": 7457,
+      "source.tar.gz": 40691311,
+      "tooling-source-index.json": 1592,
+      "verify_build_guards.py": 21544
+    },
+    "packageAllocationAllowanceBytes": 43679744,
+    "sourceFileCount": 1567,
+    "sourceDirectoryCount": 141,
+    "sourceRoundedFileBytes": 65540096,
+    "sourceExtractionAllowanceBytes": 84680704,
+    "sourceMarginNumerator": 5,
+    "sourceMarginDenominator": 4,
+    "specLengthLimitBytes": 1048576,
+    "buildAllocationReserveBytes": 4294967296,
+    "reserveFloorBytes": 10556150894,
+    "additionalHeadroomBytes": 10000000000
+  },
+  "requiredFreeBytesByPhase": {
+    "before-root": 24979478638,
+    "before-unit": 24935798894,
+    "before-build": 24851118190
+  },
+  "files": [
+    {
+      "name": "authority-6189025975-original.json",
+      "bytes": 6545,
+      "sha256": "16e9b64f1e0729e6c8d66a18e5099b2ac88d00ee1199bea528df8c28563a6b34"
+    },
+    {
+      "name": "authority-6189658753-original.json",
+      "bytes": 6654,
+      "sha256": "433dee0b65e0a046bf905aa59f8a2c6821f484026a08674def660fb2a0a55607"
+    },
+    {
+      "name": "authority-6189669837-original.json",
+      "bytes": 4262,
+      "sha256": "e6ea6a6dc2a0f13769eecd0f60780072b8a2902952d3ca30c7cae76017703dcf"
+    },
+    {
+      "name": "authority-6191219093-original.json",
+      "bytes": 5365,
+      "sha256": "1c74e5f354e8f2c434d333b1fcf5830d01224866b4c93bc44bfd83975510ab71"
+    },
+    {
+      "name": "batch_build.py",
+      "bytes": 13688,
+      "sha256": "17fae7713e60cfe2e3fe4c394ebd2c9715005adc4abf34481f685686e7de26ab"
+    },
+    {
+      "name": "batch_build_contract.py",
+      "bytes": 22451,
+      "sha256": "fc7d350be90df8e3e4254d3e0c7cd5749abc91cefda04ec085a8501c235383b9"
+    },
+    {
+      "name": "build-input.json",
+      "bytes": 7059,
+      "sha256": "052b8e7077689b1e73a3b3010d2fc67c61a65c78c0fa1f6bb4b92a4bafedbc8e"
+    },
+    {
+      "name": "fallback-direction-original.json",
+      "bytes": 6613,
+      "sha256": "1a199ef0023c5ba2315d038de4f5797831679f3382933d50e34336b92ffa7ddb"
+    },
+    {
+      "name": "launch_batch_build.py",
+      "bytes": 10416,
+      "sha256": "6f355d087facbbd5cd7fa0a0d9623c1379329d23429854862a7eed50dd64896c"
+    },
+    {
+      "name": "main-ci-original.json",
+      "bytes": 12122,
+      "sha256": "2c90f06107206bb4bdb799a458e15a3d80a58f486c6c741ca9841a70daca5388"
+    },
+    {
+      "name": "main-original.json",
+      "bytes": 336,
+      "sha256": "5dbe45b3d22a65a8a14dc291df3e7fc536f7465cceca1682788cdb46d6448679"
+    },
+    {
+      "name": "metadata-analysis-original.json",
+      "bytes": 48734,
+      "sha256": "c2f4fc6d15d064f4e4a08255edbfd450494adb3f3625224ce7267550f66e6d25"
+    },
+    {
+      "name": "original-build-failure.json",
+      "bytes": 2047,
+      "sha256": "4474dcd30269c0710e17723e2f702114f09d48129ccc070b499aa65a69ab30c2"
+    },
+    {
+      "name": "pr295-actual-pass-original.json",
+      "bytes": 6787,
+      "sha256": "3d504670dbe3035c87ff67d73c50782e005a1893c4665de338de9fb57ce0a25a"
+    },
+    {
+      "name": "pr295-comments-original.json",
+      "bytes": 10644,
+      "sha256": "3cd8ecfd08235af23aae6a5ae7c7157690c06e85c7574e503562dd566b4b3201"
+    },
+    {
+      "name": "pr295-original.json",
+      "bytes": 23239,
+      "sha256": "39181cc127040536d22cbf1e66778601a25fdffc06c48bed2c3b99215f0f026a"
+    },
+    {
+      "name": "pr296-actual-pass-original.json",
+      "bytes": 8178,
+      "sha256": "83293fdf38e293253ec6ae50ff81dc3a9b61cd87fe863d04eaa465f99a8b9f47"
+    },
+    {
+      "name": "pr296-comments-original.json",
+      "bytes": 13709,
+      "sha256": "d6f0751f4ac2bdb75a54211ea8dc43b25edaf9d9440621ac8e6a98e47f4b46c9"
+    },
+    {
+      "name": "pr296-original.json",
+      "bytes": 65850,
+      "sha256": "f66fa3f41e7ed82bc8f61b89047e9209b1fe4171a085f2ce602e91307b94be90"
+    },
+    {
+      "name": "pr297-actual-pass-original.json",
+      "bytes": 5571,
+      "sha256": "2272d318b7d824d7341e90cd340b53bfeb81dc5cbec26150f857b4db8251a167"
+    },
+    {
+      "name": "pr297-comments-original.json",
+      "bytes": 20259,
+      "sha256": "20f195ef4512a4febe5926cdcbb8baddae3bab99a21fd698ca6b1052d57a0751"
+    },
+    {
+      "name": "pr297-original.json",
+      "bytes": 33502,
+      "sha256": "6f5ae6b6ed7302f16fe2339ebac494d0c852c4722d013a1aa6ad528daccaf287"
+    },
+    {
+      "name": "pr298-actual-pass-original.json",
+      "bytes": 8010,
+      "sha256": "184b61b81a83ee40832800c1ade276ccebaf1542e534bb6a12e0cfed19fa024c"
+    },
+    {
+      "name": "pr298-comments-original.json",
+      "bytes": 14628,
+      "sha256": "17ff6b5df9ce9396f3b9c8ba9231fbc227900b374bce08eeaab9373813f440ae"
+    },
+    {
+      "name": "pr298-original.json",
+      "bytes": 31968,
+      "sha256": "05dbb592e8807020f71657cfdb84fe3b5114e6095d133ff5f9f3d2db5d4f495e"
+    },
+    {
+      "name": "prepare_batch_build.py",
+      "bytes": 9982,
+      "sha256": "00caeef399735d3ca9ed6cef6febd63dbfee69a8cee1981fd0bb25ec1d4dcb9f"
+    },
+    {
+      "name": "source-index.json",
+      "bytes": 413542,
+      "sha256": "c7ee2de3e0cbad7aad9be99b8a74f5ddc070f033b70b9595b7f7c754e99156db"
+    },
+    {
+      "name": "source-review-original.json",
+      "bytes": 7457,
+      "sha256": "7dfa53fe12035afa2ebfa02dc6f560248a015b244f02b7c7c7e4f577675aa216"
+    },
+    {
+      "name": "source.tar.gz",
+      "bytes": 40691311,
+      "sha256": "b086b15bf69f69df82f0278128aa6752dd94ebdbde6e21baf68bce29fd4b9e74"
+    },
+    {
+      "name": "tooling-source-index.json",
+      "bytes": 1592,
+      "sha256": "db8f5766c3812c6f1556595b464baca9a83c7315a8f64a158ffe748775e0ed82"
+    },
+    {
+      "name": "verify_build_guards.py",
+      "bytes": 21544,
+      "sha256": "58238c64700d78352713ab9b6c3d43f7a82caab9bec061b40914f4c486a0ae4d"
+    }
+  ],
+  "builds": 0,
+  "hostConnections": 0
+}
