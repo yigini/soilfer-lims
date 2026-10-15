@@ -1,0 +1,55 @@
+test_01_all_five_sources_compile_python39 (r2_guards_inmemory.Guards) ... ok
+test_02_exact_review_accepts_complete_graph (r2_guards_inmemory.Guards) ... ok
+test_03_missing_source_hash_refuses (r2_guards_inmemory.Guards) ... ok
+test_04_old_review_refuses (r2_guards_inmemory.Guards) ... ok
+test_05_edited_or_nonclaude_review_refuses (r2_guards_inmemory.Guards) ... ok
+test_06_incomplete_graph_refuses (r2_guards_inmemory.Guards) ... ok
+test_07_actual_successful_build_binding (r2_guards_inmemory.Guards) ... ok
+test_08_failed_or_other_build_receipt_refuses (r2_guards_inmemory.Guards) ... ok
+test_09_image_inspection_changed_refuses (r2_guards_inmemory.Guards) ... ok
+test_10_duplicate_json_refuses (r2_guards_inmemory.Guards) ... ok
+test_11_invalid_full_id_refuses (r2_guards_inmemory.Guards) ... ok
+test_12_cache_protection_booleans_exact (r2_guards_inmemory.Guards) ... ok
+test_13_size_and_usage_exact_integers (r2_guards_inmemory.Guards) ... ok
+test_14_duplicate_cache_refuses (r2_guards_inmemory.Guards) ... ok
+test_15_parent_aliases_and_duplicates_refuse (r2_guards_inmemory.Guards) ... ok
+test_16_parent_cycles_refuse (r2_guards_inmemory.Guards) ... ok
+test_17_empty_and_bounds (r2_guards_inmemory.Guards) ... ok
+test_18_inuse_and_shared_never_planned (r2_guards_inmemory.Guards) ... ok
+test_19_protected_child_preserves_parent (r2_guards_inmemory.Guards) ... ok
+test_20_leaf_before_parent (r2_guards_inmemory.Guards) ... ok
+test_21_changed_record_skips (r2_guards_inmemory.Guards) ... ok
+test_22_new_child_blocks_parent (r2_guards_inmemory.Guards) ... ok
+test_23_exact_cap_and_atomic_protection_filters (r2_guards_inmemory.Guards) ... ok
+test_24_du_complete_and_matching (r2_guards_inmemory.Guards) ... ok
+test_25_du_protected_or_size_changed_refuses (r2_guards_inmemory.Guards) ... ok
+test_26_outside_removal_refuses (r2_guards_inmemory.Guards) ... ok
+test_27_report_and_actual_must_agree (r2_guards_inmemory.Guards) ... ok
+test_28_protected_loss_refuses (r2_guards_inmemory.Guards) ... ok
+test_29_noop_is_honest (r2_guards_inmemory.Guards) ... ok
+test_30_duplicate_report_refuses (r2_guards_inmemory.Guards) ... ok
+test_31_df_same_fs_not_added (r2_guards_inmemory.Guards) ... ok
+test_32_df_floor_alias_block_device_refuse (r2_guards_inmemory.Guards) ... ok
+test_33_actual_core_under_cap_no_prune (r2_guards_inmemory.Guards) ... ok
+test_34_actual_core_protected_above_cap_stays (r2_guards_inmemory.Guards) ... ok
+test_35_actual_core_changed_after_du_skips (r2_guards_inmemory.Guards) ... ok
+test_36_actual_core_failed_mutation_never_retried (r2_guards_inmemory.Guards) ... ok
+test_37_actual_core_outside_change_stops (r2_guards_inmemory.Guards) ... ok
+test_38_actual_core_deadline_before_operation (r2_guards_inmemory.Guards) ... ok
+test_39_actual_core_preservation_change_stops (r2_guards_inmemory.Guards) ... ok
+test_40_new_direction_bound_but_r2_retry_prohibited (r2_guards_inmemory.Guards) ... ok
+test_41_later_exact_source_failure_refuses (r2_guards_inmemory.Guards) ... ok
+test_42_new_unknown_id_not_substituted (r2_guards_inmemory.Guards) ... ok
+test_43_actual_core_unknown_outcome_retains_item_receipt (r2_guards_inmemory.Guards) ... ok
+test_44_maximum32_closed_items_no_substitution (r2_guards_inmemory.Guards) ... ok
+test_45_exact_actual_upload_template_renders_and_compiles (r2_guards_inmemory.Guards) ... ok
+test_46_exact_actual_unit_template_renders_and_compiles (r2_guards_inmemory.Guards) ... ok
+test_47_replacement_order_and_nested_name_do_not_collide (r2_guards_inmemory.Guards) ... ok
+test_48_missing_extra_or_invalid_render_refuses_before_ssh (r2_guards_inmemory.Guards) ... ok
+test_49_original_actual_render_syntax_failure_preserved (r2_guards_inmemory.Guards) ... ok
+test_50_new_root_and_no_sequential_replace_or_old_replay (r2_guards_inmemory.Guards) ... ok
+
+----------------------------------------------------------------------
+Ran 50 tests in 0.157s
+
+OK
