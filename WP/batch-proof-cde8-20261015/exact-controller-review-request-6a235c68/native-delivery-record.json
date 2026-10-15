@@ -1,0 +1,22 @@
+{
+  "status": "ACTUAL_NATIVE_CONTROLLER_SUCCESSOR_HANDOFF_SENT_ONCE_VISUALLY_VERIFIED",
+  "observedUtc": "2026-10-15T01:51:51.598Z",
+  "project": "LIMS Audit",
+  "thread": "Lab workflow audit and plan",
+  "windowId": 7867734,
+  "sourceCommit": "6a235c68ecf3a8ef8c405d49ff4d3f41bedabe38",
+  "githubRequestId": 6182530739,
+  "freshTargetRead": true,
+  "rightEmptyBeforeInput": true,
+  "rightCaretVerified": true,
+  "ownHeadAndEndInspected": true,
+  "returnPressCount": 1,
+  "actualSentBubbleVerified": true,
+  "rightEmptyAfterSend": true,
+  "claudioStatus": "Working",
+  "centerHumanDraft": "can you go and ask Pip",
+  "humanDraftAndCardsUntouched": true,
+  "old87dfPassPreservedUnexecuted": true,
+  "productionOperations": 0,
+  "newSourceApproval": null
+}
