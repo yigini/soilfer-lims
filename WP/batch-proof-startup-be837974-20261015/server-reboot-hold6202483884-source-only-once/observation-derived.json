@@ -1,0 +1,10 @@
+{
+  "observedUtc": "2026-10-15T21:23:38.614714+00:00",
+  "actualCommentId": 6202483884,
+  "rawSha256": "5829660111db572610ceb96901adeebb6ba7149656335fdbeadf9a722f7fff4f",
+  "serverWorkHeldUntilYyBackUp": true,
+  "ourServerOperationActive": false,
+  "serverStepsThisTurn": 0,
+  "sourceWorkContinues": true,
+  "hostTestsNotStarted": true
+}

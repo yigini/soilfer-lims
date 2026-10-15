@@ -1,0 +1,433 @@
+/**
+ * Report Assembly Service
+ * Assembles a complete report payload from sample data, results, work items, and lab context.
+ */
+const prisma = require('../prisma');
+const { normalizeUnit, interpretParameter, evaluateSoilProfile } = require('./interpretationService');
+const { isCurrentValidAnalyticalResult, matchingItems, governingItems,
+    getReportingMode, reportingQc, linkedBatchIds, resolveReportingModes } = require('./reportResultGovernance');
+const { freezeReportEvidence, describeReportEvidence } = require('./reportTruthfulnessService');
+const { normalizeBasis, moistureFactor, applyOvenDryBasis, basisStatement } = require('./reportBasisService');
+const { TransitionError } = require('./workflowStateRules');
+const contentEvidence = require('./reportContentEvidence');
+
+/**
+ * Assemble a full report object for a given sample.
+ * Returns a structured JSON payload ready for storage and rendering.
+ */
+async function assembleReport(sampleId, user, options = {}) {
+    const db = options.db || prisma;
+    // 1. Fetch sample with all related data
+    const sample = await db.sample.findUnique({
+        where: { id: sampleId },
+        include: {
+            results: {
+                where: { isCurrent: true }
+            },
+            workItems: {
+                orderBy: { createdAt: 'asc' }
+            },
+            project: true
+        }
+    });
+
+    if (!sample) throw new Error(`Sample ${sampleId} not found`);
+
+    const batchIds = [...new Set(sample.results.flatMap(result => linkedBatchIds(result, sample.workItems)))];
+    const qcBatches = options.qcBatches || (batchIds.length ? await db.batch.findMany({ where: { id: { in: batchIds } },
+        include: require('./qcRunViewService').QC_RUN_INCLUDE }) : []);
+    const { qcModes, qcModeEvidence } = options.qcModes && options.qcModeEvidence
+        ? options : await resolveReportingModes(sample, qcBatches, { db });
+    const { qcGates, qcAcknowledgements } = options.qcGates && options.qcAcknowledgements ? options
+        : await require('./qcGateService').resolveForSample(sample, qcBatches, db);
+    const reportedSelectionProof = options.reportedSelectionProof || await require('./reportedValueReadService').readSampleReportedValues(db,sample);
+    Object.assign(qcGates,reportedSelectionProof.qcGates); Object.assign(qcAcknowledgements,reportedSelectionProof.qcAcknowledgements);
+    for(const [id,gate] of Object.entries(reportedSelectionProof.qcGates)) qcModes[id]=gate.mode;
+    const evidenceBatches = [...new Map([...qcBatches,...reportedSelectionProof.qcBatches].map(row=>[row.id,row])).values()];
+    const reportOptions = { qcModes, qcBatches:evidenceBatches, qcGates, qcAcknowledgements, reportedSelectionProof };
+    const reportableResults = reportedSelectionProof.values;
+    const reportLocale = user?.language || 'en';
+    const omittedByDisposition = sample.results.filter(result =>
+        isCurrentValidAnalyticalResult(result, getReportingMode(sample, result, reportOptions)) &&
+        matchingItems(result, sample.workItems).length > 0 && governingItems(result, sample.workItems).length === 0)
+        .map(result => ({ param: result.param, itemIds: matchingItems(result, sample.workItems).map(item => item.id) }));
+
+    // 2. Fetch lab info
+    let lab = null;
+    const labId = sample.assignedLab || sample.labId;
+    if (labId) {
+        lab = await db.lab.findFirst({
+            where: { OR: [{ id: labId }, { code: labId }] }
+        });
+    }
+
+    const attemptIds = [...new Set(reportedSelectionProof.sourceResults.map(row => row.attemptId).filter(Boolean))];
+    const sourceAttempts = attemptIds.length ? await db.workAttempt.findMany({ where: { id: { in: attemptIds } } }) : [];
+
+    // 4. Parse metadata
+    const metadata = typeof sample.metadata === 'string' ? JSON.parse(sample.metadata) : (sample.metadata || {});
+    const fieldMeta = typeof sample.fieldMetadata === 'string' ? JSON.parse(sample.fieldMetadata) : (sample.fieldMetadata || {});
+    const receptionData = typeof sample.receptionData === 'string' ? JSON.parse(sample.receptionData) : (sample.receptionData || {});
+
+    // 5. Extract client/farmer info for search keys
+    const clientInfo = extractClientInfo(metadata, fieldMeta, receptionData, sample);
+
+    // 6. Fetch analyses and the methods named by the saved reported values.
+    const analyses = await db.analysis.findMany();
+    const analysisMap = new Map(analyses.map(a => [a.code, a]));
+
+    const resultMethodIds = [...new Set(reportableResults.map(r => r.methodologyId).filter(Boolean))];
+    let specificMethodologies = [];
+    try {
+        specificMethodologies = resultMethodIds.length > 0 ? await db.methodology.findMany({
+            where: { id: { in: resultMethodIds } }
+        }) : [];
+    } catch (e) { /* methodologies table may be empty */ }
+    const specificMethodMap = new Map(specificMethodologies.map(m => [m.id, m]));
+
+    // 7. Group results by category and apply controlled units & agronomic interpretation
+    const groupedResults = {};
+    for (const result of reportableResults) {
+        const analysis = analysisMap.get(result.param);
+        const category = analysis?.categoryId || 'Other';
+        if (!groupedResults[category]) {
+            groupedResults[category] = {
+                categoryName: category,
+                items: []
+            };
+        }
+
+        const sources = reportedSelectionProof.sourceResults.filter(row => result.sourceResultIds.includes(row.id));
+        const flags = [...new Set(sources.flatMap(row => typeof row.flags === 'string' ? JSON.parse(row.flags) : row.flags || []))];
+        const methodology = result.methodologyId ? specificMethodMap.get(result.methodologyId) : null;
+        const methods = contentEvidence.executedMethods(sources, sourceAttempts, evidenceBatches);
+        const scope = { db, analysisCode: result.param, methodologyId: result.methodologyId || null };
+        const policy = lab ? { mode: await require('./policyService').get(lab.id, 'report.uncertaintyMode', scope),
+            coverageFactor: await require('./policyService').get(lab.id, 'report.uncertaintyCoverageFactor', scope) } : {};
+        const uncertainty = contentEvidence.expandedUncertainty(result.numericValue, methodology, policy, {
+            censored: result.censoring && result.censoring !== 'NONE',
+            methodKnown: methods.length > 0 && methods.every(row => row.methodologyId === methodology?.id &&
+                row.methodVersion != null && String(row.methodVersion) === String(methodology?.version))
+        });
+        const rawUnit = result.unit || analysis?.units || '';
+        const notReportable = result.mode==='NOT_REPORTABLE';
+        const interp = notReportable ? {unit:'',rating:null,label:null,advisory:null} : interpretParameter(result.param, result.value, rawUnit);
+
+        groupedResults[category].items.push({
+            param: result.param,
+            analysisId: result.param, // #211: the Analysis.code primary key.
+            name: analysis?.name || result.param,
+            value: require('./reportedValueReadService').reportedValueText(result,reportLocale),
+            unit: notReportable ? '' : interp.unit || rawUnit,
+            decimalPlaces: methodology?.decimalPlaces ?? null,
+            reportedValueSelectionId: result.selectionId,
+            selectionGroupId: result.selectionGroupId,
+            reportedMode: result.mode,
+            selectionReason: result.reason,
+            sourceResultIds: result.sourceResultIds,
+            attemptIds: result.attemptIds,
+            selectionRule: result.rule,
+            selectionPolicyVersion: result.policyVersion,
+            method: methods.map(row => row.method).filter(Boolean).join('; ') || null,
+            standard: methods.map(row => row.standard).filter(Boolean).join('; ') || null,
+            methodologyId: result.methodologyId || null,
+            methodVersion: methods.length === 1 ? methods[0].methodVersion : null,
+            executedMethods: methods,
+            uncertainty,
+            uncertaintyPolicy: policy,
+            interpretation: {
+                rating: interp.rating,
+                label: interp.label,
+                advisory: interp.advisory
+            },
+            flags,
+            isValid: result.isValid,
+            provenance: result.provenance || 'MEASURED',
+            basis: result.basis || null,
+            replicateNo: result.replicateNo || 1,
+            censoring: result.censoring || 'NONE'
+        });
+    }
+
+    // 8. Fetch category names
+    const categoryIds = [...new Set(Object.keys(groupedResults))];
+    const categories = await db.analysisCategory.findMany({
+        where: { id: { in: categoryIds } }
+    });
+    const categoryMap = new Map(categories.map(c => [c.id, c.name]));
+    for (const [catId, group] of Object.entries(groupedResults)) {
+        group.categoryName = categoryMap.get(catId) || catId;
+    }
+
+    // 8a. #205: an oven-dry report converts eligible air-dry values with the frozen moisture correction factor.
+    const reportBasis = normalizeBasis(options.basis);
+    let moistureCorrection = null;
+    if (reportBasis === 'OVEN_DRY') {
+        moistureCorrection = await moistureFactor(db, reportedSelectionProof.sourceResults);
+        moistureCorrection.convertedParams = [];
+        const items = Object.values(groupedResults).flatMap(group => group.items);
+        await applyOvenDryBasis(db, lab?.id || null, items, moistureCorrection);
+        moistureCorrection.convertedParams = items.filter(item => item.basisConversion).map(item => item.param);
+        if (!moistureCorrection.convertedParams.length) throw new TransitionError('No reported value is convertible to an oven-dry basis.', 409,
+            'OVEN_DRY_NOTHING_CONVERTIBLE');
+    }
+
+    // 8b. Compute comprehensive multi-parameter soil diagnostics
+    const soilDiagnostics = evaluateSoilProfile(reportableResults.filter(r=>r.mode!=='NOT_REPORTABLE').map(r => ({
+        param: r.param,
+        value: r.value,
+        unit: r.unit || analysisMap.get(r.param)?.units
+    })));
+
+    // 9. Work item summary
+    const workItemSummary = sample.workItems.map(wi => ({
+        analysis: wi.analysis,
+        status: wi.status,
+        result: wi.status === 'ACCEPTED' ? reportableResults.filter(result=>result.workItemId===wi.id)
+            .map(result=>require('./reportedValueReadService').reportedValueText(result,reportLocale)).join('; ') || null : null,
+        completedAt: wi.completedAt,
+        assignedTo: wi.assignedTo
+    }));
+
+    // 10. Lab branding
+    let labBranding = {};
+    if (lab?.branding) {
+        labBranding = typeof lab.branding === 'string' ? JSON.parse(lab.branding) : lab.branding;
+    }
+
+    // 11. Build unique methodologies list for footnotes
+    const usedMethods = [];
+    const seenMethods = new Set();
+    for (const item of Object.values(groupedResults).flatMap(group => group.items)) for (const method of item.executedMethods) {
+        const key = JSON.stringify(method);
+        if (!seenMethods.has(key)) {
+            seenMethods.add(key);
+            usedMethods.push({
+                ...method, paramName: item.name
+            });
+        }
+    }
+
+    // 12. Extract location data (merge receptionData + fieldMetadata)
+    const locationData = extractLocationData(fieldMeta, receptionData, sample);
+
+    // 14. Build signedBy block
+    // SD-17: Compute analytical episodes for reopened samples
+    const auditLogs = await db.auditLog.findMany({
+        where: { OR: [{ sampleId: sample.id }, { entityId: sample.id }] },
+        orderBy: { timestamp: 'asc' }
+    });
+    const undoLogs = auditLogs.filter(a => a.action === 'UNDO_APPROVAL' || a.action === 'SAMPLE_REOPENED');
+    const approvalLogs = auditLogs.filter(a => a.action === 'SAMPLE_APPROVED' || (a.action === 'STATUS_CHANGE' && a.details && a.details.includes('APPROVED')));
+    const signedBy = contentEvidence.approvalEvidence(sample, auditLogs);
+
+    const episodes = [];
+    if (undoLogs.length > 0) {
+        episodes.push({
+            episodeNumber: 1,
+            label: 'Initial Analytical Pass',
+            approvedAt: approvalLogs[0]?.timestamp || null,
+            approvedBy: approvalLogs[0]?.performedBy || null
+        });
+        undoLogs.forEach((undo, idx) => {
+            episodes.push({
+                episodeNumber: idx + 2,
+                label: `Reopened Pass ${idx + 1}`,
+                reopenedAt: undo.timestamp,
+                reopenReason: undo.details,
+                approvedAt: approvalLogs[idx + 1]?.timestamp || (sample.status === 'APPROVED' ? sample.approvedAt : null),
+                approvedBy: approvalLogs[idx + 1]?.performedBy || (sample.status === 'APPROVED' ? sample.approvedBy : null)
+            });
+        });
+    } else if (sample.approvedAt) {
+        episodes.push({
+            episodeNumber: 1,
+            label: 'Initial Analytical Pass',
+            approvedAt: sample.approvedAt,
+            approvedBy: sample.approvedBy
+        });
+    }
+
+    // 15. Assemble the final structured report payload
+    const qcWarnings = reportingQc(sample, reportOptions).warnings;
+    const warningLocale = ['en', 'es', 'es-419', 'fr', 'pt'].includes(reportLocale) ? reportLocale : 'en';
+    const qcWarningStatement = qcWarnings.length
+        ? require(`../locales/${warningLocale}.json`).resultReports.qcWarningStatement : null;
+    const gateReceiptIds = sample.workItems.filter(item => ['DRYING', 'PREPARATION'].includes(item.analysis)).map(item => {
+        try { return (typeof item.result === 'string' ? JSON.parse(item.result) : item.result)?.receiptId; } catch { return null; }
+    });
+    const preparationRecords = await require('./preparationRecordService').forReceipts(db, gateReceiptIds);
+    const evidence = freezeReportEvidence(reportedSelectionProof.sourceResults, sample.workItems, evidenceBatches, { ...reportOptions, preparationRecords });
+    const sourceModes=await Promise.all(reportedSelectionProof.sourceResults.map(result=>resolveReportingModes(
+        {...sample,results:[result],workItems:reportedSelectionProof.workItemsByResult[result.id]},evidenceBatches,{db})));
+    evidence.qcModes=sourceModes.flatMap(proof=>proof.qcModeEvidence);
+    evidence.reportedValueSelections = reportedSelectionProof.groups;
+    const evidenceText = describeReportEvidence(evidence, warningLocale);
+    for (const item of Object.values(groupedResults).flatMap(group => group.items)) item.qcNotes = evidence.qc.deviations
+        .filter(row => row.analysisCode === item.param).map(row => [row.qcStatus, row.dispositionReason, row.acknowledgementReason].filter(Boolean).join(' · '));
+    const reportContent = {
+        meta: {
+            reportId: null, // assigned when saved
+            formatVersion: '2.0',
+            template: 'STANDARD_AGRONOMIC',
+            locale: reportLocale,
+            terminologyVersion: '1.0',
+            frozenAt: new Date().toISOString(),
+            assembly: { omittedByDisposition }
+        },
+        // Sample Details
+        sample: {
+            id: sample.id,
+            labId: sample.labId,
+            originalId: sample.originalId,
+            matrix: sample.matrix,
+            batchId: sample.batchId,
+            status: sample.status,
+            countryName: sample.countryName,
+            country: sample.country,
+            receptionDate: sample.receptionDate,
+            receivedBy: sample.receivedBy,
+            acceptedBy: sample.acceptedBy,
+            acceptedAt: sample.acceptedAt,
+            approvedBy: sample.approvedBy,
+            approvedAt: sample.approvedAt,
+            depthTop: sample.depthTop,
+            depthBottom: sample.depthBottom,
+            horizon: sample.horizon,
+            reportEvidence: contentEvidence.sampleContentEvidence(sample, reportedSelectionProof.sourceResults, sourceAttempts),
+            episodes
+        },
+        // Client/Farmer Info
+        client: clientInfo,
+        // Project Info
+        project: sample.project ? {
+            code: sample.project.code,
+            name: sample.project.name,
+            client: sample.project.client
+        } : null,
+        // Lab Info
+        lab: lab ? {
+            id: lab.id,
+            code: lab.code,
+            name: lab.name,
+            country: lab.country,
+            address: lab.address,
+            city: lab.city,
+            phone: lab.phone,
+            email: lab.email,
+            website: lab.website
+        } : null,
+        labBranding,
+        // Results (grouped by category)
+        resultGroups: Object.values(groupedResults),
+        qcWarnings,
+        qcWarningStatement,
+        evidence,
+        ...evidenceText,
+        ...(moistureCorrection && { reportBasis, moistureCorrection, basisStatement: basisStatement(moistureCorrection, warningLocale) }),
+        // Holistic Multi-Parameter Soil Metrology & Diagnostics
+        diagnostics: soilDiagnostics,
+        // Methodologies footnotes
+        methodologies: usedMethods,
+        // Work Items
+        workItems: workItemSummary,
+        // Location data (merged and structured)
+        locationData,
+        // Field metadata (raw, for backward compat)
+        fieldMetadata: fieldMeta,
+        // Reception data (raw, for backward compat)
+        receptionData,
+        // Signature
+        signedBy,
+        // Generation metadata
+        generated: {
+            at: new Date().toISOString(),
+            by: user?.username || 'system',
+            byName: user?.name || user?.username || 'System',
+            role: user?.role || null
+        }
+    };
+
+    // 16. Extract denormalized search keys
+    const searchKeys = {
+        firstName: clientInfo.firstName || null,
+        surname: clientInfo.surname || null,
+        phone: clientInfo.phone || null,
+        phoneNorm: clientInfo.phone ? clientInfo.phone.replace(/\D/g, '') : null,
+        projectCode: sample.projectCode || null,
+        projectName: sample.project?.name || null,
+        sampleLabId: sample.labId || null
+    };
+
+    return { content: reportContent, searchKeys };
+}
+
+function unwrapVal(v) {
+    if (v === null || v === undefined) return null;
+    if (typeof v === 'object') {
+        if ('value' in v) return unwrapVal(v.value);
+        if ('label' in v) return unwrapVal(v.label);
+        return null;
+    }
+    const str = String(v).trim();
+    return str.length > 0 ? str : null;
+}
+
+/**
+ * Extract client/farmer info from various metadata sources.
+ */
+function extractClientInfo(metadata, fieldMeta, receptionData, sample) {
+    const info = {
+        firstName: null,
+        surname: null,
+        fullName: null,
+        phone: null,
+        email: null,
+        address: null,
+        organization: null
+    };
+
+    const fm = fieldMeta || {};
+    const rd = receptionData || {};
+    const md = metadata || {};
+
+    const rawName = unwrapVal(rd.clientName || rd.farmerName || sample?.clientName || fm.submitterName || fm.farmer_name || fm.farmerName || fm.client_name || fm.clientName);
+    if (rawName) {
+        const parts = rawName.split(/\s+/);
+        info.firstName = parts[0] || null;
+        info.surname = parts.slice(1).join(' ') || null;
+        info.fullName = rawName;
+    }
+
+    info.phone = unwrapVal(rd.phone || rd.clientPhone || fm.contactPhone || fm.phone || fm.farmer_phone || fm.farmerPhone || md.phone);
+    info.email = unwrapVal(rd.email || rd.clientEmail || fm.contactEmail || fm.email || fm.farmer_email || fm.farmerEmail || md.email);
+    info.address = unwrapVal(rd.address || rd.clientAddress || fm.address || fm.farmer_address || md.address);
+    info.organization = unwrapVal(rd.organization || rd.company || fm.organization || fm.submitterOrganization || fm.company || md.organization);
+
+    return info;
+}
+
+/**
+ * Extract and structure location data from multiple sources.
+ */
+function extractLocationData(fieldMeta, receptionData, sample) {
+    const fm = fieldMeta || {};
+    const rd = receptionData || {};
+
+    return {
+        gpsLat: unwrapVal(fm.latitude || fm.gps_lat || rd.gpsLat),
+        gpsLng: unwrapVal(fm.longitude || fm.gps_lng || rd.gpsLng),
+        altitude: unwrapVal(fm.altitude || rd.altitude),
+        landUse: unwrapVal(fm.landUse || fm.land_use || rd.landUse),
+        cropType: unwrapVal(fm.cropType || fm.crop_type || rd.cropType),
+        soilDepth: unwrapVal(fm.soilDepth || fm.soil_depth || rd.depth || rd.soilDepth),
+        soilTexture: unwrapVal(fm.soilTexture || fm.soil_texture || rd.soilTexture),
+        district: unwrapVal(fm.district || rd.district),
+        village: unwrapVal(fm.village || rd.village),
+        region: unwrapVal(fm.region || fm.province || rd.region || rd.province),
+        locationDescription: unwrapVal(fm.locationDescription || fm.location_description || rd.locationDescription),
+        country: unwrapVal(sample?.countryName || sample?.country || fm.country)
+    };
+}
+
+module.exports = { assembleReport, extractClientInfo, extractLocationData };

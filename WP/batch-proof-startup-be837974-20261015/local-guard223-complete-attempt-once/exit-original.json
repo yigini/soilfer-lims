@@ -1,0 +1,43 @@
+{
+  "status": "LOCAL_PASS_HOST_HELD_NOT_STARTED",
+  "closedUtc": "2026-10-15T21:28:45.869799+00:00",
+  "exitCode": 0,
+  "error": null,
+  "expectedTests": 223,
+  "sourceSha256Before": {
+    "launch_proof.py": "270eacfefba760631ee414ac3362a31d16387efdf9f20b9dddad4a5211ab6dc1",
+    "prepare_proof.py": "75224c3b1aa1e31119caace21d9fdc6bb9a99451560ca3dac15f761dc00fdbdd",
+    "proof_app_sources.py": "87fce38e1143e23a1b7f45e6c74518095dc65e9b1546e92917447b1e35c468c5",
+    "proof_budget.py": "d042a2597da993fedd8f7cdbaa9017e35c454bd0bacb40b23ffc97a1bd91d14b",
+    "proof_contract.py": "658bc4c1fc1beccb1febbdb398d8216f70c3f52cf5f8edf39455343429998f65",
+    "proof_disk.py": "54556f7d1166b34e2e83b3c0e55eaf10418817d1f72fb44d5e98a4e94647bd79",
+    "proof_docker.py": "03be75d1fed62bc9647ec0b5ad0159701f688246547a5e0d7c346c17a4abbdc8",
+    "proof_files.py": "6bd7adb616218b8add259eaf61c2922cfc3d05d88e8dbae4dbf5dda386e1241c",
+    "proof_health.py": "ada964f3d86453f61d082961e78b76f7dfb3cd3976ca361e5aadf863f227f846",
+    "proof_inputs.py": "fa7dd2f3b151aa78cc27e8ccdb1a7768730875e91b4d9e94ebfcbf36bb48d7d5",
+    "proof_render.py": "73683b6283e8351d06309242a4b3c883746db1e9d1a9cf74d57fe06aaee24d74",
+    "proof_startup.py": "2b16cfe0ddce4e47d76316c02424399e2089e9e129be11aab23f603e22ea3c48",
+    "run_stopped_proof.py": "c7a4a0468d41c80e2b373f5cf29f795be6e924f7260c648a7bb8f9a8565edd6f",
+    "verify_proof_guards.py": "90038682918b085ff7ad16da1642955173c9689a9ef9a82ed351992b17331ff4"
+  },
+  "sourceSha256After": {
+    "launch_proof.py": "270eacfefba760631ee414ac3362a31d16387efdf9f20b9dddad4a5211ab6dc1",
+    "prepare_proof.py": "75224c3b1aa1e31119caace21d9fdc6bb9a99451560ca3dac15f761dc00fdbdd",
+    "proof_app_sources.py": "87fce38e1143e23a1b7f45e6c74518095dc65e9b1546e92917447b1e35c468c5",
+    "proof_budget.py": "d042a2597da993fedd8f7cdbaa9017e35c454bd0bacb40b23ffc97a1bd91d14b",
+    "proof_contract.py": "658bc4c1fc1beccb1febbdb398d8216f70c3f52cf5f8edf39455343429998f65",
+    "proof_disk.py": "54556f7d1166b34e2e83b3c0e55eaf10418817d1f72fb44d5e98a4e94647bd79",
+    "proof_docker.py": "03be75d1fed62bc9647ec0b5ad0159701f688246547a5e0d7c346c17a4abbdc8",
+    "proof_files.py": "6bd7adb616218b8add259eaf61c2922cfc3d05d88e8dbae4dbf5dda386e1241c",
+    "proof_health.py": "ada964f3d86453f61d082961e78b76f7dfb3cd3976ca361e5aadf863f227f846",
+    "proof_inputs.py": "fa7dd2f3b151aa78cc27e8ccdb1a7768730875e91b4d9e94ebfcbf36bb48d7d5",
+    "proof_render.py": "73683b6283e8351d06309242a4b3c883746db1e9d1a9cf74d57fe06aaee24d74",
+    "proof_startup.py": "2b16cfe0ddce4e47d76316c02424399e2089e9e129be11aab23f603e22ea3c48",
+    "run_stopped_proof.py": "c7a4a0468d41c80e2b373f5cf29f795be6e924f7260c648a7bb8f9a8565edd6f",
+    "verify_proof_guards.py": "90038682918b085ff7ad16da1642955173c9689a9ef9a82ed351992b17331ff4"
+  },
+  "hostSteps": 0,
+  "operatorsExecuted": 0,
+  "productionConnections": 0,
+  "fixturesRetained": true
+}

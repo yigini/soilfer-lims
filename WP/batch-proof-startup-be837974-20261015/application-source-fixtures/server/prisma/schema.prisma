@@ -1,0 +1,2353 @@
+generator client {
+  provider      = "prisma-client-js"
+  output        = "../prisma_client"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x", "debian-openssl-3.0.x", "windows", "darwin", "darwin-arm64"]
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// --- CORE MODELS ---
+
+model User {
+  id                 String     @id
+  username           String     @unique
+  password           String
+  email              String     @unique
+  role               String     // SUPER_ADMIN, LAB_MANAGER, LAB_TECHNICIAN, SAMPLE_RECEPTION, etc.
+  name               String?
+  labId             String?
+  language          String?    // 'en', 'es', etc. Preference override
+  themePreference   String     @default("light")
+  uiThemeId            String?
+  uiModePreference     String     @default("inherit")
+  uiAppearanceRevision Int        @default(0)
+  countries          String?    // JSON string: Array of country codes: ["GTM", "HND"]
+  projects           String?    // JSON string: Array of project codes: ["SoilFER-USA"]
+  isActive           Boolean    @default(true)
+  mustChangePassword Boolean    @default(false)
+  tokenVersion       Int        @default(0)
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+
+  // Relations
+  assignedWorkItems  WorkItem[] @relation("AssignedTo")
+  createdWorkItems   WorkItem[] @relation("AssignedBy")
+  submissions        Submission[]
+  analyticalBatches  Batch[] @relation("BatchAnalyst")
+  calcActivations    CalcTemplateActivation[]
+  calibrationCurves CalibrationCurve[]
+  resultCalculations ResultCalculation[]
+  
+  sentMessages       Message[]  @relation("SentMessages")
+  receivedMessages   Message[]  @relation("ReceivedMessages")
+  requestedOverrides ResultOverrideRequest[] @relation("OverrideRequester")
+  decidedOverrides ResultOverrideRequest[] @relation("OverrideDecider")
+  cancelledOverrides ResultOverrideRequest[] @relation("OverrideCanceller")
+  benchCredential    UserBenchCredential?
+}
+
+// #202: the analyst's bench PIN, kept apart from User so no user read returns it.
+model UserBenchCredential {
+  userId         String    @id
+  pinHash        String
+  failedAttempts Int       @default(0)
+  lockedUntil    DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+}
+
+model Message {
+  id              String   @id
+  senderId        String
+  recipientId     String?
+  subject         String
+  body            String
+  status          String   // SENT, DRAFT
+  folderSender    String?  // SENT, TRASH, DRAFT
+  folderRecipient String?  // INBOX, ARCHIVE, TRASH
+  isRead          Boolean  @default(false)
+  isDelivered     Boolean  @default(false)
+  isChat          Boolean  @default(false)  // true = instant chat, false = formal message
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt // Added for drafts
+
+  sender          User     @relation("SentMessages", fields: [senderId], references: [id])
+  recipient       User?    @relation("ReceivedMessages", fields: [recipientId], references: [id])
+}
+
+model Project {
+  id                     String    @id
+  code                   String    @unique
+  name                   String
+  description            String?   // General description
+  notes                  String?   // Lab specific instructions
+  client                 String?   
+  startDate              DateTime?
+  deliveryDeadline       DateTime?
+  status                 String    // ACTIVE, PAUSED, CLOSED
+  projectType            String    @default("OPEN_INTAKE") // TEMPLATE_PREDEFINED_IDS, OPEN_INTAKE
+  expectedSampleCount    Int?      @default(0)
+  priority               String?   @default("NORMAL") // LOW, NORMAL, HIGH
+  defaultAnalysisBundle  String?
+  labId                  String?   // Legacy: Single lab (kept for backward compatibility)
+  countries              String?   // Legacy JSON list
+  assignedLabIds         String?   // Legacy JSON string: Array of lab IDs for Global projects
+  templateId             String?   @default("GENERIC_OPEN_INTAKE")
+  templateVersion        String?   @default("1.0.0")
+  policyConfig           String?   // JSON: { allowedChannels, requiresExceptionForDesk, requiresExceptionForManifest, ... }
+  programmeCode          String?   // Aggregate programme grouping code, e.g. 'SOILFER-US', 'SOILFER-JPN'
+  parentProjectId        String?
+  parentProject          Project?  @relation("ProgrammeChildProjects", fields: [parentProjectId], references: [id])
+  childProjects          Project[] @relation("ProgrammeChildProjects")
+
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+
+  // Relations
+  samples                Sample[]
+  projectLabs            ProjectLab[]  // Many-to-many: labs assigned to this project
+}
+
+model Sample {
+  id                String     @id
+  originalId        String     @unique
+  projectCode       String?
+  projectId         String?
+  project           Project?   @relation(fields: [projectId], references: [id])
+  countryName       String?
+  country           String?
+  assignedLab       String?
+  labId             String?    // Legacy sample-code alias, retained for one release
+  labSampleCode     String?    @unique // Issued laboratory sample code; never renumbered
+  status            String     // EXPECTED, RECEIVED, ACCEPTED, PROCESSING, etc.
+  holdPriorStatus   String?    // Recorded state to restore when releasing a hold
+  legacyStatus      String?    // Original value retained by the reversible status migration
+  
+  // Workflow Gates
+  dryingStatus      String?    // PENDING, DONE, FAILED
+  preparationStatus String?    // PENDING, DONE
+  receptionDate     DateTime?
+  receivedBy        String?
+
+  // Depth & Horizon (First-Class SOSA Feature of Interest)
+  depthTop          Float?     // e.g. 0 (cm)
+  depthBottom       Float?     // e.g. 20 (cm)
+  horizon           String?    // e.g. "Ap", "Bw", "T", "S"
+
+  // Metadata
+  clientName        String?
+  metadata          String?    // JSON string: Raw metadata from external sources
+  fieldMetadata     String?    // JSON string: Structured field provenance data
+  receptionData     String?    // JSON string: Intake checklist/photos/notes
+  requiredAnalyses  String?    // JSON string: Array of analysis codes
+  analysisGroupIds  String?    // JSON string: Array of analysis group IDs
+  history           String?    // JSON string: Audit trail for this sample
+  rejectionReason   String?    // Detailed explanation when sample rejected during intake
+
+  // Physical Arrival & Desk Facts (Stage A: RC-01, RC-02, RC-03, RC-04)
+  receivedMass              Float?    // Received sample mass in grams
+  massWarningAcknowledged   Boolean?  @default(false)
+  moistureOnArrival         String?   // DRY, MOIST, WET, SATURATED
+  foreignMaterial           String?   // JSON string: { stones: bool, roots: bool, plastic: bool, other: string, removed: bool }
+  intakePhotos              String?   // JSON string: Array of uploaded photo URLs
+  isResubmission            Boolean?  @default(false)
+
+  // Location, Provenance & Depth (Stage B: RC-05, RC-06, RC-07, RC-11)
+  latitude                  Float?
+  longitude                 Float?
+  elevation                 Float?
+  positionalUncertaintyM    Float?    // Positional uncertainty in metres
+  locationSource            String?   // FIELD_GPS, DEVICE_GPS, DESK_PIN, DESK_PASTE, ADMIN_UNIT, CLIENT_MANIFEST, TEXT_ONLY
+  locationCapturedAt        DateTime?
+  locationCapturedBy        String?
+  compositeRadiusM          Float?    // Radius in metres for composite samples
+  depthTopCm                Float?    // Explicit numeric depth interval top (cm)
+  depthBottomCm             Float?    // Explicit numeric depth interval bottom (cm)
+  admin1                    String?   // Department / Province
+  admin2                    String?   // Municipality / District
+  village                   String?   // Village / Community
+  siteName                  String?   // Farm or site identifier
+
+  // Chain of Custody & Handover (Stage E: RC-19)
+  custodyHandoverAt         DateTime?  // Actual physical handover timestamp
+  custodyCarrierName        String?    // Courier, driver, or extension agent name
+  custodyTrackingNumber     String?    // Waybill / delivery note / airway bill reference
+  custodySenderSignature    String?    // Sender/carrier signature confirmation
+  receivingOfficerId        String?    // User ID of receiving officer
+  receivingOfficerName      String?    // Full name or username of receiving officer
+  receivingOfficerSignature String?    // Digital counter-signature confirmation
+
+
+  // Matrix & Module (WP-18)
+  matrix            String     @default("SOIL") // SOIL, PLANT, WATER, AMENDMENT, FERTILIZER, LIMING
+  plantPart         String?    // LEAF, PETIOLE, WHOLE_PLANT, GRAIN, ROOT, FRUIT
+  growthStage       String?    // VEGETATIVE, FLOWERING, FRUITING, MATURITY
+
+  // Approvals
+  acceptedBy        String?
+  acceptedAt        DateTime?
+  approvedBy        String?
+  approvedAt        DateTime?
+
+  // Submission Tracking
+  lastSubmissionId   String?
+  lastSubmissionType String?
+  lastSubmissionAt   DateTime?
+
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+
+  // Consignment Linkage (Stage C: RC-12)
+  consignmentId             String?
+  consignment               Consignment? @relation(fields: [consignmentId], references: [id])
+
+  // Relations
+  workItems         WorkItem[]
+  results           Result[]
+  orderRevisions    SampleOrderRevision[]
+  amendments        SampleAmendment[]
+  preparationRecords PreparationRecord[]
+  containers        SampleContainer[]
+  reviewDecisions   ReviewDecision[]
+  resultEvidenceEvents ResultEvidenceEvent[]
+  holds             SampleHold[]
+  batchPositions    BatchPosition[]
+
+  @@index([consignmentId])
+  resultOverrideRequests ResultOverrideRequest[]
+  crossCheckEvaluations CrossCheckEvaluation[]
+}
+
+// Stage C: RC-12 Consignment Entity
+model Consignment {
+  id              String       @id @default(uuid())
+  code            String       @unique // e.g. CSG-20260904-001
+  labId           String       // Receiving laboratory
+  projectCode     String?      // Project reference
+  submitterName   String?      // Submitter contact name
+  submitterOrg    String?      // Submitter organization
+  submitterPhone  String?
+  submitterEmail  String?
+  deliveredBy     String?      // Courier name, driver, extension agent
+  deliveredAt     DateTime?    // Courier delivery timestamp
+  receivedBy      String       // Receiving officer username
+  receivedAt      DateTime     @default(now())
+  deliveryNoteRef String?      // Waybill or delivery note number
+  expectedCount   Int          @default(0) // Deprecated compatibility count; remove in audit 8.1
+  declaredExpectedCount Int?   // NULL means not declared; supplied values >= 1
+  sampleCount     Int          @default(0)
+  acceptedCount   Int          @default(0)
+  rejectedCount   Int          @default(0)
+  status          String       @default("RECEIVED") // RECEIVED, PARTIAL, COMPLETED
+
+  // Chain of Custody & Handover (Stage E: RC-19)
+  custodyHandoverAt         DateTime?  // Actual physical handover timestamp
+  custodyCarrierName        String?    // Courier, driver, or extension agent name
+  custodyTrackingNumber     String?    // Waybill / delivery note / airway bill reference
+  custodySenderSignature    String?    // Sender/carrier signature confirmation
+  receivingOfficerId        String?    // User ID of receiving officer
+  receivingOfficerName      String?    // Full name or username of receiving officer
+  receivingOfficerSignature String?    // Digital counter-signature confirmation
+
+  notes           String?
+  metadata        String?      // JSON string: mapping profile, manifest metadata
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  samples         Sample[]
+
+  @@index([labId])
+  @@index([projectCode])
+}
+
+model WorkItem {
+  id             String    @id
+  sampleId       String
+  sample         Sample    @relation(fields: [sampleId], references: [id])
+  labId          String?
+  legacyLabId    String?   // Original ambiguous labId retained by the audited back-fill
+  assignedLab    String?
+  analysis       String    // DRYING, PREPARATION, PH_H2O, etc.
+  duplicateOf    String?   // Manager-selected canonical item; analytical history remains intact
+  canonicalItem  WorkItem? @relation("WorkItemDuplicates", fields: [duplicateOf], references: [id], onDelete: Restrict)
+  duplicates     WorkItem[] @relation("WorkItemDuplicates")
+  category       String?   // Operational Gates, Spectroscopy, etc.
+  status         String    // NOT_ASSIGNED, ASSIGNED, IN_PROGRESS, COMPLETED, ACCEPTED
+  holdPriorStatus String?
+  legacyStatus    String?
+  cancellationCode   String?
+  cancellationReason String?
+  cancelledBy        String?
+  cancelledAt        DateTime?
+  
+  assignedTo     String?
+  assignee       User?     @relation("AssignedTo", fields: [assignedTo], references: [username])
+  
+  assignedBy     String?
+  manager        User?     @relation("AssignedBy", fields: [assignedBy], references: [username])
+  
+  assignedAt     DateTime?
+  priority       String    @default("NORMAL")
+  dueDate        DateTime?
+  
+  result         String?
+  methodologyId  String?
+  methodology    Methodology? @relation(fields: [methodologyId], references: [id])
+  equipmentId    String?
+  completedAt    DateTime?
+  version        Int       @default(0)
+
+  // Submission Link
+  submissionId   String?
+  submission     Submission? @relation(fields: [submissionId], references: [id])
+  submittedAt    DateTime?
+
+  // QC Batch Link
+  batchId        String?
+  batch          Batch?      @relation(fields: [batchId], references: [id])
+  rackPosition   Int?
+
+  // Review status
+  reanalysisReason      String?
+  reanalysisRequestedBy String?
+  reviewedBy            String?
+  reviewedAt            DateTime?
+  reviewDecision        String?
+  waiveReason           String?
+
+  history        String?     // JSON string: Array of status change events
+
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  equipmentUsage  WorkItemEquipmentUse[]
+  draft           WorkItemDraft?
+  spectralScans   SpectralData[]
+  workAttempts    WorkAttempt[]
+  preparationRecords PreparationRecord[]
+  reviewDecisions ReviewDecision[]
+  batchPositions  BatchPositionWorkItem[]
+  reportedValueSelections ReportedValueSelection[]
+  resultOverrideRequests ResultOverrideRequest[]
+  amendmentAttempts SampleAmendmentAttempt[]
+}
+
+model SampleHold {
+  id                String   @id
+  sampleId          String
+  sample            Sample   @relation(fields: [sampleId], references: [id], onDelete: Restrict)
+  type              String
+  reason            String
+  raisedBy          String
+  raisedAt          DateTime
+  resolvedBy        String?
+  resolvedAt        DateTime?
+  resolution        String?
+  attributionSource String
+  compatMarker      String?
+
+  @@index([sampleId, resolvedAt])
+}
+
+model WorkItemDraft {
+  id            String    @id @default(uuid())
+  workItemId    String    @unique
+  workItem      WorkItem  @relation(fields: [workItemId], references: [id], onDelete: Cascade)
+  sampleId      String
+  userId        String    // Author / technician username
+  labId         String?
+  analysis      String
+  value         String?   // Raw input string (e.g. "6,42", "<0.5")
+  values        String?   // JSON array of strings (e.g. texture: ["40", "40", "20"])
+  checks        String?   // JSON array of booleans (operational task checklists)
+  records       String?   // JSON array of unconfirmed #205 preparation records
+  basis         String?   @default("AIR_DRY")
+  replicateNo   Int       @default(1)
+  instrumentId  String?
+  methodologyId String?
+  notes         String?
+  baseVersion   Int       @default(0)
+  draftVersion  Int       @default(1)
+  conflictValue String?   // Server value snapshot for conflict compare
+  importReceiptId String? // #200: no historical adoption or backfill.
+  importReceipt InstrumentImportReceipt? @relation(fields:[importReceiptId],references:[id],onDelete:Restrict,onUpdate:Restrict)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([userId, labId])
+  @@index([sampleId, analysis])
+}
+
+// Criteria are nullable overrides; rule rows are immutable revisions (#185).
+model QcRule {
+  id                         String   @id
+  labId                      String
+  analysisCode               String
+  methodologyId              String?
+  version                    Int
+  effectiveFrom              DateTime
+  approvedBy                 String
+  reason                     String
+  createdAt                  DateTime @default(now())
+  maxBatchSize               Int?
+  blankPerBatch              Int?
+  blankLimitMode             String?
+  blankAbsLimit              Float?
+  duplicateEvery            Int?
+  duplicateRpdMax            Float?
+  duplicateMode              String?
+  duplicateAbsMax            Float?
+  duplicateAbsMaxBelow5LOQ    Float?
+  lrmPerBatch                Int?
+  lrmMode                    String?
+  lrmWindowPct               Float?
+  crmEveryNBatches            Int?
+  crmMode                    String?
+  crmRecoveryMin             Float?
+  crmRecoveryMax             Float?
+  crmAbsWindow               Float?
+  ccvEvery                   Int?
+  ccvMin                     Float?
+  ccvMax                     Float?
+  curveMinPoints             Int?
+  curveMinR                  Float?
+  repeatabilityLimit         Float?
+  blankCorrection            String?
+  failAction                 String?
+  lab                        Lab @relation(fields: [labId], references: [id], onDelete: Restrict)
+  analysis                   Analysis @relation(fields: [analysisCode], references: [code], onDelete: Restrict)
+  methodology                Methodology? @relation(fields: [methodologyId], references: [id], onDelete: Restrict)
+  batchAnalytes              BatchAnalyte[]
+  evaluations                QcEvaluation[]
+
+  @@index([labId, analysisCode, methodologyId, effectiveFrom])
+}
+
+model Batch {
+  id          String   @id
+  labId       String?
+  analysis    String
+  instrument  String?
+  instrumentId String?
+  equipment   EquipmentAsset? @relation(fields: [instrumentId], references: [id], onDelete: Restrict)
+  analystUsername String?
+  analyst     User? @relation("BatchAnalyst", fields: [analystUsername], references: [username], onDelete: Restrict)
+  startedAt   DateTime? // First native start; never cleared on reopen. Legacy unknown stays null.
+  completedAt DateTime?
+  status      String   // OPEN, RUNNING, QC_PASS, QC_FAIL, CLOSED
+  createdBy   String
+  createdAt   DateTime @default(now())
+  notes       String?
+  qcResults   String?  // Deprecated frozen legacy evidence; remove in audit 8.1.
+  workItemIds String?  // Deprecated frozen legacy evidence; remove in audit 8.1.
+  maxCapacity Int?     @default(40)
+  profile     String?
+  disposition String?  // Deprecated frozen legacy evidence; remove in audit 8.1.
+  history     String?  // Deprecated frozen legacy evidence; remove in audit 8.1.
+
+  // Relations
+  workItems   WorkItem[]
+  qcItems     BatchQcResult[]
+  analytes    BatchAnalyte[]
+  positions   BatchPosition[]
+  measurements QcMeasurement[]
+  evaluations QcEvaluation[]
+  dispositions BatchDisposition[]
+  events      BatchEvent[]
+  workAttempts WorkAttempt[]
+  reagentLots BatchReagentLot[]
+  calibrationCurves CalibrationCurve[]
+}
+
+// #194 pin6072013517: retained links, never an inventory consumption record.
+model BatchReagentLot {
+  id             String       @id
+  batchId        String
+  batch          Batch        @relation(fields: [batchId], references: [id], onDelete: Restrict)
+  labId          String
+  lab            Lab          @relation(fields: [labId], references: [id], onDelete: Restrict)
+  inventoryLotId String
+  inventoryLot   InventoryLot @relation(fields: [inventoryLotId], references: [id], onDelete: Restrict)
+  role           String?
+  linkedBy       String
+  linkedAt       DateTime     @default(now())
+
+  @@unique([batchId, inventoryLotId])
+  @@index([labId, batchId])
+}
+
+// #186 scope pins 1–12. String enums and immutable evidence are guarded by the
+// additive release SQL; unknown historical metadata remains nullable.
+model BatchAnalyte {
+  id                      String @id
+  batchId                 String
+  batch                   Batch @relation(fields: [batchId], references: [id], onDelete: Restrict)
+  labId                   String?
+  analysisCode            String // Legacy codes need not still exist in the catalogue.
+  methodologyId           String?
+  methodology             Methodology? @relation(fields: [methodologyId], references: [id], onDelete: Restrict)
+  methodResolution        String?
+  qcRuleId                String?
+  qcRule                  QcRule? @relation(fields: [qcRuleId], references: [id], onDelete: Restrict)
+  qcRuleVersion           Int?
+  policyVersion           Int?
+  criteriaSnapshot        String? // Frozen at native first start, not at build.
+  crmOrdinal              Int?
+  status                  String
+  provenance              String
+  legacyMembershipFrozen  Boolean @default(false)
+  legacySource            String?
+
+  calibrationCurves       CalibrationCurve[]
+
+  @@unique([batchId, analysisCode])
+  @@index([labId, analysisCode, methodologyId])
+}
+
+model BatchPosition {
+  id                      String @id
+  batchId                 String
+  batch                   Batch @relation(fields: [batchId], references: [id], onDelete: Restrict)
+  position                Int
+  kind                    String
+  sampleId                String?
+  sample                  Sample? @relation(fields: [sampleId], references: [id], onDelete: Restrict)
+  duplicateOfPositionId   String?
+  duplicateOf             BatchPosition? @relation("PhysicalDuplicate", fields: [duplicateOfPositionId], references: [id], onDelete: Restrict)
+  duplicates              BatchPosition[] @relation("PhysicalDuplicate")
+  historicalSnapshotSeq   Int? // #186 part 7: isolated historical evidence, never a current/native position.
+  provenance              String
+  legacySource            String?
+  workItems               BatchPositionWorkItem[]
+  references              BatchPositionReference[]
+  measurements            QcMeasurement[]
+
+  @@unique([batchId, position])
+}
+
+model BatchPositionWorkItem {
+  id                      String @id
+  positionId              String
+  position                BatchPosition @relation(fields: [positionId], references: [id], onDelete: Restrict)
+  workItemId              String
+  workItem                WorkItem @relation(fields: [workItemId], references: [id], onDelete: Restrict)
+  analysisCode            String
+
+  @@unique([positionId, analysisCode])
+  @@index([workItemId])
+}
+
+model BatchPositionReference {
+  id                      String @id
+  positionId              String
+  position                BatchPosition @relation(fields: [positionId], references: [id], onDelete: Restrict)
+  analysisCode            String
+  referenceMaterialId     String
+  referenceMaterial       ReferenceMaterial @relation(fields: [referenceMaterialId], references: [id], onDelete: Restrict)
+  referenceValueId        String?
+  referenceValue          ReferenceValue? @relation(fields: [referenceValueId], references: [id], onDelete: Restrict)
+  referenceUse            String
+  referenceSnapshot       String? // Null only for explicitly NOT_SERVED optional service.
+  serviceStatus           String @default("SERVED")
+  boundBy                 String?
+  boundAt                 DateTime?
+  supersededById          String?
+  supersededBy            BatchPositionReference? @relation("PositionReferenceRevision", fields: [supersededById], references: [id], onDelete: Restrict)
+  revisions               BatchPositionReference[] @relation("PositionReferenceRevision")
+  // #186 part 19: migration adds DEFERRABLE INITIALLY DEFERRED; Prisma cannot emit it.
+  correctionReason        String?
+
+  @@index([positionId, analysisCode])
+  // Migration-only partial unique index: one current binding per analyte.
+}
+
+model QcMeasurement {
+  id                      String @id
+  batchId                 String
+  batch                   Batch @relation(fields: [batchId], references: [id], onDelete: Restrict)
+  positionId              String
+  position                BatchPosition @relation(fields: [positionId], references: [id], onDelete: Restrict)
+  analysisCode            String
+  replicateNo             Int
+  value                   Float?
+  rawInput                String?
+  censoring               String?
+  censoringLimit          Float?
+  enteredBy               String?
+  enteredAt               DateTime?
+  supersededById          String?
+  supersededBy            QcMeasurement? @relation("MeasurementRevision", fields: [supersededById], references: [id], onDelete: Restrict)
+  revisions               QcMeasurement[] @relation("MeasurementRevision")
+  // #186 part 19: migration adds DEFERRABLE INITIALLY DEFERRED; Prisma cannot emit it.
+  correctionReason        String?
+  legacySource            String?
+
+  @@index([batchId, analysisCode])
+  @@index([positionId, analysisCode, replicateNo])
+  // Migration-only partial unique index: one current physical observation.
+}
+
+model QcEvaluation {
+  id                      String @id
+  batchId                 String
+  batch                   Batch @relation(fields: [batchId], references: [id], onDelete: Restrict)
+  analysisCode            String
+  version                 Int
+  ruleId                  String?
+  rule                    QcRule? @relation(fields: [ruleId], references: [id], onDelete: Restrict)
+  ruleVersion             Int?
+  policyVersion           Int?
+  verdict                 String
+  details                 String
+  evaluatedBy             String?
+  evaluatedAt             DateTime?
+  supersedesId            String?
+  supersedes              QcEvaluation? @relation("EvaluationRevision", fields: [supersedesId], references: [id], onDelete: Restrict)
+  revisions               QcEvaluation[] @relation("EvaluationRevision")
+  legacySource            String?
+  controlReviews          QcReviewObligation[]
+
+  @@unique([batchId, analysisCode, version])
+}
+
+model BatchDisposition {
+  id                      String @id
+  batchId                 String
+  batch                   Batch @relation(fields: [batchId], references: [id], onDelete: Restrict)
+  analysisCode            String?
+  decision                String
+  reason                  String?
+  decidedBy               String?
+  decidedAt               DateTime?
+  legacySource            String?
+  scope                   String?
+
+  @@index([batchId, analysisCode])
+}
+
+model BatchEvent {
+  id                      String @id
+  batchId                 String
+  batch                   Batch @relation(fields: [batchId], references: [id], onDelete: Restrict)
+  type                    String
+  payload                 String
+  by                      String?
+  at                      DateTime?
+
+  @@index([batchId, at])
+}
+
+model BatchQcResult {
+  id          String   @id
+  batchId     String
+  batch       Batch    @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  type        String   // BLANK, DUPLICATE, CONTROL
+  label       String?
+  expected    Float?
+  measured    Float?
+  value1      Float?
+  value2      Float?
+  recoveryPct Float?
+  rpd         Float?
+  status      String   // PASS, FAIL, INVALID
+  details     String?
+  createdAt   DateTime @default(now())
+  referenceMaterialId String?
+  referenceMaterial   ReferenceMaterial? @relation(fields: [referenceMaterialId], references: [id], onDelete: Restrict)
+  referenceValueId    String?
+  referenceValue      ReferenceValue? @relation(fields: [referenceValueId], references: [id], onDelete: Restrict)
+
+  @@index([batchId])
+}
+
+// --- MANAGEMENT MODELS ---
+
+model Submission {
+  id          String     @id
+  sampleId    String
+  labId       String?
+  assignedLab String?
+  type        String     // PARTIAL, FULL
+  status      String     // PENDING_REVIEW, ACCEPTED, REJECTED
+  note        String?
+  
+  submittedBy String
+  submitter   User       @relation(fields: [submittedBy], references: [username])
+  submittedAt DateTime   @default(now())
+  
+  workItemIds   String?   // JSON string: Array of IDs
+  workItemCount Int       @default(0)
+  
+  reviewNote  String?
+  reviewedBy  String?
+  reviewedAt  DateTime?
+
+  // Relations
+  workItems   WorkItem[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model AuditLog {
+  id              String   @id
+  entity          String   // SAMPLE, WORKITEM, USER
+  entityId        String
+  action          String   // STATUS_CHANGE, CREATE, DELETE
+  details         String?
+  performedBy     String
+  performedByName String?
+  timestamp       DateTime @default(now())
+  
+  // Contextual Data (Flattened for easy querying)
+  sampleId        String?
+  labId           String?
+  analysisCode    String?
+  before          String?    // JSON string
+  after           String?    // JSON string
+}
+
+// --- ASSET & CONFIG MODELS ---
+
+model Lab {
+  id          String   @id
+  code        String   @unique
+  name        String
+  country     String
+  location    String?
+  address     String?    // Full address
+  city        String?
+  phone       String?
+  email       String?
+  website     String?
+  capacity    Int?       // Max samples per month
+  timezone    String?    // e.g., "America/Guatemala"
+  projectCode String?    // Legacy: Primary project association
+  branding    String?    // JSON string: { title, colors, logoUrl }
+  settings    String?    // JSON string: { dateFormat, language, etc. }
+  notes       String?    // Admin notes about the lab
+  isActive    Boolean    @default(true)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @default(now()) @updatedAt
+
+  // Relations
+  projectLabs       ProjectLab[]  // Many-to-many: projects this lab is assigned to
+  proficiencyRounds ProficiencyRound[]
+  appearanceSetting LabAppearanceSetting?
+  policy             LabPolicy?
+  policyOverrides    LabPolicyOverride[]
+  qcRules            QcRule[]
+  referenceMaterials ReferenceMaterial[]
+  nonconformityReports NonconformityReport[]
+  batchReagentLots    BatchReagentLot[]
+  resultOverrideRequests ResultOverrideRequest[]
+  calcTemplates      CalcTemplate[]
+  calcActivations    CalcTemplateActivation[]
+  calibrationCurves CalibrationCurve[]
+  crossCheckEvaluations CrossCheckEvaluation[]
+  importTemplates   ImportTemplate[]
+  instrumentImports InstrumentImportReceipt[]
+  controlLimitProposals ControlLimitProposal[]
+  controlLimitSets ControlLimitSet[]
+  qcReviewObligations QcReviewObligation[]
+}
+
+model LabPolicy {
+  id          String   @id @default(uuid())
+  labId       String   @unique
+  lab         Lab      @relation(fields: [labId], references: [id])
+  presetCode  String?
+  version     Int      @default(1)
+  updatedBy   String
+  updatedAt   DateTime @updatedAt
+}
+
+model LabPolicyOverride {
+  id            String   @id @default(uuid())
+  labId         String
+  lab           Lab      @relation(fields: [labId], references: [id])
+  key           String
+  analysisCode  String?
+  methodologyId String?
+  value         String   // JSON; old rows remain immutable when revoked.
+  reason        String
+  setBy         String
+  setAt         DateTime @default(now())
+  revokedAt     DateTime?
+  revokedBy     String?
+
+  @@index([labId, key])
+}
+
+model ProficiencyRound {
+  id            String   @id
+  provider      String   // e.g. "Wepal", "BIPEA", "GLOSOLAN-RingTrial", "FAO/IAEA"
+  roundRef      String   // e.g. "ISE-2026-1", "GLOSOLAN-RT-2"
+  labId         String   // References Lab(id)
+  lab           Lab      @relation(fields: [labId], references: [id])
+  analysisCode  String   // References Analysis(code)
+  assignedValue Float    // Consensus/certified value
+  uncertainty   Float?   // Standard uncertainty or target std dev (sigma_pt)
+  labResult     Float    // Result reported by the participating laboratory
+  zScore        Float?   // Calculated: (labResult - assignedValue) / uncertainty
+  outcome       String   // SATISFACTORY (|z|<=2), QUESTIONABLE (2<|z|<3), UNSATISFACTORY (|z|>=3)
+  date          DateTime // Date of round / submission
+  notes         String?
+  ncrStatus     String?  // NULL | RAISED; PENDING is retained pre-193 evidence only
+  nonconformityId String?
+  nonconformity NonconformityReport? @relation(fields: [nonconformityId], references: [id], onDelete: Restrict)
+  classificationLimits String? // Frozen resolved lab/analysis z-score limits; legacy NULL
+  legacyScoreFlag String? // SIGMA_MISSING | SIGMA_NONPOSITIVE; preserves stored scores
+  legacyFlaggedAt DateTime?
+  deletedAt     DateTime?
+  deletedBy     String?
+  deleteReason  String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([labId, analysisCode])
+  @@index([date])
+}
+
+model NonconformityReport {
+  id                    String   @id
+  labId                 String
+  lab                   Lab      @relation(fields: [labId], references: [id], onDelete: Restrict)
+  source                String   // QC | PT | REPEAT_LIMIT | CUSTOMER | INTAKE | OTHER
+  refType               String
+  refId                 String
+  description           String
+  impactAssessment      String?
+  correctiveAction      String?
+  status                String   @default("OPEN") // OPEN | ACTION | CLOSED
+  raisedBy              String
+  closedBy              String?
+  closedAt              DateTime?
+  firstQcEvaluationId   String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  proficiencyRounds     ProficiencyRound[]
+
+  @@unique([source, refType, refId])
+  @@index([labId, status, source])
+}
+
+// Junction table for many-to-many Project <-> Lab relationship
+model ProjectLab {
+  id           String   @id @default(uuid())
+  projectCode  String   // References Project.code
+  labId        String   // References Lab.id
+  role         String   @default("PRIMARY")  // PRIMARY, BACKUP, OVERFLOW
+  priority     Int      @default(1)          // For ordering labs (1 = highest priority)
+  createdAt    DateTime @default(now())
+
+  // Relations
+  project      Project  @relation(fields: [projectCode], references: [code], onDelete: Cascade)
+  lab          Lab      @relation(fields: [labId], references: [id], onDelete: Cascade)
+
+  @@unique([projectCode, labId])  // Each lab can only be assigned once per project
+  @@index([projectCode])
+  @@index([labId])
+}
+
+// --- INVENTORY MODULE ---
+
+model InventoryItem {
+  id                 String   @id
+  labId              String
+  itemType           String   // REAGENT | CHEMICAL | CONSUMABLE | STANDARD | CRM | CONTAINER | OTHER
+  name               String
+  shortCode          String?
+  grade              String?  // Purity/grade text (e.g., "ACS Grade", "99.9%")
+  unitOfMeasure      String   // g, mL, L, pcs
+  defaultLocationId  String?
+  storageConditions  String?  // JSON: { tempMin, tempMax, lightSensitive, humidity }
+  hazardClass        String?  // GHS classification text
+  sopLink            String?
+  reorderPoint       Float    @default(0)
+  reorderQuantity    Float    @default(0)
+  preferredVendor    String?
+  notes              String?
+  isActive           Boolean  @default(true)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  // Relations
+  lots               InventoryLot[]
+  methodRequirements MethodRequirement[]
+
+  @@index([labId])
+  @@index([itemType])
+}
+
+model InventoryLot {
+  id               String    @id
+  inventoryItemId  String
+  item             InventoryItem @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
+  labId            String
+  lotNumber        String
+  receivedDate     DateTime  @default(now())
+  expiryDate       DateTime?
+  initialQuantity  Float
+  currentQuantity  Float
+  unitOfMeasure    String
+  locationId       String?
+  location         InventoryLocation? @relation(fields: [locationId], references: [id])
+  status           String    @default("AVAILABLE") // AVAILABLE | QUARANTINED | EXPIRED | DISPOSED
+  coaAttachment    String?   // JSON: { filename, url }
+  preparedBy       String?   // For in-house prepared reagents/standards
+  concentration    String?   // For standards (e.g., "1000 ppm")
+  traceabilityNotes String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  // Relations
+  transactions     InventoryTransaction[]
+  reservations     InventoryReservation[]
+  referenceMaterials ReferenceMaterial[]
+  batchReagentLots  BatchReagentLot[]
+
+  @@index([inventoryItemId])
+  @@index([labId])
+  @@index([status])
+  @@index([expiryDate])
+}
+
+model InventoryLocation {
+  id               String   @id
+  labId            String
+  name             String
+  locationType     String   @default("SHELF") // ROOM | FRIDGE | FREEZER | CABINET | SHELF | OTHER
+  parentLocationId String?
+  temperatureRange String?  // e.g., "2-8°C"
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+
+  // Relations
+  lots             InventoryLot[]
+
+  @@index([labId])
+}
+
+model InventoryTransaction {
+  id             String   @id
+  labId          String
+  timestamp      DateTime @default(now())
+  userId         String
+  userName       String?
+  actionType     String   // RECEIVE | ADJUST | CONSUME | TRANSFER | QUARANTINE | RELEASE | EXPIRE | DISPOSE
+  inventoryLotId String
+  lot            InventoryLot @relation(fields: [inventoryLotId], references: [id], onDelete: Cascade)
+  deltaQuantity  Float    // Positive for additions, negative for reductions
+  unit           String
+  reasonCode     String?  // Structured reason category
+  freeTextReason String?  // Required for ADJUST, QUARANTINE, DISPOSE, overrides
+  sampleId       String?
+  workItemId     String?
+  analysisCode   String?
+
+  @@index([inventoryLotId])
+  @@index([labId])
+  @@index([timestamp])
+  @@index([actionType])
+}
+
+model InventoryReservation {
+  id               String    @id
+  labId            String
+  inventoryLotId   String
+  lot              InventoryLot @relation(fields: [inventoryLotId], references: [id], onDelete: Cascade)
+  reservedQuantity Float
+  reservedByUserId String
+  purpose          String    @default("GENERAL") // WORK_ITEM | BATCH_RUN | GENERAL
+  workItemId       String?
+  expiresAt        DateTime?
+  createdAt        DateTime  @default(now())
+
+  @@index([inventoryLotId])
+  @@index([labId])
+}
+
+model MethodRequirement {
+  id                 String  @id
+  analysisCode       String
+  methodId           String?
+  inventoryItemId    String
+  item               InventoryItem @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
+  defaultConsumption Float?
+  unit               String?
+  isRequired         Boolean @default(true)
+  labId              String?
+  createdAt          DateTime @default(now())
+
+  @@index([analysisCode])
+  @@index([inventoryItemId])
+}
+
+// --- EQUIPMENT MODULE ---
+
+model EquipmentAsset {
+  id                 String     @id
+  labId              String
+  assetType          String     // SPECTROMETER | BALANCE | PH_METER | ICP | AAS | UV_VIS | EC_METER | OVEN | MuffleFurnace | SHAKER | CENTRIFUGE | AUTO_ANALYZER | OTHER
+  name               String
+  manufacturer       String?
+  model              String?
+  serialNumber       String?
+  internalAssetTag   String?
+  locationId         String?
+  status             String     // IN_SERVICE | OUT_OF_SERVICE | DECOMMISSIONED
+  criticality        String     // CRITICAL | IMPORTANT | NON_CRITICAL
+  commissioningDate  DateTime?
+  notes              String?
+  qcLimits           String?    // JSON string storing instrument-specific tolerances: min/max range, noise, baseline, RMSD
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+
+  // Relations
+  qualification      EquipmentQualification?
+  scheduleRules      EquipmentScheduleRule[]
+  events             EquipmentEvent[]
+  usage              WorkItemEquipmentUse[]
+  spectralScans      SpectralData[]
+  batches            Batch[]
+  resultOverrideRequests ResultOverrideRequest[]
+  preparationRecords PreparationRecord[]
+  importTemplates    ImportTemplate[]
+  instrumentImports  InstrumentImportReceipt[]
+}
+
+// #200 pins6091749530/6094747629: immutable configuration revisions and
+// retained source evidence. An import does not create analytical Results.
+model ImportTemplate {
+  id           String @id @default(uuid())
+  labId        String
+  lab          Lab @relation(fields:[labId],references:[id],onDelete:Restrict,onUpdate:Restrict)
+  instrumentId String
+  instrument   EquipmentAsset @relation(fields:[instrumentId],references:[id],onDelete:Restrict,onUpdate:Restrict)
+  name         String
+  version      Int
+  mapping      String
+  createdBy    String
+  createdAt    DateTime @default(now())
+  supersedesId String? @unique
+  supersedes   ImportTemplate? @relation("ImportTemplateRevision",fields:[supersedesId],references:[id],onDelete:Restrict,onUpdate:Restrict)
+  successor    ImportTemplate? @relation("ImportTemplateRevision")
+  imports      InstrumentImportReceipt[]
+}
+
+model InstrumentImportReceipt {
+  id              String @id @default(uuid())
+  labId           String
+  lab             Lab @relation(fields:[labId],references:[id],onDelete:Restrict,onUpdate:Restrict)
+  instrumentId    String
+  instrument      EquipmentAsset @relation(fields:[instrumentId],references:[id],onDelete:Restrict,onUpdate:Restrict)
+  templateId      String
+  template        ImportTemplate @relation(fields:[templateId],references:[id],onDelete:Restrict,onUpdate:Restrict)
+  templateVersion Int
+  sourceSha256    String
+  sourceName      String
+  mappingSnapshot String
+  importedBy      String
+  importedAt      DateTime @default(now())
+  drafts          WorkItemDraft[]
+}
+
+model EquipmentQualification {
+  id                     String    @id
+  equipmentId            String    @unique
+  labId                  String
+  calibrationStatus      String    // OK | DUE_SOON | OVERDUE | NOT_CONFIGURED
+  verificationStatus     String    // OK | DUE_SOON | OVERDUE | NOT_CONFIGURED
+  lastCalibrationDate    DateTime?
+  nextCalibrationDueDate DateTime?
+  lastVerificationDate   DateTime?
+  nextVerificationDueDate DateTime?
+  toleranceProfileId     String?
+  lastUpdatedBy          String?
+  lastUpdatedAt          DateTime  @updatedAt
+
+  equipment              EquipmentAsset @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+}
+
+model EquipmentScheduleRule {
+  id             String    @id
+  equipmentId    String
+  labId          String
+  scheduleType   String    // CALIBRATION | VERIFICATION | MAINTENANCE
+  frequencyDays  Int?
+  dueSoonDays    Int       @default(30)
+  responsibleRole String?  // LAB_MANAGER | TECHNICIAN | QA_OFFICER
+  active         Boolean   @default(true)
+
+  equipment      EquipmentAsset @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+}
+
+model EquipmentEvent {
+  id                     String    @id
+  equipmentId            String
+  labId                  String
+  ts                     DateTime  @default(now())
+  userId                 String
+  eventType              String    // REGISTER | EDIT | STATUS_CHANGE | CALIBRATION_PERFORMED | CALIBRATION_FAILED | VERIFICATION_PERFORMED | VERIFICATION_FAILED | MAINTENANCE_PERFORMED | MAINTENANCE_FAILED | INCIDENT | DOWNTIME_START | DOWNTIME_END | DECOMMISSION
+  summary                String
+  details                String?   // JSON string
+  attachmentIds          String?   // JSON string
+  outcome                String?   // PASS | FAIL | NA
+  requiresManagerSignoff Boolean   @default(false)
+  managerDecision        String?   // APPROVED | REJECTED | NA
+  managerReason          String?
+  
+  equipment              EquipmentAsset @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+}
+
+model EquipmentMethodEligibility {
+  id                     String    @id
+  labId                  String
+  analysisCode           String
+  methodId               String?
+  equipmentTypeRequired  String?
+  eligibleEquipmentIds   String?   // JSON string: list
+  isRequired             Boolean   @default(true)
+}
+
+model WorkItemEquipmentUse {
+  id             String    @id
+  labId          String
+  workItemId     String
+  sampleId       String
+  equipmentId    String
+  usedAt         DateTime  @default(now())
+  runId          String?
+  notes          String?
+  attachments    String?   // JSON string
+  
+  equipment      EquipmentAsset @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+  workItem       WorkItem       @relation(fields: [workItemId], references: [id], onDelete: Cascade)
+}
+
+model SpectralData {
+  id             String   @id
+  sampleId       String?   // Nullable: spectra can be uploaded without a sample link
+  labId          String?
+  workItemId     String?
+  workItem       WorkItem? @relation(fields: [workItemId], references: [id], onDelete: SetNull)
+  attemptNo      Int       @default(1)
+  modality       String   // NIR, MIR
+  filename       String
+  scanIp         String?  // Deprecated (SL-08), retained for backward compatibility
+  uploadedBy     String?
+  timestamp      DateTime @default(now())
+  metadata       String?    // JSON string
+  
+  wavelengths    String?    // JSON string: Array of numbers
+  values         String?    // JSON string: Array of numbers
+  qcStatus       String?    // PASS, WARN, FAIL
+  qcFlags        String?    // JSON string: Array of flags
+  
+  // SL-06: Raw File Storage & Integrity
+  sourceFile     String?    // Relative storage path on disk: uploads/spectra/{id}_{filename}
+  sourceFormat   String?    // CSV, JCAMP, OPUS, SPC, ASD
+  sha256         String?    // SHA-256 hash of original file / point data
+  parserVersion  String?    @default("1.0.0")
+
+  // SL-07: Signal & Physical Quantity
+  quantity       String     @default("UNVERIFIED") // ABSORBANCE, REFLECTANCE, LOG_1_R, KUBELKA_MUNK, TRANSMITTANCE, UNVERIFIED
+  axisUnit       String     @default("WAVENUMBER_CM1") // WAVENUMBER_CM1, WAVELENGTH_NM
+  axisDirection  String     @default("UNORDERED") // ASCENDING, DESCENDING, UNORDERED
+  region         String?    // VIS, VNIR, NIR, MIR, COMBINED
+  isRaw          Boolean    @default(true)
+
+  // SL-08: Equipment Register Link
+  equipmentId    String?
+  equipment      EquipmentAsset? @relation(fields: [equipmentId], references: [id])
+
+  // SL-09: Optical Acquisition Columns
+  resolution     Float?     // cm-1 or nm
+  coAddedScans   Int?       // e.g. 16, 32, 64
+  accessory      String?    // DRIFT, ATR, INTEGRATING_SPHERE, CONTACT_PROBE, TRANSMISSION
+  backgroundRef  String?    // GOLD, KBR, SPECTRALON, AIR, INTERNAL
+  backgroundAt   DateTime?
+  detector       String?    // DTGS, MCT, IN_GA_AS, SI
+  beamsplitter   String?    // KBR, ZN_SE, QUARTZ
+
+  // SL-10: Sample Presentation Columns
+  preparation    String?    // SIEVED_2MM, BALL_MILLED, AGATE_100UM, FINE_GROUND
+  moistureState  String?    // AIR_DRY, OVEN_DRY, FIELD_MOIST
+  windowMaterial String?    // KBR, ZN_SE, DIAMOND, QUARTZ, NONE
+  replicateNo    Int        @default(1)
+  ambientTemp    Float?
+  ambientRh      Float?
+
+  // SL-12: Supersession Model
+  isCurrent      Boolean    @default(true)
+  supersedes     String?    // ID of prior scan
+  supersededBy   String?    // ID of superseding scan
+  supersededAt   DateTime?
+  supersedeReason String?
+
+  // Workflow Status: PENDING -> VALIDATED -> APPROVED (or REJECTED)
+  scanType       String?    @default("SAMPLE") // SAMPLE, CONTROL
+  status         String?    @default("PENDING") // PENDING, VALIDATED, APPROVED, REJECTED, ARCHIVED, DELETED
+  reviewedBy     String?    // Manager who approved/rejected
+  reviewedAt     DateTime?  // When it was approved/rejected
+  reviewNotes    String?    // Optional notes from manager
+
+  @@index([labId, isCurrent])
+  @@index([sampleId, isCurrent])
+  @@index([workItemId, isCurrent])
+  @@index([sha256])
+  @@index([equipmentId])
+  @@index([equipmentId, scanType])
+}
+
+// --- ADMIN & SYSTEM MODELS ---
+
+model SystemSetting {
+  id        String @id // 'global'
+  branding  String // JSON string: { title, colors, logoUrl }
+}
+
+model Language {
+  code         String  @id
+  name         String
+  isDefault    Boolean @default(false)
+  isActive     Boolean @default(true)
+  translations String? // JSON string
+}
+
+// Updated Notification
+model Notification {
+  id          String   @id
+  userId      String
+  title       String
+  message     String
+  titleCode   String?
+  titleParams String?
+  messageCode String?
+  messageParams String?
+  type        String   // INFO, WARNING, SUCCESS
+  isRead      Boolean  @default(false)
+  link        String?
+  senderId    String?
+  createdAt   DateTime @default(now())
+}
+
+// --- KOBO INTEGRATION ---
+
+model KoboConfig {
+  id               String    @id @default(uuid())
+  labId            String             // Lab code: GTM-LAB1, HND-LAB1, etc.
+  labName          String?            // Display name
+  projectCode      String?            // Link to Project.code (nullable for legacy configs)
+  koboServerUrl    String    @default("https://kf.kobotoolbox.org")
+  formId           String             // Kobo asset UID
+  apiToken         String             // Kobo API token
+  fieldMapping     String?            // JSON: Maps Kobo fields to sample fields
+  lastSyncAt       DateTime?
+  lastSubmissionId String?            // Track last synced submission
+  syncIntervalMins Int       @default(15)
+  isActive         Boolean   @default(true)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@unique([labId, projectCode])
+}
+
+// --- ANALYSIS & RESULTS MODELS ---
+
+model Result {
+  id            String    @id
+  sampleId      String
+  sample        Sample    @relation(fields: [sampleId], references: [id])
+  param         String
+  value         String
+  numericValue  Float?
+  rawInput      String?   // Exact original entry; historical rows remain null.
+  unit          String?
+  flags         String?   // JSON string: validation flags
+  isValid       Boolean?
+  censoring     String?   @default("NONE") // NONE, BELOW_LOQ, ABOVE_RANGE
+  basis         String?   @default("AIR_DRY") // AIR_DRY, OVEN_DRY, FIELD_MOIST
+  provenance    String    @default("MEASURED") // MEASURED, PREDICTED, DERIVED, IMPORTED
+  methodologyId String?
+  replicateNo   Int       @default(1)
+  isCurrent     Boolean   @default(true)
+  supersededBy  String?
+  enteredBy     String?
+  analysedAt    DateTime?
+  equipmentId   String?
+  equipmentReadiness String? // Insert-only frozen commit-time equipment evidence (#189).
+  batchId       String?
+  attemptId     String?   // Additive scalar; reference-preserving triggers enforce integrity.
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  evidenceEvents ResultEvidenceEvent[]
+  calculation    ResultCalculation?
+
+  @@index([sampleId, param, isCurrent])
+  @@index([batchId])
+  @@index([attemptId])
+  consumedOverrideRequest ResultOverrideRequest?
+}
+
+// Preparation reversions preserve the result and its QC flags. Evidence is append-only.
+model ResultEvidenceEvent {
+  id        String   @id
+  resultId  String
+  result    Result   @relation(fields: [resultId], references: [id], onDelete: Restrict)
+  sampleId  String
+  sample    Sample   @relation(fields: [sampleId], references: [id], onDelete: Restrict)
+  eventType String   // PREP_REVERTED | PREP_REVERT_CLEARED; enforced by additive triggers
+  gate      String   // DRYING | PREPARATION
+  reason    String
+  actor     String
+  createdAt DateTime @default(now())
+
+  @@index([resultId, gate, createdAt])
+  @@index([sampleId, createdAt])
+}
+
+model Unit {
+  code         String     @id // e.g. "g/kg", "mg/kg", "cmol(+)/kg", "%", "dS/m", "pH_units"
+  display      String     // e.g. "g/kg", "mg/kg", "cmol(+)/kg"
+  quantityKind String     // e.g. "MASS_FRACTION", "CONCENTRATION", "CEC", "DIMENSIONLESS", "CONDUCTIVITY"
+  factorToBase Float      @default(1.0) // Conversion factor to multiply to reach base unit
+  synonyms     String?    // JSON string array e.g. ["ppm", "mg/l", "g/100g"]
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  analyses     Analysis[]
+  referenceValues ReferenceValue[]
+  calcTemplates   CalcTemplate[]
+  resultCalculations ResultCalculation[] @relation("ResultReportingUnit")
+  nativeCalculations ResultCalculation[] @relation("ResultNativeUnit")
+}
+
+model MethodReference {
+  id            String        @id // e.g. "GLOSOLAN-SOP-01", "ISO-10390-2021"
+  authority     String        // e.g. "GLOSOLAN", "ISO", "AOAC", "USDA"
+  citation      String        // Bibliographic citation
+  title         String        // Descriptive title
+  year          Int?          // Publication year
+  url           String?       // Standard / SOP URL
+  status        String        @default("ACTIVE") // ACTIVE, UNDER_PUBLICATION, SUPERSEDED
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  methodologies Methodology[]
+}
+
+model LabMethodDefault {
+  id            String   @id @default(uuid())
+  labId         String
+  analysisCode  String
+  methodologyId String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([labId, analysisCode])
+}
+
+model AnalysisCategory {
+  id       String     @id
+  name     String
+  labId    String?
+  analyses Analysis[]
+}
+
+model Analysis {
+  code               String            @id
+  name               String
+  description        String?
+  categoryId         String?
+  category           AnalysisCategory? @relation(fields: [categoryId], references: [id])
+  units              String?
+  unitCode           String?           // References Unit(code)
+  unit               Unit?             @relation(fields: [unitCode], references: [code])
+  qudtUnit           String?           // QUDT unit identifier (e.g. "GM-PER-KiloGM", "PERCENT", "DeciSIEMENS-PER-M")
+  matrix             String            @default("SOIL") // SOIL, PLANT, WATER, AMENDMENT, FERTILIZER, LIMING
+  module             String            @default("FERTILITY") // FERTILITY, HEALTH, ENVIRONMENTAL, QUALITY
+  isGlobal           Boolean           @default(true)
+  executionOrder     Int?              @default(100)
+  prerequisites      String?           // JSON string: array of analysis codes
+  status             String?           // active, inactive
+  validation         String?           // JSON string: validation rules
+  decimalPlaces      Int?              @default(2)
+  lod                Float?
+  loq                Float?
+  uncertainty        Float?
+  labId              String?
+  methodLabel        String?           // Selected Method Label e.g. TotalN_kjeldahl
+  methodDefinition   String?           // Procedure description
+  methodCitation     String?           // Procedure scientific reference / standard
+  sampleMassRequired Float?            @default(10.0) // Sample mass required in grams (RC-01)
+  version            Int?              @default(1)
+  methodologies      Methodology[]
+  qcRules            QcRule[]
+  referenceValues    ReferenceValue[]
+  resultOverrideRequests ResultOverrideRequest[]
+  calcTemplates      CalcTemplate[]
+  calcActivations    CalcTemplateActivation[]
+}
+
+model ExternalMapping {
+  id         String   @id @default(uuid())
+  entityType String   // ANALYSIS, METHODOLOGY, UNIT
+  entityKey  String   // code or id
+  scheme     String   // GLOSIS, QUDT, AGROVOC
+  code       String   // external identifier
+  uri        String?  // Linked Data URI
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([entityType, entityKey])
+  @@index([scheme, code])
+}
+
+model AnalysisGroup {
+  id       String  @id
+  name     String
+  analyses String? // JSON string: list of analysis codes
+  labId    String?
+}
+
+model Methodology {
+  id               String           @id @default(uuid())
+  analysisCode     String
+  analysis         Analysis         @relation(fields: [analysisCode], references: [code])
+  name             String           // e.g. "pH in Water (1:2.5)"
+  standard         String?          // e.g. "ISO 10390:2021"
+  referenceId      String?          // References MethodReference(id)
+  reference        MethodReference? @relation(fields: [referenceId], references: [id])
+  qudtUnit         String?          // QUDT unit override
+  decimalPlaces    Int?
+  lod              Float?
+  loq              Float?
+  uncertainty      Float?
+  isDefault        Boolean          @default(false)
+  labId            String?
+  version          Int?             @default(1)
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  workItems        WorkItem[]
+  qcRules          QcRule[]
+  referenceValues  ReferenceValue[]
+  batchAnalytes    BatchAnalyte[]
+  controlLimitProposals ControlLimitProposal[]
+  controlLimitSets ControlLimitSet[]
+  resultOverrideRequests ResultOverrideRequest[]
+  calcTemplates    CalcTemplate[]
+  calcActivations  CalcTemplateActivation[]
+  calibrationCurves CalibrationCurve[]
+}
+
+// #199 pins6083098510/6083312978: additive, immutable definitions and
+// per-Result evidence. The release SQL owns shape/chain/write-once guards.
+model CalcTemplate {
+  id               String @id
+  templateKey      String
+  labId            String?
+  parentTemplateId String?
+  version          Int
+  analysisCode     String
+  methodologyId    String?
+  variant          String
+  inputs           String
+  parameters       String
+  curve            String?
+  formulaModule    String
+  outputUnit       String
+  outputDecimals   Int?
+  precisionSource  String?
+  status           String
+  sourceCitation   String
+  createdBy        String
+  createdAt        DateTime @default(now())
+  reason           String
+  lab              Lab? @relation(fields: [labId], references: [id], onDelete: Restrict)
+  analysis         Analysis @relation(fields: [analysisCode], references: [code], onDelete: Restrict)
+  methodology      Methodology? @relation(fields: [methodologyId], references: [id], onDelete: Restrict)
+  reportingUnit    Unit @relation(fields: [outputUnit], references: [code], onDelete: Restrict)
+  parent           CalcTemplate? @relation("CalcTemplateParent", fields: [parentTemplateId], references: [id], onDelete: Restrict)
+  children         CalcTemplate[] @relation("CalcTemplateParent")
+  activations      CalcTemplateActivation[]
+  calculations     ResultCalculation[]
+  calibrationCurves CalibrationCurve[]
+
+  @@unique([templateKey, labId, version])
+  @@index([labId, analysisCode, methodologyId])
+}
+
+model CalcTemplateActivation {
+  id                 String @id
+  labId              String
+  analysisCode       String
+  methodologyId      String?
+  templateId         String
+  templateVersion    Int
+  action             String
+  activatedBy        String
+  activatedAt        DateTime @default(now())
+  reason             String
+  verifiedAgainstSop Boolean
+  supersedesId       String? @unique
+  lab                Lab @relation(fields: [labId], references: [id], onDelete: Restrict)
+  analysis           Analysis @relation(fields: [analysisCode], references: [code], onDelete: Restrict)
+  methodology        Methodology? @relation(fields: [methodologyId], references: [id], onDelete: Restrict)
+  template           CalcTemplate @relation(fields: [templateId], references: [id], onDelete: Restrict)
+  actor              User @relation(fields: [activatedBy], references: [username], onDelete: Restrict)
+  supersedes         CalcTemplateActivation? @relation("CalcActivationChain", fields: [supersedesId], references: [id], onDelete: Restrict)
+  successor          CalcTemplateActivation? @relation("CalcActivationChain")
+  calculations       ResultCalculation[]
+
+  @@index([labId, analysisCode, methodologyId])
+}
+
+model CalibrationCurve {
+  id                     String @id
+  labId                  String
+  batchId                String
+  batchAnalyteId         String
+  methodologyId          String
+  executedMethodRevision String
+  templateId             String
+  templateVersion        Int
+  revision               Int
+  supersedesId           String? @unique
+  slope                  Float?
+  intercept              Float?
+  r                      Float?
+  rSquared               Float?
+  pointCount             Int
+  levelCount             Int
+  minPointsApplied       Int
+  minRApplied            Float
+  thresholdSource        String
+  status                 String
+  failReason             String?
+  recordedBy             String
+  recordedAt             DateTime @default(now())
+  reason                 String?
+  lab                    Lab @relation(fields: [labId], references: [id], onDelete: Restrict)
+  batch                  Batch @relation(fields: [batchId], references: [id], onDelete: Restrict)
+  batchAnalyte           BatchAnalyte @relation(fields: [batchAnalyteId], references: [id], onDelete: Restrict)
+  methodology            Methodology @relation(fields: [methodologyId], references: [id], onDelete: Restrict)
+  template               CalcTemplate @relation(fields: [templateId], references: [id], onDelete: Restrict)
+  actor                  User @relation(fields: [recordedBy], references: [username], onDelete: Restrict)
+  supersedes             CalibrationCurve? @relation("CalibrationCurveChain", fields: [supersedesId], references: [id], onDelete: Restrict)
+  successor              CalibrationCurve? @relation("CalibrationCurveChain")
+  points                 CalibrationPoint[]
+  calculations           ResultCalculation[]
+
+  @@unique([batchId, batchAnalyteId, revision])
+  @@index([labId, batchId, batchAnalyteId])
+}
+
+model CalibrationPoint {
+  curveId               String
+  ordinal               Int
+  standardConcentration Float
+  response              Float
+  curve                 CalibrationCurve @relation(fields: [curveId], references: [id], onDelete: Restrict)
+
+  @@id([curveId, ordinal])
+}
+
+model ResultCalculation {
+  id              String @id
+  resultId        String @unique
+  templateId      String
+  templateVersion Int
+  activationId    String
+  inputs          String
+  parameters      String
+  intermediate    String
+  nativeValue     Float
+  nativeUnit      String
+  conversionFactor Float
+  unitConversion  String
+  unroundedOutput Float
+  output          Float
+  outputUnit      String
+  curveId         String?
+  engineVersion   String
+  computedBy      String
+  computedAt      DateTime @default(now())
+  result          Result @relation(fields: [resultId], references: [id], onDelete: Restrict)
+  template        CalcTemplate @relation(fields: [templateId], references: [id], onDelete: Restrict)
+  activation      CalcTemplateActivation @relation(fields: [activationId], references: [id], onDelete: Restrict)
+  curve           CalibrationCurve? @relation(fields: [curveId], references: [id], onDelete: Restrict)
+  reportingUnit   Unit @relation("ResultReportingUnit", fields: [outputUnit], references: [code], onDelete: Restrict)
+  nativeUnitCatalogue Unit @relation("ResultNativeUnit", fields: [nativeUnit], references: [code], onDelete: Restrict)
+  actor           User @relation(fields: [computedBy], references: [username], onDelete: Restrict)
+}
+
+// #184: each certificate/lot has its own material; assigned values are immutable.
+model ReferenceMaterial {
+  id             String   @id
+  labId          String
+  lab            Lab      @relation(fields: [labId], references: [id], onDelete: Restrict)
+  code           String
+  name           String
+  kind           String
+  matrix         String
+  supplier       String?
+  certificateRef String?
+  inventoryLotId String?
+  inventoryLot   InventoryLot? @relation(fields: [inventoryLotId], references: [id], onDelete: Restrict)
+  lotNumber      String
+  expiryDate     DateTime?
+  openedAt       DateTime?
+  status         String
+  createdBy      String
+  createdAt      DateTime @default(now())
+  values         ReferenceValue[]
+  qcItems        BatchQcResult[]
+  batchReferences BatchPositionReference[]
+  controlLimitProposals ControlLimitProposal[]
+  controlLimitSets ControlLimitSet[]
+
+  @@index([labId, code])
+}
+
+// #214: proposal selections and evaluation inputs are retained, never backfilled.
+model ControlLimitProposal {
+  id String @id
+  labId String
+  lab Lab @relation(fields: [labId], references: [id], onDelete: Restrict)
+  analysisCode String
+  methodologyId String
+  methodology Methodology @relation(fields: [methodologyId], references: [id], onDelete: Restrict)
+  referenceMaterialId String
+  referenceMaterial ReferenceMaterial @relation(fields: [referenceMaterialId], references: [id], onDelete: Restrict)
+  mean Float
+  sd Float
+  n Int
+  selectionSnapshot String
+  policySnapshot String
+  reason String
+  proposedBy String
+  proposedAt DateTime @default(now())
+  approvedSet ControlLimitSet?
+  @@index([labId, analysisCode, methodologyId, referenceMaterialId])
+}
+
+model ControlLimitSet {
+  id String @id
+  labId String
+  lab Lab @relation(fields: [labId], references: [id], onDelete: Restrict)
+  analysisCode String
+  methodologyId String
+  methodology Methodology @relation(fields: [methodologyId], references: [id], onDelete: Restrict)
+  referenceMaterialId String
+  referenceMaterial ReferenceMaterial @relation(fields: [referenceMaterialId], references: [id], onDelete: Restrict)
+  proposalId String @unique
+  proposal ControlLimitProposal @relation(fields: [proposalId], references: [id], onDelete: Restrict)
+  mean Float
+  sd Float
+  n Int
+  fromDate DateTime
+  toDate DateTime?
+  approvedBy String
+  status String
+  @@index([labId, analysisCode, methodologyId, referenceMaterialId])
+}
+
+model QcReviewObligation {
+  id String @id
+  labId String
+  lab Lab @relation(fields: [labId], references: [id], onDelete: Restrict)
+  evaluationId String
+  evaluation QcEvaluation @relation(fields: [evaluationId], references: [id], onDelete: Restrict)
+  rule String
+  evidenceSnapshot String
+  createdAt DateTime @default(now())
+  resolutions QcReviewResolution[]
+  @@unique([evaluationId, rule])
+  @@index([labId, createdAt])
+}
+
+model QcReviewResolution {
+  id String @id
+  obligationId String @unique
+  obligation QcReviewObligation @relation(fields: [obligationId], references: [id], onDelete: Restrict)
+  outcome String
+  note String
+  resolvedBy String
+  resolvedAt DateTime @default(now())
+}
+
+model ReferenceValue {
+  id                  String   @id
+  referenceMaterialId String
+  referenceMaterial   ReferenceMaterial @relation(fields: [referenceMaterialId], references: [id], onDelete: Restrict)
+  analysisCode        String
+  analysis            Analysis @relation(fields: [analysisCode], references: [code], onDelete: Restrict)
+  methodologyId       String?
+  methodology         Methodology? @relation(fields: [methodologyId], references: [id], onDelete: Restrict)
+  assignedValue       Float
+  unit                String
+  measurementUnit     Unit     @relation(fields: [unit], references: [code], onDelete: Restrict)
+  expandedUncertainty Float?
+  coverageFactor      Float?
+  valueType           String
+  createdBy           String
+  createdAt           DateTime @default(now())
+  supersededById      String?
+  supersededAt        DateTime?
+  supersededBy        String?
+  correctionReason    String?
+  qcItems             BatchQcResult[]
+  batchReferences     BatchPositionReference[]
+
+  @@index([referenceMaterialId, analysisCode])
+  // Two migration-only partial unique indexes enforce current generic/method values.
+}
+
+model OperationalGate {
+  id        String  @id @default(uuid())
+  code      String  // e.g. DRYING, SIEVING, PREPARATION
+  name      String  // e.g. "Air Drying (40°C)"
+  sortOrder Int     @default(0)
+  labId     String? // null = global default
+  isActive  Boolean @default(true)
+
+  @@unique([code, labId])
+}
+
+// --- REPORTING MODULE ---
+
+model Report {
+  id            String    @id @default(uuid())
+  sampleId      String
+  labId         String?
+  version       Int       @default(1)
+  status        String    @default("DRAFT")  // DRAFT, PUBLISHED, SUPERSEDED, WITHDRAWN
+  reportNumberBase String?
+  revision      Int?
+  policyVersion Int?
+  // #211: frozen revision evidence, written only for newly generated reports.
+  supersedesReportId    String?
+  amendmentId           String?
+  amendmentReason       String?
+  issuedBy              String?
+  approvedBy            String?
+  amendmentAuthorizedBy String?
+
+  // Denormalized search keys (populated at generation time)
+  firstName     String?
+  surname       String?
+  phone         String?
+  phoneNorm     String?   // digits-only for fuzzy search
+  projectCode   String?
+  projectName   String?
+  sampleLabId   String?   // Sample's labId for quick lookup
+
+  // Report content snapshot (denormalized)
+  content       String?   // JSON: full assembled report payload
+  generatedBy   String
+  generatedAt   DateTime  @default(now())
+  publishedAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  shareLinks    ReportShareLink[]
+  amendmentWithdrawals ReportAmendmentWithdrawal[]
+
+  @@unique([sampleId, version])
+  @@index([sampleId])
+  @@index([labId])
+  @@index([status])
+  @@index([projectCode])
+  @@index([sampleLabId])
+}
+
+model ReportSequence {
+  labId     String
+  year      Int
+  lastValue Int @default(0)
+
+  @@unique([labId, year])
+}
+
+model LabSequence {
+  labId String
+  scope String // SAMPLE, REPORT, CONSIGNMENT, BATCH (SQL CHECK)
+  year  Int
+  next  Int @default(1)
+
+  @@id([labId, scope, year])
+}
+
+model ReportShareLink {
+  id          String    @id @default(uuid())
+  reportId    String
+  report      Report    @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  tokenHash   String    @unique   // SHA-256 of the public token (token itself is NOT stored)
+  expiresAt   DateTime?
+  isRevoked   Boolean   @default(false)
+  createdBy   String
+  createdAt   DateTime  @default(now())
+  revokedAt   DateTime?
+  revokedBy   String?
+
+  accessLogs  ReportAccessLog[]
+
+  @@index([reportId])
+}
+
+model ReportAccessLog {
+  id          String    @id @default(uuid())
+  linkId      String
+  link        ReportShareLink @relation(fields: [linkId], references: [id], onDelete: Cascade)
+  accessedAt  DateTime  @default(now())
+  ipAddress   String?
+  userAgent   String?
+
+  @@index([linkId])
+}
+
+// --- SOIL INFORMATION SYSTEM (SIS) INTEGRATION API KEYS ---
+
+model ApiKey {
+  id           String    @id
+  name         String
+  keyHash      String    @unique // Hashed or masked token
+  keyPrefix    String    // e.g. "slims_live_9f83..." for display
+  role         String    @default("NSIS_CONSUMER") // NSIS_CONSUMER, EXTERNAL_GIS, GLOBAL_HARVESTER
+  capabilities String?   // JSON array: ["SPATIAL", "SPECTRAL", "SNAPSHOT", "RECEIPT"] or null
+  connectionId String?   // Persistent connection ID: conn_<uuid>
+  countries    String?   // JSON array: ["GTM", "HND"] or null for all
+  projects     String?   // JSON array: ["SoilFER-USA"] or null for all
+  labs         String?   // JSON array: ["LAB-GTM"] or null (absent = deny for spectra)
+  isActive     Boolean   @default(true)
+  createdBy    String?
+  lastUsedAt   DateTime?
+  expiresAt    DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([keyHash])
+  @@index([connectionId])
+}
+
+// --- PACKAGE P2: TRANSACTIONAL FOUNDATIONS & SAMPLE WORKSPACE ---
+
+model SampleOrderRevision {
+  id           String       @id @default(uuid())
+  sampleId     String
+  sample       Sample       @relation(fields: [sampleId], references: [id], onDelete: Cascade)
+  version      Int          @default(1)
+  status       String       @default("ACTIVE") // ACTIVE, SUPERSEDED, CANCELLED
+  reason       String?
+  requestedBy  String?
+  authorizedBy String?
+  authorizedAt DateTime?
+  lines        OrderLine[]
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  @@unique([sampleId, version])
+  @@index([sampleId])
+}
+
+model OrderLine {
+  id                   String              @id @default(uuid())
+  revisionId           String
+  revision             SampleOrderRevision @relation(fields: [revisionId], references: [id], onDelete: Cascade)
+  analysis             String              // Analysis code (e.g. PH_H2O, VIS_NIR, etc.)
+  workItemId           String?             // #209 new-line identity; retained lines remain null.
+  methodologyId        String?
+  methodRevision       String?
+  isRequired           Boolean             @default(true)
+  status               String              @default("ACTIVE") // ACTIVE, CANCELLED, OMITTED
+  omissionReason       String?
+  omissionAuthorizedBy String?
+  omissionAuthorizedAt DateTime?
+  predecessorLineId    String?
+  attempts             WorkAttempt[]
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+
+  @@index([revisionId])
+  @@index([analysis])
+}
+
+model WorkAttempt {
+  id                     String      @id @default(uuid())
+  workItemId             String
+  workItem               WorkItem    @relation(fields: [workItemId], references: [id], onDelete: Cascade)
+  orderLineId            String?
+  orderLine              OrderLine?  @relation(fields: [orderLineId], references: [id], onDelete: SetNull)
+  attemptNo              Int         @default(1)
+  executedMethodRevision String?
+  author                 String?
+  authorName             String?
+  materialAliquot        String?
+  instrumentId           String?
+  qcBatchId              String?
+  batchId                String?
+  batch                  Batch?      @relation(fields: [batchId], references: [id], onDelete: Restrict)
+  reason                 String?     // RepeatReason; null on historical first attempts.
+  requestedBy            String?
+  requestedAt            DateTime?
+  parentAttemptId        String?     // Immutable repeat request; SQL checks the canonical parent owner.
+  note                   String?     // Immutable request note; never inferred for historical attempts.
+  rawData                String?     // Immutable JSON text; calculation templates are #199.
+  calcVersion            String?
+  dilutionFactor         Float?
+  aliquotId              String?     // Structured aliquots are #206.
+  legacyAttemptNoConflict String?    // Migration-only, write-once conflict exemption.
+  version                Int         @default(1)
+  status                 String      @default("RECORDED") // Canonical shared statuses; historical RETURNED/REJECTED remain stored.
+  evidenceHash           String?
+  evidenceData           String?     // JSON snapshot of recorded evidence
+  createdAt              DateTime    @default(now())
+  updatedAt              DateTime    @updatedAt
+
+  amendmentParentLinks SampleAmendmentAttempt[] @relation("AmendmentParentAttempt")
+  amendmentChildLink   SampleAmendmentAttempt?  @relation("AmendmentChildAttempt")
+
+  @@index([workItemId])
+  // Partial uniqueness is installed by the additive #190 SQL in every lab.
+  @@index([workItemId, attemptNo])
+  @@index([batchId])
+  @@index([orderLineId])
+}
+
+// #192: values are retained per output; one choice supersedes its whole group.
+model ReportedValueSelection {
+  id               String @id
+  workItemId       String
+  workItem         WorkItem @relation(fields: [workItemId], references: [id], onDelete: Restrict)
+  analysisCode     String
+  selectionGroupId String
+  mode             String
+  attemptIds       String
+  resultIds        String
+  value            Float?
+  valueText        String
+  unit             String?
+  censoring        String
+  methodologyId    String?
+  rule             String
+  policyKey        String
+  policyVersion    Int
+  policyRule       String
+  qcRuleSnapshot   String
+  evidenceSnapshot String
+  lineageSnapshot  String
+  outputParams     String
+  derivation       String?
+  reason           String?
+  selectedBy       String
+  selectedAt       DateTime
+  supersedesId     String? @unique
+  backfill         Boolean @default(false)
+
+  @@unique([selectionGroupId, analysisCode])
+  @@index([workItemId, analysisCode])
+}
+
+model ReviewDecision {
+  id               String    @id @default(uuid())
+  sampleId         String
+  sample           Sample    @relation(fields: [sampleId], references: [id], onDelete: Cascade)
+  workItemId       String?
+  workItem         WorkItem? @relation(fields: [workItemId], references: [id], onDelete: SetNull)
+  submissionItemId String?
+  attemptId        String?
+  decision         String    // ACCEPT, RETURN, REJECT, OMIT
+  reason           String?
+  reasonCode       String?
+  evidenceVersion  Int?
+  evidenceHash     String?
+  reviewerId       String
+  reviewerName     String?
+  authorization    String?   // Role / capability
+  policyVersion    String?   @default("v1")
+  createdAt        DateTime  @default(now())
+
+  @@index([sampleId])
+  @@index([workItemId])
+}
+
+model SampleAmendment {
+  id                 String    @id @default(uuid())
+  sampleId           String
+  sample             Sample    @relation(fields: [sampleId], references: [id], onDelete: Cascade)
+  type               String    // CLERICAL, SCIENTIFIC, ORDER, REPORT
+  status             String    @default("PENDING") // PENDING, APPROVED, REJECTED, RESOLVED
+  reason             String
+  affectedOrderLines String?   // JSON array of order line IDs
+  affectedResults    String?   // JSON array of result IDs
+  affectedReports    String?   // JSON array of report IDs
+  impactAssessment   String?
+  requestPayload     String?   // Immutable JSON request, #210; historical rows remain NULL.
+  version            Int?      // Compare-and-swap revision for the new request/authorise flow.
+  priorApprovedBy    String?
+  priorApprovedAt    DateTime?
+  selectedWorkItemIds String?  // Immutable JSON array of the selected current order-line IDs.
+  authorizedBy       String?
+  authorizedAt       DateTime?
+  resolution         String?
+  createdBy          String
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  attemptLinks SampleAmendmentAttempt[]
+  reportWithdrawals ReportAmendmentWithdrawal[]
+
+  @@index([sampleId])
+}
+
+// #210 pin6091749343: immutable authorisation authority, with no backfill.
+model SampleAmendmentAttempt {
+  id              String @id @default(uuid())
+  amendmentId     String
+  workItemId      String
+  parentAttemptId String
+  childAttemptId  String @unique
+  reason          String // CLIENT_RETEST or CONFIRMATION; SQL guards enforce it.
+  createdAt       DateTime @default(now())
+
+  amendment SampleAmendment @relation(fields: [amendmentId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  workItem  WorkItem @relation(fields: [workItemId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  parent    WorkAttempt @relation("AmendmentParentAttempt", fields: [parentAttemptId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  child     WorkAttempt @relation("AmendmentChildAttempt", fields: [childAttemptId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+}
+
+// #210 pin6094004400: a retained report has one immutable withdrawal reason.
+model ReportAmendmentWithdrawal {
+  id String @id @default(uuid())
+  reportId String @unique
+  amendmentId String
+  createdAt DateTime @default(now())
+
+  report Report @relation(fields: [reportId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  amendment SampleAmendment @relation(fields: [amendmentId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+}
+
+model CommandReceipt {
+  id             String    @id @default(uuid())
+  idempotencyKey String    @unique
+  commandType    String
+  targetResource String    // e.g. "Sample:123"
+  actor          String
+  status         String    // SUCCESS, FAILED
+  outcome        String?   // JSON payload of result
+  createdAt      DateTime  @default(now())
+
+  @@index([idempotencyKey])
+  @@index([actor])
+}
+
+// ─── HELP CENTRE & KNOWLEDGE BASE MODELS ───
+
+model HelpArticle {
+  id          String    @id
+  category    String
+  kind        String
+  feature     String    @default("core")
+  roles       String
+  keywords    String
+  minutes     Int       @default(2)
+  reviewOwner String    @default("Lab operations lead")
+  visibility  String    @default("AUTHENTICATED")
+  archivedAt  DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  revisions    HelpRevision[]
+  publications HelpPublication[]
+  labNotes     HelpLabNote[]
+  feedback     HelpFeedback[]
+
+  @@index([category])
+  @@index([visibility])
+}
+
+model HelpRevision {
+  id             String       @id @default(uuid())
+  articleId      String
+  article        HelpArticle  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  revisionNumber Int
+  title          String
+  summary        String
+  steps          String
+  success        String
+  caution        String
+  related        String
+  sourceLocale   String       @default("en")
+  sourceHash     String
+  changeReason   String?
+  authorId       String?
+  createdAt      DateTime     @default(now())
+
+  locales      HelpLocaleRevision[]
+  publications HelpPublication[]
+
+  @@unique([articleId, revisionNumber])
+  @@index([articleId])
+}
+
+model HelpLocaleRevision {
+  id           String       @id @default(uuid())
+  revisionId   String
+  revision     HelpRevision @relation(fields: [revisionId], references: [id], onDelete: Cascade)
+  locale       String
+  title        String
+  summary      String
+  steps        String
+  success      String
+  caution      String
+  reviewStatus String       @default("TRANSLATION_REQUIRED")
+  reviewedBy   String?
+  reviewedAt   DateTime?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  @@unique([revisionId, locale])
+  @@index([locale])
+}
+
+model HelpPublication {
+  id              String       @id @default(uuid())
+  articleId       String
+  article         HelpArticle  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  revisionId      String
+  revision        HelpRevision @relation(fields: [revisionId], references: [id], onDelete: Cascade)
+  approvedLocales String
+  publishedBy     String
+  publishedAt     DateTime     @default(now())
+  reviewDue       DateTime?
+  isCurrent       Boolean      @default(true)
+
+  @@index([articleId, isCurrent])
+}
+
+model HelpLabNote {
+  id        String      @id @default(uuid())
+  articleId String
+  article   HelpArticle @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  labId     String
+  noteText  String
+  authorId  String
+  isActive  Boolean     @default(true)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  @@unique([articleId, labId])
+  @@index([labId])
+}
+
+model HelpFeedback {
+  id         String      @id @default(uuid())
+  articleId  String
+  article    HelpArticle @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  revisionId String?
+  locale     String      @default("en")
+  useful     Boolean
+  comment    String?
+  category   String?
+  userId     String?
+  createdAt  DateTime    @default(now())
+
+  @@index([articleId])
+}
+
+model HelpSupportConfig {
+  id            String   @id @default(uuid())
+  labId         String   @unique
+  supportName   String?
+  contactMethod String?
+  contactValue  String?
+  instructions  String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([labId])
+}
+
+// --- LABORATORY GOVERNANCE & ACCESS CONTROL MODELS ---
+
+model LabLifecycleState {
+  labId             String    @id
+  operationalStatus String    @default("ACTIVE")
+  revision          Int       @default(1)
+  pauseReason       String?
+  pausedAt          DateTime?
+  pausedBy          String?
+  updatedAt         DateTime  @default(now()) @updatedAt
+}
+
+model StaffInvitation {
+  id         String    @id
+  email      String
+  name       String
+  role       String
+  labId      String
+  projects   String?
+  tokenHash  String    @unique
+  expiresAt  DateTime
+  isConsumed Boolean   @default(false)
+  isRevoked  Boolean   @default(false)
+  createdBy  String
+  createdAt  DateTime  @default(now())
+  consumedAt DateTime?
+}
+
+model PasswordRecoveryGrant {
+  id         String    @id
+  userId     String
+  tokenHash  String    @unique
+  expiresAt  DateTime
+  isConsumed Boolean   @default(false)
+  isRevoked  Boolean   @default(false)
+  createdBy  String
+  createdAt  DateTime  @default(now())
+  consumedAt DateTime?
+
+  @@map("StaffRecoveryGrant")
+}
+
+model LabAppearanceSetting {
+  labId       String   @id
+  themeId     String?
+  defaultMode String   @default("inherit")
+  revision    Int      @default(0)
+  updatedAt   DateTime @default(now()) @updatedAt
+  updatedBy   String?
+
+  lab         Lab      @relation(fields: [labId], references: [id], onDelete: Cascade)
+}
+
+model GlobalAppearanceSetting {
+  id          String   @id // 'global'
+  themeId     String   @default("soilfer-classic")
+  defaultMode String   @default("light")
+  revision    Int      @default(0)
+  updatedAt   DateTime @default(now()) @updatedAt
+  updatedBy   String?
+}
+
+
+// #197: retained context and single-use approval; SQL guards enforce edges.
+model ResultOverrideRequest {
+  id String @id
+  labId String
+  lab Lab @relation(fields:[labId], references:[id], onDelete:Restrict)
+  workItemId String
+  workItem WorkItem @relation(fields:[workItemId], references:[id], onDelete:Restrict)
+  sampleId String
+  sample Sample @relation(fields:[sampleId], references:[id], onDelete:Restrict)
+  analysisCode String
+  analysis Analysis @relation(fields:[analysisCode], references:[code], onDelete:Restrict)
+  replicateNo Int
+  rawValue String
+  unit String?
+  basis String
+  methodologyId String?
+  methodology Methodology? @relation(fields:[methodologyId], references:[id], onDelete:Restrict)
+  methodRevision String?
+  instrumentId String?
+  instrument EquipmentAsset? @relation(fields:[instrumentId], references:[id], onDelete:Restrict)
+  rulesSha256 String
+  flags String
+  reason String
+  requestedBy String
+  requester User @relation("OverrideRequester", fields:[requestedBy], references:[id], onDelete:Restrict)
+  requestedAt DateTime @default(now())
+  status String @default("REQUESTED")
+  decidedBy String?
+  decider User? @relation("OverrideDecider", fields:[decidedBy], references:[id], onDelete:Restrict)
+  decidedAt DateTime?
+  decisionReason String?
+  cancelledBy String?
+  canceller User? @relation("OverrideCanceller", fields:[cancelledBy], references:[id], onDelete:Restrict)
+  cancelledAt DateTime?
+  cancelReason String?
+  consumedResultId String? @unique
+  consumedResult Result? @relation(fields:[consumedResultId], references:[id], onDelete:Restrict)
+  consumedAt DateTime?
+  @@index([labId,status,requestedAt])
+  @@index([workItemId,replicateNo])
+}
+
+// #201 pin6092380877: immutable outcomes from the submission transaction.
+model CrossCheckEvaluation {
+  id          String   @id @default(uuid())
+  sampleId    String
+  sample      Sample   @relation(fields: [sampleId], references: [id], onDelete: Restrict)
+  labId       String
+  lab         Lab      @relation(fields: [labId], references: [id], onDelete: Restrict)
+  trigger     String
+  ruleCode    String
+  outcome     String
+  reasonCode  String?
+  inputs      String
+  thresholds  String
+  evaluatedBy String
+  evaluatedAt DateTime @default(now())
+
+  @@index([sampleId, evaluatedAt])
+  @@index([labId, sampleId, evaluatedAt])
+}
+
+// #205: append-only structured preparation evidence, one row per recorded
+// step of a confirmed DRYING or PREPARATION gate receipt.
+model PreparationRecord {
+  id                String          @id
+  sampleId          String
+  workItemId        String
+  receiptId         String
+  gateCode          String          // DRYING | SIEVING | GRINDING | SPLITTING
+  equipmentId       String?
+  method            String?         // AIR | OVEN_40 | OVEN_105 | OTHER (DRYING only)
+  startedAt         DateTime
+  endedAt           DateTime
+  temperatureC      Float?
+  massBeforeG       Float?
+  massAfterG        Float?
+  coarseFractionG   Float?
+  coarseFractionPct Float?
+  sieveMm           Float?
+  grindMm           Float?
+  performedBy       String
+  notes             String?
+  version           Int             @default(1)
+  createdAt         DateTime        @default(now())
+
+  sample    Sample          @relation(fields: [sampleId], references: [id], onDelete: Restrict)
+  workItem  WorkItem        @relation(fields: [workItemId], references: [id], onDelete: Restrict)
+  equipment EquipmentAsset? @relation(fields: [equipmentId], references: [id], onDelete: Restrict)
+
+  @@unique([receiptId, gateCode])
+  @@index([sampleId])
+  @@index([workItemId])
+}
+
+// #206: physical identities are append-only; custody/lifecycle are #207/#208.
+model SampleContainer {
+  id                String @id
+  sampleId          String
+  sample            Sample @relation(fields: [sampleId], references: [id], onDelete: Restrict)
+  parentId          String?
+  parent            SampleContainer? @relation("ContainerHierarchy", fields: [parentId], references: [id], onDelete: Restrict)
+  children          SampleContainer[] @relation("ContainerHierarchy")
+  kind              String
+  code              String @unique
+  massG             Float?
+  createdAt         DateTime @default(now())
+  createdBy         String
+  storageLocationId String?
+  status            String @default("ACTIVE")
+  @@index([sampleId])
+  @@index([parentId])
+}

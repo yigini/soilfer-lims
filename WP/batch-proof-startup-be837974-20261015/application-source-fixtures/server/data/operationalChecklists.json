@@ -1,0 +1,20 @@
+{
+  "DRYING": {
+    "name": "Sample drying",
+    "revision": "operational-checklist-v1",
+    "steps": [
+      "Sample identity and container label verified",
+      "Drying completed according to the applicable laboratory procedure",
+      "Required drying endpoint and sample condition checked before handover"
+    ]
+  },
+  "PREPARATION": {
+    "name": "Sample preparation",
+    "revision": "operational-checklist-v1",
+    "steps": [
+      "Sample identity and completed drying record verified",
+      "Required preparation steps completed according to the applicable laboratory procedure",
+      "Prepared material and retained portions labeled for their intended analyses"
+    ]
+  }
+}
