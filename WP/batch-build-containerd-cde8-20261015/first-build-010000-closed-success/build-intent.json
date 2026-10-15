@@ -1,0 +1,8 @@
+{
+  "status": "BUILD_ATTEMPTED_ONCE",
+  "startedUtc": "2026-10-15T00:27:22.197506+00:00",
+  "head": "cde8c8896f5f9d5f1ab07b0ae16b1a765e0a6367",
+  "tag": "soilfer-lims:audit-workflow-batch-build-cde8c889-20261015T010000Z",
+  "scope": "BUILD_ONLY_NO_DATABASE_CONNECTION_OR_VOLUME",
+  "neverRetry": true
+}

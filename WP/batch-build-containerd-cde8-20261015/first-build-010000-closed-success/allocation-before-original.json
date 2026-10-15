@@ -1,0 +1,54 @@
+{
+  "argv": [
+    "du",
+    "-s",
+    "-B1",
+    "--",
+    "/opt/lims/releases/workflow-batch-build-cde8c889-20261015T010000Z",
+    "/var/lib/docker/buildkit",
+    "/var/lib/containerd"
+  ],
+  "timeoutSeconds": 120,
+  "exitCode": 0,
+  "physicalBytesExact": true,
+  "hardlinksCountedOnceInOneDuInvocation": true,
+  "mountInventoryChecked": true,
+  "rows": {
+    "/opt/lims/releases/workflow-batch-build-cde8c889-20261015T010000Z": {
+      "bytes": 41492480,
+      "device": 64769,
+      "exists": true,
+      "symlink": false
+    },
+    "/var/lib/docker/buildkit": {
+      "bytes": 94449664,
+      "device": 64769,
+      "exists": true,
+      "symlink": false
+    },
+    "/var/lib/docker/overlay2": {
+      "bytes": 0,
+      "device": 64769,
+      "exists": false,
+      "symlink": false
+    },
+    "/var/lib/docker/image": {
+      "bytes": 0,
+      "device": 64769,
+      "exists": false,
+      "symlink": false
+    },
+    "/var/lib/docker/containerd": {
+      "bytes": 0,
+      "device": 64769,
+      "exists": false,
+      "symlink": false
+    },
+    "/var/lib/containerd": {
+      "bytes": 43259318272,
+      "device": 64769,
+      "exists": true,
+      "symlink": false
+    }
+  }
+}
