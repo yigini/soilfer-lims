@@ -1,0 +1,1 @@
+{"argv":["docker","buildx","inspect","default"],"neverRetry":true,"timeoutSeconds":30,"utc":"2026-10-15T20:24:28.704699+00:00"}

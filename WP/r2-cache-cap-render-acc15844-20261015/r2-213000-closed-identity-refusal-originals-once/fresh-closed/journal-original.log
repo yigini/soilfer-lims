@@ -1,0 +1,17 @@
+2026-10-15T22:24:28.031860+0200 server systemd[1]: Starting /usr/bin/python3 -B /opt/lims/cleanup-receipts/r2-cache-acc15844-20261015T213000Z/r2_cache.py...
+2026-10-15T22:24:28.034218+0200 server systemd[1]: Started /usr/bin/python3 -B /opt/lims/cleanup-receipts/r2-cache-acc15844-20261015T213000Z/r2_cache.py.
+2026-10-15T22:24:48.586148+0200 server python3[1219732]: Traceback (most recent call last):
+2026-10-15T22:24:48.586148+0200 server python3[1219732]:   File "/opt/lims/cleanup-receipts/r2-cache-acc15844-20261015T213000Z/r2_cache.py", line 183, in <module>
+2026-10-15T22:24:48.587745+0200 server python3[1219732]:     if __name__=='__main__':raise SystemExit(run())
+2026-10-15T22:24:48.587745+0200 server python3[1219732]:   File "/opt/lims/cleanup-receipts/r2-cache-acc15844-20261015T213000Z/r2_cache.py", line 174, in run
+2026-10-15T22:24:48.587745+0200 server python3[1219732]:     result=maintain(backend,sink)
+2026-10-15T22:24:48.587745+0200 server python3[1219732]:   File "/opt/lims/cleanup-receipts/r2-cache-acc15844-20261015T213000Z/r2_cache.py", line 125, in maintain
+2026-10-15T22:24:48.587745+0200 server python3[1219732]:     du_guard(backend.du(wanted),wanted)
+2026-10-15T22:24:48.587745+0200 server python3[1219732]:   File "/opt/lims/cleanup-receipts/r2-cache-acc15844-20261015T213000Z/r2_contract.py", line 129, in du_guard
+2026-10-15T22:24:48.587745+0200 server python3[1219732]:     require(str(r.get('Size'))==str(wanted['Size']) and sorted(r.get('Parents',[]))==wanted['Parents'] and r.get('CreatedAt')==wanted['CreatedAt'] and r.get('LastUsedAt')==wanted['LastUsedAt'],'Buildx/API identity differs')
+2026-10-15T22:24:48.587745+0200 server python3[1219732]:   File "/opt/lims/cleanup-receipts/r2-cache-acc15844-20261015T213000Z/r2_contract.py", line 41, in require
+2026-10-15T22:24:48.587745+0200 server python3[1219732]:     if not ok:raise RuntimeError(message)
+2026-10-15T22:24:48.587745+0200 server python3[1219732]: RuntimeError: Buildx/API identity differs
+2026-10-15T22:24:48.618514+0200 server systemd[1]: lims-r2-cache-acc15844-20261015t213000z.service: Main process exited, code=exited, status=1/FAILURE
+2026-10-15T22:24:48.619089+0200 server systemd[1]: lims-r2-cache-acc15844-20261015t213000z.service: Failed with result 'exit-code'.
+2026-10-15T22:24:48.620614+0200 server systemd[1]: lims-r2-cache-acc15844-20261015t213000z.service: Consumed 3.916s CPU time, 51.4M memory peak.

@@ -1,0 +1,1 @@
+{"argv":["docker","buildx","version"],"error":null,"exitCode":0,"outputTruncated":false,"stderr":"","stdout":"github.com/docker/buildx v0.30.1 9e66234aa13328a5e75b75aa5574e1ca6d6d9c01\n","utc":"2026-10-15T20:24:28.702280+00:00"}
