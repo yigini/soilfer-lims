@@ -1,0 +1,45 @@
+test_500mb_abort (verify_proof_guards.Guards) ... ok
+test_approved_nonzero_stop (verify_proof_guards.Guards) ... ok
+test_arbitrary_installer (verify_proof_guards.Guards) ... ok
+test_backfill_refused (verify_proof_guards.Guards) ... ok
+test_changed_image (verify_proof_guards.Guards) ... ok
+test_cross_device_credit (verify_proof_guards.Guards) ... ok
+test_descendant_mount (verify_proof_guards.Guards) ... ok
+test_edited_pass (verify_proof_guards.Guards) ... ok
+test_fake_actor (verify_proof_guards.Guards) ... ok
+test_growth_zero (verify_proof_guards.Guards) ... ok
+test_historical_container_delete (verify_proof_guards.Guards) ... ok
+test_impact_zero (verify_proof_guards.Guards) ... ok
+test_later_failed (verify_proof_guards.Guards) ... ok
+test_malformed_analysis_missing_ids (verify_proof_guards.Guards) ... ok
+test_missing_containerd (verify_proof_guards.Guards) ... ok
+test_missing_graph (verify_proof_guards.Guards) ... ok
+test_missing_jobs_gate (verify_proof_guards.Guards) ... ok
+test_old_pass (verify_proof_guards.Guards) ... ok
+test_parent_escape (verify_proof_guards.Guards) ... ok
+test_policy_absent_stop (verify_proof_guards.Guards) ... ok
+test_policy_canonical (verify_proof_guards.Guards) ... ok
+test_policy_prisma_shape_stop (verify_proof_guards.Guards) ... ok
+test_preserve_stopped (verify_proof_guards.Guards) ... ok
+test_production_mount (verify_proof_guards.Guards) ... ok
+test_retained_argv (verify_proof_guards.Guards) ... ok
+test_review_full (verify_proof_guards.Guards) ... ok
+test_scaled_reserve (verify_proof_guards.Guards) ... ok
+test_scope_omitted (verify_proof_guards.Guards) ... ok
+test_startup_duplicate (verify_proof_guards.Guards) ... ok
+test_startup_exact (verify_proof_guards.Guards) ... ok
+test_startup_write (verify_proof_guards.Guards) ... ok
+test_stopped_container_start (verify_proof_guards.Guards) ... ok
+test_unapproved_mode (verify_proof_guards.Guards) ... ok
+test_wrong_root (verify_proof_guards.Guards) ... ok
+test_nonempty_added_table_refused (verify_proof_guards.OwnedFixtureTests) ... ok
+test_nonempty_wal_fold_master_preserved (verify_proof_guards.OwnedFixtureTests) ... ok
+test_old_receipt_change_refused (verify_proof_guards.OwnedFixtureTests) ... ok
+test_original_row_change_refused (verify_proof_guards.OwnedFixtureTests) ... ok
+test_unapproved_column_refused (verify_proof_guards.OwnedFixtureTests) ... ok
+test_valid_additive_rows_receipts (verify_proof_guards.OwnedFixtureTests) ... ok
+
+----------------------------------------------------------------------
+Ran 40 tests in 0.166s
+
+OK

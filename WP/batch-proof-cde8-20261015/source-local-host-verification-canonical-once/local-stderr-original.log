@@ -1,0 +1,45 @@
+test_500mb_abort (__main__.Guards.test_500mb_abort) ... ok
+test_approved_nonzero_stop (__main__.Guards.test_approved_nonzero_stop) ... ok
+test_arbitrary_installer (__main__.Guards.test_arbitrary_installer) ... ok
+test_backfill_refused (__main__.Guards.test_backfill_refused) ... ok
+test_changed_image (__main__.Guards.test_changed_image) ... ok
+test_cross_device_credit (__main__.Guards.test_cross_device_credit) ... ok
+test_descendant_mount (__main__.Guards.test_descendant_mount) ... ok
+test_edited_pass (__main__.Guards.test_edited_pass) ... ok
+test_fake_actor (__main__.Guards.test_fake_actor) ... ok
+test_growth_zero (__main__.Guards.test_growth_zero) ... ok
+test_historical_container_delete (__main__.Guards.test_historical_container_delete) ... ok
+test_impact_zero (__main__.Guards.test_impact_zero) ... ok
+test_later_failed (__main__.Guards.test_later_failed) ... ok
+test_malformed_analysis_missing_ids (__main__.Guards.test_malformed_analysis_missing_ids) ... ok
+test_missing_containerd (__main__.Guards.test_missing_containerd) ... ok
+test_missing_graph (__main__.Guards.test_missing_graph) ... ok
+test_missing_jobs_gate (__main__.Guards.test_missing_jobs_gate) ... ok
+test_old_pass (__main__.Guards.test_old_pass) ... ok
+test_parent_escape (__main__.Guards.test_parent_escape) ... ok
+test_policy_absent_stop (__main__.Guards.test_policy_absent_stop) ... ok
+test_policy_canonical (__main__.Guards.test_policy_canonical) ... ok
+test_policy_prisma_shape_stop (__main__.Guards.test_policy_prisma_shape_stop) ... ok
+test_preserve_stopped (__main__.Guards.test_preserve_stopped) ... ok
+test_production_mount (__main__.Guards.test_production_mount) ... ok
+test_retained_argv (__main__.Guards.test_retained_argv) ... ok
+test_review_full (__main__.Guards.test_review_full) ... ok
+test_scaled_reserve (__main__.Guards.test_scaled_reserve) ... ok
+test_scope_omitted (__main__.Guards.test_scope_omitted) ... ok
+test_startup_duplicate (__main__.Guards.test_startup_duplicate) ... ok
+test_startup_exact (__main__.Guards.test_startup_exact) ... ok
+test_startup_write (__main__.Guards.test_startup_write) ... ok
+test_stopped_container_start (__main__.Guards.test_stopped_container_start) ... ok
+test_unapproved_mode (__main__.Guards.test_unapproved_mode) ... ok
+test_wrong_root (__main__.Guards.test_wrong_root) ... ok
+test_nonempty_added_table_refused (__main__.OwnedFixtureTests.test_nonempty_added_table_refused) ... ok
+test_nonempty_wal_fold_master_preserved (__main__.OwnedFixtureTests.test_nonempty_wal_fold_master_preserved) ... ok
+test_old_receipt_change_refused (__main__.OwnedFixtureTests.test_old_receipt_change_refused) ... ok
+test_original_row_change_refused (__main__.OwnedFixtureTests.test_original_row_change_refused) ... ok
+test_unapproved_column_refused (__main__.OwnedFixtureTests.test_unapproved_column_refused) ... ok
+test_valid_additive_rows_receipts (__main__.OwnedFixtureTests.test_valid_additive_rows_receipts) ... ok
+
+----------------------------------------------------------------------
+Ran 40 tests in 0.110s
+
+OK
