@@ -1,0 +1,68 @@
+{
+  "baseAudit": "584573491c741e9d79582524d078d180f2ec0408",
+  "status": "FINAL_NATIVE_AUDIT_HANDOFF_SENT_ONCE_VERIFIED_VISUALLY",
+  "publishedUtc": "2026-10-15T13:38:35.902891+00:00",
+  "files": [
+    {
+      "path": "WP/startup-order-readiness-20261015/pr298-final-native-handoff-once/coordination-after-handoff-original.json",
+      "length": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "gitBlobOid": "0637a088a01e8ddab3bf3fa98dbe804cbde1a0dc"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/pr298-final-native-handoff-once/main-after-handoff-original.json",
+      "length": 336,
+      "sha256": "8ab38fb8db0993cd672bbb2e6bf3b6ca8d124087fb841ecc97bad4fb1d9bfe89",
+      "gitBlobOid": "dc45c7625305c3a43f77f46efbc91993affaa349"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/pr298-final-native-handoff-once/native-accessibility-tool-output-transcription.txt",
+      "length": 8689,
+      "sha256": "c4874db6683c12b1ae4a0528b2f08d3be2fe4d289a35c3af8de2ce62c34044ee",
+      "gitBlobOid": "d972fc7acde43c573db1ede57516a7be4ff3fa56"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/pr298-final-native-handoff-once/native-delivery-record.json",
+      "length": 2078,
+      "sha256": "3ca5c3293b709a4482a51a0a30dac7bf0a59703ee9df779499b88ac4bb12d5f5",
+      "gitBlobOid": "8687afd05fc45bb7f1ba1f2f9d26144a569de56a"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/pr298-final-native-handoff-once/native-handoff-actual-sent.txt",
+      "length": 2639,
+      "sha256": "9c7b1a618a55e66d244cc8563cf9ab2b823822f07a452267941455ae0395d82f",
+      "gitBlobOid": "35e5d820818f34249d16c786e5cc3e2481d36692"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/pr298-final-native-handoff-once/pr-after-handoff-original.json",
+      "length": 31305,
+      "sha256": "100cdea60d63d2e538a3edf5b2934f1253e33643956b46f82c1da7698f7e256e",
+      "gitBlobOid": "3b999486d04dd2947d2f166dc58ef2629254a784"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/pr298-final-native-handoff-once/pr-comments-after-handoff-original.json",
+      "length": 6324,
+      "sha256": "2c7dd7d3ec686957eadb950fed35660249db50337548275ed60a8a897ae5d008",
+      "gitBlobOid": "2d2f94b858eb82d6e7237f846af3f941a53ac929"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/pr298-final-native-handoff-once/pr-reviews-after-handoff-original.json",
+      "length": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "gitBlobOid": "0637a088a01e8ddab3bf3fa98dbe804cbde1a0dc"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/retain-startup-pr298-final-native-handoff-once.py",
+      "length": 6361,
+      "sha256": "54f285ce53a44ded1775cdfbf670b02937321df0e0a76239f568a72f866166d0",
+      "gitBlobOid": "0e2853bc4853493e02c0a30c4697bda6360a6db1"
+    },
+    {
+      "path": "WP/audit-release-eb6de2e8/README.md",
+      "length": 635294,
+      "sha256": "cfc62157ea413a264f43eb25ceae131820c3f8221c206e0243bebdc8693adc52",
+      "gitBlobOid": "f1e13c6ae81a10faf1e98bfe80aea79266c17b50"
+    }
+  ],
+  "productionOperations": 0
+}

@@ -1,0 +1,28 @@
+{
+  "status": "FINAL_NATIVE_AUDIT_HANDOFF_SENT_ONCE_VERIFIED_VISUALLY",
+  "sentObservationUtc": "2026-10-15T13:37:25.419Z",
+  "verifiedObservationUtc": "2026-10-15T13:37:38.600Z",
+  "app": "Claude_pzs8sxrjxfjjc!Claude",
+  "window": 7867734,
+  "project": "LIMS Audit",
+  "thread": "Lab workflow audit and plan",
+  "initialOtherProject": "Dashboards: both composers empty, response finished and paused; no ongoing input or draft observed.",
+  "selection": "Returned app/window; activated then selected observed LIMS Audit button; screenshot proved LIMS/thread identity. Accessibility initially stale; no stale indexes used for composing. Fresh screenshot and subsequently updated accessibility preceded composer click.",
+  "beforeTyping": "Both actual composers empty; right composer clicked and caret observed.",
+  "draftInspection": "Own prepared text inspected at Control+Home and Control+End before ONE Return.",
+  "sentVerification": "Actual sent PR298/eba02837/6193369476 bubble, empty right composer and Claude Vibing visible. Next fresh screenshot shows actual acknowledgement and Running a command.",
+  "actualClaudeAcknowledgementVisible": "Got it: the startup fix (PR 298) is ready for its final audit. I’m checking out that exact version and running the tests now.",
+  "acknowledgementIsFinalAuditPass": false,
+  "humanCards": "The old test-copy deletion question remains unanswered; no card answered or human text changed.",
+  "accessibilityCaution": "After-send accessibility still reported the old composer text; visual screenshot shows actual sent bubble/empty composer/Claude response. Preserved tool-output transcription is stale accessibility, not independent final-audit evidence.",
+  "originalScreenshotLocation": "Conversation Computer Use tool results; no local screenshot bytes claimed.",
+  "pr": 298,
+  "head": "eba02837eaa2ab797cad0572fecada686f660346",
+  "comment": 6193369476,
+  "requestAudit": "584573491c741e9d79582524d078d180f2ec0408",
+  "productionOperations": 0,
+  "ciDispatches": 0,
+  "nativeReturnCount": 1,
+  "actualFinalAuditPass": false
+}
+
