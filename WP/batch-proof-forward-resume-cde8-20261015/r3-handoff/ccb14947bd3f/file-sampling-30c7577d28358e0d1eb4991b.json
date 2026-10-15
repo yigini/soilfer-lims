@@ -1,0 +1,1 @@
+{"after":{"bytes":8220,"device":6533813723147324839,"inode":844424934624311,"mode":438,"mtimeNs":1792041890024263600},"before":{"bytes":8192,"device":6533813723147324839,"inode":844424934624311,"mode":438,"mtimeNs":1792041890021562200},"comparisonPassed":false,"error":"File changed during sampling; no retry","neverRetry":true,"observedUtc":"2026-10-15T05:24:50.024263+00:00"}

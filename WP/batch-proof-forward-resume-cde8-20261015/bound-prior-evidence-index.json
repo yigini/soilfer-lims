@@ -1,0 +1,137 @@
+{
+  "files": {
+    "prior-apply-206-measurement.json": {
+      "blob": "971c2cbd2a4450f6803f7d5e02c4f6a905673938",
+      "bytes": 232,
+      "path": "WP/batch-proof-snapshot-handoff-cde8-20261015/first-proof-070000-closed-repeat-identity-stop/remote-originals/apply-206-measurement.json",
+      "sha256": "bd97f338be054fc9cb0c78f3952832fc669c2a82a818845ed6f513a3058aaac3"
+    },
+    "prior-apply-206-run.stdout": {
+      "blob": "4c200125e09de781cbd5ea5d205bd711c5f07d42",
+      "bytes": 701,
+      "path": "WP/batch-proof-snapshot-handoff-cde8-20261015/first-proof-070000-closed-repeat-identity-stop/remote-originals/apply-206-run.stdout",
+      "sha256": "1960e3c8e00da555e2d7a8ed8d633c22725377d5c5d85c8c657fe173659f7f5b"
+    },
+    "prior-assets-snapshot-handoff.json": {
+      "blob": "9d0323f3cb7177adcfe42148ed44c029fd7491b6",
+      "bytes": 310931,
+      "path": "WP/batch-proof-snapshot-handoff-cde8-20261015/first-proof-070000-closed-repeat-identity-stop/remote-originals/assets-snapshot-handoff.json",
+      "sha256": "74dfd0c4536e9f5a8100d75087bcdf79c558ae17d516d729350708371b74da6d"
+    },
+    "prior-closed-retention.json": {
+      "blob": "8a7d14295c6d05f890bd4a62fcb8def0cc56f2ee",
+      "bytes": 705544,
+      "path": "WP/batch-proof-snapshot-handoff-cde8-20261015/first-proof-070000-closed-repeat-identity-stop/closed-retention-record.json",
+      "sha256": "2d1367422b1c72021b87818b7bce10b19fc98d6bf37f3e5c35bb228c88d8a17f"
+    },
+    "prior-dry-206-byte-identity.json": {
+      "blob": "24de3aa7a0a1dde75028f8174a13f16db6c49e86",
+      "bytes": 722,
+      "path": "WP/batch-proof-snapshot-handoff-cde8-20261015/first-proof-070000-closed-repeat-identity-stop/remote-originals/dry-206-byte-identity.json",
+      "sha256": "e950878e7a2ba8cd398f6c5800e882e324d1e22a6f95f2e70137c8383b1dec7d"
+    },
+    "prior-dry-206-measurement.json": {
+      "blob": "883e9a90b4a9eda1c6e5bd3cad41e9b2ded32b8a",
+      "bytes": 231,
+      "path": "WP/batch-proof-snapshot-handoff-cde8-20261015/first-proof-070000-closed-repeat-identity-stop/remote-originals/dry-206-measurement.json",
+      "sha256": "609d4ef60292b1b5d30191b0d02f8695ffbbc0cdcaabbd4d3df36b5725b97094"
+    },
+    "prior-dry-206-run.stdout": {
+      "blob": "ca0e4c6924feeac083a15a8ed4aa24953ea59165",
+      "bytes": 243,
+      "path": "WP/batch-proof-snapshot-handoff-cde8-20261015/first-proof-070000-closed-repeat-identity-stop/remote-originals/dry-206-run.stdout",
+      "sha256": "6465c8c61eb85034df4d2f4a1432d7e1b23b6c9e01093896846b735c45414ce8"
+    },
+    "prior-fresh-actual-baseline.json": {
+      "blob": "41f64fce2ee3c7d046a6aa1afcd3bea5d5867b5e",
+      "bytes": 436,
+      "path": "WP/batch-proof-snapshot-handoff-cde8-20261015/first-proof-070000-closed-repeat-identity-stop/remote-originals/fresh-actual-baseline.json",
+      "sha256": "f58a2bdaba6873dd7c8f214473e53453ea0fbe932d5a20864a2d456f9549fb02"
+    },
+    "prior-fresh-production-snapshot--logical-state.json": {
+      "blob": "ed34578f5670f4213650c95b2c0e032e473398b2",
+      "bytes": 317448,
+      "path": "WP/batch-proof-snapshot-handoff-cde8-20261015/first-proof-070000-closed-repeat-identity-stop/remote-originals/fresh-production-snapshot/logical-state.json",
+      "sha256": "0a8d72affc84abd6085a4ecd7ea7d38a93e13d328d80df5d2299be714aa23c7d"
+    },
+    "prior-fresh-production-snapshot--raw--snapshot-handoff.json": {
+      "blob": "725b51701a78508b480cbba42a50df184dc98e76",
+      "bytes": 1784,
+      "path": "WP/batch-proof-snapshot-handoff-cde8-20261015/first-proof-070000-closed-repeat-identity-stop/remote-originals/fresh-production-snapshot/raw/snapshot-handoff.json",
+      "sha256": "8f09694705642d23fea511bfa701f1fe071b4d758c738d84a2cbd387478673f2"
+    },
+    "prior-fresh-production-snapshot--seal.json": {
+      "blob": "cd0fcecbd57f26a09b75b33fb2924f4973be7d89",
+      "bytes": 2894,
+      "path": "WP/batch-proof-snapshot-handoff-cde8-20261015/first-proof-070000-closed-repeat-identity-stop/remote-originals/fresh-production-snapshot/seal.json",
+      "sha256": "3a22e2a10c626bdd5fec32b27f210bc7e822e486d2721e1caa41d77dad647f0e"
+    },
+    "prior-installed-206--logical-state.json": {
+      "blob": "32e2596834cf5e0eeca6095a6a8067a7e597faff",
+      "bytes": 321307,
+      "path": "WP/batch-proof-snapshot-handoff-cde8-20261015/first-proof-070000-closed-repeat-identity-stop/remote-originals/installed-206/logical-state.json",
+      "sha256": "352f7f261ee4423b6fd3963f85714641e5ca18e1d5ef4664f322f4990233c481"
+    },
+    "prior-installed-206--raw--copy-authority.json": {
+      "blob": "f55cf7226f987b1353ed957e6c474b13bbbb4556",
+      "bytes": 307,
+      "path": "WP/batch-proof-snapshot-handoff-cde8-20261015/first-proof-070000-closed-repeat-identity-stop/remote-originals/installed-206/raw/copy-authority.json",
+      "sha256": "f03c9cb5d22abba175a446b2d676ef0548429210e22135893f0fd8dc2ed16bb3"
+    },
+    "prior-installed-206--seal.json": {
+      "blob": "89b7194dab3730be6eb29ba0f90a198acebe5b88",
+      "bytes": 724,
+      "path": "WP/batch-proof-snapshot-handoff-cde8-20261015/first-proof-070000-closed-repeat-identity-stop/remote-originals/installed-206/seal.json",
+      "sha256": "afb9f084d5948976cb968998fc6bca172411fbfffe9da1c4e24cd3321a541cab"
+    },
+    "prior-policy-result.json": {
+      "blob": "81dba60f20e88ddeb421012fe207e88be4bfe576",
+      "bytes": 478,
+      "path": "WP/batch-proof-snapshot-handoff-cde8-20261015/first-proof-070000-closed-repeat-identity-stop/remote-originals/policy-result.json",
+      "sha256": "826053a061d53db4d446205cd45f0670f266b009ef2b288e562d1fff23648f1d"
+    },
+    "prior-preservation-206.json": {
+      "blob": "aac2d08d0947e62c41bcd462d1a6d68734300419",
+      "bytes": 219,
+      "path": "WP/batch-proof-snapshot-handoff-cde8-20261015/first-proof-070000-closed-repeat-identity-stop/remote-originals/preservation-206.json",
+      "sha256": "1c2643614a05173106ff3eeded1558ad45eedab2a2417aa568abe88fb8302370"
+    },
+    "prior-proof-input.json": {
+      "blob": "77ddd5ee52d19117972ba89e012b17c51e761108",
+      "bytes": 3428,
+      "path": "WP/batch-proof-snapshot-handoff-cde8-20261015/first-proof-070000-closed-repeat-identity-stop/remote-originals/proof-input.json",
+      "sha256": "9df45cb4f1985b90289f3347bfe65fd15ee461a8eaad2f72b1470f2d8bacc79c"
+    },
+    "prior-proof-terminal-refusal.json": {
+      "blob": "e2efcb4b2581df960e9af0cef7d54a8469f07f0d",
+      "bytes": 409,
+      "path": "WP/batch-proof-snapshot-handoff-cde8-20261015/first-proof-070000-closed-repeat-identity-stop/remote-originals/proof-terminal-refusal.json",
+      "sha256": "4601f42d33fe4cd6a7072b36aab39f362aeeabf8eef450a3f2fc3e86ad0cb12a"
+    },
+    "prior-repeat-206-measurement.json": {
+      "blob": "abe44b106a25d8159c27da2738fea11031dc4a88",
+      "bytes": 231,
+      "path": "WP/batch-proof-snapshot-handoff-cde8-20261015/first-proof-070000-closed-repeat-identity-stop/remote-originals/repeat-206-measurement.json",
+      "sha256": "abd2d8b19a7d9df42f5dd8cb57092b3913cd415ed1d4a689b465547dd54f5dad"
+    },
+    "prior-repeat-206-run.stdout": {
+      "blob": "f2ea5f72b8bf6f656e4a19356f6882164d495051",
+      "bytes": 660,
+      "path": "WP/batch-proof-snapshot-handoff-cde8-20261015/first-proof-070000-closed-repeat-identity-stop/remote-originals/repeat-206-run.stdout",
+      "sha256": "3560fe69a742d0b8f5716d19a3f2f6c02964d38c7ebc44c08ae03b6def788b62"
+    },
+    "prior-source-review-original.json": {
+      "blob": "e16ebf5712e1a31a02ebcc98baecdcd319c3e5e3",
+      "bytes": 11131,
+      "path": "WP/batch-proof-snapshot-handoff-cde8-20261015/first-proof-070000-closed-repeat-identity-stop/remote-originals/source-review-original.json",
+      "sha256": "e8e3131c05f4f0510586ca812800551932a38cc350d440ec33d70f37ecca3170"
+    },
+    "prior-tooling-source-index.json": {
+      "blob": "17d210527dd40c4d768ad0e6c7e46b3367884e0a",
+      "bytes": 1830,
+      "path": "WP/batch-proof-snapshot-handoff-cde8-20261015/first-proof-070000-closed-repeat-identity-stop/remote-originals/tooling-source-index.json",
+      "sha256": "fc96daa11615c9f0038bf91887aebdf6744489eee1c3bb6a01fb57504eea8f89"
+    }
+  },
+  "source": "e283e6a8747598c1d5d447059c879042f5c3377e"
+}
