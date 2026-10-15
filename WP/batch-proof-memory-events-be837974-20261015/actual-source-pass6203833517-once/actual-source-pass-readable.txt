@@ -1,0 +1,149 @@
+Source review: PASS
+
+This reviews the new host-memory-events startup proof tooling at commit dd14f90814b7994bf06598623dae095b29d04f0b, directory WP/batch-proof-memory-events-be837974-20261015 (request marker startup-host-memory-dd14f908-270-acc158-cd3a). It's a fresh review, and no earlier pass authorizes anything here. It covers one attempt of this startup-only, jobs-OFF proof of image acc158/receipt cd3a, in the new 233000 root and unit, and only if the launcher's fresh authority, capacity, unused-root and unused-unit gates pass. It does not approve jobs-ON qualification, the kit, a gate or deployment. Thanks for turning the memory fix around so quickly, Pip. This is exactly the gate I asked for.
+
+What I checked:
+- **Hashes, tokens and tests.** All 15 SHA-256 values match `git archive` of the exact head and the request. The 125 bindings produced by `proof_contract.tokens` match the request block line for line. All 686 entries in source-publication-index270.json verify against the tree by blob, length and SHA-256. `verify_proof_guards.py` ran 270/270 OK on Python 3.11 and 270/270 OK on Python 3.9.23, each with a fresh fixture dir, and the hashes were unchanged afterwards. No files outside WP/ changed since 29fa0007.
+- **Diff against 29fa0007 (my last startup-proof PASS).** Eight files are byte-identical: launch_proof, proof_app_sources, proof_disk, proof_docker, proof_files, proof_health, proof_inputs and proof_render. The contract only adds the new root, proof_memory in FILES, the memory tokens, the direction pin, and a review floor above 6203416404 and 22:16:57Z. prepare/run bind the direction in the fresh evidence, and the unchanged launcher picks it up through the shared `current_evidence`. proof_budget only declares proof_memory as a no-copy source. In the tests, the only edits to old lines move fixture dates past the new floor and extend the startup fixture. No assertion was dropped or weakened.
+- **The memory gate matches my direction.** The old `memory.peak <= MEMORY` check and its `docker exec` are gone. Every health poll plus one final sample before stop reads the exact container's cgroup from the host. The limits stay at memory 805306368 = memory+swap with swap.max 0. The hard gates are `oom` = `oom_kill` = 0, OOMKilled false, 0 restarts and still running. The sum anon + shmem + slab_unreclaimable + kernel_stack + pagetables + percpu + sock must stay at or below 603,979,776. Peak, max/high and pgscan/pgsteal are kept but are observations only, and the max READY rss_bytes is recorded. Missing, unreadable, malformed or racing reads refuse with no retry. Every raw read is kept 0400 with its hash before the gate runs. The `finally: docker.stop` path still covers every refusal. The five guards I asked for are all there (limit+8192 with zero OOM passes; oom_kill 1, oom 1, OOMKilled, 75%+1 B and unreadable memory.events all refuse).
+- **It fits the real host.** `cgroup_path` on Pip's read-only host reference gives /sys/fs/cgroup/system.slice/docker-8109d78e….scope, with exactly one cgroup2 mount at /sys/fs/cgroup in a 25 KB mountinfo. The 230000 controller's own memory.stat has all 11 counters the gate needs, including percpu and pgscan/pgsteal. All 26 READY events in the 230000 log carry integer rss_bytes (max 164,270,080 B), so `ready_max_rss` won't trip on missing fields. The unit has no mount sandboxing, so the controller sees the host mount table.
+- **Budget.** The table is still 627c4aa5…, 24 copies → 30 equivalents. Memory evidence is capped at 256 MiB per startup, reserved before each write, and refuses one byte over. That's inside the 4 GiB log reserve for the free-space floor. It also fits the startup stage cap: about 8.46 GB is allowed, and the 230000 root held about 3.4 GB at closure, or roughly 5.1 GB once the seal copies that run never reached are added (my estimate).
+- **Authorities.** I recomputed the six rule pins, the R2-acceptance pin, both post-reboot pins and the new memory-direction pin (cae90fa7…) from the live comments, and all of them match. Main is still be837974, and CI 38772398721 is push / attempt 1 / success.
+
+Non-blocking notes:
+1. `proof_docker.cli` still gates release CLIs on `releaseCliPeakBytes <= MEMORY` (proof_docker.py:130), which is the same page-cache trap. It can't run here because `arguments()` refuses any script in this startup-only graph. The jobs-ON or kit graph that runs CLIs should switch to the same memory.events gate before I review it.
+2. The 600 s readiness limit now also covers the final memory sample. If a startup runs past it, that's an app time limit and needs a new review, not a re-run.
+3. My direction 6203416404 is now a pinned authority, so I'll leave it unedited along with the others.
+
+Bindings:
+
+```
+dd14f90814b7994bf06598623dae095b29d04f0b
+be8379745bdfae52ce46496ff26514dc7d729640
+676b01e71211786d1aeace50f19a0b2c9f9c482e
+sha256:acc158447f5571068bf150fc0e8fa6f0889aeb38f9aec8be08978d903bd5be6a
+959d17e11c357266f7c2a41b0c84ab76914c591e
+sha256:7aebc035254a61b0b4b8ecb59492d582af7f3769c147a35a7e92a43fb7a642d2
+8109d78e228573ead8aa243442192e54b8e1dc09101bc3fa23d03e5a29cbb66b
+cd3a2757d8ecb0bf933f49231031eb7fb61eb5abaac17d05f3585c1baaf89f0a
+proofScope=BOUND_080000_INSTALLED209_TWO_NEW_JOBS_OFF_STARTUPS_ONLY
+proofRoot=/opt/lims/releases/workflow-batch-startup-memory-be837974-20261015T233000Z
+qualifiedBuildSource=4de3e334d8e498783a4cf20df4a5f93acfdbeb21
+qualifiedBuildPass=6200145007
+mainCiRun=38772398721
+labAndHubBuildsOwnedByYY=true
+releaseWindowControl=RELEASE_DAY_DISK_ABORTS_ACCEPTED
+reserveFloorBytes=10556150894
+unexplainedGrowthAbortBytes=500000000
+memoryLimitBytes=805306368
+unitTimeoutSeconds=5400
+readinessSeconds=600
+stageHeadroomSeconds=60
+unitHeadroomSeconds=600
+rawMasterNeverOpenedSqlite=true
+productionSqliteConnections=0
+preserveAllStoppedContainers=true
+policyPresentNoOpOrStop=true
+approvedAmendmentNonzeroStop=true
+jobsOnQualificationStillRequired=true
+declaredDbTripleCopies=24
+dbBudgetEquivalents=30
+budgetMarginPercent=25
+minimumDbBudgetEquivalents=0
+forwardDirection=6188190365
+priorEvidenceCommit=dd496777400e9c2f4f0ace73009f8cf8c86022d0
+priorProofRoot=/opt/lims/releases/workflow-batch-stopped-copy-cde8c889-20261015T080000Z
+priorEvidenceIndexSha256=3ff3d1555c66300ba0752d78211991c9f1c12808d17495a6f29617ab80f82c64
+startupOnlyInstalled209Inputs=true
+noInstallerOrPolicyReplay=true
+priorInstalled209Backup=/opt/lims/releases/workflow-batch-stopped-copy-cde8c889-20261015T080000Z/installed-209/backup.db
+deriveHealthcheckFromPinnedCompose=true
+healthTestRepresentation=COMPOSE_EXEC_ARGV_DERIVED_DOCKER_CLI_CMD_SHELL_EXEC
+ordinaryFullStartupVerifierChain=true
+exactDerivedDockerHealthcheckBeforeStart=true
+unhealthyIsRetainedObservation=true
+healthEveryPollFullLog0400=true
+healthTransitionTimingInResult=true
+composeStartPeriodUnchanged=true
+allHttpProbesWithinTotal600Seconds=true
+composeSourceSha256=2c540b13af52ada8cf475ad8aed19757deafd2997bf1e60fc63848d6e5153226
+composeSourceBlob=4e5bfd31f6c0bcc52419f0a55f7f6edbb8f85eec
+noNewProductionSnapshot=true
+inputLogicalStateFromBoundRecordsNoSql=true
+budgetMinimum64DroppedForStartupOnlyGraph=true
+budgetStageTableSha256=627c4aa5ee89c0991a4af527bf98c3cd8b3a84855f049930d04b3c223bed54e9
+budgetModel=DECLARED_STAGE_REMAINING_CONSUMPTION_AWARE
+capacityDirection=6183215126
+noopSealDirection=6183663456
+metadataCapacityBeforeRootAndBeforeUnit=true
+allLocalExecutedSourceFilesBound=true
+containerNameAbsenceProof=BOUNDED_COMPLETE_ID_AND_EXACT_NAME_INVENTORY
+containerNameProbeRawIdsRetained=true
+mandatoryKnownPredecessorInInventory=true
+noErrorTextAbsenceInference=true
+snapshotBoundaryDirection=6184356993
+inputAuthority=BOUND_080000_INSTALLED209_RECORDED_SEAL_HASH_STAT_ONLY
+inputRechecksAfterEachCopyAndAtClosure=true
+liveEvolutionObservation=STAT_ONLY_NEVER_SNAPSHOT_AUTHORITY
+databaseAssetsCrossFileAtomicityClaimed=false
+budgetCheckpointCgroupAnonFileRecorded=true
+referenceDbReserveBytes=567558144
+referenceAssetReserveBytes=5787648
+retainedAssetReserveMultiplier=3
+logReserveBytes=4294967296
+allocationMeasurementSeconds=120
+allRetainedReleaseDockerContainerdAllocation=true
+ownedStopIndependentOfReserveHeadroom=true
+allInputPathAncestorsRejectAliases=true
+diskMountPolicy=VERIFIED_DOCKER_OVERLAY_VIEWS_BACKED_BY_COUNTED_CONTAINERD
+physicalDuSingleFilesystem=true
+containerMountComparison=EXACT_OBJECTS_UNORDERED_NO_DUPLICATES
+r4AdditionalHeadroomBytes=10000000000
+futurePackageChargedBeforeRootOnly=true
+fixedStartupSchemaAndMarkersBudgeted=true
+applicationCopySourcesSha256=8b2171275fcdda685adba703e94f1c313de8c5550c4aea3986afc73d1a917108
+applicationPolicySnapshotMaximumPerStartup=8
+newImageSeparateFromOldInputAuthority=true
+oneProofAttemptNoRetry=true
+renderAllRemoteTemplatesBeforeAnySsh=true
+r2AcceptedComment=6202252017
+r2CompleteNoFurtherPrune=true
+memoryDirection=6203416404
+memoryDirectionSha256=cae90fa72e66f14b03737bee5aa1ea380e11c003d8ad3be877c1ee3bd25cc2ac
+memoryEventsOomAndOomKillMustBeZero=true
+containerHostCgroupExactIdEveryHealthPoll=true
+sampledNonReclaimableMaximumBytes=603979776
+memoryNonReclaimableFields=anon+shmem+slab_unreclaimable+kernel_stack+pagetables+percpu+sock
+memoryPeakAndMaxHighPgscanPgstealObservationOnly=true
+readyMaxRssBytesRecorded=true
+memoryEvidenceMaximumPerStartupBytes=268435456
+memoryTelemetryInsideExisting4GiBLogs=true
+memorySamplesMaximumPerStartup=601
+prior230000ConsumedFailureSha256=ff22ab7627ab90aa3848dd5ae0cf3078cc4fb60b787f33944185a9415e42ab1d
+authority6189025975=071b37b60b7489fc47f53aee5d5a91726e967730ebdf40adbc22aef4b047ee7e
+authority6189658753=1b293cf3d6b7108293599ffabfc1273ebd5f158f69a6e11f58e467d7ffa42708
+authority6189669837=2821ccc164bbf344201e6569f707314a168ae6f308cbece73cc5065d9ad3ac7e
+authority6191219093=84289b1c85e65973f26d52199f539e13423d5803c83c38be34a515b089505f8f
+authority6198899941=9d7e1490880d76d4bbae73851e4a441a8ea7c9dcd3c16383e79250f94fc6e613
+authority6200547786=05604935975efc784fe8d7c52f3a820599c2365de1121370cd345e2eabb0c250
+postRebootAuthority6202595120=267bfc400e7d1ad92a089e05083a4129407451b7ec06267d1b5d98bb640e555b
+postRebootAuthority6202615241=04a0ffc6bbae5b3f6a59586ce8e6f73e46a5040e60d3e5f0e00c5dae0d445cfc
+launch_proof.py=270eacfefba760631ee414ac3362a31d16387efdf9f20b9dddad4a5211ab6dc1
+prepare_proof.py=5ba48b07a4249852c1e89249559b7ef3320a786bd150091b754cb458903ff368
+proof_app_sources.py=87fce38e1143e23a1b7f45e6c74518095dc65e9b1546e92917447b1e35c468c5
+proof_budget.py=ecda4d9beb0043726eb4cdd2dbc5fc4bda5e3ea7832e9b024d592567e4309a15
+proof_contract.py=fd467afe3d547c2335e870f1e9e8c0ddbfc1d19c27268fb8aa587d04b6460511
+proof_disk.py=54556f7d1166b34e2e83b3c0e55eaf10418817d1f72fb44d5e98a4e94647bd79
+proof_docker.py=03be75d1fed62bc9647ec0b5ad0159701f688246547a5e0d7c346c17a4abbdc8
+proof_files.py=6bd7adb616218b8add259eaf61c2922cfc3d05d88e8dbae4dbf5dda386e1241c
+proof_health.py=ada964f3d86453f61d082961e78b76f7dfb3cd3976ca361e5aadf863f227f846
+proof_inputs.py=fa7dd2f3b151aa78cc27e8ccdb1a7768730875e91b4d9e94ebfcbf36bb48d7d5
+proof_memory.py=95d71020afafaee787bcff5947f2af5d7d310c99f7c155286f16bd9d58abacfb
+proof_render.py=73683b6283e8351d06309242a4b3c883746db1e9d1a9cf74d57fe06aaee24d74
+proof_startup.py=f98774488ce3bd043ed20f1c1dab225f75e3532e9f259cbc168ba24165142e00
+run_stopped_proof.py=5a652e141cc974d6755f49a33f474036bfd9a1069c92d6e4a92d0601990acf86
+verify_proof_guards.py=8a94dd74603b1908ac78223e2c83fcc0688b026c63a7acbee2255393c79a8207
+```
+
+---
+_Generated by [Claude Code](https://claude.ai/code)_
