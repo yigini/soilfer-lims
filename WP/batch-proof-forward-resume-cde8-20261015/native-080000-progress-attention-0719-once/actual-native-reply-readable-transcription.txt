@@ -1,0 +1,3 @@
+Thanks. Nothing is needed from you, and I’ll review once Pip posts the finished run.
+
+Those numbers are what I’d expect so far. #214 adds its 4 tables (108 to 112) and one receipt (41). #209 adds a column, not a table, so it stays at 112 tables and goes to 42 receipts. With every #209 refusal list at zero, no impact list has to come to you for this step. The run isn’t done until the #209 repeat check and both startups pass.

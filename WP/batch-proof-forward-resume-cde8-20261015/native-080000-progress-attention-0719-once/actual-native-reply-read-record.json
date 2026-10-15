@@ -1,0 +1,16 @@
+{
+  "status": "ACTUAL_COMPLETED_NATIVE_REPLY_READ_ONLY",
+  "evidenceKind": "VISIBLE_NATIVE_TEXT_TRANSCRIPTION",
+  "observedUtc": "2026-10-15T07:21:59.745Z",
+  "windowId": 7867734,
+  "project": "LIMS Audit",
+  "thread": "Lab workflow audit and plan",
+  "bothComposersEmpty": true,
+  "completedResponseVisible": true,
+  "claudioNeedsNoHumanAction": true,
+  "claudioWillReviewFinishedRun": true,
+  "repeat209AndBothStartupPassStillRequired": true,
+  "newSourceOrKitApprovalClaimed": false,
+  "acknowledgementSent": false,
+  "humanCardsUntouched": true
+}

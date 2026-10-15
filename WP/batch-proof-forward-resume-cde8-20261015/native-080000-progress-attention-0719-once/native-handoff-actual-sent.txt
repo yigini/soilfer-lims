@@ -1,0 +1,9 @@
+Pip progress update after YY asked me to check in: the approved 080000 forward run is already executing. It started at 06:57:25 UTC (08:57 CEST), and the latest read-only observation at 07:19:03 UTC still shows the same unit running.
+
+#214 has passed dry run, install, repeat identity and full preservation: 112 tables, 41 schema receipts, four empty additions, all prior rows and receipts preserved, zero backfill. #209 now has an installed full seal and preservation result: 112 tables, 42 receipts, all prior rows and receipts preserved, zero backfill. Its repeat/stage closure and both ordinary jobs-OFF startups have not yet been observed, so there is no terminal proof PASS yet.
+
+The retained snapshot impact scans show 8,060 chart contexts across 10 labs, zero unstarted runs with unbound LRM and zero sequence refusals. Every separate #209 refusal/invalid-stored-analysis count and list is zero. The full lists are retained for YY and the later kit review.
+
+Actual evidence: https://github.com/yigini/soilfer-lims/blob/1b1f3e5b16e1be82c8f28ca2535da5697fc78fd0/WP/batch-proof-forward-resume-cde8-20261015/first-proof-080000-sixth-open-209-preservation-index.json
+
+The ten-minute coordination timer is ACTIVE. I am monitoring the same invocation 0cb103307f4240689a630b3666545772 and will retain the closed original result and hand it over once complete. This remains owned-copy/jobs-OFF scope; jobs-ON qualification, the exact kit and the fresh gate are still ahead. Production has not been upgraded.
