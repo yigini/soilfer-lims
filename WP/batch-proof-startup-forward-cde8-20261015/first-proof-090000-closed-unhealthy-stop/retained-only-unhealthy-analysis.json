@@ -1,0 +1,68 @@
+{
+  "status": "RETAINED_ONLY_PARTIAL_STARTUP_ANALYSIS_NOT_PASS_OR_RETRY_AUTHORITY",
+  "closedUtc": "2026-10-15T08:32:11.064416+00:00",
+  "freshClosedLogsLabel": "Distinct fresh closed docker logs, not original controller startup-log capture (which was never reached).",
+  "logsSha256": "6a29bd2b216834c7972c74fc4085498d264c06ec56c82a1fc3c24ee6eb4b2178",
+  "healthStatus": "unhealthy",
+  "failingStreak": 3,
+  "healthcheckExactDerivedCompose": {
+    "Interval": 30000000000,
+    "Retries": 3,
+    "StartPeriod": 30000000000,
+    "Test": [
+      "CMD-SHELL",
+      "exec wget -q --spider http://localhost:3000/api/health"
+    ],
+    "Timeout": 10000000000
+  },
+  "healthLog": [
+    {
+      "End": "2026-10-15T10:30:49.095096242+02:00",
+      "ExitCode": 1,
+      "Output": "wget: can't connect to remote host: Connection refused\n",
+      "Start": "2026-10-15T10:30:48.985304294+02:00"
+    },
+    {
+      "End": "2026-10-15T10:30:54.187836374+02:00",
+      "ExitCode": 1,
+      "Output": "wget: can't connect to remote host: Connection refused\n",
+      "Start": "2026-10-15T10:30:54.096099992+02:00"
+    },
+    {
+      "End": "2026-10-15T10:30:59.267749714+02:00",
+      "ExitCode": 1,
+      "Output": "wget: can't connect to remote host: Connection refused\n",
+      "Start": "2026-10-15T10:30:59.18919833+02:00"
+    },
+    {
+      "End": "2026-10-15T10:31:29.354317391+02:00",
+      "ExitCode": 1,
+      "Output": "wget: can't connect to remote host: Connection refused\n",
+      "Start": "2026-10-15T10:31:29.269580834+02:00"
+    },
+    {
+      "End": "2026-10-15T10:31:59.45313551+02:00",
+      "ExitCode": 1,
+      "Output": "wget: can't connect to remote host: Connection refused\n",
+      "Start": "2026-10-15T10:31:59.355915113+02:00"
+    }
+  ],
+  "entrypointVerifierCountObserved": 24,
+  "allObservedEntryVerifiersNoopExactIntegerZero": true,
+  "expectedEntryVerifiers": 27,
+  "startupReadyCountObserved": 0,
+  "expectedReadyCount": 26,
+  "serverStartupMarkerObserved": false,
+  "lastOutput": "Installing canonical lab policy schema prerequisite...",
+  "observedElapsedStartToOwnedStopSeconds": 102.226213,
+  "containerExitCode": 137,
+  "oomKilled": false,
+  "secondStartupAttempted": false,
+  "httpReadinessResponseObserved": false,
+  "stoppedFullLogicalStateSealObserved": false,
+  "controllerDeadlineReached": false,
+  "causeInference": "Docker marked unhealthy while the default entrypoint was still executing its verifier chain; the last retained output was the canonical policy prerequisite. All health attempts reported connection refused. No evidence proves that the entrypoint would finish or health would pass if allowed more time.",
+  "proposedScopeQuestion": "May a new separately reviewed startup-only forward graph derive a proof-only health StartPeriod of READY_SECONDS (600s), preserving Compose-derived command/interval/timeout/retries and immediate STOP on actual unhealthy, exact config checks, hard600s total readiness, full27+26 and HTTP/stoppedstate requirements? No production Compose/image change or prior root retry proposed.",
+  "officialDockerSemanticsSource": "https://docs.docker.com/reference/dockerfile/#healthcheck",
+  "officialDockerSemanticsParaphrase": "Start-period permits initial startup failures without adding to the unhealthy failure threshold. A successful health check during that period ends the grace behavior; later failures count normally. This supports a bounded startup grace proposal, not a claimed PASS."
+}
