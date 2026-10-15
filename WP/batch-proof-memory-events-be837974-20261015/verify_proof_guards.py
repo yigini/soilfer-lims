@@ -1089,5 +1089,12 @@ class HostContainerMemoryTests(unittest.TestCase):
         self.assertGreater(summary['sampleAndSummaryAllocatedAllowanceBytes'],before);self.assertTrue(summary['memoryEvidenceWithinExisting4GiBLogs'])
     def test_memory_budget_remains_inside_existing4gib_no_copy_budget_change(self):
         self.assertLessEqual(2*self.m.MAX_EVIDENCE_ALLOCATED_PER_STARTUP,LOG_BYTES);self.assertEqual(self.m.MAX_SAMPLES_PER_STARTUP,601);self.assertEqual((TOTAL_DB_COPIES,DB_EQUIVALENTS),(24,30))
+    def test_descendant_subgroup_is_not_the_container_root(self):
+        member=self.member.rstrip(b'\n')+b'/descendant\n'
+        with self.assertRaisesRegex(RuntimeError,'descendant subgroup'):self.m.cgroup_path(self.id,member,self.mount)
+    def test_summary_allowance_includes_its_own_field_and_rounded_bytes(self):
+        h=self.history(self.fixture());h.observe('before-stop');before=h.evidence_allocated;summary=h.summary(123)
+        actual=((len(canonical(summary))+1+4095)//4096)*4096
+        self.assertGreaterEqual(summary['sampleAndSummaryAllocatedAllowanceBytes'],before+actual);self.assertEqual(summary['sampleAndSummaryAllocatedAllowanceBytes'],h.evidence_allocated)
 
 if __name__=='__main__':unittest.main(verbosity=2)

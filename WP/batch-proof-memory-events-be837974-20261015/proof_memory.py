@@ -42,6 +42,7 @@ def cgroup_path(container_id,membership,mountinfo):
     relative=members[0][3:];parts=pathlib.PurePosixPath(relative).parts
     require(relative.startswith('/') and not any(x in relative for x in ['..','\\','\x00']) and '//' not in relative and relative!='/' and re.fullmatch('/[a-zA-Z0-9_.:/@-]+',relative),'Canonical cgroup membership required')
     require(sum(x in (container_id,'docker-'+container_id+'.scope') for x in parts)==1,'Cgroup does not belong to exact full container ID')
+    require(parts[-1] in (container_id,'docker-'+container_id+'.scope'),'Container cgroup must be the exact ID group, not a descendant subgroup')
     matches=[]
     for line in mountinfo.decode('ascii','strict').splitlines():
         fields=line.split();require(len(fields)>=10 and '-' in fields,'Malformed host mountinfo')
@@ -132,5 +133,8 @@ class MemoryHistory:
         require(self.samples and self.samples[-1]['phase']=='before-stop','Fresh final host memory.events check before stop required')
         result={'hostMemorySamples':self.samples,'sampledNonReclaimableMaxBytes':max(v['nonReclaimableBytes'] for v in self.samples),'nonReclaimableLimitBytes':NON_RECLAIMABLE_MAX,'maxReadyRssBytes':rss,'memoryPeakBytesObservation':max(v['memoryPeakBytesObservation'] for v in self.samples),'peakIsObservationNotGate':True,'oomAndOomKillZeroEverySample':True,'hostBeforeStopEventsChecked':True,'memoryMaxBytes':MEMORY,'memorySwapMaxBytes':0,'samplingIsNotContinuousPeakMeasurement':True,'memoryEvidenceMaximumBytesPerStartup':MAX_EVIDENCE_ALLOCATED_PER_STARTUP,'memoryEvidenceWithinExisting4GiBLogs':True}
         # The startup result stores this summary once, in addition to each raw sample.
-        self.reserve_evidence(len(canonical(result))+1);result['sampleAndSummaryAllocatedAllowanceBytes']=self.evidence_allocated
+        result['sampleAndSummaryAllocatedAllowanceBytes']=self.evidence_allocated
+        # Include this allowance field before sizing.128 bytes conservatively cover
+        # its final decimal-value growth; the existing268435456 bound is unchanged.
+        self.reserve_evidence(len(canonical(result))+1+128);result['sampleAndSummaryAllocatedAllowanceBytes']=self.evidence_allocated
         return result
