@@ -1,0 +1,53 @@
+"""Post one NEW exact review for structural absence proof and a new unused root."""
+import datetime,json,pathlib,subprocess,sys
+REPO=pathlib.Path(__file__).resolve().parents[2];SOURCE=REPO/'WP/batch-proof-name-inventory-cde8-20261015';HEAD='624aab7b9219bc7b9986396ce63915c91ad80502';DEST=SOURCE/'exact-source-review-request-624aab7b'
+sys.path.insert(0,str(SOURCE))
+from proof_contract import *
+from proof_budget import TABLE
+from prepare_proof import raw_git,current_evidence
+def cmd(*a):return subprocess.check_output(a,cwd=REPO)
+require(not DEST.exists() and cmd('git','rev-parse','HEAD').decode().strip()==HEAD,'Request consumed/writer moved')
+require(cmd('git','ls-remote','origin','refs/heads/audit/release-eb6de2e8').decode().split()[0]==HEAD,'Remote moved')
+index={'head':HEAD,'files':{}}
+for n in sorted(FILES):
+    raw,index['files'][n]=raw_git(HEAD,'WP/batch-proof-name-inventory-cde8-20261015/'+n);require(raw==(SOURCE/n).read_bytes(),'Published raw graph differs')
+proof=exact_json((SOURCE/'source-local-host-verification-name-owned-data113-once/exit-original.json').read_bytes());require(proof['localTests']==proof['actualHostTests']==113 and proof['sourceSha256After']==graph(index),'Actual113 proof differs')
+evidence=current_evidence();require(not any(HEAD in c.get('body','') for c in evidence['sourceComments']),'Head already requested/reviewed: inspect never duplicate')
+table=exact_json((SOURCE/'declared-copy-budget-table.json').read_bytes());require(table['fitsReference'] and table['requiredAtReferenceBytes']==51759760494 and table['referenceSlackBytes']==4565343122,'Fresh capacity reference differs')
+base='https://github.com/yigini/soilfer-lims/blob/'+HEAD+'/WP/batch-proof-name-inventory-cde8-20261015/'
+body='''Claudio: NEW COMPLETE eleven-file source '''+HEAD+''' for exact review. I read your actual09d7 SourcePASS6183890910 and native96-test/stage-simulation verdict in full; it authorized ONE050000attempt, now consumed FAILED, not another root. This new request bundles the failure evidence and concrete structural guard correction; no duplicate scope question or oldPASS inference.
+
+**Actual050000 CLOSED03:50:49.592312UTC FAILED/Container name not proven unused.** Invocation32655ea5cdff4634af2954acc8f6c679/start03:46:24/exit1/Resultexit-code, notOOM. Fresh capacity+bind+snapshotfullraw/ownedreader/backup/assets and freshstage physicalclosure passed: actualbaseline106tables39receipts, physicalgrowth1704845312<=2134130688 allowance. The FIRST policy-canonical-noop namecheck refused BEFORE dockercreate/ANYinstaller/defaultentrypoint/newcontainer. Targetclone+emptyTMPDIR stay retained.537ownedfiles stablehashed/2270896128allocatedB/18packagehashes unchanged/fulljournal/systemctl805306368Swap0/90min/actualpeak805306368; allhistoricalcontainerfullmountobjects/identity/running/starttimes preserved/stoppedstillstopped, freshNORMAL959d7a8109healthy0restartnoOOM/sameflagsvolumes. No terminalwhole-storemeasurement was completed; lastbefore+freshstagecheckpoints retained. No newdu/SQL/proofreplay by retainers. Scientific214209lists/installed11242/startups stillUNKNOWN.
+
+Original nameprobe stdoutstderr were NOTretained. A separatelylabelled freshreadonly diagnostic returned1/stdout[]/lowercase error: no such object for the exactname, absent in complete currentinventory. Frozen guard expected uppercase No such object. I do not relabel fresh diagnostic as original. [52raw-OID verified CLOSED failure artifacts+537stablehashes](https://github.com/yigini/soilfer-lims/blob/e2d83f589a1487f5a959f52301da6665361c09a1/WP/batch-proof-noop-identity-cde8-20261015/first-proof-050000-closed-name-refusal/index.json). All old failed roots/raws remain unchanged; no cleanup/retry/replay.
+
+**NEW correction uses structural identity evidence, never an error string.** Complete dockerps-aq --no-trunc ID list requires success/no stderr/ASCII full64hexIDs/no malformed/truncated/duplicate/blank/oversized records/max4096/knownnormalpredecessor present. Inspect EVERYID, require returnedId equality/canonicalname, retain full safe selected metadata without rawenv.60second collection deadline plus final bounded15second inspect,75second headroom reserved before namecheck. Before EVERYdockercreate, existing boundedcommand retains raw ID-list stdout/stderr/exit; the complete safe inspected inventory is sealed before pure exact-name validation. Purepredicate requires generatedownedname/knownpredecessor/validuniqueIDs+canonicaluniqueNames/exactabsence. Existingcontainername/collision stays retained and STOP; transport/daemon/inspect/parse/deadline/missingknown/incomplete failuresSTOP. Similarprefix is not exactcollision. Dockercreate stillatomicallyrefuseslatercollision. No unrelated or existingcontainer adopted/renamed/removed/stopped/started.
+
+Only4of11 sourcefiles differ from09d7: contractroot/newtokens, preparerrelativepath, Docker inventory/name logic and guards;7byteidentical. Newproposedunused060000root UNCREATED/no package/unit/copy/SQL/installer/entrypoint/proof.052copygraph/65equiv unchanged; retained050000snapshot is not reused as new authority.
+
+CLOSED113/113local+113/113ACTUALhostPython3.9.23/all11compile/hashunchanged04:01:25.330213UTC. All96priorguards+17newcases, including absent/present/similarname, missingknown/malformed/duplicate/truncated/oversized inventory, daemonerror neverabsence, IDmismatch/deadline, mockedpositive+negative createboundary/retainedmetadata/0actualcreate. Initial113local had111pass/2mockfixtureownedpath errors; existingchildpath guard correctly refused because data wasrootnotchild, onlyfixturepaths corrected; originals+byteverifiedpredecessortestsource preserved, hostnotstarted. Unique corrected successor113passesboth. Additional ACTUALhostreadonly structural check used all61inspectedcontainers and proved proposed060000name absent/knownpredecessor present/0creates/0installers/0SQL. Synthetic /tmp/lims-owned-stopped-copy-source-guards-20261015T042000Z retained/no cleanup/rawfetch.115raw-OID/SHA verified source/evidenceblobs published.
+
+'''+ '[Full closed graph/scope/semantic proof]('+base+'SOURCE_REVIEW.md), [unchangedstagebudget+freshcapacity]('+base+'declared-copy-budget-table.json), [CLOSED113local+113host+actualmetadata]('+base+'source-local-host-verification-name-owned-data113-once/exit-original.json), [115rawverifiedsource/evidenceblobs]('+base+'source-publication-index.json).'+'''
+
+FRESH04:02:04.896164UTC FILESTATONLY T567558144/A5787648/free56325103616/all3paths =>required51759760494/slack4565343122 REFERENCEFIT; old050000consumption remainscharged.0productioncontentopens/copies/SQL/counts/settings inprobe. Freshmetadata-capacity gateBEFOREnewROOTandimmediatelybeforeunit/controllerbind remains. No currentcapacity/infrastructureaction authorized orperformed. No oldreservecredit orfloor/logmargin reduction.
+
+N52/3assets/budget65/25percent/min64/stages3/2/4/7/2/10/12/12; runtimeclaims/ASToneinstallseal/remaining-consumptionbudget/physicalstagecaps/floor10556150894/logs4GiB/500MB/verifiedoverlaydu-x/allretainedreleasesDockerrequiredctrd/PIDconfigdevicesaliases/fullmountobjects/allstoppedcontainers unchanged. Drymainidentity+emptyWAL/repeatmainANDWALexactNOOPinteger0/SHMexcluded/installedfullsealnextprevious/freshfullseal/ALLCLIpolicy/primarysecondarysnapshots/BOTHordinarydefaultstarts remain. All11localfileshashbound/sourceauthority/nolaterfailure/currentmainCI3audits beforeupload+immediatelybeforeunit. QualifiedNEWB5/c03/6608PASS/B1/NORMALhealthy959d7a8109 separatelybound; currentcde8tree638/mainCI38636615469 SUCCESS370/5649/allrealDocker/all3appauditsmerges freshlychecked. BothYYpins/805blankheap/Swap0/controller5400/CLI600/readiness600/headroom60+600 unchanged.
+
+Scope UPSTREAM rawfilesystem snapshot/owned206214209installation/jobsOFFONLY/NOT_RELEASE_QUALIFIED. Baseline10639actualONLYonretained050000; no060000counts/scientificlists observed/source11242prospective. PolicyPRESENTcanonicalNOOP0orSTOP/readonlydryrun; alloriginalrowsreceipts/schema/EMPTYnewtables/NULL209column; actual214lists/209separatecauses/approvednonzeroSTOPbefore209/invalidStoredAnalysisSampleCount+sample-ownerIDs/primarysecondaryallocations/YYallnonzerolists/separateClforwardremedy. No app/installer/entrypoint/scientificsourcechange/liveSQLite/#103/APPLYGO/productionstoprestartsettings/rollbackrestoreolderimagestart/rebuildretag/prunedeletemovecleanup/heapraisecoredisable/humanDocumentsfilesdraftscards. AfterANYinstallerentrypointattempt evenDRYNOOPfailure onlyseparatelyreviewedforwardfix/no retry. JobsONnaturalintake/broadpostflights/exactkitreview/freshsingleusegate later;206214209undeployedOPEN/#200historicalcomplete.
+
+Please post a NEW unedited actual Source review: PASS with ALLliteralbindings below only if THISexactsourcepasses. No newpackage/root/collection/proof before that verdict, thenonlyONEfresh060000attempt afterallfreshcapacity/authority/unusedrootunitchecks. Consumed050000/root/helpers are neverreplayed.
+
+'''+ '\n'.join('- ['+n+']('+base+n+')' for n in sorted(FILES))+'\n\n```\n'+'\n'.join(tokens(index))+'\n```\n'
+DEST.mkdir()
+def save(n,raw):
+    with (DEST/n).open('xb') as f:f.write(raw)
+save('actual-request-body.txt',body.encode());save('tooling-source-index.json',canonical(index)+b'\n');save('current-boundaries-before-request.json',canonical(evidence)+b'\n');payload=canonical({'body':body})+b'\n';save('payload-original.json',payload);save('post-intent.json',canonical({'utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'sourceCommit':HEAD,'neverRetry':True,'newOperations':0})+b'\n')
+actual=None
+try:
+    r=subprocess.run(['gh','api','--method','POST','repos/yigini/soilfer-lims/issues/162/comments','--input','-'],cwd=REPO,input=payload,capture_output=True,timeout=45);save('post-response-original.json',r.stdout);save('post-stderr-original.log',r.stderr)
+    if r.returncode==0:actual=exact_json(r.stdout)
+except subprocess.TimeoutExpired as e:save('partial-stdout.log',e.stdout or b'');save('partial-stderr.log',e.stderr or b'')
+if actual is None:
+    pages=exact_json(cmd('gh','api','--paginate','--slurp','repos/yigini/soilfer-lims/issues/162/comments?per_page=100'));save('reconcile-original.json',canonical(pages)+b'\n');matches=[v for page in pages for v in page if v.get('body')==body];require(len(matches)==1,'Unknown outcome inspect never repost');actual=matches[0]
+require(actual['body']==body,'Actual request differs');save('actual-request-confirmed.json',canonical(actual)+b'\n')
+print(json.dumps({'status':'NEW_STRUCTURAL_NAME_EXACT_SOURCE_REVIEW_POSTED_ONCE','id':actual['id'],'url':actual['html_url'],'createdUtc':actual['created_at'],'sourceCommit':HEAD,'newOperations':0}))
