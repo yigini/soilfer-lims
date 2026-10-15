@@ -1,0 +1,68 @@
+Source review: PASS
+
+This reviews the R2 successor at commit edfe56e7e77431689a58c4a641c86d538a6f795b, directory WP/r2-cache-api-identity-acc15844-20261015 (request 6201803209). Good diagnosis, and thanks for flagging the authority change explicitly. I checked it as a real change, not a formatting fix.
+
+The authority change is acceptable:
+- I read the pinned upstream buildx v0.30.1 commands/diskusage.go myself. Its JSON output formats Size with units.HumanSize, CreatedAt with time.String() and LastUsedAt as a relative duration ("... ago"), while ID, Parents, Type, UsageCount, Shared and Mutable are raw, and Reclaimable is !InUse. So the old byte and time equality against buildx could never pass, and the 213000 refusal was the guard working as written.
+- Exact identity still comes from the Docker API: eligible() compares the whole planned record (Size, CreatedAt, LastUsedAt, UsageCount, Parents, Type, InUse, Shared) with a fresh API inventory before the buildx du and again after it, and any difference skips with no substitute.
+- Buildx still independently confirms ID, the full parent list, Type, integer UsageCount, Shared=false and Reclaimable=true. Its three display strings are kept as bounded evidence only, never parsed or used as authority, and the new buildx-reference-crosscheck event records both roles.
+- The daemon-side shared=false, inuse=false and anchored-ID filters still protect a record that changes after the last check.
+
+What else I checked:
+- The five file hashes match the request, and the 44 bindings generated from r2_contract.review_tokens match the request block line for line.
+- launch_r2.py is byte-identical to 4eccae15. In r2_cache.py the only change is recording the crosscheck event. The other changes are the new root and unit (T220000Z), the review floor above 6201434518, the new preparer directory, and the prior-du-failure package slot and validator.
+- The 213000 refusal record at 5f0aba81 hashes to be7e104f..., is an ancestor of this commit, and records zero prune intents, invocations and item receipts, with retryAllowed false. validate_prior_du_failure binds exactly that.
+- verify_r2.py passes locally, 58 of 58.
+
+Scope: this authorizes one R2 cache trim in the new T220000Z root only. The 210000 and 213000 graphs, packages and roots stay consumed and must not be re-run. Everything else from 6200950139 and 6201434518 still holds. No build, proof, R1 cleanup, kit, gate or deploy is authorized.
+
+Bindings:
+```
+edfe56e7e77431689a58c4a641c86d538a6f795b
+be8379745bdfae52ce46496ff26514dc7d729640
+676b01e71211786d1aeace50f19a0b2c9f9c482e
+sha256:acc158447f5571068bf150fc0e8fa6f0889aeb38f9aec8be08978d903bd5be6a
+qualifiedBuildReceiptSha256=cd3a2757d8ecb0bf933f49231031eb7fb61eb5abaac17d05f3585c1baaf89f0a
+qualifiedBuildAudit=5f86a1966af536f83a345ebdb02983bbe2a166ad
+r2Scope=R2_EXACT_CACHE_IDS_ONLY_AFTER_QUALIFIED190000_BUILD
+r2Root=/opt/lims/cleanup-receipts/r2-cache-acc15844-20261015T220000Z
+r2Unit=lims-r2-cache-acc15844-20261015t220000z
+actualMaxUsedSpaceBytes=5000000000
+reservedSpaceIsNotACap=true
+inUseAndImageSharedAlwaysProtectedEvenAboveCap=true
+exactAnchoredIdAndSharedFalseAndInuseFalseFilters=true
+maximumPruneInvocations=32
+controllerSeconds=1800
+unitSeconds=2400
+memoryMaxBytes=805306368
+memorySwapMaxBytes=0
+noDaemonConfigOrRestart=true
+noBlanketPrune=true
+noImageContainerVolumeBackupProofFileRemoval=true
+immutablePerItemReceiptAndDfBeforeAfter=true
+unknownOutcomeNeverRetry=true
+exactApiByteTimeIdentityBeforeAndAfterBuildx=true
+buildxHumanDisplayIsEvidenceOnly=true
+priorR2DuFailureSha256=be7e104fbd7617f75f11fadd5142bc23a2049aaf463f3d37f51a6235d1b496a1
+collisionSafeOnePassRemoteRenderAndCompileBeforeSsh=true
+priorR2RenderFailureSha256=4f7fa58ae5225f03929a3df10d6cc793edc9b2e75ad75c4521025ce48c50be23
+sameBuilderDockerDriverDefaultUnixEndpoint=true
+logicalCacheBytesNotPhysicalReclaim=true
+allChangedOrProtectedItemsSkipNoSubstitution=true
+labAndHubBuildsOwnedByYY=true
+releaseWindowControl=RELEASE_DAY_DISK_ABORTS_ACCEPTED
+authority6189025975=071b37b60b7489fc47f53aee5d5a91726e967730ebdf40adbc22aef4b047ee7e
+authority6189658753=1b293cf3d6b7108293599ffabfc1273ebd5f158f69a6e11f58e467d7ffa42708
+authority6189669837=2821ccc164bbf344201e6569f707314a168ae6f308cbece73cc5065d9ad3ac7e
+authority6191219093=84289b1c85e65973f26d52199f539e13423d5803c83c38be34a515b089505f8f
+authority6198899941=9d7e1490880d76d4bbae73851e4a441a8ea7c9dcd3c16383e79250f94fc6e613
+authority6200547786=05604935975efc784fe8d7c52f3a820599c2365de1121370cd345e2eabb0c250
+launch_r2.py=52ce9dda434305a3e32bf791921e19376490590250bde392c50d13781af142b8
+prepare_r2.py=9223aec1aae8d5d14e59d3888c81fe47dcf9a66eb69fc4df7cd8e2261faa22a2
+r2_cache.py=6b4252dc46a78ee085713c1fe732a7e9d49ab6a2f36caf2654b68c616dae5f4c
+r2_contract.py=318815e2b2cd01a9651904fe60709e1fc4659541c9e67e203d374015aa072208
+verify_r2.py=c07b19e936a1bcd05233409fd2ebbb4ae76a93657f45117698d8e67fcbcf734d
+```
+
+---
+_Generated by [Claude Code](https://claude.ai/code)_
