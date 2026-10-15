@@ -1,0 +1,1054 @@
+{
+  "matchingJsonFiles": 462,
+  "foundTopLevelRootRetentionRecords": [
+    {
+      "path": "WP/batch-release-cde8-20261014/first-build-221500-opening-retention/index.json",
+      "root": "/opt/lims/releases/workflow-batch-build-cde8c889-20261014T221500Z",
+      "status": "FIRST_APPROVED_BUILD_UNIT_OPEN_ORIGINALS_RETAINED",
+      "keys": [
+        "status",
+        "retainedUtc",
+        "toolingCommit",
+        "sourceReviewId",
+        "root",
+        "unit",
+        "invocationId",
+        "buildReceipt",
+        "activeBuildLogsCapturedAsClosed",
+        "productionConnections",
+        "proofsLaunched",
+        "productionDeployments",
+        "files"
+      ]
+    },
+    {
+      "path": "WP/runtime-recovery-kobo/frozen-kit-f830f900-004200Z/prepared-manifest.json",
+      "root": "/opt/lims/releases/runtime-kobo-release-f830f900-20261012T004200Z",
+      "status": "PREPARED_RUNTIME_FORWARD_ONLY_NOT_EXECUTED",
+      "keys": [
+        "status",
+        "root",
+        "head",
+        "image",
+        "tree",
+        "baseHead",
+        "naturalIntakePolicy",
+        "auditedPrTree",
+        "mergeParents",
+        "preparedUtc",
+        "packagingCommit",
+        "originalProofRoot",
+        "originalProofUnit",
+        "proofReferences",
+        "sourceReviewId",
+        "proofToolingCommit",
+        "diskMeasurementGuardSha256",
+        "baselineMeasurementGuardSha256",
+        "proofBaselineLayoutGuardSha256",
+        "proofBaselineLayoutPolicy",
+        "productionBaselineAdapterSha256",
+        "productionBaselineScopeCommentId",
+        "productionBaselineSourceReviewId",
+        "copyVerifierSha256",
+        "proofContractSha256",
+        "refusalScopeCommentId",
+        "schedulerRefusalPolicy",
+        "intakeCardinalityPolicy",
+        "refusalPairingScopeCommentId",
+        "schedulerRefusalPairing"
+      ]
+    },
+    {
+      "path": "WP/runtime-recovery-kobo/pr291-forward-failed-005230Z/prepared-manifest.json",
+      "root": "/opt/lims/releases/runtime-kobo-release-f830f900-20261012T004200Z",
+      "status": "PREPARED_RUNTIME_FORWARD_ONLY_NOT_EXECUTED",
+      "keys": [
+        "status",
+        "root",
+        "head",
+        "image",
+        "tree",
+        "baseHead",
+        "naturalIntakePolicy",
+        "auditedPrTree",
+        "mergeParents",
+        "preparedUtc",
+        "packagingCommit",
+        "originalProofRoot",
+        "originalProofUnit",
+        "proofReferences",
+        "sourceReviewId",
+        "proofToolingCommit",
+        "diskMeasurementGuardSha256",
+        "baselineMeasurementGuardSha256",
+        "proofBaselineLayoutGuardSha256",
+        "proofBaselineLayoutPolicy",
+        "productionBaselineAdapterSha256",
+        "productionBaselineScopeCommentId",
+        "productionBaselineSourceReviewId",
+        "copyVerifierSha256",
+        "proofContractSha256",
+        "refusalScopeCommentId",
+        "schedulerRefusalPolicy",
+        "intakeCardinalityPolicy",
+        "refusalPairingScopeCommentId",
+        "schedulerRefusalPairing"
+      ]
+    },
+    {
+      "path": "WP/runtime-recovery-kobo/pr291-forward-failed-005230Z/observation.json",
+      "root": "/opt/lims/releases/runtime-kobo-release-f830f900-20261012T004200Z",
+      "status": null,
+      "keys": [
+        "observedUtc",
+        "root",
+        "unit",
+        "productionMutations",
+        "unitState",
+        "journalTail",
+        "live",
+        "freeBytes",
+        "httpsGet",
+        "files"
+      ]
+    },
+    {
+      "path": "WP/runtime-recovery-kobo/proof-observation-20261011T2141Z/observation.json",
+      "root": "/opt/lims/releases/runtime-kobo-proof-171dd36c-20261011T211630Z",
+      "status": null,
+      "keys": [
+        "observedUtc",
+        "root",
+        "unit",
+        "productionMutations",
+        "unitState",
+        "unit.stdoutTail",
+        "unit.stderrTail",
+        "files"
+      ]
+    },
+    {
+      "path": "WP/runtime-recovery-kobo/proof-observation-20261011T2136Z/observation.json",
+      "root": "/opt/lims/releases/runtime-kobo-proof-171dd36c-20261011T211630Z",
+      "status": null,
+      "keys": [
+        "observedUtc",
+        "root",
+        "unit",
+        "productionMutations",
+        "unitState",
+        "unit.stdoutTail",
+        "unit.stderrTail",
+        "files"
+      ]
+    },
+    {
+      "path": "WP/runtime-recovery-kobo/proof-observation-20261011T2133Z/observation.json",
+      "root": "/opt/lims/releases/runtime-kobo-proof-171dd36c-20261011T211630Z",
+      "status": null,
+      "keys": [
+        "observedUtc",
+        "root",
+        "unit",
+        "productionMutations",
+        "unitState",
+        "unit.stdoutTail",
+        "unit.stderrTail",
+        "files"
+      ]
+    },
+    {
+      "path": "WP/runtime-recovery-kobo/proof-observation-20261011T2130Z/observation.json",
+      "root": "/opt/lims/releases/runtime-kobo-proof-171dd36c-20261011T211630Z",
+      "status": null,
+      "keys": [
+        "observedUtc",
+        "root",
+        "unit",
+        "productionMutations",
+        "unitState",
+        "unit.stdoutTail",
+        "unit.stderrTail",
+        "files"
+      ]
+    },
+    {
+      "path": "WP/runtime-recovery-kobo/proof-observation-20261011T2125Z/observation.json",
+      "root": "/opt/lims/releases/runtime-kobo-proof-171dd36c-20261011T211630Z",
+      "status": null,
+      "keys": [
+        "observedUtc",
+        "root",
+        "unit",
+        "productionMutations",
+        "unitState",
+        "unit.stdoutTail",
+        "unit.stderrTail",
+        "files"
+      ]
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/reviewed-package-preparation-once/package-validation.json",
+      "root": "/opt/lims/releases/workflow-batch-forward-metadata-cde8c889-20261014T233000Z",
+      "status": "PREPARED_REVIEWED_METADATA_PACKAGE_NOT_LAUNCHED",
+      "keys": [
+        "status",
+        "preparedUtc",
+        "package",
+        "root",
+        "toolingCommit",
+        "sourceReviewId",
+        "imageEligibility",
+        "metadataCollectorsRun",
+        "newReceipts",
+        "files"
+      ]
+    },
+    {
+      "path": "WP/runtime-recovery-kobo/proof-observation-20261011T2121Z/observation.json",
+      "root": "/opt/lims/releases/runtime-kobo-proof-171dd36c-20261011T211630Z",
+      "status": null,
+      "keys": [
+        "observedUtc",
+        "root",
+        "unit",
+        "productionMutations",
+        "unitState",
+        "unit.stdoutTail",
+        "unit.stderrTail",
+        "files"
+      ]
+    },
+    {
+      "path": "WP/runtime-recovery-kobo/proof-observation-20261011T2117Z/observation.json",
+      "root": "/opt/lims/releases/runtime-kobo-proof-171dd36c-20261011T211630Z",
+      "status": null,
+      "keys": [
+        "observedUtc",
+        "root",
+        "unit",
+        "productionMutations",
+        "unitState",
+        "unit.stdoutTail",
+        "unit.stderrTail",
+        "files"
+      ]
+    },
+    {
+      "path": "WP/runtime-recovery-kobo/proof-observation-20261011T2107Z/observation.json",
+      "root": "/opt/lims/releases/runtime-kobo-proof-171dd36c-20261011T210700Z",
+      "status": null,
+      "keys": [
+        "observedUtc",
+        "root",
+        "unit",
+        "productionMutations",
+        "unitState",
+        "unit.stdoutTail",
+        "unit.stderrTail",
+        "files"
+      ]
+    },
+    {
+      "path": "WP/runtime-recovery-kobo/proof-observation-20261011T2043Z/observation.json",
+      "root": "/opt/lims/releases/runtime-kobo-proof-171dd36c-20261011T203339Z",
+      "status": null,
+      "keys": [
+        "observedUtc",
+        "root",
+        "unit",
+        "productionMutations",
+        "unitState",
+        "unit.stdoutTail",
+        "unit.stderrTail",
+        "files"
+      ]
+    },
+    {
+      "path": "WP/runtime-recovery-kobo/pr291-proof-observation-233400Z/observation.json",
+      "root": "/opt/lims/releases/runtime-kobo-proof-f830f900-20261011T233321Z",
+      "status": null,
+      "keys": [
+        "observedUtc",
+        "root",
+        "unit",
+        "productionMutations",
+        "unitState",
+        "unit.stdoutTail",
+        "unit.stderrTail",
+        "files"
+      ]
+    },
+    {
+      "path": "WP/runtime-recovery-kobo/proof-observation-20261011T2042Z/observation.json",
+      "root": "/opt/lims/releases/runtime-kobo-proof-171dd36c-20261011T203339Z",
+      "status": null,
+      "keys": [
+        "observedUtc",
+        "root",
+        "unit",
+        "productionMutations",
+        "unitState",
+        "unit.stdoutTail",
+        "unit.stderrTail",
+        "files"
+      ]
+    },
+    {
+      "path": "WP/runtime-recovery-kobo/proof-observation-20261011T2039Z/observation.json",
+      "root": "/opt/lims/releases/runtime-kobo-proof-171dd36c-20261011T203339Z",
+      "status": null,
+      "keys": [
+        "observedUtc",
+        "root",
+        "unit",
+        "productionMutations",
+        "unitState",
+        "unit.stdoutTail",
+        "unit.stderrTail",
+        "files"
+      ]
+    },
+    {
+      "path": "WP/runtime-recovery-kobo/proof-observation-20261011T2037Z/observation.json",
+      "root": "/opt/lims/releases/runtime-kobo-proof-171dd36c-20261011T203339Z",
+      "status": null,
+      "keys": [
+        "observedUtc",
+        "root",
+        "unit",
+        "productionMutations",
+        "unitState",
+        "unit.stdoutTail",
+        "unit.stderrTail",
+        "files"
+      ]
+    },
+    {
+      "path": "WP/runtime-recovery-kobo/proof-observation-20261011T2003Z/observation.json",
+      "root": "/opt/lims/releases/runtime-kobo-proof-171dd36c-20261011T200210Z",
+      "status": null,
+      "keys": [
+        "observedUtc",
+        "root",
+        "unit",
+        "productionMutations",
+        "unitState",
+        "unit.stdoutTail",
+        "unit.stderrTail",
+        "files"
+      ]
+    },
+    {
+      "path": "WP/runtime-recovery-kobo/proof-observation-20261011T2034Z/observation.json",
+      "root": "/opt/lims/releases/runtime-kobo-proof-171dd36c-20261011T203339Z",
+      "status": null,
+      "keys": [
+        "observedUtc",
+        "root",
+        "unit",
+        "productionMutations",
+        "unitState",
+        "unit.stdoutTail",
+        "unit.stderrTail",
+        "files"
+      ]
+    },
+    {
+      "path": "WP/pr284-frozen-kit-20261012T161000Z/prepared-manifest.json",
+      "root": "/opt/lims/releases/instrument-import-release-959d17e1-20261012T161000Z",
+      "status": "PREPARED_IMPORT_FORWARD_ONLY_NOT_EXECUTED",
+      "keys": [
+        "status",
+        "root",
+        "head",
+        "image",
+        "tree",
+        "buildReusePolicy",
+        "buildRoot",
+        "buildReceiptSha256",
+        "buildSourceCommit",
+        "buildSourceReviewId",
+        "buildSourceIndexSha256",
+        "buildSourceReviewRawSha256",
+        "originalBuilderSha256",
+        "originalPreparerSha256",
+        "imageBytes",
+        "repeatPhysicalPolicy",
+        "baseHead",
+        "mergeBaseHead",
+        "auditReviewId",
+        "firstProofPolicy",
+        "auditedPrTree",
+        "mergeParents",
+        "preparedUtc",
+        "packagingCommit",
+        "originalProofRoot",
+        "originalProofUnit",
+        "proofReferences",
+        "sourceReviewId",
+        "proofToolingCommit",
+        "productionBaselineSourceReviewId"
+      ]
+    },
+    {
+      "path": "WP/runtime-recovery-kobo/proof-observation-20261011T2010Z/observation.json",
+      "root": "/opt/lims/releases/runtime-kobo-proof-171dd36c-20261011T200210Z",
+      "status": null,
+      "keys": [
+        "observedUtc",
+        "root",
+        "unit",
+        "productionMutations",
+        "unitState",
+        "unit.stdoutTail",
+        "unit.stderrTail",
+        "files"
+      ]
+    },
+    {
+      "path": "WP/runtime-recovery-kobo/proof-failure-logs-20261011T2043Z/observation.json",
+      "root": "/opt/lims/releases/runtime-kobo-proof-171dd36c-20261011T203339Z",
+      "status": null,
+      "keys": [
+        "observedUtc",
+        "root",
+        "productionMutations",
+        "containers",
+        "files"
+      ]
+    },
+    {
+      "path": "WP/pr284-frozen-kit-20261012T161000Z/retention-index.json",
+      "root": "/opt/lims/releases/instrument-import-release-959d17e1-20261012T161000Z",
+      "status": "READ_ONLY_UNUSED_FROZEN_KIT_VERIFIED",
+      "keys": [
+        "observedUtc",
+        "root",
+        "status",
+        "manifestSha256",
+        "files",
+        "productionOperations",
+        "sqliteConnections"
+      ]
+    },
+    {
+      "path": "WP/runtime-recovery-kobo/proof-failure-disk-20261011T2011Z/observation.json",
+      "root": "/opt/lims/releases/runtime-kobo-proof-171dd36c-20261011T200210Z",
+      "status": null,
+      "keys": [
+        "observedUtc",
+        "root",
+        "productionMutations",
+        "files",
+        "containers"
+      ]
+    },
+    {
+      "path": "WP/runtime-recovery-kobo/proof-observation-20261011T2008Z/observation.json",
+      "root": "/opt/lims/releases/runtime-kobo-proof-171dd36c-20261011T200210Z",
+      "status": null,
+      "keys": [
+        "observedUtc",
+        "root",
+        "unit",
+        "productionMutations",
+        "unitState",
+        "unit.stdoutTail",
+        "unit.stderrTail",
+        "files"
+      ]
+    },
+    {
+      "path": "WP/runtime-recovery-kobo/proof-observation-20261011T2006Z/observation.json",
+      "root": "/opt/lims/releases/runtime-kobo-proof-171dd36c-20261011T200210Z",
+      "status": null,
+      "keys": [
+        "observedUtc",
+        "root",
+        "unit",
+        "productionMutations",
+        "unitState",
+        "unit.stdoutTail",
+        "unit.stderrTail",
+        "files"
+      ]
+    },
+    {
+      "path": "WP/runtime-recovery-kobo/proof-observation-20261011T2005Z/observation.json",
+      "root": "/opt/lims/releases/runtime-kobo-proof-171dd36c-20261011T200210Z",
+      "status": null,
+      "keys": [
+        "observedUtc",
+        "root",
+        "unit",
+        "productionMutations",
+        "unitState",
+        "unit.stdoutTail",
+        "unit.stderrTail",
+        "files"
+      ]
+    },
+    {
+      "path": "WP/runtime-recovery-kobo/proof-failure-211630Z-original-logs/read-only-observation.json",
+      "root": "/opt/lims/releases/runtime-kobo-proof-171dd36c-20261011T211630Z",
+      "status": null,
+      "keys": [
+        "observedUtc",
+        "root",
+        "productionMutations",
+        "containers",
+        "files"
+      ]
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/first-metadata-233000-closed-stop/remote-closed-original-index.json",
+      "root": "/opt/lims/releases/workflow-batch-forward-metadata-cde8c889-20261014T233000Z",
+      "status": "ACTUAL_CLOSED_METADATA_STOP_ORIGINALS",
+      "keys": [
+        "status",
+        "observedUtc",
+        "root",
+        "unit",
+        "properties",
+        "files",
+        "directories",
+        "imageEligibility",
+        "newImageInspects",
+        "metadataOperatorsDispatched",
+        "databaseConnections",
+        "imageAdoptions"
+      ]
+    },
+    {
+      "path": "WP/pr284-resume-20261012/failed-production-161000/read-only-failure-verification.json",
+      "root": "/opt/lims/releases/instrument-import-release-959d17e1-20261012T161000Z",
+      "status": "FAILED_PRODUCTION_HELD_PHYSICAL_ORIGINALS_VERIFIED_NO_APPLY",
+      "keys": [
+        "observedUtc",
+        "status",
+        "root",
+        "unitState",
+        "receiptSha256",
+        "originalPhysicalTripleUnchanged",
+        "originalStoppedBackupHashUnchanged",
+        "allOriginalWritersStopped",
+        "ingressHeld",
+        "originalImageStopped",
+        "dryRunTotalChanges",
+        "dryRunMeasurement",
+        "noApplyOrRepeatArtifacts",
+        "all62FrozenFilesUnchanged",
+        "originalProofReceiptUnchanged",
+        "productionMutationsByThisVerifier",
+        "liveSqliteConnections",
+        "files",
+        "/api/health",
+        "/login"
+      ]
+    },
+    {
+      "path": "WP/pr284-resume-20261012/pr294-first-proof-observation-20261012T142521464857Z.json",
+      "root": "/opt/lims/releases/instrument-import-proof-959d17e1-20261012T134000Z",
+      "status": null,
+      "keys": [
+        "observedUtc",
+        "root",
+        "unit",
+        "unitState",
+        "sourceBytesUnchanged",
+        "containers",
+        "files",
+        "receipt",
+        "tail",
+        "freeBytes",
+        "productionMutations"
+      ]
+    },
+    {
+      "path": "WP/pr284-resume-20261012/pr294-first-proof-observation-20261012T142331279463Z.json",
+      "root": "/opt/lims/releases/instrument-import-proof-959d17e1-20261012T134000Z",
+      "status": null,
+      "keys": [
+        "observedUtc",
+        "root",
+        "unit",
+        "unitState",
+        "sourceBytesUnchanged",
+        "containers",
+        "files",
+        "receipt",
+        "tail",
+        "freeBytes",
+        "productionMutations"
+      ]
+    },
+    {
+      "path": "WP/pr284-resume-20261012/pr294-failed-production-161000-checkpoint.json",
+      "root": "/opt/lims/releases/instrument-import-release-959d17e1-20261012T161000Z",
+      "status": "FAILED_PRODUCTION_HELD_PHYSICAL_ORIGINALS_VERIFIED_NO_APPLY",
+      "keys": [
+        "observedUtc",
+        "status",
+        "root",
+        "unitState",
+        "receiptSha256",
+        "originalPhysicalTripleUnchanged",
+        "originalStoppedBackupHashUnchanged",
+        "allOriginalWritersStopped",
+        "ingressHeld",
+        "originalImageStopped",
+        "dryRunTotalChanges",
+        "dryRunMeasurement",
+        "noApplyOrRepeatArtifacts",
+        "all62FrozenFilesUnchanged",
+        "originalProofReceiptUnchanged",
+        "productionMutationsByThisVerifier",
+        "liveSqliteConnections",
+        "files",
+        "/api/health",
+        "/login"
+      ]
+    },
+    {
+      "path": "WP/pr284-resume-20261012/pr294-first-proof-observation-20261012T141844637233Z.json",
+      "root": "/opt/lims/releases/instrument-import-proof-959d17e1-20261012T134000Z",
+      "status": null,
+      "keys": [
+        "observedUtc",
+        "root",
+        "unit",
+        "unitState",
+        "sourceBytesUnchanged",
+        "containers",
+        "files",
+        "receipt",
+        "tail",
+        "freeBytes",
+        "productionMutations"
+      ]
+    },
+    {
+      "path": "WP/pr284-resume-20261012/pr294-first-proof-observation-20261012T141648210011Z.json",
+      "root": "/opt/lims/releases/instrument-import-proof-959d17e1-20261012T134000Z",
+      "status": null,
+      "keys": [
+        "observedUtc",
+        "root",
+        "unit",
+        "unitState",
+        "sourceBytesUnchanged",
+        "containers",
+        "files",
+        "receipt",
+        "tail",
+        "freeBytes",
+        "productionMutations"
+      ]
+    },
+    {
+      "path": "WP/pr284-resume-20261012/pr294-first-proof-observation-20261012T141615019511Z.json",
+      "root": "/opt/lims/releases/instrument-import-proof-959d17e1-20261012T134000Z",
+      "status": null,
+      "keys": [
+        "observedUtc",
+        "root",
+        "unit",
+        "unitState",
+        "sourceBytesUnchanged",
+        "containers",
+        "files",
+        "receipt",
+        "tail",
+        "freeBytes",
+        "productionMutations"
+      ]
+    },
+    {
+      "path": "WP/batch-proof-noop-identity-cde8-20261015/source-publication-index.json",
+      "root": "/opt/lims/releases/workflow-batch-stopped-copy-cde8c889-20261015T050000Z",
+      "status": "NEW_COMPLETE_NOOP_IDENTITY_SOURCE_REVIEW_REQUIRED",
+      "keys": [
+        "actualHostTests",
+        "closedUtc",
+        "files",
+        "localTests",
+        "newOperations",
+        "newRootCreated",
+        "root",
+        "sourceApproval",
+        "sourceSha256",
+        "status",
+        "table"
+      ]
+    },
+    {
+      "path": "WP/pr284-resume-20261012/proof-observation-1055.json",
+      "root": "/opt/lims/releases/instrument-import-proof-5dd5488d-20261012T105200Z",
+      "status": "READ_ONLY_OWNED_RUN_OBSERVATION",
+      "keys": [
+        "status",
+        "observedUtc",
+        "root",
+        "unit",
+        "unitState",
+        "files",
+        "tails",
+        "containers",
+        "progressFiles",
+        "freeBytes",
+        "productionMutations"
+      ]
+    },
+    {
+      "path": "WP/batch-proof-cde8-20261015/first-proof-023000-closed-reserve-stop/closed-retention-record.json",
+      "root": "/opt/lims/releases/workflow-batch-stopped-copy-cde8c889-20261015T023000Z",
+      "status": "CLOSED_RESERVE_STOP_ALL_ORIGINALS_RETAINED_METADATA_ONLY_DIAGNOSTIC",
+      "keys": [
+        "allHistoricalContainersPreserved",
+        "allHistoricalStoppedContainersPreserved",
+        "allRootFilesUnchanged",
+        "defaultEntrypointAttempts",
+        "files",
+        "installerAttempts",
+        "journalOriginal",
+        "newOwnedContainers",
+        "normalPredecessorSelectedDerived",
+        "observedUtc",
+        "originalRefusal",
+        "packageUnchanged",
+        "postFailureMetadataOnly",
+        "productionCopies",
+        "productionSqliteConnections",
+        "proofReplays",
+        "root",
+        "status",
+        "systemctlOriginal",
+        "unit"
+      ]
+    },
+    {
+      "path": "WP/pr284-resume-20261012/proof-observation-1053.json",
+      "root": "/opt/lims/releases/instrument-import-proof-5dd5488d-20261012T105200Z",
+      "status": "READ_ONLY_OWNED_RUN_OBSERVATION",
+      "keys": [
+        "status",
+        "observedUtc",
+        "root",
+        "unit",
+        "unitState",
+        "files",
+        "tails",
+        "containers",
+        "freeBytes",
+        "productionMutations"
+      ]
+    },
+    {
+      "path": "WP/batch-proof-cde8-20261015/closed-source-publication-index.json",
+      "root": "/opt/lims/releases/workflow-batch-stopped-copy-cde8c889-20261015T020000Z",
+      "status": "NEW_COMPLETE_SCOPED_STOPPED_COPY_GRAPH_REVIEW_READY_NOT_APPROVED",
+      "keys": [
+        "actualHostTests",
+        "actualSourceReview",
+        "createdUtc",
+        "files",
+        "jobsOnQualificationStillRequired",
+        "localTests",
+        "productionSnapshotsCollected",
+        "proofsRun",
+        "root",
+        "scope",
+        "sourceSha256",
+        "status"
+      ]
+    },
+    {
+      "path": "WP/pr284-resume-20261012/proof-observation-1056.json",
+      "root": "/opt/lims/releases/instrument-import-proof-5dd5488d-20261012T105200Z",
+      "status": "READ_ONLY_OWNED_RUN_OBSERVATION",
+      "keys": [
+        "status",
+        "observedUtc",
+        "root",
+        "unit",
+        "unitState",
+        "files",
+        "tails",
+        "containers",
+        "progressFiles",
+        "freeBytes",
+        "productionMutations"
+      ]
+    },
+    {
+      "path": "WP/batch-proof-cde8-20261015/first-proof-020000-closed-mount-differences-successor/closed-retention-record.json",
+      "root": "/opt/lims/releases/workflow-batch-stopped-copy-cde8c889-20261015T020000Z",
+      "status": "CLOSED_PREFLIGHT_REFUSAL_ALL_ORIGINALS_READONLY_RETAINED_NOT_REPLAYED",
+      "keys": [
+        "allHistoricalStoppedContainersPreserved",
+        "containerComparisonDifferences",
+        "defaultEntrypointAttempts",
+        "descendantMountMetadata",
+        "files",
+        "installerAttempts",
+        "journalOriginal",
+        "mountinfoOriginal",
+        "neverReplay",
+        "newOwnedContainers",
+        "normalPredecessorSelected",
+        "observedUtc",
+        "packageUnchanged",
+        "productionCopies",
+        "productionMutations",
+        "productionSqliteConnections",
+        "root",
+        "status",
+        "systemctlOriginal",
+        "unit"
+      ]
+    },
+    {
+      "path": "WP/batch-proof-noop-identity-cde8-20261015/first-proof-050000-third-open-baseline-index.json",
+      "root": "/opt/lims/releases/workflow-batch-stopped-copy-cde8c889-20261015T050000Z",
+      "status": "ACTUAL_OPEN_RETAINED_BASELINE_106_39_NOT_PROOF_COMPLETE",
+      "keys": [
+        "actualMemoryMax",
+        "actualRetainedBaseline",
+        "actualSwapMax",
+        "fileCount",
+        "files",
+        "invocation",
+        "measuredBind",
+        "neverReplay",
+        "observedMemoryCurrent",
+        "observedMemoryPeak",
+        "observedUtc",
+        "root",
+        "runtimeSeconds",
+        "scientificImpactLists",
+        "status",
+        "terminalStatus",
+        "unit"
+      ]
+    },
+    {
+      "path": "WP/batch-proof-noop-identity-cde8-20261015/first-proof-050000-second-open-index.json",
+      "root": "/opt/lims/releases/workflow-batch-stopped-copy-cde8c889-20261015T050000Z",
+      "status": "ACTUAL_OPEN_PAST_MEASURED_RESERVE_NOT_PROOF_COMPLETE",
+      "keys": [
+        "actualMemoryMax",
+        "actualProductionCounts",
+        "actualSwapMax",
+        "fileCount",
+        "files",
+        "invocation",
+        "measuredBind",
+        "neverReplay",
+        "observedMemoryCurrent",
+        "observedMemoryPeak",
+        "observedUtc",
+        "root",
+        "runtimeSeconds",
+        "status",
+        "terminalStatus",
+        "unit"
+      ]
+    },
+    {
+      "path": "WP/batch-proof-cde8-20261015/overlay-accounting-source-publication-index.json",
+      "root": "/opt/lims/releases/workflow-batch-stopped-copy-cde8c889-20261015T023000Z",
+      "status": "VERIFIED_OVERLAY_ACCOUNTING_SOURCE_READY_FOR_NEW_REVIEW",
+      "keys": [
+        "actualHostTests",
+        "actualSourceReview",
+        "closedUtc",
+        "failed020000RemainsFailed",
+        "files",
+        "localTests",
+        "newRootCreated",
+        "productionCopies",
+        "root",
+        "sourceSha256",
+        "status"
+      ]
+    },
+    {
+      "path": "WP/batch-proof-noop-identity-cde8-20261015/first-proof-050000-opening-index.json",
+      "root": "/opt/lims/releases/workflow-batch-stopped-copy-cde8c889-20261015T050000Z",
+      "status": "ACTUAL_ONCE_LAUNCHED_OPEN_NOT_PROOF_COMPLETE",
+      "keys": [
+        "actualExecutedLimitsAtOpening",
+        "actualProductionCounts",
+        "actualSourcePass",
+        "files",
+        "invocation",
+        "jobsOnQualificationStillRequired",
+        "neverReplay",
+        "observedUtc",
+        "root",
+        "sourceCommit",
+        "status",
+        "terminalProofStatus",
+        "unit"
+      ]
+    },
+    {
+      "path": "WP/batch-proof-cde8-20261015/first-proof-023000-opening-index.json",
+      "root": "/opt/lims/releases/workflow-batch-stopped-copy-cde8c889-20261015T023000Z",
+      "status": "ACTUAL_ONCE_LAUNCHED_OPEN_NOT_PROOF_COMPLETE",
+      "keys": [
+        "actualExecutedLimitsAtOpening",
+        "actualProductionCounts",
+        "actualSourcePass",
+        "files",
+        "invocation",
+        "jobsOnQualificationStillRequired",
+        "neverReplay",
+        "observedUtc",
+        "root",
+        "sourceCommit",
+        "status",
+        "terminalProofStatus",
+        "unit"
+      ]
+    },
+    {
+      "path": "WP/batch-proof-noop-identity-cde8-20261015/first-proof-050000-closed-name-refusal/closed-retention-record.json",
+      "root": "/opt/lims/releases/workflow-batch-stopped-copy-cde8c889-20261015T050000Z",
+      "status": "CLOSED_NAME_PREFLIGHT_REFUSAL_ALL_RETAINED_NO_SQL_OR_REPLAY",
+      "keys": [
+        "actualRetainedBaseline",
+        "allHistoricalContainerFullObjectsPreserved",
+        "allHistoricalStoppedContainersPreserved",
+        "allRawTriplesAndAssetsRemainOnHost",
+        "artifacts",
+        "containerInventoryAfterSafeSelected",
+        "currentFreeBytes",
+        "freshNameDiagnosticNotOriginalUnretainedInspect",
+        "installerOrEntrypointAttempts",
+        "journalOriginal",
+        "newOwnedContainers",
+        "newPhysicalDuMeasurements",
+        "normalPredecessorSelectedDerived",
+        "observedUtc",
+        "originalNameProbeRawWasNotRetained",
+        "originalRefusal",
+        "packageUnchanged",
+        "productionMutations",
+        "productionSqliteConnections",
+        "proofReplays",
+        "root",
+        "rootFileCount",
+        "rootFileInventoryWithStableHashes",
+        "rootPhysicalAllocatedBytes",
+        "status",
+        "systemctlOriginal",
+        "terminalFullStoreAccountingNotPerformed",
+        "unit"
+      ]
+    },
+    {
+      "path": "WP/batch-proof-name-inventory-cde8-20261015/source-publication-index.json",
+      "root": "/opt/lims/releases/workflow-batch-stopped-copy-cde8c889-20261015T060000Z",
+      "status": "NEW_COMPLETE_STRUCTURAL_NAME_SOURCE_REVIEW_REQUIRED",
+      "keys": [
+        "actualHostMetadataNameProof",
+        "actualHostTests",
+        "closedUtc",
+        "files",
+        "localTests",
+        "newOperations",
+        "newRootCreated",
+        "root",
+        "sourceApproval",
+        "sourceSha256",
+        "status",
+        "table"
+      ]
+    },
+    {
+      "path": "WP/batch-proof-name-inventory-cde8-20261015/first-proof-060000-closed-source-preservation-stop/closed-retention-record.json",
+      "root": "/opt/lims/releases/workflow-batch-stopped-copy-cde8c889-20261015T060000Z",
+      "status": "CLOSED_FRESH_SEAL_SOURCE_PRESERVATION_STOP_ALL_RETAINED_NO_SQL_OR_REPLAY",
+      "keys": [
+        "actual060000BaselineCounts",
+        "allHistoricalContainerFullObjectsPreserved",
+        "allHistoricalStoppedContainersPreserved",
+        "allRawTriplesAndAssetsRemainOnHost",
+        "artifacts",
+        "containerInventoryAfterSafeSelected",
+        "currentFreeBytes",
+        "freshSealCompleted",
+        "freshStagePhysicalClosureNotCompleted",
+        "installerOrEntrypointAttempts",
+        "journalOriginal",
+        "liveProductionContentOpensByRetainer",
+        "newOwnedContainers",
+        "newPhysicalDuMeasurements",
+        "normalPredecessorSelectedDerived",
+        "observedUtc",
+        "originalAbsentEvidence",
+        "originalFailureAfterSourceSampleWasNotSealed",
+        "originalRefusal",
+        "packageUnchanged",
+        "productionMutations",
+        "productionSqliteConnections",
+        "proofReplays",
+        "retainedRawMasterBytesMatchOriginalCopyAuthority",
+        "retainedRawMasterFullMetadataMatchesReaderCopyAuthority",
+        "root",
+        "rootFileCount",
+        "rootFileInventoryWithStableHashes",
+        "rootPhysicalAllocatedBytes",
+        "status"
+      ]
+    },
+    {
+      "path": "WP/batch-proof-name-inventory-cde8-20261015/first-proof-060000-second-open-index.json",
+      "root": "/opt/lims/releases/workflow-batch-stopped-copy-cde8c889-20261015T060000Z",
+      "status": "ACTUAL_OPEN_PAST_MEASURED_RESERVE_NOT_PROOF_COMPLETE",
+      "keys": [
+        "actualMemoryMax",
+        "actualProductionCounts",
+        "actualSwapMax",
+        "fileCount",
+        "files",
+        "invocation",
+        "measuredBind",
+        "neverReplay",
+        "observedMemoryCurrent",
+        "observedMemoryPeak",
+        "observedUtc",
+        "root",
+        "runtimeSeconds",
+        "status",
+        "terminalStatus",
+        "unit"
+      ]
+    },
+    {
+      "path": "WP/batch-proof-name-inventory-cde8-20261015/first-proof-060000-opening-index.json",
+      "root": "/opt/lims/releases/workflow-batch-stopped-copy-cde8c889-20261015T060000Z",
+      "status": "ACTUAL_ONCE_LAUNCHED_OPEN_NOT_PROOF_COMPLETE",
+      "keys": [
+        "actualExecutedLimitsAtOpening",
+        "actualSourcePass",
+        "capacityChecks",
+        "files",
+        "invocation",
+        "jobsOnQualificationStillRequired",
+        "memoryCurrentAtOpen",
+        "memoryPeakAtOpenNotFinal",
+        "neverReplay",
+        "newActualProductionCounts",
+        "observedUtc",
+        "root",
+        "sourceCommit",
+        "status",
+        "terminalProofStatus",
+        "unit"
+      ]
+    }
+  ]
+}

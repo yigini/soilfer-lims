@@ -1,0 +1,9 @@
+{
+  "status": "TOOL_OUTPUT_TRANSCRIPTION_LOCAL_DERIVER_REFUSAL_BEFORE_OUTPUT_OR_REMOTE_MUTATION",
+  "exitCode": 1,
+  "error": "RuntimeError: Original terminal receipt missing",
+  "cause": "freshOwnOutcome.file is an absolute remote path; publication payload uses relative paths. Successor normalizes using PurePosixPath.name.",
+  "derivedReportCreated": false,
+  "remoteOperations": 0,
+  "originalHelperUnchanged": true
+}

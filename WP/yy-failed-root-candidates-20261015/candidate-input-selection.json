@@ -1,0 +1,1150 @@
+{
+  "candidates": [
+    {
+      "root": "/opt/lims/releases/combined-eb6de2e8-20261010T154300Z",
+      "name": "combined-eb6de2e8-20261010T154300Z",
+      "physicalAllocatedBytes": 1389903872,
+      "birthEpoch": 1791647020,
+      "birthTimeOriginal": "2026-10-10 17:43:40.603471331 +0200",
+      "mtimeOriginal": "2026-10-10 17:57:51.669162800 +0200",
+      "outcomeCategory": "FAILED_OR_STOP",
+      "ownOutcomeStatus": "REFUSED_OR_FAILED_OWNED_COPY",
+      "ownOutcomeRecord": {
+        "file": "rehearsal-receipt.json",
+        "status": "REFUSED_OR_FAILED_OWNED_COPY",
+        "error": "193-apply failed; see retained logs"
+      },
+      "allSelectedRecordsMayIncludeCopiedPriorReceipts": [
+        {
+          "file": "build-receipt.json",
+          "selected": {
+            "status": "BUILT_ONLY_NOT_DEPLOYED"
+          }
+        },
+        {
+          "file": "rehearsal-receipt.json",
+          "selected": {
+            "status": "REFUSED_OR_FAILED_OWNED_COPY",
+            "error": "193-apply failed; see retained logs"
+          }
+        }
+      ],
+      "publishedClosedRawEvidence": [],
+      "conditionalRootOnlyEstimateBytes": 0,
+      "notDeletionAuthority": true
+    },
+    {
+      "root": "/opt/lims/releases/combined-eb6de2e8-20261010T160100Z",
+      "name": "combined-eb6de2e8-20261010T160100Z",
+      "physicalAllocatedBytes": 1132859392,
+      "birthEpoch": 1791648091,
+      "birthTimeOriginal": "2026-10-10 18:01:31.637740604 +0200",
+      "mtimeOriginal": "2026-10-10 18:07:08.076764486 +0200",
+      "outcomeCategory": "FAILED_OR_STOP",
+      "ownOutcomeStatus": "REFUSED_OR_FAILED_OWNED_COPY",
+      "ownOutcomeRecord": {
+        "file": "rehearsal-receipt.json",
+        "status": "REFUSED_OR_FAILED_OWNED_COPY",
+        "error": "193-apply failed; see retained logs"
+      },
+      "allSelectedRecordsMayIncludeCopiedPriorReceipts": [
+        {
+          "file": "build-receipt.json",
+          "selected": {
+            "status": "BUILT_ONLY_NOT_DEPLOYED"
+          }
+        },
+        {
+          "file": "rehearsal-receipt.json",
+          "selected": {
+            "status": "REFUSED_OR_FAILED_OWNED_COPY",
+            "error": "193-apply failed; see retained logs"
+          }
+        }
+      ],
+      "publishedClosedRawEvidence": [],
+      "conditionalRootOnlyEstimateBytes": 0,
+      "notDeletionAuthority": true
+    },
+    {
+      "root": "/opt/lims/releases/combined-eb6de2e8-main-042c04b5-retry-20261010T180200Z",
+      "name": "combined-eb6de2e8-main-042c04b5-retry-20261010T180200Z",
+      "physicalAllocatedBytes": 1300602880,
+      "birthEpoch": 1791655273,
+      "birthTimeOriginal": "2026-10-10 20:01:13.670937777 +0200",
+      "mtimeOriginal": "2026-10-10 20:17:09.217709099 +0200",
+      "outcomeCategory": "FAILED_OR_STOP",
+      "ownOutcomeStatus": "REFUSED_OR_FAILED_OWNED_COPY",
+      "ownOutcomeRecord": {
+        "file": "rehearsal-receipt.json",
+        "status": "REFUSED_OR_FAILED_OWNED_COPY",
+        "error": "Blocked #191 owners require operator resolution before release"
+      },
+      "allSelectedRecordsMayIncludeCopiedPriorReceipts": [
+        {
+          "file": "build-receipt.json",
+          "selected": {
+            "status": "BUILT_ONLY_NOT_DEPLOYED"
+          }
+        },
+        {
+          "file": "rehearsal-receipt.json",
+          "selected": {
+            "status": "REFUSED_OR_FAILED_OWNED_COPY",
+            "error": "Blocked #191 owners require operator resolution before release"
+          }
+        }
+      ],
+      "publishedClosedRawEvidence": [],
+      "conditionalRootOnlyEstimateBytes": 0,
+      "notDeletionAuthority": true
+    },
+    {
+      "root": "/opt/lims/releases/combined-eb6de2e8-repair-pr-0685d34d-20261010T164000Z",
+      "name": "combined-eb6de2e8-repair-pr-0685d34d-20261010T164000Z",
+      "physicalAllocatedBytes": 1300721664,
+      "birthEpoch": 1791650528,
+      "birthTimeOriginal": "2026-10-10 18:42:08.012809017 +0200",
+      "mtimeOriginal": "2026-10-10 18:58:58.807771969 +0200",
+      "outcomeCategory": "FAILED_OR_STOP",
+      "ownOutcomeStatus": "REFUSED_OR_FAILED_OWNED_COPY",
+      "ownOutcomeRecord": {
+        "file": "rehearsal-receipt.json",
+        "status": "REFUSED_OR_FAILED_OWNED_COPY",
+        "error": "211-dry failed; see retained logs"
+      },
+      "allSelectedRecordsMayIncludeCopiedPriorReceipts": [
+        {
+          "file": "build-receipt.json",
+          "selected": {
+            "status": "BUILT_ONLY_NOT_DEPLOYED"
+          }
+        },
+        {
+          "file": "rehearsal-receipt.json",
+          "selected": {
+            "status": "REFUSED_OR_FAILED_OWNED_COPY",
+            "error": "211-dry failed; see retained logs"
+          }
+        }
+      ],
+      "publishedClosedRawEvidence": [],
+      "conditionalRootOnlyEstimateBytes": 0,
+      "notDeletionAuthority": true
+    },
+    {
+      "root": "/opt/lims/releases/combined-eb6de2e8-repair-pr-0685d34d-verified-20261010T170400Z",
+      "name": "combined-eb6de2e8-repair-pr-0685d34d-verified-20261010T170400Z",
+      "physicalAllocatedBytes": 1301393408,
+      "birthEpoch": 1791651826,
+      "birthTimeOriginal": "2026-10-10 19:03:46.608729057 +0200",
+      "mtimeOriginal": "2026-10-10 19:22:51.278413847 +0200",
+      "outcomeCategory": "FAILED_OR_STOP",
+      "ownOutcomeStatus": "REFUSED_OR_FAILED_OWNED_COPY",
+      "ownOutcomeRecord": {
+        "file": "rehearsal-receipt.json",
+        "status": "REFUSED_OR_FAILED_OWNED_COPY",
+        "error": "'str' object has no attribute 'get'"
+      },
+      "allSelectedRecordsMayIncludeCopiedPriorReceipts": [
+        {
+          "file": "build-receipt.json",
+          "selected": {
+            "status": "BUILT_ONLY_NOT_DEPLOYED"
+          }
+        },
+        {
+          "file": "rehearsal-receipt.json",
+          "selected": {
+            "status": "REFUSED_OR_FAILED_OWNED_COPY",
+            "error": "'str' object has no attribute 'get'"
+          }
+        }
+      ],
+      "publishedClosedRawEvidence": [],
+      "conditionalRootOnlyEstimateBytes": 0,
+      "notDeletionAuthority": true
+    },
+    {
+      "root": "/opt/lims/releases/combined-eb6de2e8-repair-pr-5eba963e-20261010T162800Z",
+      "name": "combined-eb6de2e8-repair-pr-5eba963e-20261010T162800Z",
+      "physicalAllocatedBytes": 1300635648,
+      "birthEpoch": 1791649685,
+      "birthTimeOriginal": "2026-10-10 18:28:05.870239734 +0200",
+      "mtimeOriginal": "2026-10-10 18:34:59.852921038 +0200",
+      "outcomeCategory": "FAILED_OR_STOP",
+      "ownOutcomeStatus": "REFUSED_OR_FAILED_OWNED_COPY",
+      "ownOutcomeRecord": {
+        "file": "rehearsal-receipt.json",
+        "status": "REFUSED_OR_FAILED_OWNED_COPY",
+        "error": "194-apply failed; see retained logs"
+      },
+      "allSelectedRecordsMayIncludeCopiedPriorReceipts": [
+        {
+          "file": "build-receipt.json",
+          "selected": {
+            "status": "BUILT_ONLY_NOT_DEPLOYED"
+          }
+        },
+        {
+          "file": "rehearsal-receipt.json",
+          "selected": {
+            "status": "REFUSED_OR_FAILED_OWNED_COPY",
+            "error": "194-apply failed; see retained logs"
+          }
+        }
+      ],
+      "publishedClosedRawEvidence": [],
+      "conditionalRootOnlyEstimateBytes": 0,
+      "notDeletionAuthority": true
+    },
+    {
+      "root": "/opt/lims/releases/forward-ae64f169-proof-20261011T144000Z",
+      "name": "forward-ae64f169-proof-20261011T144000Z",
+      "physicalAllocatedBytes": 192512,
+      "birthEpoch": 1791729424,
+      "birthTimeOriginal": "2026-10-11 16:37:04.913788829 +0200",
+      "mtimeOriginal": "2026-10-11 16:37:37.491470380 +0200",
+      "outcomeCategory": "FAILED_OR_STOP",
+      "ownOutcomeStatus": "FAILED_FORWARD_PROOF",
+      "ownOutcomeRecord": {
+        "file": "rehearsal-receipt.json",
+        "status": "FAILED_FORWARD_PROOF",
+        "error": "",
+        "completedUtc": "2026-10-11T14:37:37.480337+00:00"
+      },
+      "allSelectedRecordsMayIncludeCopiedPriorReceipts": [
+        {
+          "file": "rehearsal-receipt.json",
+          "selected": {
+            "status": "FAILED_FORWARD_PROOF",
+            "error": "",
+            "completedUtc": "2026-10-11T14:37:37.480337+00:00"
+          }
+        }
+      ],
+      "publishedClosedRawEvidence": [],
+      "conditionalRootOnlyEstimateBytes": 0,
+      "notDeletionAuthority": true
+    },
+    {
+      "root": "/opt/lims/releases/forward-ae64f169-proof-20261011T144300Z",
+      "name": "forward-ae64f169-proof-20261011T144300Z",
+      "physicalAllocatedBytes": 577245184,
+      "birthEpoch": 1791729644,
+      "birthTimeOriginal": "2026-10-11 16:40:44.508382951 +0200",
+      "mtimeOriginal": "2026-10-11 16:48:38.111291164 +0200",
+      "outcomeCategory": "FAILED_OR_STOP",
+      "ownOutcomeStatus": "FAILED_FORWARD_PROOF",
+      "ownOutcomeRecord": {
+        "file": "rehearsal-receipt.json",
+        "status": "FAILED_FORWARD_PROOF",
+        "error": "Database committed a write during startup/checks",
+        "completedUtc": "2026-10-11T14:48:07.416215+00:00"
+      },
+      "allSelectedRecordsMayIncludeCopiedPriorReceipts": [
+        {
+          "file": "rehearsal-receipt.json",
+          "selected": {
+            "status": "FAILED_FORWARD_PROOF",
+            "error": "Database committed a write during startup/checks",
+            "completedUtc": "2026-10-11T14:48:07.416215+00:00"
+          }
+        }
+      ],
+      "publishedClosedRawEvidence": [],
+      "conditionalRootOnlyEstimateBytes": 0,
+      "notDeletionAuthority": true
+    },
+    {
+      "root": "/opt/lims/releases/instrument-import-proof-5dd5488d-20261012T105200Z",
+      "name": "instrument-import-proof-5dd5488d-20261012T105200Z",
+      "physicalAllocatedBytes": 1705963520,
+      "birthEpoch": 1791802345,
+      "birthTimeOriginal": "2026-10-12 12:52:25.523242505 +0200",
+      "mtimeOriginal": "2026-10-12 12:54:26.149743020 +0200",
+      "outcomeCategory": "FAILED_OR_STOP",
+      "ownOutcomeStatus": "FAILED_NEW_IMPORT_NATURAL_KOBO_PROOF",
+      "ownOutcomeRecord": {
+        "file": "rehearsal-receipt.json",
+        "status": "FAILED_NEW_IMPORT_NATURAL_KOBO_PROOF",
+        "error": "Bounded import CLI failed; retain evidence and hold forward-only",
+        "completedUtc": "2026-10-12T10:54:26.150977+00:00"
+      },
+      "allSelectedRecordsMayIncludeCopiedPriorReceipts": [
+        {
+          "file": "rehearsal-receipt.json",
+          "selected": {
+            "status": "FAILED_NEW_IMPORT_NATURAL_KOBO_PROOF",
+            "error": "Bounded import CLI failed; retain evidence and hold forward-only",
+            "completedUtc": "2026-10-12T10:54:26.150977+00:00"
+          }
+        }
+      ],
+      "publishedClosedRawEvidence": [
+        {
+          "path": "WP/pr284-resume-20261012/failed-proof-105200/rehearsal-receipt.json",
+          "commit": "dd496777400e9c2f4f0ace73009f8cf8c86022d0",
+          "gitBlobOid": "4d983dfbd6db19b9ee211c1eb23f4211b7c195e7",
+          "sha256": "511c1951dd11b37612186190237f302f015ebfabefb970b4490395ef9cc2268e",
+          "publicationRole": "ORIGINAL_TERMINAL_RECEIPT_NOT_DATABASE_BACKUP"
+        }
+      ],
+      "conditionalRootOnlyEstimateBytes": 1705963520,
+      "notDeletionAuthority": true
+    },
+    {
+      "root": "/opt/lims/releases/instrument-import-proof-959d17e1-20261012T134000Z",
+      "name": "instrument-import-proof-959d17e1-20261012T134000Z",
+      "physicalAllocatedBytes": 3415617536,
+      "birthEpoch": 1791814560,
+      "birthTimeOriginal": "2026-10-12 16:16:00.456687873 +0200",
+      "mtimeOriginal": "2026-10-12 16:24:27.292253155 +0200",
+      "outcomeCategory": "FAILED_OR_STOP",
+      "ownOutcomeStatus": "FAILED_NEW_IMPORT_NATURAL_KOBO_PROOF",
+      "ownOutcomeRecord": {
+        "file": "rehearsal-receipt.json",
+        "status": "FAILED_NEW_IMPORT_NATURAL_KOBO_PROOF",
+        "error": "Immediate repeat changed original bytes or full installed state",
+        "completedUtc": "2026-10-12T14:24:27.293103+00:00"
+      },
+      "allSelectedRecordsMayIncludeCopiedPriorReceipts": [
+        {
+          "file": "rehearsal-receipt.json",
+          "selected": {
+            "status": "FAILED_NEW_IMPORT_NATURAL_KOBO_PROOF",
+            "error": "Immediate repeat changed original bytes or full installed state",
+            "completedUtc": "2026-10-12T14:24:27.293103+00:00"
+          }
+        }
+      ],
+      "publishedClosedRawEvidence": [],
+      "conditionalRootOnlyEstimateBytes": 0,
+      "notDeletionAuthority": true
+    },
+    {
+      "root": "/opt/lims/releases/instrument-import-release-959d17e1-20261012T161000Z",
+      "name": "instrument-import-release-959d17e1-20261012T161000Z",
+      "physicalAllocatedBytes": 2306981888,
+      "birthEpoch": 1791833034,
+      "birthTimeOriginal": "2026-10-12 21:23:54.211975601 +0200",
+      "mtimeOriginal": "2026-10-12 21:43:21.604353886 +0200",
+      "outcomeCategory": "FAILED_OR_STOP",
+      "ownOutcomeStatus": "FAILED_IMPORT_FORWARD_HOLD",
+      "ownOutcomeRecord": {
+        "file": "production-receipt.json",
+        "status": "FAILED_IMPORT_FORWARD_HOLD",
+        "error": "[Errno 17] File exists: '/opt/lims/releases/instrument-import-release-959d17e1-20261012T161000Z/import-dry-copy-authority.json'"
+      },
+      "allSelectedRecordsMayIncludeCopiedPriorReceipts": [
+        {
+          "file": "production-receipt.json",
+          "selected": {
+            "status": "FAILED_IMPORT_FORWARD_HOLD",
+            "error": "[Errno 17] File exists: '/opt/lims/releases/instrument-import-release-959d17e1-20261012T161000Z/import-dry-copy-authority.json'"
+          }
+        },
+        {
+          "file": "rehearsal-receipt.json",
+          "selected": {
+            "status": "PASSED_NEW_IMPORT_NATURAL_KOBO_PROOF",
+            "completedUtc": "2026-10-12T15:40:30.271703+00:00"
+          }
+        }
+      ],
+      "publishedClosedRawEvidence": [
+        {
+          "path": "WP/pr284-resume-20261012/failed-production-161000/production-receipt.json",
+          "commit": "dd496777400e9c2f4f0ace73009f8cf8c86022d0",
+          "gitBlobOid": "395ed7993bfdafcba07569839c209e337cb5d1f0",
+          "sha256": "2a03e66071406c58b754d9c63ed8200373c55a0433c2d1ad1cbdc2836d72499e",
+          "publicationRole": "EXPLICIT_HISTORICAL_ROOT_TO_ORIGINAL_TERMINAL_RECEIPT_BINDING_NOT_DATABASE_BACKUP"
+        }
+      ],
+      "conditionalRootOnlyEstimateBytes": 2306981888,
+      "notDeletionAuthority": true
+    },
+    {
+      "root": "/opt/lims/releases/preparation-ae64f169-rehearsal-20261011T131500Z",
+      "name": "preparation-ae64f169-rehearsal-20261011T131500Z",
+      "physicalAllocatedBytes": 1196404736,
+      "birthEpoch": 1791724545,
+      "birthTimeOriginal": "2026-10-11 15:15:45.260724213 +0200",
+      "mtimeOriginal": "2026-10-11 15:18:08.133626964 +0200",
+      "outcomeCategory": "FAILED_OR_STOP",
+      "ownOutcomeStatus": "REFUSED_OR_FAILED_OWNED_COPY",
+      "ownOutcomeRecord": {
+        "file": "rehearsal-receipt.json",
+        "status": "REFUSED_OR_FAILED_OWNED_COPY",
+        "error": "272 prior schema not complete"
+      },
+      "allSelectedRecordsMayIncludeCopiedPriorReceipts": [
+        {
+          "file": "build-receipt.json",
+          "selected": {
+            "status": "BUILT_ONLY_NOT_DEPLOYED"
+          }
+        },
+        {
+          "file": "rehearsal-receipt.json",
+          "selected": {
+            "status": "REFUSED_OR_FAILED_OWNED_COPY",
+            "error": "272 prior schema not complete"
+          }
+        }
+      ],
+      "publishedClosedRawEvidence": [],
+      "conditionalRootOnlyEstimateBytes": 0,
+      "notDeletionAuthority": true
+    },
+    {
+      "root": "/opt/lims/releases/preparation-ae64f169-rehearsal-20261011T132800Z",
+      "name": "preparation-ae64f169-rehearsal-20261011T132800Z",
+      "physicalAllocatedBytes": 1196539904,
+      "birthEpoch": 1791725291,
+      "birthTimeOriginal": "2026-10-11 15:28:11.723256003 +0200",
+      "mtimeOriginal": "2026-10-11 15:30:27.625106392 +0200",
+      "outcomeCategory": "FAILED_OR_STOP",
+      "ownOutcomeStatus": "REFUSED_OR_FAILED_OWNED_COPY",
+      "ownOutcomeRecord": {
+        "file": "rehearsal-receipt.json",
+        "status": "REFUSED_OR_FAILED_OWNED_COPY",
+        "error": "legacy-191-link-dry failed; see retained logs"
+      },
+      "allSelectedRecordsMayIncludeCopiedPriorReceipts": [
+        {
+          "file": "build-receipt.json",
+          "selected": {
+            "status": "BUILT_ONLY_NOT_DEPLOYED"
+          }
+        },
+        {
+          "file": "rehearsal-receipt.json",
+          "selected": {
+            "status": "REFUSED_OR_FAILED_OWNED_COPY",
+            "error": "legacy-191-link-dry failed; see retained logs"
+          }
+        }
+      ],
+      "publishedClosedRawEvidence": [],
+      "conditionalRootOnlyEstimateBytes": 0,
+      "notDeletionAuthority": true
+    },
+    {
+      "root": "/opt/lims/releases/preparation-ae64f169-rehearsal-20261011T133600Z",
+      "name": "preparation-ae64f169-rehearsal-20261011T133600Z",
+      "physicalAllocatedBytes": 1196793856,
+      "birthEpoch": 1791725714,
+      "birthTimeOriginal": "2026-10-11 15:35:14.504118785 +0200",
+      "mtimeOriginal": "2026-10-11 15:41:39.597182022 +0200",
+      "outcomeCategory": "FAILED_OR_STOP",
+      "ownOutcomeStatus": "REFUSED_OR_FAILED_OWNED_COPY",
+      "ownOutcomeRecord": {
+        "file": "rehearsal-receipt.json",
+        "status": "REFUSED_OR_FAILED_OWNED_COPY",
+        "error": ""
+      },
+      "allSelectedRecordsMayIncludeCopiedPriorReceipts": [
+        {
+          "file": "build-receipt.json",
+          "selected": {
+            "status": "BUILT_ONLY_NOT_DEPLOYED"
+          }
+        },
+        {
+          "file": "rehearsal-receipt.json",
+          "selected": {
+            "status": "REFUSED_OR_FAILED_OWNED_COPY",
+            "error": ""
+          }
+        }
+      ],
+      "publishedClosedRawEvidence": [],
+      "conditionalRootOnlyEstimateBytes": 0,
+      "notDeletionAuthority": true
+    },
+    {
+      "root": "/opt/lims/releases/qc187-rehearsal-a14ff63-20261007T105111Z",
+      "name": "qc187-rehearsal-a14ff63-20261007T105111Z",
+      "physicalAllocatedBytes": 49782784,
+      "birthEpoch": 1791370277,
+      "birthTimeOriginal": "2026-10-07 12:51:17.175561805 +0200",
+      "mtimeOriginal": "2026-10-07 12:53:55.149923056 +0200",
+      "outcomeCategory": "FAILED_OR_STOP",
+      "ownOutcomeStatus": "FAILED",
+      "ownOutcomeRecord": {
+        "file": "owned-rehearsal-receipt.json",
+        "status": "FAILED",
+        "error": "[Errno 2] No such file or directory: '/opt/lims/releases/qc187-rehearsal-a14ff63-20261007T105111Z/qc187-owned-fault.cjs'"
+      },
+      "allSelectedRecordsMayIncludeCopiedPriorReceipts": [
+        {
+          "file": "owned-rehearsal-receipt.json",
+          "selected": {
+            "status": "FAILED",
+            "error": "[Errno 2] No such file or directory: '/opt/lims/releases/qc187-rehearsal-a14ff63-20261007T105111Z/qc187-owned-fault.cjs'"
+          }
+        }
+      ],
+      "publishedClosedRawEvidence": [],
+      "conditionalRootOnlyEstimateBytes": 0,
+      "notDeletionAuthority": true
+    },
+    {
+      "root": "/opt/lims/releases/qc187-rehearsal-d61cda0-20261007T085400Z",
+      "name": "qc187-rehearsal-d61cda0-20261007T085400Z",
+      "physicalAllocatedBytes": 124178432,
+      "birthEpoch": 1791363130,
+      "birthTimeOriginal": "2026-10-07 10:52:10.831344075 +0200",
+      "mtimeOriginal": "2026-10-07 12:12:54.338270597 +0200",
+      "outcomeCategory": "FAILED_OR_STOP",
+      "ownOutcomeStatus": "FAILED",
+      "ownOutcomeRecord": {
+        "file": "owned-rehearsal-receipt.json",
+        "status": "FAILED",
+        "error": "dry-run exit=1: {\"code\":\"QC_GATE_SCOPE_SOURCE_MISMATCH\",\"error\":\"QC scope migration digest differs.\"}\n"
+      },
+      "allSelectedRecordsMayIncludeCopiedPriorReceipts": [
+        {
+          "file": "owned-rehearsal-receipt.json",
+          "selected": {
+            "status": "FAILED",
+            "error": "dry-run exit=1: {\"code\":\"QC_GATE_SCOPE_SOURCE_MISMATCH\",\"error\":\"QC scope migration digest differs.\"}\n"
+          }
+        }
+      ],
+      "publishedClosedRawEvidence": [],
+      "conditionalRootOnlyEstimateBytes": 0,
+      "notDeletionAuthority": true
+    },
+    {
+      "root": "/opt/lims/releases/qc188-release-20261008T055500Z",
+      "name": "qc188-release-20261008T055500Z",
+      "physicalAllocatedBytes": 566013952,
+      "birthEpoch": 1791438847,
+      "birthTimeOriginal": "2026-10-08 07:54:07.594540694 +0200",
+      "mtimeOriginal": "2026-10-08 09:27:42.057827846 +0200",
+      "outcomeCategory": "FAILED_OR_STOP",
+      "ownOutcomeStatus": "ABORTED_BEFORE_INSTALL_PREVIOUS_RELEASE_REOPENED",
+      "ownOutcomeRecord": {
+        "file": "production-receipt.json",
+        "status": "ABORTED_BEFORE_INSTALL_PREVIOUS_RELEASE_REOPENED",
+        "error": "Unexplained disk growth exceeds 500 MB before installer",
+        "recovery": "forward hold after candidate startup; verified pre-start refusal can reopen unchanged #189; never restore the database"
+      },
+      "allSelectedRecordsMayIncludeCopiedPriorReceipts": [
+        {
+          "file": "owned-failure-retention.json",
+          "selected": {}
+        },
+        {
+          "file": "owned-postflight-receipt.json",
+          "selected": {
+            "status": "PASSED",
+            "completedUtc": "2026-10-08T05:44:42.727037+00:00"
+          }
+        },
+        {
+          "file": "owned-rehearsal-receipt.json",
+          "selected": {
+            "status": "PASSED",
+            "completedUtc": "2026-10-08T05:44:42.727037+00:00"
+          }
+        },
+        {
+          "file": "production-receipt.json",
+          "selected": {
+            "status": "ABORTED_BEFORE_INSTALL_PREVIOUS_RELEASE_REOPENED",
+            "error": "Unexplained disk growth exceeds 500 MB before installer",
+            "recovery": "forward hold after candidate startup; verified pre-start refusal can reopen unchanged #189; never restore the database"
+          }
+        }
+      ],
+      "publishedClosedRawEvidence": [],
+      "conditionalRootOnlyEstimateBytes": 0,
+      "notDeletionAuthority": true
+    },
+    {
+      "root": "/opt/lims/releases/qc189-rehearsal-dfac90e-post187-20261008",
+      "name": "qc189-rehearsal-dfac90e-post187-20261008",
+      "physicalAllocatedBytes": 1228070912,
+      "birthEpoch": 1791429093,
+      "birthTimeOriginal": "2026-10-08 05:11:33.751608158 +0200",
+      "mtimeOriginal": "2026-10-08 05:23:48.388847258 +0200",
+      "outcomeCategory": "FAILED_OR_STOP",
+      "ownOutcomeStatus": "FAILED_OWNED_REHEARSAL",
+      "ownOutcomeRecord": {
+        "file": "rehearsal-receipt.json",
+        "status": "FAILED_OWNED_REHEARSAL",
+        "error": "Owned app did not become healthy"
+      },
+      "allSelectedRecordsMayIncludeCopiedPriorReceipts": [
+        {
+          "file": "rehearsal-receipt.json",
+          "selected": {
+            "status": "FAILED_OWNED_REHEARSAL",
+            "error": "Owned app did not become healthy"
+          }
+        }
+      ],
+      "publishedClosedRawEvidence": [],
+      "conditionalRootOnlyEstimateBytes": 0,
+      "notDeletionAuthority": true
+    },
+    {
+      "root": "/opt/lims/releases/runtime-jobs-off-ae64f169-proof-20261011T175017Z",
+      "name": "runtime-jobs-off-ae64f169-proof-20261011T175017Z",
+      "physicalAllocatedBytes": 1140142080,
+      "birthEpoch": 1791741018,
+      "birthTimeOriginal": "2026-10-11 19:50:18.838918756 +0200",
+      "mtimeOriginal": "2026-10-11 19:52:44.881967462 +0200",
+      "outcomeCategory": "FAILED_OR_STOP",
+      "ownOutcomeStatus": "FAILED_NEW_OWNED_JOBS_OFF_CONTAINMENT_PROOF",
+      "ownOutcomeRecord": {
+        "file": "rehearsal-receipt.json",
+        "status": "FAILED_NEW_OWNED_JOBS_OFF_CONTAINMENT_PROOF",
+        "error": "Unexplained disk growth exceeds 500 MB"
+      },
+      "allSelectedRecordsMayIncludeCopiedPriorReceipts": [
+        {
+          "file": "rehearsal-receipt.json",
+          "selected": {
+            "status": "FAILED_NEW_OWNED_JOBS_OFF_CONTAINMENT_PROOF",
+            "error": "Unexplained disk growth exceeds 500 MB"
+          }
+        }
+      ],
+      "publishedClosedRawEvidence": [],
+      "conditionalRootOnlyEstimateBytes": 0,
+      "notDeletionAuthority": true
+    },
+    {
+      "root": "/opt/lims/releases/runtime-kobo-proof-171dd36c-20261011T200210Z",
+      "name": "runtime-kobo-proof-171dd36c-20261011T200210Z",
+      "physicalAllocatedBytes": 1152548864,
+      "birthEpoch": 1791748942,
+      "birthTimeOriginal": "2026-10-11 22:02:22.756474825 +0200",
+      "mtimeOriginal": "2026-10-11 22:08:54.343613766 +0200",
+      "outcomeCategory": "FAILED_OR_STOP",
+      "ownOutcomeStatus": "FAILED_NEW_CANDIDATE_NATURAL_KOBO_PROOF",
+      "ownOutcomeRecord": {
+        "file": "rehearsal-receipt.json",
+        "status": "FAILED_NEW_CANDIDATE_NATURAL_KOBO_PROOF",
+        "error": "Unexplained disk growth exceeds 500 MB",
+        "completedUtc": "2026-10-11T20:08:54.343816+00:00"
+      },
+      "allSelectedRecordsMayIncludeCopiedPriorReceipts": [
+        {
+          "file": "rehearsal-receipt.json",
+          "selected": {
+            "status": "FAILED_NEW_CANDIDATE_NATURAL_KOBO_PROOF",
+            "error": "Unexplained disk growth exceeds 500 MB",
+            "completedUtc": "2026-10-11T20:08:54.343816+00:00"
+          }
+        }
+      ],
+      "publishedClosedRawEvidence": [
+        {
+          "path": "WP/runtime-recovery-kobo/proof-observation-20261011T2010Z/rehearsal-receipt.json",
+          "commit": "dd496777400e9c2f4f0ace73009f8cf8c86022d0",
+          "gitBlobOid": "1e0693ad744aae24e1abf1fafddff0210677711f",
+          "sha256": "ee68fd53f099a9e68840dae2ff4e8eeabbbc24e8e3b16ffd5a63d4fbf2cb8109",
+          "publicationRole": "ORIGINAL_TERMINAL_RECEIPT_NOT_DATABASE_BACKUP"
+        }
+      ],
+      "conditionalRootOnlyEstimateBytes": 1152548864,
+      "notDeletionAuthority": true
+    },
+    {
+      "root": "/opt/lims/releases/runtime-kobo-proof-171dd36c-20261011T203339Z",
+      "name": "runtime-kobo-proof-171dd36c-20261011T203339Z",
+      "physicalAllocatedBytes": 1162317824,
+      "birthEpoch": 1791750828,
+      "birthTimeOriginal": "2026-10-11 22:33:48.431669245 +0200",
+      "mtimeOriginal": "2026-10-11 22:41:16.502981028 +0200",
+      "outcomeCategory": "FAILED_OR_STOP",
+      "ownOutcomeStatus": "FAILED_NEW_CANDIDATE_NATURAL_KOBO_PROOF",
+      "ownOutcomeRecord": {
+        "file": "rehearsal-receipt.json",
+        "status": "FAILED_NEW_CANDIDATE_NATURAL_KOBO_PROOF",
+        "error": "Owned scheduler/runtime error; retain this failed proof",
+        "completedUtc": "2026-10-11T20:41:16.504087+00:00"
+      },
+      "allSelectedRecordsMayIncludeCopiedPriorReceipts": [
+        {
+          "file": "rehearsal-receipt.json",
+          "selected": {
+            "status": "FAILED_NEW_CANDIDATE_NATURAL_KOBO_PROOF",
+            "error": "Owned scheduler/runtime error; retain this failed proof",
+            "completedUtc": "2026-10-11T20:41:16.504087+00:00"
+          }
+        }
+      ],
+      "publishedClosedRawEvidence": [
+        {
+          "path": "WP/runtime-recovery-kobo/proof-observation-20261011T2043Z/rehearsal-receipt.json",
+          "commit": "dd496777400e9c2f4f0ace73009f8cf8c86022d0",
+          "gitBlobOid": "6d66bc685f0e74f6b1f7a5096570d34a6c135354",
+          "sha256": "66915143d779f7b8b3c17eb474c42390499dde63b5fb41b65bba16565ce27d84",
+          "publicationRole": "ORIGINAL_TERMINAL_RECEIPT_NOT_DATABASE_BACKUP"
+        }
+      ],
+      "conditionalRootOnlyEstimateBytes": 1162317824,
+      "notDeletionAuthority": true
+    },
+    {
+      "root": "/opt/lims/releases/runtime-kobo-proof-171dd36c-20261011T210700Z",
+      "name": "runtime-kobo-proof-171dd36c-20261011T210700Z",
+      "physicalAllocatedBytes": 233472,
+      "birthEpoch": 1791752826,
+      "birthTimeOriginal": "2026-10-11 23:07:06.667193753 +0200",
+      "mtimeOriginal": "2026-10-11 23:07:08.034222169 +0200",
+      "outcomeCategory": "FAILED_OR_STOP",
+      "ownOutcomeStatus": "FAILED_NEW_CANDIDATE_NATURAL_KOBO_PROOF",
+      "ownOutcomeRecord": {
+        "file": "rehearsal-receipt.json",
+        "status": "FAILED_NEW_CANDIDATE_NATURAL_KOBO_PROOF",
+        "error": "Unreadable baseline allocation; refuse attribution credit",
+        "completedUtc": "2026-10-11T21:07:08.034984+00:00"
+      },
+      "allSelectedRecordsMayIncludeCopiedPriorReceipts": [
+        {
+          "file": "rehearsal-receipt.json",
+          "selected": {
+            "status": "FAILED_NEW_CANDIDATE_NATURAL_KOBO_PROOF",
+            "error": "Unreadable baseline allocation; refuse attribution credit",
+            "completedUtc": "2026-10-11T21:07:08.034984+00:00"
+          }
+        }
+      ],
+      "publishedClosedRawEvidence": [
+        {
+          "path": "WP/runtime-recovery-kobo/proof-observation-20261011T2107Z/rehearsal-receipt.json",
+          "commit": "dd496777400e9c2f4f0ace73009f8cf8c86022d0",
+          "gitBlobOid": "1b8248772925ea48b8acc2a7b3cb8af521f40f47",
+          "sha256": "84524bf95152437db9050c1c0a81aa5dba5246b5675d8acff197ac68a7fa5f1e",
+          "publicationRole": "ORIGINAL_TERMINAL_RECEIPT_NOT_DATABASE_BACKUP"
+        }
+      ],
+      "conditionalRootOnlyEstimateBytes": 233472,
+      "notDeletionAuthority": true
+    },
+    {
+      "root": "/opt/lims/releases/runtime-kobo-proof-171dd36c-20261011T211630Z",
+      "name": "runtime-kobo-proof-171dd36c-20261011T211630Z",
+      "physicalAllocatedBytes": 1731461120,
+      "birthEpoch": 1791753391,
+      "birthTimeOriginal": "2026-10-11 23:16:31.260929859 +0200",
+      "mtimeOriginal": "2026-10-11 23:40:39.464028744 +0200",
+      "outcomeCategory": "FAILED_OR_STOP",
+      "ownOutcomeStatus": "FAILED_NEW_CANDIDATE_NATURAL_KOBO_PROOF",
+      "ownOutcomeRecord": {
+        "file": "rehearsal-receipt.json",
+        "status": "FAILED_NEW_CANDIDATE_NATURAL_KOBO_PROOF",
+        "error": "Scheduler refusal has no exact bound trigger",
+        "completedUtc": "2026-10-11T21:40:39.464694+00:00"
+      },
+      "allSelectedRecordsMayIncludeCopiedPriorReceipts": [
+        {
+          "file": "rehearsal-receipt.json",
+          "selected": {
+            "status": "FAILED_NEW_CANDIDATE_NATURAL_KOBO_PROOF",
+            "error": "Scheduler refusal has no exact bound trigger",
+            "completedUtc": "2026-10-11T21:40:39.464694+00:00"
+          }
+        }
+      ],
+      "publishedClosedRawEvidence": [
+        {
+          "path": "WP/runtime-recovery-kobo/proof-failure-211630Z-original-logs/rehearsal-receipt.json",
+          "commit": "dd496777400e9c2f4f0ace73009f8cf8c86022d0",
+          "gitBlobOid": "f882027cc5370b660984f4030c51bbd3b0f5e22b",
+          "sha256": "d2fe1791af254b17c077b59012bc2e5cd9ba9e087aec10f6c3b752399b39fb4f",
+          "publicationRole": "ORIGINAL_TERMINAL_RECEIPT_NOT_DATABASE_BACKUP"
+        },
+        {
+          "path": "WP/runtime-recovery-kobo/proof-observation-20261011T2141Z/rehearsal-receipt.json",
+          "commit": "dd496777400e9c2f4f0ace73009f8cf8c86022d0",
+          "gitBlobOid": "f882027cc5370b660984f4030c51bbd3b0f5e22b",
+          "sha256": "d2fe1791af254b17c077b59012bc2e5cd9ba9e087aec10f6c3b752399b39fb4f",
+          "publicationRole": "ORIGINAL_TERMINAL_RECEIPT_NOT_DATABASE_BACKUP"
+        }
+      ],
+      "conditionalRootOnlyEstimateBytes": 1731461120,
+      "notDeletionAuthority": true
+    },
+    {
+      "root": "/opt/lims/releases/runtime-kobo-proof-f830f900-20261011T233321Z",
+      "name": "runtime-kobo-proof-f830f900-20261011T233321Z",
+      "physicalAllocatedBytes": 241664,
+      "birthEpoch": 1791761622,
+      "birthTimeOriginal": "2026-10-12 01:33:42.351486432 +0200",
+      "mtimeOriginal": "2026-10-12 01:33:43.359507181 +0200",
+      "outcomeCategory": "FAILED_OR_STOP",
+      "ownOutcomeStatus": "FAILED_NEW_CANDIDATE_NATURAL_KOBO_PROOF",
+      "ownOutcomeRecord": {
+        "file": "rehearsal-receipt.json",
+        "status": "FAILED_NEW_CANDIDATE_NATURAL_KOBO_PROOF",
+        "error": "Non-empty baseline root; no copy, assets or extra allocation permitted",
+        "completedUtc": "2026-10-11T23:33:43.360275+00:00"
+      },
+      "allSelectedRecordsMayIncludeCopiedPriorReceipts": [
+        {
+          "file": "rehearsal-receipt.json",
+          "selected": {
+            "status": "FAILED_NEW_CANDIDATE_NATURAL_KOBO_PROOF",
+            "error": "Non-empty baseline root; no copy, assets or extra allocation permitted",
+            "completedUtc": "2026-10-11T23:33:43.360275+00:00"
+          }
+        }
+      ],
+      "publishedClosedRawEvidence": [
+        {
+          "path": "WP/runtime-recovery-kobo/pr291-proof-observation-233400Z/rehearsal-receipt.json",
+          "commit": "dd496777400e9c2f4f0ace73009f8cf8c86022d0",
+          "gitBlobOid": "2ecfa7b6875558695dac282f748f68628c974b70",
+          "sha256": "e68a80fbe56b006ef71c3ba8c0d0e13e1165dc0ad035c195e1eb9648749bf707",
+          "publicationRole": "ORIGINAL_TERMINAL_RECEIPT_NOT_DATABASE_BACKUP"
+        }
+      ],
+      "conditionalRootOnlyEstimateBytes": 241664,
+      "notDeletionAuthority": true
+    },
+    {
+      "root": "/opt/lims/releases/runtime-kobo-release-f830f900-20261012T004200Z",
+      "name": "runtime-kobo-release-f830f900-20261012T004200Z",
+      "physicalAllocatedBytes": 1687552,
+      "birthEpoch": 1791765892,
+      "birthTimeOriginal": "2026-10-12 02:44:52.399471190 +0200",
+      "mtimeOriginal": "2026-10-12 02:52:12.235537415 +0200",
+      "outcomeCategory": "FAILED_OR_STOP",
+      "ownOutcomeStatus": "FAILED_RUNTIME_FORWARD_HOLD",
+      "ownOutcomeRecord": {
+        "file": "production-receipt.json",
+        "status": "FAILED_RUNTIME_FORWARD_HOLD",
+        "error": "Stopped original WAL remains nonempty; retain and diagnose, never delete it"
+      },
+      "allSelectedRecordsMayIncludeCopiedPriorReceipts": [
+        {
+          "file": "production-receipt.json",
+          "selected": {
+            "status": "FAILED_RUNTIME_FORWARD_HOLD",
+            "error": "Stopped original WAL remains nonempty; retain and diagnose, never delete it"
+          }
+        },
+        {
+          "file": "rehearsal-receipt.json",
+          "selected": {
+            "status": "PASSED_NEW_CANDIDATE_NATURAL_KOBO_PROOF",
+            "completedUtc": "2026-10-12T00:19:48.823434+00:00"
+          }
+        }
+      ],
+      "publishedClosedRawEvidence": [
+        {
+          "path": "WP/runtime-recovery-kobo/pr291-forward-failed-005230Z/production-receipt.json",
+          "commit": "dd496777400e9c2f4f0ace73009f8cf8c86022d0",
+          "gitBlobOid": "67ced6230b57510f86b97756098c9ea41221b120",
+          "sha256": "e274d3b8cf6514e7fe878ad7d712caa6303d3f969fd49372f8bb0147efbb6588",
+          "publicationRole": "EXPLICIT_HISTORICAL_ROOT_TO_ORIGINAL_TERMINAL_RECEIPT_BINDING_NOT_DATABASE_BACKUP"
+        }
+      ],
+      "conditionalRootOnlyEstimateBytes": 1687552,
+      "notDeletionAuthority": true
+    },
+    {
+      "root": "/opt/lims/releases/workflow-batch-build-cde8c889-20261014T221500Z",
+      "name": "workflow-batch-build-cde8c889-20261014T221500Z",
+      "physicalAllocatedBytes": 107524096,
+      "birthEpoch": 1792017175,
+      "birthTimeOriginal": "2026-10-15 00:32:55.748979968 +0200",
+      "mtimeOriginal": "2026-10-15 00:38:24.455825335 +0200",
+      "outcomeCategory": "FAILED_OR_STOP",
+      "ownOutcomeStatus": "FAILED_OR_RESERVE_REFUSED_BUILD_ONLY_RETAIN_ALL",
+      "ownOutcomeRecord": {
+        "file": "build-terminal-failure.json",
+        "status": "FAILED_OR_RESERVE_REFUSED_BUILD_ONLY_RETAIN_ALL",
+        "closedUtc": "2026-10-14T22:38:24.457022+00:00",
+        "error": "Unexplained disk growth reached the 500MB abort boundary",
+        "neverRetry": true
+      },
+      "allSelectedRecordsMayIncludeCopiedPriorReceipts": [
+        {
+          "file": "build-terminal-failure.json",
+          "selected": {
+            "status": "FAILED_OR_RESERVE_REFUSED_BUILD_ONLY_RETAIN_ALL",
+            "closedUtc": "2026-10-14T22:38:24.457022+00:00",
+            "error": "Unexplained disk growth reached the 500MB abort boundary",
+            "neverRetry": true
+          }
+        }
+      ],
+      "publishedClosedRawEvidence": [
+        {
+          "path": "WP/batch-release-cde8-20261014/first-build-221500-closed-terminal/build-terminal-failure.json",
+          "commit": "dd496777400e9c2f4f0ace73009f8cf8c86022d0",
+          "gitBlobOid": "3d8143b9c17c141ac02afdb566ff7cff97582b58",
+          "sha256": "4474dcd30269c0710e17723e2f702114f09d48129ccc070b499aa65a69ab30c2",
+          "publicationRole": "EXPLICIT_HISTORICAL_ROOT_TO_ORIGINAL_TERMINAL_RECEIPT_BINDING_NOT_DATABASE_BACKUP"
+        }
+      ],
+      "conditionalRootOnlyEstimateBytes": 107524096,
+      "notDeletionAuthority": true
+    },
+    {
+      "root": "/opt/lims/releases/workflow-batch-forward-metadata-cde8c889-20261014T233000Z",
+      "name": "workflow-batch-forward-metadata-cde8c889-20261014T233000Z",
+      "physicalAllocatedBytes": 1503232,
+      "birthEpoch": 1792021390,
+      "birthTimeOriginal": "2026-10-15 01:43:10.542348133 +0200",
+      "mtimeOriginal": "2026-10-15 01:43:21.814581132 +0200",
+      "outcomeCategory": "FAILED_OR_STOP",
+      "ownOutcomeStatus": "STOP_METADATA_INCOMPLETE_IMAGE_EXCLUDED",
+      "ownOutcomeRecord": {
+        "file": "metadata-evidence-terminal.json",
+        "status": "STOP_METADATA_INCOMPLETE_IMAGE_EXCLUDED",
+        "closedUtc": "2026-10-14T23:43:21.814667+00:00"
+      },
+      "allSelectedRecordsMayIncludeCopiedPriorReceipts": [
+        {
+          "file": "metadata-evidence-terminal.json",
+          "selected": {
+            "status": "STOP_METADATA_INCOMPLETE_IMAGE_EXCLUDED",
+            "closedUtc": "2026-10-14T23:43:21.814667+00:00"
+          }
+        },
+        {
+          "file": "original-failure.json",
+          "selected": {
+            "status": "FAILED_OR_RESERVE_REFUSED_BUILD_ONLY_RETAIN_ALL",
+            "closedUtc": "2026-10-14T22:38:24.457022+00:00",
+            "error": "Unexplained disk growth reached the 500MB abort boundary",
+            "neverRetry": true
+          }
+        }
+      ],
+      "publishedClosedRawEvidence": [
+        {
+          "path": "WP/batch-forward-metadata-cde8-20261014/first-metadata-233000-closed-stop/metadata-evidence-terminal.json",
+          "commit": "dd496777400e9c2f4f0ace73009f8cf8c86022d0",
+          "gitBlobOid": "45eac7f4d57b31375b5cfd4ffa66719ebbc3b702",
+          "sha256": "5bb598e4d7adaad09daf84b1481c33fa2bbb170b1c5c0c0d77bd2c594a4a311e",
+          "publicationRole": "EXPLICIT_HISTORICAL_ROOT_TO_ORIGINAL_TERMINAL_RECEIPT_BINDING_NOT_DATABASE_BACKUP"
+        }
+      ],
+      "conditionalRootOnlyEstimateBytes": 1503232,
+      "notDeletionAuthority": true
+    },
+    {
+      "root": "/opt/lims/releases/workflow-batch-stopped-copy-cde8c889-20261015T020000Z",
+      "name": "workflow-batch-stopped-copy-cde8c889-20261015T020000Z",
+      "physicalAllocatedBytes": 2707456,
+      "birthEpoch": 1792029669,
+      "birthTimeOriginal": "2026-10-15 04:01:09.135004458 +0200",
+      "mtimeOriginal": "2026-10-15 04:01:30.447446172 +0200",
+      "outcomeCategory": "FAILED_OR_STOP",
+      "ownOutcomeStatus": "FAILED_OR_REFUSED_RETAIN_ALL_FORWARD_FIX_ONLY",
+      "ownOutcomeRecord": {
+        "file": "proof-terminal-refusal.json",
+        "status": "FAILED_OR_REFUSED_RETAIN_ALL_FORWARD_FIX_ONLY",
+        "closedUtc": "2026-10-15T02:01:30.448385+00:00",
+        "error": "RuntimeError: Descendant mount makes accounting incomplete",
+        "recovery": "SEPARATELY_AUDITED_FORWARD_FIX_ONLY",
+        "neverRetry": true
+      },
+      "allSelectedRecordsMayIncludeCopiedPriorReceipts": [
+        {
+          "file": "build-receipt.json",
+          "selected": {
+            "status": "BUILT_AFTER_EXCLUDED_ACCOUNTING_FAILURE_NOT_PROVED_OR_DEPLOYED",
+            "closedUtc": "2026-10-15T00:27:51.026962+00:00",
+            "error": null,
+            "neverRetry": true
+          }
+        },
+        {
+          "file": "proof-terminal-refusal.json",
+          "selected": {
+            "status": "FAILED_OR_REFUSED_RETAIN_ALL_FORWARD_FIX_ONLY",
+            "closedUtc": "2026-10-15T02:01:30.448385+00:00",
+            "error": "RuntimeError: Descendant mount makes accounting incomplete",
+            "recovery": "SEPARATELY_AUDITED_FORWARD_FIX_ONLY",
+            "neverRetry": true
+          }
+        }
+      ],
+      "publishedClosedRawEvidence": [
+        {
+          "path": "WP/batch-proof-cde8-20261015/first-proof-020000-closed-mount-differences-successor/closed-retention-record.json",
+          "commit": "dd496777400e9c2f4f0ace73009f8cf8c86022d0",
+          "gitBlobOid": "559edb551610ca722339d4ae492e292e403f8596",
+          "sha256": "2dbfe50183a49881133b7964509222469b3eec5c1332f8ad2f624b61ca60ab81",
+          "publicationRole": "FULL_CLOSED_RETENTION_RECORD"
+        }
+      ],
+      "conditionalRootOnlyEstimateBytes": 2707456,
+      "notDeletionAuthority": true
+    },
+    {
+      "root": "/opt/lims/releases/workflow-batch-stopped-copy-cde8c889-20261015T023000Z",
+      "name": "workflow-batch-stopped-copy-cde8c889-20261015T023000Z",
+      "physicalAllocatedBytes": 2809856,
+      "birthEpoch": 1792031794,
+      "birthTimeOriginal": "2026-10-15 04:36:34.368086094 +0200",
+      "mtimeOriginal": "2026-10-15 04:37:54.845755651 +0200",
+      "outcomeCategory": "FAILED_OR_STOP",
+      "ownOutcomeStatus": "FAILED_OR_REFUSED_RETAIN_ALL_FORWARD_FIX_ONLY",
+      "ownOutcomeRecord": {
+        "file": "proof-terminal-refusal.json",
+        "status": "FAILED_OR_REFUSED_RETAIN_ALL_FORWARD_FIX_ONLY",
+        "closedUtc": "2026-10-15T02:37:54.846974+00:00",
+        "error": "RuntimeError: Measured/scaled reserve STOP",
+        "recovery": "SEPARATELY_AUDITED_FORWARD_FIX_ONLY",
+        "neverRetry": true
+      },
+      "allSelectedRecordsMayIncludeCopiedPriorReceipts": [
+        {
+          "file": "build-receipt.json",
+          "selected": {
+            "status": "BUILT_AFTER_EXCLUDED_ACCOUNTING_FAILURE_NOT_PROVED_OR_DEPLOYED",
+            "closedUtc": "2026-10-15T00:27:51.026962+00:00",
+            "error": null,
+            "neverRetry": true
+          }
+        },
+        {
+          "file": "proof-terminal-refusal.json",
+          "selected": {
+            "status": "FAILED_OR_REFUSED_RETAIN_ALL_FORWARD_FIX_ONLY",
+            "closedUtc": "2026-10-15T02:37:54.846974+00:00",
+            "error": "RuntimeError: Measured/scaled reserve STOP",
+            "recovery": "SEPARATELY_AUDITED_FORWARD_FIX_ONLY",
+            "neverRetry": true
+          }
+        }
+      ],
+      "publishedClosedRawEvidence": [
+        {
+          "path": "WP/batch-proof-cde8-20261015/first-proof-023000-closed-reserve-stop/closed-retention-record.json",
+          "commit": "dd496777400e9c2f4f0ace73009f8cf8c86022d0",
+          "gitBlobOid": "cec80f954fe3ba09eb5535412821e46ce99434e3",
+          "sha256": "2e716c6d6ce955ffb81f432cc55a3ab735ff807f07ecb69e871768b4a019b33d",
+          "publicationRole": "FULL_CLOSED_RETENTION_RECORD"
+        }
+      ],
+      "conditionalRootOnlyEstimateBytes": 2809856,
+      "notDeletionAuthority": true
+    },
+    {
+      "root": "/opt/lims/releases/workflow-batch-stopped-copy-cde8c889-20261015T050000Z",
+      "name": "workflow-batch-stopped-copy-cde8c889-20261015T050000Z",
+      "physicalAllocatedBytes": 2270986240,
+      "birthEpoch": 1792035966,
+      "birthTimeOriginal": "2026-10-15 05:46:06.661618468 +0200",
+      "mtimeOriginal": "2026-10-15 05:50:49.592488043 +0200",
+      "outcomeCategory": "FAILED_OR_STOP",
+      "ownOutcomeStatus": "FAILED_OR_REFUSED_RETAIN_ALL_FORWARD_FIX_ONLY",
+      "ownOutcomeRecord": {
+        "file": "proof-terminal-refusal.json",
+        "status": "FAILED_OR_REFUSED_RETAIN_ALL_FORWARD_FIX_ONLY",
+        "closedUtc": "2026-10-15T03:50:49.592312+00:00",
+        "error": "RuntimeError: Container name not proven unused",
+        "recovery": "SEPARATELY_AUDITED_FORWARD_FIX_ONLY",
+        "neverRetry": true
+      },
+      "allSelectedRecordsMayIncludeCopiedPriorReceipts": [
+        {
+          "file": "build-receipt.json",
+          "selected": {
+            "status": "BUILT_AFTER_EXCLUDED_ACCOUNTING_FAILURE_NOT_PROVED_OR_DEPLOYED",
+            "closedUtc": "2026-10-15T00:27:51.026962+00:00",
+            "error": null,
+            "neverRetry": true
+          }
+        },
+        {
+          "file": "proof-terminal-refusal.json",
+          "selected": {
+            "status": "FAILED_OR_REFUSED_RETAIN_ALL_FORWARD_FIX_ONLY",
+            "closedUtc": "2026-10-15T03:50:49.592312+00:00",
+            "error": "RuntimeError: Container name not proven unused",
+            "recovery": "SEPARATELY_AUDITED_FORWARD_FIX_ONLY",
+            "neverRetry": true
+          }
+        }
+      ],
+      "publishedClosedRawEvidence": [
+        {
+          "path": "WP/batch-proof-noop-identity-cde8-20261015/first-proof-050000-closed-name-refusal/closed-retention-record.json",
+          "commit": "dd496777400e9c2f4f0ace73009f8cf8c86022d0",
+          "gitBlobOid": "11334ead94817c02a9186060fe04a3b8c17419cc",
+          "sha256": "5cad0b5d2934df3469b9772fbce6c8df59e54020822fdd5ce94edeb7189c40e2",
+          "publicationRole": "FULL_CLOSED_RETENTION_RECORD"
+        }
+      ],
+      "conditionalRootOnlyEstimateBytes": 2270986240,
+      "notDeletionAuthority": true
+    },
+    {
+      "root": "/opt/lims/releases/workflow-batch-stopped-copy-cde8c889-20261015T060000Z",
+      "name": "workflow-batch-stopped-copy-cde8c889-20261015T060000Z",
+      "physicalAllocatedBytes": 1701425152,
+      "birthEpoch": 1792037598,
+      "birthTimeOriginal": "2026-10-15 06:13:18.943481354 +0200",
+      "mtimeOriginal": "2026-10-15 06:16:51.484890837 +0200",
+      "outcomeCategory": "FAILED_OR_STOP",
+      "ownOutcomeStatus": "FAILED_OR_REFUSED_RETAIN_ALL_FORWARD_FIX_ONLY",
+      "ownOutcomeRecord": {
+        "file": "proof-terminal-refusal.json",
+        "status": "FAILED_OR_REFUSED_RETAIN_ALL_FORWARD_FIX_ONLY",
+        "closedUtc": "2026-10-15T04:16:51.486060+00:00",
+        "error": "RuntimeError: Original or raw master changed while reading owned copy",
+        "recovery": "SEPARATELY_AUDITED_FORWARD_FIX_ONLY",
+        "neverRetry": true
+      },
+      "allSelectedRecordsMayIncludeCopiedPriorReceipts": [
+        {
+          "file": "build-receipt.json",
+          "selected": {
+            "status": "BUILT_AFTER_EXCLUDED_ACCOUNTING_FAILURE_NOT_PROVED_OR_DEPLOYED",
+            "closedUtc": "2026-10-15T00:27:51.026962+00:00",
+            "error": null,
+            "neverRetry": true
+          }
+        },
+        {
+          "file": "proof-terminal-refusal.json",
+          "selected": {
+            "status": "FAILED_OR_REFUSED_RETAIN_ALL_FORWARD_FIX_ONLY",
+            "closedUtc": "2026-10-15T04:16:51.486060+00:00",
+            "error": "RuntimeError: Original or raw master changed while reading owned copy",
+            "recovery": "SEPARATELY_AUDITED_FORWARD_FIX_ONLY",
+            "neverRetry": true
+          }
+        }
+      ],
+      "publishedClosedRawEvidence": [
+        {
+          "path": "WP/batch-proof-name-inventory-cde8-20261015/first-proof-060000-closed-source-preservation-stop/closed-retention-record.json",
+          "commit": "dd496777400e9c2f4f0ace73009f8cf8c86022d0",
+          "gitBlobOid": "3498d9ebf3ac80083d25e755a9ec52f665c0b385",
+          "sha256": "1e6365438c8571e0ecb87ed7e9ea13ff0490c24677861c3ed039bc7484ca0b05",
+          "publicationRole": "FULL_CLOSED_RETENTION_RECORD"
+        }
+      ],
+      "conditionalRootOnlyEstimateBytes": 1701425152,
+      "notDeletionAuthority": true
+    }
+  ],
+  "excludedOperationalInputs": {
+    "/opt/lims/releases/workflow-batch-stopped-copy-cde8c889-20261015T070000Z": "REQUIRED070000_RAW_ASSET_INPUT",
+    "/opt/lims/releases/workflow-batch-stopped-copy-cde8c889-20261015T080000Z": "REQUIRED_INSTALLED209_RAW_READER_BACKUP_LOGICAL_INPUT",
+    "/opt/lims/releases/workflow-batch-build-cde8c889-20261015T010000Z": "QUALIFIED_B5_BUILD_INPUT"
+  },
+  "fullClosedRecordRootHashes": [
+    "/opt/lims/releases/workflow-batch-stopped-copy-cde8c889-20261015T020000Z",
+    "/opt/lims/releases/workflow-batch-stopped-copy-cde8c889-20261015T023000Z",
+    "/opt/lims/releases/workflow-batch-stopped-copy-cde8c889-20261015T050000Z",
+    "/opt/lims/releases/workflow-batch-stopped-copy-cde8c889-20261015T060000Z"
+  ]
+}
