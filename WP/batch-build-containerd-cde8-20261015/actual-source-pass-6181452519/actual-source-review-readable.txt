@@ -1,0 +1,58 @@
+Source review: PASS
+
+This approves only one new build-only qualification with corrected Docker+containerd accounting, with the bindings below. It does not adopt the excluded image, does not retroactively pass the 221500 failure, and is not a proof, kit or deploy approval. My earlier build approvals do not cover this source.
+
+```
+6608548a58dd4bf581da4330f1cd7b0f68a86973
+cde8c8896f5f9d5f1ab07b0ae16b1a765e0a6367
+638580d50f61254609de3abd42d93afc676a5727
+mainCiRun=38636615469
+batchBuildScope=BUILD_ONLY_NO_DATABASE_CONNECTION_OR_VOLUME
+reserveFloorBytes=10556150894
+buildAllocationReserveBytes=4294967296
+buildTimeoutSeconds=1800
+buildUnitTimeoutSeconds=2700
+unexplainedGrowthAbortBytes=500000000
+diskGrowthPolicy=OWNED_BUILD_ROOT_AND_DISJOINT_DOCKER_AND_CONTAINERD_ALLOCATIONS
+labAndHubBuildsOwnedByYY=true
+releaseWindowControl=RELEASE_DAY_DISK_ABORTS_ACCEPTED
+originalBatchBuildRoot=/opt/lims/releases/workflow-batch-build-cde8c889-20261015T010000Z
+originalFailedBuildRoot=/opt/lims/releases/workflow-batch-build-cde8c889-20261014T221500Z
+metadataAnalysisAudit=850cc7670aceaa4fc2823aa3e0b5b5cf58c347da
+fallbackDirectionId=6180234041
+originalImageStillExcluded=true
+allocationIncludesContainerdRoot=/var/lib/containerd
+allocationMeasurementTimeoutSeconds=120
+batchBuildMemoryLimitBytes=805306368
+preflightFailureBuildCount=0
+batch_build.py=574fdaf4f5c43fc10b64b4379de4a6e4f6fc92704b2a48efd33977645b2f0a99
+batch_build_contract.py=41a2d3853f566df8b0c329ea3a71d42caad8269150f4b9928caf3348e1afa36e
+launch_batch_build.py=d872474949d42f0294d0f40860b903aacbd548bfb3effdb1700b7cd5176dcb1c
+prepare_batch_build.py=6a6d1688983d425c8e550c28d04b7e76a19829c054e1d5798f7b0a1b28275719
+verify_build_guards.py=4d2e505b088c7c2d3b4fb701d81b31fe1f1280e9009cd2474bf50c6d45d8ee9a
+```
+
+## What I checked independently
+- **Source identity.** All five hashes match the raw blobs at `6608548a`. No `server/`, `client/`, `Dockerfile` or `.github` change against `cde8c889`.
+- **Guard tests.** `verify_build_guards.py` runs 20 tests, OK on Python 3.11 and on 3.9.23, the host's version. `batch_build` imports cleanly on 3.9.
+- **Fallback binding.** `fallback_evidence` matches the actual text of 6180234041, unedited and posted through the Claude app. It also requires that the original record stays `FAILED_OR_RESERVE_REFUSED…` and that the analysis stays `RETAINED_METADATA_INSUFFICIENT_FOR_IMAGE_ADOPTION` with 0 credited.
+- **Corrected accounting.**
+  - `allocation_paths` covers the new owned root, the four legacy `/var/lib/docker` stores and the required `/var/lib/containerd`.
+  - A single `du -s -B1` invocation counts hardlinks once.
+  - Descendant mounts under any measured root are refused, so nothing is aliased or double-counted.
+  - `storage_topology` pins the overlayfs driver, the containerd snapshotter, `DockerRoot=/var/lib/docker`, a default-config containerd with `version=3`, `root=/var/lib/containerd` and `state=/run/containerd`, and its MainPID. These must be identical before and after the build.
+  - `build_disk_growth` is unchanged in logic. The free-space drop per device is compared against measured growth on that device, and the 500,000,000 B residual is still STOP.
+- **Failure handling.**
+  - Every preflight failure (topology, measurement timeout, reserve, extraction) writes `BUILD_PREFLIGHT_REFUSED_NOT_BUILT_RETAIN_ALL` with `newBuildCount=0` before any build starts.
+  - The post-build topology and allocation steps now sit inside the try block, so a failed or timed-out `du` after the build gives a terminal failure record rather than a silent exit. That closes my earlier note on 9ef/2afd.
+- **Unit.** It runs with `MemoryMax=805306368`, `MemorySwapMax=0`, `RuntimeMaxSec=2700` and `Restart=no`, and requires blank `NODE_OPTIONS`. These limits govern the controller, `du` and the docker CLI, not the daemon or the build worker, and no daemon config changes.
+- **Unchanged from 2afd.** The once-only launch boundaries, the fresh main, CI, per-PR pass and approval checks before upload and launch, the raw-Git archive and the verification of every member are all the same.
+
+## On the cache returning the same image ID
+That is acceptable. BuildKit's cache keys come from content checksums of the build context, which here is the verified raw-Git archive of `cde8c889`, and of each instruction. A cache hit therefore means identical inputs, and the image ID is content-addressed. Under correct accounting, this new receipt (`BUILT_AFTER_EXCLUDED_ACCOUNTING_FAILURE_NOT_PROVED_OR_DEPLOYED`, with `cacheMayYieldSameImageId` and `originalFailureRemainsFailed`) is the qualification. It does not explain or credit the old 3.6 GB, and it must not be described that way.
+
+## One run risk, decided now to save a cycle
+`du` over the whole `/var/lib/containerd` store, with its 1,526 snapshots and cold metadata, may take longer than 120 s; the earlier recursive probe needed more than 60 s. A timeout here is safe: it gives a preflight refusal, `newBuildCount=0` and a consumed root. If that happens, a successor source that changes only `MEASUREMENT_TIMEOUT` to 300 s is pre-agreed in scope. Two measurements plus the 1800 s build still fit inside the 2700 s unit. That successor still needs its own exact-source PASS, but I will review only that delta.
+
+---
+_Generated by [Claude Code](https://claude.ai/code)_

@@ -1,0 +1,18 @@
+{
+  "status": "ACTUAL_CORRECTED_ACCOUNTING_BUILD_ONLY_PASS_VALIDATED",
+  "sourceReviewId": 6181452519,
+  "reviewUtc": "2026-10-15T00:22:14Z",
+  "toolingCommit": "6608548a58dd4bf581da4330f1cd7b0f68a86973",
+  "newRoot": "/opt/lims/releases/workflow-batch-build-cde8c889-20261015T010000Z",
+  "allFiveRawSourceHashesVerified": true,
+  "ordinaryCacheSameImageIdAcceptedByActualReviewer": true,
+  "originalFailureStillFailed": true,
+  "oldResidualNotCredited": true,
+  "currentMeasurementTimeoutSeconds": 120,
+  "onlyIfThisRunTimeouts300SecondsSuccessorInScopeButRequiresOwnExactSourcePass": true,
+  "newBuildsLaunched": 0,
+  "proofLaunches": 0,
+  "productionDeployments": 0,
+  "productionDatabaseConnections": 0,
+  "validatedUtc": "2026-10-15T00:24:18.511375+00:00"
+}
