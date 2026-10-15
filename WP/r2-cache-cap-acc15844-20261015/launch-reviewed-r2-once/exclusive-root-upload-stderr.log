@@ -1,0 +1,4 @@
+  File "<stdin>", line 10
+    original=pathlib.Path(BUILD_'/opt/lims/cleanup-receipts/r2-cache-acc15844-20261015T210000Z')/'build-receipt.json'
+                                ^
+SyntaxError: invalid syntax

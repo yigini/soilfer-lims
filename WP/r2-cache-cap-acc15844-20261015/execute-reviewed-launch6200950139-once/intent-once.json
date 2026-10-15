@@ -1,0 +1,13 @@
+{
+  "utc": "2026-10-15T20:00:29.894451+00:00",
+  "argv": [
+    "C:\\Users\\yigin\\AppData\\Local\\Programs\\Python\\Python312-arm64\\python.exe",
+    "-B",
+    "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\WP\\r2-cache-cap-acc15844-20261015\\launch_r2.py",
+    "--package",
+    "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\WP\\r2-cache-cap-acc15844-20261015\\reviewed-r2-package-once"
+  ],
+  "packagePublication": "598bcb3d189d7934e88f4db1d9bcb2cb8c3948ab",
+  "sourceReviewId": 6200950139,
+  "neverReplay": true
+}

@@ -1,0 +1,10 @@
+{
+  "closedUtc": "2026-10-15T20:00:50.151782+00:00",
+  "status": "R2_LAUNCH_FAILED_OR_UNKNOWN_RETAIN_ALL_NO_REPLAY",
+  "exitCode": 1,
+  "error": null,
+  "root": "/opt/lims/cleanup-receipts/r2-cache-acc15844-20261015T210000Z",
+  "unit": "lims-r2-cache-acc15844-20261015t210000z",
+  "operationComplete": false,
+  "retryAllowed": false
+}

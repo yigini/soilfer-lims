@@ -1,0 +1,14 @@
+Traceback (most recent call last):
+  File "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\WP\r2-cache-cap-acc15844-20261015\launch_r2.py", line 73, in <module>
+    p=argparse.ArgumentParser();p.add_argument('--package',required=True);a=p.parse_args();launch(a.package)
+                                                                                           ^^^^^^^^^^^^^^^^^
+  File "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\WP\r2-cache-cap-acc15844-20261015\launch_r2.py", line 49, in launch
+    created=ssh('exclusive-root-upload',create);hashes={n:sha(base64.b64decode(v)) for n,v in encoded.items()};require(created['fileSha256']==hashes,'Uploaded package differs')
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\WP\r2-cache-cap-acc15844-20261015\launch_r2.py", line 26, in ssh
+    save(name+'-stdout.json',r.stdout);save(name+'-stderr.log',r.stderr);require(r.returncode==0,'Remote boundary failed/unknown; inspect, never replay');return json_exact(r.stdout)
+                                                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\WP\r2-cache-cap-acc15844-20261015\r2_contract.py", line 38, in require
+    if not ok:raise RuntimeError(message)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Remote boundary failed/unknown; inspect, never replay
