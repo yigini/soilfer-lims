@@ -1,0 +1,74 @@
+{
+  "status": "ACTUAL_QUALIFIED_BUILD_COMPLETION_NOTICE_NATIVE_RETAINED",
+  "noticeId": 6181815795,
+  "retainedUtc": "2026-10-15T00:55:37.731376+00:00",
+  "proofSourceReview": null,
+  "productionDeployments": 0,
+  "files": [
+    {
+      "path": "WP/batch-proof-cde8-20261015/b5-qualified-build-handoff-once/actual-notice-fresh-original.json",
+      "bytes": 4991,
+      "sha256": "f0ac16b83004aee3c956b58ad1ac5245b5c93c76bbc06247bbd8b78bacafbfc8"
+    },
+    {
+      "path": "WP/batch-proof-cde8-20261015/b5-qualified-build-handoff-once/actual-post-confirmed.json",
+      "bytes": 5235,
+      "sha256": "eb4816447a1464cfda3a104a6e3f35c99271d044c4dfadfeb5d115d5308d1fe9"
+    },
+    {
+      "path": "WP/batch-proof-cde8-20261015/b5-qualified-build-handoff-once/actual-qualified-notice-body.txt",
+      "bytes": 3390,
+      "sha256": "5e5d3775efacd892cf7e270e646017dcfe356412e4a7071f7845e5a887647caf"
+    },
+    {
+      "path": "WP/batch-proof-cde8-20261015/b5-qualified-build-handoff-once/history-before-original.json",
+      "bytes": 1807325,
+      "sha256": "2b892d0b0c9ea6ce8dbcec6e84be92e906544b89c78e55cbe583bba52e205fa7"
+    },
+    {
+      "path": "WP/batch-proof-cde8-20261015/b5-qualified-build-handoff-once/native-actual-sent.txt",
+      "bytes": 2724,
+      "sha256": "d34da5a5ee0f0a4e3a8543ad3a9334b08086c92e2f7c1f1c0abc024f420368dd"
+    },
+    {
+      "path": "WP/batch-proof-cde8-20261015/b5-qualified-build-handoff-once/native-delivery-record.json",
+      "bytes": 904,
+      "sha256": "e6f1f1bfd06137c19b542efc27b0dd4a72c8c3fef1a2c9924c29eab87b11ebff"
+    },
+    {
+      "path": "WP/batch-proof-cde8-20261015/b5-qualified-build-handoff-once/post-intent.json",
+      "bytes": 175,
+      "sha256": "04d7fdb1fc22e37ad9fcac517ee80bf279fc2d55e301679e2ba4ab2a3c16bbbc"
+    },
+    {
+      "path": "WP/batch-proof-cde8-20261015/b5-qualified-build-handoff-once/post-payload-original.json",
+      "bytes": 3420,
+      "sha256": "4847f443c77cda89a7995bf28de7da7a59f70a0f800b4a2be88bcc6c5fb7a1a8"
+    },
+    {
+      "path": "WP/batch-proof-cde8-20261015/b5-qualified-build-handoff-once/post-response-original.json",
+      "bytes": 4991,
+      "sha256": "f0ac16b83004aee3c956b58ad1ac5245b5c93c76bbc06247bbd8b78bacafbfc8"
+    },
+    {
+      "path": "WP/batch-proof-cde8-20261015/b5-qualified-build-handoff-once/post-stderr-original.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/post-b5-qualified-build-boundary-once.py",
+      "bytes": 5724,
+      "sha256": "3d07a5589c5aa0e3a40999ef5b151ad7c491bd1e50729a1069b94dcbdc8c3503"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/retain-b5-qualified-build-handoff-once.py",
+      "bytes": 3909,
+      "sha256": "8ebf5e127b6fce32a3032b74ab8ca37e74a132540e50991abd09b6d3460acd3f"
+    },
+    {
+      "path": "WP/audit-release-eb6de2e8/README.md",
+      "bytes": 432793,
+      "sha256": "0e53e0315f99696fae9fcc11a3f3a313527581cb9070c3add0c48f33f5798e2f"
+    }
+  ]
+}
