@@ -1,0 +1,13 @@
+RuntimeMaxUSec=1h 30min
+MainPID=0
+Result=exit-code
+ExecMainStartTimestamp=Thu 2026-10-15 23:54:32 CEST
+ExecMainExitTimestamp=Fri 2026-10-16 00:03:39 CEST
+ExecMainStatus=1
+MemoryPeak=805306368
+MemoryMax=805306368
+MemorySwapMax=0
+LoadState=loaded
+ActiveState=failed
+SubState=failed
+InvocationID=b962da09082d4fb49c8b9076181b7f4c
