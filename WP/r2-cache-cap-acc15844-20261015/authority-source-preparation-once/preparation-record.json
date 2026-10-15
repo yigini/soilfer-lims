@@ -1,0 +1,9 @@
+{
+  "status": "SOURCE_ONLY_COMPLETE_SELF_CONTAINED_AUTHORITY",
+  "newAuthoritySemanticSha256": {
+    "6198899941": "9d7e1490880d76d4bbae73851e4a441a8ea7c9dcd3c16383e79250f94fc6e613",
+    "6200547786": "05604935975efc784fe8d7c52f3a820599c2365de1121370cd345e2eabb0c250"
+  },
+  "sourceChangesOutsideR2Folder": 0,
+  "operatorsExecuted": 0
+}
