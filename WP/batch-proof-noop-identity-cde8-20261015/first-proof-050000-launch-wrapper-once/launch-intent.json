@@ -1,0 +1,8 @@
+{
+  "startedUtc": "2026-10-15T03:45:55.369827+00:00",
+  "toolingCommit": "09d7e537d90bc8ed17e9d162fd6868a7c34a8e15",
+  "actualSourcePass": 6183890910,
+  "root": "/opt/lims/releases/workflow-batch-stopped-copy-cde8c889-20261015T050000Z",
+  "neverReplay": true,
+  "productionDeployment": false
+}
