@@ -1,0 +1,9 @@
+{
+  "exitCode": 0,
+  "closedUtc": "2026-10-15T00:38:56.777740+00:00",
+  "scope": "SAFE_READONLY_CONTAINER_METADATA_ONLY",
+  "productionDatabaseConnections": 0,
+  "volumeFilesOpened": 0,
+  "settingsChanged": 0,
+  "neverReplay": true
+}

@@ -1,0 +1,54 @@
+{
+  "status": "DRAFT_NORMAL_PREDECESSOR_STOPPED_COPY_PROOF_AUTHORITY_NOT_EXECUTABLE",
+  "preparedUtc": "2026-10-15T00:48:03.509277+00:00",
+  "proofSourceReview": null,
+  "snapshotCollectionAuthority": null,
+  "productionDeployments": 0,
+  "files": [
+    {
+      "path": "WP/batch-proof-cde8-20261015/normal-predecessor-proof-authority-draft.json",
+      "bytes": 6376,
+      "sha256": "81d02735db1bee94a9100d6613c1b1bb3040a05d0ba46532a5f46363ff8f4461"
+    },
+    {
+      "path": "WP/batch-proof-cde8-20261015/README.md",
+      "bytes": 2933,
+      "sha256": "02c79f89855981c116657c7a21de2e0d78f7ba08548796cc25957e33c663fc87"
+    },
+    {
+      "path": "WP/batch-proof-cde8-20261015/predecessor-metadata-readonly-once/exit-original.json",
+      "bytes": 241,
+      "sha256": "834fa41469cafb7e74a76ff055ca5c9175dce2df40c55daa826d68cb981fa699"
+    },
+    {
+      "path": "WP/batch-proof-cde8-20261015/predecessor-metadata-readonly-once/readonly-safe-metadata-probe-source.py",
+      "bytes": 2676,
+      "sha256": "618d122e07c2d157a818f80cebc0f5dcf743cf55b143b6e94766571875363aab"
+    },
+    {
+      "path": "WP/batch-proof-cde8-20261015/predecessor-metadata-readonly-once/stderr-original.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "WP/batch-proof-cde8-20261015/predecessor-metadata-readonly-once/stdout-original-selected-metadata.json",
+      "bytes": 1739,
+      "sha256": "1919e865f51b9ec7d589b74129b00fe3c462820f405079aaa37ee33c1be430fd"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/read-normal-predecessor-metadata-after-b5-qualification-once.py",
+      "bytes": 4004,
+      "sha256": "9fa01fea088004b155f47f9730ff7bcdee204187d2e2ca8d05acc101d3ee0fa0"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/retain-b5-normal-predecessor-proof-authority-draft-once.py",
+      "bytes": 11075,
+      "sha256": "65d35a9ecb692ba421664c1c239ea57605c791c2ae8b5e051344c6ac9157b7f1"
+    },
+    {
+      "path": "WP/audit-release-eb6de2e8/README.md",
+      "bytes": 431778,
+      "sha256": "84441dcb32448359050e1d6b175448169419e165068f9c5f8cd3eec5e0ea5641"
+    }
+  ]
+}

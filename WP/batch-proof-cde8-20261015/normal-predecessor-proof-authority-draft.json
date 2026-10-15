@@ -1,0 +1,161 @@
+{
+  "status": "DRAFT_NORMAL_PREDECESSOR_STOPPED_COPY_PROOF_AUTHORITY_NOT_EXECUTABLE",
+  "preparedUtc": "2026-10-15T00:48:03.509277+00:00",
+  "candidateHead": "cde8c8896f5f9d5f1ab07b0ae16b1a765e0a6367",
+  "candidateTree": "638580d50f61254609de3abd42d93afc676a5727",
+  "issues": [
+    206,
+    214,
+    209
+  ],
+  "sourceAudits": [
+    {
+      "issue": 206,
+      "pr": 295,
+      "sourceHead": "1a0702b3be410ac1dcdd9dc92f0f0c3dd2774a3a",
+      "merge": "6d750914d8565acdd496767a7dd935811b5a89b2",
+      "mergeBase": "959d17e11c357266f7c2a41b0c84ab76914c591e",
+      "tree": "85350d14bdff5a607a3d2edc9615785842c9c94b",
+      "actualAuditCommentId": 6146939836,
+      "actualAuditUrl": "https://github.com/yigini/soilfer-lims/pull/295#issuecomment-6146939836"
+    },
+    {
+      "issue": 214,
+      "pr": 296,
+      "sourceHead": "5e0b32830f961b3236c7cf8f74cf8f676e98fbaa",
+      "merge": "2242bcb4861a7085bb95e78e0e7b1e4edf11d1b8",
+      "mergeBase": "6d750914d8565acdd496767a7dd935811b5a89b2",
+      "tree": "f2152e240b355cd141612b783c6ccf04f5c8383a",
+      "actualAuditCommentId": 6163165778,
+      "actualAuditUrl": "https://github.com/yigini/soilfer-lims/pull/296#issuecomment-6163165778"
+    },
+    {
+      "issue": 209,
+      "pr": 297,
+      "sourceHead": "6bd516c42a07332d0b0653ed150d1526bf7e424e",
+      "merge": "cde8c8896f5f9d5f1ab07b0ae16b1a765e0a6367",
+      "mergeBase": "2242bcb4861a7085bb95e78e0e7b1e4edf11d1b8",
+      "tree": "638580d50f61254609de3abd42d93afc676a5727",
+      "actualAuditCommentId": 6178123314,
+      "actualAuditUrl": "https://github.com/yigini/soilfer-lims/pull/297#issuecomment-6178123314"
+    }
+  ],
+  "mainCi": 38636615469,
+  "exactJestSummary": [
+    "Test Suites: 370 passed, 370 total",
+    "Tests:       5649 passed, 5649 total"
+  ],
+  "qualifiedBuild": {
+    "evidenceAudit": "b1d68199ec356d744950f801515874e6a7096474",
+    "root": "/opt/lims/releases/workflow-batch-build-cde8c889-20261015T010000Z",
+    "toolingCommit": "6608548a58dd4bf581da4330f1cd7b0f68a86973",
+    "sourceReviewId": 6181452519,
+    "image": "sha256:b5ab0a0a57aeec4fe24dd8095126f3502cbc0c8629a7f4c1ef9e55034893c6fb",
+    "imageBytes": 414679214,
+    "receiptSha256": "c03ca0cd16395a451a12f1606655166f0dfe0b3f78516212034b548888c7a3fd",
+    "unexplainedGrowthBytes": 0,
+    "newBuildCount": 1,
+    "rebuildOrRetagAllowed": false
+  },
+  "predecessor": {
+    "head": "959d17e11c357266f7c2a41b0c84ab76914c591e",
+    "image": "sha256:7aebc035254a61b0b4b8ecb59492d582af7f3769c147a35a7e92a43fb7a642d2",
+    "containerId": "8109d78e228573ead8aa243442192e54b8e1dc09101bc3fa23d03e5a29cbb66b",
+    "containerName": "/soilfer-lims",
+    "freshMetadataObservedUtc": "2026-10-15T00:38:56.288743+00:00",
+    "safeMetadataSha256": "1919e865f51b9ec7d589b74129b00fe3c462820f405079aaa37ee33c1be430fd",
+    "normalHealthyMetadataVerified": true,
+    "restartCount": 0,
+    "oomKilled": false,
+    "memoryMax": 805306368,
+    "memorySwap": 1610612736,
+    "nodeOptions": "",
+    "allowPrismaDbPush": false,
+    "allowAutoSeed": false,
+    "backgroundJobsEnabled": true,
+    "volumeMetadata": [
+      {
+        "Type": "volume",
+        "Name": "lims_lims-assets",
+        "Source": "/var/lib/docker/volumes/lims_lims-assets/_data",
+        "Destination": "/app/server/uploads",
+        "RW": true,
+        "Propagation": ""
+      },
+      {
+        "Type": "volume",
+        "Name": "lims_lims-data",
+        "Source": "/var/lib/docker/volumes/lims_lims-data/_data",
+        "Destination": "/app/server/prisma",
+        "RW": true,
+        "Propagation": ""
+      }
+    ],
+    "historicalReceiptSha256": "03e3309714cadd956e13e9b34576ed774f1e56c482fdc2b07a828a52c1fcb953",
+    "historicalReceiptIsBaselineEvidenceOnly": true,
+    "freshLiveMetadataMustBeRevalidatedBeforeCollection": true
+  },
+  "prospectiveSchemaChecksFromSourceAndHistoricalReceiptOnly": {
+    "priorTables": 106,
+    "priorSchemaReceipts": 39,
+    "installedTables": 112,
+    "installedSchemaReceipts": 42,
+    "theseAreNotFreshProductionCounts": true
+  },
+  "proof": {
+    "sourceCommit": null,
+    "closedSourceGraph": null,
+    "actualSourceReviewId": null,
+    "rawProductionSnapshotCollected": false,
+    "proofExecuted": false,
+    "stoppedPassReceipt": null,
+    "noHistoricalProofReplay": true,
+    "normalHealthyPredecessorRequired": true
+  },
+  "requiredBeforeAnyInstallerOrEntrypoint": {
+    "newExactSourcePass": true,
+    "newExactRootAndUnusedUnit": true,
+    "originalDbWalShmAndAssetsImmutableRetained": true,
+    "onlySeparatelyOwnedCopiesMayBeOpened": true,
+    "policyPresentCanonicalNoOp0OrStop": true,
+    "fullRetainedPhysicalAllocationAccountingIncludingDockerAndContainerd": true
+  },
+  "requiredScientificImpact": {
+    "chartContextsByLabAnalyteMethod": null,
+    "createdUnstartedUnboundServedLrmRuns": null,
+    "orderSeparateCausesAndApprovedRefusalLists": null,
+    "invalidStoredAnalysisSampleCount": null,
+    "sampleAndOwnerIds": null,
+    "nonzeroListsToYY": true,
+    "approvedAmendmentNonzeroStop": true,
+    "separatelyClaudioReviewedForwardRemedyRequired": true,
+    "noAmendmentSideOrderStepBackfillRelinkOrNormalizerChanges": true
+  },
+  "limits": {
+    "absoluteReserveFloorBytes": 10556150894,
+    "unexplainedGrowthAbortBytes": 500000000,
+    "memoryMaxBytes": 805306368,
+    "nodeOptions": "",
+    "readinessSeconds": 600,
+    "productionUnitSeconds": 5400,
+    "stageHeadroomSeconds": 60,
+    "unitHeadroomSeconds": 600,
+    "freshSingleUseGateMaximumSeconds": 600,
+    "actualScaledReserveAndAllAllocationsAssetsLogsMustBeMeasured": true
+  },
+  "workloadPins": {
+    "labAndHubBuildsOwnedByYY": true,
+    "releaseWindowControl": "RELEASE_DAY_DISK_ABORTS_ACCEPTED"
+  },
+  "kit": null,
+  "actualExactKitReview": null,
+  "freshSingleUseProductionGate": null,
+  "productionConnectionOrCollection": false,
+  "productionInstallerOrEntrypointAttempt": false,
+  "productionDeployments": 0,
+  "issue103ProductionConnectionOrApplyGo": false,
+  "allStoppedContainersMustRemainRetained": true,
+  "noRmPruneDeleteMoveCleanupRestoreOlderImageStartOrHeapRaise": true,
+  "afterAnyInstallerOrEntrypointAttemptRecoveryOnlySeparatelyAuditedForwardFix": true,
+  "humanDocumentsDraftsCardsAndUnrelatedWorktreeDirtUntouched": true
+}
