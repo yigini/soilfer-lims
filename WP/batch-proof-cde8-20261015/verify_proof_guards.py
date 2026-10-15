@@ -1,10 +1,12 @@
 """Pure negative authority/accounting/container guards. Never run an operator in these tests."""
 import copy,os,pathlib,sqlite3,unittest
+from unittest import mock
 from proof_contract import *
 from proof_disk import growth,mount_guard,ALLOCATION,BOUND
-from proof_docker import arguments,preserved_containers
+from proof_docker import arguments,preserved_containers,Docker
 from proof_startup import startup_log
-from proof_files import seal,triple,logical,delta,write_new,byte_identity
+from proof_files import seal,triple,logical,delta,write_new,byte_identity,file_state
+from proof_install import install
 
 def fixture_graph():return {'head':'a'*40,'files':{n:{'sha256':'b'*64,'blob':'c'*40,'bytes':1} for n in FILES}}
 def fixture_review():
@@ -101,7 +103,7 @@ class OwnedFixtureTests(unittest.TestCase):
         given=os.environ.get('LIMS_PROOF_GUARD_FIXTURE_DIR')
         require(given and pathlib.Path(given).is_absolute(),'Explicit NEW synthetic fixture directory required')
         cls.root=pathlib.Path(given);require(not cls.root.exists() and not cls.root.is_symlink(),'Fixture boundary consumed');cls.root.mkdir(mode=0o700,parents=True)
-    def setUp(self):self.owner=self.root/self._testMethodName;self.owner.mkdir(mode=0o700)
+    def setUp(self):self.owner=self.root/sha(self._testMethodName.encode())[:12];self.owner.mkdir(mode=0o700)
     def database(self,name='before.db'):
         p=self.owner/name;db=sqlite3.connect(p);db.execute('CREATE TABLE evidence (id TEXT,value BLOB)');db.execute('CREATE TABLE _schema_migrations (id TEXT PRIMARY KEY,details TEXT)');db.execute('INSERT INTO evidence VALUES (?,?)',('one',b'original'));db.execute('INSERT INTO _schema_migrations VALUES (?,?)',('old','original receipt'));db.commit();db.close();return p
     def test_nonempty_wal_fold_master_preserved(self):
@@ -130,4 +132,35 @@ class OwnedFixtureTests(unittest.TestCase):
     def test_old_receipt_change_refused(self):
         p=self.database();a=self.add_delta(p);db=sqlite3.connect(a);db.execute('UPDATE _schema_migrations SET details=? WHERE id=?',('tampered','old'));db.commit();db.close()
         with self.assertRaises(RuntimeError):delta(p,a,{'NewEvidence'},'new')
+    def test_absent_policy_preflight_cannot_apply(self):
+        baseline=self.database();calls=[]
+        class FakeDisk:
+            def check(self):pass
+        class FakeDocker:
+            def cli(self,label,data,script,mode=None):
+                calls.append((script,mode))
+                if mode=='--apply':
+                    db=sqlite3.connect(data/'dev.db');db.execute('CREATE TABLE unauthorized_policy_write (id TEXT)');db.commit();db.close()
+                    return {'classification':'PRESENT','shape':'CANONICAL','mode':'APPLIED','totalChanges':0,'dataWrites':0}
+                return {'classification':'ABSENT','mode':'DRY_RUN','totalChanges':0,'dataWrites':0,'readonlySnapshot':{'originalFilesPreserved':True}}
+        with self.assertRaises(RuntimeError):install(self.owner,baseline,FakeDocker(),FakeDisk())
+        self.assertEqual(calls,[('install_lab_policy_schema.js','--dry-run')]);self.assertEqual(logical(self.owner/'installation-target/dev.db'),logical(baseline))
+    def test_owned_stop_works_after_reserve_and_headroom_failure(self):
+        class RefusedDisk:
+            def check(self):raise RuntimeError('Reserve refused')
+            def time_guard(self,seconds):raise RuntimeError('Headroom refused')
+        d=Docker(self.owner,RefusedDisk());id='d'*64;owner=str(self.owner)+':only-new';d.created=[(id,owner)]
+        first={'Image':IMAGE,'Config':{'Labels':{'io.soilfer.release-owned':owner}},'State':{'Running':True}};closed=copy.deepcopy(first);closed['State']['Running']=False
+        result=type('StopResult',(),{'returncode':0,'stdout':id.encode()+b'\n','stderr':b''})()
+        with mock.patch('proof_docker.inspect',side_effect=[first,closed,closed]),mock.patch('proof_docker.subprocess.run',return_value=result) as stop:
+            d.stop(id,owner,'owned-stop');stop.assert_called_once_with(['docker','stop','-t','10',id],capture_output=True,timeout=30)
+    def test_stop_untracked_container_refused(self):
+        d=Docker(self.owner,None)
+        with mock.patch('proof_docker.inspect') as inspect_mock:
+            with self.assertRaises(RuntimeError):d.stop('id','owner','label')
+            inspect_mock.assert_not_called()
+    def test_source_parent_alias_refused_before_open(self):
+        p=self.owner/'aliased'/'dev.db'
+        with mock.patch.object(pathlib.Path,'is_symlink',lambda q:q.name=='aliased'):
+            with self.assertRaises(RuntimeError):file_state(p)
 if __name__=='__main__':unittest.main(verbosity=2)

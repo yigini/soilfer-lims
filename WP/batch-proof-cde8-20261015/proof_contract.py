@@ -67,7 +67,8 @@ def tokens(index):
         'rawMasterNeverOpenedSqlite=true','productionSqliteConnections=0','preserveAllStoppedContainers=true',
         'policyPresentNoOpOrStop=true','approvedAmendmentNonzeroStop=true','jobsOnQualificationStillRequired=true',
         'retainedDatabaseReserveMultiplier=128','retainedAssetReserveMultiplier=3','logReserveBytes='+str(LOG_RESERVE),
-        'allocationMeasurementSeconds=120','allRetainedReleaseDockerContainerdAllocation=true']+[n+'='+d for n,d in sorted(graph(index).items())]
+        'allocationMeasurementSeconds=120','allRetainedReleaseDockerContainerdAllocation=true',
+        'policyPreflightMode=READONLY_DRY_RUN','ownedStopIndependentOfReserveHeadroom=true','allInputPathAncestorsRejectAliases=true']+[n+'='+d for n,d in sorted(graph(index).items())]
 def approval(review,index):
     require(review.get('id',0)>6181815795 and review.get('performed_via_github_app',{}).get('slug')=='claude','NEW actual Claudio source review required')
     require(review.get('html_url')=='https://github.com/yigini/soilfer-lims/issues/162#issuecomment-'+str(review['id']) and first_line(review.get('body',''))=='Source review: PASS','Final exact source PASS missing')

@@ -6,7 +6,7 @@ def install(root,baseline_backup,docker,disk):
     target=clone_backup(root,'installation-target',baseline_backup,disk.check)
     # Canonical policy MUST already be present. This graph never creates/normalizes policy.
     policy_before=triple(target/'dev.db')
-    policy=docker.cli('policy-canonical-noop',target,'install_lab_policy_schema.js','--apply')
+    policy=docker.cli('policy-canonical-noop',target,'install_lab_policy_schema.js','--dry-run')
     write_new(root/'policy-result.json',policy)
     policy_gate(policy)
     require(triple(target/'dev.db')==policy_before,'Policy changed original triple')

@@ -7,7 +7,8 @@ def write_new(path,value):
     with p.open('xb') as f:f.write(canonical(value)+b'\n')
     p.chmod(0o400)
 def file_state(path):
-    p=pathlib.Path(path);require(not p.is_symlink(),'File alias refused')
+    p=pathlib.Path(path)
+    for ancestor in [p,*p.parents]:require(not ancestor.is_symlink(),'File or ancestor alias refused')
     if not p.exists():return None
     before=p.stat();require(stat.S_ISREG(before.st_mode) and before.st_size<=BYTE_LIMIT,'Regular bounded file required')
     h=hashlib.sha256()

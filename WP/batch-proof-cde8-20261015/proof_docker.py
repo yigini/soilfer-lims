@@ -70,8 +70,19 @@ class Docker:
         require(all(r['Type']=='bind' and pathlib.Path(self.root).resolve() in pathlib.Path(r['Source']).resolve().parents for r in v['Mounts']),'Production or unrelated mount refused')
         return v
     def stop(self,id,owner,label):
+        require((id,owner) in self.created,'Only a container created by THIS controller can stop')
         v=inspect(id);require(v['Image']==IMAGE and v['Config']['Labels'].get('io.soilfer.release-owned')==owner,'Only exact NEW candidate may stop')
-        if v['State']['Running']:self.command(['docker','stop','-t','10',id],label+'-stop',30)
+        if v['State']['Running']:
+            # Emergency stop is independent of a failed reserve/headroom guard.
+            # Perform the strictly-owned bounded stop BEFORE trying to retain output;
+            # even a full filesystem must not prevent stopping this owned writer.
+            result=subprocess.run(['docker','stop','-t','10',id],capture_output=True,timeout=30)
+            require(result.returncode==0 and len(result.stdout)<=65536 and len(result.stderr)<=65536,'Owned stop failed; inspect same retained container')
+            require(inspect(id)['State']['Running'] is False,'Owned writer remains; STOP')
+            for suffix,raw in [('stdout',result.stdout),('stderr',result.stderr)]:
+                p=self.root/(label+'-emergency-stop-'+suffix+'.log')
+                with p.open('xb') as f:f.write(raw)
+                p.chmod(0o400)
         require(inspect(id)['State']['Running'] is False,'Owned writer remains; STOP')
     def cli(self,label,data,script,mode=None):
         tmp=self.root/(label+'-retained-temp');id,owner=self.create(label,data,tmp,script,mode)
