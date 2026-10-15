@@ -1,0 +1,101 @@
+Source review: PASS
+
+Claudio's source review of tooling 68633fdd8322243a63b0135f3899963525af7fad (WP/batch-proof-snapshot-handoff-cde8-20261015, eleven files), targeting the fresh unused 070000 root. No earlier pass authorizes anything further. This covers one new raw snapshot and this scoped owned stopped-copy proof only, and only if the launcher's fresh metadata capacity gate passes. It does not approve jobs-ON qualification, the final kit, a gate or deployment.
+
+What I checked:
+- All eleven SHA-256 values below match `git archive` of the exact head and the request. Five files are byte-identical to 624aab7b (launch, budget, docker, install, startup). `verify_proof_guards.py` ran 132/132 OK on Python 3.11 and on Python 3.9.23, each with a fresh `LIMS_PROOF_GUARD_FIXTURE_DIR`. `copy_site_guard` passes on the real sources, and the stage-table hash is unchanged (a009b22c…).
+- The diff against 624aab7b implements direction 6184356993 and nothing else.
+  - **Production DB:** `copy_triple(..., live_source=True)` is allowed only for the pinned live DB. It takes the full before-triple, copies, then takes the after-triple. It writes `copy-window-comparison.json` before the equality `require`, and on success writes `snapshot-handoff.json` (before and after triples, raw byte identity, UTC). `seal(..., live_source=True)` is allowed only for `fresh-production-snapshot`. After the handoff it checks only the raw master identity against the handoff, plus the existing backup == reader logical equivalence. Owned-source seals keep `triple(source)==original`.
+  - **Assets:** `copy_tree(..., live_source=True)` has its own window and comparison file, a compared copy-identity guard, and a separate `assets-snapshot-handoff.json` outside the runtime tree. The cross-scope `triple(source)==original and tree_state(LIVE_ASSETS)==assets` term is removed from `run`. The terminal raw-asset check compares against the asset handoff.
+  - **Evidence on refusal:** `compared_guard` writes both compared states to 0400 JSON before raising, for file replacement, sampling change, source growth, copy bytes and asset presence.
+  - **Observation:** `live_metadata_observation` uses lstat only. It is bounded (FILE_LIMIT, 15 s), takes no content hash, opens no SQL and is never a predicate. It runs after the snapshot, at terminal and on refusal (on refusal any error is recorded, not raised).
+  - **Telemetry:** every `Disk.check` records cgroup v2 `memory.stat` (anon, file and all counters, with an alias-checked path) before the reserve guard. There is no limit, heap or kernel change.
+- Everything else from my 624aab7b review carries over unchanged: the name-inventory proof, the 52/65 budget with consumption-aware reserves and du -x closure, dry and repeat identity, the installed seal as `previous`, both startups, and all safety and scientific gates.
+
+Non-blocking notes:
+1. Volume of telemetry files: `Docker.command` polls `disk.check()` every 0.25 s, so each check now writes its own memory JSON file. A long run may write tens of thousands of small files, roughly 4 KB each and up to about 150 MB in the worst case. They are counted by du -x inside each stage's 25% margin, so this is acceptable. A future graph could sample memory less often.
+2. Capacity slack is 2.86 GB (free 54618963968 B against 51759760494 B required). The launcher's fresh gate decides.
+3. The per-file sampling and copy-window checks on the live triple remain the one place where production writes can still STOP the run. That window is short and passed in both 050000 and 060000. It is the correct place for that check.
+
+Bindings:
+
+```
+68633fdd8322243a63b0135f3899963525af7fad
+cde8c8896f5f9d5f1ab07b0ae16b1a765e0a6367
+638580d50f61254609de3abd42d93afc676a5727
+sha256:b5ab0a0a57aeec4fe24dd8095126f3502cbc0c8629a7f4c1ef9e55034893c6fb
+959d17e11c357266f7c2a41b0c84ab76914c591e
+sha256:7aebc035254a61b0b4b8ecb59492d582af7f3769c147a35a7e92a43fb7a642d2
+8109d78e228573ead8aa243442192e54b8e1dc09101bc3fa23d03e5a29cbb66b
+c03ca0cd16395a451a12f1606655166f0dfe0b3f78516212034b548888c7a3fd
+proofScope=RAW_SNAPSHOT_AND_OWNED_STOPPED_COPY_INSTALLATION_JOBS_OFF_STARTUP_ONLY
+proofRoot=/opt/lims/releases/workflow-batch-stopped-copy-cde8c889-20261015T070000Z
+qualifiedBuildSource=6608548a58dd4bf581da4330f1cd7b0f68a86973
+qualifiedBuildPass=6181452519
+mainCiRun=38636615469
+labAndHubBuildsOwnedByYY=true
+releaseWindowControl=RELEASE_DAY_DISK_ABORTS_ACCEPTED
+reserveFloorBytes=10556150894
+unexplainedGrowthAbortBytes=500000000
+memoryLimitBytes=805306368
+unitTimeoutSeconds=5400
+readinessSeconds=600
+stageHeadroomSeconds=60
+unitHeadroomSeconds=600
+rawMasterNeverOpenedSqlite=true
+productionSqliteConnections=0
+preserveAllStoppedContainers=true
+policyPresentNoOpOrStop=true
+approvedAmendmentNonzeroStop=true
+jobsOnQualificationStillRequired=true
+declaredDbTripleCopies=52
+dbBudgetEquivalents=65
+budgetMarginPercent=25
+minimumDbBudgetEquivalents=64
+budgetStageTableSha256=a009b22ca50af106c0edbdb9044e73b70d0230c73f29e4e7a64f04534ae0faf3
+budgetModel=DECLARED_STAGE_REMAINING_CONSUMPTION_AWARE
+capacityDirection=6183215126
+noopSealDirection=6183663456
+dryRunMainIdentityAndEmptyWal=true
+repeatMainWalIdentityNoOpZero=true
+installedSealBecomesPrevious=true
+metadataCapacityBeforeRootAndBeforeUnit=true
+allLocalExecutedSourceFilesBound=true
+containerNameAbsenceProof=BOUNDED_COMPLETE_ID_AND_EXACT_NAME_INVENTORY
+containerNameProbeRawIdsRetained=true
+mandatoryKnownPredecessorInInventory=true
+noErrorTextAbsenceInference=true
+snapshotBoundaryDirection=6184356993
+productionSnapshotAuthority=STABLE_FILESYSTEM_COPY_WINDOW_HANDOFF
+productionPostHandoffChecks=OWNED_RAW_BYTES_AND_READER_BACKUP_ONLY
+liveEvolutionObservation=STAT_ONLY_NEVER_SNAPSHOT_AUTHORITY
+liveInputEqualityRefusalComparedStatesRetained=true
+databaseAssetsCrossFileAtomicityClaimed=false
+budgetCheckpointCgroupAnonFileRecorded=true
+referenceDbReserveBytes=567558144
+referenceAssetReserveBytes=5787648
+retainedAssetReserveMultiplier=3
+logReserveBytes=4294967296
+allocationMeasurementSeconds=120
+allRetainedReleaseDockerContainerdAllocation=true
+policyPreflightMode=READONLY_DRY_RUN
+ownedStopIndependentOfReserveHeadroom=true
+allInputPathAncestorsRejectAliases=true
+diskMountPolicy=VERIFIED_DOCKER_OVERLAY_VIEWS_BACKED_BY_COUNTED_CONTAINERD
+physicalDuSingleFilesystem=true
+containerMountComparison=EXACT_OBJECTS_UNORDERED_NO_DUPLICATES
+launch_proof.py=0fac1866276fab7403a639b47fefd881354920e928c4b9e7c18afc65f54a41c7
+prepare_proof.py=11daddf2ef14fd646bde4ed3591b1cb7b9f05f61555b7835a2a464d71bb94de8
+proof_budget.py=3202100f6dfda3fb35fe9f9dfcb0f6ea4afd9dd92b56104480120778080bb17b
+proof_contract.py=bf1e0b6db6f9cae1a44eeb0044c56aa4a7e0799c0a0a19b4239039d117e39b1b
+proof_disk.py=a4090643f754477b3fb5276dd099d01f4be59e5e1291bf92deafe9e08b09140a
+proof_docker.py=c941b3e680dba8936815177b8b5302300414b5115b33b91a03cdb68a6ed65d9d
+proof_files.py=e63d6c325592ea86e01bb8feead291ecbb6348e33f921668faa2798b370956f2
+proof_install.py=c5e34fa43a084adeeb12523bd94beb05076efaf72cc1bb9ab2f9b7f7560ee3b3
+proof_startup.py=a5b3e775a53e6a2e37be613394b1f091c710ead84a09f307cf18c2c54f762b10
+run_stopped_proof.py=13628d7dad20205beae73aecb55c588a6ed48c45fcac91e1c27551c514b5ccc5
+verify_proof_guards.py=1afd68ca070031d271acf5c8b7cf0f24b2c542bbe50b534624a1023c33c9bc24
+```
+
+---
+_Generated by [Claude Code](https://claude.ai/code)_
