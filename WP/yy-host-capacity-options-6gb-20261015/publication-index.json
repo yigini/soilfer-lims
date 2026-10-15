@@ -1,0 +1,156 @@
+{
+  "files": [
+    {
+      "bytes": 5274,
+      "path": "WP/yy-host-capacity-options-6gb-20261015/cache-parent-and-config-reference-once/collector-source.py",
+      "sha256": "8b2b947fb19de6e0749fae4af60a591ee8a5a88857621639ae783ddca40aa049"
+    },
+    {
+      "bytes": 103,
+      "path": "WP/yy-host-capacity-options-6gb-20261015/cache-parent-and-config-reference-once/exit-original.json",
+      "sha256": "035bee37e46fb6f2e7679426753133c77af8b92741fff9064477439315b18c6c"
+    },
+    {
+      "bytes": 0,
+      "path": "WP/yy-host-capacity-options-6gb-20261015/cache-parent-and-config-reference-once/stderr-original.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 90177,
+      "path": "WP/yy-host-capacity-options-6gb-20261015/cache-parent-and-config-reference-once/stdout-original.json",
+      "sha256": "926d5b7d20c5578c0022e9a33fc056051cf5319d755de765f50f4bcf90a4e2c6"
+    },
+    {
+      "bytes": 10549,
+      "path": "WP/yy-host-capacity-options-6gb-20261015/dependency-and-old-backup-hashes-once/collector-source.py",
+      "sha256": "c90dcb4a3598ee3478608eac56aed56b1d76d3f32416e9213f8f356b578fe183"
+    },
+    {
+      "bytes": 103,
+      "path": "WP/yy-host-capacity-options-6gb-20261015/dependency-and-old-backup-hashes-once/exit-original.json",
+      "sha256": "ccb41492045dace979c915471882be02c370ef8a4770cd63bbb5266dd27219c4"
+    },
+    {
+      "bytes": 7234,
+      "path": "WP/yy-host-capacity-options-6gb-20261015/dependency-and-old-backup-hashes-once/selection.json",
+      "sha256": "947ba699d604aa1acbba868ffc1f7c418c7c03f96d478926e640873af22b3206"
+    },
+    {
+      "bytes": 0,
+      "path": "WP/yy-host-capacity-options-6gb-20261015/dependency-and-old-backup-hashes-once/stderr-original.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 511926,
+      "path": "WP/yy-host-capacity-options-6gb-20261015/dependency-and-old-backup-hashes-once/stdout-original.json",
+      "sha256": "e8cd2534f86f3ebd8d66bfa050c12e33d754274834a4a7c7d6679dd899520668"
+    },
+    {
+      "bytes": 25811,
+      "path": "WP/yy-host-capacity-options-6gb-20261015/exact-build-cache-65-records.csv",
+      "sha256": "ebe3fd0c817d3dd096e3f8d4c501571afb08f420f02d48b3add9c4f272c2c830"
+    },
+    {
+      "bytes": 252576,
+      "path": "WP/yy-host-capacity-options-6gb-20261015/exact-review-list.json",
+      "sha256": "58b40942cc3b75b3e657c1ceadb20854354fd35646d41a5ec04162c62fecce2a"
+    },
+    {
+      "bytes": 8567,
+      "path": "WP/yy-host-capacity-options-6gb-20261015/metadata-collector-source.py",
+      "sha256": "e825be7d8dc59da476747627c2bd5a65212dc53eb18c465d5536c4de92a7efe2"
+    },
+    {
+      "bytes": 103,
+      "path": "WP/yy-host-capacity-options-6gb-20261015/metadata-exit-original.json",
+      "sha256": "124922e3f93f030640d9029cd0c3a8f124ae11ed71be44822c72e57e37dae6f7"
+    },
+    {
+      "bytes": 0,
+      "path": "WP/yy-host-capacity-options-6gb-20261015/metadata-stderr-original.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 1335679,
+      "path": "WP/yy-host-capacity-options-6gb-20261015/metadata-stdout-original.json",
+      "sha256": "1feefb89e5f812effc591868527531a7de350970c4fa52e47ca6231a937e9cb5"
+    },
+    {
+      "bytes": 2851,
+      "path": "WP/yy-host-capacity-options-6gb-20261015/old-backup-options.csv",
+      "sha256": "a25e82d7f50fe71b287a7c23a299fa390e7f599c47fb2700756f58e695176062"
+    },
+    {
+      "bytes": 82320,
+      "path": "WP/yy-host-capacity-options-6gb-20261015/prior-proven-small-proof-selection.json",
+      "sha256": "aa5f0cf0917bdbb9db087cb41a045736b86265a6ccbdbc3a8bd52d434cb2d9b7"
+    },
+    {
+      "bytes": 47896,
+      "path": "WP/yy-host-capacity-options-6gb-20261015/proof-copies-verified-elsewhere.json",
+      "sha256": "2c46b4c3fa57b03abb8872f7d98f3b058e95a1a359739abc62b72bf33e0cf900"
+    },
+    {
+      "bytes": 18417,
+      "path": "WP/yy-host-capacity-options-6gb-20261015/review-list.md",
+      "sha256": "b4afbe9647a1fc186a49788db804f9aa4645c553ec8a563a4b6cae3d5da89965"
+    },
+    {
+      "bytes": 109644,
+      "path": "WP/yy-host-capacity-options-6gb-20261015/unused-image-options.csv",
+      "sha256": "15e394918de6d539ecf68e4fdd42b62abc28728aeb096d8909c936d712f3ad86"
+    },
+    {
+      "bytes": 526,
+      "path": "WP/yy-host-capacity-options-6gb-20261015/verified-proof-folder-options.csv",
+      "sha256": "cd891f45f53f57e3831aaed0c781b1e4d3d9e775fa767a81587b80abd1d5b549"
+    },
+    {
+      "bytes": 10126,
+      "path": "WP/backlog-resume-20261013/capture-yy-host-capacity-six-gb-metadata-once.py",
+      "sha256": "ec57b6ac17c4a18f304718d84f9d0a27b97ec017e338a007f4707cb106e951b7"
+    },
+    {
+      "bytes": 7300,
+      "path": "WP/backlog-resume-20261013/capture-yy-six-gb-dependencies-backup-hashes-once.py",
+      "sha256": "766e85c92af6b062cba5e54078b9d28f421966ae07b12a79062fb103faf48b57"
+    },
+    {
+      "bytes": 4430,
+      "path": "WP/backlog-resume-20261013/capture-six-gb-cache-parents-and-image-config-once.py",
+      "sha256": "bb68f6d5532a3d89e9595e845cb6388f9917c8a3d48c05b41420657a161d3c59"
+    },
+    {
+      "bytes": 3155,
+      "path": "WP/backlog-resume-20261013/verify-six-gb-proof-copies-elsewhere-once.py",
+      "sha256": "fa3369f7b72fa32c0b9b30ff0fcfbc81c33c414c39f8a82a4d2a1c7e87c6f113"
+    },
+    {
+      "bytes": 15726,
+      "path": "WP/backlog-resume-20261013/derive-yy-six-gb-exact-review-list-once.py",
+      "sha256": "22d94be3b436e1ae5fc6899d8447f68833c149e77d367fd830a52761dcfe741a"
+    },
+    {
+      "bytes": 5325,
+      "path": "WP/backlog-resume-20261013/publish-yy-six-gb-review-list-once.py",
+      "sha256": "041209b4b38ec1a22bd89771297f1aecfa0324e95ff8eef7bcf723c8148b0e11"
+    },
+    {
+      "bytes": 597478,
+      "path": "WP/audit-release-eb6de2e8/README.md",
+      "sha256": "66c7ab010becc506e6bbbf0412c63cf204706e978370674137d10584867fee21"
+    }
+  ],
+  "filesDeleted": 0,
+  "prunes": 0,
+  "status": "READ_ONLY_EXACT_LIST_PUBLISHED_NO_DELETION_APPROVAL",
+  "totals": {
+    "backupPhysicalAllocatedBytes": 1689980928,
+    "dockerCacheEstimatedBytes": 4140195008,
+    "estimatedCombinedBytes": 6083182001,
+    "estimatedCombinedGb": 6.083182001,
+    "onlyVerifiedDuplicateBackupAlternativeBytes": 4956528049,
+    "proofPhysicalDuXBytes": 7020544,
+    "unusedImageEstimatedUniqueBytes": 245985521
+  }
+}

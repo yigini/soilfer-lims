@@ -1,0 +1,54 @@
+import datetime,hashlib,http.client,json,os,pathlib,re,socket,stat,urllib.parse
+selection={'images': [{'id': 'sha256:1d4882f49f351a08549c79c0409f7848dbb205feef314b33432aae63ed11217b', 'tags': ['soilfer-lims:audit-workflow-batch-build-cde8c889-20261014T221500Z']}, {'id': 'sha256:b5ab0a0a57aeec4fe24dd8095126f3502cbc0c8629a7f4c1ef9e55034893c6fb', 'tags': ['soilfer-lims:audit-workflow-batch-build-cde8c889-20261015T010000Z']}, {'id': 'sha256:3e90c082c7dad009472e8d911921b4293d6f6fe0c05084737a3b717e75969f96', 'tags': ['soil-museum:prev-20261014-093649']}, {'id': 'sha256:57575a88c02aa6b9c0e801c2c6a6e7da0de298c41d093aeba5cc75480c3aa930', 'tags': ['soilfer-lims:audit-instrument-import-build-5dd5488d-20261012T104515Z']}, {'id': 'sha256:e2e1cc1b9ac79a92228913005fbf21dbbe106b5c703cf5ca3d5ac793e8f20f79', 'tags': ['soilfer/manual-sync:latest']}, {'id': 'sha256:d4eb9b498022078b1853013f2fbbb52f42c8c903dad7d222171c9eabd419869f', 'tags': ['soilfer-lims:audit-runtime-kobo-build-51f67988-20261012T035200Z']}, {'id': 'sha256:4894eabc1d2e70528b83e6e77b151b43c8e67adff15228cfd067485ffd7c5413', 'tags': ['soilfer-lims:audit-runtime-kobo-build-f830f900-20261011T231018Z']}, {'id': 'sha256:bac52bc8ee6a7d94d17fbdf2064fd09e8bc8dc533677304f4cc2d3e128fc4320', 'tags': ['soilfer-lims:audit-runtime-kobo-build-171dd36c-20261011T193050Z']}, {'id': 'sha256:bc2557a5dee2a8599d31cf96407088d67ce863c4ad3fc7e6989b8671e10c597a', 'tags': ['soilfer-lims:audit-preparation-ae64f169-build-20261011T110500Z']}, {'id': 'sha256:159057d56c456a0c7cdef917fd04f53f9a66d6285cc476d7203d63047bfff8e1', 'tags': ['soilfer-lims:audit-combined-eb6de2e8-main-feac6534-retry-20261010210829Z']}, {'id': 'sha256:e2ed0a732e5e34050e42f7796e1d745cb4e18eb991e049ee804993cdc792c9e6', 'tags': ['soilfer-lims:audit-combined-eb6de2e8-repair-pr-0685d34d-verified-20261010T170400Z']}, {'id': 'sha256:e7ccb759ad57c59399b0df53d8b28629af5b588da76391cf8a511dfc4fdc461c', 'tags': ['soilfer-lims:audit-combined-eb6de2e8-repair-pr-0685d34d-20261010T164000Z']}, {'id': 'sha256:d86193691489ae7570c21d91057b55da08b30c4bbe438b910d04fc132d9f9613', 'tags': ['soil-museum:prev-20261014-085302']}, {'id': 'sha256:bce8e4ddc1c14984ca8fae679540222afafa0db93c0747a336035715dc504173', 'tags': ['soilfer/lab:2026.10b']}, {'id': 'sha256:b02ddff8d7549e981edc49215fef2d54ca654adaa2a8924eceb5d4ea0af00394', 'tags': ['lims-qc188:6f72590']}, {'id': 'sha256:2cfec7b42ef8ba5758dbd43c6f4bbc702ef42f78abe700a6ed0724e151b5ab5d', 'tags': ['lims-qc189:dfac90e']}, {'id': 'sha256:5bd1553ef324519d5f5633d14a7fb37d6520488df056c79407cc1b5e5ffde7c3', 'tags': ['soilfer-lims:audit-187-a14ff63']}, {'id': 'sha256:49c54b1920f4836e64a81a558885e19890cfc733b38ad6abc0628130a4963db7', 'tags': ['soilfer-lims:1.9.0-bbd1683']}, {'id': 'sha256:c86b215eaac744638f29ab89587fe3ed84eb1f0e18e178c72853623c01f09951', 'tags': ['soilfer-lims:1.9.0-319ade7']}, {'id': 'sha256:10ed70bd29a9f7220f1532866248b644296f5089057b816a624d5edb3503d5f2', 'tags': ['soilfer-lims:1.9.0-9f298cc', 'soilfer-lims:rollback-pre-audit23-9f298cc']}, {'id': 'sha256:a9f84fb9a374b2374fe2e67c8efc0468ff3f1c66c8a0b14597ec86e349e62bca', 'tags': ['temporalio/admin-tools:1.32.0']}], 'configFiles': ['/opt/alitt/docker-compose.yml', '/opt/littv2-dynamic/docker-compose.yml', '/opt/littv2-subdomain/docker-compose.yml', '/opt/littv3/docker-compose.yml', '/opt/soil-museum/docker-compose.yml', '/opt/soilfer-learn/docker-compose.yml'], 'oldBackupRows': [{'path': '/opt/lims/backups/dev_pre_api_dialog218_20261004_031055.db', 'bytes': 563322880, 'allocatedBytes': 563326976, 'device': 64769, 'inode': 951467, 'hardLinks': 1, 'mtimeNs': 1791076291938085393, 'mode': 420, 'protectedNewestInThisBackupLocation': False}, {'path': '/opt/lims/backups/dev_pre_api_dialog218_20261004_031636.db', 'bytes': 563322880, 'allocatedBytes': 563326976, 'device': 64769, 'inode': 951475, 'hardLinks': 1, 'mtimeNs': 1791076616188836647, 'mode': 420, 'protectedNewestInThisBackupLocation': False}, {'path': '/opt/lims/backups/dev_pre_issue155_20261003_132428.db', 'bytes': 563322880, 'allocatedBytes': 563326976, 'device': 64769, 'inode': 953155, 'hardLinks': 1, 'mtimeNs': 1791026687537337216, 'mode': 420, 'protectedNewestInThisBackupLocation': False}, {'path': '/opt/lims/backups/dev_pre_issue159_20261003_221538.db', 'bytes': 563322880, 'allocatedBytes': 563326976, 'device': 64769, 'inode': 1016310, 'hardLinks': 1, 'mtimeNs': 1791058558408439801, 'mode': 420, 'protectedNewestInThisBackupLocation': False}, {'path': '/opt/lims/backups/dev_pre_issue160_20261004_005355.db', 'bytes': 563322880, 'allocatedBytes': 563326976, 'device': 64769, 'inode': 951445, 'hardLinks': 1, 'mtimeNs': 1791068082249731240, 'mode': 420, 'protectedNewestInThisBackupLocation': False}, {'path': '/opt/lims/backups/dev_pre_issue160_20261004_005720.db', 'bytes': 563322880, 'allocatedBytes': 563326976, 'device': 64769, 'inode': 951452, 'hardLinks': 1, 'mtimeNs': 1791068259061409769, 'mode': 420, 'protectedNewestInThisBackupLocation': False}, {'path': '/opt/lims/backups/failed_db_20261004_005355.db', 'bytes': 563322880, 'allocatedBytes': 563326976, 'device': 64769, 'inode': 951447, 'hardLinks': 1, 'mtimeNs': 1791068116603445826, 'mode': 420, 'protectedNewestInThisBackupLocation': False}, {'path': '/opt/lims/backups/failed_db_20261004_031055.db', 'bytes': 563322880, 'allocatedBytes': 563326976, 'device': 64769, 'inode': 951469, 'hardLinks': 1, 'mtimeNs': 1791076354953394357, 'mode': 420, 'protectedNewestInThisBackupLocation': False}], 'proofRoots': ['/opt/lims/releases/workflow-batch-forward-metadata-cde8c889-20261014T233000Z', '/opt/lims/releases/workflow-batch-stopped-copy-cde8c889-20261015T020000Z', '/opt/lims/releases/workflow-batch-stopped-copy-cde8c889-20261015T023000Z']}
+class C(http.client.HTTPConnection):
+ def connect(self):
+  self.sock=socket.socket(socket.AF_UNIX,socket.SOCK_STREAM);self.sock.settimeout(60);self.sock.connect('/var/run/docker.sock')
+def get(p):
+ assert p=='/version' or re.fullmatch(r'/v[0-9]+\.[0-9]+/(system/df|containers/json\?all=1|images/json\?all=1&manifests=true|images/[^/]+/json)',p)
+ c=C('localhost',timeout=60)
+ try:
+  c.request('GET',p);r=c.getresponse();b=r.read(32*1024**2+1);assert r.status==200 and len(b)<=32*1024**2;return json.loads(b)
+ finally:c.close()
+version=get('/version');api=version['ApiVersion'];assert re.fullmatch('[0-9]+\.[0-9]+',api);prefix='/v'+api
+df=get(prefix+'/system/df');containers=get(prefix+'/containers/json?all=1');images=get(prefix+'/images/json?all=1&manifests=true')
+safe_containers=[{k:x.get(k) for k in ['Id','Names','Image','ImageID','ImageManifestDescriptor','State','Status','Created','Labels','Mounts']} for x in containers]
+safe_images=[{k:x.get(k) for k in ['Id','ParentId','RepoTags','RepoDigests','Created','Size','SharedSize','Containers','Labels','Manifests']} for x in images]
+safe_df_images=[{k:x.get(k) for k in ['Id','ParentId','RepoTags','RepoDigests','Created','Size','SharedSize','Containers','Manifests']} for x in df.get('Images',[])]
+cache=df.get('BuildCache',[])
+cache_fields=['ID','Parent','ParentID','Parents','Type','Description','InUse','Shared','Size','CreatedAt','LastUsedAt','UsageCount']
+safe_cache=[{k:x.get(k) for k in cache_fields if k in x} for x in cache]
+inspect=[]
+for x in selection['images']:
+ a=get(prefix+'/images/'+urllib.parse.quote(x['id'],safe='')+'/json')
+ inspect.append({'requestedId':x['id'],**{k:a.get(k) for k in ['Id','RepoTags','RepoDigests','Descriptor','Manifests','Size','Parent','RootFS','Created']}})
+tokens={x['id'] for x in selection['images']}|{t for x in selection['images'] for t in x['tags']}|set(selection['proofRoots'])|{x['path'] for x in selection['oldBackupRows']}
+repos={t.rsplit(':',1)[0] for x in selection['images'] for t in x['tags']}
+configs={pathlib.Path(x) for x in selection['configFiles']}
+for location in ['/etc/systemd/system','/etc/cron.d','/etc/cron.daily','/etc/cron.hourly','/etc/cron.weekly','/etc/cron.monthly']:
+ p=pathlib.Path(location)
+ if p.is_dir():configs.update(q for q in p.rglob('*') if q.is_file() and not q.is_symlink())
+for n in ['/etc/crontab','/var/spool/cron/crontabs/root']:
+ p=pathlib.Path(n)
+ if p.is_file() and not p.is_symlink():configs.add(p)
+for location in ['/opt/lims','/opt/soil-museum','/opt/soilfer-learn']:
+ p=pathlib.Path(location)
+ if not p.is_dir():continue
+ for q in p.iterdir():
+  if q.is_file() and not q.is_symlink() and q.suffix in ['.yml','.yaml','.sh','.py','.service','.json']:configs.add(q)
+references=[];scanned=[]
+for p in sorted(configs):
+ if not p.is_file() or p.is_symlink() or p.stat().st_size>2*1024**2:continue
+ text=p.read_text(encoding='utf-8',errors='replace');scanned.append(str(p))
+ for number,line in enumerate(text.splitlines(),1):
+  exact=sorted(t for t in tokens if t in line);repo=sorted(t for t in repos if t in line)
+  if exact or repo:references.append({'path':str(p),'line':number,'exactReferenceTokens':exact,'repositoryReferenceTokens':repo,'rawLineNotStored':True})
+hashes=[]
+for original in selection['oldBackupRows']:
+ p=pathlib.Path(original['path']);assert p.parent==pathlib.Path('/opt/lims/backups') and p.suffix=='.db' and not p.is_symlink()
+ before=p.stat();assert before.st_size==original['bytes'] and before.st_mtime_ns==original['mtimeNs'] and before.st_ino==original['inode'] and before.st_dev==original['device']
+ h=hashlib.sha256()
+ with p.open('rb') as f:
+  for b in iter(lambda:f.read(1024**2),b''):h.update(b)
+ after=p.stat();assert all(getattr(before,k)==getattr(after,k) for k in ['st_dev','st_ino','st_size','st_mtime_ns','st_mode'])
+ hashes.append({**original,'sha256':h.hexdigest(),'stableBeforeAfterMetadata':True,'sqlConnections':0,'bytesFetchedOffHost':0})
+print(json.dumps({'status':'READONLY_DEPENDENCIES_AND_OLD_BACKUP_HASHES_NOT_DELETION_AUTHORITY','observedUtc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'dockerVersion':{k:version.get(k) for k in ['Version','ApiVersion','MinAPIVersion']},'versionedSafeSelectedContainers':safe_containers,'versionedSafeSelectedImages':safe_images,'versionedSystemDfSafeImages':safe_df_images,'versionedBuildCacheRecords':safe_cache,'rawCacheRecordKeys':sorted({k for x in cache for k in x}),'unusedImageInspectSafeSelected':inspect,'configFilesScanned':scanned,'exactAndRepositoryConfigReferences':references,'oldBackupStableHashes':hashes,'fullRawImageOrContainerEnvironmentStored':False,'backupContentsFetchedOffHost':0,'liveDatabaseFilesOpened':0,'sqlConnections':0,'mutations':0,'hostFilesCreated':0,'filesDeleted':0,'prunes':0,'neverReplay':True}))

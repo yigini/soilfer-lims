@@ -1,0 +1,4 @@
+﻿root,physicalDuXBytes,currentFileCount,allCurrentFileBytesHaveIndependentlyVerifiedElsewhereCopy,containerMountConsumers,otherReleaseAuthorityReferences,processOpenFileReferences,eligibleForExactListReview
+/opt/lims/releases/workflow-batch-forward-metadata-cde8c889-20261014T233000Z,1503232,46,True,[],[],[],True
+/opt/lims/releases/workflow-batch-stopped-copy-cde8c889-20261015T020000Z,2707456,22,True,[],[],[],True
+/opt/lims/releases/workflow-batch-stopped-copy-cde8c889-20261015T023000Z,2809856,25,True,[],[],[],True
