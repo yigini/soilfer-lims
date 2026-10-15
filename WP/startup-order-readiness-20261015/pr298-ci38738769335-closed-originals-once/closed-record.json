@@ -1,0 +1,371 @@
+{
+  "retainedUtc": "2026-10-15T13:33:42.715930+00:00",
+  "status": "CLOSED_SUCCESS_VERIFIED",
+  "run": 38738769335,
+  "runUrl": "https://github.com/yigini/soilfer-lims/actions/runs/38738769335",
+  "attempt": 1,
+  "conclusion": "success",
+  "job": 116434742565,
+  "completedUtc": "2026-10-15T13:27:51Z",
+  "pr": 298,
+  "head": "eba02837eaa2ab797cad0572fecada686f660346",
+  "tree": "676b01e71211786d1aeace50f19a0b2c9f9c482e",
+  "base": "cde8c8896f5f9d5f1ab07b0ae16b1a765e0a6367",
+  "exactJestSummary": [
+    "Test Suites: 373 passed, 373 total",
+    "Tests:       5679 passed, 5679 total"
+  ],
+  "passedSuites": 373,
+  "passedTests": 5679,
+  "exactFullInventoryMatch": true,
+  "all1333FrozenInputsUnchanged": true,
+  "requiredSteps": {
+    "Set up job": "success",
+    "Checkout repository": "success",
+    "Setup Node.js": "success",
+    "Install server dependencies": "success",
+    "Install client dependencies": "success",
+    "Verify theme catalog and tokens drift": "success",
+    "Build client production bundle": "success",
+    "Setup test database and generate Prisma client": "success",
+    "Install Chromium for keyboard-only recording contract": "success",
+    "Run server test suite": "success",
+    "Set up Docker Buildx": "success",
+    "Build Docker image": "success",
+    "Build Supported Baseline Docker Image (v3.5.30 / 48d0e52)": "success",
+    "Run Real Disposable Docker Boundary Rehearsal": "success",
+    "Run Real Docker Deployment Readiness Acceptance": "success",
+    "Post Build Docker image": "success",
+    "Post Set up Docker Buildx": "success",
+    "Post Setup Node.js": "success",
+    "Post Checkout repository": "success",
+    "Complete job": "success"
+  },
+  "archiveEntries": [
+    {
+      "archiveName": "0_Test & Build.txt",
+      "retainedPath": "archive-entries/entry-0000-original.log",
+      "bytes": 4101685,
+      "sha256": "88dfdcae9adce80675308817c361b2218b5e63ca7616dda68b6a5253b7c009a7",
+      "crc32": 2504184480
+    },
+    {
+      "archiveName": "Test & Build/system.txt",
+      "retainedPath": "archive-entries/entry-0001-original.log",
+      "bytes": 581,
+      "sha256": "f2f618ec0098089497e932d8d321d6c36e6719d242742649dd7c661722dad24f",
+      "crc32": 424140148
+    },
+    {
+      "archiveName": "Test & Build/1_Set up job.txt",
+      "retainedPath": "archive-entries/entry-0002-original.log",
+      "bytes": 2340,
+      "sha256": "84af2a5ef291e112c41cfb12ce77e61ed08e744bde69b8b600f1919d0c3854b1",
+      "crc32": 231562107
+    },
+    {
+      "archiveName": "Test & Build/2_Checkout repository.txt",
+      "retainedPath": "archive-entries/entry-0003-original.log",
+      "bytes": 21092,
+      "sha256": "d33f17f73380d2da9f987c44af9d5a99d776b3f460caa244049f336ba8f98dc4",
+      "crc32": 4118197677
+    },
+    {
+      "archiveName": "Test & Build/3_Setup Node.js.txt",
+      "retainedPath": "archive-entries/entry-0004-original.log",
+      "bytes": 903,
+      "sha256": "eaae21690bf01f5fe59e3c3f851cdc909ae701d5b5d8c05111a3088fb1ac76c6",
+      "crc32": 3804283275
+    },
+    {
+      "archiveName": "Test & Build/4_Install server dependencies.txt",
+      "retainedPath": "archive-entries/entry-0005-original.log",
+      "bytes": 3166,
+      "sha256": "9a6dbf2de3deed46d6b50460375b1c2655372ef22283eca6bb9d80dc204e4650",
+      "crc32": 2951542401
+    },
+    {
+      "archiveName": "Test & Build/5_Install client dependencies.txt",
+      "retainedPath": "archive-entries/entry-0006-original.log",
+      "bytes": 2620,
+      "sha256": "4230715024f00d8dbed0190414f3be58c958f8a79dd90d1f893d3644b5070a17",
+      "crc32": 515985348
+    },
+    {
+      "archiveName": "Test & Build/6_Verify theme catalog and tokens drift.txt",
+      "retainedPath": "archive-entries/entry-0007-original.log",
+      "bytes": 617,
+      "sha256": "f8c5143855319a64d31024ae7271d163aacc27ec97fe5b51688ad4a0229f4c9d",
+      "crc32": 3909377862
+    },
+    {
+      "archiveName": "Test & Build/7_Build client production bundle.txt",
+      "retainedPath": "archive-entries/entry-0008-original.log",
+      "bytes": 12791,
+      "sha256": "dba2d29e328666f256c4c8d909ab8bdde0b31280746aa932a5aab0c34595b98a",
+      "crc32": 3614357666
+    },
+    {
+      "archiveName": "Test & Build/8_Setup test database and generate Prisma client.txt",
+      "retainedPath": "archive-entries/entry-0009-original.log",
+      "bytes": 5754,
+      "sha256": "a882cf0f9c82af57c023ea0630ad914e28a8b765450e15ec09467e56ec91ed09",
+      "crc32": 3005689645
+    },
+    {
+      "archiveName": "Test & Build/9_Install Chromium for keyboard-only recording contract.txt",
+      "retainedPath": "archive-entries/entry-0010-original.log",
+      "bytes": 25111,
+      "sha256": "30cf650c8c2a975f8ab82feeff821e8fecc939eb250e55c08370a3ebf92d2a81",
+      "crc32": 3935660841
+    },
+    {
+      "archiveName": "Test & Build/10_Run server test suite.txt",
+      "retainedPath": "archive-entries/entry-0011-original.log",
+      "bytes": 3808892,
+      "sha256": "d97b497e28fb60893fbc627e93bfc73c18fff8cf20c532225e8939d2b422204d",
+      "crc32": 3855018057
+    },
+    {
+      "archiveName": "Test & Build/11_Set up Docker Buildx.txt",
+      "retainedPath": "archive-entries/entry-0012-original.log",
+      "bytes": 14673,
+      "sha256": "1b8d21f761cf89645752ef48edc3fbff7652ba7f756e63d4f44a93df6d5c8cf3",
+      "crc32": 1499438943
+    },
+    {
+      "archiveName": "Test & Build/12_Build Docker image.txt",
+      "retainedPath": "archive-entries/entry-0013-original.log",
+      "bytes": 129380,
+      "sha256": "c2f0f8b696b79eac88e170f881c4e6855b41877b4445b4ccfe115c49cbdc8bc0",
+      "crc32": 3158507026
+    },
+    {
+      "archiveName": "Test & Build/13_Build Supported Baseline Docker Image (v3.5.30 _ 48d0e52).txt",
+      "retainedPath": "archive-entries/entry-0014-original.log",
+      "bytes": 29196,
+      "sha256": "f12c09b4b9696a208f402ac4c4485e7bb050711761f9591c135eb527e0b3fa27",
+      "crc32": 1425182785
+    },
+    {
+      "archiveName": "Test & Build/14_Run Real Disposable Docker Boundary Rehearsal.txt",
+      "retainedPath": "archive-entries/entry-0015-original.log",
+      "bytes": 3784,
+      "sha256": "d8cda6f0b5c0376926e1efd5b431fe15db7fb2fa53cbb69a379268518e39efb1",
+      "crc32": 445335241
+    },
+    {
+      "archiveName": "Test & Build/15_Run Real Docker Deployment Readiness Acceptance.txt",
+      "retainedPath": "archive-entries/entry-0016-original.log",
+      "bytes": 37539,
+      "sha256": "82dba98a00428bcd6690ed14f8eff44745e1ec1095ff03773bc28632a8fa4c63",
+      "crc32": 2759832419
+    },
+    {
+      "archiveName": "Test & Build/27_Post Build Docker image.txt",
+      "retainedPath": "archive-entries/entry-0017-original.log",
+      "bytes": 595,
+      "sha256": "d44e6b3830d86133de859f93e7c799f0afb19cf29e5fd9ce4658a1d17c8dcac3",
+      "crc32": 3011202432
+    },
+    {
+      "archiveName": "Test & Build/28_Post Set up Docker Buildx.txt",
+      "retainedPath": "archive-entries/entry-0018-original.log",
+      "bytes": 833,
+      "sha256": "b55a9f0be9ff1c8f820b209b977dce5f1f93938dfd23b929b69150cfd09555b8",
+      "crc32": 1339615909
+    },
+    {
+      "archiveName": "Test & Build/29_Post Setup Node.js.txt",
+      "retainedPath": "archive-entries/entry-0019-original.log",
+      "bytes": 306,
+      "sha256": "f5c6dd31a9e690d5c7aaa7135eb24c8d364f4ab0fbea912945c0851bc8cfe81b",
+      "crc32": 1420414961
+    },
+    {
+      "archiveName": "Test & Build/30_Post Checkout repository.txt",
+      "retainedPath": "archive-entries/entry-0020-original.log",
+      "bytes": 1719,
+      "sha256": "1a593ca380a0d78b4cec9a3cf936344a4df058bb01edfefac05d530da3de1ba4",
+      "crc32": 4068602114
+    },
+    {
+      "archiveName": "Test & Build/31_Complete job.txt",
+      "retainedPath": "archive-entries/entry-0021-original.log",
+      "bytes": 431,
+      "sha256": "014e7ce6822568680e7c3c5ecee2b5a304faca6de805e5e755a0795e69400f55",
+      "crc32": 1733609198
+    }
+  ],
+  "verificationProblems": [],
+  "standardWorkflowUnchanged": true,
+  "localStorageFixturesUsedInCI": false,
+  "disposableCiImagesAreNotProductionImages": true,
+  "readyNoticeSent": false,
+  "finalNativeAuditRequestSent": false,
+  "actualFinalAuditPass": false,
+  "ciDispatches": 0,
+  "productionOperations": 0,
+  "originalFiles": {
+    "archive-entries/entry-0000-original.log": {
+      "bytes": 4101685,
+      "sha256": "88dfdcae9adce80675308817c361b2218b5e63ca7616dda68b6a5253b7c009a7"
+    },
+    "archive-entries/entry-0001-original.log": {
+      "bytes": 581,
+      "sha256": "f2f618ec0098089497e932d8d321d6c36e6719d242742649dd7c661722dad24f"
+    },
+    "archive-entries/entry-0002-original.log": {
+      "bytes": 2340,
+      "sha256": "84af2a5ef291e112c41cfb12ce77e61ed08e744bde69b8b600f1919d0c3854b1"
+    },
+    "archive-entries/entry-0003-original.log": {
+      "bytes": 21092,
+      "sha256": "d33f17f73380d2da9f987c44af9d5a99d776b3f460caa244049f336ba8f98dc4"
+    },
+    "archive-entries/entry-0004-original.log": {
+      "bytes": 903,
+      "sha256": "eaae21690bf01f5fe59e3c3f851cdc909ae701d5b5d8c05111a3088fb1ac76c6"
+    },
+    "archive-entries/entry-0005-original.log": {
+      "bytes": 3166,
+      "sha256": "9a6dbf2de3deed46d6b50460375b1c2655372ef22283eca6bb9d80dc204e4650"
+    },
+    "archive-entries/entry-0006-original.log": {
+      "bytes": 2620,
+      "sha256": "4230715024f00d8dbed0190414f3be58c958f8a79dd90d1f893d3644b5070a17"
+    },
+    "archive-entries/entry-0007-original.log": {
+      "bytes": 617,
+      "sha256": "f8c5143855319a64d31024ae7271d163aacc27ec97fe5b51688ad4a0229f4c9d"
+    },
+    "archive-entries/entry-0008-original.log": {
+      "bytes": 12791,
+      "sha256": "dba2d29e328666f256c4c8d909ab8bdde0b31280746aa932a5aab0c34595b98a"
+    },
+    "archive-entries/entry-0009-original.log": {
+      "bytes": 5754,
+      "sha256": "a882cf0f9c82af57c023ea0630ad914e28a8b765450e15ec09467e56ec91ed09"
+    },
+    "archive-entries/entry-0010-original.log": {
+      "bytes": 25111,
+      "sha256": "30cf650c8c2a975f8ab82feeff821e8fecc939eb250e55c08370a3ebf92d2a81"
+    },
+    "archive-entries/entry-0011-original.log": {
+      "bytes": 3808892,
+      "sha256": "d97b497e28fb60893fbc627e93bfc73c18fff8cf20c532225e8939d2b422204d"
+    },
+    "archive-entries/entry-0012-original.log": {
+      "bytes": 14673,
+      "sha256": "1b8d21f761cf89645752ef48edc3fbff7652ba7f756e63d4f44a93df6d5c8cf3"
+    },
+    "archive-entries/entry-0013-original.log": {
+      "bytes": 129380,
+      "sha256": "c2f0f8b696b79eac88e170f881c4e6855b41877b4445b4ccfe115c49cbdc8bc0"
+    },
+    "archive-entries/entry-0014-original.log": {
+      "bytes": 29196,
+      "sha256": "f12c09b4b9696a208f402ac4c4485e7bb050711761f9591c135eb527e0b3fa27"
+    },
+    "archive-entries/entry-0015-original.log": {
+      "bytes": 3784,
+      "sha256": "d8cda6f0b5c0376926e1efd5b431fe15db7fb2fa53cbb69a379268518e39efb1"
+    },
+    "archive-entries/entry-0016-original.log": {
+      "bytes": 37539,
+      "sha256": "82dba98a00428bcd6690ed14f8eff44745e1ec1095ff03773bc28632a8fa4c63"
+    },
+    "archive-entries/entry-0017-original.log": {
+      "bytes": 595,
+      "sha256": "d44e6b3830d86133de859f93e7c799f0afb19cf29e5fd9ce4658a1d17c8dcac3"
+    },
+    "archive-entries/entry-0018-original.log": {
+      "bytes": 833,
+      "sha256": "b55a9f0be9ff1c8f820b209b977dce5f1f93938dfd23b929b69150cfd09555b8"
+    },
+    "archive-entries/entry-0019-original.log": {
+      "bytes": 306,
+      "sha256": "f5c6dd31a9e690d5c7aaa7135eb24c8d364f4ab0fbea912945c0851bc8cfe81b"
+    },
+    "archive-entries/entry-0020-original.log": {
+      "bytes": 1719,
+      "sha256": "1a593ca380a0d78b4cec9a3cf936344a4df058bb01edfefac05d530da3de1ba4"
+    },
+    "archive-entries/entry-0021-original.log": {
+      "bytes": 431,
+      "sha256": "014e7ce6822568680e7c3c5ecee2b5a304faca6de805e5e755a0795e69400f55"
+    },
+    "baseline-docker-build-original.log": {
+      "bytes": 29196,
+      "sha256": "f12c09b4b9696a208f402ac4c4485e7bb050711761f9591c135eb527e0b3fa27"
+    },
+    "candidate-docker-build-original.log": {
+      "bytes": 129380,
+      "sha256": "c2f0f8b696b79eac88e170f881c4e6855b41877b4445b4ccfe115c49cbdc8bc0"
+    },
+    "client-build-original.log": {
+      "bytes": 12791,
+      "sha256": "dba2d29e328666f256c4c8d909ab8bdde0b31280746aa932a5aab0c34595b98a"
+    },
+    "closing-refs-original.json": {
+      "bytes": 31,
+      "sha256": "41d2c505b45e615f2361b1e657a3a9a2ec9be8dc89cee69269b8121226d416db"
+    },
+    "docker-boundary-original.log": {
+      "bytes": 3784,
+      "sha256": "d8cda6f0b5c0376926e1efd5b431fe15db7fb2fa53cbb69a379268518e39efb1"
+    },
+    "docker-readiness-original.log": {
+      "bytes": 37539,
+      "sha256": "82dba98a00428bcd6690ed14f8eff44745e1ec1095ff03773bc28632a8fa4c63"
+    },
+    "inventory-comparison-derived.json": {
+      "bytes": 41852,
+      "sha256": "ca9c82d18d7360cd821e8fcad9da00136366902f1aeb27c2479176a94686b107"
+    },
+    "jobs-original.json": {
+      "bytes": 4343,
+      "sha256": "9f4e4d58c0f398a3b4b3c9be16dcb3df6a6f776aade45c3806903827511b810f"
+    },
+    "logs-original.zip": {
+      "bytes": 1370879,
+      "sha256": "7c6e1521ee7bdc5a363704c5db70cbe4169d6bb7d1edc9a7720d1e12967f2cc0"
+    },
+    "main-ci-original.json": {
+      "bytes": 12111,
+      "sha256": "b76e9a34b6be2aef115860d2280e850d14b16edb41c64ccafd0b474243e4f7e2"
+    },
+    "main-original.json": {
+      "bytes": 336,
+      "sha256": "8ab38fb8db0993cd672bbb2e6bf3b6ca8d124087fb841ecc97bad4fb1d9bfe89"
+    },
+    "pr-comments-original.json": {
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "pr-original.json": {
+      "bytes": 31024,
+      "sha256": "cf17f292bac3a7122524323d72222ba07c6be98b05147365aede8ad336720bbd"
+    },
+    "readiness-proofs-derived.json": {
+      "bytes": 33504,
+      "sha256": "3a89453e04d9a8f993acc7a7a2e0cd9bb9f054982b93dc7918c400c1357d5b77"
+    },
+    "run-original.json": {
+      "bytes": 12555,
+      "sha256": "dcedf94b01774fbd85ac36a4851848c5d05d10231883b8a87e9d66ac42d76c99"
+    },
+    "scope-original.json": {
+      "bytes": 6545,
+      "sha256": "16e9b64f1e0729e6c8d66a18e5099b2ac88d00ee1199bea528df8c28563a6b34"
+    },
+    "server-tests-original.log": {
+      "bytes": 3808892,
+      "sha256": "d97b497e28fb60893fbc627e93bfc73c18fff8cf20c532225e8939d2b422204d"
+    },
+    "workflow-original.yml": {
+      "bytes": 2785,
+      "sha256": "602236753ac1d7096c257927f6192b93800f8a8da96af1cc0a1580251950fcf5"
+    }
+  }
+}

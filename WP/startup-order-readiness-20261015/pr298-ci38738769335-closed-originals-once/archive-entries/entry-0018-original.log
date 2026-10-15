@@ -1,0 +1,12 @@
+﻿2026-10-15T13:27:36.2345139Z Post job cleanup.
+2026-10-15T13:27:36.4035580Z ##[group]Removing builder
+2026-10-15T13:27:36.4039700Z (node:31915) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-15T13:27:36.4040188Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-15T13:27:36.5010134Z [command]/usr/bin/docker buildx rm builder-eb2d356f-af89-477b-bfc9-5294198cf152
+2026-10-15T13:27:47.4777486Z builder-eb2d356f-af89-477b-bfc9-5294198cf152 removed
+2026-10-15T13:27:47.4813104Z ##[endgroup]
+2026-10-15T13:27:47.4813582Z ##[group]Cleaning up certificates
+2026-10-15T13:27:47.4817057Z ##[endgroup]
+2026-10-15T13:27:47.4817577Z ##[group]Post cache
+2026-10-15T13:27:47.4819218Z State not set
+2026-10-15T13:27:47.4819550Z ##[endgroup]

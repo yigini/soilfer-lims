@@ -1,0 +1,97 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-and-build:
+    name: Test & Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Install server dependencies
+        run: npm install
+        working-directory: server
+
+      - name: Install client dependencies
+        run: npm install
+        working-directory: client
+
+      - name: Verify theme catalog and tokens drift
+        run: npm run check:theme-catalog
+        working-directory: server
+
+      - name: Build client production bundle
+        run: npm run build
+        working-directory: client
+
+      - name: Setup test database and generate Prisma client
+        run: |
+          npx prisma generate
+          npx prisma db push --accept-data-loss
+          node seeds/profile.js
+          node seeds/units.js
+          node seeds/references.js
+          node seeds/catalogue.js --confirm
+          node seed_languages.js
+          node scripts/seed_help_content.cjs
+          node scripts/publish_help_release.cjs
+        working-directory: server
+        env:
+          NODE_ENV: test
+          JWT_SECRET: ci-test-secret-key-12345
+          DATABASE_PATH: ${{ github.workspace }}/server/prisma/dev.db
+
+      - name: Install Chromium for keyboard-only recording contract
+        run: npx playwright install --with-deps chromium
+        working-directory: server
+
+      - name: Run server test suite
+        run: npm test
+        working-directory: server
+        env:
+          NODE_ENV: test
+          JWT_SECRET: ci-test-secret-key-12345
+          NODE_OPTIONS: --max-old-space-size=8192
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          load: true
+          push: false
+          tags: soilfer-lims:ci
+
+      - name: Build Supported Baseline Docker Image (v3.5.30 / 48d0e52)
+        run: |
+          mkdir -p /tmp/baseline_v3_5_30
+          git archive 48d0e526ded03232ac8516dd867f4b14923bdb58 | tar -x -C /tmp/baseline_v3_5_30
+          docker build -t soilfer-lims:baseline-v3.5.30 /tmp/baseline_v3_5_30
+
+      - name: Run Real Disposable Docker Boundary Rehearsal
+        run: node server/scripts/rehearsal_docker_boundary.cjs
+        env:
+          IMAGE_TAG: soilfer-lims:ci
+          CI: true
+
+      - name: Run Real Docker Deployment Readiness Acceptance
+        run: node server/scripts/rehearsal_deployment_readiness.cjs
+        env:
+          IMAGE_TAG: soilfer-lims:ci
+          CI: true

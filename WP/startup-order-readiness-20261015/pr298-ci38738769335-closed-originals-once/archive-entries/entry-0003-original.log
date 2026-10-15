@@ -1,0 +1,196 @@
+﻿2026-10-15T12:58:14.0907914Z ##[group]Run actions/checkout@v4
+2026-10-15T12:58:14.0908710Z with:
+2026-10-15T12:58:14.0909190Z   fetch-depth: 0
+2026-10-15T12:58:14.0909730Z   repository: yigini/soilfer-lims
+2026-10-15T12:58:14.0914816Z   token: ***
+2026-10-15T12:58:14.0970968Z   ssh-strict: true
+2026-10-15T12:58:14.0971539Z   ssh-user: git
+2026-10-15T12:58:14.0972060Z   persist-credentials: true
+2026-10-15T12:58:14.0972638Z   clean: true
+2026-10-15T12:58:14.0973151Z   sparse-checkout-cone-mode: true
+2026-10-15T12:58:14.0973851Z   fetch-tags: false
+2026-10-15T12:58:14.0974366Z   show-progress: true
+2026-10-15T12:58:14.0974883Z   lfs: false
+2026-10-15T12:58:14.0975373Z   submodules: false
+2026-10-15T12:58:14.0975882Z   set-safe-directory: true
+2026-10-15T12:58:14.0976500Z   allow-unsafe-pr-checkout: false
+2026-10-15T12:58:14.0977407Z ##[endgroup]
+2026-10-15T12:58:14.1717303Z Syncing repository: yigini/soilfer-lims
+2026-10-15T12:58:14.1719339Z ##[group]Getting Git version info
+2026-10-15T12:58:14.1720237Z Working directory is '/home/runner/work/soilfer-lims/soilfer-lims'
+2026-10-15T12:58:14.1721612Z [command]/usr/bin/git version
+2026-10-15T12:58:14.1810048Z git version 2.55.0
+2026-10-15T12:58:14.1826791Z ##[endgroup]
+2026-10-15T12:58:14.1838918Z Temporarily overriding HOME='/home/runner/work/_temp/bcf6de05-1031-4016-9daa-32820f84108b' before making global git config changes
+2026-10-15T12:58:14.1842002Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-15T12:58:14.1844345Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/soilfer-lims/soilfer-lims
+2026-10-15T12:58:14.1894666Z Deleting the contents of '/home/runner/work/soilfer-lims/soilfer-lims'
+2026-10-15T12:58:14.1897818Z ##[group]Initializing the repository
+2026-10-15T12:58:14.1901805Z [command]/usr/bin/git init /home/runner/work/soilfer-lims/soilfer-lims
+2026-10-15T12:58:14.2009851Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-15T12:58:14.2012498Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-15T12:58:14.2014887Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-15T12:58:14.2016868Z hint: call:
+2026-10-15T12:58:14.2017724Z hint:
+2026-10-15T12:58:14.2018779Z hint: 	git config --global init.defaultBranch <name>
+2026-10-15T12:58:14.2020029Z hint:
+2026-10-15T12:58:14.2021203Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-15T12:58:14.2023083Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-15T12:58:14.2024722Z hint:
+2026-10-15T12:58:14.2025588Z hint: 	git branch -m <name>
+2026-10-15T12:58:14.2026794Z hint:
+2026-10-15T12:58:14.2028139Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-15T12:58:14.2030384Z Initialized empty Git repository in /home/runner/work/soilfer-lims/soilfer-lims/.git/
+2026-10-15T12:58:14.2034228Z [command]/usr/bin/git remote add origin https://github.com/yigini/soilfer-lims
+2026-10-15T12:58:14.2083420Z ##[endgroup]
+2026-10-15T12:58:14.2085208Z ##[group]Disabling automatic garbage collection
+2026-10-15T12:58:14.2086566Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-15T12:58:14.2124140Z ##[endgroup]
+2026-10-15T12:58:14.2125571Z ##[group]Setting up auth
+2026-10-15T12:58:14.2130349Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-15T12:58:14.2172004Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-15T12:58:14.2488271Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-15T12:58:14.2520593Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-15T12:58:14.2756137Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-15T12:58:14.2795137Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-15T12:58:14.3009393Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-15T12:58:14.3049810Z ##[endgroup]
+2026-10-15T12:58:14.3051330Z ##[group]Fetching the repository
+2026-10-15T12:58:14.3060426Z [command]/usr/bin/git -c protocol.version=2 fetch --prune --no-recurse-submodules origin +refs/heads/*:refs/remotes/origin/* +refs/tags/*:refs/tags/* +1db72ddf5fda8919cfd5262a401f4a92ee10d280:refs/remotes/pull/298/merge
+2026-10-15T12:58:24.1355474Z From https://github.com/yigini/soilfer-lims
+2026-10-15T12:58:24.1356158Z  * [new branch]        audit/0.0-lint-baseline                  -> origin/audit/0.0-lint-baseline
+2026-10-15T12:58:24.1356538Z  * [new branch]        audit/0.1-qc-form-empty                  -> origin/audit/0.1-qc-form-empty
+2026-10-15T12:58:24.1356957Z  * [new branch]        audit/0.10-current-result-views          -> origin/audit/0.10-current-result-views
+2026-10-15T12:58:24.1357339Z  * [new branch]        audit/0.10-fixture-identifiers           -> origin/audit/0.10-fixture-identifiers
+2026-10-15T12:58:24.1357729Z  * [new branch]        audit/0.11-workbench-blockers            -> origin/audit/0.11-workbench-blockers
+2026-10-15T12:58:24.1358142Z  * [new branch]        audit/0.12-batch-intake-observations     -> origin/audit/0.12-batch-intake-observations
+2026-10-15T12:58:24.1358529Z  * [new branch]        audit/0.13-sample-lookup                 -> origin/audit/0.13-sample-lookup
+2026-10-15T12:58:24.1358902Z  * [new branch]        audit/0.14-shared-number-parsing         -> origin/audit/0.14-shared-number-parsing
+2026-10-15T12:58:24.1359486Z  * [new branch]        audit/0.15-duplicate-loq                 -> origin/audit/0.15-duplicate-loq
+2026-10-15T12:58:24.1359830Z  * [new branch]        audit/0.2-qc-failure-lock                -> origin/audit/0.2-qc-failure-lock
+2026-10-15T12:58:24.1360223Z  * [new branch]        audit/0.3-publication-reviewed-qc        -> origin/audit/0.3-publication-reviewed-qc
+2026-10-15T12:58:24.1360622Z  * [new branch]        audit/0.4-disable-legacy-result          -> origin/audit/0.4-disable-legacy-result
+2026-10-15T12:58:24.1361019Z  * [new branch]        audit/0.5-legacy-review-delegate         -> origin/audit/0.5-legacy-review-delegate
+2026-10-15T12:58:24.1361468Z  * [new branch]        audit/0.6-review-atomicity               -> origin/audit/0.6-review-atomicity
+2026-10-15T12:58:24.1361884Z  * [new branch]        audit/0.7-return-resubmission            -> origin/audit/0.7-return-resubmission
+2026-10-15T12:58:24.1362266Z  * [new branch]        audit/0.8-report-truthfulness            -> origin/audit/0.8-report-truthfulness
+2026-10-15T12:58:24.1362668Z  * [new branch]        audit/0.9-public-report-superseded       -> origin/audit/0.9-public-report-superseded
+2026-10-15T12:58:24.1363070Z  * [new branch]        audit/1.0-lab-policy-settings            -> origin/audit/1.0-lab-policy-settings
+2026-10-15T12:58:24.1363715Z  * [new branch]        audit/1.1-intake-service                 -> origin/audit/1.1-intake-service
+2026-10-15T12:58:24.1364295Z  * [new branch]        audit/1.2-state-machine                  -> origin/audit/1.2-state-machine
+2026-10-15T12:58:24.1364864Z  * [new branch]        audit/1.3-atomic-sample-code             -> origin/audit/1.3-atomic-sample-code
+2026-10-15T12:58:24.1365366Z  * [new branch]        audit/1.4-uuid-transactional-writes      -> origin/audit/1.4-uuid-transactional-writes
+2026-10-15T12:58:24.1366006Z  * [new branch]        audit/1.5-raw-input-release              -> origin/audit/1.5-raw-input-release
+2026-10-15T12:58:24.1366611Z  * [new branch]        audit/1.5-result-write                   -> origin/audit/1.5-result-write
+2026-10-15T12:58:24.1367146Z  * [new branch]        audit/1.6-sample-holds                   -> origin/audit/1.6-sample-holds
+2026-10-15T12:58:24.1367911Z  * [new branch]        audit/193-stream-fingerprints            -> origin/audit/193-stream-fingerprints
+2026-10-15T12:58:24.1368515Z  * [new branch]        audit/2.1-reference-materials            -> origin/audit/2.1-reference-materials
+2026-10-15T12:58:24.1369055Z  * [new branch]        audit/2.2-qc-rules                       -> origin/audit/2.2-qc-rules
+2026-10-15T12:58:24.1369681Z  * [new branch]        audit/2.3-qc-run-members                 -> origin/audit/2.3-qc-run-members
+2026-10-15T12:58:24.1370259Z  * [new branch]        audit/2.4-qc-gate                        -> origin/audit/2.4-qc-gate
+2026-10-15T12:58:24.1370710Z  * [new branch]        audit/2.5-qc-worksheet                   -> origin/audit/2.5-qc-worksheet
+2026-10-15T12:58:24.1371031Z  * [new branch]        audit/2.6-qc-trail                       -> origin/audit/2.6-qc-trail
+2026-10-15T12:58:24.1371372Z  * [new branch]        audit/252-sample-membership              -> origin/audit/252-sample-membership
+2026-10-15T12:58:24.1371762Z  * [new branch]        audit/253-reviewed-qc-correction         -> origin/audit/253-reviewed-qc-correction
+2026-10-15T12:58:24.1372127Z  * [new branch]        audit/3.1-work-attempts                  -> origin/audit/3.1-work-attempts
+2026-10-15T12:58:24.1372475Z  * [new branch]        audit/3.2-repeat-correction              -> origin/audit/3.2-repeat-correction
+2026-10-15T12:58:24.1372821Z  * [new branch]        audit/3.3-reported-value                 -> origin/audit/3.3-reported-value
+2026-10-15T12:58:24.1373160Z  * [new branch]        audit/3.4-nonconformity                  -> origin/audit/3.4-nonconformity
+2026-10-15T12:58:24.1373660Z  * [new branch]        audit/4.1-run-first                      -> origin/audit/4.1-run-first
+2026-10-15T12:58:24.1374219Z  * [new branch]        audit/4.2-barcode-scan                   -> origin/audit/4.2-barcode-scan
+2026-10-15T12:58:24.1374547Z  * [new branch]        audit/4.3-keyboard-grid                  -> origin/audit/4.3-keyboard-grid
+2026-10-15T12:58:24.1374903Z  * [new branch]        audit/4.4-value-validation               -> origin/audit/4.4-value-validation
+2026-10-15T12:58:24.1375256Z  * [new branch]        audit/4.5-replicate-grid                 -> origin/audit/4.5-replicate-grid
+2026-10-15T12:58:24.1375627Z  * [new branch]        audit/4.6-calculation-templates          -> origin/audit/4.6-calculation-templates
+2026-10-15T12:58:24.1376024Z  * [new branch]        audit/4.7-instrument-file-import         -> origin/audit/4.7-instrument-file-import
+2026-10-15T12:58:24.1376419Z  * [new branch]        audit/4.8-cross-parameter-checks         -> origin/audit/4.8-cross-parameter-checks
+2026-10-15T12:58:24.1376811Z  * [new branch]        audit/6.1-amendment-authoriser           -> origin/audit/6.1-amendment-authoriser
+2026-10-15T12:58:24.1377186Z  * [new branch]        audit/6.2-report-revisions               -> origin/audit/6.2-report-revisions
+2026-10-15T12:58:24.1377545Z  * [new branch]        audit/6.3-report-content                 -> origin/audit/6.3-report-content
+2026-10-15T12:58:24.1377905Z  * [new branch]        audit/ci-server-heap                     -> origin/audit/ci-server-heap
+2026-10-15T12:58:24.1378265Z  * [new branch]        audit/release-eb6de2e8                   -> origin/audit/release-eb6de2e8
+2026-10-15T12:58:24.1378638Z  * [new branch]        audit/wip-pr144-release-log              -> origin/audit/wip-pr144-release-log
+2026-10-15T12:58:24.1379035Z  * [new branch]        audit/wip-pre-october-handoff            -> origin/audit/wip-pre-october-handoff
+2026-10-15T12:58:24.1379423Z  * [new branch]        claude/202-bench-terminals               -> origin/claude/202-bench-terminals
+2026-10-15T12:58:24.1379818Z  * [new branch]        claude/data-results-unavailable          -> origin/claude/data-results-unavailable
+2026-10-15T12:58:24.1380209Z  * [new branch]        claude/kobo-sync-bounded                 -> origin/claude/kobo-sync-bounded
+2026-10-15T12:58:24.1380591Z  * [new branch]        claude/project-thread-7qdiri             -> origin/claude/project-thread-7qdiri
+2026-10-15T12:58:24.1381166Z  * [new branch]        claude/project-thread-7qdiri-191-acceptance-link -> origin/claude/project-thread-7qdiri-191-acceptance-link
+2026-10-15T12:58:24.1381625Z  * [new branch]        codex/api-key-dialog-fit                 -> origin/codex/api-key-dialog-fit
+2026-10-15T12:58:24.1382029Z  * [new branch]        codex/audit-qc-integration-preview       -> origin/codex/audit-qc-integration-preview
+2026-10-15T12:58:24.1382612Z  * [new branch]        codex/catalogue-foundation-and-lab-operations-v3 -> origin/codex/catalogue-foundation-and-lab-operations-v3
+2026-10-15T12:58:24.1383532Z  * [new branch]        codex/full-platform-localization-v1      -> origin/codex/full-platform-localization-v1
+2026-10-15T12:58:24.1384105Z  * [new branch]        codex/issue-140-profile-identity         -> origin/codex/issue-140-profile-identity
+2026-10-15T12:58:24.1384647Z  * [new branch]        codex/issue-156-intake-integrity         -> origin/codex/issue-156-intake-integrity
+2026-10-15T12:58:24.1385134Z  * [new branch]        codex/issue-206-containers               -> origin/codex/issue-206-containers
+2026-10-15T12:58:24.1385640Z  * [new branch]        codex/issue-209-order-revisions          -> origin/codex/issue-209-order-revisions
+2026-10-15T12:58:24.1386043Z  * [new branch]        codex/issue-214-control-charts           -> origin/codex/issue-214-control-charts
+2026-10-15T12:58:24.1386438Z  * [new branch]        codex/lab-governance-v1                  -> origin/codex/lab-governance-v1
+2026-10-15T12:58:24.1386848Z  * [new branch]        codex/mobile-offline-redesign-v1         -> origin/codex/mobile-offline-redesign-v1
+2026-10-15T12:58:24.1387308Z  * [new branch]        codex/native-workbench-import-forward-fix -> origin/codex/native-workbench-import-forward-fix
+2026-10-15T12:58:24.1387874Z  * [new branch]        codex/profile-intake-delivery            -> origin/codex/profile-intake-delivery
+2026-10-15T12:58:24.1388354Z  * [new branch]        codex/soilfer-signature-visual-refresh-v1 -> origin/codex/soilfer-signature-visual-refresh-v1
+2026-10-15T12:58:24.1388829Z  * [new branch]        codex/startup-readiness-shared-context   -> origin/codex/startup-readiness-shared-context
+2026-10-15T12:58:24.1389270Z  * [new branch]        codex/u01-k01-governance-alignment       -> origin/codex/u01-k01-governance-alignment
+2026-10-15T12:58:24.1389748Z  * [new branch]        dependabot/npm_and_yarn/client/rollup-4.63.1 -> origin/dependabot/npm_and_yarn/client/rollup-4.63.1
+2026-10-15T12:58:24.1390216Z  * [new branch]        dependabot/npm_and_yarn/client/vite-8.3.2 -> origin/dependabot/npm_and_yarn/client/vite-8.3.2
+2026-10-15T12:58:24.1390657Z  * [new branch]        docs/issue155-final-records              -> origin/docs/issue155-final-records
+2026-10-15T12:58:24.1391166Z  * [new branch]        feat/deployment-readiness                -> origin/feat/deployment-readiness
+2026-10-15T12:58:24.1391632Z  * [new branch]        feat/issue-140-a0-exchange-eligibility-503 -> origin/feat/issue-140-a0-exchange-eligibility-503
+2026-10-15T12:58:24.1392075Z  * [new branch]        feat/issue-140-nsis-exchange             -> origin/feat/issue-140-nsis-exchange
+2026-10-15T12:58:24.1392487Z  * [new branch]        feat/sitewide-graphite-appearance        -> origin/feat/sitewide-graphite-appearance
+2026-10-15T12:58:24.1392896Z  * [new branch]        feat/sitewide-theme-library-v1           -> origin/feat/sitewide-theme-library-v1
+2026-10-15T12:58:24.1393432Z  * [new branch]        feat/workbench-single-entry-v1           -> origin/feat/workbench-single-entry-v1
+2026-10-15T12:58:24.1393839Z  * [new branch]        fix/ghana-expected-arrivals-146          -> origin/fix/ghana-expected-arrivals-146
+2026-10-15T12:58:24.1394252Z  * [new branch]        fix/issue-113-routine-compliance-ui      -> origin/fix/issue-113-routine-compliance-ui
+2026-10-15T12:58:24.1394691Z  * [new branch]        fix/issue-114-map-fallback-batch-state   -> origin/fix/issue-114-map-fallback-batch-state
+2026-10-15T12:58:24.1395112Z  * [new branch]        fix/issue-119-sample-assign-loop         -> origin/fix/issue-119-sample-assign-loop
+2026-10-15T12:58:24.1395632Z  * [new branch]        fix/issue-120-kobo-notification-view     -> origin/fix/issue-120-kobo-notification-view
+2026-10-15T12:58:24.1396078Z  * [new branch]        fix/issue-120-manager-dashboard-progress -> origin/fix/issue-120-manager-dashboard-progress
+2026-10-15T12:58:24.1396505Z  * [new branch]        fix/issue-120-operational-views          -> origin/fix/issue-120-operational-views
+2026-10-15T12:58:24.1396917Z  * [new branch]        fix/issue-121-batch-label-projection     -> origin/fix/issue-121-batch-label-projection
+2026-10-15T12:58:24.1397324Z  * [new branch]        fix/issue-121-label-print-dates          -> origin/fix/issue-121-label-print-dates
+2026-10-15T12:58:24.1397715Z  * [new branch]        fix/issue-122-lab-methods-scope          -> origin/fix/issue-122-lab-methods-scope
+2026-10-15T12:58:24.1398103Z  * [new branch]        fix/issue-124-reports-lifecycle          -> origin/fix/issue-124-reports-lifecycle
+2026-10-15T12:58:24.1398495Z  * [new branch]        fix/issue-125-inventory-alerts           -> origin/fix/issue-125-inventory-alerts
+2026-10-15T12:58:24.1398892Z  * [new branch]        fix/issue-126-message-attribution        -> origin/fix/issue-126-message-attribution
+2026-10-15T12:58:24.1399279Z  * [new branch]        fix/issue-150-bash3-setup                -> origin/fix/issue-150-bash3-setup
+2026-10-15T12:58:24.1399658Z  * [new branch]        fix/issue-152-dotenv-root-path           -> origin/fix/issue-152-dotenv-root-path
+2026-10-15T12:58:24.1400030Z  * [new branch]        fix/issues-115-116-nav-i18n              -> origin/fix/issues-115-116-nav-i18n
+2026-10-15T12:58:24.1400461Z  * [new branch]        fix/issues-123-128-workbench-search-deeplink -> origin/fix/issues-123-128-workbench-search-deeplink
+2026-10-15T12:58:24.1401044Z  * [new branch]        fix/reception-location-draft-dashboard   -> origin/fix/reception-location-draft-dashboard
+2026-10-15T12:58:24.1401401Z  * [new branch]        main                                     -> origin/main
+2026-10-15T12:58:24.1401771Z  * [new branch]        review/wp-contributor-issues-candidate   -> origin/review/wp-contributor-issues-candidate
+2026-10-15T12:58:24.1402132Z  * [new tag]           v1.6.0                                   -> v1.6.0
+2026-10-15T12:58:24.1402376Z  * [new tag]           v1.6.1                                   -> v1.6.1
+2026-10-15T12:58:24.1402613Z  * [new tag]           v1.7.0                                   -> v1.7.0
+2026-10-15T12:58:24.1402922Z  * [new tag]           v1.8.0                                   -> v1.8.0
+2026-10-15T12:58:24.1403450Z  * [new ref]           1db72ddf5fda8919cfd5262a401f4a92ee10d280 -> pull/298/merge
+2026-10-15T12:58:24.1404902Z ##[endgroup]
+2026-10-15T12:58:24.1405261Z ##[group]Determining the checkout info
+2026-10-15T12:58:24.1405657Z ##[endgroup]
+2026-10-15T12:58:24.1405946Z [command]/usr/bin/git sparse-checkout disable
+2026-10-15T12:58:24.1435665Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-15T12:58:24.1466042Z ##[group]Checking out the ref
+2026-10-15T12:58:24.1466366Z [command]/usr/bin/git checkout --progress --force refs/remotes/pull/298/merge
+2026-10-15T12:58:24.4683421Z Note: switching to 'refs/remotes/pull/298/merge'.
+2026-10-15T12:58:24.4683714Z 
+2026-10-15T12:58:24.4684033Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-10-15T12:58:24.4684319Z changes and commit them, and you can discard any commits you make in this
+2026-10-15T12:58:24.4684608Z state without impacting any branches by switching back to a branch.
+2026-10-15T12:58:24.4684770Z 
+2026-10-15T12:58:24.4684881Z If you want to create a new branch to retain commits you create, you may
+2026-10-15T12:58:24.4685176Z do so (now or later) by using -c with the switch command. Example:
+2026-10-15T12:58:24.4685326Z 
+2026-10-15T12:58:24.4685399Z   git switch -c <new-branch-name>
+2026-10-15T12:58:24.4685507Z 
+2026-10-15T12:58:24.4685597Z Or undo this operation with:
+2026-10-15T12:58:24.4685914Z 
+2026-10-15T12:58:24.4685968Z   git switch -
+2026-10-15T12:58:24.4686044Z 
+2026-10-15T12:58:24.4686181Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-10-15T12:58:24.4686355Z 
+2026-10-15T12:58:24.4686562Z HEAD is now at 1db72ddf Merge eba02837eaa2ab797cad0572fecada686f660346 into cde8c8896f5f9d5f1ab07b0ae16b1a765e0a6367
+2026-10-15T12:58:24.4728642Z ##[endgroup]
+2026-10-15T12:58:24.4772932Z [command]/usr/bin/git log -1 --format=%H
+2026-10-15T12:58:24.4798370Z 1db72ddf5fda8919cfd5262a401f4a92ee10d280
