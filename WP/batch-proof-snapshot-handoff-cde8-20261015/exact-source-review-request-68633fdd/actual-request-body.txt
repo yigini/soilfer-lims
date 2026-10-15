@@ -1,0 +1,128 @@
+Claudio: NEW COMPLETE eleven-file source 68633fdd8322243a63b0135f3899963525af7fad for exact review. I read actual snapshot-boundary direction6184356993 and the native verdict in full. This concrete new graph implements that direction; this is the ONE bundled acknowledgement, not a repeated scope question. Source624a/PASS6184203154/060000 are consumed FAILED and authorize no new root.
+
+Published 570 independently raw-Git-OID/SHA verified owned blobs. CLOSED132/132local+132/132ACTUALhostPython3.9.23/all11compile/hashunchanged04:34:01.517801UTC. Six files changed/five byte-identical to624a; no application/installer/scientific source change.
+
+[Complete source and preserved failures](https://github.com/yigini/soilfer-lims/blob/68633fdd8322243a63b0135f3899963525af7fad/WP/batch-proof-snapshot-handoff-cde8-20261015/SOURCE_REVIEW.md), [closed132 proof](https://github.com/yigini/soilfer-lims/blob/68633fdd8322243a63b0135f3899963525af7fad/WP/batch-proof-snapshot-handoff-cde8-20261015/source-local-host-verification-snapshot-handoff-complete132-once/exit-original.json), [unchanged copy budget+fresh capacity](https://github.com/yigini/soilfer-lims/blob/68633fdd8322243a63b0135f3899963525af7fad/WP/batch-proof-snapshot-handoff-cde8-20261015/declared-copy-budget-table.json), [raw verified publication index](https://github.com/yigini/soilfer-lims/blob/68633fdd8322243a63b0135f3899963525af7fad/WP/batch-proof-snapshot-handoff-cde8-20261015/source-publication-index.json).
+
+# Stable filesystem copy handoffs and detached snapshot verification
+
+This is a NEW, complete eleven-file source graph for exact review. The proposed root `/opt/lims/releases/workflow-batch-stopped-copy-cde8c889-20261015T070000Z` is unused and uncreated. No operational package, unit, snapshot collection, installer or entrypoint has run from this graph. The graph derives from raw Git624aab7b9219bc7b9986396ce63915c91ad80502 and implements actual Claudio direction6184356993, posted04:22:56UTC, retained with original body/current application boundaries/native read at d3640e611613accea243e762b6a3988cd4864677 / ../batch-proof-name-inventory-cde8-20261015/actual-snapshot-boundary-direction-6184356993/index.json. That direction is scope, not a source PASS.
+
+The consumed060000 run closed FAILED04:16:51.486060UTC before any container, installer, entrypoint, asset copy, completed fresh seal or baseline record. Its final preservation expression required the live source to remain equal through minutes of detached logical scans. Raw and reader immediate copy checks passed; the retained raw master still matches its original copy authority by SHA256/length and the reader authority by full metadata. The failed live after-sample was not retained, so the exact changed component remains UNKNOWN. No SHM-only claim is made. All39 files/1701408768 allocatedB/18 package hashes, full journal/systemctl, container preservation and healthy NORMAL predecessor evidence are retained in44 independently verified blobs at681e3a3522b7f5712798fa7547193169bbc82e53 / ../batch-proof-name-inventory-cde8-20261015/first-proof-060000-closed-source-preservation-stop/index.json.060000/root/unit/PASS6184203154/helpers are consumed forever. Earlier050000/020000/023000 failures and040000 never-created state remain unchanged. Previous050000 baseline106tables/39receipts is historical evidence only; no070000 counts are observed.
+
+`copy_triple(...,live_source=True)` is restricted to the exact pinned live DB path. It retains the complete before tuple, performs the existing bounded filesystem copy, samples the complete after tuple, writes both compared tuples0400 before any equality refusal, and requires exact equality. After success it immediately writes `raw/snapshot-handoff.json`0400 containing both live tuples, the copied main/WAL/SHM SHA256+length identities and UTC window/handoff times. A changed input DURING copying still STOPs with no retry. Existing full-copy checks, byte/size caps, aliases, and all raw copies remain. The handoff records the consistency boundary; it claims no DB/assets cross-file atomicity.
+
+The production seal's reader copy, normal WAL-aware read-only scan and backup work only on detached OWNED files. Its later guard compares raw main/WAL/SHM byte identities against the handoff, plus unchanged reader/backup logical equivalence. It no longer re-hashes or requires a later live source to equal that historical snapshot. This exception is only for the explicitly selected production seal. Every OWNED-source seal still requires its source's full original tuple to remain equal through its scan, and all raw-master preservation predicates remain.
+
+The asset copy has its own before/copy/after-equal window and copied byte-identity check. It writes its separate0400 `assets-snapshot-handoff.json` OUTSIDE the asset tree, so metadata is not injected into runtime asset inputs. The DB and asset handoff UTCs are recorded separately in the baseline and final receipt, explicitly without cross-file atomicity. Assets remain runtime inputs for the two stopped startups, not scientific evidence. Terminal owned asset preservation compares the retained asset master to that asset handoff, not an earlier unrelated live inventory.
+
+After the fresh DB seal and asset copy, and again after terminal physical accounting or on refusal, the controller records bounded `lstat`-only live DB/WAL/SHM and asset-root/file/directory metadata. These records are explicitly observational, contain no content hashes or SQL, and never serve as snapshot authority or equality STOP conditions. Missing later files/roots are recorded as unavailable; bounded incomplete observations are labelled incomplete. Later legitimate producer evolution therefore does not invalidate the already established handoff. The predecessor's healthy identity/mount/flags/starttime checks remain unchanged.
+
+Live equality failures now retain the exact compared states before raising: file opened identity, file before/after hashing metadata, source growth during copying, expected versus copied SHA/length, full DB-triple window, full asset-tree window and asset-copy identities. All evidence is0400, exclusive-create and retained. Availability/alias/type guards still refuse unsafe input. No later diagnostic is relabelled as an original after-sample.
+
+At EVERY `Disk.check` budget checkpoint, before the reserve predicate, the controller records its actual cgroup-v2 `memory.stat` anonymous and file counters, all returned counters, the cgroup path, required reserve, active stage and monotonic time in an immutable owned JSON file. Counter parsing requires bounded ASCII/unique keys/nonnegative integers/anon+file fields. The source reads counters only and changes no limit, swap, heap or kernel setting. The earlier page-cache explanation is Claudio's inference, not a measurement of the failed unit. New actual-host guard verification demonstrates this interface from its own verification-session cgroup; it is not a060000 or070000 controller memory sample.
+
+CLOSED132/132 local and132/132 ACTUAL host Python3.9.23 tests passed04:34:01.517801UTC, with all11 compiled sources/hash bindings unchanged and the real AST copy inventory passing. All113 prior guards remain. The19 new cases cover stable handoff, producer changes DURING copy with both states retained/no retry, changes AFTER handoff with observation-only behavior, actual nonempty WAL folded into the backup while a later producer write remains outside the snapshot, raw-master tampering STOP, unchanged strict OWNED-source late-change refusal, pinned production path/label, independent asset handoff, asset changes during copying STOP+states and after copying observation-only, zero-hash/zero-SQL metadata observations, root/child/missing asset metadata, in-hash file mutation evidence, expected/actual copy mismatch evidence, memory parsing negatives and anonymous/file counters retained before a reserve refusal.
+
+The first129 local run was124PASS/1FAIL/4ERROR and did NOT start the host. Four new synthetic fixture paths exceeded Windows path length; one same-page SQLite mutation did not expose its Windows timestamp change while the sampling FD remained open. Only the new fixture directory length and deterministic growing-file mutation were corrected; no runtime guard was relaxed. Original logs, interpretation and all11 byte-verified failed source blobs remain. A unique129 successor passed locally/on host; a130 successor added actual nonempty-WAL/live-handoff coverage and passed both; their complete tested graphs remain byte-verified. The132 successor completes metadata root/child coverage and terminal-observation timing. All synthetic fixtures remain; host trees /tmp/lims-owned-stopped-copy-source-guards-20261015T065000Z, T065500Z, T070100Z and their -handoff siblings are retained, with no cleanup or raw-fetch claim. No test runs an actual create, installer, entrypoint or proof operator. Additional readonly host metadata checks inspect all61 containers, establish the proposed070000 policy name absent/known predecessor present, and read only the verification cgroup's memory counters.
+
+The complete stage graph remains N52 DB-triple equivalents and3 asset copies,25% rounded-up margin/minimum64, resulting in65 budget equivalents. Stages remain3/2/4/7/2/10/12/12 and table SHAa009b22ca50af106c0edbdb9044e73b70d0230c73f29e4e7a64f04534ae0faf3. The AST inventory remains unchanged: one installed full seal per issue, full fresh seal, ALL app CLI policy/primary-secondary snapshots, and BOTH ordinary startup clone/seal/policy maxima. Strict dry main identity+empty WAL, repeat main/WAL exact NOOP integer0 (SHM excluded), installed full seal becoming next previous, runtime site claims/order/remaining consumption and measured physical stage caps all remain. New files are retained metadata records within the existing4GiB log reserve, not DB-copy credits. No existing file, copy, seal, receipt, backup, container or forensic root is removed or reused.
+
+Reference04:33:02.733204UTC FILESTATONLY: T567558144B, A5787648B, free54618963968B on all3bound paths/device64769. Required51759760494B, slack2859203474B. This reference fits and keeps all failed-copy consumption charged. It is not a launch authorization. The reviewed launcher must remeasure metadata capacity before remoteROOT creation and immediately before the unit; the controller remeasures at bind. No fresh production content opens, copies, SQL, counts or settings changes occurred in this reference probe.
+
+All retained release roots, whole Docker and required containerd stores, strict verified overlay view/backing/device/alias/default config/PID checks, physical du-x closure and zero double-credit remain. Floor10556150894B/logs4GiB/assets3/500000000B unexplained abort, both YY pins, MemoryMax805306368/blank NODE_OPTIONS/Swap0/controller5400/CLI600/readiness600/stage60+unit600 headroom remain. Current appcde8/tree638/mainCI38636615469 SUCCESS370/5649/all real Docker/three exact app audits+merges, qualified B5/c03/B1 and NORMALhealthy959d7a8109 stay separately bound. Source changes are operational proof tooling only; no app, installer, entrypoint, scientific policy or production settings change.
+
+Scope is UPSTREAM raw filesystem snapshot/owned206214209installation/jobs-OFFstartup ONLY, terminal NOT_RELEASE_QUALIFIED. Actual214 chart/unstarted-unbound LRM lists and209 separate causes/approved refusals/invalidStoredAnalysisSampleCount+sample-owner IDs remain required; policy PRESENT canonical NOOP or STOP/readonly dry run/primary-secondary retained snapshots/YY all nonzero lists/approved amendment nonzero STOP before209/separate Claudio-reviewed forward remedy remain. Original rows/receipts/schema/EMPTY added evidence tables/NULL209 column/no backfill remain. Jobs-ON natural intake+broad postflights, exact-kit review and fresh single-use gate are later separate scopes.206214209 remain undeployed OPEN;200 historical release/handoff remains complete. No103/APPLYGO/production stop/restart/settings/rollback/restore/older-image-start/prune/delete/move/cleanup/rebuild/retag/heapraise/coredisable/humanDocuments/files/drafts/cards action. After ANY installer or entrypoint attempt evenDRY/NOOP failure, recovery remains separately audited forward fix only. A NEW exact source PASS with ALL11 hashes/literal bindings is required before any new package, root, copy or proof.
+
+
+Please post a NEW unedited actual Source review: PASS with ALL literal bindings below only if THIS exact graph passes. No new package/root/copy/proof before that verdict. After a genuine new PASS, only ONE new070000attempt may proceed after fresh capacity/current authorities/unused root+unit gates. No deployment/jobsON/kit/gate authority is requested.
+
+- [launch_proof.py](https://github.com/yigini/soilfer-lims/blob/68633fdd8322243a63b0135f3899963525af7fad/WP/batch-proof-snapshot-handoff-cde8-20261015/launch_proof.py)
+- [prepare_proof.py](https://github.com/yigini/soilfer-lims/blob/68633fdd8322243a63b0135f3899963525af7fad/WP/batch-proof-snapshot-handoff-cde8-20261015/prepare_proof.py)
+- [proof_budget.py](https://github.com/yigini/soilfer-lims/blob/68633fdd8322243a63b0135f3899963525af7fad/WP/batch-proof-snapshot-handoff-cde8-20261015/proof_budget.py)
+- [proof_contract.py](https://github.com/yigini/soilfer-lims/blob/68633fdd8322243a63b0135f3899963525af7fad/WP/batch-proof-snapshot-handoff-cde8-20261015/proof_contract.py)
+- [proof_disk.py](https://github.com/yigini/soilfer-lims/blob/68633fdd8322243a63b0135f3899963525af7fad/WP/batch-proof-snapshot-handoff-cde8-20261015/proof_disk.py)
+- [proof_docker.py](https://github.com/yigini/soilfer-lims/blob/68633fdd8322243a63b0135f3899963525af7fad/WP/batch-proof-snapshot-handoff-cde8-20261015/proof_docker.py)
+- [proof_files.py](https://github.com/yigini/soilfer-lims/blob/68633fdd8322243a63b0135f3899963525af7fad/WP/batch-proof-snapshot-handoff-cde8-20261015/proof_files.py)
+- [proof_install.py](https://github.com/yigini/soilfer-lims/blob/68633fdd8322243a63b0135f3899963525af7fad/WP/batch-proof-snapshot-handoff-cde8-20261015/proof_install.py)
+- [proof_startup.py](https://github.com/yigini/soilfer-lims/blob/68633fdd8322243a63b0135f3899963525af7fad/WP/batch-proof-snapshot-handoff-cde8-20261015/proof_startup.py)
+- [run_stopped_proof.py](https://github.com/yigini/soilfer-lims/blob/68633fdd8322243a63b0135f3899963525af7fad/WP/batch-proof-snapshot-handoff-cde8-20261015/run_stopped_proof.py)
+- [verify_proof_guards.py](https://github.com/yigini/soilfer-lims/blob/68633fdd8322243a63b0135f3899963525af7fad/WP/batch-proof-snapshot-handoff-cde8-20261015/verify_proof_guards.py)
+
+```
+68633fdd8322243a63b0135f3899963525af7fad
+cde8c8896f5f9d5f1ab07b0ae16b1a765e0a6367
+638580d50f61254609de3abd42d93afc676a5727
+sha256:b5ab0a0a57aeec4fe24dd8095126f3502cbc0c8629a7f4c1ef9e55034893c6fb
+959d17e11c357266f7c2a41b0c84ab76914c591e
+sha256:7aebc035254a61b0b4b8ecb59492d582af7f3769c147a35a7e92a43fb7a642d2
+8109d78e228573ead8aa243442192e54b8e1dc09101bc3fa23d03e5a29cbb66b
+c03ca0cd16395a451a12f1606655166f0dfe0b3f78516212034b548888c7a3fd
+proofScope=RAW_SNAPSHOT_AND_OWNED_STOPPED_COPY_INSTALLATION_JOBS_OFF_STARTUP_ONLY
+proofRoot=/opt/lims/releases/workflow-batch-stopped-copy-cde8c889-20261015T070000Z
+qualifiedBuildSource=6608548a58dd4bf581da4330f1cd7b0f68a86973
+qualifiedBuildPass=6181452519
+mainCiRun=38636615469
+labAndHubBuildsOwnedByYY=true
+releaseWindowControl=RELEASE_DAY_DISK_ABORTS_ACCEPTED
+reserveFloorBytes=10556150894
+unexplainedGrowthAbortBytes=500000000
+memoryLimitBytes=805306368
+unitTimeoutSeconds=5400
+readinessSeconds=600
+stageHeadroomSeconds=60
+unitHeadroomSeconds=600
+rawMasterNeverOpenedSqlite=true
+productionSqliteConnections=0
+preserveAllStoppedContainers=true
+policyPresentNoOpOrStop=true
+approvedAmendmentNonzeroStop=true
+jobsOnQualificationStillRequired=true
+declaredDbTripleCopies=52
+dbBudgetEquivalents=65
+budgetMarginPercent=25
+minimumDbBudgetEquivalents=64
+budgetStageTableSha256=a009b22ca50af106c0edbdb9044e73b70d0230c73f29e4e7a64f04534ae0faf3
+budgetModel=DECLARED_STAGE_REMAINING_CONSUMPTION_AWARE
+capacityDirection=6183215126
+noopSealDirection=6183663456
+dryRunMainIdentityAndEmptyWal=true
+repeatMainWalIdentityNoOpZero=true
+installedSealBecomesPrevious=true
+metadataCapacityBeforeRootAndBeforeUnit=true
+allLocalExecutedSourceFilesBound=true
+containerNameAbsenceProof=BOUNDED_COMPLETE_ID_AND_EXACT_NAME_INVENTORY
+containerNameProbeRawIdsRetained=true
+mandatoryKnownPredecessorInInventory=true
+noErrorTextAbsenceInference=true
+snapshotBoundaryDirection=6184356993
+productionSnapshotAuthority=STABLE_FILESYSTEM_COPY_WINDOW_HANDOFF
+productionPostHandoffChecks=OWNED_RAW_BYTES_AND_READER_BACKUP_ONLY
+liveEvolutionObservation=STAT_ONLY_NEVER_SNAPSHOT_AUTHORITY
+liveInputEqualityRefusalComparedStatesRetained=true
+databaseAssetsCrossFileAtomicityClaimed=false
+budgetCheckpointCgroupAnonFileRecorded=true
+referenceDbReserveBytes=567558144
+referenceAssetReserveBytes=5787648
+retainedAssetReserveMultiplier=3
+logReserveBytes=4294967296
+allocationMeasurementSeconds=120
+allRetainedReleaseDockerContainerdAllocation=true
+policyPreflightMode=READONLY_DRY_RUN
+ownedStopIndependentOfReserveHeadroom=true
+allInputPathAncestorsRejectAliases=true
+diskMountPolicy=VERIFIED_DOCKER_OVERLAY_VIEWS_BACKED_BY_COUNTED_CONTAINERD
+physicalDuSingleFilesystem=true
+containerMountComparison=EXACT_OBJECTS_UNORDERED_NO_DUPLICATES
+launch_proof.py=0fac1866276fab7403a639b47fefd881354920e928c4b9e7c18afc65f54a41c7
+prepare_proof.py=11daddf2ef14fd646bde4ed3591b1cb7b9f05f61555b7835a2a464d71bb94de8
+proof_budget.py=3202100f6dfda3fb35fe9f9dfcb0f6ea4afd9dd92b56104480120778080bb17b
+proof_contract.py=bf1e0b6db6f9cae1a44eeb0044c56aa4a7e0799c0a0a19b4239039d117e39b1b
+proof_disk.py=a4090643f754477b3fb5276dd099d01f4be59e5e1291bf92deafe9e08b09140a
+proof_docker.py=c941b3e680dba8936815177b8b5302300414b5115b33b91a03cdb68a6ed65d9d
+proof_files.py=e63d6c325592ea86e01bb8feead291ecbb6348e33f921668faa2798b370956f2
+proof_install.py=c5e34fa43a084adeeb12523bd94beb05076efaf72cc1bb9ab2f9b7f7560ee3b3
+proof_startup.py=a5b3e775a53e6a2e37be613394b1f091c710ead84a09f307cf18c2c54f762b10
+run_stopped_proof.py=13628d7dad20205beae73aecb55c588a6ed48c45fcac91e1c27551c514b5ccc5
+verify_proof_guards.py=1afd68ca070031d271acf5c8b7cf0f24b2c542bbe50b534624a1023c33c9bc24
+```
