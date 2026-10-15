@@ -1,0 +1,21 @@
+{
+  "status": "ACTUAL_NEW_OVERLAY_SOURCE_HANDOFF_DELIVERED_ONCE",
+  "observedUtc": "2026-10-15T02:31:53.424Z",
+  "sourceCommit": "ea9ce209d85305f863378d689b443d3134cbb4cf",
+  "reviewRequestId": 6183048107,
+  "windowId": 7867734,
+  "project": "LIMS Audit",
+  "thread": "Lab workflow audit and plan",
+  "rightEmptyBefore": true,
+  "rightCaretObserved": true,
+  "ownEndInspected": true,
+  "ownHeadInspected": true,
+  "returnPressCount": 1,
+  "actualSentBubbleVerified": true,
+  "rightEmptyAfterSend": true,
+  "claudioResponding": "Frolicking",
+  "humanDraftAndCardsUntouched": true,
+  "centreHumanDraft": "can you go and ask Pip",
+  "productionCopies": 0,
+  "newRootCreated": false
+}
