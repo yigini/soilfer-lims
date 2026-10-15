@@ -1,0 +1,201 @@
+{
+  "actualApply206": {
+    "backfilledCount": 0,
+    "classification": "COMPLETE_206",
+    "mode": "APPLIED",
+    "previousClassification": "PRE_206",
+    "receipt": {
+      "backfilledCount": 0,
+      "originalRowsPreserved": true,
+      "originalRowsSha256": "5c8193afab59fdcbff93ae60b76663eea90a36ac47fe94676469cf79c54b7d1a",
+      "receiptSha256": "01fde4c40235e28a29176e61f798131712a07b08f23fa5ca86d7e60de087e781",
+      "sources": {
+        "contractVersion": "206-v1",
+        "migrationSha256": "2a239bf9b13820a151e3fcc3e81fc47142a34027ec0502c5c26acd42200254b4"
+      }
+    },
+    "sources": {
+      "contractVersion": "206-v1",
+      "migrationSha256": "2a239bf9b13820a151e3fcc3e81fc47142a34027ec0502c5c26acd42200254b4"
+    },
+    "totalChanges": 1
+  },
+  "actualPreservation206": {
+    "allOriginalRowsAndReceiptsPreserved": true,
+    "backfilledCount": 0,
+    "emptyEvidenceTables": true,
+    "marker": "206_sample_containers",
+    "newTables": [
+      "ContainerSequence",
+      "SampleContainer"
+    ],
+    "schemaReceiptCount": 40,
+    "totalTables": 108
+  },
+  "actualRepeat206": {
+    "backfilledCount": 0,
+    "classification": "COMPLETE_206",
+    "mode": "NO_OP",
+    "receipt": {
+      "backfilledCount": 0,
+      "originalRowsPreserved": true,
+      "originalRowsSha256": "5c8193afab59fdcbff93ae60b76663eea90a36ac47fe94676469cf79c54b7d1a",
+      "receiptSha256": "01fde4c40235e28a29176e61f798131712a07b08f23fa5ca86d7e60de087e781",
+      "sources": {
+        "contractVersion": "206-v1",
+        "migrationSha256": "2a239bf9b13820a151e3fcc3e81fc47142a34027ec0502c5c26acd42200254b4"
+      }
+    },
+    "sources": {
+      "contractVersion": "206-v1",
+      "migrationSha256": "2a239bf9b13820a151e3fcc3e81fc47142a34027ec0502c5c26acd42200254b4"
+    },
+    "totalChanges": 0
+  },
+  "anonMaximum": 38326272,
+  "anonMinimum": 14426112,
+  "closedFreeOnlyNotFreshCapacityGate": {
+    "/opt/lims": 49521278976,
+    "/var/lib/containerd": 49521278976,
+    "/var/lib/docker": 49521278976
+  },
+  "currentClosedTargetNotOriginalComparisonPair": {
+    "": {
+      "allocatedBytes": 563326976,
+      "bytes": 563322880,
+      "device": 64769,
+      "inode": 11409614,
+      "mode": 384,
+      "mtimeNs": 1792040085633062499,
+      "sha256": "9abe179ba9630143d000d4294139e51274cb474aac4a9fc11756503beca6958f"
+    },
+    "-shm": {
+      "allocatedBytes": 32768,
+      "bytes": 32768,
+      "device": 64769,
+      "inode": 11410266,
+      "mode": 384,
+      "mtimeNs": 1792040346758477409,
+      "sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb"
+    },
+    "-wal": {
+      "allocatedBytes": 0,
+      "bytes": 0,
+      "device": 64769,
+      "inode": 11410265,
+      "mode": 384,
+      "mtimeNs": 1792040342183382552,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "currentMainMatchesInstalledSealShaAndLength": true,
+  "currentWalPresentEmpty": true,
+  "exactControllerBeforeAfterSamplesNotSealed": true,
+  "fileMaximum": 786784256,
+  "fileMinimum": 3121152,
+  "hypothesisOnly": "Absent-to-empty WAL representation is consistent with retained evidence; original controller compared pair not sealed",
+  "installed206OriginalTriple": {
+    "": {
+      "allocatedBytes": 563326976,
+      "bytes": 563322880,
+      "device": 64769,
+      "inode": 11409614,
+      "mode": 384,
+      "mtimeNs": 1792040085633062499,
+      "sha256": "9abe179ba9630143d000d4294139e51274cb474aac4a9fc11756503beca6958f"
+    },
+    "-shm": null,
+    "-wal": null
+  },
+  "lastActualMemoryStat": {
+    "activeStage": "issue-206",
+    "actualCountersNotPageCacheDiagnosis": true,
+    "allCounters": {
+      "active_anon": 13942784,
+      "active_file": 6946816,
+      "anon": 38326272,
+      "anon_thp": 6291456,
+      "file": 577835008,
+      "file_dirty": 212992,
+      "file_mapped": 0,
+      "file_thp": 0,
+      "file_writeback": 0,
+      "inactive_anon": 24383488,
+      "inactive_file": 570884096,
+      "kernel": 15319040,
+      "kernel_stack": 147456,
+      "pagetables": 344064,
+      "percpu": 192,
+      "pgactivate": 25760,
+      "pgdeactivate": 0,
+      "pgfault": 956252,
+      "pglazyfree": 0,
+      "pglazyfreed": 0,
+      "pgmajfault": 1447,
+      "pgrefill": 1030829,
+      "pgscan": 5382826,
+      "pgscan_direct": 5375308,
+      "pgscan_khugepaged": 0,
+      "pgscan_kswapd": 7518,
+      "pgsteal": 5297434,
+      "pgsteal_direct": 5289916,
+      "pgsteal_khugepaged": 0,
+      "pgsteal_kswapd": 7518,
+      "sec_pagetables": 0,
+      "shmem": 0,
+      "shmem_thp": 0,
+      "slab": 14779304,
+      "slab_reclaimable": 14588512,
+      "slab_unreclaimable": 190792,
+      "sock": 0,
+      "swapcached": 0,
+      "thp_collapse_alloc": 0,
+      "thp_fault_alloc": 852,
+      "thp_swpout": 0,
+      "thp_swpout_fallback": 0,
+      "unevictable": 0,
+      "vmalloc": 0,
+      "workingset_activate_anon": 0,
+      "workingset_activate_file": 2839250,
+      "workingset_nodereclaim": 0,
+      "workingset_refault_anon": 0,
+      "workingset_refault_file": 4184598,
+      "workingset_restore_anon": 0,
+      "workingset_restore_file": 775688,
+      "zswap": 0,
+      "zswapped": 0,
+      "zswpin": 0,
+      "zswpout": 0,
+      "zswpwb": 0
+    },
+    "anonBytes": 38326272,
+    "cgroup": "/system.slice/lims-workflow-batch-stopped-copy-cde8c889-20261015t070000z.service",
+    "checkpoint": 1142,
+    "fileBytes": 577835008,
+    "observedMonotonic": 316821.158296072,
+    "requiredFreeBytes": 45368943726,
+    "source": "CGROUP_V2_MEMORY_STAT"
+  },
+  "memoryCheckpointCount": 1142,
+  "memoryCountersAreSamplesNotOOMOrCausalDiagnosis": true,
+  "newCopies": 0,
+  "newPhysicalDu": 0,
+  "newSqlConnections": 0,
+  "oldFullFreshDeficitAtClosedFreeBytes": 2238481518,
+  "oldFullFreshRequiredBytes": 51759760494,
+  "originalFailure": {
+    "allRawFilesAndStoppedContainersMustRemain": true,
+    "closedUtc": "2026-10-15T04:59:13.698388+00:00",
+    "error": "RuntimeError: Repeat changed main or WAL SHA-256 or length",
+    "neverRetry": true,
+    "ownedStopError": null,
+    "productionMutations": 0,
+    "productionSqliteConnections": 0,
+    "recovery": "SEPARATELY_AUDITED_FORWARD_FIX_ONLY",
+    "status": "FAILED_OR_REFUSED_RETAIN_ALL_FORWARD_FIX_ONLY",
+    "terminalMetadataObservationError": null
+  },
+  "proofReplays": 0,
+  "proposedScopeOnlyNoSourceGraphOrNewOperator": true,
+  "status": "RETAINED_ONLY_ANALYSIS_NO_NEW_HOST_OPERATION"
+}

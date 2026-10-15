@@ -1,0 +1,18 @@
+{
+  "status": "ACTUAL_SENT_BUBBLE_EMPTY_RIGHT_COMPOSER_VERIFIED",
+  "observedUtc": "2026-10-15T05:09:57.200Z",
+  "windowId": 7867734,
+  "project": "LIMS Audit",
+  "thread": "Lab workflow audit and plan",
+  "freshEmptyRightCaretVerified": true,
+  "ownDraftEndAndHeadVerified": true,
+  "returnCount": 1,
+  "sentBubbleVerified": true,
+  "rightComposerEmptyAfterSend": true,
+  "claudioStatusObserved": "Befuddling",
+  "centerHumanDraftPreserved": "can you go and ask Pip",
+  "humanCardsUntouched": true,
+  "scopeBoundaryComment": 6184895395,
+  "sourcePassAcknowledgementBundledOnlyHere": true,
+  "newOperations": 0
+}
