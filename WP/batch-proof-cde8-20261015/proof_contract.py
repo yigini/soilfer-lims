@@ -14,7 +14,7 @@ PREDECESSOR_IMAGE='sha256:7aebc035254a61b0b4b8ecb59492d582af7f3769c147a35a7e92a4
 PREDECESSOR_ID='8109d78e228573ead8aa243442192e54b8e1dc09101bc3fa23d03e5a29cbb66b'
 LIVE_DATA='/var/lib/docker/volumes/lims_lims-data/_data'
 LIVE_ASSETS='/var/lib/docker/volumes/lims_lims-assets/_data'
-ROOT_NAME='workflow-batch-stopped-copy-cde8c889-20261015T020000Z'
+ROOT_NAME='workflow-batch-stopped-copy-cde8c889-20261015T023000Z'
 ROOT=pathlib.PurePosixPath('/opt/lims/releases')/ROOT_NAME
 SCOPE='RAW_SNAPSHOT_AND_OWNED_STOPPED_COPY_INSTALLATION_JOBS_OFF_STARTUP_ONLY'
 FILES=frozenset({'proof_contract.py','proof_files.py','proof_disk.py','proof_docker.py','proof_install.py','proof_startup.py','run_stopped_proof.py','prepare_proof.py','launch_proof.py','verify_proof_guards.py'})
@@ -68,7 +68,9 @@ def tokens(index):
         'policyPresentNoOpOrStop=true','approvedAmendmentNonzeroStop=true','jobsOnQualificationStillRequired=true',
         'retainedDatabaseReserveMultiplier=128','retainedAssetReserveMultiplier=3','logReserveBytes='+str(LOG_RESERVE),
         'allocationMeasurementSeconds=120','allRetainedReleaseDockerContainerdAllocation=true',
-        'policyPreflightMode=READONLY_DRY_RUN','ownedStopIndependentOfReserveHeadroom=true','allInputPathAncestorsRejectAliases=true']+[n+'='+d for n,d in sorted(graph(index).items())]
+        'policyPreflightMode=READONLY_DRY_RUN','ownedStopIndependentOfReserveHeadroom=true','allInputPathAncestorsRejectAliases=true',
+        'diskMountPolicy=VERIFIED_DOCKER_OVERLAY_VIEWS_BACKED_BY_COUNTED_CONTAINERD',
+        'physicalDuSingleFilesystem=true','containerMountComparison=EXACT_OBJECTS_UNORDERED_NO_DUPLICATES']+[n+'='+d for n,d in sorted(graph(index).items())]
 def approval(review,index):
     require(review.get('id',0)>6181815795 and review.get('performed_via_github_app',{}).get('slug')=='claude','NEW actual Claudio source review required')
     require(review.get('html_url')=='https://github.com/yigini/soilfer-lims/issues/162#issuecomment-'+str(review['id']) and first_line(review.get('body',''))=='Source review: PASS','Final exact source PASS missing')

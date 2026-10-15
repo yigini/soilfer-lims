@@ -1,0 +1,1 @@
+{"status": "SOURCE_AST_REFUSAL_BEFORE_TESTS_OR_OPERATORS", "source": "proof_disk.py", "line": 62, "error": "Missing closing bracket in proposed backing-path iteration", "localTestsRun": 0, "hostTestsRun": 0, "productionOperations": 0, "originalSourcePreserved": true, "neverReplayHelper": true}

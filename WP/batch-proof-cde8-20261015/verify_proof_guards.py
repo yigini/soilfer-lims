@@ -3,7 +3,7 @@ import copy,os,pathlib,sqlite3,unittest
 from unittest import mock
 from proof_contract import *
 from proof_disk import growth,mount_guard,ALLOCATION,BOUND
-from proof_docker import arguments,preserved_containers,Docker
+from proof_docker import arguments,preserved_containers,Docker,mount_objects
 from proof_startup import startup_log
 from proof_files import seal,triple,logical,delta,write_new,byte_identity,file_state
 from proof_install import install
@@ -97,6 +97,48 @@ class Guards(unittest.TestCase):
     def test_policy_absent_stop(self):
         p=self.policy();p['classification']='ABSENT';p['mode']='DRY_RUN'
         with self.assertRaises(RuntimeError):policy_gate(p)
+    def view_line(self):
+        return '816 67 0:44 / /var/lib/docker/rootfs/overlayfs/'+('a'*64)+' rw,relatime shared:276 - overlay overlay rw,lowerdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/20/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/19/fs,upperdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/21/fs,workdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/21/work'
+    def test_verified_overlay_views_not_credited_twice(self):
+        v=mount_guard(self.view_line(),ALLOCATION,['a'*64]);self.assertEqual(len(v),1);self.assertEqual(v[0]['upperdir'],'/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/21/fs');self.assertIn('EXCLUDED_BY_DU_X',v[0]['accounting'])
+    def test_unknown_view_owner_refused(self):
+        with self.assertRaises(RuntimeError):mount_guard(self.view_line(),ALLOCATION,['b'*64])
+    def relative_view(self):return self.view_line().replace('lowerdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/20/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/19/fs','lowerdir=20/fs:19/fs')
+    def test_compact_numeric_lowerdirs_resolve_counted_store(self):
+        a=mount_guard(self.view_line(),ALLOCATION,['a'*64])[0];b=mount_guard(self.relative_view(),ALLOCATION,['a'*64])[0]
+        self.assertEqual(a['lowerdirs'],b['lowerdirs']);self.assertEqual(b['lowerdirEncoding'],'CONTAINERD_COMPACT_NUMERIC_RELATIVE')
+    def test_mixed_absolute_relative_lowerdirs_refused(self):
+        with self.assertRaises(RuntimeError):mount_guard(self.relative_view().replace(':19/fs',':/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/19/fs'),ALLOCATION,['a'*64])
+    def test_relative_lowerdir_escape_refused(self):
+        with self.assertRaises(RuntimeError):mount_guard(self.relative_view().replace('20/fs','../20/fs'),ALLOCATION,['a'*64])
+    def test_relative_lowerdir_zero_or_leading_zero_refused(self):
+        for n in ['0/fs','020/fs']:
+            with self.assertRaises(RuntimeError):mount_guard(self.relative_view().replace('20/fs',n),ALLOCATION,['a'*64])
+    def test_relative_lowerdir_foreign_upper_root_refused(self):
+        with self.assertRaises(RuntimeError):mount_guard(self.relative_view().replace('upperdir=/var/lib/containerd/','upperdir=/unaccounted/'),ALLOCATION,['a'*64])
+    def test_backing_outside_counted_store_refused(self):
+        with self.assertRaises(RuntimeError):mount_guard(self.view_line().replace('/var/lib/containerd/','/unaccounted/'),ALLOCATION,['a'*64])
+    def test_overlay_upper_work_differ_refused(self):
+        with self.assertRaises(RuntimeError):mount_guard(self.view_line().replace('/21/work','/22/work'),ALLOCATION,['a'*64])
+    def test_duplicate_view_refused(self):
+        with self.assertRaises(RuntimeError):mount_guard(self.view_line()+'\n'+self.view_line(),ALLOCATION,['a'*64])
+    def test_unknown_overlay_option_refused(self):
+        with self.assertRaises(RuntimeError):mount_guard(self.view_line()+',unexpected=on',ALLOCATION,['a'*64])
+    def test_foreign_mounted_filesystem_refused(self):
+        with self.assertRaises(RuntimeError):mount_guard(self.view_line().replace('- overlay overlay','- nfs4 remote'),ALLOCATION,['a'*64])
+    def test_backing_parent_escape_refused(self):
+        with self.assertRaises(RuntimeError):mount_guard(self.view_line().replace('/20/fs','/20/../fs'),ALLOCATION,['a'*64])
+    def mounts(self):return [{'Type':'bind','Source':'/owned/data','Destination':'/data','RW':True},{'Type':'bind','Source':'/owned/assets','Destination':'/assets','RW':True}]
+    def test_exact_mount_permutations_preserved(self):
+        old={'id':{'name':'old','image':'old','running':False,'startedAt':'before','labels':{},'mounts':self.mounts()}};new=copy.deepcopy(old);new['id']['mounts'].reverse();preserved_containers(old,new)
+    def test_changed_mount_flag_refused(self):
+        a=self.mounts();b=copy.deepcopy(a);b[0]['RW']=False
+        self.assertNotEqual(mount_objects(a),mount_objects(b))
+    def test_missing_mount_refused(self):
+        old={'id':{'name':'old','image':'old','running':False,'startedAt':'before','labels':{},'mounts':self.mounts()}};new=copy.deepcopy(old);new['id']['mounts'].pop()
+        with self.assertRaises(RuntimeError):preserved_containers(old,new)
+    def test_duplicate_mount_destination_refused(self):
+        with self.assertRaises(RuntimeError):mount_objects(self.mounts()+[self.mounts()[0]])
 class OwnedFixtureTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

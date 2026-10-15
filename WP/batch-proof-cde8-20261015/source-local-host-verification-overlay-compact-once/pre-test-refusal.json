@@ -1,0 +1,9 @@
+{
+  "status": "PRE_TEST_HELPER_REFUSAL",
+  "error": "AttributeError hashlib.sha261",
+  "cause": "Verification helper count substitution also changed sha256 spelling",
+  "testsExecuted": 0,
+  "hostExecuted": false,
+  "productionOperations": 0,
+  "utc": "2026-10-15T02:25:05.036993+00:00"
+}

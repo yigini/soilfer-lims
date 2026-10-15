@@ -1,0 +1,7 @@
+{
+  "status": "PUBLISHER_KEY_REFUSAL_BEFORE_MUTATION",
+  "error": "KeyError sourceSha256After",
+  "cause": "Earlier count substitution also changed output labels to sourceSha261; hashing algorithm corrected to sha256 before successful61 run; original raw labels retained",
+  "productionOperations": 0,
+  "utc": "2026-10-15T02:29:05.701944+00:00"
+}

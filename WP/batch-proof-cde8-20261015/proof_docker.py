@@ -15,10 +15,14 @@ def all_containers():
     for id in ids:
         v=inspect(id);rows[id]={'name':v['Name'],'image':v['Image'],'running':v['State']['Running'],'startedAt':v['State']['StartedAt'],'labels':v['Config'].get('Labels') or {},'mounts':v['Mounts']}
     return rows
+def mount_objects(mounts):
+    require(isinstance(mounts,list) and all(isinstance(m,dict) and isinstance(m.get('Destination'),str) for m in mounts),'Complete mount-object array required')
+    require(len({m['Destination'] for m in mounts})==len(mounts),'Duplicate mount destination refused')
+    return sorted(canonical(m) for m in mounts)
 def preserved_containers(before,after):
     require(set(before)<=set(after),'A pre-existing container was deleted')
     for id,row in before.items():
-        v=after[id];require(row['name']==v['name'] and row['image']==v['image'] and row['labels']==v['labels'] and row['mounts']==v['mounts'],'Pre-existing container changed')
+        v=after[id];require(row['name']==v['name'] and row['image']==v['image'] and row['labels']==v['labels'] and mount_objects(row['mounts'])==mount_objects(v['mounts']),'Pre-existing container changed')
         if not row['running']:require(v['running'] is False and row['startedAt']==v['startedAt'],'A historical stopped container was started')
 def arguments(root,label,data,tmp,script=None,mode=None,assets=None):
     require(re.fullmatch('[a-z0-9-]+',label),'Safe unique container label required');data=child_path(root,data);tmp=child_path(root,tmp)
