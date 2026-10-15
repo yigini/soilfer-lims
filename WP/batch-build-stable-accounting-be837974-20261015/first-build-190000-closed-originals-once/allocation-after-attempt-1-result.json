@@ -1,0 +1,8 @@
+{
+  "attempt": 1,
+  "exitCode": 0,
+  "stdoutSha256": "28ad687261c0f2a04e357b1d900944d451486efff6d22056d1e28660dd9f9ce4",
+  "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "commandExit0WithEmptyStderr": true,
+  "accepted": false
+}

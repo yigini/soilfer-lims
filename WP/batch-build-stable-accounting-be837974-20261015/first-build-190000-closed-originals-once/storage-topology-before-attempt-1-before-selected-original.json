@@ -1,0 +1,11 @@
+{
+  "driver": "overlayfs",
+  "dockerRoot": "/var/lib/docker",
+  "containerdRoot": "/var/lib/containerd",
+  "containerdState": "/run/containerd",
+  "containerdVersion": "3",
+  "daemonMainPid": 679,
+  "fullConfigRawSha256": "8b4332e85193c5060a6b30c2f35f15d26dbc50930250eee726a9a6848e947225",
+  "fullConfigStored": false,
+  "selectedTopLevelOnly": true
+}

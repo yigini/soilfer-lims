@@ -1,0 +1,66 @@
+{
+  "argv": [
+    "du",
+    "-s",
+    "-B1",
+    "--",
+    "/opt/lims/releases/workflow-batch-build-be837974-20261015T190000Z",
+    "/var/lib/docker/buildkit",
+    "/var/lib/containerd"
+  ],
+  "timeoutSeconds": 120,
+  "exitCode": 0,
+  "acceptedCompleteAttempt": 1,
+  "allAttempts": [
+    {
+      "attempt": 1,
+      "exitCode": 0,
+      "stdoutSha256": "a7bb704cd59728e6e1181495a7a4b625bdd1f63124c20b4b7e7d7cb51cf85cac",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "commandExit0WithEmptyStderr": true,
+      "accepted": true
+    }
+  ],
+  "physicalBytesExact": true,
+  "hardlinksCountedOnceInOneDuInvocation": true,
+  "mountInventoryChecked": true,
+  "rows": {
+    "/opt/lims/releases/workflow-batch-build-be837974-20261015T190000Z": {
+      "bytes": 41631744,
+      "device": 64769,
+      "exists": true,
+      "symlink": false
+    },
+    "/var/lib/docker/buildkit": {
+      "bytes": 94449664,
+      "device": 64769,
+      "exists": true,
+      "symlink": false
+    },
+    "/var/lib/docker/overlay2": {
+      "bytes": 0,
+      "device": 64769,
+      "exists": false,
+      "symlink": false
+    },
+    "/var/lib/docker/image": {
+      "bytes": 0,
+      "device": 64769,
+      "exists": false,
+      "symlink": false
+    },
+    "/var/lib/docker/containerd": {
+      "bytes": 0,
+      "device": 64769,
+      "exists": false,
+      "symlink": false
+    },
+    "/var/lib/containerd": {
+      "bytes": 42540838912,
+      "device": 64769,
+      "exists": true,
+      "symlink": false
+    }
+  },
+  "partialTotalsNeverCredited": true
+}

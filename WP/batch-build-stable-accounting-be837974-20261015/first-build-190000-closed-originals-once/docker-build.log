@@ -1,0 +1,228 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 9.40kB done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/node:24-alpine
+#2 DONE 0.9s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 862B done
+#3 DONE 0.0s
+
+#4 [internal] load build context
+#4 DONE 0.0s
+
+#5 [builder  1/12] FROM docker.io/library/node:24-alpine@sha256:44fce696f38ba8c987c4db89954051000bbd05ffd8d8659ba15ed4a8602e937f
+#5 resolve docker.io/library/node:24-alpine@sha256:44fce696f38ba8c987c4db89954051000bbd05ffd8d8659ba15ed4a8602e937f 0.0s done
+#5 DONE 0.0s
+
+#4 [internal] load build context
+#4 transferring context: 53.89kB 0.1s done
+#4 DONE 0.2s
+
+#6 [stage-1 16/56] COPY server/prisma/migrations/20261006000000_result_attempt_link/migration.sql /app/server/.migrations-backup/182/20261006000000_result_attempt_link/migration.sql
+#6 CACHED
+
+#7 [stage-1 43/56] COPY server/prisma/migrations/20261010000200_report_revision_amendment/migration.sql /app/server/.migrations-backup/211/20261010000200_report_revision_amendment/migration.sql
+#7 CACHED
+
+#8 [stage-1 39/56] COPY server/prisma/migrations/20261010000100_cross_check_evaluation/migration.sql /app/server/.migrations-backup/201/20261010000100_cross_check_evaluation/migration.sql
+#8 CACHED
+
+#9 [stage-1 52/56] COPY server/prisma/migrations/20261013000200_control_charts/migration.sql /app/server/.migrations-backup/214/20261013000200_control_charts/migration.sql
+#9 CACHED
+
+#10 [stage-1 31/56] COPY server/prisma/migrations/20261004190100_unique_active_workitem/migration.sql /app/server/.migrations-backup/178/20261004190100_unique_active_workitem/migration.sql
+#10 CACHED
+
+#11 [stage-1 41/56] COPY server/prisma/migrations/20261010000000_sample_amendment_authorisation/migration.sql /app/server/.migrations-backup/210/20261010000000_sample_amendment_authorisation/migration.sql
+#11 CACHED
+
+#12 [stage-1  4/56] COPY server/package.json server/package-lock.json ./server/
+#12 CACHED
+
+#13 [stage-1 30/56] COPY server/prisma/migrations/20261004190000_add_workitem_duplicate_marker/migration.sql /app/server/.migrations-backup/178/20261004190000_add_workitem_duplicate_marker/migration.sql
+#13 CACHED
+
+#14 [stage-1 17/56] COPY server/prisma/migrations/20261004064500_add_result_raw_input/migration.sql /app/server/.migrations-backup/272/20261004064500_add_result_raw_input/migration.sql
+#14 CACHED
+
+#15 [stage-1 25/56] COPY server/prisma/migrations/20261007000100_qc_gate_scope/migration.sql /app/server/.migrations-backup/187/20261007000100_qc_gate_scope/migration.sql
+#15 CACHED
+
+#16 [stage-1  3/56] RUN apk add --no-cache python3 make g++
+#16 CACHED
+
+#17 [stage-1 45/56] COPY server/prisma/migrations/20261010000400_preparation_records/migration.sql /app/server/.migrations-backup/205/20261010000400_preparation_records/migration.sql
+#17 CACHED
+
+#18 [stage-1 29/56] COPY server/prisma/migrations/20261009000100_nonconformity_reports/migration.sql /app/server/.migrations-backup/193/20261009000100_nonconformity_reports/migration.sql
+#18 CACHED
+
+#19 [stage-1 38/56] COPY server/prisma/migrations/20261009000400_calculation_templates/fresh-prisma-tables.json /app/server/.migrations-backup/199/20261009000400_calculation_templates/fresh-prisma-tables.json
+#19 CACHED
+
+#20 [stage-1 49/56] COPY server/prisma/migrations/20261010000100_instrument_import_templates/upgraded-prisma-draft-table.sql /app/server/.migrations-backup/200/20261010000100_instrument_import_templates/upgraded-prisma-draft-table.sql
+#20 CACHED
+
+#21 [builder  6/12] RUN cd server && npm ci --ignore-scripts
+#21 CACHED
+
+#22 [stage-1 19/56] COPY server/prisma/migrations/20261006000200_reference_material_catalogue/migration.sql /app/server/.migrations-backup/184/20261006000200_reference_material_catalogue/migration.sql
+#22 CACHED
+
+#23 [stage-1 48/56] COPY server/prisma/migrations/20261010000100_instrument_import_templates/pre-prisma-draft-table.sql /app/server/.migrations-backup/200/20261010000100_instrument_import_templates/pre-prisma-draft-table.sql
+#23 CACHED
+
+#24 [stage-1 28/56] COPY server/prisma/migrations/20261007000400_result_equipment_evidence/migration.sql /app/server/.migrations-backup/189/20261007000400_result_equipment_evidence/migration.sql
+#24 CACHED
+
+#25 [stage-1 11/56] COPY profiles/ ./profiles/
+#25 CACHED
+
+#26 [stage-1 22/56] COPY server/prisma/migrations/20261006000300_qc_rules/fresh-prisma-tables.json /app/server/.migrations-backup/185/20261006000300_qc_rules/fresh-prisma-tables.json
+#26 CACHED
+
+#27 [stage-1 51/56] COPY server/prisma/migrations/20261013000100_sample_containers/migration.sql /app/server/.migrations-backup/206/20261013000100_sample_containers/migration.sql
+#27 CACHED
+
+#28 [stage-1 13/56] RUN mkdir -p /app/server/.schema-backup &&     cp /app/server/prisma/schema.prisma /app/server/.schema-backup/schema.prisma
+#28 CACHED
+
+#29 [stage-1 20/56] COPY server/prisma/migrations/20261006000200_reference_material_catalogue/fresh-prisma-tables.json /app/server/.migrations-backup/184/20261006000200_reference_material_catalogue/fresh-prisma-tables.json
+#29 CACHED
+
+#30 [stage-1 47/56] COPY server/prisma/migrations/20261010000100_instrument_import_templates/fresh-prisma-tables.json /app/server/.migrations-backup/200/20261010000100_instrument_import_templates/fresh-prisma-tables.json
+#30 CACHED
+
+#31 [builder  8/12] COPY server/ ./server/
+#31 CACHED
+
+#32 [stage-1 50/56] COPY server/prisma/migrations/20261010000100_instrument_import_templates/post205-draft-tables.json /app/server/.migrations-backup/200/20261010000100_instrument_import_templates/post205-draft-tables.json
+#32 CACHED
+
+#33 [stage-1 55/56] COPY docker-entrypoint.sh /app/docker-entrypoint.sh
+#33 CACHED
+
+#34 [stage-1 53/56] COPY server/prisma/migrations/20261004085500_add_lab_policy_settings/migration.sql /app/server/.migrations-backup/policy/20261004085500_add_lab_policy_settings/migration.sql
+#34 CACHED
+
+#35 [builder  4/12] RUN cd client && npm ci --ignore-scripts
+#35 CACHED
+
+#36 [stage-1 12/56] COPY --from=builder /app/client/dist ./client/dist/
+#36 CACHED
+
+#37 [stage-1 32/56] COPY server/prisma/migrations/20261008000100_work_attempt_contract/migration.sql /app/server/.migrations-backup/190/20261008000100_work_attempt_contract/migration.sql
+#37 CACHED
+
+#38 [stage-1 35/56] COPY server/prisma/migrations/20261009000200_batch_reagent_lots/migration.sql /app/server/.migrations-backup/194/20261009000200_batch_reagent_lots/migration.sql
+#38 CACHED
+
+#39 [stage-1 34/56] COPY server/prisma/migrations/20261009000100_reported_value_selection/migration.sql /app/server/.migrations-backup/192/20261009000100_reported_value_selection/migration.sql
+#39 CACHED
+
+#40 [builder 11/12] RUN cd server && npx prisma generate
+#40 CACHED
+
+#41 [stage-1  5/56] RUN cd server && npm ci --omit=dev --ignore-scripts
+#41 CACHED
+
+#42 [builder 10/12] COPY profiles/ ./profiles/
+#42 CACHED
+
+#43 [stage-1 10/56] COPY --from=builder /app/server/prisma_client ./server/prisma_client/
+#43 CACHED
+
+#44 [stage-1 21/56] COPY server/prisma/migrations/20261006000300_qc_rules/migration.sql /app/server/.migrations-backup/185/20261006000300_qc_rules/migration.sql
+#44 CACHED
+
+#45 [stage-1 33/56] COPY server/prisma/migrations/20261008000200_repeat_correction_contract/migration.sql /app/server/.migrations-backup/191/20261008000200_repeat_correction_contract/migration.sql
+#45 CACHED
+
+#46 [stage-1 46/56] COPY server/prisma/migrations/20261010000100_instrument_import_templates/migration.sql /app/server/.migrations-backup/200/20261010000100_instrument_import_templates/migration.sql
+#46 CACHED
+
+#47 [builder  2/12] WORKDIR /app
+#47 CACHED
+
+#48 [stage-1 40/56] COPY server/prisma/migrations/20261010000100_cross_check_evaluation/fresh-prisma-tables.json /app/server/.migrations-backup/201/20261010000100_cross_check_evaluation/fresh-prisma-tables.json
+#48 CACHED
+
+#49 [stage-1 44/56] COPY server/prisma/migrations/20261010000300_bench_credentials/migration.sql /app/server/.migrations-backup/202/20261010000300_bench_credentials/migration.sql
+#49 CACHED
+
+#50 [builder  9/12] COPY shared/ ./shared/
+#50 CACHED
+
+#51 [stage-1 23/56] COPY server/prisma/migrations/20261006000400_normalized_qc_runs/migration.sql /app/server/.migrations-backup/186/20261006000400_normalized_qc_runs/migration.sql
+#51 CACHED
+
+#52 [builder  3/12] COPY client/package.json client/package-lock.json ./client/
+#52 CACHED
+
+#53 [builder  5/12] COPY server/package.json server/package-lock.json ./server/
+#53 CACHED
+
+#54 [stage-1  8/56] COPY server/ ./server/
+#54 CACHED
+
+#55 [stage-1 54/56] COPY server/prisma/migrations/20261014000100_order_revision_contract/migration.sql /app/server/.migrations-backup/209/20261014000100_order_revision_contract/migration.sql
+#55 CACHED
+
+#56 [builder  7/12] COPY client/ ./client/
+#56 CACHED
+
+#57 [stage-1 24/56] COPY server/prisma/migrations/20261006000400_normalized_qc_runs/fresh-prisma-tables.json /app/server/.migrations-backup/186/20261006000400_normalized_qc_runs/fresh-prisma-tables.json
+#57 CACHED
+
+#58 [stage-1 27/56] COPY server/prisma/migrations/20261007000300_proficiency_evidence/migration.sql /app/server/.migrations-backup/189/20261007000300_proficiency_evidence/migration.sql
+#58 CACHED
+
+#59 [stage-1 37/56] COPY server/prisma/migrations/20261009000400_calculation_templates/migration.sql /app/server/.migrations-backup/199/20261009000400_calculation_templates/migration.sql
+#59 CACHED
+
+#60 [stage-1 18/56] COPY server/prisma/migrations/20261006000100_sample_holds_cancellation/migration.sql /app/server/.migrations-backup/183/20261006000100_sample_holds_cancellation/migration.sql
+#60 CACHED
+
+#61 [stage-1 42/56] COPY server/prisma/migrations/20261010000000_sample_amendment_authorisation/fresh-prisma-tables.json /app/server/.migrations-backup/210/20261010000000_sample_amendment_authorisation/fresh-prisma-tables.json
+#61 CACHED
+
+#62 [stage-1 14/56] COPY server/prisma/migrations/20261005000000_workflow_state_evidence/migration.sql /app/server/.migrations-backup/179/20261005000000_workflow_state_evidence/migration.sql
+#62 CACHED
+
+#63 [stage-1  7/56] RUN apk del python3 make g++
+#63 CACHED
+
+#64 [stage-1  6/56] RUN cd server && npm rebuild better-sqlite3
+#64 CACHED
+
+#65 [stage-1 15/56] COPY server/prisma/migrations/20261005000100_workflow_state_guards/migration.sql /app/server/.migrations-backup/179/20261005000100_workflow_state_guards/migration.sql
+#65 CACHED
+
+#66 [stage-1  9/56] COPY shared/ ./shared/
+#66 CACHED
+
+#67 [stage-1 36/56] COPY server/prisma/migrations/20261009000300_result_override_requests/migration.sql /app/server/.migrations-backup/197/20261009000300_result_override_requests/migration.sql
+#67 CACHED
+
+#68 [stage-1 26/56] COPY server/prisma/migrations/20261007000200_qc_bracket_membership/migration.sql /app/server/.migrations-backup/187/20261007000200_qc_bracket_membership/migration.sql
+#68 CACHED
+
+#69 [builder 12/12] RUN cd client && npm run build
+#69 CACHED
+
+#70 [stage-1 56/56] RUN sed -i 's/\r$//' /app/docker-entrypoint.sh && chmod +x /app/docker-entrypoint.sh
+#70 CACHED
+
+#71 exporting to image
+#71 exporting layers 0.1s done
+#71 exporting manifest sha256:c22e66aceb4d2ea3ad3784dd4041abfd05f8626612d42ba0014a1730122d95fb done
+#71 exporting config sha256:84d1175a924f80b78940e27b1f2eadf4b947ed8d50bc79031a15f611af711331 done
+#71 exporting attestation manifest sha256:ad3647fdd1f2efc3b8a8d9c643e8fea537fd33c129e2759e59ac4e840e275c2c 0.0s done
+#71 exporting manifest list sha256:acc158447f5571068bf150fc0e8fa6f0889aeb38f9aec8be08978d903bd5be6a done
+#71 naming to docker.io/library/soilfer-lims:audit-workflow-batch-build-be837974-20261015T190000Z done
+#71 unpacking to docker.io/library/soilfer-lims:audit-workflow-batch-build-be837974-20261015T190000Z 0.1s done
+#71 DONE 0.5s

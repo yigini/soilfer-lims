@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "du",
+    "-s",
+    "-B1",
+    "--",
+    "/opt/lims/releases/workflow-batch-build-be837974-20261015T190000Z",
+    "/var/lib/docker/buildkit",
+    "/var/lib/containerd"
+  ],
+  "startedUtc": "2026-10-15T19:19:26.626899+00:00",
+  "timeoutSeconds": 120,
+  "attempt": 1,
+  "stage": "after",
+  "maximumPostBuildAttempts": 2,
+  "partialTotalsAccepted": false
+}
