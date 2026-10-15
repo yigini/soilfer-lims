@@ -1,0 +1,251 @@
+{
+  "validation": {
+    "status": "ACTUAL_STARTUP_BUILD180000_ACTIVE_ACCOUNTING_PREFLIGHT_AT_OPENING",
+    "observedUtc": "2026-10-15T18:30:17.322327+00:00",
+    "actualInvocationId": "8a78764a88a44f1b9c5dc577a2f4b8de",
+    "actualActiveUnitLimits": {
+      "MemoryMax": "805306368",
+      "MemorySwapMax": "0",
+      "RuntimeMaxUSec": "45min"
+    },
+    "toolingCommit": "2c0cebca0e9e191d2062c2f43756aa1d46e98c85",
+    "sourceReviewId": 6199128746,
+    "root": "/opt/lims/releases/workflow-batch-build-be837974-20261015T180000Z",
+    "unit": "lims-workflow-batch-build-be837974-20261015t180000z",
+    "freshLauncherCapacityGates": {
+      "before-root": {
+        "phase": "before-root",
+        "requiredFreeBytes": 24979478638,
+        "additionalHeadroomBytes": 10000000000,
+        "paths": {
+          "/opt/lims": {
+            "freeBytes": 32152936448,
+            "device": 64769,
+            "blockBytes": 4096,
+            "symlink": false,
+            "directory": true
+          },
+          "/var/lib/docker": {
+            "freeBytes": 32152936448,
+            "device": 64769,
+            "blockBytes": 4096,
+            "symlink": false,
+            "directory": true
+          },
+          "/var/lib/containerd": {
+            "freeBytes": 32152936448,
+            "device": 64769,
+            "blockBytes": 4096,
+            "symlink": false,
+            "directory": true
+          }
+        },
+        "sameFilesystemValuesNotAdditive": true,
+        "capacityPlanSha256": "3bbfd38c23790e2ccc11eb9792b5ef7c105aaf32525167f44bb876e68a6e4281",
+        "observedUtc": "2026-10-15T18:29:09.028565+00:00"
+      },
+      "before-unit": {
+        "phase": "before-unit",
+        "requiredFreeBytes": 24935798894,
+        "additionalHeadroomBytes": 10000000000,
+        "paths": {
+          "/opt/lims": {
+            "freeBytes": 32111202304,
+            "device": 64769,
+            "blockBytes": 4096,
+            "symlink": false,
+            "directory": true
+          },
+          "/var/lib/docker": {
+            "freeBytes": 32111202304,
+            "device": 64769,
+            "blockBytes": 4096,
+            "symlink": false,
+            "directory": true
+          },
+          "/var/lib/containerd": {
+            "freeBytes": 32111202304,
+            "device": 64769,
+            "blockBytes": 4096,
+            "symlink": false,
+            "directory": true
+          }
+        },
+        "sameFilesystemValuesNotAdditive": true,
+        "capacityPlanSha256": "3bbfd38c23790e2ccc11eb9792b5ef7c105aaf32525167f44bb876e68a6e4281",
+        "observedUtc": "2026-10-15T18:29:56.447809+00:00"
+      }
+    },
+    "buildEnteredAtOpening": false,
+    "terminalResultAtOpening": null,
+    "activeResultSuccessAndExit0AreNotClosedSuccess": true,
+    "buildRootUnitLaunchConsumedNeverReplay": true,
+    "proofs": 0,
+    "cleanup": 0,
+    "productionOperations": 0
+  },
+  "files": [
+    {
+      "path": "WP/batch-build-startup-be837974-20261015/first-build-180000-opening-publication-once/opening-record.json",
+      "length": 2781,
+      "sha256": "188aed67d55640d264f4df138b58adc4c830db428cdad8bc71064023503cf899",
+      "gitBlobOid": "b2bc0aa010764864849c406c7435e94ec70bf6a9"
+    },
+    {
+      "path": "WP/batch-build-startup-be837974-20261015/build-package-workflow-batch-build-be837974-20261015T180000Z-launch/capacity-before-root-original.stderr",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "WP/batch-build-startup-be837974-20261015/build-package-workflow-batch-build-be837974-20261015T180000Z-launch/capacity-before-root-original.stdout",
+      "length": 653,
+      "sha256": "db5db467a718779b1866e366d25b653840786dc96aa9b676568e8b342b06136b",
+      "gitBlobOid": "1bea37cb2a89c7fb3e96073fb52c2099e1f9c3a0"
+    },
+    {
+      "path": "WP/batch-build-startup-be837974-20261015/build-package-workflow-batch-build-be837974-20261015T180000Z-launch/capacity-before-unit-original.stderr",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "WP/batch-build-startup-be837974-20261015/build-package-workflow-batch-build-be837974-20261015T180000Z-launch/capacity-before-unit-original.stdout",
+      "length": 653,
+      "sha256": "8ae464463146ec15c81eff8a8eebbf4a8f5a1bcec2a489acaa7dc316b8f6f404",
+      "gitBlobOid": "8ca8c0fce6c45ec0ba017aa88ab0a6e4c86df47a"
+    },
+    {
+      "path": "WP/batch-build-startup-be837974-20261015/build-package-workflow-batch-build-be837974-20261015T180000Z-launch/create-new-root.stderr",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "WP/batch-build-startup-be837974-20261015/build-package-workflow-batch-build-be837974-20261015T180000Z-launch/create-new-root.stdout",
+      "length": 116,
+      "sha256": "3f3feb453259a85237237f14c76c61e0e3b5a1c76b3057323805f6fb5138c85c",
+      "gitBlobOid": "d1e32d1b6c2469ea79cb2792d975e5bd55770e26"
+    },
+    {
+      "path": "WP/batch-build-startup-be837974-20261015/build-package-workflow-batch-build-be837974-20261015T180000Z-launch/current-main-before-launch.json",
+      "length": 336,
+      "sha256": "5dbe45b3d22a65a8a14dc291df3e7fc536f7465cceca1682788cdb46d6448679",
+      "gitBlobOid": "304c7641f875df313b3c12146f7ce990a7872ee7"
+    },
+    {
+      "path": "WP/batch-build-startup-be837974-20261015/build-package-workflow-batch-build-be837974-20261015T180000Z-launch/launch-intent.json",
+      "length": 631,
+      "sha256": "d1c4b4ad47e8dd1bf37463784faf0de65c0d74fea5995fd4678a68cae430b5b8",
+      "gitBlobOid": "71a9bdf599deaf32e658df07fff7b59d7ec3d829"
+    },
+    {
+      "path": "WP/batch-build-startup-be837974-20261015/build-package-workflow-batch-build-be837974-20261015T180000Z-launch/launch-record.json",
+      "length": 4273,
+      "sha256": "112a4ff74f7aba637db6a55e1b071cd59fe8482662880df48cca19e561fc1f63",
+      "gitBlobOid": "33888be1397eea826cceed5727dca16d5e13441f"
+    },
+    {
+      "path": "WP/batch-build-startup-be837974-20261015/build-package-workflow-batch-build-be837974-20261015T180000Z-launch/upload-new-build-package.stderr",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "WP/batch-build-startup-be837974-20261015/build-package-workflow-batch-build-be837974-20261015T180000Z-launch/upload-new-build-package.stdout",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "WP/batch-build-startup-be837974-20261015/build-package-workflow-batch-build-be837974-20261015T180000Z-launch/verify-and-launch-once.stderr",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "WP/batch-build-startup-be837974-20261015/build-package-workflow-batch-build-be837974-20261015T180000Z-launch/verify-and-launch-once.stdout",
+      "length": 318,
+      "sha256": "ba6ed00208552a76d250f83c9abf65f901f4b84c10b8e3478f0b915f8c9c57ee",
+      "gitBlobOid": "663bc7bea9f3930860972fe5653bf82ff6828732"
+    },
+    {
+      "path": "WP/batch-build-startup-be837974-20261015/first-build-180000-opening-observation-once/command-original.json",
+      "length": 211,
+      "sha256": "5f7bcb555296f848cb6feae37bff8e19851dfeda52f0ed80045bc79a26335b10",
+      "gitBlobOid": "e6d3ab3e610a03851e75ca0175789c0af3a6a68e"
+    },
+    {
+      "path": "WP/batch-build-startup-be837974-20261015/first-build-180000-opening-observation-once/exit-original.json",
+      "length": 65,
+      "sha256": "8f63fb3c3d207eb4d3620e5d29fd43acfe873267a2bda7d346a029a02aa14387",
+      "gitBlobOid": "65e63668c4dc7c5618f614bcc9057fc69db08fa8"
+    },
+    {
+      "path": "WP/batch-build-startup-be837974-20261015/first-build-180000-opening-observation-once/readonly-observer-source.py",
+      "length": 1447,
+      "sha256": "eb0be16093a20c3e5a92d7758a55093e07df4a9be9e9ccb167907ca3a2126182",
+      "gitBlobOid": "d697fd97b57a00d3b78d1acae64be285d90a122e"
+    },
+    {
+      "path": "WP/batch-build-startup-be837974-20261015/first-build-180000-opening-observation-once/stderr-original.log",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "WP/batch-build-startup-be837974-20261015/first-build-180000-opening-observation-once/stdout-original.json",
+      "length": 1859,
+      "sha256": "80176bd5ffbc16cc290b2ab88be4c202c1294eb607c0f76095bff3690111b31e",
+      "gitBlobOid": "8c687a12d98c88d2f47aa6775610ce1b88772235"
+    },
+    {
+      "path": "WP/batch-build-startup-be837974-20261015/reviewed-launch-execution-6199128746-once/command-original.json",
+      "length": 636,
+      "sha256": "e09f5d5f0829ca09cadbbb2c8d55f5aa3fb9c74172ea8731afbf80bee2268eac",
+      "gitBlobOid": "0ada33e47a857bd4190e54425159eab97c32f634"
+    },
+    {
+      "path": "WP/batch-build-startup-be837974-20261015/reviewed-launch-execution-6199128746-once/exit-original.json",
+      "length": 119,
+      "sha256": "307599ab2512865a8e5d998ce0ec6716b50c3909e882e98f2e95b5ce49b1ab5a",
+      "gitBlobOid": "b0b11f6b2ee8386957e1b71a419b163a4bbc85e2"
+    },
+    {
+      "path": "WP/batch-build-startup-be837974-20261015/reviewed-launch-execution-6199128746-once/stderr-original.log",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "WP/batch-build-startup-be837974-20261015/reviewed-launch-execution-6199128746-once/stdout-original.log",
+      "length": 4098,
+      "sha256": "3e654b2193db9ea50ba6d4ce852d04da1630d40cbcb5cb8572850f551220512a",
+      "gitBlobOid": "26f3279492d394f7f38a85a1f99571e5dda536ba"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/observe-startup-build180000-first-readonly-once.py",
+      "length": 2562,
+      "sha256": "f44ef34058be9414c423afd829aff2ea797b3166988132f1c18e84e1e5e137a3",
+      "gitBlobOid": "af742598a212459db14d027b6c47e970433751e2"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/retain-startup-build180000-opening-once.py",
+      "length": 5840,
+      "sha256": "fa2bceba9a1b89e50091ff71ade6ee85f1a00f25c54b4384ac03461e9eda55ca",
+      "gitBlobOid": "2ac9e61332e4136b158cc04aebeb8081d43cb31a"
+    },
+    {
+      "path": "WP/audit-release-eb6de2e8/README.md",
+      "length": 648324,
+      "sha256": "4e3d0b59a84d43fab257b96c0d648fe11d3b03f9e38cc4dcac816095bc677467",
+      "gitBlobOid": "7a452b78c47c1f3d6d188ed5ffbd91aa4211ffe3"
+    },
+    {
+      "path": "WP/runtime-recovery-kobo/README.md",
+      "length": 397617,
+      "sha256": "a57d12b97b45ae26456bb48238f9de94f935c5ba72372a1c0b0bb39efced8513",
+      "gitBlobOid": "1d7bdebf48211bdcaa295fceb6421dcbebd1e5f7"
+    }
+  ]
+}

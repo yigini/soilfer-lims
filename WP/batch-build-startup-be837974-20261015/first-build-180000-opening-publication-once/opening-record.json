@@ -1,0 +1,85 @@
+{
+  "status": "ACTUAL_STARTUP_BUILD180000_ACTIVE_ACCOUNTING_PREFLIGHT_AT_OPENING",
+  "observedUtc": "2026-10-15T18:30:17.322327+00:00",
+  "actualInvocationId": "8a78764a88a44f1b9c5dc577a2f4b8de",
+  "actualActiveUnitLimits": {
+    "MemoryMax": "805306368",
+    "MemorySwapMax": "0",
+    "RuntimeMaxUSec": "45min"
+  },
+  "toolingCommit": "2c0cebca0e9e191d2062c2f43756aa1d46e98c85",
+  "sourceReviewId": 6199128746,
+  "root": "/opt/lims/releases/workflow-batch-build-be837974-20261015T180000Z",
+  "unit": "lims-workflow-batch-build-be837974-20261015t180000z",
+  "freshLauncherCapacityGates": {
+    "before-root": {
+      "phase": "before-root",
+      "requiredFreeBytes": 24979478638,
+      "additionalHeadroomBytes": 10000000000,
+      "paths": {
+        "/opt/lims": {
+          "freeBytes": 32152936448,
+          "device": 64769,
+          "blockBytes": 4096,
+          "symlink": false,
+          "directory": true
+        },
+        "/var/lib/docker": {
+          "freeBytes": 32152936448,
+          "device": 64769,
+          "blockBytes": 4096,
+          "symlink": false,
+          "directory": true
+        },
+        "/var/lib/containerd": {
+          "freeBytes": 32152936448,
+          "device": 64769,
+          "blockBytes": 4096,
+          "symlink": false,
+          "directory": true
+        }
+      },
+      "sameFilesystemValuesNotAdditive": true,
+      "capacityPlanSha256": "3bbfd38c23790e2ccc11eb9792b5ef7c105aaf32525167f44bb876e68a6e4281",
+      "observedUtc": "2026-10-15T18:29:09.028565+00:00"
+    },
+    "before-unit": {
+      "phase": "before-unit",
+      "requiredFreeBytes": 24935798894,
+      "additionalHeadroomBytes": 10000000000,
+      "paths": {
+        "/opt/lims": {
+          "freeBytes": 32111202304,
+          "device": 64769,
+          "blockBytes": 4096,
+          "symlink": false,
+          "directory": true
+        },
+        "/var/lib/docker": {
+          "freeBytes": 32111202304,
+          "device": 64769,
+          "blockBytes": 4096,
+          "symlink": false,
+          "directory": true
+        },
+        "/var/lib/containerd": {
+          "freeBytes": 32111202304,
+          "device": 64769,
+          "blockBytes": 4096,
+          "symlink": false,
+          "directory": true
+        }
+      },
+      "sameFilesystemValuesNotAdditive": true,
+      "capacityPlanSha256": "3bbfd38c23790e2ccc11eb9792b5ef7c105aaf32525167f44bb876e68a6e4281",
+      "observedUtc": "2026-10-15T18:29:56.447809+00:00"
+    }
+  },
+  "buildEnteredAtOpening": false,
+  "terminalResultAtOpening": null,
+  "activeResultSuccessAndExit0AreNotClosedSuccess": true,
+  "buildRootUnitLaunchConsumedNeverReplay": true,
+  "proofs": 0,
+  "cleanup": 0,
+  "productionOperations": 0
+}
