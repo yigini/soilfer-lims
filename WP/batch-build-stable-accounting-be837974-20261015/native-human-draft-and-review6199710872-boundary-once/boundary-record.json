@@ -1,0 +1,16 @@
+{
+  "recordedUtc": "2026-10-15T18:48:44.204084+00:00",
+  "status": "NEW_SOURCE_REVIEW_REQUEST_POSTED_NATIVE_DEFERRED_FOR_HUMAN_DRAFT",
+  "sourceCommit": "4de3e334d8e498783a4cf20df4a5f93acfdbeb21",
+  "sourceRequestId": 6199710872,
+  "requestCreatedUtc": "2026-10-15T18:46:51Z",
+  "actualNewSourcePassClaimed": false,
+  "newComments": [],
+  "allFiveCurrentSourcesAnd1333ApplicationHashesUnchanged": true,
+  "prior180000FailedEvidenceAudit": "23e8dad8d6442321586b7d0bf4920c48a8681054",
+  "candidateA61Excluded": true,
+  "new190000PackageRootUnitUncreated": true,
+  "nativeNewHandoffUnsentPreserveHumanDraft": true,
+  "hostConnectionsByRetainer": 0,
+  "buildsProofsCleanupProductionOperations": 0
+}
