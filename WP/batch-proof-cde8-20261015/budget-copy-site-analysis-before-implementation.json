@@ -1,0 +1,103 @@
+{
+  "status": "RETAINED_SOURCE_ONLY_COPY_SITE_ACCOUNTING_NOT_NEW_SOURCE_APPROVAL",
+  "utc": "2026-10-15T02:48:03.881008+00:00",
+  "actualDirection": 6183215126,
+  "stages": [
+    {
+      "stage": "fresh-seal",
+      "dbTriples": 3,
+      "assets": 1
+    },
+    {
+      "stage": "target-and-policy",
+      "dbTriples": 2,
+      "assets": 0
+    },
+    {
+      "stage": "206",
+      "dbTriples": 10,
+      "assets": 0
+    },
+    {
+      "stage": "214",
+      "dbTriples": 13,
+      "assets": 0
+    },
+    {
+      "stage": "order-impact",
+      "dbTriples": 2,
+      "assets": 0
+    },
+    {
+      "stage": "209",
+      "dbTriples": 16,
+      "assets": 0
+    },
+    {
+      "stage": "startup-1",
+      "dbTriples": 12,
+      "assets": 1
+    },
+    {
+      "stage": "startup-2",
+      "dbTriples": 12,
+      "assets": 1
+    }
+  ],
+  "declaredMaximumDbTripleCount": 70,
+  "marginPercent": 25,
+  "minimumDbEquivalents": 64,
+  "derivedDbEquivalents": 88,
+  "basisT": 567558144,
+  "basisA": 5787648,
+  "requiredBytes": 64813597806,
+  "postFailureFreeBytes": 58602573824,
+  "remainingCapacityShortfallBytes": 6211023982,
+  "extraCopiesBeyondClaudioEstimate": "214 dry/apply/repeat each retain one policy snapshot;209 dry/apply/repeat each retain two policy snapshots;each startup retains four entrypoint plus four server-readiness policy snapshots. Chart impact itself copies zero DBs.",
+  "applicationGitBlobs": [
+    {
+      "path": "server/scripts/install_lab_policy_schema.js",
+      "bytes": 11387,
+      "sha256": "2fb7aec33e45dcd26cf7e34e4d0cb8102420fa06b311db3472c39c33aca92023",
+      "blob": "643916b07e3a19f1df5600ea3f350cd359fc1e8e"
+    },
+    {
+      "path": "server/scripts/install_control_charts.js",
+      "bytes": 8475,
+      "sha256": "0557ab276ec24795cabdf6f58b4a8946c193d19853f259cf8ab52d6df4ce3370",
+      "blob": "ba78a6971400340934615d7aeb6a3803f2a471da"
+    },
+    {
+      "path": "server/scripts/install_order_revisions.js",
+      "bytes": 18100,
+      "sha256": "756a720c3351b87e9b6dd2a57fb109874952e2d3a4c5496472120d08c7b6552e",
+      "blob": "40f214b3d46e71371d8e346b8023507b431e4ed5"
+    },
+    {
+      "path": "server/scripts/order_revision_impact.js",
+      "bytes": 4773,
+      "sha256": "6cf3712c20cead275f8ea41e258ca321b03932f23a559d550670b40e03f4cb76",
+      "blob": "39cd8daf96b10740d63e35ed1d22e6a59cf0f0a0"
+    },
+    {
+      "path": "server/scripts/control_chart_prebinding_impact.js",
+      "bytes": 8709,
+      "sha256": "abf37ed7905e6f5c0482a90a66ed01b6aaede17f73e0701216d5eed6e4ac37c0",
+      "blob": "92c7cd1bae19714812c16d3ccf86bf0dcd01f735"
+    },
+    {
+      "path": "docker-entrypoint.sh",
+      "bytes": 9463,
+      "sha256": "e7f1cf8241776e5aa9f357d5435a5e11632e6b9e5c6502ee1b1ecdd31146e19c",
+      "blob": "6e9d00752eee0a7b5cd5f8b1531cd62984bdf03c"
+    },
+    {
+      "path": "server/index.js",
+      "bytes": 10311,
+      "sha256": "012b45e634cc6883f0a8c672890cf5516fdeccd5ef399e7d32c5cbcfbfe28590",
+      "blob": "bd58cf20aee5f1de757a0ffc6544e50ff1173c19"
+    }
+  ],
+  "sourceBudgetImplementationExists": false,
+  "newOperations": 0
+}
