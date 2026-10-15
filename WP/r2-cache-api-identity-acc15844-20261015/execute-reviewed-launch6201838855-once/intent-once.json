@@ -1,0 +1,13 @@
+{
+  "utc": "2026-10-15T20:47:24.838422+00:00",
+  "argv": [
+    "C:\\Users\\yigin\\AppData\\Local\\Programs\\Python\\Python312-arm64\\python.exe",
+    "-B",
+    "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\WP\\r2-cache-api-identity-acc15844-20261015\\launch_r2.py",
+    "--package",
+    "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\WP\\r2-cache-api-identity-acc15844-20261015\\reviewed-r2-package-once"
+  ],
+  "packagePublication": "509fcd050fb07755c1e3b714b0c61a1f8e4e3b17",
+  "sourceReviewId": 6201838855,
+  "neverReplay": true
+}
