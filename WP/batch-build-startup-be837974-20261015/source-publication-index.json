@@ -1,0 +1,223 @@
+{
+  "baseAudit": "3167ea258780a8590337e89e233083a8ef272695",
+  "status": "NEW_BUILD_SOURCE28_LOCAL_HOST_VERIFIED_NOT_APPROVED_OR_EXECUTED",
+  "candidate": "be8379745bdfae52ce46496ff26514dc7d729640",
+  "files": [
+    {
+      "path": "WP/batch-build-startup-be837974-20261015/authority-6189025975-original.json",
+      "length": 6545,
+      "sha256": "16e9b64f1e0729e6c8d66a18e5099b2ac88d00ee1199bea528df8c28563a6b34",
+      "gitBlobOid": "b2141c6fd2a707909b5def97fcadf0d5df38c350"
+    },
+    {
+      "path": "WP/batch-build-startup-be837974-20261015/authority-6189658753-original.json",
+      "length": 6654,
+      "sha256": "433dee0b65e0a046bf905aa59f8a2c6821f484026a08674def660fb2a0a55607",
+      "gitBlobOid": "e9910f23a7ffc3e61d39f45f89115a7db7455cd0"
+    },
+    {
+      "path": "WP/batch-build-startup-be837974-20261015/authority-6189669837-original.json",
+      "length": 4262,
+      "sha256": "e6ea6a6dc2a0f13769eecd0f60780072b8a2902952d3ca30c7cae76017703dcf",
+      "gitBlobOid": "f3dd190c056690605fb142d1d5012cf368242194"
+    },
+    {
+      "path": "WP/batch-build-startup-be837974-20261015/authority-6191219093-original.json",
+      "length": 5365,
+      "sha256": "1c74e5f354e8f2c434d333b1fcf5830d01224866b4c93bc44bfd83975510ab71",
+      "gitBlobOid": "bb55d6433c2bf870748261f9dd6a14ce840cfb55"
+    },
+    {
+      "path": "WP/batch-build-startup-be837974-20261015/batch_build.py",
+      "length": 13688,
+      "sha256": "17fae7713e60cfe2e3fe4c394ebd2c9715005adc4abf34481f685686e7de26ab",
+      "gitBlobOid": "bc46a16a0039cc9c5fb8980b4f5363da505fb671"
+    },
+    {
+      "path": "WP/batch-build-startup-be837974-20261015/batch_build_contract.py",
+      "length": 22451,
+      "sha256": "fc7d350be90df8e3e4254d3e0c7cd5749abc91cefda04ec085a8501c235383b9",
+      "gitBlobOid": "772b2092913a0256288d258d89b3e46434511163"
+    },
+    {
+      "path": "WP/batch-build-startup-be837974-20261015/launch_batch_build.py",
+      "length": 10416,
+      "sha256": "6f355d087facbbd5cd7fa0a0d9623c1379329d23429854862a7eed50dd64896c",
+      "gitBlobOid": "3d8809f22939b71e359d3dc0651e9044e4396b8e"
+    },
+    {
+      "path": "WP/batch-build-startup-be837974-20261015/prepare_batch_build.py",
+      "length": 9982,
+      "sha256": "00caeef399735d3ca9ed6cef6febd63dbfee69a8cee1981fd0bb25ec1d4dcb9f",
+      "gitBlobOid": "fefab73da7cc868637ca6c72e9b06244ef49cfc1"
+    },
+    {
+      "path": "WP/batch-build-startup-be837974-20261015/README.md",
+      "length": 5122,
+      "sha256": "ec3d87ef962e9d7e5c4d26e45bc49ca98759bef2a88acd9bdd4b8c86412d10d4",
+      "gitBlobOid": "a376761b2421e84b85694076d9b9aab60dc5a4fa"
+    },
+    {
+      "path": "WP/batch-build-startup-be837974-20261015/source-authority-beforebytes-once/batch_build.py",
+      "length": 13499,
+      "sha256": "0ecd7d85861fc556601ef5a1f78f74660bf3ff05923f0b5bca9e17ebe33d5a65",
+      "gitBlobOid": "21cd0d1c709021a9c8d1db26005e38743277fb7e"
+    },
+    {
+      "path": "WP/batch-build-startup-be837974-20261015/source-authority-beforebytes-once/batch_build_contract.py",
+      "length": 21454,
+      "sha256": "70faf2ce3939a07c635c01499367bc62fd8519c0f55a3abbb0bcc14811c61c8c",
+      "gitBlobOid": "c2636e633ee6f0f76b03bf5cf2f4c84851e6077c"
+    },
+    {
+      "path": "WP/batch-build-startup-be837974-20261015/source-authority-beforebytes-once/launch_batch_build.py",
+      "length": 10416,
+      "sha256": "6f355d087facbbd5cd7fa0a0d9623c1379329d23429854862a7eed50dd64896c",
+      "gitBlobOid": "3d8809f22939b71e359d3dc0651e9044e4396b8e"
+    },
+    {
+      "path": "WP/batch-build-startup-be837974-20261015/source-authority-beforebytes-once/prepare_batch_build.py",
+      "length": 9826,
+      "sha256": "ad2245d43f2079222d4c05d9ef27aef46972023c39d4c2f53e6e89a67357ebf6",
+      "gitBlobOid": "93c0846539318e9e19f09a1c3531d86f51bb0681"
+    },
+    {
+      "path": "WP/batch-build-startup-be837974-20261015/source-authority-beforebytes-once/verify_build_guards.py",
+      "length": 20177,
+      "sha256": "f805bf9b18bbc106f002270cc67d7af65d7f807fffe11927039ebc7c97ce5e3f",
+      "gitBlobOid": "1f80aa296028ddd313fb8bd72b42b7facdd14790"
+    },
+    {
+      "path": "WP/batch-build-startup-be837974-20261015/source-authority-preparation-original.json",
+      "length": 2113,
+      "sha256": "5e096071764694a2ff649c1f650d83781dd34a93583829149cce65bfa3148160",
+      "gitBlobOid": "a58f6d273ef158e74334a14bc412b878ae970af7"
+    },
+    {
+      "path": "WP/batch-build-startup-be837974-20261015/source-local-host-verification-once/command-original.json",
+      "length": 646,
+      "sha256": "d27b3f8cd89e212cb86d385d770c24bfd43b485faa3ced548d4a6b4973ff5716",
+      "gitBlobOid": "ecff9cc3b42de3ef9386f819bd8260dc7f160273"
+    },
+    {
+      "path": "WP/batch-build-startup-be837974-20261015/source-local-host-verification-once/exit-original.json",
+      "length": 2149,
+      "sha256": "af2c2fe0f7710ec45b8e7d602c39b99db991a3466498873da4a340916a81eefc",
+      "gitBlobOid": "56a23a05978f4b0ff57a616f5928fc03d6885ddf"
+    },
+    {
+      "path": "WP/batch-build-startup-be837974-20261015/source-local-host-verification-once/frozen-batch_build.py",
+      "length": 13688,
+      "sha256": "17fae7713e60cfe2e3fe4c394ebd2c9715005adc4abf34481f685686e7de26ab",
+      "gitBlobOid": "bc46a16a0039cc9c5fb8980b4f5363da505fb671"
+    },
+    {
+      "path": "WP/batch-build-startup-be837974-20261015/source-local-host-verification-once/frozen-batch_build_contract.py",
+      "length": 22451,
+      "sha256": "fc7d350be90df8e3e4254d3e0c7cd5749abc91cefda04ec085a8501c235383b9",
+      "gitBlobOid": "772b2092913a0256288d258d89b3e46434511163"
+    },
+    {
+      "path": "WP/batch-build-startup-be837974-20261015/source-local-host-verification-once/frozen-launch_batch_build.py",
+      "length": 10416,
+      "sha256": "6f355d087facbbd5cd7fa0a0d9623c1379329d23429854862a7eed50dd64896c",
+      "gitBlobOid": "3d8809f22939b71e359d3dc0651e9044e4396b8e"
+    },
+    {
+      "path": "WP/batch-build-startup-be837974-20261015/source-local-host-verification-once/frozen-prepare_batch_build.py",
+      "length": 9982,
+      "sha256": "00caeef399735d3ca9ed6cef6febd63dbfee69a8cee1981fd0bb25ec1d4dcb9f",
+      "gitBlobOid": "fefab73da7cc868637ca6c72e9b06244ef49cfc1"
+    },
+    {
+      "path": "WP/batch-build-startup-be837974-20261015/source-local-host-verification-once/frozen-verify_build_guards.py",
+      "length": 21544,
+      "sha256": "58238c64700d78352713ab9b6c3d43f7a82caab9bec061b40914f4c486a0ae4d",
+      "gitBlobOid": "15bd64976487d9f99a8b669c23dd93f7a815e5ef"
+    },
+    {
+      "path": "WP/batch-build-startup-be837974-20261015/source-local-host-verification-once/host-inmemory-verification-source.py",
+      "length": 105816,
+      "sha256": "775f2383fc89ef04bc2e83402fe90d0ac9d08c61e2d7b99a57a56ef7510f691f",
+      "gitBlobOid": "331920f77188bdfd2e626b5707424f0cb2872bc4"
+    },
+    {
+      "path": "WP/batch-build-startup-be837974-20261015/source-local-host-verification-once/host-stderr-original.log",
+      "length": 3221,
+      "sha256": "69d3237ffabad7e70372df55e03fa61f4c19f339ea451fcc95135a3209b912b3",
+      "gitBlobOid": "487654ffb0f5b3843a9bac735c42f4316248af87"
+    },
+    {
+      "path": "WP/batch-build-startup-be837974-20261015/source-local-host-verification-once/host-stdout-original.json",
+      "length": 731,
+      "sha256": "5fbbead0234176ff2015c5614479ab8738ca2bd47875f0b099d7f29a9bd67810",
+      "gitBlobOid": "f7c17df43ec8baf5910df3181a6dad2411ea4b2f"
+    },
+    {
+      "path": "WP/batch-build-startup-be837974-20261015/source-local-host-verification-once/local-stderr-original.log",
+      "length": 4437,
+      "sha256": "5e0b336c2df9db60306c5fd3a804821564f6612605826d50714586336fbd1aa6",
+      "gitBlobOid": "f9d667e801a4eb0c2db1707aaa6c89e1c3f8c473"
+    },
+    {
+      "path": "WP/batch-build-startup-be837974-20261015/source-local-host-verification-once/local-stdout-original.log",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "WP/batch-build-startup-be837974-20261015/source-preparation-original.json",
+      "length": 1866,
+      "sha256": "c0e1b04a1c52e176307153e05374191fbb69bd3b2bf2f7419ccbf69880ebd567",
+      "gitBlobOid": "535737b38629b0a7608a30c9f671e9f91a00eba1"
+    },
+    {
+      "path": "WP/batch-build-startup-be837974-20261015/verify_build_guards.py",
+      "length": 21544,
+      "sha256": "58238c64700d78352713ab9b6c3d43f7a82caab9bec061b40914f4c486a0ae4d",
+      "gitBlobOid": "15bd64976487d9f99a8b669c23dd93f7a815e5ef"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/prepare-startup-be837974-build-source-once.py",
+      "length": 18237,
+      "sha256": "870cc7b37c7fc9f0ba2cb90a350f4c9e643b1c23cd2754b62f04906e98131e27",
+      "gitBlobOid": "11677f4b468ae1f6f1e3f124f824f0c932f84f31"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/prepare-startup-be837974-build-source-structural-successor-once.py",
+      "length": 18209,
+      "sha256": "23ce1a9620f3185374f57c8c6b1c50560b37c57a5f224c494844e7eb2b0d214d",
+      "gitBlobOid": "6607c4861e00062d92753b2409c6abc5fb049a8a"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/verify-startup-be837974-build-source-local-host-once.py",
+      "length": 4525,
+      "sha256": "57e2c74e31d199dfcba6fd1e8446c8ed4944d843cd8077c3a02d7de9ce5f60ac",
+      "gitBlobOid": "07e1aa1270a8d004fdb634a3d7f91a6b39147a87"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/publish-startup-be837974-build-source28-once.py",
+      "length": 9674,
+      "sha256": "d266c89a2a53c4a0d6dfb29013a5a46f2ae8a0e350ea68c4e76aea99483836f8",
+      "gitBlobOid": "32446b011b5975a6bd4239fc265715482d7bda27"
+    },
+    {
+      "path": "WP/audit-release-eb6de2e8/README.md",
+      "length": 641455,
+      "sha256": "3c469de4cfa04ae0aa44e0edcb9a8cfbe1ed6a94306dba26cecb8d2169d99681",
+      "gitBlobOid": "0e9cb26c31c94e6095fbf108d6940e3f3859a1f6"
+    },
+    {
+      "path": "WP/runtime-recovery-kobo/README.md",
+      "length": 390748,
+      "sha256": "9d9e398b67184b311ba192d82c9288eef59d8b9bc90d519a1c82a533e74fd95d",
+      "gitBlobOid": "9627ed5c258ea1357b9839ab157a911be836d9df"
+    }
+  ],
+  "productionOperations": 0,
+  "publisherPrepRefusal": {
+    "kind": "TOOL_OUTPUT_TRANSCRIPTION",
+    "error": "SyntaxError: Unexpected identifier Source in functions exec source template; before publisher-file creation",
+    "oldSourceUnchanged": true
+  }
+}

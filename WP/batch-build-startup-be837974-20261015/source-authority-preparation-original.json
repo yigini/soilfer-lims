@@ -1,0 +1,42 @@
+{
+  "status": "COMPLETE_NEW_BUILD_SOURCE_DRAFT_WITH_FRESH_RULE_PINS_NOT_TESTED",
+  "authorityPins": {
+    "6189025975": "071b37b60b7489fc47f53aee5d5a91726e967730ebdf40adbc22aef4b047ee7e",
+    "6189658753": "1b293cf3d6b7108293599ffabfc1273ebd5f158f69a6e11f58e467d7ffa42708",
+    "6189669837": "2821ccc164bbf344201e6569f707314a168ae6f308cbece73cc5065d9ad3ac7e",
+    "6191219093": "84289b1c85e65973f26d52199f539e13423d5803c83c38be34a515b089505f8f"
+  },
+  "sourceHashes": {
+    "batch_build_contract.py": "fc7d350be90df8e3e4254d3e0c7cd5749abc91cefda04ec085a8501c235383b9",
+    "batch_build.py": "17fae7713e60cfe2e3fe4c394ebd2c9715005adc4abf34481f685686e7de26ab",
+    "prepare_batch_build.py": "00caeef399735d3ca9ed6cef6febd63dbfee69a8cee1981fd0bb25ec1d4dcb9f",
+    "launch_batch_build.py": "6f355d087facbbd5cd7fa0a0d9623c1379329d23429854862a7eed50dd64896c",
+    "verify_build_guards.py": "58238c64700d78352713ab9b6c3d43f7a82caab9bec061b40914f4c486a0ae4d"
+  },
+  "operatorsExecuted": 0,
+  "productionOperations": 0,
+  "preparationRefusals": [
+    {
+      "kind": "TOOL_OUTPUT_TRANSCRIPTION",
+      "helper": "prepare-startup-be837974-build-source-once.py",
+      "exitCode": 1,
+      "error": "SyntaxError: unterminated string literal at structural-test source literal, before NEW directory creation",
+      "newUniqueSuccessor": "prepare-startup-be837974-build-source-structural-successor-once.py",
+      "originalHelperUnchanged": true
+    },
+    {
+      "kind": "TOOL_OUTPUT_TRANSCRIPTION",
+      "boundary": "38a95c",
+      "exitCode": 1,
+      "error": "Exact current_evidence return whitespace assertion refused before any source write; four original authority reads and beforebytes retained",
+      "resolution": "Unique return-line-bound source-only successor"
+    }
+  ],
+  "nativeObservation": {
+    "returnedClaudeWindow": 7867734,
+    "getStateResult": "window is minimized; call activate_window, refresh with get_window, then retry get_window_state",
+    "newNativeReadObtained": false,
+    "activationOrInput": false,
+    "mainCiAcknowledgementSent": false
+  }
+}
