@@ -1,0 +1,16 @@
+{
+  "status": "ACTUAL_NATIVE_READ_ONLY_YY_DISK_QUESTION_AND_CLAUDIO_REQUEST",
+  "recordedUtc": "2026-10-15T07:46:29.585Z",
+  "window": {
+    "app": "Claude_pzs8sxrjxfjjc!Claude",
+    "id": 7867734,
+    "title": "Claude"
+  },
+  "project": "LIMS Audit",
+  "thread": "Lab workflow audit and plan",
+  "observedHumanQuestion": "disk was upgraded to 240.. what is filling that fast?",
+  "composerInputAttempted": false,
+  "humanCardsUntouched": true,
+  "githubRequest": 6186928334,
+  "screenshotInspectedDirectly": true
+}

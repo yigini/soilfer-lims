@@ -1,0 +1,9 @@
+{
+  "status": "RETAINED_DERIVED_PREDECESSOR_CORRECTED_NO_REMOTE_REPLAY",
+  "issue": "Initial derived classifier matched FAILURE inside the qualified BUILT_AFTER_EXCLUDED_ACCOUNTING_FAILURE status; corrected successor uses own-outcome prefixes and matches REFUSAL in full closed publication records. Original raw captures and initial derivatives remain unchanged.",
+  "currentReport": "disk-breakdown-report-corrected.md",
+  "currentSummary": "derived-summary-corrected.json",
+  "currentAllRootTable": "release-roots-corrected.csv",
+  "remoteCommandsRepeated": 0,
+  "productionMutations": 0
+}

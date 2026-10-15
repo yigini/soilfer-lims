@@ -1,0 +1,148 @@
+{
+  "status": "READONLY_DERIVED_DISK_BREAKDOWN_NOT_CLEANUP_AUTHORITY",
+  "captureBeganUtc": "2026-10-15T07:38:46.429989+00:00",
+  "captureClosedUtc": "2026-10-15T07:40:20.152941+00:00",
+  "extraObservedUtc": "2026-10-15T07:42:51.878198+00:00",
+  "filesystem": {
+    "device": "/dev/vda1",
+    "type": "ext4",
+    "sizeBytes": 253548216320,
+    "usedBytes": 209987596288,
+    "availableBytes": 33128968192,
+    "sizeMinusUsedMinusAvailableBytes": 10431651840
+  },
+  "releaseDirectoryCount": 127,
+  "releaseDirectoryPhysicalBytes": 105425149952,
+  "releaseParentPhysicalBytes": 109465116672,
+  "looseReleaseRootFileCount": 181,
+  "looseReleaseRootFilesPhysicalBytes": 4039933952,
+  "physicalStores": {
+    "/var/lib/docker": 11095085056,
+    "/var/lib/containerd": 43260563456
+  },
+  "liveVolumesIncludedWithinDockerNotAdditional": {
+    "/var/lib/docker/volumes/lims_lims-data/_data": 9902845952,
+    "/var/lib/docker/volumes/lims_lims-assets/_data": 5857280
+  },
+  "backupDirectories": {
+    "/home/admin/admin_backups": 4096,
+    "/home/admin/user_backups": 4096,
+    "/opt/lims/audit-backups": 16211320832,
+    "/opt/lims/backups": 6156845056,
+    "/opt/lims/server/backups": 291713024,
+    "/opt/lims/server/data/backup_1769719089950": 12734464,
+    "/opt/lims/server/data/backup_1769719280068": 9777152,
+    "/root/soilfer-qc186-ba116f6-20261007/server/.migrations-backup": 53248,
+    "/root/soilfer-qc186-d6b19c1-20261007/server/.migrations-backup": 53248,
+    "/root/soilfer-qc186-d7653cf-20261007/server/.migrations-backup": 57344,
+    "/root/soilfer-qc186-e7c2661-20261007/server/.migrations-backup": 53248
+  },
+  "dockerSummaryHumanRoundedAndOverlapping": [
+    {
+      "Active": "20",
+      "Reclaimable": "19.36GB (44%)",
+      "Size": "43.19GB",
+      "TotalCount": "34",
+      "Type": "Images"
+    },
+    {
+      "Active": "16",
+      "Reclaimable": "761.9kB (1%)",
+      "Size": "56.19MB",
+      "TotalCount": "74",
+      "Type": "Containers"
+    },
+    {
+      "Active": "14",
+      "Reclaimable": "271.3MB (2%)",
+      "Size": "10.69GB",
+      "TotalCount": "17",
+      "Type": "Local Volumes"
+    },
+    {
+      "Active": "0",
+      "Reclaimable": "4.14GB",
+      "Size": "9.72GB",
+      "TotalCount": "379",
+      "Type": "Build Cache"
+    }
+  ],
+  "imageReferenceCount": 35,
+  "uniqueImageIds": 34,
+  "taggedReferenceCount": 35,
+  "danglingUniqueImages": 0,
+  "containerCount": 74,
+  "stoppedContainerCount": 58,
+  "runningContainerCount": 16,
+  "largestOtherDepthTwoDirectoriesOverlappingDoNotSum": [
+    [
+      "/root",
+      6792544256
+    ],
+    [
+      "/usr",
+      6242631680
+    ],
+    [
+      "/usr/local",
+      2499833856
+    ],
+    [
+      "/root/soilfer-qc186-d6b19c1-20261007",
+      2470645760
+    ],
+    [
+      "/root/soilfer-qc186-d7653cf-20261007",
+      2353496064
+    ],
+    [
+      "/opt/soilfer-learn",
+      1903656960
+    ],
+    [
+      "/usr/share",
+      1437937664
+    ],
+    [
+      "/root/soilfer-qc186-e7c2661-20261007",
+      1127378944
+    ],
+    [
+      "/usr/lib",
+      1074941952
+    ],
+    [
+      "/var/log",
+      814243840
+    ]
+  ],
+  "closedFailedRootCountByOwnReceipt": 33,
+  "allClosedFailedRootsPhysicalBytesBeforePublicationQualification": 52030410752,
+  "publishedOriginalReceiptOrClosedRecordRootCount": 16,
+  "conditionalRootOnlyPublishedEvidenceEstimateBytes": 33613312000,
+  "fullClosedRetentionRecordSubsetCount": 6,
+  "fullClosedRetentionRecordSubsetBytes": 25442848768,
+  "failedRootsWithoutVerifiedPublicationInThisReport": [
+    "/opt/lims/releases/combined-eb6de2e8-20261010T154300Z",
+    "/opt/lims/releases/combined-eb6de2e8-20261010T160100Z",
+    "/opt/lims/releases/combined-eb6de2e8-main-042c04b5-retry-20261010T180200Z",
+    "/opt/lims/releases/combined-eb6de2e8-repair-pr-0685d34d-20261010T164000Z",
+    "/opt/lims/releases/combined-eb6de2e8-repair-pr-0685d34d-verified-20261010T170400Z",
+    "/opt/lims/releases/combined-eb6de2e8-repair-pr-5eba963e-20261010T162800Z",
+    "/opt/lims/releases/forward-ae64f169-proof-20261011T144000Z",
+    "/opt/lims/releases/forward-ae64f169-proof-20261011T144300Z",
+    "/opt/lims/releases/instrument-import-proof-959d17e1-20261012T134000Z",
+    "/opt/lims/releases/preparation-ae64f169-rehearsal-20261011T131500Z",
+    "/opt/lims/releases/preparation-ae64f169-rehearsal-20261011T132800Z",
+    "/opt/lims/releases/preparation-ae64f169-rehearsal-20261011T133600Z",
+    "/opt/lims/releases/qc187-rehearsal-a14ff63-20261007T105111Z",
+    "/opt/lims/releases/qc187-rehearsal-d61cda0-20261007T085400Z",
+    "/opt/lims/releases/qc188-release-20261008T055500Z",
+    "/opt/lims/releases/qc189-rehearsal-dfac90e-post187-20261008",
+    "/opt/lims/releases/runtime-jobs-off-ae64f169-proof-20261011T175017Z"
+  ],
+  "rawDatabaseBackupsRemainOnHostNotGit": true,
+  "rawReceiptsInGitAreNotAReplacementForRetainedDatabaseBytes": true,
+  "noDeletionEligibilityInferred": true,
+  "noProofCapacityAuthority": true
+}
