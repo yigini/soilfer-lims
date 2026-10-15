@@ -1,0 +1,44 @@
+{
+  "status": "RETAINED_LOCAL_ANALYSIS_IMAGE_EXCLUDED",
+  "analysisUtc": "2026-10-15T00:09:58.130763+00:00",
+  "imageEligibility": false,
+  "newBuildAuthority": null,
+  "forwardBuildSourceReviewAllowedByDirection": 6180234041,
+  "files": [
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/retained-targeted-analysis-no-adoption-once/analysis-original.json",
+      "bytes": 48734,
+      "sha256": "c2f4fc6d15d064f4e4a08255edbfd450494adb3f3625224ce7267550f66e6d25"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/retained-targeted-analysis-no-adoption-once/cache-timestamps-and-sharing.json",
+      "bytes": 246807,
+      "sha256": "e042d90a6b2c8be0b2e4eb639f3ab331dfae6a33974e3dfef17b788234ed6af9"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/retained-targeted-analysis-no-adoption-once/oci-manifest-descriptor-lengths.json",
+      "bytes": 455,
+      "sha256": "ec0a6145cf8600d1b93ac28db16b25242ed3d0ad25f59982f5d2319a207f595f"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/retained-targeted-analysis-no-adoption-once/snapshot-timestamps-and-rounded-usage.json",
+      "bytes": 28621,
+      "sha256": "00585d90d3d6002fcd6ed16ee4d76ccba6f6613205b1e03de4bf2c42969c6a9b"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/analyse-retained-targeted-metadata-no-adoption-once.py",
+      "bytes": 6829,
+      "sha256": "239626b07a685ba7816aab17f8d6bca6aecce46bdc789dfe5c76abd09c881f21"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/retain-targeted-analysis-image-excluded-once.py",
+      "bytes": 3771,
+      "sha256": "494981b9d08ad6c3eb2b6d0e46fe052036bdc44136abf5e7a95a6384f99e49a6"
+    },
+    {
+      "path": "WP/audit-release-eb6de2e8/README.md",
+      "bytes": 424665,
+      "sha256": "64e678015471ea4a21a8bafc33a00888fd9cafc73866c62b6597cbfcb7840757"
+    }
+  ]
+}

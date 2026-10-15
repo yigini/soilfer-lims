@@ -1,0 +1,14 @@
+[
+  {
+    "digest": "sha256:35efc0c5bdb0e2b9edca7b92fefecdc607cbd68624bda36484d1f8f026b03be4",
+    "layerCount": 59,
+    "compressedDescriptorBytesExact": 414640791,
+    "physicalAllocationIsNotDescriptorLength": true
+  },
+  {
+    "digest": "sha256:429bdfbc204b4eabc6438e6d34e4e9d8dd2ca1df8289bcd78cdd3c5db387b7a5",
+    "layerCount": 4,
+    "compressedDescriptorBytesExact": 62446568,
+    "physicalAllocationIsNotDescriptorLength": true
+  }
+]
