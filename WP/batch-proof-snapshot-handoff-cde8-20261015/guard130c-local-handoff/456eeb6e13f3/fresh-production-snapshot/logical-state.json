@@ -1,0 +1,1 @@
+{"foreignKeyViolations":0,"integrity":"ok","objects":[["table","evidence","evidence","CREATE TABLE evidence (id INTEGER,value TEXT)"]],"tables":{"evidence":{"columns":["id","value"],"count":1,"sha256":"6f3708ed601127df057d79c88a89b1a0f6d54ce2ba50f25088f75c8722a96e4d"}}}

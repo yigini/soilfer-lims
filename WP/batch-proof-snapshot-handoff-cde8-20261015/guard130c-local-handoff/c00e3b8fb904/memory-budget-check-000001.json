@@ -1,0 +1,1 @@
+{"activeStage":null,"allCounters":{"anon":123,"file":456},"anonBytes":123,"checkpoint":1,"fileBytes":456,"observedMonotonic":908065.0,"requiredFreeBytes":14851118190,"source":"CGROUP_V2_MEMORY_STAT"}
