@@ -1,0 +1,120 @@
+{
+  "status": "SOURCE_REVIEW_FOLLOWUPS_REQUIRED_AFTER_CURRENT_FULL_RUN_CLOSES_NOT_A_TEST_RESULT",
+  "observedUtc": "2026-10-15T11:30:37.923443+00:00",
+  "sourceAudit": "eef826a3213a51135ee5a4e9593c984306c14ae8",
+  "activeRunner": {
+    "helper": "verify-startup-context-full-ordinary-once.py",
+    "session": 76923,
+    "inventory": 373,
+    "expectedTests": 5672,
+    "status": "RUNNING_METADATA_ONLY",
+    "observedCompletedSuiteHeaders": [
+      "PASS tests/contracts/audit_6_1_non_scientific_authorisation.test.js (118.951 s)",
+      "PASS tests/contracts/issue_209_order_revision_integration.test.js (55.574 s)",
+      "PASS tests/contracts/audit_4_6_calibration.test.js (83.447 s)",
+      "PASS tests/contracts/audit_3_3_separate_texture.test.js (49.261 s)",
+      "PASS tests/contracts/audit_3_2_repeat_commands.test.js (71.605 s)",
+      "PASS tests/contracts/audit_4_6_calculation_install.test.js (70.014 s)",
+      "PASS tests/contracts/audit_3_1_attempt_sql_guards.test.js (70.166 s)",
+      "PASS tests/contracts/audit_2_3_compatibility_runs.test.js (17.891 s)",
+      "PASS tests/contracts/audit_2_4_bracket_disposition.test.js (45.703 s)",
+      "PASS tests/contracts/audit_2_3_native_runs.test.js (39.951 s)",
+      "PASS tests/contracts/audit_6_1_first_fill.test.js (20.83 s)",
+      "PASS tests/contracts/audit_4_1_run_start_header.test.js (37.294 s)",
+      "PASS tests/contracts/audit_4_4_override_sql.test.js (18.573 s)",
+      "PASS tests/contracts/audit_3_1_attempt_install.test.js (38.724 s)",
+      "PASS tests/contracts/audit_253_reviewed_qc_correction.test.js (33.423 s)",
+      "PASS tests/contracts/audit_4_8_cross_check_evidence.test.js (33.363 s)",
+      "PASS tests/contracts/audit_3_3_reported_readers.test.js (30.649 s)",
+      "PASS tests/contracts/audit_4_4_override_commands.test.js (31.024 s)",
+      "FAIL tests/contracts/audit_1_2_guard_installer.test.js (29.472 s)",
+      "PASS tests/contracts/audit_4_1_reagent_lot_commands.test.js (26.684 s)",
+      "PASS tests/contracts/deployment_readiness_bootstrap.test.js (13.526 s)",
+      "PASS tests/contracts/migration_lab_operations_v3.test.js (25.898 s)"
+    ],
+    "notFinalResult": true
+  },
+  "frozenSourceUnchanged": true,
+  "closedFocusedResult": "3 suites /23 tests PASS; bounded to fixtures actually exercised",
+  "sourceBindings": {
+    "server/utils/startupReadinessContext.js": "c328939e883ec20b60414109af1139c25a5c884546a9ade0f2d391b88467878b",
+    "server/scripts/install_order_revisions.js": "b08c8d5a5850da38bb3d599b51552365655a61159d82b49162f5103a155a58a0",
+    "server/tests/contracts/startup_readiness_context.test.js": "e746c519939d0cd4a415b0ce098807c8cc25578f4447afb6046064c703958ec0",
+    "server/tests/helpers/workflowWriteScanner.js": "22b2c1a285e40d8d6da2f22763b238a0c446c4ccf71a3cde9a4083a6ffbf258b"
+  },
+  "requiredNext": [
+    {
+      "work": "Wait for SAME frozen full runner to close; retain originals honestly before any edits. No interrupt/replay/concurrent runner. Inspect ALL actual failures first.",
+      "priority": 1
+    },
+    {
+      "work": "Verify WAL-mode coverage on new owned fixtures: empty/absent WAL and genuine nonempty WAL with an idle owned writer. Full26 legacy/context report equality, integrity/FK exactly once for stable bytes, one policy snapshot, unchanged original copy/hash/race guards. The existing focused fixtures sampled here use rollback-journal header versions1/1. No WAL-mode failure has been measured yet; do not invent one or a cache normalization fix.",
+      "priority": 2,
+      "closedFixtureHeaderObservationsFilesystemOnly": [
+        {
+          "path": "server/tests/.tmp/startup-readiness-kIKh89/owned.db",
+          "headerReadWriteVersions": [
+            1,
+            1
+          ],
+          "walPresent": false
+        },
+        {
+          "path": "server/tests/.tmp/startup-readiness-xDmucl/owned.db",
+          "headerReadWriteVersions": [
+            1,
+            1
+          ],
+          "walPresent": false
+        },
+        {
+          "path": "server/tests/.tmp/startup-readiness-a3zx8M/owned.db",
+          "headerReadWriteVersions": [
+            1,
+            1
+          ],
+          "walPresent": false
+        },
+        {
+          "path": "server/tests/.tmp/startup-readiness-RFgqHW/owned.db",
+          "headerReadWriteVersions": [
+            1,
+            1
+          ],
+          "walPresent": false
+        },
+        {
+          "path": "server/tests/.tmp/startup-readiness-4TT6k5/owned.db",
+          "headerReadWriteVersions": [
+            1,
+            1
+          ],
+          "walPresent": false
+        },
+        {
+          "path": "server/tests/.tmp/startup-readiness-u0UGHU/owned.db",
+          "headerReadWriteVersions": [
+            1,
+            1
+          ],
+          "walPresent": false
+        }
+      ]
+    },
+    {
+      "work": "Add the earlier order race case: mutate ORIGINAL after order captures its policy snapshot but BEFORE its nested chart prerequisite. Compare exact legacy refusal code. Current context order branch passes target(original) to chart whereas the default path passes copy. That can refresh/rebind the shared snapshot mid-order instead of preserving the order snapshot and reaching the existing final ORDER_REVISION_SNAPSHOT_CHANGED guard. Verify and repair using the SAME pinned retained snapshot for nested chart/policy; preserve independent original-path validation, source-digest checks and final original hash guard. No new STOP/code or trigger change. This is source-inspection concern, not an executed new test result.",
+      "priority": 3
+    },
+    {
+      "work": "Inspect actual workflow scanner results. Source inspection finds a new read-only test canary DELETE FROM WorkItem, dynamic db.exec(sql) in its mutation helper, dynamic .pragma/.prepare forwarding in the new context and instrumentation. Existing scanner is intentionally fail-closed on protected SQL/unknown SQL. Do not weaken scanner predicates, add a general runtime writer exemption, hide forwarding through reflection, or change stock test assertions. Prefer explicit shared integrity/FK helpers using literal SQL and a module-private WeakMap bound only through the explicit startup context; keep private readonly reader lifecycle. A normal generic method binding can replace the unnecessary prepare-forwarding wrapper. New test canary may use harmless literal canary-table DDL on the readonly file; test mutation actions should be closed literal DDL, and instrumentation can use explicit known pragma calls. Replace the SQL-hook race test with an owner-result/snapshot-path hook so tests need no opaque SQL forwarder. Retain failed source bytes/results before successors. The actual full scanner outcome is still pending.",
+      "priority": 4
+    },
+    {
+      "work": "Only after these follow-ups and all existing policy/chart/order tests pass unchanged should source-only codex/* PR preparation proceed. If source changes, use new meaningful focused/full successors as warranted; never rerun consumed helpers. Actual CI and exact-head Claudio PASS remain required.",
+      "priority": 5
+    }
+  ],
+  "productionOperations": 0,
+  "cleanupReplayed": false,
+  "appPrReady": false
+}
