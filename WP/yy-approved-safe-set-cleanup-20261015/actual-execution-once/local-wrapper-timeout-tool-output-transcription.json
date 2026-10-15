@@ -1,0 +1,13 @@
+{
+  "status": "LOCAL_SSH_WRAPPER_TIMEOUT_OBSERVED_NO_REPLAY",
+  "classification": "TOOL_OUTPUT_TRANSCRIPTION_NOT_ORIGINAL_PROCESS_LOG",
+  "sessionId": 84337,
+  "observedUtc": "2026-10-15T10:40:30Z",
+  "toolResult": {
+    "chunk_id": "6f188a",
+    "wall_time_seconds": 0.0000099,
+    "exit_code": 1,
+    "original_token_count": 345,
+    "output": "Traceback (most recent call last):\r\n  File \"C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\WP\\backlog-resume-20261013\\execute-yy-exact-safe-set-6189633644-once.py\", line 17, in <module>\r\n    p=subprocess.run(['ssh','-o','BatchMode=yes','-o','ConnectTimeout=15','root@46.19.33.37','python3','-B','-'],input=program.encode(),cwd=R,capture_output=True,timeout=1200)\r\n      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\r\n  File \"C:\\Users\\yigin\\AppData\\Local\\Programs\\Python\\Python312-arm64\\Lib\\subprocess.py\", line 550, in run\r\n    stdout, stderr = process.communicate(input, timeout=timeout)\r\n                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\r\n  File \"C:\\Users\\yigin\\AppData\\Local\\Programs\\Python\\Python312-arm64\\Lib\\subprocess.py\", line 1209, in communicate\r\n    stdout, stderr = self._communicate(input, endtime, timeout)\r\n                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\r\n  File \"C:\\Users\\yigin\\AppData\\Local\\Programs\\Python\\Python312-arm64\\Lib\\subprocess.py\", line 1630, in _communicate\r\n    raise TimeoutExpired(self.args, orig_timeout)\r\nsubprocess.TimeoutExpired: Command '['ssh', '-o', 'BatchMode=yes', '-o', 'ConnectTimeout=15', 'root@46.19.33.37', 'python3', '-B', '-']' timed out after 1200 seconds\r\n"
+  }
+}

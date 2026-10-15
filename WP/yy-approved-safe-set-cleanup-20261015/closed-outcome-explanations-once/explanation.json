@@ -1,0 +1,21 @@
+{
+  "status": "DERIVED_CLOSED_OUTCOME_EXPLANATION_NOT_NEW_OPERATION",
+  "localWrapperTimeoutUtc": "2026-10-15T10:40:30Z",
+  "localWrapperExit": 1,
+  "localWrapperResult": "SSH subprocess TimeoutExpired after1200s; original wrapper never rerun",
+  "actualRemoteControllerStatus": "CLOSED_EXACT_APPROVED_SAFE_SET_ATTEMPTED_WITH_ITEM_RESULTS",
+  "actualRemoteClosedUtc": "2026-10-15T10:41:01.285182+00:00",
+  "independentReadOnlyAfterTimeout": "2026-10-15T10:41:28.052027+00:00",
+  "matchingLiveCleanupProcessesAfterClosure": [],
+  "firstPostTimeoutObserver": "remote literal NUL SyntaxError before read; rawstderr retained, no cleanup operation",
+  "localSuccessorPreparation": "PowerShell quoting SyntaxError before successor file creation; attempted missing-file invocation performed no operation; tool-output transcription retained",
+  "firstClosedRetainer": "refused known fifth output cache-before-original.json before emitting originals; predecessor unchanged, all-five-record read-only successor completed",
+  "p1Skip": "46 top-level files plus buildx-client/cache/docker-client/tmp directories; flat file-only allowlist mismatch, not evidence of changed file bytes; no files removed there, no retry",
+  "removedProofFiles": 47,
+  "all93GitCopiesIndependentlyReverifiedBeforeDispatch": true,
+  "eligibleRemoved47ProofFilesImmediatelyStableHashedBeforeRemoval": true,
+  "measuredNetFreeIncreaseBytes": 4708380672,
+  "estimatedOriginalSafeSetBytes": 4956528049,
+  "noExactAttributionOfDifference": "Docker unique/cache estimates differ from net physical filesystem observation; unrelated live changes are possible",
+  "noAdditionalRemovals": true
+}

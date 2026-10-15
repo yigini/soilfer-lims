@@ -1,0 +1,4 @@
+  File "<stdin>", line 9
+    try:args=(p/'cmdline').read_bytes().split(b' except (FileNotFoundError,PermissionError,ProcessLookupError):continue
+                                                                                                                       ^
+SyntaxError: EOL while scanning string literal

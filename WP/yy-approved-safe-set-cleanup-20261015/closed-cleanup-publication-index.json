@@ -1,0 +1,512 @@
+{
+  "authorityId": 6189633644,
+  "files": [
+    {
+      "bytes": 106201,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/actual-execution-once/actual-cleanup-program.py",
+      "sha256": "087150461ec85fe1ecfbf9a317707b577708f06215ec5fbfe29cdb4f2094bc56"
+    },
+    {
+      "bytes": 382,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/actual-execution-once/dispatch-intent.json",
+      "sha256": "04e504ffa5fc708aae5bf688cd32518c9a6feb2ddd10e92568f20787f16b8d01"
+    },
+    {
+      "bytes": 16972,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/actual-execution-once/fresh-comments-before-dispatch-original.json",
+      "sha256": "3d235e0f97d2ff8cabd8d941ff4203976288443b4f8394ec9507ccc5ee38c934"
+    },
+    {
+      "bytes": 1805,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/actual-execution-once/local-wrapper-timeout-tool-output-transcription.json",
+      "sha256": "4e4ea1f697f10bd8eda7cbd01cb9fe310f14b37046bb7edb1440d7140e31c14d"
+    },
+    {
+      "bytes": 64,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/after-local-timeout-readonly-once/exit-original.json",
+      "sha256": "2808f74f6755dd108064d849debecb5c81c84867a4f8f2987eabf5ead14acfc5"
+    },
+    {
+      "bytes": 845,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/after-local-timeout-readonly-once/observer-source.py",
+      "sha256": "fcc0922aeb594b1ae7a982f4b003540462669a05f7046b9bec4c56b4f7e8a71c"
+    },
+    {
+      "bytes": 313,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/after-local-timeout-readonly-once/stderr-original.log",
+      "sha256": "fb91e240f6f7f7365473c97b90f90f5acbfbf0cb23aacf23d760c42573ff4706"
+    },
+    {
+      "bytes": 0,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/after-local-timeout-readonly-once/stdout-original.json",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 105849,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/approved-plan.json",
+      "sha256": "bf008011f673f1bf6885c30ab82efb1474d79d9df922a08d3a5465f16adc357a"
+    },
+    {
+      "bytes": 5945,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/authority-6189633644-original.json",
+      "sha256": "c55c5c6e5214b8bf1b7ded283de29c95b54a0f76c90582e47d8961c45e27f3e3"
+    },
+    {
+      "bytes": 8690,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/authority-and-source-index.json",
+      "sha256": "4854ed96a749c2b5abb9f0e0a216c22be01eccdbbfed724881638561f625dd00"
+    },
+    {
+      "bytes": 2234,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/authority-readable.txt",
+      "sha256": "b7ccd1cc41db16f22f6ea6d47ea423743ceda824d67f1d6babc0b832730e6184"
+    },
+    {
+      "bytes": 17785,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/cleanup_exact_safe_set.py",
+      "sha256": "d21ce935b19b0368efc609116fbb8e15caa91ecdf87bb968ca353afc3746b8ed"
+    },
+    {
+      "bytes": 1671,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/closed-outcome-explanations-once/explanation.json",
+      "sha256": "352705e3f97eaa374f61aa7d9f35f0add1c9658dab571abdc9afce842f18613d"
+    },
+    {
+      "bytes": 3821,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/closed-outcome-explanations-once/receipt-readable-before-clarification.md",
+      "sha256": "39e7f7522cc48c482f3eea23436c9699820f0ab1cc5c3c91b6fa7c366e245c1c"
+    },
+    {
+      "bytes": 64,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/closed-receipt-retention-complete-once/exit-original.json",
+      "sha256": "78915e7eb0d6fd7d9823d09832b936117afb8c6f087a71acf4f00624832afba2"
+    },
+    {
+      "bytes": 7836,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/closed-receipt-retention-complete-once/item-by-item-results.csv",
+      "sha256": "f8ed565f2888342f358357f24621b2f430933c44500f730a55261359599677ce"
+    },
+    {
+      "bytes": 1015,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/closed-receipt-retention-complete-once/readonly-retainer-source.py",
+      "sha256": "44e2beb48f2bba86409d3f341771e7ce1b2dccd1196e4a1836d9209bd80e9712"
+    },
+    {
+      "bytes": 4574,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/closed-receipt-retention-complete-once/receipt-readable.md",
+      "sha256": "51a1fc45ac53798408fec9b529b0c4d4995445802647d0d348185cee4aedaf8a"
+    },
+    {
+      "bytes": 103690,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/closed-receipt-retention-complete-once/remote-originals/approval-and-plan.json",
+      "sha256": "066a8b034f2ee28a82907053e23783a9450c8c0cc774cebe9396ec0380ece7d5"
+    },
+    {
+      "bytes": 139423,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/closed-receipt-retention-complete-once/remote-originals/before.json",
+      "sha256": "97de75aaac33ee3318611e76713ca150f31ad7bb7f85105d099846487393984e"
+    },
+    {
+      "bytes": 175741,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/closed-receipt-retention-complete-once/remote-originals/cache-before-original.json",
+      "sha256": "79b4392922a04032284715781f82697c82040f99b53ffa1b4619409f00c464ea"
+    },
+    {
+      "bytes": 324425,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/closed-receipt-retention-complete-once/remote-originals/item-results.jsonl",
+      "sha256": "0f1808186c2ed021700ab98b9e4dc50052418defd579dc270e35e4819f175478"
+    },
+    {
+      "bytes": 606990,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/closed-receipt-retention-complete-once/remote-originals/receipt.json",
+      "sha256": "24ee73d86131626e3294094077f6b1056fe42d1db6ddd2625fb4335b5503736a"
+    },
+    {
+      "bytes": 0,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/closed-receipt-retention-complete-once/stderr-original.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 1492196,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/closed-receipt-retention-complete-once/stdout-original.json",
+      "sha256": "3a3f4f57553df0d0a392e85663abb69edc6318a356ab9540ad8747ec61c26081"
+    },
+    {
+      "bytes": 23800,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/closed-receipt-retention-complete-once/summary.json",
+      "sha256": "c8c571f72b70d14dc4eabbef8fceb11bd4895f423ee702346bc0b52cfbcd3d24"
+    },
+    {
+      "bytes": 64,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/closed-receipt-retention-once/exit-original.json",
+      "sha256": "7ba3952856f2d5d46c3ba8544823fe85a20c962711aebfff64a21993d730f9ea"
+    },
+    {
+      "bytes": 986,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/closed-receipt-retention-once/readonly-retainer-source.py",
+      "sha256": "8c9ff60657ad069447a554d0eab24d834e181e3f6de4aad77df4a9f778651d31"
+    },
+    {
+      "bytes": 88,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/closed-receipt-retention-once/stderr-original.log",
+      "sha256": "d40eaa31165dbb7eeba618fb0a102cff3a7c4b124b652031073c94c4e79176cf"
+    },
+    {
+      "bytes": 0,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/closed-receipt-retention-once/stdout-original.json",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 64,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/first-readonly-boundary-once/exit-original.json",
+      "sha256": "b9c9aaf21eee8889b3c56f66aabb90e5ddbbbe64b7f68e7b29a144f1ff9b7905"
+    },
+    {
+      "bytes": 453,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/first-readonly-boundary-once/observer-source.py",
+      "sha256": "427e6d699dac25ce38346f6f6dddd3657040cc0ff44b9a1aec7fdf948e68127f"
+    },
+    {
+      "bytes": 0,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/first-readonly-boundary-once/stderr-original.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 17025,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/first-readonly-boundary-once/stdout-original.json",
+      "sha256": "c2597863351a860325fbbf3ae817a14919e0d6f5b2ff5c81c639b7f786ca29a7"
+    },
+    {
+      "bytes": 64,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/fourth-readonly-boundary-once/exit-original.json",
+      "sha256": "402b216bfe9c0d33349c032ec54be66a1b5ff96e16ee8bebe4942b162803b65b"
+    },
+    {
+      "bytes": 453,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/fourth-readonly-boundary-once/observer-source.py",
+      "sha256": "427e6d699dac25ce38346f6f6dddd3657040cc0ff44b9a1aec7fdf948e68127f"
+    },
+    {
+      "bytes": 0,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/fourth-readonly-boundary-once/stderr-original.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 301843,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/fourth-readonly-boundary-once/stdout-original.json",
+      "sha256": "ca2ef223a5dfe0b730703d2cd086c7e81cb89a615b96d3f3f40266c1efc888e0"
+    },
+    {
+      "bytes": 8,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/guard-fixture-retained/owned.txt",
+      "sha256": "ee8250fb76e094b34b471f13a73dbbe51d1ae142e9df59d7c0d31ec20f0a0a8e"
+    },
+    {
+      "bytes": 8,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/guard-fixture-retained-platform-successor/owned.txt",
+      "sha256": "d121be3103007b41edf96f8262925f8c7d61894afe9a041843b631f69445bc57"
+    },
+    {
+      "bytes": 220,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/guard-tests-exit.json",
+      "sha256": "948f710103e3db61c084a5e66d7ece0dcc2eaf184230c2bb9d4d1b4a06434540"
+    },
+    {
+      "bytes": 1844,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/guard-tests-stderr-original.log",
+      "sha256": "33e53f8c81c9cad5d74dd41b5a6a5800fc89962670d9f90414f3fcc63dfb60da"
+    },
+    {
+      "bytes": 0,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/guard-tests-stdout-original.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 17785,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/initial-guard-run-windows-o-nofollow/cleanup_exact_safe_set.py",
+      "sha256": "d21ce935b19b0368efc609116fbb8e15caa91ecdf87bb968ca353afc3746b8ed"
+    },
+    {
+      "bytes": 220,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/initial-guard-run-windows-o-nofollow/guard-tests-exit.json",
+      "sha256": "948f710103e3db61c084a5e66d7ece0dcc2eaf184230c2bb9d4d1b4a06434540"
+    },
+    {
+      "bytes": 1844,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/initial-guard-run-windows-o-nofollow/guard-tests-stderr-original.log",
+      "sha256": "33e53f8c81c9cad5d74dd41b5a6a5800fc89962670d9f90414f3fcc63dfb60da"
+    },
+    {
+      "bytes": 0,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/initial-guard-run-windows-o-nofollow/guard-tests-stdout-original.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 2760,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/initial-guard-run-windows-o-nofollow/verify_exact_cleanup_guards.py",
+      "sha256": "9519c794fa163d657015dc32d153d034cf697a9d683f76ebf5bf84315ee705ae"
+    },
+    {
+      "bytes": 684,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/native-approval-readonly-record.json",
+      "sha256": "d7c380546f201fa12f00e5626285bee8826cf4ae0c23e66d181c15563b78e8f0"
+    },
+    {
+      "bytes": 719,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/native-standing-rule-approval-readonly-record.json",
+      "sha256": "bc937254513e518850fd6200344a5d42a8b4ac8c5e11395ed689e72db4f3cf17"
+    },
+    {
+      "bytes": 11707,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/native-standing-rule-context-original.txt",
+      "sha256": "ce0d265a6011b273144267794c40dc66dcadb230af692358f640e6b7a6f55c16"
+    },
+    {
+      "bytes": 11707,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/native-yy-safe-set-and-followup-original.txt",
+      "sha256": "ce0d265a6011b273144267794c40dc66dcadb230af692358f640e6b7a6f55c16"
+    },
+    {
+      "bytes": 64,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/platform-guard-successor-once/host-exit-original.json",
+      "sha256": "402ea9e6741c3d5d951303dd46293064e3dbdf6270c2a107e406f57cc3726cdd"
+    },
+    {
+      "bytes": 0,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/platform-guard-successor-once/host-stderr-original.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 1637,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/platform-guard-successor-once/host-stdout-original.json",
+      "sha256": "5ac3ef5a99355caaccff600ee931f26b40d81c8706119c7ec002f580fb116691"
+    },
+    {
+      "bytes": 169968,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/platform-guard-successor-once/host-synthetic-runner-source.py",
+      "sha256": "d59f191a7df006e185e1bbc939fe74cca9abaa9e9f79c510dc423adb0b416552"
+    },
+    {
+      "bytes": 130,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/platform-guard-successor-once/local-exit-original.json",
+      "sha256": "dc8b65e4bfee73f9ddfcb91a5933a96af8d3b61dd8c1029a960cdaca9f9f25fb"
+    },
+    {
+      "bytes": 906,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/platform-guard-successor-once/local-stderr-original.log",
+      "sha256": "a2271c22915166a46b7f6e2b0ee0d168efa51ef81c8f7e32cb97632c4f5d3097"
+    },
+    {
+      "bytes": 0,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/platform-guard-successor-once/local-stdout-original.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 487,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/platform-guard-successor-once/summary.json",
+      "sha256": "00632f0bb17a33ff917285d49f84bdf7a4716f1a44cb7f1354e237ab41926cba"
+    },
+    {
+      "bytes": 243,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/preparation-result.json",
+      "sha256": "04e2bf26bb73aff152ceb47b090d95b6218f245f4d8b686a60f3180f069b2649"
+    },
+    {
+      "bytes": 292,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/receipt-directory-metadata-once/source.py",
+      "sha256": "5e91c50fcadf5c38e86265d12141b5e99c90d6efaa59e60f18a9cea62bc10192"
+    },
+    {
+      "bytes": 0,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/receipt-directory-metadata-once/stderr-original.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 570,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/receipt-directory-metadata-once/stdout-original.json",
+      "sha256": "f9891851f859bad9551d611421ee71426fa5bf345d59575f1387b8472cf6c927"
+    },
+    {
+      "bytes": 64,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/second-readonly-boundary-once/exit-original.json",
+      "sha256": "0a6ba584b6e2a6af24015f330c44454b46b066937c061c5880fe863b8458af46"
+    },
+    {
+      "bytes": 453,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/second-readonly-boundary-once/observer-source.py",
+      "sha256": "427e6d699dac25ce38346f6f6dddd3657040cc0ff44b9a1aec7fdf948e68127f"
+    },
+    {
+      "bytes": 0,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/second-readonly-boundary-once/stderr-original.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 183861,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/second-readonly-boundary-once/stdout-original.json",
+      "sha256": "91ebfee66226c64152c6e7ec671051bd931a3c3c4eedef4e045ea7a7a22622ac"
+    },
+    {
+      "bytes": 362,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/skipped-p1-directory-metadata-once/source.py",
+      "sha256": "d47c6ad964b7d03c0fac20b3933f7336671df1801c541fbda5b1d1da56f40435"
+    },
+    {
+      "bytes": 0,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/skipped-p1-directory-metadata-once/stderr-original.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 6054,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/skipped-p1-directory-metadata-once/stdout-original.json",
+      "sha256": "f4dca5dae6b1d9ff697abdffe0f84e50b588a21585810581de5f63a805ee9215"
+    },
+    {
+      "bytes": 4262,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/standing-rule-activation-original.json",
+      "sha256": "e6ea6a6dc2a0f13769eecd0f60780072b8a2902952d3ca30c7cae76017703dcf"
+    },
+    {
+      "bytes": 551,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/standing-rule-activation-readable.txt",
+      "sha256": "b269a8326edf9a625c75a818c513dbde5f026ec3a044407b4e8194adf4b7c7e4"
+    },
+    {
+      "bytes": 6654,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/standing-rule-original.json",
+      "sha256": "433dee0b65e0a046bf905aa59f8a2c6821f484026a08674def660fb2a0a55607"
+    },
+    {
+      "bytes": 2945,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/standing-rule-readable.txt",
+      "sha256": "26a7f7f9beffc6b3fd4bb2582b4f0ed64ef660935da9922673eb77fcaec15c7b"
+    },
+    {
+      "bytes": 64,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/third-readonly-boundary-once/exit-original.json",
+      "sha256": "978a2cdc78880871384462f89280dc3a39b7e55e5e84ac1ec1adcfac78f458ba"
+    },
+    {
+      "bytes": 453,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/third-readonly-boundary-once/observer-source.py",
+      "sha256": "427e6d699dac25ce38346f6f6dddd3657040cc0ff44b9a1aec7fdf948e68127f"
+    },
+    {
+      "bytes": 0,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/third-readonly-boundary-once/stderr-original.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 259868,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/third-readonly-boundary-once/stdout-original.json",
+      "sha256": "c3819acb80204c17a74c7ce56e0a6c613294d8679460e81ccddeef821c6b9bac"
+    },
+    {
+      "bytes": 64,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/timeout-literal-successor-readonly-once/exit-original.json",
+      "sha256": "f606daed90024398d64b09e7d95b391d4dbf24e638a5d8005632f81854065be7"
+    },
+    {
+      "bytes": 882,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/timeout-literal-successor-readonly-once/observer-source.py",
+      "sha256": "35356e51ff4adadb66ab1d91245f5227ced44339f22f3bff2b795c009a0dd3f6"
+    },
+    {
+      "bytes": 0,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/timeout-literal-successor-readonly-once/stderr-original.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 1035123,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/timeout-literal-successor-readonly-once/stdout-original.json",
+      "sha256": "6582780c042ce5027669a33778d036e59889d90b66cb7033729977b0253ff7d1"
+    },
+    {
+      "bytes": 2999,
+      "path": "WP/yy-approved-safe-set-cleanup-20261015/verify_exact_cleanup_guards.py",
+      "sha256": "10a29636bda59fac686c024cacbb596bbe138e4994bd7812b45176103a706283"
+    },
+    {
+      "bytes": 3488,
+      "path": "WP/backlog-resume-20261013/execute-yy-exact-safe-set-6189633644-once.py",
+      "sha256": "02844cb3868441850371f53629e0ae139c31f14967abeb33f75afb3e5a5ddd2e"
+    },
+    {
+      "bytes": 1828,
+      "path": "WP/backlog-resume-20261013/observe-safe-set-cleanup-first-boundary-readonly-once.py",
+      "sha256": "0785fe22eb9dc8d1e94bfb12a136d62d8ca595c69c5439dbbdf240efc97555ea"
+    },
+    {
+      "bytes": 1858,
+      "path": "WP/backlog-resume-20261013/observe-safe-set-cleanup-second-boundary-readonly-once.py",
+      "sha256": "060a79452f456dc757b958a051c521716077d4ae02266c11efe7f6d1ed3f6784"
+    },
+    {
+      "bytes": 1857,
+      "path": "WP/backlog-resume-20261013/observe-safe-set-cleanup-third-boundary-readonly-once.py",
+      "sha256": "678f61c89defbe48be8edb1a7be29686849a111631e730ba3c6b3973a13c5be1"
+    },
+    {
+      "bytes": 1859,
+      "path": "WP/backlog-resume-20261013/observe-safe-set-cleanup-fourth-boundary-readonly-once.py",
+      "sha256": "233e0ae20b1d7baf7240dcdac860a334950c3ee55a4343f5e8c778279d1ccbde"
+    },
+    {
+      "bytes": 2278,
+      "path": "WP/backlog-resume-20261013/observe-safe-set-after-local-timeout-readonly-once.py",
+      "sha256": "b3f261627a567b705eded1e2aef33b3666b96316fd6d130103745f844f9d03cd"
+    },
+    {
+      "bytes": 2364,
+      "path": "WP/backlog-resume-20261013/read-safe-set-journal-after-timeout-literal-once.py",
+      "sha256": "320ea9e58b93d017c5506203e7e395993e4aedde5d31691d5233f44358f07a39"
+    },
+    {
+      "bytes": 6557,
+      "path": "WP/backlog-resume-20261013/retain-approved-safe-set-closed-receipt-once.py",
+      "sha256": "c1e0b36f7267797937c08d38238ee610277614243c83c2007ad8f4f8961bcfc5"
+    },
+    {
+      "bytes": 923,
+      "path": "WP/backlog-resume-20261013/read-cleanup-receipt-directory-metadata-once.py",
+      "sha256": "91cb3883a0b1b370611ccdf6f3b00a1710a0645806fc9818415c811be22992bb"
+    },
+    {
+      "bytes": 1096,
+      "path": "WP/backlog-resume-20261013/prepare-cleanup-retainer-full-inventory-successor-once.py",
+      "sha256": "31622a7c10d81b4458ada1f8e3fa449e8e678357904caf3269b75d2d9e187662"
+    },
+    {
+      "bytes": 6627,
+      "path": "WP/backlog-resume-20261013/retain-approved-safe-set-closed-all-five-records-once.py",
+      "sha256": "adc8542fed221548468b02e05052fce92c70100f850871bc693ebaeace6b3e38"
+    },
+    {
+      "bytes": 1165,
+      "path": "WP/backlog-resume-20261013/read-skipped-safe-set-p1-directory-metadata-once.py",
+      "sha256": "3498993e9ba118fb5056120859d8ebac0337872948a085d46617495fc1e30152"
+    },
+    {
+      "bytes": 6339,
+      "path": "WP/backlog-resume-20261013/post-safe-set-6189633644-closed-receipt-once.py",
+      "sha256": "955917e5e5b10538af7bf950dca746340feb81dd616dfd2f46a627c530866b78"
+    },
+    {
+      "bytes": 5060,
+      "path": "WP/backlog-resume-20261013/explain-safe-set-closed-transport-and-skip-once.py",
+      "sha256": "c735ced7a05e7d40490475815149e89bcc20424f3228c4c2295eb1c2e76fdf1d"
+    },
+    {
+      "bytes": 7277,
+      "path": "WP/backlog-resume-20261013/publish-safe-set-closed-cleanup-evidence-once.py",
+      "sha256": "0c06870bfc7da03218010617e75c1d18cc8cb206928469982f16362bcb1e17f1"
+    },
+    {
+      "bytes": 606027,
+      "path": "WP/audit-release-eb6de2e8/README.md",
+      "sha256": "ea43ed55ebd0cda2479ecf977f47dac132fbd56a786547097d7ce2bf03d57d57"
+    }
+  ],
+  "status": "ACTUAL_CLOSED_SAFE_SET_CLEANUP_EVIDENCE_PUBLISHED",
+  "summaryPath": "WP/yy-approved-safe-set-cleanup-20261015/closed-receipt-retention-complete-once/summary.json"
+}

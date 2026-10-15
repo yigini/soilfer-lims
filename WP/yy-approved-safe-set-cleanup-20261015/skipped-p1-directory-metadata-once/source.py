@@ -1,0 +1,1 @@
+import json,pathlib,stat; p=pathlib.Path('/opt/lims/releases/workflow-batch-forward-metadata-cde8c889-20261014T233000Z'); print(json.dumps({'readOnly':True,'root':str(p),'children':[{'name':q.name,'isFile':q.is_file(),'isDir':q.is_dir(),'isSymlink':q.is_symlink(),'bytes':q.lstat().st_size,'mode':stat.S_IMODE(q.lstat().st_mode)} for q in sorted(p.iterdir())]}))

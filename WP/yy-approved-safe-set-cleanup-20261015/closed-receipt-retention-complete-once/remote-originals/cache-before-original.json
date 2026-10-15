@@ -1,0 +1,5251 @@
+[
+  {
+    " Parents": [
+      "02dkembml5h6c78e5vr2d3lve"
+    ],
+    "CreatedAt": "2026-10-12T03:54:09.035739466Z",
+    "Description": "[stage-1 11/47] COPY profiles/ ./profiles/",
+    "ID": "8ckqop5sn853ra5a0lsr3r63c",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T03:54:20.069301954Z",
+    "Shared": true,
+    "Size": 46265,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "81tbjqynycspdsgqqqjvv72l1"
+    ],
+    "CreatedAt": "2026-10-12T03:54:09.986418203Z",
+    "Description": "[stage-1 21/47] COPY server/prisma/migrations/20261006000300_qc_rules/migration.sql /app/server/.migrations-backup/185/20261006000300_qc_rules/migration.sql",
+    "ID": "shkijhct2oar8voowkgpaumjc",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T03:54:20.092021025Z",
+    "Shared": true,
+    "Size": 42962,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "3dnvow5e081kndnz1nr6ckas7"
+    ],
+    "CreatedAt": "2026-10-14T22:34:36.677680436Z",
+    "Description": "[stage-1  8/56] COPY server/ ./server/",
+    "ID": "yq28vkcdio03083k3ayyvyv0y",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:38:24.458698309Z",
+    "Shared": true,
+    "Size": 14805416,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "jx96c59mibd032la7ngflj3r6"
+    ],
+    "CreatedAt": "2026-10-11T23:12:13.163163326Z",
+    "Description": "[stage-1 18/47] COPY server/prisma/migrations/20261006000100_sample_holds_cancellation/migration.sql /app/server/.migrations-backup/183/20261006000100_sample_holds_cancellation/migration.sql",
+    "ID": "nz0xthrbk1w5ws07fabqjdiba",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T23:12:23.374427071Z",
+    "Shared": true,
+    "Size": 42369,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "ky3535iilhr2u863rlg1pczah"
+    ],
+    "CreatedAt": "2026-10-12T13:55:09.940277766Z",
+    "Description": "[stage-1 48/52] COPY server/prisma/migrations/20261010000100_instrument_import_templates/pre-prisma-draft-table.sql /app/server/.migrations-backup/200/20261010000100_instrument_import_templates/pre-prisma-draft-table.sql",
+    "ID": "tbzhxo9v3o9idwr6n34c07146",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T13:55:19.520516107Z",
+    "Shared": true,
+    "Size": 45654,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "lmz7nae0u12mr0qco1d7xzjdf"
+    ],
+    "CreatedAt": "2026-10-14T22:33:44.025343742Z",
+    "Description": "mount / from exec /bin/sh -c apk add --no-cache python3 make g++",
+    "ID": "7qlu9yxdtinb1zikqi8c1rhzn",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:38:24.475777757Z",
+    "Shared": true,
+    "Size": 425186489,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "mqbbm2fgc5fjnog5vz4rap2fe"
+    ],
+    "CreatedAt": "2026-10-11T23:12:13.705089442Z",
+    "Description": "[stage-1 31/47] COPY server/prisma/migrations/20261004190100_unique_active_workitem/migration.sql /app/server/.migrations-backup/178/20261004190100_unique_active_workitem/migration.sql",
+    "ID": "yk479zrg7iqlp7zpecpd6t63f",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T23:12:23.413374368Z",
+    "Shared": true,
+    "Size": 41364,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "21giz7dbyxp0u7qohnm75i50g"
+    ],
+    "CreatedAt": "2026-10-14T22:36:51.011304404Z",
+    "Description": "[stage-1 12/56] COPY --from=builder /app/client/dist ./client/dist/",
+    "ID": "rgqgoeuzgsjgf8mc5032n6w8o",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:38:24.407551221Z",
+    "Shared": true,
+    "Size": 62091869,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "col50tc9g031nas8edzxx50he"
+    ],
+    "CreatedAt": "2026-10-11T19:35:40.339661469Z",
+    "Description": "[stage-1 24/47] COPY server/prisma/migrations/20261006000400_normalized_qc_runs/fresh-prisma-tables.json /app/server/.migrations-backup/186/20261006000400_normalized_qc_runs/fresh-prisma-tables.json",
+    "ID": "mjrhcyyasz7ri2jqxfw1ev0fz",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T19:37:27.180473954Z",
+    "Shared": true,
+    "Size": 50356,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "n70qyzjt4817zyzq9g2sp08r6"
+    ],
+    "CreatedAt": "2026-10-11T23:12:13.660553861Z",
+    "Description": "[stage-1 30/47] COPY server/prisma/migrations/20261004190000_add_workitem_duplicate_marker/migration.sql /app/server/.migrations-backup/178/20261004190000_add_workitem_duplicate_marker/migration.sql",
+    "ID": "mqbbm2fgc5fjnog5vz4rap2fe",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T23:12:23.392156344Z",
+    "Shared": true,
+    "Size": 37216,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "un82cprc5a6vbkqwy8jhmkk87"
+    ],
+    "CreatedAt": "2026-10-12T13:55:09.190923258Z",
+    "Description": "[stage-1 31/52] COPY server/prisma/migrations/20261004190100_unique_active_workitem/migration.sql /app/server/.migrations-backup/178/20261004190100_unique_active_workitem/migration.sql",
+    "ID": "uc7t8zyg01cv22vmh10bkoza6",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T13:55:19.486717187Z",
+    "Shared": true,
+    "Size": 41366,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "puefudiw0bbtvnm7ljdfg0izd"
+    ],
+    "CreatedAt": "2026-10-11T19:35:39.561126089Z",
+    "Description": "[stage-1 15/47] COPY server/prisma/migrations/20261005000100_workflow_state_guards/migration.sql /app/server/.migrations-backup/179/20261005000100_workflow_state_guards/migration.sql",
+    "ID": "vc6dsu1knlxx6d2i5t06oi9rr",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T19:37:27.280552306Z",
+    "Shared": true,
+    "Size": 41976,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "wjft4dtxcwjq6ighnes75l6g4"
+    ],
+    "CreatedAt": "2026-10-12T10:47:00.697563586Z",
+    "Description": "[builder  7/12] COPY client/ ./client/",
+    "ID": "r55nvq9c8dsey9ucgbo72lcbt",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T13:55:19.456725839Z",
+    "Shared": false,
+    "Size": 34275328,
+    "Type": "regular",
+    "UsageCount": 2
+  },
+  {
+    " Parents": [
+      "3pjjzhc1uouvtj07at0oyp0vc"
+    ],
+    "CreatedAt": "2026-10-12T10:48:17.385447807Z",
+    "Description": "[stage-1 44/52] COPY server/prisma/migrations/20261010000300_bench_credentials/migration.sql /app/server/.migrations-backup/202/20261010000300_bench_credentials/migration.sql",
+    "ID": "prtsxd8ild8hgplterjus2di0",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T10:49:28.248982455Z",
+    "Shared": true,
+    "Size": 37444,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "q6it17rm8j8o9ska6imee7oo2"
+    ],
+    "CreatedAt": "2026-10-14T22:36:52.487358487Z",
+    "Description": "[stage-1 29/56] COPY server/prisma/migrations/20261009000100_nonconformity_reports/migration.sql /app/server/.migrations-backup/193/20261009000100_nonconformity_reports/migration.sql",
+    "ID": "0g6r08fqfqxk6h62qgna1yktx",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:38:24.39566834Z",
+    "Shared": true,
+    "Size": 42392,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "0g6r08fqfqxk6h62qgna1yktx"
+    ],
+    "CreatedAt": "2026-10-14T22:36:52.530146826Z",
+    "Description": "[stage-1 30/56] COPY server/prisma/migrations/20261004190000_add_workitem_duplicate_marker/migration.sql /app/server/.migrations-backup/178/20261004190000_add_workitem_duplicate_marker/migration.sql",
+    "ID": "tedpofr84b0pyc5api4lvoz6y",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:38:24.470254163Z",
+    "Shared": true,
+    "Size": 37213,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "zrbpcjczzkk7jmmbp8sehyrbp"
+    ],
+    "CreatedAt": "2026-10-12T03:53:09.366719614Z",
+    "Description": "mount / from exec /bin/sh -c cd client && npm run build",
+    "ID": "ruodaijz6y9bwg5j09avoxq6u",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T03:54:20.064684938Z",
+    "Shared": false,
+    "Size": 33075200,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "37b5k7aa13ym8cvmkpn9ptapp"
+    ],
+    "CreatedAt": "2026-10-11T23:12:09.388382217Z",
+    "Description": "[stage-1 11/47] COPY profiles/ ./profiles/",
+    "ID": "jktea5zb1yy4l3uhn0jfohvxj",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T23:12:23.396632348Z",
+    "Shared": true,
+    "Size": 46266,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "h1tn6o9tdfaw03fwqafqdzhpx"
+    ],
+    "CreatedAt": "2026-10-14T22:33:28.573362703Z",
+    "Description": "pulled from docker.io/library/node:24-alpine@sha256:44fce696f38ba8c987c4db89954051000bbd05ffd8d8659ba15ed4a8602e937f",
+    "ID": "t4lq6miunaeuoqga9qlrfgltz",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:33:28.64604711Z",
+    "Shared": true,
+    "Size": 223766724,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    "CreatedAt": "2026-10-14T06:53:05.780199253Z",
+    "Description": "pulled from docker.io/docker/dockerfile:1@sha256:4edf897a3ffa55b89f906fc8cc78afdb3f1834cc9c7083565e611a8a7d5fe99e",
+    "ID": "kz6l24nd595phfs1t75egn5m2",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T07:36:54.108942762Z",
+    "Shared": false,
+    "Size": 43113664,
+    "Type": "frontend",
+    "UsageCount": 2
+  },
+  {
+    " Parents": [
+      "y2wlgl8p7ziexn2p7bk1endyk"
+    ],
+    "CreatedAt": "2026-10-11T23:12:14.339780495Z",
+    "Description": "[stage-1 46/47] COPY docker-entrypoint.sh /app/docker-entrypoint.sh",
+    "ID": "8qhenesoim7n1to0dn1xw8jvf",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T23:12:23.337679452Z",
+    "Shared": true,
+    "Size": 23453,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "q6jbgf05egcy49lj52pv95kp7"
+    ],
+    "CreatedAt": "2026-10-11T23:12:13.824926424Z",
+    "Description": "[stage-1 34/47] COPY server/prisma/migrations/20261009000100_reported_value_selection/migration.sql /app/server/.migrations-backup/192/20261009000100_reported_value_selection/migration.sql",
+    "ID": "ti2ocjvw5gss5f7hxg3qlm7vk",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T23:12:23.399235152Z",
+    "Shared": true,
+    "Size": 42892,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "zrizcg8ohdnv7jfuu669i6gru"
+    ],
+    "CreatedAt": "2026-10-12T10:48:17.066370602Z",
+    "Description": "[stage-1 37/52] COPY server/prisma/migrations/20261009000400_calculation_templates/migration.sql /app/server/.migrations-backup/199/20261009000400_calculation_templates/migration.sql",
+    "ID": "8lbyj49svb07lhutxcyr0uu5p",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T10:49:28.225316192Z",
+    "Shared": true,
+    "Size": 66014,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "tl7uslarohc6sq6qxwew39l3a"
+    ],
+    "CreatedAt": "2026-10-12T03:54:10.576748199Z",
+    "Description": "[stage-1 35/47] COPY server/prisma/migrations/20261009000200_batch_reagent_lots/migration.sql /app/server/.migrations-backup/194/20261009000200_batch_reagent_lots/migration.sql",
+    "ID": "tnt7yhgcrfxkhpijndpzf68fn",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T03:54:20.030059011Z",
+    "Shared": true,
+    "Size": 37542,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "su8065vw9vnv5t657mycyf1or"
+    ],
+    "CreatedAt": "2026-10-12T13:54:09.655218743Z",
+    "Description": "mount / from exec /bin/sh -c cd server && npx prisma generate",
+    "ID": "hrf18jw8gcoktj46pegoca277",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T13:55:19.529799846Z",
+    "Shared": false,
+    "Size": 67153920,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "w8zxomos8b51iqziko73t2bmj"
+    ],
+    "CreatedAt": "2026-10-12T03:54:10.157419307Z",
+    "Description": "[stage-1 25/47] COPY server/prisma/migrations/20261007000100_qc_gate_scope/migration.sql /app/server/.migrations-backup/187/20261007000100_qc_gate_scope/migration.sql",
+    "ID": "uyw5fltc0mtbebdrir8gm9l54",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T03:54:20.107359379Z",
+    "Shared": true,
+    "Size": 37367,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "4t0zg7ejzokag9wwd7kyanl3f"
+    ],
+    "CreatedAt": "2026-10-12T10:48:15.388376479Z",
+    "Description": "[stage-1 10/52] COPY --from=builder /app/server/prisma_client ./server/prisma_client/",
+    "ID": "jds1dziowhqnhft0macs0pzr1",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T10:49:28.213151793Z",
+    "Shared": true,
+    "Size": 24158970,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "urmfc8k2s5cxsixjio9b3hvsl"
+    ],
+    "CreatedAt": "2026-10-14T22:36:52.146035537Z",
+    "Description": "[stage-1 22/56] COPY server/prisma/migrations/20261006000300_qc_rules/fresh-prisma-tables.json /app/server/.migrations-backup/185/20261006000300_qc_rules/fresh-prisma-tables.json",
+    "ID": "dj1ex1cgosw1zthnwm5n9gpd1",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:38:24.438888349Z",
+    "Shared": true,
+    "Size": 45829,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "6b8azuxnoump43t8imofm89y2"
+    ],
+    "CreatedAt": "2026-10-11T19:34:11.602051034Z",
+    "Description": "mount / from exec /bin/sh -c cd server && npm ci --ignore-scripts",
+    "ID": "n1fa5pyvop7ggpfi677q4ze21",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T03:54:20.068071Z",
+    "Shared": false,
+    "Size": 654204928,
+    "Type": "regular",
+    "UsageCount": 3
+  },
+  {
+    " Parents": [
+      "sm3ppowjpq1aylohjl7ruslsa"
+    ],
+    "CreatedAt": "2026-10-12T13:55:08.839923848Z",
+    "Description": "[stage-1 22/52] COPY server/prisma/migrations/20261006000300_qc_rules/fresh-prisma-tables.json /app/server/.migrations-backup/185/20261006000300_qc_rules/fresh-prisma-tables.json",
+    "ID": "fq71ujraa0v1n0r36vssnho8o",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T13:55:19.549422966Z",
+    "Shared": true,
+    "Size": 45831,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "nz0xthrbk1w5ws07fabqjdiba"
+    ],
+    "CreatedAt": "2026-10-11T23:12:13.198263433Z",
+    "Description": "[stage-1 19/47] COPY server/prisma/migrations/20261006000200_reference_material_catalogue/migration.sql /app/server/.migrations-backup/184/20261006000200_reference_material_catalogue/migration.sql",
+    "ID": "rou3sa1g18na1s87cfx2grh5q",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T23:12:23.351119375Z",
+    "Shared": true,
+    "Size": 42967,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "c1oxpuntcicei0ir3hr058va8"
+    ],
+    "CreatedAt": "2026-10-11T19:31:59.626283344Z",
+    "Description": "",
+    "ID": "atz6zg106zfdxf7on287d11k6",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T19:31:59.66395615Z",
+    "Shared": true,
+    "Size": 1261993,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "n1fa5pyvop7ggpfi677q4ze21"
+    ],
+    "CreatedAt": "2026-10-11T23:11:00.649217249Z",
+    "Description": "[builder  7/12] COPY client/ ./client/",
+    "ID": "f795ib8252yiyuax69xtreizc",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T23:12:23.430551027Z",
+    "Shared": false,
+    "Size": 34213888,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "3k5x6tfdkulhtu4resmsmgdqr"
+    ],
+    "CreatedAt": "2026-10-12T13:53:55.637193919Z",
+    "Description": "[builder  9/12] COPY shared/ ./shared/",
+    "ID": "zt15ge7kat4zipi6we1e16qsd",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T13:55:19.466147343Z",
+    "Shared": false,
+    "Size": 53248,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "ohgeomq1j5iwqye78repdgavw"
+    ],
+    "CreatedAt": "2026-10-12T10:48:16.909310412Z",
+    "Description": "[stage-1 33/52] COPY server/prisma/migrations/20261008000200_repeat_correction_contract/migration.sql /app/server/.migrations-backup/191/20261008000200_repeat_correction_contract/migration.sql",
+    "ID": "3qf6nvl2fm4oyg9mneuxo8eb8",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T10:49:28.272393Z",
+    "Shared": true,
+    "Size": 56463,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "jspvkm209ml10fpoxq82vlcrh"
+    ],
+    "CreatedAt": "2026-10-12T13:55:07.842720726Z",
+    "Description": "[stage-1 12/52] COPY --from=builder /app/client/dist ./client/dist/",
+    "ID": "1pt7hf5qvvskqpi92hmgicm8h",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T13:55:19.560981514Z",
+    "Shared": true,
+    "Size": 62033840,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "3o6lrhkldhclwistci6rksury"
+    ],
+    "CreatedAt": "2026-10-14T22:36:54.049173555Z",
+    "Description": "[stage-1 48/56] COPY server/prisma/migrations/20261010000100_instrument_import_templates/pre-prisma-draft-table.sql /app/server/.migrations-backup/200/20261010000100_instrument_import_templates/pre-prisma-draft-table.sql",
+    "ID": "szdymtgidc2ljr433doohdbzk",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:38:24.399358946Z",
+    "Shared": true,
+    "Size": 45650,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "o3i0cukj4u29yiexef5u5ihrh"
+    ],
+    "CreatedAt": "2026-10-11T23:12:13.392115082Z",
+    "Description": "[stage-1 24/47] COPY server/prisma/migrations/20261006000400_normalized_qc_runs/fresh-prisma-tables.json /app/server/.migrations-backup/186/20261006000400_normalized_qc_runs/fresh-prisma-tables.json",
+    "ID": "lmzmenl70kxco2453q9fpk6iu",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T23:12:23.38002716Z",
+    "Shared": true,
+    "Size": 50353,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    "CreatedAt": "2026-10-11T19:31:58.108137799Z",
+    "Description": "local source for dockerfile",
+    "ID": "wcy07j6gaq2ncxb005nig5ifk",
+    "InUse": false,
+    "LastUsedAt": "2026-10-15T00:27:26.495025518Z",
+    "Shared": false,
+    "Size": 16384,
+    "Type": "source.local",
+    "UsageCount": 7
+  },
+  {
+    " Parents": [
+      "rou3sa1g18na1s87cfx2grh5q"
+    ],
+    "CreatedAt": "2026-10-11T23:12:13.240662572Z",
+    "Description": "[stage-1 20/47] COPY server/prisma/migrations/20261006000200_reference_material_catalogue/fresh-prisma-tables.json /app/server/.migrations-backup/184/20261006000200_reference_material_catalogue/fresh-prisma-tables.json",
+    "ID": "r3w5cgxsxtfzhrhg226e6kam5",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T23:12:23.428704824Z",
+    "Shared": true,
+    "Size": 45854,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "s0ovejitoqg55ht8nsy1xelfd"
+    ],
+    "CreatedAt": "2026-10-12T03:54:09.696679947Z",
+    "Description": "[stage-1 14/47] COPY server/prisma/migrations/20261005000000_workflow_state_evidence/migration.sql /app/server/.migrations-backup/179/20261005000000_workflow_state_evidence/migration.sql",
+    "ID": "m4bywf07zlw68svhaheza485y",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T03:54:20.032572605Z",
+    "Shared": true,
+    "Size": 33421,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "8lbyj49svb07lhutxcyr0uu5p"
+    ],
+    "CreatedAt": "2026-10-12T10:48:17.107235199Z",
+    "Description": "[stage-1 38/52] COPY server/prisma/migrations/20261009000400_calculation_templates/fresh-prisma-tables.json /app/server/.migrations-backup/199/20261009000400_calculation_templates/fresh-prisma-tables.json",
+    "ID": "s48dac8jnwpef3jgzcbtn535u",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T10:49:28.218534131Z",
+    "Shared": true,
+    "Size": 50486,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "oehl3hxwaydoyrmroalkycwlp"
+    ],
+    "CreatedAt": "2026-10-11T19:35:42.170295047Z",
+    "Description": "mount / from exec /bin/sh -c sed -i 's/\\r$//' /app/docker-entrypoint.sh && chmod +x /app/docker-entrypoint.sh",
+    "ID": "bj6lo2zrxm14noo7fpye7tkb3",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T19:37:27.151985342Z",
+    "Shared": true,
+    "Size": 27536,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "jt0cxejij3ji025roahfulxdg"
+    ],
+    "CreatedAt": "2026-10-14T22:36:51.711000615Z",
+    "Description": "[stage-1 18/56] COPY server/prisma/migrations/20261006000100_sample_holds_cancellation/migration.sql /app/server/.migrations-backup/183/20261006000100_sample_holds_cancellation/migration.sql",
+    "ID": "jhzeuv1vtlmussf6dkz8k1317",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:38:24.379161396Z",
+    "Shared": true,
+    "Size": 42364,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "p7ueb0this2jip925ihi5l6em"
+    ],
+    "CreatedAt": "2026-10-11T19:35:41.225901216Z",
+    "Description": "[stage-1 36/47] COPY server/prisma/migrations/20261009000300_result_override_requests/migration.sql /app/server/.migrations-backup/197/20261009000300_result_override_requests/migration.sql",
+    "ID": "eqkbq271zxi6ehp0dwxh3me19",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T19:37:27.210724759Z",
+    "Shared": true,
+    "Size": 42942,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    "CreatedAt": "2026-10-12T07:57:19.929048261Z",
+    "Description": "local source for context",
+    "ID": "lz02n8gqryfe52qhdnpc75buo",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T08:00:30.376032279Z",
+    "Shared": false,
+    "Size": 4096,
+    "Type": "source.local",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "yogvpetm037gsag3n2qlti63h"
+    ],
+    "CreatedAt": "2026-10-12T10:47:01.243244609Z",
+    "Description": "[builder 10/12] COPY profiles/ ./profiles/",
+    "ID": "l9p613t6qcttjhkuuk245fuy8",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T10:49:28.254384104Z",
+    "Shared": false,
+    "Size": 45056,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "remujodcxqivsh9pnsc5ex3yo"
+    ],
+    "CreatedAt": "2026-10-12T13:55:09.554175708Z",
+    "Description": "[stage-1 39/52] COPY server/prisma/migrations/20261010000100_cross_check_evaluation/migration.sql /app/server/.migrations-backup/201/20261010000100_cross_check_evaluation/migration.sql",
+    "ID": "jtjsnb887p0vq7sneqwql8th8",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T13:55:19.519236853Z",
+    "Shared": true,
+    "Size": 37532,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "eqkbq271zxi6ehp0dwxh3me19"
+    ],
+    "CreatedAt": "2026-10-11T19:35:41.273227456Z",
+    "Description": "[stage-1 37/47] COPY server/prisma/migrations/20261009000400_calculation_templates/migration.sql /app/server/.migrations-backup/199/20261009000400_calculation_templates/migration.sql",
+    "ID": "ve6os1h7z8t6k7bd8y9d2u82n",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T19:37:27.253676332Z",
+    "Shared": true,
+    "Size": 66015,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "guh7ne6biq2emc45lwo9z6s63"
+    ],
+    "CreatedAt": "2026-10-14T22:36:53.619710323Z",
+    "Description": "[stage-1 44/56] COPY server/prisma/migrations/20261010000300_bench_credentials/migration.sql /app/server/.migrations-backup/202/20261010000300_bench_credentials/migration.sql",
+    "ID": "tu095s1vqrz60maf9m6qhqg6e",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:38:24.389774856Z",
+    "Shared": true,
+    "Size": 37438,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "qyna8n2yi5lo3ejjkpzgh4wls"
+    ],
+    "CreatedAt": "2026-10-11T19:32:08.599235605Z",
+    "Description": "[stage-1  4/47] COPY server/package.json server/package-lock.json ./server/",
+    "ID": "xg6569adm57ml5bju3zkvud4x",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T19:37:27.271675477Z",
+    "Shared": true,
+    "Size": 403524,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    "CreatedAt": "2026-10-12T08:02:06.083005565Z",
+    "Description": "local source for dockerfile",
+    "ID": "r4d2pj2j8o8g1xlv40ko0kpva",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T08:02:50.407901216Z",
+    "Shared": false,
+    "Size": 8192,
+    "Type": "source.local",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "fawwgdlq13vn2dgnfpbbx9dwr"
+    ],
+    "CreatedAt": "2026-10-14T22:33:35.537282163Z",
+    "Description": "[builder  2/12] WORKDIR /app",
+    "ID": "lmz7nae0u12mr0qco1d7xzjdf",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:38:24.349035152Z",
+    "Shared": true,
+    "Size": 8285,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "nun7fp8oz8aumw3p1my3dnnuz"
+    ],
+    "CreatedAt": "2026-10-12T10:47:17.295833715Z",
+    "Description": "mount / from exec /bin/sh -c cd client && npm run build",
+    "ID": "ivdxyxjqqauznmd6bcecawify",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T10:49:28.201678072Z",
+    "Shared": false,
+    "Size": 33120256,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "ii16nkuahw3k022bbk8wttmsu"
+    ],
+    "CreatedAt": "2026-10-14T22:35:26.554349332Z",
+    "Description": "[builder  8/12] COPY server/ ./server/",
+    "ID": "5nyhkca0mg5f8r82pu0g4n776",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:38:24.480959623Z",
+    "Shared": false,
+    "Size": 12787712,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "3qf6nvl2fm4oyg9mneuxo8eb8"
+    ],
+    "CreatedAt": "2026-10-12T10:48:16.946387398Z",
+    "Description": "[stage-1 34/52] COPY server/prisma/migrations/20261009000100_reported_value_selection/migration.sql /app/server/.migrations-backup/192/20261009000100_reported_value_selection/migration.sql",
+    "ID": "mrl37nt0rfl3301fnj7y53tlf",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T10:49:28.223691375Z",
+    "Shared": true,
+    "Size": 42894,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "rvsrnbjbssaafciskguqqjt0y"
+    ],
+    "CreatedAt": "2026-10-12T07:57:58.532762273Z",
+    "Description": "mount / from exec /bin/sh -c apt-get update  && apt-get install -y --no-install-recommends ca-certificates curl  && curl -fsSL -o /tmp/quarto.deb       \"https://github.com/quarto-dev/quarto-cli/releases/download/v${QUARTO_VERSION}/quarto-${QUARTO_VERSION}-linux-${TARGETARCH:-amd64}.deb\"  && apt-get install -y /tmp/quarto.deb  && rm -rf /tmp/quarto.deb /var/lib/apt/lists/*",
+    "ID": "sjubzmk31t2ktj01oxsqbawlk",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T07:58:52.634731019Z",
+    "Shared": false,
+    "Size": 487628800,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "oeqkq26s0k8lf6s9l0kcxy5sj"
+    ],
+    "CreatedAt": "2026-10-12T10:46:49.559343045Z",
+    "Description": "mount / from exec /bin/sh -c apk del python3 make g++",
+    "ID": "6r2wh9iw99h56ntlkurxq925x",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T13:55:19.481796223Z",
+    "Shared": true,
+    "Size": 128190,
+    "Type": "regular",
+    "UsageCount": 2
+  },
+  {
+    " Parents": [
+      "shnkvz355rq61kermh3p5f4kg"
+    ],
+    "CreatedAt": "2026-10-12T03:52:54.72829006Z",
+    "Description": "[stage-1  8/47] COPY server/ ./server/",
+    "ID": "r52q5m91pl95p74535d4lbfe3",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T03:54:20.113626119Z",
+    "Shared": true,
+    "Size": 14421854,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "jhnw54c1789hhkn7zmq02dxjz"
+    ],
+    "CreatedAt": "2026-10-12T03:54:09.949407366Z",
+    "Description": "[stage-1 20/47] COPY server/prisma/migrations/20261006000200_reference_material_catalogue/fresh-prisma-tables.json /app/server/.migrations-backup/184/20261006000200_reference_material_catalogue/fresh-prisma-tables.json",
+    "ID": "81tbjqynycspdsgqqqjvv72l1",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T03:54:20.025502862Z",
+    "Shared": true,
+    "Size": 45851,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "n1fa5pyvop7ggpfi677q4ze21"
+    ],
+    "CreatedAt": "2026-10-12T03:52:54.731359526Z",
+    "Description": "[builder  7/12] COPY client/ ./client/",
+    "ID": "ftp43g75snyetklelnw13ecs6",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T03:54:20.031328477Z",
+    "Shared": false,
+    "Size": 34217984,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "qysegqqedeij53joadx49n5wi"
+    ],
+    "CreatedAt": "2026-10-14T07:36:53.424460188Z",
+    "Description": "mount / from exec /bin/sh -c node -e \"require('fs').writeFileSync('.build-id', String(Date.now()))\"",
+    "ID": "lqf1rixhnzmggex725noqri9w",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T07:36:54.103018989Z",
+    "Shared": true,
+    "Size": 16531,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "8ckqop5sn853ra5a0lsr3r63c"
+    ],
+    "CreatedAt": "2026-10-12T03:54:09.223843309Z",
+    "Description": "[stage-1 12/47] COPY --from=builder /app/client/dist ./client/dist/",
+    "ID": "2fc24dtq8kjmhz9z4m2dedun5",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T03:54:20.093193568Z",
+    "Shared": true,
+    "Size": 61974535,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    "CreatedAt": "2026-10-12T07:57:18.717910147Z",
+    "Description": "local source for dockerfile",
+    "ID": "45a1za4byofdjvq72otwrdewl",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T07:58:52.61086625Z",
+    "Shared": false,
+    "Size": 8192,
+    "Type": "source.local",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "mvnptjxmu4evif9dzypw9j5lj"
+    ],
+    "CreatedAt": "2026-10-14T22:36:52.286053448Z",
+    "Description": "[stage-1 25/56] COPY server/prisma/migrations/20261007000100_qc_gate_scope/migration.sql /app/server/.migrations-backup/187/20261007000100_qc_gate_scope/migration.sql",
+    "ID": "lvnr81luzcwuw77f2cb5tlt3c",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:38:24.388284475Z",
+    "Shared": true,
+    "Size": 37365,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "3ve5npxd3qw41xktlu5ht8ndy"
+    ],
+    "CreatedAt": "2026-10-11T23:12:13.471049193Z",
+    "Description": "[stage-1 26/47] COPY server/prisma/migrations/20261007000200_qc_bracket_membership/migration.sql /app/server/.migrations-backup/187/20261007000200_qc_bracket_membership/migration.sql",
+    "ID": "1a1wf6wm66pixdh4uttqdg85u",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T23:12:23.358145565Z",
+    "Shared": true,
+    "Size": 42012,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "qyna8n2yi5lo3ejjkpzgh4wls"
+    ],
+    "CreatedAt": "2026-10-12T10:45:53.120543122Z",
+    "Description": "[stage-1  4/52] COPY server/package.json server/package-lock.json ./server/",
+    "ID": "07dasx69vyehmfs0soo9axrs4",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T10:49:28.179461247Z",
+    "Shared": true,
+    "Size": 403547,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "hg5ihaldf9zrmb8iks4ll35dk"
+    ],
+    "CreatedAt": "2026-10-12T10:48:17.461567481Z",
+    "Description": "[stage-1 46/52] COPY server/prisma/migrations/20261010000100_instrument_import_templates/migration.sql /app/server/.migrations-backup/200/20261010000100_instrument_import_templates/migration.sql",
+    "ID": "a4bw28zi5uparfbrd38w6na72",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T10:49:28.30965687Z",
+    "Shared": true,
+    "Size": 42231,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "j3v8px4ku4sw01v09it614s93"
+    ],
+    "CreatedAt": "2026-10-12T13:55:10.50727719Z",
+    "Description": "mount / from exec /bin/sh -c sed -i 's/\\r$//' /app/docker-entrypoint.sh && chmod +x /app/docker-entrypoint.sh",
+    "ID": "uedh2q068140rxfcn2whhsmh7",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T13:55:19.474600004Z",
+    "Shared": true,
+    "Size": 27563,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "q9ss0yk9bze8hs988inpi9pow"
+    ],
+    "CreatedAt": "2026-10-12T13:55:08.759820907Z",
+    "Description": "[stage-1 20/52] COPY server/prisma/migrations/20261006000200_reference_material_catalogue/fresh-prisma-tables.json /app/server/.migrations-backup/184/20261006000200_reference_material_catalogue/fresh-prisma-tables.json",
+    "ID": "nelc2d1gddl3ls8bl4hxstfw3",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T13:55:19.56329048Z",
+    "Shared": true,
+    "Size": 45855,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "r55nvq9c8dsey9ucgbo72lcbt"
+    ],
+    "CreatedAt": "2026-10-12T13:53:55.553432949Z",
+    "Description": "[builder  8/12] COPY server/ ./server/",
+    "ID": "3k5x6tfdkulhtu4resmsmgdqr",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T13:55:19.546699483Z",
+    "Shared": false,
+    "Size": 12546048,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "mg0btbwuocawvdnjf2z6idwaa"
+    ],
+    "CreatedAt": "2026-10-12T13:55:09.639128949Z",
+    "Description": "[stage-1 41/52] COPY server/prisma/migrations/20261010000000_sample_amendment_authorisation/migration.sql /app/server/.migrations-backup/210/20261010000000_sample_amendment_authorisation/migration.sql",
+    "ID": "l00e7cklv3igwgtltooaed1xh",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T13:55:19.559703476Z",
+    "Shared": true,
+    "Size": 42984,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "3pzu1vnzgue7t99vanwn102ec"
+    ],
+    "CreatedAt": "2026-10-12T07:58:51.190897337Z",
+    "Description": "[stage-1 3/3] COPY --from=site /site/_site /srv/site",
+    "ID": "o4lmezgng5b90ssv3t40renok",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T07:58:52.615511779Z",
+    "Shared": true,
+    "Size": 8321624,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "rw61gr8c15kedyagikb7g2bjo"
+    ],
+    "CreatedAt": "2026-10-12T03:54:10.307365884Z",
+    "Description": "[stage-1 29/47] COPY server/prisma/migrations/20261009000100_nonconformity_reports/migration.sql /app/server/.migrations-backup/193/20261009000100_nonconformity_reports/migration.sql",
+    "ID": "kowiimwz7h1nuk6tfxwhfc2ej",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T03:54:20.073098846Z",
+    "Shared": true,
+    "Size": 42394,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "i7ph3nj116eqa26y3uez3xwh7"
+    ],
+    "CreatedAt": "2026-10-11T23:12:14.260105859Z",
+    "Description": "[stage-1 44/47] COPY server/prisma/migrations/20261010000300_bench_credentials/migration.sql /app/server/.migrations-backup/202/20261010000300_bench_credentials/migration.sql",
+    "ID": "mixhd8sz2vxcehzrxdnku45fq",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T23:12:23.362394434Z",
+    "Shared": true,
+    "Size": 37441,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "uzv50snt7dphlh2o89fc5zwhe"
+    ],
+    "CreatedAt": "2026-10-11T19:35:40.207496207Z",
+    "Description": "[stage-1 22/47] COPY server/prisma/migrations/20261006000300_qc_rules/fresh-prisma-tables.json /app/server/.migrations-backup/185/20261006000300_qc_rules/fresh-prisma-tables.json",
+    "ID": "ikxoyu4g4t45ghda7sjr5txi1",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T19:37:27.222097953Z",
+    "Shared": true,
+    "Size": 45834,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "edd9c2d3g0x4kvvbekfqmr5sv"
+    ],
+    "CreatedAt": "2026-10-12T10:48:17.627392088Z",
+    "Description": "[stage-1 50/52] COPY server/prisma/migrations/20261010000100_instrument_import_templates/post205-draft-tables.json /app/server/.migrations-backup/200/20261010000100_instrument_import_templates/post205-draft-tables.json",
+    "ID": "utzo60e3q9335jfp775hdvr0i",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T10:49:28.268255922Z",
+    "Shared": true,
+    "Size": 49937,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "mjrhcyyasz7ri2jqxfw1ev0fz"
+    ],
+    "CreatedAt": "2026-10-11T19:35:40.397061636Z",
+    "Description": "[stage-1 25/47] COPY server/prisma/migrations/20261007000100_qc_gate_scope/migration.sql /app/server/.migrations-backup/187/20261007000100_qc_gate_scope/migration.sql",
+    "ID": "k4b02mwdg01tr3ttq5thhjn1p",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T19:37:27.120851038Z",
+    "Shared": true,
+    "Size": 37369,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "5ggitt92l2x4k6e5t9fbdtw2l"
+    ],
+    "CreatedAt": "2026-10-12T10:48:16.121686911Z",
+    "Description": "[stage-1 14/52] COPY server/prisma/migrations/20261005000000_workflow_state_evidence/migration.sql /app/server/.migrations-backup/179/20261005000000_workflow_state_evidence/migration.sql",
+    "ID": "ij0qg4mhquzmux90mpy4sv7ov",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T10:49:28.189916257Z",
+    "Shared": true,
+    "Size": 33424,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "m9qdwnt5wmiw868rv8ntkqisj"
+    ],
+    "CreatedAt": "2026-10-11T23:12:14.131199459Z",
+    "Description": "[stage-1 41/47] COPY server/prisma/migrations/20261010000000_sample_amendment_authorisation/migration.sql /app/server/.migrations-backup/210/20261010000000_sample_amendment_authorisation/migration.sql",
+    "ID": "i0vsmkqv1qwooolp8g3gfk9o9",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T23:12:23.435277766Z",
+    "Shared": true,
+    "Size": 42984,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "klkb4s24yr5tfu9cxrgal0hor"
+    ],
+    "CreatedAt": "2026-10-12T07:57:20.246081786Z",
+    "Description": "",
+    "ID": "dgobib14w110g7w912mzuu9ep",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T08:02:50.399289414Z",
+    "Shared": true,
+    "Size": 249,
+    "Type": "regular",
+    "UsageCount": 2
+  },
+  {
+    " Parents": [
+      "ssj3jiqe6z1i04dz3zmfd98mg"
+    ],
+    "CreatedAt": "2026-10-12T13:55:08.923484707Z",
+    "Description": "[stage-1 24/52] COPY server/prisma/migrations/20261006000400_normalized_qc_runs/fresh-prisma-tables.json /app/server/.migrations-backup/186/20261006000400_normalized_qc_runs/fresh-prisma-tables.json",
+    "ID": "29zvyoltugp43ug6jrvgwlf72",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T13:55:19.459441002Z",
+    "Shared": true,
+    "Size": 50352,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "1xjkppmkpn5k74hz2ypyaekou"
+    ],
+    "CreatedAt": "2026-10-12T07:59:33.761032764Z",
+    "Description": "[5/9] COPY jupyterhub_config.py /srv/jupyterhub/jupyterhub_config.py",
+    "ID": "vvj8dehok438k28dj53bbm14b",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T08:00:30.371404997Z",
+    "Shared": true,
+    "Size": 32557,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "l9p613t6qcttjhkuuk245fuy8"
+    ],
+    "CreatedAt": "2026-10-12T10:47:17.237254605Z",
+    "Description": "mount / from exec /bin/sh -c cd server && npx prisma generate",
+    "ID": "nun7fp8oz8aumw3p1my3dnnuz",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T10:49:28.194128831Z",
+    "Shared": false,
+    "Size": 67153920,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "l5k6ej5qg9h6izzmo4ug1p5e6"
+    ],
+    "CreatedAt": "2026-10-11T19:35:40.567031772Z",
+    "Description": "[stage-1 29/47] COPY server/prisma/migrations/20261009000100_nonconformity_reports/migration.sql /app/server/.migrations-backup/193/20261009000100_nonconformity_reports/migration.sql",
+    "ID": "0zd9nj6wkmxc7uyxc9bky29m8",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T19:37:27.129529523Z",
+    "Shared": true,
+    "Size": 42399,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "szdymtgidc2ljr433doohdbzk"
+    ],
+    "CreatedAt": "2026-10-14T22:36:54.08605265Z",
+    "Description": "[stage-1 49/56] COPY server/prisma/migrations/20261010000100_instrument_import_templates/upgraded-prisma-draft-table.sql /app/server/.migrations-backup/200/20261010000100_instrument_import_templates/upgraded-prisma-draft-table.sql",
+    "ID": "oebgw33yx35yxb5ucb2e18fa1",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:38:24.380710484Z",
+    "Shared": true,
+    "Size": 45687,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "8n7nd25vvdg1npnb5jqsdmjgc"
+    ],
+    "CreatedAt": "2026-10-12T10:48:16.39179044Z",
+    "Description": "[stage-1 20/52] COPY server/prisma/migrations/20261006000200_reference_material_catalogue/fresh-prisma-tables.json /app/server/.migrations-backup/184/20261006000200_reference_material_catalogue/fresh-prisma-tables.json",
+    "ID": "c4bbcp6ejgwikpx7ltcmyap7i",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T10:49:28.278459802Z",
+    "Shared": true,
+    "Size": 45854,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "4ty5hoalnx3n7pbrjm0odvvwi"
+    ],
+    "CreatedAt": "2026-10-14T06:53:08.999347478Z",
+    "Description": "[4/7] COPY --chown=node:node package.json package-lock.json ./",
+    "ID": "itn0zxw631884s38msysa0sre",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T06:54:20.479055032Z",
+    "Shared": true,
+    "Size": 179112,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "5sfjy9eggtcnkdwx5jd9cuoct"
+    ],
+    "CreatedAt": "2026-10-12T13:55:08.636514488Z",
+    "Description": "[stage-1 17/52] COPY server/prisma/migrations/20261004064500_add_result_raw_input/migration.sql /app/server/.migrations-backup/272/20261004064500_add_result_raw_input/migration.sql",
+    "ID": "72vvt8djvebshl3clcy8b262z",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T13:55:19.52716787Z",
+    "Shared": true,
+    "Size": 37159,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "o1fb3k0hq8o2z678zccxsiauy"
+    ],
+    "CreatedAt": "2026-10-12T13:55:10.092839507Z",
+    "Description": "[stage-1 50/52] COPY server/prisma/migrations/20261010000100_instrument_import_templates/post205-draft-tables.json /app/server/.migrations-backup/200/20261010000100_instrument_import_templates/post205-draft-tables.json",
+    "ID": "go030jj3e5i9oisha03n58k8o",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T13:55:19.508851567Z",
+    "Shared": true,
+    "Size": 50079,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "rvsrnbjbssaafciskguqqjt0y"
+    ],
+    "CreatedAt": "2026-10-12T07:57:20.057463289Z",
+    "Description": "",
+    "ID": "zxrux82h1sxgg1qgtjj6h79vn",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T07:57:20.15817567Z",
+    "Shared": true,
+    "Size": 1294052,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "um9imaz9celmurythu6htujk1"
+    ],
+    "CreatedAt": "2026-10-11T19:33:08.13220494Z",
+    "Description": "mount / from exec /bin/sh -c cd client && npm ci --ignore-scripts",
+    "ID": "9oukyfow25nq6mm4x0ha537lm",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T10:49:28.260352122Z",
+    "Shared": false,
+    "Size": 365346816,
+    "Type": "regular",
+    "UsageCount": 2
+  },
+  {
+    " Parents": [
+      "gmaf1h5g4remvktq3d4jam5uo"
+    ],
+    "CreatedAt": "2026-10-11T23:12:13.966784038Z",
+    "Description": "[stage-1 37/47] COPY server/prisma/migrations/20261009000400_calculation_templates/migration.sql /app/server/.migrations-backup/199/20261009000400_calculation_templates/migration.sql",
+    "ID": "nw86rcz9h5vval7mr9lz8m64j",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T23:12:23.376253801Z",
+    "Shared": true,
+    "Size": 66014,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "txkvot5dlzu0loh1zteclgm60"
+    ],
+    "CreatedAt": "2026-10-14T22:36:52.064835249Z",
+    "Description": "[stage-1 20/56] COPY server/prisma/migrations/20261006000200_reference_material_catalogue/fresh-prisma-tables.json /app/server/.migrations-backup/184/20261006000200_reference_material_catalogue/fresh-prisma-tables.json",
+    "ID": "5omrjg28djsrv3vzscqczkh6j",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:38:24.34250485Z",
+    "Shared": true,
+    "Size": 45851,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "ti2ocjvw5gss5f7hxg3qlm7vk"
+    ],
+    "CreatedAt": "2026-10-11T23:12:13.865505863Z",
+    "Description": "[stage-1 35/47] COPY server/prisma/migrations/20261009000200_batch_reagent_lots/migration.sql /app/server/.migrations-backup/194/20261009000200_batch_reagent_lots/migration.sql",
+    "ID": "7mpi951xvccjlockhzr71b4ds",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T23:12:23.400687378Z",
+    "Shared": true,
+    "Size": 37544,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "2s7m0mz1o6alrv635xxm5eo2o"
+    ],
+    "CreatedAt": "2026-10-14T22:36:54.804496836Z",
+    "Description": "mount / from exec /bin/sh -c sed -i 's/\\r$//' /app/docker-entrypoint.sh && chmod +x /app/docker-entrypoint.sh",
+    "ID": "oi6n1co6mnl3ir2zdiu7hot2k",
+    "InUse": false,
+    "LastUsedAt": "2026-10-15T00:27:26.50582689Z",
+    "Shared": true,
+    "Size": 27616,
+    "Type": "regular",
+    "UsageCount": 2
+  },
+  {
+    " Parents": [
+      "mtltyog8xks6xltphxexfalr5"
+    ],
+    "CreatedAt": "2026-10-11T19:35:40.067659112Z",
+    "Description": "[stage-1 19/47] COPY server/prisma/migrations/20261006000200_reference_material_catalogue/migration.sql /app/server/.migrations-backup/184/20261006000200_reference_material_catalogue/migration.sql",
+    "ID": "m6gk1gxgpwutwe63efjqffdg0",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T19:37:27.170870772Z",
+    "Shared": true,
+    "Size": 42971,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "t8a989d19u9c9mb9j9himr4oz"
+    ],
+    "CreatedAt": "2026-10-12T10:48:16.564441731Z",
+    "Description": "[stage-1 24/52] COPY server/prisma/migrations/20261006000400_normalized_qc_runs/fresh-prisma-tables.json /app/server/.migrations-backup/186/20261006000400_normalized_qc_runs/fresh-prisma-tables.json",
+    "ID": "elted5j4xm3v3vvwwqk9ndvzq",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T10:49:28.176499786Z",
+    "Shared": true,
+    "Size": 50353,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "vjd11p7znwqzxenenyyz1as0f"
+    ],
+    "CreatedAt": "2026-10-12T13:55:09.153269458Z",
+    "Description": "[stage-1 30/52] COPY server/prisma/migrations/20261004190000_add_workitem_duplicate_marker/migration.sql /app/server/.migrations-backup/178/20261004190000_add_workitem_duplicate_marker/migration.sql",
+    "ID": "un82cprc5a6vbkqwy8jhmkk87",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T13:55:19.557047745Z",
+    "Shared": true,
+    "Size": 37219,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "jktea5zb1yy4l3uhn0jfohvxj"
+    ],
+    "CreatedAt": "2026-10-11T23:12:12.489017441Z",
+    "Description": "[stage-1 12/47] COPY --from=builder /app/client/dist ./client/dist/",
+    "ID": "y9w4wdqkohfroyaxbp1gek6sl",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T23:12:23.3728072Z",
+    "Shared": true,
+    "Size": 61974226,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "1lkk14apjsmbtpjy3vf4hd2qn"
+    ],
+    "CreatedAt": "2026-10-12T13:55:09.723028238Z",
+    "Description": "[stage-1 43/52] COPY server/prisma/migrations/20261010000200_report_revision_amendment/migration.sql /app/server/.migrations-backup/211/20261010000200_report_revision_amendment/migration.sql",
+    "ID": "jkv1fgmo5xd6fnydiagnt8619",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T13:55:19.532590497Z",
+    "Shared": true,
+    "Size": 37837,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "7mpi951xvccjlockhzr71b4ds"
+    ],
+    "CreatedAt": "2026-10-11T23:12:13.924190675Z",
+    "Description": "[stage-1 36/47] COPY server/prisma/migrations/20261009000300_result_override_requests/migration.sql /app/server/.migrations-backup/197/20261009000300_result_override_requests/migration.sql",
+    "ID": "gmaf1h5g4remvktq3d4jam5uo",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T23:12:23.367124118Z",
+    "Shared": true,
+    "Size": 42940,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    "CreatedAt": "2026-10-12T08:02:06.735484032Z",
+    "Description": "local source for context",
+    "ID": "k9o7avf6s95u611v8gdkdd6e3",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T08:02:50.402735577Z",
+    "Shared": false,
+    "Size": 4096,
+    "Type": "source.local",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "g8firfc6wyov85m9hfwps66se"
+    ],
+    "CreatedAt": "2026-10-14T22:36:53.199354914Z",
+    "Description": "[stage-1 36/56] COPY server/prisma/migrations/20261009000300_result_override_requests/migration.sql /app/server/.migrations-backup/197/20261009000300_result_override_requests/migration.sql",
+    "ID": "s8qv6wwn7o85jiy2tdof2xfik",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:38:24.447544171Z",
+    "Shared": true,
+    "Size": 42938,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "k5rufl2z20pglrwi9sqfveoml"
+    ],
+    "CreatedAt": "2026-10-14T22:33:28.661234225Z",
+    "Description": "pulled from docker.io/library/node:24-alpine@sha256:44fce696f38ba8c987c4db89954051000bbd05ffd8d8659ba15ed4a8602e937f",
+    "ID": "fawwgdlq13vn2dgnfpbbx9dwr",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:38:24.428658991Z",
+    "Shared": true,
+    "Size": 20921,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "bcwxgvwedkbn50j2mneh0xm3h"
+    ],
+    "CreatedAt": "2026-10-11T19:35:40.667685297Z",
+    "Description": "[stage-1 31/47] COPY server/prisma/migrations/20261004190100_unique_active_workitem/migration.sql /app/server/.migrations-backup/178/20261004190100_unique_active_workitem/migration.sql",
+    "ID": "iwq2wds5utalruvetk14fxur9",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T19:37:27.199376644Z",
+    "Shared": true,
+    "Size": 41366,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "tedpofr84b0pyc5api4lvoz6y"
+    ],
+    "CreatedAt": "2026-10-14T22:36:52.582874338Z",
+    "Description": "[stage-1 31/56] COPY server/prisma/migrations/20261004190100_unique_active_workitem/migration.sql /app/server/.migrations-backup/178/20261004190100_unique_active_workitem/migration.sql",
+    "ID": "s07y6eg2echljj8k7is1l7byq",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:38:24.344820764Z",
+    "Shared": true,
+    "Size": 41362,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "j91yo9ohblzzm681a5lz22z6w"
+    ],
+    "CreatedAt": "2026-10-12T10:48:16.749247124Z",
+    "Description": "[stage-1 29/52] COPY server/prisma/migrations/20261009000100_nonconformity_reports/migration.sql /app/server/.migrations-backup/193/20261009000100_nonconformity_reports/migration.sql",
+    "ID": "rc78hy96di4fqo1w47py41m4f",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T10:49:28.265927848Z",
+    "Shared": true,
+    "Size": 42397,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "sucxc7f8xl6d20wx0mnljwgmc"
+    ],
+    "CreatedAt": "2026-10-12T03:54:10.842720037Z",
+    "Description": "[stage-1 41/47] COPY server/prisma/migrations/20261010000000_sample_amendment_authorisation/migration.sql /app/server/.migrations-backup/210/20261010000000_sample_amendment_authorisation/migration.sql",
+    "ID": "7qpd4ank7p79rob33lr6yrise",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T03:54:20.037087184Z",
+    "Shared": true,
+    "Size": 42982,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "023u5307f7fen90goj7sqymkn"
+    ],
+    "CreatedAt": "2026-10-14T22:36:53.714438435Z",
+    "Description": "[stage-1 46/56] COPY server/prisma/migrations/20261010000100_instrument_import_templates/migration.sql /app/server/.migrations-backup/200/20261010000100_instrument_import_templates/migration.sql",
+    "ID": "t9c32tgv1f476pgawvdmvde5i",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:38:24.391238116Z",
+    "Shared": true,
+    "Size": 42224,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "vvj8dehok438k28dj53bbm14b"
+    ],
+    "CreatedAt": "2026-10-12T07:59:33.801683099Z",
+    "Description": "[6/9] COPY templates/ /srv/jupyterhub/templates/",
+    "ID": "kmibt84cq5if68y00v518tubt",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T08:00:30.380347476Z",
+    "Shared": true,
+    "Size": 50312,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "oa3jd88f0k56ithouixr87qcb"
+    ],
+    "CreatedAt": "2026-10-14T22:36:52.445492682Z",
+    "Description": "[stage-1 28/56] COPY server/prisma/migrations/20261007000400_result_equipment_evidence/migration.sql /app/server/.migrations-backup/189/20261007000400_result_equipment_evidence/migration.sql",
+    "ID": "q6it17rm8j8o9ska6imee7oo2",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:38:24.462081988Z",
+    "Shared": true,
+    "Size": 41525,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "avz0i3b51rss3k2975jshcj98"
+    ],
+    "CreatedAt": "2026-10-11T23:11:14.862753078Z",
+    "Description": "mount / from exec /bin/sh -c cd client && npm run build",
+    "ID": "387wurepjbaznqrae07bro6qw",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T23:12:23.408977178Z",
+    "Shared": false,
+    "Size": 33075200,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "ddcfpq9oqcr4nnqpqjz7sy4da"
+    ],
+    "CreatedAt": "2026-10-11T23:12:13.573918207Z",
+    "Description": "[stage-1 28/47] COPY server/prisma/migrations/20261007000400_result_equipment_evidence/migration.sql /app/server/.migrations-backup/189/20261007000400_result_equipment_evidence/migration.sql",
+    "ID": "kvrixjcxhyr5su5sdertkmsgo",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T23:12:23.385488349Z",
+    "Shared": true,
+    "Size": 41526,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "m6gk1gxgpwutwe63efjqffdg0"
+    ],
+    "CreatedAt": "2026-10-11T19:35:40.111535437Z",
+    "Description": "[stage-1 20/47] COPY server/prisma/migrations/20261006000200_reference_material_catalogue/fresh-prisma-tables.json /app/server/.migrations-backup/184/20261006000200_reference_material_catalogue/fresh-prisma-tables.json",
+    "ID": "8y5fmsexnask6qtuylgzicxhk",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T19:37:27.21902942Z",
+    "Shared": true,
+    "Size": 45858,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "6b5wd7agg4qice1klhihfir83"
+    ],
+    "CreatedAt": "2026-10-11T23:12:13.314145338Z",
+    "Description": "[stage-1 22/47] COPY server/prisma/migrations/20261006000300_qc_rules/fresh-prisma-tables.json /app/server/.migrations-backup/185/20261006000300_qc_rules/fresh-prisma-tables.json",
+    "ID": "nhikoeblzux7a6bp0cblm21oc",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T23:12:23.352572427Z",
+    "Shared": true,
+    "Size": 45831,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "li8rghr0klzly0fwq1nh0bn4v"
+    ],
+    "CreatedAt": "2026-10-14T22:34:26.238309452Z",
+    "Description": "mount / from exec /bin/sh -c cd client && npm ci --ignore-scripts",
+    "ID": "gmgan77x4huwyx9czaj0yts6z",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:38:24.444132818Z",
+    "Shared": false,
+    "Size": 365367296,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "mxpag536isj6e0ke2s6vf90ni"
+    ],
+    "CreatedAt": "2026-10-12T13:55:09.330451384Z",
+    "Description": "[stage-1 34/52] COPY server/prisma/migrations/20261009000100_reported_value_selection/migration.sql /app/server/.migrations-backup/192/20261009000100_reported_value_selection/migration.sql",
+    "ID": "lsr1avxnu2q6r0rqeubg4jmed",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T13:55:19.525991572Z",
+    "Shared": true,
+    "Size": 42898,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "dcwk5uzk3tc4crlsts3mqzuuf"
+    ],
+    "CreatedAt": "2026-10-11T19:35:41.480525029Z",
+    "Description": "[stage-1 41/47] COPY server/prisma/migrations/20261010000000_sample_amendment_authorisation/migration.sql /app/server/.migrations-backup/210/20261010000000_sample_amendment_authorisation/migration.sql",
+    "ID": "99ivz1bfwsqd9h72arz98v6th",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T19:37:27.132128324Z",
+    "Shared": true,
+    "Size": 42986,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "vz2z05bekwascg9zptnr0deaw"
+    ],
+    "CreatedAt": "2026-10-14T22:36:53.524852576Z",
+    "Description": "[stage-1 43/56] COPY server/prisma/migrations/20261010000200_report_revision_amendment/migration.sql /app/server/.migrations-backup/211/20261010000200_report_revision_amendment/migration.sql",
+    "ID": "guh7ne6biq2emc45lwo9z6s63",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:38:24.449348001Z",
+    "Shared": true,
+    "Size": 37831,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "lvnr81luzcwuw77f2cb5tlt3c"
+    ],
+    "CreatedAt": "2026-10-14T22:36:52.335084369Z",
+    "Description": "[stage-1 26/56] COPY server/prisma/migrations/20261007000200_qc_bracket_membership/migration.sql /app/server/.migrations-backup/187/20261007000200_qc_bracket_membership/migration.sql",
+    "ID": "kvisnrlk7dfc7yz6eni291a12",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:38:24.442564019Z",
+    "Shared": true,
+    "Size": 42009,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "mbz1hfzjh92c440elddm6xo07"
+    ],
+    "CreatedAt": "2026-10-12T13:55:09.857299962Z",
+    "Description": "[stage-1 46/52] COPY server/prisma/migrations/20261010000100_instrument_import_templates/migration.sql /app/server/.migrations-backup/200/20261010000100_instrument_import_templates/migration.sql",
+    "ID": "f5ruun4493rgw89x81ij8ch8a",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T13:55:19.533990496Z",
+    "Shared": true,
+    "Size": 42231,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "yda1sxeh84ce5c6emljeux0l1"
+    ],
+    "CreatedAt": "2026-10-11T19:35:41.136170743Z",
+    "Description": "[stage-1 34/47] COPY server/prisma/migrations/20261009000100_reported_value_selection/migration.sql /app/server/.migrations-backup/192/20261009000100_reported_value_selection/migration.sql",
+    "ID": "3e8ahevfs3hj4c9lpvjeypy4k",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T19:37:27.187409753Z",
+    "Shared": true,
+    "Size": 42898,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "thxx20q41la7jb5lxvrsf5mdo"
+    ],
+    "CreatedAt": "2026-10-12T07:59:34.254841136Z",
+    "Description": "mount / from exec /bin/sh -c chmod +x /usr/local/bin/soilfer-users",
+    "ID": "5utv676en0211qmdkxf8tx9w9",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T08:00:30.355993949Z",
+    "Shared": true,
+    "Size": 38584,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "7qpd4ank7p79rob33lr6yrise"
+    ],
+    "CreatedAt": "2026-10-12T03:54:11.006031635Z",
+    "Description": "[stage-1 42/47] COPY server/prisma/migrations/20261010000000_sample_amendment_authorisation/fresh-prisma-tables.json /app/server/.migrations-backup/210/20261010000000_sample_amendment_authorisation/fresh-prisma-tables.json",
+    "ID": "mi5qucmwmjsdsy2tsgwf2oty7",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T03:54:20.041550783Z",
+    "Shared": true,
+    "Size": 45670,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "lmzmenl70kxco2453q9fpk6iu"
+    ],
+    "CreatedAt": "2026-10-11T23:12:13.432466009Z",
+    "Description": "[stage-1 25/47] COPY server/prisma/migrations/20261007000100_qc_gate_scope/migration.sql /app/server/.migrations-backup/187/20261007000100_qc_gate_scope/migration.sql",
+    "ID": "3ve5npxd3qw41xktlu5ht8ndy",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T23:12:23.412221206Z",
+    "Shared": true,
+    "Size": 37366,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "yazeah943cmekn2tbi7zyp939"
+    ],
+    "CreatedAt": "2026-10-12T13:53:55.642117047Z",
+    "Description": "[stage-1  9/52] COPY shared/ ./shared/",
+    "ID": "twl6rijkheehtutxu9qaspns0",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T13:55:19.550717843Z",
+    "Shared": true,
+    "Size": 60631,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "t9c32tgv1f476pgawvdmvde5i"
+    ],
+    "CreatedAt": "2026-10-14T22:36:54.005051663Z",
+    "Description": "[stage-1 47/56] COPY server/prisma/migrations/20261010000100_instrument_import_templates/fresh-prisma-tables.json /app/server/.migrations-backup/200/20261010000100_instrument_import_templates/fresh-prisma-tables.json",
+    "ID": "3o6lrhkldhclwistci6rksury",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:38:24.465440846Z",
+    "Shared": true,
+    "Size": 45912,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    "CreatedAt": "2026-10-12T07:57:20.040365221Z",
+    "Description": "",
+    "ID": "rvsrnbjbssaafciskguqqjt0y",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T07:58:52.60566064Z",
+    "Shared": true,
+    "Size": 29843350,
+    "Type": "regular",
+    "UsageCount": 2
+  },
+  {
+    " Parents": [
+      "2y007dosymgmkybgh52ozar7f"
+    ],
+    "CreatedAt": "2026-10-14T22:36:51.561147992Z",
+    "Description": "[stage-1 15/56] COPY server/prisma/migrations/20261005000100_workflow_state_guards/migration.sql /app/server/.migrations-backup/179/20261005000100_workflow_state_guards/migration.sql",
+    "ID": "pzkqehmkzql7sorfauqjmdied",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:38:24.376135609Z",
+    "Shared": true,
+    "Size": 41972,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "onfmqmq0kfh0w1qvht72s9tll"
+    ],
+    "CreatedAt": "2026-10-11T19:34:13.1075679Z",
+    "Description": "[builder  9/12] COPY shared/ ./shared/",
+    "ID": "qd8ow4zoizcfrq6ljz5pjm2f6",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T19:37:27.276731532Z",
+    "Shared": false,
+    "Size": 49152,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "atz6zg106zfdxf7on287d11k6"
+    ],
+    "CreatedAt": "2026-10-11T19:31:59.659778123Z",
+    "Description": "",
+    "ID": "kzcyyosfdoxp54dfh099szg7g",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T19:37:27.201638402Z",
+    "Shared": true,
+    "Size": 444,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "psteosu5vr8zbnxt3z485z8th"
+    ],
+    "CreatedAt": "2026-10-11T19:35:41.437705422Z",
+    "Description": "[stage-1 40/47] COPY server/prisma/migrations/20261010000100_cross_check_evaluation/fresh-prisma-tables.json /app/server/.migrations-backup/201/20261010000100_cross_check_evaluation/fresh-prisma-tables.json",
+    "ID": "dcwk5uzk3tc4crlsts3mqzuuf",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T19:37:27.123329692Z",
+    "Shared": true,
+    "Size": 45604,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "woleuhny6gxk79xsemgz9s7rz"
+    ],
+    "CreatedAt": "2026-10-11T19:34:29.194744794Z",
+    "Description": "mount / from exec /bin/sh -c cd server && npx prisma generate",
+    "ID": "k26kmw0n07jlz7w7cvhqgj8ct",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T19:37:27.31138246Z",
+    "Shared": false,
+    "Size": 66830336,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "yk479zrg7iqlp7zpecpd6t63f"
+    ],
+    "CreatedAt": "2026-10-11T23:12:13.74512792Z",
+    "Description": "[stage-1 32/47] COPY server/prisma/migrations/20261008000100_work_attempt_contract/migration.sql /app/server/.migrations-backup/190/20261008000100_work_attempt_contract/migration.sql",
+    "ID": "af6xep0e5ek8f35ygnzkbe0zr",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T23:12:23.344118259Z",
+    "Shared": true,
+    "Size": 42941,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "4l9qksd5lj5oc5ku8occb8xjv"
+    ],
+    "CreatedAt": "2026-10-12T13:55:09.078209566Z",
+    "Description": "[stage-1 28/52] COPY server/prisma/migrations/20261007000400_result_equipment_evidence/migration.sql /app/server/.migrations-backup/189/20261007000400_result_equipment_evidence/migration.sql",
+    "ID": "to33urmglgrbfn7nf91tpq7s1",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T13:55:19.555344957Z",
+    "Shared": true,
+    "Size": 41529,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "8y5fmsexnask6qtuylgzicxhk"
+    ],
+    "CreatedAt": "2026-10-11T19:35:40.160337616Z",
+    "Description": "[stage-1 21/47] COPY server/prisma/migrations/20261006000300_qc_rules/migration.sql /app/server/.migrations-backup/185/20261006000300_qc_rules/migration.sql",
+    "ID": "uzv50snt7dphlh2o89fc5zwhe",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T19:37:27.178037903Z",
+    "Shared": true,
+    "Size": 42969,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "21t10bmyex8hp0nd4b1h7svjw"
+    ],
+    "CreatedAt": "2026-10-12T07:59:33.718827503Z",
+    "Description": "[4/9] WORKDIR /srv/jupyterhub",
+    "ID": "1xjkppmkpn5k74hz2ypyaekou",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T08:00:30.345731335Z",
+    "Shared": true,
+    "Size": 12408,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "hhqjoqma4u7s0wxq11ov41rio"
+    ],
+    "CreatedAt": "2026-10-12T10:48:17.346920207Z",
+    "Description": "[stage-1 43/52] COPY server/prisma/migrations/20261010000200_report_revision_amendment/migration.sql /app/server/.migrations-backup/211/20261010000200_report_revision_amendment/migration.sql",
+    "ID": "3pjjzhc1uouvtj07at0oyp0vc",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T10:49:28.256357379Z",
+    "Shared": true,
+    "Size": 37839,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "pch17ysvoudj1agv5n8nd685t"
+    ],
+    "CreatedAt": "2026-10-14T06:53:30.542692839Z",
+    "Description": "[6/7] COPY --chown=node:node . .",
+    "ID": "xagcioi3xmat8m630g5lnhrgy",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T06:54:20.472752807Z",
+    "Shared": true,
+    "Size": 2277112,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "bdagvphso3baxulfgvakvyng0"
+    ],
+    "CreatedAt": "2026-10-12T03:54:09.912961265Z",
+    "Description": "[stage-1 19/47] COPY server/prisma/migrations/20261006000200_reference_material_catalogue/migration.sql /app/server/.migrations-backup/184/20261006000200_reference_material_catalogue/migration.sql",
+    "ID": "jhnw54c1789hhkn7zmq02dxjz",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T03:54:20.070528912Z",
+    "Shared": true,
+    "Size": 42961,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    "CreatedAt": "2026-10-12T07:57:18.711652355Z",
+    "Description": "local source for dockerfile",
+    "ID": "wvgplbyyijr9mp3byfi19ijwv",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T08:00:30.388002892Z",
+    "Shared": false,
+    "Size": 8192,
+    "Type": "source.local",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "rgqgoeuzgsjgf8mc5032n6w8o"
+    ],
+    "CreatedAt": "2026-10-14T22:36:51.431537171Z",
+    "Description": "mount / from exec /bin/sh -c mkdir -p /app/server/.schema-backup &&     cp /app/server/prisma/schema.prisma /app/server/.schema-backup/schema.prisma",
+    "ID": "ealp0pfkk70khr2j7bwkcdonw",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:38:24.484673635Z",
+    "Shared": true,
+    "Size": 135655,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "e2x2u1yobdt4o2nhy44vqv6fj"
+    ],
+    "CreatedAt": "2026-10-12T10:48:16.866230364Z",
+    "Description": "[stage-1 32/52] COPY server/prisma/migrations/20261008000100_work_attempt_contract/migration.sql /app/server/.migrations-backup/190/20261008000100_work_attempt_contract/migration.sql",
+    "ID": "ohgeomq1j5iwqye78repdgavw",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T10:49:28.181654487Z",
+    "Shared": true,
+    "Size": 42940,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "0zd9nj6wkmxc7uyxc9bky29m8"
+    ],
+    "CreatedAt": "2026-10-11T19:35:40.609118533Z",
+    "Description": "[stage-1 30/47] COPY server/prisma/migrations/20261004190000_add_workitem_duplicate_marker/migration.sql /app/server/.migrations-backup/178/20261004190000_add_workitem_duplicate_marker/migration.sql",
+    "ID": "bcwxgvwedkbn50j2mneh0xm3h",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T19:37:27.265469277Z",
+    "Shared": true,
+    "Size": 37216,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "to33urmglgrbfn7nf91tpq7s1"
+    ],
+    "CreatedAt": "2026-10-12T13:55:09.116360755Z",
+    "Description": "[stage-1 29/52] COPY server/prisma/migrations/20261009000100_nonconformity_reports/migration.sql /app/server/.migrations-backup/193/20261009000100_nonconformity_reports/migration.sql",
+    "ID": "vjd11p7znwqzxenenyyz1as0f",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T13:55:19.470234458Z",
+    "Shared": true,
+    "Size": 42398,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "lmz7nae0u12mr0qco1d7xzjdf"
+    ],
+    "CreatedAt": "2026-10-14T22:33:35.589848299Z",
+    "Description": "[builder  3/12] COPY client/package.json client/package-lock.json ./client/",
+    "ID": "li8rghr0klzly0fwq1nh0bn4v",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:38:24.460190952Z",
+    "Shared": false,
+    "Size": 262144,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "pis7rgncoxuo15n1vdt3ajdt2"
+    ],
+    "CreatedAt": "2026-10-12T10:46:47.295954302Z",
+    "Description": "mount / from exec /bin/sh -c cd server && npm rebuild better-sqlite3",
+    "ID": "oeqkq26s0k8lf6s9l0kcxy5sj",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T10:49:28.182964825Z",
+    "Shared": true,
+    "Size": 6029739,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "dgobib14w110g7w912mzuu9ep"
+    ],
+    "CreatedAt": "2026-10-12T08:02:31.179703996Z",
+    "Description": "mount / from exec /bin/sh -c apt-get update && apt-get install -y --no-install-recommends git ca-certificates  && rm -rf /var/lib/apt/lists/* && pip install --no-cache-dir \"pillow>=11\"",
+    "ID": "obk9aw9116rjm7pbgklwk85uy",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T08:02:50.397437922Z",
+    "Shared": true,
+    "Size": 183734201,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "shnkvz355rq61kermh3p5f4kg"
+    ],
+    "CreatedAt": "2026-10-11T23:11:00.644373144Z",
+    "Description": "[stage-1  8/47] COPY server/ ./server/",
+    "ID": "z28jhbg00vf7vpgifkdlqjxe3",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T23:12:23.418994341Z",
+    "Shared": true,
+    "Size": 14421290,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "3prk56vml0l9rlon8xiuc6vog"
+    ],
+    "CreatedAt": "2026-10-11T23:12:14.217696393Z",
+    "Description": "[stage-1 43/47] COPY server/prisma/migrations/20261010000200_report_revision_amendment/migration.sql /app/server/.migrations-backup/211/20261010000200_report_revision_amendment/migration.sql",
+    "ID": "i7ph3nj116eqa26y3uez3xwh7",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T23:12:23.369038855Z",
+    "Shared": true,
+    "Size": 37834,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "n1fa5pyvop7ggpfi677q4ze21"
+    ],
+    "CreatedAt": "2026-10-11T19:34:12.698833973Z",
+    "Description": "[builder  7/12] COPY client/ ./client/",
+    "ID": "w7mkbf327i9kjpfz78of5ugc7",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T19:37:27.11408674Z",
+    "Shared": false,
+    "Size": 34213888,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "j72fvu5xxp4a51iyfinq7kflq"
+    ],
+    "CreatedAt": "2026-10-12T07:57:20.437570277Z",
+    "Description": "[stage-1 2/3] COPY gateway/Caddyfile /etc/caddy/Caddyfile",
+    "ID": "3pzu1vnzgue7t99vanwn102ec",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T07:58:52.620313436Z",
+    "Shared": true,
+    "Size": 21354,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "cuq3vrx1yyti288hp9goc80ct"
+    ],
+    "CreatedAt": "2026-10-12T10:48:17.240073634Z",
+    "Description": "[stage-1 41/52] COPY server/prisma/migrations/20261010000000_sample_amendment_authorisation/migration.sql /app/server/.migrations-backup/210/20261010000000_sample_amendment_authorisation/migration.sql",
+    "ID": "jqjyy1nyhgjr8810sl71k1qvj",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T10:49:28.329984004Z",
+    "Shared": true,
+    "Size": 42985,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "mi5qucmwmjsdsy2tsgwf2oty7"
+    ],
+    "CreatedAt": "2026-10-12T03:54:11.058178445Z",
+    "Description": "[stage-1 43/47] COPY server/prisma/migrations/20261010000200_report_revision_amendment/migration.sql /app/server/.migrations-backup/211/20261010000200_report_revision_amendment/migration.sql",
+    "ID": "t6cgnopznxigay4gaed499dq7",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T03:54:20.112524878Z",
+    "Shared": true,
+    "Size": 37834,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "jkv1fgmo5xd6fnydiagnt8619"
+    ],
+    "CreatedAt": "2026-10-12T13:55:09.762748047Z",
+    "Description": "[stage-1 44/52] COPY server/prisma/migrations/20261010000300_bench_credentials/migration.sql /app/server/.migrations-backup/202/20261010000300_bench_credentials/migration.sql",
+    "ID": "kcnj0d4zhnzcu5db4wlbeevch",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T13:55:19.541449674Z",
+    "Shared": true,
+    "Size": 37444,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "oebgw33yx35yxb5ucb2e18fa1"
+    ],
+    "CreatedAt": "2026-10-14T22:36:54.124116867Z",
+    "Description": "[stage-1 50/56] COPY server/prisma/migrations/20261010000100_instrument_import_templates/post205-draft-tables.json /app/server/.migrations-backup/200/20261010000100_instrument_import_templates/post205-draft-tables.json",
+    "ID": "y4vuahuw2x15qskrjueiar9bq",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:38:24.450935232Z",
+    "Shared": true,
+    "Size": 50073,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "y4vuahuw2x15qskrjueiar9bq"
+    ],
+    "CreatedAt": "2026-10-14T22:36:54.163175627Z",
+    "Description": "[stage-1 51/56] COPY server/prisma/migrations/20261013000100_sample_containers/migration.sql /app/server/.migrations-backup/206/20261013000100_sample_containers/migration.sql",
+    "ID": "o512l3xpy4ezv7272uhwrukts",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:38:24.401692657Z",
+    "Shared": true,
+    "Size": 38373,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "o6p8oth21wh2kdsflrggrqm9m"
+    ],
+    "CreatedAt": "2026-10-12T13:55:09.413751298Z",
+    "Description": "[stage-1 36/52] COPY server/prisma/migrations/20261009000300_result_override_requests/migration.sql /app/server/.migrations-backup/197/20261009000300_result_override_requests/migration.sql",
+    "ID": "u03f86e7s469qqfr6uttu3fae",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T13:55:19.54294262Z",
+    "Shared": true,
+    "Size": 42941,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "vc6dsu1knlxx6d2i5t06oi9rr"
+    ],
+    "CreatedAt": "2026-10-11T19:35:39.629359407Z",
+    "Description": "[stage-1 16/47] COPY server/prisma/migrations/20261006000000_result_attempt_link/migration.sql /app/server/.migrations-backup/182/20261006000000_result_attempt_link/migration.sql",
+    "ID": "gg29rh7st03n3gkn4qx7ah58e",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T19:37:27.23826725Z",
+    "Shared": true,
+    "Size": 37495,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "tbzhxo9v3o9idwr6n34c07146"
+    ],
+    "CreatedAt": "2026-10-12T13:55:09.980693788Z",
+    "Description": "[stage-1 49/52] COPY server/prisma/migrations/20261010000100_instrument_import_templates/upgraded-prisma-draft-table.sql /app/server/.migrations-backup/200/20261010000100_instrument_import_templates/upgraded-prisma-draft-table.sql",
+    "ID": "o1fb3k0hq8o2z678zccxsiauy",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T13:55:19.521749266Z",
+    "Shared": true,
+    "Size": 45691,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "mrl37nt0rfl3301fnj7y53tlf"
+    ],
+    "CreatedAt": "2026-10-12T10:48:16.982981157Z",
+    "Description": "[stage-1 35/52] COPY server/prisma/migrations/20261009000200_batch_reagent_lots/migration.sql /app/server/.migrations-backup/194/20261009000200_batch_reagent_lots/migration.sql",
+    "ID": "mf23m2crj3hy3pz5cpwponpct",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T10:49:28.239943146Z",
+    "Shared": true,
+    "Size": 37544,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "5omrjg28djsrv3vzscqczkh6j"
+    ],
+    "CreatedAt": "2026-10-14T22:36:52.10477178Z",
+    "Description": "[stage-1 21/56] COPY server/prisma/migrations/20261006000300_qc_rules/migration.sql /app/server/.migrations-backup/185/20261006000300_qc_rules/migration.sql",
+    "ID": "urmfc8k2s5cxsixjio9b3hvsl",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:38:24.360994063Z",
+    "Shared": true,
+    "Size": 42965,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "nimpdinek3c4o7omosr3qlfhq"
+    ],
+    "CreatedAt": "2026-10-12T10:48:16.467046434Z",
+    "Description": "[stage-1 22/52] COPY server/prisma/migrations/20261006000300_qc_rules/fresh-prisma-tables.json /app/server/.migrations-backup/185/20261006000300_qc_rules/fresh-prisma-tables.json",
+    "ID": "39k8z0t2bsfeg6iqwib326ktj",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T10:49:28.307479537Z",
+    "Shared": true,
+    "Size": 45830,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "af6xep0e5ek8f35ygnzkbe0zr"
+    ],
+    "CreatedAt": "2026-10-11T23:12:13.785237769Z",
+    "Description": "[stage-1 33/47] COPY server/prisma/migrations/20261008000200_repeat_correction_contract/migration.sql /app/server/.migrations-backup/191/20261008000200_repeat_correction_contract/migration.sql",
+    "ID": "q6jbgf05egcy49lj52pv95kp7",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T23:12:23.339656812Z",
+    "Shared": true,
+    "Size": 56462,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "r55nvq9c8dsey9ucgbo72lcbt"
+    ],
+    "CreatedAt": "2026-10-12T10:47:01.107203377Z",
+    "Description": "[builder  8/12] COPY server/ ./server/",
+    "ID": "kveymyrdagpqh9of7fltrkjsq",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T10:49:28.246767772Z",
+    "Shared": false,
+    "Size": 12546048,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "w5glh6652715ihvnb4z6dgkeb"
+    ],
+    "CreatedAt": "2026-10-12T03:54:09.798598356Z",
+    "Description": "[stage-1 16/47] COPY server/prisma/migrations/20261006000000_result_attempt_link/migration.sql /app/server/.migrations-backup/182/20261006000000_result_attempt_link/migration.sql",
+    "ID": "vw02yalir5rvry56j581px6jf",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T03:54:20.089637551Z",
+    "Shared": true,
+    "Size": 37492,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "nelc2d1gddl3ls8bl4hxstfw3"
+    ],
+    "CreatedAt": "2026-10-12T13:55:08.804069915Z",
+    "Description": "[stage-1 21/52] COPY server/prisma/migrations/20261006000300_qc_rules/migration.sql /app/server/.migrations-backup/185/20261006000300_qc_rules/migration.sql",
+    "ID": "sm3ppowjpq1aylohjl7ruslsa",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T13:55:19.458142607Z",
+    "Shared": true,
+    "Size": 42963,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "3japtosl8aw7kujydav26okcq"
+    ],
+    "CreatedAt": "2026-10-12T13:55:08.994017617Z",
+    "Description": "[stage-1 26/52] COPY server/prisma/migrations/20261007000200_qc_bracket_membership/migration.sql /app/server/.migrations-backup/187/20261007000200_qc_bracket_membership/migration.sql",
+    "ID": "87t95m86skr2n6fon2iws4mgf",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T13:55:19.566063423Z",
+    "Shared": true,
+    "Size": 42010,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "f795ib8252yiyuax69xtreizc"
+    ],
+    "CreatedAt": "2026-10-11T23:11:01.078133967Z",
+    "Description": "[builder  8/12] COPY server/ ./server/",
+    "ID": "269rtmb97s4lqpuyzhnt9l9kh",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T23:12:23.355292811Z",
+    "Shared": false,
+    "Size": 12394496,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "vshuzsngw9marwlfim3ms3es3"
+    ],
+    "CreatedAt": "2026-10-11T19:35:41.374162952Z",
+    "Description": "[stage-1 39/47] COPY server/prisma/migrations/20261010000100_cross_check_evaluation/migration.sql /app/server/.migrations-backup/201/20261010000100_cross_check_evaluation/migration.sql",
+    "ID": "psteosu5vr8zbnxt3z485z8th",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T19:37:27.316728887Z",
+    "Shared": true,
+    "Size": 37534,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "ww2iqiy9jl7fb0a1w57zdr63m"
+    ],
+    "CreatedAt": "2026-10-11T23:11:14.809132193Z",
+    "Description": "mount / from exec /bin/sh -c cd server && npx prisma generate",
+    "ID": "avz0i3b51rss3k2975jshcj98",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T23:12:23.383712875Z",
+    "Shared": false,
+    "Size": 66830336,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "oe4eudflhxcnu2eoocwo9vmjb"
+    ],
+    "CreatedAt": "2026-10-12T10:48:16.829163902Z",
+    "Description": "[stage-1 31/52] COPY server/prisma/migrations/20261004190100_unique_active_workitem/migration.sql /app/server/.migrations-backup/178/20261004190100_unique_active_workitem/migration.sql",
+    "ID": "e2x2u1yobdt4o2nhy44vqv6fj",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T10:49:28.333811Z",
+    "Shared": true,
+    "Size": 41364,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "obk9aw9116rjm7pbgklwk85uy"
+    ],
+    "CreatedAt": "2026-10-12T08:02:31.329867484Z",
+    "Description": "[3/3] COPY sync.py /usr/local/bin/manual-sync",
+    "ID": "b193ug66e9voto9ewdh8dspo5",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T08:02:50.382734892Z",
+    "Shared": true,
+    "Size": 36340,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "tszzcubjfgjoelp9igxzoiunf"
+    ],
+    "CreatedAt": "2026-10-12T03:54:10.083192823Z",
+    "Description": "[stage-1 23/47] COPY server/prisma/migrations/20261006000400_normalized_qc_runs/migration.sql /app/server/.migrations-backup/186/20261006000400_normalized_qc_runs/migration.sql",
+    "ID": "m44yzwfkfsql26o07nzov7an4",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T03:54:20.094676398Z",
+    "Shared": true,
+    "Size": 74653,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "i0vsmkqv1qwooolp8g3gfk9o9"
+    ],
+    "CreatedAt": "2026-10-11T23:12:14.176724562Z",
+    "Description": "[stage-1 42/47] COPY server/prisma/migrations/20261010000000_sample_amendment_authorisation/fresh-prisma-tables.json /app/server/.migrations-backup/210/20261010000000_sample_amendment_authorisation/fresh-prisma-tables.json",
+    "ID": "3prk56vml0l9rlon8xiuc6vog",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T23:12:23.393813668Z",
+    "Shared": true,
+    "Size": 45671,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "mixhd8sz2vxcehzrxdnku45fq"
+    ],
+    "CreatedAt": "2026-10-11T23:12:14.299268939Z",
+    "Description": "[stage-1 45/47] COPY server/prisma/migrations/20261010000400_preparation_records/migration.sql /app/server/.migrations-backup/205/20261010000400_preparation_records/migration.sql",
+    "ID": "y2wlgl8p7ziexn2p7bk1endyk",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T23:12:23.335384198Z",
+    "Shared": true,
+    "Size": 38051,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "w8ey8reioec1e18a2t5igivwl"
+    ],
+    "CreatedAt": "2026-10-12T10:48:17.186372202Z",
+    "Description": "[stage-1 40/52] COPY server/prisma/migrations/20261010000100_cross_check_evaluation/fresh-prisma-tables.json /app/server/.migrations-backup/201/20261010000100_cross_check_evaluation/fresh-prisma-tables.json",
+    "ID": "cuq3vrx1yyti288hp9goc80ct",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T10:49:28.328035649Z",
+    "Shared": true,
+    "Size": 45603,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "3e8ahevfs3hj4c9lpvjeypy4k"
+    ],
+    "CreatedAt": "2026-10-11T19:35:41.177670835Z",
+    "Description": "[stage-1 35/47] COPY server/prisma/migrations/20261009000200_batch_reagent_lots/migration.sql /app/server/.migrations-backup/194/20261009000200_batch_reagent_lots/migration.sql",
+    "ID": "p7ueb0this2jip925ihi5l6em",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T19:37:27.250317026Z",
+    "Shared": true,
+    "Size": 37546,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "jtjsnb887p0vq7sneqwql8th8"
+    ],
+    "CreatedAt": "2026-10-12T13:55:09.593132999Z",
+    "Description": "[stage-1 40/52] COPY server/prisma/migrations/20261010000100_cross_check_evaluation/fresh-prisma-tables.json /app/server/.migrations-backup/201/20261010000100_cross_check_evaluation/fresh-prisma-tables.json",
+    "ID": "mg0btbwuocawvdnjf2z6idwaa",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T13:55:19.421469819Z",
+    "Shared": true,
+    "Size": 45603,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "p8ukdszfjc4doop0jq7yf44p0"
+    ],
+    "CreatedAt": "2026-10-12T10:48:16.715121616Z",
+    "Description": "[stage-1 28/52] COPY server/prisma/migrations/20261007000400_result_equipment_evidence/migration.sql /app/server/.migrations-backup/189/20261007000400_result_equipment_evidence/migration.sql",
+    "ID": "j91yo9ohblzzm681a5lz22z6w",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T10:49:28.331950001Z",
+    "Shared": true,
+    "Size": 41526,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "ek507qp8rnj5c47m7dobum21o"
+    ],
+    "CreatedAt": "2026-10-11T19:33:16.394041841Z",
+    "Description": "[stage-1  9/47] COPY shared/ ./shared/",
+    "ID": "350t23sqgt6kxnblkx89f489g",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T19:37:27.261285286Z",
+    "Shared": true,
+    "Size": 55642,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "jjnxjzhf5aa8dwl7h2h22bvl3"
+    ],
+    "CreatedAt": "2026-10-14T22:35:25.002071244Z",
+    "Description": "mount / from exec /bin/sh -c cd server && npm ci --ignore-scripts",
+    "ID": "hwmb8ohxwxr0k6lwgkiajhbj3",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:38:24.359211778Z",
+    "Shared": false,
+    "Size": 654204928,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "y6i07vo4khl5dm0vdv4jp8qzu"
+    ],
+    "CreatedAt": "2026-10-12T10:48:16.242594245Z",
+    "Description": "[stage-1 16/52] COPY server/prisma/migrations/20261006000000_result_attempt_link/migration.sql /app/server/.migrations-backup/182/20261006000000_result_attempt_link/migration.sql",
+    "ID": "dv0p7pgolczdfuqmcvbrytx9p",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T10:49:28.19611369Z",
+    "Shared": true,
+    "Size": 37494,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "99ivz1bfwsqd9h72arz98v6th"
+    ],
+    "CreatedAt": "2026-10-11T19:35:41.519627076Z",
+    "Description": "[stage-1 42/47] COPY server/prisma/migrations/20261010000000_sample_amendment_authorisation/fresh-prisma-tables.json /app/server/.migrations-backup/210/20261010000000_sample_amendment_authorisation/fresh-prisma-tables.json",
+    "ID": "vy0pz5ttlf28ynyr95fcng4b3",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T19:37:27.189080933Z",
+    "Shared": true,
+    "Size": 45674,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "z8pr17h90vkb4isreijrbap49"
+    ],
+    "CreatedAt": "2026-10-12T10:48:16.350926438Z",
+    "Description": "[stage-1 19/52] COPY server/prisma/migrations/20261006000200_reference_material_catalogue/migration.sql /app/server/.migrations-backup/184/20261006000200_reference_material_catalogue/migration.sql",
+    "ID": "8n7nd25vvdg1npnb5jqsdmjgc",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T10:49:28.192091825Z",
+    "Shared": true,
+    "Size": 42968,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "sjubzmk31t2ktj01oxsqbawlk"
+    ],
+    "CreatedAt": "2026-10-12T07:57:58.666201341Z",
+    "Description": "[site 3/5] WORKDIR /site",
+    "ID": "llfw2cygbd371tpm790xgcnmv",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T07:58:52.612990902Z",
+    "Shared": false,
+    "Size": 8192,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "72vvt8djvebshl3clcy8b262z"
+    ],
+    "CreatedAt": "2026-10-12T13:55:08.681971394Z",
+    "Description": "[stage-1 18/52] COPY server/prisma/migrations/20261006000100_sample_holds_cancellation/migration.sql /app/server/.migrations-backup/183/20261006000100_sample_holds_cancellation/migration.sql",
+    "ID": "o8hfsfbzvmudazixrmfhj2tke",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T13:55:19.523327569Z",
+    "Shared": true,
+    "Size": 42368,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "iwq2wds5utalruvetk14fxur9"
+    ],
+    "CreatedAt": "2026-10-11T19:35:40.722931415Z",
+    "Description": "[stage-1 32/47] COPY server/prisma/migrations/20261008000100_work_attempt_contract/migration.sql /app/server/.migrations-backup/190/20261008000100_work_attempt_contract/migration.sql",
+    "ID": "q5zuouqgg5o88wehui043xgdh",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T19:37:27.269593324Z",
+    "Shared": true,
+    "Size": 42943,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "q3z7ulrzgzwlotaf0pmfkc5fy"
+    ],
+    "CreatedAt": "2026-10-14T22:34:34.002404605Z",
+    "Description": "mount / from exec /bin/sh -c cd server && npm rebuild better-sqlite3",
+    "ID": "sm07w4yfh5qyvi8nsdjsii6ub",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:38:24.477289245Z",
+    "Shared": true,
+    "Size": 6029724,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "9wpnqk3kiw2bs58atk2cuqikx"
+    ],
+    "CreatedAt": "2026-10-11T23:12:14.078713097Z",
+    "Description": "[stage-1 40/47] COPY server/prisma/migrations/20261010000100_cross_check_evaluation/fresh-prisma-tables.json /app/server/.migrations-backup/201/20261010000100_cross_check_evaluation/fresh-prisma-tables.json",
+    "ID": "m9qdwnt5wmiw868rv8ntkqisj",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T23:12:23.360027508Z",
+    "Shared": true,
+    "Size": 45601,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "1a1wf6wm66pixdh4uttqdg85u"
+    ],
+    "CreatedAt": "2026-10-11T23:12:13.529482834Z",
+    "Description": "[stage-1 27/47] COPY server/prisma/migrations/20261007000300_proficiency_evidence/migration.sql /app/server/.migrations-backup/189/20261007000300_proficiency_evidence/migration.sql",
+    "ID": "ddcfpq9oqcr4nnqpqjz7sy4da",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T23:12:23.390680273Z",
+    "Shared": true,
+    "Size": 37445,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    "CreatedAt": "2026-10-11T19:31:59.431260209Z",
+    "Description": "local source for context",
+    "ID": "z952xvx6gk9qkjl0rmjigwlx3",
+    "InUse": false,
+    "LastUsedAt": "2026-10-15T00:27:26.499081012Z",
+    "Shared": false,
+    "Size": 8192,
+    "Type": "source.local",
+    "UsageCount": 7
+  },
+  {
+    " Parents": [
+      "t4lq6miunaeuoqga9qlrfgltz"
+    ],
+    "CreatedAt": "2026-10-14T22:33:28.641265154Z",
+    "Description": "pulled from docker.io/library/node:24-alpine@sha256:44fce696f38ba8c987c4db89954051000bbd05ffd8d8659ba15ed4a8602e937f",
+    "ID": "k5rufl2z20pglrwi9sqfveoml",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:33:28.669516128Z",
+    "Shared": true,
+    "Size": 6746977,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "6r2wh9iw99h56ntlkurxq925x"
+    ],
+    "CreatedAt": "2026-10-12T10:46:50.145795644Z",
+    "Description": "[stage-1  8/52] COPY server/ ./server/",
+    "ID": "4bytfh9nqg22ma3gf9p43mkek",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T10:49:28.325906113Z",
+    "Shared": true,
+    "Size": 14523476,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "iigbfzprqy2w1uovsgkmuj6if"
+    ],
+    "CreatedAt": "2026-10-14T22:34:29.619014849Z",
+    "Description": "mount / from exec /bin/sh -c cd server && npm ci --omit=dev --ignore-scripts",
+    "ID": "q3z7ulrzgzwlotaf0pmfkc5fy",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:38:24.43081101Z",
+    "Shared": true,
+    "Size": 743566491,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "c4bbcp6ejgwikpx7ltcmyap7i"
+    ],
+    "CreatedAt": "2026-10-12T10:48:16.428647997Z",
+    "Description": "[stage-1 21/52] COPY server/prisma/migrations/20261006000300_qc_rules/migration.sql /app/server/.migrations-backup/185/20261006000300_qc_rules/migration.sql",
+    "ID": "nimpdinek3c4o7omosr3qlfhq",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T10:49:28.270386291Z",
+    "Shared": true,
+    "Size": 42967,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "a6z22tdzmjkr975b7wam3xg0t"
+    ],
+    "CreatedAt": "2026-10-12T13:55:05.191270443Z",
+    "Description": "[stage-1 11/52] COPY profiles/ ./profiles/",
+    "ID": "jspvkm209ml10fpoxq82vlcrh",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T13:55:19.517906254Z",
+    "Shared": true,
+    "Size": 46266,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "j8u6ka94zxl3aflzwg4pdkr95"
+    ],
+    "CreatedAt": "2026-10-14T22:36:53.27306297Z",
+    "Description": "[stage-1 38/56] COPY server/prisma/migrations/20261009000400_calculation_templates/fresh-prisma-tables.json /app/server/.migrations-backup/199/20261009000400_calculation_templates/fresh-prisma-tables.json",
+    "ID": "mh1b26szicktwwb3t0jrnlubh",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:38:24.35225605Z",
+    "Shared": true,
+    "Size": 50481,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "it5sx5rddiup2lqszu9nuq05b"
+    ],
+    "CreatedAt": "2026-10-11T19:32:08.464526247Z",
+    "Description": "mount / from exec /bin/sh -c apk add --no-cache python3 make g++",
+    "ID": "qyna8n2yi5lo3ejjkpzgh4wls",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T10:49:28.252439214Z",
+    "Shared": true,
+    "Size": 425209026,
+    "Type": "regular",
+    "UsageCount": 2
+  },
+  {
+    "CreatedAt": "2026-10-12T07:57:20.068985738Z",
+    "Description": "local source for context",
+    "ID": "xurmhj8qufsyx2hvshdn5jz1f",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T08:00:30.366483461Z",
+    "Shared": false,
+    "Size": 131072,
+    "Type": "source.local",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "mf23m2crj3hy3pz5cpwponpct"
+    ],
+    "CreatedAt": "2026-10-12T10:48:17.023078069Z",
+    "Description": "[stage-1 36/52] COPY server/prisma/migrations/20261009000300_result_override_requests/migration.sql /app/server/.migrations-backup/197/20261009000300_result_override_requests/migration.sql",
+    "ID": "zrizcg8ohdnv7jfuu669i6gru",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T10:49:28.274168781Z",
+    "Shared": true,
+    "Size": 42943,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "elted5j4xm3v3vvwwqk9ndvzq"
+    ],
+    "CreatedAt": "2026-10-12T10:48:16.604332949Z",
+    "Description": "[stage-1 25/52] COPY server/prisma/migrations/20261007000100_qc_gate_scope/migration.sql /app/server/.migrations-backup/187/20261007000100_qc_gate_scope/migration.sql",
+    "ID": "lzr0hxw2nwuhhwhardc0iiu3a",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T10:49:28.21491441Z",
+    "Shared": true,
+    "Size": 37366,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "dj1ex1cgosw1zthnwm5n9gpd1"
+    ],
+    "CreatedAt": "2026-10-14T22:36:52.188291178Z",
+    "Description": "[stage-1 23/56] COPY server/prisma/migrations/20261006000400_normalized_qc_runs/migration.sql /app/server/.migrations-backup/186/20261006000400_normalized_qc_runs/migration.sql",
+    "ID": "6hdanb320ndtvi2aq6krp7vo6",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:38:24.347465092Z",
+    "Shared": true,
+    "Size": 74650,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "kzcyyosfdoxp54dfh099szg7g"
+    ],
+    "CreatedAt": "2026-10-11T19:31:59.813959697Z",
+    "Description": "[builder  2/12] WORKDIR /app",
+    "ID": "it5sx5rddiup2lqszu9nuq05b",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T19:37:27.282861976Z",
+    "Shared": true,
+    "Size": 8285,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "kml83t3t480lprtubscw2pwaa"
+    ],
+    "CreatedAt": "2026-10-12T10:48:18.003053756Z",
+    "Description": "mount / from exec /bin/sh -c sed -i 's/\\r$//' /app/docker-entrypoint.sh && chmod +x /app/docker-entrypoint.sh",
+    "ID": "yjnf3t0ots5x5n2k107535gh3",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T10:49:28.288432622Z",
+    "Shared": true,
+    "Size": 27561,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "pzkqehmkzql7sorfauqjmdied"
+    ],
+    "CreatedAt": "2026-10-14T22:36:51.633006955Z",
+    "Description": "[stage-1 16/56] COPY server/prisma/migrations/20261006000000_result_attempt_link/migration.sql /app/server/.migrations-backup/182/20261006000000_result_attempt_link/migration.sql",
+    "ID": "14obq4ak8zqhzlb2ak7l78t5u",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:38:24.394280867Z",
+    "Shared": true,
+    "Size": 37490,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "m44yzwfkfsql26o07nzov7an4"
+    ],
+    "CreatedAt": "2026-10-12T03:54:10.125668387Z",
+    "Description": "[stage-1 24/47] COPY server/prisma/migrations/20261006000400_normalized_qc_runs/fresh-prisma-tables.json /app/server/.migrations-backup/186/20261006000400_normalized_qc_runs/fresh-prisma-tables.json",
+    "ID": "w8zxomos8b51iqziko73t2bmj",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T03:54:20.099587263Z",
+    "Shared": true,
+    "Size": 50352,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "it5sx5rddiup2lqszu9nuq05b"
+    ],
+    "CreatedAt": "2026-10-11T19:32:01.580978144Z",
+    "Description": "[builder  3/12] COPY client/package.json client/package-lock.json ./client/",
+    "ID": "um9imaz9celmurythu6htujk1",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T19:37:27.19078654Z",
+    "Shared": false,
+    "Size": 262144,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "w73687pxp38x6s24whhjzail0"
+    ],
+    "CreatedAt": "2026-10-11T19:35:41.60200417Z",
+    "Description": "[stage-1 44/47] COPY server/prisma/migrations/20261010000300_bench_credentials/migration.sql /app/server/.migrations-backup/202/20261010000300_bench_credentials/migration.sql",
+    "ID": "v3mxvqnsrhazlq5kolloofyle",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T19:37:27.185497782Z",
+    "Shared": true,
+    "Size": 37444,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "yq28vkcdio03083k3ayyvyv0y"
+    ],
+    "CreatedAt": "2026-10-14T22:34:36.734244475Z",
+    "Description": "[stage-1  9/56] COPY shared/ ./shared/",
+    "ID": "1e08tlv5zez1qtp1gkqfvc3pz",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:38:24.406170644Z",
+    "Shared": true,
+    "Size": 60633,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "e6066rdrq8yfnfewo8c0w702r"
+    ],
+    "CreatedAt": "2026-10-12T03:54:10.428145291Z",
+    "Description": "[stage-1 32/47] COPY server/prisma/migrations/20261008000100_work_attempt_contract/migration.sql /app/server/.migrations-backup/190/20261008000100_work_attempt_contract/migration.sql",
+    "ID": "2svi9pxwaadayoga0q3gw9m7t",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T03:54:20.108974909Z",
+    "Shared": true,
+    "Size": 42940,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "pozfjfotd9qpp1wvznqs5oeo3"
+    ],
+    "CreatedAt": "2026-10-14T22:36:54.275167743Z",
+    "Description": "[stage-1 53/56] COPY server/prisma/migrations/20261004085500_add_lab_policy_settings/migration.sql /app/server/.migrations-backup/policy/20261004085500_add_lab_policy_settings/migration.sql",
+    "ID": "rqi7s6kwhd9z5aweaucn4ihl3",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:38:24.452557687Z",
+    "Shared": true,
+    "Size": 37615,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "l00e7cklv3igwgtltooaed1xh"
+    ],
+    "CreatedAt": "2026-10-12T13:55:09.675564984Z",
+    "Description": "[stage-1 42/52] COPY server/prisma/migrations/20261010000000_sample_amendment_authorisation/fresh-prisma-tables.json /app/server/.migrations-backup/210/20261010000000_sample_amendment_authorisation/fresh-prisma-tables.json",
+    "ID": "1lkk14apjsmbtpjy3vf4hd2qn",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T13:55:19.497471214Z",
+    "Shared": true,
+    "Size": 45673,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "q5zuouqgg5o88wehui043xgdh"
+    ],
+    "CreatedAt": "2026-10-11T19:35:41.015980617Z",
+    "Description": "[stage-1 33/47] COPY server/prisma/migrations/20261008000200_repeat_correction_contract/migration.sql /app/server/.migrations-backup/191/20261008000200_repeat_correction_contract/migration.sql",
+    "ID": "yda1sxeh84ce5c6emljeux0l1",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T19:37:27.17513392Z",
+    "Shared": true,
+    "Size": 56466,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "j8hnfn0xxy2vuzf4ptbkhpr0x"
+    ],
+    "CreatedAt": "2026-10-12T10:48:17.552989207Z",
+    "Description": "[stage-1 48/52] COPY server/prisma/migrations/20261010000100_instrument_import_templates/pre-prisma-draft-table.sql /app/server/.migrations-backup/200/20261010000100_instrument_import_templates/pre-prisma-draft-table.sql",
+    "ID": "b6bnu5l2vne0i2fuhnumirfaw",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T10:49:28.250587035Z",
+    "Shared": true,
+    "Size": 45655,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "fq71ujraa0v1n0r36vssnho8o"
+    ],
+    "CreatedAt": "2026-10-12T13:55:08.88449325Z",
+    "Description": "[stage-1 23/52] COPY server/prisma/migrations/20261006000400_normalized_qc_runs/migration.sql /app/server/.migrations-backup/186/20261006000400_normalized_qc_runs/migration.sql",
+    "ID": "ssj3jiqe6z1i04dz3zmfd98mg",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T13:55:19.524615236Z",
+    "Shared": true,
+    "Size": 74652,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "r391el6r797kngkrq5bmtalwr"
+    ],
+    "CreatedAt": "2026-10-11T19:33:15.631079888Z",
+    "Description": "mount / from exec /bin/sh -c apk del python3 make g++",
+    "ID": "shnkvz355rq61kermh3p5f4kg",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T03:54:20.054924911Z",
+    "Shared": true,
+    "Size": 128186,
+    "Type": "regular",
+    "UsageCount": 3
+  },
+  {
+    " Parents": [
+      "x7qvxfojl9a5mcwl10eh0z7qd"
+    ],
+    "CreatedAt": "2026-10-11T23:11:01.163547384Z",
+    "Description": "[builder 10/12] COPY profiles/ ./profiles/",
+    "ID": "ww2iqiy9jl7fb0a1w57zdr63m",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T23:12:23.378092842Z",
+    "Shared": false,
+    "Size": 45056,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "uyw5fltc0mtbebdrir8gm9l54"
+    ],
+    "CreatedAt": "2026-10-12T03:54:10.192666929Z",
+    "Description": "[stage-1 26/47] COPY server/prisma/migrations/20261007000200_qc_bracket_membership/migration.sql /app/server/.migrations-backup/187/20261007000200_qc_bracket_membership/migration.sql",
+    "ID": "stzhv0t8xrpdf1nuezzh64ikd",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T03:54:20.071862735Z",
+    "Shared": true,
+    "Size": 42012,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "shkijhct2oar8voowkgpaumjc"
+    ],
+    "CreatedAt": "2026-10-12T03:54:10.035141689Z",
+    "Description": "[stage-1 22/47] COPY server/prisma/migrations/20261006000300_qc_rules/fresh-prisma-tables.json /app/server/.migrations-backup/185/20261006000300_qc_rules/fresh-prisma-tables.json",
+    "ID": "tszzcubjfgjoelp9igxzoiunf",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T03:54:20.040094276Z",
+    "Shared": true,
+    "Size": 45830,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "a4bw28zi5uparfbrd38w6na72"
+    ],
+    "CreatedAt": "2026-10-12T10:48:17.502224255Z",
+    "Description": "[stage-1 47/52] COPY server/prisma/migrations/20261010000100_instrument_import_templates/fresh-prisma-tables.json /app/server/.migrations-backup/200/20261010000100_instrument_import_templates/fresh-prisma-tables.json",
+    "ID": "j8hnfn0xxy2vuzf4ptbkhpr0x",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T10:49:28.220208836Z",
+    "Shared": true,
+    "Size": 45919,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "q7fu7qmagfrq6tj6mwebbxui0"
+    ],
+    "CreatedAt": "2026-10-14T22:35:42.554433815Z",
+    "Description": "mount / from exec /bin/sh -c cd server && npx prisma generate",
+    "ID": "w70wn0pwc1x4xjy4nx3ijqmfc",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:38:24.400596635Z",
+    "Shared": false,
+    "Size": 67813376,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "sfvuwm1j6iuzosh9e1rc0vcm4"
+    ],
+    "CreatedAt": "2026-10-12T10:48:16.675754452Z",
+    "Description": "[stage-1 27/52] COPY server/prisma/migrations/20261007000300_proficiency_evidence/migration.sql /app/server/.migrations-backup/189/20261007000300_proficiency_evidence/migration.sql",
+    "ID": "p8ukdszfjc4doop0jq7yf44p0",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T10:49:28.203166016Z",
+    "Shared": true,
+    "Size": 37443,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "jcs2wb6eacfl2rs1es80pr0dm"
+    ],
+    "CreatedAt": "2026-10-14T22:36:53.468521658Z",
+    "Description": "[stage-1 42/56] COPY server/prisma/migrations/20261010000000_sample_amendment_authorisation/fresh-prisma-tables.json /app/server/.migrations-backup/210/20261010000000_sample_amendment_authorisation/fresh-prisma-tables.json",
+    "ID": "vz2z05bekwascg9zptnr0deaw",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:38:24.366357486Z",
+    "Shared": true,
+    "Size": 45668,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "qnos8oiwca29f3zqtoc5s7yji"
+    ],
+    "CreatedAt": "2026-10-12T03:54:09.87444693Z",
+    "Description": "[stage-1 18/47] COPY server/prisma/migrations/20261006000100_sample_holds_cancellation/migration.sql /app/server/.migrations-backup/183/20261006000100_sample_holds_cancellation/migration.sql",
+    "ID": "bdagvphso3baxulfgvakvyng0",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T03:54:20.098189364Z",
+    "Shared": true,
+    "Size": 42366,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "5lro0hhjk4a26f61lvipxhk10"
+    ],
+    "CreatedAt": "2026-10-11T19:35:40.523814184Z",
+    "Description": "[stage-1 28/47] COPY server/prisma/migrations/20261007000400_result_equipment_evidence/migration.sql /app/server/.migrations-backup/189/20261007000400_result_equipment_evidence/migration.sql",
+    "ID": "l5k6ej5qg9h6izzmo4ug1p5e6",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T19:37:27.225793391Z",
+    "Shared": true,
+    "Size": 41528,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "w7mkbf327i9kjpfz78of5ugc7"
+    ],
+    "CreatedAt": "2026-10-11T19:34:13.05702355Z",
+    "Description": "[builder  8/12] COPY server/ ./server/",
+    "ID": "onfmqmq0kfh0w1qvht72s9tll",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T19:37:27.195113979Z",
+    "Shared": false,
+    "Size": 12369920,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "vy0pz5ttlf28ynyr95fcng4b3"
+    ],
+    "CreatedAt": "2026-10-11T19:35:41.560766459Z",
+    "Description": "[stage-1 43/47] COPY server/prisma/migrations/20261010000200_report_revision_amendment/migration.sql /app/server/.migrations-backup/211/20261010000200_report_revision_amendment/migration.sql",
+    "ID": "w73687pxp38x6s24whhjzail0",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T19:37:27.161812496Z",
+    "Shared": true,
+    "Size": 37837,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "o8hfsfbzvmudazixrmfhj2tke"
+    ],
+    "CreatedAt": "2026-10-12T13:55:08.722204159Z",
+    "Description": "[stage-1 19/52] COPY server/prisma/migrations/20261006000200_reference_material_catalogue/migration.sql /app/server/.migrations-backup/184/20261006000200_reference_material_catalogue/migration.sql",
+    "ID": "q9ss0yk9bze8hs988inpi9pow",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T13:55:19.468560943Z",
+    "Shared": true,
+    "Size": 42966,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "298dt779ryisucx66nhkam3cq"
+    ],
+    "CreatedAt": "2026-10-12T03:54:10.265946226Z",
+    "Description": "[stage-1 28/47] COPY server/prisma/migrations/20261007000400_result_equipment_evidence/migration.sql /app/server/.migrations-backup/189/20261007000400_result_equipment_evidence/migration.sql",
+    "ID": "rw61gr8c15kedyagikb7g2bjo",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T03:54:20.074322905Z",
+    "Shared": true,
+    "Size": 41525,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "8qhenesoim7n1to0dn1xw8jvf"
+    ],
+    "CreatedAt": "2026-10-11T23:12:14.717244216Z",
+    "Description": "mount / from exec /bin/sh -c sed -i 's/\\r$//' /app/docker-entrypoint.sh && chmod +x /app/docker-entrypoint.sh",
+    "ID": "pt523eyz469fu2hv26p98vv04",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T23:12:23.415137139Z",
+    "Shared": true,
+    "Size": 27536,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "jds1dziowhqnhft0macs0pzr1"
+    ],
+    "CreatedAt": "2026-10-12T10:48:15.442787858Z",
+    "Description": "[stage-1 11/52] COPY profiles/ ./profiles/",
+    "ID": "7pmj7e845o6chddld05hwmcm8",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T10:49:28.186264235Z",
+    "Shared": true,
+    "Size": 46264,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    "CreatedAt": "2026-10-11T19:31:59.566265244Z",
+    "Description": "",
+    "ID": "h1tn6o9tdfaw03fwqafqdzhpx",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:33:28.589242032Z",
+    "Shared": true,
+    "Size": 3849738,
+    "Type": "regular",
+    "UsageCount": 3
+  },
+  {
+    " Parents": [
+      "kcxg7g9kz45zuxn08yjyjg5w6"
+    ],
+    "CreatedAt": "2026-10-14T22:36:53.362808304Z",
+    "Description": "[stage-1 40/56] COPY server/prisma/migrations/20261010000100_cross_check_evaluation/fresh-prisma-tables.json /app/server/.migrations-backup/201/20261010000100_cross_check_evaluation/fresh-prisma-tables.json",
+    "ID": "q5e56yrzy3q616g5rnm4wy29e",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:38:24.372177192Z",
+    "Shared": true,
+    "Size": 45601,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "qd8ow4zoizcfrq6ljz5pjm2f6"
+    ],
+    "CreatedAt": "2026-10-11T19:34:13.146287209Z",
+    "Description": "[builder 10/12] COPY profiles/ ./profiles/",
+    "ID": "woleuhny6gxk79xsemgz9s7rz",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T19:37:27.19732356Z",
+    "Shared": false,
+    "Size": 45056,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "xhm896jj3g79k6zwqlugs4xhp"
+    ],
+    "CreatedAt": "2026-10-12T03:54:10.52151127Z",
+    "Description": "[stage-1 34/47] COPY server/prisma/migrations/20261009000100_reported_value_selection/migration.sql /app/server/.migrations-backup/192/20261009000100_reported_value_selection/migration.sql",
+    "ID": "tl7uslarohc6sq6qxwew39l3a",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T03:54:20.028791783Z",
+    "Shared": true,
+    "Size": 42895,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "kragzprfg0pyzghunsd0qpuu0"
+    ],
+    "CreatedAt": "2026-10-11T19:35:40.486689783Z",
+    "Description": "[stage-1 27/47] COPY server/prisma/migrations/20261007000300_proficiency_evidence/migration.sql /app/server/.migrations-backup/189/20261007000300_proficiency_evidence/migration.sql",
+    "ID": "5lro0hhjk4a26f61lvipxhk10",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T19:37:27.183138979Z",
+    "Shared": true,
+    "Size": 37446,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "350t23sqgt6kxnblkx89f489g"
+    ],
+    "CreatedAt": "2026-10-11T19:35:38.445323005Z",
+    "Description": "[stage-1 10/47] COPY --from=builder /app/server/prisma_client ./server/prisma_client/",
+    "ID": "ywp198g5hqn951qufdtipr2ae",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T19:37:27.118497539Z",
+    "Shared": true,
+    "Size": 23803238,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "s48dac8jnwpef3jgzcbtn535u"
+    ],
+    "CreatedAt": "2026-10-12T10:48:17.147526669Z",
+    "Description": "[stage-1 39/52] COPY server/prisma/migrations/20261010000100_cross_check_evaluation/migration.sql /app/server/.migrations-backup/201/20261010000100_cross_check_evaluation/migration.sql",
+    "ID": "w8ey8reioec1e18a2t5igivwl",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T10:49:28.207140993Z",
+    "Shared": true,
+    "Size": 37533,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "kmibt84cq5if68y00v518tubt"
+    ],
+    "CreatedAt": "2026-10-12T07:59:33.838941622Z",
+    "Description": "[7/9] COPY soilfer_admin/ /srv/jupyterhub/soilfer_admin/",
+    "ID": "u40ie5jghydu0f3svoum39o5x",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T08:00:30.35293965Z",
+    "Shared": true,
+    "Size": 120825,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "hwmb8ohxwxr0k6lwgkiajhbj3"
+    ],
+    "CreatedAt": "2026-10-14T22:35:26.177816747Z",
+    "Description": "[builder  7/12] COPY client/ ./client/",
+    "ID": "ii16nkuahw3k022bbk8wttmsu",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:38:24.457177867Z",
+    "Shared": false,
+    "Size": 34344960,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "hrf18jw8gcoktj46pegoca277"
+    ],
+    "CreatedAt": "2026-10-12T13:54:09.695897945Z",
+    "Description": "mount / from exec /bin/sh -c cd client && npm run build",
+    "ID": "1py35nfwzarobg4t5pypd37cs",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T13:55:19.536702343Z",
+    "Shared": false,
+    "Size": 33120256,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    "CreatedAt": "2026-10-14T06:53:08.325237934Z",
+    "Description": "local source for context",
+    "ID": "krg3frf5mp5m2o7hm0lq0y5hb",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T07:36:54.118942727Z",
+    "Shared": false,
+    "Size": 1589248,
+    "Type": "source.local",
+    "UsageCount": 2
+  },
+  {
+    " Parents": [
+      "vzdqnmych7icht6maa6bc3b1j"
+    ],
+    "CreatedAt": "2026-10-14T22:36:53.160236623Z",
+    "Description": "[stage-1 35/56] COPY server/prisma/migrations/20261009000200_batch_reagent_lots/migration.sql /app/server/.migrations-backup/194/20261009000200_batch_reagent_lots/migration.sql",
+    "ID": "g8firfc6wyov85m9hfwps66se",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:38:24.39802841Z",
+    "Shared": true,
+    "Size": 37540,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "h1tn6o9tdfaw03fwqafqdzhpx"
+    ],
+    "CreatedAt": "2026-10-11T19:31:59.603329056Z",
+    "Description": "",
+    "ID": "c1oxpuntcicei0ir3hr058va8",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T19:31:59.648115912Z",
+    "Shared": true,
+    "Size": 56519242,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "8wu7rqwiu0xg8r3twiay7gbfb"
+    ],
+    "CreatedAt": "2026-10-12T03:54:10.707052921Z",
+    "Description": "[stage-1 38/47] COPY server/prisma/migrations/20261009000400_calculation_templates/fresh-prisma-tables.json /app/server/.migrations-backup/199/20261009000400_calculation_templates/fresh-prisma-tables.json",
+    "ID": "llxfzmaigjhyzo4n5b429pm3l",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T03:54:20.035437014Z",
+    "Shared": true,
+    "Size": 50483,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "oh5kwjnimweo58d7bfc6ibvb3"
+    ],
+    "CreatedAt": "2026-10-12T13:55:08.589716648Z",
+    "Description": "[stage-1 16/52] COPY server/prisma/migrations/20261006000000_result_attempt_link/migration.sql /app/server/.migrations-backup/182/20261006000000_result_attempt_link/migration.sql",
+    "ID": "5sfjy9eggtcnkdwx5jd9cuoct",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T13:55:19.545034378Z",
+    "Shared": true,
+    "Size": 37494,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "kvrixjcxhyr5su5sdertkmsgo"
+    ],
+    "CreatedAt": "2026-10-11T23:12:13.616327605Z",
+    "Description": "[stage-1 29/47] COPY server/prisma/migrations/20261009000100_nonconformity_reports/migration.sql /app/server/.migrations-backup/193/20261009000100_nonconformity_reports/migration.sql",
+    "ID": "n70qyzjt4817zyzq9g2sp08r6",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T23:12:23.381781887Z",
+    "Shared": true,
+    "Size": 42394,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "7x4foijdn2qum7os0amsjhyeg"
+    ],
+    "CreatedAt": "2026-10-12T13:55:09.295978342Z",
+    "Description": "[stage-1 33/52] COPY server/prisma/migrations/20261008000200_repeat_correction_contract/migration.sql /app/server/.migrations-backup/191/20261008000200_repeat_correction_contract/migration.sql",
+    "ID": "mxpag536isj6e0ke2s6vf90ni",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T13:55:19.472646366Z",
+    "Shared": true,
+    "Size": 56465,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "gmgan77x4huwyx9czaj0yts6z"
+    ],
+    "CreatedAt": "2026-10-14T22:34:27.062985395Z",
+    "Description": "[builder  5/12] COPY server/package.json server/package-lock.json ./server/",
+    "ID": "jjnxjzhf5aa8dwl7h2h22bvl3",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:38:24.346130839Z",
+    "Shared": false,
+    "Size": 327680,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "2lk0er5sra5b05c4330oh1b6z"
+    ],
+    "CreatedAt": "2026-10-14T22:36:54.361765788Z",
+    "Description": "[stage-1 55/56] COPY docker-entrypoint.sh /app/docker-entrypoint.sh",
+    "ID": "2s7m0mz1o6alrv635xxm5eo2o",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:38:24.468662061Z",
+    "Shared": true,
+    "Size": 23527,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "2svi9pxwaadayoga0q3gw9m7t"
+    ],
+    "CreatedAt": "2026-10-12T03:54:10.473763562Z",
+    "Description": "[stage-1 33/47] COPY server/prisma/migrations/20261008000200_repeat_correction_contract/migration.sql /app/server/.migrations-backup/191/20261008000200_repeat_correction_contract/migration.sql",
+    "ID": "xhm896jj3g79k6zwqlugs4xhp",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T03:54:20.095974053Z",
+    "Shared": true,
+    "Size": 56462,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "ij0qg4mhquzmux90mpy4sv7ov"
+    ],
+    "CreatedAt": "2026-10-12T10:48:16.199119105Z",
+    "Description": "[stage-1 15/52] COPY server/prisma/migrations/20261005000100_workflow_state_guards/migration.sql /app/server/.migrations-backup/179/20261005000100_workflow_state_guards/migration.sql",
+    "ID": "y6i07vo4khl5dm0vdv4jp8qzu",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T10:49:28.216801957Z",
+    "Shared": true,
+    "Size": 41975,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "ikxoyu4g4t45ghda7sjr5txi1"
+    ],
+    "CreatedAt": "2026-10-11T19:35:40.299546695Z",
+    "Description": "[stage-1 23/47] COPY server/prisma/migrations/20261006000400_normalized_qc_runs/migration.sql /app/server/.migrations-backup/186/20261006000400_normalized_qc_runs/migration.sql",
+    "ID": "col50tc9g031nas8edzxx50he",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T19:37:27.246900146Z",
+    "Shared": true,
+    "Size": 74657,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "b4tm9smu3ltzgfjvewp9o1517"
+    ],
+    "CreatedAt": "2026-10-12T03:54:10.795653512Z",
+    "Description": "[stage-1 40/47] COPY server/prisma/migrations/20261010000100_cross_check_evaluation/fresh-prisma-tables.json /app/server/.migrations-backup/201/20261010000100_cross_check_evaluation/fresh-prisma-tables.json",
+    "ID": "sucxc7f8xl6d20wx0mnljwgmc",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T03:54:20.083960625Z",
+    "Shared": true,
+    "Size": 45600,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "lsr1avxnu2q6r0rqeubg4jmed"
+    ],
+    "CreatedAt": "2026-10-12T13:55:09.374338764Z",
+    "Description": "[stage-1 35/52] COPY server/prisma/migrations/20261009000200_batch_reagent_lots/migration.sql /app/server/.migrations-backup/194/20261009000200_batch_reagent_lots/migration.sql",
+    "ID": "o6p8oth21wh2kdsflrggrqm9m",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T13:55:19.539582488Z",
+    "Shared": true,
+    "Size": 37547,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    "CreatedAt": "2026-10-12T07:57:20.086766327Z",
+    "Description": "",
+    "ID": "8qk9lgqdhwh9206wudhat2ibn",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T07:57:20.223966527Z",
+    "Shared": true,
+    "Size": 3848507,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "hu2ipo2ws3hu8y9ed59rlzhdk"
+    ],
+    "CreatedAt": "2026-10-11T23:12:12.945410737Z",
+    "Description": "[stage-1 14/47] COPY server/prisma/migrations/20261005000000_workflow_state_evidence/migration.sql /app/server/.migrations-backup/179/20261005000000_workflow_state_evidence/migration.sql",
+    "ID": "xf7astupu0b4aig3swgvbpcd0",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T23:12:23.397874705Z",
+    "Shared": true,
+    "Size": 33421,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "z5d2pyj41a478s0xr8xs9eeuq"
+    ],
+    "CreatedAt": "2026-10-12T07:59:33.420448369Z",
+    "Description": "mount / from exec /bin/sh -c pip install --no-cache-dir       \"jupyterhub==${JUPYTERHUB_VERSION}\"       \"dockerspawner>=13\"       \"jupyterhub-nativeauthenticator>=1.2\"       \"jupyterhub-idle-culler>=1.3\"",
+    "ID": "21t10bmyex8hp0nd4b1h7svjw",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T08:00:30.360081671Z",
+    "Shared": true,
+    "Size": 211092616,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "s07y6eg2echljj8k7is1l7byq"
+    ],
+    "CreatedAt": "2026-10-14T22:36:53.012188386Z",
+    "Description": "[stage-1 32/56] COPY server/prisma/migrations/20261008000100_work_attempt_contract/migration.sql /app/server/.migrations-backup/190/20261008000100_work_attempt_contract/migration.sql",
+    "ID": "ym45z0o2ltysyl43sbckbkc7q",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:38:24.445865615Z",
+    "Shared": true,
+    "Size": 42940,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "w7evcahstuao5yswz30ya1svr"
+    ],
+    "CreatedAt": "2026-10-12T03:54:10.380281933Z",
+    "Description": "[stage-1 31/47] COPY server/prisma/migrations/20261004190100_unique_active_workitem/migration.sql /app/server/.migrations-backup/178/20261004190100_unique_active_workitem/migration.sql",
+    "ID": "e6066rdrq8yfnfewo8c0w702r",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T03:54:20.061515462Z",
+    "Shared": true,
+    "Size": 41364,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "14obq4ak8zqhzlb2ak7l78t5u"
+    ],
+    "CreatedAt": "2026-10-14T22:36:51.673273956Z",
+    "Description": "[stage-1 17/56] COPY server/prisma/migrations/20261004064500_add_result_raw_input/migration.sql /app/server/.migrations-backup/272/20261004064500_add_result_raw_input/migration.sql",
+    "ID": "jt0cxejij3ji025roahfulxdg",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:38:24.377531576Z",
+    "Shared": true,
+    "Size": 37154,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "tv9ulruc71bkr2d611k12dq8z"
+    ],
+    "CreatedAt": "2026-10-14T06:53:08.868849105Z",
+    "Description": "mount / from exec /bin/sh -c mkdir -p /app /data && chown node:node /app /data",
+    "ID": "sf0cojm5wgr3ooq2xf9sg99gw",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T06:54:20.468568811Z",
+    "Shared": true,
+    "Size": 16496,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "prtsxd8ild8hgplterjus2di0"
+    ],
+    "CreatedAt": "2026-10-12T10:48:17.423236812Z",
+    "Description": "[stage-1 45/52] COPY server/prisma/migrations/20261010000400_preparation_records/migration.sql /app/server/.migrations-backup/205/20261010000400_preparation_records/migration.sql",
+    "ID": "hg5ihaldf9zrmb8iks4ll35dk",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T10:49:28.281025234Z",
+    "Shared": true,
+    "Size": 38053,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    "CreatedAt": "2026-10-11T19:31:59.574333134Z",
+    "Description": "local source for context",
+    "ID": "eh2wmupjjxx5ox1uir60fhr7r",
+    "InUse": false,
+    "LastUsedAt": "2026-10-15T00:27:26.503157092Z",
+    "Shared": false,
+    "Size": 47210496,
+    "Type": "source.local",
+    "UsageCount": 7
+  },
+  {
+    " Parents": [
+      "zxrux82h1sxgg1qgtjj6h79vn"
+    ],
+    "CreatedAt": "2026-10-12T07:57:20.117885696Z",
+    "Description": "",
+    "ID": "klkb4s24yr5tfu9cxrgal0hor",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T07:57:20.254508996Z",
+    "Shared": true,
+    "Size": 12121637,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "6r2wh9iw99h56ntlkurxq925x"
+    ],
+    "CreatedAt": "2026-10-12T13:53:55.556983587Z",
+    "Description": "[stage-1  8/52] COPY server/ ./server/",
+    "ID": "yazeah943cmekn2tbi7zyp939",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T13:55:19.514636994Z",
+    "Shared": true,
+    "Size": 14599307,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "twl6rijkheehtutxu9qaspns0"
+    ],
+    "CreatedAt": "2026-10-12T13:55:05.055488335Z",
+    "Description": "[stage-1 10/52] COPY --from=builder /app/server/prisma_client ./server/prisma_client/",
+    "ID": "a6z22tdzmjkr975b7wam3xg0t",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T13:55:19.548183902Z",
+    "Shared": true,
+    "Size": 24158980,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "9baup7jfizczubzmb91sy521v"
+    ],
+    "CreatedAt": "2026-10-12T07:57:20.32856248Z",
+    "Description": "",
+    "ID": "7rjauccdczss66nn17bselmn9",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T07:57:20.392210782Z",
+    "Shared": true,
+    "Size": 18227348,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "llfw2cygbd371tpm790xgcnmv"
+    ],
+    "CreatedAt": "2026-10-12T07:57:58.756471304Z",
+    "Description": "[site 4/5] COPY site/ /site/",
+    "ID": "voxwc3rafmh0304w2e71j23bh",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T07:58:52.641982078Z",
+    "Shared": false,
+    "Size": 4231168,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "ealp0pfkk70khr2j7bwkcdonw"
+    ],
+    "CreatedAt": "2026-10-14T22:36:51.49600208Z",
+    "Description": "[stage-1 14/56] COPY server/prisma/migrations/20261005000000_workflow_state_evidence/migration.sql /app/server/.migrations-backup/179/20261005000000_workflow_state_evidence/migration.sql",
+    "ID": "2y007dosymgmkybgh52ozar7f",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:38:24.386772662Z",
+    "Shared": true,
+    "Size": 33418,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "9oukyfow25nq6mm4x0ha537lm"
+    ],
+    "CreatedAt": "2026-10-11T19:33:09.629146454Z",
+    "Description": "[builder  5/12] COPY server/package.json server/package-lock.json ./server/",
+    "ID": "6b8azuxnoump43t8imofm89y2",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T19:37:27.234724493Z",
+    "Shared": false,
+    "Size": 327680,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "s8qv6wwn7o85jiy2tdof2xfik"
+    ],
+    "CreatedAt": "2026-10-14T22:36:53.238035351Z",
+    "Description": "[stage-1 37/56] COPY server/prisma/migrations/20261009000400_calculation_templates/migration.sql /app/server/.migrations-backup/199/20261009000400_calculation_templates/migration.sql",
+    "ID": "j8u6ka94zxl3aflzwg4pdkr95",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:38:24.370462651Z",
+    "Shared": true,
+    "Size": 66010,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "ghka2qsjizlwqfpk9uigyi6gv"
+    ],
+    "CreatedAt": "2026-10-11T19:35:40.026457321Z",
+    "Description": "[stage-1 18/47] COPY server/prisma/migrations/20261006000100_sample_holds_cancellation/migration.sql /app/server/.migrations-backup/183/20261006000100_sample_holds_cancellation/migration.sql",
+    "ID": "mtltyog8xks6xltphxexfalr5",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T19:37:27.216302623Z",
+    "Shared": true,
+    "Size": 42372,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "itn0zxw631884s38msysa0sre"
+    ],
+    "CreatedAt": "2026-10-14T06:53:30.098819653Z",
+    "Description": "mount / from exec /bin/sh -c npm ci",
+    "ID": "pch17ysvoudj1agv5n8nd685t",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T07:36:54.115381596Z",
+    "Shared": true,
+    "Size": 599561352,
+    "Type": "regular",
+    "UsageCount": 2
+  },
+  {
+    " Parents": [
+      "o512l3xpy4ezv7272uhwrukts"
+    ],
+    "CreatedAt": "2026-10-14T22:36:54.219688525Z",
+    "Description": "[stage-1 52/56] COPY server/prisma/migrations/20261013000200_control_charts/migration.sql /app/server/.migrations-backup/214/20261013000200_control_charts/migration.sql",
+    "ID": "pozfjfotd9qpp1wvznqs5oeo3",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:38:24.382158534Z",
+    "Shared": true,
+    "Size": 46994,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "39k8z0t2bsfeg6iqwib326ktj"
+    ],
+    "CreatedAt": "2026-10-12T10:48:16.51993057Z",
+    "Description": "[stage-1 23/52] COPY server/prisma/migrations/20261006000400_normalized_qc_runs/migration.sql /app/server/.migrations-backup/186/20261006000400_normalized_qc_runs/migration.sql",
+    "ID": "t8a989d19u9c9mb9j9himr4oz",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T10:49:28.231812026Z",
+    "Shared": true,
+    "Size": 74653,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "nw86rcz9h5vval7mr9lz8m64j"
+    ],
+    "CreatedAt": "2026-10-11T23:12:14.003856036Z",
+    "Description": "[stage-1 38/47] COPY server/prisma/migrations/20261009000400_calculation_templates/fresh-prisma-tables.json /app/server/.migrations-backup/199/20261009000400_calculation_templates/fresh-prisma-tables.json",
+    "ID": "jf3mc43abx741vxg23y7isbkx",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T23:12:23.33327545Z",
+    "Shared": true,
+    "Size": 50482,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "nuo4q4otat62430btf21fol8b"
+    ],
+    "CreatedAt": "2026-10-12T03:52:55.437232935Z",
+    "Description": "[builder 10/12] COPY profiles/ ./profiles/",
+    "ID": "v9720hr30wxxuiljcfl4kesv8",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T03:54:20.110154724Z",
+    "Shared": false,
+    "Size": 45056,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "u40ie5jghydu0f3svoum39o5x"
+    ],
+    "CreatedAt": "2026-10-12T07:59:33.869453109Z",
+    "Description": "[8/9] COPY soilfer-users.py /usr/local/bin/soilfer-users",
+    "ID": "thxx20q41la7jb5lxvrsf5mdo",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T08:00:30.362547502Z",
+    "Shared": true,
+    "Size": 30397,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "5nyhkca0mg5f8r82pu0g4n776"
+    ],
+    "CreatedAt": "2026-10-14T22:35:26.620460681Z",
+    "Description": "[builder  9/12] COPY shared/ ./shared/",
+    "ID": "unctnx0xivexfssmomm0bejt8",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:38:24.482654892Z",
+    "Shared": false,
+    "Size": 53248,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "pgmbotoov0gkkow4kcqu12ij7"
+    ],
+    "CreatedAt": "2026-10-12T03:54:11.586398157Z",
+    "Description": "mount / from exec /bin/sh -c sed -i 's/\\r$//' /app/docker-entrypoint.sh && chmod +x /app/docker-entrypoint.sh",
+    "ID": "htcotenu42n3m5z8cqdjb17t0",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T03:54:20.044785538Z",
+    "Shared": true,
+    "Size": 27536,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "8lifvco15nvjke54kuw09i0pu"
+    ],
+    "CreatedAt": "2026-10-12T10:48:16.314174904Z",
+    "Description": "[stage-1 18/52] COPY server/prisma/migrations/20261006000100_sample_holds_cancellation/migration.sql /app/server/.migrations-backup/183/20261006000100_sample_holds_cancellation/migration.sql",
+    "ID": "z8pr17h90vkb4isreijrbap49",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T10:49:28.27599118Z",
+    "Shared": true,
+    "Size": 42369,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "xagcioi3xmat8m630g5lnhrgy"
+    ],
+    "CreatedAt": "2026-10-14T06:53:31.010296709Z",
+    "Description": "mount / from exec /bin/sh -c node -e \"require('fs').writeFileSync('.build-id', String(Date.now()))\"",
+    "ID": "xcylmigc71sn2pyl65m9b7ioa",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T06:54:20.461804513Z",
+    "Shared": true,
+    "Size": 16531,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "ym45z0o2ltysyl43sbckbkc7q"
+    ],
+    "CreatedAt": "2026-10-14T22:36:53.070475024Z",
+    "Description": "[stage-1 33/56] COPY server/prisma/migrations/20261008000200_repeat_correction_contract/migration.sql /app/server/.migrations-backup/191/20261008000200_repeat_correction_contract/migration.sql",
+    "ID": "cmtpxt4jnggcq995n2k20zn5b",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:38:24.35041655Z",
+    "Shared": true,
+    "Size": 56459,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "xf7astupu0b4aig3swgvbpcd0"
+    ],
+    "CreatedAt": "2026-10-11T23:12:13.045493887Z",
+    "Description": "[stage-1 15/47] COPY server/prisma/migrations/20261005000100_workflow_state_guards/migration.sql /app/server/.migrations-backup/179/20261005000100_workflow_state_guards/migration.sql",
+    "ID": "z9c0pe38uonq0mkyppljt7dex",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T23:12:23.341975112Z",
+    "Shared": true,
+    "Size": 41973,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "9oukyfow25nq6mm4x0ha537lm"
+    ],
+    "CreatedAt": "2026-10-12T10:45:53.123434676Z",
+    "Description": "[builder  5/12] COPY server/package.json server/package-lock.json ./server/",
+    "ID": "ugc02s24xentwjsgtnmqdcra4",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T10:49:28.293691963Z",
+    "Shared": false,
+    "Size": 327680,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "utzo60e3q9335jfp775hdvr0i"
+    ],
+    "CreatedAt": "2026-10-12T10:48:17.664900654Z",
+    "Description": "[stage-1 51/52] COPY docker-entrypoint.sh /app/docker-entrypoint.sh",
+    "ID": "kml83t3t480lprtubscw2pwaa",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T10:49:28.22701938Z",
+    "Shared": true,
+    "Size": 23478,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "kiryvhcsja9iqgbzy9v57gry9"
+    ],
+    "CreatedAt": "2026-10-11T19:33:13.195892025Z",
+    "Description": "mount / from exec /bin/sh -c cd server && npm rebuild better-sqlite3",
+    "ID": "r391el6r797kngkrq5bmtalwr",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T19:37:27.116366527Z",
+    "Shared": true,
+    "Size": 6029731,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "k4b02mwdg01tr3ttq5thhjn1p"
+    ],
+    "CreatedAt": "2026-10-11T19:35:40.438783465Z",
+    "Description": "[stage-1 26/47] COPY server/prisma/migrations/20261007000200_qc_bracket_membership/migration.sql /app/server/.migrations-backup/187/20261007000200_qc_bracket_membership/migration.sql",
+    "ID": "kragzprfg0pyzghunsd0qpuu0",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T19:37:27.241885374Z",
+    "Shared": true,
+    "Size": 42015,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "e3a8u2cmc5c8izny2md151kg6"
+    ],
+    "CreatedAt": "2026-10-12T13:55:08.471140135Z",
+    "Description": "[stage-1 14/52] COPY server/prisma/migrations/20261005000000_workflow_state_evidence/migration.sql /app/server/.migrations-backup/179/20261005000000_workflow_state_evidence/migration.sql",
+    "ID": "3on3izfnso5pxjmcuswx0s50a",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T13:55:19.501840866Z",
+    "Shared": true,
+    "Size": 33423,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "unctnx0xivexfssmomm0bejt8"
+    ],
+    "CreatedAt": "2026-10-14T22:35:26.661901317Z",
+    "Description": "[builder 10/12] COPY profiles/ ./profiles/",
+    "ID": "q7fu7qmagfrq6tj6mwebbxui0",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:38:24.356164287Z",
+    "Shared": false,
+    "Size": 45056,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "v9720hr30wxxuiljcfl4kesv8"
+    ],
+    "CreatedAt": "2026-10-12T03:53:09.327456028Z",
+    "Description": "mount / from exec /bin/sh -c cd server && npx prisma generate",
+    "ID": "zrbpcjczzkk7jmmbp8sehyrbp",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T03:54:20.081532952Z",
+    "Shared": false,
+    "Size": 66830336,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "iktkwsyewdi43kqsupdx7i2n1"
+    ],
+    "CreatedAt": "2026-10-12T03:54:08.989822607Z",
+    "Description": "[stage-1 10/47] COPY --from=builder /app/server/prisma_client ./server/prisma_client/",
+    "ID": "02dkembml5h6c78e5vr2d3lve",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T03:54:20.111392972Z",
+    "Shared": true,
+    "Size": 23803221,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "lj8jcpudxrgoomfhzieaea8vf"
+    ],
+    "CreatedAt": "2026-10-14T06:53:08.348032726Z",
+    "Description": "",
+    "ID": "mruwz2n4mn1v2p1unun9ifkzr",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T06:53:08.377875958Z",
+    "Shared": true,
+    "Size": 1262001,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "rt532pzno559u1k1vf0br624i"
+    ],
+    "CreatedAt": "2026-10-12T03:52:55.3964806Z",
+    "Description": "[builder  9/12] COPY shared/ ./shared/",
+    "ID": "nuo4q4otat62430btf21fol8b",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T03:54:20.079963728Z",
+    "Shared": false,
+    "Size": 49152,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "voxwc3rafmh0304w2e71j23bh"
+    ],
+    "CreatedAt": "2026-10-12T07:57:58.855483181Z",
+    "Description": "mount / from exec /bin/sh -c rm -rf _site .quarto && quarto render",
+    "ID": "8obsapg4t56k20bauqhkja1sb",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T07:58:52.638340229Z",
+    "Shared": false,
+    "Size": 8990720,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    "CreatedAt": "2026-10-12T07:57:20.099287429Z",
+    "Description": "local source for context",
+    "ID": "ze8x5vl6qhweaggs39fr8abg7",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T07:58:52.603136196Z",
+    "Shared": false,
+    "Size": 4239360,
+    "Type": "source.local",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "mruwz2n4mn1v2p1unun9ifkzr"
+    ],
+    "CreatedAt": "2026-10-14T06:53:08.371601694Z",
+    "Description": "",
+    "ID": "tv9ulruc71bkr2d611k12dq8z",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T06:54:20.487919502Z",
+    "Shared": true,
+    "Size": 447,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "kcnj0d4zhnzcu5db4wlbeevch"
+    ],
+    "CreatedAt": "2026-10-12T13:55:09.811036383Z",
+    "Description": "[stage-1 45/52] COPY server/prisma/migrations/20261010000400_preparation_records/migration.sql /app/server/.migrations-backup/205/20261010000400_preparation_records/migration.sql",
+    "ID": "mbz1hfzjh92c440elddm6xo07",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T13:55:19.499127286Z",
+    "Shared": true,
+    "Size": 38053,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "87t95m86skr2n6fon2iws4mgf"
+    ],
+    "CreatedAt": "2026-10-12T13:55:09.038318705Z",
+    "Description": "[stage-1 27/52] COPY server/prisma/migrations/20261007000300_proficiency_evidence/migration.sql /app/server/.migrations-backup/189/20261007000300_proficiency_evidence/migration.sql",
+    "ID": "4l9qksd5lj5oc5ku8occb8xjv",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T13:55:19.503162698Z",
+    "Shared": true,
+    "Size": 37448,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    "CreatedAt": "2026-10-12T08:02:06.770960322Z",
+    "Description": "local source for context",
+    "ID": "w9anixn64e9x6mh0e078gpil7",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T08:02:50.394997621Z",
+    "Shared": false,
+    "Size": 12288,
+    "Type": "source.local",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "nhikoeblzux7a6bp0cblm21oc"
+    ],
+    "CreatedAt": "2026-10-11T23:12:13.355895831Z",
+    "Description": "[stage-1 23/47] COPY server/prisma/migrations/20261006000400_normalized_qc_runs/migration.sql /app/server/.migrations-backup/186/20261006000400_normalized_qc_runs/migration.sql",
+    "ID": "o3i0cukj4u29yiexef5u5ihrh",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T23:12:23.389355248Z",
+    "Shared": true,
+    "Size": 74653,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "y9w4wdqkohfroyaxbp1gek6sl"
+    ],
+    "CreatedAt": "2026-10-11T23:12:12.88183294Z",
+    "Description": "mount / from exec /bin/sh -c mkdir -p /app/server/.schema-backup &&     cp /app/server/prisma/schema.prisma /app/server/.schema-backup/schema.prisma",
+    "ID": "hu2ipo2ws3hu8y9ed59rlzhdk",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T23:12:23.35670786Z",
+    "Shared": true,
+    "Size": 130606,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "sf0cojm5wgr3ooq2xf9sg99gw"
+    ],
+    "CreatedAt": "2026-10-14T06:53:08.91881013Z",
+    "Description": "[3/7] WORKDIR /app",
+    "ID": "4ty5hoalnx3n7pbrjm0odvvwi",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T06:54:20.486082164Z",
+    "Shared": true,
+    "Size": 4128,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "z9c0pe38uonq0mkyppljt7dex"
+    ],
+    "CreatedAt": "2026-10-11T23:12:13.084074804Z",
+    "Description": "[stage-1 16/47] COPY server/prisma/migrations/20261006000000_result_attempt_link/migration.sql /app/server/.migrations-backup/182/20261006000000_result_attempt_link/migration.sql",
+    "ID": "v1ias7wr0133205vk4eom1im2",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T23:12:23.364813298Z",
+    "Shared": true,
+    "Size": 37494,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    "CreatedAt": "2026-10-12T07:57:19.933016434Z",
+    "Description": "local source for context",
+    "ID": "nnti78ozb93dtj42685voa3h3",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T07:58:52.623668729Z",
+    "Shared": false,
+    "Size": 8192,
+    "Type": "source.local",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "7qlu9yxdtinb1zikqi8c1rhzn"
+    ],
+    "CreatedAt": "2026-10-14T22:33:44.164457322Z",
+    "Description": "[stage-1  4/56] COPY server/package.json server/package-lock.json ./server/",
+    "ID": "iigbfzprqy2w1uovsgkmuj6if",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:38:24.404914743Z",
+    "Shared": true,
+    "Size": 403558,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "ywp198g5hqn951qufdtipr2ae"
+    ],
+    "CreatedAt": "2026-10-11T19:35:38.497270581Z",
+    "Description": "[stage-1 11/47] COPY profiles/ ./profiles/",
+    "ID": "b6bwnrxbni570selkaws6egka",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T19:37:27.159303327Z",
+    "Shared": true,
+    "Size": 46254,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "2fc24dtq8kjmhz9z4m2dedun5"
+    ],
+    "CreatedAt": "2026-10-12T03:54:09.638961034Z",
+    "Description": "mount / from exec /bin/sh -c mkdir -p /app/server/.schema-backup &&     cp /app/server/prisma/schema.prisma /app/server/.schema-backup/schema.prisma",
+    "ID": "s0ovejitoqg55ht8nsy1xelfd",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T03:54:20.056377037Z",
+    "Shared": true,
+    "Size": 130606,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "kvisnrlk7dfc7yz6eni291a12"
+    ],
+    "CreatedAt": "2026-10-14T22:36:52.37510305Z",
+    "Description": "[stage-1 27/56] COPY server/prisma/migrations/20261007000300_proficiency_evidence/migration.sql /app/server/.migrations-backup/189/20261007000300_proficiency_evidence/migration.sql",
+    "ID": "oa3jd88f0k56ithouixr87qcb",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:38:24.440466454Z",
+    "Shared": true,
+    "Size": 37443,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "dv0p7pgolczdfuqmcvbrytx9p"
+    ],
+    "CreatedAt": "2026-10-12T10:48:16.277406477Z",
+    "Description": "[stage-1 17/52] COPY server/prisma/migrations/20261004064500_add_result_raw_input/migration.sql /app/server/.migrations-backup/272/20261004064500_add_result_raw_input/migration.sql",
+    "ID": "8lifvco15nvjke54kuw09i0pu",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T10:49:28.221967236Z",
+    "Shared": true,
+    "Size": 37157,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "1pt7hf5qvvskqpi92hmgicm8h"
+    ],
+    "CreatedAt": "2026-10-12T13:55:08.425801726Z",
+    "Description": "mount / from exec /bin/sh -c mkdir -p /app/server/.schema-backup &&     cp /app/server/prisma/schema.prisma /app/server/.schema-backup/schema.prisma",
+    "ID": "e3a8u2cmc5c8izny2md151kg6",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T13:55:19.552103891Z",
+    "Shared": true,
+    "Size": 135092,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "u3onl3u0uf47jbg5t8be6ggks"
+    ],
+    "CreatedAt": "2026-10-12T03:54:10.6633299Z",
+    "Description": "[stage-1 37/47] COPY server/prisma/migrations/20261009000400_calculation_templates/migration.sql /app/server/.migrations-backup/199/20261009000400_calculation_templates/migration.sql",
+    "ID": "8wu7rqwiu0xg8r3twiay7gbfb",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T03:54:20.033916229Z",
+    "Shared": true,
+    "Size": 66014,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "jqjyy1nyhgjr8810sl71k1qvj"
+    ],
+    "CreatedAt": "2026-10-12T10:48:17.300131475Z",
+    "Description": "[stage-1 42/52] COPY server/prisma/migrations/20261010000000_sample_amendment_authorisation/fresh-prisma-tables.json /app/server/.migrations-backup/210/20261010000000_sample_amendment_authorisation/fresh-prisma-tables.json",
+    "ID": "hhqjoqma4u7s0wxq11ov41rio",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T10:49:28.205060052Z",
+    "Shared": true,
+    "Size": 45672,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    "CreatedAt": "2026-10-14T06:53:08.160578424Z",
+    "Description": "local source for context",
+    "ID": "2oclayd47zvdu3z2qyufrw4xr",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T07:36:54.123118029Z",
+    "Shared": false,
+    "Size": 8192,
+    "Type": "source.local",
+    "UsageCount": 2
+  },
+  {
+    " Parents": [
+      "6hdanb320ndtvi2aq6krp7vo6"
+    ],
+    "CreatedAt": "2026-10-14T22:36:52.242333114Z",
+    "Description": "[stage-1 24/56] COPY server/prisma/migrations/20261006000400_normalized_qc_runs/fresh-prisma-tables.json /app/server/.migrations-backup/186/20261006000400_normalized_qc_runs/fresh-prisma-tables.json",
+    "ID": "mvnptjxmu4evif9dzypw9j5lj",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:38:24.410892125Z",
+    "Shared": true,
+    "Size": 50351,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "ugc02s24xentwjsgtnmqdcra4"
+    ],
+    "CreatedAt": "2026-10-12T10:46:59.508239883Z",
+    "Description": "mount / from exec /bin/sh -c cd server && npm ci --ignore-scripts",
+    "ID": "wjft4dtxcwjq6ighnes75l6g4",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T10:49:28.300786215Z",
+    "Shared": false,
+    "Size": 654204928,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "269rtmb97s4lqpuyzhnt9l9kh"
+    ],
+    "CreatedAt": "2026-10-11T23:11:01.12688402Z",
+    "Description": "[builder  9/12] COPY shared/ ./shared/",
+    "ID": "x7qvxfojl9a5mcwl10eh0z7qd",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T23:12:23.420272399Z",
+    "Shared": false,
+    "Size": 49152,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "sm07w4yfh5qyvi8nsdjsii6ub"
+    ],
+    "CreatedAt": "2026-10-14T22:34:36.300992392Z",
+    "Description": "mount / from exec /bin/sh -c apk del python3 make g++",
+    "ID": "3dnvow5e081kndnz1nr6ckas7",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:38:24.478955295Z",
+    "Shared": true,
+    "Size": 136840,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "0cufpqeun1zc64kq45s5nlnj6"
+    ],
+    "CreatedAt": "2026-10-11T19:35:39.450959009Z",
+    "Description": "mount / from exec /bin/sh -c mkdir -p /app/server/.schema-backup &&     cp /app/server/prisma/schema.prisma /app/server/.schema-backup/schema.prisma",
+    "ID": "m3hcti6xcgqjew8dkzqhfbkw8",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T19:37:27.26337698Z",
+    "Shared": true,
+    "Size": 130609,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "ve6os1h7z8t6k7bd8y9d2u82n"
+    ],
+    "CreatedAt": "2026-10-11T19:35:41.335232644Z",
+    "Description": "[stage-1 38/47] COPY server/prisma/migrations/20261009000400_calculation_templates/fresh-prisma-tables.json /app/server/.migrations-backup/199/20261009000400_calculation_templates/fresh-prisma-tables.json",
+    "ID": "vshuzsngw9marwlfim3ms3es3",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T19:37:27.213391176Z",
+    "Shared": true,
+    "Size": 50487,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "vw02yalir5rvry56j581px6jf"
+    ],
+    "CreatedAt": "2026-10-12T03:54:09.838067001Z",
+    "Description": "[stage-1 17/47] COPY server/prisma/migrations/20261004064500_add_result_raw_input/migration.sql /app/server/.migrations-backup/272/20261004064500_add_result_raw_input/migration.sql",
+    "ID": "qnos8oiwca29f3zqtoc5s7yji",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T03:54:20.059595736Z",
+    "Shared": true,
+    "Size": 37156,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "uc7t8zyg01cv22vmh10bkoza6"
+    ],
+    "CreatedAt": "2026-10-12T13:55:09.255741919Z",
+    "Description": "[stage-1 32/52] COPY server/prisma/migrations/20261008000100_work_attempt_contract/migration.sql /app/server/.migrations-backup/190/20261008000100_work_attempt_contract/migration.sql",
+    "ID": "7x4foijdn2qum7os0amsjhyeg",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T13:55:19.537977843Z",
+    "Shared": true,
+    "Size": 42944,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "7pmj7e845o6chddld05hwmcm8"
+    ],
+    "CreatedAt": "2026-10-12T10:48:15.624967694Z",
+    "Description": "[stage-1 12/52] COPY --from=builder /app/client/dist ./client/dist/",
+    "ID": "r7sngwou06wxw4sw1kdbeqx4y",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T10:49:28.187663763Z",
+    "Shared": true,
+    "Size": 62033871,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "42yoph8scnlz5viqreyg707wr"
+    ],
+    "CreatedAt": "2026-10-12T13:55:09.511431453Z",
+    "Description": "[stage-1 38/52] COPY server/prisma/migrations/20261009000400_calculation_templates/fresh-prisma-tables.json /app/server/.migrations-backup/199/20261009000400_calculation_templates/fresh-prisma-tables.json",
+    "ID": "remujodcxqivsh9pnsc5ex3yo",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T13:55:19.52848596Z",
+    "Shared": true,
+    "Size": 50486,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "q5e56yrzy3q616g5rnm4wy29e"
+    ],
+    "CreatedAt": "2026-10-14T22:36:53.411403397Z",
+    "Description": "[stage-1 41/56] COPY server/prisma/migrations/20261010000000_sample_amendment_authorisation/migration.sql /app/server/.migrations-backup/210/20261010000000_sample_amendment_authorisation/migration.sql",
+    "ID": "jcs2wb6eacfl2rs1es80pr0dm",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:38:24.46381869Z",
+    "Shared": true,
+    "Size": 42981,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "h1tn6o9tdfaw03fwqafqdzhpx"
+    ],
+    "CreatedAt": "2026-10-14T06:53:08.317818809Z",
+    "Description": "",
+    "ID": "lj8jcpudxrgoomfhzieaea8vf",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T06:53:08.355588064Z",
+    "Shared": true,
+    "Size": 55585204,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "t6cgnopznxigay4gaed499dq7"
+    ],
+    "CreatedAt": "2026-10-12T03:54:11.096914649Z",
+    "Description": "[stage-1 44/47] COPY server/prisma/migrations/20261010000300_bench_credentials/migration.sql /app/server/.migrations-backup/202/20261010000300_bench_credentials/migration.sql",
+    "ID": "wunm7gnjajdrfsnq2cta1ant4",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T03:54:20.043431002Z",
+    "Shared": true,
+    "Size": 37442,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "7rjauccdczss66nn17bselmn9"
+    ],
+    "CreatedAt": "2026-10-12T07:57:20.383675418Z",
+    "Description": "",
+    "ID": "j72fvu5xxp4a51iyfinq7kflq",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T07:58:52.639990069Z",
+    "Shared": true,
+    "Size": 32,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "1e08tlv5zez1qtp1gkqfvc3pz"
+    ],
+    "CreatedAt": "2026-10-14T22:36:47.620119114Z",
+    "Description": "[stage-1 10/56] COPY --from=builder /app/server/prisma_client ./server/prisma_client/",
+    "ID": "t5xtnfo8ri8pincjfsynb430a",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:38:24.392810313Z",
+    "Shared": true,
+    "Size": 24885321,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "29zvyoltugp43ug6jrvgwlf72"
+    ],
+    "CreatedAt": "2026-10-12T13:55:08.958015081Z",
+    "Description": "[stage-1 25/52] COPY server/prisma/migrations/20261007000100_qc_gate_scope/migration.sql /app/server/.migrations-backup/187/20261007000100_qc_gate_scope/migration.sql",
+    "ID": "3japtosl8aw7kujydav26okcq",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T13:55:19.553756778Z",
+    "Shared": true,
+    "Size": 37366,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "3on3izfnso5pxjmcuswx0s50a"
+    ],
+    "CreatedAt": "2026-10-12T13:55:08.538213891Z",
+    "Description": "[stage-1 15/52] COPY server/prisma/migrations/20261005000100_workflow_state_guards/migration.sql /app/server/.migrations-backup/179/20261005000100_workflow_state_guards/migration.sql",
+    "ID": "oh5kwjnimweo58d7bfc6ibvb3",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T13:55:19.418463765Z",
+    "Shared": true,
+    "Size": 41976,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "mh1b26szicktwwb3t0jrnlubh"
+    ],
+    "CreatedAt": "2026-10-14T22:36:53.315354891Z",
+    "Description": "[stage-1 39/56] COPY server/prisma/migrations/20261010000100_cross_check_evaluation/migration.sql /app/server/.migrations-backup/201/20261010000100_cross_check_evaluation/migration.sql",
+    "ID": "kcxg7g9kz45zuxn08yjyjg5w6",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:38:24.357685382Z",
+    "Shared": true,
+    "Size": 37529,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "shnkvz355rq61kermh3p5f4kg"
+    ],
+    "CreatedAt": "2026-10-11T19:33:16.321101316Z",
+    "Description": "[stage-1  8/47] COPY server/ ./server/",
+    "ID": "ek507qp8rnj5c47m7dobum21o",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T19:37:27.258579528Z",
+    "Shared": true,
+    "Size": 14316447,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "8qk9lgqdhwh9206wudhat2ibn"
+    ],
+    "CreatedAt": "2026-10-12T07:57:20.147119694Z",
+    "Description": "",
+    "ID": "mjlyfqrrga5zvcb6xpbgqlaya",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T07:57:20.316074699Z",
+    "Shared": true,
+    "Size": 2784585,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "07dasx69vyehmfs0soo9axrs4"
+    ],
+    "CreatedAt": "2026-10-12T10:46:42.456554641Z",
+    "Description": "mount / from exec /bin/sh -c cd server && npm ci --omit=dev --ignore-scripts",
+    "ID": "pis7rgncoxuo15n1vdt3ajdt2",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T10:49:28.258369814Z",
+    "Shared": true,
+    "Size": 743551767,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "stzhv0t8xrpdf1nuezzh64ikd"
+    ],
+    "CreatedAt": "2026-10-12T03:54:10.223383107Z",
+    "Description": "[stage-1 27/47] COPY server/prisma/migrations/20261007000300_proficiency_evidence/migration.sql /app/server/.migrations-backup/189/20261007000300_proficiency_evidence/migration.sql",
+    "ID": "298dt779ryisucx66nhkam3cq",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T03:54:20.066263392Z",
+    "Shared": true,
+    "Size": 37445,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "w70wn0pwc1x4xjy4nx3ijqmfc"
+    ],
+    "CreatedAt": "2026-10-14T22:35:42.594953095Z",
+    "Description": "mount / from exec /bin/sh -c cd client && npm run build",
+    "ID": "g7xkuhio60pxb81qmyoi79z93",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:38:24.437186561Z",
+    "Shared": false,
+    "Size": 33165312,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "b6bnu5l2vne0i2fuhnumirfaw"
+    ],
+    "CreatedAt": "2026-10-12T10:48:17.58973534Z",
+    "Description": "[stage-1 49/52] COPY server/prisma/migrations/20261010000100_instrument_import_templates/upgraded-prisma-draft-table.sql /app/server/.migrations-backup/200/20261010000100_instrument_import_templates/upgraded-prisma-draft-table.sql",
+    "ID": "edd9c2d3g0x4kvvbekfqmr5sv",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T10:49:28.244205321Z",
+    "Shared": true,
+    "Size": 45692,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "v3mxvqnsrhazlq5kolloofyle"
+    ],
+    "CreatedAt": "2026-10-11T19:35:41.642873107Z",
+    "Description": "[stage-1 45/47] COPY server/prisma/migrations/20261010000400_preparation_records/migration.sql /app/server/.migrations-backup/205/20261010000400_preparation_records/migration.sql",
+    "ID": "30ycqyvqturvnu8r4g5vl13xw",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T19:37:27.133583278Z",
+    "Shared": true,
+    "Size": 38052,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "kowiimwz7h1nuk6tfxwhfc2ej"
+    ],
+    "CreatedAt": "2026-10-12T03:54:10.34091038Z",
+    "Description": "[stage-1 30/47] COPY server/prisma/migrations/20261004190000_add_workitem_duplicate_marker/migration.sql /app/server/.migrations-backup/178/20261004190000_add_workitem_duplicate_marker/migration.sql",
+    "ID": "w7evcahstuao5yswz30ya1svr",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T03:54:20.027277822Z",
+    "Shared": true,
+    "Size": 37214,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "gg29rh7st03n3gkn4qx7ah58e"
+    ],
+    "CreatedAt": "2026-10-11T19:35:39.681453938Z",
+    "Description": "[stage-1 17/47] COPY server/prisma/migrations/20261004064500_add_result_raw_input/migration.sql /app/server/.migrations-backup/272/20261004064500_add_result_raw_input/migration.sql",
+    "ID": "ghka2qsjizlwqfpk9uigyi6gv",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T19:37:27.229495421Z",
+    "Shared": true,
+    "Size": 37157,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "cmtpxt4jnggcq995n2k20zn5b"
+    ],
+    "CreatedAt": "2026-10-14T22:36:53.117762232Z",
+    "Description": "[stage-1 34/56] COPY server/prisma/migrations/20261009000100_reported_value_selection/migration.sql /app/server/.migrations-backup/192/20261009000100_reported_value_selection/migration.sql",
+    "ID": "vzdqnmych7icht6maa6bc3b1j",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:38:24.396861679Z",
+    "Shared": true,
+    "Size": 42894,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "wunm7gnjajdrfsnq2cta1ant4"
+    ],
+    "CreatedAt": "2026-10-12T03:54:11.142330284Z",
+    "Description": "[stage-1 45/47] COPY server/prisma/migrations/20261010000400_preparation_records/migration.sql /app/server/.migrations-backup/205/20261010000400_preparation_records/migration.sql",
+    "ID": "fldkd5yzsh78xjkr0trcp5q4c",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T03:54:20.085544556Z",
+    "Shared": true,
+    "Size": 38050,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "r7sngwou06wxw4sw1kdbeqx4y"
+    ],
+    "CreatedAt": "2026-10-12T10:48:16.08100803Z",
+    "Description": "mount / from exec /bin/sh -c mkdir -p /app/server/.schema-backup &&     cp /app/server/prisma/schema.prisma /app/server/.schema-backup/schema.prisma",
+    "ID": "5ggitt92l2x4k6e5t9fbdtw2l",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T10:49:28.228995294Z",
+    "Shared": true,
+    "Size": 135092,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "30ycqyvqturvnu8r4g5vl13xw"
+    ],
+    "CreatedAt": "2026-10-11T19:35:41.681134509Z",
+    "Description": "[stage-1 46/47] COPY docker-entrypoint.sh /app/docker-entrypoint.sh",
+    "ID": "oehl3hxwaydoyrmroalkycwlp",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T19:37:27.267344127Z",
+    "Shared": true,
+    "Size": 23453,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "d20w6z3vl19xwfiyim6smrdvl"
+    ],
+    "CreatedAt": "2026-10-11T23:12:09.342355549Z",
+    "Description": "[stage-1 10/47] COPY --from=builder /app/server/prisma_client ./server/prisma_client/",
+    "ID": "37b5k7aa13ym8cvmkpn9ptapp",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T23:12:23.410389076Z",
+    "Shared": true,
+    "Size": 23803243,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "m3hcti6xcgqjew8dkzqhfbkw8"
+    ],
+    "CreatedAt": "2026-10-11T19:35:39.51088273Z",
+    "Description": "[stage-1 14/47] COPY server/prisma/migrations/20261005000000_workflow_state_evidence/migration.sql /app/server/.migrations-backup/179/20261005000000_workflow_state_evidence/migration.sql",
+    "ID": "puefudiw0bbtvnm7ljdfg0izd",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T19:37:27.314648769Z",
+    "Shared": true,
+    "Size": 33423,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "kveymyrdagpqh9of7fltrkjsq"
+    ],
+    "CreatedAt": "2026-10-12T10:47:01.163035923Z",
+    "Description": "[builder  9/12] COPY shared/ ./shared/",
+    "ID": "yogvpetm037gsag3n2qlti63h",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T10:49:28.263946813Z",
+    "Shared": false,
+    "Size": 53248,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "go030jj3e5i9oisha03n58k8o"
+    ],
+    "CreatedAt": "2026-10-12T13:55:10.13459128Z",
+    "Description": "[stage-1 51/52] COPY docker-entrypoint.sh /app/docker-entrypoint.sh",
+    "ID": "j3v8px4ku4sw01v09it614s93",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T13:55:19.500479981Z",
+    "Shared": true,
+    "Size": 23480,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "lzr0hxw2nwuhhwhardc0iiu3a"
+    ],
+    "CreatedAt": "2026-10-12T10:48:16.640979189Z",
+    "Description": "[stage-1 26/52] COPY server/prisma/migrations/20261007000200_qc_bracket_membership/migration.sql /app/server/.migrations-backup/187/20261007000200_qc_bracket_membership/migration.sql",
+    "ID": "sfvuwm1j6iuzosh9e1rc0vcm4",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T10:49:28.198885441Z",
+    "Shared": true,
+    "Size": 42012,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "rc78hy96di4fqo1w47py41m4f"
+    ],
+    "CreatedAt": "2026-10-12T10:48:16.787504032Z",
+    "Description": "[stage-1 30/52] COPY server/prisma/migrations/20261004190000_add_workitem_duplicate_marker/migration.sql /app/server/.migrations-backup/178/20261004190000_add_workitem_duplicate_marker/migration.sql",
+    "ID": "oe4eudflhxcnu2eoocwo9vmjb",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T10:49:28.313774738Z",
+    "Shared": true,
+    "Size": 37215,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "4bytfh9nqg22ma3gf9p43mkek"
+    ],
+    "CreatedAt": "2026-10-12T10:46:50.200156394Z",
+    "Description": "[stage-1  9/52] COPY shared/ ./shared/",
+    "ID": "4t0zg7ejzokag9wwd7kyanl3f",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T10:49:28.262067845Z",
+    "Shared": true,
+    "Size": 60639,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "k26kmw0n07jlz7w7cvhqgj8ct"
+    ],
+    "CreatedAt": "2026-10-11T19:34:29.257951633Z",
+    "Description": "mount / from exec /bin/sh -c cd client && npm run build",
+    "ID": "qmvr9aqvhe8zrucog32w7qvkx",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T19:37:27.167004421Z",
+    "Shared": false,
+    "Size": 33071104,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "m4bywf07zlw68svhaheza485y"
+    ],
+    "CreatedAt": "2026-10-12T03:54:09.757235778Z",
+    "Description": "[stage-1 15/47] COPY server/prisma/migrations/20261005000100_workflow_state_guards/migration.sql /app/server/.migrations-backup/179/20261005000100_workflow_state_guards/migration.sql",
+    "ID": "w5glh6652715ihvnb4z6dgkeb",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T03:54:20.057978261Z",
+    "Shared": true,
+    "Size": 41972,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "f5ruun4493rgw89x81ij8ch8a"
+    ],
+    "CreatedAt": "2026-10-12T13:55:09.901245871Z",
+    "Description": "[stage-1 47/52] COPY server/prisma/migrations/20261010000100_instrument_import_templates/fresh-prisma-tables.json /app/server/.migrations-backup/200/20261010000100_instrument_import_templates/fresh-prisma-tables.json",
+    "ID": "ky3535iilhr2u863rlg1pczah",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T13:55:19.504330197Z",
+    "Shared": true,
+    "Size": 45920,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "xg6569adm57ml5bju3zkvud4x"
+    ],
+    "CreatedAt": "2026-10-11T19:33:08.159051608Z",
+    "Description": "mount / from exec /bin/sh -c cd server && npm ci --omit=dev --ignore-scripts",
+    "ID": "kiryvhcsja9iqgbzy9v57gry9",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T19:37:27.110597225Z",
+    "Shared": true,
+    "Size": 743094606,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "jf3mc43abx741vxg23y7isbkx"
+    ],
+    "CreatedAt": "2026-10-11T23:12:14.040660481Z",
+    "Description": "[stage-1 39/47] COPY server/prisma/migrations/20261010000100_cross_check_evaluation/migration.sql /app/server/.migrations-backup/201/20261010000100_cross_check_evaluation/migration.sql",
+    "ID": "9wpnqk3kiw2bs58atk2cuqikx",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T23:12:23.432507686Z",
+    "Shared": true,
+    "Size": 37530,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "rqi7s6kwhd9z5aweaucn4ihl3"
+    ],
+    "CreatedAt": "2026-10-14T22:36:54.326997302Z",
+    "Description": "[stage-1 54/56] COPY server/prisma/migrations/20261014000100_order_revision_contract/migration.sql /app/server/.migrations-backup/209/20261014000100_order_revision_contract/migration.sql",
+    "ID": "2lk0er5sra5b05c4330oh1b6z",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:38:24.474085804Z",
+    "Shared": true,
+    "Size": 37963,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "r52q5m91pl95p74535d4lbfe3"
+    ],
+    "CreatedAt": "2026-10-12T03:52:55.016193952Z",
+    "Description": "[stage-1  9/47] COPY shared/ ./shared/",
+    "ID": "iktkwsyewdi43kqsupdx7i2n1",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T03:54:20.088406716Z",
+    "Shared": true,
+    "Size": 55643,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "fldkd5yzsh78xjkr0trcp5q4c"
+    ],
+    "CreatedAt": "2026-10-12T03:54:11.17982055Z",
+    "Description": "[stage-1 46/47] COPY docker-entrypoint.sh /app/docker-entrypoint.sh",
+    "ID": "pgmbotoov0gkkow4kcqu12ij7",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T03:54:20.090915516Z",
+    "Shared": true,
+    "Size": 23453,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "t5xtnfo8ri8pincjfsynb430a"
+    ],
+    "CreatedAt": "2026-10-14T22:36:47.668926382Z",
+    "Description": "[stage-1 11/56] COPY profiles/ ./profiles/",
+    "ID": "21giz7dbyxp0u7qohnm75i50g",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:38:24.466964416Z",
+    "Shared": true,
+    "Size": 46262,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "z28jhbg00vf7vpgifkdlqjxe3"
+    ],
+    "CreatedAt": "2026-10-11T23:11:00.710148267Z",
+    "Description": "[stage-1  9/47] COPY shared/ ./shared/",
+    "ID": "d20w6z3vl19xwfiyim6smrdvl",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T23:12:23.395218945Z",
+    "Shared": true,
+    "Size": 55643,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "ftp43g75snyetklelnw13ecs6"
+    ],
+    "CreatedAt": "2026-10-12T03:52:55.302862981Z",
+    "Description": "[builder  8/12] COPY server/ ./server/",
+    "ID": "rt532pzno559u1k1vf0br624i",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T03:54:20.078403587Z",
+    "Shared": false,
+    "Size": 12394496,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "tu095s1vqrz60maf9m6qhqg6e"
+    ],
+    "CreatedAt": "2026-10-14T22:36:53.673351545Z",
+    "Description": "[stage-1 45/56] COPY server/prisma/migrations/20261010000400_preparation_records/migration.sql /app/server/.migrations-backup/205/20261010000400_preparation_records/migration.sql",
+    "ID": "023u5307f7fen90goj7sqymkn",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:38:24.472231297Z",
+    "Shared": true,
+    "Size": 38048,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "tnt7yhgcrfxkhpijndpzf68fn"
+    ],
+    "CreatedAt": "2026-10-12T03:54:10.617006019Z",
+    "Description": "[stage-1 36/47] COPY server/prisma/migrations/20261009000300_result_override_requests/migration.sql /app/server/.migrations-backup/197/20261009000300_result_override_requests/migration.sql",
+    "ID": "u3onl3u0uf47jbg5t8be6ggks",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T03:54:20.087019686Z",
+    "Shared": true,
+    "Size": 42940,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "dgobib14w110g7w912mzuu9ep"
+    ],
+    "CreatedAt": "2026-10-12T07:58:55.226805208Z",
+    "Description": "mount / from exec /bin/sh -c apt-get update  && apt-get install -y --no-install-recommends nodejs npm curl  && npm install -g configurable-http-proxy  && apt-get clean && rm -rf /var/lib/apt/lists/*",
+    "ID": "z5d2pyj41a478s0xr8xs9eeuq",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T08:00:30.348175848Z",
+    "Shared": true,
+    "Size": 439450944,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "jhzeuv1vtlmussf6dkz8k1317"
+    ],
+    "CreatedAt": "2026-10-14T22:36:51.746790166Z",
+    "Description": "[stage-1 19/56] COPY server/prisma/migrations/20261006000200_reference_material_catalogue/migration.sql /app/server/.migrations-backup/184/20261006000200_reference_material_catalogue/migration.sql",
+    "ID": "txkvot5dlzu0loh1zteclgm60",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T22:38:24.409012475Z",
+    "Shared": true,
+    "Size": 42959,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "b6bwnrxbni570selkaws6egka"
+    ],
+    "CreatedAt": "2026-10-11T19:35:38.696010967Z",
+    "Description": "[stage-1 12/47] COPY --from=builder /app/client/dist ./client/dist/",
+    "ID": "0cufpqeun1zc64kq45s5nlnj6",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T19:37:27.208013139Z",
+    "Shared": true,
+    "Size": 61969683,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "u03f86e7s469qqfr6uttu3fae"
+    ],
+    "CreatedAt": "2026-10-12T13:55:09.451482839Z",
+    "Description": "[stage-1 37/52] COPY server/prisma/migrations/20261009000400_calculation_templates/migration.sql /app/server/.migrations-backup/199/20261009000400_calculation_templates/migration.sql",
+    "ID": "42yoph8scnlz5viqreyg707wr",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T13:55:19.531186239Z",
+    "Shared": true,
+    "Size": 66015,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "llxfzmaigjhyzo4n5b429pm3l"
+    ],
+    "CreatedAt": "2026-10-12T03:54:10.750380854Z",
+    "Description": "[stage-1 39/47] COPY server/prisma/migrations/20261010000100_cross_check_evaluation/migration.sql /app/server/.migrations-backup/201/20261010000100_cross_check_evaluation/migration.sql",
+    "ID": "b4tm9smu3ltzgfjvewp9o1517",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T03:54:20.082773569Z",
+    "Shared": true,
+    "Size": 37529,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    "CreatedAt": "2026-10-14T06:53:04.510210968Z",
+    "Description": "local source for dockerfile",
+    "ID": "3o3jhe9lvm5ho4uwxe7x9dbrl",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T07:36:54.113882017Z",
+    "Shared": false,
+    "Size": 8192,
+    "Type": "source.local",
+    "UsageCount": 2
+  },
+  {
+    " Parents": [
+      "r3w5cgxsxtfzhrhg226e6kam5"
+    ],
+    "CreatedAt": "2026-10-11T23:12:13.275358637Z",
+    "Description": "[stage-1 21/47] COPY server/prisma/migrations/20261006000300_qc_rules/migration.sql /app/server/.migrations-backup/185/20261006000300_qc_rules/migration.sql",
+    "ID": "6b5wd7agg4qice1klhihfir83",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T23:12:23.370712486Z",
+    "Shared": true,
+    "Size": 42966,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "v1ias7wr0133205vk4eom1im2"
+    ],
+    "CreatedAt": "2026-10-11T23:12:13.124541273Z",
+    "Description": "[stage-1 17/47] COPY server/prisma/migrations/20261004064500_add_result_raw_input/migration.sql /app/server/.migrations-backup/272/20261004064500_add_result_raw_input/migration.sql",
+    "ID": "jx96c59mibd032la7ngflj3r6",
+    "InUse": false,
+    "LastUsedAt": "2026-10-11T23:12:23.421621147Z",
+    "Shared": true,
+    "Size": 37159,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "zt15ge7kat4zipi6we1e16qsd"
+    ],
+    "CreatedAt": "2026-10-12T13:53:55.676531899Z",
+    "Description": "[builder 10/12] COPY profiles/ ./profiles/",
+    "ID": "su8065vw9vnv5t657mycyf1or",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T13:55:19.516485513Z",
+    "Shared": false,
+    "Size": 45056,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "pch17ysvoudj1agv5n8nd685t"
+    ],
+    "CreatedAt": "2026-10-14T07:36:52.793975799Z",
+    "Description": "[6/7] COPY --chown=node:node . .",
+    "ID": "qysegqqedeij53joadx49n5wi",
+    "InUse": false,
+    "LastUsedAt": "2026-10-14T07:36:54.12508279Z",
+    "Shared": true,
+    "Size": 2313980,
+    "Type": "regular",
+    "UsageCount": 1
+  },
+  {
+    " Parents": [
+      "mjlyfqrrga5zvcb6xpbgqlaya"
+    ],
+    "CreatedAt": "2026-10-12T07:57:20.304187828Z",
+    "Description": "",
+    "ID": "9baup7jfizczubzmb91sy521v",
+    "InUse": false,
+    "LastUsedAt": "2026-10-12T07:57:20.345092446Z",
+    "Shared": true,
+    "Size": 7497,
+    "Type": "regular",
+    "UsageCount": 1
+  }
+]

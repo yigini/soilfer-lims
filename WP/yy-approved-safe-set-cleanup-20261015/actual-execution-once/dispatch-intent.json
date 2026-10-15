@@ -1,0 +1,9 @@
+{
+  "utc": "2026-10-15T10:20:27.241769+00:00",
+  "authorityId": 6189633644,
+  "sourceCommit": "ee5c39d8ee0460d8a65f95ae003f22ae951ea187",
+  "operatorSha256": "d21ce935b19b0368efc609116fbb8e15caa91ecdf87bb968ca353afc3746b8ed",
+  "programSha256": "c5942bf48427e972a94d531a33b0c92ccf2de8cfcfb633a7ea407bd20b19c484",
+  "oneDispatchOnly": true,
+  "noReplayUnknownOutcome": true
+}
