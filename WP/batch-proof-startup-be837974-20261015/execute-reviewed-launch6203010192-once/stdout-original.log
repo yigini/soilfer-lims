@@ -1,0 +1,2 @@
+{"unit": "lims-workflow-batch-startup-be837974-20261015t230000z", "root": "/opt/lims/releases/workflow-batch-startup-be837974-20261015T230000Z", "launchExitCode": 0, "stdout": "", "stderr": "Running as unit: lims-workflow-batch-startup-be837974-20261015t230000z.service\n", "proofComplete": false, "neverReplay": true}
+

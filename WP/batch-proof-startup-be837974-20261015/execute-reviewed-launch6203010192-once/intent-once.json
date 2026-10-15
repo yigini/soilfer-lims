@@ -1,0 +1,15 @@
+{
+  "utc": "2026-10-15T21:53:45.893936+00:00",
+  "argv": [
+    "C:\\Users\\yigin\\AppData\\Local\\Programs\\Python\\Python312-arm64\\python.exe",
+    "-B",
+    "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\WP\\batch-proof-startup-be837974-20261015\\launch_proof.py",
+    "--package",
+    "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\WP\\batch-proof-startup-be837974-20261015\\proof-package-workflow-batch-startup-be837974-20261015T230000Z"
+  ],
+  "packagePublication": "6e7036d06e94ab359bc2cf9653c980a673c0e816",
+  "sourceReviewId": 6203010192,
+  "futurePackageAllocationBytes": 10137600,
+  "oneAttempt": true,
+  "neverReplay": true
+}
