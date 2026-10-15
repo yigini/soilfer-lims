@@ -1,0 +1,24 @@
+{
+  "status": "ACTUAL_NATIVE_DELIVERED_ONCE_SENT_BUBBLE_EMPTY_RIGHT_IDEATING",
+  "recordedUtc": "2026-10-15T07:49:34.414Z",
+  "window": {
+    "app": "Claude_pzs8sxrjxfjjc!Claude",
+    "id": 7867734,
+    "title": "Claude"
+  },
+  "project": "LIMS Audit",
+  "thread": "Lab workflow audit and plan",
+  "commentId": 6187194076,
+  "correctTargetObserved": true,
+  "bothComposersEmptyBeforeInput": true,
+  "rightCaretObserved": true,
+  "ownDraftHeadAndEndInspected": true,
+  "returnCount": 1,
+  "sentBubbleObserved": true,
+  "rightComposerEmptyAfter": true,
+  "claudioActivity": "Ideating",
+  "humanCentreComposerPreservedEmpty": true,
+  "humanCardsUntouched": true,
+  "noFurtherAckSent": true,
+  "neverRepeat": true
+}
