@@ -1,0 +1,7 @@
+{
+  "status": "NEW_STARTUP_APP_BUILD_PREFLIGHT_ATTEMPTED_ONCE",
+  "startedUtc": "2026-10-15T18:29:57.970023+00:00",
+  "newBuildCount": 0,
+  "originalFailedRoot": "/opt/lims/releases/workflow-batch-build-cde8c889-20261014T221500Z",
+  "neverReplay": true
+}

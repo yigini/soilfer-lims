@@ -1,0 +1,11 @@
+2026-10-15T20:29:57.629594+0200 server systemd[1]: Starting /usr/bin/python3 -B /opt/lims/releases/workflow-batch-build-be837974-20261015T180000Z/batch_build.py...
+2026-10-15T20:29:57.630306+0200 server systemd[1]: Started /usr/bin/python3 -B /opt/lims/releases/workflow-batch-build-be837974-20261015T180000Z/batch_build.py.
+2026-10-15T20:36:16.102230+0200 server python3[1121100]: Traceback (most recent call last):
+2026-10-15T20:36:16.102230+0200 server python3[1121100]:   File "/opt/lims/releases/workflow-batch-build-be837974-20261015T180000Z/batch_build.py", line 142, in <module>
+2026-10-15T20:36:16.104216+0200 server python3[1121100]:     if __name__=='__main__':main()
+2026-10-15T20:36:16.104216+0200 server python3[1121100]:   File "/opt/lims/releases/workflow-batch-build-be837974-20261015T180000Z/batch_build.py", line 125, in main
+2026-10-15T20:36:16.104216+0200 server python3[1121100]:     raise RuntimeError('Build failed or reserve refused; retain all artifacts, never replay/cleanup')
+2026-10-15T20:36:16.104415+0200 server python3[1121100]: RuntimeError: Build failed or reserve refused; retain all artifacts, never replay/cleanup
+2026-10-15T20:36:16.143919+0200 server systemd[1]: lims-workflow-batch-build-be837974-20261015t180000z.service: Main process exited, code=exited, status=1/FAILURE
+2026-10-15T20:36:16.144408+0200 server systemd[1]: lims-workflow-batch-build-be837974-20261015t180000z.service: Failed with result 'exit-code'.
+2026-10-15T20:36:16.145626+0200 server systemd[1]: lims-workflow-batch-build-be837974-20261015t180000z.service: Consumed 38.887s CPU time, 357.6M memory peak.

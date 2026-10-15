@@ -1,0 +1,478 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 9.40kB 0.0s done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/node:24-alpine
+#2 DONE 0.7s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 862B done
+#3 DONE 0.0s
+
+#4 [internal] load build context
+#4 DONE 0.0s
+
+#5 [builder  1/12] FROM docker.io/library/node:24-alpine@sha256:44fce696f38ba8c987c4db89954051000bbd05ffd8d8659ba15ed4a8602e937f
+#5 resolve docker.io/library/node:24-alpine@sha256:44fce696f38ba8c987c4db89954051000bbd05ffd8d8659ba15ed4a8602e937f 0.0s done
+#5 DONE 0.1s
+
+#6 [builder  2/12] WORKDIR /app
+#6 DONE 0.1s
+
+#4 [internal] load build context
+#4 transferring context: 44.84MB 2.2s done
+#4 DONE 2.2s
+
+#7 [builder  3/12] COPY client/package.json client/package-lock.json ./client/
+#7 DONE 0.1s
+
+#8 [stage-1  3/56] RUN apk add --no-cache python3 make g++
+#8 2.593 ( 1/29) Installing libstdc++-dev (15.2.0-r5)
+#8 3.057 ( 2/29) Installing jansson (2.15.0-r0)
+#8 3.062 ( 3/29) Installing zstd-libs (1.5.7-r2)
+#8 3.078 ( 4/29) Installing binutils (2.45.1-r1)
+#8 3.246 ( 5/29) Installing libgcc-static (15.2.0-r5)
+#8 3.296 ( 6/29) Installing libgomp (15.2.0-r5)
+#8 3.305 ( 7/29) Installing gmp (6.3.0-r4)
+#8 3.316 ( 8/29) Installing isl26 (0.26-r2)
+#8 3.349 ( 9/29) Installing mpfr4 (4.2.2-r0)
+#8 3.363 (10/29) Installing mpc1 (1.3.1-r1)
+#8 3.368 (11/29) Installing gcc (15.2.0-r5)
+#8 6.017 (12/29) Installing musl-dev (1.2.6-r2)
+#8 6.193 (13/29) Installing g++ (15.2.0-r5)
+#8 7.025 (14/29) Installing make (4.4.1-r4)
+#8 7.033 (15/29) Installing libexpat (2.8.5-r0)
+#8 7.038 (16/29) Installing libbz2 (1.0.8-r6)
+#8 7.042 (17/29) Installing libffi (3.5.2-r1)
+#8 7.049 (18/29) Installing gdbm (1.26-r0)
+#8 7.058 (19/29) Installing xz-libs (5.8.4-r0)
+#8 7.069 (20/29) Installing mpdecimal (4.0.1-r0)
+#8 7.077 (21/29) Installing ncurses-terminfo-base (6.6_p20260516-r0)
+#8 7.119 (22/29) Installing libncursesw (6.6_p20260516-r0)
+#8 7.132 (23/29) Installing libpanelw (6.6_p20260516-r0)
+#8 7.136 (24/29) Installing readline (8.3.3-r1)
+#8 7.145 (25/29) Installing sqlite-libs (3.53.4-r0)
+#8 7.186 (26/29) Installing python3 (3.14.8-r0)
+#8 7.892 (27/29) Installing python3-pycache-pyc0 (3.14.8-r0)
+#8 8.198 (28/29) Installing pyc (3.14.8-r0)
+#8 8.198 (29/29) Installing python3-pyc (3.14.8-r0)
+#8 8.198 Executing busybox-1.37.0-r31.trigger
+#8 8.231 OK: 301.6 MiB in 48 packages
+#8 DONE 8.7s
+
+#9 [builder  4/12] RUN cd client && npm ci --ignore-scripts
+#9 ...
+
+#10 [stage-1  4/56] COPY server/package.json server/package-lock.json ./server/
+#10 DONE 0.1s
+
+#11 [stage-1  5/56] RUN cd server && npm ci --omit=dev --ignore-scripts
+#11 ...
+
+#9 [builder  4/12] RUN cd client && npm ci --ignore-scripts
+#9 11.03 npm warn deprecated rimraf@3.0.2: Rimraf versions prior to v4 are no longer supported
+#9 13.60 npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+#9 13.94 npm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+#9 16.45 npm warn deprecated @humanwhocodes/config-array@0.13.0: Use @eslint/config-array instead
+#9 16.60 npm warn deprecated @humanwhocodes/object-schema@2.0.3: Use @eslint/object-schema instead
+#9 37.85 npm warn deprecated eslint@8.57.1: This version is no longer supported. Please see https://eslint.org/version-support for other options.
+#9 50.52 
+#9 50.52 added 461 packages, and audited 462 packages in 49s
+#9 50.53 
+#9 50.53 128 packages are looking for funding
+#9 50.53   run `npm fund` for details
+#9 50.83 
+#9 50.83 24 vulnerabilities (1 low, 6 moderate, 17 high)
+#9 50.83 
+#9 50.83 To address issues that do not require attention, run:
+#9 50.83   npm audit fix
+#9 50.83 
+#9 50.83 To address all issues possible (including breaking changes), run:
+#9 50.83   npm audit fix --force
+#9 50.83 
+#9 50.83 Some issues need review, and may require choosing
+#9 50.83 a different dependency.
+#9 50.83 
+#9 50.83 Run `npm audit` for details.
+#9 50.84 npm notice
+#9 50.84 npm notice New major version of npm available! 11.19.1 -> 12.2.0
+#9 50.84 npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.0
+#9 50.84 npm notice To update run: npm install -g npm@12.2.0
+#9 50.84 npm notice
+#9 DONE 51.7s
+
+#11 [stage-1  5/56] RUN cd server && npm ci --omit=dev --ignore-scripts
+#11 ...
+
+#12 [builder  5/12] COPY server/package.json server/package-lock.json ./server/
+#12 DONE 0.9s
+
+#11 [stage-1  5/56] RUN cd server && npm ci --omit=dev --ignore-scripts
+#11 45.83 
+#11 45.83 added 310 packages, and audited 311 packages in 45s
+#11 45.83 
+#11 45.83 54 packages are looking for funding
+#11 45.84   run `npm fund` for details
+#11 46.29 
+#11 46.29 5 vulnerabilities (4 high, 1 critical)
+#11 46.29 
+#11 46.29 To address issues that do not require attention, run:
+#11 46.29   npm audit fix
+#11 46.29 
+#11 46.29 To address all issues (including breaking changes), run:
+#11 46.29   npm audit fix --force
+#11 46.29 
+#11 46.29 Run `npm audit` for details.
+#11 46.30 npm notice
+#11 46.30 npm notice New major version of npm available! 11.19.1 -> 12.2.0
+#11 46.30 npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.0
+#11 46.30 npm notice To update run: npm install -g npm@12.2.0
+#11 46.30 npm notice
+#11 DONE 46.8s
+
+#13 [builder  6/12] RUN cd server && npm ci --ignore-scripts
+#13 ...
+
+#14 [stage-1  6/56] RUN cd server && npm rebuild better-sqlite3
+#14 3.424 npm warn rebuild 3 packages have install scripts not yet covered by allowScripts. Run `npm install-scripts ls` to review.
+#14 3.426 rebuilt dependencies successfully
+#14 DONE 3.5s
+
+#15 [stage-1  7/56] RUN apk del python3 make g++
+#15 1.712 ( 1/29) Purging g++ (15.2.0-r5)
+#15 1.714 ( 2/29) Purging libstdc++-dev (15.2.0-r5)
+#15 1.862 ( 3/29) Purging gcc (15.2.0-r5)
+#15 1.996 ( 4/29) Purging binutils (2.45.1-r1)
+#15 2.015 ( 5/29) Purging libgcc-static (15.2.0-r5)
+#15 2.017 ( 6/29) Purging libgomp (15.2.0-r5)
+#15 2.017 ( 7/29) Purging musl-dev (1.2.6-r2)
+#15 2.041 ( 8/29) Purging isl26 (0.26-r2)
+#15 2.041 ( 9/29) Purging jansson (2.15.0-r0)
+#15 2.041 (10/29) Purging make (4.4.1-r4)
+#15 2.042 (11/29) Purging mpc1 (1.3.1-r1)
+#15 2.042 (12/29) Purging mpfr4 (4.2.2-r0)
+#15 2.043 (13/29) Purging python3-pyc (3.14.8-r0)
+#15 2.043 (14/29) Purging python3-pycache-pyc0 (3.14.8-r0)
+#15 2.138 (15/29) Purging pyc (3.14.8-r0)
+#15 2.138 (16/29) Purging python3 (3.14.8-r0)
+#15 2.551 (17/29) Purging readline (8.3.3-r1)
+#15 2.552 (18/29) Purging sqlite-libs (3.53.4-r0)
+#15 2.552 (19/29) Purging xz-libs (5.8.4-r0)
+#15 2.553 (20/29) Purging zstd-libs (1.5.7-r2)
+#15 2.553 (21/29) Purging gdbm (1.26-r0)
+#15 2.554 (22/29) Purging gmp (6.3.0-r4)
+#15 2.554 (23/29) Purging libbz2 (1.0.8-r6)
+#15 2.555 (24/29) Purging libexpat (2.8.5-r0)
+#15 2.555 (25/29) Purging libffi (3.5.2-r1)
+#15 2.556 (26/29) Purging libpanelw (6.6_p20260516-r0)
+#15 2.556 (27/29) Purging libncursesw (6.6_p20260516-r0)
+#15 2.557 (28/29) Purging ncurses-terminfo-base (6.6_p20260516-r0)
+#15 2.585 (29/29) Purging mpdecimal (4.0.1-r0)
+#15 2.586 Executing busybox-1.37.0-r31.trigger
+#15 2.609 OK: 10.9 MiB in 19 packages
+#15 DONE 2.7s
+
+#13 [builder  6/12] RUN cd server && npm ci --ignore-scripts
+#13 ...
+
+#16 [stage-1  8/56] COPY server/ ./server/
+#16 DONE 0.4s
+
+#13 [builder  6/12] RUN cd server && npm ci --ignore-scripts
+#13 ...
+
+#17 [stage-1  9/56] COPY shared/ ./shared/
+#17 DONE 0.4s
+
+#13 [builder  6/12] RUN cd server && npm ci --ignore-scripts
+#13 9.908 npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+#13 11.06 npm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+#13 12.59 npm warn deprecated whatwg-encoding@3.1.1: Use @exodus/bytes instead for a more spec-conformant and faster implementation
+#13 58.93 
+#13 58.93 added 640 packages, and audited 641 packages in 58s
+#13 58.93 
+#13 58.93 105 packages are looking for funding
+#13 58.93   run `npm fund` for details
+#13 59.72 
+#13 59.72 41 vulnerabilities (1 low, 3 moderate, 36 high, 1 critical)
+#13 59.72 
+#13 59.72 To address issues that do not require attention, run:
+#13 59.72   npm audit fix
+#13 59.72 
+#13 59.72 To address all issues (including breaking changes), run:
+#13 59.72   npm audit fix --force
+#13 59.72 
+#13 59.72 Run `npm audit` for details.
+#13 DONE 60.8s
+
+#18 [builder  7/12] COPY client/ ./client/
+#18 DONE 1.2s
+
+#19 [builder  8/12] COPY server/ ./server/
+#19 DONE 0.4s
+
+#20 [builder  9/12] COPY shared/ ./shared/
+#20 DONE 0.1s
+
+#21 [builder 10/12] COPY profiles/ ./profiles/
+#21 DONE 0.0s
+
+#22 [builder 11/12] RUN cd server && npx prisma generate
+#22 7.261 Loaded Prisma config from prisma.config.ts.
+#22 7.261 
+#22 9.080 Prisma schema loaded from prisma/schema.prisma.
+#22 16.05 
+#22 16.05 ✔ Generated Prisma Client (v7.10.0) to ./prisma_client in 5.03s
+#22 16.05 
+#22 16.05 Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+#22 16.05 
+#22 16.05 
+#22 DONE 16.4s
+
+#23 [builder 12/12] RUN cd client && npm run build
+#23 0.993 
+#23 0.993 > client@1.9.0 prebuild
+#23 0.993 > node scripts/generate-workflow-contract.cjs
+#23 0.993 
+#23 1.097 
+#23 1.097 > client@1.9.0 build
+#23 1.097 > vite build
+#23 1.097 
+#23 1.992 vite v5.4.21 building for production...
+#23 2.181 transforming...
+#23 3.418 Browserslist: browsers data (caniuse-lite) is 10 months old. Please run:
+#23 3.418   npx update-browserslist-db@latest
+#23 3.418   Why you should do it regularly: https://github.com/browserslist/update-db#readme
+#23 46.83 ✓ 2715 modules transformed.
+#23 65.42 rendering chunks...
+#23 72.00 computing gzip size...
+#23 73.41 dist/index.html                                   1.69 kB │ gzip:   0.64 kB
+#23 73.41 dist/assets/SampleWorkflowMap-DxFfliMr.css       14.34 kB │ gzip:   3.55 kB
+#23 73.41 dist/assets/index-CGes9DlH.css                  215.67 kB │ gzip:  35.43 kB
+#23 73.41 dist/assets/play-DN828QEs.js                      0.30 kB │ gzip:   0.25 kB
+#23 73.41 dist/assets/pen-line-Che6wCxd.js                  0.36 kB │ gzip:   0.28 kB
+#23 73.41 dist/assets/plus-circle-DsS0R2WP.js               0.37 kB │ gzip:   0.28 kB
+#23 73.41 dist/assets/check-square-DkjHbzlu.js              0.38 kB │ gzip:   0.28 kB
+#23 73.41 dist/assets/key-round-P4t9Tp-n.js                 0.41 kB │ gzip:   0.32 kB
+#23 73.41 dist/assets/wrench-CzSqXSBR.js                    0.43 kB │ gzip:   0.31 kB
+#23 73.41 dist/assets/tag-CNkhNTuM.js                       0.50 kB │ gzip:   0.35 kB
+#23 73.42 dist/assets/share-2-CVEpleby.js                   0.52 kB │ gzip:   0.33 kB
+#23 73.42 dist/assets/layout-list-DsdbgyGa.js               0.53 kB │ gzip:   0.32 kB
+#23 73.42 dist/assets/scale-BUYPFXq4.js                     0.53 kB │ gzip:   0.34 kB
+#23 73.42 dist/assets/sparkles-BUJtGScr.js                  0.59 kB │ gzip:   0.35 kB
+#23 73.42 dist/assets/cpu-B7JnR4PU.js                       0.66 kB │ gzip:   0.36 kB
+#23 73.42 dist/assets/panels-top-left-DWGIQGSd.js           0.72 kB │ gzip:   0.36 kB
+#23 73.42 dist/assets/loader-CCfJoOgO.js                    0.73 kB │ gzip:   0.37 kB
+#23 73.42 dist/assets/thumbs-up-DX6ZQFbO.js                 0.90 kB │ gzip:   0.43 kB
+#23 73.42 dist/assets/vendor-flow-BTkdDkRO.js               0.96 kB │ gzip:   0.60 kB
+#23 73.42 dist/assets/vendor-pdf-D7HrI6pR.js                1.02 kB │ gzip:   0.62 kB
+#23 73.42 dist/assets/LabPolicies-C4qXVASF.js               1.11 kB │ gzip:   0.63 kB
+#23 73.42 dist/assets/settings-2-BoL9vSLZ.js                1.30 kB │ gzip:   0.52 kB
+#23 73.42 dist/assets/spreadsheetImport-B7K8n_-a.js         1.48 kB │ gzip:   0.67 kB
+#23 73.42 dist/assets/useRealtimeData-BLhgzWaC.js           2.61 kB │ gzip:   1.16 kB
+#23 73.42 dist/assets/NotFound-C1HhF-5-.js                  2.81 kB │ gzip:   1.16 kB
+#23 73.42 dist/assets/CountryData-BbF5McwL.js               4.20 kB │ gzip:   1.34 kB
+#23 73.43 dist/assets/TopicExplorer-CCArN1_L.js             4.36 kB │ gzip:   1.77 kB
+#23 73.43 dist/assets/DataSheet-UQGpRekz.js                 5.12 kB │ gzip:   1.83 kB
+#23 73.43 dist/assets/PublicReport-xxOMg5Oq.js              5.21 kB │ gzip:   1.86 kB
+#23 73.43 dist/assets/FAQPage-Dh4I73oh.js                   6.14 kB │ gzip:   2.29 kB
+#23 73.43 dist/assets/ResetPassword-RD77from.js             6.36 kB │ gzip:   1.87 kB
+#23 73.43 dist/assets/ActivateAccount-B9XaE0DG.js           7.42 kB │ gzip:   2.03 kB
+#23 73.43 dist/assets/ScanPage-Cvzanj7J.js                  7.64 kB │ gzip:   2.99 kB
+#23 73.43 dist/assets/AuditLogs-BmWt2q1x.js                 8.30 kB │ gzip:   2.86 kB
+#23 73.43 dist/assets/LegacyImport-lnQeJEWU.js             10.41 kB │ gzip:   3.32 kB
+#23 73.43 dist/assets/LabMethods-dB-W_6Uf.js               11.50 kB │ gzip:   3.59 kB
+#23 73.43 dist/assets/MyWork-nUKsCi1D.js                   14.57 kB │ gzip:   3.88 kB
+#23 73.43 dist/assets/Users-DH3k_-q7.js                    15.34 kB │ gzip:   4.64 kB
+#23 73.43 dist/assets/ResultReports-7MlYvCOj.js            16.20 kB │ gzip:   5.02 kB
+#23 73.43 dist/assets/DataResults-Byv2XyWS.js              16.78 kB │ gzip:   5.25 kB
+#23 73.43 dist/assets/QADashboard-CtoyfFRw.js              17.31 kB │ gzip:   4.26 kB
+#23 73.43 dist/assets/ManagerQueue-CKVjk37i.js             17.98 kB │ gzip:   6.08 kB
+#23 73.43 dist/assets/LabPolicies-BbUDF6RR.js              18.17 kB │ gzip:   5.13 kB
+#23 73.43 dist/assets/About-TBKMgQXy.js                    20.84 kB │ gzip:   4.89 kB
+#23 73.43 dist/assets/Projects-B8dS733Q.js                 21.67 kB │ gzip:   6.29 kB
+#23 73.43 dist/assets/TechStack-B_I1dpjI.js                22.88 kB │ gzip:   8.64 kB
+#23 73.43 dist/assets/SampleWorkflowMap-DQIQM9th.js        23.60 kB │ gzip:   7.13 kB
+#23 73.43 dist/assets/ArticleReader-BlfhMRSo.js            23.91 kB │ gzip:   5.76 kB
+#23 73.43 dist/assets/ThemeGallery-DodHkHTo.js             25.93 kB │ gzip:   6.48 kB
+#23 73.43 dist/assets/AdminHelpEditor-CkxtLCkT.js          28.56 kB │ gzip:   6.82 kB
+#23 73.43 dist/assets/SuspendUserModal-DsMm76o1.js         30.92 kB │ gzip:   7.11 kB
+#23 73.43 dist/assets/Profile-DV4V-BeL.js                  32.30 kB │ gzip:   8.33 kB
+#23 73.43 dist/assets/BatchInspectionModal-RKKhoc5d.js     32.72 kB │ gzip:   8.34 kB
+#23 73.43 dist/assets/SpectralLibrary-U6bFrxnR.js          37.05 kB │ gzip:   8.73 kB
+#23 73.43 dist/assets/HelpCentre-BiFckRsm.js               37.95 kB │ gzip:  10.45 kB
+#23 73.43 dist/assets/Inventory-CKiKlfcG.js                41.43 kB │ gzip:   9.61 kB
+#23 73.43 dist/assets/Equipment-Bt67LgjB.js                41.60 kB │ gzip:   8.95 kB
+#23 73.43 dist/assets/LabManagement-Bi-rtX9-.js            82.65 kB │ gzip:  17.54 kB
+#23 73.43 dist/assets/ProjectWorkspace-CBbx_NEo.js        128.70 kB │ gzip:  27.92 kB
+#23 73.43 dist/assets/vendor-maps-DwGOs-Il.js             156.28 kB │ gzip:  45.73 kB
+#23 73.43 dist/assets/vendor-react-DoAq6ymf.js            163.50 kB │ gzip:  53.43 kB
+#23 73.43 dist/assets/AdminPanel-BUuH_os_.js              193.89 kB │ gzip:  46.06 kB
+#23 73.43 dist/assets/TechWorkbench-DV4D5kG5.js           247.74 kB │ gzip:  66.86 kB
+#23 73.43 dist/assets/vendor-charts-CqgcOpg6.js           383.30 kB │ gzip: 105.42 kB
+#23 73.43 dist/assets/vendor-excel-CKN5doRT.js            424.23 kB │ gzip: 141.75 kB
+#23 73.43 dist/assets/Reception-IXAoKKmA.js               565.67 kB │ gzip: 162.60 kB
+#23 73.43 dist/assets/index-CxtOq3qr.js                 1,652.97 kB │ gzip: 488.46 kB
+#23 73.43 
+#23 73.43 (!) Some chunks are larger than 1000 kB after minification. Consider:
+#23 73.43 - Using dynamic import() to code-split the application
+#23 73.43 - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+#23 73.43 - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+#23 73.43 ✓ built in 1m 11s
+#23 DONE 74.3s
+
+#24 [stage-1 10/56] COPY --from=builder /app/server/prisma_client ./server/prisma_client/
+#24 DONE 0.2s
+
+#25 [stage-1 11/56] COPY profiles/ ./profiles/
+#25 DONE 0.0s
+
+#26 [stage-1 12/56] COPY --from=builder /app/client/dist ./client/dist/
+#26 DONE 0.3s
+
+#27 [stage-1 13/56] RUN mkdir -p /app/server/.schema-backup &&     cp /app/server/prisma/schema.prisma /app/server/.schema-backup/schema.prisma
+#27 DONE 0.5s
+
+#28 [stage-1 14/56] COPY server/prisma/migrations/20261005000000_workflow_state_evidence/migration.sql /app/server/.migrations-backup/179/20261005000000_workflow_state_evidence/migration.sql
+#28 DONE 0.1s
+
+#29 [stage-1 15/56] COPY server/prisma/migrations/20261005000100_workflow_state_guards/migration.sql /app/server/.migrations-backup/179/20261005000100_workflow_state_guards/migration.sql
+#29 DONE 0.1s
+
+#30 [stage-1 16/56] COPY server/prisma/migrations/20261006000000_result_attempt_link/migration.sql /app/server/.migrations-backup/182/20261006000000_result_attempt_link/migration.sql
+#30 DONE 0.0s
+
+#31 [stage-1 17/56] COPY server/prisma/migrations/20261004064500_add_result_raw_input/migration.sql /app/server/.migrations-backup/272/20261004064500_add_result_raw_input/migration.sql
+#31 DONE 0.0s
+
+#32 [stage-1 18/56] COPY server/prisma/migrations/20261006000100_sample_holds_cancellation/migration.sql /app/server/.migrations-backup/183/20261006000100_sample_holds_cancellation/migration.sql
+#32 DONE 0.0s
+
+#33 [stage-1 19/56] COPY server/prisma/migrations/20261006000200_reference_material_catalogue/migration.sql /app/server/.migrations-backup/184/20261006000200_reference_material_catalogue/migration.sql
+#33 DONE 0.0s
+
+#34 [stage-1 20/56] COPY server/prisma/migrations/20261006000200_reference_material_catalogue/fresh-prisma-tables.json /app/server/.migrations-backup/184/20261006000200_reference_material_catalogue/fresh-prisma-tables.json
+#34 DONE 0.0s
+
+#35 [stage-1 21/56] COPY server/prisma/migrations/20261006000300_qc_rules/migration.sql /app/server/.migrations-backup/185/20261006000300_qc_rules/migration.sql
+#35 DONE 0.0s
+
+#36 [stage-1 22/56] COPY server/prisma/migrations/20261006000300_qc_rules/fresh-prisma-tables.json /app/server/.migrations-backup/185/20261006000300_qc_rules/fresh-prisma-tables.json
+#36 DONE 0.1s
+
+#37 [stage-1 23/56] COPY server/prisma/migrations/20261006000400_normalized_qc_runs/migration.sql /app/server/.migrations-backup/186/20261006000400_normalized_qc_runs/migration.sql
+#37 DONE 0.0s
+
+#38 [stage-1 24/56] COPY server/prisma/migrations/20261006000400_normalized_qc_runs/fresh-prisma-tables.json /app/server/.migrations-backup/186/20261006000400_normalized_qc_runs/fresh-prisma-tables.json
+#38 DONE 0.0s
+
+#39 [stage-1 25/56] COPY server/prisma/migrations/20261007000100_qc_gate_scope/migration.sql /app/server/.migrations-backup/187/20261007000100_qc_gate_scope/migration.sql
+#39 DONE 0.0s
+
+#40 [stage-1 26/56] COPY server/prisma/migrations/20261007000200_qc_bracket_membership/migration.sql /app/server/.migrations-backup/187/20261007000200_qc_bracket_membership/migration.sql
+#40 DONE 0.0s
+
+#41 [stage-1 27/56] COPY server/prisma/migrations/20261007000300_proficiency_evidence/migration.sql /app/server/.migrations-backup/189/20261007000300_proficiency_evidence/migration.sql
+#41 DONE 0.1s
+
+#42 [stage-1 28/56] COPY server/prisma/migrations/20261007000400_result_equipment_evidence/migration.sql /app/server/.migrations-backup/189/20261007000400_result_equipment_evidence/migration.sql
+#42 DONE 0.0s
+
+#43 [stage-1 29/56] COPY server/prisma/migrations/20261009000100_nonconformity_reports/migration.sql /app/server/.migrations-backup/193/20261009000100_nonconformity_reports/migration.sql
+#43 DONE 0.1s
+
+#44 [stage-1 30/56] COPY server/prisma/migrations/20261004190000_add_workitem_duplicate_marker/migration.sql /app/server/.migrations-backup/178/20261004190000_add_workitem_duplicate_marker/migration.sql
+#44 DONE 0.0s
+
+#45 [stage-1 31/56] COPY server/prisma/migrations/20261004190100_unique_active_workitem/migration.sql /app/server/.migrations-backup/178/20261004190100_unique_active_workitem/migration.sql
+#45 DONE 0.1s
+
+#46 [stage-1 32/56] COPY server/prisma/migrations/20261008000100_work_attempt_contract/migration.sql /app/server/.migrations-backup/190/20261008000100_work_attempt_contract/migration.sql
+#46 DONE 0.0s
+
+#47 [stage-1 33/56] COPY server/prisma/migrations/20261008000200_repeat_correction_contract/migration.sql /app/server/.migrations-backup/191/20261008000200_repeat_correction_contract/migration.sql
+#47 DONE 0.0s
+
+#48 [stage-1 34/56] COPY server/prisma/migrations/20261009000100_reported_value_selection/migration.sql /app/server/.migrations-backup/192/20261009000100_reported_value_selection/migration.sql
+#48 DONE 0.0s
+
+#49 [stage-1 35/56] COPY server/prisma/migrations/20261009000200_batch_reagent_lots/migration.sql /app/server/.migrations-backup/194/20261009000200_batch_reagent_lots/migration.sql
+#49 DONE 0.0s
+
+#50 [stage-1 36/56] COPY server/prisma/migrations/20261009000300_result_override_requests/migration.sql /app/server/.migrations-backup/197/20261009000300_result_override_requests/migration.sql
+#50 DONE 0.0s
+
+#51 [stage-1 37/56] COPY server/prisma/migrations/20261009000400_calculation_templates/migration.sql /app/server/.migrations-backup/199/20261009000400_calculation_templates/migration.sql
+#51 DONE 0.0s
+
+#52 [stage-1 38/56] COPY server/prisma/migrations/20261009000400_calculation_templates/fresh-prisma-tables.json /app/server/.migrations-backup/199/20261009000400_calculation_templates/fresh-prisma-tables.json
+#52 DONE 0.0s
+
+#53 [stage-1 39/56] COPY server/prisma/migrations/20261010000100_cross_check_evaluation/migration.sql /app/server/.migrations-backup/201/20261010000100_cross_check_evaluation/migration.sql
+#53 DONE 0.0s
+
+#54 [stage-1 40/56] COPY server/prisma/migrations/20261010000100_cross_check_evaluation/fresh-prisma-tables.json /app/server/.migrations-backup/201/20261010000100_cross_check_evaluation/fresh-prisma-tables.json
+#54 DONE 0.0s
+
+#55 [stage-1 41/56] COPY server/prisma/migrations/20261010000000_sample_amendment_authorisation/migration.sql /app/server/.migrations-backup/210/20261010000000_sample_amendment_authorisation/migration.sql
+#55 DONE 0.0s
+
+#56 [stage-1 42/56] COPY server/prisma/migrations/20261010000000_sample_amendment_authorisation/fresh-prisma-tables.json /app/server/.migrations-backup/210/20261010000000_sample_amendment_authorisation/fresh-prisma-tables.json
+#56 DONE 0.0s
+
+#57 [stage-1 43/56] COPY server/prisma/migrations/20261010000200_report_revision_amendment/migration.sql /app/server/.migrations-backup/211/20261010000200_report_revision_amendment/migration.sql
+#57 DONE 0.0s
+
+#58 [stage-1 44/56] COPY server/prisma/migrations/20261010000300_bench_credentials/migration.sql /app/server/.migrations-backup/202/20261010000300_bench_credentials/migration.sql
+#58 DONE 0.0s
+
+#59 [stage-1 45/56] COPY server/prisma/migrations/20261010000400_preparation_records/migration.sql /app/server/.migrations-backup/205/20261010000400_preparation_records/migration.sql
+#59 DONE 0.0s
+
+#60 [stage-1 46/56] COPY server/prisma/migrations/20261010000100_instrument_import_templates/migration.sql /app/server/.migrations-backup/200/20261010000100_instrument_import_templates/migration.sql
+#60 DONE 0.0s
+
+#61 [stage-1 47/56] COPY server/prisma/migrations/20261010000100_instrument_import_templates/fresh-prisma-tables.json /app/server/.migrations-backup/200/20261010000100_instrument_import_templates/fresh-prisma-tables.json
+#61 DONE 0.0s
+
+#62 [stage-1 48/56] COPY server/prisma/migrations/20261010000100_instrument_import_templates/pre-prisma-draft-table.sql /app/server/.migrations-backup/200/20261010000100_instrument_import_templates/pre-prisma-draft-table.sql
+#62 DONE 0.0s
+
+#63 [stage-1 49/56] COPY server/prisma/migrations/20261010000100_instrument_import_templates/upgraded-prisma-draft-table.sql /app/server/.migrations-backup/200/20261010000100_instrument_import_templates/upgraded-prisma-draft-table.sql
+#63 DONE 0.1s
+
+#64 [stage-1 50/56] COPY server/prisma/migrations/20261010000100_instrument_import_templates/post205-draft-tables.json /app/server/.migrations-backup/200/20261010000100_instrument_import_templates/post205-draft-tables.json
+#64 DONE 0.0s
+
+#65 [stage-1 51/56] COPY server/prisma/migrations/20261013000100_sample_containers/migration.sql /app/server/.migrations-backup/206/20261013000100_sample_containers/migration.sql
+#65 DONE 0.0s
+
+#66 [stage-1 52/56] COPY server/prisma/migrations/20261013000200_control_charts/migration.sql /app/server/.migrations-backup/214/20261013000200_control_charts/migration.sql
+#66 DONE 0.0s
+
+#67 [stage-1 53/56] COPY server/prisma/migrations/20261004085500_add_lab_policy_settings/migration.sql /app/server/.migrations-backup/policy/20261004085500_add_lab_policy_settings/migration.sql
+#67 DONE 0.0s
+
+#68 [stage-1 54/56] COPY server/prisma/migrations/20261014000100_order_revision_contract/migration.sql /app/server/.migrations-backup/209/20261014000100_order_revision_contract/migration.sql
+#68 DONE 0.0s
+
+#69 [stage-1 55/56] COPY docker-entrypoint.sh /app/docker-entrypoint.sh
+#69 DONE 0.0s
+
+#70 [stage-1 56/56] RUN sed -i 's/\r$//' /app/docker-entrypoint.sh && chmod +x /app/docker-entrypoint.sh
+#70 DONE 0.4s
+
+#71 exporting to image
+#71 exporting layers
+#71 exporting layers 57.4s done
+#71 exporting manifest sha256:c22e66aceb4d2ea3ad3784dd4041abfd05f8626612d42ba0014a1730122d95fb 0.1s done
+#71 exporting config sha256:84d1175a924f80b78940e27b1f2eadf4b947ed8d50bc79031a15f611af711331 0.0s done
+#71 exporting attestation manifest sha256:60d2b9416046c420f95df992f9a0a86ca631826d23e928f85dcb504e6b76949b
+#71 exporting attestation manifest sha256:60d2b9416046c420f95df992f9a0a86ca631826d23e928f85dcb504e6b76949b 0.0s done
+#71 exporting manifest list sha256:a61e5c84045e7116c0d1a01627e4d80cbaf76e4990223a37cd4fb009bf296294 0.0s done
+#71 naming to docker.io/library/soilfer-lims:audit-workflow-batch-build-be837974-20261015T180000Z done
+#71 unpacking to docker.io/library/soilfer-lims:audit-workflow-batch-build-be837974-20261015T180000Z
+#71 unpacking to docker.io/library/soilfer-lims:audit-workflow-batch-build-be837974-20261015T180000Z 23.9s done
+#71 DONE 81.6s

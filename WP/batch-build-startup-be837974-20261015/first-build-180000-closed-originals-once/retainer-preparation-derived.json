@@ -1,0 +1,7 @@
+{
+  "staticPreparationOnly": true,
+  "initialInlineAstInspection": "AttributeError Call has no attribute value; before collector execution or host operation",
+  "correctedInlineAstInspection": "Local helper and embedded collector parsed successfully; no execution",
+  "bothToolOutputs": "Retained in conversation tool output",
+  "currentRetainerExecutionCount": 1
+}
