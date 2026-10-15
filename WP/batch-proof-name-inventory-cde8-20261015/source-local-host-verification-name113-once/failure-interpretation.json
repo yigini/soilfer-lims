@@ -1,0 +1,9 @@
+{
+  "status": "LOCAL113_TESTS_111_PASS_2_FIXTURE_OWNED_PATH_ERRORS_HOST_NOT_STARTED",
+  "originalLogsUnchanged": true,
+  "testSourceReconstructedAndVerifiedAgainstOriginalBeforeSha256": "51c034c80cab785743d636a010af47cb55b1680fbf6a079d2d0c0416b3d3ed6e",
+  "cause": "Two new mocked create-boundary fixtures used the owner root as data rather than a distinct owned child; existing child_path guard correctly refused before metadata/create calls. Only fixture data paths corrected.",
+  "hostStarted": false,
+  "sourceOperatorsExecuted": 0,
+  "productionOperations": 0
+}
