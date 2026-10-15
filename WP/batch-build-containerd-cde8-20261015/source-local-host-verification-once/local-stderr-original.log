@@ -1,0 +1,25 @@
+test_duplicate_missing_modified_and_wrong_source_inventory_refuse (__main__.ArchiveGuards.test_duplicate_missing_modified_and_wrong_source_inventory_refuse) ... ok
+test_foreign_directories_executable_modes_and_hardlinks_refuse (__main__.ArchiveGuards.test_foreign_directories_executable_modes_and_hardlinks_refuse) ... ok
+test_raw_application_file_and_ignored_dependency_link (__main__.ArchiveGuards.test_raw_application_file_and_ignored_dependency_link) ... ok
+test_unsafe_paths_and_links_refuse (__main__.ArchiveGuards.test_unsafe_paths_and_links_refuse) ... ok
+test_changed_source_graph_missing_file_and_extra_file_refuse (__main__.AuthorityGuards.test_changed_source_graph_missing_file_and_extra_file_refuse) ... ok
+test_current_bound_build_scope_passes (__main__.AuthorityGuards.test_current_bound_build_scope_passes) ... ok
+test_duplicate_json_and_unsafe_roots_refuse (__main__.AuthorityGuards.test_duplicate_json_and_unsafe_roots_refuse) ... ok
+test_historical_and_expanded_bindings_refuse (__main__.AuthorityGuards.test_historical_and_expanded_bindings_refuse) ... ok
+test_later_source_rejection_refuses_and_unrelated_note_does_not (__main__.AuthorityGuards.test_later_source_rejection_refuses_and_unrelated_note_does_not) ... ok
+test_old_edited_wrong_actor_and_incomplete_reviews_refuse (__main__.AuthorityGuards.test_old_edited_wrong_actor_and_incomplete_reviews_refuse) ... ok
+test_unreviewed_individual_issue_or_main_moves_refuse (__main__.AuthorityGuards.test_unreviewed_individual_issue_or_main_moves_refuse) ... ok
+test_actual_containerd_top_level_and_no_custom_daemon_root_required (__main__.DiskGuards.test_actual_containerd_top_level_and_no_custom_daemon_root_required) ... ok
+test_cache_shrink_does_not_hide_unexplained_growth (__main__.DiskGuards.test_cache_shrink_does_not_hide_unexplained_growth) ... ok
+test_complete_disjoint_containerd_inventory_required_and_optional_legacy_absence_allowed (__main__.DiskGuards.test_complete_disjoint_containerd_inventory_required_and_optional_legacy_absence_allowed) ... ok
+test_descendant_mounts_and_malformed_mount_inventory_refuse_without_traversal (__main__.DiskGuards.test_descendant_mounts_and_malformed_mount_inventory_refuse_without_traversal) ... ok
+test_known_growth_does_not_mask_a_different_filesystem (__main__.DiskGuards.test_known_growth_does_not_mask_a_different_filesystem) ... ok
+test_new_spec_cannot_drop_containerd_measurement_or_failure_reference_bindings (__main__.DiskGuards.test_new_spec_cannot_drop_containerd_measurement_or_failure_reference_bindings) ... ok
+test_old_consumed_build_root_and_same_namespace_aliases_are_refused (__main__.DiskGuards.test_old_consumed_build_root_and_same_namespace_aliases_are_refused) ... ok
+test_shared_filesystem_counts_known_allocations_once_and_bounds_residual (__main__.DiskGuards.test_shared_filesystem_counts_known_allocations_once_and_bounds_residual) ... ok
+test_source_only_fallback_direction_does_not_adopt_or_reclassify_original (__main__.DiskGuards.test_source_only_fallback_direction_does_not_adopt_or_reclassify_original) ... ok
+
+----------------------------------------------------------------------
+Ran 20 tests in 0.009s
+
+OK

@@ -1,0 +1,119 @@
+{
+  "status": "CORRECTED_CONTAINERD_BUILD_SOURCE_REVIEW_READY_NOT_APPROVED",
+  "preparedUtc": "2026-10-15T00:17:46.990073+00:00",
+  "sourceSha256": {
+    "batch_build.py": "574fdaf4f5c43fc10b64b4379de4a6e4f6fc92704b2a48efd33977645b2f0a99",
+    "batch_build_contract.py": "41a2d3853f566df8b0c329ea3a71d42caad8269150f4b9928caf3348e1afa36e",
+    "launch_batch_build.py": "d872474949d42f0294d0f40860b903aacbd548bfb3effdb1700b7cd5176dcb1c",
+    "prepare_batch_build.py": "6a6d1688983d425c8e550c28d04b7e76a19829c054e1d5798f7b0a1b28275719",
+    "verify_build_guards.py": "4d2e505b088c7c2d3b4fb701d81b31fe1f1280e9009cd2474bf50c6d45d8ee9a"
+  },
+  "newRoot": "/opt/lims/releases/workflow-batch-build-cde8c889-20261015T010000Z",
+  "newSourceReview": null,
+  "newBuildAuthority": null,
+  "originalImageStillExcluded": true,
+  "referenceFiles": {
+    "original-build-failure.json": {
+      "audit": "a514c0a49a7487f44b33e27a7390972926a56307",
+      "path": "WP/batch-release-cde8-20261014/first-build-221500-closed-terminal/build-terminal-failure.json",
+      "sha256": "4474dcd30269c0710e17723e2f702114f09d48129ccc070b499aa65a69ab30c2"
+    },
+    "metadata-analysis-original.json": {
+      "audit": "850cc7670aceaa4fc2823aa3e0b5b5cf58c347da",
+      "path": "WP/batch-forward-metadata-cde8-20261014/retained-targeted-analysis-no-adoption-once/analysis-original.json",
+      "sha256": "c2f4fc6d15d064f4e4a08255edbfd450494adb3f3625224ce7267550f66e6d25"
+    }
+  },
+  "files": [
+    {
+      "path": "WP/batch-build-containerd-cde8-20261015/actual-fallback-direction-before-source-publication.json",
+      "bytes": 6613,
+      "sha256": "1a199ef0023c5ba2315d038de4f5797831679f3382933d50e34336b92ffa7ddb"
+    },
+    {
+      "path": "WP/batch-build-containerd-cde8-20261015/batch_build.py",
+      "bytes": 12839,
+      "sha256": "574fdaf4f5c43fc10b64b4379de4a6e4f6fc92704b2a48efd33977645b2f0a99"
+    },
+    {
+      "path": "WP/batch-build-containerd-cde8-20261015/batch_build_contract.py",
+      "bytes": 16980,
+      "sha256": "41a2d3853f566df8b0c329ea3a71d42caad8269150f4b9928caf3348e1afa36e"
+    },
+    {
+      "path": "WP/batch-build-containerd-cde8-20261015/launch_batch_build.py",
+      "bytes": 8579,
+      "sha256": "d872474949d42f0294d0f40860b903aacbd548bfb3effdb1700b7cd5176dcb1c"
+    },
+    {
+      "path": "WP/batch-build-containerd-cde8-20261015/old-source-basis-original.json",
+      "bytes": 1316,
+      "sha256": "058f1c97d2638106db21d2bd69a6d0c89ef2c6e46f0c24f13e53c1f87753665f"
+    },
+    {
+      "path": "WP/batch-build-containerd-cde8-20261015/prepare_batch_build.py",
+      "bytes": 9586,
+      "sha256": "6a6d1688983d425c8e550c28d04b7e76a19829c054e1d5798f7b0a1b28275719"
+    },
+    {
+      "path": "WP/batch-build-containerd-cde8-20261015/README.md",
+      "bytes": 8227,
+      "sha256": "bf0a2f78948ddf0cb076f0d9658533dbbb2b3a64a06a2afffb0fe51d229073f2"
+    },
+    {
+      "path": "WP/batch-build-containerd-cde8-20261015/verify_build_guards.py",
+      "bytes": 16795,
+      "sha256": "4d2e505b088c7c2d3b4fb701d81b31fe1f1280e9009cd2474bf50c6d45d8ee9a"
+    },
+    {
+      "path": "WP/batch-build-containerd-cde8-20261015/source-local-host-verification-once/command-original.json",
+      "bytes": 753,
+      "sha256": "1a6a5694ccc860e0bc50083748458aebd73e3d843a225dac530f1a27d3e332d1"
+    },
+    {
+      "path": "WP/batch-build-containerd-cde8-20261015/source-local-host-verification-once/exit-original.json",
+      "bytes": 2266,
+      "sha256": "1e85b1455a94e3e3a0db95747e8ec2b2882890c6a9efeb5aa403a0215ffa0460"
+    },
+    {
+      "path": "WP/batch-build-containerd-cde8-20261015/source-local-host-verification-once/host-inmemory-verification-source.py",
+      "bytes": 88118,
+      "sha256": "a946f0f238eb8ec044bc37633f220ca1d2d23a4d805f66194b089097b897d6e3"
+    },
+    {
+      "path": "WP/batch-build-containerd-cde8-20261015/source-local-host-verification-once/host-stderr-original.log",
+      "bytes": 2343,
+      "sha256": "557adb959aaa0209f0cbd2ad2af757ba95b54445ce04f59fb25ccca9ae821b2d"
+    },
+    {
+      "path": "WP/batch-build-containerd-cde8-20261015/source-local-host-verification-once/host-stdout-original.json",
+      "bytes": 802,
+      "sha256": "2001449349d601fcd8a469d1df036a6e5e617635b19a2c52811384e58471e690"
+    },
+    {
+      "path": "WP/batch-build-containerd-cde8-20261015/source-local-host-verification-once/local-stderr-original.log",
+      "bytes": 3185,
+      "sha256": "6e727c735132f469ded2615294cb59a1758902855683fbfb32287f37c71642a0"
+    },
+    {
+      "path": "WP/batch-build-containerd-cde8-20261015/source-local-host-verification-once/local-stdout-original.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/verify-accounted-build-source-local-and-host-once.py",
+      "bytes": 3858,
+      "sha256": "3f492c27a6e1dcf0bf5a4d74bf80729c332914ecba2b133c319222f072e08260"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/publish-corrected-containerd-build-source-once.py",
+      "bytes": 13455,
+      "sha256": "3db599331bfda21f59bf1b1e025ca729569666ba12e6a056edb78721df6d4e51"
+    },
+    {
+      "path": "WP/audit-release-eb6de2e8/README.md",
+      "bytes": 425824,
+      "sha256": "c25df215947b7fb9864bbcb7c8615b252a79714b17596529627d2689e29708ca"
+    }
+  ]
+}

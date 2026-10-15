@@ -1,0 +1,25 @@
+test_duplicate_missing_modified_and_wrong_source_inventory_refuse (accounted_build_guard_memory.ArchiveGuards) ... ok
+test_foreign_directories_executable_modes_and_hardlinks_refuse (accounted_build_guard_memory.ArchiveGuards) ... ok
+test_raw_application_file_and_ignored_dependency_link (accounted_build_guard_memory.ArchiveGuards) ... ok
+test_unsafe_paths_and_links_refuse (accounted_build_guard_memory.ArchiveGuards) ... ok
+test_changed_source_graph_missing_file_and_extra_file_refuse (accounted_build_guard_memory.AuthorityGuards) ... ok
+test_current_bound_build_scope_passes (accounted_build_guard_memory.AuthorityGuards) ... ok
+test_duplicate_json_and_unsafe_roots_refuse (accounted_build_guard_memory.AuthorityGuards) ... ok
+test_historical_and_expanded_bindings_refuse (accounted_build_guard_memory.AuthorityGuards) ... ok
+test_later_source_rejection_refuses_and_unrelated_note_does_not (accounted_build_guard_memory.AuthorityGuards) ... ok
+test_old_edited_wrong_actor_and_incomplete_reviews_refuse (accounted_build_guard_memory.AuthorityGuards) ... ok
+test_unreviewed_individual_issue_or_main_moves_refuse (accounted_build_guard_memory.AuthorityGuards) ... ok
+test_actual_containerd_top_level_and_no_custom_daemon_root_required (accounted_build_guard_memory.DiskGuards) ... ok
+test_cache_shrink_does_not_hide_unexplained_growth (accounted_build_guard_memory.DiskGuards) ... ok
+test_complete_disjoint_containerd_inventory_required_and_optional_legacy_absence_allowed (accounted_build_guard_memory.DiskGuards) ... ok
+test_descendant_mounts_and_malformed_mount_inventory_refuse_without_traversal (accounted_build_guard_memory.DiskGuards) ... ok
+test_known_growth_does_not_mask_a_different_filesystem (accounted_build_guard_memory.DiskGuards) ... ok
+test_new_spec_cannot_drop_containerd_measurement_or_failure_reference_bindings (accounted_build_guard_memory.DiskGuards) ... ok
+test_old_consumed_build_root_and_same_namespace_aliases_are_refused (accounted_build_guard_memory.DiskGuards) ... ok
+test_shared_filesystem_counts_known_allocations_once_and_bounds_residual (accounted_build_guard_memory.DiskGuards) ... ok
+test_source_only_fallback_direction_does_not_adopt_or_reclassify_original (accounted_build_guard_memory.DiskGuards) ... ok
+
+----------------------------------------------------------------------
+Ran 20 tests in 0.034s
+
+OK

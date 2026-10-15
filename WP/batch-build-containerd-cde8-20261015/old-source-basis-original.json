@@ -1,0 +1,33 @@
+{
+  "status": "NEW_SOURCE_DRAFT_FROM_RAW_REVIEWED_PREDECESSOR_NOT_EXECUTED",
+  "basis": "2afd192872ce38bfabbaf5c69404d0aa7e679123",
+  "sourceFiles": {
+    "batch_build_contract.py": {
+      "originalBlob": "ba444723d62dad2cf2349b782a173eeb4dc16964",
+      "originalSha256": "43b3e9ca228c07e3ceaa7645b9ae0d87099f3779c327fa336c8fa69184b367a5",
+      "bytes": 11093
+    },
+    "batch_build.py": {
+      "originalBlob": "e35bc00c45dc6f2248b4309a480761d9926adda3",
+      "originalSha256": "897ff69d61cf61ef58a0e2266c2c23f5038b6ef5efe884226d7d0ec1a22e4191",
+      "bytes": 8089
+    },
+    "prepare_batch_build.py": {
+      "originalBlob": "88d697513979ed636a096706d8f41575b1be1d7a",
+      "originalSha256": "e8b862b8a5136290ee1175497d37f765a8ae1b6e1000af6df9c5cac732896fa9",
+      "bytes": 8640
+    },
+    "launch_batch_build.py": {
+      "originalBlob": "7ffa3a00a7b73bb6177c08e823dfea8212806821",
+      "originalSha256": "7cff0a41ad5cd1d4baefbce9323554f9ea8629fd2391f129f89143a552a2a8c3",
+      "bytes": 7760
+    },
+    "verify_build_guards.py": {
+      "originalBlob": "dffbbe786f6ee4d0c891265efb1e91395f024e8a",
+      "originalSha256": "a0a1b17c8fdb91679ed089e2834e4664c917bd00f7ea305d0058736a83ef3b23",
+      "bytes": 11530
+    }
+  },
+  "newReview": null,
+  "newBuildAuthority": null
+}
