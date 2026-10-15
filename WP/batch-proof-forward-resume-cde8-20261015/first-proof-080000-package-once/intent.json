@@ -1,0 +1,8 @@
+{
+  "startedUtc": "2026-10-15T06:55:15.393325+00:00",
+  "toolingCommit": "b9af37993632ca10b56943ae894fc0a816b8efcc",
+  "actualSourcePass": 6185240820,
+  "scope": "LOCAL_APPROVED_FORWARD_PACKAGE_ONLY",
+  "neverReplay": true,
+  "productionCopies": 0
+}

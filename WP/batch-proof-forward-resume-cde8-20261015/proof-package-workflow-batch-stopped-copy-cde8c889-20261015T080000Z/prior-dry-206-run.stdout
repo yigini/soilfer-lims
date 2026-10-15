@@ -1,0 +1,10 @@
+{
+  "classification": "PRE_206",
+  "sources": {
+    "migrationSha256": "2a239bf9b13820a151e3fcc3e81fc47142a34027ec0502c5c26acd42200254b4",
+    "contractVersion": "206-v1"
+  },
+  "mode": "DRY_RUN",
+  "totalChanges": 0,
+  "backfilledCount": 0
+}
