@@ -1,0 +1,15 @@
+{
+  "preparedUtc": "2026-10-15T20:35:23.227509+00:00",
+  "baseAudit": "5f0aba81926e9d5e9108eb261498870137ab3bee",
+  "sourceBeforeSha256": {
+    "r2_contract.py": "cbaab078f30a9a1ca551c148930c57a68b587d9ecb77c6798738191c4c0cc34a",
+    "r2_cache.py": "3cc5d1daf6c1d9a7101c4f676c6c2dc866d0bc3e5d6cc9bb036913fe248e5a6c",
+    "prepare_r2.py": "f6def087675f30dc875b2ce9a2f20ac1998061927429090946498c866d928534",
+    "launch_r2.py": "52ce9dda434305a3e32bf791921e19376490590250bde392c50d13781af142b8",
+    "verify_r2.py": "45909c3dceb3f7e8b91485fa3c3b464d7ab0052b50494191780eb7509df1b37a"
+  },
+  "proposedRoot": "/opt/lims/cleanup-receipts/r2-cache-acc15844-20261015T220000Z",
+  "priorDuFailureSha256": "be7e104fbd7617f75f11fadd5142bc23a2049aaf463f3d37f51a6235d1b496a1",
+  "realOperatorCalls": 0,
+  "notAReplay": true
+}
