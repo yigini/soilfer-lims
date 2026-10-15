@@ -1,0 +1,42 @@
+{
+  "closedUtc": "2026-10-15T22:48:51.632125+00:00",
+  "status": "APPROVED_STARTUP_PROOF_LOCAL_PACKAGE_PREPARED",
+  "exitCode": 0,
+  "error": null,
+  "sourceSha256Before": {
+    "launch_proof.py": "270eacfefba760631ee414ac3362a31d16387efdf9f20b9dddad4a5211ab6dc1",
+    "prepare_proof.py": "5ba48b07a4249852c1e89249559b7ef3320a786bd150091b754cb458903ff368",
+    "proof_app_sources.py": "87fce38e1143e23a1b7f45e6c74518095dc65e9b1546e92917447b1e35c468c5",
+    "proof_budget.py": "ecda4d9beb0043726eb4cdd2dbc5fc4bda5e3ea7832e9b024d592567e4309a15",
+    "proof_contract.py": "fd467afe3d547c2335e870f1e9e8c0ddbfc1d19c27268fb8aa587d04b6460511",
+    "proof_disk.py": "54556f7d1166b34e2e83b3c0e55eaf10418817d1f72fb44d5e98a4e94647bd79",
+    "proof_docker.py": "03be75d1fed62bc9647ec0b5ad0159701f688246547a5e0d7c346c17a4abbdc8",
+    "proof_files.py": "6bd7adb616218b8add259eaf61c2922cfc3d05d88e8dbae4dbf5dda386e1241c",
+    "proof_health.py": "ada964f3d86453f61d082961e78b76f7dfb3cd3976ca361e5aadf863f227f846",
+    "proof_inputs.py": "fa7dd2f3b151aa78cc27e8ccdb1a7768730875e91b4d9e94ebfcbf36bb48d7d5",
+    "proof_memory.py": "95d71020afafaee787bcff5947f2af5d7d310c99f7c155286f16bd9d58abacfb",
+    "proof_render.py": "73683b6283e8351d06309242a4b3c883746db1e9d1a9cf74d57fe06aaee24d74",
+    "proof_startup.py": "f98774488ce3bd043ed20f1c1dab225f75e3532e9f259cbc168ba24165142e00",
+    "run_stopped_proof.py": "5a652e141cc974d6755f49a33f474036bfd9a1069c92d6e4a92d0601990acf86",
+    "verify_proof_guards.py": "8a94dd74603b1908ac78223e2c83fcc0688b026c63a7acbee2255393c79a8207"
+  },
+  "sourceSha256After": {
+    "launch_proof.py": "270eacfefba760631ee414ac3362a31d16387efdf9f20b9dddad4a5211ab6dc1",
+    "prepare_proof.py": "5ba48b07a4249852c1e89249559b7ef3320a786bd150091b754cb458903ff368",
+    "proof_app_sources.py": "87fce38e1143e23a1b7f45e6c74518095dc65e9b1546e92917447b1e35c468c5",
+    "proof_budget.py": "ecda4d9beb0043726eb4cdd2dbc5fc4bda5e3ea7832e9b024d592567e4309a15",
+    "proof_contract.py": "fd467afe3d547c2335e870f1e9e8c0ddbfc1d19c27268fb8aa587d04b6460511",
+    "proof_disk.py": "54556f7d1166b34e2e83b3c0e55eaf10418817d1f72fb44d5e98a4e94647bd79",
+    "proof_docker.py": "03be75d1fed62bc9647ec0b5ad0159701f688246547a5e0d7c346c17a4abbdc8",
+    "proof_files.py": "6bd7adb616218b8add259eaf61c2922cfc3d05d88e8dbae4dbf5dda386e1241c",
+    "proof_health.py": "ada964f3d86453f61d082961e78b76f7dfb3cd3976ca361e5aadf863f227f846",
+    "proof_inputs.py": "fa7dd2f3b151aa78cc27e8ccdb1a7768730875e91b4d9e94ebfcbf36bb48d7d5",
+    "proof_memory.py": "95d71020afafaee787bcff5947f2af5d7d310c99f7c155286f16bd9d58abacfb",
+    "proof_render.py": "73683b6283e8351d06309242a4b3c883746db1e9d1a9cf74d57fe06aaee24d74",
+    "proof_startup.py": "f98774488ce3bd043ed20f1c1dab225f75e3532e9f259cbc168ba24165142e00",
+    "run_stopped_proof.py": "5a652e141cc974d6755f49a33f474036bfd9a1069c92d6e4a92d0601990acf86",
+    "verify_proof_guards.py": "8a94dd74603b1908ac78223e2c83fcc0688b026c63a7acbee2255393c79a8207"
+  },
+  "hostConnections": 0,
+  "operationalExecutions": 0
+}
