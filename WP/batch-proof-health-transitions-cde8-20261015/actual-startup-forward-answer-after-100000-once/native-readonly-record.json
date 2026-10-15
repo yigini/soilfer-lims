@@ -1,0 +1,19 @@
+{
+  "status": "ACTUAL_COMPLETED_FORWARD_APP_CORRECTION_DIRECTION_READ_NO_INPUT",
+  "recordedUtc": "2026-10-15T09:31:30.693Z",
+  "windowId": 7867734,
+  "project": "LIMS Audit",
+  "thread": "Lab workflow audit and plan",
+  "githubDirection": 6188917117,
+  "actualCompletedReplyRead": true,
+  "rightComposerEmptyVisually": true,
+  "centerComposerEmptyVisually": true,
+  "humanCardUntouched": true,
+  "noHumanCleanupApprovalObserved": true,
+  "inputsOnlyReadOnlyScroll": true,
+  "noMessageSent": true,
+  "nativeCapacityPhraseNotFreshLaunchAuthority": true,
+  "capacityCorrection": "Actual closed free27417268224 versus previous reference31768290414 is4351022190B deficit before any removal; groupa3979431936B would leave371582254B reference gap, not4.4GB after removal. Nothing is approved or removed.",
+  "futureAppFixAndNewBuildRequired": true,
+  "noCde8RetryOrGraphAllowed": true
+}
