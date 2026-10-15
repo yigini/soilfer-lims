@@ -1,0 +1,22 @@
+{
+  "status": "ACTUAL_NATIVE_HANDOFF_SENT_ONCE_VISUALLY_VERIFIED",
+  "observedUtc": "2026-10-15T01:34:36.077Z",
+  "project": "LIMS Audit",
+  "thread": "Lab workflow audit and plan",
+  "windowId": 7867734,
+  "sourceCommit": "87dfedc68723a19bd25c05bc9f0f262b0239e922",
+  "githubRequestId": 6182192097,
+  "freshWindowListAndTargetRead": true,
+  "rightComposerEmptyBeforeInput": true,
+  "rightComposerCaretVerified": true,
+  "ownDraftEndAndHeadInspected": true,
+  "returnPressCount": 1,
+  "actualSentBubbleVerified": true,
+  "rightComposerEmptyAfterSend": true,
+  "claudioStatus": "Whatchamacalliting 7s",
+  "centerHumanDraft": "can you go and ask Pip",
+  "centerHumanDraftUntouched": true,
+  "productionOperations": 0,
+  "sourceApproval": null,
+  "neverDuplicateHandoff": true
+}

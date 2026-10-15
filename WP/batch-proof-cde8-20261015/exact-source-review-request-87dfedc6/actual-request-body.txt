@@ -1,0 +1,80 @@
+Claudio: NEW concrete closed source for production raw-snapshot inputs and the owned stopped-copy batch installation / jobs-OFF startup proof. Please review this exact graph before ANY production file collection or proof execution.
+
+Tooling 87dfedc68723a19bd25c05bc9f0f262b0239e922 has ten complete source files and40/40 local +40/40 actual host Python3.9 guards, all ten compiled/hash unchanged, closed2026-10-15T01:17:10.875877UTC. The synthetic tests include nonempty WAL folding into an owned backup while preserving all raw master bytes, valid additive receipt/table acceptance, and refusal of altered original rows/receipts/columns/backfill. No production file copy/database connection, image inspection, installer/default entrypoint or proof operator ran. All synthetic fixtures are retained; the40-test graph supersedes the immutable37-test predecessor before the explicit canonical policy-shape predicate.134 original owned blobs were independently Git-OID/SHA verified and pushed.
+
+[Complete scope and failure paths](https://github.com/yigini/soilfer-lims/blob/87dfedc68723a19bd25c05bc9f0f262b0239e922/WP/batch-proof-cde8-20261015/SOURCE_REVIEW.md), [current CLOSED guard evidence](https://github.com/yigini/soilfer-lims/blob/87dfedc68723a19bd25c05bc9f0f262b0239e922/WP/batch-proof-cde8-20261015/source-local-host-verification-canonical-once/exit-original.json), [complete raw source/evidence publication index](https://github.com/yigini/soilfer-lims/blob/87dfedc68723a19bd25c05bc9f0f262b0239e922/WP/batch-proof-cde8-20261015/closed-source-publication-index.json).
+
+- [launch_proof.py](https://github.com/yigini/soilfer-lims/blob/87dfedc68723a19bd25c05bc9f0f262b0239e922/WP/batch-proof-cde8-20261015/launch_proof.py)
+- [prepare_proof.py](https://github.com/yigini/soilfer-lims/blob/87dfedc68723a19bd25c05bc9f0f262b0239e922/WP/batch-proof-cde8-20261015/prepare_proof.py)
+- [proof_contract.py](https://github.com/yigini/soilfer-lims/blob/87dfedc68723a19bd25c05bc9f0f262b0239e922/WP/batch-proof-cde8-20261015/proof_contract.py)
+- [proof_disk.py](https://github.com/yigini/soilfer-lims/blob/87dfedc68723a19bd25c05bc9f0f262b0239e922/WP/batch-proof-cde8-20261015/proof_disk.py)
+- [proof_docker.py](https://github.com/yigini/soilfer-lims/blob/87dfedc68723a19bd25c05bc9f0f262b0239e922/WP/batch-proof-cde8-20261015/proof_docker.py)
+- [proof_files.py](https://github.com/yigini/soilfer-lims/blob/87dfedc68723a19bd25c05bc9f0f262b0239e922/WP/batch-proof-cde8-20261015/proof_files.py)
+- [proof_install.py](https://github.com/yigini/soilfer-lims/blob/87dfedc68723a19bd25c05bc9f0f262b0239e922/WP/batch-proof-cde8-20261015/proof_install.py)
+- [proof_startup.py](https://github.com/yigini/soilfer-lims/blob/87dfedc68723a19bd25c05bc9f0f262b0239e922/WP/batch-proof-cde8-20261015/proof_startup.py)
+- [run_stopped_proof.py](https://github.com/yigini/soilfer-lims/blob/87dfedc68723a19bd25c05bc9f0f262b0239e922/WP/batch-proof-cde8-20261015/run_stopped_proof.py)
+- [verify_proof_guards.py](https://github.com/yigini/soilfer-lims/blob/87dfedc68723a19bd25c05bc9f0f262b0239e922/WP/batch-proof-cde8-20261015/verify_proof_guards.py)
+
+The qualified NEW b5 image/receiptc03/buildSource6608548a/actualSourcePASS6181452519/closed buildb1 evidence are bound separately from production's NORMALHEALTHY959d/7aeb/8109 predecessor. The original qualified receipt, raw application manifest and entire image inspection must match; pinned application sources from the immutable build package are rehashed. Current maincde8/tree638/mainCI38636615469 attempt1 SUCCESS370/5649/all actual Docker plus all three actual source-audit/merge records must still match, before upload and again immediately before launch. Old build/source/proof approvals do not authorize this graph. Actual normal predecessor health/identity/0restart/noOOM/memory805/existingSwap1610612736/blankheap/noautopush/noautoseed/jobsON/same volumes are refreshed. Full production environment is not persisted.
+
+Proposed new root /opt/lims/releases/workflow-batch-stopped-copy-cde8c889-20261015T020000Z and unit/package are UNCREATED/UNUSED. Readonly filesystem bytes copy production DB/WAL/SHM and assets, with complete before/copy/after hashes and device/inode/mtime/mode/length/tree consistency. Any drift/alias/missing/special-file/size/output/deadline problem consumes and refuses this boundary, never retries. No SQLite/Prisma connection touches production or immutable raw masters. Only separate owned readers fold WAL and create retained consistent backups; no immutable=1 shortcut ignores committed WAL. All raw triples/readers/backups remain.
+
+Installation is confined to one owned copy: policy must return PRESENT, shape CANONICAL, NO_OP0/dataWrites0/originaltriplepreserved or STOP; no policy normalization is performed. Then exact206/214/209 dry→apply→immediate NO_OP, each with independent stopped seals and every original row/column/schema object/receipt checked. New tables stay EMPTY, no scientific backfill,209nullable OrderLine.workItemId stays NULL.106/39→112/42 are source/historical-receipt expectations only until reviewed retained-copy collection; actual mismatch refuses and no production count is claimed now.
+
+Actual214 policy/QC precedence collector prints chart lab/analyte/method contexts and created-unstarted-unboundservedLRM plus sequence refusals on the owned copy. Actual209 collector runs after COMPLETE214 and prints separate no-active/no-matching/fraction/texture/reservation causes, approved-amendment sample/refusal lists, invalidStoredAnalysisSampleCount with sample/owner IDs. Primary AND secondary prerequisite snapshots and every reported retained file hash/physical allocation are independently inspected under owned TMPDIR. Approved-amendment nonzero STOP occurs before209 apply, leaving all evidence for YY and a separately Claudio-reviewed forward remedy. Other nonzero lists must also be shown to YY before any future gate. No amendment-side order step/backfill/relink/normalizer change exists.
+
+Two independent ordinary default startups use separate installed DB/assets copies, jobs OFF/network NONE/no production mount/no credential reuse/blankheap/memory805306368/no-swap container cap. Exact27 entrypoint NO_OP0 and26 READY0 expectations are pinned to current source. Readiness600, peak memory, health/login/unauthorized401 checks, exact full installed state in detached stopped seals. Every new CLI/runtime container is stopped and RETAINED. Every pre-existing stopped container must still have its original name/image/config labels/mounts/start time and remain stopped. No --rm/prune/delete/cleanup/older-image-start/restore/retag/rebuild is used.
+
+This is intentionally the complete upstream snapshot + stopped installation/jobs-OFF startup graph, not release qualification. Its terminal explicitly says STOPPED_COPY_INSTALLATION_AND_JOBS_OFF_STARTUP_PASS_NOT_RELEASE_QUALIFIED. Jobs-ON natural scheduler/intake qualification and broader application postflights remain separately required, followed by final exact-kit review and a fresh single-use gate. It cannot stop/restart/reconfigure production, start historical images, deploy or issue a gate. Four refused Kobo configurations/#103 human card remain untouched.
+
+Physical accounting includes ALL retained release roots, whole Docker storage (containers/logs/volumes included) and required /var/lib/containerd in one disjoint du -s -B1 invocation per checkpoint,120second/64KiB. No descendant mounts/aliases/device changes; actual overlayfs/containerd snapshotter/default daemon/configuration/PID must remain. Scaled reserve128 actual DB-triple allocations +3 actual asset copies +4GiB logs/headroom +fixed10556150894 floor; includes primary/secondary retained snapshots. Per-device measured free loss versus full physical growth keeps500000000 unexplained STOP. No daemon/production configuration change. Controller5400/memory805306368/swap0/Restartno/UMask0077; CLI600/readiness600 preserve60 stage+600 unit headroom. Output/reserve/deadlines are monitored while running. Only an owned transport process/exact labelled NEW b5 container may stop on refusal; all prior containers/daemon processes remain.
+
+After ANY installer/default-entrypoint attempt including dry/NO_OP/refusal, recovery remains separately audited FORWARD FIX ONLY. All old failures, image1d exclusion/missing-before3609116672 residual, historical roots/raws/receipts/gates/backups/stopped containers and#200 completion stay immutable.206214209 source merged/undeployedOPEN; no#103 production connection/APPLYGO; both YY workload pins/human files/drafts/cards unchanged.
+
+Please review THIS concrete ten-file graph. If it passes, issue a NEW unedited actual verdict `Source review: PASS` containing ALL literal bindings below. This approval would cover one new raw snapshot and this scoped owned proof only; it does not approve jobs-ON qualification, final kit/gate or deployment:
+
+```
+87dfedc68723a19bd25c05bc9f0f262b0239e922
+cde8c8896f5f9d5f1ab07b0ae16b1a765e0a6367
+638580d50f61254609de3abd42d93afc676a5727
+sha256:b5ab0a0a57aeec4fe24dd8095126f3502cbc0c8629a7f4c1ef9e55034893c6fb
+959d17e11c357266f7c2a41b0c84ab76914c591e
+sha256:7aebc035254a61b0b4b8ecb59492d582af7f3769c147a35a7e92a43fb7a642d2
+8109d78e228573ead8aa243442192e54b8e1dc09101bc3fa23d03e5a29cbb66b
+c03ca0cd16395a451a12f1606655166f0dfe0b3f78516212034b548888c7a3fd
+proofScope=RAW_SNAPSHOT_AND_OWNED_STOPPED_COPY_INSTALLATION_JOBS_OFF_STARTUP_ONLY
+proofRoot=/opt/lims/releases/workflow-batch-stopped-copy-cde8c889-20261015T020000Z
+qualifiedBuildSource=6608548a58dd4bf581da4330f1cd7b0f68a86973
+qualifiedBuildPass=6181452519
+mainCiRun=38636615469
+labAndHubBuildsOwnedByYY=true
+releaseWindowControl=RELEASE_DAY_DISK_ABORTS_ACCEPTED
+reserveFloorBytes=10556150894
+unexplainedGrowthAbortBytes=500000000
+memoryLimitBytes=805306368
+unitTimeoutSeconds=5400
+readinessSeconds=600
+stageHeadroomSeconds=60
+unitHeadroomSeconds=600
+rawMasterNeverOpenedSqlite=true
+productionSqliteConnections=0
+preserveAllStoppedContainers=true
+policyPresentNoOpOrStop=true
+approvedAmendmentNonzeroStop=true
+jobsOnQualificationStillRequired=true
+retainedDatabaseReserveMultiplier=128
+retainedAssetReserveMultiplier=3
+logReserveBytes=4294967296
+allocationMeasurementSeconds=120
+allRetainedReleaseDockerContainerdAllocation=true
+launch_proof.py=37ca02f27e9538a51422f2186c65b8dc8a1102cd688d71d3c88682df435ce7e8
+prepare_proof.py=a8cdb8e87b51653e7a8d258e47a0c74c5510025e0c693259588d698418b6e9ef
+proof_contract.py=c04ae1bbf263579d8918dac69dda03f4091eb6bc53c1b554dcd3ecc3546cbb51
+proof_disk.py=a8523a53cdca48c0464718c1b58958607398721b412d2f10f73dc62b85f39630
+proof_docker.py=3945534e0f94f60ddd31efb3649cc8e1fc0eb466077b1c623fba0436211ef444
+proof_files.py=6e89a67f82387d019c58ee6ac0b69d92b2047f5a058fafd6586d2e9519c1ba03
+proof_install.py=c049dae7ea166e99470a26298a22e5f6ae32fe087be068f9a7175d5b48b604a5
+proof_startup.py=761cb01453f4789b3af04d646f10301c2ed1b55c31b179eb79feed43dd0000cf
+run_stopped_proof.py=ec2a79a498eacf8430488a44f08083c4ec0fb8c2536e4c2d1cb1ba017f6da3c8
+verify_proof_guards.py=3e153e2f1888883c25a8438166f1ef1fbf8c4251784e2a7c5f2c577e2e5fc009
+```
