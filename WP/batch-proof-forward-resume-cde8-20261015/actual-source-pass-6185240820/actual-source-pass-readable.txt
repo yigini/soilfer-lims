@@ -1,0 +1,129 @@
+Source review: PASS
+
+Claudio's source review of tooling b9af37993632ca10b56943ae894fc0a816b8efcc (WP/batch-proof-forward-resume-cde8-20261015, twelve files), targeting the fresh unused 080000 root. No earlier pass authorizes anything further. This PASS covers one forward attempt of this scoped owned stopped-copy proof only, and only if the launcher's fresh authority, capacity and unused root and unit gates pass. It does not approve jobs-ON qualification, the final kit, a gate or deployment.
+
+What I checked:
+- **Hashes and tests.** All twelve SHA-256 values below match `git archive` of the exact head and the request. proof_docker and proof_startup are byte-identical to 68633fdd.
+  - `verify_proof_guards.py` ran 166/166 OK on Python 3.11 and 166/166 OK on Python 3.9.23, each with a fresh `LIMS_PROOF_GUARD_FIXTURE_DIR`. The hashes were unchanged afterwards.
+  - `copy_site_guard` passes on the real sources. The derived values are N=44, 55 equivalents and stage table 6e70c1bd….
+- **Prior evidence pins.** I fetched each of the 22 `PRIOR_FILES` pins from e283e6a8 myself. Git OID, SHA-256 and length all match, and `priorEvidenceIndexSha256` is 5f846d27….
+  - `proof_resume.validate_records` passes on those real blobs and returns the full 1765-row inventory.
+  - I also ran `repeat_identity` on the real bound records:
+    - before: the installed-206 seal `originalFiles` (main 9abe179b…, 563322880 B, WAL and SHM absent);
+    - after: the closed inventory's installation target (same main, WAL 0 B with the empty SHA, SHM 32768 B);
+    - with the bound repeat stdout.
+  - It passes under the corrected rule.
+- **The diff against 68633fdd implements direction 6184928681 and nothing else.**
+  - **Input.** The input is only the installed-206 seal's raw triple. Before and after the single copy, `retained_guard` checks by hash and stat only, against the seal and the closed inventory:
+    - the raw triple (mode 0400 and identity);
+    - the reader, backup and closed target;
+    - every prior package file;
+    - the raw assets against their own handoff.
+  - No prior database is opened in SQLite. `prepare_resume` writes the 206 evaluation after closure, labelled `notOriginalControllerUnsealedTuples`, makes exactly one `copy_triple` into the new `installation-target` and compares the copy's identity.
+  - **No replay.** `CHAIN` is 214 then 209 only, and `install` refuses anything else. Target-policy, the 206 calls and any new production snapshot are removed from `run`, and the capacity probe measures the prior raw input, not production.
+  - **Byte rule.** `compared_identity` writes both states to 0400 JSON before any refusal. It then requires the full triple keys, well-formed identities (a 0-byte file must carry the empty SHA) and identical main SHA and length. The WAL pair {absent, 0 B} counts as equivalent; any non-empty WAL must match exactly. For repeats, `plan(...,'NO_OP')` runs after the states are written. Absent→32 B, 0 B→non-empty and changed non-empty WAL all STOP, and both dry and repeat comparisons use this rule.
+  - **Preservation.** `delta_from_state` compares the bound prior logical state with only the new sealed backup. Its receipt fingerprint excluding the marker uses the same length-prefixed canonical hash as `table_fingerprint`, so it is equivalent to the earlier row-by-row check. The checks for column, object, empty-table and OrderLine backfill are unchanged.
+  - **Budget.** The forward-input stage is 1 triple and the minimum is 0. The asset reserve is still 3A, with the one unused padding equivalent carried in `padding`. The 214 dry clone is counted, and the 214 target clone is removed with its AST site.
+  - **Stricter installer check.** `plan` now requires integer types for `totalChanges` and `backfilledCount`.
+- **Carried over unchanged:** everything else from my 68633fdd review (name inventory, du -x closure, consumption-aware reserves, both startups, all safety and scientific gates, the YY pins and the nonzero-list STOPs).
+
+Non-blocking notes:
+1. Ten of the twelve files are now committed with CRLF line endings, while proof_docker, proof_resume and proof_startup are LF. Every executed file is run as `python3 -B file` or fed over stdin, and Python normalizes line endings, so this does not affect behavior. The bindings hash the committed bytes, which is correct. A later graph could normalize the line endings.
+2. Startups now copy assets from the 070000 raw-production-assets directory. `retained_guard` checks that directory against its handoff before and after, so the asset input is the same one the accepted evidence used.
+3. Reference slack is about 3.67 GB (required 45851464814 B, free 49517506560 B). The launcher's fresh gates decide. If capacity is short, the run STOPs, everything is retained, and the decision goes to YY.
+
+Bindings:
+
+```
+b9af37993632ca10b56943ae894fc0a816b8efcc
+cde8c8896f5f9d5f1ab07b0ae16b1a765e0a6367
+638580d50f61254609de3abd42d93afc676a5727
+sha256:b5ab0a0a57aeec4fe24dd8095126f3502cbc0c8629a7f4c1ef9e55034893c6fb
+959d17e11c357266f7c2a41b0c84ab76914c591e
+sha256:7aebc035254a61b0b4b8ecb59492d582af7f3769c147a35a7e92a43fb7a642d2
+8109d78e228573ead8aa243442192e54b8e1dc09101bc3fa23d03e5a29cbb66b
+c03ca0cd16395a451a12f1606655166f0dfe0b3f78516212034b548888c7a3fd
+proofScope=BOUND_070000_RAW206_FORWARD_214_209_JOBS_OFF_STARTUP_ONLY
+proofRoot=/opt/lims/releases/workflow-batch-stopped-copy-cde8c889-20261015T080000Z
+qualifiedBuildSource=6608548a58dd4bf581da4330f1cd7b0f68a86973
+qualifiedBuildPass=6181452519
+mainCiRun=38636615469
+labAndHubBuildsOwnedByYY=true
+releaseWindowControl=RELEASE_DAY_DISK_ABORTS_ACCEPTED
+reserveFloorBytes=10556150894
+unexplainedGrowthAbortBytes=500000000
+memoryLimitBytes=805306368
+unitTimeoutSeconds=5400
+readinessSeconds=600
+stageHeadroomSeconds=60
+unitHeadroomSeconds=600
+rawMasterNeverOpenedSqlite=true
+productionSqliteConnections=0
+preserveAllStoppedContainers=true
+policyPresentNoOpOrStop=true
+approvedAmendmentNonzeroStop=true
+jobsOnQualificationStillRequired=true
+declaredDbTripleCopies=44
+dbBudgetEquivalents=55
+budgetMarginPercent=25
+minimumDbBudgetEquivalents=0
+forwardDirection=6184928681
+priorEvidenceCommit=e283e6a8747598c1d5d447059c879042f5c3377e
+priorProofRoot=/opt/lims/releases/workflow-batch-stopped-copy-cde8c889-20261015T070000Z
+priorEvidenceIndexSha256=5f846d27770cab26a7347053cbe5df0b18cb14128e1ee83802a100e2809f3732
+forwardRaw206InputOnly=true
+no206OrPolicyReplay=true
+noNewProductionSnapshot=true
+repeat206Evaluation=AFTER_CLOSURE_SEAL_AND_RETAINED_FILES_NOT_UNSEALED_TUPLES
+repeatWalRule=ABSENT_AND_ZERO_EQUIVALENT_NONEMPTY_EXACT
+allRepeatComparedStatesRetainedBeforeRefusal=true
+inputLogicalStateFromBoundRecordsNoSql=true
+budgetMinimum64DroppedForForwardGraph=true
+budgetStageTableSha256=6e70c1bd3ed2b0b8b23a8e93f4208554ecd36b2b6550d25dcafcd621789ee172
+budgetModel=DECLARED_STAGE_REMAINING_CONSUMPTION_AWARE
+capacityDirection=6183215126
+noopSealDirection=6183663456
+dryRunMainWalCorrectedIdentity=true
+repeatMainWalCorrectedIdentityNoOpZero=true
+installedSealBecomesPrevious=true
+metadataCapacityBeforeRootAndBeforeUnit=true
+allLocalExecutedSourceFilesBound=true
+containerNameAbsenceProof=BOUNDED_COMPLETE_ID_AND_EXACT_NAME_INVENTORY
+containerNameProbeRawIdsRetained=true
+mandatoryKnownPredecessorInInventory=true
+noErrorTextAbsenceInference=true
+snapshotBoundaryDirection=6184356993
+productionSnapshotAuthority=STABLE_FILESYSTEM_COPY_WINDOW_HANDOFF
+productionPostHandoffChecks=OWNED_RAW_BYTES_AND_READER_BACKUP_ONLY
+liveEvolutionObservation=STAT_ONLY_NEVER_SNAPSHOT_AUTHORITY
+liveInputEqualityRefusalComparedStatesRetained=true
+databaseAssetsCrossFileAtomicityClaimed=false
+budgetCheckpointCgroupAnonFileRecorded=true
+referenceDbReserveBytes=567558144
+referenceAssetReserveBytes=5787648
+retainedAssetReserveMultiplier=3
+logReserveBytes=4294967296
+allocationMeasurementSeconds=120
+allRetainedReleaseDockerContainerdAllocation=true
+policyPreflightMode=READONLY_DRY_RUN
+ownedStopIndependentOfReserveHeadroom=true
+allInputPathAncestorsRejectAliases=true
+diskMountPolicy=VERIFIED_DOCKER_OVERLAY_VIEWS_BACKED_BY_COUNTED_CONTAINERD
+physicalDuSingleFilesystem=true
+containerMountComparison=EXACT_OBJECTS_UNORDERED_NO_DUPLICATES
+launch_proof.py=7ccf3bb568a51a1b66c9d3df30b48432416f0d65db276b01f5968592a237a596
+prepare_proof.py=0817c8f2b159e04d0b74bdd0d07cf0920c1217f8e1c68de3457449820c481a22
+proof_budget.py=016664128f88ee9d9c52eb36ed21767c8d69a53d0793ba498627ce0b8792780b
+proof_contract.py=d98110a84f4a88f6a4f5f9f0aaa59f81197e38d1e756e8bee2d53ee9da84d35b
+proof_disk.py=d1b676dbd23bc9f88b51c222994639ac3c14b3b1b49f096d95eb24a7de2eab6d
+proof_docker.py=c941b3e680dba8936815177b8b5302300414b5115b33b91a03cdb68a6ed65d9d
+proof_files.py=6bd7adb616218b8add259eaf61c2922cfc3d05d88e8dbae4dbf5dda386e1241c
+proof_install.py=bc2ea4f1335a4f5529f20ae5b7ae5923784b915ac7280f38534d5c2468e50a4d
+proof_resume.py=5f80d7972edb63bb9b1ef9ffc30fe9ac124d847f2b661f9cc733064346af798a
+proof_startup.py=a5b3e775a53e6a2e37be613394b1f091c710ead84a09f307cf18c2c54f762b10
+run_stopped_proof.py=eed56e8b02679228a11b986d18c1f69f7e7df921478247f45ce433ec38677a2c
+verify_proof_guards.py=d6fde7ed1812286c0802e4a7d63f8d7b8be6f57bf74fc6595ec36b76a0d59843
+```
+
+---
+_Generated by [Claude Code](https://claude.ai/code)_
