@@ -1,4 +1,10 @@
 #!/usr/bin/env node
+// The optional startup context must not become a default CLI/image-copy dependency.
+function openReadonlyDatabase(Database, target, options, startupContext) {
+    return startupContext
+        ? require('../utils/startupReadinessContext').openReadonlyDatabase(Database, target, options, startupContext)
+        : new Database(target, options);
+}
 const fs=require('node:fs'),path=require('node:path'),{createHash}=require('node:crypto'),Database=require('better-sqlite3');
 const {loadControlChartMigrationSource}=require('../services/controlChartMigrationSource');
 const MARKER='214_control_charts',TABLES=['ControlLimitProposal','ControlLimitSet','QcReviewObligation','QcReviewResolution'];
@@ -54,13 +60,13 @@ function snapshot(db){
  }
  return tables;
 }
-function installControlCharts({dbPath,apply=false}={}){
+function installControlCharts({dbPath,apply=false, startupContext}={}){
  if(typeof dbPath!=='string'||!dbPath.trim())throw fail('QC_CHART_DATABASE_REQUIRED','Provide an explicit database path.');
  const target=path.resolve(dbPath),source=loadControlChartMigrationSource();
- require('./install_sample_containers').assertSampleContainerStartupReady(target);
- require('./install_lab_policy_schema').assertLabPolicyStartupReady(target);
- const reader=new Database(target,{readonly:true,fileMustExist:true});let reviewed;
- try{reviewed=reader.transaction(()=>classify(reader,source))();}finally{reader.close();}
+ require('./install_sample_containers').assertSampleContainerStartupReady(target, apply ? undefined : startupContext);
+ require('./install_lab_policy_schema').assertLabPolicyStartupReady(target, apply ? undefined : startupContext);
+ const reader=openReadonlyDatabase(Database, target, {readonly:true,fileMustExist:true}, apply ? undefined : startupContext);let reviewed;
+ try{reviewed=!apply&&startupContext?startupContext.reviewChart(source,()=>reader.transaction(()=>classify(reader,source))()):reader.transaction(()=>classify(reader,source))();}finally{reader.close();}
  if(!apply||reviewed.classification==='COMPLETE_214')return{...reviewed,mode:apply?'NO_OP':'DRY_RUN',totalChanges:0,backfilledCount:0};
  const db=new Database(target,{fileMustExist:true,timeout:5000});
  try{
@@ -78,9 +84,9 @@ function installControlCharts({dbPath,apply=false}={}){
   }).immediate();
  }finally{db.close();}
 }
-function assertControlChartStartupReady(dbPath){
+function assertControlChartStartupReady(dbPath, startupContext){
  if(typeof dbPath!=='string'||!dbPath.trim()||!fs.existsSync(dbPath))throw fail('QC_CHART_DATABASE_REQUIRED','The lab database does not exist.');
- const result=installControlCharts({dbPath});
+ const result=installControlCharts({dbPath, startupContext});
  if(result.classification!=='COMPLETE_214')throw fail('QC_CHART_STARTUP_REQUIRED','Run the reviewed control chart installer before starting the lab.');
  return result;
 }

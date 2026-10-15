@@ -8,24 +8,30 @@ const { beforeGuards } = require('./legacyWorkflowDatabase');
 const { createSampleFixture, createWorkItemFixture } = require('./workflowFixtures');
 const { installCalculationReleasePrerequisites } = require('./calculationReleasePrerequisites');
 
-async function qcGateFixture({ count = 1, criteria = {}, status = 'IN_PROGRESS', sharedSample = false, resolvedRules = true, installSelectionEvidence = true, installOverrideRequests = true, installInstrumentImports = true, installSampleContainers = true, installControlCharts = true, installOrderRevisions = true, fixedWindowPolicy = criteria.lrmMode !== 'CONTROL_CHART' && criteria.lrmPerBatch !== 0 } = {}) {
+async function qcGateFixture({ managedStartup = false, count = 1, criteria = {}, status = 'IN_PROGRESS', sharedSample = false, resolvedRules = true, installSelectionEvidence = true, installOverrideRequests = true, installInstrumentImports = true, installSampleContainers = true, installControlCharts = true, installOrderRevisions = true, fixedWindowPolicy = criteria.lrmMode !== 'CONTROL_CHART' && criteria.lrmPerBatch !== 0 } = {}) {
     const labId = randomUUID(), analysisCode = `QC-GATE-${randomUUID()}`, username = 'system:fixture';
-    const historical = beforeGuards({ actor: username, schemaVariant: 'PRE_1_3_SAMPLE_CODES', relatedRows: {
+    const historical = beforeGuards({ actor: username, ...(managedStartup ? { installWorkflowStateGuards: true } : { schemaVariant: 'PRE_1_3_SAMPLE_CODES' }), relatedRows: {
         Lab: [{ id: labId, code: labId, name: 'QC gate fixture', country: 'TEST', updatedAt: Date.now() }],
         User: [{ id: username, username, email: 'qc-gate@example.test', password: 'fixture', role: 'SUPER_ADMIN', updatedAt: Date.now() }]
     } });
     const { file } = historical;
-    historical.applyPendingMigration({ migration: 'SAMPLE_CODES' });
-    const connection = new Database(file, { fileMustExist: true });
-    try { connection.exec('CREATE TABLE "_schema_migrations" ("id" TEXT PRIMARY KEY NOT NULL,"appliedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,"details" TEXT)'); }
-    finally { connection.close(); }
+    if (!managedStartup) {
+        historical.applyPendingMigration({ migration: 'SAMPLE_CODES' });
+        const connection = new Database(file, { fileMustExist: true });
+        try { connection.exec('CREATE TABLE "_schema_migrations" ("id" TEXT PRIMARY KEY NOT NULL,"appliedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,"details" TEXT)'); }
+        finally { connection.close(); }
+    }
     for (const [script, method] of [['install_result_attempt_links', 'installResultAttemptLinks'], ['install_sample_holds', 'installSampleHolds'],
         ['install_reference_materials', 'installReferenceMaterials'], ['install_qc_rules', 'installQcRules'], ['install_qc_runs', 'installQcRuns'],
         ['install_qc_gate_scope', 'installQcGateScope'], ['install_proficiency_evidence', 'installProficiencyEvidence'],
         ['install_result_equipment_evidence', 'installResultEquipmentEvidence'],
         ['install_work_attempt_contract','installWorkAttemptContract'],
         ['install_work_repeat_contract','installWorkRepeatContract'],
-        ['install_nonconformity_reports','installNonconformityReports']]) require(`../../scripts/${script}`)[method]({ dbPath: file, apply: true });
+        ['install_nonconformity_reports','installNonconformityReports']]) {
+        if (managedStartup && script === 'install_proficiency_evidence')
+            require('../../scripts/bootstrap_pt_nonconformity').bootstrapPtNonconformity({ dbPath: file, apply: true });
+        require(`../../scripts/${script}`)[method]({ dbPath: file, apply: true });
+    }
     if (installSelectionEvidence) require('../../scripts/install_reported_value_selections').installReportedValueSelections({ dbPath: file, apply: true });
     require('../../scripts/install_batch_reagent_lots').installBatchReagentLots({ dbPath: file, apply: true });
     if (installOverrideRequests) require('../../scripts/install_result_override_requests').installResultOverrideRequests({ dbPath: file, apply: true });

@@ -1,4 +1,10 @@
 #!/usr/bin/env node
+// The optional startup context must not become a default CLI/image-copy dependency.
+function openReadonlyDatabase(Database, target, options, startupContext) {
+    return startupContext
+        ? require('../utils/startupReadinessContext').openReadonlyDatabase(Database, target, options, startupContext)
+        : new Database(target, options);
+}
 const fs=require('node:fs'),path=require('node:path'),{createHash}=require('node:crypto'),Database=require('better-sqlite3');
 const {loadSampleAmendmentMigrationSource}=require('../services/sampleAmendmentMigrationSource');
 const MARKER='210_sample_amendment_authorisation';
@@ -89,10 +95,10 @@ function snapshot(db,originalColumns){
   amendmentForeignKeys:db.prepare('PRAGMA foreign_key_list("SampleAmendment")').all()};
 }
 
-function installSampleAmendmentAuthorisation({dbPath,apply=false}={}){
+function installSampleAmendmentAuthorisation({dbPath,apply=false, startupContext}={}){
  if(typeof dbPath!=='string'||!dbPath.trim())throw fail('AMENDMENT_DATABASE_REQUIRED','Provide an explicit database path.');
  const target=path.resolve(dbPath),source=loadSampleAmendmentMigrationSource();
- const reader=new Database(target,{readonly:true,fileMustExist:true});let reviewed;
+ const reader=openReadonlyDatabase(Database, target, {readonly:true,fileMustExist:true}, apply ? undefined : startupContext);let reviewed;
  try{reviewed=reader.transaction(()=>classify(reader,source))();}finally{reader.close();}
  if(!apply||reviewed.classification==='COMPLETE_210')return{...reviewed,mode:apply?'NO_OP':'DRY_RUN',totalChanges:0,newAmendmentCount:0,newAttemptLinkCount:0,newWithdrawalCount:0,backfilledCount:0};
  const db=new Database(target,{fileMustExist:true,timeout:5000});
@@ -123,10 +129,10 @@ function installSampleAmendmentAuthorisation({dbPath,apply=false}={}){
   }).immediate();
  }finally{db.close();}
 }
-function assertAmendmentStartupReady(dbPath){
+function assertAmendmentStartupReady(dbPath, startupContext){
  if(typeof dbPath!=='string'||!dbPath.trim()||!fs.existsSync(dbPath))
   throw fail('AMENDMENT_DATABASE_REQUIRED','The lab database does not exist.');
- const outcome=installSampleAmendmentAuthorisation({dbPath});
+ const outcome=installSampleAmendmentAuthorisation({dbPath, startupContext});
  if(outcome.classification!=='COMPLETE_210')
   throw fail('AMENDMENT_STARTUP_REQUIRED','Run the reviewed amendment installer before starting the lab.');
  return outcome;

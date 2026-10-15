@@ -1,4 +1,10 @@
 #!/usr/bin/env node
+// The optional startup context must not become a default CLI/image-copy dependency.
+function openReadonlyDatabase(Database, target, options, startupContext) {
+    return startupContext
+        ? require('../utils/startupReadinessContext').openReadonlyDatabase(Database, target, options, startupContext)
+        : new Database(target, options);
+}
 const path = require('node:path'), Database = require('better-sqlite3');
 const { loadWorkRepeatMigrationSource } = require('../services/workRepeatMigrationSource');
 const { loadWorkAttemptMigrationSource } = require('../services/workAttemptMigrationSource');
@@ -42,10 +48,10 @@ function retainedRows(db, transformRow) {
         'Batch','BatchAnalyte','BatchPosition','BatchPositionWorkItem','BatchPositionReference','QcMeasurement','QcEvaluation','BatchDisposition','BatchEvent'],
         orderBy: 'id', transformRow });
 }
-function installWorkRepeatContract({ dbPath, apply = false } = {}) {
+function installWorkRepeatContract({ dbPath, apply = false, startupContext} = {}) {
     if (typeof dbPath !== 'string' || !dbPath.trim()) throw fail('WORK_REPEAT_DATABASE_REQUIRED', 'An explicit database path is required.');
     const target = path.resolve(dbPath), source = loadWorkRepeatMigrationSource();
-    const reader = new Database(target, { readonly: true, fileMustExist: true });
+    const reader = openReadonlyDatabase(Database, target, { readonly: true, fileMustExist: true }, apply ? undefined : startupContext);
     let before;
     try { before = reader.transaction(() => classify(reader))(); } finally { reader.close(); }
     if (!apply) return { ...before, mode: 'DRY_RUN', totalChanges: 0 };
@@ -77,8 +83,8 @@ function installWorkRepeatContract({ dbPath, apply = false } = {}) {
         }).immediate();
     } finally { db.close(); }
 }
-function assertWorkRepeatStartupReady(dbPath) {
-    const plan = installWorkRepeatContract({ dbPath });
+function assertWorkRepeatStartupReady(dbPath, startupContext) {
+    const plan = installWorkRepeatContract({ dbPath, startupContext });
     if (plan.classification !== 'COMPLETE') throw fail('WORK_REPEAT_NOT_INSTALLED', 'Install reviewed repeat evidence before startup.');
     return plan;
 }

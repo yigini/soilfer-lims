@@ -1,4 +1,10 @@
 #!/usr/bin/env node
+// The optional startup context must not become a default CLI/image-copy dependency.
+function openReadonlyDatabase(Database, target, options, startupContext) {
+    return startupContext
+        ? require('../utils/startupReadinessContext').openReadonlyDatabase(Database, target, options, startupContext)
+        : new Database(target, options);
+}
 const path = require('node:path');
 const fs = require('node:fs');
 const Database = require('better-sqlite3');
@@ -154,7 +160,7 @@ function postflight(db, expected) {
         guards: expected.triggers.map(({ name }) => name), marker: db.prepare('SELECT * FROM "_schema_migrations" WHERE id=?').get(MARKER) };
 }
 
-function installWorkflowStateGuards({ dbPath, apply = false, reviewedStatusSha256 } = {}) {
+function installWorkflowStateGuards({ dbPath, apply = false, reviewedStatusSha256, startupContext} = {}) {
     if (typeof dbPath !== 'string' || !dbPath.trim()) throw refusal('WORKFLOW_GUARDS_DATABASE_REQUIRED', 'An explicit database path is required.');
     if (reviewedStatusSha256 !== undefined && (!apply || !/^[a-f0-9]{64}$/.test(reviewedStatusSha256))) {
         throw refusal('WORKFLOW_GUARDS_ARGUMENT_INVALID', '--reviewed-status-sha256 requires --apply and an exact 64-hex reviewed fingerprint.');
@@ -162,13 +168,13 @@ function installWorkflowStateGuards({ dbPath, apply = false, reviewedStatusSha25
     // Validate both release sources before opening even a read-only connection.
     const sources = loadWorkflowMigrationSources(), expected = sourceShape();
     const target = path.resolve(dbPath);
-    const reader = new Database(target, { readonly: true, fileMustExist: true, timeout: 5000 });
+    const reader = openReadonlyDatabase(Database, target, { readonly: true, fileMustExist: true, timeout: 5000 }, apply ? undefined : startupContext);
     let plan;
     try { plan = reader.transaction(() => classify(reader, sources.evidence.sql, sources.guards.sql, sources.evidence.sha256, sources.guards.sha256, expected))(); }
     finally { reader.close(); }
     if (apply) assertReviewedStatusPlan(plan, reviewedStatusSha256);
     if (!apply || plan.classification === 'COMPLETE') {
-        const observer = new Database(target, { readonly: true, fileMustExist: true });
+        const observer = openReadonlyDatabase(Database, target, { readonly: true, fileMustExist: true }, apply ? undefined : startupContext);
         try { return { mode: apply ? 'NO_OP' : 'DRY_RUN', ...plan,
             totalChanges: observer.prepare('SELECT total_changes() AS n').get().n,
             ...(plan.classification === 'COMPLETE' && { postflight: postflight(observer, expected) }) }; }
@@ -225,10 +231,10 @@ function parseArguments(args) {
 
 // #179 pin 5992946755: the app process never installs a schema. Reuse the
 // installer's read-only classification and inventory, then require COMPLETE.
-function assertWorkflowStartupReady(dbPath) {
+function assertWorkflowStartupReady(dbPath, startupContext) {
     if (!fs.existsSync(dbPath)) throw refusal('DATABASE_NOT_FOUND',
         'The database does not exist. Set DATABASE_PATH to the existing lab file and follow the reviewed setup procedure.');
-    const plan = installWorkflowStateGuards({ dbPath });
+    const plan = installWorkflowStateGuards({ dbPath, startupContext });
     if (plan.classification !== 'COMPLETE') throw refusal('WORKFLOW_GUARDS_NOT_INSTALLED',
         'Run node scripts/install_workflow_state_guards.js --apply, or the reviewed legacy-status upgrade procedure when candidates exist.');
     assertReviewedStatusPlan(plan);

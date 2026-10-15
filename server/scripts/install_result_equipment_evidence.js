@@ -1,4 +1,10 @@
 #!/usr/bin/env node
+// The optional startup context must not become a default CLI/image-copy dependency.
+function openReadonlyDatabase(Database, target, options, startupContext) {
+    return startupContext
+        ? require('../utils/startupReadinessContext').openReadonlyDatabase(Database, target, options, startupContext)
+        : new Database(target, options);
+}
 const path = require('node:path'), Database = require('better-sqlite3');
 const { createHash } = require('node:crypto');
 const { loadResultEquipmentMigrationSource } = require('../services/resultEquipmentMigrationSource');
@@ -39,10 +45,10 @@ function classify(db, source) {
     return { classification, sources, bootstrapRebuild: [], backfillCount: 0, resultCount: db.prepare('SELECT count(*) n FROM "Result"').get().n,
         originalResultSha256: resultDigest(db) };
 }
-function installResultEquipmentEvidence({ dbPath, apply = false } = {}) {
+function installResultEquipmentEvidence({ dbPath, apply = false, startupContext} = {}) {
     if (typeof dbPath !== 'string' || !dbPath.trim()) throw fail('RESULT_EQUIPMENT_DATABASE_REQUIRED', 'An explicit database path is required.');
     const target = path.resolve(dbPath), source = loadResultEquipmentMigrationSource();
-    const reader = new Database(target, { readonly: true, fileMustExist: true });
+    const reader = openReadonlyDatabase(Database, target, { readonly: true, fileMustExist: true }, apply ? undefined : startupContext);
     let plan; try { plan = reader.transaction(() => classify(reader, { sql: source.sql, sha256: source.sha256 }))(); } finally { reader.close(); }
     if (!apply || plan.classification === 'COMPLETE') return { ...plan, mode: apply ? 'NO_OP' : 'DRY_RUN', totalChanges: 0 };
     const db = new Database(target, { fileMustExist: true, timeout: 5000 });
@@ -62,8 +68,8 @@ function installResultEquipmentEvidence({ dbPath, apply = false } = {}) {
         }).immediate();
     } finally { db.close(); }
 }
-function assertResultEquipmentStartupReady(dbPath) {
-    const plan = installResultEquipmentEvidence({ dbPath });
+function assertResultEquipmentStartupReady(dbPath, startupContext) {
+    const plan = installResultEquipmentEvidence({ dbPath, startupContext });
     if (plan.classification !== 'COMPLETE') throw fail('RESULT_EQUIPMENT_NOT_INSTALLED', 'Install reviewed Result equipment evidence before startup.');
     return plan;
 }

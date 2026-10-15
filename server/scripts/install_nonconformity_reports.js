@@ -1,4 +1,10 @@
 #!/usr/bin/env node
+// The optional startup context must not become a default CLI/image-copy dependency.
+function openReadonlyDatabase(Database, target, options, startupContext) {
+    return startupContext
+        ? require('../utils/startupReadinessContext').openReadonlyDatabase(Database, target, options, startupContext)
+        : new Database(target, options);
+}
 const path=require('node:path'), Database=require('better-sqlite3');
 const {loadNonconformityMigrationSource}=require('../services/nonconformityMigrationSource');
 const {loadProficiencyMigrationSource}=require('../services/proficiencyMigrationSource');
@@ -35,10 +41,10 @@ function classify(db) {
 function retainedFingerprint(db,transformRow) {
     return fingerprintRetainedTables(db,{excludeTables:['NonconformityReport','_schema_migrations'],transformRow});
 }
-function installNonconformityReports({dbPath,apply=false}={}) {
+function installNonconformityReports({dbPath,apply=false, startupContext}={}) {
     if(typeof dbPath!=='string'||!dbPath.trim())throw e.fail('NCR_DATABASE_REQUIRED','Provide an explicit database path.');
     const target=path.resolve(dbPath),source=loadNonconformityMigrationSource(),ptSource=loadProficiencyMigrationSource();
-    const reader=new Database(target,{readonly:true,fileMustExist:true});let plan;
+    const reader=openReadonlyDatabase(Database, target, {readonly:true,fileMustExist:true}, apply ? undefined : startupContext);let plan;
     try {plan=reader.transaction(()=>classify(reader))();}finally{reader.close();}
     if(!apply||plan.classification==='COMPLETE_193')return {...plan,mode:apply?'NO_OP':'DRY_RUN',totalChanges:0,backfilledCount:0};
     const db=new Database(target,{fileMustExist:true,timeout:5000});
@@ -73,8 +79,8 @@ function installNonconformityReports({dbPath,apply=false}={}) {
         }).immediate();
     }finally{db.close();}
 }
-function assertNonconformityStartupReady(dbPath) {
-    const plan=installNonconformityReports({dbPath});
+function assertNonconformityStartupReady(dbPath, startupContext) {
+    const plan=installNonconformityReports({dbPath, startupContext});
     if(plan.classification!=='COMPLETE_193')throw e.fail('NCR_NOT_INSTALLED','Install the complete reviewed NCR schema before startup.');
     return plan;
 }

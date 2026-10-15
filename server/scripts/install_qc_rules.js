@@ -1,4 +1,10 @@
 #!/usr/bin/env node
+// The optional startup context must not become a default CLI/image-copy dependency.
+function openReadonlyDatabase(Database, target, options, startupContext) {
+    return startupContext
+        ? require('../utils/startupReadinessContext').openReadonlyDatabase(Database, target, options, startupContext)
+        : new Database(target, options);
+}
 const fs = require('node:fs');
 const path = require('node:path');
 const Database = require('better-sqlite3');
@@ -54,10 +60,10 @@ function classify(db, source) {
     if (differences.length) throw fail('QC_RULE_INTEGRITY_REFUSED', 'Existing QC rules need review.', differences);
     return { classification, sources, guards: guards.map(row => row.name), indexes: indexes.map(row => row.name), counts: { rules: rows.length }, backfillCount: 0 };
 }
-function installQcRules({ dbPath, apply = false } = {}) {
+function installQcRules({ dbPath, apply = false, startupContext} = {}) {
     if (typeof dbPath !== 'string' || !dbPath.trim()) throw fail('QC_RULE_DATABASE_REQUIRED', 'An explicit database path is required.');
     const source = loadQcRuleMigrationSource(), target = path.resolve(dbPath);
-    const reader = new Database(target, { readonly: true, fileMustExist: true });
+    const reader = openReadonlyDatabase(Database, target, { readonly: true, fileMustExist: true }, apply ? undefined : startupContext);
     let plan;
     try { plan = reader.transaction(() => classify(reader, { sql: source.sql, sha256: source.sha256, oracleSha256: source.oracleSha256, freshTables: source.freshTables }))(); } finally { reader.close(); }
     if (!apply || plan.classification === 'COMPLETE') return { ...plan, mode: apply ? 'NO_OP' : 'DRY_RUN', totalChanges: 0 };
@@ -75,9 +81,9 @@ function installQcRules({ dbPath, apply = false } = {}) {
         }).immediate();
     } finally { db.close(); }
 }
-function assertQcRuleStartupReady(dbPath) {
+function assertQcRuleStartupReady(dbPath, startupContext) {
     if (!fs.existsSync(dbPath)) throw fail('DATABASE_NOT_FOUND', 'The lab database does not exist.');
-    const outcome = installQcRules({ dbPath });
+    const outcome = installQcRules({ dbPath, startupContext });
     if (outcome.classification !== 'COMPLETE') throw fail('QC_RULE_NOT_INSTALLED', 'Run the reviewed QC rule installer before starting the lab.');
     return outcome;
 }

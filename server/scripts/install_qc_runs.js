@@ -1,4 +1,10 @@
 #!/usr/bin/env node
+// The optional startup context must not become a default CLI/image-copy dependency.
+function openReadonlyDatabase(Database, target, options, startupContext) {
+    return startupContext
+        ? require('../utils/startupReadinessContext').openReadonlyDatabase(Database, target, options, startupContext)
+        : new Database(target, options);
+}
 const fs = require('node:fs');
 const path = require('node:path');
 const Database = require('better-sqlite3');
@@ -48,11 +54,11 @@ function bootstrapDeferredTables(db, schemaSource, schema) {
     }
     return ['QcMeasurement', 'BatchPositionReference'];
 }
-function installQcRuns({ dbPath, apply = false, planSha256 = null } = {}) {
+function installQcRuns({ dbPath, apply = false, planSha256 = null, startupContext} = {}) {
     if (typeof dbPath !== 'string' || !dbPath.trim()) throw fail('QC_RUN_DATABASE_REQUIRED', 'An explicit database path is required.');
     const source = loadQcRunMigrationSource(), target = path.resolve(dbPath);
     const schemaSource = { sql: source.sql, sha256: source.sha256, oracleSha256: source.oracleSha256, freshTables: source.freshTables };
-    const reader = new Database(target, { readonly: true, fileMustExist: true });
+    const reader = openReadonlyDatabase(Database, target, { readonly: true, fileMustExist: true }, apply ? undefined : startupContext);
     let schema, plan;
     try {
         reader.transaction(() => {
@@ -87,9 +93,9 @@ function installQcRuns({ dbPath, apply = false, planSha256 = null } = {}) {
         }).immediate();
     } finally { db.close(); }
 }
-function assertQcRunStartupReady(dbPath) {
+function assertQcRunStartupReady(dbPath, startupContext) {
     if (!fs.existsSync(dbPath)) throw fail('DATABASE_NOT_FOUND', 'The lab database does not exist.');
-    const outcome = installQcRuns({ dbPath });
+    const outcome = installQcRuns({ dbPath, startupContext });
     if (outcome.classification !== 'COMPLETE') throw fail('QC_RUN_NOT_INSTALLED', 'Run the reviewed normalized QC installer before starting the lab.');
     return outcome;
 }

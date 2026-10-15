@@ -1,4 +1,10 @@
 #!/usr/bin/env node
+// The optional startup context must not become a default CLI/image-copy dependency.
+function openReadonlyDatabase(Database, target, options, startupContext) {
+    return startupContext
+        ? require('../utils/startupReadinessContext').openReadonlyDatabase(Database, target, options, startupContext)
+        : new Database(target, options);
+}
 const fs = require('node:fs'), path = require('node:path'), { createHash } = require('node:crypto'), Database = require('better-sqlite3');
 const { loadOrderRevisionMigrationSource } = require('../services/orderRevisionMigrationSource');
 const { chooseOrderLine } = require('../services/orderLineResolutionService');
@@ -130,15 +136,20 @@ function impact(db) {
             ...(result.contextCause && {contextCause:result.contextCause})});
     }
     const approvedAmendmentSampleIds=[...new Set(prospectiveApprovedAmendmentRefusals.map(item=>item.sampleId))].sort();
-    const ownersBySample = new Map();
-    for (const item of db.prepare("SELECT id,sampleId,analysis,status FROM WorkItem WHERE analysis IN ('SAND','SILT','CLAY') AND status<>'WAIVED' ORDER BY id").iterate()) {
-        if (!ownersBySample.has(item.sampleId)) ownersBySample.set(item.sampleId, []);
+    const ownersBySample = new Map(), sampleTargets = new Map();
+    // Read fraction owners and their stored selections in one indexed join.
+    // Keep owner objects and first-owner ordering identical to the legacy report.
+    for (const row of db.prepare("SELECT w.id,w.sampleId,w.analysis,w.status,s.id AS storedSampleId,s.requiredAnalyses FROM WorkItem w LEFT JOIN Sample s ON s.id=w.sampleId WHERE w.analysis IN ('SAND','SILT','CLAY') AND w.status<>'WAIVED' ORDER BY w.id").iterate()) {
+        const item = { id: row.id, sampleId: row.sampleId, analysis: row.analysis, status: row.status };
+        if (!ownersBySample.has(item.sampleId)) {
+            ownersBySample.set(item.sampleId, []);
+            sampleTargets.set(item.sampleId, row.storedSampleId === null ? undefined : { requiredAnalyses: row.requiredAnalyses });
+        }
         ownersBySample.get(item.sampleId).push(item);
     }
     const incompleteTextureOwners = [], invalidStoredAnalyses = [];
-    const sampleTarget = db.prepare('SELECT requiredAnalyses FROM Sample WHERE id=?');
     for (const [sampleId, owners] of ownersBySample) {
-        const raw = sampleTarget.get(sampleId).requiredAnalyses;
+        const raw = sampleTargets.get(sampleId).requiredAnalyses;
         let target;
         try { target = normalizedSelection(typeof raw === 'string' ? JSON.parse(raw) : raw || [], true); }
         catch (error) {
@@ -179,14 +190,14 @@ function snapshot(db, prior = null) {
     return result;
 }
 
-function installOrderRevisions({ dbPath, apply = false } = {}) {
+function installOrderRevisions({ dbPath, apply = false, startupContext} = {}) {
     if (typeof dbPath !== 'string' || !dbPath.trim() || !fs.existsSync(dbPath)) throw fail('ORDER_REVISION_DATABASE_REQUIRED', 'Provide an existing explicit database path.');
     const target = path.resolve(dbPath), source = loadOrderRevisionMigrationSource();
     // This prerequisite's retained-copy classification never opens the original target.
-    const policy = require('./install_lab_policy_schema').assertLabPolicyStartupReady(target);
+    const policy = require('./install_lab_policy_schema').assertLabPolicyStartupReady(target, apply ? undefined : startupContext);
     const copy = policy.readonlySnapshot.path;
-    require('./install_control_charts').assertControlChartStartupReady(copy);
-    const reader = new Database(copy, { readonly: true, fileMustExist: true }); let reviewed, counts;
+    require('./install_control_charts').assertControlChartStartupReady(copy, apply ? undefined : startupContext);
+    const reader = openReadonlyDatabase(Database, copy, { readonly: true, fileMustExist: true }, apply ? undefined : startupContext); let reviewed, counts;
     try { reader.transaction(() => { reviewed = classify(reader, source); counts = impact(reader); })(); }
     finally { reader.close(); }
     if (JSON.stringify(fileHashes(target)) !== JSON.stringify(policy.readonlySnapshot.originalDbWalShmSha256)) {
@@ -221,8 +232,8 @@ function installOrderRevisions({ dbPath, apply = false } = {}) {
     } finally { db.close(); }
 }
 
-function assertOrderRevisionStartupReady(dbPath) {
-    const result = installOrderRevisions({ dbPath });
+function assertOrderRevisionStartupReady(dbPath, startupContext) {
+    const result = installOrderRevisions({ dbPath, startupContext });
     if (result.classification !== 'COMPLETE_209') throw fail('ORDER_REVISION_STARTUP_REQUIRED', 'Run the reviewed order-revision installer before starting the lab.');
     return result;
 }

@@ -1,4 +1,10 @@
 #!/usr/bin/env node
+// The optional startup context must not become a default CLI/image-copy dependency.
+function openReadonlyDatabase(Database, target, options, startupContext) {
+    return startupContext
+        ? require('../utils/startupReadinessContext').openReadonlyDatabase(Database, target, options, startupContext)
+        : new Database(target, options);
+}
 const fs = require('node:fs'), path = require('node:path'), Database = require('better-sqlite3');
 const { isDeepStrictEqual } = require('node:util');
 const { createHash } = require('node:crypto');
@@ -49,11 +55,11 @@ function assertPreserved(db, original) {
         } else if (!isDeepStrictEqual(columns, table.columns) || !isDeepStrictEqual(foreign, table.foreign)) throw fail('IMPORT_PRESERVATION_REFUSED', 'An original table shape changed.');
     }
 }
-function installInstrumentImports({ dbPath, apply = false } = {}) {
+function installInstrumentImports({ dbPath, apply = false, startupContext} = {}) {
     if (typeof dbPath !== 'string' || !dbPath.trim() || !fs.existsSync(path.resolve(dbPath))) throw fail('IMPORT_DATABASE_REQUIRED', 'Provide an explicit existing lab database.');
     const target = path.resolve(dbPath), source = loadInstrumentImportMigrationSource();
-    require('./install_calculation_templates').assertCalculationStartupReady(target);
-    const reader = new Database(target, { readonly: true, fileMustExist: true });
+    require('./install_calculation_templates').assertCalculationStartupReady(target, apply ? undefined : startupContext);
+    const reader = openReadonlyDatabase(Database, target, { readonly: true, fileMustExist: true }, apply ? undefined : startupContext);
     let planned; try { planned = reader.transaction(() => { integrity(reader); return classifyInstrumentImportSchema(reader, source); })(); } finally { reader.close(); }
     const zero = { totalChanges: 0, newTemplateCount: 0, newReceiptCount: 0, backfilledCount: 0 };
     if (!apply || planned.classification === 'COMPLETE_200') return { ...planned, mode: apply ? 'NO_OP' : 'DRY_RUN', ...zero };
@@ -79,8 +85,8 @@ function installInstrumentImports({ dbPath, apply = false } = {}) {
         }).immediate();
     } finally { db.close(); }
 }
-function assertInstrumentImportStartupReady(dbPath) {
-    const outcome = installInstrumentImports({ dbPath });
+function assertInstrumentImportStartupReady(dbPath, startupContext) {
+    const outcome = installInstrumentImports({ dbPath, startupContext });
     if (outcome.classification !== 'COMPLETE_200') throw fail('IMPORT_STARTUP_REQUIRED', 'Run the reviewed instrument import installer before starting the lab.');
     return outcome;
 }

@@ -1,4 +1,10 @@
 #!/usr/bin/env node
+// The optional startup context must not become a default CLI/image-copy dependency.
+function openReadonlyDatabase(Database, target, options, startupContext) {
+    return startupContext
+        ? require('../utils/startupReadinessContext').openReadonlyDatabase(Database, target, options, startupContext)
+        : new Database(target, options);
+}
 const fs=require('node:fs'),path=require('node:path'),{createHash}=require('node:crypto'),Database=require('better-sqlite3');
 const {loadSampleContainerMigrationSource}=require('../services/sampleContainerMigrationSource');
 const MARKER='206_sample_containers',TABLE='SampleContainer',COUNTER='ContainerSequence';
@@ -67,11 +73,11 @@ function snapshot(db){
  }
  return tables;
 }
-function installSampleContainers({dbPath,apply=false}={}){
+function installSampleContainers({dbPath,apply=false, startupContext}={}){
  if(typeof dbPath!=='string'||!dbPath.trim())throw fail('SAMPLE_CONTAINER_DATABASE_REQUIRED','Provide an explicit database path.');
  const target=path.resolve(dbPath),source=loadSampleContainerMigrationSource();
- require('./install_instrument_imports').assertInstrumentImportStartupReady(target);
- const reader=new Database(target,{readonly:true,fileMustExist:true});let reviewed;
+ require('./install_instrument_imports').assertInstrumentImportStartupReady(target, apply ? undefined : startupContext);
+ const reader=openReadonlyDatabase(Database, target, {readonly:true,fileMustExist:true}, apply ? undefined : startupContext);let reviewed;
  try{reviewed=reader.transaction(()=>classify(reader,source))();}finally{reader.close();}
  if(!apply||reviewed.classification==='COMPLETE_206')return{...reviewed,mode:apply?'NO_OP':'DRY_RUN',totalChanges:0,backfilledCount:0};
  const db=new Database(target,{fileMustExist:true,timeout:5000});
@@ -93,10 +99,10 @@ function installSampleContainers({dbPath,apply=false}={}){
   }).immediate();
  }finally{db.close();}
 }
-function assertSampleContainerStartupReady(dbPath){
+function assertSampleContainerStartupReady(dbPath, startupContext){
  if(typeof dbPath!=='string'||!dbPath.trim()||!fs.existsSync(dbPath))
   throw fail('SAMPLE_CONTAINER_DATABASE_REQUIRED','The lab database does not exist.');
- const outcome=installSampleContainers({dbPath});
+ const outcome=installSampleContainers({dbPath, startupContext});
  if(outcome.classification!=='COMPLETE_206')
   throw fail('SAMPLE_CONTAINER_STARTUP_REQUIRED','Run the reviewed sample container installer before starting the lab.');
  return outcome;
