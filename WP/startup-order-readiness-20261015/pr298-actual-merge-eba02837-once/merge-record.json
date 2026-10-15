@@ -1,0 +1,45 @@
+{
+  "observedUtc": "2026-10-15T16:51:02.564286+00:00",
+  "status": "MERGED_ACTUAL_AUDITED_SOURCE_ONCE",
+  "pr": 298,
+  "sourceHead": "eba02837eaa2ab797cad0572fecada686f660346",
+  "sourceTree": "676b01e71211786d1aeace50f19a0b2c9f9c482e",
+  "priorMain": "cde8c8896f5f9d5f1ab07b0ae16b1a765e0a6367",
+  "actualMerge": "be8379745bdfae52ce46496ff26514dc7d729640",
+  "mergedAt": "2026-10-15T16:50:55Z",
+  "parents": [
+    "cde8c8896f5f9d5f1ab07b0ae16b1a765e0a6367",
+    "eba02837eaa2ab797cad0572fecada686f660346"
+  ],
+  "mergedTreeEqualsAuditedSource": true,
+  "actualAuditCommentId": 6195167175,
+  "actualAuditEvidenceCommit": "7745763154d1ce5003245e884cfcc22ad221f55d",
+  "prCi": 38738769335,
+  "closingIssuesReferences": [],
+  "deploymentIssuesStillOpen": [
+    206,
+    214,
+    209
+  ],
+  "all1333FrozenInputsUnchanged": true,
+  "all36SourceBindingsVerified": true,
+  "mainCi": [
+    {
+      "id": 38772398721,
+      "head": "be8379745bdfae52ce46496ff26514dc7d729640",
+      "event": "push",
+      "attempt": 1,
+      "status": "queued",
+      "conclusion": null,
+      "url": "https://github.com/yigini/soilfer-lims/actions/runs/38772398721"
+    }
+  ],
+  "mainCiLogsCollected": false,
+  "mainCiPassClaimed": false,
+  "nativeAcknowledgementSent": false,
+  "messagesSent": 0,
+  "productionOperations": 0,
+  "deploymentPerformed": false,
+  "buildOrProofPerformed": false,
+  "nextBoundary": "Observe ONE automatic main push CI, never dispatch/retry. On actual complete green retain full originals. NEW app image/tooling all-hash review/R4 fresh computed requirement PLUS10GB before EACH build/proof/NEW proof root; never cde8/B5/100000 retry. R1 no proofDB removal pendingYY; all science/refusal/report/hash/copyrace/600/805/forward-only/no103/history/human guards remain."
+}
