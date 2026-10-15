@@ -1,0 +1,70 @@
+{
+  "closedUtc": "2026-10-15T18:36:16.098416+00:00",
+  "head": "be8379745bdfae52ce46496ff26514dc7d729640",
+  "tree": "676b01e71211786d1aeace50f19a0b2c9f9c482e",
+  "scope": "STARTUP_PERFORMANCE_NEW_APP_BUILD_ONLY_NO_DATABASE_CONNECTION_OR_VOLUME",
+  "exitCode": 0,
+  "error": "Physical measurement failed; no estimate or replay",
+  "elapsedSeconds": 303.47692349902354,
+  "freeBytesBefore": {
+    "/opt/lims": 32111185920,
+    "/var/lib/docker": 32111185920,
+    "/var/lib/containerd": 32111185920
+  },
+  "freeBytesAfter": {
+    "/opt/lims": 28620238848,
+    "/var/lib/docker": 28620238848,
+    "/var/lib/containerd": 28620238848
+  },
+  "reserveFloorBytes": 10556150894,
+  "buildAllocationReserveBytes": 4294967296,
+  "diskGrowth": {
+    "policy": "OWNED_BUILD_ROOT_AND_DISJOINT_DOCKER_AND_CONTAINERD_ALLOCATIONS",
+    "beforeAllocations": {
+      "/opt/lims/releases/workflow-batch-build-be837974-20261015T180000Z": {
+        "bytes": 41603072,
+        "device": 64769,
+        "exists": true,
+        "symlink": false
+      },
+      "/var/lib/docker/buildkit": {
+        "bytes": 94449664,
+        "device": 64769,
+        "exists": true,
+        "symlink": false
+      },
+      "/var/lib/docker/overlay2": {
+        "bytes": 0,
+        "device": 64769,
+        "exists": false,
+        "symlink": false
+      },
+      "/var/lib/docker/image": {
+        "bytes": 0,
+        "device": 64769,
+        "exists": false,
+        "symlink": false
+      },
+      "/var/lib/docker/containerd": {
+        "bytes": 0,
+        "device": 64769,
+        "exists": false,
+        "symlink": false
+      },
+      "/var/lib/containerd": {
+        "bytes": 39115993088,
+        "device": 64769,
+        "exists": true,
+        "symlink": false
+      }
+    },
+    "afterAllocations": null,
+    "refusal": "RuntimeError: Physical measurement failed; no estimate or replay"
+  },
+  "productionDatabaseMounts": 0,
+  "productionDatabaseConnections": 0,
+  "proofLaunches": 0,
+  "productionDeployments": 0,
+  "neverRetry": true,
+  "status": "FAILED_OR_RESERVE_REFUSED_BUILD_ONLY_RETAIN_ALL"
+}
