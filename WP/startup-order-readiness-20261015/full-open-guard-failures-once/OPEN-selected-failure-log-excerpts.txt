@@ -1,0 +1,144 @@
+
+  ● image-copy hashes are checked and the overlaid volume sources are never read
+
+    SyntaxError: Unexpected token 'o', "node:intern"... is not valid JSON
+        at JSON.parse (<anonymous>)
+
+      57 |     const before = fingerprint(file), child = cli(file, ['--apply', ...args], entry, preload);
+      58 |     expect(child.status).not.toBe(0);
+    > 59 |     const error = JSON.parse(child.stderr);
+         |                        ^
+      60 |     expect(error.error).toBe(code);
+      61 |     expect(fingerprint(file)).toBe(before);
+      62 |     expect(child.stdout).toBe('');
+
+      at parse (tests/contracts/audit_1_2_guard_installer.test.js:59:24)
+      at Object.assertRefusal (tests/contracts/audit_1_2_guard_installer.test.js:529:5)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: system:fixture (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User system:fixture (Lab: cfa2d914-25ac-4694-9025-ed5c67a3541d) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at ensureScope (services/qcRunViewService.js:159:22)
+      at linkReagentLot (services/batchReagentLotService.js:35:52)
+      at services/qcRunAuditService.js:106:28
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at inTransaction (services/workflowStateRules.js:188:60)
+      at Object.<anonymous> (tests/contracts/audit_4_1_reagent_lot_commands.test.js:152:5)
+
+
+  ● all handwritten runtime, script, seed and test Sample/WorkItem writes use central authorities
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 74
+
+    - Array []
+    + Array [
+    +   Object {
+    +     "code": "RAW_WORKFLOW_SQL",
+    +     "detail": "prepare",
+    +     "file": "tests/contracts/order_revision_impact_set_query.test.js",
+    +     "line": 33,
+    +   },
+    +   Object {
+    +     "code": "RAW_WORKFLOW_SQL",
+    +     "detail": "prepare",
+    +     "file": "tests/contracts/order_revision_impact_set_query.test.js",
+    +     "line": 34,
+    +   },
+    +   Object {
+    +     "code": "UNRESOLVED_WORKFLOW_SQL",
+    +     "detail": "prepare",
+    +     "file": "tests/contracts/order_revision_impact_set_query.test.js",
+    +     "line": 72,
+    +   },
+    +   Object {
+    +     "code": "UNRESOLVED_WORKFLOW_SQL",
+    +     "detail": "prepare",
+    +     "file": "tests/contracts/order_revision_impact_set_query.test.js",
+    +     "line": 76,
+    +   },
+    +   Object {
+    +     "code": "UNRESOLVED_WORKFLOW_SQL",
+    +     "detail": "pragma",
+    +     "file": "tests/contracts/startup_readiness_context.test.js",
+    +     "line": 45,
+    +   },
+    +   Object {
+    +     "code": "UNRESOLVED_WORKFLOW_SQL",
+    +     "detail": "prepare",
+    +     "file": "tests/contracts/startup_readiness_context.test.js",
+    +     "line": 47,
+    +   },
+    +   Object {
+    +     "code": "UNRESOLVED_WORKFLOW_SQL",
+    +     "detail": "exec",
+    +     "file": "tests/contracts/startup_readiness_context.test.js",
+    +     "line": 88,
+    +   },
+    +   Object {
+    +     "code": "RAW_WORKFLOW_SQL",
+    +     "detail": "prepare",
+    +     "file": "tests/contracts/startup_readiness_context.test.js",
+    +     "line": 169,
+    +   },
+    +   Object {
+    +     "code": "UNRESOLVED_WORKFLOW_SQL",
+    +     "detail": "pragma",
+    +     "file": "tests/contracts/startup_readiness_context.test.js",
+    +     "line": 188,
+    +   },
+    +   Object {
+    +     "code": "UNRESOLVED_WORKFLOW_SQL",
+    +     "detail": "pragma",
+    +     "file": "utils/startupReadinessContext.js",
+    +     "line": 58,
+    +   },
+    +   Object {
+    +     "code": "UNRESOLVED_WORKFLOW_SQL",
+    +     "detail": "pragma",
+    +     "file": "utils/startupReadinessContext.js",
+    +     "line": 61,
+    +   },
+    +   Object {
+    +     "code": "UNRESOLVED_WORKFLOW_SQL",
+    +     "detail": "prepare",
+    +     "file": "utils/startupReadinessContext.js",
+    +     "line": 71,
+    +   },
+    + ]
+
+      290 |     expect(deferred.length).toBeGreaterThan(0);
+      291 |     expect(deferred.every(finding => finding.file === 'scripts/rehearsal_docker_boundary.cjs' && finding.detail.includes('#245'))).toBe(true);
+    > 292 |     expect(violations.filter(finding => finding.code !== 'DEFERRED_SYNTHETIC_FAULT_FIXTURE')).toEqual([]);
+          |                                                                                               ^
+      293 | });
+      294 |
+      295 | test.each([
+
+      at Object.toEqual (tests/security/audit_1_2_state_writes.test.js:292:95)

@@ -1,0 +1,104 @@
+{
+  "status": "OPEN_RUN_OBSERVED_SUITE_FAILURES_NOT_TERMINAL_TOTALS",
+  "observedUtc": "2026-10-15T11:34:35.928664+00:00",
+  "session": 76923,
+  "helper": "verify-startup-context-full-ordinary-once.py",
+  "expectedSuites": 373,
+  "expectedTests": 5672,
+  "sourceFrozenUnchanged": true,
+  "observedHeaders": 35,
+  "observedFailHeaders": [
+    "FAIL tests/contracts/audit_1_2_guard_installer.test.js (29.472 s)",
+    "FAIL tests/security/audit_1_2_state_writes.test.js (11.086 s)"
+  ],
+  "failureNames": [
+    "image-copy hashes are checked and the overlaid volume sources are never read",
+    "all handwritten runtime, script, seed and test Sample/WorkItem writes use central authorities"
+  ],
+  "scannerFindingsParsedDerivedNotFullOriginalReport": [
+    {
+      "code": "RAW_WORKFLOW_SQL",
+      "detail": "prepare",
+      "file": "tests/contracts/order_revision_impact_set_query.test.js",
+      "line": 33
+    },
+    {
+      "code": "RAW_WORKFLOW_SQL",
+      "detail": "prepare",
+      "file": "tests/contracts/order_revision_impact_set_query.test.js",
+      "line": 34
+    },
+    {
+      "code": "UNRESOLVED_WORKFLOW_SQL",
+      "detail": "prepare",
+      "file": "tests/contracts/order_revision_impact_set_query.test.js",
+      "line": 72
+    },
+    {
+      "code": "UNRESOLVED_WORKFLOW_SQL",
+      "detail": "prepare",
+      "file": "tests/contracts/order_revision_impact_set_query.test.js",
+      "line": 76
+    },
+    {
+      "code": "UNRESOLVED_WORKFLOW_SQL",
+      "detail": "pragma",
+      "file": "tests/contracts/startup_readiness_context.test.js",
+      "line": 45
+    },
+    {
+      "code": "UNRESOLVED_WORKFLOW_SQL",
+      "detail": "prepare",
+      "file": "tests/contracts/startup_readiness_context.test.js",
+      "line": 47
+    },
+    {
+      "code": "UNRESOLVED_WORKFLOW_SQL",
+      "detail": "exec",
+      "file": "tests/contracts/startup_readiness_context.test.js",
+      "line": 88
+    },
+    {
+      "code": "RAW_WORKFLOW_SQL",
+      "detail": "prepare",
+      "file": "tests/contracts/startup_readiness_context.test.js",
+      "line": 169
+    },
+    {
+      "code": "UNRESOLVED_WORKFLOW_SQL",
+      "detail": "pragma",
+      "file": "tests/contracts/startup_readiness_context.test.js",
+      "line": 188
+    },
+    {
+      "code": "UNRESOLVED_WORKFLOW_SQL",
+      "detail": "pragma",
+      "file": "utils/startupReadinessContext.js",
+      "line": 58
+    },
+    {
+      "code": "UNRESOLVED_WORKFLOW_SQL",
+      "detail": "pragma",
+      "file": "utils/startupReadinessContext.js",
+      "line": 61
+    },
+    {
+      "code": "UNRESOLVED_WORKFLOW_SQL",
+      "detail": "prepare",
+      "file": "utils/startupReadinessContext.js",
+      "line": 71
+    }
+  ],
+  "installerObservedError": "JSON.parse(child.stderr) failed on node:internal output; full child stderr not printed by that assertion",
+  "installerSourceInspection": "isolated image-copy test copies only workflow installer + existing source loader, not new utils; new top-level startup context import is outside CLI error handling. Verify after closure; make new context dependency lazy ONLY for explicit context, keeping default CLI independent. No catch-and-ignore missing dependency fallback. Existing test unchanged.",
+  "requiredAfterClosure": [
+    "Retain complete CLOSED report/logs/exit/inventory/source hashes honestly before edits. Do not interrupt or replay current run.",
+    "Fix scanner findings in new performance code/tests, including earlier new order_revision_impact_set_query.test.js lines33/34/72/76. These findings are ACTUAL, not just a context-test concern. No stock scanner weakening or general runtime writer exemption. Closed declared owned fixture/helper patterns and existing central test authorities may be used; any new fixture allowance must be narrowly guarded, explicit and reviewable, with negative guards unchanged.",
+    "Prefer private pragma caching with literal integrity_check and foreign_key_check SQL; no opaque dynamic SQL forwarding. Keep normal method binding for readonly prepared statements. Alternatively explicit shared-check functions with private WeakMap, preserving owner refusal branches.",
+    "Fix default copied CLI dependency loading lazily; then add the WAL-mode and earlier pinned-order-snapshot race cases recorded in private-context-review-followups-while-full-open.json.",
+    "Keep original policy/chart/order tests and stock assertions unchanged. Use new named source/test successors; full source PR, CI, build and proof remain unqualified."
+  ],
+  "productionOperations": 0,
+  "cleanupReplayed": false,
+  "appPrReady": false
+}
