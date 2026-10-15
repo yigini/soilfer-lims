@@ -1,0 +1,11 @@
+{
+  "status": "TOOL_OUTPUT_TRANSCRIPTION_LOCAL_RETAINER_REFUSAL_BEFORE_MUTATION",
+  "exitCode": 1,
+  "error": "RuntimeError: Wrong root or selected terminal evidence",
+  "cause": "Guard refused any partial selected JSON although only terminal receipt/refusal should be excluded; carried inputs, derived healthcheck and reserve were present.",
+  "sourceUnchanged": true,
+  "remoteOperations": 0,
+  "readmeModified": false,
+  "indexCreated": false,
+  "originalHelper": "WP/backlog-resume-20261013/retain-startup-forward-090000-opening-once.py"
+}

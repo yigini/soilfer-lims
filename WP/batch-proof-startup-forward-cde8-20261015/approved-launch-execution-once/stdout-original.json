@@ -1,0 +1,2 @@
+{"unit": "lims-workflow-batch-startup-forward-cde8c889-20261015t090000z", "root": "/opt/lims/releases/workflow-batch-startup-forward-cde8c889-20261015T090000Z", "launchExitCode": 0, "stdout": "", "stderr": "Running as unit: lims-workflow-batch-startup-forward-cde8c889-20261015t090000z.service\n", "proofComplete": false, "neverReplay": true}
+
