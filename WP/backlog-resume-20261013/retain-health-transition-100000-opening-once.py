@@ -1,0 +1,34 @@
+"""Retain the actual one-time startup launch and first OPEN observation."""
+import json,pathlib,subprocess,sys
+REPO=pathlib.Path(__file__).resolve().parents[2];S=REPO/'WP/batch-proof-health-transitions-cde8-20261015';BASE='00410e14468a6824673c6f989a050bffcf6de25d'
+sys.path.insert(0,str(S))
+from proof_contract import *
+from proof_budget import capacity_gate
+from prepare_proof import raw_git
+def cmd(*a):return subprocess.check_output(a,cwd=REPO)
+require(cmd('git','rev-parse','HEAD').decode().strip()==BASE and not cmd('git','diff','--cached','--name-only').strip(),'Writer/staging moved')
+require(cmd('git','ls-remote','origin','refs/heads/audit/release-eb6de2e8').decode().split()[0]==BASE,'Remote moved')
+o=exact_json((S/'first-proof-100000-first-observation-once/stdout-original.json').read_bytes())
+p=dict(l.split('=',1) for l in o['systemctlOriginal'].splitlines() if '=' in l)
+require(p['ActiveState']=='active' and p['SubState']=='running' and p['InvocationID']=='e8e4806968d748fc862d465491a691e2' and p['MemoryMax']=='805306368' and p['MemorySwapMax']=='0' and p['RuntimeMaxUSec']=='1h 30min','Opening differs')
+require(o['root']==str(ROOT) and not any(n in o['closedImmutableSelectedJson'] for n in ['proof-receipt.json','proof-terminal-refusal.json']),'Wrong root or selected terminal evidence')
+capacities={}
+for n in ['metadata-capacity-before-root','metadata-capacity-immediately-before-unit']:
+ v=exact_json((S/('proof-launch-'+ROOT_NAME)/(n+'-stdout.log')).read_bytes());capacity_gate(v);capacities[n]=v
+out=S/'first-proof-100000-opening-index.json';require(not out.exists(),'Consumed opening retainer')
+lead='## 2026-10-15 actual100000 health-transition proof launchedONCE / OPEN09:08:53.326416UTC\n\nActuala748b9dc/SourcePASS6188457144 retained10rawf671adcc/one40filepackage48raw00410e14. ONE100000unit started09:08:40UTC/invocatione8e4806968d748fc862d465491a691e2. Bothfreshmetadata-capacitygatesPASS:BEFOREROOT09:08:14.980763UTCfree31945965568/immediatelyBEFOREunit09:08:39.972392free31938379776/all3FS/required31768290414/T563326976/A5787648/N24/30equiv25percentmin0/tablec74e17c1. Freshall12source/newPASS/currentappmainCI3auditsmerges/nolaterfailure/unusedrootunit passed. ActualreadonlyOPEN09:08:53active/running/45files/Current113725440Peak113725440 OPENONLY/MemoryMax805306368Swap0Runtime90min/no selectedterminalJSON/no startupresult/healthpoll yet. WholeproofNOTcomplete/NOT_RELEASE_QUALIFIED. OneREMOTEcontrolleractive/no localrunnerretainer. ROOTunitPASSpackagehelpersCONSUMEDneverreplayretrycleanup. NEXTreasonableinterval NEWuniqueobserver200000filebound/compacthealthtransitioncountsummaryONLY SAMErootunit. ActualCLOSEDreceiptORfailure/fulljournal/systemctl/packagehashes/stablehashinventory/alloriginalJSONlogs/FULLhealthpolls/allhistorical+newownedSTOPPEDcontainers/safeNORMALmetadata/existingphysicalaccounting retainhonestlyNEWuniqueclosedretainer/no liveSQL/DBfetch/newdu/proofreplay. DoNOTinferPASSfromactiveResultsuccess/ExecMainStatus0.\n\nScopeTWOnewindependentordinaryjobsOFFstartsONLY/from080000installed209backup+recorded11242/070000assets/hashstatinputs/postcopyBEFOREstart/eachsealclosure rechecks/no oldSQL/newproductionsnapshot/installerspolicyimpactreplay. ExactderivedComposehealth30s10s3start30s/unhealthyobservationallowed/everypoll0400FULLStateHealth.LogFailingStreakUTCelapsed/transitions/firsthealthy+unhealthytiming/HARD600afterALLHTTP/full27NOOP0+26READY0/HTTP200200401/fullstoppedequality mandatory. Missingunknown/exitedrestartingdeadOOM/configmismatch/deadlineSTOP. N24/30/25percentmin0explicit6188190365/3assets/floor10556150894/logs4GiB/500MBdu-x/ASTruntimeclaims/remainingbudget/physicalcaps/allretention/memory805blankheapSwap0/readiness600unit5400headroom60+600/gate600/YYpins/science/forwardonlyno103humanhistory hold. AfterANYentrypointattempt evenNOOPfailure onlyseparatelyauditedforwardfix/no retry. JobsONnaturalintake+broadpostflights/exactkitfreshsingleusegate later. QualifiedB5c03B1/NORMALhealthy959d7a8109/appcde8CI38636615469SUCCESS3705649/3appaudits unchanged. Allold090000080000070000failedrootsrawcontainersimmutable;080000accepted21420911241then11242/zero209causes/chart8060contexts10labs remainbound. YYreviewedgroupa5roots3979431936Blist1f871bbc offeredYY/rawforensiclossplain/cardUNANSWEREDbyagent/no actualYYcleanupapprovalobserved/0deletedmovedpruned. No duplicateACK/native/request/notice. Samewriterbranch/noagents/newchat/worktree/checkout/concurrentwriter/broadstage/resetclean/unrelateddirt.\n\n'
+readme=REPO/'WP/audit-release-eb6de2e8/README.md';readme.write_bytes(lead.encode()+readme.read_bytes())
+paths=[]
+for n in ['approved-launch-execution-once','proof-launch-'+ROOT_NAME,'first-proof-100000-first-observation-once']:
+ paths.extend(sorted(x for x in (S/n).rglob('*') if x.is_file()))
+paths += [pathlib.Path(__file__),REPO/'WP/backlog-resume-20261013/execute-reviewed-health-transition-launch-once.py',REPO/'WP/backlog-resume-20261013/observe-health-transition-100000-first-boundary-readonly-once.py',readme]
+record={'status':'ACTUAL_ONCE_STARTUP_FORWARD_LAUNCHED_OPEN_NOT_COMPLETE','observedUtc':o['observedUtc'],'sourceCommit':'a748b9dc5d3e5309fe3ef2b5cf4a6c5e7d796ef2','actualSourcePass':6188457144,'root':o['root'],'unit':o['unit'],'invocation':p['InvocationID'],'limits':{'memoryMax':805306368,'swapMax':0,'runtimeSeconds':5400},'memoryCurrentAtOpen':p['MemoryCurrent'],'memoryPeakAtOpenNotFinal':p['MemoryPeak'],'capacityChecks':capacities,'startupResults':None,'terminalProofStatus':None,'jobsOnQualificationStillRequired':True,'neverReplay':True,'files':[{'path':x.relative_to(REPO).as_posix(),'bytes':x.stat().st_size,'sha256':sha(x.read_bytes())} for x in paths]}
+with out.open('xb') as f:f.write(canonical(record)+b'\n')
+paths.append(out);rels=[x.relative_to(REPO).as_posix() for x in paths];require(len(set(rels))==len(rels),'Duplicate paths')
+for start in range(0,len(rels),15):cmd('git','-c','core.autocrlf=false','-c','core.longpaths=true','add','-f','--',*rels[start:start+15])
+require(set(cmd('git','diff','--cached','--name-only').decode().splitlines())==set(rels),'Unowned staging');tree=cmd('git','write-tree').decode().strip()
+for x,r in zip(paths,rels):require(raw_git(tree,r)[0]==x.read_bytes(),'Staged raw differs')
+cmd('git','commit','-m','Retain one approved startup-only launch and actual090000 opening');head=cmd('git','rev-parse','HEAD').decode().strip()
+for x,r in zip(paths,rels):require(raw_git(head,r)[0]==x.read_bytes(),'Committed raw differs')
+cmd('git','push','origin','audit/release-eb6de2e8');require(cmd('git','ls-remote','origin','refs/heads/audit/release-eb6de2e8').decode().split()[0]==head,'Remote differs')
+print(json.dumps({'status':record['status'],'head':head,'verifiedOwnedBlobs':len(paths),'invocation':p['InvocationID'],'observedUtc':o['observedUtc'],'files':len(o['fileInventory'])}))
