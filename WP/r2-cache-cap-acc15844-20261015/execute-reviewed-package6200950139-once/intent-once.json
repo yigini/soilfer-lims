@@ -1,0 +1,22 @@
+{
+  "utc": "2026-10-15T19:58:28.500177+00:00",
+  "argv": [
+    "C:\\Users\\yigin\\AppData\\Local\\Programs\\Python\\Python312-arm64\\python.exe",
+    "-B",
+    "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\WP\\r2-cache-cap-acc15844-20261015\\prepare_r2.py",
+    "--source-head",
+    "a05c3ad10bb7c7e678abe91ce444b5f5dba24dd4",
+    "--source-review-id",
+    "6200950139"
+  ],
+  "sourceSha256": {
+    "r2_contract.py": "1ecf270e27fd1f08e090916da5184c3822fcd3adbd11d04de87d44c4dbe5ce4f",
+    "r2_cache.py": "3cc5d1daf6c1d9a7101c4f676c6c2dc866d0bc3e5d6cc9bb036913fe248e5a6c",
+    "prepare_r2.py": "38c50dca438a45cafa3b240ece9fc07027e2f9596110db46d206a08c3660dbd9",
+    "launch_r2.py": "1cdd074ff05d17e8b251e8c39311b1098f31f4bfc1e664715883262490a7a698",
+    "verify_r2.py": "295dfce8f831324e0e4fe142453be0709dbfbff4eb8c13d4265fed98c5cc22f8"
+  },
+  "neverReplay": true,
+  "hostConnections": 0,
+  "cacheOperations": 0
+}

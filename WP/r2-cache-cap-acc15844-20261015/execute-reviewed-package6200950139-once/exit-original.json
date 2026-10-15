@@ -1,0 +1,22 @@
+{
+  "closedUtc": "2026-10-15T19:58:48.011530+00:00",
+  "status": "APPROVED_R2_LOCAL_PACKAGE_PREPARED",
+  "exitCode": 0,
+  "error": null,
+  "sourceSha256Before": {
+    "r2_contract.py": "1ecf270e27fd1f08e090916da5184c3822fcd3adbd11d04de87d44c4dbe5ce4f",
+    "r2_cache.py": "3cc5d1daf6c1d9a7101c4f676c6c2dc866d0bc3e5d6cc9bb036913fe248e5a6c",
+    "prepare_r2.py": "38c50dca438a45cafa3b240ece9fc07027e2f9596110db46d206a08c3660dbd9",
+    "launch_r2.py": "1cdd074ff05d17e8b251e8c39311b1098f31f4bfc1e664715883262490a7a698",
+    "verify_r2.py": "295dfce8f831324e0e4fe142453be0709dbfbff4eb8c13d4265fed98c5cc22f8"
+  },
+  "sourceSha256After": {
+    "r2_contract.py": "1ecf270e27fd1f08e090916da5184c3822fcd3adbd11d04de87d44c4dbe5ce4f",
+    "r2_cache.py": "3cc5d1daf6c1d9a7101c4f676c6c2dc866d0bc3e5d6cc9bb036913fe248e5a6c",
+    "prepare_r2.py": "38c50dca438a45cafa3b240ece9fc07027e2f9596110db46d206a08c3660dbd9",
+    "launch_r2.py": "1cdd074ff05d17e8b251e8c39311b1098f31f4bfc1e664715883262490a7a698",
+    "verify_r2.py": "295dfce8f831324e0e4fe142453be0709dbfbff4eb8c13d4265fed98c5cc22f8"
+  },
+  "hostConnections": 0,
+  "cacheOperations": 0
+}

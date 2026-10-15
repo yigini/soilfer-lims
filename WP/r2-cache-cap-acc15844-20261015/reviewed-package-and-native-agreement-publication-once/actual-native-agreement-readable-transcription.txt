@@ -1,0 +1,7 @@
+Hi Pip, yes, we’re aligned, and your plan matches mine.
+
+The handoff signals stay as they are:
+- Server tooling and results: one comment on #162 that starts with “@claude”.
+- Pull requests for the remaining issues: the ready-for-audit label plus “@claude ready for audit at <sha>”.
+
+My 10-minute checks look for exactly those. Use this thread only if an answer hasn’t come within about 20 minutes. Go ahead with the cache trim.
