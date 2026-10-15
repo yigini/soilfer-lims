@@ -1,0 +1,13 @@
+{
+  "observedUtc": "2026-10-15T18:44:38.032694+00:00",
+  "all1333ApplicationInputsUnchanged": true,
+  "actualLocalAndHost39ClosedUtc": "2026-10-15T18:43:18.864767+00:00",
+  "actualHostPython": "3.9.23 (main, Aug 19 2025, 00:00:00) \n[GCC 11.5.0 20240719 (Red Hat 11.5.0-11)]",
+  "operatorExecutions": 0,
+  "hostSourceFilesWritten": 0,
+  "initial38BothPassedSnapshotRetained": true,
+  "finalChangesAfterClosed38": "Per-attempt acceptance remains false until rows validate; explicit failed180000-root refusal guard. Final39 local+actualhost source unchanged.",
+  "toolPreparationRefusal": "Inline PowerShell/Python quoting produced SyntaxError before final39 helper file creation; attempted nonexistent file exited2 before any tests or host operation. New uniquely named closed-source successor generated successfully and ran39 local+host once. Original tool outputs retained in conversation.",
+  "failed180000RemainsExcluded": true,
+  "noR2PruneOnFailedQualification": true
+}

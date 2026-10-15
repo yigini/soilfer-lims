@@ -1,0 +1,31 @@
+{
+  "status": "NEW_PROSPECTIVE_SOURCE_ONLY_NOT_APPROVED_OR_EXECUTED",
+  "predecessorSourceCommit": "2c0cebca0e9e191d2062c2f43756aa1d46e98c85",
+  "priorFailedBuildEvidenceAudit": "23e8dad8d6442321586b7d0bf4920c48a8681054",
+  "priorFailureSha256": "46d6cfa5b9214c3ecca68d293086f4b97dd3d00840378a17261738cf696d0217",
+  "proposedRoot": "/opt/lims/releases/workflow-batch-build-be837974-20261015T190000Z",
+  "sourceFiles": {
+    "batch_build_contract.py": {
+      "bytes": 25371,
+      "sha256": "1a59194ff3ebb80772f96130e454281185d3c77387f476d3da8f2158543c60c6"
+    },
+    "batch_build.py": {
+      "bytes": 15925,
+      "sha256": "db782e43e4d63442e998b581a6a47735ce9fb69fa606c74e226ce39674ae0050"
+    },
+    "prepare_batch_build.py": {
+      "bytes": 10083,
+      "sha256": "6af97b27c20525694d6431769aeb313ff6b9d88c52e668cc4317a4a04117ed7f"
+    },
+    "launch_batch_build.py": {
+      "bytes": 10426,
+      "sha256": "c00fcf7f57d86490c996c36d23719b436f25bc6063721afbcd8427dacb444b8a"
+    },
+    "verify_build_guards.py": {
+      "bytes": 24230,
+      "sha256": "faea587d647c314779576ee9069e2fdb766b5e3472f65d553ad222b5d9a86d0b"
+    }
+  },
+  "newBuildProofCleanupHostOperations": 0,
+  "notARetryOrAdoptionOf180000": true
+}
