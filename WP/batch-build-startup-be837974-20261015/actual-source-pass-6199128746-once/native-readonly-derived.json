@@ -1,0 +1,13 @@
+{
+  "observedWindow": "2026-10-15 18:26 UTC tool boundary; minute label only",
+  "app": "Claude_pzs8sxrjxfjjc!Claude",
+  "windowId": 7867734,
+  "target": "LIMS Audit / Lab workflow audit and plan",
+  "actualScreenshot": "Latest issue-count answer visible; right composer contains HUMAN DRAFT 669 with caret; left composer empty. No build PASS visible in the current viewport.",
+  "accessibilityAgreesHumanDraft": "document_text 669",
+  "nativeBuildPassReadClaimed": false,
+  "inputActivationNavigationMessages": 0,
+  "humanDraftPreserved": true,
+  "pixels": "Conversation tool output only, no local pixel artifact claimed",
+  "earlierReadAttempt": "Unsupported sky.get_app_state returned not-a-function; no input or state change; refreshed supported list_apps/get_window/get_window_state succeeded."
+}

@@ -1,0 +1,40 @@
+{
+  "head": "2c0cebca0e9e191d2062c2f43756aa1d46e98c85",
+  "files": {
+    "batch_build.py": {
+      "path": "WP/batch-build-startup-be837974-20261015/batch_build.py",
+      "mode": "100644",
+      "blob": "bc46a16a0039cc9c5fb8980b4f5363da505fb671",
+      "bytes": 13688,
+      "sha256": "17fae7713e60cfe2e3fe4c394ebd2c9715005adc4abf34481f685686e7de26ab"
+    },
+    "batch_build_contract.py": {
+      "path": "WP/batch-build-startup-be837974-20261015/batch_build_contract.py",
+      "mode": "100644",
+      "blob": "772b2092913a0256288d258d89b3e46434511163",
+      "bytes": 22451,
+      "sha256": "fc7d350be90df8e3e4254d3e0c7cd5749abc91cefda04ec085a8501c235383b9"
+    },
+    "launch_batch_build.py": {
+      "path": "WP/batch-build-startup-be837974-20261015/launch_batch_build.py",
+      "mode": "100644",
+      "blob": "3d8809f22939b71e359d3dc0651e9044e4396b8e",
+      "bytes": 10416,
+      "sha256": "6f355d087facbbd5cd7fa0a0d9623c1379329d23429854862a7eed50dd64896c"
+    },
+    "prepare_batch_build.py": {
+      "path": "WP/batch-build-startup-be837974-20261015/prepare_batch_build.py",
+      "mode": "100644",
+      "blob": "fefab73da7cc868637ca6c72e9b06244ef49cfc1",
+      "bytes": 9982,
+      "sha256": "00caeef399735d3ca9ed6cef6febd63dbfee69a8cee1981fd0bb25ec1d4dcb9f"
+    },
+    "verify_build_guards.py": {
+      "path": "WP/batch-build-startup-be837974-20261015/verify_build_guards.py",
+      "mode": "100644",
+      "blob": "15bd64976487d9f99a8b669c23dd93f7a815e5ef",
+      "bytes": 21544,
+      "sha256": "58238c64700d78352713ab9b6c3d43f7a82caab9bec061b40914f4c486a0ae4d"
+    }
+  }
+}
