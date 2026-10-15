@@ -1,0 +1,58 @@
+{
+  "status": "ACTUAL_TARGETED_METADATA_ONLY_SOURCE_PASS_RETAINED",
+  "sourceReviewId": 6181164638,
+  "toolingCommit": "8df9e1261647dcc8ba018c739bd606fe5291f1ca",
+  "imageEligibility": false,
+  "files": [
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/actual-targeted-source-pass-6181164638/actual-source-review-original.json",
+      "bytes": 7694,
+      "sha256": "dedecdb4d5eb90cc9bb60bf97be839264b47ee683baf05fa1dd94c71c5b7e7d4"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/actual-targeted-source-pass-6181164638/actual-source-review-readable.txt",
+      "bytes": 3928,
+      "sha256": "24bd8ea5dfd5c238b8a6e5a23d9c6a4e9b0382d408bb713c91db6c2bcb4600f1"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/actual-targeted-source-pass-6181164638/current-main-original.json",
+      "bytes": 336,
+      "sha256": "8ab38fb8db0993cd672bbb2e6bf3b6ca8d124087fb841ecc97bad4fb1d9bfe89"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/actual-targeted-source-pass-6181164638/independent-source-validation.json",
+      "bytes": 651,
+      "sha256": "b01ace23cbceaf27b9e3930e6305c558bb281ddaf27e473b4b961f0e777745ee"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/actual-targeted-source-pass-6181164638/main-ci-original.json",
+      "bytes": 12111,
+      "sha256": "b76e9a34b6be2aef115860d2280e850d14b16edb41c64ccafd0b474243e4f7e2"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/actual-targeted-source-pass-6181164638/reference-direction-original.json",
+      "bytes": 5195,
+      "sha256": "3e5ff7910985af8de6c8294efd76612e68c2956669e8fca7b1d3ea80d353340a"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/actual-targeted-source-pass-6181164638/scope-direction-original.json",
+      "bytes": 6613,
+      "sha256": "1a199ef0023c5ba2315d038de4f5797831679f3382933d50e34336b92ffa7ddb"
+    },
+    {
+      "path": "WP/batch-forward-metadata-cde8-20261014/actual-targeted-source-pass-6181164638/source-index-original.json",
+      "bytes": 1664,
+      "sha256": "af586d39ffe78963316eb1cc88e564f0a8e173f4663838699c98040a18e3476b"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/retain-targeted-metadata-source-pass-6181164638-once.py",
+      "bytes": 4802,
+      "sha256": "d03aaa9120932fe4a54f2d7dc437c0f722a93fcc4d6a6f0dd467af454af78076"
+    },
+    {
+      "path": "WP/audit-release-eb6de2e8/README.md",
+      "bytes": 422252,
+      "sha256": "77d5d6631e39798dbf3fe0af7a4e3e90b2292f339c4fe9254799c6bf5790a5bb"
+    }
+  ]
+}

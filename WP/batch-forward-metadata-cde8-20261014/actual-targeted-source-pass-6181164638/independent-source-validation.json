@@ -1,0 +1,18 @@
+{
+  "status": "ACTUAL_EXACT_TARGETED_METADATA_ONLY_PASS_VALIDATED",
+  "sourceReviewId": 6181164638,
+  "reviewUtc": "2026-10-15T00:00:00Z",
+  "toolingCommit": "8df9e1261647dcc8ba018c739bd606fe5291f1ca",
+  "fiveRawSourceHashesVerified": true,
+  "completeCatalogueNoTruncation": true,
+  "exactCandidateChainSelection": true,
+  "imageEligibility": false,
+  "metadataCollectorsRun": 0,
+  "imageAdoptionReceipts": 0,
+  "proofLaunches": 0,
+  "productionDeployments": 0,
+  "laterAttributionMustSeparateOlderBaseLayers": true,
+  "missingBeforeStateUnknown": true,
+  "residualAtLeast500MBStillStop": true,
+  "validatedUtc": "2026-10-15T00:01:26.728770+00:00"
+}
