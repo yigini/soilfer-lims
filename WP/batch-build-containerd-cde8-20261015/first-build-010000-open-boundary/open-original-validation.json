@@ -1,0 +1,18 @@
+{
+  "status": "ACTUAL_CORRECTED_BUILD_UNIT_OPEN_ACCOUNTING_PREFLIGHT",
+  "observedUtc": "2026-10-15T00:27:09.761955+00:00",
+  "sourceReviewId": 6181452519,
+  "toolingCommit": "6608548a58dd4bf581da4330f1cd7b0f68a86973",
+  "root": "/opt/lims/releases/workflow-batch-build-cde8c889-20261015T010000Z",
+  "unit": "lims-workflow-batch-build-cde8c889-20261015t010000z",
+  "actualInvocationId": "a856dfdc5dcf401698724f7ef9459933",
+  "actualMemoryMax": 805306368,
+  "actualMemorySwapMax": 0,
+  "actualRuntimeMax": "45min",
+  "newBuildStartedAtObservation": false,
+  "terminalResult": null,
+  "activeLogsCapturedAsClosed": false,
+  "originalFailureAndExcludedImageUnchanged": true,
+  "noProductionDatabaseConnection": true,
+  "neverReplay": true
+}

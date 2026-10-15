@@ -1,0 +1,1 @@
+{"unit": "lims-workflow-batch-build-cde8c889-20261015t010000z", "root": "/opt/lims/releases/workflow-batch-build-cde8c889-20261015T010000Z", "launchExitCode": 0, "stdout": "", "stderr": "Running as unit: lims-workflow-batch-build-cde8c889-20261015t010000z.service\n", "buildComplete": false, "databaseConnections": 0}

@@ -1,0 +1,15 @@
+{
+  "startedUtc": "2026-10-15T00:25:55.314419+00:00",
+  "status": "LAUNCH_ATTEMPTED_ONCE",
+  "scope": "BUILD_ONLY_NO_DATABASE_CONNECTION_OR_VOLUME",
+  "root": "/opt/lims/releases/workflow-batch-build-cde8c889-20261015T010000Z",
+  "unit": "lims-workflow-batch-build-cde8c889-20261015t010000z",
+  "head": "cde8c8896f5f9d5f1ab07b0ae16b1a765e0a6367",
+  "sourceReviewId": 6181452519,
+  "toolingCommit": "6608548a58dd4bf581da4330f1cd7b0f68a86973",
+  "neverRetry": true,
+  "productionDatabaseMounts": 0,
+  "productionDatabaseConnections": 0,
+  "proofLaunches": 0,
+  "productionDeployments": 0
+}
