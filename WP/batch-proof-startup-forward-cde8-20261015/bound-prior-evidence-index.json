@@ -1,0 +1,126 @@
+{
+  "commit": "dd496777400e9c2f4f0ace73009f8cf8c86022d0",
+  "files": {
+    "prior-closed-retention.json": {
+      "path": "WP/batch-proof-forward-resume-cde8-20261015/first-proof-080000-closed-readiness-stop/closed-retention-record.json",
+      "bytes": 1835061,
+      "sha256": "6787b8fff691b49456d56a8ae821a6012e2405d954af50f8a605f43345e0e8f3",
+      "blob": "feb11c705d5f679715df16d5a10d3f008130307c"
+    },
+    "prior-proof-terminal-refusal.json": {
+      "path": "WP/batch-proof-forward-resume-cde8-20261015/first-proof-080000-closed-readiness-stop/remote-originals/proof-terminal-refusal.json",
+      "bytes": 417,
+      "sha256": "0b1f42c3be281c72d49bc4fa253a1350c0209ef86402691f727b021f44e32ed7",
+      "blob": "32012a7c6e747f84ded9ff7f11c9a11ada03187c"
+    },
+    "prior-proof-input.json": {
+      "path": "WP/batch-proof-forward-resume-cde8-20261015/first-proof-080000-closed-readiness-stop/remote-originals/proof-input.json",
+      "bytes": 5962,
+      "sha256": "93cfc115a11664d59653c42aa8bd98bc5476a6ac056390a7c46bdba414476b77",
+      "blob": "aed162b7302dee5ebaf1cb5c9fa953fc0a0c7c78"
+    },
+    "prior-tooling-source-index.json": {
+      "path": "WP/batch-proof-forward-resume-cde8-20261015/first-proof-080000-closed-readiness-stop/remote-originals/tooling-source-index.json",
+      "bytes": 1989,
+      "sha256": "5dc3a18ab29d38316ab9036e46ebbb000037a0a1762fd33201fed4eefa38bdae",
+      "blob": "fcf2559447f1458ff232cb3ecaa6091b0f2c2ba5"
+    },
+    "prior-source-review-original.json": {
+      "path": "WP/batch-proof-forward-resume-cde8-20261015/first-proof-080000-closed-readiness-stop/remote-originals/source-review-original.json",
+      "bytes": 13071,
+      "sha256": "49aebd26e81b7efb61dc810b0db11cc043b3ad60b57ce9fc8385589eff8418ca",
+      "blob": "f6e9505960936e43a6569f0717f02b34ff863034"
+    },
+    "prior-installed-209--seal.json": {
+      "path": "WP/batch-proof-forward-resume-cde8-20261015/first-proof-080000-closed-readiness-stop/remote-originals/installed-209/seal.json",
+      "bytes": 723,
+      "sha256": "596e52e63e7e6fd94f721ac98430e615bb5533890821ccb75c040a31db4721e0",
+      "blob": "56b92328a252577480724ae7f96ee49439df27eb"
+    },
+    "prior-installed-209--logical-state.json": {
+      "path": "WP/batch-proof-forward-resume-cde8-20261015/first-proof-080000-closed-readiness-stop/remote-originals/installed-209/logical-state.json",
+      "bytes": 336650,
+      "sha256": "dc3ddf079eba24a49dcfd8e5d52bdf6332e13fb23db801a0446beb63547d0565",
+      "blob": "30f5a5dc7ccf5d10ed1043f82eb79ee5f621d028"
+    },
+    "prior-installed-209--raw--copy-authority.json": {
+      "path": "WP/batch-proof-forward-resume-cde8-20261015/first-proof-080000-closed-readiness-stop/remote-originals/installed-209/raw/copy-authority.json",
+      "bytes": 306,
+      "sha256": "620d42091c9aaba58fcb3f7f19db2d62b1f4822c8b9317224d81663403a68cab",
+      "blob": "4a58ddd009dfa31ef5fac0b2c6eabc0f76e5a30b"
+    },
+    "prior-installed-209--reader--copy-authority.json": {
+      "path": "WP/batch-proof-forward-resume-cde8-20261015/first-proof-080000-closed-readiness-stop/remote-originals/installed-209/reader/copy-authority.json",
+      "bytes": 306,
+      "sha256": "66f4ee6e0e0cedd7190231183e01748577696612c4684aad3f5a046f48e3a45d",
+      "blob": "66d5b60b3354d8d8faaf10e72b54b8286a0ef8c3"
+    },
+    "prior-preservation-214.json": {
+      "path": "WP/batch-proof-forward-resume-cde8-20261015/first-proof-080000-closed-readiness-stop/remote-originals/preservation-214.json",
+      "bytes": 299,
+      "sha256": "f6876b66b608bdf17ce16f5bc7f590ebf14cc2e1f7d66aef89761732d1221776",
+      "blob": "e5eb5711acbd1e4a389c4e2c241b136c70f06e3c"
+    },
+    "prior-preservation-209.json": {
+      "path": "WP/batch-proof-forward-resume-cde8-20261015/first-proof-080000-closed-readiness-stop/remote-originals/preservation-209.json",
+      "bytes": 226,
+      "sha256": "aee36e8715cda6498af2fbe1b6f7f5a650d46bdbef2cfff30c2e47f7f5364956",
+      "blob": "6438398f0b67430ec439f761d620b04b91a647da"
+    },
+    "prior-stage-214.json": {
+      "path": "WP/batch-proof-forward-resume-cde8-20261015/first-proof-080000-closed-readiness-stop/remote-originals/stage-214.json",
+      "bytes": 3446,
+      "sha256": "21c0d8dcc5507416ffe89108d9b5bb3f2119d9a92706c4d0f1136625a12b927a",
+      "blob": "e3890c1846bb022acf275bdfcf988f4804f37252"
+    },
+    "prior-stage-209.json": {
+      "path": "WP/batch-proof-forward-resume-cde8-20261015/first-proof-080000-closed-readiness-stop/remote-originals/stage-209.json",
+      "bytes": 6145,
+      "sha256": "0212cfdd6d835a91d1008b5ad68f13fdfec370aea0527305c2f9b4ab3d74e3fb",
+      "blob": "6c5ac4fad000a8fca1e5ceff82228a33ec4f156a"
+    },
+    "prior-installation-result.json": {
+      "path": "WP/batch-proof-forward-resume-cde8-20261015/first-proof-080000-closed-readiness-stop/remote-originals/installation-result.json",
+      "bytes": 9778,
+      "sha256": "3101a3c716bfb6f151aa25ada7bd0f2c28806075c65d8f0c3463e89168ae119e",
+      "blob": "f5c8f71d4ec308efa2051885c05ee926c56c4b91"
+    },
+    "prior-actual-chart-impact.json": {
+      "path": "WP/batch-proof-forward-resume-cde8-20261015/first-proof-080000-closed-readiness-stop/remote-originals/actual-chart-impact.json",
+      "bytes": 1910004,
+      "sha256": "54a32e163f3d86e4866b81d149fe3d424d674ff2c47109e2b2075b4cd6965eed",
+      "blob": "bd660134197b757335ab82ea935d9b0c7a737abb"
+    },
+    "prior-actual-order-impact.json": {
+      "path": "WP/batch-proof-forward-resume-cde8-20261015/first-proof-080000-closed-readiness-stop/remote-originals/actual-order-impact.json",
+      "bytes": 4039,
+      "sha256": "7d447330484a85158a3f7fadd984f6ed0b4af98c2717562233903f3e6710bcb2",
+      "blob": "7642f540d0f5ebec80075a9ea00200ec81f9fe36"
+    },
+    "prior-assets-snapshot-handoff.json": {
+      "path": "WP/batch-proof-forward-resume-cde8-20261015/first-proof-080000-closed-readiness-stop/remote-originals/prior-assets-snapshot-handoff.json",
+      "bytes": 310931,
+      "sha256": "74dfd0c4536e9f5a8100d75087bcdf79c558ae17d516d729350708371b74da6d",
+      "blob": "9d0323f3cb7177adcfe42148ed44c029fd7491b6"
+    },
+    "prior-fresh-actual-baseline.json": {
+      "path": "WP/batch-proof-forward-resume-cde8-20261015/first-proof-080000-closed-readiness-stop/remote-originals/prior-fresh-actual-baseline.json",
+      "bytes": 436,
+      "sha256": "f58a2bdaba6873dd7c8f214473e53453ea0fbe932d5a20864a2d456f9549fb02",
+      "blob": "41f64fce2ee3c7d046a6aa1afcd3bea5d5867b5e"
+    },
+    "prior-carried-forward-inputs.json": {
+      "path": "WP/batch-proof-forward-resume-cde8-20261015/first-proof-080000-closed-readiness-stop/remote-originals/carried-forward-inputs.json",
+      "bytes": 1095,
+      "sha256": "a83aaed18573d20b7aeb24c626b2b89b70fce35edab05a53146e7c17ce53e134",
+      "blob": "d71fbf4d16c1d8eb67968f579d42505b14a016a6"
+    }
+  },
+  "scopeDirection": 6187223904,
+  "composePin": {
+    "path": "docker-compose.yml",
+    "bytes": 1214,
+    "sha256": "2c540b13af52ada8cf475ad8aed19757deafd2997bf1e60fc63848d6e5153226",
+    "blob": "4e5bfd31f6c0bcc52419f0a55f7f6edbb8f85eec"
+  }
+}

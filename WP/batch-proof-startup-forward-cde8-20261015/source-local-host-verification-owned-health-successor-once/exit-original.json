@@ -1,0 +1,39 @@
+{
+  "status": "PASS",
+  "localExitCode": 0,
+  "hostExitCode": 0,
+  "expectedTests": 170,
+  "sourceSha256Before": {
+    "launch_proof.py": "9e33ea86c16c4018a1a94991c6969323d16958bb4e5094219ddd2fdfd9ad708f",
+    "prepare_proof.py": "ef0f871e8a50ebfc02e0177c67460acc387e59303b12e02aba6143ea7db573bc",
+    "proof_budget.py": "1bbb4e83d714031cab8567dbca6db3904e7dfc2cd0bdaa92dc19831a2e1c389a",
+    "proof_contract.py": "4e49b45c1f29f07620119eb523844b01d6f5f270380bc055ef19aea655572f34",
+    "proof_disk.py": "d1b676dbd23bc9f88b51c222994639ac3c14b3b1b49f096d95eb24a7de2eab6d",
+    "proof_docker.py": "9ce41066fe2ff11e74dd48cc18be510801b1b8a02980711d699a57b31241d370",
+    "proof_files.py": "6bd7adb616218b8add259eaf61c2922cfc3d05d88e8dbae4dbf5dda386e1241c",
+    "proof_health.py": "b22d962158d9cc4a8fb2546b8c13e4de7640a9775defcfeccce33529ddebee9e",
+    "proof_inputs.py": "f520d79437a9ccd9debe3a9949bd71c912550d757523a313fecbfbdcd90f88dc",
+    "proof_startup.py": "cd1e9ef7eda33380dd477d59dbc35318b4afb710ed7b9440a9dd35a89e87f474",
+    "run_stopped_proof.py": "66742675a603d2f8be7efda176637b45c7469748a3f326388df997f8c10d64e0",
+    "verify_proof_guards.py": "af71eb5cf51e8a954b287b6477e7744ee4c7f8b0fc170433df72389da84bfc05"
+  },
+  "sourceSha256After": {
+    "launch_proof.py": "9e33ea86c16c4018a1a94991c6969323d16958bb4e5094219ddd2fdfd9ad708f",
+    "prepare_proof.py": "ef0f871e8a50ebfc02e0177c67460acc387e59303b12e02aba6143ea7db573bc",
+    "proof_budget.py": "1bbb4e83d714031cab8567dbca6db3904e7dfc2cd0bdaa92dc19831a2e1c389a",
+    "proof_contract.py": "4e49b45c1f29f07620119eb523844b01d6f5f270380bc055ef19aea655572f34",
+    "proof_disk.py": "d1b676dbd23bc9f88b51c222994639ac3c14b3b1b49f096d95eb24a7de2eab6d",
+    "proof_docker.py": "9ce41066fe2ff11e74dd48cc18be510801b1b8a02980711d699a57b31241d370",
+    "proof_files.py": "6bd7adb616218b8add259eaf61c2922cfc3d05d88e8dbae4dbf5dda386e1241c",
+    "proof_health.py": "b22d962158d9cc4a8fb2546b8c13e4de7640a9775defcfeccce33529ddebee9e",
+    "proof_inputs.py": "f520d79437a9ccd9debe3a9949bd71c912550d757523a313fecbfbdcd90f88dc",
+    "proof_startup.py": "cd1e9ef7eda33380dd477d59dbc35318b4afb710ed7b9440a9dd35a89e87f474",
+    "run_stopped_proof.py": "66742675a603d2f8be7efda176637b45c7469748a3f326388df997f8c10d64e0",
+    "verify_proof_guards.py": "af71eb5cf51e8a954b287b6477e7744ee4c7f8b0fc170433df72389da84bfc05"
+  },
+  "sourceUnchanged": true,
+  "closedUtc": "2026-10-15T08:06:57.885700+00:00",
+  "operators": 0,
+  "productionConnections": 0,
+  "hostFixturesRetained": true
+}

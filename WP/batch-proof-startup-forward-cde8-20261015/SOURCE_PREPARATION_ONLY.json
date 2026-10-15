@@ -1,0 +1,25 @@
+{
+  "status": "NEW_STARTUP_ONLY_SOURCE_GRAPH_PREPARED_NOT_YET_TESTED_PUBLISHED_OR_APPROVED",
+  "sourceDirection": 6187223904,
+  "priorEvidence": "dd496777400e9c2f4f0ace73009f8cf8c86022d0",
+  "root": "/opt/lims/releases/workflow-batch-startup-forward-cde8c889-20261015T090000Z",
+  "operationalExecutions": 0,
+  "productionMutations": 0,
+  "oldSourceChanged": false,
+  "newRootCreated": false,
+  "pythonFiles": [
+    "proof_budget.py",
+    "proof_contract.py",
+    "proof_files.py",
+    "proof_disk.py",
+    "proof_docker.py",
+    "proof_health.py",
+    "proof_inputs.py",
+    "proof_startup.py",
+    "run_stopped_proof.py",
+    "prepare_proof.py",
+    "launch_proof.py",
+    "verify_proof_guards.py"
+  ],
+  "next": "Complete health/input tests and local+host pure-guard verification; new exact all-hash source review before any operator."
+}

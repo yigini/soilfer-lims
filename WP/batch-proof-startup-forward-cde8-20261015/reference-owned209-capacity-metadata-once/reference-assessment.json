@@ -1,0 +1,55 @@
+{
+  "status": "REFERENCE_FIT_NOT_CURRENT_LAUNCH_AUTHORITY",
+  "actualMetadata": {
+    "metadataOnly": true,
+    "observedUtc": "2026-10-15T08:08:39.693551+00:00",
+    "databaseReserveBytes": 563326976,
+    "assetReserveBytes": 5787648,
+    "requiredBytes": 31768290414,
+    "dbEquivalents": 30,
+    "stageTableSha256": "c74e17c1f2e155673f3d91426086e0f96515e161442165c099c7c99269b9c5dc",
+    "freeBytes": {
+      "/opt/lims": 33108267008,
+      "/var/lib/docker": 33108267008,
+      "/var/lib/containerd": 33108267008
+    },
+    "productionContentOpens": 0,
+    "productionCopies": 0,
+    "sqlConnections": 0
+  },
+  "declaredTable": [
+    {
+      "stage": "startup-1",
+      "sites": {
+        "clone": 1,
+        "triple": 2,
+        "backup": 1,
+        "assets": 1,
+        "startup-policy-chain": 1
+      },
+      "dbTriples": 12,
+      "assetCopies": 1
+    },
+    {
+      "stage": "startup-2",
+      "sites": {
+        "clone": 1,
+        "triple": 2,
+        "backup": 1,
+        "assets": 1,
+        "startup-policy-chain": 1
+      },
+      "dbTriples": 12,
+      "assetCopies": 1
+    }
+  ],
+  "tableSha256": "c74e17c1f2e155673f3d91426086e0f96515e161442165c099c7c99269b9c5dc",
+  "N": 24,
+  "equivalents": 30,
+  "slackBytes": 1339976594,
+  "error": null,
+  "newRootCreated": false,
+  "operatorsExecuted": 0,
+  "productionSqlConnections": 0,
+  "freshBeforeRootAndBeforeUnitStillRequired": true
+}
