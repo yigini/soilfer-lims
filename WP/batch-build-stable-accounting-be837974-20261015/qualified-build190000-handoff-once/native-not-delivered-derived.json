@@ -1,0 +1,16 @@
+{
+  "source": "Conversation Computer Use tool output; screenshots remain only in conversation, no local pixel artifact claimed",
+  "observedUtcLabel": "2026-10-15 19:24-19:25 UTC tool boundary, minute label only",
+  "selectedReturnedApp": "Claude_pzs8sxrjxfjjc!Claude",
+  "selectedReturnedWindowId": 7867734,
+  "accessibility": "Returned prior LIMS Audit/Lab workflow text, empty composers and running labels",
+  "actualScreenshot": "Displayed a different browser app rather than the selected Claude conversation; screenshot and accessibility disagreed",
+  "nativeCurrentClaudeReadOrDeliveryClaimed": false,
+  "nativeBuildOutcomeHandoffSent": false,
+  "reason": "No current actual Claude target/composer could be confirmed from the screenshot; preserve human activity in the other app",
+  "inputActivationNavigationTypingMessagesCards": 0,
+  "lastActualNativeRead": "19:12 tool boundary confirmed the completed new review explanation6200145007",
+  "githubNoticeAlreadyDelivered": 6200455534,
+  "laterNativeHandoffOnlyAtMeaningfulFreshActualTargetEmptyComposerBoundary": true,
+  "neverDuplicateGithubNoticeOrApprovalAcknowledgement": true
+}

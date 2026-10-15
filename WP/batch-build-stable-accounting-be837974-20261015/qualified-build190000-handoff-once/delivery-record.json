@@ -1,0 +1,18 @@
+{
+  "status": "QUALIFIED_NEW_BUILD_RESULT_GIVEN_ONCE_GITHUB_NATIVE_DEFERRED",
+  "observedUtc": "2026-10-15T19:26:05.501327+00:00",
+  "commentId": 6200455534,
+  "commentUrl": "https://github.com/yigini/soilfer-lims/issues/162#issuecomment-6200455534",
+  "commentCreatedUtc": "2026-10-15T19:24:35Z",
+  "bundledSourcePassAcknowledgement": 6200145007,
+  "bundledYyRequestedClaudioNoteAcknowledgement": 6200229685,
+  "qualifiedBuildAudit": "5f86a1966af536f83a345ebdb02983bbe2a166ad",
+  "qualifiedReceiptSha256": "cd3a2757d8ecb0bf933f49231031eb7fb61eb5abaac17d05f3585c1baaf89f0a",
+  "image": "sha256:acc158447f5571068bf150fc0e8fa6f0889aeb38f9aec8be08978d903bd5be6a",
+  "all1333ApplicationAndFiveToolingSourcesUnchanged": true,
+  "freshMainCiAndAllFourAppAuditsAndRulePinsVerified": true,
+  "nativeHandoffSent": false,
+  "noNewSourceReviewRequestForUnimplementedR2Graph": true,
+  "next": "Actually implement complete bounded R2 source with meaningful local/host guards, publish, then request new exact source review before any cache operation; next image-bound proof tooling needs its own all-hash review/fresh R4/new root",
+  "newBuildsProofsCleanupProductionOperationsByThisRetainer": 0
+}
