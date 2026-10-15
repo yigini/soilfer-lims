@@ -1,0 +1,151 @@
+{
+  "status": "ACTUAL_CORRECTED_BUILD_SOURCE_REQUEST_NATIVE_RETAINED",
+  "requestId": 6181415046,
+  "toolingCommit": "6608548a58dd4bf581da4330f1cd7b0f68a86973",
+  "retainedUtc": "2026-10-15T00:21:12.072055+00:00",
+  "newSourceReview": null,
+  "imageEligibility": false,
+  "newExecutionAuthority": null,
+  "files": [
+    {
+      "path": "WP/batch-build-containerd-cde8-20261015/exact-source-review-request-6608548a/actual-fallback-direction-original.json",
+      "bytes": 6613,
+      "sha256": "1a199ef0023c5ba2315d038de4f5797831679f3382933d50e34336b92ffa7ddb"
+    },
+    {
+      "path": "WP/batch-build-containerd-cde8-20261015/exact-source-review-request-6608548a/actual-request-confirmed.json",
+      "bytes": 10999,
+      "sha256": "4fa9c6e4c41203baf63efe198f295c7bfc896234d345bf97a288ecae137f54f9"
+    },
+    {
+      "path": "WP/batch-build-containerd-cde8-20261015/exact-source-review-request-6608548a/actual-request-fresh-original.json",
+      "bytes": 10761,
+      "sha256": "8c0b4d9e62c6e5381b4e81e462f765eb356c008b9690cb8e807fa7d6a712f11e"
+    },
+    {
+      "path": "WP/batch-build-containerd-cde8-20261015/exact-source-review-request-6608548a/actual-review-request-body.txt",
+      "bytes": 9112,
+      "sha256": "abfa68690cf6104672a5552df1bfa76fc58e1ff2e568ecf0373717f23046785e"
+    },
+    {
+      "path": "WP/batch-build-containerd-cde8-20261015/exact-source-review-request-6608548a/excluded-metadata-analysis-original.json",
+      "bytes": 48734,
+      "sha256": "c2f4fc6d15d064f4e4a08255edbfd450494adb3f3625224ce7267550f66e6d25"
+    },
+    {
+      "path": "WP/batch-build-containerd-cde8-20261015/exact-source-review-request-6608548a/history-before-original.json",
+      "bytes": 1787446,
+      "sha256": "1d604c3c6c62f43cd6ebffefbbdc10aba6f3f821e9ee0b96b7b4d547ac3be9ce"
+    },
+    {
+      "path": "WP/batch-build-containerd-cde8-20261015/exact-source-review-request-6608548a/main-ci-original.json",
+      "bytes": 12111,
+      "sha256": "b76e9a34b6be2aef115860d2280e850d14b16edb41c64ccafd0b474243e4f7e2"
+    },
+    {
+      "path": "WP/batch-build-containerd-cde8-20261015/exact-source-review-request-6608548a/main-original.json",
+      "bytes": 336,
+      "sha256": "8ab38fb8db0993cd672bbb2e6bf3b6ca8d124087fb841ecc97bad4fb1d9bfe89"
+    },
+    {
+      "path": "WP/batch-build-containerd-cde8-20261015/exact-source-review-request-6608548a/native-actual-sent.txt",
+      "bytes": 2518,
+      "sha256": "2616f7f53dc3ea69eedf1ce289c4edaf2ef094153f9214e08d218e6ef6d9bf04"
+    },
+    {
+      "path": "WP/batch-build-containerd-cde8-20261015/exact-source-review-request-6608548a/native-delivery-record.json",
+      "bytes": 796,
+      "sha256": "0ef773599b48367ac0326aa460b1fe9490b4e7c9bbb9c1d8fd70ccdcc6c9a474"
+    },
+    {
+      "path": "WP/batch-build-containerd-cde8-20261015/exact-source-review-request-6608548a/original-failed-build-record.json",
+      "bytes": 2047,
+      "sha256": "4474dcd30269c0710e17723e2f702114f09d48129ccc070b499aa65a69ab30c2"
+    },
+    {
+      "path": "WP/batch-build-containerd-cde8-20261015/exact-source-review-request-6608548a/post-intent.json",
+      "bytes": 195,
+      "sha256": "fa1720fc5b0aea9139678bf1e6cec4172085c3f4a0afe4f6c5fc4c636df3ca7d"
+    },
+    {
+      "path": "WP/batch-build-containerd-cde8-20261015/exact-source-review-request-6608548a/post-response-original.json",
+      "bytes": 10761,
+      "sha256": "8c0b4d9e62c6e5381b4e81e462f765eb356c008b9690cb8e807fa7d6a712f11e"
+    },
+    {
+      "path": "WP/batch-build-containerd-cde8-20261015/exact-source-review-request-6608548a/post-stderr-original.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "WP/batch-build-containerd-cde8-20261015/exact-source-review-request-6608548a/pr295-actual-pass-original.json",
+      "bytes": 6787,
+      "sha256": "3d504670dbe3035c87ff67d73c50782e005a1893c4665de338de9fb57ce0a25a"
+    },
+    {
+      "path": "WP/batch-build-containerd-cde8-20261015/exact-source-review-request-6608548a/pr295-comments-original.json",
+      "bytes": 10644,
+      "sha256": "3cd8ecfd08235af23aae6a5ae7c7157690c06e85c7574e503562dd566b4b3201"
+    },
+    {
+      "path": "WP/batch-build-containerd-cde8-20261015/exact-source-review-request-6608548a/pr295-original.json",
+      "bytes": 23239,
+      "sha256": "8e05a12a6fa60c6e176a8433f88c6bd132c3edbfc4232d61f3f140353a7abe39"
+    },
+    {
+      "path": "WP/batch-build-containerd-cde8-20261015/exact-source-review-request-6608548a/pr296-actual-pass-original.json",
+      "bytes": 8178,
+      "sha256": "83293fdf38e293253ec6ae50ff81dc3a9b61cd87fe863d04eaa465f99a8b9f47"
+    },
+    {
+      "path": "WP/batch-build-containerd-cde8-20261015/exact-source-review-request-6608548a/pr296-comments-original.json",
+      "bytes": 13709,
+      "sha256": "d6f0751f4ac2bdb75a54211ea8dc43b25edaf9d9440621ac8e6a98e47f4b46c9"
+    },
+    {
+      "path": "WP/batch-build-containerd-cde8-20261015/exact-source-review-request-6608548a/pr296-original.json",
+      "bytes": 65850,
+      "sha256": "1541d1ba1c1775646c521137cca594f3ae1eeb30d04e12c6cc7a97e1c036c145"
+    },
+    {
+      "path": "WP/batch-build-containerd-cde8-20261015/exact-source-review-request-6608548a/pr297-actual-pass-original.json",
+      "bytes": 5571,
+      "sha256": "2272d318b7d824d7341e90cd340b53bfeb81dc5cbec26150f857b4db8251a167"
+    },
+    {
+      "path": "WP/batch-build-containerd-cde8-20261015/exact-source-review-request-6608548a/pr297-comments-original.json",
+      "bytes": 20259,
+      "sha256": "20f195ef4512a4febe5926cdcbb8baddae3bab99a21fd698ca6b1052d57a0751"
+    },
+    {
+      "path": "WP/batch-build-containerd-cde8-20261015/exact-source-review-request-6608548a/pr297-original.json",
+      "bytes": 33502,
+      "sha256": "11c6cdfdb8e4e19417a7e14366ed0f9a64ac843b2713fe371761518806580b6f"
+    },
+    {
+      "path": "WP/batch-build-containerd-cde8-20261015/exact-source-review-request-6608548a/request-payload-original.json",
+      "bytes": 9184,
+      "sha256": "30348c88309d85cf396da4d536407e16804bdedb629574810d967f18e25c1f2c"
+    },
+    {
+      "path": "WP/batch-build-containerd-cde8-20261015/exact-source-review-request-6608548a/tooling-source-index.json",
+      "bytes": 1586,
+      "sha256": "6cdd35dcc3bf3e240c2a2072cd1d6f7151799bcb5c6787814ded04962cc119fc"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/request-corrected-containerd-build-source-review-once.py",
+      "bytes": 10426,
+      "sha256": "f89b96c09e370646f9ced2319d21308b9a150536b0f5bce384d5747d6e755869"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/retain-corrected-build-source-request-native-once.py",
+      "bytes": 4451,
+      "sha256": "7fdd34fc04da71e344e27251d499291dece64a88d0c250255155303666736a26"
+    },
+    {
+      "path": "WP/audit-release-eb6de2e8/README.md",
+      "bytes": 427124,
+      "sha256": "50c3ba1ae87a55a2c561f6bb802196be6fdb7ec541f550c8356b273e88782cce"
+    }
+  ]
+}
