@@ -1,0 +1,12 @@
+{
+  "status": "SOURCE_ONLY_DRAFT_NO_RUNTIME_PROOF",
+  "scopeDirection": 6189025975,
+  "changedPath": "server/scripts/install_order_revisions.js",
+  "beforeSha256": "756a720c3351b87e9b6dd2a57fb109874952e2d3a4c5496472120d08c7b6552e",
+  "afterSha256": "4f2c9b9e7a4bc2416bedb5a92899dcfbddd0cb57ce7b27a61a263aa5d97cee36",
+  "legacyImpactFixturePath": "server/tests/fixtures/order_revision_impact_before_set_query.txt",
+  "legacyImpactSha256": "d9e3ce2a0c107c8ef61ef3a5d7b43c0dca625b2c639df72236b9e76ce4eaf6a2",
+  "productionOperations": 0,
+  "sameOwnerFieldsAndIterationOrder": true,
+  "leftJoinPreservesMissingSampleFailure": true
+}

@@ -1,0 +1,10 @@
+{
+  "reason": "Avoid per-owner object-rest property copying; keep the exact four original owner fields",
+  "beforeSha256": "4f2c9b9e7a4bc2416bedb5a92899dcfbddd0cb57ce7b27a61a263aa5d97cee36",
+  "afterSha256": "d3eb757c7261005782bffc66c81b250e606649b900a8e366e23e54b57f867258",
+  "priorFocusedTests": 8,
+  "priorSeededElapsedOldMs": 385.1662,
+  "priorSeededElapsedNewMs": 436.7507,
+  "priorTimingIsNotAnImprovementClaim": true,
+  "hostOperations": 0
+}

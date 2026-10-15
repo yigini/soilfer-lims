@@ -1,0 +1,15 @@
+{
+  "observedUtc": "2026-10-15T10:47:32.279Z",
+  "status": "NOT_SENT_HUMAN_ACTIVE_OTHER_PROJECT",
+  "githubReceiptAlreadyPosted": 6190239878,
+  "githubReceiptUrl": "https://github.com/yigini/soilfer-lims/issues/162#issuecomment-6190239878",
+  "toolReportedHumanInput": true,
+  "freshStateReadAfterHumanInput": true,
+  "currentScreenshotProject": "Dashboards",
+  "currentScreenshotThread": "Modern dashboards on...",
+  "accessibilityCachedLimsStateWasStale": true,
+  "targetLimsThreadNotCurrentlySelected": true,
+  "noTypingOrNavigationAfterHumanInput": true,
+  "humanDraftsCardsUntouched": true,
+  "doNotClaimNativeReceiptSent": true
+}

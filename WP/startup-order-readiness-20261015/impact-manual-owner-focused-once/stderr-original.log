@@ -1,0 +1,23 @@
+  console.log
+    {"event":"ORDER_IMPACT_OWNED_SEEDED_QUERY_MEASUREMENT","samples":12000,"oldElapsedMs":394.25739999999996,"newElapsedMs":397.4805,"oldPointLookups":12000,"newPointLookups":0,"reportsEqual":true,"rssBytes":272400384,"notProductionTimingOrStartupQualification":true}
+
+      at Object.log (tests/contracts/order_revision_impact_set_query.test.js:128:17)
+
+PASS tests/contracts/order_revision_impact_set_query.test.js
+  √ all nonzero refusal, malformed-selection, reservation and approved-amendment report fields match the legacy query (55 ms)
+  √ missing sample keeps the legacy failure rather than silently dropping its fraction owners (1 ms)
+  √ empty impact is unchanged and the join adds no fields to reported owner objects (2 ms)
+  √ large seeded impact remains equivalent while replacing all per-sample lookups with one set query (2253 ms)
+
+PASS tests/contracts/startup_readiness_telemetry.test.js
+  √ all 26 real READY call sites retain their order and results, with per-stage timing and RSS (10 ms)
+  √ stage 1 refusal emits no READY for that stage or any successor, and cannot load the server (2 ms)
+  √ stage 24 refusal emits no READY for that stage or any successor, and cannot load the server (2 ms)
+  √ stage 26 refusal emits no READY for that stage or any successor, and cannot load the server (2 ms)
+
+Test Suites: 2 passed, 2 total
+Tests:       8 passed, 8 total
+Snapshots:   0 total
+Time:        2.836 s, estimated 3 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\order_revision_impact_set_query.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\startup_readiness_telemetry.test.js".
+Test results written to: ..\WP\startup-order-readiness-20261015\impact-manual-owner-focused-once\report-original.json

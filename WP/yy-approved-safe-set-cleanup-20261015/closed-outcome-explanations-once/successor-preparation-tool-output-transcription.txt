@@ -1,0 +1,9 @@
+TOOL_OUTPUT_TRANSCRIPTION — local preparation only, before file creation or any remote action.
+
+The attempted PowerShell/python -c successor preparation reported:
+SyntaxError: '(' was never closed
+
+The subsequent attempted invocation reported:
+python.exe: can't open file '.../observe-safe-set-timeout-literal-successor-readonly-once.py': [Errno 2] No such file or directory
+
+No successor file was created or executed by that preparation. The later separately named read-safe-set-journal-after-timeout-literal-once.py uses bytes([0]), compiles its source before SSH, and performs only read-only journal/receipt/process observations. No cleanup replay occurred.

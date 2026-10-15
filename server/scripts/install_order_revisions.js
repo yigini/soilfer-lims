@@ -130,15 +130,20 @@ function impact(db) {
             ...(result.contextCause && {contextCause:result.contextCause})});
     }
     const approvedAmendmentSampleIds=[...new Set(prospectiveApprovedAmendmentRefusals.map(item=>item.sampleId))].sort();
-    const ownersBySample = new Map();
-    for (const item of db.prepare("SELECT id,sampleId,analysis,status FROM WorkItem WHERE analysis IN ('SAND','SILT','CLAY') AND status<>'WAIVED' ORDER BY id").iterate()) {
-        if (!ownersBySample.has(item.sampleId)) ownersBySample.set(item.sampleId, []);
+    const ownersBySample = new Map(), sampleTargets = new Map();
+    // Read fraction owners and their stored selections in one indexed join.
+    // Keep owner objects and first-owner ordering identical to the legacy report.
+    for (const row of db.prepare("SELECT w.id,w.sampleId,w.analysis,w.status,s.id AS storedSampleId,s.requiredAnalyses FROM WorkItem w LEFT JOIN Sample s ON s.id=w.sampleId WHERE w.analysis IN ('SAND','SILT','CLAY') AND w.status<>'WAIVED' ORDER BY w.id").iterate()) {
+        const item = { id: row.id, sampleId: row.sampleId, analysis: row.analysis, status: row.status };
+        if (!ownersBySample.has(item.sampleId)) {
+            ownersBySample.set(item.sampleId, []);
+            sampleTargets.set(item.sampleId, row.storedSampleId === null ? undefined : { requiredAnalyses: row.requiredAnalyses });
+        }
         ownersBySample.get(item.sampleId).push(item);
     }
     const incompleteTextureOwners = [], invalidStoredAnalyses = [];
-    const sampleTarget = db.prepare('SELECT requiredAnalyses FROM Sample WHERE id=?');
     for (const [sampleId, owners] of ownersBySample) {
-        const raw = sampleTarget.get(sampleId).requiredAnalyses;
+        const raw = sampleTargets.get(sampleId).requiredAnalyses;
         let target;
         try { target = normalizedSelection(typeof raw === 'string' ? JSON.parse(raw) : raw || [], true); }
         catch (error) {
