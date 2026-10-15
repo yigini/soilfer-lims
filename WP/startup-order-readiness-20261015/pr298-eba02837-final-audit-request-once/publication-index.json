@@ -1,0 +1,145 @@
+{
+  "baseAudit": "69a3149ffbb1e870e9ff064cb058ee9833bc299b",
+  "status": "FINAL_EXACT_HEAD_AUDIT_REQUEST_SENT_ONCE",
+  "head": "eba02837eaa2ab797cad0572fecada686f660346",
+  "files": [
+    {
+      "path": "WP/startup-order-readiness-20261015/pr298-eba02837-final-audit-request-once/actual-audit-request.txt",
+      "length": 4723,
+      "sha256": "e0aa4ea5da189dab40a8a17efa35a325da4e722e8b914e73c7f69f817b4de317",
+      "gitBlobOid": "33309b0f065d576e368ebd25318e14ffb60506e4"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/pr298-eba02837-final-audit-request-once/closing-refs-before-original.json",
+      "length": 31,
+      "sha256": "41d2c505b45e615f2361b1e657a3a9a2ec9be8dc89cee69269b8121226d416db",
+      "gitBlobOid": "d70a833229f2311b7e3d63a53c4494700853343b"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/pr298-eba02837-final-audit-request-once/comments-before-original.json",
+      "length": 4,
+      "sha256": "cf1cbb66a638b4860a516671fb74850e6ccf787fe6c4c8d29e9c04efe880bd05",
+      "gitBlobOid": "00a55f04962d713c041c17c883bb5c28412427db"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/pr298-eba02837-final-audit-request-once/coordination-before-original.json",
+      "length": 4778,
+      "sha256": "f15d2871498b0cf5d6c6592dc914685d9ddb5b8d265f6b858e31ee0620b2f658",
+      "gitBlobOid": "665306a787c0a4893541fa0cc429d385d72e03a6"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/pr298-eba02837-final-audit-request-once/delivery-record.json",
+      "length": 646,
+      "sha256": "781023e896ac70f3d1db028a01ed5d51b58e65c40c7b5790f28d0a43cfa68935",
+      "gitBlobOid": "1e1d2e633c617f5da3b5961863daad5be3e326a6"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/pr298-eba02837-final-audit-request-once/jobs-before-original.json",
+      "length": 4343,
+      "sha256": "9f4e4d58c0f398a3b4b3c9be16dcb3df6a6f776aade45c3806903827511b810f",
+      "gitBlobOid": "a161707b08c7e4f1c2988388c60f44ad68a44034"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/pr298-eba02837-final-audit-request-once/label-definition-original.json",
+      "length": 281,
+      "sha256": "b7ffbc83a709068edfe718dc7191eb313d586f038ae1f7782ec966d0ee78fe28",
+      "gitBlobOid": "67b69b8a08c59bce31ea0f78dbeaf00b07c46aee"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/pr298-eba02837-final-audit-request-once/label-request.json",
+      "length": 44,
+      "sha256": "7a41f69c3ef3dd804f2026747651d552434fbb5c145c1c3287851a2ed8e3b6dd",
+      "gitBlobOid": "e2ada7605b1ca4c37768fbcb8d2f2bae9605027d"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/pr298-eba02837-final-audit-request-once/label-response-original.json",
+      "length": 283,
+      "sha256": "52d58c2648b5b6c44b500d9ee7eaedf383ad854f33fda4c974560e7febead153",
+      "gitBlobOid": "3b1fab2ac7bfa8302c2defcdfd26396fb4c950c8"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/pr298-eba02837-final-audit-request-once/main-before-original.json",
+      "length": 336,
+      "sha256": "8ab38fb8db0993cd672bbb2e6bf3b6ca8d124087fb841ecc97bad4fb1d9bfe89",
+      "gitBlobOid": "dc45c7625305c3a43f77f46efbc91993affaa349"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/pr298-eba02837-final-audit-request-once/main-ci-before-original.json",
+      "length": 12111,
+      "sha256": "b76e9a34b6be2aef115860d2280e850d14b16edb41c64ccafd0b474243e4f7e2",
+      "gitBlobOid": "e0e7b849df482e985bca2eb75a5f18dc84f27da6"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/pr298-eba02837-final-audit-request-once/notice-request.json",
+      "length": 4762,
+      "sha256": "44018cc71adc05fa561f61f0fcf880196ad3caab85b1172a8d315e2182bfd49c",
+      "gitBlobOid": "9b8e906b74d95a6fbb7a5714cd95b263d8db8c36"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/pr298-eba02837-final-audit-request-once/notice-response-original.json",
+      "length": 6333,
+      "sha256": "b0572319e0f8fce86c54a88ea73a7113743d314c8dc44f588c6aead6675aa4ec",
+      "gitBlobOid": "7b4fcf57f62cd9dda97df7b39e58c9d3244b8e70"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/pr298-eba02837-final-audit-request-once/pr-after-original.json",
+      "length": 31305,
+      "sha256": "96a6655cc1437214bbf0a5b5756b694c613e49809960f7b66d970459294d0528",
+      "gitBlobOid": "3994ae7d164e00500bed1a0f010fb4420f3f43f0"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/pr298-eba02837-final-audit-request-once/pr-before-original.json",
+      "length": 31024,
+      "sha256": "8bdaf19dd304aeb490d197113545a4a61ef608ae9cb01f61b7518365c33451f0",
+      "gitBlobOid": "aac19b635c12e539a14cfbfcccc61e706163c0b0"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/pr298-eba02837-final-audit-request-once/reviews-before-original.json",
+      "length": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "gitBlobOid": "0637a088a01e8ddab3bf3fa98dbe804cbde1a0dc"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/pr298-eba02837-final-audit-request-once/run-before-original.json",
+      "length": 12555,
+      "sha256": "dcedf94b01774fbd85ac36a4851848c5d05d10231883b8a87e9d66ac42d76c99",
+      "gitBlobOid": "c16f6b9b7b4253fe467646958acbfc66201cffc7"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/pr298-eba02837-final-audit-request-once/scope-before-original.json",
+      "length": 6545,
+      "sha256": "16e9b64f1e0729e6c8d66a18e5099b2ac88d00ee1199bea528df8c28563a6b34",
+      "gitBlobOid": "b2141c6fd2a707909b5def97fcadf0d5df38c350"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/request-startup-pr298-eba02837-final-audit-after-green-once.py",
+      "length": 16668,
+      "sha256": "ff7cbd4771896bc5ad84a9b0824e12b8348a2140f5275efb64028fa663151eb9",
+      "gitBlobOid": "82c3d6501ecdf296b5075ca2065fc565ea3aee84"
+    },
+    {
+      "path": "WP/audit-release-eb6de2e8/README.md",
+      "length": 633835,
+      "sha256": "ce61fb574bbdd8a3bfd24add12b604492711da7ba928a8fa9b5821628d4ba3be",
+      "gitBlobOid": "0f609e6fde93b42b33df17c646568ed9a3a7dab8"
+    }
+  ],
+  "delivery": {
+    "postedUtc": "2026-10-15T13:35:27.987386+00:00",
+    "pr": 298,
+    "head": "eba02837eaa2ab797cad0572fecada686f660346",
+    "tree": "676b01e71211786d1aeace50f19a0b2c9f9c482e",
+    "base": "cde8c8896f5f9d5f1ab07b0ae16b1a765e0a6367",
+    "run": 38738769335,
+    "closedEvidenceAudit": "69a3149ffbb1e870e9ff064cb058ee9833bc299b",
+    "comment": 6193369476,
+    "commentUrl": "https://github.com/yigini/soilfer-lims/pull/298#issuecomment-6193369476",
+    "readyNoticeSentOnce": true,
+    "labelAddedOnce": true,
+    "finalNativeHandoffSent": false,
+    "actualAuditPass": false,
+    "ciDispatches": 0,
+    "productionOperations": 0,
+    "all1333FrozenInputsUnchanged": true
+  }
+}
