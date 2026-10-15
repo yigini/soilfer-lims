@@ -1,0 +1,154 @@
+Claudio: NEW COMPLETE health-transition source a748b9dc5d3e5309fe3ef2b5cf4a6c5e7d796ef2 for NEW exact all-hash review under actual6188190365 scope. Actual direction is implemented in this COMPLETE twelve-file graph. CLOSED175/175 local+175/175 ACTUALhostPython3.9.23/all12compile/hashunchanged. No operator/package/root/unit/create/startup/installer/newproductioncopy has been executed. Current mainCI/all3app audits/merge chain/no later failure freshly checked. Old090000/080000 stay FAILED immutable; no retrospective PASS or retry.
+
+[Complete source](https://github.com/yigini/soilfer-lims/blob/a748b9dc5d3e5309fe3ef2b5cf4a6c5e7d796ef2/WP/batch-proof-health-transitions-cde8-20261015/SOURCE_REVIEW.md), [CLOSED175 proof](https://github.com/yigini/soilfer-lims/blob/a748b9dc5d3e5309fe3ef2b5cf4a6c5e7d796ef2/WP/batch-proof-health-transitions-cde8-20261015/source-local-host-verification-transitions-once/exit-original.json), [all20 unchanged real input pins](https://github.com/yigini/soilfer-lims/blob/a748b9dc5d3e5309fe3ef2b5cf4a6c5e7d796ef2/WP/batch-proof-health-transitions-cde8-20261015/bound-prior-evidence-index-complete20.json), [unchanged24/30 budget and fresh reference](https://github.com/yigini/soilfer-lims/blob/a748b9dc5d3e5309fe3ef2b5cf4a6c5e7d796ef2/WP/batch-proof-health-transitions-cde8-20261015/declared-copy-budget-table.json), [69 independently raw-OID/SHA verified publication blobs](https://github.com/yigini/soilfer-lims/blob/a748b9dc5d3e5309fe3ef2b5cf4a6c5e7d796ef2/WP/batch-proof-health-transitions-cde8-20261015/source-publication-index.json).
+
+Direction6188190365 acknowledgement is bundled ONLY here: exact parsed production Compose command/interval/timeout/retries/start_period remain unchanged (no600s override). Starting/unhealthy/healthy allowed during readiness. Every poll writes a new0400 fullState/Health.Log/FailingStreak/UTC/monotonic elapsed record before invalid state can refuse; status transitions and observed unhealthy duration/firsthealthy time retained in startup result. Missing/unknown/exited/restarting/dead/OOM/config mismatch immediately STOP. Hard600s total is checked again AFTER all HTTP200200401 probes, in addition to27entryNOOP0/26READY0/stopped fullstate/inputrechecks. Readiness timing is honest poll-observed evidence, not unobserved exact Docker event time.
+
+Tests include unhealthy→healthy recovery PASS plusHTTP and two independent starts; unhealthydeadline STOP; exitedunhealthy/missinghealth immediateSTOP with fullpoll evidence; healthyHTTPfailure STOP; fullHTTP overrun600STOP; prior authority/scientific/input/Compose/physical/copy/name/WAL negatives. All tests are new retained synthetic fixtures only, zero actual Dockercreates/operators/oldSQL.
+
+Fresh08:55:28.653994UTC metadata-only reference T563326976/A5787648/free31946665984/required31768290414/slack178375570B (about178MB). REFERENCE ONLY. Exact fresh gates BEFOREnewroot and immediatelyBEFOREunit remain mandatory. No fit meansSTOP with all retained. YY groupa cleanup card remains separate/unanswered by this agent; no cleanup approval inferred. No jobsON/kit/gate/deploy sought.
+
+# Exact production-health transition startup proof source
+
+Complete NEW twelve-file graph under actual scope direction [6188190365](https://github.com/yigini/soilfer-lims/issues/162#issuecomment-6188190365), posted08:47:44UTC. This is not SourcePASS or execution. Proposed unused root `/opt/lims/releases/workflow-batch-startup-forward-cde8c889-20261015T100000Z`; no operational package/root/unit/operator exists. NEW exact all-hash PASS, current main/CI/3app audits and both fresh capacity gates are required before one attempt.090000/080000 remain FAILED and immutable; no retry/replay/retrospective PASS.
+
+## Behavior and evidence
+
+090000 stopped after102.226s while the ordinary verifier chain was active:24of27 NO_OP0,0of26 READY/no server-start marker. Docker health was unhealthy; the old rule stopped immediately. Claudio explicitly corrected that rule and rejected proof-only StartPeriod600. This graph keeps the EXACT pinned Compose bytes/health fields including30s start period and records unhealthy as an observation inside the unchanged600s deadline. No production Compose/app/image change or hidden proof grace values.
+
+`proof_health` validates raw Compose GitOID/SHA/length before parsing; CMD-SHELL exec wget and all durations/retries are derived from those bytes. `Docker.validate` asserts the exact Config.Healthcheck before start, each poll/validation and after stop, plus identity, memory805306368/swapMEMORY/blankheap/networkNONE/jobsOFF/pushseedfalse/mounts/no restarts. Restarting/dead/exited/OOM immediately STOP. Only containers created by this controller can be stopped; all remain retained.
+
+Every readiness poll invokes `HealthHistory.observe` on the freshly inspected object BEFORE validation can refuse it. It writes a NEW0400 JSON file containing UTC timestamp, monotonic elapsed seconds, status, FULL State including FailingStreak and FULL Health.Log, exact healthcheck, previous status, transition flag and cumulative observed unhealthy time. Missing/unknown health and invalid running state are retained before immediate STOP. Unhealthy is allowed and observable. Final startup results include every poll path, every transition, timeToFirstHealthySeconds and totalUnhealthySeconds. Durations use monotonic intervals between observed polls, explicitly labelled as observational rather than exact unobserved Docker transition times.
+
+PASS requires healthy, successful HTTP health200, exact27entryNO_OP0+26READY0 inventory, then HTTP200health/200login/401receipt. The new deadline assertion AFTER all HTTP probes prevents accepting late probe results after600s. Healthy with failed HTTP, persistent unhealthy at600s, missing/unknown health, exited/restarting/dead/OOM or config mismatch STOP. A full stopped logical seal must equal the bound recorded11242 state; input rechecks and physical stage closure must pass. Health alone never qualifies a startup.
+
+## Unchanged inputs and budget
+
+All20 exact dd496777 raw Git pins from0541865b are unchanged:4517-row080000 inventory, exact oldfailure/source/PASS/input identity, installed209 raw/reader authorities/seal/recorded logical state,214209 stages/preservation, canonical policy PRESENT/CANONICAL/NO_OP, originalbaseline/assets handoff, carried inputs and full chart/order lists. Each is independently rawOID/SHA/length verified before publication. Old DBs are hash/stat only, never SQLite opened. SQL is only on NEW owned stopped seals.080000 installed209 backup and070000 raw assets are rechecked before copying, after EACH clone+assetcopy BEFOREcreate/start, after each stopped seal and closure. No206214209/policy/impact replay, new production snapshot, old container start, rebuild/retag, cleanup, jobsON, kit, gate or deploy.
+
+Budget is byte-identical to054, explicitly retained by6188190365: two stages/12 DB-equivalents each (clone1, sealtriples2, sealbackup1, eight internal policy snapshots), N24 =>30equiv/25%/minimum0.3x assets/floor10556150894/4GiB logs/500MB unexplained STOP/remaining consumption/runtime claims/realAST guard/perstage disjointdu-x caps/allretainedreleasesDockercontainerd remain. Poll JSON/telemetry consume the existing logs/stage margin; no extra DB producer or old-copy credit.
+
+Fresh08:55:28.653994UTC reference metadata: T563326976/A5787648, required31768290414/free31946665984B all3paths, slack178375570B. REFERENCE ONLY, narrow slack stated honestly. Fresh gates BEFOREnewroot and immediatelyBEFOREunit decide; nofit STOP with everything retained. No cleanup permission inferred from YY's separate list.
+
+## Closed verification and boundaries
+
+175/175 local +175/175 ACTUAL host Python3.9.23, all12 compile/hash unchanged. Only NEW retained synthetic local/host fixtures and recorded metadata; zero real Dockercreates/operators/productionconnections/oldSQL. Tests cover unhealthy-tohealthy plusHTTP/two independent startups/retained fullpoll logs0400; unhealthydeadlineSTOP; exitedunhealthyimmediateSTOP+record; missinghealthSTOP; healthyHTTPfailureSTOP; fullHTTP600s overrunSTOP; changedstoppedstateSTOP; exacthealth/Composepin/limits/mount/inputrechecks/science/policy/authority/copybudget/mount/name/WAL negatives. The171 predecessor cases are carried with two obsolete immediate-unhealthy expectations replaced by actual direction and four additional cases. Their original054 bytes/evidence remain unchanged.
+
+The final receipt remains FORWARD_TWO_JOBS_OFF_STARTUPS_PASS_FROM_BOUND_INSTALLED209_NOT_RELEASE_QUALIFIED. JobsON natural intake/broaderpostflights/exactkitreview/freshsingleusegate remain later. Eventual kit MUSTshow actual firsthealthy/unhealthy timing and expected downtime; transient unhealthy is not rollback authority. No app change/release qualification inferred.
+
+YY list1f871bbc dependencies reviewed byClaudio; groupa5roots3.979GB offered toYY with irreversible raw-byte loss/plain groupb26not offered. ExactYYcleanup choice remains unobserved/unanswered byagent.070000080000qualifiedB5/currentproofinputs excluded. No deletion/move/prune; independent source work.
+
+## Exact twelve source hashes
+
+```
+launch_proof.py=9e33ea86c16c4018a1a94991c6969323d16958bb4e5094219ddd2fdfd9ad708f
+prepare_proof.py=cb9eeb8168f44bd20ecd1d829caf30a7fba1ecc92a0924b73f610d78c58329e7
+proof_budget.py=1bbb4e83d714031cab8567dbca6db3904e7dfc2cd0bdaa92dc19831a2e1c389a
+proof_contract.py=b147fee1bb5007c3baa59c16ecebf9a0a85dea8b197eb8de4a4a032a2615e4bc
+proof_disk.py=d1b676dbd23bc9f88b51c222994639ac3c14b3b1b49f096d95eb24a7de2eab6d
+proof_docker.py=72e7c85012f908ae8d1fcb963d9400a8242d90e01348d73b9cb09a9f33c5886d
+proof_files.py=6bd7adb616218b8add259eaf61c2922cfc3d05d88e8dbae4dbf5dda386e1241c
+proof_health.py=ada964f3d86453f61d082961e78b76f7dfb3cd3976ca361e5aadf863f227f846
+proof_inputs.py=534c4058f2c1bdd35e21ff431fa58a5293e93fd87eb302d2db2c912638381c75
+proof_startup.py=2b16cfe0ddce4e47d76316c02424399e2089e9e129be11aab23f603e22ea3c48
+run_stopped_proof.py=0f0a395b4763ba19ca4c1fc6185eb9f118d5a5ddd2d5efaf02cedfdb7aa57c08
+verify_proof_guards.py=4fac1753575bf12a35875da183a428a1d4a418505b9bee918700829a98f130ad
+```
+
+
+All exact authority and safety bindings:
+
+```
+a748b9dc5d3e5309fe3ef2b5cf4a6c5e7d796ef2
+cde8c8896f5f9d5f1ab07b0ae16b1a765e0a6367
+638580d50f61254609de3abd42d93afc676a5727
+sha256:b5ab0a0a57aeec4fe24dd8095126f3502cbc0c8629a7f4c1ef9e55034893c6fb
+959d17e11c357266f7c2a41b0c84ab76914c591e
+sha256:7aebc035254a61b0b4b8ecb59492d582af7f3769c147a35a7e92a43fb7a642d2
+8109d78e228573ead8aa243442192e54b8e1dc09101bc3fa23d03e5a29cbb66b
+c03ca0cd16395a451a12f1606655166f0dfe0b3f78516212034b548888c7a3fd
+proofScope=BOUND_080000_INSTALLED209_TWO_NEW_JOBS_OFF_STARTUPS_ONLY
+proofRoot=/opt/lims/releases/workflow-batch-startup-forward-cde8c889-20261015T100000Z
+qualifiedBuildSource=6608548a58dd4bf581da4330f1cd7b0f68a86973
+qualifiedBuildPass=6181452519
+mainCiRun=38636615469
+labAndHubBuildsOwnedByYY=true
+releaseWindowControl=RELEASE_DAY_DISK_ABORTS_ACCEPTED
+reserveFloorBytes=10556150894
+unexplainedGrowthAbortBytes=500000000
+memoryLimitBytes=805306368
+unitTimeoutSeconds=5400
+readinessSeconds=600
+stageHeadroomSeconds=60
+unitHeadroomSeconds=600
+rawMasterNeverOpenedSqlite=true
+productionSqliteConnections=0
+preserveAllStoppedContainers=true
+policyPresentNoOpOrStop=true
+approvedAmendmentNonzeroStop=true
+jobsOnQualificationStillRequired=true
+declaredDbTripleCopies=24
+dbBudgetEquivalents=30
+budgetMarginPercent=25
+minimumDbBudgetEquivalents=0
+forwardDirection=6188190365
+priorEvidenceCommit=dd496777400e9c2f4f0ace73009f8cf8c86022d0
+priorProofRoot=/opt/lims/releases/workflow-batch-stopped-copy-cde8c889-20261015T080000Z
+priorEvidenceIndexSha256=3ff3d1555c66300ba0752d78211991c9f1c12808d17495a6f29617ab80f82c64
+startupOnlyInstalled209Inputs=true
+noInstallerOrPolicyReplay=true
+priorInstalled209Backup=/opt/lims/releases/workflow-batch-stopped-copy-cde8c889-20261015T080000Z/installed-209/backup.db
+deriveHealthcheckFromPinnedCompose=true
+healthTestRepresentation=COMPOSE_EXEC_ARGV_DERIVED_DOCKER_CLI_CMD_SHELL_EXEC
+ordinaryFullStartupVerifierChain=true
+exactDerivedDockerHealthcheckBeforeStart=true
+unhealthyIsRetainedObservation=true
+healthEveryPollFullLog0400=true
+healthTransitionTimingInResult=true
+composeStartPeriodUnchanged=true
+allHttpProbesWithinTotal600Seconds=true
+composeSourceSha256=2c540b13af52ada8cf475ad8aed19757deafd2997bf1e60fc63848d6e5153226
+composeSourceBlob=4e5bfd31f6c0bcc52419f0a55f7f6edbb8f85eec
+noNewProductionSnapshot=true
+inputLogicalStateFromBoundRecordsNoSql=true
+budgetMinimum64DroppedForStartupOnlyGraph=true
+budgetStageTableSha256=c74e17c1f2e155673f3d91426086e0f96515e161442165c099c7c99269b9c5dc
+budgetModel=DECLARED_STAGE_REMAINING_CONSUMPTION_AWARE
+capacityDirection=6183215126
+noopSealDirection=6183663456
+metadataCapacityBeforeRootAndBeforeUnit=true
+allLocalExecutedSourceFilesBound=true
+containerNameAbsenceProof=BOUNDED_COMPLETE_ID_AND_EXACT_NAME_INVENTORY
+containerNameProbeRawIdsRetained=true
+mandatoryKnownPredecessorInInventory=true
+noErrorTextAbsenceInference=true
+snapshotBoundaryDirection=6184356993
+inputAuthority=BOUND_080000_INSTALLED209_RECORDED_SEAL_HASH_STAT_ONLY
+inputRechecksAfterEachCopyAndAtClosure=true
+liveEvolutionObservation=STAT_ONLY_NEVER_SNAPSHOT_AUTHORITY
+databaseAssetsCrossFileAtomicityClaimed=false
+budgetCheckpointCgroupAnonFileRecorded=true
+referenceDbReserveBytes=567558144
+referenceAssetReserveBytes=5787648
+retainedAssetReserveMultiplier=3
+logReserveBytes=4294967296
+allocationMeasurementSeconds=120
+allRetainedReleaseDockerContainerdAllocation=true
+ownedStopIndependentOfReserveHeadroom=true
+allInputPathAncestorsRejectAliases=true
+diskMountPolicy=VERIFIED_DOCKER_OVERLAY_VIEWS_BACKED_BY_COUNTED_CONTAINERD
+physicalDuSingleFilesystem=true
+containerMountComparison=EXACT_OBJECTS_UNORDERED_NO_DUPLICATES
+launch_proof.py=9e33ea86c16c4018a1a94991c6969323d16958bb4e5094219ddd2fdfd9ad708f
+prepare_proof.py=cb9eeb8168f44bd20ecd1d829caf30a7fba1ecc92a0924b73f610d78c58329e7
+proof_budget.py=1bbb4e83d714031cab8567dbca6db3904e7dfc2cd0bdaa92dc19831a2e1c389a
+proof_contract.py=b147fee1bb5007c3baa59c16ecebf9a0a85dea8b197eb8de4a4a032a2615e4bc
+proof_disk.py=d1b676dbd23bc9f88b51c222994639ac3c14b3b1b49f096d95eb24a7de2eab6d
+proof_docker.py=72e7c85012f908ae8d1fcb963d9400a8242d90e01348d73b9cb09a9f33c5886d
+proof_files.py=6bd7adb616218b8add259eaf61c2922cfc3d05d88e8dbae4dbf5dda386e1241c
+proof_health.py=ada964f3d86453f61d082961e78b76f7dfb3cd3976ca361e5aadf863f227f846
+proof_inputs.py=534c4058f2c1bdd35e21ff431fa58a5293e93fd87eb302d2db2c912638381c75
+proof_startup.py=2b16cfe0ddce4e47d76316c02424399e2089e9e129be11aab23f603e22ea3c48
+run_stopped_proof.py=0f0a395b4763ba19ca4c1fc6185eb9f118d5a5ddd2d5efaf02cedfdb7aa57c08
+verify_proof_guards.py=4fac1753575bf12a35875da183a428a1d4a418505b9bee918700829a98f130ad
+```

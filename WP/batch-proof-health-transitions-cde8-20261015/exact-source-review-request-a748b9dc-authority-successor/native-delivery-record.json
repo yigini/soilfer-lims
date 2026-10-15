@@ -1,0 +1,23 @@
+{
+  "status": "ACTUAL_ONCE_CONCRETE_SOURCE_REVIEW_NATIVE_DELIVERED",
+  "observedUtc": "2026-10-15T09:01:14.792Z",
+  "window": {
+    "app": "Claude_pzs8sxrjxfjjc!Claude",
+    "id": 7867734,
+    "title": "Claude"
+  },
+  "project": "LIMS Audit",
+  "thread": "Lab workflow audit and plan",
+  "sourceHead": "a748b9dc5d3e5309fe3ef2b5cf4a6c5e7d796ef2",
+  "commentId": 6188399818,
+  "freshEmptyComposerCaretObserved": true,
+  "ownHeadAndEndInspected": true,
+  "returnPresses": 1,
+  "sentBubbleObserved": true,
+  "rightComposerEmptyVisually": true,
+  "centreComposerEmpty": true,
+  "claudioProgressVisible": "Razzle-dazzling",
+  "humanDiskCardUntouched": true,
+  "humanDiskApprovalObserved": false,
+  "neverRepeat": true
+}

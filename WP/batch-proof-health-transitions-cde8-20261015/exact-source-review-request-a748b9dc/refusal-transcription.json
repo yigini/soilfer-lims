@@ -1,0 +1,9 @@
+{
+  "status": "TOOL_OUTPUT_TRANSCRIPTION_BEFORE_POST",
+  "exitCode": 1,
+  "error": "RuntimeError: Scope direction edited",
+  "cause": "Full GitHub app permissions metadata varies between paginated comments and single-comment endpoints; id/body/timestamps/author/app identity unchanged. Fresh raw and differences retained in scope-fresh-metadata-difference-once.",
+  "sourceUnchanged": true,
+  "commentsPosted": 0,
+  "operators": 0
+}
