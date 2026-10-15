@@ -1,0 +1,109 @@
+Claudio: NEW COMPLETE successor implements your actual copy-topology direction6183663456 (03:23:02UTC), read in full on GitHub and native thread; raw direction/native-read/current-app records retained in this source. Source 09d7e537d90bc8ed17e9d162fd6868a7c34a8e15, fresh UNUSED050000 root. No source verdict was given on932e and none is inferred. No new package/root/unit/proof/production copy/SQLite/installer/entrypoint/settings action.
+
+For EACH206/214/209, removed only the FUTURE dry and repeat3-copy seal sites as directed. Dry clone stays retained: after dry CLI, main SHA-256+length must match before and WAL must be absent or zero-length. Repeat target: main AND WAL SHA-256+length must match exactly before/after, SHM excluded, classification COMPLETE_issue/mode NO_OP/totalChanges integer0/backfilledCount0. STOP on any mismatch. New hash/length evidence JSON records create0DBcopies/0SQLiteconnections.
+
+Installed seal stays full raw+owned WAL-aware reader+backup. The unchanged delta row/receipt/schema/empty-table/NULL209column guards run against it. Its installed backup becomes the NEXT previous and final startup input. Fresh production seal/rawmaster and ALL app CLI policy/primarysecondaryimpact snapshots remain; BOTH ordinary default startups remain. No old file/seal/snapshot/container is changed/deleted. No application/installer/entrypoint/scientific code changed.
+
+| Stage | DB triple equivalents maximum | Assets |
+|---|---:|---:|
+| fresh-snapshot | 3 | 1 |
+| target-policy | 2 | 0 |
+| issue-206 | 4 | 0 |
+| issue-214 | 7 | 0 |
+| order-impact | 2 | 0 |
+| issue-209 | 10 | 0 |
+| startup-1 | 12 | 1 |
+| startup-2 | 12 | 1 |
+
+N=52, assets3, budget=max(64,ceil(52*1.25))=65. AST inventory explicitly expects ONE install seal site (old3 minus dry/repeat2), runtime claims enforce all remaining site maxima and nested TMPDIR snapshots. At bind wholefuturebudget; at stagebegin current+future; duringstage future+floorlogs (no own-consumption double counting); physical du-x closure within stage allocation+25percent; unknown/missing/overrun/replayed sites/stages STOP. Measured bind inputs retained BEFORE refusal; all11 locallyexecuted source files match approved raw package graph. Metadata-capacity gate stays BEFOREremoteROOT and immediatelybeforeunit.500MBunexplained/floor/logs/du-x/allretainedallocation/topology/overlays/allstoppedcontainer guards unchanged.
+
+FRESH03:26:21.662900UTC STAT-ONLY referenceT567558144/A5787648/free58598653952B/all3paths: required51759760494B, slack6838893458B. Reference capacity FITS. This is not proof input or scientific observation;0productioncontentopens/copies/SQL/counts/settings. Fresh launcher/controller capacity must still pass after NEWSourcePASS. No capacity/infrastructure action authorized or performed.
+
+CLOSED96/96local+96/96ACTUALhostPython3.9.23 guards/all11compile/hashunchanged03:25:57.808029UTC; syntheticfixturesONLY.14new tests cover dry main hash/length changes/nonemptyWAL, repeat main/WAL changes/absent-to-emptyWAL/non-NO_OP/0/booleanFalse, SHMexclusion and4actualownedfiletamper cases; all82 prior guards pass with52/65 declarations. Host synthetic /tmp/lims-owned-stopped-copy-source-guards-20261015T034000Z retained/no cleanup/rawfetch.72raw-OID/SHA independently verified source/evidence blobs published.
+
+[Full closed graph/scope/retention](https://github.com/yigini/soilfer-lims/blob/09d7e537d90bc8ed17e9d162fd6868a7c34a8e15/WP/batch-proof-noop-identity-cde8-20261015/SOURCE_REVIEW.md), [exactstage/sitebudget+freshT/A/free](https://github.com/yigini/soilfer-lims/blob/09d7e537d90bc8ed17e9d162fd6868a7c34a8e15/WP/batch-proof-noop-identity-cde8-20261015/declared-copy-budget-table.json), [CLOSED96local+96host](https://github.com/yigini/soilfer-lims/blob/09d7e537d90bc8ed17e9d162fd6868a7c34a8e15/WP/batch-proof-noop-identity-cde8-20261015/source-local-host-verification-noop96-once/exit-original.json), [72rawverifiedblobs](https://github.com/yigini/soilfer-lims/blob/09d7e537d90bc8ed17e9d162fd6868a7c34a8e15/WP/batch-proof-noop-identity-cde8-20261015/source-publication-index.json), [actualdirectionfullraw](https://github.com/yigini/soilfer-lims/blob/09d7e537d90bc8ed17e9d162fd6868a7c34a8e15/WP/batch-proof-noop-identity-cde8-20261015/actual-noop-seal-direction-6183663456/actual-direction-original.json).
+
+BothYYpins/floor10556150894/logs4GiB/assets3/500MB/805306368blankheap/controllerSwap0/5400unit/600CLI/readiness600/headroom60+600 unchanged. QualifiedNEWb5/c03/6608PASS/B1 and NORMALhealthy959d/7a/8109 separatelybound; fresh appmaincde8/tree638/mainCI38636615469 SUCCESS370/5649/allrealDocker/all3actualappauditsmerges checked. Source/currentauthority/laterfailure/unusedrootunit checks beforeupload+immediatelybeforeunit unchanged. Old020000/023000failedroots/helpers consumedneverreplay;040000nevercreated; no oldea9/6a/87df/932ePASS reuse.
+
+Scope UPSTREAM rawsnapshot/owned206214209installation/jobsOFFstartup ONLY/NOT_RELEASE_QUALIFIED. No liveSQLite/Prisma/#103; productionrawmasterneverconnected/stablebeforecopyafter/no retry. PolicyPRESENT+CANONICAL NOOP0orSTOP/readonlydryrun; alloriginalrowsreceipts/schema/additiveEMPTYtables/NULL209column; actual214contexts/unstartedunboundservedLRM/sequence lists,209separatecauses/approvednonzeroSTOPbefore209/invalidStoredAnalysisSampleCount+sample-ownerIDs/primarysecondaryallocations; YYallnonzerolists/separateClforwardremedy unchanged. Actualscientific/tablecountsUNKNOWN/source10639to11242 prospectiveonly. Twoindependentordinary jobsOFF/networkNONE/defaultentrypoint/27NOOP0/26READY0/probes/fullstoppedequality; allhistorical/newstoppedcontainers retained. JobsONnaturalintake/broadpostflights/exactkitreview/freshsingleusegate later.206214209undeployedOPEN/#200historicalcomplete. AfterANYinstallerentrypointattempt evenDRYNOOPfailure onlyseparatelyreviewedforwardfix; no rollbackrestoreolderimagestart/rebuildretag/prunedeletemovecleanup/heapraisecoredisable/prodstoprestartsettings/humanDocumentsfilesdraftscards changes.
+
+Please post a NEW unedited actual Source review: PASS with ALL literals below only if THIS exact graph passes. No package/root/collection/proof before that verdict; then only one fresh reviewed050000 attempt after passing fresh capacity and current authority.
+
+- [launch_proof.py](https://github.com/yigini/soilfer-lims/blob/09d7e537d90bc8ed17e9d162fd6868a7c34a8e15/WP/batch-proof-noop-identity-cde8-20261015/launch_proof.py)
+- [prepare_proof.py](https://github.com/yigini/soilfer-lims/blob/09d7e537d90bc8ed17e9d162fd6868a7c34a8e15/WP/batch-proof-noop-identity-cde8-20261015/prepare_proof.py)
+- [proof_budget.py](https://github.com/yigini/soilfer-lims/blob/09d7e537d90bc8ed17e9d162fd6868a7c34a8e15/WP/batch-proof-noop-identity-cde8-20261015/proof_budget.py)
+- [proof_contract.py](https://github.com/yigini/soilfer-lims/blob/09d7e537d90bc8ed17e9d162fd6868a7c34a8e15/WP/batch-proof-noop-identity-cde8-20261015/proof_contract.py)
+- [proof_disk.py](https://github.com/yigini/soilfer-lims/blob/09d7e537d90bc8ed17e9d162fd6868a7c34a8e15/WP/batch-proof-noop-identity-cde8-20261015/proof_disk.py)
+- [proof_docker.py](https://github.com/yigini/soilfer-lims/blob/09d7e537d90bc8ed17e9d162fd6868a7c34a8e15/WP/batch-proof-noop-identity-cde8-20261015/proof_docker.py)
+- [proof_files.py](https://github.com/yigini/soilfer-lims/blob/09d7e537d90bc8ed17e9d162fd6868a7c34a8e15/WP/batch-proof-noop-identity-cde8-20261015/proof_files.py)
+- [proof_install.py](https://github.com/yigini/soilfer-lims/blob/09d7e537d90bc8ed17e9d162fd6868a7c34a8e15/WP/batch-proof-noop-identity-cde8-20261015/proof_install.py)
+- [proof_startup.py](https://github.com/yigini/soilfer-lims/blob/09d7e537d90bc8ed17e9d162fd6868a7c34a8e15/WP/batch-proof-noop-identity-cde8-20261015/proof_startup.py)
+- [run_stopped_proof.py](https://github.com/yigini/soilfer-lims/blob/09d7e537d90bc8ed17e9d162fd6868a7c34a8e15/WP/batch-proof-noop-identity-cde8-20261015/run_stopped_proof.py)
+- [verify_proof_guards.py](https://github.com/yigini/soilfer-lims/blob/09d7e537d90bc8ed17e9d162fd6868a7c34a8e15/WP/batch-proof-noop-identity-cde8-20261015/verify_proof_guards.py)
+
+```
+09d7e537d90bc8ed17e9d162fd6868a7c34a8e15
+cde8c8896f5f9d5f1ab07b0ae16b1a765e0a6367
+638580d50f61254609de3abd42d93afc676a5727
+sha256:b5ab0a0a57aeec4fe24dd8095126f3502cbc0c8629a7f4c1ef9e55034893c6fb
+959d17e11c357266f7c2a41b0c84ab76914c591e
+sha256:7aebc035254a61b0b4b8ecb59492d582af7f3769c147a35a7e92a43fb7a642d2
+8109d78e228573ead8aa243442192e54b8e1dc09101bc3fa23d03e5a29cbb66b
+c03ca0cd16395a451a12f1606655166f0dfe0b3f78516212034b548888c7a3fd
+proofScope=RAW_SNAPSHOT_AND_OWNED_STOPPED_COPY_INSTALLATION_JOBS_OFF_STARTUP_ONLY
+proofRoot=/opt/lims/releases/workflow-batch-stopped-copy-cde8c889-20261015T050000Z
+qualifiedBuildSource=6608548a58dd4bf581da4330f1cd7b0f68a86973
+qualifiedBuildPass=6181452519
+mainCiRun=38636615469
+labAndHubBuildsOwnedByYY=true
+releaseWindowControl=RELEASE_DAY_DISK_ABORTS_ACCEPTED
+reserveFloorBytes=10556150894
+unexplainedGrowthAbortBytes=500000000
+memoryLimitBytes=805306368
+unitTimeoutSeconds=5400
+readinessSeconds=600
+stageHeadroomSeconds=60
+unitHeadroomSeconds=600
+rawMasterNeverOpenedSqlite=true
+productionSqliteConnections=0
+preserveAllStoppedContainers=true
+policyPresentNoOpOrStop=true
+approvedAmendmentNonzeroStop=true
+jobsOnQualificationStillRequired=true
+declaredDbTripleCopies=52
+dbBudgetEquivalents=65
+budgetMarginPercent=25
+minimumDbBudgetEquivalents=64
+budgetStageTableSha256=a009b22ca50af106c0edbdb9044e73b70d0230c73f29e4e7a64f04534ae0faf3
+budgetModel=DECLARED_STAGE_REMAINING_CONSUMPTION_AWARE
+capacityDirection=6183215126
+noopSealDirection=6183663456
+dryRunMainIdentityAndEmptyWal=true
+repeatMainWalIdentityNoOpZero=true
+installedSealBecomesPrevious=true
+metadataCapacityBeforeRootAndBeforeUnit=true
+allLocalExecutedSourceFilesBound=true
+referenceDbReserveBytes=567558144
+referenceAssetReserveBytes=5787648
+retainedAssetReserveMultiplier=3
+logReserveBytes=4294967296
+allocationMeasurementSeconds=120
+allRetainedReleaseDockerContainerdAllocation=true
+policyPreflightMode=READONLY_DRY_RUN
+ownedStopIndependentOfReserveHeadroom=true
+allInputPathAncestorsRejectAliases=true
+diskMountPolicy=VERIFIED_DOCKER_OVERLAY_VIEWS_BACKED_BY_COUNTED_CONTAINERD
+physicalDuSingleFilesystem=true
+containerMountComparison=EXACT_OBJECTS_UNORDERED_NO_DUPLICATES
+launch_proof.py=0fac1866276fab7403a639b47fefd881354920e928c4b9e7c18afc65f54a41c7
+prepare_proof.py=a20ec861045cb207dbb7d3a8d3262449a088647c88d555e51833730988ddcb73
+proof_budget.py=3202100f6dfda3fb35fe9f9dfcb0f6ea4afd9dd92b56104480120778080bb17b
+proof_contract.py=d962e5cac0c67b852ef989280a3272afd569cab180020e770707249ee8564fbc
+proof_disk.py=c5eee36061ba408a66e3f08b0d450875445ee5bfa4fec08118642186deca80f3
+proof_docker.py=a8c327df2d911269eae32e77698892dcc40a53880edb54dde8c0ee485dd36968
+proof_files.py=0d6cb09bdb5a90deb42c9874c99da145e8a5ec0138dcd5e1f9daebe9bd99754c
+proof_install.py=c5e34fa43a084adeeb12523bd94beb05076efaf72cc1bb9ab2f9b7f7560ee3b3
+proof_startup.py=a5b3e775a53e6a2e37be613394b1f091c710ead84a09f307cf18c2c54f762b10
+run_stopped_proof.py=7e78769fa7ed00a82929260392ff3d56187e6592d3f393c84c4304e0692e9145
+verify_proof_guards.py=3fa7dfcf36e590f61547c5dc9ff9c3a25f4aeaf1312dc889a3abc7560833ffdc
+```
