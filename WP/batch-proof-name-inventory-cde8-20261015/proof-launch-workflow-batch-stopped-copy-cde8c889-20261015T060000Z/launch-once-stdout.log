@@ -1,0 +1,1 @@
+{"unit": "lims-workflow-batch-stopped-copy-cde8c889-20261015t060000z", "root": "/opt/lims/releases/workflow-batch-stopped-copy-cde8c889-20261015T060000Z", "launchExitCode": 0, "stdout": "", "stderr": "Running as unit: lims-workflow-batch-stopped-copy-cde8c889-20261015t060000z.service\n", "proofComplete": false, "neverReplay": true}
