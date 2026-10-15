@@ -1,3 +1,9 @@
+## New complete consumption-aware budget source82local+82host / review required
+
+This eleven-file graph implements actual Claudio direction6183215126 (02:45:02UTC), not new execution authority. Qualified B5/c03/B1 build and normalhealthy959d/7a/8109 predecessor remain separately bound. Applicationmaincde8/tree638/mainCI38636615469/all3actualauditsmerges remain unchanged. Fresh proposed root is /opt/lims/releases/workflow-batch-stopped-copy-cde8c889-20261015T040000Z, UNCREATED; all new operators unexecuted. Both020000/023000 failed roots remain immutable/consumed. Source scope still UPSTREAM raw snapshot/owned206214209installation/jobs-OFFstartup ONLY, terminalNOT_RELEASE_QUALIFIED; jobs-ON natural scheduler/intake/broadpostflights/exactkit/freshsingleusegate later.
+
+Declared70DB/3assets +25percent =>88equivalents, required64813597806 versusfresh58601160704, deficit6212437102. Known capacity refusal now BEFOREremoteROOT/unit; no newpackage/root/operator. Fullsource/stagebudget/freshstat/closed82proof at WP/batch-proof-budget-cde8-20261015/SOURCE_REVIEW.md. No source review request yet at publication. All other scope/guards/history retained.
+
 ## 2026-10-15 actualcapacity direction6183215126 / derived model successor required
 
 Clactual02:45:02UTC direction says128 is chosen-source margin, NOTYYpin; identifies fixed running reserve double-counting own retained consumption. Requests enumeratedcopy-site/stage/TMPDIR maxima budget,25percent margin roundedup/min64DB-equivalents, consumption-aware remaining checks and measuredstagegrowthcaps; floor10556150894/logs4GiB/assets3x/500MB/du-x/allrawsnapshotscontainers/YYpins/scientificgates unchanged; freshunusedroot/newexactreview. No host change currently required by that direction; no newsourcePASS/operation authority. Fullactualbody/currentapp/nativeREAD here. No duplicateack or capacityquestion.

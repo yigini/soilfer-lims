@@ -1,0 +1,20 @@
+{
+  "startedUtc": "2026-10-15T03:00:16.322410+00:00",
+  "sourceSha256Before": {
+    "launch_proof.py": "0fac1866276fab7403a639b47fefd881354920e928c4b9e7c18afc65f54a41c7",
+    "prepare_proof.py": "1d99d900625d2ed8ad116910932bad2e66d5faefe87881905d24a5f63ff8be2a",
+    "proof_budget.py": "963d5a0bdf8688e136a66d274920d8ce72dc3e92dd5c497108b991d46f7b812d",
+    "proof_contract.py": "1123fa79ae811cb066a62f49d7b01d13277991a3685917954ec690955c6c0d61",
+    "proof_disk.py": "c5eee36061ba408a66e3f08b0d450875445ee5bfa4fec08118642186deca80f3",
+    "proof_docker.py": "a8c327df2d911269eae32e77698892dcc40a53880edb54dde8c0ee485dd36968",
+    "proof_files.py": "89db461092e29c71904b3761159a3b99f00d20d96f1d5809881687e8238d21dc",
+    "proof_install.py": "aaf3a5f0ae206ee694881b97a339f05a3063052d2cb45d83919624572e0d3d5b",
+    "proof_startup.py": "a5b3e775a53e6a2e37be613394b1f091c710ead84a09f307cf18c2c54f762b10",
+    "run_stopped_proof.py": "7e78769fa7ed00a82929260392ff3d56187e6592d3f393c84c4304e0692e9145",
+    "verify_proof_guards.py": "c5c3173544ca6408ef1efc9faafcdc9e93b9eabb5d8bb00cada34c512bc7498d"
+  },
+  "scope": "COMPILE_GUARDS_NEW_SYNTHETIC_FIXTURES_ONLY",
+  "productionFileCopies": 0,
+  "productionConnections": 0,
+  "proofOperatorsExecuted": 0
+}
