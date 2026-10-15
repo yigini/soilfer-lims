@@ -1,0 +1,23 @@
+{
+  "argv": [
+    "cmd.exe",
+    "/d",
+    "/c",
+    "npm.cmd",
+    "test",
+    "--",
+    "--testMatch",
+    "**/tests/**/*.test.js",
+    "--runTestsByPath",
+    "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\startup_readiness_telemetry.test.js",
+    "--json",
+    "--outputFile",
+    "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\WP\\startup-order-readiness-20261015\\ready-telemetry-focused-once\\report-original.json"
+  ],
+  "nodeOptions": "",
+  "ordinarySetupsAndAssertions": true,
+  "workerIdleMemoryLimit": 512000000,
+  "localHiddenPathTestMatchFixtureOnly": true,
+  "ownedTemplate": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.owned-templates\\test_template_33522c62-1788-4298-8db6-06a0d4e5ff38.db",
+  "productionOperations": 0
+}
