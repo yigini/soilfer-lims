@@ -1,0 +1,33 @@
+{
+  "observedUtc": "2026-10-15T17:47:58.128304+00:00",
+  "status": "NEW_EXACT_BUILD_SOURCE_REVIEW_REQUESTED_ONCE",
+  "requestId": 6198527574,
+  "requestUrl": "https://github.com/yigini/soilfer-lims/issues/162#issuecomment-6198527574",
+  "requestCreatedUtc": "2026-10-15T17:46:11Z",
+  "toolingCommit": "2c0cebca0e9e191d2062c2f43756aa1d46e98c85",
+  "sourceFiles": 5,
+  "closedLocalGuards": 28,
+  "closedActualHostGuards": 28,
+  "sourceUnchanged": true,
+  "native": {
+    "freshReturnedApp": "Claude_pzs8sxrjxfjjc!Claude",
+    "freshUniqueReturnedWindow": 7867734,
+    "stateCapture": "window is minimized; call activate_window, refresh with get_window, then retry get_window_state",
+    "actualCurrentNativeContentObtained": false,
+    "activationInputNavigationTypingOrMessage": false,
+    "nativeAcknowledgementOrHandoffSent": false,
+    "humanDraftsCardsUntouched": true
+  },
+  "mainCiAcknowledgement": "Bundled ONCE in source-review request6198527574; no separate duplicate GH ACK/native message.",
+  "exactNewSourcePassClaimed": false,
+  "newOperationalPackageOrRoot": false,
+  "builds": 0,
+  "proofs": 0,
+  "cleanup": 0,
+  "productionOperations": 0,
+  "preparationRefusal": {
+    "kind": "TOOL_OUTPUT_TRANSCRIPTION",
+    "error": "functions exec SyntaxError Invalid or unexpected token due Markdown fence in JS source template; before any helper file creation or post; unique corrected helper posted once",
+    "remotePostCount": 1
+  }
+}
