@@ -1,0 +1,27 @@
+test_cache_state_and_graph (__main__.Guards.test_cache_state_and_graph) ... ok
+test_distinct_backup_refused (__main__.Guards.test_distinct_backup_refused) ... ok
+test_escape_refused (__main__.Guards.test_escape_refused) ... ok
+test_exact_plan (__main__.Guards.test_exact_plan) ... ok
+test_hash_and_symlink_guards_on_owned_files (__main__.Guards.test_hash_and_symlink_guards_on_owned_files) ... ERROR
+test_other_image_refused (__main__.Guards.test_other_image_refused) ... ok
+test_path_not_prefix (__main__.Guards.test_path_not_prefix) ... ok
+test_regex_injection_refused (__main__.Guards.test_regex_injection_refused) ... ok
+test_unapproved_proof_refused (__main__.Guards.test_unapproved_proof_refused) ... ok
+test_writes_not_during_import (__main__.Guards.test_writes_not_during_import) ... ok
+
+======================================================================
+ERROR: test_hash_and_symlink_guards_on_owned_files (__main__.Guards.test_hash_and_symlink_guards_on_owned_files)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\WP\yy-approved-safe-set-cleanup-20261015\verify_exact_cleanup_guards.py", line 36, in test_hash_and_symlink_guards_on_owned_files
+    self.assertEqual(m.hash_file(p,h,8)['sha256'],h)
+                     ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\WP\yy-approved-safe-set-cleanup-20261015\cleanup_exact_safe_set.py", line 68, in hash_file
+    fd=os.open(str(p),os.O_RDONLY|os.O_NOFOLLOW)
+                                  ^^^^^^^^^^^^^
+AttributeError: module 'os' has no attribute 'O_NOFOLLOW'
+
+----------------------------------------------------------------------
+Ran 10 tests in 0.010s
+
+FAILED (errors=1)

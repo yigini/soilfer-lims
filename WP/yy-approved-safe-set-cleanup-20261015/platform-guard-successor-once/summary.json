@@ -1,0 +1,14 @@
+{
+  "status": "PASS",
+  "localTests": 10,
+  "hostTests": 10,
+  "localExit": 0,
+  "hostExit": 0,
+  "hostPython": "3.9.23 (main, Aug 19 2025, 00:00:00) \n[GCC 11.5.0 20240719 (Red Hat 11.5.0-11)]",
+  "operatorSha256": "d21ce935b19b0368efc609116fbb8e15caa91ecdf87bb968ca353afc3746b8ed",
+  "planSha256": "bf008011f673f1bf6885c30ab82efb1474d79d9df922a08d3a5465f16adc357a",
+  "allSourceUnchanged": true,
+  "cleanupExecuted": false,
+  "hostDockerOperations": 0,
+  "fixtureTreesRetained": true
+}

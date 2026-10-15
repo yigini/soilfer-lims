@@ -1,0 +1,20 @@
+{
+  "observedUtc": "2026-10-15T10:18:03.617Z",
+  "observationNotProducerExactTimestamp": true,
+  "window": {
+    "app": "Claude_pzs8sxrjxfjjc!Claude",
+    "id": 7867734,
+    "title": "Claude"
+  },
+  "project": "LIMS Audit",
+  "thread": "Lab workflow audit and plan",
+  "actualHumanDecision": "Approve rule",
+  "cardText": "Approve the standing disk cleanup rule for Pip?",
+  "cardShows": "You chose · 12:12 PM",
+  "completedNativeReply": "The rule is now active. I have told Pip on #162 and will check every cleanup report in the hourly audit.",
+  "ghRule": 6189658753,
+  "ghActivation": 6189669837,
+  "oneTimeSafeSet": 6189633644,
+  "humanCardsNotAnsweredByAgent": true,
+  "inputActionsOtherThanWindowActivation": 0
+}

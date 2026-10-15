@@ -1,0 +1,19 @@
+{
+  "observedUtc": "2026-10-15T10:11:57.134Z",
+  "observationNotExactProducerTimestamp": true,
+  "window": {
+    "app": "Claude_pzs8sxrjxfjjc!Claude",
+    "id": 7867734,
+    "title": "Claude"
+  },
+  "project": "LIMS Audit",
+  "thread": "Lab workflow audit and plan",
+  "actualHumanDecision": "Safe set only",
+  "cardText": "Approve which items Pip removes from the server to free space?",
+  "cardShows": "You chose · 12:09 PM",
+  "completedClaudioReplyRead": true,
+  "exactGhRecord": 6189633644,
+  "followupHumanOk": "Standing rule drafting followup observed, implementation scope not inferred before full actual direction",
+  "inputActions": 0,
+  "humanCardsDraftsUntouched": true
+}
