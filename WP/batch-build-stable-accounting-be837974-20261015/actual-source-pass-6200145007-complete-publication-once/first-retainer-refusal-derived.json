@@ -1,0 +1,14 @@
+{
+  "source": "Conversation tool output transcription, not a separately retained original stderr file",
+  "helper": "WP/backlog-resume-20261013/retain-stable-accounting-source-pass6200145007-once.py",
+  "exitCode": 1,
+  "error": "RuntimeError: Complete source publication count differs",
+  "guardLine": 49,
+  "actualPublicationBindings": 63,
+  "publishedBlobsIncludingIndex": 64,
+  "beforeOutputDirectoryCreation": true,
+  "headUnchanged": "69a6802f0ad73771f3f73731b07919de09274ee9",
+  "stagedEmpty": true,
+  "operationsBeforeRefusal": "Local raw Git verification plus GitHub reads only; no host or operator",
+  "neverReplay": true
+}

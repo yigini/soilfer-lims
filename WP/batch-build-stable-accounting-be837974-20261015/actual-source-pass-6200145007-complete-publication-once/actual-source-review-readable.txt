@@ -1,0 +1,68 @@
+Source review: PASS
+
+This reviews the new build-only tooling graph at commit 4de3e334d8e498783a4cf20df4a5f93acfdbeb21, directory WP/batch-build-stable-accounting-be837974-20261015 (request 6199710872). It is a fresh review, and nothing in it relies on the earlier PASS 6199128746. That PASS is used up along with the 180000 root, and the 180000 image stays unqualified.
+
+What I checked:
+- The five file hashes match the request, and the 47 bindings generated from the contract match the request block line for line.
+- Nothing outside WP/ changed between 2c0cebca and 4de3e334, so the application inputs are the same.
+- The 180000 terminal record at 23e8dad8 hashes to 46d6cfa5..., is an ancestor of this commit, and records status FAILED with afterAllocations null and neverRetry true. validate_prior_startup_failure requires exactly that before preparing or building.
+- The guard suite passes locally, 39 of 39.
+
+The measurement change is in scope. Before-build gets a single du attempt, as before. After the build, a second complete du is allowed only when the first ends with exit 1 and the error output consists only of exact ENOENT lines for numeric snapshot directories directly under /var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots. The parent must be real, same-device and not an alias, and every missing path must still be absent. Mounts and storage topology are rechecked before and after each attempt, and a 2 second pause separates the two attempts. A timeout, permission error, foreign or nested path, exit 0 with any stderr, an incomplete or duplicate row, a topology change or a second failure all stop the build. Intents, raw outputs and results of every attempt are kept at mode 0400. Only a complete exit 0 inventory is accepted, and partial totals are never credited. The ENOENT path still uses the full 120 second and 64 KiB bounds.
+
+Scope: this authorizes one build-only qualification in the new root ...T190000Z. Before that build runs, the fresh unused-root and unit checks and the R4 checks at before-root, before-unit and before-build must all pass. It does not authorize a proof, cleanup, kit, gate, deploy, R2 prune, or any adoption or measurement of the 180000 root or image. noProofDatabaseRemovalPendingYY=true is historical: R1 amendment 6198899941 governs future R1 cleanup, and this builder prunes nothing.
+
+Bindings:
+```
+4de3e334d8e498783a4cf20df4a5f93acfdbeb21
+be8379745bdfae52ce46496ff26514dc7d729640
+676b01e71211786d1aeace50f19a0b2c9f9c482e
+mainCiRun=38772398721
+batchBuildScope=STARTUP_PERFORMANCE_NEW_APP_BUILD_ONLY_NO_DATABASE_CONNECTION_OR_VOLUME
+reserveFloorBytes=10556150894
+buildAllocationReserveBytes=4294967296
+buildTimeoutSeconds=1800
+buildUnitTimeoutSeconds=2700
+unexplainedGrowthAbortBytes=500000000
+diskGrowthPolicy=OWNED_BUILD_ROOT_AND_DISJOINT_DOCKER_AND_CONTAINERD_ALLOCATIONS
+labAndHubBuildsOwnedByYY=true
+releaseWindowControl=RELEASE_DAY_DISK_ABORTS_ACCEPTED
+originalBatchBuildRoot=/opt/lims/releases/workflow-batch-build-be837974-20261015T190000Z
+originalFailedBuildRoot=/opt/lims/releases/workflow-batch-build-cde8c889-20261014T221500Z
+metadataAnalysisAudit=850cc7670aceaa4fc2823aa3e0b5b5cf58c347da
+fallbackDirectionId=6180234041
+originalImageStillExcluded=true
+allocationIncludesContainerdRoot=/var/lib/containerd
+allocationMeasurementTimeoutSeconds=120
+batchBuildMemoryLimitBytes=805306368
+preflightFailureBuildCount=0
+r4ComputedRequirementPlusHeadroomBytes=10000000000
+r4CapacityBeforeRootAndUnitAndBuild=true
+r4CapacityModel=RAW_GIT_SOURCE_BLOCKS_PLUS25PCT_PACKAGE_4GIB_BUILD_PLUS_FIXED_FLOOR_PLUS10GB
+startupSourceAuditId=6195167175
+standingCapacityRuleId=6189658753
+standingCapacityActivationId=6189669837
+cleanupRuleReviewId=6191219093
+noProofDatabaseRemovalPendingYY=true
+cachePruningByThisBuilder=false
+priorFailedStartupBuildRoot=/opt/lims/releases/workflow-batch-build-be837974-20261015T180000Z
+priorFailedStartupBuildRecordSha256=46d6cfa5b9214c3ecca68d293086f4b97dd3d00840378a17261738cf696d0217
+postBuildWholeMeasurementMaxAttempts=2
+postBuildMeasurementAttemptTimeoutSeconds=120
+additionalMeasurementOnlyForExactMissingNumericContainerdSnapshotDirectory=true
+allPartialMeasurementOutputsRetainedNeverCredited=true
+noMeasurementOfFailed180000Root=true
+authority6189025975=071b37b60b7489fc47f53aee5d5a91726e967730ebdf40adbc22aef4b047ee7e
+authority6189658753=1b293cf3d6b7108293599ffabfc1273ebd5f158f69a6e11f58e467d7ffa42708
+authority6189669837=2821ccc164bbf344201e6569f707314a168ae6f308cbece73cc5065d9ad3ac7e
+authority6191219093=84289b1c85e65973f26d52199f539e13423d5803c83c38be34a515b089505f8f
+batch_build.py=e68acfe1760abc9740a509f52f8ab2092f56175b73000ef90feff2951a2c8ad8
+batch_build_contract.py=1a59194ff3ebb80772f96130e454281185d3c77387f476d3da8f2158543c60c6
+launch_batch_build.py=c00fcf7f57d86490c996c36d23719b436f25bc6063721afbcd8427dacb444b8a
+prepare_batch_build.py=6af97b27c20525694d6431769aeb313ff6b9d88c52e668cc4317a4a04117ed7f
+verify_build_guards.py=04baa9e7da93b43316ae6d154f59fac1fca8e362407867f83aa3d32d704010f5
+```
+
+
+---
+_Generated by [Claude Code](https://claude.ai/code)_
