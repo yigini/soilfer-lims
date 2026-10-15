@@ -1,0 +1,122 @@
+{
+  "baseAudit": "5b2678270e23dc53db4f3226f0861dd835c32d93",
+  "amendmentId": 6198899941,
+  "toolingCommit": "2c0cebca0e9e191d2062c2f43756aa1d46e98c85",
+  "files": [
+    {
+      "path": "WP/host-capacity-r1-amendment-6198899941-20261015/activation-original.json",
+      "length": 4262,
+      "sha256": "e6ea6a6dc2a0f13769eecd0f60780072b8a2902952d3ca30c7cae76017703dcf",
+      "gitBlobOid": "f3dd190c056690605fb142d1d5012cf368242194"
+    },
+    {
+      "path": "WP/host-capacity-r1-amendment-6198899941-20261015/actual-amendment-original.json",
+      "length": 5566,
+      "sha256": "e257fdab5780d1b5dab8d897a09e14c49fdfa862bdb0916a40db2c658116fb10",
+      "gitBlobOid": "495f350ce66edacdad89d7db5b317e159731095e"
+    },
+    {
+      "path": "WP/host-capacity-r1-amendment-6198899941-20261015/amendment-authority-pin.json",
+      "length": 2256,
+      "sha256": "2216dfa9efebbdc3099c1842ec481d6fa12714426588168444ae5169bf14f6ce",
+      "gitBlobOid": "1719270d15e028f424399ac8e9a9d9843cff61f5"
+    },
+    {
+      "path": "WP/host-capacity-r1-amendment-6198899941-20261015/amendment-readable.txt",
+      "length": 1853,
+      "sha256": "9d005334743f93883930fc59e234b7e702cce668c3eba2b9abbbe702648ce77e",
+      "gitBlobOid": "1e7b98804bdf27a38167c8fcbd899c86f1d2dbc5"
+    },
+    {
+      "path": "WP/host-capacity-r1-amendment-6198899941-20261015/boundary-record.json",
+      "length": 3781,
+      "sha256": "eadb925e7b292545d5c8c7015ecd5ffb12c7d5fe1e143ce0233efd471b661277",
+      "gitBlobOid": "99dd736226ec40a8cd8cacb457a592bbc00da8fe"
+    },
+    {
+      "path": "WP/host-capacity-r1-amendment-6198899941-20261015/build-source-request-original.json",
+      "length": 12925,
+      "sha256": "f8224dcff5af205de2508d76a8906bc951b61c3caeff847f42135edbf08baa1b",
+      "gitBlobOid": "b0992e3f5be6dd39f57539f41ca9a90c0287c920"
+    },
+    {
+      "path": "WP/host-capacity-r1-amendment-6198899941-20261015/coordination-after-handoff-original.json",
+      "length": 18529,
+      "sha256": "36f522f718d1a2e63440a0fe5856fa0796bb3495ba93d5a746180edf9086490d",
+      "gitBlobOid": "c452bba29832b729d2a17bc019525b23f2578794"
+    },
+    {
+      "path": "WP/host-capacity-r1-amendment-6198899941-20261015/earlier-cleanup-review-original.json",
+      "length": 5365,
+      "sha256": "1c74e5f354e8f2c434d333b1fcf5830d01224866b4c93bc44bfd83975510ab71",
+      "gitBlobOid": "bb55d6433c2bf870748261f9dd6a14ce840cfb55"
+    },
+    {
+      "path": "WP/host-capacity-r1-amendment-6198899941-20261015/frozen-inputs-reverified.json",
+      "length": 10558,
+      "sha256": "cac73f5096ffc12c14f4e3be188d8a6ae93fdcff8ca0f35213060ebc6cdb27b7",
+      "gitBlobOid": "6b305c3014aa8fdbb1563638940937072343f537"
+    },
+    {
+      "path": "WP/host-capacity-r1-amendment-6198899941-20261015/issue191-original.json",
+      "length": 9900,
+      "sha256": "bc4738533768c757f88b972f09cccc22cff5b847d4128bbc0b730b4f7e93e352",
+      "gitBlobOid": "90f0e8b2cb84a0ac8acacefdf3cab9b09f7dfb54"
+    },
+    {
+      "path": "WP/host-capacity-r1-amendment-6198899941-20261015/main-ci-original.json",
+      "length": 12122,
+      "sha256": "2c90f06107206bb4bdb799a458e15a3d80a58f486c6c741ca9841a70daca5388",
+      "gitBlobOid": "0798de0a7cc5c38b2370d644e53882c54d9a102a"
+    },
+    {
+      "path": "WP/host-capacity-r1-amendment-6198899941-20261015/main-original.json",
+      "length": 336,
+      "sha256": "5dbe45b3d22a65a8a14dc291df3e7fc536f7465cceca1682788cdb46d6448679",
+      "gitBlobOid": "304c7641f875df313b3c12146f7ce990a7872ee7"
+    },
+    {
+      "path": "WP/host-capacity-r1-amendment-6198899941-20261015/native-handoff-actual-sent.txt",
+      "length": 2541,
+      "sha256": "a7db6423df77b158b56b30c83aea461dda19a3dc35e2878cbc930747273998e0",
+      "gitBlobOid": "5973fd0d6bf476ca4776bf7239f67b0b640f91bb"
+    },
+    {
+      "path": "WP/host-capacity-r1-amendment-6198899941-20261015/native-observation-and-delivery-derived.json",
+      "length": 3950,
+      "sha256": "90223f14c48a8172c20c16c2ff671d36ff65cf0a4e3682773c8867128726298a",
+      "gitBlobOid": "e0266ad21061421d395a0d3505412d1a739cd2cf"
+    },
+    {
+      "path": "WP/host-capacity-r1-amendment-6198899941-20261015/pr298-after-handoff-original.json",
+      "length": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "gitBlobOid": "0637a088a01e8ddab3bf3fa98dbe804cbde1a0dc"
+    },
+    {
+      "path": "WP/host-capacity-r1-amendment-6198899941-20261015/standing-rule-original.json",
+      "length": 6654,
+      "sha256": "433dee0b65e0a046bf905aa59f8a2c6821f484026a08674def660fb2a0a55607",
+      "gitBlobOid": "e9910f23a7ffc3e61d39f45f89115a7db7455cd0"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/retain-r1-amendment6198899941-and-build-native-handoff-once.py",
+      "length": 14120,
+      "sha256": "39238ce47f1fe436dff35d39890faeb016a8cd14eb8891b8984f5e7c2c5b6988",
+      "gitBlobOid": "d8721fe515819d7cd3fdf2e703fcab6c752cf0d7"
+    },
+    {
+      "path": "WP/audit-release-eb6de2e8/README.md",
+      "length": 644694,
+      "sha256": "f86dcc216dd559347ebff25dc32f71f01bb9348d1ec0e52bd0982cafb5cc215b",
+      "gitBlobOid": "31a70644666e7fdeb99d9984935c332562000d4f"
+    },
+    {
+      "path": "WP/runtime-recovery-kobo/README.md",
+      "length": 393987,
+      "sha256": "3add77df02ddeec9ebfb6faf6a817bdf4edb74485c3c94658ce1a242b9b24649",
+      "gitBlobOid": "ffc498cb5befc8769663a92b5a3a0cf15c8989d9"
+    }
+  ],
+  "hostOrProductionOperations": 0
+}
