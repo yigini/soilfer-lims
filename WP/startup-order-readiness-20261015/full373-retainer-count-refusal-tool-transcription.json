@@ -1,0 +1,10 @@
+{
+  "kind": "TOOL_OUTPUT_TRANSCRIPTION",
+  "helper": "WP/backlog-resume-20261013/retain-startup-pinned-copy-full373-closed-pass-once.py",
+  "actualExitCode": 1,
+  "actualError": "AssertionError at assert len(originals) == 19, line66",
+  "boundary": "Before output directory, records, README edit, staging, commit or push; all run originals untouched",
+  "actualOriginalFileCount": 18,
+  "fullPassUnaffected": true,
+  "consumedNeverReplay": true
+}
