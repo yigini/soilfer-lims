@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+const { openReadonlyDatabase } = require('../utils/startupReadinessContext');
 const path = require('node:path');
 const { createHash } = require('node:crypto');
 const Database = require('better-sqlite3');
@@ -22,12 +23,12 @@ function assertIntegrity(db) {
     }
 }
 
-function installQcGateScope({ dbPath, apply = false } = {}) {
+function installQcGateScope({ dbPath, apply = false, startupContext} = {}) {
     if (typeof dbPath !== 'string' || !dbPath.trim()) throw fail('QC_GATE_SCOPE_DATABASE_REQUIRED', 'An explicit database path is required.');
     const target = path.resolve(dbPath);
-    const prior = require('./install_qc_runs').installQcRuns({ dbPath: target });
+    const prior = require('./install_qc_runs').installQcRuns({ dbPath: target, startupContext: apply ? undefined : startupContext });
     if (prior.classification !== 'COMPLETE') throw fail('QC_GATE_SCOPE_PRIOR_REQUIRED', 'Install normalized QC runs first.');
-    const reader = new Database(target, { readonly: true, fileMustExist: true });
+    const reader = openReadonlyDatabase(Database, target, { readonly: true, fileMustExist: true }, apply ? undefined : startupContext);
     let planned, count, fingerprint;
     try {
         reader.transaction(() => {
@@ -69,8 +70,8 @@ function installQcGateScope({ dbPath, apply = false } = {}) {
     } finally { db.close(); }
 }
 
-function assertQcGateScopeStartupReady(dbPath) {
-    const outcome = installQcGateScope({ dbPath });
+function assertQcGateScopeStartupReady(dbPath, startupContext) {
+    const outcome = installQcGateScope({ dbPath, startupContext });
     if (outcome.classification !== 'COMPLETE') throw fail('QC_GATE_SCOPE_NOT_INSTALLED', 'Install the reviewed QC scope guards before startup.');
     return outcome;
 }

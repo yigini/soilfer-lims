@@ -1,0 +1,70 @@
+FAIL tests/contracts/startup_readiness_context.test.js (5.743 s)
+  × all 26 startup reports equal the legacy default path; one physical integrity/FK check and one retained policy snapshot (801 ms)
+  √ policy schema refusal keeps the legacy code, message, differences and stage (537 ms)
+  √ order schema refusal keeps the legacy code, message, differences and stage (722 ms)
+  √ control chart schema refusal keeps the legacy code and stage (615 ms)
+  √ bad shared SQL results still reach the existing owner refusal: {"corruptIntegrity":true} (48 ms)
+  √ bad shared SQL results still reach the existing owner refusal: {"corruptForeignKeys":true} (57 ms)
+  × a new startup never reuses a prior startup result (467 ms)
+  √ changed bytes between stages cannot inherit cached integrity or chart results (111 ms)
+  √ context closes on refusal and cannot be reused for another database (18 ms)
+
+  ● all 26 startup reports equal the legacy default path; one physical integrity/FK check and one retained policy snapshot
+
+    expect(received).toHaveLength(expected)
+
+    Expected length: 1
+    Received length: 2
+    Received array:  [{"sql": "integrity_check", "target": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\startup-readiness-vgsw8G\\owned.db"}, {"sql": "integrity_check", "target": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\startup-readiness-vgsw8G\\owned.db"}]
+
+      90 |     expect(current.outcomes).toHaveLength(26);
+      91 |     expect(current.outcomes.every(row => row.report && !row.error)).toBe(true);
+    > 92 |     expect(current.physical.filter(row => row.sql === 'integrity_check')).toHaveLength(1);
+         |                                                                           ^
+      93 |     expect(current.physical.filter(row => row.sql === 'foreign_key_check')).toHaveLength(1);
+      94 |     expect(old.physical.length).toBeGreaterThan(2);
+      95 |     expect(current.snapshotCopies).toBe(1);
+
+      at Object.toHaveLength (tests/contracts/startup_readiness_context.test.js:92:75)
+
+  ● a new startup never reuses a prior startup result
+
+    expect(received).toHaveLength(expected)
+
+    Expected length: 1
+    Received length: 2
+    Received array:  [{"sql": "integrity_check", "target": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\startup-readiness-g9WnhL\\owned.db"}, {"sql": "integrity_check", "target": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\startup-readiness-g9WnhL\\owned.db"}]
+
+      137 |     expect(first.outcomes).toEqual(second.outcomes);
+      138 |     for (const run of [first, second]) {
+    > 139 |         expect(run.physical.filter(row => row.sql === 'integrity_check')).toHaveLength(1);
+          |                                                                           ^
+      140 |         expect(run.physical.filter(row => row.sql === 'foreign_key_check')).toHaveLength(1);
+      141 |     }
+      142 | });
+
+      at Object.toHaveLength (tests/contracts/startup_readiness_context.test.js:139:75)
+
+  console.log
+    {"event":"ORDER_IMPACT_OWNED_SEEDED_QUERY_MEASUREMENT","samples":12000,"oldElapsedMs":413.42019999999957,"newElapsedMs":395.6270999999997,"oldPointLookups":12000,"newPointLookups":0,"reportsEqual":true,"rssBytes":403423232,"notProductionTimingOrStartupQualification":true}
+
+      at Object.log (tests/contracts/order_revision_impact_set_query.test.js:128:17)
+
+PASS tests/contracts/order_revision_impact_set_query.test.js
+  √ all nonzero refusal, malformed-selection, reservation and approved-amendment report fields match the legacy query (54 ms)
+  √ missing sample keeps the legacy failure rather than silently dropping its fraction owners (2 ms)
+  √ empty impact is unchanged and the join adds no fields to reported owner objects (1 ms)
+  √ large seeded impact remains equivalent while replacing all per-sample lookups with one set query (2373 ms)
+
+PASS tests/contracts/startup_readiness_telemetry.test.js
+  √ all 26 real READY call sites retain their order and results, with per-stage timing and RSS (10 ms)
+  √ stage 1 refusal emits no READY for that stage or any successor, and cannot load the server (2 ms)
+  √ stage 24 refusal emits no READY for that stage or any successor, and cannot load the server (1 ms)
+  √ stage 26 refusal emits no READY for that stage or any successor, and cannot load the server (2 ms)
+
+Test Suites: 1 failed, 2 passed, 3 total
+Tests:       2 failed, 15 passed, 17 total
+Snapshots:   0 total
+Time:        8.617 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\startup_readiness_context.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\startup_readiness_telemetry.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\order_revision_impact_set_query.test.js".
+Test results written to: ..\WP\startup-order-readiness-20261015\managed-bootstrap-focused-once\report-original.json

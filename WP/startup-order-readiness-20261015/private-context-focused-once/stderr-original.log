@@ -1,0 +1,121 @@
+FAIL tests/contracts/startup_readiness_context.test.js
+  × all 26 startup reports equal the legacy default path; one physical integrity/FK check and one retained policy snapshot (48 ms)
+  × policy schema refusal keeps the legacy code, message, differences and stage (28 ms)
+  × order schema refusal keeps the legacy code, message, differences and stage (30 ms)
+  × control chart schema refusal keeps the legacy code and stage (26 ms)
+  √ bad shared SQL results still reach the existing owner refusal: {"corruptIntegrity":true} (53 ms)
+  √ bad shared SQL results still reach the existing owner refusal: {"corruptForeignKeys":true} (63 ms)
+  × a new startup never reuses a prior startup result (28 ms)
+  √ changed bytes between stages cannot inherit cached integrity or chart results (133 ms)
+  √ context closes on refusal and cannot be reused for another database (24 ms)
+
+  ● all 26 startup reports equal the legacy default path; one physical integrity/FK check and one retained policy snapshot
+
+    expect(received).toHaveLength(expected)
+
+    Expected length: 26
+    Received length: 1
+    Received array:  [{"error": {"code": "WORKFLOW_GUARDS_SCHEMA_MISMATCH", "differences": [{"additions": [true, true, true, true], "evidencePresent": true, "guardPresence": [true, true, true, true, true, true, true, true, true, true, …], "markerPresent": false, "message": "The objects match the source but the marker is absent.", "object": "workflow schema"}], "message": "The workflow schema differs from the release."}, "script": "install_workflow_state_guards"}]
+
+      88 |     const old = startup(file), current = startup(file, { shared: true });
+      89 |     expect(current.outcomes).toEqual(old.outcomes);
+    > 90 |     expect(current.outcomes).toHaveLength(26);
+         |                              ^
+      91 |     expect(current.outcomes.every(row => row.report && !row.error)).toBe(true);
+      92 |     expect(current.physical.filter(row => row.sql === 'integrity_check')).toHaveLength(1);
+      93 |     expect(current.physical.filter(row => row.sql === 'foreign_key_check')).toHaveLength(1);
+
+      at Object.toHaveLength (tests/contracts/startup_readiness_context.test.js:90:30)
+
+  ● policy schema refusal keeps the legacy code, message, differences and stage
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "LAB_POLICY_SCHEMA_MISMATCH"
+    Received: "WORKFLOW_GUARDS_SCHEMA_MISMATCH"
+
+      109 |     const old = startup(file), current = startup(file, { shared: true });
+      110 |     expect(current.outcomes).toEqual(old.outcomes);
+    > 111 |     expect(current.outcomes.at(-1).error.code).toBe(code);
+          |                                                ^
+      112 | });
+      113 |
+      114 | test('control chart schema refusal keeps the legacy code and stage', () => {
+
+      at toBe (tests/contracts/startup_readiness_context.test.js:111:48)
+
+  ● order schema refusal keeps the legacy code, message, differences and stage
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "ORDER_REVISION_SCHEMA_MISMATCH"
+    Received: "WORKFLOW_GUARDS_SCHEMA_MISMATCH"
+
+      109 |     const old = startup(file), current = startup(file, { shared: true });
+      110 |     expect(current.outcomes).toEqual(old.outcomes);
+    > 111 |     expect(current.outcomes.at(-1).error.code).toBe(code);
+          |                                                ^
+      112 | });
+      113 |
+      114 | test('control chart schema refusal keeps the legacy code and stage', () => {
+
+      at toBe (tests/contracts/startup_readiness_context.test.js:111:48)
+
+  ● control chart schema refusal keeps the legacy code and stage
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "QC_CHART_SCHEMA_MISMATCH"
+    Received: "WORKFLOW_GUARDS_SCHEMA_MISMATCH"
+
+      119 |     const old = startup(file), current = startup(file, { shared: true });
+      120 |     expect(current.outcomes).toEqual(old.outcomes);
+    > 121 |     expect(current.outcomes.at(-1).error.code).toBe('QC_CHART_SCHEMA_MISMATCH');
+          |                                                ^
+      122 | });
+      123 |
+      124 | test.each([
+
+      at Object.toBe (tests/contracts/startup_readiness_context.test.js:121:48)
+
+  ● a new startup never reuses a prior startup result
+
+    expect(received).toHaveLength(expected)
+
+    Expected length: 1
+    Received length: 0
+    Received array:  []
+
+      137 |     expect(first.outcomes).toEqual(second.outcomes);
+      138 |     for (const run of [first, second]) {
+    > 139 |         expect(run.physical.filter(row => row.sql === 'integrity_check')).toHaveLength(1);
+          |                                                                           ^
+      140 |         expect(run.physical.filter(row => row.sql === 'foreign_key_check')).toHaveLength(1);
+      141 |     }
+      142 | });
+
+      at Object.toHaveLength (tests/contracts/startup_readiness_context.test.js:139:75)
+
+  console.log
+    {"event":"ORDER_IMPACT_OWNED_SEEDED_QUERY_MEASUREMENT","samples":12000,"oldElapsedMs":421.43910000000005,"newElapsedMs":536.0170000000003,"oldPointLookups":12000,"newPointLookups":0,"reportsEqual":true,"rssBytes":404070400,"notProductionTimingOrStartupQualification":true}
+
+      at Object.log (tests/contracts/order_revision_impact_set_query.test.js:128:17)
+
+PASS tests/contracts/order_revision_impact_set_query.test.js
+  √ all nonzero refusal, malformed-selection, reservation and approved-amendment report fields match the legacy query (60 ms)
+  √ missing sample keeps the legacy failure rather than silently dropping its fraction owners (2 ms)
+  √ empty impact is unchanged and the join adds no fields to reported owner objects (2 ms)
+  √ large seeded impact remains equivalent while replacing all per-sample lookups with one set query (2893 ms)
+
+PASS tests/contracts/startup_readiness_telemetry.test.js
+  √ all 26 real READY call sites retain their order and results, with per-stage timing and RSS (9 ms)
+  √ stage 1 refusal emits no READY for that stage or any successor, and cannot load the server (2 ms)
+  √ stage 24 refusal emits no READY for that stage or any successor, and cannot load the server (2 ms)
+  √ stage 26 refusal emits no READY for that stage or any successor, and cannot load the server (2 ms)
+
+Test Suites: 1 failed, 2 passed, 3 total
+Tests:       5 failed, 12 passed, 17 total
+Snapshots:   0 total
+Time:        6.519 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\startup_readiness_context.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\startup_readiness_telemetry.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\order_revision_impact_set_query.test.js".
+Test results written to: ..\WP\startup-order-readiness-20261015\private-context-focused-once\report-original.json

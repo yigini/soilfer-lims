@@ -1,0 +1,892 @@
+{
+  "status": "SOURCE_DRAFT23PASS_FULL_ORDINARY_ACTIVE_OPEN_ONLY",
+  "scopeDirection": 6189025975,
+  "sourceBase": "047fe1daae898d3f17100c5556e5854ce17fe9e3",
+  "appPaths": [
+    "server/index.js",
+    "server/scripts/install_workflow_state_guards.js",
+    "server/scripts/install_result_attempt_links.js",
+    "server/scripts/install_sample_holds.js",
+    "server/scripts/install_reference_materials.js",
+    "server/scripts/install_qc_rules.js",
+    "server/scripts/install_qc_runs.js",
+    "server/scripts/install_qc_gate_scope.js",
+    "server/scripts/install_proficiency_evidence.js",
+    "server/scripts/install_nonconformity_reports.js",
+    "server/scripts/install_result_equipment_evidence.js",
+    "server/scripts/install_work_attempt_contract.js",
+    "server/scripts/install_work_repeat_contract.js",
+    "server/scripts/install_reported_value_selections.js",
+    "server/scripts/install_batch_reagent_lots.js",
+    "server/scripts/install_result_override_requests.js",
+    "server/scripts/install_calculation_templates.js",
+    "server/scripts/install_cross_check_evaluations.js",
+    "server/scripts/install_sample_amendment_authorisation.js",
+    "server/scripts/install_report_revisions.js",
+    "server/scripts/install_bench_credentials.js",
+    "server/scripts/install_preparation_records.js",
+    "server/scripts/install_instrument_imports.js",
+    "server/scripts/install_sample_containers.js",
+    "server/scripts/install_lab_policy_schema.js",
+    "server/scripts/install_control_charts.js",
+    "server/scripts/install_order_revisions.js",
+    "server/utils/startupReadinessContext.js",
+    "server/utils/startupReadinessTelemetry.js",
+    "server/tests/contracts/startup_readiness_context.test.js",
+    "server/tests/contracts/startup_readiness_telemetry.test.js",
+    "server/tests/contracts/order_revision_impact_set_query.test.js",
+    "server/tests/fixtures/order_revision_impact_before_set_query.txt",
+    "server/tests/helpers/qcGateFixture.js"
+  ],
+  "focusedSummary": {
+    "status": "PASS",
+    "closedUtc": "2026-10-15T11:11:25.307857+00:00",
+    "exitCode": 0,
+    "suites": 3,
+    "tests": 23,
+    "passed": 23,
+    "failed": 0,
+    "pending": 0,
+    "sourceUnchanged": true,
+    "frozenPaths": 962,
+    "exactInventory": true,
+    "ordinarySetupsAndAssertions": true,
+    "productionOperations": 0,
+    "notFullSuiteCiOrRuntimeStartupProof": true
+  },
+  "fullOpenMetadata": {
+    "status": "RUNNING_METADATA_ONLY",
+    "startedUtc": "2026-10-15T11:14:18.597918+00:00",
+    "inventory": 373,
+    "expectedTests": 5672,
+    "frozenPaths": 1332,
+    "sourceAudit": "047fe1daae898d3f17100c5556e5854ce17fe9e3",
+    "notCiOrRuntimeStartupQualification": true,
+    "closedLogsExist": false,
+    "productionOperations": 0
+  },
+  "receiptComment": 6190239878,
+  "nativeReceiptSent": false,
+  "files": [
+    {
+      "path": "server/index.js",
+      "bytes": 13542,
+      "sha256": "e600a6b3117a4e3eca26b80a5f9260eba4e2f9219c6c15b941420c144c57ec46"
+    },
+    {
+      "path": "server/scripts/install_batch_reagent_lots.js",
+      "bytes": 10509,
+      "sha256": "dcb9d2333ea3e2f8da6e6031d15f364d5ce80f944155f80bc5a041fd0720c47f"
+    },
+    {
+      "path": "server/scripts/install_bench_credentials.js",
+      "bytes": 7744,
+      "sha256": "b01c4956eaaab3b01077e38db4443869cfe451599040b98d4692cf5525a623b7"
+    },
+    {
+      "path": "server/scripts/install_calculation_templates.js",
+      "bytes": 5758,
+      "sha256": "69147dc8e94b9cbe9622dc058fe704df812715aa16e75437e5bfa9405c19c47b"
+    },
+    {
+      "path": "server/scripts/install_control_charts.js",
+      "bytes": 8840,
+      "sha256": "884879ed9e846866597bb5e3c0e7a58c5d95c07cd48ca2579e4df56af79fb727"
+    },
+    {
+      "path": "server/scripts/install_cross_check_evaluations.js",
+      "bytes": 9671,
+      "sha256": "6c79dd334baf917eb646a496effde7ac806a7a9686c21786fd1a121c2941a3e9"
+    },
+    {
+      "path": "server/scripts/install_instrument_imports.js",
+      "bytes": 8760,
+      "sha256": "e47add4c9d1edb10590a090b3e78d10fd1e86fdbae904c3ccddbdb7a2ceae6a5"
+    },
+    {
+      "path": "server/scripts/install_lab_policy_schema.js",
+      "bytes": 11818,
+      "sha256": "b86c106a64152b2a83b9f31dab64ba38a3a27d218b87da274c5cc20fcba49240"
+    },
+    {
+      "path": "server/scripts/install_nonconformity_reports.js",
+      "bytes": 7712,
+      "sha256": "ce34ee2d91a48c4af4b576b0f48adf0068550904e25343ed3a61449634e58543"
+    },
+    {
+      "path": "server/scripts/install_order_revisions.js",
+      "bytes": 18844,
+      "sha256": "b08c8d5a5850da38bb3d599b51552365655a61159d82b49162f5103a155a58a0"
+    },
+    {
+      "path": "server/scripts/install_preparation_records.js",
+      "bytes": 9476,
+      "sha256": "0134b9199fd2d9dcf81c4ba25c4c0caddb6c0e1b5c170af02743ee0c25de8577"
+    },
+    {
+      "path": "server/scripts/install_proficiency_evidence.js",
+      "bytes": 8082,
+      "sha256": "4a7118a30d1004bc93dd06fc347d306d23814696ae7f02e38499ba043c2cc7f1"
+    },
+    {
+      "path": "server/scripts/install_qc_gate_scope.js",
+      "bytes": 6155,
+      "sha256": "ab46daa34952cd0abc4e444fe150a165bc9ef0d70987028c56a928fcbc725859"
+    },
+    {
+      "path": "server/scripts/install_qc_rules.js",
+      "bytes": 8554,
+      "sha256": "2921144070d7a788154e3b0e1244423ab4330045b5d1acb6e01824bae79a4fb3"
+    },
+    {
+      "path": "server/scripts/install_qc_runs.js",
+      "bytes": 10244,
+      "sha256": "579de1ce65aead08525b6dc20dbce88de87806e3ae0a8ccf3c2f40e4f631a227"
+    },
+    {
+      "path": "server/scripts/install_reference_materials.js",
+      "bytes": 10606,
+      "sha256": "fc9012a527377a5f938e46e802f52bf9d5832e00ea4edbf5e5dbcd3eabe6a952"
+    },
+    {
+      "path": "server/scripts/install_report_revisions.js",
+      "bytes": 8904,
+      "sha256": "0dbe6ce0349fc280e948765a4dce06a0edaa83c7128664987ac544209d282232"
+    },
+    {
+      "path": "server/scripts/install_reported_value_selections.js",
+      "bytes": 7075,
+      "sha256": "bbf1a3c39b1762429721f679af2fe646134ded08a3a39d7c9534798170ca0191"
+    },
+    {
+      "path": "server/scripts/install_result_attempt_links.js",
+      "bytes": 7955,
+      "sha256": "1c4a6299df5d25cf43379e069a243a9d99e1ec7ade09e3fbc74af9115a782836"
+    },
+    {
+      "path": "server/scripts/install_result_equipment_evidence.js",
+      "bytes": 6956,
+      "sha256": "d840f91225f91145a056d37ae16fc87e732dbf1ffbd2ad655934619556ff71f1"
+    },
+    {
+      "path": "server/scripts/install_result_override_requests.js",
+      "bytes": 11773,
+      "sha256": "792914938d027b80ecd3026635b5b76cf6c0db0c13f52602e264102279251c3d"
+    },
+    {
+      "path": "server/scripts/install_sample_amendment_authorisation.js",
+      "bytes": 13052,
+      "sha256": "72cc54043ffbcd72f48949ff78937b4cb83979b2ca617db8b7a7c595434e1b2c"
+    },
+    {
+      "path": "server/scripts/install_sample_containers.js",
+      "bytes": 9143,
+      "sha256": "35dafc6c1e177e48c7af957990c155ac44f92204082a6fcb875c95e60712338b"
+    },
+    {
+      "path": "server/scripts/install_sample_holds.js",
+      "bytes": 10891,
+      "sha256": "0f2dbbaefc367f0bbc4e5bff9fe433b6e95b622d468da7b1c6a4f4362ef3918f"
+    },
+    {
+      "path": "server/scripts/install_work_attempt_contract.js",
+      "bytes": 17120,
+      "sha256": "77b29ba1c46670a31dd2dba775c093910506ac32da3bfd97ebe27bc383307925"
+    },
+    {
+      "path": "server/scripts/install_work_repeat_contract.js",
+      "bytes": 8544,
+      "sha256": "19cf7360844264bf06010e2603f54036f978b56b6a2f79620d9e1d18939fce06"
+    },
+    {
+      "path": "server/scripts/install_workflow_state_guards.js",
+      "bytes": 15860,
+      "sha256": "6b8baf5db9736ba90e74809065fd56c6815f5ed8d1cf4d2aa946705836465233"
+    },
+    {
+      "path": "server/tests/contracts/order_revision_impact_set_query.test.js",
+      "bytes": 7216,
+      "sha256": "58efeb5add6a0609124879e061a1a760d4240c7e1f951994d2998f0d7ef427d7"
+    },
+    {
+      "path": "server/tests/contracts/startup_readiness_context.test.js",
+      "bytes": 14197,
+      "sha256": "e746c519939d0cd4a415b0ce098807c8cc25578f4447afb6046064c703958ec0"
+    },
+    {
+      "path": "server/tests/contracts/startup_readiness_telemetry.test.js",
+      "bytes": 4619,
+      "sha256": "1a79a2c40bd2ba4bd130a73e355e3f24141cee8dffd3c020d1310bb953a2ddfd"
+    },
+    {
+      "path": "server/tests/fixtures/order_revision_impact_before_set_query.txt",
+      "bytes": 6788,
+      "sha256": "d9e3ce2a0c107c8ef61ef3a5d7b43c0dca625b2c639df72236b9e76ce4eaf6a2"
+    },
+    {
+      "path": "server/tests/helpers/qcGateFixture.js",
+      "bytes": 9044,
+      "sha256": "2e5825d34b2d2b5f48b0d8794ac8fbd835da275151b44f11d7cc06b8b1cebe9d"
+    },
+    {
+      "path": "server/utils/startupReadinessContext.js",
+      "bytes": 5882,
+      "sha256": "c328939e883ec20b60414109af1139c25a5c884546a9ade0f2d391b88467878b"
+    },
+    {
+      "path": "server/utils/startupReadinessTelemetry.js",
+      "bytes": 328,
+      "sha256": "e04866fe4112a4c98bf165cc23d0ea080507f4c4038606c5135f97856809d2a4"
+    },
+    {
+      "path": "WP/audit-release-eb6de2e8/README.md",
+      "bytes": 615689,
+      "sha256": "7c24e7fa84a6f894a0f17bde4f6711f4aefc991952b8ffbc782acf8a1e041a49"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/prepare-startup-check-attribution-successor-once.py",
+      "bytes": 1592,
+      "sha256": "ce427a43a0d25a513f5a3e53bdd0e9a732ebf4774a0d4ad9d3b87cd9c8a68181"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/prepare-startup-full-ordinary-successor-once.py",
+      "bytes": 1097,
+      "sha256": "e1fc36009811d8a44573275af7743a2b3f364efe07e15d3a9a2ae88e9664823d"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/prepare-startup-managed-bootstrap-exact-successor-once.py",
+      "bytes": 1965,
+      "sha256": "4aeb4ce45a973b988092b0a86936983b11aef5765ee3e2681f1761aa86f796fe"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/prepare-startup-managed-bootstrap-successor-once.py",
+      "bytes": 1799,
+      "sha256": "0a877aa7b3710d3ec4b9b714cfdce5bfc9f76340f3c4c7e95c370bd1785c5b2d"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/prepare-startup-managed-fixture-successor-once.py",
+      "bytes": 2962,
+      "sha256": "f6fe289e5a046bbd40740e9b0c801db2ac7397fdd76e74aa720784113df45304"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/prepare-startup-nested-qc-context-successor-once.py",
+      "bytes": 1959,
+      "sha256": "bc4df5ba958be52a26bef8c988505971d9c5172127de325515f6c9f04447a2e6"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/prepare-startup-private-context-draft-once.py",
+      "bytes": 4599,
+      "sha256": "4aafab71085cbc33d9455ad0a8a7d61fd5cf8c46e8fd28349e1a57fcbf390f07"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/prepare-startup-shared-pragma-views-successor-once.py",
+      "bytes": 2649,
+      "sha256": "28e9993d3b5ef2437cf0d6a3cca52c801d9d524e5b232a6c9de7935897edb65d"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/publish-startup-context-focused-and-full-open-once.py",
+      "bytes": 11684,
+      "sha256": "10894ac089322aa30650f5cfd46cfaf63b5b1305c725327fea6d833cb4cbc0dc"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/verify-startup-check-attribution-focused-once.py",
+      "bytes": 3786,
+      "sha256": "73341bd02813e84f86d5bbe3c74d671df3105b797b4ee853e3368d16589aae75"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/verify-startup-context-full-ordinary-once.py",
+      "bytes": 8184,
+      "sha256": "22f26bdef4956ea213b3baeeeaa656c60c76ea7e4bd51dbabc7a966bea52bad0"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/verify-startup-managed-bootstrap-focused-once.py",
+      "bytes": 3744,
+      "sha256": "178c6a92d7ad62b5eeae97b9550d3c4c5231c7d618369e59c0cf871874f594ba"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/verify-startup-managed-context-focused-once.py",
+      "bytes": 3742,
+      "sha256": "84adc03f3c901b0ad768e1d482bb3fa46c82ac3343fc996a44af99326f91026b"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/verify-startup-nested-qc-context-guards-focused-once.py",
+      "bytes": 3793,
+      "sha256": "e8fc751f52c701f762529e0b7e9b3bbe0713a55f2b9c3087deef2ba68ad8829e"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/verify-startup-private-context-focused-once.py",
+      "bytes": 3742,
+      "sha256": "d3c542b276651adc7718d88d25c635066fdec5484ccd8ee2be41e5c42407f5a2"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/verify-startup-shared-pragma-views-focused-once.py",
+      "bytes": 3746,
+      "sha256": "050494efc5f48780aa1b8d9e9cbd99659c9acb52030815d1064fbe5128453a90"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/check-attribution-focused-once/command.json",
+      "bytes": 953,
+      "sha256": "adde38908bd770c3a361a2692f3adcc66c19d61dead38665f0f88a4b72e43c53"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/check-attribution-focused-once/config-original.json",
+      "bytes": 7093,
+      "sha256": "d7835d207af2fcc4b43bc1ec73dfe00d2a87c8ff25f9abb97b4de7f724ccfb44"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/check-attribution-focused-once/config-stderr-original.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/check-attribution-focused-once/report-original.json",
+      "bytes": 17715,
+      "sha256": "d4f8487db45f385ccaa85f58f0081f50ba91816fff095f44904138b46797435d"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/check-attribution-focused-once/source-after.json",
+      "bytes": 118099,
+      "sha256": "01aca281e4ebc52c8c71ec2d54765276389e9c9fef5504e5043228620cdd974d"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/check-attribution-focused-once/source-before.json",
+      "bytes": 118099,
+      "sha256": "01aca281e4ebc52c8c71ec2d54765276389e9c9fef5504e5043228620cdd974d"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/check-attribution-focused-once/stderr-original.log",
+      "bytes": 5348,
+      "sha256": "0f7020c3e6008b9fce41b460ffcda688bcaa28c64cc637410da8905ae32df14a"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/check-attribution-focused-once/stdout-original.log",
+      "bytes": 676,
+      "sha256": "6dd10b345daec87981b7728825571ba0a9fae148ef63ff9176f4af6422b9e94f"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/check-attribution-focused-once/summary.json",
+      "bytes": 388,
+      "sha256": "0f1c7c18cbac4b86d05a64c6847661ac94d5b5bd337f6cb3c8c8b7bffaa9c684"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/check-attribution-preparation-once/preparation.json",
+      "bytes": 292,
+      "sha256": "a41ca86173f1030c63190bea3dd6b45006b291e98d233e58a46baa3776d129dd"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/check-attribution-preparation-once/test-before-original.js",
+      "bytes": 9196,
+      "sha256": "98bd5df437fd8019b354f3c1e3feca541b65f286d34eacb29fd2340ce9848316"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/context-checkpoint-current-comments-original.json",
+      "bytes": 8644,
+      "sha256": "d65ed28b770f879740953f6f5b7d1ff55661c141988e726305c25c50e275082a"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/full-ordinary-once/command.json",
+      "bytes": 1339,
+      "sha256": "3c8363c195587570c53a40a255525e61f2a7d888c684c4c257111316221321db"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/full-ordinary-once/config-original.json",
+      "bytes": 6868,
+      "sha256": "83553ab54066f68f14a23f9bffc17fd79fe40eaa535a312bf5ba7183030061e4"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/full-ordinary-once/config-stderr-original.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/full-ordinary-once/derived-help-manifest-before-original.json",
+      "bytes": 94717,
+      "sha256": "b6e12e39534ce4aa870769f70b38a8b1bdead75ad08903ef4f64947e683350dc"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/full-ordinary-once/existing-policy-chart-order-tests-unchanged.json",
+      "bytes": 1092,
+      "sha256": "6a5e36d23a54babf73d89fe20e5074f07f5616efe39e8454f1d23626151a8491"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/full-ordinary-once/inventory-original.json",
+      "bytes": 49985,
+      "sha256": "5178442008091ec10c28221abfadba2b9e63b990f325df47680d740856902dde"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/full-ordinary-once/inventory-stderr-original.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/full-ordinary-once/open-metadata.json",
+      "bytes": 333,
+      "sha256": "0ed0139fe39950553379ac63faea1b25cba41f51f7b285a154fe956f30b83346"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/full-ordinary-once/source-before.json",
+      "bytes": 162137,
+      "sha256": "ded426e60d3ee4ccac9bdd261f2c4ab45807da935a549822d028d705acfed53d"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/full-ordinary-once/visible-local-storage.json",
+      "bytes": 10437,
+      "sha256": "910516a4995c178e6d9cdcf88aac9c8491446a307d4663d8f6a13a989a4faa6c"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/full-runner-preparation.json",
+      "bytes": 591,
+      "sha256": "404cadc04e393a4e2d3c8cba3fcd6f6e1215eff495adfc10849517fdb2ea695e"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/local-owned-physical-retention.setup.cjs",
+      "bytes": 3801,
+      "sha256": "826e8d3bb3dbb3155c9a6927db9ce3bcdab663d63c775928a1acc224aa24039f"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/managed-bootstrap-exact-preparation-once/preparation.json",
+      "bytes": 594,
+      "sha256": "058b56a11d3c982a74231d07f7d68abe04bcfcee569fbf98831d0a7c7606f364"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/managed-bootstrap-exact-preparation-once/qcGateFixture.before-original.js",
+      "bytes": 8834,
+      "sha256": "d72fd25d239851a87c1c11cebd329b63428908806ae64717d16957331918ef59"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/managed-bootstrap-focused-once/command.json",
+      "bytes": 953,
+      "sha256": "1e3fdcea9625f6b98c008865bcb69080c6c394c6fe17c700bcc46c3e134a7fb0"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/managed-bootstrap-focused-once/config-original.json",
+      "bytes": 7093,
+      "sha256": "fbeb6656e4d5dc07b6113ddd2af001895174384d51cf57a38a7e33ce28f2ddb9"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/managed-bootstrap-focused-once/config-stderr-original.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/managed-bootstrap-focused-once/report-original.json",
+      "bytes": 17212,
+      "sha256": "1efdca73cfbef17c85540fdc28dc1cf7d1fd70a05e766ec6e88b21672063fca0"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/managed-bootstrap-focused-once/source-after.json",
+      "bytes": 118099,
+      "sha256": "3b5fb44f0cdd8855a22fd1aece954dcfda2bb183838b65ce358c4c9a28db8034"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/managed-bootstrap-focused-once/source-before.json",
+      "bytes": 118099,
+      "sha256": "3b5fb44f0cdd8855a22fd1aece954dcfda2bb183838b65ce358c4c9a28db8034"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/managed-bootstrap-focused-once/stderr-original.log",
+      "bytes": 5196,
+      "sha256": "aa3fec95e0b0824c711ec216c673a9a0c8bc1152d99fd3cfeeab4c1b58ce40e1"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/managed-bootstrap-focused-once/stdout-original.log",
+      "bytes": 676,
+      "sha256": "37afc65091193b43bae4b16f67421ec03a0d618656fe5827ab14943fb187f947"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/managed-bootstrap-focused-once/summary.json",
+      "bytes": 388,
+      "sha256": "c1441a5bd529b9abfae3d49a2cd1430817300c93e5c911f163ee7d555618e074"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/managed-bootstrap-preparation-once/qcGateFixture.before-original.js",
+      "bytes": 8834,
+      "sha256": "d72fd25d239851a87c1c11cebd329b63428908806ae64717d16957331918ef59"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/managed-context-focused-once/command.json",
+      "bytes": 951,
+      "sha256": "51179e6e5fb975f6110e21d61e12ea107a86660aa2500d89abc2a12e883891a6"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/managed-context-focused-once/config-original.json",
+      "bytes": 7092,
+      "sha256": "6017a8aeaffeb8304db868a7bf764c674c22159b042ff47d12bb63b3dcaad3dc"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/managed-context-focused-once/config-stderr-original.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/managed-context-focused-once/report-original.json",
+      "bytes": 48852,
+      "sha256": "9a0682f283ce12eb7d605e50a10b3acdfffef3a29117bacb682b1a4843fb25f8"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/managed-context-focused-once/source-after.json",
+      "bytes": 118099,
+      "sha256": "f3f32b45b8d03b54832f75ca28ab042898420b120001d266925bb710cef31bea"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/managed-context-focused-once/source-before.json",
+      "bytes": 118099,
+      "sha256": "f3f32b45b8d03b54832f75ca28ab042898420b120001d266925bb710cef31bea"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/managed-context-focused-once/stderr-original.log",
+      "bytes": 14429,
+      "sha256": "c4bddb83e8b5d14037c2138cd2328ad9fe520f9d58df74f2582656fd713b806c"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/managed-context-focused-once/stdout-original.log",
+      "bytes": 674,
+      "sha256": "053cc3934323582521279e9c69839b2a8e6196072c4d0b72878015b392862e5e"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/managed-context-focused-once/summary.json",
+      "bytes": 387,
+      "sha256": "2d7d4848498529fa1f9ec53f9f51bbe4995260abd625095dcb57f96f32b8d44a"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/managed-fixture-preparation-once/preparation.json",
+      "bytes": 757,
+      "sha256": "8c66eb050d69eed9b841a759600481d8e78af00451e0627cd021da4f66942512"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/managed-fixture-preparation-once/qcGateFixture.js.before-original",
+      "bytes": 8696,
+      "sha256": "1b4919a0a2b32363c40fc82c2045ea48de5b9d01268137068ace8b06fd3074c8"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/managed-fixture-preparation-once/startup_readiness_context.test.js.before-original",
+      "bytes": 9105,
+      "sha256": "a52ef2bb0856c442145560f6fa2a0647abfae0d633124fb6efb466f0faa6df55"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/managed-fixture-preparation-once/startupReadinessContext.js.before-original",
+      "bytes": 5713,
+      "sha256": "a243bb256e30124ccbab5560ce267cc8289e63a33c3ef29af4a8e3789c6106b5"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/nested-qc-context-guards-focused-once/command.json",
+      "bytes": 960,
+      "sha256": "c83358f86cc31de61877e9b3347050ec17912fef37408155305deea729bce59f"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/nested-qc-context-guards-focused-once/config-original.json",
+      "bytes": 7092,
+      "sha256": "2bc5840b09d7b602cb7222a19fe14015e74d91a17702050b24de188b401734c3"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/nested-qc-context-guards-focused-once/config-stderr-original.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/nested-qc-context-guards-focused-once/report-original.json",
+      "bytes": 10512,
+      "sha256": "6b90a8bb5618d102789374b005bffba07a3d1e3d14248196d95e239ecda49aa6"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/nested-qc-context-guards-focused-once/source-after.json",
+      "bytes": 118099,
+      "sha256": "6a223f22fbb87620e6c8f53db9268fa67628c7946dd982f2d42055a3ddb4e202"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/nested-qc-context-guards-focused-once/source-before.json",
+      "bytes": 118099,
+      "sha256": "6a223f22fbb87620e6c8f53db9268fa67628c7946dd982f2d42055a3ddb4e202"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/nested-qc-context-guards-focused-once/stderr-original.log",
+      "bytes": 8119,
+      "sha256": "1d4f66c7fcca2d3e2dd7b4359030a27800cf0c96c90525dc249aff6368b9961b"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/nested-qc-context-guards-focused-once/stdout-original.log",
+      "bytes": 683,
+      "sha256": "a6d1a11578bffb23636f082215735b6a39717ef3fdc29513218f65abc7af76a5"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/nested-qc-context-guards-focused-once/summary.json",
+      "bytes": 372,
+      "sha256": "b0ea75bb1eb41bc374ac6edd91098d9454df45e896cb464604241578e151398f"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/nested-qc-context-preparation-once/index.js.before-original",
+      "bytes": 13514,
+      "sha256": "4d0524ebd363a6ce92424a65244b26703e0462e19bc4f49b974d526d0f085b48"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/nested-qc-context-preparation-once/install_qc_gate_scope.js.before-original",
+      "bytes": 6103,
+      "sha256": "e90008e7657e1fb293d2c7fbeca878dec348a98bf165b11cdd8b46aa6048dcf4"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/nested-qc-context-preparation-once/preparation.json",
+      "bytes": 439,
+      "sha256": "aa4cf99e022bf635be94260507aa97c1570ea1c0c6d5430f45be0419543fa1ee"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/nested-qc-context-preparation-once/startup_readiness_context.test.js.before-original",
+      "bytes": 9271,
+      "sha256": "4637d75bd6a2efa9894fc79c90385a17bbfc354dbdb7068ec0c54bf5f1e210c5"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/nested-qc-context-preparation-once/startup_readiness_telemetry.test.js.before-original",
+      "bytes": 4493,
+      "sha256": "aa5df9f9de3312df4d23c47f8c332f5e38d049408ada5a0e9e4aea88f39e4131"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/private-context-focused-once/command.json",
+      "bytes": 951,
+      "sha256": "0a3254cf6bd99caba6a99bcd22bfbe006cc23e4676675a9bfd4daccc39613f36"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/private-context-focused-once/config-original.json",
+      "bytes": 7091,
+      "sha256": "ad81d4999f1938bbdd12a85684d944ad93159fd3e70a7ca6da533e1d265f7aab"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/private-context-focused-once/config-stderr-original.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/private-context-focused-once/report-original.json",
+      "bytes": 26728,
+      "sha256": "4901e78dde77aa2da3164995ce01e549aadce955d2703239563bba688af9a09c"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/private-context-focused-once/source-after.json",
+      "bytes": 118099,
+      "sha256": "5822dcc4af4587eadc4c1077aaa284657552de8298edbe773ee1baf1fdc1be70"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/private-context-focused-once/source-before.json",
+      "bytes": 118099,
+      "sha256": "5822dcc4af4587eadc4c1077aaa284657552de8298edbe773ee1baf1fdc1be70"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/private-context-focused-once/stderr-original.log",
+      "bytes": 7005,
+      "sha256": "1ec88b345a3470780497454962fd6fda872cb6034e30e6319391f539364c65f7"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/private-context-focused-once/stdout-original.log",
+      "bytes": 674,
+      "sha256": "0e7b6240ea3919c26737a5ee1f544592c722a42ddf9e35d758c2614d1c617603"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/private-context-focused-once/summary.json",
+      "bytes": 388,
+      "sha256": "83db192042ece2b732b40dc708a745ea0d81d4dc7ad587f05ff8bebf0b7fc2f3"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/private-context-measurements-parsed-derived.json",
+      "bytes": 8234,
+      "sha256": "0816af4367af5b3260ad4af6e0480fbaaf94783712058dd29db36d020731ba4a"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/private-context-preparation-once/before/server/index.js",
+      "bytes": 12916,
+      "sha256": "6fa8686dd33820711c7b1d0d1085269a9a18e455da8e5d246dce123cbb74c856"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/private-context-preparation-once/before/server/scripts/install_batch_reagent_lots.js",
+      "bytes": 10330,
+      "sha256": "2104e0b75d3a4b54803abd171b7e07642c4424415ebfcf92fc0f9b8e6962b20c"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/private-context-preparation-once/before/server/scripts/install_bench_credentials.js",
+      "bytes": 7527,
+      "sha256": "10b3571a808a1e06471ed3366dfea6e746726062d73ee8917c51b13225f74777"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/private-context-preparation-once/before/server/scripts/install_calculation_templates.js",
+      "bytes": 5579,
+      "sha256": "bae42c1089d469ff9dfa7951ffc1c99be0d6182b6147ebc15f6ca4002b31e631"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/private-context-preparation-once/before/server/scripts/install_control_charts.js",
+      "bytes": 8475,
+      "sha256": "0557ab276ec24795cabdf6f58b4a8946c193d19853f259cf8ab52d6df4ce3370"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/private-context-preparation-once/before/server/scripts/install_cross_check_evaluations.js",
+      "bytes": 9420,
+      "sha256": "58d53de04552d2bed67d6150aa0ae52b007dffbf550db1b9a5358ca683a3b875"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/private-context-preparation-once/before/server/scripts/install_instrument_imports.js",
+      "bytes": 8545,
+      "sha256": "e4c1e50f4c5ce90132a0ad6ebbba9fc92f5a913d755010c97a8c34b71eb85396"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/private-context-preparation-once/before/server/scripts/install_lab_policy_schema.js",
+      "bytes": 11387,
+      "sha256": "2fb7aec33e45dcd26cf7e34e4d0cb8102420fa06b311db3472c39c33aca92023"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/private-context-preparation-once/before/server/scripts/install_nonconformity_reports.js",
+      "bytes": 7531,
+      "sha256": "26f804c445dc3c3b97d337b5d8cf61d44a14ccb79423dec5b93b543ff23d58b8"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/private-context-preparation-once/before/server/scripts/install_order_revisions.js",
+      "bytes": 18557,
+      "sha256": "d3eb757c7261005782bffc66c81b250e606649b900a8e366e23e54b57f867258"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/private-context-preparation-once/before/server/scripts/install_preparation_records.js",
+      "bytes": 9259,
+      "sha256": "9ff4977778ddda6d3b34d187e21aea0ce559abb3a657865d393d2c45a722fdce"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/private-context-preparation-once/before/server/scripts/install_proficiency_evidence.js",
+      "bytes": 7903,
+      "sha256": "8fe0cc0d3b46d8ab59d329f74745d853a329d31975e9c44fd399c69ef02b23e3"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/private-context-preparation-once/before/server/scripts/install_qc_gate_scope.js",
+      "bytes": 5924,
+      "sha256": "0dd588f63a5907d3e4467c6f7588f09fe5228cc0a58aa593fee3ee357fcd1e5c"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/private-context-preparation-once/before/server/scripts/install_qc_rules.js",
+      "bytes": 8375,
+      "sha256": "9789d51a22dc1a2118c5564bfac94129eb71e24b7d7a0690686fcf6b3bcc97e3"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/private-context-preparation-once/before/server/scripts/install_qc_runs.js",
+      "bytes": 10065,
+      "sha256": "cc4dd36bb7ced8745236e8b0ae7ff759a9cbd499807575aa2c1c2ac309b33fd8"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/private-context-preparation-once/before/server/scripts/install_reference_materials.js",
+      "bytes": 10427,
+      "sha256": "453ff74225cc53ebbbbe83b6bc462ab9660165e4e60ca42eafa69ddb18c6fc60"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/private-context-preparation-once/before/server/scripts/install_report_revisions.js",
+      "bytes": 8687,
+      "sha256": "8b212d7b3a04e40932ea71306bf12f97e5b0b13c743c48cc7558d207381eac2d"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/private-context-preparation-once/before/server/scripts/install_reported_value_selections.js",
+      "bytes": 6860,
+      "sha256": "5f4a9defcc9e50e85bb0ad6530b561d1247e38f434a063e0eadaea2a1f7d9a97"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/private-context-preparation-once/before/server/scripts/install_result_attempt_links.js",
+      "bytes": 7776,
+      "sha256": "4b13e74554ac8eeb696b7713311414b3574f51f7c15e9f2d6103c2c3a184b904"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/private-context-preparation-once/before/server/scripts/install_result_equipment_evidence.js",
+      "bytes": 6777,
+      "sha256": "43acaff068d885dbe173400756e59fcfa4efda48be1fd6ab0f0385d7be3217e3"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/private-context-preparation-once/before/server/scripts/install_result_override_requests.js",
+      "bytes": 11594,
+      "sha256": "5ef34a6a48ad5d9e47d0a8878d2eb3ed1da448b99c213cce032221cb81270379"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/private-context-preparation-once/before/server/scripts/install_sample_amendment_authorisation.js",
+      "bytes": 12871,
+      "sha256": "58e5dd91c1248d782878c68a8a3750998985dd9375a593f2f5528c22432fd54d"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/private-context-preparation-once/before/server/scripts/install_sample_containers.js",
+      "bytes": 8926,
+      "sha256": "3ec6e200141c74b98db8b017de7f733d707a688500422a89fc2d5e35577cc2dd"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/private-context-preparation-once/before/server/scripts/install_sample_holds.js",
+      "bytes": 10712,
+      "sha256": "b889a658aed556a11e2d3d9b91ff8efac473d254241352131312686f3a462878"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/private-context-preparation-once/before/server/scripts/install_work_attempt_contract.js",
+      "bytes": 16941,
+      "sha256": "fa682cd4abda424c542ff96143bb5a7949aab5b21044ecddb2660f7e94929a22"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/private-context-preparation-once/before/server/scripts/install_work_repeat_contract.js",
+      "bytes": 8365,
+      "sha256": "a65c6e8a4679deca202f8b3cc7d80a9ce49c46bdf12f49de0b844d1e0fe2c6a0"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/private-context-preparation-once/before/server/scripts/install_workflow_state_guards.js",
+      "bytes": 15627,
+      "sha256": "7aa7a01063b2d9a0b81906b6f68b452ed0f43e86b48a9d7306bca021bec2f15e"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/private-context-preparation-once/source-preparation-record.json",
+      "bytes": 7693,
+      "sha256": "8774724891a37f168f262117587b2f2b03c50d1b201f23531cd621d45315df1b"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/shared-pragma-views-focused-once/command.json",
+      "bytes": 955,
+      "sha256": "ce09d3bd2ce387cce7499b6646cb33256806b975f05f56c3f47aa80f55f1d251"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/shared-pragma-views-focused-once/config-original.json",
+      "bytes": 7091,
+      "sha256": "0c3ba3624c8f33091e5c7c6775a895bb5d82767cffae56c853aea7713fbd2e5c"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/shared-pragma-views-focused-once/config-stderr-original.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/shared-pragma-views-focused-once/report-original.json",
+      "bytes": 17211,
+      "sha256": "cca89aef611a091cea456caf137433053e529fa1520892c4397bfa2e5e25dd86"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/shared-pragma-views-focused-once/source-after.json",
+      "bytes": 118099,
+      "sha256": "984403565da7355c40e5cec26ca7f9c39cb25a7aafa6f001d9ab5d9d43e05d34"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/shared-pragma-views-focused-once/source-before.json",
+      "bytes": 118099,
+      "sha256": "984403565da7355c40e5cec26ca7f9c39cb25a7aafa6f001d9ab5d9d43e05d34"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/shared-pragma-views-focused-once/stderr-original.log",
+      "bytes": 5212,
+      "sha256": "650da38ce8c71406ea26b3f63d91f02449a247cff6ca5c74b039a93d2da8bcc9"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/shared-pragma-views-focused-once/stdout-original.log",
+      "bytes": 678,
+      "sha256": "b8a6a3cd6209220fbd7d5005e1fabd211164c92e00d8778326cef3c36a027a64"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/shared-pragma-views-focused-once/summary.json",
+      "bytes": 388,
+      "sha256": "f89385057603459512fe47b39948a0ef0eaeddb24ac4e603a67f2e7276ddbe2a"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/shared-pragma-views-preparation-once/preparation.json",
+      "bytes": 475,
+      "sha256": "38c146703ee70a2a6795e392b90d7f493e5706c2adc53f2ed3a44f9e7b2373e1"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/shared-pragma-views-preparation-once/startup_readiness_context.test.js.before-original",
+      "bytes": 9127,
+      "sha256": "bfa4c7baefbd56474241ecaa1e8ad0ab2aa12b5879340e67961577e4d42c78cc"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/shared-pragma-views-preparation-once/startupReadinessContext.js.before-original",
+      "bytes": 5713,
+      "sha256": "a243bb256e30124ccbab5560ce267cc8289e63a33c3ef29af4a8e3789c6106b5"
+    }
+  ]
+}

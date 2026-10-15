@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+const { openReadonlyDatabase } = require('../utils/startupReadinessContext');
 const fs=require('node:fs'),path=require('node:path'),{createHash}=require('node:crypto'),Database=require('better-sqlite3');
 const {loadBenchCredentialMigrationSource}=require('../services/benchCredentialMigrationSource');
 const MARKER='202_bench_credentials',TABLE='UserBenchCredential';
@@ -52,11 +53,11 @@ function snapshot(db){
  }
  return tables;
 }
-function installBenchCredentials({dbPath,apply=false}={}){
+function installBenchCredentials({dbPath,apply=false, startupContext}={}){
  if(typeof dbPath!=='string'||!dbPath.trim())throw fail('BENCH_CREDENTIAL_DATABASE_REQUIRED','Provide an explicit database path.');
  const target=path.resolve(dbPath),source=loadBenchCredentialMigrationSource();
- require('./install_report_revisions').assertReportRevisionStartupReady(target);
- const reader=new Database(target,{readonly:true,fileMustExist:true});let reviewed;
+ require('./install_report_revisions').assertReportRevisionStartupReady(target, apply ? undefined : startupContext);
+ const reader=openReadonlyDatabase(Database, target, {readonly:true,fileMustExist:true}, apply ? undefined : startupContext);let reviewed;
  try{reviewed=reader.transaction(()=>classify(reader,source))();}finally{reader.close();}
  if(!apply||reviewed.classification==='COMPLETE_202')return{...reviewed,mode:apply?'NO_OP':'DRY_RUN',totalChanges:0,backfilledCount:0};
  const db=new Database(target,{fileMustExist:true,timeout:5000});
@@ -77,10 +78,10 @@ function installBenchCredentials({dbPath,apply=false}={}){
   }).immediate();
  }finally{db.close();}
 }
-function assertBenchCredentialStartupReady(dbPath){
+function assertBenchCredentialStartupReady(dbPath, startupContext){
  if(typeof dbPath!=='string'||!dbPath.trim()||!fs.existsSync(dbPath))
   throw fail('BENCH_CREDENTIAL_DATABASE_REQUIRED','The lab database does not exist.');
- const outcome=installBenchCredentials({dbPath});
+ const outcome=installBenchCredentials({dbPath, startupContext});
  if(outcome.classification!=='COMPLETE_202')
   throw fail('BENCH_CREDENTIAL_STARTUP_REQUIRED','Run the reviewed bench credential installer before starting the lab.');
  return outcome;

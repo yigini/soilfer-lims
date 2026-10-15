@@ -1,0 +1,23 @@
+{
+  "argv": [
+    "cmd.exe",
+    "/d",
+    "/c",
+    "npm.cmd",
+    "test",
+    "--",
+    "--testMatch",
+    "**/tests/**/*.test.js",
+    "--runTestsByPath",
+    "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\startup_readiness_context.test.js",
+    "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\startup_readiness_telemetry.test.js",
+    "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\contracts\\order_revision_impact_set_query.test.js",
+    "--json",
+    "--outputFile",
+    "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\WP\\startup-order-readiness-20261015\\shared-pragma-views-focused-once\\report-original.json"
+  ],
+  "nodeOptions": "",
+  "ordinarySetupsAndAssertions": true,
+  "localHiddenPathTestMatchFixtureOnly": true,
+  "productionOperations": 0
+}

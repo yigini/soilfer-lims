@@ -1,0 +1,16 @@
+{
+  "status": "FAILED_OR_INCOMPLETE",
+  "closedUtc": "2026-10-15T11:02:04.862145+00:00",
+  "exitCode": 1,
+  "suites": 3,
+  "tests": 17,
+  "passed": 12,
+  "failed": 5,
+  "pending": 0,
+  "sourceUnchanged": true,
+  "frozenPaths": 962,
+  "exactInventory": true,
+  "ordinarySetupsAndAssertions": true,
+  "productionOperations": 0,
+  "notFullSuiteCiOrRuntimeStartupProof": true
+}

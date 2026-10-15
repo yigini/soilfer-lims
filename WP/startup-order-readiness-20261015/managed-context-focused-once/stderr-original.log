@@ -1,0 +1,214 @@
+FAIL tests/contracts/startup_readiness_context.test.js
+  × all 26 startup reports equal the legacy default path; one physical integrity/FK check and one retained policy snapshot (2 ms)
+  × policy schema refusal keeps the legacy code, message, differences and stage
+  × order schema refusal keeps the legacy code, message, differences and stage
+  × control chart schema refusal keeps the legacy code and stage
+  × bad shared SQL results still reach the existing owner refusal: {"corruptIntegrity":true}
+  × bad shared SQL results still reach the existing owner refusal: {"corruptForeignKeys":true}
+  × a new startup never reuses a prior startup result
+  × changed bytes between stages cannot inherit cached integrity or chart results
+  × context closes on refusal and cannot be reused for another database
+
+  ● all 26 startup reports equal the legacy default path; one physical integrity/FK check and one retained policy snapshot
+
+    PT successor is partial, mixed or differs from its reviewed release.
+
+       8 | const FIELDS = { ncrStatus: 'TEXT', classificationLimits: 'TEXT', legacyScoreFlag: 'TEXT',
+       9 |     legacyFlaggedAt: 'DATETIME', deletedAt: 'DATETIME', deletedBy: 'TEXT', deleteReason: 'TEXT' };
+    > 10 | const fail = (code, message, differences = []) => Object.assign(new Error(message), { code, differences });
+         |                                                                 ^
+      11 | const normalized = sql => (sql.match(/'(?:''|[^'])*'|"(?:""|[^"])*"|\s+|[^\s'"]+/g) || [])
+      12 |     .filter(token => !/^\s+$/.test(token)).join('').replace(/;$/, '');
+      13 |
+
+      at fail (scripts/install_proficiency_evidence.js:10:65)
+      at fail (scripts/install_proficiency_evidence.js:34:33)
+      at classify (scripts/install_proficiency_evidence.js:70:43)
+      at sqliteTransaction (node_modules/better-sqlite3/lib/methods/transaction.js:65:24)
+      at Object.installProficiencyEvidence (scripts/install_proficiency_evidence.js:70:104)
+      at qcGateFixture (tests/helpers/qcGateFixture.js:30:117)
+      at Object.qcGateFixture (tests/contracts/startup_readiness_context.test.js:17:27)
+
+  ● policy schema refusal keeps the legacy code, message, differences and stage
+
+    PT successor is partial, mixed or differs from its reviewed release.
+
+       8 | const FIELDS = { ncrStatus: 'TEXT', classificationLimits: 'TEXT', legacyScoreFlag: 'TEXT',
+       9 |     legacyFlaggedAt: 'DATETIME', deletedAt: 'DATETIME', deletedBy: 'TEXT', deleteReason: 'TEXT' };
+    > 10 | const fail = (code, message, differences = []) => Object.assign(new Error(message), { code, differences });
+         |                                                                 ^
+      11 | const normalized = sql => (sql.match(/'(?:''|[^'])*'|"(?:""|[^"])*"|\s+|[^\s'"]+/g) || [])
+      12 |     .filter(token => !/^\s+$/.test(token)).join('').replace(/;$/, '');
+      13 |
+
+      at fail (scripts/install_proficiency_evidence.js:10:65)
+      at fail (scripts/install_proficiency_evidence.js:34:33)
+      at classify (scripts/install_proficiency_evidence.js:70:43)
+      at sqliteTransaction (node_modules/better-sqlite3/lib/methods/transaction.js:65:24)
+      at Object.installProficiencyEvidence (scripts/install_proficiency_evidence.js:70:104)
+      at qcGateFixture (tests/helpers/qcGateFixture.js:30:117)
+      at Object.qcGateFixture (tests/contracts/startup_readiness_context.test.js:17:27)
+
+  ● order schema refusal keeps the legacy code, message, differences and stage
+
+    PT successor is partial, mixed or differs from its reviewed release.
+
+       8 | const FIELDS = { ncrStatus: 'TEXT', classificationLimits: 'TEXT', legacyScoreFlag: 'TEXT',
+       9 |     legacyFlaggedAt: 'DATETIME', deletedAt: 'DATETIME', deletedBy: 'TEXT', deleteReason: 'TEXT' };
+    > 10 | const fail = (code, message, differences = []) => Object.assign(new Error(message), { code, differences });
+         |                                                                 ^
+      11 | const normalized = sql => (sql.match(/'(?:''|[^'])*'|"(?:""|[^"])*"|\s+|[^\s'"]+/g) || [])
+      12 |     .filter(token => !/^\s+$/.test(token)).join('').replace(/;$/, '');
+      13 |
+
+      at fail (scripts/install_proficiency_evidence.js:10:65)
+      at fail (scripts/install_proficiency_evidence.js:34:33)
+      at classify (scripts/install_proficiency_evidence.js:70:43)
+      at sqliteTransaction (node_modules/better-sqlite3/lib/methods/transaction.js:65:24)
+      at Object.installProficiencyEvidence (scripts/install_proficiency_evidence.js:70:104)
+      at qcGateFixture (tests/helpers/qcGateFixture.js:30:117)
+      at Object.qcGateFixture (tests/contracts/startup_readiness_context.test.js:17:27)
+
+  ● control chart schema refusal keeps the legacy code and stage
+
+    PT successor is partial, mixed or differs from its reviewed release.
+
+       8 | const FIELDS = { ncrStatus: 'TEXT', classificationLimits: 'TEXT', legacyScoreFlag: 'TEXT',
+       9 |     legacyFlaggedAt: 'DATETIME', deletedAt: 'DATETIME', deletedBy: 'TEXT', deleteReason: 'TEXT' };
+    > 10 | const fail = (code, message, differences = []) => Object.assign(new Error(message), { code, differences });
+         |                                                                 ^
+      11 | const normalized = sql => (sql.match(/'(?:''|[^'])*'|"(?:""|[^"])*"|\s+|[^\s'"]+/g) || [])
+      12 |     .filter(token => !/^\s+$/.test(token)).join('').replace(/;$/, '');
+      13 |
+
+      at fail (scripts/install_proficiency_evidence.js:10:65)
+      at fail (scripts/install_proficiency_evidence.js:34:33)
+      at classify (scripts/install_proficiency_evidence.js:70:43)
+      at sqliteTransaction (node_modules/better-sqlite3/lib/methods/transaction.js:65:24)
+      at Object.installProficiencyEvidence (scripts/install_proficiency_evidence.js:70:104)
+      at qcGateFixture (tests/helpers/qcGateFixture.js:30:117)
+      at Object.qcGateFixture (tests/contracts/startup_readiness_context.test.js:17:27)
+
+  ● bad shared SQL results still reach the existing owner refusal: {"corruptIntegrity":true}
+
+    PT successor is partial, mixed or differs from its reviewed release.
+
+       8 | const FIELDS = { ncrStatus: 'TEXT', classificationLimits: 'TEXT', legacyScoreFlag: 'TEXT',
+       9 |     legacyFlaggedAt: 'DATETIME', deletedAt: 'DATETIME', deletedBy: 'TEXT', deleteReason: 'TEXT' };
+    > 10 | const fail = (code, message, differences = []) => Object.assign(new Error(message), { code, differences });
+         |                                                                 ^
+      11 | const normalized = sql => (sql.match(/'(?:''|[^'])*'|"(?:""|[^"])*"|\s+|[^\s'"]+/g) || [])
+      12 |     .filter(token => !/^\s+$/.test(token)).join('').replace(/;$/, '');
+      13 |
+
+      at fail (scripts/install_proficiency_evidence.js:10:65)
+      at fail (scripts/install_proficiency_evidence.js:34:33)
+      at classify (scripts/install_proficiency_evidence.js:70:43)
+      at sqliteTransaction (node_modules/better-sqlite3/lib/methods/transaction.js:65:24)
+      at Object.installProficiencyEvidence (scripts/install_proficiency_evidence.js:70:104)
+      at qcGateFixture (tests/helpers/qcGateFixture.js:30:117)
+      at Object.qcGateFixture (tests/contracts/startup_readiness_context.test.js:17:27)
+
+  ● bad shared SQL results still reach the existing owner refusal: {"corruptForeignKeys":true}
+
+    PT successor is partial, mixed or differs from its reviewed release.
+
+       8 | const FIELDS = { ncrStatus: 'TEXT', classificationLimits: 'TEXT', legacyScoreFlag: 'TEXT',
+       9 |     legacyFlaggedAt: 'DATETIME', deletedAt: 'DATETIME', deletedBy: 'TEXT', deleteReason: 'TEXT' };
+    > 10 | const fail = (code, message, differences = []) => Object.assign(new Error(message), { code, differences });
+         |                                                                 ^
+      11 | const normalized = sql => (sql.match(/'(?:''|[^'])*'|"(?:""|[^"])*"|\s+|[^\s'"]+/g) || [])
+      12 |     .filter(token => !/^\s+$/.test(token)).join('').replace(/;$/, '');
+      13 |
+
+      at fail (scripts/install_proficiency_evidence.js:10:65)
+      at fail (scripts/install_proficiency_evidence.js:34:33)
+      at classify (scripts/install_proficiency_evidence.js:70:43)
+      at sqliteTransaction (node_modules/better-sqlite3/lib/methods/transaction.js:65:24)
+      at Object.installProficiencyEvidence (scripts/install_proficiency_evidence.js:70:104)
+      at qcGateFixture (tests/helpers/qcGateFixture.js:30:117)
+      at Object.qcGateFixture (tests/contracts/startup_readiness_context.test.js:17:27)
+
+  ● a new startup never reuses a prior startup result
+
+    PT successor is partial, mixed or differs from its reviewed release.
+
+       8 | const FIELDS = { ncrStatus: 'TEXT', classificationLimits: 'TEXT', legacyScoreFlag: 'TEXT',
+       9 |     legacyFlaggedAt: 'DATETIME', deletedAt: 'DATETIME', deletedBy: 'TEXT', deleteReason: 'TEXT' };
+    > 10 | const fail = (code, message, differences = []) => Object.assign(new Error(message), { code, differences });
+         |                                                                 ^
+      11 | const normalized = sql => (sql.match(/'(?:''|[^'])*'|"(?:""|[^"])*"|\s+|[^\s'"]+/g) || [])
+      12 |     .filter(token => !/^\s+$/.test(token)).join('').replace(/;$/, '');
+      13 |
+
+      at fail (scripts/install_proficiency_evidence.js:10:65)
+      at fail (scripts/install_proficiency_evidence.js:34:33)
+      at classify (scripts/install_proficiency_evidence.js:70:43)
+      at sqliteTransaction (node_modules/better-sqlite3/lib/methods/transaction.js:65:24)
+      at Object.installProficiencyEvidence (scripts/install_proficiency_evidence.js:70:104)
+      at qcGateFixture (tests/helpers/qcGateFixture.js:30:117)
+      at Object.qcGateFixture (tests/contracts/startup_readiness_context.test.js:17:27)
+
+  ● changed bytes between stages cannot inherit cached integrity or chart results
+
+    PT successor is partial, mixed or differs from its reviewed release.
+
+       8 | const FIELDS = { ncrStatus: 'TEXT', classificationLimits: 'TEXT', legacyScoreFlag: 'TEXT',
+       9 |     legacyFlaggedAt: 'DATETIME', deletedAt: 'DATETIME', deletedBy: 'TEXT', deleteReason: 'TEXT' };
+    > 10 | const fail = (code, message, differences = []) => Object.assign(new Error(message), { code, differences });
+         |                                                                 ^
+      11 | const normalized = sql => (sql.match(/'(?:''|[^'])*'|"(?:""|[^"])*"|\s+|[^\s'"]+/g) || [])
+      12 |     .filter(token => !/^\s+$/.test(token)).join('').replace(/;$/, '');
+      13 |
+
+      at fail (scripts/install_proficiency_evidence.js:10:65)
+      at fail (scripts/install_proficiency_evidence.js:34:33)
+      at classify (scripts/install_proficiency_evidence.js:70:43)
+      at sqliteTransaction (node_modules/better-sqlite3/lib/methods/transaction.js:65:24)
+      at Object.installProficiencyEvidence (scripts/install_proficiency_evidence.js:70:104)
+      at qcGateFixture (tests/helpers/qcGateFixture.js:30:117)
+      at Object.qcGateFixture (tests/contracts/startup_readiness_context.test.js:17:27)
+
+  ● context closes on refusal and cannot be reused for another database
+
+    PT successor is partial, mixed or differs from its reviewed release.
+
+       8 | const FIELDS = { ncrStatus: 'TEXT', classificationLimits: 'TEXT', legacyScoreFlag: 'TEXT',
+       9 |     legacyFlaggedAt: 'DATETIME', deletedAt: 'DATETIME', deletedBy: 'TEXT', deleteReason: 'TEXT' };
+    > 10 | const fail = (code, message, differences = []) => Object.assign(new Error(message), { code, differences });
+         |                                                                 ^
+      11 | const normalized = sql => (sql.match(/'(?:''|[^'])*'|"(?:""|[^"])*"|\s+|[^\s'"]+/g) || [])
+      12 |     .filter(token => !/^\s+$/.test(token)).join('').replace(/;$/, '');
+      13 |
+
+      at fail (scripts/install_proficiency_evidence.js:10:65)
+      at fail (scripts/install_proficiency_evidence.js:34:33)
+      at classify (scripts/install_proficiency_evidence.js:70:43)
+      at sqliteTransaction (node_modules/better-sqlite3/lib/methods/transaction.js:65:24)
+      at Object.installProficiencyEvidence (scripts/install_proficiency_evidence.js:70:104)
+      at qcGateFixture (tests/helpers/qcGateFixture.js:30:117)
+      at Object.qcGateFixture (tests/contracts/startup_readiness_context.test.js:17:27)
+
+  console.log
+    {"event":"ORDER_IMPACT_OWNED_SEEDED_QUERY_MEASUREMENT","samples":12000,"oldElapsedMs":408.99159999999983,"newElapsedMs":403.1727999999998,"oldPointLookups":12000,"newPointLookups":0,"reportsEqual":true,"rssBytes":335253504,"notProductionTimingOrStartupQualification":true}
+
+      at Object.log (tests/contracts/order_revision_impact_set_query.test.js:128:17)
+
+PASS tests/contracts/order_revision_impact_set_query.test.js
+  √ all nonzero refusal, malformed-selection, reservation and approved-amendment report fields match the legacy query (53 ms)
+  √ missing sample keeps the legacy failure rather than silently dropping its fraction owners (1 ms)
+  √ empty impact is unchanged and the join adds no fields to reported owner objects (1 ms)
+  √ large seeded impact remains equivalent while replacing all per-sample lookups with one set query (2422 ms)
+
+PASS tests/contracts/startup_readiness_telemetry.test.js
+  √ all 26 real READY call sites retain their order and results, with per-stage timing and RSS (8 ms)
+  √ stage 1 refusal emits no READY for that stage or any successor, and cannot load the server (2 ms)
+  √ stage 24 refusal emits no READY for that stage or any successor, and cannot load the server (2 ms)
+  √ stage 26 refusal emits no READY for that stage or any successor, and cannot load the server (3 ms)
+
+Test Suites: 1 failed, 2 passed, 3 total
+Tests:       9 failed, 8 passed, 17 total
+Snapshots:   0 total
+Time:        4.197 s, estimated 7 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\startup_readiness_context.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\startup_readiness_telemetry.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\order_revision_impact_set_query.test.js".
+Test results written to: ..\WP\startup-order-readiness-20261015\managed-context-focused-once\report-original.json

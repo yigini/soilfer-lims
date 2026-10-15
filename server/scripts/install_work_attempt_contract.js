@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+const { openReadonlyDatabase } = require('../utils/startupReadinessContext');
 const path = require('node:path'), Database = require('better-sqlite3');
 const { randomUUID, createHash } = require('node:crypto');
 const { loadWorkAttemptMigrationSource } = require('../services/workAttemptMigrationSource');
@@ -135,10 +136,10 @@ function applyBackfill(db, plan) {
         historicalEquipmentEvidence: plan.historicalEquipmentEvidence, originalRowsAndFieldsPreserved: true };
 }
 
-function installWorkAttemptContract({ dbPath, apply = false } = {}) {
+function installWorkAttemptContract({ dbPath, apply = false, startupContext} = {}) {
     if (typeof dbPath !== 'string' || !dbPath.trim()) throw fail('WORK_ATTEMPT_DATABASE_REQUIRED', 'An explicit database path is required.');
     const target = path.resolve(dbPath), source = loadWorkAttemptMigrationSource();
-    const reader = new Database(target, { readonly:true,fileMustExist:true });
+    const reader = openReadonlyDatabase(Database, target, { readonly:true,fileMustExist:true }, apply ? undefined : startupContext);
     let before;
     try { before = reader.transaction(() => classify(reader,{guardsSql:source.guardsSql,sha256:source.sha256}))(); } finally { reader.close(); }
     if (!apply) return { ...before, mode:'DRY_RUN',totalChanges:0 };
@@ -179,8 +180,8 @@ function installWorkAttemptContract({ dbPath, apply = false } = {}) {
         }).immediate();
     } finally { db.close(); }
 }
-function assertWorkAttemptStartupReady(dbPath) {
-    const plan = installWorkAttemptContract({dbPath});
+function assertWorkAttemptStartupReady(dbPath, startupContext) {
+    const plan = installWorkAttemptContract({dbPath, startupContext});
     if (plan.code) throw fail(plan.code, 'Install the reviewed WorkItem duplicate-marker prerequisite before startup.',
         { classification:plan.classification, duplicateMarkerPrerequisite:plan.duplicateMarkerPrerequisite, totalChanges:0 });
     if (plan.classification !== 'COMPLETE') throw fail('WORK_ATTEMPT_NOT_INSTALLED', 'Install reviewed WorkAttempt evidence before startup.');

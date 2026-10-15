@@ -1,0 +1,10 @@
+{
+  "server/tests/contracts/issue_209_order_revision_http.test.js": "97faa22ef236238d1cc2038d06c8d790ca122c30dfdd1e304e05dd5a23cebf29",
+  "server/tests/contracts/issue_209_order_revision_integration.test.js": "3bc75c273706c21d9edad359440a7b8b44917db5facc8a66d5685a21b3075b4a",
+  "server/tests/contracts/issue_209_order_revision_request.test.js": "065189bc442328379f415860e815746060c29ae78155458b5270bff4ab3c4c74",
+  "server/tests/contracts/issue_209_order_revision_ui.test.js": "7647ca68b082d2d931ce6e8a02a64b0cc51aeaa214f2b8d2506e5d7588461016",
+  "server/tests/contracts/issue_214_control_chart_integration.test.js": "7ecebd3699b23936ae68ee7120b2ccd6cd52d4c0d5f962f15744ea38e72f1239",
+  "server/tests/contracts/issue_214_control_chart_rules.test.js": "6a27d5572dd849d53cb375e5f44f57c899ece8618c5ea74130aa5f68aadc2570",
+  "server/tests/contracts/issue_214_control_chart_ui.test.js": "1387e38ecd3d8a575d4a40a6b4014274072bdbb66ef6c56968be6d6ef2087115",
+  "server/tests/contracts/issue_214_lab_policy_schema.test.js": "41bae4ed3510e8c67240407a342db3b9c0878b13f2908697da84e20793a6cd23"
+}

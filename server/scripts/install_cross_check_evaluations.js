@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+const { openReadonlyDatabase } = require('../utils/startupReadinessContext');
 const path = require('node:path'), { createHash } = require('node:crypto'), Database = require('better-sqlite3');
 const { loadCrossCheckMigrationSource } = require('../services/crossCheckMigrationSource');
 const { fingerprintRows, fingerprintRetainedTables } = require('../services/retainedRowsFingerprint');
@@ -52,11 +53,11 @@ function classify(db, source, predecessor) {
 function retainedRows(db) {
     return fingerprintRetainedTables(db, { excludeTables: ['CrossCheckEvaluation', '_schema_migrations'] });
 }
-function installCrossCheckEvaluations({ dbPath, apply = false } = {}) {
+function installCrossCheckEvaluations({ dbPath, apply = false, startupContext} = {}) {
     if (typeof dbPath !== 'string' || !dbPath.trim()) throw fail('CROSS_CHECK_DATABASE_REQUIRED', 'Provide an explicit database path.');
     const target = path.resolve(dbPath), source = loadCrossCheckMigrationSource();
-    const predecessor = require('./install_reported_value_selections').assertReportedValueStartupReady(target);
-    const reader = new Database(target, { readonly: true, fileMustExist: true });
+    const predecessor = require('./install_reported_value_selections').assertReportedValueStartupReady(target, apply ? undefined : startupContext);
+    const reader = openReadonlyDatabase(Database, target, { readonly: true, fileMustExist: true }, apply ? undefined : startupContext);
     let reviewed;
     try { reviewed = reader.transaction(() => { integrity(reader); return classify(reader, source, predecessor); })(); }
     finally { reader.close(); }
@@ -65,7 +66,7 @@ function installCrossCheckEvaluations({ dbPath, apply = false } = {}) {
     try {
         require('../services/exchangeDbFunctions').registerDbFunctions(db); db.pragma('foreign_keys=ON');
         return db.transaction(() => {
-            const lockedPredecessor = require('./install_reported_value_selections').assertReportedValueStartupReady(target);
+            const lockedPredecessor = require('./install_reported_value_selections').assertReportedValueStartupReady(target, apply ? undefined : startupContext);
             if (lockedPredecessor.migrationSha256 !== predecessor.migrationSha256)
                 throw fail('CROSS_CHECK_PLAN_STALE', 'The reported-value prerequisite changed after review.');
             const current = classify(db, source, predecessor);
@@ -90,8 +91,8 @@ function installCrossCheckEvaluations({ dbPath, apply = false } = {}) {
         throw Object.assign(fail('CROSS_CHECK_INSTALL_REFUSED', 'Cross-check evidence installation failed atomically.'), { cause: error });
     } finally { db.close(); }
 }
-function assertCrossCheckStartupReady(dbPath) {
-    const current = installCrossCheckEvaluations({ dbPath });
+function assertCrossCheckStartupReady(dbPath, startupContext) {
+    const current = installCrossCheckEvaluations({ dbPath, startupContext });
     if (current.classification !== 'COMPLETE_201') throw fail('CROSS_CHECK_NOT_INSTALLED', 'Install cross-check evidence before startup.');
     return current;
 }

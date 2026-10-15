@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+const { openReadonlyDatabase } = require('../utils/startupReadinessContext');
 const fs = require('node:fs'), path = require('node:path'), { createHash } = require('node:crypto'), Database = require('better-sqlite3');
 const { loadOrderRevisionMigrationSource } = require('../services/orderRevisionMigrationSource');
 const { chooseOrderLine } = require('../services/orderLineResolutionService');
@@ -184,14 +185,14 @@ function snapshot(db, prior = null) {
     return result;
 }
 
-function installOrderRevisions({ dbPath, apply = false } = {}) {
+function installOrderRevisions({ dbPath, apply = false, startupContext} = {}) {
     if (typeof dbPath !== 'string' || !dbPath.trim() || !fs.existsSync(dbPath)) throw fail('ORDER_REVISION_DATABASE_REQUIRED', 'Provide an existing explicit database path.');
     const target = path.resolve(dbPath), source = loadOrderRevisionMigrationSource();
     // This prerequisite's retained-copy classification never opens the original target.
-    const policy = require('./install_lab_policy_schema').assertLabPolicyStartupReady(target);
+    const policy = require('./install_lab_policy_schema').assertLabPolicyStartupReady(target, apply ? undefined : startupContext);
     const copy = policy.readonlySnapshot.path;
-    require('./install_control_charts').assertControlChartStartupReady(copy);
-    const reader = new Database(copy, { readonly: true, fileMustExist: true }); let reviewed, counts;
+    require('./install_control_charts').assertControlChartStartupReady(startupContext && !apply ? target : copy, apply ? undefined : startupContext);
+    const reader = openReadonlyDatabase(Database, copy, { readonly: true, fileMustExist: true }, apply ? undefined : startupContext); let reviewed, counts;
     try { reader.transaction(() => { reviewed = classify(reader, source); counts = impact(reader); })(); }
     finally { reader.close(); }
     if (JSON.stringify(fileHashes(target)) !== JSON.stringify(policy.readonlySnapshot.originalDbWalShmSha256)) {
@@ -226,8 +227,8 @@ function installOrderRevisions({ dbPath, apply = false } = {}) {
     } finally { db.close(); }
 }
 
-function assertOrderRevisionStartupReady(dbPath) {
-    const result = installOrderRevisions({ dbPath });
+function assertOrderRevisionStartupReady(dbPath, startupContext) {
+    const result = installOrderRevisions({ dbPath, startupContext });
     if (result.classification !== 'COMPLETE_209') throw fail('ORDER_REVISION_STARTUP_REQUIRED', 'Run the reviewed order-revision installer before starting the lab.');
     return result;
 }

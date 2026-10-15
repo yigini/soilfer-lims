@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+const { openReadonlyDatabase } = require('../utils/startupReadinessContext');
 // Claudio6160619940: existing canonical DDL only; no data writes or normalization.
 const fs = require('node:fs'), os = require('node:os'), path = require('node:path'), { createHash } = require('node:crypto'), Database = require('better-sqlite3');
 const { loadLabPolicyMigrationSource } = require('../services/labPolicyMigrationSource');
@@ -79,7 +80,8 @@ function fileHashes(target) {
         return [suffix, hash.digest('hex')];
     }));
 }
-function reviewReadonlySnapshot(target, source) {
+function reviewReadonlySnapshot(target, source, startupContext) {
+    startupContext?.beforeSnapshot();
     // A normal SQLite read-only open can create WAL/SHM files. Read target files
     // only, and let SQLite open an isolated, retained copy instead. Bind all
     // three originals before/after copying and classification; never retry a race.
@@ -88,7 +90,8 @@ function reviewReadonlySnapshot(target, source) {
     for (const suffix of ['', '-wal', '-shm']) if (before[suffix] !== null) fs.copyFileSync(target + suffix, copy + suffix, fs.constants.COPYFILE_EXCL);
     if (JSON.stringify(fileHashes(copy)) !== JSON.stringify(before) || JSON.stringify(fileHashes(target)) !== JSON.stringify(before))
         throw fail('LAB_POLICY_SNAPSHOT_CHANGED', 'Database files changed while retaining the read-only snapshot.');
-    const reader = new Database(copy, { readonly: true, fileMustExist: true }); let reviewed;
+    startupContext?.useSnapshot(copy, before);
+    const reader = openReadonlyDatabase(Database, copy, { readonly: true, fileMustExist: true }, startupContext); let reviewed;
     try { reviewed = reader.transaction(() => classify(reader, source))(); } finally { reader.close(); }
     if (JSON.stringify(fileHashes(target)) !== JSON.stringify(before))
         throw fail('LAB_POLICY_SNAPSHOT_CHANGED', 'Database files changed during read-only classification.');
@@ -107,11 +110,13 @@ function snapshot(db, previous) {
     }
     return result;
 }
-function installLabPolicySchema({ dbPath, apply = false } = {}) {
+function installLabPolicySchema({ dbPath, apply = false, startupContext} = {}) {
     if (typeof dbPath !== 'string' || !dbPath.trim()) throw fail('LAB_POLICY_DATABASE_REQUIRED', 'Provide an explicit existing database path.');
     const target = path.resolve(dbPath), source = loadLabPolicyMigrationSource();
     if (!fs.existsSync(target)) throw fail('LAB_POLICY_DATABASE_REQUIRED', 'The explicit database file does not exist.');
-    const reviewed = reviewReadonlySnapshot(target, source);
+    const reviewed = !apply && startupContext
+        ? startupContext.reviewPolicy(target, source, fileHashes(target), () => reviewReadonlySnapshot(target, source, startupContext))
+        : reviewReadonlySnapshot(target, source);
     if (reviewed.classification === 'PRESENT') return { ...reviewed, mode: 'NO_OP', totalChanges: 0, dataWrites: 0 };
     if (!apply) return { ...reviewed, mode: 'DRY_RUN', totalChanges: 0, dataWrites: 0 };
     // Revalidate the digest before opening a writer, then reclassify under its lock.
@@ -130,8 +135,8 @@ function installLabPolicySchema({ dbPath, apply = false } = {}) {
         }).immediate();
     } finally { db.close(); }
 }
-function assertLabPolicyStartupReady(dbPath) {
-    const result = installLabPolicySchema({ dbPath });
+function assertLabPolicyStartupReady(dbPath, startupContext) {
+    const result = installLabPolicySchema({ dbPath, startupContext });
     if (result.classification !== 'PRESENT') throw fail('LAB_POLICY_STARTUP_REQUIRED', 'Install the reviewed policy prerequisite before starting the lab.');
     return result;
 }

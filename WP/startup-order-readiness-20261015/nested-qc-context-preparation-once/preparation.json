@@ -1,0 +1,9 @@
+{
+  "status": "OBSERVED_DIRECT_QC_INSTALLER_BINDING_COMPLETED",
+  "priorRun": "check-attribution-focused-once",
+  "priorExtraPhysicalIntegrityStage": "install_qc_gate_scope",
+  "sameReadonlyContextNowPassedToInstallQcRuns": true,
+  "noSourceGuardOrRefusalChanges": true,
+  "newGuardCases": "mixed pragma views/full26 bad-integrity and FK/refusal/copy race/order race/source digest revalidation",
+  "closedBeforeProcessExit": true
+}

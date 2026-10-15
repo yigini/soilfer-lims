@@ -1,0 +1,9 @@
+{
+  "status": "LOCAL_FULL_RUNNER_PREPARED_NOT_DISPATCHED",
+  "localRetentionSource": "WP/backlog-resume-20261013/issue209-local-owned-physical-retention-spectral-finalizer.cjs",
+  "sourceSha256": "90fd7048cb2efdb7485e5e18df0b6dd6f6216a919c6424f76463ad4b43b127df",
+  "newLocalSetup": "WP/startup-order-readiness-20261015/local-owned-physical-retention.setup.cjs",
+  "newSha256": "826e8d3bb3dbb3155c9a6927db9ce3bcdab663d63c775928a1acc224aa24039f",
+  "onlyChange": "exact local ledger destination prefix; both ordinary setups/assertions unchanged",
+  "stockCiHasNoLocalFixtures": true
+}

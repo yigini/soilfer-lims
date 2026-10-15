@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+const { openReadonlyDatabase } = require('../utils/startupReadinessContext');
 const path = require('node:path');
 const { createHash } = require('node:crypto');
 const Database = require('better-sqlite3');
@@ -73,10 +74,10 @@ function classify(db) {
 function retainedRows(db) {
     return fingerprintRetainedTables(db, { excludeTables: ['BatchReagentLot', '_schema_migrations'] });
 }
-function installBatchReagentLots({ dbPath, apply = false } = {}) {
+function installBatchReagentLots({ dbPath, apply = false, startupContext} = {}) {
     if (typeof dbPath !== 'string' || !dbPath.trim()) throw fail('REAGENT_LOT_DATABASE_REQUIRED', 'Provide an explicit database path.');
     const target = path.resolve(dbPath), source = loadBatchReagentLotMigrationSource();
-    const reader = new Database(target, { readonly: true, fileMustExist: true }); let reviewed;
+    const reader = openReadonlyDatabase(Database, target, { readonly: true, fileMustExist: true }, apply ? undefined : startupContext); let reviewed;
     try { reviewed = reader.transaction(() => classify(reader))(); } finally { reader.close(); }
     if (!apply || reviewed.classification === 'COMPLETE_194') return { ...reviewed, mode: apply ? 'NO_OP' : 'DRY_RUN', totalChanges: 0, backfilledCount: 0 };
     const db = new Database(target, { fileMustExist: true, timeout: 5000 });
@@ -102,8 +103,8 @@ function installBatchReagentLots({ dbPath, apply = false } = {}) {
         }).immediate();
     } finally { db.close(); }
 }
-function assertBatchReagentLotsStartupReady(dbPath) {
-    const plan = installBatchReagentLots({ dbPath });
+function assertBatchReagentLotsStartupReady(dbPath, startupContext) {
+    const plan = installBatchReagentLots({ dbPath, startupContext });
     if (plan.classification !== 'COMPLETE_194') throw fail('REAGENT_LOT_NOT_INSTALLED', 'Install the reviewed reagent-link schema before startup.');
     return plan;
 }

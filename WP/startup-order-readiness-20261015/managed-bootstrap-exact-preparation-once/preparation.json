@@ -1,0 +1,10 @@
+{
+  "status": "FIXTURE_ONLY_SUCCESSOR",
+  "beforeFailedRun": "managed-context-focused-once",
+  "initialBootstrapPreparation": "pre-edit source-match assertion refused; no source modification; successor runner absent then attempted and exited2; TOOL_OUTPUT_TRANSCRIPTION",
+  "beforeSha256": "d72fd25d239851a87c1c11cebd329b63428908806ae64717d16957331918ef59",
+  "afterSha256": "2e5825d34b2d2b5f48b0d8794ac8fbd835da275151b44f11d7cc06b8b1cebe9d",
+  "runtimeSourceChanged": false,
+  "managedFixtureUsesExistingGuardedPtNcrBootstrap": true,
+  "existingPolicyChartOrderTestsUnchanged": true
+}

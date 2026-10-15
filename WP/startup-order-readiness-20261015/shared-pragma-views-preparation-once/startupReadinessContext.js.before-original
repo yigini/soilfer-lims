@@ -1,0 +1,117 @@
+const fs = require('node:fs');
+const path = require('node:path');
+const { createHash } = require('node:crypto');
+
+const contexts = new WeakSet();
+const same = (left, right) => JSON.stringify(left) === JSON.stringify(right);
+
+// Full main/WAL hashes bind a cached SQL check to the bytes SQLite read. SHM is
+// an index/lock file, not SQL data. The policy owner's separate three-file copy
+// and race guards still hash and compare SHM as well.
+function dataHashes(target) {
+    return ['', '-wal'].map(suffix => {
+        if (!fs.existsSync(target + suffix)) return null;
+        const hash = createHash('sha256'), buffer = Buffer.allocUnsafe(1024 * 1024);
+        const fd = fs.openSync(target + suffix, 'r');
+        try {
+            let length;
+            while ((length = fs.readSync(fd, buffer, 0, buffer.length, null))) hash.update(buffer.subarray(0, length));
+        } finally { fs.closeSync(fd); }
+        return hash.digest('hex');
+    });
+}
+function optionalDataHashes(target) {
+    // A failed cache binding never creates a new refusal: use the real SQL
+    // checks again. The owning installers retain their existing error paths.
+    try { return dataHashes(target); } catch { return null; }
+}
+
+function createStartupReadinessContext() {
+    let original, connection, facade, activePath, closed = false;
+    let checks = new Map(), checkedVersion = null, firstReadVersion = null;
+    let policy, chart;
+
+    function releaseReader() {
+        if (!connection) return;
+        try { if (connection.inTransaction) connection.exec('ROLLBACK'); }
+        finally { connection.close(); connection = facade = null; }
+    }
+    const context = {
+        open(Database, target, options) {
+            if (closed) throw new TypeError('The startup readiness context is closed.');
+            const resolved = path.resolve(target);
+            if (!original) original = resolved;
+            if (resolved !== original && resolved !== policy?.readonlySnapshot.path && resolved !== activePath)
+                throw new TypeError('A startup context belongs to one database and its retained snapshot.');
+            if (connection) return facade;
+            activePath = resolved;
+            connection = new Database(resolved, options);
+            connection.exec('BEGIN');
+            const reader = connection;
+            facade = new Proxy(reader, {
+                get(db, key) {
+                    // Existing installer finally blocks release their lease;
+                    // the startup owner closes the one private read transaction.
+                    if (key === 'close') return () => {};
+                    if (key === 'pragma') return (sql, pragmaOptions) => {
+                        const name = sql.trim().toLowerCase();
+                        if (name !== 'integrity_check' && name !== 'foreign_key_check') return db.pragma(sql, pragmaOptions);
+                        const cacheKey = JSON.stringify([name, pragmaOptions || null]);
+                        if (!checks.has(cacheKey)) checks.set(cacheKey, db.pragma(sql, pragmaOptions));
+                        if (name === 'foreign_key_check' && !checkedVersion) {
+                            const after = optionalDataHashes(activePath);
+                            if (firstReadVersion && same(firstReadVersion, after)) checkedVersion = after;
+                        }
+                        return structuredClone(checks.get(cacheKey));
+                    };
+                    if (key === 'prepare') return (...args) => {
+                        if (!firstReadVersion) firstReadVersion = optionalDataHashes(activePath);
+                        return db.prepare(...args);
+                    };
+                    const value = Reflect.get(db, key, db);
+                    return typeof value === 'function' ? value.bind(db) : value;
+                }
+            });
+            return facade;
+        },
+        beforeSnapshot() {
+            releaseReader();
+        },
+        useSnapshot(copy, originalHashes) {
+            const version = ['', '-wal'].map(suffix => originalHashes[suffix]);
+            if (!checkedVersion || !same(checkedVersion, version)) checks = new Map();
+            activePath = copy;
+            firstReadVersion = version;
+            checkedVersion = checks.size ? version : null;
+        },
+        reviewPolicy(target, source, hashes, review) {
+            if (!original) original = path.resolve(target);
+            if (policy && policy.sourceSha256 === source.sha256 && same(policy.readonlySnapshot.originalDbWalShmSha256, hashes)) return structuredClone(policy);
+            // If the source files evolved between stages, retain a new snapshot
+            // through the unchanged owner guards; never reuse stale results.
+            releaseReader();
+            policy = chart = null;
+            policy = review();
+            return structuredClone(policy);
+        },
+        reviewChart(source, review) {
+            const key = [activePath, source.sha256];
+            if (!chart || !same(chart.key, key)) chart = { key, result: review() };
+            return structuredClone(chart.result);
+        },
+        close() {
+            try { releaseReader(); }
+            finally { closed = true; checks.clear(); policy = chart = null; }
+        }
+    };
+    contexts.add(context);
+    return context;
+}
+
+function openReadonlyDatabase(Database, target, options, startupContext) {
+    if (!startupContext) return new Database(target, options);
+    if (!contexts.has(startupContext)) throw new TypeError('Use an explicit startup readiness context.');
+    return startupContext.open(Database, target, options);
+}
+
+module.exports = { createStartupReadinessContext, openReadonlyDatabase };

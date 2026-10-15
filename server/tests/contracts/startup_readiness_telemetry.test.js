@@ -17,6 +17,7 @@ const expectedEvents = [
 function startup({ refuseAt = null } = {}) {
     let now = 1000;
     let calls = 0;
+    let contextClosed = false;
     const loaded = [];
     const events = [];
     const failures = [];
@@ -25,7 +26,7 @@ function startup({ refuseAt = null } = {}) {
     const processFixture = {
         env: {},
         memoryUsage: () => ({ rss: 64 * 1024 * 1024 + calls * 4096 }),
-        exit: code => { expect(code).toBe(1); throw exitBoundary; }
+        exit: code => { expect(code).toBe(1); expect(contextClosed).toBe(true); throw exitBoundary; }
     };
     const telemetryModule = { exports: {} };
     vm.runInNewContext(fs.readFileSync(telemetryPath, 'utf8'), {
@@ -42,6 +43,7 @@ function startup({ refuseAt = null } = {}) {
         if (name === 'fs') return { existsSync: () => false };
         if (name === 'dotenv') return { config: () => {} };
         if (name === './utils/startupReadinessTelemetry') return telemetryModule.exports;
+        if (name === './utils/startupReadinessContext') return { createStartupReadinessContext: () => ({ close: () => { contextClosed = true; } }) };
         if (name.startsWith('./scripts/install_')) return new Proxy({}, {
             get: () => () => {
                 calls++;
@@ -69,6 +71,7 @@ function startup({ refuseAt = null } = {}) {
         }, { filename: entryPath });
     } catch (error) { stopped = error; }
     expect(stopped).toBe(refuseAt === null ? afterReadiness : exitBoundary);
+    expect(contextClosed).toBe(true);
     return { calls, events, failures, loaded };
 }
 

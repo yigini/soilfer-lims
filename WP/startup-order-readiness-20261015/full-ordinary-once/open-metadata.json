@@ -1,0 +1,11 @@
+{
+  "status": "RUNNING_METADATA_ONLY",
+  "startedUtc": "2026-10-15T11:14:18.597918+00:00",
+  "inventory": 373,
+  "expectedTests": 5672,
+  "frozenPaths": 1332,
+  "sourceAudit": "047fe1daae898d3f17100c5556e5854ce17fe9e3",
+  "notCiOrRuntimeStartupQualification": true,
+  "closedLogsExist": false,
+  "productionOperations": 0
+}

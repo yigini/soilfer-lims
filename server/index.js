@@ -15,90 +15,92 @@ if (fs.existsSync(serverEnv)) {
     dotenv.config({ path: serverEnv });
 }
 const { beginReadinessStage, readinessTelemetry } = require('./utils/startupReadinessTelemetry');
+const { createStartupReadinessContext } = require('./utils/startupReadinessContext');
+const startupContext = createStartupReadinessContext();
 
 // Direct npm/node startup gets the same fail-closed outcome as Docker, using
 // only a read-only gate. No app, scheduler or writable adapter is loaded first.
 try {
     const dbPath = process.env.DATABASE_PATH ? path.resolve(process.env.DATABASE_PATH) : path.resolve(__dirname, 'prisma', 'dev.db');
     const readyBegan = beginReadinessStage();
-    const ready = require('./scripts/install_workflow_state_guards').assertWorkflowStartupReady(dbPath);
+    const ready = require('./scripts/install_workflow_state_guards').assertWorkflowStartupReady(dbPath, startupContext);
     console.log(JSON.stringify({ event: 'WORKFLOW_STARTUP_READY', ...ready , ...readinessTelemetry(readyBegan)}));
     const resultsReadyBegan = beginReadinessStage();
-    const resultsReady = require('./scripts/install_result_attempt_links').assertResultAttemptStartupReady(dbPath);
+    const resultsReady = require('./scripts/install_result_attempt_links').assertResultAttemptStartupReady(dbPath, startupContext);
     console.log(JSON.stringify({ event: 'RESULT_ATTEMPT_STARTUP_READY', ...resultsReady , ...readinessTelemetry(resultsReadyBegan)}));
     const holdsReadyBegan = beginReadinessStage();
-    const holdsReady = require('./scripts/install_sample_holds').assertSampleHoldStartupReady(dbPath);
+    const holdsReady = require('./scripts/install_sample_holds').assertSampleHoldStartupReady(dbPath, startupContext);
     console.log(JSON.stringify({ event: 'SAMPLE_HOLD_STARTUP_READY', ...holdsReady , ...readinessTelemetry(holdsReadyBegan)}));
     const referencesReadyBegan = beginReadinessStage();
-    const referencesReady = require('./scripts/install_reference_materials').assertReferenceStartupReady(dbPath);
+    const referencesReady = require('./scripts/install_reference_materials').assertReferenceStartupReady(dbPath, startupContext);
     console.log(JSON.stringify({ event: 'REFERENCE_STARTUP_READY', ...referencesReady , ...readinessTelemetry(referencesReadyBegan)}));
     const qcRulesReadyBegan = beginReadinessStage();
-    const qcRulesReady = require('./scripts/install_qc_rules').assertQcRuleStartupReady(dbPath);
+    const qcRulesReady = require('./scripts/install_qc_rules').assertQcRuleStartupReady(dbPath, startupContext);
     console.log(JSON.stringify({ event: 'QC_RULE_STARTUP_READY', ...qcRulesReady , ...readinessTelemetry(qcRulesReadyBegan)}));
     const qcRunsReadyBegan = beginReadinessStage();
-    const qcRunsReady = require('./scripts/install_qc_runs').assertQcRunStartupReady(dbPath);
+    const qcRunsReady = require('./scripts/install_qc_runs').assertQcRunStartupReady(dbPath, startupContext);
     console.log(JSON.stringify({ event: 'QC_RUN_STARTUP_READY', ...qcRunsReady , ...readinessTelemetry(qcRunsReadyBegan)}));
     const qcScopeReadyBegan = beginReadinessStage();
-    const qcScopeReady = require('./scripts/install_qc_gate_scope').assertQcGateScopeStartupReady(dbPath);
+    const qcScopeReady = require('./scripts/install_qc_gate_scope').assertQcGateScopeStartupReady(dbPath, startupContext);
     console.log(JSON.stringify({ event: 'QC_GATE_SCOPE_STARTUP_READY', ...qcScopeReady , ...readinessTelemetry(qcScopeReadyBegan)}));
     const ptReadyBegan = beginReadinessStage();
-    const ptReady = require('./scripts/install_proficiency_evidence').assertProficiencyStartupReady(dbPath);
+    const ptReady = require('./scripts/install_proficiency_evidence').assertProficiencyStartupReady(dbPath, startupContext);
     console.log(JSON.stringify({ event: 'PT_STARTUP_READY', ...ptReady , ...readinessTelemetry(ptReadyBegan)}));
     const ncrReadyBegan = beginReadinessStage();
-    const ncrReady = require('./scripts/install_nonconformity_reports').assertNonconformityStartupReady(dbPath);
+    const ncrReady = require('./scripts/install_nonconformity_reports').assertNonconformityStartupReady(dbPath, startupContext);
     console.log(JSON.stringify({event:'NCR_STARTUP_READY',classification:ncrReady.classification,sources:ncrReady.sources,totalChanges:ncrReady.totalChanges, ...readinessTelemetry(ncrReadyBegan)}));
     const equipmentReadyBegan = beginReadinessStage();
-    const equipmentReady = require('./scripts/install_result_equipment_evidence').assertResultEquipmentStartupReady(dbPath);
+    const equipmentReady = require('./scripts/install_result_equipment_evidence').assertResultEquipmentStartupReady(dbPath, startupContext);
     console.log(JSON.stringify({ event: 'RESULT_EQUIPMENT_STARTUP_READY', ...equipmentReady , ...readinessTelemetry(equipmentReadyBegan)}));
     const attemptsReadyBegan = beginReadinessStage();
-    const attemptsReady=require('./scripts/install_work_attempt_contract').assertWorkAttemptStartupReady(dbPath);
+    const attemptsReady=require('./scripts/install_work_attempt_contract').assertWorkAttemptStartupReady(dbPath, startupContext);
     console.log(JSON.stringify({event:'WORK_ATTEMPT_STARTUP_READY',classification:attemptsReady.classification,
         sources:attemptsReady.sources,totalChanges:attemptsReady.totalChanges, ...readinessTelemetry(attemptsReadyBegan)}));
     const repeatsReadyBegan = beginReadinessStage();
-    const repeatsReady=require('./scripts/install_work_repeat_contract').assertWorkRepeatStartupReady(dbPath);
+    const repeatsReady=require('./scripts/install_work_repeat_contract').assertWorkRepeatStartupReady(dbPath, startupContext);
     console.log(JSON.stringify({event:'WORK_REPEAT_STARTUP_READY',classification:repeatsReady.classification,
         sources:repeatsReady.sources,totalChanges:repeatsReady.totalChanges, ...readinessTelemetry(repeatsReadyBegan)}));
     const selectionsReadyBegan = beginReadinessStage();
-    const selectionsReady=require('./scripts/install_reported_value_selections').assertReportedValueStartupReady(dbPath);
+    const selectionsReady=require('./scripts/install_reported_value_selections').assertReportedValueStartupReady(dbPath, startupContext);
     console.log(JSON.stringify({event:'REPORTED_VALUE_STARTUP_READY',...selectionsReady, ...readinessTelemetry(selectionsReadyBegan)}));
     const reagentLotsReadyBegan = beginReadinessStage();
-    const reagentLotsReady=require('./scripts/install_batch_reagent_lots').assertBatchReagentLotsStartupReady(dbPath);
+    const reagentLotsReady=require('./scripts/install_batch_reagent_lots').assertBatchReagentLotsStartupReady(dbPath, startupContext);
     console.log(JSON.stringify({event:'REAGENT_LOT_STARTUP_READY',...reagentLotsReady, ...readinessTelemetry(reagentLotsReadyBegan)}));
     const overrideRequestsReadyBegan = beginReadinessStage();
-    const overrideRequestsReady=require('./scripts/install_result_override_requests').assertResultOverrideRequestsStartupReady(dbPath);
+    const overrideRequestsReady=require('./scripts/install_result_override_requests').assertResultOverrideRequestsStartupReady(dbPath, startupContext);
     console.log(JSON.stringify({event:'RESULT_OVERRIDE_STARTUP_READY',...overrideRequestsReady, ...readinessTelemetry(overrideRequestsReadyBegan)}));
     const calculationsReadyBegan = beginReadinessStage();
-    const calculationsReady=require('./scripts/install_calculation_templates').assertCalculationStartupReady(dbPath);
+    const calculationsReady=require('./scripts/install_calculation_templates').assertCalculationStartupReady(dbPath, startupContext);
     console.log(JSON.stringify({event:'CALCULATION_STARTUP_READY',...calculationsReady, ...readinessTelemetry(calculationsReadyBegan)}));
     const crossChecksReadyBegan = beginReadinessStage();
-    const crossChecksReady=require('./scripts/install_cross_check_evaluations').assertCrossCheckStartupReady(dbPath);
+    const crossChecksReady=require('./scripts/install_cross_check_evaluations').assertCrossCheckStartupReady(dbPath, startupContext);
     console.log(JSON.stringify({event:'CROSS_CHECK_STARTUP_READY',...crossChecksReady, ...readinessTelemetry(crossChecksReadyBegan)}));
     const amendmentsReadyBegan = beginReadinessStage();
-    const amendmentsReady=require('./scripts/install_sample_amendment_authorisation').assertAmendmentStartupReady(dbPath);
+    const amendmentsReady=require('./scripts/install_sample_amendment_authorisation').assertAmendmentStartupReady(dbPath, startupContext);
     console.log(JSON.stringify({event:'AMENDMENT_STARTUP_READY',...amendmentsReady, ...readinessTelemetry(amendmentsReadyBegan)}));
     const revisionsReadyBegan = beginReadinessStage();
-    const revisionsReady=require('./scripts/install_report_revisions').assertReportRevisionStartupReady(dbPath);
+    const revisionsReady=require('./scripts/install_report_revisions').assertReportRevisionStartupReady(dbPath, startupContext);
     console.log(JSON.stringify({event:'REPORT_REVISION_STARTUP_READY',...revisionsReady, ...readinessTelemetry(revisionsReadyBegan)}));
     const benchReadyBegan = beginReadinessStage();
-    const benchReady=require('./scripts/install_bench_credentials').assertBenchCredentialStartupReady(dbPath);
+    const benchReady=require('./scripts/install_bench_credentials').assertBenchCredentialStartupReady(dbPath, startupContext);
     console.log(JSON.stringify({event:'BENCH_CREDENTIAL_STARTUP_READY',...benchReady, ...readinessTelemetry(benchReadyBegan)}));
     const preparationReadyBegan = beginReadinessStage();
-    const preparationReady=require('./scripts/install_preparation_records').assertPreparationRecordStartupReady(dbPath);
+    const preparationReady=require('./scripts/install_preparation_records').assertPreparationRecordStartupReady(dbPath, startupContext);
     console.log(JSON.stringify({event:'PREPARATION_RECORD_STARTUP_READY',...preparationReady, ...readinessTelemetry(preparationReadyBegan)}));
     const importsReadyBegan = beginReadinessStage();
-    const importsReady=require('./scripts/install_instrument_imports').assertInstrumentImportStartupReady(dbPath);
+    const importsReady=require('./scripts/install_instrument_imports').assertInstrumentImportStartupReady(dbPath, startupContext);
     console.log(JSON.stringify({event:'INSTRUMENT_IMPORT_STARTUP_READY',...importsReady, ...readinessTelemetry(importsReadyBegan)}));
     const containersReadyBegan = beginReadinessStage();
-    const containersReady=require('./scripts/install_sample_containers').assertSampleContainerStartupReady(dbPath);
+    const containersReady=require('./scripts/install_sample_containers').assertSampleContainerStartupReady(dbPath, startupContext);
     console.log(JSON.stringify({event:'SAMPLE_CONTAINER_STARTUP_READY',...containersReady, ...readinessTelemetry(containersReadyBegan)}));
     const policyReadyBegan = beginReadinessStage();
-    const policyReady=require('./scripts/install_lab_policy_schema').assertLabPolicyStartupReady(dbPath);
+    const policyReady=require('./scripts/install_lab_policy_schema').assertLabPolicyStartupReady(dbPath, startupContext);
     console.log(JSON.stringify({event:'LAB_POLICY_STARTUP_READY',...policyReady, ...readinessTelemetry(policyReadyBegan)}));
     const chartsReadyBegan = beginReadinessStage();
-    const chartsReady=require('./scripts/install_control_charts').assertControlChartStartupReady(dbPath);
+    const chartsReady=require('./scripts/install_control_charts').assertControlChartStartupReady(dbPath, startupContext);
     console.log(JSON.stringify({event:'CONTROL_CHART_STARTUP_READY',...chartsReady, ...readinessTelemetry(chartsReadyBegan)}));
     const orderReadyBegan = beginReadinessStage();
-    const orderReady=require('./scripts/install_order_revisions').assertOrderRevisionStartupReady(dbPath);
+    const orderReady=require('./scripts/install_order_revisions').assertOrderRevisionStartupReady(dbPath, startupContext);
     console.log(JSON.stringify({event:'ORDER_REVISION_STARTUP_READY',...orderReady, ...readinessTelemetry(orderReadyBegan)}));
 } catch (error) {
     console.error(JSON.stringify({ error: error.code || 'WORKFLOW_STARTUP_REFUSED', message: error.message,
@@ -122,7 +124,10 @@ try {
             : error.code?.startsWith('REFERENCE_') ? 'Keep the lab stopped and follow docs/audit/2.1-reference-materials.md.'
             : error.code?.startsWith('QC_RULE_') ? 'Keep the lab stopped and follow docs/audit/2.2-qc-rules.md.'
             : 'Keep the lab stopped and follow docs/audit/1.2-state-machine.md.', differences: error.differences || [] }));
+    startupContext.close();
     process.exit(1);
+} finally {
+    startupContext.close();
 }
 const http = require('http');
 const app = require('./app');

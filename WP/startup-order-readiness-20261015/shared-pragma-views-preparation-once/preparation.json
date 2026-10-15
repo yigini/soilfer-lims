@@ -1,0 +1,13 @@
+{
+  "status": "SHARED_PRAGMA_VIEWS_SUCCESSOR",
+  "beforeFailedRun": "managed-bootstrap-focused-once",
+  "previousResult": "all26 legacy/context reports and three late refusal equivalences passed, but two physical integrity calls because some owners request rows and others simple values",
+  "previousTotals": {
+    "suites": 3,
+    "tests": 17,
+    "passed": 15,
+    "failed": 2
+  },
+  "allChecksRetained": true,
+  "existingPolicyChartOrderTestsUnchanged": true
+}

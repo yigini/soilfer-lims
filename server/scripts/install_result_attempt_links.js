@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+const { openReadonlyDatabase } = require('../utils/startupReadinessContext');
 const fs = require('node:fs');
 const path = require('node:path');
 const Database = require('better-sqlite3');
@@ -49,10 +50,10 @@ function classify(db, source) {
         backfillCount: 0 };
 }
 
-function installResultAttemptLinks({ dbPath, apply = false } = {}) {
+function installResultAttemptLinks({ dbPath, apply = false, startupContext} = {}) {
     if (typeof dbPath !== 'string' || !dbPath.trim()) throw fail('RESULT_ATTEMPT_DATABASE_REQUIRED', 'An explicit database path is required.');
     const source = loadResultAttemptMigrationSource(), target = path.resolve(dbPath);
-    const reader = new Database(target, { readonly: true, fileMustExist: true });
+    const reader = openReadonlyDatabase(Database, target, { readonly: true, fileMustExist: true }, apply ? undefined : startupContext);
     let plan;
     try { plan = reader.transaction(() => classify(reader, { sql: source.sql, guardsSql: source.guardsSql, sha256: source.sha256 }))(); }
     finally { reader.close(); }
@@ -74,9 +75,9 @@ function installResultAttemptLinks({ dbPath, apply = false } = {}) {
     } finally { db.close(); }
 }
 
-function assertResultAttemptStartupReady(dbPath) {
+function assertResultAttemptStartupReady(dbPath, startupContext) {
     if (!fs.existsSync(dbPath)) throw fail('DATABASE_NOT_FOUND', 'The lab database does not exist.');
-    const outcome = installResultAttemptLinks({ dbPath });
+    const outcome = installResultAttemptLinks({ dbPath, startupContext });
     if (outcome.classification !== 'COMPLETE') throw fail('RESULT_ATTEMPT_NOT_INSTALLED', 'Run the reviewed result attempt installer before starting the lab.');
     return outcome;
 }

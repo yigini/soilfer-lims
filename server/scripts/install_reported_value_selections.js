@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+const { openReadonlyDatabase } = require('../utils/startupReadinessContext');
 const path = require('node:path'), Database = require('better-sqlite3');
 const { loadReportedValueMigrationSource } = require('../services/reportedValueMigrationSource');
 const { normalize } = require('../services/workRepeatInstallationEvidence');
@@ -41,11 +42,11 @@ function classify(db, source) {
 function retained(db) {
     return fingerprintRetainedTables(db, { excludeTables: ['ReportedValueSelection'] });
 }
-function installReportedValueSelections({ dbPath, apply = false } = {}) {
+function installReportedValueSelections({ dbPath, apply = false, startupContext} = {}) {
     if (typeof dbPath !== 'string' || !dbPath.trim()) throw fail('An explicit database path is required.');
     const target = path.resolve(dbPath), source = loadReportedValueMigrationSource();
-    const predecessor = require('./install_work_repeat_contract').assertWorkRepeatStartupReady(target);
-    const reader = new Database(target, { readonly: true, fileMustExist: true });
+    const predecessor = require('./install_work_repeat_contract').assertWorkRepeatStartupReady(target, apply ? undefined : startupContext);
+    const reader = openReadonlyDatabase(Database, target, { readonly: true, fileMustExist: true }, apply ? undefined : startupContext);
     let before; try { before = reader.transaction(() => classify(reader, source))(); } finally { reader.close(); }
     if (!apply || before.classification === 'COMPLETE') return { ...before, mode: apply ? 'NO_OP' : 'DRY_RUN', totalChanges: 0, newSelectionCount: 0 };
     const db = new Database(target, { fileMustExist: true, timeout: 5000 });
@@ -68,8 +69,8 @@ function installReportedValueSelections({ dbPath, apply = false } = {}) {
         }).immediate();
     } finally { db.close(); }
 }
-function assertReportedValueStartupReady(dbPath) {
-    const current = installReportedValueSelections({ dbPath });
+function assertReportedValueStartupReady(dbPath, startupContext) {
+    const current = installReportedValueSelections({ dbPath, startupContext });
     if (current.classification !== 'COMPLETE') throw Object.assign(new Error('Install reviewed reported-value evidence before startup.'), { code: 'REPORTED_VALUE_NOT_INSTALLED' });
     return current;
 }

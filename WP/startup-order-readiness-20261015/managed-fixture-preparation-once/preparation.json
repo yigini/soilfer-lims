@@ -1,0 +1,19 @@
+{
+  "status": "NEW_FIXTURE_ONLY_SUCCESSOR",
+  "beforeFailedRun": "private-context-focused-once",
+  "failedTotals": {
+    "suites": 3,
+    "tests": 17,
+    "passed": 12,
+    "failed": 5
+  },
+  "runtimeSourceUnchanged": true,
+  "existingPolicyChartOrderTestsUnchanged": true,
+  "defaultFixtureUnchanged": true,
+  "managedFixtureUsesActualWorkflowInstaller": true,
+  "after": {
+    "server/tests/helpers/qcGateFixture.js": "d72fd25d239851a87c1c11cebd329b63428908806ae64717d16957331918ef59",
+    "server/tests/contracts/startup_readiness_context.test.js": "bfa4c7baefbd56474241ecaa1e8ad0ab2aa12b5879340e67961577e4d42c78cc",
+    "server/utils/startupReadinessContext.js": "a243bb256e30124ccbab5560ce267cc8289e63a33c3ef29af4a8e3789c6106b5"
+  }
+}

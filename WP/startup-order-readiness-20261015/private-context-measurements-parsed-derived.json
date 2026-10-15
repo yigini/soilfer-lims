@@ -1,0 +1,290 @@
+{
+  "status": "PARSED_FROM_LOCAL_ORIGINAL_LOGS_NOT_PRODUCTION_TIMING",
+  "source": "nested-qc-context-guards-focused-once",
+  "measurements": [
+    {
+      "event": "ALL_26_OWNED_STARTUP_COMPARISON",
+      "reportsEqual": true,
+      "oldPhysicalChecks": 68,
+      "newPhysicalChecks": 2,
+      "oldSnapshotCopies": 4,
+      "newSnapshotCopies": 1,
+      "oldStages": [
+        {
+          "script": "install_workflow_state_guards",
+          "elapsed_ms": 18.035,
+          "rss_bytes": 318140416
+        },
+        {
+          "script": "install_result_attempt_links",
+          "elapsed_ms": 4.1931,
+          "rss_bytes": 318337024
+        },
+        {
+          "script": "install_sample_holds",
+          "elapsed_ms": 4.3551,
+          "rss_bytes": 318857216
+        },
+        {
+          "script": "install_reference_materials",
+          "elapsed_ms": 4.8557,
+          "rss_bytes": 319709184
+        },
+        {
+          "script": "install_qc_rules",
+          "elapsed_ms": 4.2233,
+          "rss_bytes": 320212992
+        },
+        {
+          "script": "install_qc_runs",
+          "elapsed_ms": 25.5124,
+          "rss_bytes": 313872384
+        },
+        {
+          "script": "install_qc_gate_scope",
+          "elapsed_ms": 25.3987,
+          "rss_bytes": 316252160
+        },
+        {
+          "script": "install_proficiency_evidence",
+          "elapsed_ms": 5.7427,
+          "rss_bytes": 316678144
+        },
+        {
+          "script": "install_nonconformity_reports",
+          "elapsed_ms": 5.3779,
+          "rss_bytes": 317194240
+        },
+        {
+          "script": "install_result_equipment_evidence",
+          "elapsed_ms": 4.1916,
+          "rss_bytes": 317366272
+        },
+        {
+          "script": "install_work_attempt_contract",
+          "elapsed_ms": 10.1933,
+          "rss_bytes": 321216512
+        },
+        {
+          "script": "install_work_repeat_contract",
+          "elapsed_ms": 27.8998,
+          "rss_bytes": 338063360
+        },
+        {
+          "script": "install_reported_value_selections",
+          "elapsed_ms": 37.015,
+          "rss_bytes": 369790976
+        },
+        {
+          "script": "install_batch_reagent_lots",
+          "elapsed_ms": 5.0547,
+          "rss_bytes": 369668096
+        },
+        {
+          "script": "install_result_override_requests",
+          "elapsed_ms": 5.3553,
+          "rss_bytes": 369369088
+        },
+        {
+          "script": "install_calculation_templates",
+          "elapsed_ms": 10.7856,
+          "rss_bytes": 369733632
+        },
+        {
+          "script": "install_cross_check_evaluations",
+          "elapsed_ms": 33.9381,
+          "rss_bytes": 371625984
+        },
+        {
+          "script": "install_sample_amendment_authorisation",
+          "elapsed_ms": 6.0978,
+          "rss_bytes": 371392512
+        },
+        {
+          "script": "install_report_revisions",
+          "elapsed_ms": 13.1992,
+          "rss_bytes": 371499008
+        },
+        {
+          "script": "install_bench_credentials",
+          "elapsed_ms": 16.5666,
+          "rss_bytes": 372723712
+        },
+        {
+          "script": "install_preparation_records",
+          "elapsed_ms": 21.1699,
+          "rss_bytes": 373542912
+        },
+        {
+          "script": "install_instrument_imports",
+          "elapsed_ms": 15.7163,
+          "rss_bytes": 374046720
+        },
+        {
+          "script": "install_sample_containers",
+          "elapsed_ms": 19.1089,
+          "rss_bytes": 374374400
+        },
+        {
+          "script": "install_lab_policy_schema",
+          "elapsed_ms": 25.5875,
+          "rss_bytes": 378122240
+        },
+        {
+          "script": "install_control_charts",
+          "elapsed_ms": 50.7417,
+          "rss_bytes": 381071360
+        },
+        {
+          "script": "install_order_revisions",
+          "elapsed_ms": 85.0576,
+          "rss_bytes": 388980736
+        }
+      ],
+      "newStages": [
+        {
+          "script": "install_workflow_state_guards",
+          "elapsed_ms": 16.8552,
+          "rss_bytes": 391827456
+        },
+        {
+          "script": "install_result_attempt_links",
+          "elapsed_ms": 0.7166,
+          "rss_bytes": 391823360
+        },
+        {
+          "script": "install_sample_holds",
+          "elapsed_ms": 0.9676,
+          "rss_bytes": 391823360
+        },
+        {
+          "script": "install_reference_materials",
+          "elapsed_ms": 1.2282,
+          "rss_bytes": 391823360
+        },
+        {
+          "script": "install_qc_rules",
+          "elapsed_ms": 0.9407,
+          "rss_bytes": 391888896
+        },
+        {
+          "script": "install_qc_runs",
+          "elapsed_ms": 13.2949,
+          "rss_bytes": 392245248
+        },
+        {
+          "script": "install_qc_gate_scope",
+          "elapsed_ms": 13.8639,
+          "rss_bytes": 392757248
+        },
+        {
+          "script": "install_proficiency_evidence",
+          "elapsed_ms": 1.7727,
+          "rss_bytes": 392773632
+        },
+        {
+          "script": "install_nonconformity_reports",
+          "elapsed_ms": 1.8656,
+          "rss_bytes": 392773632
+        },
+        {
+          "script": "install_result_equipment_evidence",
+          "elapsed_ms": 0.5061,
+          "rss_bytes": 392773632
+        },
+        {
+          "script": "install_work_attempt_contract",
+          "elapsed_ms": 7.9651,
+          "rss_bytes": 377114624
+        },
+        {
+          "script": "install_work_repeat_contract",
+          "elapsed_ms": 25.5516,
+          "rss_bytes": 377319424
+        },
+        {
+          "script": "install_reported_value_selections",
+          "elapsed_ms": 26.2816,
+          "rss_bytes": 378195968
+        },
+        {
+          "script": "install_batch_reagent_lots",
+          "elapsed_ms": 1.135,
+          "rss_bytes": 378298368
+        },
+        {
+          "script": "install_result_override_requests",
+          "elapsed_ms": 1.8459,
+          "rss_bytes": 378368000
+        },
+        {
+          "script": "install_calculation_templates",
+          "elapsed_ms": 5.048,
+          "rss_bytes": 378814464
+        },
+        {
+          "script": "install_cross_check_evaluations",
+          "elapsed_ms": 24.5387,
+          "rss_bytes": 379240448
+        },
+        {
+          "script": "install_sample_amendment_authorisation",
+          "elapsed_ms": 1.8173,
+          "rss_bytes": 379326464
+        },
+        {
+          "script": "install_report_revisions",
+          "elapsed_ms": 1.8543,
+          "rss_bytes": 379326464
+        },
+        {
+          "script": "install_bench_credentials",
+          "elapsed_ms": 2.3682,
+          "rss_bytes": 379326464
+        },
+        {
+          "script": "install_preparation_records",
+          "elapsed_ms": 2.767,
+          "rss_bytes": 379342848
+        },
+        {
+          "script": "install_instrument_imports",
+          "elapsed_ms": 6.1457,
+          "rss_bytes": 379621376
+        },
+        {
+          "script": "install_sample_containers",
+          "elapsed_ms": 7.0532,
+          "rss_bytes": 380215296
+        },
+        {
+          "script": "install_lab_policy_schema",
+          "elapsed_ms": 31.6355,
+          "rss_bytes": 373633024
+        },
+        {
+          "script": "install_control_charts",
+          "elapsed_ms": 13.0326,
+          "rss_bytes": 361390080
+        },
+        {
+          "script": "install_order_revisions",
+          "elapsed_ms": 23.7477,
+          "rss_bytes": 363405312
+        }
+      ],
+      "notProductionTimingOrStartupQualification": true
+    },
+    {
+      "event": "ORDER_IMPACT_OWNED_SEEDED_QUERY_MEASUREMENT",
+      "samples": 12000,
+      "oldElapsedMs": 383.4965999999995,
+      "newElapsedMs": 383.865600000001,
+      "oldPointLookups": 12000,
+      "newPointLookups": 0,
+      "reportsEqual": true,
+      "rssBytes": 407547904,
+      "notProductionTimingOrStartupQualification": true
+    }
+  ]
+}

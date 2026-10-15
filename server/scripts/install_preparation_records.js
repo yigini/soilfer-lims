@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+const { openReadonlyDatabase } = require('../utils/startupReadinessContext');
 const fs=require('node:fs'),path=require('node:path'),{createHash}=require('node:crypto'),Database=require('better-sqlite3');
 const {loadPreparationRecordMigrationSource}=require('../services/preparationRecordMigrationSource');
 const MARKER='205_preparation_records',TABLE='PreparationRecord',DRAFT='WorkItemDraft',COLUMN='records';
@@ -70,11 +71,11 @@ function snapshot(db){
  }
  return tables;
 }
-function installPreparationRecords({dbPath,apply=false}={}){
+function installPreparationRecords({dbPath,apply=false, startupContext}={}){
  if(typeof dbPath!=='string'||!dbPath.trim())throw fail('PREPARATION_RECORD_DATABASE_REQUIRED','Provide an explicit database path.');
  const target=path.resolve(dbPath),source=loadPreparationRecordMigrationSource();
- require('./install_bench_credentials').assertBenchCredentialStartupReady(target);
- const reader=new Database(target,{readonly:true,fileMustExist:true});let reviewed;
+ require('./install_bench_credentials').assertBenchCredentialStartupReady(target, apply ? undefined : startupContext);
+ const reader=openReadonlyDatabase(Database, target, {readonly:true,fileMustExist:true}, apply ? undefined : startupContext);let reviewed;
  try{reviewed=reader.transaction(()=>classify(reader,source))();}finally{reader.close();}
  if(!apply||reviewed.classification==='COMPLETE_205')return{...reviewed,mode:apply?'NO_OP':'DRY_RUN',totalChanges:0,backfilledCount:0};
  const db=new Database(target,{fileMustExist:true,timeout:5000});
@@ -95,10 +96,10 @@ function installPreparationRecords({dbPath,apply=false}={}){
   }).immediate();
  }finally{db.close();}
 }
-function assertPreparationRecordStartupReady(dbPath){
+function assertPreparationRecordStartupReady(dbPath, startupContext){
  if(typeof dbPath!=='string'||!dbPath.trim()||!fs.existsSync(dbPath))
   throw fail('PREPARATION_RECORD_DATABASE_REQUIRED','The lab database does not exist.');
- const outcome=installPreparationRecords({dbPath});
+ const outcome=installPreparationRecords({dbPath, startupContext});
  if(outcome.classification!=='COMPLETE_205')
   throw fail('PREPARATION_RECORD_STARTUP_REQUIRED','Run the reviewed preparation record installer before starting the lab.');
  return outcome;

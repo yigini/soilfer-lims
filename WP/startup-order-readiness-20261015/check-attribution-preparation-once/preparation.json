@@ -1,0 +1,12 @@
+{
+  "status": "TEST_OBSERVABILITY_ONLY",
+  "runtimeSourceChanged": false,
+  "previousRun": "shared-pragma-views-focused-once",
+  "previousTotals": {
+    "tests": 17,
+    "passed": 15,
+    "failed": 2
+  },
+  "all26ReportsEquivalent": true,
+  "unresolvedPhysicalIntegrityChecks": 2
+}

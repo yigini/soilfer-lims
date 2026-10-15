@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+const { openReadonlyDatabase } = require('../utils/startupReadinessContext');
 const fs = require('node:fs');
 const path = require('node:path');
 const Database = require('better-sqlite3');
@@ -73,10 +74,10 @@ function classify(db, source) {
             linked: links.every(Boolean) ? db.prepare('SELECT COUNT(*) n FROM "BatchQcResult" WHERE referenceValueId IS NOT NULL').get().n : 0 }, backfillCount: 0 };
 }
 
-function installReferenceMaterials({ dbPath, apply = false } = {}) {
+function installReferenceMaterials({ dbPath, apply = false, startupContext} = {}) {
     if (typeof dbPath !== 'string' || !dbPath.trim()) throw fail('REFERENCE_DATABASE_REQUIRED', 'An explicit database path is required.');
     const source = loadReferenceMaterialMigrationSource(), target = path.resolve(dbPath);
-    const reader = new Database(target, { readonly: true, fileMustExist: true });
+    const reader = openReadonlyDatabase(Database, target, { readonly: true, fileMustExist: true }, apply ? undefined : startupContext);
     let plan;
     try { plan = reader.transaction(() => classify(reader, { sql: source.sql, sha256: source.sha256,
         oracleSha256: source.oracleSha256, freshTables: source.freshTables }))(); }
@@ -97,9 +98,9 @@ function installReferenceMaterials({ dbPath, apply = false } = {}) {
     } finally { db.close(); }
 }
 
-function assertReferenceStartupReady(dbPath) {
+function assertReferenceStartupReady(dbPath, startupContext) {
     if (!fs.existsSync(dbPath)) throw fail('DATABASE_NOT_FOUND', 'The lab database does not exist.');
-    const outcome = installReferenceMaterials({ dbPath });
+    const outcome = installReferenceMaterials({ dbPath, startupContext });
     if (outcome.classification !== 'COMPLETE') throw fail('REFERENCE_NOT_INSTALLED', 'Run the reviewed reference material installer before starting the lab.');
     return outcome;
 }
