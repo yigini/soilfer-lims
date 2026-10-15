@@ -1,0 +1,25 @@
+{
+  "status": "ACTUAL_SCOPE_REPLY_READ_AND_ONE_DISK_DEPENDENCY_CORRECTION_DELIVERED",
+  "recordedUtc": "2026-10-15T07:52:35.510Z",
+  "window": {
+    "app": "Claude_pzs8sxrjxfjjc!Claude",
+    "id": 7867734,
+    "title": "Claude"
+  },
+  "project": "LIMS Audit",
+  "thread": "Lab workflow audit and plan",
+  "actualScopeComment": 6187223904,
+  "scopeOnlyNotSourcePass": true,
+  "humanDiskCardObserved": "Keep for now / Remove16runs / Show list first",
+  "humanCardNeverAnswered": true,
+  "correctionReason": "16-root conditional estimate includes070000080000 requiredinputs; only6fullclosedrecords verified versus10terminalreceipts",
+  "emptyRightBefore": true,
+  "ownShortDraftFullyInspected": true,
+  "oneReturn": true,
+  "sentBubbleObserved": true,
+  "emptyRightAfter": true,
+  "claudioActivity": "Orchestrating",
+  "humanCentreEmptyUntouched": true,
+  "noCleanupAuthorizedOrPerformed": true,
+  "noDuplicateFailureOrDiskHandoff": true
+}
