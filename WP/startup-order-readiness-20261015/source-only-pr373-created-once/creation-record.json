@@ -1,0 +1,14 @@
+{
+  "createdUtc": "2026-10-15T12:58:08.473653+00:00",
+  "url": "https://github.com/yigini/soilfer-lims/pull/298",
+  "number": 298,
+  "head": "eba02837eaa2ab797cad0572fecada686f660346",
+  "tree": "676b01e71211786d1aeace50f19a0b2c9f9c482e",
+  "base": "cde8c8896f5f9d5f1ab07b0ae16b1a765e0a6367",
+  "auditSource": "7bb585c8e465a529455dfb5ba6f1b8d229f37521",
+  "sourcePathCount": 36,
+  "readyNoticeSent": false,
+  "finalNativeHandoffSent": false,
+  "auditPass": false,
+  "mergeOrProductionOperations": 0
+}
