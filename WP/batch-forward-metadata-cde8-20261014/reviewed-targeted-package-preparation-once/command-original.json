@@ -1,0 +1,16 @@
+{
+  "startedUtc": "2026-10-15T00:01:50.531003+00:00",
+  "argv": [
+    "C:\\Users\\yigin\\AppData\\Local\\Programs\\Python\\Python312-arm64\\python.exe",
+    "-B",
+    "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\WP\\batch-forward-metadata-cde8-20261014\\prepare_forward_metadata.py",
+    "--tooling-commit",
+    "8df9e1261647dcc8ba018c739bd606fe5291f1ca",
+    "--source-review-id",
+    "6181164638"
+  ],
+  "sourceReviewId": 6181164638,
+  "preparationCount": 1,
+  "neverReplay": true,
+  "imageEligibility": false
+}

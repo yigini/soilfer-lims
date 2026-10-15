@@ -1,0 +1,11 @@
+{
+  "status": "FIRST_METADATA_LAUNCH_ATTEMPTED_ONCE",
+  "startedUtc": "2026-10-15T00:02:08.763413+00:00",
+  "root": "/opt/lims/releases/workflow-batch-forward-metadata-cde8c889-20261015T000500Z",
+  "unit": "lims-workflow-batch-forward-metadata-cde8c889-20261015t000500z",
+  "toolingCommit": "8df9e1261647dcc8ba018c739bd606fe5291f1ca",
+  "sourceReviewId": 6181164638,
+  "scope": "READONLY_FORWARD_METADATA_EVIDENCE_ONLY_NO_ADOPTION",
+  "imageEligibility": false,
+  "neverReplay": true
+}

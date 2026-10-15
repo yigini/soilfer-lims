@@ -1,0 +1,28 @@
+{
+  "argv": [
+    "ctr",
+    "--address",
+    "/run/containerd/containerd.sock",
+    "--namespace",
+    "moby",
+    "snapshots",
+    "--snapshotter",
+    "overlayfs",
+    "info",
+    "sha256:9b3ed99c309931a062d0e141f865d89ac619790e28296f98df89adc2d14ec288"
+  ],
+  "label": "moby-snapshot-info-20",
+  "exitCode": 0,
+  "timeoutOrOutputRefused": false,
+  "elapsedSeconds": 0.04359478299738839,
+  "stdout": {
+    "file": "048-moby-snapshot-info-20.stdout",
+    "bytes": 302,
+    "sha256": "8e957d82be0b125f075556096ed5e6a2000f1a229bfa0da771224cb39f7305d5"
+  },
+  "stderr": {
+    "file": "048-moby-snapshot-info-20.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

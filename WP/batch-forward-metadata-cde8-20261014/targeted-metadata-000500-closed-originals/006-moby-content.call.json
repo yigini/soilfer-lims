@@ -1,0 +1,25 @@
+{
+  "argv": [
+    "ctr",
+    "--address",
+    "/run/containerd/containerd.sock",
+    "--namespace",
+    "moby",
+    "content",
+    "list"
+  ],
+  "label": "moby-content",
+  "exitCode": 0,
+  "timeoutOrOutputRefused": false,
+  "elapsedSeconds": 0.14523090596776456,
+  "stdout": {
+    "file": "006-moby-content.stdout",
+    "bytes": 536615,
+    "sha256": "f31d21efa33ab7ca90e9579d95ff8257c61ff6f35a565d74b0c01b82713d4856"
+  },
+  "stderr": {
+    "file": "006-moby-content.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

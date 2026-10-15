@@ -1,0 +1,15 @@
+{
+  "startedUtc": "2026-10-15T00:02:04.645401+00:00",
+  "argv": [
+    "C:\\Users\\yigin\\AppData\\Local\\Programs\\Python\\Python312-arm64\\python.exe",
+    "-B",
+    "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\WP\\batch-forward-metadata-cde8-20261014\\launch_forward_metadata.py",
+    "--package",
+    "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\WP\\batch-forward-metadata-cde8-20261014\\metadata-package-workflow-batch-forward-metadata-cde8c889-20261015T000500Z"
+  ],
+  "sourceReviewId": 6181164638,
+  "launcherInvocationCount": 1,
+  "neverReplay": true,
+  "imageEligibility": false,
+  "newReceipts": 0
+}

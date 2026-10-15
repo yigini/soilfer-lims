@@ -1,0 +1,23 @@
+{
+  "argv": [
+    "docker",
+    "buildx",
+    "du",
+    "--format",
+    "json"
+  ],
+  "label": "buildkit-cache-metadata",
+  "exitCode": 0,
+  "timeoutOrOutputRefused": false,
+  "elapsedSeconds": 0.3972103160340339,
+  "stdout": {
+    "file": "126-buildkit-cache-metadata.stdout",
+    "bytes": 152533,
+    "sha256": "e863bd2629dc5dc2754c34d62b45769029949e44bd8c2d3d00c8b5403e304478"
+  },
+  "stderr": {
+    "file": "126-buildkit-cache-metadata.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

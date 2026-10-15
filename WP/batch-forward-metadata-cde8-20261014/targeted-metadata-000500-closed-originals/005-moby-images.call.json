@@ -1,0 +1,25 @@
+{
+  "argv": [
+    "ctr",
+    "--address",
+    "/run/containerd/containerd.sock",
+    "--namespace",
+    "moby",
+    "images",
+    "list"
+  ],
+  "label": "moby-images",
+  "exitCode": 0,
+  "timeoutOrOutputRefused": false,
+  "elapsedSeconds": 0.22995660203741863,
+  "stdout": {
+    "file": "005-moby-images.stdout",
+    "bytes": 10150,
+    "sha256": "5e0aa3e09c8e30f25c9e7ebc270e79039add0ea812410c6c0a2bd5f7c9766c30"
+  },
+  "stderr": {
+    "file": "005-moby-images.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "argv": [
+    "ctr",
+    "--address",
+    "/run/containerd/containerd.sock",
+    "--namespace",
+    "moby",
+    "content",
+    "get",
+    "sha256:1d4882f49f351a08549c79c0409f7848dbb205feef314b33432aae63ed11217b"
+  ],
+  "label": "oci-metadata-1",
+  "exitCode": 0,
+  "timeoutOrOutputRefused": false,
+  "elapsedSeconds": 0.04326479299925268,
+  "stdout": {
+    "file": "127-oci-metadata-1.stdout",
+    "bytes": 857,
+    "sha256": "1d4882f49f351a08549c79c0409f7848dbb205feef314b33432aae63ed11217b"
+  },
+  "stderr": {
+    "file": "127-oci-metadata-1.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

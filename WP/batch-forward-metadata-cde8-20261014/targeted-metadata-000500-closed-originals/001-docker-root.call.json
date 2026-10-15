@@ -1,0 +1,22 @@
+{
+  "argv": [
+    "docker",
+    "info",
+    "--format",
+    "{{.DockerRootDir}}"
+  ],
+  "label": "docker-root",
+  "exitCode": 0,
+  "timeoutOrOutputRefused": false,
+  "elapsedSeconds": 0.1652402160107158,
+  "stdout": {
+    "file": "001-docker-root.stdout",
+    "bytes": 16,
+    "sha256": "de06adb1b989dfb4bc336424e31d05b78070d845ebf0b62793726992afe13996"
+  },
+  "stderr": {
+    "file": "001-docker-root.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

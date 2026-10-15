@@ -1,0 +1,44 @@
+{
+  "status": "PREPARED_READONLY_METADATA_NOT_LAUNCHED",
+  "scope": "READONLY_FORWARD_METADATA_EVIDENCE_ONLY_NO_ADOPTION",
+  "candidate": "cde8c8896f5f9d5f1ab07b0ae16b1a765e0a6367",
+  "tree": "638580d50f61254609de3abd42d93afc676a5727",
+  "image": "sha256:1d4882f49f351a08549c79c0409f7848dbb205feef314b33432aae63ed11217b",
+  "rootName": "workflow-batch-forward-metadata-cde8c889-20261015T000500Z",
+  "toolingCommit": "8df9e1261647dcc8ba018c739bd606fe5291f1ca",
+  "toolingIndexSha256": "baf87592095e0ec296835413cd71abf7fceaf2795ee12b811bee9b490448c184",
+  "sourceReviewId": 6181164638,
+  "sourceReviewSha256": "61fb5b93839a931b98e705145e56deff208d4fdec049f74ed134b36b9d38bbf3",
+  "scopeDirectionSha256": "d6bdae8bfbfc12c27267855e42339ef55a16b424d8dd23759c0e524cb0233ce6",
+  "referenceDirectionSha256": "01b53c01aeb1b99ba401e2faf641baf17d1fbf348e9adef585bce0ff6e264171",
+  "originalRefs": {
+    "candidate-image.id": {
+      "bytes": 71,
+      "sha256": "6bb4227f82debcf97845874330ae261d044b749819d2f2193a0fc0c3935967e3",
+      "mode": 384
+    },
+    "docker-build.log": {
+      "bytes": 28713,
+      "sha256": "5a7736d9d36aaccafa9d98d84c3d1a537af4ee29b5255022d2565d78792db0f4",
+      "mode": 256
+    },
+    "candidate-image-fresh-inspect-original.json": {
+      "bytes": 7229,
+      "sha256": "c4b4d2fabe2783adf0eb6f842bb424982fcb6a7d53753b3dde2c79800f821c14",
+      "mode": null
+    }
+  },
+  "originalFailedRoot": "/opt/lims/releases/workflow-batch-build-cde8c889-20261014T221500Z",
+  "originalInspectAbsent": true,
+  "imageEligibility": false,
+  "imageAdoptionReceipts": 0,
+  "newBuilds": 0,
+  "retags": 0,
+  "containerStarts": 0,
+  "databaseConnections": 0,
+  "volumeMounts": 0,
+  "filesystemDuCalls": 0,
+  "labAndHubBuildsOwnedByYY": true,
+  "releaseWindowControl": "RELEASE_DAY_DISK_ABORTS_ACCEPTED",
+  "preparedUtc": "2026-10-15T00:01:56.345424+00:00"
+}

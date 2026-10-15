@@ -1,0 +1,22 @@
+{
+  "argv": [
+    "docker",
+    "info",
+    "--format",
+    "{{json .DriverStatus}}"
+  ],
+  "label": "docker-driver-status",
+  "exitCode": 0,
+  "timeoutOrOutputRefused": false,
+  "elapsedSeconds": 0.1309262069989927,
+  "stdout": {
+    "file": "003-docker-driver-status.stdout",
+    "bytes": 49,
+    "sha256": "375efec34cde40c98b06ac3e9706b79cc21a8849fadda54740af1f3834fad8f4"
+  },
+  "stderr": {
+    "file": "003-docker-driver-status.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}
