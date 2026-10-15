@@ -1,0 +1,20 @@
+{
+  "classification": "PRESENT",
+  "shape": "CANONICAL",
+  "sourceSha256": "fa6ef0563f80704dbc4ee08d90ceae91f632c912813ca037221b02aa03ef7b70",
+  "addReportPolicyVersion": false,
+  "plannedSql": "",
+  "plannedDdlCount": 0,
+  "readonlySnapshot": {
+    "path": "/tmp/lims-policy-schema-readonly-GJPjhf/snapshot.db",
+    "originalDbWalShmSha256": {
+      "": "5d3b825d2b328902a1601753e03a65f75d93d00092976e428510979a8d01ba61",
+      "-wal": null,
+      "-shm": null
+    },
+    "originalFilesPreserved": true
+  },
+  "mode": "NO_OP",
+  "totalChanges": 0,
+  "dataWrites": 0
+}
