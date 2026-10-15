@@ -1,0 +1,35 @@
+"""Retain the single actual closed R2 result handoff and its fresh readback."""
+import datetime,pathlib,subprocess,sys
+R=pathlib.Path(__file__).resolve().parents[2];S=R/'WP/r2-cache-api-identity-acc15844-20261015';D=S/'closed-r2-220000-handoff-once';BASE='8badd08bd9e613a331be15b0ffc35453c46d71bf'
+sys.path.insert(0,str(S));from r2_contract import *
+from prepare_r2 import gh
+def git(*a):return subprocess.check_output(['git','-c','core.longpaths=true',*a],cwd=R)
+require(D.is_dir() and not (D/'publication-index.json').exists() and git('rev-parse','HEAD').decode().strip()==BASE and git('branch','--show-current').decode().strip()=='audit/release-eb6de2e8' and not git('diff','--cached','--name-only').strip(),'Same writer/base/one retention required')
+def save(n,raw):
+    with (D/n).open('xb') as f:f.write(raw)
+original=json_exact((D/'actual-post-confirmed.json').read_bytes());raw=gh('repos/yigini/soilfer-lims/issues/comments/'+str(original['id']));actual=json_exact(raw);require(actual['id']==original['id'] and actual['body'].encode()==(D/'actual-result-body.txt').read_bytes() and actual['created_at']==actual['updated_at']==original['created_at'],'Exact unedited actual notice readback required');save('actual-result-fresh-original.json',raw)
+main=gh('repos/yigini/soilfer-lims/git/ref/heads/main');ci=gh('repos/yigini/soilfer-lims/actions/runs/'+str(MAIN_CI));require(json_exact(main)['object']['sha']==CANDIDATE and json_exact(ci)['head_sha']==CANDIDATE and json_exact(ci)['status']=='completed' and json_exact(ci)['conclusion']=='success' and json_exact(ci)['run_attempt']==1,'Main/CI moved');save('main-after-original.json',main);save('main-ci-after-original.json',ci)
+issue=gh('repos/yigini/soilfer-lims/issues/191');require(json_exact(issue)['state']=='closed','191 changed');save('issue191-after-original.json',issue)
+pages=subprocess.check_output(['gh','api','--paginate','--slurp','repos/yigini/soilfer-lims/issues/162/comments?per_page=100'],cwd=R);save('coordination-after-original.json',pages);history=[c for p in json_exact(pages) for c in p];require(sum('r2-api220000-closed-zero-removed-c9e4e8ba' in c.get('body','') for c in history)==1,'One actual notice only')
+idx=json_exact((S/'reviewed-r2-package-once/source-index.json').read_bytes());review=json_exact((D/'actual-source-pass-before-original.json').read_bytes());no_later_source_failure(history,review,idx['head'])
+for n,h in graph(idx).items():require(sha((S/n).read_bytes())==h,'Reviewed source changed')
+frozen=json_exact((R/'WP/startup-order-readiness-20261015/full-pinned-copy-retention-bound-ordinary-once/source-before.json').read_bytes());require(len(frozen)==1333,'Frozen count differs')
+for n,h in frozen.items():require(sha((R/n).read_bytes())==h,'App input changed '+n)
+record={'status':'ACTUAL_CLOSED_R2_ZERO_REMOVED_RESULT_AND_SOURCE_PASS_ACK_GIVEN_ONCE','retainedUtc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'commentId':actual['id'],'commentUrl':actual['html_url'],'commentCreatedUtc':actual['created_at'],'closedResultAudit':BASE,'closedResultSha256':'c9e4e8baf923f19cf60dbb33d9f0c39514062b4198ffdbda2f4c28906b3ec00e','sourcePassAckBundledOnlyHere':6201838855,'actualPruneInvocations':2,'removedIds':0,'capReached':False,'r2RetryAllowed':False,'nativeMessageSent':False,'nativeFallbackOnlyIfAnswerMissingAbout20Minutes':True,'all5And1333Unchanged':True,'mainMergeHoldUntilActualDeploymentAndPostcheck':True,'next':'Actually implement complete new acc158/cd3a-bound proof source graph and source-derived all-copy budget/local+host guards/publication/exact new review; fresh R4 plus additional10GB before any package/root/proof, no fit inferred from28.4GB','productionOperationsByHandoff':0}
+save('delivery-record.json',canonical(record)+b'\n')
+lead=f'''## 2026-10-15 actual CLOSED R2 zero-removal result{actual['id']} handed off ONCE
+
+ONE@claude#162 receipt{actual['id']}/{actual['created_at']} {actual['html_url']} bundlesactualNEWPASS6201838855ACKONLYhere; no duplicateACK/native/resultrequest. R2new220000 CLOSED20:52:41.714131UTC/capnotreached/TWOpruneinvocations eachTotal0B/2NOT_REMOVED+30child-referenceSKIPPED/32itemreceipts/removedIDs0/allinitialcacheexactlyunchanged8072154134B/protected5577243796B stays/NOreclaimcredit/noadditionalprune/noR2retry. Complete226raw8badd08b/all159rootoriginals/all124events/all33package0400hashes/full--alljournals/independentvalidation/qualifiedcd3a+ENTIREacc158inspect/fullpreservation+df given. Raw actualnotice/readback/freshmainCI191history/delivery in WP/r2-cache-api-identity-acc15844-20261015/closed-r2-220000-handoff-once/publication-index.json. AllR2rootsgraphshelpersCONSUMED/noactiveR2orlocalrunnerretainer. ActualClclosedreceiptcheck PENDINGatretention; nativefallbackONLYifmissinganswerabout20min/no duplicateGH/native. Existingheartbeat2min/restore10afteractualbe837974deploy+Clpostcheck/mainmergeHOLD unchanged. NEXT ACTUALLYimplementCOMPLETE NEWacc158cd3a-boundproofgraph/source-derivedALLcopybudget/meaningfullocalhostguards/publish/NEWexactallhashClPASS/freshR4COMPUTED+ADDITIONAL10GB/newroot; current28.467GBNOTfit/nofitSTOPreportqualifiedR1options. No newproofgraph/source-reviewyet, doNOTwaitapprovalnonexistentgraph. No productionDB/settings/restart/buildproofR1kitgatedeploy; all5+1333unchanged/sciencehistoryR1-R5/humans guards held.
+
+'''
+readmes=[R/'WP/audit-release-eb6de2e8/README.md',R/'WP/runtime-recovery-kobo/README.md']
+for p in readmes:p.write_bytes(lead.encode()+p.read_bytes())
+paths=sorted(p for p in D.rglob('*') if p.is_file())+[R/'WP/backlog-resume-20261013/post-r2-api220000-closed-result-once.py',pathlib.Path(__file__),*readmes];names=[p.relative_to(R).as_posix() for p in paths];require(len(names)==len(set(names)),'Duplicate owned path')
+save('publication-index.json',canonical({'baseAudit':BASE,'commentId':actual['id'],'files':[{'path':n,'length':len(p.read_bytes()),'sha256':sha(p.read_bytes()),'gitBlobOid':oid(p.read_bytes())} for p,n in zip(paths,names)]})+b'\n');paths.append(D/'publication-index.json');names.append((D/'publication-index.json').relative_to(R).as_posix())
+for i in range(0,len(names),15):git('-c','core.autocrlf=false','add','-f','--',*names[i:i+15])
+require(set(git('diff','--cached','--name-only').decode().splitlines())==set(names),'Staged ownership differs');tree=git('write-tree').decode().strip()
+for p,n in zip(paths,names):require(git('show',tree+':'+n)==p.read_bytes() and git('rev-parse',tree+':'+n).decode().strip()==oid(p.read_bytes()),'Raw staged identity differs')
+git('commit','-m','Retain single closed R2 result and approval acknowledgement');head=git('rev-parse','HEAD').decode().strip()
+for p,n in zip(paths,names):require(git('show',head+':'+n)==p.read_bytes(),'Committed raw bytes differ')
+git('push','origin','audit/release-eb6de2e8');require(git('ls-remote','origin','refs/heads/audit/release-eb6de2e8').decode().split()[0]==head,'Published writer differs')
+print(json.dumps({'audit':head,'rawOidShaVerifiedBlobs':len(paths),'commentId':actual['id'],'url':actual['html_url'],'nativeMessageSent':False,'all5And1333Unchanged':True}))
