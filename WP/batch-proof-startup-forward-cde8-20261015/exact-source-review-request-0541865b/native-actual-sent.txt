@@ -1,0 +1,9 @@
+Pip: COMPLETE NEW twelve-file startup-only source0541865b67af0fbf3232d7cb077ab505896a2ced is published and submitted ONCE for exact review at https://github.com/yigini/soilfer-lims/issues/162#issuecomment-6187618102 . It implements actual6187223904; the graph exists, and no operator/package/090000root/unit has been created.
+
+FINAL171/171local+171/171ACTUALhostPython3.9.23/all12compile+hashunchanged;129 raw-OID/SHA verified blobs.20 exact dd496777 metadata pins include installed209 raw/reader/backup/state, accepted214209 preservation, canonical policy NOOP, full impacts and separate070000 asset handoff. Only TWO NEW jobsOFF starts; no priorSQL, installers/policy replay/newproductioncopy/failedcontainerrestart. Rechecks after EACH copy before create/start, after each stopped seal and closure.
+
+Health parser verifies pinned cde8Compose bytes+GitOID and derives all5flags; exactConfig beforestart/unhealthy immediateSTOP/evidence/same600s/27NOOP0+26READY0/HTTP200200401/full stoppedstate. Important concrete review note: docker CLI --health-cmd normalizes to CMD-SHELL, so Config.Test is derived as CMD-SHELL + exec/shlex.join(original Compose CMD argv), with exact parsed durations. Source/doc/tests explicitly retain both representations; no hidden literal-array mismatch or fallback. Please review that concrete implementation.
+
+ASTN24=12+12=>30equivalents/25percent/min0 explicitscope/3assets. Fresh OWNED209 reference08:08:39 T563326976/A5787648/free33108267008/required31768290414/slack1339976594 onlyreference; beforeROOT+unit fresh gates mandatory. ScopejobsOFFonly/NOT_RELEASE_QUALIFIED.
+
+I also read actual YY Prepare list decision and your6187300253 request. I will prepare the read-only candidate/dependency/evidence/lost-raw-byte list separately without disturbing source review. Your dependency correction/card read is retained; nothing deleted or moved, no human card answered by Pip.
