@@ -1,0 +1,46 @@
+{
+  "classification": "COMPLETE_209",
+  "sourceSha256": "5c51f423689b1c726e16c12cdce7b381574661017cdb622eb3f562957a18304c",
+  "receipt": {
+    "sourceSha256": "5c51f423689b1c726e16c12cdce7b381574661017cdb622eb3f562957a18304c",
+    "originalRowsSha256": "741666b3c3a56405101c0856f344dcc3bf1951310b505ba502fa08d62dbf7ed2",
+    "originalRowsPreserved": true,
+    "backfilledCount": 0,
+    "receiptSha256": "c77655472fafe22665d7306ee360ad84527baee9081a878439f460b5bb95ef13"
+  },
+  "previousClassification": "PRE_209",
+  "mode": "APPLIED",
+  "originalRowsPreserved": true,
+  "backfilledCount": 0,
+  "totalChanges": 1,
+  "impact": {
+    "multipleActiveSampleCount": 0,
+    "multipleActive": [],
+    "refusalCounts": {
+      "NO_LINE": 0,
+      "AMBIGUOUS_LINE": 0,
+      "MULTIPLE_ACTIVE_REVISIONS": 0,
+      "FRACTION_OWNER_LINE_REQUIRED": 0
+    },
+    "refusedOpenWorkItems": [],
+    "noActiveRevisionCount": 0,
+    "noActiveRevisionWorkItems": [],
+    "noMatchingLineCount": 0,
+    "noMatchingLineWorkItems": [],
+    "prospectiveApprovedAmendmentRefusalCount": 0,
+    "prospectiveApprovedAmendmentSampleCount": 0,
+    "approvedAmendmentSampleIds": [],
+    "prospectiveApprovedAmendmentRefusals": [],
+    "approvedAmendmentKitGate": "NO_APPROVED_AMENDMENT_REFUSALS",
+    "fractionOwnerRefusalCount": 0,
+    "incompleteTextureOwnerSampleCount": 0,
+    "incompleteTextureOwners": [],
+    "invalidStoredAnalysisSampleCount": 0,
+    "invalidStoredAnalyses": [],
+    "continuingReservedOpenCount": 0,
+    "continuingReservedOpenWorkItems": [],
+    "ambiguousOpenReservationCount": 0,
+    "ambiguousOpenReservations": [],
+    "refusalScope": "Open measurement work requiring a new attempt INSERT; existing OPEN reservations reported separately"
+  }
+}

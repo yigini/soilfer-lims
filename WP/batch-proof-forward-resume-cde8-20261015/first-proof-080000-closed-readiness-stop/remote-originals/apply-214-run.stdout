@@ -1,0 +1,21 @@
+{
+  "classification": "COMPLETE_214",
+  "sources": {
+    "migrationSha256": "49b378296a8a0ede3318ae1e543060478b55827db0ec981d8cc4bd6180a56df6",
+    "contractVersion": "214-v1"
+  },
+  "receipt": {
+    "sources": {
+      "migrationSha256": "49b378296a8a0ede3318ae1e543060478b55827db0ec981d8cc4bd6180a56df6",
+      "contractVersion": "214-v1"
+    },
+    "originalRowsSha256": "4ae780c3c7204d847f342971c6fe8645535456ab26f99fd5e94d3c0c18b9a0a8",
+    "originalRowsPreserved": true,
+    "backfilledCount": 0,
+    "receiptSha256": "b6d23202d705021b8f0a5b824434b5855e46ee8b0a613afc73124ce40b98e84b"
+  },
+  "previousClassification": "PRE_214",
+  "mode": "APPLIED",
+  "backfilledCount": 0,
+  "totalChanges": 1
+}

@@ -1,0 +1,46 @@
+{
+  "classification": "PRE_209",
+  "sourceSha256": "5c51f423689b1c726e16c12cdce7b381574661017cdb622eb3f562957a18304c",
+  "mode": "DRY_RUN",
+  "totalChanges": 0,
+  "backfilledCount": 0,
+  "impact": {
+    "multipleActiveSampleCount": 0,
+    "multipleActive": [],
+    "refusalCounts": {
+      "NO_LINE": 0,
+      "AMBIGUOUS_LINE": 0,
+      "MULTIPLE_ACTIVE_REVISIONS": 0,
+      "FRACTION_OWNER_LINE_REQUIRED": 0
+    },
+    "refusedOpenWorkItems": [],
+    "noActiveRevisionCount": 0,
+    "noActiveRevisionWorkItems": [],
+    "noMatchingLineCount": 0,
+    "noMatchingLineWorkItems": [],
+    "prospectiveApprovedAmendmentRefusalCount": 0,
+    "prospectiveApprovedAmendmentSampleCount": 0,
+    "approvedAmendmentSampleIds": [],
+    "prospectiveApprovedAmendmentRefusals": [],
+    "approvedAmendmentKitGate": "NO_APPROVED_AMENDMENT_REFUSALS",
+    "fractionOwnerRefusalCount": 0,
+    "incompleteTextureOwnerSampleCount": 0,
+    "incompleteTextureOwners": [],
+    "invalidStoredAnalysisSampleCount": 0,
+    "invalidStoredAnalyses": [],
+    "continuingReservedOpenCount": 0,
+    "continuingReservedOpenWorkItems": [],
+    "ambiguousOpenReservationCount": 0,
+    "ambiguousOpenReservations": [],
+    "refusalScope": "Open measurement work requiring a new attempt INSERT; existing OPEN reservations reported separately"
+  },
+  "readonlySnapshot": {
+    "path": "/tmp/lims-policy-schema-readonly-LCKABb/snapshot.db",
+    "originalDbWalShmSha256": {
+      "": "67622290aa0e60c1b54e974195430e7ffb000884ed6ca9b34ad649b9028a3e29",
+      "-wal": null,
+      "-shm": null
+    },
+    "originalFilesPreserved": true
+  }
+}

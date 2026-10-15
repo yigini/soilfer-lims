@@ -1,0 +1,2840 @@
+╔═══════════════════════════════════════╗
+║    SoilFER-LIMS Docker Entrypoint     ║
+╚═══════════════════════════════════════╝
+⚠ schema.prisma not found — copying from backup...
+📦 Applying versioned lab operations v3 migration...
+╔══════════════════════════════════════════════════════════════╗
+║  SoilFER-LIMS Lab Operations v3 Fail-Closed DB Migration    ║
+╚══════════════════════════════════════════════════════════════╝
+Target Database: /app/server/prisma/dev.db
+Mode:            APPLY (Transactional Execution)
+
+A94 manual-review candidates: [{"sampleId":"GTM-LAB1","tasks":[{"id":"WI-1789582246595-545","sampleId":"GTM-LAB1","analysis":"SAND","status":"NOT_ASSIGNED","assignedTo":null},{"id":"WI-1789582246600-449","sampleId":"GTM-LAB1","analysis":"SILT","status":"NOT_ASSIGNED","assignedTo":null},{"id":"WI-1789582246606-350","sampleId":"GTM-LAB1","analysis":"CLAY","status":"NOT_ASSIGNED","assignedTo":null}],"requiredAnalyses":"[\"PH_H2O\",\"EC\",\"SOC\",\"TN\",\"P_OLSEN\",\"EXCH_CA\",\"EXCH_MG\",\"EXCH_K\",\"EXCH_NA\",\"CEC\",\"SAND\",\"SILT\",\"CLAY\"]","reasons":["COMPLETE_LEGACY_FRACTION_SET","DECLARED_REQUIRED_ANALYSES"]},{"sampleId":"Prueba 1 Arturo","tasks":[{"id":"WI-1789583575821-509","sampleId":"Prueba 1 Arturo","analysis":"SAND","status":"ASSIGNED","assignedTo":"tech_gtm_2"},{"id":"WI-1789583575826-765","sampleId":"Prueba 1 Arturo","analysis":"SILT","status":"ASSIGNED","assignedTo":"tech_gtm_2"},{"id":"WI-1789583575830-22","sampleId":"Prueba 1 Arturo","analysis":"CLAY","status":"ASSIGNED","assignedTo":"tech_gtm_2"}],"requiredAnalyses":"[\"PH_H2O\",\"EC\",\"SOC\",\"TN\",\"P_OLSEN\",\"EXCH_CA\",\"EXCH_MG\",\"EXCH_K\",\"EXCH_NA\",\"CEC\",\"SAND\",\"SILT\",\"CLAY\"]","reasons":["COMPLETE_LEGACY_FRACTION_SET","DECLARED_REQUIRED_ANALYSES"]},{"sampleId":"W001","tasks":[{"id":"WI-1789481393069-84","sampleId":"W001","analysis":"SAND","status":"NOT_ASSIGNED","assignedTo":null}],"requiredAnalyses":"[\"PH_H2O\",\"EC\",\"SOC\",\"TN\",\"P_OLSEN\",\"EXCH_CA\",\"EXCH_MG\",\"EXCH_K\",\"CEC\",\"SAND\"]","reasons":["EXPLICIT_GROUPED_ORDER"]}]
+ℹ️ [SCHEMA MIGRATIONS] Migration 'v3_lab_operations_20260906' was already applied at 2026-09-06 14:15:52.
+Skipping default re-assertions and data migrations to preserve administrative changes.
+
+📦 Applying appearance preference migration...
+[MIGRATE-APPEARANCE] Target DB: /app/server/prisma/dev.db
+[MIGRATE-APPEARANCE] Column themePreference already exists on User table. Skipping ALTER.
+[MIGRATE-APPEARANCE] Verification: 49 users have valid themePreference.
+[MIGRATE-APPEARANCE] Migration completed successfully.
+📦 Applying project templates and policy migration...
+[MIGRATE-PROJECT-POLICY] Target DB: /app/server/prisma/dev.db
+[MIGRATE-PROJECT-POLICY] All project template & policy columns and indexes already exist. Verification successful (no-op).
+[MIGRATE-PROJECT-POLICY] Process exited normally.
+📦 Applying sitewide theme library migration...
+[MIGRATE-THEMES] Target DB: /app/server/prisma/dev.db
+[MIGRATE-THEMES] Integrity check: [{"integrity_check":"ok"}]
+[MIGRATE-THEMES] Foreign key errors: 0
+[MIGRATE-THEMES] Global setting: theme=soilfer-classic, mode=light, rev=1
+[MIGRATE-THEMES] Verified 49 users.
+[MIGRATE-THEMES] Migration completed successfully: {"success":true,"integrity":"ok","fkErrors":0,"globalSetting":{"id":"global","themeId":"soilfer-classic","defaultMode":"light","revision":1,"updatedAt":"2026-10-03 11:24:55","updatedBy":null},"userCount":49}
+📦 Installing workflow-state schema and guards...
+{
+  "mode": "NO_OP",
+  "classification": "COMPLETE",
+  "inventory": {
+    "totals": {
+      "Sample": 39280,
+      "WorkItem": 90
+    },
+    "candidateCount": 0,
+    "unmappedCount": 0,
+    "blockedCount": 0,
+    "fingerprint": "f92b4677e3ce0424471df4cffefe4c4e3138a1557846094059b8af0886129386"
+  },
+  "statements": [],
+  "sources": {
+    "evidenceSha256": "ae3accea0c276aab9ea3ed443b44d89ac05e52ef38a39345aa33e8744f019552",
+    "guardsSha256": "84921ef45fa8609621b38908de5261d716820f2135f2dde1b9a20fafa6fc81ed"
+  },
+  "totalChanges": 0,
+  "postflight": {
+    "counts": {
+      "Sample": 39280,
+      "WorkItem": 90,
+      "Result": 19,
+      "ReviewDecision": 7,
+      "ResultEvidenceEvent": 0
+    },
+    "integrity": "ok",
+    "foreignKeyViolations": [],
+    "guards": [
+      "Sample_status_insert_guard",
+      "Sample_status_update_guard",
+      "WorkItem_status_insert_guard",
+      "WorkItem_status_update_guard",
+      "Batch_status_insert_guard",
+      "Batch_status_update_guard",
+      "ReviewDecision_decision_insert_guard",
+      "ReviewDecision_decision_immutable",
+      "ResultEvidenceEvent_insert_guard",
+      "ResultEvidenceEvent_update_immutable",
+      "ResultEvidenceEvent_delete_immutable"
+    ],
+    "marker": {
+      "id": "179_workflow_state_guards",
+      "appliedAt": "2026-10-05 21:40:40",
+      "details": "{\"evidenceSha256\":\"ae3accea0c276aab9ea3ed443b44d89ac05e52ef38a39345aa33e8744f019552\",\"guardsSha256\":\"84921ef45fa8609621b38908de5261d716820f2135f2dde1b9a20fafa6fc81ed\"}"
+    }
+  }
+}
+📦 Installing result attempt links...
+{
+  "classification": "COMPLETE",
+  "sources": {
+    "migrationSha256": "aac7a1fc8e7a19ea993f6995032812e43ee4887bf0683da446438659061b235d"
+  },
+  "guards": [
+    "Result_attempt_insert_guard",
+    "Result_attempt_update_guard",
+    "WorkAttempt_result_reference_guard"
+  ],
+  "counts": {
+    "results": 19,
+    "linked": 19
+  },
+  "backfillCount": 0,
+  "mode": "NO_OP",
+  "totalChanges": 0
+}
+{
+  "classification": "COMPLETE",
+  "sources": {
+    "migrationSha256": "5fce16e8bc148e07880fe6afcc7f5aec1c94c319a5c98ddaeaf47450906b06a8"
+  },
+  "guards": [
+    "SampleHold_insert_guard",
+    "SampleHold_update_guard",
+    "SampleHold_raise_immutable",
+    "SampleHold_resolution_final",
+    "SampleHold_delete_refusal",
+    "WorkItem_cancellation_insert_guard",
+    "WorkItem_cancellation_update_guard"
+  ],
+  "counts": {
+    "workItems": 90,
+    "holds": 12
+  },
+  "backfillCount": 0,
+  "mode": "NO_OP",
+  "totalChanges": 0
+}
+📦 Installing reference material catalogue...
+{
+  "classification": "COMPLETE",
+  "sources": {
+    "migrationSha256": "5da12ca98c6402002ab2701105eb9e2a51539d4421f53d70c60f47ab98bd51e3",
+    "oracleSha256": "7a626b66bd31a7e7305d8c1b091207f3fb26348345a431fb77b63f875d3b99b5"
+  },
+  "guards": [
+    "ReferenceMaterial_insert_guard",
+    "ReferenceMaterial_update_guard",
+    "ReferenceValue_insert_guard",
+    "ReferenceValue_immutable_guard",
+    "ReferenceValue_delete_guard",
+    "BatchQcResult_reference_insert_guard",
+    "BatchQcResult_reference_update_guard"
+  ],
+  "indexes": [
+    "ReferenceMaterial_labId_code_idx",
+    "ReferenceValue_referenceMaterialId_analysisCode_idx",
+    "ReferenceValue_current_generic",
+    "ReferenceValue_current_method"
+  ],
+  "counts": {
+    "materials": 0,
+    "values": 0,
+    "qcRows": 18,
+    "linked": 0
+  },
+  "backfillCount": 0,
+  "mode": "NO_OP",
+  "totalChanges": 0
+}
+📦 Installing versioned QC rules...
+{
+  "classification": "COMPLETE",
+  "sources": {
+    "migrationSha256": "4ee7f414ae3e6228faf52fe81d32bde2bdaf6ecb975ca62a438494db42e58b06",
+    "oracleSha256": "fe0dbc7dbb0a35bc62353de715a48b4263d492917225c7be5b6f969ec3f52819"
+  },
+  "guards": [
+    "QcRule_immutable_update",
+    "QcRule_immutable_delete",
+    "QcRule_version_guard",
+    "QcRule_scope_guard",
+    "QcRule_value_guard"
+  ],
+  "indexes": [
+    "QcRule_labId_analysisCode_methodologyId_effectiveFrom_idx",
+    "QcRule_scope_version_unique"
+  ],
+  "counts": {
+    "rules": 0
+  },
+  "backfillCount": 0,
+  "mode": "NO_OP",
+  "totalChanges": 0
+}
+📦 Installing normalized QC runs...
+{
+  "classification": "COMPLETE",
+  "sources": {
+    "migrationSha256": "2f3d7a319d6cbb1fb061092d79e29e03358c28aba9e22190f221df71635e2046",
+    "oracleSha256": "2991b84db149e9005a0dcd3995a63198f8668e532a68b8f7d14068aacd2b7369"
+  },
+  "counts": {
+    "BatchAnalyte": 6,
+    "BatchPosition": 33,
+    "BatchPositionWorkItem": 15,
+    "BatchPositionReference": 0,
+    "QcMeasurement": 24,
+    "QcEvaluation": 6,
+    "BatchDisposition": 1,
+    "BatchEvent": 28
+  },
+  "receipt": {
+    "migrationSha256": "2f3d7a319d6cbb1fb061092d79e29e03358c28aba9e22190f221df71635e2046",
+    "oracleSha256": "2991b84db149e9005a0dcd3995a63198f8668e532a68b8f7d14068aacd2b7369",
+    "backfillFingerprint": "18637fad813051498f233de8f49fe7509795cd67d66213a67804c08ad18f443b",
+    "backfillCounts": {
+      "batches": 6,
+      "analytes": 6,
+      "samplePositions": 15,
+      "qcPositions": 18,
+      "historicalSnapshots": 0,
+      "currentEvaluations": 6,
+      "evaluations": 6,
+      "measurements": 24,
+      "typedRows": 18,
+      "historicalTypedRows": 0,
+      "jsonEntries": 18,
+      "typedFallbackEntries": 0,
+      "typedJsonConflicts": 12,
+      "historyAuditConflicts": 0,
+      "unresolvedMethods": 0,
+      "unresolvedAnalysts": 3,
+      "unresolvedInstruments": 6,
+      "unlinkedReferences": 6,
+      "unresolvedNumbers": 0,
+      "unresolvedDuplicateParents": 6,
+      "unresolvedRackPositions": 15,
+      "missingWorkItems": 16,
+      "malformedHistory": 0,
+      "malformedQcResults": 0,
+      "orphanSnapshots": 0,
+      "multiAttemptMembershipGroups": 0,
+      "refusals": 0,
+      "legacyDispositionMapped": {
+        "REJECT_REANALYSIS": 1,
+        "ACCEPT_OPAQUE": 1
+      },
+      "dispositionAttribution": {
+        "AUDIT_LOG": 0,
+        "BATCH_DISPOSITION_FIELD": 2,
+        "SNAPSHOT_DISPOSITION_FIELD": 0
+      },
+      "dispositionAttributionConflicts": 0,
+      "TEXTURE_ALIAS_MERGED": 0
+    },
+    "bootstrapRebuild": []
+  },
+  "bootstrapRebuild": [],
+  "guards": [
+    "Batch_legacy_qc_immutable",
+    "Batch_first_start_immutable",
+    "BatchQcResult_frozen_insert",
+    "BatchQcResult_frozen_update",
+    "BatchQcResult_frozen_delete",
+    "BatchAnalyte_insert_guard",
+    "BatchAnalyte_update_guard",
+    "BatchAnalyte_identity_immutable",
+    "BatchAnalyte_membership_insert_guard",
+    "BatchAnalyte_membership_delete_guard",
+    "BatchAnalyte_membership_update_guard",
+    "BatchPosition_insert_guard",
+    "BatchPosition_update_guard",
+    "BatchPosition_membership_insert_guard",
+    "BatchPosition_membership_update_guard",
+    "BatchPosition_membership_delete_guard",
+    "BatchPosition_identity_guard",
+    "BatchPositionWorkItem_insert_guard",
+    "BatchPositionWorkItem_immutable",
+    "BatchPositionWorkItem_run_unique_guard",
+    "BatchPositionWorkItem_membership_insert_guard",
+    "BatchPositionWorkItem_membership_delete_guard",
+    "WorkItem_batch_membership_guard",
+    "WorkItem_batch_membership_insert_guard",
+    "BatchPositionReference_insert_guard",
+    "BatchPositionReference_correction_reason_guard",
+    "BatchPositionReference_lot_guard",
+    "BatchPositionReference_supersede_guard",
+    "BatchPositionReference_delete_guard",
+    "QcMeasurement_insert_guard",
+    "QcMeasurement_historical_write_guard",
+    "QcMeasurement_replacement_guard",
+    "BatchPositionReference_replacement_guard",
+    "QcMeasurement_start_guard",
+    "QcMeasurement_supersede_guard",
+    "QcMeasurement_delete_guard",
+    "QcEvaluation_insert_guard",
+    "QcEvaluation_start_guard",
+    "QcEvaluation_frozen_criteria_guard",
+    "QcEvaluation_immutable_update",
+    "QcEvaluation_immutable_delete",
+    "BatchDisposition_immutable_update",
+    "BatchDisposition_immutable_delete",
+    "BatchEvent_immutable_update",
+    "BatchEvent_immutable_delete",
+    "BatchDisposition_insert_guard",
+    "BatchEvent_insert_guard"
+  ],
+  "indexes": [
+    "BatchAnalyte_labId_analysisCode_methodologyId_idx",
+    "BatchAnalyte_batchId_analysisCode_key",
+    "BatchPosition_batchId_position_key",
+    "BatchPositionWorkItem_workItemId_idx",
+    "BatchPositionWorkItem_positionId_analysisCode_key",
+    "BatchPositionReference_positionId_analysisCode_idx",
+    "QcMeasurement_batchId_analysisCode_idx",
+    "QcMeasurement_positionId_analysisCode_replicateNo_idx",
+    "QcEvaluation_batchId_analysisCode_version_key",
+    "BatchDisposition_batchId_analysisCode_idx",
+    "BatchEvent_batchId_at_idx",
+    "BatchAnalyte_crm_ordinal_unique",
+    "BatchPositionReference_current_unique",
+    "QcMeasurement_current_unique"
+  ],
+  "backfillCount": 0,
+  "backfillCounts": {
+    "batches": 6,
+    "analytes": 6,
+    "samplePositions": 15,
+    "qcPositions": 18,
+    "historicalSnapshots": 0,
+    "currentEvaluations": 6,
+    "evaluations": 6,
+    "measurements": 24,
+    "typedRows": 18,
+    "historicalTypedRows": 0,
+    "jsonEntries": 18,
+    "typedFallbackEntries": 0,
+    "typedJsonConflicts": 12,
+    "historyAuditConflicts": 0,
+    "unresolvedMethods": 0,
+    "unresolvedAnalysts": 3,
+    "unresolvedInstruments": 6,
+    "unlinkedReferences": 6,
+    "unresolvedNumbers": 0,
+    "unresolvedDuplicateParents": 6,
+    "unresolvedRackPositions": 15,
+    "missingWorkItems": 16,
+    "malformedHistory": 0,
+    "malformedQcResults": 0,
+    "orphanSnapshots": 0,
+    "multiAttemptMembershipGroups": 0,
+    "refusals": 0,
+    "legacyDispositionMapped": {
+      "REJECT_REANALYSIS": 1,
+      "ACCEPT_OPAQUE": 1
+    },
+    "dispositionAttribution": {
+      "AUDIT_LOG": 0,
+      "BATCH_DISPOSITION_FIELD": 2,
+      "SNAPSHOT_DISPOSITION_FIELD": 0
+    },
+    "dispositionAttributionConflicts": 0,
+    "TEXTURE_ALIAS_MERGED": 0
+  },
+  "backfillFingerprint": "18637fad813051498f233de8f49fe7509795cd67d66213a67804c08ad18f443b",
+  "mode": "NO_OP",
+  "totalChanges": 0
+}
+📦 Installing QC disposition scope guards...
+{
+  "classification": "COMPLETE",
+  "migrationSha256": "fac0023cc90f9d5703ec8d722be55727028c7d24398fbfd4a0aa1cd1bd4fe5bf",
+  "membershipMigrationSha256": "1bc85113a3b6b7da327265bc7005eb4a1c97855943c599b1fe5ed8b126cf8572",
+  "membershipGuardSha256": "62cae98d9fdc435991030a8b330a25346ce0732069be22ce9f00fff4178db067",
+  "supersededMembershipGuardSha256": "3f33787e89eb1f5fb4552aef429a289908bcdb588b843d3313816bf45230a91d",
+  "existingDispositionRows": 1,
+  "originalDispositionFingerprint": "9afcbd14c8f9b319a2e2552a5e853aa382be8249bce9ace3eb24c17076146338",
+  "backfillCount": 0,
+  "bootstrapRebuild": [],
+  "totalChanges": 0,
+  "mode": "NO_OP",
+  "receipt": {
+    "migrationSha256": "fac0023cc90f9d5703ec8d722be55727028c7d24398fbfd4a0aa1cd1bd4fe5bf",
+    "existingDispositionRows": 1,
+    "membershipMigrationSha256": "1bc85113a3b6b7da327265bc7005eb4a1c97855943c599b1fe5ed8b126cf8572",
+    "membershipGuardSha256": "62cae98d9fdc435991030a8b330a25346ce0732069be22ce9f00fff4178db067",
+    "supersededMembershipGuardSha256": "3f33787e89eb1f5fb4552aef429a289908bcdb588b843d3313816bf45230a91d",
+    "originalDispositionFingerprint": "9afcbd14c8f9b319a2e2552a5e853aa382be8249bce9ace3eb24c17076146338",
+    "backfillCount": 0,
+    "bootstrapRebuild": []
+  }
+}
+📦 Installing retained raw input column...
+{
+  "classification": "ALREADY_PRESENT",
+  "counts": {
+    "results": 19,
+    "recordedRawInputs": 0
+  },
+  "backfillCount": 0,
+  "sources": {
+    "migrationSha256": "850a47806543f1e6587641daa918fe586b6cbb4bfece5a6920132e4b74c593cc"
+  },
+  "mode": "NO_OP",
+  "totalChanges": 0
+}
+📦 Installing proficiency evidence...
+{
+  "classification": "COMPLETE_193",
+  "sources": {
+    "migrationSha256": "3b52e666a829449062b700948d9ccb6ccedb562b631509590f9a8b7cc8b94c47",
+    "proficiencyMigrationSha256": "bab161fb91e649a33454086aff12eca8ad0b56d16b9f5f47c278a7c20e4fc77a"
+  },
+  "receipt": {
+    "sources": {
+      "migrationSha256": "3b52e666a829449062b700948d9ccb6ccedb562b631509590f9a8b7cc8b94c47",
+      "proficiencyMigrationSha256": "bab161fb91e649a33454086aff12eca8ad0b56d16b9f5f47c278a7c20e4fc77a"
+    },
+    "originalRowsSha256": "82e93589e9ef0d0d6fdd045be02d475670d700b9866bffb96b68832b9d858743",
+    "originalRowsAndFieldsPreserved": true,
+    "newNcrCount": 0,
+    "backfilledCount": 0,
+    "receiptSha256": "cae019cfb890d3b4ad0812dcecc6733148e9b949fc764421928a7b0fd5305c2b"
+  },
+  "roundCount": 0,
+  "pendingRoundIds": [],
+  "ncrCount": 0,
+  "mode": "NO_OP",
+  "totalChanges": 0,
+  "backfilledCount": 0
+}
+{
+  "classification": "COMPLETE",
+  "sources": {
+    "migrationSha256": "bd409a6e5d4d8aea357991450025601d73c4c4729cb46473d847c17cb66319d4"
+  },
+  "bootstrapRebuild": [],
+  "backfillCount": 0,
+  "resultCount": 19,
+  "originalResultSha256": "935e140956349abc9eddbee25b830c9ff041700f6565479a62f16031deb90d26",
+  "mode": "NO_OP",
+  "totalChanges": 0
+}
+📦 Installing duplicate-marker prerequisite...
+{
+  "classification": "COMPLETE",
+  "sources": [
+    {
+      "id": "20261004190000_add_workitem_duplicate_marker",
+      "sqlSha256": "80278c2d318bc47fa92746015ec278a204a7ff08a9e36d24faca0a56ef05fa1e"
+    },
+    {
+      "id": "20261004190100_unique_active_workitem",
+      "sqlSha256": "a6e1cf6a26319954e35f4008bc4d18e904014f086db0e31d88e42948fac6556e"
+    }
+  ],
+  "workItemCount": 90,
+  "duplicateGroupCount": 0,
+  "duplicateGroups": [],
+  "differences": [],
+  "ledgerReady": true,
+  "executionTablesEmpty": false,
+  "mode": "NO_OP",
+  "totalChanges": 0
+}
+📦 Installing WorkAttempt execution evidence...
+{
+  "classification": "COMPLETE",
+  "sources": {
+    "migrationSha256": "7e7d5679c9aeeea45ac3c2bac09e4db31dd15b52fe37c743080aa0e3473c8fe2",
+    "contractVersion": "190-v1"
+  },
+  "plan": {
+    "status": "READY",
+    "existingAttemptCount": 19,
+    "resultCount": 19,
+    "alreadyLinkedResultCount": 19,
+    "exemptImportCount": 0,
+    "exemptImports": [],
+    "missingOrderedWorkGroups": [
+      {
+        "labId": "MOZ-LAB1",
+        "param": "SAND",
+        "sampleIds": [
+          "1769086088871"
+        ],
+        "sampleCount": 1
+      },
+      {
+        "labId": "MOZ-LAB1",
+        "param": "SILT",
+        "sampleIds": [
+          "1769086088871"
+        ],
+        "sampleCount": 1
+      },
+      {
+        "labId": "MOZ-LAB1",
+        "param": "CLAY",
+        "sampleIds": [
+          "1769086088871"
+        ],
+        "sampleCount": 1
+      },
+      {
+        "labId": "GTM-LAB1",
+        "param": "SAND",
+        "sampleIds": [
+          "1769086466918",
+          "1769086467021",
+          "1769464262091",
+          "1769464262872",
+          "1769719118243",
+          "1769719138492",
+          "1769719197975",
+          "299d3dbe-0fe9-4605-9475-3b8e6c516b36"
+        ],
+        "sampleCount": 8
+      },
+      {
+        "labId": "GTM-LAB1",
+        "param": "SILT",
+        "sampleIds": [
+          "1769086466918",
+          "1769086467021",
+          "1769464262091",
+          "1769464262872",
+          "1769719118243",
+          "1769719138492",
+          "1769719197975",
+          "299d3dbe-0fe9-4605-9475-3b8e6c516b36"
+        ],
+        "sampleCount": 8
+      },
+      {
+        "labId": "GTM-LAB1",
+        "param": "CLAY",
+        "sampleIds": [
+          "1769086466918",
+          "1769086467021",
+          "1769464262091",
+          "1769464262872",
+          "1769719118243",
+          "1769719138492",
+          "1769719197975",
+          "299d3dbe-0fe9-4605-9475-3b8e6c516b36"
+        ],
+        "sampleCount": 8
+      },
+      {
+        "labId": "GTM-LAB1",
+        "param": "BD",
+        "sampleIds": [
+          "1769086466918",
+          "1769086467021",
+          "1769464262091",
+          "1769464262872",
+          "1769719118243",
+          "1769719138492",
+          "1769719197975"
+        ],
+        "sampleCount": 7
+      },
+      {
+        "labId": "GTM-LAB1",
+        "param": "MOIST",
+        "sampleIds": [
+          "1769086466918",
+          "1769086467021",
+          "1769464262091",
+          "1769464262872",
+          "1769719118243",
+          "1769719138492",
+          "1769719197975"
+        ],
+        "sampleCount": 7
+      },
+      {
+        "labId": "GTM-LAB1",
+        "param": "PSD",
+        "sampleIds": [
+          "1769086466918",
+          "1769086467021",
+          "1769464262091",
+          "1769464262872",
+          "1769719118243",
+          "1769719138492",
+          "1769719197975"
+        ],
+        "sampleCount": 7
+      },
+      {
+        "labId": "GTM-LAB1",
+        "param": "GRAVEL",
+        "sampleIds": [
+          "1769086466918",
+          "1769086467021",
+          "1769464262091",
+          "1769464262872",
+          "1769719118243",
+          "1769719138492",
+          "1769719197975"
+        ],
+        "sampleCount": 7
+      },
+      {
+        "labId": "GTM-LAB1",
+        "param": "PH_H2O",
+        "sampleIds": [
+          "1769086466918",
+          "1769086467021",
+          "1769464262091",
+          "1769464262872",
+          "1769719118243",
+          "1769719138492",
+          "1769719197975"
+        ],
+        "sampleCount": 7
+      },
+      {
+        "labId": "GTM-LAB1",
+        "param": "PH_KCL",
+        "sampleIds": [
+          "1769086466918",
+          "1769086467021",
+          "1769464262091",
+          "1769464262872",
+          "1769719118243",
+          "1769719138492",
+          "1769719197975"
+        ],
+        "sampleCount": 7
+      },
+      {
+        "labId": "GTM-LAB1",
+        "param": "EC",
+        "sampleIds": [
+          "1769086466918",
+          "1769086467021",
+          "1769464262091",
+          "1769464262872",
+          "1769719118243",
+          "1769719138492",
+          "1769719197975"
+        ],
+        "sampleCount": 7
+      },
+      {
+        "labId": "GTM-LAB1",
+        "param": "SOC",
+        "sampleIds": [
+          "1769086466918",
+          "1769086467021",
+          "1769464262091",
+          "1769464262872",
+          "1769719118243",
+          "1769719138492",
+          "1769719197975"
+        ],
+        "sampleCount": 7
+      },
+      {
+        "labId": "GTM-LAB1",
+        "param": "TN",
+        "sampleIds": [
+          "1769086466918",
+          "1769086467021",
+          "1769464262091",
+          "1769464262872",
+          "1769719118243",
+          "1769719138492",
+          "1769719197975"
+        ],
+        "sampleCount": 7
+      },
+      {
+        "labId": "GTM-LAB1",
+        "param": "P_AVAIL",
+        "sampleIds": [
+          "1769086466918",
+          "1769086467021",
+          "1769464262091",
+          "1769464262872",
+          "1769719118243",
+          "1769719138492",
+          "1769719197975"
+        ],
+        "sampleCount": 7
+      },
+      {
+        "labId": "GTM-LAB1",
+        "param": "K_EXCH",
+        "sampleIds": [
+          "1769086466918",
+          "1769086467021",
+          "1769464262091",
+          "1769464262872",
+          "1769719118243",
+          "1769719138492",
+          "1769719197975"
+        ],
+        "sampleCount": 7
+      },
+      {
+        "labId": "GTM-LAB1",
+        "param": "CA_EXCH",
+        "sampleIds": [
+          "1769086466918",
+          "1769086467021",
+          "1769464262091",
+          "1769464262872",
+          "1769719118243",
+          "1769719138492",
+          "1769719197975"
+        ],
+        "sampleCount": 7
+      },
+      {
+        "labId": "GTM-LAB1",
+        "param": "MG_EXCH",
+        "sampleIds": [
+          "1769086466918",
+          "1769086467021",
+          "1769464262091",
+          "1769464262872",
+          "1769719118243",
+          "1769719138492",
+          "1769719197975"
+        ],
+        "sampleCount": 7
+      },
+      {
+        "labId": "GTM-LAB1",
+        "param": "NA_EXCH",
+        "sampleIds": [
+          "1769086466918",
+          "1769086467021",
+          "1769464262091",
+          "1769464262872",
+          "1769719118243",
+          "1769719138492",
+          "1769719197975"
+        ],
+        "sampleCount": 7
+      },
+      {
+        "labId": "GTM-LAB1",
+        "param": "CEC",
+        "sampleIds": [
+          "1769086466918",
+          "1769086467021",
+          "1769464262091",
+          "1769464262872",
+          "1769719118243",
+          "1769719138492",
+          "1769719197975"
+        ],
+        "sampleCount": 7
+      },
+      {
+        "labId": "GTM-LAB1",
+        "param": "BS",
+        "sampleIds": [
+          "1769086466918",
+          "1769086467021",
+          "1769464262091",
+          "1769464262872",
+          "1769719118243",
+          "1769719138492",
+          "1769719197975"
+        ],
+        "sampleCount": 7
+      },
+      {
+        "labId": "GTM-LAB1",
+        "param": "CACO3",
+        "sampleIds": [
+          "1769086466918",
+          "1769086467021",
+          "1769464262091",
+          "1769464262872",
+          "1769719118243",
+          "1769719138492",
+          "1769719197975"
+        ],
+        "sampleCount": 7
+      },
+      {
+        "labId": "GTM-LAB1",
+        "param": "FE",
+        "sampleIds": [
+          "1769086466918",
+          "1769086467021",
+          "1769464262091",
+          "1769464262872",
+          "1769719118243",
+          "1769719138492",
+          "1769719197975"
+        ],
+        "sampleCount": 7
+      },
+      {
+        "labId": "GTM-LAB1",
+        "param": "MN",
+        "sampleIds": [
+          "1769086466918",
+          "1769086467021",
+          "1769464262091",
+          "1769464262872",
+          "1769719118243",
+          "1769719138492",
+          "1769719197975"
+        ],
+        "sampleCount": 7
+      },
+      {
+        "labId": "GTM-LAB1",
+        "param": "ZN",
+        "sampleIds": [
+          "1769086466918",
+          "1769086467021",
+          "1769464262091",
+          "1769464262872",
+          "1769719118243",
+          "1769719138492",
+          "1769719197975"
+        ],
+        "sampleCount": 7
+      },
+      {
+        "labId": "GTM-LAB1",
+        "param": "CU",
+        "sampleIds": [
+          "1769086466918",
+          "1769086467021",
+          "1769464262091",
+          "1769464262872",
+          "1769719118243",
+          "1769719138492",
+          "1769719197975"
+        ],
+        "sampleCount": 7
+      },
+      {
+        "labId": "GTM-LAB1",
+        "param": "B",
+        "sampleIds": [
+          "1769086466918",
+          "1769086467021",
+          "1769464262091",
+          "1769464262872",
+          "1769719118243",
+          "1769719138492",
+          "1769719197975"
+        ],
+        "sampleCount": 7
+      },
+      {
+        "labId": "GTM-LAB1",
+        "param": "SOM",
+        "sampleIds": [
+          "1769086466918",
+          "1769086467021",
+          "1769464262091",
+          "1769464262872",
+          "1769719118243",
+          "1769719138492",
+          "1769719197975"
+        ],
+        "sampleCount": 7
+      },
+      {
+        "labId": "GTM-LAB1",
+        "param": "MBC",
+        "sampleIds": [
+          "1769086466918",
+          "1769086467021",
+          "1769464262091",
+          "1769464262872",
+          "1769719118243",
+          "1769719138492",
+          "1769719197975"
+        ],
+        "sampleCount": 7
+      },
+      {
+        "labId": "GTM-LAB1",
+        "param": "PMN",
+        "sampleIds": [
+          "1769086466918",
+          "1769086467021",
+          "1769464262091",
+          "1769464262872",
+          "1769719118243",
+          "1769719138492",
+          "1769719197975"
+        ],
+        "sampleCount": 7
+      },
+      {
+        "labId": "GTM-LAB1",
+        "param": "S_RESP",
+        "sampleIds": [
+          "1769086466918",
+          "1769086467021",
+          "1769464262091",
+          "1769464262872",
+          "1769719118243",
+          "1769719138492",
+          "1769719197975"
+        ],
+        "sampleCount": 7
+      },
+      {
+        "labId": "GTM-LAB1",
+        "param": "SPEC_VIS_NIR",
+        "sampleIds": [
+          "1769086466918",
+          "1769086467021",
+          "1769464262091",
+          "1769464262872",
+          "1769719118243",
+          "1769719123914",
+          "1769719138492",
+          "1769719197975"
+        ],
+        "sampleCount": 8
+      },
+      {
+        "labId": "GTM-LAB1",
+        "param": "SPEC_MIR",
+        "sampleIds": [
+          "1769086466918",
+          "1769086467021",
+          "1769464262091",
+          "1769464262872",
+          "1769719118243",
+          "1769719123914",
+          "1769719138492",
+          "1769719197975"
+        ],
+        "sampleCount": 8
+      }
+    ],
+    "missingOrderedWorkCount": 225,
+    "samplesWithMissingOrderedWorkCount": 10,
+    "invalidOrderMetadata": [],
+    "unmappedStatusGroups": [],
+    "newAttempts": [],
+    "links": [],
+    "blockers": [],
+    "duplicateAttemptNumberGroups": [],
+    "currentResultConflicts": [],
+    "historicalEquipmentEvidence": [],
+    "historicalBatchEvidence": [
+      {
+        "attemptId": "att-s02-p-1",
+        "workItemId": "WI-GTM-DEMO-S02-P",
+        "outcome": "RETAINED",
+        "reason": null,
+        "batchId": "BATCH-GTM-2026-P-01"
+      },
+      {
+        "attemptId": "att-s02-p-2",
+        "workItemId": "WI-GTM-DEMO-S02-P",
+        "outcome": "RETAINED",
+        "reason": null,
+        "batchId": "BATCH-GTM-2026-P-02"
+      },
+      {
+        "attemptId": "att190-16df97e9-f3fc-4c15-9432-7b1f3b2169e2",
+        "workItemId": "WI-1789634536059-97",
+        "outcome": "NOT_RECORDED",
+        "reason": "BATCH_NOT_RECORDED",
+        "batchId": null
+      },
+      {
+        "attemptId": "att190-2bb701e8-2b43-4da8-9ac3-057a1944948a",
+        "workItemId": "WI-GTM-DEMO-S01-K",
+        "outcome": "RETAINED",
+        "reason": null,
+        "batchId": "BATCH-GTM-2026-K-01"
+      },
+      {
+        "attemptId": "att190-2cefb713-9ee2-4ad3-a03f-b6c768158fe5",
+        "workItemId": "WI-GTM-DEMO-S01-PH",
+        "outcome": "RETAINED",
+        "reason": null,
+        "batchId": "BATCH-GTM-2026-PH-01"
+      },
+      {
+        "attemptId": "att190-32bca60b-2ef7-452e-adaf-50c45ec66236",
+        "workItemId": "WI-GTM-DEMO-S02-K",
+        "outcome": "RETAINED",
+        "reason": null,
+        "batchId": "BATCH-GTM-2026-K-01"
+      },
+      {
+        "attemptId": "att190-3f91ace4-f24f-4baa-813b-5793b860109e",
+        "workItemId": "WI-GTM-DEMO-S03-K",
+        "outcome": "RETAINED",
+        "reason": null,
+        "batchId": "BATCH-GTM-2026-K-01"
+      },
+      {
+        "attemptId": "att190-4b50565c-b26c-4452-81ef-af520f849a77",
+        "workItemId": "WI-GTM-DEMO-S03-EC",
+        "outcome": "RETAINED",
+        "reason": null,
+        "batchId": "BATCH-GTM-2026-EC-01"
+      },
+      {
+        "attemptId": "att190-752364b5-3b74-47f6-92aa-ccd52943caa1",
+        "workItemId": "WI-1789634536011-406",
+        "outcome": "NOT_RECORDED",
+        "reason": "BATCH_NOT_RECORDED",
+        "batchId": null
+      },
+      {
+        "attemptId": "att190-781205b4-16d2-480e-a616-5cfaff3b7ae8",
+        "workItemId": "WI-GTM-DEMO-S03-PH",
+        "outcome": "RETAINED",
+        "reason": null,
+        "batchId": "BATCH-GTM-2026-PH-01"
+      },
+      {
+        "attemptId": "att190-8153d483-fb69-4a7c-8dcd-be91073cfd75",
+        "workItemId": "WI-1789634536051-965",
+        "outcome": "NOT_RECORDED",
+        "reason": "BATCH_NOT_RECORDED",
+        "batchId": null
+      },
+      {
+        "attemptId": "att190-89438697-6e7d-4795-9dd5-db1fe8a90ef1",
+        "workItemId": "WI-GTM-DEMO-S02-PH",
+        "outcome": "RETAINED",
+        "reason": null,
+        "batchId": "BATCH-GTM-2026-PH-01"
+      },
+      {
+        "attemptId": "att190-96433480-e2ff-406b-ba79-2c5d6706acbf",
+        "workItemId": "WI-GTM-DEMO-S01-P",
+        "outcome": "RETAINED",
+        "reason": null,
+        "batchId": "BATCH-GTM-2026-P-01"
+      },
+      {
+        "attemptId": "att190-a9fd8a80-d29b-482a-b0d5-43f169a3fc95",
+        "workItemId": "WI-GTM-DEMO-S01-SOC",
+        "outcome": "RETAINED",
+        "reason": null,
+        "batchId": "BATCH-GTM-2026-SOC-01"
+      },
+      {
+        "attemptId": "att190-ac045345-d7ea-4002-a3e9-2a60762974f9",
+        "workItemId": "WI-GTM-DEMO-S03-SOC",
+        "outcome": "RETAINED",
+        "reason": null,
+        "batchId": "BATCH-GTM-2026-SOC-01"
+      },
+      {
+        "attemptId": "att190-b322848a-7ad3-4332-9720-81c83a426cad",
+        "workItemId": "WI-GTM-DEMO-S02-EC",
+        "outcome": "RETAINED",
+        "reason": null,
+        "batchId": "BATCH-GTM-2026-EC-01"
+      },
+      {
+        "attemptId": "att190-b6852f8b-1f84-471a-84b0-782faca2c7e9",
+        "workItemId": "WI-GTM-DEMO-S03-P",
+        "outcome": "RETAINED",
+        "reason": null,
+        "batchId": "BATCH-GTM-2026-P-01"
+      },
+      {
+        "attemptId": "att190-d3fa23d7-82fa-45a1-8b3f-2e1b78388af3",
+        "workItemId": "WI-GTM-DEMO-S01-EC",
+        "outcome": "RETAINED",
+        "reason": null,
+        "batchId": "BATCH-GTM-2026-EC-01"
+      },
+      {
+        "attemptId": "att190-f333de96-7ef6-4358-98c0-bf5d76df269d",
+        "workItemId": "WI-GTM-DEMO-S02-SOC",
+        "outcome": "RETAINED",
+        "reason": null,
+        "batchId": "BATCH-GTM-2026-SOC-01"
+      }
+    ],
+    "originalAttemptSha256": "257402af0ae543b070dfd1c114337e7e4c709ce9d73da830f285f893ab8a62c0",
+    "originalResultSha256": "f84d137e1bbd634b764ea3b140a7cc67cb619394ded931acdfb62cf523d0d41c",
+    "matchedWorkItemSourceSha256": "89597e83da2232a8f15c21e13805538497b505faaec4d3b1e0b7b0469815c2bb",
+    "batchReferenceSha256": "b4c51186ea82897dfa1aab7d8e8308d9e6834ef440ed271b7864fbec6aa45701",
+    "totalChanges": 0,
+    "planSha256": "a908d76eb0a644a635a37a23ba4adb7657d561caa5f6fdd813d002973ecb9185"
+  },
+  "duplicateMarkerPrerequisite": {
+    "classification": "COMPLETE",
+    "sources": [
+      {
+        "id": "20261004190000_add_workitem_duplicate_marker",
+        "sqlSha256": "80278c2d318bc47fa92746015ec278a204a7ff08a9e36d24faca0a56ef05fa1e"
+      },
+      {
+        "id": "20261004190100_unique_active_workitem",
+        "sqlSha256": "a6e1cf6a26319954e35f4008bc4d18e904014f086db0e31d88e42948fac6556e"
+      }
+    ]
+  },
+  "receipt": {
+    "sources": {
+      "migrationSha256": "7e7d5679c9aeeea45ac3c2bac09e4db31dd15b52fe37c743080aa0e3473c8fe2",
+      "contractVersion": "190-v1"
+    },
+    "originalPlanSha256": "7ffdb375cab35663d188d6087f02ee81161ec950feae7611bbbad6d8706d57f9",
+    "duplicateMarkerPrerequisite": {
+      "classification": "COMPLETE",
+      "sources": [
+        {
+          "id": "20261004190000_add_workitem_duplicate_marker",
+          "sqlSha256": "80278c2d318bc47fa92746015ec278a204a7ff08a9e36d24faca0a56ef05fa1e"
+        },
+        {
+          "id": "20261004190100_unique_active_workitem",
+          "sqlSha256": "a6e1cf6a26319954e35f4008bc4d18e904014f086db0e31d88e42948fac6556e"
+        }
+      ]
+    },
+    "originalAttemptSha256": "356b45f28f94828d9dc705b656d5ddbc2717c3dc1dc1249d0f4378ef1f071786",
+    "originalResultSha256": "07d02a9f76eaf0a06a352d477bdeb416cb69a6694135de9b3f14c004cb4cd437",
+    "matchedWorkItemSourceSha256": "89597e83da2232a8f15c21e13805538497b505faaec4d3b1e0b7b0469815c2bb",
+    "createdAttempts": [
+      {
+        "workItemId": "WI-1789634536051-965",
+        "attemptNo": 1,
+        "sourceStatus": "ACCEPTED",
+        "status": "ACCEPTED",
+        "resultIds": [
+          "res-1789655582508-vr6tcs"
+        ],
+        "id": "att190-8153d483-fb69-4a7c-8dcd-be91073cfd75",
+        "batchId": null,
+        "equipmentOutcome": "NOT_RECORDED",
+        "equipmentReason": "SNAPSHOT_NOT_RECORDED"
+      },
+      {
+        "workItemId": "WI-1789634536059-97",
+        "attemptNo": 1,
+        "sourceStatus": "ACCEPTED",
+        "status": "ACCEPTED",
+        "resultIds": [
+          "res-1789655713932-8zifo4"
+        ],
+        "id": "att190-16df97e9-f3fc-4c15-9432-7b1f3b2169e2",
+        "batchId": null,
+        "equipmentOutcome": "NOT_RECORDED",
+        "equipmentReason": "SNAPSHOT_NOT_RECORDED"
+      },
+      {
+        "workItemId": "WI-1789634536011-406",
+        "attemptNo": 1,
+        "sourceStatus": "ACCEPTED",
+        "status": "ACCEPTED",
+        "resultIds": [
+          "res-1789656669699-4sqmm1"
+        ],
+        "id": "att190-752364b5-3b74-47f6-92aa-ccd52943caa1",
+        "batchId": null,
+        "equipmentOutcome": "NOT_RECORDED",
+        "equipmentReason": "SNAPSHOT_NOT_RECORDED"
+      },
+      {
+        "workItemId": "WI-GTM-DEMO-S01-EC",
+        "attemptNo": 1,
+        "sourceStatus": "ACCEPTED",
+        "status": "ACCEPTED",
+        "resultIds": [
+          "res-GTM-DEMO-S01-ec"
+        ],
+        "id": "att190-d3fa23d7-82fa-45a1-8b3f-2e1b78388af3",
+        "batchId": "BATCH-GTM-2026-EC-01",
+        "equipmentOutcome": "NOT_RECORDED",
+        "equipmentReason": "SNAPSHOT_NOT_RECORDED"
+      },
+      {
+        "workItemId": "WI-GTM-DEMO-S01-K",
+        "attemptNo": 1,
+        "sourceStatus": "ACCEPTED",
+        "status": "ACCEPTED",
+        "resultIds": [
+          "res-GTM-DEMO-S01-k"
+        ],
+        "id": "att190-2bb701e8-2b43-4da8-9ac3-057a1944948a",
+        "batchId": "BATCH-GTM-2026-K-01",
+        "equipmentOutcome": "NOT_RECORDED",
+        "equipmentReason": "SNAPSHOT_NOT_RECORDED"
+      },
+      {
+        "workItemId": "WI-GTM-DEMO-S01-P",
+        "attemptNo": 1,
+        "sourceStatus": "ACCEPTED",
+        "status": "ACCEPTED",
+        "resultIds": [
+          "res-GTM-DEMO-S01-p"
+        ],
+        "id": "att190-96433480-e2ff-406b-ba79-2c5d6706acbf",
+        "batchId": "BATCH-GTM-2026-P-01",
+        "equipmentOutcome": "NOT_RECORDED",
+        "equipmentReason": "SNAPSHOT_NOT_RECORDED"
+      },
+      {
+        "workItemId": "WI-GTM-DEMO-S01-PH",
+        "attemptNo": 1,
+        "sourceStatus": "ACCEPTED",
+        "status": "ACCEPTED",
+        "resultIds": [
+          "res-GTM-DEMO-S01-ph"
+        ],
+        "id": "att190-2cefb713-9ee2-4ad3-a03f-b6c768158fe5",
+        "batchId": "BATCH-GTM-2026-PH-01",
+        "equipmentOutcome": "NOT_RECORDED",
+        "equipmentReason": "SNAPSHOT_NOT_RECORDED"
+      },
+      {
+        "workItemId": "WI-GTM-DEMO-S01-SOC",
+        "attemptNo": 1,
+        "sourceStatus": "ACCEPTED",
+        "status": "ACCEPTED",
+        "resultIds": [
+          "res-GTM-DEMO-S01-soc"
+        ],
+        "id": "att190-a9fd8a80-d29b-482a-b0d5-43f169a3fc95",
+        "batchId": "BATCH-GTM-2026-SOC-01",
+        "equipmentOutcome": "NOT_RECORDED",
+        "equipmentReason": "SNAPSHOT_NOT_RECORDED"
+      },
+      {
+        "workItemId": "WI-GTM-DEMO-S02-EC",
+        "attemptNo": 1,
+        "sourceStatus": "ACCEPTED",
+        "status": "ACCEPTED",
+        "resultIds": [
+          "res-GTM-DEMO-S02-ec"
+        ],
+        "id": "att190-b322848a-7ad3-4332-9720-81c83a426cad",
+        "batchId": "BATCH-GTM-2026-EC-01",
+        "equipmentOutcome": "NOT_RECORDED",
+        "equipmentReason": "SNAPSHOT_NOT_RECORDED"
+      },
+      {
+        "workItemId": "WI-GTM-DEMO-S02-K",
+        "attemptNo": 1,
+        "sourceStatus": "ACCEPTED",
+        "status": "ACCEPTED",
+        "resultIds": [
+          "res-GTM-DEMO-S02-k"
+        ],
+        "id": "att190-32bca60b-2ef7-452e-adaf-50c45ec66236",
+        "batchId": "BATCH-GTM-2026-K-01",
+        "equipmentOutcome": "NOT_RECORDED",
+        "equipmentReason": "SNAPSHOT_NOT_RECORDED"
+      },
+      {
+        "workItemId": "WI-GTM-DEMO-S02-PH",
+        "attemptNo": 1,
+        "sourceStatus": "ACCEPTED",
+        "status": "ACCEPTED",
+        "resultIds": [
+          "res-GTM-DEMO-S02-ph"
+        ],
+        "id": "att190-89438697-6e7d-4795-9dd5-db1fe8a90ef1",
+        "batchId": "BATCH-GTM-2026-PH-01",
+        "equipmentOutcome": "NOT_RECORDED",
+        "equipmentReason": "SNAPSHOT_NOT_RECORDED"
+      },
+      {
+        "workItemId": "WI-GTM-DEMO-S02-SOC",
+        "attemptNo": 1,
+        "sourceStatus": "ACCEPTED",
+        "status": "ACCEPTED",
+        "resultIds": [
+          "res-GTM-DEMO-S02-soc"
+        ],
+        "id": "att190-f333de96-7ef6-4358-98c0-bf5d76df269d",
+        "batchId": "BATCH-GTM-2026-SOC-01",
+        "equipmentOutcome": "NOT_RECORDED",
+        "equipmentReason": "SNAPSHOT_NOT_RECORDED"
+      },
+      {
+        "workItemId": "WI-GTM-DEMO-S03-EC",
+        "attemptNo": 1,
+        "sourceStatus": "ACCEPTED",
+        "status": "ACCEPTED",
+        "resultIds": [
+          "res-GTM-DEMO-S03-ec"
+        ],
+        "id": "att190-4b50565c-b26c-4452-81ef-af520f849a77",
+        "batchId": "BATCH-GTM-2026-EC-01",
+        "equipmentOutcome": "NOT_RECORDED",
+        "equipmentReason": "SNAPSHOT_NOT_RECORDED"
+      },
+      {
+        "workItemId": "WI-GTM-DEMO-S03-K",
+        "attemptNo": 1,
+        "sourceStatus": "ACCEPTED",
+        "status": "ACCEPTED",
+        "resultIds": [
+          "res-GTM-DEMO-S03-k"
+        ],
+        "id": "att190-3f91ace4-f24f-4baa-813b-5793b860109e",
+        "batchId": "BATCH-GTM-2026-K-01",
+        "equipmentOutcome": "NOT_RECORDED",
+        "equipmentReason": "SNAPSHOT_NOT_RECORDED"
+      },
+      {
+        "workItemId": "WI-GTM-DEMO-S03-P",
+        "attemptNo": 1,
+        "sourceStatus": "ACCEPTED",
+        "status": "ACCEPTED",
+        "resultIds": [
+          "res-GTM-DEMO-S03-p"
+        ],
+        "id": "att190-b6852f8b-1f84-471a-84b0-782faca2c7e9",
+        "batchId": "BATCH-GTM-2026-P-01",
+        "equipmentOutcome": "NOT_RECORDED",
+        "equipmentReason": "SNAPSHOT_NOT_RECORDED"
+      },
+      {
+        "workItemId": "WI-GTM-DEMO-S03-PH",
+        "attemptNo": 1,
+        "sourceStatus": "ACCEPTED",
+        "status": "ACCEPTED",
+        "resultIds": [
+          "res-GTM-DEMO-S03-ph"
+        ],
+        "id": "att190-781205b4-16d2-480e-a616-5cfaff3b7ae8",
+        "batchId": "BATCH-GTM-2026-PH-01",
+        "equipmentOutcome": "NOT_RECORDED",
+        "equipmentReason": "SNAPSHOT_NOT_RECORDED"
+      },
+      {
+        "workItemId": "WI-GTM-DEMO-S03-SOC",
+        "attemptNo": 1,
+        "sourceStatus": "ACCEPTED",
+        "status": "ACCEPTED",
+        "resultIds": [
+          "res-GTM-DEMO-S03-soc"
+        ],
+        "id": "att190-ac045345-d7ea-4002-a3e9-2a60762974f9",
+        "batchId": "BATCH-GTM-2026-SOC-01",
+        "equipmentOutcome": "NOT_RECORDED",
+        "equipmentReason": "SNAPSHOT_NOT_RECORDED"
+      }
+    ],
+    "links": [
+      {
+        "resultId": "res-1789655582508-vr6tcs",
+        "workItemId": "WI-1789634536051-965",
+        "newAttemptForWorkItemId": "WI-1789634536051-965",
+        "attemptId": "att190-8153d483-fb69-4a7c-8dcd-be91073cfd75"
+      },
+      {
+        "resultId": "res-1789655713932-8zifo4",
+        "workItemId": "WI-1789634536059-97",
+        "newAttemptForWorkItemId": "WI-1789634536059-97",
+        "attemptId": "att190-16df97e9-f3fc-4c15-9432-7b1f3b2169e2"
+      },
+      {
+        "resultId": "res-1789656669699-4sqmm1",
+        "workItemId": "WI-1789634536011-406",
+        "newAttemptForWorkItemId": "WI-1789634536011-406",
+        "attemptId": "att190-752364b5-3b74-47f6-92aa-ccd52943caa1"
+      },
+      {
+        "resultId": "res-GTM-DEMO-S01-ec",
+        "workItemId": "WI-GTM-DEMO-S01-EC",
+        "newAttemptForWorkItemId": "WI-GTM-DEMO-S01-EC",
+        "attemptId": "att190-d3fa23d7-82fa-45a1-8b3f-2e1b78388af3"
+      },
+      {
+        "resultId": "res-GTM-DEMO-S01-k",
+        "workItemId": "WI-GTM-DEMO-S01-K",
+        "newAttemptForWorkItemId": "WI-GTM-DEMO-S01-K",
+        "attemptId": "att190-2bb701e8-2b43-4da8-9ac3-057a1944948a"
+      },
+      {
+        "resultId": "res-GTM-DEMO-S01-p",
+        "workItemId": "WI-GTM-DEMO-S01-P",
+        "newAttemptForWorkItemId": "WI-GTM-DEMO-S01-P",
+        "attemptId": "att190-96433480-e2ff-406b-ba79-2c5d6706acbf"
+      },
+      {
+        "resultId": "res-GTM-DEMO-S01-ph",
+        "workItemId": "WI-GTM-DEMO-S01-PH",
+        "newAttemptForWorkItemId": "WI-GTM-DEMO-S01-PH",
+        "attemptId": "att190-2cefb713-9ee2-4ad3-a03f-b6c768158fe5"
+      },
+      {
+        "resultId": "res-GTM-DEMO-S01-soc",
+        "workItemId": "WI-GTM-DEMO-S01-SOC",
+        "newAttemptForWorkItemId": "WI-GTM-DEMO-S01-SOC",
+        "attemptId": "att190-a9fd8a80-d29b-482a-b0d5-43f169a3fc95"
+      },
+      {
+        "resultId": "res-GTM-DEMO-S02-ec",
+        "workItemId": "WI-GTM-DEMO-S02-EC",
+        "newAttemptForWorkItemId": "WI-GTM-DEMO-S02-EC",
+        "attemptId": "att190-b322848a-7ad3-4332-9720-81c83a426cad"
+      },
+      {
+        "resultId": "res-GTM-DEMO-S02-k",
+        "workItemId": "WI-GTM-DEMO-S02-K",
+        "newAttemptForWorkItemId": "WI-GTM-DEMO-S02-K",
+        "attemptId": "att190-32bca60b-2ef7-452e-adaf-50c45ec66236"
+      },
+      {
+        "resultId": "res-GTM-DEMO-S02-ph",
+        "workItemId": "WI-GTM-DEMO-S02-PH",
+        "newAttemptForWorkItemId": "WI-GTM-DEMO-S02-PH",
+        "attemptId": "att190-89438697-6e7d-4795-9dd5-db1fe8a90ef1"
+      },
+      {
+        "resultId": "res-GTM-DEMO-S02-soc",
+        "workItemId": "WI-GTM-DEMO-S02-SOC",
+        "newAttemptForWorkItemId": "WI-GTM-DEMO-S02-SOC",
+        "attemptId": "att190-f333de96-7ef6-4358-98c0-bf5d76df269d"
+      },
+      {
+        "resultId": "res-GTM-DEMO-S03-ec",
+        "workItemId": "WI-GTM-DEMO-S03-EC",
+        "newAttemptForWorkItemId": "WI-GTM-DEMO-S03-EC",
+        "attemptId": "att190-4b50565c-b26c-4452-81ef-af520f849a77"
+      },
+      {
+        "resultId": "res-GTM-DEMO-S03-k",
+        "workItemId": "WI-GTM-DEMO-S03-K",
+        "newAttemptForWorkItemId": "WI-GTM-DEMO-S03-K",
+        "attemptId": "att190-3f91ace4-f24f-4baa-813b-5793b860109e"
+      },
+      {
+        "resultId": "res-GTM-DEMO-S03-p",
+        "workItemId": "WI-GTM-DEMO-S03-P",
+        "newAttemptForWorkItemId": "WI-GTM-DEMO-S03-P",
+        "attemptId": "att190-b6852f8b-1f84-471a-84b0-782faca2c7e9"
+      },
+      {
+        "resultId": "res-GTM-DEMO-S03-ph",
+        "workItemId": "WI-GTM-DEMO-S03-PH",
+        "newAttemptForWorkItemId": "WI-GTM-DEMO-S03-PH",
+        "attemptId": "att190-781205b4-16d2-480e-a616-5cfaff3b7ae8"
+      },
+      {
+        "resultId": "res-GTM-DEMO-S03-soc",
+        "workItemId": "WI-GTM-DEMO-S03-SOC",
+        "newAttemptForWorkItemId": "WI-GTM-DEMO-S03-SOC",
+        "attemptId": "att190-ac045345-d7ea-4002-a3e9-2a60762974f9"
+      },
+      {
+        "resultId": "res-s02-p-run1",
+        "workItemId": "WI-GTM-DEMO-S02-P",
+        "attemptId": "att-s02-p-1",
+        "rule": "EXISTING_ATTEMPT_ONE_TO_ONE_BATCH_MATCH",
+        "attemptNo": 1,
+        "attemptStatus": "SUPERSEDED",
+        "attemptQcBatchId": "BATCH-GTM-2026-P-01",
+        "resultBatchId": "BATCH-GTM-2026-P-01",
+        "isCurrent": 0
+      },
+      {
+        "resultId": "res-s02-p-run2",
+        "workItemId": "WI-GTM-DEMO-S02-P",
+        "attemptId": "att-s02-p-2",
+        "rule": "EXISTING_ATTEMPT_ONE_TO_ONE_BATCH_MATCH",
+        "attemptNo": 2,
+        "attemptStatus": "RECORDED",
+        "attemptQcBatchId": "BATCH-GTM-2026-P-02",
+        "resultBatchId": "BATCH-GTM-2026-P-02",
+        "isCurrent": 1
+      }
+    ],
+    "flaggedGroups": [],
+    "exemptImportCount": 0,
+    "exemptImports": [],
+    "missingOrderedWorkGroups": [
+      {
+        "labId": "MOZ-LAB1",
+        "param": "SAND",
+        "sampleIds": [
+          "1769086088871"
+        ],
+        "sampleCount": 1
+      },
+      {
+        "labId": "MOZ-LAB1",
+        "param": "SILT",
+        "sampleIds": [
+          "1769086088871"
+        ],
+        "sampleCount": 1
+      },
+      {
+        "labId": "MOZ-LAB1",
+        "param": "CLAY",
+        "sampleIds": [
+          "1769086088871"
+        ],
+        "sampleCount": 1
+      },
+      {
+        "labId": "GTM-LAB1",
+        "param": "SAND",
+        "sampleIds": [
+          "1769086466918",
+          "1769086467021",
+          "1769464262091",
+          "1769464262872",
+          "1769719118243",
+          "1769719138492",
+          "1769719197975",
+          "299d3dbe-0fe9-4605-9475-3b8e6c516b36"
+        ],
+        "sampleCount": 8
+      },
+      {
+        "labId": "GTM-LAB1",
+        "param": "SILT",
+        "sampleIds": [
+          "1769086466918",
+          "1769086467021",
+          "1769464262091",
+          "1769464262872",
+          "1769719118243",
+          "1769719138492",
+          "1769719197975",
+          "299d3dbe-0fe9-4605-9475-3b8e6c516b36"
+        ],
+        "sampleCount": 8
+      },
+      {
+        "labId": "GTM-LAB1",
+        "param": "CLAY",
+        "sampleIds": [
+          "1769086466918",
+          "1769086467021",
+          "1769464262091",
+          "1769464262872",
+          "1769719118243",
+          "1769719138492",
+          "1769719197975",
+          "299d3dbe-0fe9-4605-9475-3b8e6c516b36"
+        ],
+        "sampleCount": 8
+      },
+      {
+        "labId": "GTM-LAB1",
+        "param": "BD",
+        "sampleIds": [
+          "1769086466918",
+          "1769086467021",
+          "1769464262091",
+          "1769464262872",
+          "1769719118243",
+          "1769719138492",
+          "1769719197975"
+        ],
+        "sampleCount": 7
+      },
+      {
+        "labId": "GTM-LAB1",
+        "param": "MOIST",
+        "sampleIds": [
+          "1769086466918",
+          "1769086467021",
+          "1769464262091",
+          "1769464262872",
+          "1769719118243",
+          "1769719138492",
+          "1769719197975"
+        ],
+        "sampleCount": 7
+      },
+      {
+        "labId": "GTM-LAB1",
+        "param": "PSD",
+        "sampleIds": [
+          "1769086466918",
+          "1769086467021",
+          "1769464262091",
+          "1769464262872",
+          "1769719118243",
+          "1769719138492",
+          "1769719197975"
+        ],
+        "sampleCount": 7
+      },
+      {
+        "labId": "GTM-LAB1",
+        "param": "GRAVEL",
+        "sampleIds": [
+          "1769086466918",
+          "1769086467021",
+          "1769464262091",
+          "1769464262872",
+          "1769719118243",
+          "1769719138492",
+          "1769719197975"
+        ],
+        "sampleCount": 7
+      },
+      {
+        "labId": "GTM-LAB1",
+        "param": "PH_H2O",
+        "sampleIds": [
+          "1769086466918",
+          "1769086467021",
+          "1769464262091",
+          "1769464262872",
+          "1769719118243",
+          "1769719138492",
+          "1769719197975"
+        ],
+        "sampleCount": 7
+      },
+      {
+        "labId": "GTM-LAB1",
+        "param": "PH_KCL",
+        "sampleIds": [
+          "1769086466918",
+          "1769086467021",
+          "1769464262091",
+          "1769464262872",
+          "1769719118243",
+          "1769719138492",
+          "1769719197975"
+        ],
+        "sampleCount": 7
+      },
+      {
+        "labId": "GTM-LAB1",
+        "param": "EC",
+        "sampleIds": [
+          "1769086466918",
+          "1769086467021",
+          "1769464262091",
+          "1769464262872",
+          "1769719118243",
+          "1769719138492",
+          "1769719197975"
+        ],
+        "sampleCount": 7
+      },
+      {
+        "labId": "GTM-LAB1",
+        "param": "SOC",
+        "sampleIds": [
+          "1769086466918",
+          "1769086467021",
+          "1769464262091",
+          "1769464262872",
+          "1769719118243",
+          "1769719138492",
+          "1769719197975"
+        ],
+        "sampleCount": 7
+      },
+      {
+        "labId": "GTM-LAB1",
+        "param": "TN",
+        "sampleIds": [
+          "1769086466918",
+          "1769086467021",
+          "1769464262091",
+          "1769464262872",
+          "1769719118243",
+          "1769719138492",
+          "1769719197975"
+        ],
+        "sampleCount": 7
+      },
+      {
+        "labId": "GTM-LAB1",
+        "param": "P_AVAIL",
+        "sampleIds": [
+          "1769086466918",
+          "1769086467021",
+          "1769464262091",
+          "1769464262872",
+          "1769719118243",
+          "1769719138492",
+          "1769719197975"
+        ],
+        "sampleCount": 7
+      },
+      {
+        "labId": "GTM-LAB1",
+        "param": "K_EXCH",
+        "sampleIds": [
+          "1769086466918",
+          "1769086467021",
+          "1769464262091",
+          "1769464262872",
+          "1769719118243",
+          "1769719138492",
+          "1769719197975"
+        ],
+        "sampleCount": 7
+      },
+      {
+        "labId": "GTM-LAB1",
+        "param": "CA_EXCH",
+        "sampleIds": [
+          "1769086466918",
+          "1769086467021",
+          "1769464262091",
+          "1769464262872",
+          "1769719118243",
+          "1769719138492",
+          "1769719197975"
+        ],
+        "sampleCount": 7
+      },
+      {
+        "labId": "GTM-LAB1",
+        "param": "MG_EXCH",
+        "sampleIds": [
+          "1769086466918",
+          "1769086467021",
+          "1769464262091",
+          "1769464262872",
+          "1769719118243",
+          "1769719138492",
+          "1769719197975"
+        ],
+        "sampleCount": 7
+      },
+      {
+        "labId": "GTM-LAB1",
+        "param": "NA_EXCH",
+        "sampleIds": [
+          "1769086466918",
+          "1769086467021",
+          "1769464262091",
+          "1769464262872",
+          "1769719118243",
+          "1769719138492",
+          "1769719197975"
+        ],
+        "sampleCount": 7
+      },
+      {
+        "labId": "GTM-LAB1",
+        "param": "CEC",
+        "sampleIds": [
+          "1769086466918",
+          "1769086467021",
+          "1769464262091",
+          "1769464262872",
+          "1769719118243",
+          "1769719138492",
+          "1769719197975"
+        ],
+        "sampleCount": 7
+      },
+      {
+        "labId": "GTM-LAB1",
+        "param": "BS",
+        "sampleIds": [
+          "1769086466918",
+          "1769086467021",
+          "1769464262091",
+          "1769464262872",
+          "1769719118243",
+          "1769719138492",
+          "1769719197975"
+        ],
+        "sampleCount": 7
+      },
+      {
+        "labId": "GTM-LAB1",
+        "param": "CACO3",
+        "sampleIds": [
+          "1769086466918",
+          "1769086467021",
+          "1769464262091",
+          "1769464262872",
+          "1769719118243",
+          "1769719138492",
+          "1769719197975"
+        ],
+        "sampleCount": 7
+      },
+      {
+        "labId": "GTM-LAB1",
+        "param": "FE",
+        "sampleIds": [
+          "1769086466918",
+          "1769086467021",
+          "1769464262091",
+          "1769464262872",
+          "1769719118243",
+          "1769719138492",
+          "1769719197975"
+        ],
+        "sampleCount": 7
+      },
+      {
+        "labId": "GTM-LAB1",
+        "param": "MN",
+        "sampleIds": [
+          "1769086466918",
+          "1769086467021",
+          "1769464262091",
+          "1769464262872",
+          "1769719118243",
+          "1769719138492",
+          "1769719197975"
+        ],
+        "sampleCount": 7
+      },
+      {
+        "labId": "GTM-LAB1",
+        "param": "ZN",
+        "sampleIds": [
+          "1769086466918",
+          "1769086467021",
+          "1769464262091",
+          "1769464262872",
+          "1769719118243",
+          "1769719138492",
+          "1769719197975"
+        ],
+        "sampleCount": 7
+      },
+      {
+        "labId": "GTM-LAB1",
+        "param": "CU",
+        "sampleIds": [
+          "1769086466918",
+          "1769086467021",
+          "1769464262091",
+          "1769464262872",
+          "1769719118243",
+          "1769719138492",
+          "1769719197975"
+        ],
+        "sampleCount": 7
+      },
+      {
+        "labId": "GTM-LAB1",
+        "param": "B",
+        "sampleIds": [
+          "1769086466918",
+          "1769086467021",
+          "1769464262091",
+          "1769464262872",
+          "1769719118243",
+          "1769719138492",
+          "1769719197975"
+        ],
+        "sampleCount": 7
+      },
+      {
+        "labId": "GTM-LAB1",
+        "param": "SOM",
+        "sampleIds": [
+          "1769086466918",
+          "1769086467021",
+          "1769464262091",
+          "1769464262872",
+          "1769719118243",
+          "1769719138492",
+          "1769719197975"
+        ],
+        "sampleCount": 7
+      },
+      {
+        "labId": "GTM-LAB1",
+        "param": "MBC",
+        "sampleIds": [
+          "1769086466918",
+          "1769086467021",
+          "1769464262091",
+          "1769464262872",
+          "1769719118243",
+          "1769719138492",
+          "1769719197975"
+        ],
+        "sampleCount": 7
+      },
+      {
+        "labId": "GTM-LAB1",
+        "param": "PMN",
+        "sampleIds": [
+          "1769086466918",
+          "1769086467021",
+          "1769464262091",
+          "1769464262872",
+          "1769719118243",
+          "1769719138492",
+          "1769719197975"
+        ],
+        "sampleCount": 7
+      },
+      {
+        "labId": "GTM-LAB1",
+        "param": "S_RESP",
+        "sampleIds": [
+          "1769086466918",
+          "1769086467021",
+          "1769464262091",
+          "1769464262872",
+          "1769719118243",
+          "1769719138492",
+          "1769719197975"
+        ],
+        "sampleCount": 7
+      },
+      {
+        "labId": "GTM-LAB1",
+        "param": "SPEC_VIS_NIR",
+        "sampleIds": [
+          "1769086466918",
+          "1769086467021",
+          "1769464262091",
+          "1769464262872",
+          "1769719118243",
+          "1769719123914",
+          "1769719138492",
+          "1769719197975"
+        ],
+        "sampleCount": 8
+      },
+      {
+        "labId": "GTM-LAB1",
+        "param": "SPEC_MIR",
+        "sampleIds": [
+          "1769086466918",
+          "1769086467021",
+          "1769464262091",
+          "1769464262872",
+          "1769719118243",
+          "1769719123914",
+          "1769719138492",
+          "1769719197975"
+        ],
+        "sampleCount": 8
+      }
+    ],
+    "missingOrderedWorkCount": 225,
+    "samplesWithMissingOrderedWorkCount": 10,
+    "invalidOrderMetadata": [],
+    "historicalBatchEvidence": [
+      {
+        "attemptId": "att-s02-p-1",
+        "workItemId": "WI-GTM-DEMO-S02-P",
+        "outcome": "COPIED",
+        "reason": null,
+        "batchId": "BATCH-GTM-2026-P-01"
+      },
+      {
+        "attemptId": "att-s02-p-2",
+        "workItemId": "WI-GTM-DEMO-S02-P",
+        "outcome": "COPIED",
+        "reason": null,
+        "batchId": "BATCH-GTM-2026-P-02"
+      },
+      {
+        "newAttemptForWorkItemId": "WI-1789634536051-965",
+        "resultIds": [
+          "res-1789655582508-vr6tcs"
+        ],
+        "outcome": "NOT_RECORDED",
+        "reason": "BATCH_NOT_RECORDED",
+        "batchId": null
+      },
+      {
+        "newAttemptForWorkItemId": "WI-1789634536059-97",
+        "resultIds": [
+          "res-1789655713932-8zifo4"
+        ],
+        "outcome": "NOT_RECORDED",
+        "reason": "BATCH_NOT_RECORDED",
+        "batchId": null
+      },
+      {
+        "newAttemptForWorkItemId": "WI-1789634536011-406",
+        "resultIds": [
+          "res-1789656669699-4sqmm1"
+        ],
+        "outcome": "NOT_RECORDED",
+        "reason": "BATCH_NOT_RECORDED",
+        "batchId": null
+      },
+      {
+        "newAttemptForWorkItemId": "WI-GTM-DEMO-S01-EC",
+        "resultIds": [
+          "res-GTM-DEMO-S01-ec"
+        ],
+        "outcome": "COPIED",
+        "reason": null,
+        "batchId": "BATCH-GTM-2026-EC-01"
+      },
+      {
+        "newAttemptForWorkItemId": "WI-GTM-DEMO-S01-K",
+        "resultIds": [
+          "res-GTM-DEMO-S01-k"
+        ],
+        "outcome": "COPIED",
+        "reason": null,
+        "batchId": "BATCH-GTM-2026-K-01"
+      },
+      {
+        "newAttemptForWorkItemId": "WI-GTM-DEMO-S01-P",
+        "resultIds": [
+          "res-GTM-DEMO-S01-p"
+        ],
+        "outcome": "COPIED",
+        "reason": null,
+        "batchId": "BATCH-GTM-2026-P-01"
+      },
+      {
+        "newAttemptForWorkItemId": "WI-GTM-DEMO-S01-PH",
+        "resultIds": [
+          "res-GTM-DEMO-S01-ph"
+        ],
+        "outcome": "COPIED",
+        "reason": null,
+        "batchId": "BATCH-GTM-2026-PH-01"
+      },
+      {
+        "newAttemptForWorkItemId": "WI-GTM-DEMO-S01-SOC",
+        "resultIds": [
+          "res-GTM-DEMO-S01-soc"
+        ],
+        "outcome": "COPIED",
+        "reason": null,
+        "batchId": "BATCH-GTM-2026-SOC-01"
+      },
+      {
+        "newAttemptForWorkItemId": "WI-GTM-DEMO-S02-EC",
+        "resultIds": [
+          "res-GTM-DEMO-S02-ec"
+        ],
+        "outcome": "COPIED",
+        "reason": null,
+        "batchId": "BATCH-GTM-2026-EC-01"
+      },
+      {
+        "newAttemptForWorkItemId": "WI-GTM-DEMO-S02-K",
+        "resultIds": [
+          "res-GTM-DEMO-S02-k"
+        ],
+        "outcome": "COPIED",
+        "reason": null,
+        "batchId": "BATCH-GTM-2026-K-01"
+      },
+      {
+        "newAttemptForWorkItemId": "WI-GTM-DEMO-S02-PH",
+        "resultIds": [
+          "res-GTM-DEMO-S02-ph"
+        ],
+        "outcome": "COPIED",
+        "reason": null,
+        "batchId": "BATCH-GTM-2026-PH-01"
+      },
+      {
+        "newAttemptForWorkItemId": "WI-GTM-DEMO-S02-SOC",
+        "resultIds": [
+          "res-GTM-DEMO-S02-soc"
+        ],
+        "outcome": "COPIED",
+        "reason": null,
+        "batchId": "BATCH-GTM-2026-SOC-01"
+      },
+      {
+        "newAttemptForWorkItemId": "WI-GTM-DEMO-S03-EC",
+        "resultIds": [
+          "res-GTM-DEMO-S03-ec"
+        ],
+        "outcome": "COPIED",
+        "reason": null,
+        "batchId": "BATCH-GTM-2026-EC-01"
+      },
+      {
+        "newAttemptForWorkItemId": "WI-GTM-DEMO-S03-K",
+        "resultIds": [
+          "res-GTM-DEMO-S03-k"
+        ],
+        "outcome": "COPIED",
+        "reason": null,
+        "batchId": "BATCH-GTM-2026-K-01"
+      },
+      {
+        "newAttemptForWorkItemId": "WI-GTM-DEMO-S03-P",
+        "resultIds": [
+          "res-GTM-DEMO-S03-p"
+        ],
+        "outcome": "COPIED",
+        "reason": null,
+        "batchId": "BATCH-GTM-2026-P-01"
+      },
+      {
+        "newAttemptForWorkItemId": "WI-GTM-DEMO-S03-PH",
+        "resultIds": [
+          "res-GTM-DEMO-S03-ph"
+        ],
+        "outcome": "COPIED",
+        "reason": null,
+        "batchId": "BATCH-GTM-2026-PH-01"
+      },
+      {
+        "newAttemptForWorkItemId": "WI-GTM-DEMO-S03-SOC",
+        "resultIds": [
+          "res-GTM-DEMO-S03-soc"
+        ],
+        "outcome": "COPIED",
+        "reason": null,
+        "batchId": "BATCH-GTM-2026-SOC-01"
+      }
+    ],
+    "historicalEquipmentEvidence": [
+      {
+        "workItemId": "WI-1789634536051-965",
+        "resultIds": [
+          "res-1789655582508-vr6tcs"
+        ],
+        "outcome": "NOT_RECORDED",
+        "reason": "SNAPSHOT_NOT_RECORDED",
+        "evidenceData": null,
+        "instrumentId": null
+      },
+      {
+        "workItemId": "WI-1789634536059-97",
+        "resultIds": [
+          "res-1789655713932-8zifo4"
+        ],
+        "outcome": "NOT_RECORDED",
+        "reason": "SNAPSHOT_NOT_RECORDED",
+        "evidenceData": null,
+        "instrumentId": null
+      },
+      {
+        "workItemId": "WI-1789634536011-406",
+        "resultIds": [
+          "res-1789656669699-4sqmm1"
+        ],
+        "outcome": "NOT_RECORDED",
+        "reason": "SNAPSHOT_NOT_RECORDED",
+        "evidenceData": null,
+        "instrumentId": null
+      },
+      {
+        "workItemId": "WI-GTM-DEMO-S01-EC",
+        "resultIds": [
+          "res-GTM-DEMO-S01-ec"
+        ],
+        "outcome": "NOT_RECORDED",
+        "reason": "SNAPSHOT_NOT_RECORDED",
+        "evidenceData": null,
+        "instrumentId": null
+      },
+      {
+        "workItemId": "WI-GTM-DEMO-S01-K",
+        "resultIds": [
+          "res-GTM-DEMO-S01-k"
+        ],
+        "outcome": "NOT_RECORDED",
+        "reason": "SNAPSHOT_NOT_RECORDED",
+        "evidenceData": null,
+        "instrumentId": null
+      },
+      {
+        "workItemId": "WI-GTM-DEMO-S01-P",
+        "resultIds": [
+          "res-GTM-DEMO-S01-p"
+        ],
+        "outcome": "NOT_RECORDED",
+        "reason": "SNAPSHOT_NOT_RECORDED",
+        "evidenceData": null,
+        "instrumentId": null
+      },
+      {
+        "workItemId": "WI-GTM-DEMO-S01-PH",
+        "resultIds": [
+          "res-GTM-DEMO-S01-ph"
+        ],
+        "outcome": "NOT_RECORDED",
+        "reason": "SNAPSHOT_NOT_RECORDED",
+        "evidenceData": null,
+        "instrumentId": null
+      },
+      {
+        "workItemId": "WI-GTM-DEMO-S01-SOC",
+        "resultIds": [
+          "res-GTM-DEMO-S01-soc"
+        ],
+        "outcome": "NOT_RECORDED",
+        "reason": "SNAPSHOT_NOT_RECORDED",
+        "evidenceData": null,
+        "instrumentId": null
+      },
+      {
+        "workItemId": "WI-GTM-DEMO-S02-EC",
+        "resultIds": [
+          "res-GTM-DEMO-S02-ec"
+        ],
+        "outcome": "NOT_RECORDED",
+        "reason": "SNAPSHOT_NOT_RECORDED",
+        "evidenceData": null,
+        "instrumentId": null
+      },
+      {
+        "workItemId": "WI-GTM-DEMO-S02-K",
+        "resultIds": [
+          "res-GTM-DEMO-S02-k"
+        ],
+        "outcome": "NOT_RECORDED",
+        "reason": "SNAPSHOT_NOT_RECORDED",
+        "evidenceData": null,
+        "instrumentId": null
+      },
+      {
+        "workItemId": "WI-GTM-DEMO-S02-PH",
+        "resultIds": [
+          "res-GTM-DEMO-S02-ph"
+        ],
+        "outcome": "NOT_RECORDED",
+        "reason": "SNAPSHOT_NOT_RECORDED",
+        "evidenceData": null,
+        "instrumentId": null
+      },
+      {
+        "workItemId": "WI-GTM-DEMO-S02-SOC",
+        "resultIds": [
+          "res-GTM-DEMO-S02-soc"
+        ],
+        "outcome": "NOT_RECORDED",
+        "reason": "SNAPSHOT_NOT_RECORDED",
+        "evidenceData": null,
+        "instrumentId": null
+      },
+      {
+        "workItemId": "WI-GTM-DEMO-S03-EC",
+        "resultIds": [
+          "res-GTM-DEMO-S03-ec"
+        ],
+        "outcome": "NOT_RECORDED",
+        "reason": "SNAPSHOT_NOT_RECORDED",
+        "evidenceData": null,
+        "instrumentId": null
+      },
+      {
+        "workItemId": "WI-GTM-DEMO-S03-K",
+        "resultIds": [
+          "res-GTM-DEMO-S03-k"
+        ],
+        "outcome": "NOT_RECORDED",
+        "reason": "SNAPSHOT_NOT_RECORDED",
+        "evidenceData": null,
+        "instrumentId": null
+      },
+      {
+        "workItemId": "WI-GTM-DEMO-S03-P",
+        "resultIds": [
+          "res-GTM-DEMO-S03-p"
+        ],
+        "outcome": "NOT_RECORDED",
+        "reason": "SNAPSHOT_NOT_RECORDED",
+        "evidenceData": null,
+        "instrumentId": null
+      },
+      {
+        "workItemId": "WI-GTM-DEMO-S03-PH",
+        "resultIds": [
+          "res-GTM-DEMO-S03-ph"
+        ],
+        "outcome": "NOT_RECORDED",
+        "reason": "SNAPSHOT_NOT_RECORDED",
+        "evidenceData": null,
+        "instrumentId": null
+      },
+      {
+        "workItemId": "WI-GTM-DEMO-S03-SOC",
+        "resultIds": [
+          "res-GTM-DEMO-S03-soc"
+        ],
+        "outcome": "NOT_RECORDED",
+        "reason": "SNAPSHOT_NOT_RECORDED",
+        "evidenceData": null,
+        "instrumentId": null
+      }
+    ],
+    "originalRowsAndFieldsPreserved": true,
+    "receiptSha256": "ffa89f3717768134e029e459613fe0039e510bda18be3352b97ec3b682202c2c"
+  },
+  "bootstrapRebuild": [],
+  "mode": "NO_OP",
+  "totalChanges": 0
+}
+📦 Installing repeat and correction evidence...
+{
+  "classification": "COMPLETE",
+  "sources": {
+    "migrationSha256": "600a4d92ef55c91ffcf6f308a14e2591f929ac6299dc0818961a20225771c7dd",
+    "contractVersion": "191-v1",
+    "predecessor": {
+      "marker": "190_work_attempt_contract",
+      "migrationSha256": "7e7d5679c9aeeea45ac3c2bac09e4db31dd15b52fe37c743080aa0e3473c8fe2",
+      "contractVersion": "190-v1",
+      "receiptSha256": "ffa89f3717768134e029e459613fe0039e510bda18be3352b97ec3b682202c2c"
+    },
+    "qcPredecessors": {
+      "186_normalized_qc_runs": {
+        "receiptSha256": "d461aab82504feaf91a27b4816e1d4b3abd66c147f32122752d72f4eb842be1a"
+      },
+      "187_qc_gate_scope": {
+        "receiptSha256": "ee802a39b62a9e06ab92677c3c016c461e4d1c8ca43674f077622220ef1fbd04"
+      }
+    }
+  },
+  "receipt": {
+    "sources": {
+      "migrationSha256": "600a4d92ef55c91ffcf6f308a14e2591f929ac6299dc0818961a20225771c7dd",
+      "contractVersion": "191-v1",
+      "predecessor": {
+        "marker": "190_work_attempt_contract",
+        "migrationSha256": "7e7d5679c9aeeea45ac3c2bac09e4db31dd15b52fe37c743080aa0e3473c8fe2",
+        "contractVersion": "190-v1",
+        "receiptSha256": "ffa89f3717768134e029e459613fe0039e510bda18be3352b97ec3b682202c2c"
+      },
+      "qcPredecessors": {
+        "186_normalized_qc_runs": {
+          "receiptSha256": "d461aab82504feaf91a27b4816e1d4b3abd66c147f32122752d72f4eb842be1a"
+        },
+        "187_qc_gate_scope": {
+          "receiptSha256": "ee802a39b62a9e06ab92677c3c016c461e4d1c8ca43674f077622220ef1fbd04"
+        }
+      }
+    },
+    "originalRowsSha256": "9aef6a87e12e3acada91c01655dcde21bd87e23e9973583f5f1b9011a892e94b",
+    "reasonNotRecordedCount": 1,
+    "reasonNotRecorded": [
+      {
+        "id": "att-s02-p-2",
+        "workItemId": "WI-GTM-DEMO-S02-P",
+        "attemptNo": 2,
+        "status": "ACCEPTED",
+        "reason": null,
+        "description": "reason not recorded"
+      }
+    ],
+    "backfilledCount": 0,
+    "originalReasonFieldsPreserved": true,
+    "originalRowsAndFieldsPreserved": true,
+    "newAttemptCount": 0,
+    "linkedResultCount": 0,
+    "receiptSha256": "09f260ded1080cb03e7af9deea88bebdd76d2c8ab49f9316e38772b69755a479"
+  },
+  "predecessor": {
+    "classification": "COMPLETE",
+    "sources": {
+      "migrationSha256": "7e7d5679c9aeeea45ac3c2bac09e4db31dd15b52fe37c743080aa0e3473c8fe2",
+      "contractVersion": "190-v1"
+    },
+    "receiptSha256": "ffa89f3717768134e029e459613fe0039e510bda18be3352b97ec3b682202c2c"
+  },
+  "plan": {
+    "reasonNotRecordedCount": 1,
+    "reasonNotRecorded": [
+      {
+        "id": "att-s02-p-2",
+        "workItemId": "WI-GTM-DEMO-S02-P",
+        "attemptNo": 2,
+        "status": "ACCEPTED",
+        "reason": null,
+        "description": "reason not recorded"
+      }
+    ],
+    "backfilledCount": 0,
+    "originalReasonFieldsPreserved": true
+  },
+  "releaseInventory": {
+    "blockedWorkItemCount": 0,
+    "blockedWorkItems": [],
+    "totalChanges": 0
+  },
+  "bootstrapRebuild": [],
+  "mode": "NO_OP",
+  "totalChanges": 0
+}
+📦 Installing reported-value selection evidence...
+{
+  "classification": "COMPLETE",
+  "migrationSha256": "52b4df85d07ef6f63b35249e317037b64450ba718fda72c0a9e4df946cb628f7",
+  "mode": "NO_OP",
+  "totalChanges": 0,
+  "newSelectionCount": 0
+}
+📦 Installing retained run reagent links...
+{
+  "classification": "COMPLETE_194",
+  "sources": {
+    "migrationSha256": "6e409e753d9142381a668352be82ca4981e41847914f868cdacc32b7729cb580"
+  },
+  "linkCount": 0,
+  "receipt": {
+    "sources": {
+      "migrationSha256": "6e409e753d9142381a668352be82ca4981e41847914f868cdacc32b7729cb580"
+    },
+    "originalRowsSha256": "f79db32ba1d05b87d2e5009954d90ae2dd0f0a960cd51865e0f4b75de0bc4cbe",
+    "originalRowsPreserved": true,
+    "newLinkCount": 0,
+    "backfilledCount": 0,
+    "receiptSha256": "5d737a49f3a62a5accf3c405ae938308b11b4ffe5682e71c0982951ee61715e1"
+  },
+  "mode": "NO_OP",
+  "totalChanges": 0,
+  "backfilledCount": 0
+}
+📦 Installing inactive calculation references and evidence guards...
+{
+  "classification": "COMPLETE",
+  "sources": {
+    "migrationSha256": "84f50f90aaa69f96e8b025b4b5932eb374c26900c1470919025ae4c7bf9c3da8",
+    "oracleSha256": "684eb3e000930bd52a0c3628f020198bc315c7ace8cb284da91430167007f07d",
+    "referenceSha256": "57dc4b667dab93606e24673b39a12032e48f3df686b9bd3c593ac04d2fac8491"
+  },
+  "receipt": {
+    "migrationSha256": "84f50f90aaa69f96e8b025b4b5932eb374c26900c1470919025ae4c7bf9c3da8",
+    "oracleSha256": "684eb3e000930bd52a0c3628f020198bc315c7ace8cb284da91430167007f07d",
+    "guards": [
+      "CalcTemplate_insert_contract",
+      "CalcTemplateActivation_insert_contract",
+      "CalibrationCurve_insert_contract",
+      "CalibrationPoint_insert_contract",
+      "ResultCalculation_insert_contract",
+      "CalcTemplate_update_immutable",
+      "CalcTemplate_delete_immutable",
+      "CalcTemplateActivation_update_immutable",
+      "CalcTemplateActivation_delete_immutable",
+      "CalibrationCurve_update_immutable",
+      "CalibrationCurve_delete_immutable",
+      "CalibrationPoint_update_immutable",
+      "CalibrationPoint_delete_immutable",
+      "ResultCalculation_update_immutable",
+      "ResultCalculation_delete_immutable",
+      "CalibrationCurve_pass_coefficients_guard"
+    ],
+    "backfillCount": 0
+  },
+  "guards": [
+    "CalcTemplate_insert_contract",
+    "CalcTemplateActivation_insert_contract",
+    "CalibrationCurve_insert_contract",
+    "CalibrationPoint_insert_contract",
+    "ResultCalculation_insert_contract",
+    "CalcTemplate_update_immutable",
+    "CalcTemplate_delete_immutable",
+    "CalcTemplateActivation_update_immutable",
+    "CalcTemplateActivation_delete_immutable",
+    "CalibrationCurve_update_immutable",
+    "CalibrationCurve_delete_immutable",
+    "CalibrationPoint_update_immutable",
+    "CalibrationPoint_delete_immutable",
+    "ResultCalculation_update_immutable",
+    "ResultCalculation_delete_immutable",
+    "CalibrationCurve_pass_coefficients_guard"
+  ],
+  "counts": {
+    "CalcTemplate": 8,
+    "CalcTemplateActivation": 0,
+    "CalibrationCurve": 0,
+    "CalibrationPoint": 0,
+    "ResultCalculation": 0
+  },
+  "backfillCount": 0,
+  "unit": {
+    "classification": "ABSENT",
+    "unitCode": "pct_mass",
+    "unitInsertCount": 0,
+    "backfillCount": 0
+  },
+  "references": {
+    "classification": "COMPLETE",
+    "referenceCount": 11,
+    "installedReferenceCount": 8,
+    "missingReferenceIds": [],
+    "deferredReferences": [
+      {
+        "id": "calc-ref-walkley-black-130-v1",
+        "code": "DEFERRED_PREREQUISITE_ABSENT",
+        "missingAnalysisCodes": [],
+        "missingUnitCodes": [
+          "pct_mass"
+        ]
+      },
+      {
+        "id": "calc-ref-walkley-black-133-v1",
+        "code": "DEFERRED_PREREQUISITE_ABSENT",
+        "missingAnalysisCodes": [],
+        "missingUnitCodes": [
+          "pct_mass"
+        ]
+      },
+      {
+        "id": "calc-ref-kjeldahl-nitrogen-v1",
+        "code": "DEFERRED_PREREQUISITE_ABSENT",
+        "missingAnalysisCodes": [],
+        "missingUnitCodes": [
+          "pct_mass"
+        ]
+      }
+    ],
+    "deferredReferenceCount": 3,
+    "referenceInsertCount": 0,
+    "referenceReceiptInsertCount": 0,
+    "activationInsertCount": 0,
+    "backfillCount": 0
+  },
+  "ready": true,
+  "plannedUnitInsertCount": 0,
+  "plannedReferenceInsertCount": 0,
+  "activationInsertCount": 0,
+  "mode": "NO_OP",
+  "totalChanges": 0,
+  "unitInsertCount": 0,
+  "referenceInsertCount": 0,
+  "referenceReceiptInsertCount": 0,
+  "schemaReceiptInsertCount": 0
+}
+📦 Installing immutable result override requests...
+{
+  "classification": "COMPLETE_197",
+  "sources": {
+    "migrationSha256": "35ff44f0bd6b7b61289da296f1929d63a66f1c613d62836100923cd19e69bba9"
+  },
+  "requestCount": 0,
+  "receipt": {
+    "sources": {
+      "migrationSha256": "35ff44f0bd6b7b61289da296f1929d63a66f1c613d62836100923cd19e69bba9"
+    },
+    "originalRowsSha256": "6e0207946cd67d4109b3f6e7ff0b23fd8b545b21d2a4f81796e651923db1564b",
+    "originalRowsPreserved": true,
+    "newRequestCount": 0,
+    "backfilledCount": 0,
+    "receiptSha256": "953a236c33e3b37f7a4fe173dc01f17b6d49924a2bfa432877f05b896253b83e"
+  },
+  "mode": "NO_OP",
+  "totalChanges": 0,
+  "backfilledCount": 0
+}
+📦 Installing immutable cross-check evidence...
+{
+  "classification": "COMPLETE_201",
+  "sources": {
+    "migrationSha256": "7579e84f62aa8561b4746a6360e83757d067046ad97fcadace05660fb6bf44a4",
+    "oracleSha256": "97cc1f211adb71056ed3c2d82ea94385d63f812071ba44a57674be24c4905de0",
+    "predecessorMigrationSha256": "52b4df85d07ef6f63b35249e317037b64450ba718fda72c0a9e4df946cb628f7"
+  },
+  "evaluationCount": 0,
+  "receipt": {
+    "sources": {
+      "migrationSha256": "7579e84f62aa8561b4746a6360e83757d067046ad97fcadace05660fb6bf44a4",
+      "oracleSha256": "97cc1f211adb71056ed3c2d82ea94385d63f812071ba44a57674be24c4905de0",
+      "predecessorMigrationSha256": "52b4df85d07ef6f63b35249e317037b64450ba718fda72c0a9e4df946cb628f7"
+    },
+    "originalRowsSha256": "8559985c861e950fdffe53f6661a48b0e76916edcd4c3f0e51b473d827824d58",
+    "originalRowsPreserved": true,
+    "newEvaluationCount": 0,
+    "backfilledCount": 0,
+    "receiptSha256": "3185df5bbb809f86c7ca8c0689135e6dbd93e227c9dbda66850256b965966a9e"
+  },
+  "mode": "NO_OP",
+  "totalChanges": 0,
+  "newEvaluationCount": 0,
+  "backfilledCount": 0
+}
+📦 Installing immutable amendment requests, attempt links and report withdrawals...
+{
+  "classification": "COMPLETE_210",
+  "sources": {
+    "migrationSha256": "98f180e1fe6464f0fb8e4f23a8d83832994216ff9f8174e205f75320395727f0",
+    "oracleSha256": "d738c6f76e59daea9b48824bb0dd39eb0ee390e3548c801229e593d3e3914aa2",
+    "contractVersion": "210-v1"
+  },
+  "amendmentCount": 1,
+  "amendmentAttemptLinkCount": 0,
+  "withdrawalCount": 0,
+  "receipt": {
+    "sources": {
+      "migrationSha256": "98f180e1fe6464f0fb8e4f23a8d83832994216ff9f8174e205f75320395727f0",
+      "oracleSha256": "d738c6f76e59daea9b48824bb0dd39eb0ee390e3548c801229e593d3e3914aa2",
+      "contractVersion": "210-v1"
+    },
+    "originalRowsSha256": "d843166d8ca8117121e56a44fd8eeed47ac92f75f3cd63ea0b466912247241d3",
+    "originalRowsPreserved": true,
+    "newAmendmentCount": 0,
+    "newAttemptLinkCount": 0,
+    "newWithdrawalCount": 0,
+    "backfilledCount": 0,
+    "receiptSha256": "efc085838fcd3c85af095eed605a790b1252d178b52c8e9de9a5eaada223e424"
+  },
+  "mode": "NO_OP",
+  "totalChanges": 0,
+  "newAmendmentCount": 0,
+  "newAttemptLinkCount": 0,
+  "newWithdrawalCount": 0,
+  "backfilledCount": 0
+}
+📦 Installing immutable report revision evidence...
+{
+  "classification": "COMPLETE_211",
+  "sources": {
+    "migrationSha256": "3acf8e97469c826b163f956e0701841143144d7fcd982fee3ba85151acfefe52",
+    "contractVersion": "211-v1"
+  },
+  "reportCount": 4,
+  "receipt": {
+    "sources": {
+      "migrationSha256": "3acf8e97469c826b163f956e0701841143144d7fcd982fee3ba85151acfefe52",
+      "contractVersion": "211-v1"
+    },
+    "originalRowsSha256": "2e6e021a9c590b35591f505a0aba09f529839015dfbd49e4ff81a8a29541ba39",
+    "originalRowsPreserved": true,
+    "backfilledCount": 0,
+    "receiptSha256": "7172b9201f5173b63a1a1414b0a18414da150b8366762c868081d1a6d61dc72d"
+  },
+  "mode": "NO_OP",
+  "totalChanges": 0,
+  "backfilledCount": 0
+}
+📦 Installing bench credential storage...
+{
+  "classification": "COMPLETE_202",
+  "sources": {
+    "migrationSha256": "954639ef2839b158cf19f827adad0fbae6a973e1491ace2b352415957afc4a2b",
+    "contractVersion": "202-v1"
+  },
+  "receipt": {
+    "sources": {
+      "migrationSha256": "954639ef2839b158cf19f827adad0fbae6a973e1491ace2b352415957afc4a2b",
+      "contractVersion": "202-v1"
+    },
+    "originalRowsSha256": "a380b9ab2f9dd1ee5533c9266bbed055be9a6802f6bad10ad9462cfeeb30abf7",
+    "originalRowsPreserved": true,
+    "backfilledCount": 0,
+    "receiptSha256": "220eeb9b44b23db3d1176eda595b5fcf1ac67b1f84fe87fbc7be58e12c46e3c6"
+  },
+  "mode": "NO_OP",
+  "totalChanges": 0,
+  "backfilledCount": 0
+}
+📦 Installing preparation record evidence...
+{
+  "classification": "COMPLETE_205",
+  "sources": {
+    "migrationSha256": "e2d59e7b54096d97de5d1443f28516869672b2178cb3da345299d24838a7013c",
+    "contractVersion": "205-v1"
+  },
+  "receipt": {
+    "sources": {
+      "migrationSha256": "e2d59e7b54096d97de5d1443f28516869672b2178cb3da345299d24838a7013c",
+      "contractVersion": "205-v1"
+    },
+    "originalRowsSha256": "10f132d31e12b6551a00a48cfd136791d49a70fc9520834df7a5972cd988c57a",
+    "originalRowsPreserved": true,
+    "backfilledCount": 0,
+    "receiptSha256": "01df5c84dc90b6c4be4e91b9d3b05e44af2bc5cc03e0ec5fec5bef6a238c19ae"
+  },
+  "mode": "NO_OP",
+  "totalChanges": 0,
+  "backfilledCount": 0
+}
+📦 Installing retained instrument import templates and receipts...
+{
+  "classification": "COMPLETE_200",
+  "sources": {
+    "migrationSha256": "68555c0f9901a48c1c87a7d4ccb8320d0c515e388df094a47865064ee0ad6fc8",
+    "oracleSha256": "9e098129de487fdb8ae551da9756a48c5627821ebe8da899f965824f815849df",
+    "preDraftSha256": "a523b351ff7046f21c448c637600ddbbc159c38487a4cd982163e0ada13ef6af",
+    "upgradedDraftSha256": "4f444bdf15f710a2c0223764b650713ce6b413c3d4469a950bb8bfaa05bf666b",
+    "post205DraftsSha256": "208c61cfed932cdf44bdc2b36e6d337d7687a71d13ac99dc4d48f406fcdf50ad"
+  },
+  "counts": {
+    "templates": 0,
+    "receipts": 0,
+    "draftLinks": 0
+  },
+  "receipt": {
+    "sources": {
+      "migrationSha256": "68555c0f9901a48c1c87a7d4ccb8320d0c515e388df094a47865064ee0ad6fc8",
+      "oracleSha256": "9e098129de487fdb8ae551da9756a48c5627821ebe8da899f965824f815849df",
+      "preDraftSha256": "a523b351ff7046f21c448c637600ddbbc159c38487a4cd982163e0ada13ef6af",
+      "upgradedDraftSha256": "4f444bdf15f710a2c0223764b650713ce6b413c3d4469a950bb8bfaa05bf666b",
+      "post205DraftsSha256": "208c61cfed932cdf44bdc2b36e6d337d7687a71d13ac99dc4d48f406fcdf50ad"
+    },
+    "originalRowsSha256": "699878de03a3e1a784e4645a459afd0f223619883c04a9ab00ea8636cd382b63",
+    "originalRowsPreserved": true,
+    "newTemplateCount": 0,
+    "newReceiptCount": 0,
+    "backfilledCount": 0,
+    "receiptSha256": "4592d8ce35416a95258bd7717d96a31750663151129c373e6be07abce4fc6382"
+  },
+  "mode": "NO_OP",
+  "totalChanges": 0,
+  "newTemplateCount": 0,
+  "newReceiptCount": 0,
+  "backfilledCount": 0
+}
+{
+  "classification": "COMPLETE_206",
+  "sources": {
+    "migrationSha256": "2a239bf9b13820a151e3fcc3e81fc47142a34027ec0502c5c26acd42200254b4",
+    "contractVersion": "206-v1"
+  },
+  "receipt": {
+    "sources": {
+      "migrationSha256": "2a239bf9b13820a151e3fcc3e81fc47142a34027ec0502c5c26acd42200254b4",
+      "contractVersion": "206-v1"
+    },
+    "originalRowsSha256": "5c8193afab59fdcbff93ae60b76663eea90a36ac47fe94676469cf79c54b7d1a",
+    "originalRowsPreserved": true,
+    "backfilledCount": 0,
+    "receiptSha256": "01fde4c40235e28a29176e61f798131712a07b08f23fa5ca86d7e60de087e781"
+  },
+  "mode": "NO_OP",
+  "totalChanges": 0,
+  "backfilledCount": 0
+}
+📦 Installing canonical lab policy schema prerequisite...
+{
+  "classification": "PRESENT",
+  "shape": "CANONICAL",
+  "sourceSha256": "fa6ef0563f80704dbc4ee08d90ceae91f632c912813ca037221b02aa03ef7b70",
+  "addReportPolicyVersion": false,
+  "plannedSql": "",
+  "plannedDdlCount": 0,
+  "readonlySnapshot": {
+    "path": "/tmp/lims-policy-schema-readonly-hpjcbp/snapshot.db",
+    "originalDbWalShmSha256": {
+      "": "9dc3c00dc4ac148d9eae23b63bd71ef4e9e60ada432aa20bc898d6fcf7c8944a",
+      "-wal": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "-shm": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb"
+    },
+    "originalFilesPreserved": true
+  },
+  "mode": "NO_OP",
+  "totalChanges": 0,
+  "dataWrites": 0
+}
+{
+  "classification": "COMPLETE_214",
+  "sources": {
+    "migrationSha256": "49b378296a8a0ede3318ae1e543060478b55827db0ec981d8cc4bd6180a56df6",
+    "contractVersion": "214-v1"
+  },
+  "receipt": {
+    "sources": {
+      "migrationSha256": "49b378296a8a0ede3318ae1e543060478b55827db0ec981d8cc4bd6180a56df6",
+      "contractVersion": "214-v1"
+    },
+    "originalRowsSha256": "4ae780c3c7204d847f342971c6fe8645535456ab26f99fd5e94d3c0c18b9a0a8",
+    "originalRowsPreserved": true,
+    "backfilledCount": 0,
+    "receiptSha256": "b6d23202d705021b8f0a5b824434b5855e46ee8b0a613afc73124ce40b98e84b"
+  },
+  "mode": "NO_OP",
+  "totalChanges": 0,
+  "backfilledCount": 0
+}
+{
+  "classification": "COMPLETE_209",
+  "sourceSha256": "5c51f423689b1c726e16c12cdce7b381574661017cdb622eb3f562957a18304c",
+  "receipt": {
+    "sourceSha256": "5c51f423689b1c726e16c12cdce7b381574661017cdb622eb3f562957a18304c",
+    "originalRowsSha256": "741666b3c3a56405101c0856f344dcc3bf1951310b505ba502fa08d62dbf7ed2",
+    "originalRowsPreserved": true,
+    "backfilledCount": 0,
+    "receiptSha256": "c77655472fafe22665d7306ee360ad84527baee9081a878439f460b5bb95ef13"
+  },
+  "mode": "NO_OP",
+  "totalChanges": 0,
+  "backfilledCount": 0,
+  "impact": {
+    "multipleActiveSampleCount": 0,
+    "multipleActive": [],
+    "refusalCounts": {
+      "NO_LINE": 0,
+      "AMBIGUOUS_LINE": 0,
+      "MULTIPLE_ACTIVE_REVISIONS": 0,
+      "FRACTION_OWNER_LINE_REQUIRED": 0
+    },
+    "refusedOpenWorkItems": [],
+    "noActiveRevisionCount": 0,
+    "noActiveRevisionWorkItems": [],
+    "noMatchingLineCount": 0,
+    "noMatchingLineWorkItems": [],
+    "prospectiveApprovedAmendmentRefusalCount": 0,
+    "prospectiveApprovedAmendmentSampleCount": 0,
+    "approvedAmendmentSampleIds": [],
+    "prospectiveApprovedAmendmentRefusals": [],
+    "approvedAmendmentKitGate": "NO_APPROVED_AMENDMENT_REFUSALS",
+    "fractionOwnerRefusalCount": 0,
+    "incompleteTextureOwnerSampleCount": 0,
+    "incompleteTextureOwners": [],
+    "invalidStoredAnalysisSampleCount": 0,
+    "invalidStoredAnalyses": [],
+    "continuingReservedOpenCount": 0,
+    "continuingReservedOpenWorkItems": [],
+    "ambiguousOpenReservationCount": 0,
+    "ambiguousOpenReservations": [],
+    "refusalScope": "Open measurement work requiring a new attempt INSERT; existing OPEN reservations reported separately"
+  },
+  "readonlySnapshot": {
+    "path": "/tmp/lims-policy-schema-readonly-AeMOHc/snapshot.db",
+    "originalDbWalShmSha256": {
+      "": "9dc3c00dc4ac148d9eae23b63bd71ef4e9e60ada432aa20bc898d6fcf7c8944a",
+      "-wal": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "-shm": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb"
+    },
+    "originalFilesPreserved": true
+  }
+}
+🚀 Starting SoilFER-LIMS...
+{"event":"WORKFLOW_STARTUP_READY","classification":"COMPLETE","inventory":{"totals":{"Sample":39280,"WorkItem":90},"candidateCount":0,"unmappedCount":0,"blockedCount":0,"fingerprint":"f92b4677e3ce0424471df4cffefe4c4e3138a1557846094059b8af0886129386"},"totalChanges":0}
+{"event":"RESULT_ATTEMPT_STARTUP_READY","classification":"COMPLETE","sources":{"migrationSha256":"aac7a1fc8e7a19ea993f6995032812e43ee4887bf0683da446438659061b235d"},"guards":["Result_attempt_insert_guard","Result_attempt_update_guard","WorkAttempt_result_reference_guard"],"counts":{"results":19,"linked":19},"backfillCount":0,"mode":"DRY_RUN","totalChanges":0}
+{"event":"SAMPLE_HOLD_STARTUP_READY","classification":"COMPLETE","sources":{"migrationSha256":"5fce16e8bc148e07880fe6afcc7f5aec1c94c319a5c98ddaeaf47450906b06a8"},"guards":["SampleHold_insert_guard","SampleHold_update_guard","SampleHold_raise_immutable","SampleHold_resolution_final","SampleHold_delete_refusal","WorkItem_cancellation_insert_guard","WorkItem_cancellation_update_guard"],"counts":{"workItems":90,"holds":12},"backfillCount":0,"mode":"DRY_RUN","totalChanges":0}
+{"event":"REFERENCE_STARTUP_READY","classification":"COMPLETE","sources":{"migrationSha256":"5da12ca98c6402002ab2701105eb9e2a51539d4421f53d70c60f47ab98bd51e3","oracleSha256":"7a626b66bd31a7e7305d8c1b091207f3fb26348345a431fb77b63f875d3b99b5"},"guards":["ReferenceMaterial_insert_guard","ReferenceMaterial_update_guard","ReferenceValue_insert_guard","ReferenceValue_immutable_guard","ReferenceValue_delete_guard","BatchQcResult_reference_insert_guard","BatchQcResult_reference_update_guard"],"indexes":["ReferenceMaterial_labId_code_idx","ReferenceValue_referenceMaterialId_analysisCode_idx","ReferenceValue_current_generic","ReferenceValue_current_method"],"counts":{"materials":0,"values":0,"qcRows":18,"linked":0},"backfillCount":0,"mode":"DRY_RUN","totalChanges":0}
+{"event":"QC_RULE_STARTUP_READY","classification":"COMPLETE","sources":{"migrationSha256":"4ee7f414ae3e6228faf52fe81d32bde2bdaf6ecb975ca62a438494db42e58b06","oracleSha256":"fe0dbc7dbb0a35bc62353de715a48b4263d492917225c7be5b6f969ec3f52819"},"guards":["QcRule_immutable_update","QcRule_immutable_delete","QcRule_version_guard","QcRule_scope_guard","QcRule_value_guard"],"indexes":["QcRule_labId_analysisCode_methodologyId_effectiveFrom_idx","QcRule_scope_version_unique"],"counts":{"rules":0},"backfillCount":0,"mode":"DRY_RUN","totalChanges":0}
+{"event":"QC_RUN_STARTUP_READY","classification":"COMPLETE","sources":{"migrationSha256":"2f3d7a319d6cbb1fb061092d79e29e03358c28aba9e22190f221df71635e2046","oracleSha256":"2991b84db149e9005a0dcd3995a63198f8668e532a68b8f7d14068aacd2b7369"},"counts":{"BatchAnalyte":6,"BatchPosition":33,"BatchPositionWorkItem":15,"BatchPositionReference":0,"QcMeasurement":24,"QcEvaluation":6,"BatchDisposition":1,"BatchEvent":28},"receipt":{"migrationSha256":"2f3d7a319d6cbb1fb061092d79e29e03358c28aba9e22190f221df71635e2046","oracleSha256":"2991b84db149e9005a0dcd3995a63198f8668e532a68b8f7d14068aacd2b7369","backfillFingerprint":"18637fad813051498f233de8f49fe7509795cd67d66213a67804c08ad18f443b","backfillCounts":{"batches":6,"analytes":6,"samplePositions":15,"qcPositions":18,"historicalSnapshots":0,"currentEvaluations":6,"evaluations":6,"measurements":24,"typedRows":18,"historicalTypedRows":0,"jsonEntries":18,"typedFallbackEntries":0,"typedJsonConflicts":12,"historyAuditConflicts":0,"unresolvedMethods":0,"unresolvedAnalysts":3,"unresolvedInstruments":6,"unlinkedReferences":6,"unresolvedNumbers":0,"unresolvedDuplicateParents":6,"unresolvedRackPositions":15,"missingWorkItems":16,"malformedHistory":0,"malformedQcResults":0,"orphanSnapshots":0,"multiAttemptMembershipGroups":0,"refusals":0,"legacyDispositionMapped":{"REJECT_REANALYSIS":1,"ACCEPT_OPAQUE":1},"dispositionAttribution":{"AUDIT_LOG":0,"BATCH_DISPOSITION_FIELD":2,"SNAPSHOT_DISPOSITION_FIELD":0},"dispositionAttributionConflicts":0,"TEXTURE_ALIAS_MERGED":0},"bootstrapRebuild":[]},"bootstrapRebuild":[],"guards":["Batch_legacy_qc_immutable","Batch_first_start_immutable","BatchQcResult_frozen_insert","BatchQcResult_frozen_update","BatchQcResult_frozen_delete","BatchAnalyte_insert_guard","BatchAnalyte_update_guard","BatchAnalyte_identity_immutable","BatchAnalyte_membership_insert_guard","BatchAnalyte_membership_delete_guard","BatchAnalyte_membership_update_guard","BatchPosition_insert_guard","BatchPosition_update_guard","BatchPosition_membership_insert_guard","BatchPosition_membership_update_guard","BatchPosition_membership_delete_guard","BatchPosition_identity_guard","BatchPositionWorkItem_insert_guard","BatchPositionWorkItem_immutable","BatchPositionWorkItem_run_unique_guard","BatchPositionWorkItem_membership_insert_guard","BatchPositionWorkItem_membership_delete_guard","WorkItem_batch_membership_guard","WorkItem_batch_membership_insert_guard","BatchPositionReference_insert_guard","BatchPositionReference_correction_reason_guard","BatchPositionReference_lot_guard","BatchPositionReference_supersede_guard","BatchPositionReference_delete_guard","QcMeasurement_insert_guard","QcMeasurement_historical_write_guard","QcMeasurement_replacement_guard","BatchPositionReference_replacement_guard","QcMeasurement_start_guard","QcMeasurement_supersede_guard","QcMeasurement_delete_guard","QcEvaluation_insert_guard","QcEvaluation_start_guard","QcEvaluation_frozen_criteria_guard","QcEvaluation_immutable_update","QcEvaluation_immutable_delete","BatchDisposition_immutable_update","BatchDisposition_immutable_delete","BatchEvent_immutable_update","BatchEvent_immutable_delete","BatchDisposition_insert_guard","BatchEvent_insert_guard"],"indexes":["BatchAnalyte_labId_analysisCode_methodologyId_idx","BatchAnalyte_batchId_analysisCode_key","BatchPosition_batchId_position_key","BatchPositionWorkItem_workItemId_idx","BatchPositionWorkItem_positionId_analysisCode_key","BatchPositionReference_positionId_analysisCode_idx","QcMeasurement_batchId_analysisCode_idx","QcMeasurement_positionId_analysisCode_replicateNo_idx","QcEvaluation_batchId_analysisCode_version_key","BatchDisposition_batchId_analysisCode_idx","BatchEvent_batchId_at_idx","BatchAnalyte_crm_ordinal_unique","BatchPositionReference_current_unique","QcMeasurement_current_unique"],"backfillCount":0,"backfillCounts":{"batches":6,"analytes":6,"samplePositions":15,"qcPositions":18,"historicalSnapshots":0,"currentEvaluations":6,"evaluations":6,"measurements":24,"typedRows":18,"historicalTypedRows":0,"jsonEntries":18,"typedFallbackEntries":0,"typedJsonConflicts":12,"historyAuditConflicts":0,"unresolvedMethods":0,"unresolvedAnalysts":3,"unresolvedInstruments":6,"unlinkedReferences":6,"unresolvedNumbers":0,"unresolvedDuplicateParents":6,"unresolvedRackPositions":15,"missingWorkItems":16,"malformedHistory":0,"malformedQcResults":0,"orphanSnapshots":0,"multiAttemptMembershipGroups":0,"refusals":0,"legacyDispositionMapped":{"REJECT_REANALYSIS":1,"ACCEPT_OPAQUE":1},"dispositionAttribution":{"AUDIT_LOG":0,"BATCH_DISPOSITION_FIELD":2,"SNAPSHOT_DISPOSITION_FIELD":0},"dispositionAttributionConflicts":0,"TEXTURE_ALIAS_MERGED":0},"backfillFingerprint":"18637fad813051498f233de8f49fe7509795cd67d66213a67804c08ad18f443b","mode":"DRY_RUN","totalChanges":0}
+{"event":"QC_GATE_SCOPE_STARTUP_READY","classification":"COMPLETE","migrationSha256":"fac0023cc90f9d5703ec8d722be55727028c7d24398fbfd4a0aa1cd1bd4fe5bf","membershipMigrationSha256":"1bc85113a3b6b7da327265bc7005eb4a1c97855943c599b1fe5ed8b126cf8572","membershipGuardSha256":"62cae98d9fdc435991030a8b330a25346ce0732069be22ce9f00fff4178db067","supersededMembershipGuardSha256":"3f33787e89eb1f5fb4552aef429a289908bcdb588b843d3313816bf45230a91d","existingDispositionRows":1,"originalDispositionFingerprint":"9afcbd14c8f9b319a2e2552a5e853aa382be8249bce9ace3eb24c17076146338","backfillCount":0,"bootstrapRebuild":[],"totalChanges":0,"mode":"DRY_RUN","receipt":{"migrationSha256":"fac0023cc90f9d5703ec8d722be55727028c7d24398fbfd4a0aa1cd1bd4fe5bf","existingDispositionRows":1,"membershipMigrationSha256":"1bc85113a3b6b7da327265bc7005eb4a1c97855943c599b1fe5ed8b126cf8572","membershipGuardSha256":"62cae98d9fdc435991030a8b330a25346ce0732069be22ce9f00fff4178db067","supersededMembershipGuardSha256":"3f33787e89eb1f5fb4552aef429a289908bcdb588b843d3313816bf45230a91d","originalDispositionFingerprint":"9afcbd14c8f9b319a2e2552a5e853aa382be8249bce9ace3eb24c17076146338","backfillCount":0,"bootstrapRebuild":[]}}
+{"event":"PT_STARTUP_READY","classification":"COMPLETE","successor":"COMPLETE_193","sources":{"migrationSha256":"bab161fb91e649a33454086aff12eca8ad0b56d16b9f5f47c278a7c20e4fc77a"},"successorSources":{"migrationSha256":"3b52e666a829449062b700948d9ccb6ccedb562b631509590f9a8b7cc8b94c47","proficiencyMigrationSha256":"bab161fb91e649a33454086aff12eca8ad0b56d16b9f5f47c278a7c20e4fc77a"},"bootstrapRebuild":[],"backfillCount":0,"roundCount":0,"scoreOutcomeSha256":"4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945","mode":"DRY_RUN","totalChanges":0}
+{"event":"NCR_STARTUP_READY","classification":"COMPLETE_193","sources":{"migrationSha256":"3b52e666a829449062b700948d9ccb6ccedb562b631509590f9a8b7cc8b94c47","proficiencyMigrationSha256":"bab161fb91e649a33454086aff12eca8ad0b56d16b9f5f47c278a7c20e4fc77a"},"totalChanges":0}
+{"event":"RESULT_EQUIPMENT_STARTUP_READY","classification":"COMPLETE","sources":{"migrationSha256":"bd409a6e5d4d8aea357991450025601d73c4c4729cb46473d847c17cb66319d4"},"bootstrapRebuild":[],"backfillCount":0,"resultCount":19,"originalResultSha256":"935e140956349abc9eddbee25b830c9ff041700f6565479a62f16031deb90d26","mode":"DRY_RUN","totalChanges":0}
+{"event":"WORK_ATTEMPT_STARTUP_READY","classification":"COMPLETE","sources":{"migrationSha256":"7e7d5679c9aeeea45ac3c2bac09e4db31dd15b52fe37c743080aa0e3473c8fe2","contractVersion":"190-v1"},"totalChanges":0}
+{"event":"WORK_REPEAT_STARTUP_READY","classification":"COMPLETE","sources":{"migrationSha256":"600a4d92ef55c91ffcf6f308a14e2591f929ac6299dc0818961a20225771c7dd","contractVersion":"191-v1","predecessor":{"marker":"190_work_attempt_contract","migrationSha256":"7e7d5679c9aeeea45ac3c2bac09e4db31dd15b52fe37c743080aa0e3473c8fe2","contractVersion":"190-v1","receiptSha256":"ffa89f3717768134e029e459613fe0039e510bda18be3352b97ec3b682202c2c"},"qcPredecessors":{"186_normalized_qc_runs":{"receiptSha256":"d461aab82504feaf91a27b4816e1d4b3abd66c147f32122752d72f4eb842be1a"},"187_qc_gate_scope":{"receiptSha256":"ee802a39b62a9e06ab92677c3c016c461e4d1c8ca43674f077622220ef1fbd04"}}},"totalChanges":0}
+{"event":"REPORTED_VALUE_STARTUP_READY","classification":"COMPLETE","migrationSha256":"52b4df85d07ef6f63b35249e317037b64450ba718fda72c0a9e4df946cb628f7","mode":"DRY_RUN","totalChanges":0,"newSelectionCount":0}
+{"event":"REAGENT_LOT_STARTUP_READY","classification":"COMPLETE_194","sources":{"migrationSha256":"6e409e753d9142381a668352be82ca4981e41847914f868cdacc32b7729cb580"},"linkCount":0,"receipt":{"sources":{"migrationSha256":"6e409e753d9142381a668352be82ca4981e41847914f868cdacc32b7729cb580"},"originalRowsSha256":"f79db32ba1d05b87d2e5009954d90ae2dd0f0a960cd51865e0f4b75de0bc4cbe","originalRowsPreserved":true,"newLinkCount":0,"backfilledCount":0,"receiptSha256":"5d737a49f3a62a5accf3c405ae938308b11b4ffe5682e71c0982951ee61715e1"},"mode":"DRY_RUN","totalChanges":0,"backfilledCount":0}
+{"event":"RESULT_OVERRIDE_STARTUP_READY","classification":"COMPLETE_197","sources":{"migrationSha256":"35ff44f0bd6b7b61289da296f1929d63a66f1c613d62836100923cd19e69bba9"},"requestCount":0,"receipt":{"sources":{"migrationSha256":"35ff44f0bd6b7b61289da296f1929d63a66f1c613d62836100923cd19e69bba9"},"originalRowsSha256":"6e0207946cd67d4109b3f6e7ff0b23fd8b545b21d2a4f81796e651923db1564b","originalRowsPreserved":true,"newRequestCount":0,"backfilledCount":0,"receiptSha256":"953a236c33e3b37f7a4fe173dc01f17b6d49924a2bfa432877f05b896253b83e"},"mode":"DRY_RUN","totalChanges":0,"backfilledCount":0}
+{"event":"CALCULATION_STARTUP_READY","classification":"COMPLETE","sources":{"migrationSha256":"84f50f90aaa69f96e8b025b4b5932eb374c26900c1470919025ae4c7bf9c3da8","oracleSha256":"684eb3e000930bd52a0c3628f020198bc315c7ace8cb284da91430167007f07d","referenceSha256":"57dc4b667dab93606e24673b39a12032e48f3df686b9bd3c593ac04d2fac8491"},"receipt":{"migrationSha256":"84f50f90aaa69f96e8b025b4b5932eb374c26900c1470919025ae4c7bf9c3da8","oracleSha256":"684eb3e000930bd52a0c3628f020198bc315c7ace8cb284da91430167007f07d","guards":["CalcTemplate_insert_contract","CalcTemplateActivation_insert_contract","CalibrationCurve_insert_contract","CalibrationPoint_insert_contract","ResultCalculation_insert_contract","CalcTemplate_update_immutable","CalcTemplate_delete_immutable","CalcTemplateActivation_update_immutable","CalcTemplateActivation_delete_immutable","CalibrationCurve_update_immutable","CalibrationCurve_delete_immutable","CalibrationPoint_update_immutable","CalibrationPoint_delete_immutable","ResultCalculation_update_immutable","ResultCalculation_delete_immutable","CalibrationCurve_pass_coefficients_guard"],"backfillCount":0},"guards":["CalcTemplate_insert_contract","CalcTemplateActivation_insert_contract","CalibrationCurve_insert_contract","CalibrationPoint_insert_contract","ResultCalculation_insert_contract","CalcTemplate_update_immutable","CalcTemplate_delete_immutable","CalcTemplateActivation_update_immutable","CalcTemplateActivation_delete_immutable","CalibrationCurve_update_immutable","CalibrationCurve_delete_immutable","CalibrationPoint_update_immutable","CalibrationPoint_delete_immutable","ResultCalculation_update_immutable","ResultCalculation_delete_immutable","CalibrationCurve_pass_coefficients_guard"],"counts":{"CalcTemplate":8,"CalcTemplateActivation":0,"CalibrationCurve":0,"CalibrationPoint":0,"ResultCalculation":0},"backfillCount":0,"unit":{"classification":"ABSENT","unitCode":"pct_mass","unitInsertCount":0,"backfillCount":0},"references":{"classification":"COMPLETE","referenceCount":11,"installedReferenceCount":8,"missingReferenceIds":[],"deferredReferences":[{"id":"calc-ref-walkley-black-130-v1","code":"DEFERRED_PREREQUISITE_ABSENT","missingAnalysisCodes":[],"missingUnitCodes":["pct_mass"]},{"id":"calc-ref-walkley-black-133-v1","code":"DEFERRED_PREREQUISITE_ABSENT","missingAnalysisCodes":[],"missingUnitCodes":["pct_mass"]},{"id":"calc-ref-kjeldahl-nitrogen-v1","code":"DEFERRED_PREREQUISITE_ABSENT","missingAnalysisCodes":[],"missingUnitCodes":["pct_mass"]}],"deferredReferenceCount":3,"referenceInsertCount":0,"referenceReceiptInsertCount":0,"activationInsertCount":0,"backfillCount":0},"ready":true,"plannedUnitInsertCount":0,"plannedReferenceInsertCount":0,"activationInsertCount":0,"mode":"DRY_RUN","totalChanges":0,"unitInsertCount":0,"referenceInsertCount":0,"referenceReceiptInsertCount":0,"schemaReceiptInsertCount":0}
+{"event":"CROSS_CHECK_STARTUP_READY","classification":"COMPLETE_201","sources":{"migrationSha256":"7579e84f62aa8561b4746a6360e83757d067046ad97fcadace05660fb6bf44a4","oracleSha256":"97cc1f211adb71056ed3c2d82ea94385d63f812071ba44a57674be24c4905de0","predecessorMigrationSha256":"52b4df85d07ef6f63b35249e317037b64450ba718fda72c0a9e4df946cb628f7"},"evaluationCount":0,"receipt":{"sources":{"migrationSha256":"7579e84f62aa8561b4746a6360e83757d067046ad97fcadace05660fb6bf44a4","oracleSha256":"97cc1f211adb71056ed3c2d82ea94385d63f812071ba44a57674be24c4905de0","predecessorMigrationSha256":"52b4df85d07ef6f63b35249e317037b64450ba718fda72c0a9e4df946cb628f7"},"originalRowsSha256":"8559985c861e950fdffe53f6661a48b0e76916edcd4c3f0e51b473d827824d58","originalRowsPreserved":true,"newEvaluationCount":0,"backfilledCount":0,"receiptSha256":"3185df5bbb809f86c7ca8c0689135e6dbd93e227c9dbda66850256b965966a9e"},"mode":"DRY_RUN","totalChanges":0,"newEvaluationCount":0,"backfilledCount":0}
+{"event":"AMENDMENT_STARTUP_READY","classification":"COMPLETE_210","sources":{"migrationSha256":"98f180e1fe6464f0fb8e4f23a8d83832994216ff9f8174e205f75320395727f0","oracleSha256":"d738c6f76e59daea9b48824bb0dd39eb0ee390e3548c801229e593d3e3914aa2","contractVersion":"210-v1"},"amendmentCount":1,"amendmentAttemptLinkCount":0,"withdrawalCount":0,"receipt":{"sources":{"migrationSha256":"98f180e1fe6464f0fb8e4f23a8d83832994216ff9f8174e205f75320395727f0","oracleSha256":"d738c6f76e59daea9b48824bb0dd39eb0ee390e3548c801229e593d3e3914aa2","contractVersion":"210-v1"},"originalRowsSha256":"d843166d8ca8117121e56a44fd8eeed47ac92f75f3cd63ea0b466912247241d3","originalRowsPreserved":true,"newAmendmentCount":0,"newAttemptLinkCount":0,"newWithdrawalCount":0,"backfilledCount":0,"receiptSha256":"efc085838fcd3c85af095eed605a790b1252d178b52c8e9de9a5eaada223e424"},"mode":"DRY_RUN","totalChanges":0,"newAmendmentCount":0,"newAttemptLinkCount":0,"newWithdrawalCount":0,"backfilledCount":0}
+{"event":"REPORT_REVISION_STARTUP_READY","classification":"COMPLETE_211","sources":{"migrationSha256":"3acf8e97469c826b163f956e0701841143144d7fcd982fee3ba85151acfefe52","contractVersion":"211-v1"},"reportCount":4,"receipt":{"sources":{"migrationSha256":"3acf8e97469c826b163f956e0701841143144d7fcd982fee3ba85151acfefe52","contractVersion":"211-v1"},"originalRowsSha256":"2e6e021a9c590b35591f505a0aba09f529839015dfbd49e4ff81a8a29541ba39","originalRowsPreserved":true,"backfilledCount":0,"receiptSha256":"7172b9201f5173b63a1a1414b0a18414da150b8366762c868081d1a6d61dc72d"},"mode":"DRY_RUN","totalChanges":0,"backfilledCount":0}
+{"event":"BENCH_CREDENTIAL_STARTUP_READY","classification":"COMPLETE_202","sources":{"migrationSha256":"954639ef2839b158cf19f827adad0fbae6a973e1491ace2b352415957afc4a2b","contractVersion":"202-v1"},"receipt":{"sources":{"migrationSha256":"954639ef2839b158cf19f827adad0fbae6a973e1491ace2b352415957afc4a2b","contractVersion":"202-v1"},"originalRowsSha256":"a380b9ab2f9dd1ee5533c9266bbed055be9a6802f6bad10ad9462cfeeb30abf7","originalRowsPreserved":true,"backfilledCount":0,"receiptSha256":"220eeb9b44b23db3d1176eda595b5fcf1ac67b1f84fe87fbc7be58e12c46e3c6"},"mode":"DRY_RUN","totalChanges":0,"backfilledCount":0}
+{"event":"PREPARATION_RECORD_STARTUP_READY","classification":"COMPLETE_205","sources":{"migrationSha256":"e2d59e7b54096d97de5d1443f28516869672b2178cb3da345299d24838a7013c","contractVersion":"205-v1"},"receipt":{"sources":{"migrationSha256":"e2d59e7b54096d97de5d1443f28516869672b2178cb3da345299d24838a7013c","contractVersion":"205-v1"},"originalRowsSha256":"10f132d31e12b6551a00a48cfd136791d49a70fc9520834df7a5972cd988c57a","originalRowsPreserved":true,"backfilledCount":0,"receiptSha256":"01df5c84dc90b6c4be4e91b9d3b05e44af2bc5cc03e0ec5fec5bef6a238c19ae"},"mode":"DRY_RUN","totalChanges":0,"backfilledCount":0}
+{"event":"INSTRUMENT_IMPORT_STARTUP_READY","classification":"COMPLETE_200","sources":{"migrationSha256":"68555c0f9901a48c1c87a7d4ccb8320d0c515e388df094a47865064ee0ad6fc8","oracleSha256":"9e098129de487fdb8ae551da9756a48c5627821ebe8da899f965824f815849df","preDraftSha256":"a523b351ff7046f21c448c637600ddbbc159c38487a4cd982163e0ada13ef6af","upgradedDraftSha256":"4f444bdf15f710a2c0223764b650713ce6b413c3d4469a950bb8bfaa05bf666b","post205DraftsSha256":"208c61cfed932cdf44bdc2b36e6d337d7687a71d13ac99dc4d48f406fcdf50ad"},"counts":{"templates":0,"receipts":0,"draftLinks":0},"receipt":{"sources":{"migrationSha256":"68555c0f9901a48c1c87a7d4ccb8320d0c515e388df094a47865064ee0ad6fc8","oracleSha256":"9e098129de487fdb8ae551da9756a48c5627821ebe8da899f965824f815849df","preDraftSha256":"a523b351ff7046f21c448c637600ddbbc159c38487a4cd982163e0ada13ef6af","upgradedDraftSha256":"4f444bdf15f710a2c0223764b650713ce6b413c3d4469a950bb8bfaa05bf666b","post205DraftsSha256":"208c61cfed932cdf44bdc2b36e6d337d7687a71d13ac99dc4d48f406fcdf50ad"},"originalRowsSha256":"699878de03a3e1a784e4645a459afd0f223619883c04a9ab00ea8636cd382b63","originalRowsPreserved":true,"newTemplateCount":0,"newReceiptCount":0,"backfilledCount":0,"receiptSha256":"4592d8ce35416a95258bd7717d96a31750663151129c373e6be07abce4fc6382"},"mode":"DRY_RUN","totalChanges":0,"newTemplateCount":0,"newReceiptCount":0,"backfilledCount":0}
+{"event":"SAMPLE_CONTAINER_STARTUP_READY","classification":"COMPLETE_206","sources":{"migrationSha256":"2a239bf9b13820a151e3fcc3e81fc47142a34027ec0502c5c26acd42200254b4","contractVersion":"206-v1"},"receipt":{"sources":{"migrationSha256":"2a239bf9b13820a151e3fcc3e81fc47142a34027ec0502c5c26acd42200254b4","contractVersion":"206-v1"},"originalRowsSha256":"5c8193afab59fdcbff93ae60b76663eea90a36ac47fe94676469cf79c54b7d1a","originalRowsPreserved":true,"backfilledCount":0,"receiptSha256":"01fde4c40235e28a29176e61f798131712a07b08f23fa5ca86d7e60de087e781"},"mode":"DRY_RUN","totalChanges":0,"backfilledCount":0}
+{"event":"LAB_POLICY_STARTUP_READY","classification":"PRESENT","shape":"CANONICAL","sourceSha256":"fa6ef0563f80704dbc4ee08d90ceae91f632c912813ca037221b02aa03ef7b70","addReportPolicyVersion":false,"plannedSql":"","plannedDdlCount":0,"readonlySnapshot":{"path":"/tmp/lims-policy-schema-readonly-JLoJmA/snapshot.db","originalDbWalShmSha256":{"":"9dc3c00dc4ac148d9eae23b63bd71ef4e9e60ada432aa20bc898d6fcf7c8944a","-wal":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855","-shm":"fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb"},"originalFilesPreserved":true},"mode":"NO_OP","totalChanges":0,"dataWrites":0}
+{"event":"CONTROL_CHART_STARTUP_READY","classification":"COMPLETE_214","sources":{"migrationSha256":"49b378296a8a0ede3318ae1e543060478b55827db0ec981d8cc4bd6180a56df6","contractVersion":"214-v1"},"receipt":{"sources":{"migrationSha256":"49b378296a8a0ede3318ae1e543060478b55827db0ec981d8cc4bd6180a56df6","contractVersion":"214-v1"},"originalRowsSha256":"4ae780c3c7204d847f342971c6fe8645535456ab26f99fd5e94d3c0c18b9a0a8","originalRowsPreserved":true,"backfilledCount":0,"receiptSha256":"b6d23202d705021b8f0a5b824434b5855e46ee8b0a613afc73124ce40b98e84b"},"mode":"DRY_RUN","totalChanges":0,"backfilledCount":0}
+{"event":"ORDER_REVISION_STARTUP_READY","classification":"COMPLETE_209","sourceSha256":"5c51f423689b1c726e16c12cdce7b381574661017cdb622eb3f562957a18304c","receipt":{"sourceSha256":"5c51f423689b1c726e16c12cdce7b381574661017cdb622eb3f562957a18304c","originalRowsSha256":"741666b3c3a56405101c0856f344dcc3bf1951310b505ba502fa08d62dbf7ed2","originalRowsPreserved":true,"backfilledCount":0,"receiptSha256":"c77655472fafe22665d7306ee360ad84527baee9081a878439f460b5bb95ef13"},"mode":"DRY_RUN","totalChanges":0,"backfilledCount":0,"impact":{"multipleActiveSampleCount":0,"multipleActive":[],"refusalCounts":{"NO_LINE":0,"AMBIGUOUS_LINE":0,"MULTIPLE_ACTIVE_REVISIONS":0,"FRACTION_OWNER_LINE_REQUIRED":0},"refusedOpenWorkItems":[],"noActiveRevisionCount":0,"noActiveRevisionWorkItems":[],"noMatchingLineCount":0,"noMatchingLineWorkItems":[],"prospectiveApprovedAmendmentRefusalCount":0,"prospectiveApprovedAmendmentSampleCount":0,"approvedAmendmentSampleIds":[],"prospectiveApprovedAmendmentRefusals":[],"approvedAmendmentKitGate":"NO_APPROVED_AMENDMENT_REFUSALS","fractionOwnerRefusalCount":0,"incompleteTextureOwnerSampleCount":0,"incompleteTextureOwners":[],"invalidStoredAnalysisSampleCount":0,"invalidStoredAnalyses":[],"continuingReservedOpenCount":0,"continuingReservedOpenWorkItems":[],"ambiguousOpenReservationCount":0,"ambiguousOpenReservations":[],"refusalScope":"Open measurement work requiring a new attempt INSERT; existing OPEN reservations reported separately"},"readonlySnapshot":{"path":"/tmp/lims-policy-schema-readonly-AiikNI/snapshot.db","originalDbWalShmSha256":{"":"9dc3c00dc4ac148d9eae23b63bd71ef4e9e60ada432aa20bc898d6fcf7c8944a","-wal":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855","-shm":"fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb"},"originalFilesPreserved":true}}
+[PRISMA] Using better-sqlite3 adapter — DB: /app/server/prisma/dev.db
+[SCHEDULER] Background schedulers suppressed (writer hold active)
+[WS] WebSocket server initialised on /ws
+[SCHEDULER] Escalation background scheduler suppressed (writer hold active)
+Enterprise Server running on http://localhost:3000

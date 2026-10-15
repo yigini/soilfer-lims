@@ -1,0 +1,16 @@
+{
+  "status": 0,
+  "signal": null,
+  "error": null,
+  "before": {
+    "": "d1691c8c2d6eb247cc34b4fcd95558eedbef3950ee8019774164085e27c96edc",
+    "-wal": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "-shm": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb"
+  },
+  "after": {
+    "": "d1691c8c2d6eb247cc34b4fcd95558eedbef3950ee8019774164085e27c96edc",
+    "-wal": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "-shm": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb"
+  },
+  "originalFilesPreserved": true
+}

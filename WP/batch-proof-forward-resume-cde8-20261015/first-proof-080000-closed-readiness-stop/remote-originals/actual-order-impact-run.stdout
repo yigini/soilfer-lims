@@ -1,0 +1,125 @@
+{
+  "classification": "PRE_209",
+  "sourceSha256": "5c51f423689b1c726e16c12cdce7b381574661017cdb622eb3f562957a18304c",
+  "mode": "DRY_RUN",
+  "totalChanges": 0,
+  "backfilledCount": 0,
+  "impact": {
+    "multipleActiveSampleCount": 0,
+    "multipleActive": [],
+    "refusalCounts": {
+      "NO_LINE": 0,
+      "AMBIGUOUS_LINE": 0,
+      "MULTIPLE_ACTIVE_REVISIONS": 0,
+      "FRACTION_OWNER_LINE_REQUIRED": 0
+    },
+    "refusedOpenWorkItems": [],
+    "noActiveRevisionCount": 0,
+    "noActiveRevisionWorkItems": [],
+    "noMatchingLineCount": 0,
+    "noMatchingLineWorkItems": [],
+    "prospectiveApprovedAmendmentRefusalCount": 0,
+    "prospectiveApprovedAmendmentSampleCount": 0,
+    "approvedAmendmentSampleIds": [],
+    "prospectiveApprovedAmendmentRefusals": [],
+    "approvedAmendmentKitGate": "NO_APPROVED_AMENDMENT_REFUSALS",
+    "fractionOwnerRefusalCount": 0,
+    "incompleteTextureOwnerSampleCount": 0,
+    "incompleteTextureOwners": [],
+    "invalidStoredAnalysisSampleCount": 0,
+    "invalidStoredAnalyses": [],
+    "continuingReservedOpenCount": 0,
+    "continuingReservedOpenWorkItems": [],
+    "ambiguousOpenReservationCount": 0,
+    "ambiguousOpenReservations": [],
+    "refusalScope": "Open measurement work requiring a new attempt INSERT; existing OPEN reservations reported separately"
+  },
+  "readonlySnapshot": {
+    "path": "/tmp/lims-order-impact-fNLeDF/lims-policy-schema-readonly-nFJjAh/snapshot.db",
+    "originalDbWalShmSha256": {
+      "": "d1691c8c2d6eb247cc34b4fcd95558eedbef3950ee8019774164085e27c96edc",
+      "-wal": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "-shm": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb"
+    },
+    "originalFilesPreserved": true
+  },
+  "access": "RETAINED_SNAPSHOT_ONLY",
+  "originalDbWalShmSha256": {
+    "": "d1691c8c2d6eb247cc34b4fcd95558eedbef3950ee8019774164085e27c96edc",
+    "-wal": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "-shm": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb"
+  },
+  "originalFilesPreserved": true,
+  "productionMutations": 0,
+  "retainedAllocation": {
+    "root": "/tmp/lims-order-impact-fNLeDF",
+    "files": [
+      {
+        "path": "/tmp/lims-order-impact-fNLeDF/exit-original.json",
+        "bytes": 594,
+        "sha256": "50e1a883fa6a15da5f7fb09e9effb05e1ae97d5a6a45318c2a4d01d205f3f10c",
+        "allocatedBytes": 4096,
+        "conservativeAllocationBytes": 4096
+      },
+      {
+        "path": "/tmp/lims-order-impact-fNLeDF/lims-policy-schema-readonly-nFJjAh/snapshot.db",
+        "bytes": 563322880,
+        "sha256": "d1691c8c2d6eb247cc34b4fcd95558eedbef3950ee8019774164085e27c96edc",
+        "allocatedBytes": 563326976,
+        "conservativeAllocationBytes": 563326976
+      },
+      {
+        "path": "/tmp/lims-order-impact-fNLeDF/lims-policy-schema-readonly-nFJjAh/snapshot.db-shm",
+        "bytes": 32768,
+        "sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb",
+        "allocatedBytes": 32768,
+        "conservativeAllocationBytes": 32768
+      },
+      {
+        "path": "/tmp/lims-order-impact-fNLeDF/lims-policy-schema-readonly-nFJjAh/snapshot.db-wal",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "allocatedBytes": 0,
+        "conservativeAllocationBytes": 0
+      },
+      {
+        "path": "/tmp/lims-order-impact-fNLeDF/lims-policy-schema-readonly-NgKHFm/snapshot.db",
+        "bytes": 563322880,
+        "sha256": "d1691c8c2d6eb247cc34b4fcd95558eedbef3950ee8019774164085e27c96edc",
+        "allocatedBytes": 563326976,
+        "conservativeAllocationBytes": 563326976
+      },
+      {
+        "path": "/tmp/lims-order-impact-fNLeDF/lims-policy-schema-readonly-NgKHFm/snapshot.db-shm",
+        "bytes": 32768,
+        "sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb",
+        "allocatedBytes": 32768,
+        "conservativeAllocationBytes": 32768
+      },
+      {
+        "path": "/tmp/lims-order-impact-fNLeDF/lims-policy-schema-readonly-NgKHFm/snapshot.db-wal",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "allocatedBytes": 0,
+        "conservativeAllocationBytes": 0
+      },
+      {
+        "path": "/tmp/lims-order-impact-fNLeDF/stderr-original.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "allocatedBytes": 0,
+        "conservativeAllocationBytes": 0
+      },
+      {
+        "path": "/tmp/lims-order-impact-fNLeDF/stdout-original.json",
+        "bytes": 1749,
+        "sha256": "778bb264f164083cce6aafa1b4695e412c7fd029cd19913ba588038360d2c2e3",
+        "allocatedBytes": 4096,
+        "conservativeAllocationBytes": 4096
+      }
+    ],
+    "logicalBytes": 1126713639,
+    "allocationMeasured": true,
+    "conservativeAllocationBytes": 1126727680
+  }
+}

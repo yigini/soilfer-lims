@@ -1,0 +1,21 @@
+{
+  "classification": "COMPLETE_206",
+  "sources": {
+    "migrationSha256": "2a239bf9b13820a151e3fcc3e81fc47142a34027ec0502c5c26acd42200254b4",
+    "contractVersion": "206-v1"
+  },
+  "receipt": {
+    "sources": {
+      "migrationSha256": "2a239bf9b13820a151e3fcc3e81fc47142a34027ec0502c5c26acd42200254b4",
+      "contractVersion": "206-v1"
+    },
+    "originalRowsSha256": "5c8193afab59fdcbff93ae60b76663eea90a36ac47fe94676469cf79c54b7d1a",
+    "originalRowsPreserved": true,
+    "backfilledCount": 0,
+    "receiptSha256": "01fde4c40235e28a29176e61f798131712a07b08f23fa5ca86d7e60de087e781"
+  },
+  "previousClassification": "PRE_206",
+  "mode": "APPLIED",
+  "backfilledCount": 0,
+  "totalChanges": 1
+}
