@@ -1,0 +1,9 @@
+{
+  "cause": "Retainer required _SYSTEMD_INVOCATION_ID, but PID1 lifecycle records carry exact INVOCATION_ID. Eighth observer already retains all four original lifecycle records with exact233000 invocation and successful deactivation. No service-origin stdout was produced on success.",
+  "originalHelpersConsumedNeverReplay": true,
+  "originalStderr": "Traceback (most recent call last):\n  File \"<stdin>\", line 56, in <module>\nAssertionError: Full same-invocation journal required\n",
+  "producerReceiptUnchanged": true,
+  "recordedUtc": "2026-10-15T23:20:38.696174+00:00",
+  "status": "READONLY_RETENTION_JOURNAL_FIELD_REFUSAL_NOT_PROOF_FAILURE",
+  "successor": "NEW complete read-only retainer accepts either actual journal identity field and requires exact invocation; same closed root only/no SQL/newdu/replay"
+}
