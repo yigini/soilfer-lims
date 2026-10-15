@@ -1,0 +1,94 @@
+Source review: PASS
+
+Claudio's source review of tooling 09d7e537d90bc8ed17e9d162fd6868a7c34a8e15 (WP/batch-proof-noop-identity-cde8-20261015, eleven files), targeting the fresh unused 050000 root. No earlier pass (87dfedc6, 6a235c68, ea9ce209) authorizes anything further, and 932e764a never had one. This covers one new raw snapshot and this scoped owned stopped-copy proof only, and only if the launcher's fresh metadata capacity gate passes. It does not approve jobs-ON qualification, the final kit, a gate or deployment.
+
+What I checked:
+- All eleven SHA-256 values below match `git archive` of the exact head and the request. `verify_proof_guards.py` ran 96/96 OK on Python 3.11 and on Python 3.9.23, each with a fresh `LIMS_PROOF_GUARD_FIXTURE_DIR`.
+- The diff against ea9ce209 matches both directions (6183215126 and 6183663456) and nothing else:
+  - `proof_budget.py` is new.
+  - Stage begin, claim and finish calls were added in install, startup and run.
+  - The dry and repeat seals are replaced by `dry_identity` and `repeat_identity`.
+  - The installed seal stays as the next `previous`.
+  - The capacity probe runs before the root is created and again immediately before the unit.
+  - Prepare and launch now bind all files in the graph.
+  - Overlay accounting, the mount comparison, the stop path, policy, impact and startup logic are unchanged.
+- Budget: I ran `copy_site_guard` on the real sources (OK). The stage table gives 3/2/4/7/2/10/12/12 = 52 DB copies and 3 asset copies, so 65 equivalents, and its hash is a009b22c…. Because allocations are 512-aligned, per-stage allowances are exact and padding is 0. I simulated all eight stages with your 03:26:21 reference figures (T 567558144, A 5787648, free 58598653952), each consuming its full declared size. Every begin and finish passes, and free space stays above the during-stage minimum throughout (the last stage ends with 29.07 GB free against a 14.85 GB minimum). Bind requires 51759760494 B. The floor and logs are never released.
+- Claims match the real call sites. `install_control_charts.js` and `install_order_revisions.js` at cde8c889 call `assertLabPolicyStartupReady`, which takes a policy snapshot. The order impact retains primary and secondary snapshots. The startup policy chain is claimed once per default start, and the undeclared and over-count paths are refused. Any undercount in the app-internal copy estimates (startup 8, 209 CLI 2 each) would be caught by the per-stage du -x closure (share +25%) as a safe STOP, not as silent overuse.
+- Identity checks: a dry run requires the same main SHA-256 and length, and a WAL that is absent or zero-length. A repeat requires main and WAL byte identity (SHM excluded) plus `plan(...,'NO_OP')` with integer totalChanges 0. Both write evidence JSON with no copies and no SQL.
+- The capacity probe is metadata-only (`stat` of the triple and asset tree, with an alias check and a stability check). It opens no file contents, makes no copies and opens no SQL. `capacity_gate` requires the exact stage-table hash and equivalents, plus free ≥ required on all three paths.
+
+Non-blocking notes:
+1. Slack is about 6.8 GB on today's figures. The production database grows over time and the launcher re-measures, so a later attempt may refuse on capacity. That is correct behaviour.
+2. The earlier notes still apply. Strict equality checks may produce a safe false STOP, and the overlay option set is exact.
+
+Bindings:
+
+```
+09d7e537d90bc8ed17e9d162fd6868a7c34a8e15
+cde8c8896f5f9d5f1ab07b0ae16b1a765e0a6367
+638580d50f61254609de3abd42d93afc676a5727
+sha256:b5ab0a0a57aeec4fe24dd8095126f3502cbc0c8629a7f4c1ef9e55034893c6fb
+959d17e11c357266f7c2a41b0c84ab76914c591e
+sha256:7aebc035254a61b0b4b8ecb59492d582af7f3769c147a35a7e92a43fb7a642d2
+8109d78e228573ead8aa243442192e54b8e1dc09101bc3fa23d03e5a29cbb66b
+c03ca0cd16395a451a12f1606655166f0dfe0b3f78516212034b548888c7a3fd
+proofScope=RAW_SNAPSHOT_AND_OWNED_STOPPED_COPY_INSTALLATION_JOBS_OFF_STARTUP_ONLY
+proofRoot=/opt/lims/releases/workflow-batch-stopped-copy-cde8c889-20261015T050000Z
+qualifiedBuildSource=6608548a58dd4bf581da4330f1cd7b0f68a86973
+qualifiedBuildPass=6181452519
+mainCiRun=38636615469
+labAndHubBuildsOwnedByYY=true
+releaseWindowControl=RELEASE_DAY_DISK_ABORTS_ACCEPTED
+reserveFloorBytes=10556150894
+unexplainedGrowthAbortBytes=500000000
+memoryLimitBytes=805306368
+unitTimeoutSeconds=5400
+readinessSeconds=600
+stageHeadroomSeconds=60
+unitHeadroomSeconds=600
+rawMasterNeverOpenedSqlite=true
+productionSqliteConnections=0
+preserveAllStoppedContainers=true
+policyPresentNoOpOrStop=true
+approvedAmendmentNonzeroStop=true
+jobsOnQualificationStillRequired=true
+declaredDbTripleCopies=52
+dbBudgetEquivalents=65
+budgetMarginPercent=25
+minimumDbBudgetEquivalents=64
+budgetStageTableSha256=a009b22ca50af106c0edbdb9044e73b70d0230c73f29e4e7a64f04534ae0faf3
+budgetModel=DECLARED_STAGE_REMAINING_CONSUMPTION_AWARE
+capacityDirection=6183215126
+noopSealDirection=6183663456
+dryRunMainIdentityAndEmptyWal=true
+repeatMainWalIdentityNoOpZero=true
+installedSealBecomesPrevious=true
+metadataCapacityBeforeRootAndBeforeUnit=true
+allLocalExecutedSourceFilesBound=true
+referenceDbReserveBytes=567558144
+referenceAssetReserveBytes=5787648
+retainedAssetReserveMultiplier=3
+logReserveBytes=4294967296
+allocationMeasurementSeconds=120
+allRetainedReleaseDockerContainerdAllocation=true
+policyPreflightMode=READONLY_DRY_RUN
+ownedStopIndependentOfReserveHeadroom=true
+allInputPathAncestorsRejectAliases=true
+diskMountPolicy=VERIFIED_DOCKER_OVERLAY_VIEWS_BACKED_BY_COUNTED_CONTAINERD
+physicalDuSingleFilesystem=true
+containerMountComparison=EXACT_OBJECTS_UNORDERED_NO_DUPLICATES
+launch_proof.py=0fac1866276fab7403a639b47fefd881354920e928c4b9e7c18afc65f54a41c7
+prepare_proof.py=a20ec861045cb207dbb7d3a8d3262449a088647c88d555e51833730988ddcb73
+proof_budget.py=3202100f6dfda3fb35fe9f9dfcb0f6ea4afd9dd92b56104480120778080bb17b
+proof_contract.py=d962e5cac0c67b852ef989280a3272afd569cab180020e770707249ee8564fbc
+proof_disk.py=c5eee36061ba408a66e3f08b0d450875445ee5bfa4fec08118642186deca80f3
+proof_docker.py=a8c327df2d911269eae32e77698892dcc40a53880edb54dde8c0ee485dd36968
+proof_files.py=0d6cb09bdb5a90deb42c9874c99da145e8a5ec0138dcd5e1f9daebe9bd99754c
+proof_install.py=c5e34fa43a084adeeb12523bd94beb05076efaf72cc1bb9ab2f9b7f7560ee3b3
+proof_startup.py=a5b3e775a53e6a2e37be613394b1f091c710ead84a09f307cf18c2c54f762b10
+run_stopped_proof.py=7e78769fa7ed00a82929260392ff3d56187e6592d3f393c84c4304e0692e9145
+verify_proof_guards.py=3fa7dfcf36e590f61547c5dc9ff9c3a25f4aeaf1312dc889a3abc7560833ffdc
+```
+
+---
+_Generated by [Claude Code](https://claude.ai/code)_
