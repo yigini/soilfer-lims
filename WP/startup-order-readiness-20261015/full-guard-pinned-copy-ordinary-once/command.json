@@ -1,0 +1,28 @@
+{
+  "argv": [
+    "cmd.exe",
+    "/d",
+    "/c",
+    "npm.cmd",
+    "test",
+    "--",
+    "--testMatch",
+    "**/tests/**/*.test.js",
+    "--setupFilesAfterEnv",
+    "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\ownedSuiteSetup.js",
+    "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\setup.js",
+    "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\WP\\startup-order-readiness-20261015\\local-owned-physical-retention.setup.cjs",
+    "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\WP\\backlog-resume-20261013\\visible-test-storage-206.setup.cjs",
+    "--globalTeardown",
+    "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\WP\\backlog-resume-20261013\\issue214-policy-owner-local-retention-teardown.cjs",
+    "--json",
+    "--outputFile",
+    "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\WP\\startup-order-readiness-20261015\\full-guard-pinned-copy-ordinary-once\\report-original.json"
+  ],
+  "nodeOptions": "",
+  "bothOrdinarySetups": true,
+  "stockAssertions": true,
+  "localRetentionAndByteIdenticalVisiblePathFixturesOnly": true,
+  "onlyDeclaredMutableOutput": "server/data/help/RELEASE_MANIFEST_v1.json",
+  "productionOperations": 0
+}

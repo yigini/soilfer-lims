@@ -1,0 +1,19 @@
+{
+  "closedUtc": "2026-10-15T12:01:03.109616+00:00",
+  "exitCode": 1,
+  "suites": 373,
+  "tests": 0,
+  "passedSuites": 0,
+  "passedTests": 0,
+  "failed": 0,
+  "pending": 0,
+  "sourceUnchanged": true,
+  "exactInventory": true,
+  "visibleAssetsUnchanged": true,
+  "expectedTests": 5679,
+  "bothOrdinarySetups": true,
+  "onlyDeclaredMutableOutput": "server/data/help/RELEASE_MANIFEST_v1.json",
+  "declaredOutputCapturedBeforeAfter": true,
+  "productionOperations": 0,
+  "status": "FAILED_OR_INCOMPLETE"
+}

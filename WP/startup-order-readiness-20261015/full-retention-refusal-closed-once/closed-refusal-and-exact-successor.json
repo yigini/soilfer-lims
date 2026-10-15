@@ -1,0 +1,79 @@
+{
+  "status": "CLOSED_LOCAL_SETUP_REFUSAL_ZERO_TESTS_NOT_APPLICATION_TEST_FAILURE",
+  "retainedUtc": "2026-10-15T12:04:42.855968+00:00",
+  "session": 12570,
+  "actualSummary": {
+    "closedUtc": "2026-10-15T12:01:03.109616+00:00",
+    "exitCode": 1,
+    "suites": 373,
+    "tests": 0,
+    "passedSuites": 0,
+    "passedTests": 0,
+    "failed": 0,
+    "pending": 0,
+    "sourceUnchanged": true,
+    "exactInventory": true,
+    "visibleAssetsUnchanged": true,
+    "expectedTests": 5679,
+    "bothOrdinarySetups": true,
+    "onlyDeclaredMutableOutput": "server/data/help/RELEASE_MANIFEST_v1.json",
+    "declaredOutputCapturedBeforeAfter": true,
+    "productionOperations": 0,
+    "status": "FAILED_OR_INCOMPLETE"
+  },
+  "runtimeErrorSuites": 373,
+  "executedTests": 0,
+  "all1333SourceHashesUnchanged": true,
+  "cause": "New runner evidence root was not the original local retention setup exact directory pin. Setup refused before test bodies.",
+  "noOriginalSetupOrAppSourceEdited": true,
+  "newSetupOnlyChange": "One exact owned ledger directory prefix; all retention scopes/guards/assertions byte-identical.",
+  "newSetupPreflights": [
+    {
+      "name": "valid",
+      "argv": [
+        "node",
+        "-e",
+        "require(process.argv[1])",
+        "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\WP\\startup-order-readiness-20261015\\local-owned-pinned-copy-retention-bound.setup.cjs"
+      ],
+      "NODE_ENV": "test",
+      "ledger": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\WP\\startup-order-readiness-20261015\\full-pinned-copy-retention-bound-ordinary-once\\physical-retention-original.jsonl",
+      "exitCode": 0
+    },
+    {
+      "name": "wrong-root",
+      "argv": [
+        "node",
+        "-e",
+        "require(process.argv[1])",
+        "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\WP\\startup-order-readiness-20261015\\local-owned-pinned-copy-retention-bound.setup.cjs"
+      ],
+      "NODE_ENV": "test",
+      "ledger": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\WP\\startup-order-readiness-20261015\\full-ordinary-once\\physical-retention-original.jsonl",
+      "exitCode": 1
+    },
+    {
+      "name": "wrong-environment",
+      "argv": [
+        "node",
+        "-e",
+        "require(process.argv[1])",
+        "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\WP\\startup-order-readiness-20261015\\local-owned-pinned-copy-retention-bound.setup.cjs"
+      ],
+      "NODE_ENV": "production",
+      "ledger": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\WP\\startup-order-readiness-20261015\\full-pinned-copy-retention-bound-ordinary-once\\physical-retention-original.jsonl",
+      "exitCode": 1
+    }
+  ],
+  "newRunnerPreparedNotExecuted": "WP/backlog-resume-20261013/verify-startup-pinned-copy-retention-bound-full-ordinary-once.py",
+  "consumedOpeningPublisher": "publish-startup-corrected-full-open-and-cleanup-review-once.py",
+  "openingPublisherRefusal": {
+    "kind": "TOOL_OUTPUT_TRANSCRIPTION",
+    "exitCode": 1,
+    "boundary": "First assertion before output directory creation because SAME full run had already closed. No opening evidence published."
+  },
+  "actualClaudioReview": 6191219093,
+  "nativeReadNotClaimed": true,
+  "r1NoProofDbCopyRemovedPendingYY": true,
+  "productionOperations": 0
+}
