@@ -1,0 +1,23 @@
+{
+  "status": "SENT_ONCE_VISUALLY_VERIFIED",
+  "observedUtc": "2026-10-15T10:07:55.477Z",
+  "observationNotProducerExactTimestamp": true,
+  "window": {
+    "app": "Claude_pzs8sxrjxfjjc!Claude",
+    "id": 7867734,
+    "title": "Claude"
+  },
+  "project": "LIMS Audit",
+  "thread": "Lab workflow audit and plan",
+  "freshReturnedWindow": true,
+  "rightComposerEmptyBefore": true,
+  "caretObserved": true,
+  "ownDraftBeginningAndEndInspected": true,
+  "oneReturn": true,
+  "sentBubbleObserved": true,
+  "rightComposerEmptyAfter": true,
+  "claudioStatus": "Manifesting",
+  "humanCardsAndCentreComposerUntouched": true,
+  "cleanupApproved": false,
+  "neverRepeat": true
+}

@@ -1,0 +1,67 @@
+{
+  "cleanupApproved": false,
+  "commentId": 6189575607,
+  "commentUrl": "https://github.com/yigini/soilfer-lims/issues/162#issuecomment-6189575607",
+  "deleted": 0,
+  "files": [
+    {
+      "bytes": 2196277,
+      "path": "WP/yy-host-capacity-options-6gb-20261015/claudio-handoff-once/comments-after-native-original.json",
+      "sha256": "da59dea74d3992b4a1e51d924fe6ff2738bad1ec1d8d38712c280ff416ce9982"
+    },
+    {
+      "bytes": 2186885,
+      "path": "WP/yy-host-capacity-options-6gb-20261015/claudio-handoff-once/comments-before-original.json",
+      "sha256": "b80bb1c2d56acd97dc49264d96c9bf5e05d67ad706fc89145a2d9429c52f4672"
+    },
+    {
+      "bytes": 337,
+      "path": "WP/yy-host-capacity-options-6gb-20261015/claudio-handoff-once/delivery-record.json",
+      "sha256": "c803314c59d01b82790545d38d9e7f7a0e2e0a8c5094d0d428e0473a38498a12"
+    },
+    {
+      "bytes": 665,
+      "path": "WP/yy-host-capacity-options-6gb-20261015/claudio-handoff-once/native-delivery-record.json",
+      "sha256": "4e49762122e0045771b5574fd0c72971f77591a2cb868fb6754c40617df6f3c4"
+    },
+    {
+      "bytes": 2201,
+      "path": "WP/yy-host-capacity-options-6gb-20261015/claudio-handoff-once/native-handoff-actual-sent.txt",
+      "sha256": "525eccb21bc250658be6137c18f3398a8853ccc02f1b30a5a85c46bd4f1b33ba"
+    },
+    {
+      "bytes": 7825,
+      "path": "WP/yy-host-capacity-options-6gb-20261015/claudio-handoff-once/post-input.json",
+      "sha256": "a2a3c16f056a8af9af42642fdccfe91c6be3e835d40d28a9af35bbc7977ea7d9"
+    },
+    {
+      "bytes": 9391,
+      "path": "WP/yy-host-capacity-options-6gb-20261015/claudio-handoff-once/post-response-original.json",
+      "sha256": "80b05f8cd8150c2c19356c91612f713e14b3c4960111476016275ae50c77cb5b"
+    },
+    {
+      "bytes": 7801,
+      "path": "WP/yy-host-capacity-options-6gb-20261015/claudio-handoff-once/posted-body.txt",
+      "sha256": "0e24f3bdd40a240a8ff2e07003fc03330e94699233be9c3687916af76b1ccfa4"
+    },
+    {
+      "bytes": 5229,
+      "path": "WP/backlog-resume-20261013/give-yy-six-gb-exact-list-to-claudio-once.py",
+      "sha256": "acc8c40ba8410fba3b5dac1fe50760ad7601719dbe84eb90704db4e92af9f1a0"
+    },
+    {
+      "bytes": 5256,
+      "path": "WP/backlog-resume-20261013/retain-yy-six-gb-claudio-handoff-once.py",
+      "sha256": "1e7064bc800631763114e00fe45b0111d3ed5be4ac48b8f71dd9601ea06fb15a"
+    },
+    {
+      "bytes": 599440,
+      "path": "WP/audit-release-eb6de2e8/README.md",
+      "sha256": "ebc26d0de805b9862531d2569f79bf645aeb7f50660add756235e5df63656cf9"
+    }
+  ],
+  "laterCommentsMetadataOnly": [],
+  "listCommit": "420919a83fed52ee229caaee32158a0a61eccd59",
+  "nativeVerified": true,
+  "status": "ONE_GITHUB_AND_NATIVE_READ_ONLY_LIST_DELIVERED"
+}
