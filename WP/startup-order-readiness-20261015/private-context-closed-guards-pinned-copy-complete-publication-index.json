@@ -1,0 +1,850 @@
+{
+  "status": "CORRECTED_SOURCE_FOCUSED167PASS_FULL_STILL_REQUIRED",
+  "baseAudit": "787aa5692996a108120b510efa0154d7a74da85e",
+  "predecessorPreparedIndex": {
+    "path": "WP/startup-order-readiness-20261015/private-context-closed-guards-pinned-copy-publication-index.json",
+    "length": 41310,
+    "sha256": "dbedffe5cb09a3ebc024b31c02a2cdc51a062b2f630a0f88ce366af1e7ea186c",
+    "gitBlobOid": "73704c4d2eee4666316ab6cf9e05c55a35a01e1f"
+  },
+  "appPaths": [
+    "server/index.js",
+    "server/scripts/install_workflow_state_guards.js",
+    "server/scripts/install_result_attempt_links.js",
+    "server/scripts/install_sample_holds.js",
+    "server/scripts/install_reference_materials.js",
+    "server/scripts/install_qc_rules.js",
+    "server/scripts/install_qc_runs.js",
+    "server/scripts/install_qc_gate_scope.js",
+    "server/scripts/install_proficiency_evidence.js",
+    "server/scripts/install_nonconformity_reports.js",
+    "server/scripts/install_result_equipment_evidence.js",
+    "server/scripts/install_work_attempt_contract.js",
+    "server/scripts/install_work_repeat_contract.js",
+    "server/scripts/install_reported_value_selections.js",
+    "server/scripts/install_batch_reagent_lots.js",
+    "server/scripts/install_result_override_requests.js",
+    "server/scripts/install_calculation_templates.js",
+    "server/scripts/install_cross_check_evaluations.js",
+    "server/scripts/install_sample_amendment_authorisation.js",
+    "server/scripts/install_report_revisions.js",
+    "server/scripts/install_bench_credentials.js",
+    "server/scripts/install_preparation_records.js",
+    "server/scripts/install_instrument_imports.js",
+    "server/scripts/install_sample_containers.js",
+    "server/scripts/install_lab_policy_schema.js",
+    "server/scripts/install_control_charts.js",
+    "server/scripts/install_order_revisions.js",
+    "server/utils/startupReadinessContext.js",
+    "server/utils/startupReadinessTelemetry.js",
+    "server/tests/contracts/startup_readiness_context.test.js",
+    "server/tests/contracts/startup_readiness_telemetry.test.js",
+    "server/tests/contracts/order_revision_impact_set_query.test.js",
+    "server/tests/fixtures/order_revision_impact_before_set_query.txt",
+    "server/tests/helpers/qcGateFixture.js",
+    "server/tests/helpers/startupImpactFixture.js",
+    "server/tests/helpers/workflowWriteScanner.js"
+  ],
+  "focusedSummary": {
+    "status": "PASS",
+    "closedUtc": "2026-10-15T11:56:46.978909+00:00",
+    "exitCode": 0,
+    "suites": 5,
+    "tests": 167,
+    "passed": 167,
+    "failed": 0,
+    "pending": 0,
+    "sourceUnchanged": true,
+    "exactInventory": true,
+    "ordinarySetupsAndAssertions": true,
+    "productionOperations": 0,
+    "notFullSuiteCiOrRuntimeQualification": true
+  },
+  "stockTestsUnchanged": 371,
+  "originalFullFailedResultRetained": true,
+  "expectedNewFullSuites": 373,
+  "expectedNewFullTests": 5679,
+  "files": [
+    {
+      "path": "server/index.js",
+      "length": 13542,
+      "sha256": "e600a6b3117a4e3eca26b80a5f9260eba4e2f9219c6c15b941420c144c57ec46",
+      "gitBlobOid": "53034b906f5718c3a0f8391352f3cfe9a6fad57a"
+    },
+    {
+      "path": "server/scripts/install_batch_reagent_lots.js",
+      "length": 10778,
+      "sha256": "d8c2c53c8e6fc909824520ecd8e2e992bc674c694eebb92eb34a86cff35dfae9",
+      "gitBlobOid": "b2fb6c0c483f3cc189d5803c39f1effc9208663e"
+    },
+    {
+      "path": "server/scripts/install_bench_credentials.js",
+      "length": 8013,
+      "sha256": "4dd633e1fc19680d47018386106f9788554d550d6f84857115449c5a42fd5724",
+      "gitBlobOid": "94ea239e0b84cd2ff7b52339a6efc1c30db100f4"
+    },
+    {
+      "path": "server/scripts/install_calculation_templates.js",
+      "length": 6027,
+      "sha256": "56c77798bf81c295bdc9b645661473e01c6d3fe90541e3cbe5de1104b8a04380",
+      "gitBlobOid": "1c2d614dfaeb9a0cf8def0c6f09249a1ac0e4f28"
+    },
+    {
+      "path": "server/scripts/install_control_charts.js",
+      "length": 9109,
+      "sha256": "fd5bdc007ac2e995dd25a65822169135c3c41252dc5d86c50fe45b99bd72125b",
+      "gitBlobOid": "799be75d6a945cd5fdfa83712d2168a64b822bfa"
+    },
+    {
+      "path": "server/scripts/install_cross_check_evaluations.js",
+      "length": 9940,
+      "sha256": "e2848bc155ea1141a3d658a31a1382388ff8af6da9e556dfad624f13bbefff78",
+      "gitBlobOid": "bbeadabad67f48f6484424b4961ec62b977f99a3"
+    },
+    {
+      "path": "server/scripts/install_instrument_imports.js",
+      "length": 9029,
+      "sha256": "4d1706458dd0730cf2fcc7581c6d08e8c091989e394d45ea100c133faac8f93f",
+      "gitBlobOid": "c1c7ac484f01126580cf7464c05c1d6b662bfc37"
+    },
+    {
+      "path": "server/scripts/install_lab_policy_schema.js",
+      "length": 12099,
+      "sha256": "b4d867b31c798981de10665ee929696343257fdac16fdcd2fd4a56a35cbdd4ba",
+      "gitBlobOid": "446e5f3a1fe1cff5198f8dbc5daf51626b717787"
+    },
+    {
+      "path": "server/scripts/install_nonconformity_reports.js",
+      "length": 7981,
+      "sha256": "554a1d00c3f881d18a62d2245493cc7c9ab6da3b22f2f7ce9d3a5396ba65f3b7",
+      "gitBlobOid": "3ea622f4fc2af51452a5180d169a7abbf758bbc8"
+    },
+    {
+      "path": "server/scripts/install_order_revisions.js",
+      "length": 19077,
+      "sha256": "1e4fdbe8ff12c7e6bc8b751c3b47bcb0ef2f9ee80dd6840bd56abfd86f52057e",
+      "gitBlobOid": "c531d9f997967dffd52a28c677747cc253570ccd"
+    },
+    {
+      "path": "server/scripts/install_preparation_records.js",
+      "length": 9745,
+      "sha256": "47a45055c43abd199862e39dd213704b578144a843bf9d5db2a799f3af29eddb",
+      "gitBlobOid": "6b98a3b2f68d133900b51ad40a400502ac98d516"
+    },
+    {
+      "path": "server/scripts/install_proficiency_evidence.js",
+      "length": 8351,
+      "sha256": "defee5943021ff3fccfaf77be2996d1e4696f29df380924dd6d5ec3ac51cc857",
+      "gitBlobOid": "9c281490ed68c3342b73064f23942819a44e9d3f"
+    },
+    {
+      "path": "server/scripts/install_qc_gate_scope.js",
+      "length": 6424,
+      "sha256": "2b18e7df19e3ab8d235ee800c4b078044dad5dccc014a23f6dc8a3ec7f95b6f9",
+      "gitBlobOid": "2e58fdfb9496e5644c867f54e5ddb81cf9bc20ec"
+    },
+    {
+      "path": "server/scripts/install_qc_rules.js",
+      "length": 8823,
+      "sha256": "4e36d82e6f793bf28c789e8bf2ff6152fe2f9039658ca44931f897fceff6f6fa",
+      "gitBlobOid": "70d754d6f8a93fdb976fc32c02c1d9aee63a31f4"
+    },
+    {
+      "path": "server/scripts/install_qc_runs.js",
+      "length": 10513,
+      "sha256": "4b88f546b54b513577047dce371f75032be63ca7620d239e4711e70b7b202bd2",
+      "gitBlobOid": "5fb0b6af1cf75ebf8e74ac4f633060cde06dfb2a"
+    },
+    {
+      "path": "server/scripts/install_reference_materials.js",
+      "length": 10875,
+      "sha256": "5ad8f2efa72705624177965b08dd8aa030cb7a5fd7bb0d41c404f0f54a30f6e4",
+      "gitBlobOid": "9630016403e33445b827ee6ee0053e860a6a78e8"
+    },
+    {
+      "path": "server/scripts/install_report_revisions.js",
+      "length": 9173,
+      "sha256": "afff8b6358ef879cb4e9c5b5aad0679a02979868967011e82c2d281788ea2061",
+      "gitBlobOid": "95d24435f8b5041e307b3c3bb7954b0a2a5b71ed"
+    },
+    {
+      "path": "server/scripts/install_reported_value_selections.js",
+      "length": 7344,
+      "sha256": "2cdba854bf43a940cbd15022915fc24e0ce646cc77c94232975959115e00584c",
+      "gitBlobOid": "c40ee764570506f920419c1a050087e49de90f15"
+    },
+    {
+      "path": "server/scripts/install_result_attempt_links.js",
+      "length": 8224,
+      "sha256": "624b4356657de5a807b4a6585635caa65ecd7b797fc73e73cf68b8628f95d828",
+      "gitBlobOid": "6a13d208b52786e113f682044836764b03ac0366"
+    },
+    {
+      "path": "server/scripts/install_result_equipment_evidence.js",
+      "length": 7225,
+      "sha256": "f9685a910cd986be8d530252ed52b91aa7da46641c9790e790ab211c0e3a3513",
+      "gitBlobOid": "357b3bf21fea2e89ae4c054cdb2dda49ce172925"
+    },
+    {
+      "path": "server/scripts/install_result_override_requests.js",
+      "length": 12042,
+      "sha256": "54e0b7d740426005678ef49deb8f07c5cf8bb1c3b833beda2a889e6c23e9f703",
+      "gitBlobOid": "87a7e2a2b70149fd93974ce75438a088568f0b67"
+    },
+    {
+      "path": "server/scripts/install_sample_amendment_authorisation.js",
+      "length": 13321,
+      "sha256": "05cef2979c67594c38661eebe149d5e4b44ba6aeb5331e54f83acd79a7123dd7",
+      "gitBlobOid": "5796b603e7d9e7f611be6a7ce29920c4ac29f292"
+    },
+    {
+      "path": "server/scripts/install_sample_containers.js",
+      "length": 9412,
+      "sha256": "67bcf2f978e99f50952b5303fbb837bd447c5ff13c625970f6eadb02ab1796b7",
+      "gitBlobOid": "6a817ccdf11927af162ca9ea0644786604d9d5b7"
+    },
+    {
+      "path": "server/scripts/install_sample_holds.js",
+      "length": 11160,
+      "sha256": "df6c51f2eb7c00cb0684f4e93931f501e55f9a6674a8e0ea98d32916a05daebb",
+      "gitBlobOid": "72436a39afa95e18b0e0dc38ab3bcac72f783d90"
+    },
+    {
+      "path": "server/scripts/install_work_attempt_contract.js",
+      "length": 17389,
+      "sha256": "4650b6f794af31d37e1a90cb2946d26bc982a35b8932d53724d94c62c7452739",
+      "gitBlobOid": "6ca7f5d45d346b13e45502673fe90318170ad7bb"
+    },
+    {
+      "path": "server/scripts/install_work_repeat_contract.js",
+      "length": 8813,
+      "sha256": "9071ba8becf692b9978024f91ebdc963eaab79d360b8ef3b5d78b078c6aa1882",
+      "gitBlobOid": "45f06ec3cc1ba1cd7b3ad284c45cb49320a9c550"
+    },
+    {
+      "path": "server/scripts/install_workflow_state_guards.js",
+      "length": 16129,
+      "sha256": "3b8654b4f8ead1286985110ae6db42e23be5620cc1f080bf1f732f66f9277306",
+      "gitBlobOid": "d6b08598d760408d5fad431b1c12e0e545b2425c"
+    },
+    {
+      "path": "server/tests/contracts/order_revision_impact_set_query.test.js",
+      "length": 7141,
+      "sha256": "c36f4094376eab4f3e60f42988d1722b70efac7d9349f2d03fd6b89c6d399b1b",
+      "gitBlobOid": "5bfd7c7d2a4487a1b2010fdf02e92d6cc0c49fc3"
+    },
+    {
+      "path": "server/tests/contracts/startup_readiness_context.test.js",
+      "length": 20339,
+      "sha256": "9f73269ce6526b2f1bc846b7ab05f9da063278b941bb556a7f7e81bd71a9fa5e",
+      "gitBlobOid": "54d638ba2e5e8edc36389e6b716ee4616a571b59"
+    },
+    {
+      "path": "server/tests/contracts/startup_readiness_telemetry.test.js",
+      "length": 4619,
+      "sha256": "1a79a2c40bd2ba4bd130a73e355e3f24141cee8dffd3c020d1310bb953a2ddfd",
+      "gitBlobOid": "e5d958b652acea7109727f471486141df37df349"
+    },
+    {
+      "path": "server/tests/fixtures/order_revision_impact_before_set_query.txt",
+      "length": 6788,
+      "sha256": "d9e3ce2a0c107c8ef61ef3a5d7b43c0dca625b2c639df72236b9e76ce4eaf6a2",
+      "gitBlobOid": "f456831efe944741049620de42b6469a308b2ea9"
+    },
+    {
+      "path": "server/tests/helpers/qcGateFixture.js",
+      "length": 9044,
+      "sha256": "2e5825d34b2d2b5f48b0d8794ac8fbd835da275151b44f11d7cc06b8b1cebe9d",
+      "gitBlobOid": "a27564295d7fb3ded8a90be96d52112653528a02"
+    },
+    {
+      "path": "server/tests/helpers/startupImpactFixture.js",
+      "length": 3658,
+      "sha256": "b516abe71f18df6571201e30a852ae50bd078956c1d7f898b922bd6c05d06a4b",
+      "gitBlobOid": "88ad56bc425d22a8602c2d19b9686a2fa7ab69d9"
+    },
+    {
+      "path": "server/tests/helpers/workflowWriteScanner.js",
+      "length": 88612,
+      "sha256": "aa8b8e598197c81d725026be1a8c6020edffdc94bfb923061be28aab77e241b2",
+      "gitBlobOid": "f0bc3ceef43b4084c61ee522f5171a681d604378"
+    },
+    {
+      "path": "server/utils/startupReadinessContext.js",
+      "length": 7881,
+      "sha256": "200c79a9ae82346e7e3540cc5f2607088ba9ed4b2ce45c87336b466976a3ff76",
+      "gitBlobOid": "3420689b859f002c25bfdbb769dd8f53ecf1c4fe"
+    },
+    {
+      "path": "server/utils/startupReadinessTelemetry.js",
+      "length": 328,
+      "sha256": "e04866fe4112a4c98bf165cc23d0ea080507f4c4038606c5135f97856809d2a4",
+      "gitBlobOid": "4dfd42138c59103dcb67d3386132cc1cfa2b781e"
+    },
+    {
+      "path": "WP/audit-release-eb6de2e8/README.md",
+      "length": 622383,
+      "sha256": "81323f04dc7bd540acb04c42858347fec4f8ecd69a783a623bd074c739ac575f",
+      "gitBlobOid": "810879f0d6e0e352dad26016d27a7fed604cd42f"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/prepare-startup-closed-owned-fixture-successor-once.py",
+      "length": 9588,
+      "sha256": "27ba9c731e92fb62bce7a68103798b1180547b47bbf20d3c1dcc70ad9f6033d0",
+      "gitBlobOid": "edd4073ce88f8cf8784e276074241edadcd7dc85"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/prepare-startup-context-closed-guard-successor-once.py",
+      "length": 5929,
+      "sha256": "8e7605d159ca9924d61a7f105048028646c4ab9b3d7232e68c460d9407106f7f",
+      "gitBlobOid": "4529f6d16854d584a4999166fddffe4be077b5e8"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/prepare-startup-context-visible-guards-and-races-once.py",
+      "length": 9460,
+      "sha256": "a6ce6f12424e0c2644e03ec26a9c9af1a25b98c58b9990686dcbb693fb2cf664",
+      "gitBlobOid": "5cab67036c981c820b872f2f54bc05d089e3e68c"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/prepare-startup-pinned-policy-alias-successor-once.py",
+      "length": 6911,
+      "sha256": "0bd4cac44b621c2aa77466b396c2f6f915b9e8a4834faf785468a2698ef262db",
+      "gitBlobOid": "259a19536e84c269e942b13ab95c09a09c32fdc7"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/prepare-startup-retained-copy-validation-successor-once.py",
+      "length": 4648,
+      "sha256": "ff6646431928921a672e170c3c205c180d2532ac0f05a4df7b84e907de2b346a",
+      "gitBlobOid": "5c9803183ca247aba195aa65953b24844ed78a40"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/publish-startup-closed-guard-and-pinned-copy-source-once.py",
+      "length": 8521,
+      "sha256": "d90df16dfd2ea6c932bc2cf5080644d5994b0ff769eda2d9d8a30342ea99d3aa",
+      "gitBlobOid": "e092d80c5d8212c2ac3275af85d2545a2b641817"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/verify-startup-closed-guard-wal-race-focused-once.py",
+      "length": 5122,
+      "sha256": "dfcd14c6b8f8513fa55da3f8761c2fb9f9096e29495e09fb708311158fb908da",
+      "gitBlobOid": "58e4a95f3dd4d49321d08540ded8b58328054b51"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/verify-startup-pinned-policy-alias-focused-once.py",
+      "length": 5120,
+      "sha256": "d8c3cacffdff2758f78fdc0c885f8c20570a4931cc86fcd6e6382adda7ac5b55",
+      "gitBlobOid": "763b757642570504ed8c1a55ea3ba1cc05fc4aeb"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/verify-startup-retained-copy-validation-focused-once.py",
+      "length": 5125,
+      "sha256": "807faba7f45d2879efad8203e5e438fbdb9c2c29166583d9334adcdd50f0fec5",
+      "gitBlobOid": "71be962cf9db079f12209b69a9d9d355155d165e"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/closed-guard-source-successor-once/isolated-cli-before-stderr-original.log",
+      "length": 1454,
+      "sha256": "1e4a39d1f610914563699416670a205a74b9da344737c2844e748e26f72785b8",
+      "gitBlobOid": "49f798dba977aae7b16427d754ee90abe719fa07"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/closed-guard-source-successor-once/isolated-cli-before-stdout-original.log",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/closed-guard-source-successor-once/runtime-correction-prepared.json",
+      "length": 1735,
+      "sha256": "3225aef4a02e139ab57083564f27ab857a5c75ad167531f5ae1041a48149b793",
+      "gitBlobOid": "b46acf54f1d5bbc689c385a59748a4f4975136d9"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/closed-guard-source-successor-once/source-before/server/index.js",
+      "length": 13542,
+      "sha256": "e600a6b3117a4e3eca26b80a5f9260eba4e2f9219c6c15b941420c144c57ec46",
+      "gitBlobOid": "53034b906f5718c3a0f8391352f3cfe9a6fad57a"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/closed-guard-source-successor-once/source-before/server/scripts/install_batch_reagent_lots.js",
+      "length": 10509,
+      "sha256": "dcb9d2333ea3e2f8da6e6031d15f364d5ce80f944155f80bc5a041fd0720c47f",
+      "gitBlobOid": "db12df7921c239500cc30fe07a7ebe47e80bdd7f"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/closed-guard-source-successor-once/source-before/server/scripts/install_bench_credentials.js",
+      "length": 7744,
+      "sha256": "b01c4956eaaab3b01077e38db4443869cfe451599040b98d4692cf5525a623b7",
+      "gitBlobOid": "748945deb8dc52e36997ac08252d16367fb17f26"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/closed-guard-source-successor-once/source-before/server/scripts/install_calculation_templates.js",
+      "length": 5758,
+      "sha256": "69147dc8e94b9cbe9622dc058fe704df812715aa16e75437e5bfa9405c19c47b",
+      "gitBlobOid": "e438fd9163e4a6bc49c2c9d348a74e6cc97c1703"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/closed-guard-source-successor-once/source-before/server/scripts/install_control_charts.js",
+      "length": 8840,
+      "sha256": "884879ed9e846866597bb5e3c0e7a58c5d95c07cd48ca2579e4df56af79fb727",
+      "gitBlobOid": "5f78678e6242eea2ec3ffe4a7fd92c4a5b24d14a"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/closed-guard-source-successor-once/source-before/server/scripts/install_cross_check_evaluations.js",
+      "length": 9671,
+      "sha256": "6c79dd334baf917eb646a496effde7ac806a7a9686c21786fd1a121c2941a3e9",
+      "gitBlobOid": "a234cb9923ce8acd27626d0c94e8af97c12a159f"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/closed-guard-source-successor-once/source-before/server/scripts/install_instrument_imports.js",
+      "length": 8760,
+      "sha256": "e47add4c9d1edb10590a090b3e78d10fd1e86fdbae904c3ccddbdb7a2ceae6a5",
+      "gitBlobOid": "083b57dd56e1ff42339fa0045d7dbf2330d9eb18"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/closed-guard-source-successor-once/source-before/server/scripts/install_lab_policy_schema.js",
+      "length": 11818,
+      "sha256": "b86c106a64152b2a83b9f31dab64ba38a3a27d218b87da274c5cc20fcba49240",
+      "gitBlobOid": "683c1ad5f8eb41aa6e7347c7025e085a8c490b01"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/closed-guard-source-successor-once/source-before/server/scripts/install_nonconformity_reports.js",
+      "length": 7712,
+      "sha256": "ce34ee2d91a48c4af4b576b0f48adf0068550904e25343ed3a61449634e58543",
+      "gitBlobOid": "5554afb43f44dcc9e4503a747e751b7744bec389"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/closed-guard-source-successor-once/source-before/server/scripts/install_order_revisions.js",
+      "length": 18844,
+      "sha256": "b08c8d5a5850da38bb3d599b51552365655a61159d82b49162f5103a155a58a0",
+      "gitBlobOid": "1dd7f97ce6e3a3e83f44650820143adb69d83ea3"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/closed-guard-source-successor-once/source-before/server/scripts/install_preparation_records.js",
+      "length": 9476,
+      "sha256": "0134b9199fd2d9dcf81c4ba25c4c0caddb6c0e1b5c170af02743ee0c25de8577",
+      "gitBlobOid": "2f9d4877473a9dda808b80fa9a2b55c90bc8dbaf"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/closed-guard-source-successor-once/source-before/server/scripts/install_proficiency_evidence.js",
+      "length": 8082,
+      "sha256": "4a7118a30d1004bc93dd06fc347d306d23814696ae7f02e38499ba043c2cc7f1",
+      "gitBlobOid": "35c2be357023a4ebd3302210bb99fbf2033a1265"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/closed-guard-source-successor-once/source-before/server/scripts/install_qc_gate_scope.js",
+      "length": 6155,
+      "sha256": "ab46daa34952cd0abc4e444fe150a165bc9ef0d70987028c56a928fcbc725859",
+      "gitBlobOid": "a16eb3a4359b267eac0343f0ca7175090b2a19fb"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/closed-guard-source-successor-once/source-before/server/scripts/install_qc_rules.js",
+      "length": 8554,
+      "sha256": "2921144070d7a788154e3b0e1244423ab4330045b5d1acb6e01824bae79a4fb3",
+      "gitBlobOid": "ce174d16acfb41ea1d98424758ad3018db0e58cd"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/closed-guard-source-successor-once/source-before/server/scripts/install_qc_runs.js",
+      "length": 10244,
+      "sha256": "579de1ce65aead08525b6dc20dbce88de87806e3ae0a8ccf3c2f40e4f631a227",
+      "gitBlobOid": "180251561da19d060adbbb1efc1692b0ceab98e3"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/closed-guard-source-successor-once/source-before/server/scripts/install_reference_materials.js",
+      "length": 10606,
+      "sha256": "fc9012a527377a5f938e46e802f52bf9d5832e00ea4edbf5e5dbcd3eabe6a952",
+      "gitBlobOid": "20c20a227ea7d0dcb6a8af11f43ef22ef38488a6"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/closed-guard-source-successor-once/source-before/server/scripts/install_report_revisions.js",
+      "length": 8904,
+      "sha256": "0dbe6ce0349fc280e948765a4dce06a0edaa83c7128664987ac544209d282232",
+      "gitBlobOid": "828d4bc18440bdb8798087d0b3779f3d38f51b2f"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/closed-guard-source-successor-once/source-before/server/scripts/install_reported_value_selections.js",
+      "length": 7075,
+      "sha256": "bbf1a3c39b1762429721f679af2fe646134ded08a3a39d7c9534798170ca0191",
+      "gitBlobOid": "2b5f453d8391af43347ff3314b96c7cda48dd7df"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/closed-guard-source-successor-once/source-before/server/scripts/install_result_attempt_links.js",
+      "length": 7955,
+      "sha256": "1c4a6299df5d25cf43379e069a243a9d99e1ec7ade09e3fbc74af9115a782836",
+      "gitBlobOid": "38bb4e6c53df8959feeb5d93f648166c19c995ee"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/closed-guard-source-successor-once/source-before/server/scripts/install_result_equipment_evidence.js",
+      "length": 6956,
+      "sha256": "d840f91225f91145a056d37ae16fc87e732dbf1ffbd2ad655934619556ff71f1",
+      "gitBlobOid": "75903bf4dd3a9c2ac6a8219e1af1e7b896aec078"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/closed-guard-source-successor-once/source-before/server/scripts/install_result_override_requests.js",
+      "length": 11773,
+      "sha256": "792914938d027b80ecd3026635b5b76cf6c0db0c13f52602e264102279251c3d",
+      "gitBlobOid": "15121d4e36543d647b264f665efe2754633d75c8"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/closed-guard-source-successor-once/source-before/server/scripts/install_sample_amendment_authorisation.js",
+      "length": 13052,
+      "sha256": "72cc54043ffbcd72f48949ff78937b4cb83979b2ca617db8b7a7c595434e1b2c",
+      "gitBlobOid": "d9244def01876044465c0a7f075973fc580e985f"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/closed-guard-source-successor-once/source-before/server/scripts/install_sample_containers.js",
+      "length": 9143,
+      "sha256": "35dafc6c1e177e48c7af957990c155ac44f92204082a6fcb875c95e60712338b",
+      "gitBlobOid": "cf04c998c05a752b9c69c3246d88b41b8cb63161"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/closed-guard-source-successor-once/source-before/server/scripts/install_sample_holds.js",
+      "length": 10891,
+      "sha256": "0f2dbbaefc367f0bbc4e5bff9fe433b6e95b622d468da7b1c6a4f4362ef3918f",
+      "gitBlobOid": "086f6f287cc4eea61050cb7e8776d6f21a6b4a25"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/closed-guard-source-successor-once/source-before/server/scripts/install_work_attempt_contract.js",
+      "length": 17120,
+      "sha256": "77b29ba1c46670a31dd2dba775c093910506ac32da3bfd97ebe27bc383307925",
+      "gitBlobOid": "a0cf83a6ee558afa3afc5bae389d910eaa0dcb97"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/closed-guard-source-successor-once/source-before/server/scripts/install_work_repeat_contract.js",
+      "length": 8544,
+      "sha256": "19cf7360844264bf06010e2603f54036f978b56b6a2f79620d9e1d18939fce06",
+      "gitBlobOid": "f2d52805dc127f8c77c20d7ebaf6b6f8259ef0d0"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/closed-guard-source-successor-once/source-before/server/scripts/install_workflow_state_guards.js",
+      "length": 15860,
+      "sha256": "6b8baf5db9736ba90e74809065fd56c6815f5ed8d1cf4d2aa946705836465233",
+      "gitBlobOid": "f16175a4727751767a5bfa64793d2b6bf29d7ef3"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/closed-guard-source-successor-once/source-before/server/tests/contracts/order_revision_impact_set_query.test.js",
+      "length": 7216,
+      "sha256": "58efeb5add6a0609124879e061a1a760d4240c7e1f951994d2998f0d7ef427d7",
+      "gitBlobOid": "5b8fae6b11ddbf4c74ce4d90c51f43ab2fe14cdc"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/closed-guard-source-successor-once/source-before/server/tests/contracts/startup_readiness_context.test.js",
+      "length": 14197,
+      "sha256": "e746c519939d0cd4a415b0ce098807c8cc25578f4447afb6046064c703958ec0",
+      "gitBlobOid": "3fdb3ddc3e2e4da80f505fb6b8d2a557dffefa2f"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/closed-guard-source-successor-once/source-before/server/tests/contracts/startup_readiness_telemetry.test.js",
+      "length": 4619,
+      "sha256": "1a79a2c40bd2ba4bd130a73e355e3f24141cee8dffd3c020d1310bb953a2ddfd",
+      "gitBlobOid": "e5d958b652acea7109727f471486141df37df349"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/closed-guard-source-successor-once/source-before/server/tests/fixtures/order_revision_impact_before_set_query.txt",
+      "length": 6788,
+      "sha256": "d9e3ce2a0c107c8ef61ef3a5d7b43c0dca625b2c639df72236b9e76ce4eaf6a2",
+      "gitBlobOid": "f456831efe944741049620de42b6469a308b2ea9"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/closed-guard-source-successor-once/source-before/server/tests/helpers/qcGateFixture.js",
+      "length": 9044,
+      "sha256": "2e5825d34b2d2b5f48b0d8794ac8fbd835da275151b44f11d7cc06b8b1cebe9d",
+      "gitBlobOid": "a27564295d7fb3ded8a90be96d52112653528a02"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/closed-guard-source-successor-once/source-before/server/tests/helpers/workflowWriteScanner.js",
+      "length": 86302,
+      "sha256": "22b2c1a285e40d8d6da2f22763b238a0c446c4ccf71a3cde9a4083a6ffbf258b",
+      "gitBlobOid": "af06fe3350483b4b983875babcdd47e24efcdc40"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/closed-guard-source-successor-once/source-before/server/utils/startupReadinessContext.js",
+      "length": 5882,
+      "sha256": "c328939e883ec20b60414109af1139c25a5c884546a9ade0f2d391b88467878b",
+      "gitBlobOid": "0fb950f214870e398a51a38e7a23eca134444823"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/closed-guard-source-successor-once/source-before/server/utils/startupReadinessTelemetry.js",
+      "length": 328,
+      "sha256": "e04866fe4112a4c98bf165cc23d0ea080507f4c4038606c5135f97856809d2a4",
+      "gitBlobOid": "4dfd42138c59103dcb67d3386132cc1cfa2b781e"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/closed-guard-source-successor-once/verified-dependency-cause-before-correction.json",
+      "length": 3470,
+      "sha256": "76d8997b7e2e61026d73df012165a70b8a514829cd02b61d18cde1958866ab44",
+      "gitBlobOid": "89a38578478293bd6a836e692ae9b9e802665a8b"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/closed-guard-wal-race-focused-once/command.json",
+      "length": 1266,
+      "sha256": "f31f24fc85b1bc9eab8e0812ec3db699cfdb5230739e8938e1a92f056e3a4c8b",
+      "gitBlobOid": "16268bd05f4809edbed670849f56947d4bcd2e56"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/closed-guard-wal-race-focused-once/config-original.json",
+      "length": 7894,
+      "sha256": "19e62f302222ce7974e0c7b6da7cbf971e196a3d9ae6eb0a31a11638be691c4a",
+      "gitBlobOid": "7b65f0458456df62ccad90e3928abb82d61b8b04"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/closed-guard-wal-race-focused-once/config-stderr-original.log",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/closed-guard-wal-race-focused-once/exit-original.txt",
+      "length": 3,
+      "sha256": "f1b2f662800122bed0ff255693df89c4487fbdcf453d3524a42d4ec20c3d9c04",
+      "gitBlobOid": "f33dfa25aa16a97ca941fe1d9cabdc3689179f3f"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/closed-guard-wal-race-focused-once/report-original.json",
+      "length": 131377,
+      "sha256": "3d0dd1aaf5f187931fce1cb1b00faaa852876d58766fe569530c43f0d7ffa94f",
+      "gitBlobOid": "0b932bebb8471f833ed047168d6f19f3f53eb3bb"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/closed-guard-wal-race-focused-once/source-after.json",
+      "length": 118218,
+      "sha256": "a66b135f09646f26ad6a049015a46c9c2b8b16aa433f48bad756b49a05b9a07d",
+      "gitBlobOid": "ef8c82b23ecf783c3e250c891855cec1874b309c"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/closed-guard-wal-race-focused-once/source-before.json",
+      "length": 118218,
+      "sha256": "a66b135f09646f26ad6a049015a46c9c2b8b16aa433f48bad756b49a05b9a07d",
+      "gitBlobOid": "ef8c82b23ecf783c3e250c891855cec1874b309c"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/closed-guard-wal-race-focused-once/stderr-original.log",
+      "length": 26351,
+      "sha256": "57018601da71ecbe1e274b1274e3fe7ac6853682e6852eba9b616ffd8c737a63",
+      "gitBlobOid": "c86603c2341593b62f4521bc64c631c04199e53f"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/closed-guard-wal-race-focused-once/stdout-original.log",
+      "length": 922,
+      "sha256": "e7de164614404f0f5494108f6750eb98839e5e2ed8e4cfcb091d6b6d9f4c138e",
+      "gitBlobOid": "d20d06570c7874cf7fe73a18dc0610b7c4a929e2"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/closed-guard-wal-race-focused-once/summary.json",
+      "length": 368,
+      "sha256": "d14bbcd286f1f834590951bb4a71a8472cf9d699acf7bc58322e4d13f7fb4bb3",
+      "gitBlobOid": "ed2537c8f1e6ec4058fa25357e4aaa5516869563"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/closed-owned-fixture-successor-once/preparation.json",
+      "length": 488,
+      "sha256": "34dae296069835900d0ec8a2bc6c2c02a772f30177c74e7ce7927aeb28c394fa",
+      "gitBlobOid": "6099ac955ec7b5e7d60ac53ed09eb092ba6e4e67"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/closed-successor-original-test-hashes-unchanged.json",
+      "length": 48227,
+      "sha256": "2124411b1b751e8842ec8314084b97bf5b9bc03af8409ef61acd4675f4b0b8c3",
+      "gitBlobOid": "76d6e7e0f3ec9d6e71325661c11a4abfeb555793"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/full-closed-findings-unique-parsed-derived.json",
+      "length": 2193,
+      "sha256": "e460857dae3d5839f700f9bed557b0a2b585d2455ac73ce9c53f4e9b11ab071d",
+      "gitBlobOid": "39c66ffbc9e02590aa40104a5097dfb3ec2ae3ae"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/pinned-policy-alias-focused-once/command.json",
+      "length": 1264,
+      "sha256": "2f37c3135628dbf59741f2efe16552c2d7f22783b7c71fa7cf47391016619d14",
+      "gitBlobOid": "084fa587de6c4655978181812e496796fcdeebe2"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/pinned-policy-alias-focused-once/config-original.json",
+      "length": 7895,
+      "sha256": "e5b9aa8789d55494c78903c73fba18acd1a9adf7534b0c6bbb2ff4c0de7b154f",
+      "gitBlobOid": "460b94b2c717ab095338ea21dd928fbe1de5975f"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/pinned-policy-alias-focused-once/config-stderr-original.log",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/pinned-policy-alias-focused-once/exit-original.txt",
+      "length": 3,
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "gitBlobOid": "18748286e5b8b4de5db905f87cdfed1a7d48fe60"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/pinned-policy-alias-focused-once/report-original.json",
+      "length": 74008,
+      "sha256": "aceee4e81d6b43d7115cffc2d80549139216bc1be97266a8816e434b81b70d3b",
+      "gitBlobOid": "a186492d5027df4d3858869dbc2ab17dac027ace"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/pinned-policy-alias-focused-once/source-after.json",
+      "length": 118218,
+      "sha256": "35a22b25527d3185f5672b21082fb9888cfed3da5afa0379d91349c2f1bb98a3",
+      "gitBlobOid": "d4c0b48e0c485cfea041f9076733921d11cc6983"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/pinned-policy-alias-focused-once/source-before.json",
+      "length": 118218,
+      "sha256": "35a22b25527d3185f5672b21082fb9888cfed3da5afa0379d91349c2f1bb98a3",
+      "gitBlobOid": "d4c0b48e0c485cfea041f9076733921d11cc6983"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/pinned-policy-alias-focused-once/stderr-original.log",
+      "length": 25136,
+      "sha256": "f6b86d3ac90cf3ee0c7f6e8a20ff8937a6ef6e8cd42b4f9bc2d1a84172780078",
+      "gitBlobOid": "a927a464b92a285b6f4b679bf36d3d23dad630ea"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/pinned-policy-alias-focused-once/stdout-original.log",
+      "length": 920,
+      "sha256": "92128302ced0318d20459befcc59c092f1c0dc92d50be7798b9b4f9316649999",
+      "gitBlobOid": "bf89e35647e7aceb04c992e714205cf226fdf52e"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/pinned-policy-alias-focused-once/summary.json",
+      "length": 352,
+      "sha256": "ac3272ef1c1f5ebf04621dd598cf609792227e97b73542ccd0cf0bdefc111423",
+      "gitBlobOid": "0266f732b96abf2c311a24e2d09cb06b276d6f94"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/pinned-policy-alias-source-successor-once/actual-failure-and-wal-results-parsed-derived.json",
+      "length": 100091,
+      "sha256": "70443cd19a6e95e8baffc4f48e90fa14537c4a4c54e48963f8167c4d9393af82",
+      "gitBlobOid": "9032a5797929cf9b75b4b381758d267c7d3f686c"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/pinned-policy-alias-source-successor-once/preparation.json",
+      "length": 549,
+      "sha256": "2e8b17663fee205903b4b5cfbb81043ae9124cdbe7bd326cadedf873a94023fc",
+      "gitBlobOid": "e59c3830491924dcac426ebf913f2363533d1933"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/pinned-policy-alias-source-successor-once/source-before/server/scripts/install_lab_policy_schema.js",
+      "length": 12087,
+      "sha256": "42d7e9395ce4f437c2c0c86a8658d9e9a77db07ac7c0eef8495760d0f912be22",
+      "gitBlobOid": "09b14709d63cff08ea8a5b69ecddee369db74006"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/pinned-policy-alias-source-successor-once/source-before/server/scripts/install_order_revisions.js",
+      "length": 19113,
+      "sha256": "b4fd6f69160e094df46f7b605105cf110c23b48c72a6c58397e0f975274671c9",
+      "gitBlobOid": "f9a14f0a04559ec9d4fa6e12f4a0968510103c30"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/pinned-policy-alias-source-successor-once/source-before/server/utils/startupReadinessContext.js",
+      "length": 6206,
+      "sha256": "70e9878b0eeaeb2f7487221eaecd8200e575a78bbdce28e1f7f872bc06ac31cd",
+      "gitBlobOid": "feeb8c9b083764626ad4d85d6e5506d600ff02a4"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/retained-copy-validation-focused-once/command.json",
+      "length": 1269,
+      "sha256": "972946b724402e1b7d4e53c1024ebd085d965e5727821fcf0dacfec240fdeaab",
+      "gitBlobOid": "fd24e882cd852ed00788e43551723232dff256c4"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/retained-copy-validation-focused-once/config-original.json",
+      "length": 7895,
+      "sha256": "6821640393a5a9bdef447201267c16014864514179754e17bcbac08effdaae8d",
+      "gitBlobOid": "9269e5e0cd2988f9553bbae51cd279c0b273e587"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/retained-copy-validation-focused-once/config-stderr-original.log",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobOid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/retained-copy-validation-focused-once/exit-original.txt",
+      "length": 3,
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "gitBlobOid": "18748286e5b8b4de5db905f87cdfed1a7d48fe60"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/retained-copy-validation-focused-once/report-original.json",
+      "length": 74388,
+      "sha256": "e3c369a824554b39257c3320586176ff59c907491a98405b6ce2aa7f1125087d",
+      "gitBlobOid": "4cd8a17e1d990ebbb40ea382d649399aa052f8d4"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/retained-copy-validation-focused-once/source-after.json",
+      "length": 118218,
+      "sha256": "7448123562ccce68c2b569ed48e37ac48a1bcac09298155c38b559417741f604",
+      "gitBlobOid": "ab1bac159313ec3a0b1c3acbd191d031a1b35da9"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/retained-copy-validation-focused-once/source-before.json",
+      "length": 118218,
+      "sha256": "7448123562ccce68c2b569ed48e37ac48a1bcac09298155c38b559417741f604",
+      "gitBlobOid": "ab1bac159313ec3a0b1c3acbd191d031a1b35da9"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/retained-copy-validation-focused-once/stderr-original.log",
+      "length": 25164,
+      "sha256": "b13e4ab02a1254e4a15fad713bd1b549bfd282ee4e1b7c93cf918ba677ba8c1e",
+      "gitBlobOid": "a63745cf7de21d5df7ecb87c9e98188ccb9a4f6a"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/retained-copy-validation-focused-once/stdout-original.log",
+      "length": 925,
+      "sha256": "76d860862f08bf1edd3612d8cdf5ead73bc160495d79057bbc63193a82114dc0",
+      "gitBlobOid": "b9e90c4d68d404f454f7f4469c869d0da5743f23"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/retained-copy-validation-focused-once/summary.json",
+      "length": 352,
+      "sha256": "1d07dac1797cb22c16f962de6fadddd528e1db4451f24ea091ec2078b4e9a3b0",
+      "gitBlobOid": "9961a7e926ecced993deb65f27a067b7515ea66e"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/retained-copy-validation-source-successor-once/preparation.json",
+      "length": 742,
+      "sha256": "3aab5260e0518c1c49dff843917a921e10d6d4fc956bfb0a20ca2c788e84b49d",
+      "gitBlobOid": "13da90d951ed7faadaddaee555576bb209f717c3"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/retained-copy-validation-source-successor-once/source-before/server/tests/contracts/startup_readiness_context.test.js",
+      "length": 18976,
+      "sha256": "4bb0b913df00bc2de85770cee321d7d20f4bb6bd6d152ed797a92d5dd43f487d",
+      "gitBlobOid": "b9f8ab74ae451ae2edb74abc79e597ca9582a9a5"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/retained-copy-validation-source-successor-once/source-before/server/utils/startupReadinessContext.js",
+      "length": 7535,
+      "sha256": "5c86471ef1a068fadd078625efe794ad952077b36933e93da151898544e4d1f0",
+      "gitBlobOid": "40d51f0f8abd4e2006b25fb2af809f0a34be0026"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/visible-guards-and-races-preparation-once/preparation.json",
+      "length": 385,
+      "sha256": "7168ce98e19a78fbd3f8380b1929abc3a02c1d490c9e3293aa21fc954de3a827",
+      "gitBlobOid": "a4c1824e7da136bb77a54eb34d750a8d2881e4c0"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/private-context-closed-guards-pinned-copy-publication-index.json",
+      "length": 41310,
+      "sha256": "dbedffe5cb09a3ebc024b31c02a2cdc51a062b2f630a0f88ce366af1e7ea186c",
+      "gitBlobOid": "73704c4d2eee4666316ab6cf9e05c55a35a01e1f"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/closed-guard-publication-longpath-refusal-tool-transcription.json",
+      "length": 885,
+      "sha256": "9572364ae643b247fed86ac1a1863e56e2ea1a6cf0f3fa5a93d1908893a7cba0",
+      "gitBlobOid": "95d489f07f558dfa37e701aadbdcab780cb9d0be"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/publish-startup-closed-guard-longpath-successor-once.py",
+      "length": 4172,
+      "sha256": "f7b01f4108c9f89e560521f198655c708f589e30f41ac6feaadbec17d71578fc",
+      "gitBlobOid": "f852b4be3f1bae9920ff864d701141236eb7dfe1"
+    }
+  ],
+  "productionOperations": 0
+}

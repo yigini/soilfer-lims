@@ -29,7 +29,8 @@ function optionalDataHashes(target) {
 function createStartupReadinessContext() {
     let original, connection, facade, activePath, closed = false;
     let checks = new Map(), checkedVersion = null, firstReadVersion = null;
-    let policy, chart;
+    let policy, chart, policyCopyHashes;
+    const retainedSnapshots = new Set();
 
     function releaseReader() {
         if (!connection) return;
@@ -41,8 +42,15 @@ function createStartupReadinessContext() {
             if (closed) throw new TypeError('The startup readiness context is closed.');
             const resolved = path.resolve(target);
             if (!original) original = resolved;
-            if (resolved !== original && resolved !== policy?.readonlySnapshot.path && resolved !== activePath)
+            if (resolved !== original && !retainedSnapshots.has(resolved) && resolved !== activePath)
                 throw new TypeError('A startup context belongs to one database and its retained snapshot.');
+            if (connection && resolved !== original && resolved !== activePath) {
+                releaseReader();
+                const version = optionalDataHashes(resolved);
+                if (!checkedVersion || !same(checkedVersion, version)) checks = new Map();
+                firstReadVersion = version;
+                checkedVersion = checks.size ? version : null;
+            }
             if (connection) return facade;
             activePath = resolved;
             connection = new Database(resolved, options);
@@ -55,10 +63,13 @@ function createStartupReadinessContext() {
                     if (key === 'close') return () => {};
                     if (key === 'pragma') return (sql, pragmaOptions) => {
                         const name = sql.trim().toLowerCase();
-                        if (name !== 'integrity_check' && name !== 'foreign_key_check') return db.pragma(sql, pragmaOptions);
-                        // Some owners request the full rows, others the first
-                        // value. Retain one full result and preserve both views.
-                        if (!checks.has(name)) checks.set(name, db.pragma(sql));
+                        // This private facade accepts only the two startup
+                        // checks. SQL stays literal and visible to the scanner.
+                        if (name !== 'integrity_check' && name !== 'foreign_key_check')
+                            throw new TypeError('The startup context supports only integrity and foreign-key checks.');
+                        if (!checks.has(name)) checks.set(name, name === 'integrity_check'
+                            ? db.pragma('integrity_check') : db.pragma('foreign_key_check'));
+                        // Preserve the owners' full-row and simple result views.
                         if (name === 'foreign_key_check' && !checkedVersion) {
                             const after = optionalDataHashes(activePath);
                             if (firstReadVersion && same(firstReadVersion, after)) checkedVersion = after;
@@ -66,10 +77,10 @@ function createStartupReadinessContext() {
                         const rows = checks.get(name);
                         return structuredClone(pragmaOptions?.simple ? (rows.length ? Object.values(rows[0])[0] : undefined) : rows);
                     };
-                    if (key === 'prepare') return (...args) => {
-                        if (!firstReadVersion) firstReadVersion = optionalDataHashes(activePath);
-                        return db.prepare(...args);
-                    };
+                    if (key === 'prepare' && !firstReadVersion)
+                        firstReadVersion = optionalDataHashes(activePath);
+                    // Prepared statements use the ordinary bound method. Their
+                    // SQL remains visible at each owning installer call site.
                     const value = Reflect.get(db, key, db);
                     return typeof value === 'function' ? value.bind(db) : value;
                 }
@@ -86,14 +97,35 @@ function createStartupReadinessContext() {
             firstReadVersion = version;
             checkedVersion = checks.size ? version : null;
         },
-        reviewPolicy(target, source, hashes, review) {
-            if (!original) original = path.resolve(target);
-            if (policy && policy.sourceSha256 === source.sha256 && same(policy.readonlySnapshot.originalDbWalShmSha256, hashes)) return structuredClone(policy);
-            // If the source files evolved between stages, retain a new snapshot
-            // through the unchanged owner guards; never reuse stale results.
+        reviewPolicy(target, source, hashes, review, snapshotHashes) {
+            const resolved = path.resolve(target);
+            if (!original) original = resolved;
+            let copyUnchanged = false;
+            if (policy && policy.sourceSha256 === source.sha256) {
+                copyUnchanged = same(policyCopyHashes, resolved === policy.readonlySnapshot.path
+                    ? hashes : snapshotHashes(policy.readonlySnapshot.path));
+                if (resolved === policy.readonlySnapshot.path && copyUnchanged) {
+                    // A nested owner is reviewing the already pinned copy.
+                    // Validate that copy and the source, without refreshing
+                    // from the original midway through the outer order check.
+                    const pinned = structuredClone(policy);
+                    pinned.readonlySnapshot.originalDbWalShmSha256 = structuredClone(hashes);
+                    return pinned;
+                }
+                if (resolved === original && copyUnchanged && same(policy.readonlySnapshot.originalDbWalShmSha256, hashes))
+                    return structuredClone(policy);
+            }
+            // Changed source/copy bytes use the unchanged full owner review.
+            // Its copy and race guards still decide the existing refusal.
             releaseReader();
+            if (policy && !copyUnchanged) {
+                checks.clear(); checkedVersion = firstReadVersion = null;
+            }
             policy = chart = null;
+            policyCopyHashes = null;
             policy = review();
+            retainedSnapshots.add(policy.readonlySnapshot.path);
+            policyCopyHashes = snapshotHashes(policy.readonlySnapshot.path);
             return structuredClone(policy);
         },
         reviewChart(source, review) {
@@ -103,7 +135,7 @@ function createStartupReadinessContext() {
         },
         close() {
             try { releaseReader(); }
-            finally { closed = true; checks.clear(); policy = chart = null; }
+            finally { closed = true; checks.clear(); retainedSnapshots.clear(); policy = chart = policyCopyHashes = null; }
         }
     };
     contexts.add(context);

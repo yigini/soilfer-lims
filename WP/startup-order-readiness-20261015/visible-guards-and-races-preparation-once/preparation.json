@@ -1,0 +1,13 @@
+{
+  "closedLiteralDdlAndPragmaInstrumentation": true,
+  "passivePolicySnapshotPathAndAfterChartHooks": true,
+  "newEarlierRaceBeforeNestedChart": true,
+  "ownedWalRepresentations": [
+    "absent",
+    "empty",
+    "nonempty-idle-writer"
+  ],
+  "newOutcomesNotYetObserved": true,
+  "originalPolicyChartOrderAndStockScannerTestsUnchanged": true,
+  "productionOperations": 0
+}

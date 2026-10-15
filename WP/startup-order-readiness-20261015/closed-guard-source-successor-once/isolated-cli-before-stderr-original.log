@@ -1,0 +1,24 @@
+node:internal/modules/cjs/loader:1424
+  throw err;
+  ^
+
+Error: Cannot find module '../utils/startupReadinessContext'
+Require stack:
+- C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\.tmp\startup-cli-context-diagnostic-e10d7100-ff3d-47dd-948f-fdcd14fe01d2\scripts\install_workflow_state_guards.js
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1421:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1059:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1064:22)
+    at Module._load (node:internal/modules/cjs/loader:1227:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+    at Module.require (node:internal/modules/cjs/loader:1504:12)
+    at require (node:internal/modules/helpers:152:16)
+    at Object.<anonymous> (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\.tmp\startup-cli-context-diagnostic-e10d7100-ff3d-47dd-948f-fdcd14fe01d2\scripts\install_workflow_state_guards.js:2:34)
+    at Module._compile (node:internal/modules/cjs/loader:1761:14) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    'C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\server\\tests\\.tmp\\startup-cli-context-diagnostic-e10d7100-ff3d-47dd-948f-fdcd14fe01d2\\scripts\\install_workflow_state_guards.js'
+  ]
+}
+
+Node.js v24.13.0

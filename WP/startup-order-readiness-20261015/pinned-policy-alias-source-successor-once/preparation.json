@@ -1,0 +1,14 @@
+{
+  "changedPaths": [
+    "server/utils/startupReadinessContext.js",
+    "server/scripts/install_lab_policy_schema.js",
+    "server/scripts/install_order_revisions.js"
+  ],
+  "nestedChartUsesSameCapturedCopyAsLegacy": true,
+  "copyAliasFullHashAndSourceValidation": true,
+  "originalFinalOrderHashGuardUnchanged": true,
+  "noNewRefusalCodeOrCondition": true,
+  "noOriginalFullCopyOrRaceGuardRelaxed": true,
+  "testsNotRunYet": true,
+  "nextUniqueRunner": "WP/backlog-resume-20261013/verify-startup-pinned-policy-alias-focused-once.py"
+}

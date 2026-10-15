@@ -3,7 +3,7 @@ const path = require('node:path');
 const vm = require('node:vm');
 const { createHash } = require('node:crypto');
 const { performance } = require('node:perf_hooks');
-const Database = require('better-sqlite3');
+const { createStartupImpactFixture } = require('../helpers/startupImpactFixture');
 
 const legacySource = fs.readFileSync(path.join(__dirname, '../fixtures/order_revision_impact_before_set_query.txt'), 'utf8');
 const currentInstaller = fs.readFileSync(path.join(__dirname, '../../scripts/install_order_revisions.js'), 'utf8');
@@ -19,64 +19,25 @@ const dependencies = {
 const legacyImpact = vm.runInNewContext(`(${legacySource})`, dependencies);
 const currentImpact = vm.runInNewContext(`(${currentSource})`, dependencies);
 
-function fixture(samples, { orphan = false } = {}) {
-    // New disposable in-memory data only. No file or application connection exists.
-    const db = new Database(':memory:');
-    db.exec(`
-        CREATE TABLE Sample(id TEXT PRIMARY KEY,requiredAnalyses TEXT,status TEXT);
-        CREATE TABLE WorkItem(id TEXT PRIMARY KEY,sampleId TEXT,analysis TEXT,status TEXT,duplicateOf TEXT);
-        CREATE INDEX WorkItem_sampleId_idx ON WorkItem(sampleId);
-        CREATE TABLE SampleOrderRevision(id TEXT PRIMARY KEY,sampleId TEXT,status TEXT);
-        CREATE TABLE OrderLine(id TEXT PRIMARY KEY,revisionId TEXT,analysis TEXT,status TEXT,workItemId TEXT);
-        CREATE TABLE WorkAttempt(id TEXT PRIMARY KEY,workItemId TEXT,orderLineId TEXT,status TEXT);
-    `);
-    const sample = db.prepare('INSERT INTO Sample VALUES(?,?,?)');
-    const item = db.prepare('INSERT INTO WorkItem VALUES(?,?,?,?,?)');
-    const revision = db.prepare('INSERT INTO SampleOrderRevision VALUES(?,?,?)');
-    const line = db.prepare('INSERT INTO OrderLine VALUES(?,?,?,?,?)');
-    const attempt = db.prepare('INSERT INTO WorkAttempt VALUES(?,?,?,?)');
-    db.transaction(() => {
-        for (let n = 0; n < samples; n++) {
-            const id = String(n).padStart(6, '0');
-            const selections = ['["TEXTURE"]', '{malformed', 'null', '[null]', '[]', '["SAND"]'][n % 6];
-            if (!orphan) sample.run(id, selections, n % 7 === 0 ? 'APPROVED' : 'PROCESSING');
-            for (const [i, analysis] of ['SAND', 'SILT', 'CLAY'].entries()) {
-                if (n % 5 === 0 && i === 2) continue;
-                item.run(`${id}-${i}`, id, analysis, n % 7 === 0 ? 'ACCEPTED' : 'IN_PROGRESS', null);
-            }
-            item.run(`${id}-waived`, id, 'CLAY', 'WAIVED', null);
-            if (n % 4 !== 0) {
-                revision.run(`${id}-r1`, id, 'ACTIVE');
-                line.run(`${id}-l1`, `${id}-r1`, 'SAND', 'ACTIVE', null);
-                if (n % 4 === 2) line.run(`${id}-l2`, `${id}-r1`, 'SAND', 'ACTIVE', null);
-                if (n % 4 === 3) revision.run(`${id}-r2`, id, 'ACTIVE');
-            }
-            if (n % 11 === 0) attempt.run(`${id}-a1`, `${id}-0`, `${id}-retained-line`, 'OPEN');
-            if (n % 13 === 0) {
-                attempt.run(`${id}-a2`, `${id}-1`, null, 'OPEN');
-                attempt.run(`${id}-a3`, `${id}-1`, null, 'OPEN');
-            }
-        }
-    })();
-    return db;
+function fixture(samples, options = {}) {
+    const declared = { samples, ...options };
+    return createStartupImpactFixture(declared);
 }
 
-function readImpact(fn, db) {
-    let pointLookups = 0;
-    let ownerSetQueries = 0;
+function readImpact(fn, { db, statements }) {
     const before = db.prepare('SELECT total_changes() n').get().n;
+    statements.length = 0;
     const began = performance.now();
-    const report = fn({ prepare: sql => {
-        expect(/^(SELECT|PRAGMA)\b/.test(sql)).toBe(true);
-        if (sql === 'SELECT requiredAnalyses FROM Sample WHERE id=?') {
-            const statement = db.prepare(sql);
-            return { get: (...args) => { pointLookups++; return statement.get(...args); } };
-        }
-        if (sql.includes('s.id AS storedSampleId')) ownerSetQueries++;
-        return db.prepare(sql);
-    } });
+    const report = fn(db);
+    const elapsedMs = performance.now() - began;
+    // SQLite's passive statement trace observes actual execution. No SQL is
+    // forwarded, rewritten or hidden; the fixture is query_only after seeding.
+    const executed = [...statements];
+    expect(executed.every(sql => /^(SELECT|PRAGMA)\b/.test(sql))).toBe(true);
+    const pointLookups = executed.filter(sql => sql.startsWith('SELECT requiredAnalyses FROM Sample WHERE id=')).length;
+    const ownerSetQueries = executed.filter(sql => sql.includes('s.id AS storedSampleId')).length;
     expect(db.prepare('SELECT total_changes() n').get().n).toBe(before);
-    return { report: JSON.parse(JSON.stringify(report)), pointLookups, ownerSetQueries, elapsedMs: performance.now() - began };
+    return { report: JSON.parse(JSON.stringify(report)), pointLookups, ownerSetQueries, elapsedMs };
 }
 
 test('all nonzero refusal, malformed-selection, reservation and approved-amendment report fields match the legacy query', () => {
@@ -95,25 +56,25 @@ test('all nonzero refusal, malformed-selection, reservation and approved-amendme
         expect(current.report.multipleActiveSampleCount).toBeGreaterThan(0);
         expect(current.pointLookups).toBe(0);
         expect(current.ownerSetQueries).toBe(1);
-    } finally { db.close(); }
+    } finally { db.db.close(); }
 });
 
 test('missing sample keeps the legacy failure rather than silently dropping its fraction owners', () => {
     const db = fixture(1, { orphan: true });
     try {
         const outcomes = [legacyImpact, currentImpact].map(fn => {
-            try { fn(db); return { unexpectedSuccess: true }; }
+            try { fn(db.db); return { unexpectedSuccess: true }; }
             catch (error) { return { name: error.name, message: error.message, code: error.code }; }
         });
         expect(outcomes[0].name).toBe('TypeError');
         expect(outcomes[1]).toEqual(outcomes[0]);
-    } finally { db.close(); }
+    } finally { db.db.close(); }
 });
 
 test('empty impact is unchanged and the join adds no fields to reported owner objects', () => {
     const db = fixture(0);
     try { expect(readImpact(currentImpact, db).report).toEqual(readImpact(legacyImpact, db).report); }
-    finally { db.close(); }
+    finally { db.db.close(); }
 });
 
 test('large seeded impact remains equivalent while replacing all per-sample lookups with one set query', () => {
@@ -129,5 +90,35 @@ test('large seeded impact remains equivalent while replacing all per-sample look
             oldElapsedMs: old.elapsedMs, newElapsedMs: current.elapsedMs, oldPointLookups: old.pointLookups,
             newPointLookups: current.pointLookups, reportsEqual: true, rssBytes: process.memoryUsage().rss,
             notProductionTimingOrStartupQualification: true }));
-    } finally { db.close(); }
+    } finally { db.db.close(); }
+});
+
+test('the synthetic fixture refuses extra capabilities, undeclared cases and another caller', () => {
+    for (const options of [{ samples: 2 }, { samples: 1, sql: 'SELECT 1' },
+        { samples: 1, db: {} }, { samples: 1, file: ':memory:' }, { samples: 1, orphan: 1 }])
+        expect(() => createStartupImpactFixture(options)).toThrow('closed startup impact fixture');
+    const getState = jest.spyOn(expect, 'getState');
+    const state = getState();
+    try {
+        getState.mockReturnValue({ ...state, testPath: path.join(__dirname, 'unlisted.test.js') });
+        const options = { samples: 0 };
+        expect(() => createStartupImpactFixture(options)).toThrow('exact test caller');
+    } finally { getState.mockRestore(); }
+});
+
+test('the fixture scanner binding refuses changed source, runtime callers and unrelated tests', () => {
+    const { scanSource } = require('../helpers/workflowWriteScanner');
+    const filename = 'tests/helpers/startupImpactFixture.js';
+    const source = fs.readFileSync(path.join(__dirname, '../helpers/startupImpactFixture.js'), 'utf8');
+    expect(scanSource(source, filename)).toEqual([]);
+    expect(scanSource(source + '\n', filename)).toEqual(expect.arrayContaining([
+        expect.objectContaining({ code: 'HISTORICAL_FIXTURE_SOURCE_MISMATCH' }),
+        expect.objectContaining({ code: 'RAW_WORKFLOW_SQL' })]));
+    expect(scanSource(source, 'controllers/canary.js')).toEqual(expect.arrayContaining([
+        expect.objectContaining({ code: 'RAW_WORKFLOW_SQL' })]));
+    const imported = "const { createStartupImpactFixture } = require('../helpers/startupImpactFixture'); const options={samples:0}; createStartupImpactFixture(options);";
+    expect(scanSource(imported, 'tests/contracts/unlisted.test.js')).toEqual([
+        expect.objectContaining({ code: 'HISTORICAL_FIXTURE_CALLER_NOT_ALLOWED' })]);
+    expect(scanSource(imported.replace('../helpers/', '../tests/helpers/'), 'controllers/canary.js')).toEqual([
+        expect.objectContaining({ code: 'TEST_HELPER_IMPORTED_BY_RUNTIME' })]);
 });

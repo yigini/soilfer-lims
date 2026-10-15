@@ -150,6 +150,14 @@ const deferredSources = Object.freeze([Object.freeze({
     reason: '#146 synthetic Docker fault adapter; deferred, see #245'
 })]);
 
+// Performance-only startup impact equivalence: one closed in-memory builder,
+// digest-bound export and explicit test caller. No runtime writer exemption.
+const STARTUP_IMPACT_FIXTURE = Object.freeze({
+    file: 'tests/helpers/startupImpactFixture.js', exportName: 'createStartupImpactFixture',
+    sha256: 'b516abe71f18df6571201e30a852ae50bd078956c1d7f898b922bd6c05d06a4b',
+    caller: 'tests/contracts/order_revision_impact_set_query.test.js'
+});
+
 const mutations = new Set(['create', 'createMany', 'createManyAndReturn', 'update', 'updateMany', 'updateManyAndReturn', 'upsert', 'save', 'saveMany', 'bulkUpdate', 'delete', 'deleteMany']);
 const sqlMethods = new Set(['prepare', 'exec', 'execute', 'pragma', '$executeRaw', '$executeRawUnsafe', '$queryRaw', '$queryRawUnsafe']);
 const workflowModels = new Map([['sample', 'Sample'], ['samples', 'Sample'], ['workItem', 'WorkItem'], ['workItems', 'WorkItem'], ['result', 'Result'], ['results', 'Result']]);
@@ -272,6 +280,10 @@ const AMENDMENT_MAIN_FIXTURE = Object.freeze({
 function scanSource(source, filename, exceptions = []) {
     const violations = [];
     const report = (node, code, detail) => violations.push({ file: filename, line: node?.loc?.start?.line || node?.loc?.line || 1, code, detail });
+    const validStartupImpactFixture = filename === STARTUP_IMPACT_FIXTURE.file &&
+        createHash('sha256').update(source).digest('hex') === STARTUP_IMPACT_FIXTURE.sha256;
+    if (filename === STARTUP_IMPACT_FIXTURE.file && !validStartupImpactFixture)
+        report(null, 'HISTORICAL_FIXTURE_SOURCE_MISMATCH', 'The closed startup impact builder differs.');
     let validAttemptFixture = false;
     let validCalculationFixture = false;
     let validInstrumentImportFixture = false;
@@ -792,6 +804,7 @@ function scanSource(source, filename, exceptions = []) {
     function authorized(p, entities, operation) {
         const name = owner(p);
         if (!exportedNames.has(name)) return false;
+        if (validStartupImpactFixture && name === STARTUP_IMPACT_FIXTURE.exportName) return true;
         if (validCalculationFixture && name === CALCULATION_FIXTURE.exportName) return true;
         if (validInstrumentImportFixture && name === INSTRUMENT_IMPORT_FIXTURE.exportName) return true;
         if (validInstrumentImportMainFixture && name === INSTRUMENT_IMPORT_MAIN_FIXTURE.exportName) return true;
@@ -837,6 +850,20 @@ function scanSource(source, filename, exceptions = []) {
             const root = path.resolve(__dirname, '../..');
             const resolved = path.relative(root, path.resolve(root, path.dirname(filename), specifier))
                 .replace(/\\/g, '/').replace(/\.(?:js|cjs)$/, '');
+            if (resolved === STARTUP_IMPACT_FIXTURE.file.replace(/\.js$/, '')) {
+                const declaration = p.parentPath;
+                const allowed = filename === STARTUP_IMPACT_FIXTURE.caller && declaration.isVariableDeclarator() &&
+                    declaration.get('id').isObjectPattern() && declaration.get('id.properties').length === 1 &&
+                    declaration.get('id.properties').every(property => {
+                        if (!property.isObjectProperty() || property.node.computed || !property.get('value').isIdentifier() ||
+                            (property.node.key.name || property.node.key.value) !== STARTUP_IMPACT_FIXTURE.exportName) return false;
+                        const binding = declaration.scope.getBinding(property.node.value.name);
+                        return binding && binding.constantViolations.length === 0 && binding.referencePaths.length > 0 &&
+                            binding.referencePaths.every(reference => reference.key === 'callee' && reference.parentPath.isCallExpression() &&
+                                reference.parentPath.get('arguments').length === 1 && reference.parentPath.get('arguments.0').isIdentifier());
+                    });
+                if (!allowed) report(p.node, filename.startsWith('tests/') ? 'HISTORICAL_FIXTURE_CALLER_NOT_ALLOWED' : 'TEST_HELPER_IMPORTED_BY_RUNTIME', specifier);
+            }
             if (resolved === CALCULATION_PREREQUISITES.file.replace(/\.js$/, '')) {
                 const declaration = p.parentPath;
                 const allowed = CALCULATION_PREREQUISITES.callers.includes(filename) && declaration.isVariableDeclarator() &&

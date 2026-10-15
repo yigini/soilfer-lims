@@ -1,0 +1,80 @@
+{
+  "source": "full-ordinary-once/stderr-original.log",
+  "occurrences": 24,
+  "uniqueFindings": [
+    {
+      "code": "RAW_WORKFLOW_SQL",
+      "detail": "prepare",
+      "file": "tests/contracts/order_revision_impact_set_query.test.js",
+      "line": 33
+    },
+    {
+      "code": "RAW_WORKFLOW_SQL",
+      "detail": "prepare",
+      "file": "tests/contracts/order_revision_impact_set_query.test.js",
+      "line": 34
+    },
+    {
+      "code": "UNRESOLVED_WORKFLOW_SQL",
+      "detail": "prepare",
+      "file": "tests/contracts/order_revision_impact_set_query.test.js",
+      "line": 72
+    },
+    {
+      "code": "UNRESOLVED_WORKFLOW_SQL",
+      "detail": "prepare",
+      "file": "tests/contracts/order_revision_impact_set_query.test.js",
+      "line": 76
+    },
+    {
+      "code": "UNRESOLVED_WORKFLOW_SQL",
+      "detail": "pragma",
+      "file": "tests/contracts/startup_readiness_context.test.js",
+      "line": 45
+    },
+    {
+      "code": "UNRESOLVED_WORKFLOW_SQL",
+      "detail": "prepare",
+      "file": "tests/contracts/startup_readiness_context.test.js",
+      "line": 47
+    },
+    {
+      "code": "UNRESOLVED_WORKFLOW_SQL",
+      "detail": "exec",
+      "file": "tests/contracts/startup_readiness_context.test.js",
+      "line": 88
+    },
+    {
+      "code": "RAW_WORKFLOW_SQL",
+      "detail": "prepare",
+      "file": "tests/contracts/startup_readiness_context.test.js",
+      "line": 169
+    },
+    {
+      "code": "UNRESOLVED_WORKFLOW_SQL",
+      "detail": "pragma",
+      "file": "tests/contracts/startup_readiness_context.test.js",
+      "line": 188
+    },
+    {
+      "code": "UNRESOLVED_WORKFLOW_SQL",
+      "detail": "pragma",
+      "file": "utils/startupReadinessContext.js",
+      "line": 58
+    },
+    {
+      "code": "UNRESOLVED_WORKFLOW_SQL",
+      "detail": "pragma",
+      "file": "utils/startupReadinessContext.js",
+      "line": 61
+    },
+    {
+      "code": "UNRESOLVED_WORKFLOW_SQL",
+      "detail": "prepare",
+      "file": "utils/startupReadinessContext.js",
+      "line": 71
+    }
+  ],
+  "twelveFindingsRepeatedInJestFailureSummary": true,
+  "originalsUntouched": true
+}

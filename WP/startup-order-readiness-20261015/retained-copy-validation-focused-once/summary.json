@@ -1,0 +1,15 @@
+{
+  "status": "PASS",
+  "closedUtc": "2026-10-15T11:56:46.978909+00:00",
+  "exitCode": 0,
+  "suites": 5,
+  "tests": 167,
+  "passed": 167,
+  "failed": 0,
+  "pending": 0,
+  "sourceUnchanged": true,
+  "exactInventory": true,
+  "ordinarySetupsAndAssertions": true,
+  "productionOperations": 0,
+  "notFullSuiteCiOrRuntimeQualification": true
+}

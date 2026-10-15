@@ -1,5 +1,10 @@
 #!/usr/bin/env node
-const { openReadonlyDatabase } = require('../utils/startupReadinessContext');
+// The optional startup context must not become a default CLI/image-copy dependency.
+function openReadonlyDatabase(Database, target, options, startupContext) {
+    return startupContext
+        ? require('../utils/startupReadinessContext').openReadonlyDatabase(Database, target, options, startupContext)
+        : new Database(target, options);
+}
 const fs = require('node:fs'), path = require('node:path'), { createHash } = require('node:crypto'), Database = require('better-sqlite3');
 const { loadOrderRevisionMigrationSource } = require('../services/orderRevisionMigrationSource');
 const { chooseOrderLine } = require('../services/orderLineResolutionService');
@@ -191,7 +196,7 @@ function installOrderRevisions({ dbPath, apply = false, startupContext} = {}) {
     // This prerequisite's retained-copy classification never opens the original target.
     const policy = require('./install_lab_policy_schema').assertLabPolicyStartupReady(target, apply ? undefined : startupContext);
     const copy = policy.readonlySnapshot.path;
-    require('./install_control_charts').assertControlChartStartupReady(startupContext && !apply ? target : copy, apply ? undefined : startupContext);
+    require('./install_control_charts').assertControlChartStartupReady(copy, apply ? undefined : startupContext);
     const reader = openReadonlyDatabase(Database, copy, { readonly: true, fileMustExist: true }, apply ? undefined : startupContext); let reviewed, counts;
     try { reader.transaction(() => { reviewed = classify(reader, source); counts = impact(reader); })(); }
     finally { reader.close(); }

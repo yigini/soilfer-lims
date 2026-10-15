@@ -1,0 +1,16 @@
+{
+  "recordedUtc": "2026-10-15T11:59:17.757950+00:00",
+  "kind": "TOOL_OUTPUT_TRANSCRIPTION_NOT_ORIGINAL_RAW_PROCESS_CAPTURE",
+  "consumedHelper": "publish-startup-closed-guard-and-pinned-copy-source-once.py",
+  "exitCode": 1,
+  "boundary": "git show while verifying staged tree 35b97afcd6e39ba4b373d8a2d6dc27268916d839 before commit/push",
+  "freshReadonlyDiagnostic": {
+    "exitCode": 128,
+    "stdoutLength": 0,
+    "stderr": "fatal: failed to stat '35b97afcd6e39ba4b373d8a2d6dc27268916d839:WP/startup-order-readiness-20261015/retained-copy-validation-source-successor-once/source-before/server/tests/contracts/startup_readiness_context.test.js': Filename too long\n"
+  },
+  "allPreparedPathsExistInIndex": true,
+  "perCommandLongpathsOptionSucceeds": true,
+  "noSourceOrEvidenceRewrittenAndNoGlobalGitSettingChange": true,
+  "originalPublisherNeverReplayed": true
+}

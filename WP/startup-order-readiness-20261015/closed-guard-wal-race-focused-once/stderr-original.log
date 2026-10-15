@@ -1,0 +1,226 @@
+PASS tests/contracts/audit_1_2_guard_installer.test.js (29.849 s)
+  √ fresh Prisma schema installs the exact guards and marker; repeat starts write nothing (1671 ms)
+  √ actual pre-179 child installer preserves seeded historical science and the old schema (628 ms)
+  √ unreviewed UNMAPPED_SAMPLE refuses the actual child with unchanged bytes and no returned handle (475 ms)
+  √ unreviewed COLLECTED refuses the actual child with unchanged bytes and no returned handle (481 ms)
+  √ the real reviewed legacy upgrade preserves science, refuses interrupted startup, then maps and starts without writes (1742 ms)
+  √ a real timestamp race invalidates the review and the actual installer refuses without writes or a returned file (1179 ms)
+  √ a reviewed fingerprint cannot approve an unmapped status (1001 ms)
+  √ a blocked legacy marker refuses startup even with a reviewed fingerprint and preserves all bytes (995 ms)
+  √ malformed or unsupported reviewed fixture options refuse before creating any file (539 ms)
+  √ direct startup refuses a pre-179 file before app import, scheduler or listen, with unchanged bytes (613 ms)
+  √ direct startup refuses a fresh db push, without writes, serving or scheduler initialization (1429 ms)
+  √ direct startup refuses an interrupted reviewed upgrade with unchanged SHA and no listener (1143 ms)
+  √ direct startup reports a mismatched trigger before serving and preserves the file (1419 ms)
+  √ direct startup refuses a missing file without implicitly creating it (80 ms)
+  √ direct startup refuses missing normalized QC installation before app import and preserves the file (751 ms)
+  √ a complete guarded database passes the read-only gate, listens and answers a real health request (4491 ms)
+  √ partial schema refuses a writable owned database before any write (343 ms)
+  √ tampered trigger refuses a writable owned database before any write (1583 ms)
+  √ marker without guards refuses a writable owned database before any write (1464 ms)
+  √ complete objects without marker refuses a writable owned database before any write (1470 ms)
+  √ different marker hashes refuses a writable owned database before any write (1441 ms)
+  √ extra marker key refuses a writable owned database before any write (1439 ms)
+  √ unparseable marker refuses a writable owned database before any write (1437 ms)
+  √ image-copy hashes are checked and the overlaid volume sources are never read (1568 ms)
+  √ startup calls the installer after the existing migrations and fails before serving; no override argument exists (14 ms)
+
+PASS tests/security/audit_1_2_state_writes.test.js (10.8 s)
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.workItem.deleteMany({where:{sampleId:id}})) (6 ms)
+  √ audit gap form is one scanner finding (tests/contracts/canary.test.js / prisma.sample.deleteMany({where:{id}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / state.removeUnstartedWorkItems(prisma, {}, {actor,reason}))
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.project.create({data:{samples:{create:[{status:"APPROVED"}]}}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / const nested={create:[{status:"APPROVED"}]};prisma.project.create({data:{samples:nested}})) (2 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / const key="workItems";const op="deleteMany";prisma.sample.update({data:{[key]:{[op]:{}}}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.sample.create({data:{workItems:{connect:[{id:otherSampleItem}]}}}))
+  √ audit gap form is one scanner finding (controllers/canary.js / const relation={set:[{id}]};prisma.project.update({data:{samples:relation}})) (4 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / const op="disconnect";prisma.sample.update({data:{workItems:{[op]:[{id}]}}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.sample.update({where:{id},data:{workItems:{upsert:{create:{status:"ACCEPTED"},update:{status:"ACCEPTED"}}}}}))
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.sample?.update({data:{status:"APPROVED"}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.sample.update?.({data:{status:"APPROVED"}}))
+  √ audit gap form is one scanner finding (controllers/canary.js / db.prepare("UPDATE main.Sample SET status = ?")) (2 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / db.prepare("UPDATE OR ABORT main.WorkItem SET status = ?")) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / db.exec("REPLACE INTO Sample (id,status) VALUES (1,2)"))
+  √ audit gap form is one scanner finding (controllers/canary.js / db.exec("INSERT OR REPLACE INTO main.WorkItem (id,status) VALUES (1,2)"))
+  √ the original rehearsal cannot reintroduce a direct Sample deletion
+  √ nested connect association has one actual authority finding (1 ms)
+  √ nested set association has one actual authority finding
+  √ nested disconnect association has one actual authority finding (1 ms)
+  √ the closed FK runner refuses unknown case (82 ms)
+  √ the closed FK runner refuses configured candidate (82 ms)
+  √ the #192 loader is independently byte-bound; a changed loader remains unresolved (2 ms)
+  √ the previous #191 release digest is refused; only the exact current loader and DDL are inspected (1 ms)
+  √ the #193 source resolver inspects byte-bound sql without granting workflow writer authority (2 ms)
+  √ the #193 source resolver inspects byte-bound schemaSql without granting workflow writer authority (1 ms)
+  √ the #193 source resolver inspects byte-bound guardsSql without granting workflow writer authority (1 ms)
+  √ the #206 resolver inspects only pinned sql and retains workflow write restrictions (1 ms)
+  √ the #206 resolver inspects only pinned schemaSql and retains workflow write restrictions (1 ms)
+  √ the #206 resolver inspects only pinned prismaSql and retains workflow write restrictions (1 ms)
+  √ the #206 resolver inspects only pinned counterSql and retains workflow write restrictions (1 ms)
+  √ the #206 resolver inspects only pinned guardsSql and retains workflow write restrictions (1 ms)
+  √ the #206 resolver refuses altered bytes in services/sampleContainerMigrationSource.js (1 ms)
+  √ the #206 resolver refuses altered bytes in prisma/migrations/20261013000100_sample_containers/migration.sql
+  √ legacy CLI launchers cannot import any fixture or test module (2 ms)
+  √ FK OFF is confined to the exact pinned synthetic branch, export and helper file (5 ms)
+  √ the #190 source resolver inspects the exact checked-in sql asset
+  √ the #190 source resolver inspects the exact checked-in schemaSql asset (1 ms)
+  √ the #190 source resolver inspects the exact checked-in guardsSql asset
+  √ the #190 historical factory cannot be imported by runtime or client: services/probe.js (1 ms)
+  √ the #190 historical factory cannot be imported by runtime or client: controllers/probe.js
+  √ the #190 historical factory cannot be imported by runtime or client: routes/probe.js
+  √ the #190 historical factory cannot be imported by runtime or client: scripts/probe.js
+  √ the #190 historical factory cannot be imported by runtime or client: ../client/src/probe.js (1 ms)
+  √ the #190 factory import allowlist is exact, including the named spectral refusal (2 ms)
+  √ the #191 owned result-set export is confined to seven inventoried test files without writer exemptions (5 ms)
+  √ the #190 composite positive fixture has exactly two named publication callers (4 ms)
+  √ positive attempt fixtures cannot be imported by runtime or client: services/probe.js
+  √ positive attempt fixtures cannot be imported by runtime or client: controllers/probe.js
+  √ positive attempt fixtures cannot be imported by runtime or client: routes/probe.js (1 ms)
+  √ positive attempt fixtures cannot be imported by runtime or client: scripts/probe.js
+  √ positive attempt fixtures cannot be imported by runtime or client: ../client/src/probe.js
+  √ a direct sample write in a #190 test remains a finding outside the factory (1 ms)
+  √ a direct workItem write in a #190 test remains a finding outside the factory
+  √ a direct result write in a #190 test remains a finding outside the factory
+  √ a changed #190 historical factory digest is a scanner finding (9 ms)
+  √ a changed #190 historical DDL digest is a scanner finding (8 ms)
+  √ an altered #190 loader or SQL digest restores a failing source finding: services/workAttemptMigrationSource.js (1 ms)
+  √ an altered #190 loader or SQL digest restores a failing source finding: prisma/migrations/20261008000100_work_attempt_contract/migration.sql (1 ms)
+  √ the unchanged duplicate-marker prerequisite loadWorkItemDuplicateMarkerSource is inspected without writer exemptions (4 ms)
+  √ the unchanged duplicate-marker prerequisite loadActiveWorkItemIndexSource is inspected without writer exemptions (1 ms)
+  √ an altered prerequisite source is a failing finding: loadWorkItemDuplicateMarkerSource / services/workItemUniquenessMigrationSource.js (1 ms)
+  √ an altered prerequisite source is a failing finding: loadActiveWorkItemIndexSource / services/workItemUniquenessMigrationSource.js (1 ms)
+  √ an altered prerequisite source is a failing finding: loadWorkItemDuplicateMarkerSource / prisma/migrations/20261004190000_add_workitem_duplicate_marker/migration.sql (1 ms)
+  √ an altered prerequisite source is a failing finding: loadActiveWorkItemIndexSource / prisma/migrations/20261004190100_unique_active_workitem/migration.sql
+  √ all handwritten runtime, script, seed and test Sample/WorkItem writes use central authorities (10218 ms)
+  √ embedded literal programs cannot hide workflow DML: const vm=require('vm');vm.runInNewContext("db.exec('REPLACE INTO main.Sample (id,status) VALUES (1,2)')")
+  √ embedded literal programs cannot hide workflow DML: const {spawnSync}=require('child_process');spawnSync('node',['-e',"db.exec('INSERT OR REPLACE INTO main.WorkItem (id,status) VALUES (1,2)')"])
+  √ embedded literal programs cannot hide workflow DML: const vm=require('vm');vm.runInNewContext("db.exec('UPDATE OR ABORT main.Sample SET status = 1')")
+  √ embedded literal programs cannot hide workflow DML: import {execSync as launch} from 'node:child_process';launch("node -e `db.exec('DELETE FROM Sample')`") (1 ms)
+  √ embedded literal programs cannot hide workflow DML: import {writeFileSync as saveProgram} from 'node:fs';saveProgram('program.cjs',"db.exec('UPDATE WorkItem SET metadata = 1')")
+  √ embedded literal programs cannot hide workflow DML: const {spawnSync}=require('node:child_process');spawnSync('node',['-e',"db.exec('INSERT INTO Sample (id) VALUES (1)')"])
+  √ embedded literal programs cannot hide workflow DML: const cp=require('child_process');const code=`db.prepare('UPDATE \"WorkItem\" SET result = 1')`;cp.spawn('node',['-e',code]) (15 ms)
+  √ embedded literal programs cannot hide workflow DML: const cp=require('child_process');cp.exec(`node -e \"db.exec('delete from \\\"Sample\\\"')\"`)
+  √ embedded literal programs cannot hide workflow DML: const fs=require('fs');fs.writeFileSync('program.cjs',`db.exec('UPDATE \"WorkItem\" SET status = 1')`) (1 ms)
+  √ embedded literal programs cannot hide workflow DML: const fs=require('fs');fs.writeFile('program.mjs','db.exec(`insert into [WorkItem] (id) values (1)`)')
+  √ embedded literal programs cannot hide workflow DML: new Function("db.exec('INSERT INTO \"Sample\" (id) VALUES (1)')")
+  √ embedded literal programs cannot hide workflow DML: const vm=require('vm');vm.runInNewContext("db.exec('DELETE FROM WorkItem')")
+  √ embedded literal programs cannot hide workflow DML: const vm=require('vm');new vm.Script("db.exec('UPDATE Sample SET metadata = 1')") (1 ms)
+  √ a new physical source file with embedded node-e Sample inserts fails the inventory (3 ms)
+  √ the sole deferral is byte-bound inventory; a one-byte change becomes a failing embedded writer (37 ms)
+  √ the source guard catches aliases, data variables and spreads: prisma.sample.create({data: {originalId:'fixture'}}) (1 ms)
+  √ the source guard catches aliases, data variables and spreads: const model=prisma.workItem; model.updateMany({data:{status:'ACCEPTED'}})
+  √ the source guard catches aliases, data variables and spreads: const {sample: alias}=prisma; const data={status:'APPROVED'}; alias.update({data})
+  √ the source guard catches aliases, data variables and spreads: const data={clientName:'safe'}; data.status='APPROVED'; prisma.sample.update({data}) (1 ms)
+  √ the source guard catches aliases, data variables and spreads: const data={clientName:'safe'}; const key='status'; data[key]='APPROVED'; prisma.sample.update({data})
+  √ the source guard catches aliases, data variables and spreads: const patch={status:'APPROVED'}; const data={...patch}; prisma.sample.update({data})
+  √ the source guard catches aliases, data variables and spreads: const args={data:{status:'APPROVED'}}; prisma.sample.update(args)
+  √ the source guard catches aliases, data variables and spreads: const {update: write}=prisma.sample; write({data:{status:'APPROVED'}}) (1 ms)
+  √ the source guard catches aliases, data variables and spreads: const write=prisma.sample.update.bind(prisma.sample); write({data:{status:'APPROVED'}})
+  √ the source guard catches aliases, data variables and spreads: const entity='workItem'; prisma[entity].upsert({create:{sampleId:'s'},update:{status:'ACCEPTED'}})
+  √ the source guard catches aliases, data variables and spreads: const delegate=prisma[Math.random()?'sample':'workItem']; delegate.create({data:{}})
+  √ the source guard catches aliases, data variables and spreads: function mutate(data) { prisma.sample.update({data:{...data}}) } (1 ms)
+  √ the source guard catches aliases, data variables and spreads: const sql='UPDATE Sample SET '+'status = ?'; db.prepare(sql).run('APPROVED')
+  √ the source guard catches aliases, data variables and spreads: const table='WorkItem'; db.exec(`INSERT INTO ${table} (id,status) VALUES ('x','ACCEPTED')`)
+  √ the source guard catches aliases, data variables and spreads: prisma.$executeRaw`UPDATE WorkItem SET status=${'ACCEPTED'}`
+  √ the source guard catches aliases, data variables and spreads: function rawWrite(statement) { db.exec(statement) } (1 ms)
+  √ the source guard catches aliases, data variables and spreads: const fields=['status = ?']; db.prepare(`UPDATE Sample SET ${fields.join(',')}`)
+  √ a real temporary non-allowlisted test file fails the source guard (10 ms)
+  √ a shadowed file reader cannot impersonate a known schema load (1 ms)
+  √ the two exceptions apply to the named export only, never to the caller or the rest of its file (1 ms)
+  √ runtime cannot import the test helper tests/helpers/legacyWorkflowDatabase.js (1 ms)
+  √ runtime cannot import the test helper tests/helpers/rejectedGuardWrite.js
+  √ metadata-only updates and other models are permitted, and guard disabling is always refused (1 ms)
+  √ native pragma calls cannot disable constraints: db.pragma('foreign_keys = OFF') (1 ms)
+  √ native pragma calls cannot disable constraints: const setting='recursive_triggers=0'; database.pragma(setting)
+  √ native pragma calls cannot disable constraints: const {pragma: configure}=db; configure('foreign_keys=0')
+  √ native pragma calls cannot disable constraints: const method='pragma'; client[method]('foreign_keys = OFF')
+  √ native pragma reads and enabled constraints remain permitted
+  √ loaded SQL is inspected without a caller exemption: UPDATE Consignment SET declaredExpectedCount = ? WHERE id = ? (1 ms)
+  √ loaded SQL is inspected without a caller exemption: UPDATE Sample SET status = ? WHERE id = ? (2 ms)
+  √ loaded SQL is inspected without a caller exemption: PRAGMA foreign_keys = OFF (1 ms)
+
+  console.log
+    {"event":"ALL_26_OWNED_STARTUP_COMPARISON","reportsEqual":true,"oldPhysicalChecks":68,"newPhysicalChecks":2,"oldSnapshotCopies":4,"newSnapshotCopies":1,"oldStages":[{"script":"install_workflow_state_guards","elapsed_ms":20.9624,"rss_bytes":718594048},{"script":"install_result_attempt_links","elapsed_ms":5.5286,"rss_bytes":718594048},{"script":"install_sample_holds","elapsed_ms":5.5462,"rss_bytes":718610432},{"script":"install_reference_materials","elapsed_ms":6.9176,"rss_bytes":718614528},{"script":"install_qc_rules","elapsed_ms":7.3375,"rss_bytes":711553024},{"script":"install_qc_runs","elapsed_ms":29.4277,"rss_bytes":683020288},{"script":"install_qc_gate_scope","elapsed_ms":43.597,"rss_bytes":684113920},{"script":"install_proficiency_evidence","elapsed_ms":8.5433,"rss_bytes":684171264},{"script":"install_nonconformity_reports","elapsed_ms":7.9495,"rss_bytes":684171264},{"script":"install_result_equipment_evidence","elapsed_ms":5.4355,"rss_bytes":684195840},{"script":"install_work_attempt_contract","elapsed_ms":12.4804,"rss_bytes":684253184},{"script":"install_work_repeat_contract","elapsed_ms":25.0972,"rss_bytes":685359104},{"script":"install_reported_value_selections","elapsed_ms":28.2278,"rss_bytes":686366720},{"script":"install_batch_reagent_lots","elapsed_ms":4.4945,"rss_bytes":686452736},{"script":"install_result_override_requests","elapsed_ms":4.9145,"rss_bytes":686452736},{"script":"install_calculation_templates","elapsed_ms":10.9469,"rss_bytes":687030272},{"script":"install_cross_check_evaluations","elapsed_ms":37.4518,"rss_bytes":688263168},{"script":"install_sample_amendment_authorisation","elapsed_ms":6.9496,"rss_bytes":688263168},{"script":"install_report_revisions","elapsed_ms":11.6551,"rss_bytes":688300032},{"script":"install_bench_credentials","elapsed_ms":16.1528,"rss_bytes":688308224},{"script":"install_preparation_records","elapsed_ms":22.5032,"rss_bytes":688312320},{"script":"install_instrument_imports","elapsed_ms":15.6145,"rss_bytes":688353280},{"script":"install_sample_containers","elapsed_ms":20.2182,"rss_bytes":688517120},{"script":"install_lab_policy_schema","elapsed_ms":25.4782,"rss_bytes":688590848},{"script":"install_control_charts","elapsed_ms":51.4989,"rss_bytes":690499584},{"script":"install_order_revisions","elapsed_ms":86.1418,"rss_bytes":700035072}],"newStages":[{"script":"install_workflow_state_guards","elapsed_ms":18.707,"rss_bytes":702189568},{"script":"install_result_attempt_links","elapsed_ms":0.7607,"rss_bytes":702189568},{"script":"install_sample_holds","elapsed_ms":0.9772,"rss_bytes":702189568},{"script":"install_reference_materials","elapsed_ms":1.2493,"rss_bytes":702193664},{"script":"install_qc_rules","elapsed_ms":0.8837,"rss_bytes":702193664},{"script":"install_qc_runs","elapsed_ms":13.1581,"rss_bytes":702226432},{"script":"install_qc_gate_scope","elapsed_ms":13.3486,"rss_bytes":702496768},{"script":"install_proficiency_evidence","elapsed_ms":1.7603,"rss_bytes":702496768},{"script":"install_nonconformity_reports","elapsed_ms":1.4712,"rss_bytes":702500864},{"script":"install_result_equipment_evidence","elapsed_ms":0.3779,"rss_bytes":702500864},{"script":"install_work_attempt_contract","elapsed_ms":5.4073,"rss_bytes":702533632},{"script":"install_work_repeat_contract","elapsed_ms":20.1612,"rss_bytes":703250432},{"script":"install_reported_value_selections","elapsed_ms":24.4637,"rss_bytes":693350400},{"script":"install_batch_reagent_lots","elapsed_ms":1.0929,"rss_bytes":693354496},{"script":"install_result_override_requests","elapsed_ms":1.5879,"rss_bytes":693370880},{"script":"install_calculation_templates","elapsed_ms":5.635,"rss_bytes":693374976},{"script":"install_cross_check_evaluations","elapsed_ms":21.5989,"rss_bytes":693485568},{"script":"install_sample_amendment_authorisation","elapsed_ms":1.9729,"rss_bytes":693489664},{"script":"install_report_revisions","elapsed_ms":1.9622,"rss_bytes":693489664},{"script":"install_bench_credentials","elapsed_ms":2.0443,"rss_bytes":693493760},{"script":"install_preparation_records","elapsed_ms":2.8548,"rss_bytes":693518336},{"script":"install_instrument_imports","elapsed_ms":6.2037,"rss_bytes":693637120},{"script":"install_sample_containers","elapsed_ms":6.3977,"rss_bytes":693862400},{"script":"install_lab_policy_schema","elapsed_ms":29.0109,"rss_bytes":693870592},{"script":"install_control_charts","elapsed_ms":12.5982,"rss_bytes":693870592},{"script":"install_order_revisions","elapsed_ms":22.504,"rss_bytes":694964224}],"notProductionTimingOrStartupQualification":true}
+
+      at Object.log (tests/contracts/startup_readiness_context.test.js:154:13)
+
+FAIL tests/contracts/startup_readiness_context.test.js (10.368 s)
+  √ all 26 startup reports equal the legacy default path; one physical integrity/FK check and one retained policy snapshot (789 ms)
+  √ policy schema refusal keeps the legacy code, message, differences and stage (514 ms)
+  √ order schema refusal keeps the legacy code, message, differences and stage (679 ms)
+  √ control chart schema refusal keeps the legacy code and stage (602 ms)
+  √ bad shared SQL results still reach the existing owner refusal: {"corruptIntegrity":true} (47 ms)
+  √ bad shared SQL results still reach the existing owner refusal: {"corruptForeignKeys":true} (53 ms)
+  √ a new startup never reuses a prior startup result (439 ms)
+  √ changed bytes between stages cannot inherit cached integrity or chart results (116 ms)
+  √ context closes on refusal and cannot be reused for another database (25 ms)
+  √ the complete startup retains the first real owner refusal for {"corruptIntegrity":true} (80 ms)
+  √ the complete startup retains the first real owner refusal for {"corruptForeignKeys":true} (86 ms)
+  √ one full SQL result preserves both the full-row and simple pragma APIs (16 ms)
+  √ copy races preserve the existing snapshot refusal, with no second copy attempt (504 ms)
+  × an original-file race after-policy-capture keeps ORDER_REVISION_SNAPSHOT_CHANGED (835 ms)
+  √ an original-file race after-nested-chart keeps ORDER_REVISION_SNAPSHOT_CHANGED (702 ms)
+  √ all26 reports and shared checks remain equivalent with an owned WAL-mode absent WAL (770 ms)
+  √ all26 reports and shared checks remain equivalent with an owned WAL-mode empty WAL (713 ms)
+  √ all26 reports and shared checks remain equivalent with an owned WAL-mode nonempty WAL (769 ms)
+  √ reusing a chart result still reloads and verifies its migration digest (607 ms)
+
+  ● an original-file race after-policy-capture keeps ORDER_REVISION_SNAPSHOT_CHANGED
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 5
+    + Received  + 1
+
+    @@ -933,14 +933,10 @@
+          },
+          "script": "install_control_charts",
+        },
+        Object {
+          "error": Object {
+    -       "code": "ORDER_REVISION_SNAPSHOT_CHANGED",
+    -       "differences": Array [],
+    -       "message": "Database files changed during order classification.",
+    -       "statusCode": 409,
+    -       "totalChanges": 0,
+    +       "message": "A startup context belongs to one database and its retained snapshot.",
+          },
+          "script": "install_order_revisions",
+        },
+      ]
+
+      275 |     });
+      276 |     expect(results[0].outcomes.at(-1).error.code).toBe('ORDER_REVISION_SNAPSHOT_CHANGED');
+    > 277 |     expect(results[1].outcomes).toEqual(results[0].outcomes);
+          |                                 ^
+      278 | });
+      279 |
+      280 | test.each(['absent', 'empty', 'nonempty'])('all26 reports and shared checks remain equivalent with an owned WAL-mode %s WAL', representation => {
+
+      at toEqual (tests/contracts/startup_readiness_context.test.js:277:33)
+
+  console.log
+    {"event":"ORDER_IMPACT_OWNED_SEEDED_QUERY_MEASUREMENT","samples":12000,"oldElapsedMs":367.13170000000537,"newElapsedMs":346.2332999999999,"oldPointLookups":12000,"newPointLookups":0,"reportsEqual":true,"rssBytes":663076864,"notProductionTimingOrStartupQualification":true}
+
+      at Object.log (tests/contracts/order_revision_impact_set_query.test.js:89:17)
+
+PASS tests/contracts/order_revision_impact_set_query.test.js
+  √ all nonzero refusal, malformed-selection, reservation and approved-amendment report fields match the legacy query (63 ms)
+  √ missing sample keeps the legacy failure rather than silently dropping its fraction owners (3 ms)
+  √ empty impact is unchanged and the join adds no fields to reported owner objects (1 ms)
+  √ large seeded impact remains equivalent while replacing all per-sample lookups with one set query (2453 ms)
+  √ the synthetic fixture refuses extra capabilities, undeclared cases and another caller (9 ms)
+  √ the fixture scanner binding refuses changed source, runtime callers and unrelated tests (78 ms)
+
+PASS tests/contracts/startup_readiness_telemetry.test.js
+  √ all 26 real READY call sites retain their order and results, with per-stage timing and RSS (8 ms)
+  √ stage 1 refusal emits no READY for that stage or any successor, and cannot load the server (2 ms)
+  √ stage 24 refusal emits no READY for that stage or any successor, and cannot load the server (1 ms)
+  √ stage 26 refusal emits no READY for that stage or any successor, and cannot load the server (2 ms)
+
+Test Suites: 1 failed, 4 passed, 5 total
+Tests:       1 failed, 165 passed, 166 total
+Snapshots:   0 total
+Time:        54.116 s
+Ran all test suites within paths "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\startup_readiness_context.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\startup_readiness_telemetry.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\order_revision_impact_set_query.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_guard_installer.test.js", "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\security\audit_1_2_state_writes.test.js".
+Test results written to: ..\WP\startup-order-readiness-20261015\closed-guard-wal-race-focused-once\report-original.json

@@ -1,0 +1,4 @@
+
+> server@1.9.0 test
+> jest --maxWorkers=1 --workerIdleMemoryLimit=512MB --testMatch **/tests/**/*.test.js --runTestsByPath C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\startup_readiness_context.test.js C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\startup_readiness_telemetry.test.js C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\order_revision_impact_set_query.test.js C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\contracts\audit_1_2_guard_installer.test.js C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\server\tests\security\audit_1_2_state_writes.test.js --json --outputFile C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\WP\startup-order-readiness-20261015\closed-guard-wal-race-focused-once\report-original.json
+

@@ -1,0 +1,11 @@
+{
+  "newFixture": "server/tests/helpers/startupImpactFixture.js",
+  "fixtureSha256": "b516abe71f18df6571201e30a852ae50bd078956c1d7f898b922bd6c05d06a4b",
+  "literalClosedMemoryDatabase": true,
+  "soleCaller": "tests/contracts/order_revision_impact_set_query.test.js",
+  "passiveSqliteTraceNotSqlForwarder": true,
+  "existingScannerPredicatesAndNegativeAssertionsUnchanged": true,
+  "newDigestAndCallerNegativeGuards": true,
+  "testsNotRunYet": true,
+  "productionOperations": 0
+}

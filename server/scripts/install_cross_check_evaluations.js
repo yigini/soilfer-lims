@@ -1,5 +1,10 @@
 #!/usr/bin/env node
-const { openReadonlyDatabase } = require('../utils/startupReadinessContext');
+// The optional startup context must not become a default CLI/image-copy dependency.
+function openReadonlyDatabase(Database, target, options, startupContext) {
+    return startupContext
+        ? require('../utils/startupReadinessContext').openReadonlyDatabase(Database, target, options, startupContext)
+        : new Database(target, options);
+}
 const path = require('node:path'), { createHash } = require('node:crypto'), Database = require('better-sqlite3');
 const { loadCrossCheckMigrationSource } = require('../services/crossCheckMigrationSource');
 const { fingerprintRows, fingerprintRetainedTables } = require('../services/retainedRowsFingerprint');

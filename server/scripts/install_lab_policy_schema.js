@@ -1,5 +1,10 @@
 #!/usr/bin/env node
-const { openReadonlyDatabase } = require('../utils/startupReadinessContext');
+// The optional startup context must not become a default CLI/image-copy dependency.
+function openReadonlyDatabase(Database, target, options, startupContext) {
+    return startupContext
+        ? require('../utils/startupReadinessContext').openReadonlyDatabase(Database, target, options, startupContext)
+        : new Database(target, options);
+}
 // Claudio6160619940: existing canonical DDL only; no data writes or normalization.
 const fs = require('node:fs'), os = require('node:os'), path = require('node:path'), { createHash } = require('node:crypto'), Database = require('better-sqlite3');
 const { loadLabPolicyMigrationSource } = require('../services/labPolicyMigrationSource');
@@ -115,7 +120,7 @@ function installLabPolicySchema({ dbPath, apply = false, startupContext} = {}) {
     const target = path.resolve(dbPath), source = loadLabPolicyMigrationSource();
     if (!fs.existsSync(target)) throw fail('LAB_POLICY_DATABASE_REQUIRED', 'The explicit database file does not exist.');
     const reviewed = !apply && startupContext
-        ? startupContext.reviewPolicy(target, source, fileHashes(target), () => reviewReadonlySnapshot(target, source, startupContext))
+        ? startupContext.reviewPolicy(target, source, fileHashes(target), () => reviewReadonlySnapshot(target, source, startupContext), fileHashes)
         : reviewReadonlySnapshot(target, source);
     if (reviewed.classification === 'PRESENT') return { ...reviewed, mode: 'NO_OP', totalChanges: 0, dataWrites: 0 };
     if (!apply) return { ...reviewed, mode: 'DRY_RUN', totalChanges: 0, dataWrites: 0 };
