@@ -1,0 +1,8 @@
+2026-10-15T16:50:59.0910000Z Job is about to start running on the hosted runner: GitHub Actions 1000000755
+2026-10-15T16:50:59.0790000Z Evaluating test-and-build.if
+2026-10-15T16:50:59.0790000Z Evaluating: success()
+2026-10-15T16:50:59.0790000Z Result: true
+2026-10-15T16:50:59.0900000Z Job is waiting for a hosted runner to come online.
+2026-10-15T16:50:59.0850000Z Requested labels: ubuntu-latest
+2026-10-15T16:50:59.0850000Z Job defined at: yigini/soilfer-lims/.github/workflows/ci.yml@refs/heads/main
+2026-10-15T16:50:59.0850000Z Waiting for a runner to pick up this job...

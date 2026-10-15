@@ -1,0 +1,9 @@
+﻿2026-10-15T16:51:48.8121767Z ##[group]Run npm run check:theme-catalog
+2026-10-15T16:51:48.8122160Z [36;1mnpm run check:theme-catalog[0m
+2026-10-15T16:51:48.8186107Z shell: /usr/bin/bash -e {0}
+2026-10-15T16:51:48.8186378Z ##[endgroup]
+2026-10-15T16:51:48.9308598Z 
+2026-10-15T16:51:48.9309162Z > server@1.9.0 check:theme-catalog
+2026-10-15T16:51:48.9309855Z > node scripts/generate_theme_catalog.js --check
+2026-10-15T16:51:48.9310119Z 
+2026-10-15T16:51:48.9616825Z [PASS] Theme catalog check: 0 drift detected across server catalogue, client catalogue, CSS appearance tokens (14 variants), and module bindings.

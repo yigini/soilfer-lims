@@ -1,0 +1,18 @@
+{
+  "recordedUtc": "2026-10-15T17:31:10.176214+00:00",
+  "kind": "TOOL_OUTPUT_TRANSCRIPTION",
+  "helper": "WP/backlog-resume-20261013/retain-startup-main-ci38772398721-closed-originals-once.py",
+  "helperSha256": "e29ad743781d980d7d3d4f932dca1ec1cb8aeb20de4d25f669e6067d060dc00e",
+  "exitCode": 1,
+  "failure": "RuntimeError: fatal: bad object be8379745bdfae52ce46496ff26514dc7d729640",
+  "failedAt": "First git show of merge commit tree, before evidence output directory, README, staging or commit.",
+  "ciFailure": false,
+  "sourceChanged": false,
+  "replayForbidden": true,
+  "resolution": "Fetched exact merged commit with git fetch --no-tags origin be8379745bdfae52ce46496ff26514dc7d729640 into FETCH_HEAD only; no checkout or branch change. New uniquely named retainer required.",
+  "earlierPatchPreparationRefusal": {
+    "kind": "TOOL_OUTPUT_TRANSCRIPTION",
+    "message": "apply_patch verification failed: invalid hunk at line 210, '' is not a valid hunk header",
+    "beforeFileCreation": true
+  }
+}

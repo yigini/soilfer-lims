@@ -1,0 +1,303 @@
+{
+  "baseAudit": "f91377a695ab925762de245c0a48216e7a74e505",
+  "status": "CLOSED_SUCCESS_VERIFIED",
+  "run": 38772398721,
+  "head": "be8379745bdfae52ce46496ff26514dc7d729640",
+  "files": [
+    {
+      "path": "WP/startup-order-readiness-20261015/main-ci38772398721-closed-originals-once/archive-entries/entry-0000-original.log",
+      "length": 4055699,
+      "sha256": "741f8e47a74809e456559052d62772d9e6eead69b8abf5305a17dc374f387da2",
+      "gitBlobOid": "d3bd5864989808f5c15635411931cda5b1864929"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/main-ci38772398721-closed-originals-once/archive-entries/entry-0001-original.log",
+      "length": 577,
+      "sha256": "8c9af4c1b540a4865459e3e4792443cc2ffc6e6b3c77d000c564eb0c71c8b990",
+      "gitBlobOid": "7b7e21f1f95b2d7a42e07c2076051cfb74ab3a5b"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/main-ci38772398721-closed-originals-once/archive-entries/entry-0002-original.log",
+      "length": 2338,
+      "sha256": "4db0321d496e96defb4d4f8b13f0b02cbf359379f40505b38df41c6fd8d4da93",
+      "gitBlobOid": "b2e13439675f56abdcc8f419f2e8ed7a8d665890"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/main-ci38772398721-closed-originals-once/archive-entries/entry-0003-original.log",
+      "length": 18989,
+      "sha256": "43eea6a7d97a12ea4e2baa4e61a97ff6b16a948498d21e580a374558e32365d3",
+      "gitBlobOid": "726fb4953ea14df181878c9657b3d9d49a64ed1f"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/main-ci38772398721-closed-originals-once/archive-entries/entry-0004-original.log",
+      "length": 903,
+      "sha256": "2cefd97e2771d9579ca7b4cfdad68380e254b3090ed77de0e301dfab9b192b43",
+      "gitBlobOid": "413f9cbbac07806a8020fd5d8829804b45271a5c"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/main-ci38772398721-closed-originals-once/archive-entries/entry-0005-original.log",
+      "length": 3166,
+      "sha256": "3911b450128296289c7bbdf8a3a2abddc498d4669fcb5a665d0580b82800f4b0",
+      "gitBlobOid": "a3599f9abd5f80c86355adaed1e877e8ccf5d077"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/main-ci38772398721-closed-originals-once/archive-entries/entry-0006-original.log",
+      "length": 2621,
+      "sha256": "02b961849f4bd9bc4a51fba8c3d97d539b974264a9a13db605f32e385918b36c",
+      "gitBlobOid": "eeeacebcae54d00268d7dff8555ee629a9b29dde"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/main-ci38772398721-closed-originals-once/archive-entries/entry-0007-original.log",
+      "length": 617,
+      "sha256": "a8b17aeb9f1f7075038a71b57764365a6e95e64086f1a34d67bb103ead541303",
+      "gitBlobOid": "f2a9a5c207c1929a4cb0c9bd7b003a8a985033f2"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/main-ci38772398721-closed-originals-once/archive-entries/entry-0008-original.log",
+      "length": 12792,
+      "sha256": "6b66665c220386186d5a260ed31eaa66e8af95671cb9f221ec039fe959e395f7",
+      "gitBlobOid": "6458d0a9e444e8c5fd87f263145e4ec0dcf8be9e"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/main-ci38772398721-closed-originals-once/archive-entries/entry-0009-original.log",
+      "length": 5754,
+      "sha256": "f7beb7571c2302464dc53457658ffd1a8a3baf2582efe6be9f6a73a6174fa9f6",
+      "gitBlobOid": "ee535744c85d0b47aa9da4c52134d654e78c694d"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/main-ci38772398721-closed-originals-once/archive-entries/entry-0010-original.log",
+      "length": 22499,
+      "sha256": "24aee6ec8e27566e132b7e8aaa19509c0f115fda0de03872aba62fc9a384b1a2",
+      "gitBlobOid": "3d2b893edd4639968452c92a10b50c55acd4f556"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/main-ci38772398721-closed-originals-once/archive-entries/entry-0011-original.log",
+      "length": 3812479,
+      "sha256": "0e53b22ff86bfd2be417d2b0ff2f6f7fe499c5c594ad3c68a54e7064d2460bf7",
+      "gitBlobOid": "1719b9e19c126f7a70601ab9cda13f73e722afe7"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/main-ci38772398721-closed-originals-once/archive-entries/entry-0012-original.log",
+      "length": 14642,
+      "sha256": "e99560c87c532fef891f68b21befcba4f6a46af56f5fe8df781cf05a7c1124e5",
+      "gitBlobOid": "14809684b723bddf8b7383f7b9650d1d95934919"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/main-ci38772398721-closed-originals-once/archive-entries/entry-0013-original.log",
+      "length": 85081,
+      "sha256": "06fb61bdfa6ab6ac2f3d0f08ad203d77298165a4176f6e5b81838e8005ebccc8",
+      "gitBlobOid": "def42527d6a4e025999889fbdc67e9d8d31a36ca"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/main-ci38772398721-closed-originals-once/archive-entries/entry-0014-original.log",
+      "length": 28668,
+      "sha256": "e4d5b54b459dc4e5b95b56c0d4658cd35e42b74ffe1d997c041cd1cf3754d1cc",
+      "gitBlobOid": "97584f5c2ed8454241a19ac4e60c2c804938e42d"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/main-ci38772398721-closed-originals-once/archive-entries/entry-0015-original.log",
+      "length": 3784,
+      "sha256": "50cdfd45fd21abcdfe3054966250663c8f8829104f0b8e3e67a55c262ec1aed2",
+      "gitBlobOid": "4be6806222d2e10215fb4a719bf3d2fc68f7457c"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/main-ci38772398721-closed-originals-once/archive-entries/entry-0016-original.log",
+      "length": 37539,
+      "sha256": "f3ad31863a0cbaba8471e9a9d5cadd255b74faa4e0fa1d56d58cc45c70661bb9",
+      "gitBlobOid": "ce993fbfdbcd4f0e224d51bea76299f5764196ed"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/main-ci38772398721-closed-originals-once/archive-entries/entry-0017-original.log",
+      "length": 595,
+      "sha256": "7a935e0a5f770fa5caeeae6a9d317cd9b941a77c13368c68e0b44ebb296d318d",
+      "gitBlobOid": "3434eb21b1feeb925f60df1db6b0fa961c03c4d0"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/main-ci38772398721-closed-originals-once/archive-entries/entry-0018-original.log",
+      "length": 833,
+      "sha256": "2d6a4961eacfa5c04a9c00baa0cd6a22e6c01a3db578ff79c8c54d5f19d75329",
+      "gitBlobOid": "14ba19506fac9dedac02ac93b338551d356d07b1"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/main-ci38772398721-closed-originals-once/archive-entries/entry-0019-original.log",
+      "length": 306,
+      "sha256": "e0a7819e98b444a80a7c19d0f48cef0f8542a8dd073369c3e979d4cf90526266",
+      "gitBlobOid": "798dc9f9c5a45524f0121244de5654f5115d8852"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/main-ci38772398721-closed-originals-once/archive-entries/entry-0020-original.log",
+      "length": 1719,
+      "sha256": "81d200b621cf788df009ec2bdda2d3978533fdcf1cfeaadee426c5792050ee74",
+      "gitBlobOid": "9257b97c5a972d3639bfcc61cf1a0bb3b0176a60"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/main-ci38772398721-closed-originals-once/archive-entries/entry-0021-original.log",
+      "length": 431,
+      "sha256": "c989ccf8fd84ac3383a5b90b7fe772006597deb748e8d59a97adbe4eb2e515c9",
+      "gitBlobOid": "89acd8050785c248166b2db153a2aad4dfb1f354"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/main-ci38772398721-closed-originals-once/baseline-docker-build-original.log",
+      "length": 28668,
+      "sha256": "e4d5b54b459dc4e5b95b56c0d4658cd35e42b74ffe1d997c041cd1cf3754d1cc",
+      "gitBlobOid": "97584f5c2ed8454241a19ac4e60c2c804938e42d"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/main-ci38772398721-closed-originals-once/candidate-docker-build-original.log",
+      "length": 85081,
+      "sha256": "06fb61bdfa6ab6ac2f3d0f08ad203d77298165a4176f6e5b81838e8005ebccc8",
+      "gitBlobOid": "def42527d6a4e025999889fbdc67e9d8d31a36ca"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/main-ci38772398721-closed-originals-once/client-build-original.log",
+      "length": 12792,
+      "sha256": "6b66665c220386186d5a260ed31eaa66e8af95671cb9f221ec039fe959e395f7",
+      "gitBlobOid": "6458d0a9e444e8c5fd87f263145e4ec0dcf8be9e"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/main-ci38772398721-closed-originals-once/closed-record.json",
+      "length": 15759,
+      "sha256": "b98dd740db79262fef8aca655b1a4701092d8d59bb887c99f7651e68b61df809",
+      "gitBlobOid": "d377dca8cb01f6266ebf4d44daa48f83c7bda5ee"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/main-ci38772398721-closed-originals-once/closing-refs-original.json",
+      "length": 31,
+      "sha256": "41d2c505b45e615f2361b1e657a3a9a2ec9be8dc89cee69269b8121226d416db",
+      "gitBlobOid": "d70a833229f2311b7e3d63a53c4494700853343b"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/main-ci38772398721-closed-originals-once/coordination-original.json",
+      "length": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "gitBlobOid": "0637a088a01e8ddab3bf3fa98dbe804cbde1a0dc"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/main-ci38772398721-closed-originals-once/docker-boundary-original.log",
+      "length": 3784,
+      "sha256": "50cdfd45fd21abcdfe3054966250663c8f8829104f0b8e3e67a55c262ec1aed2",
+      "gitBlobOid": "4be6806222d2e10215fb4a719bf3d2fc68f7457c"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/main-ci38772398721-closed-originals-once/docker-readiness-original.log",
+      "length": 37539,
+      "sha256": "f3ad31863a0cbaba8471e9a9d5cadd255b74faa4e0fa1d56d58cc45c70661bb9",
+      "gitBlobOid": "ce993fbfdbcd4f0e224d51bea76299f5764196ed"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/main-ci38772398721-closed-originals-once/inventory-comparison-derived.json",
+      "length": 41852,
+      "sha256": "ca9c82d18d7360cd821e8fcad9da00136366902f1aeb27c2479176a94686b107",
+      "gitBlobOid": "ee332354eb131e099d1b551b39ef950a28fa0d45"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/main-ci38772398721-closed-originals-once/jobs-original.json",
+      "length": 4309,
+      "sha256": "58b6ddd060251f77e18da807edab9fdd9e23e634549648461564d861e8a59e0e",
+      "gitBlobOid": "e86f6d91ca0aeee1bcbae8284e1da389c979fbd3"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/main-ci38772398721-closed-originals-once/logs-original.zip",
+      "length": 1367960,
+      "sha256": "291ec29cbad067af90ecc99b814b4fa75d3af569c40006f5f2109bd8ecaa70c5",
+      "gitBlobOid": "4e835f3f0102a3136dcbb58e54e5d27fd80b9d52"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/main-ci38772398721-closed-originals-once/main-original.json",
+      "length": 336,
+      "sha256": "5dbe45b3d22a65a8a14dc291df3e7fc536f7465cceca1682788cdb46d6448679",
+      "gitBlobOid": "304c7641f875df313b3c12146f7ce990a7872ee7"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/main-ci38772398721-closed-originals-once/pr-ci-original.json",
+      "length": 12074,
+      "sha256": "853d50aad826cfff023b529a0d832e8eb3de277aa7705fd1a907e257cdd28ea6",
+      "gitBlobOid": "1316b174828428319d622edb489665c4165adc88"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/main-ci38772398721-closed-originals-once/pr-comments-original.json",
+      "length": 14359,
+      "sha256": "d59f51bbdcd741e37562d6ab7821a9d8ccaae14c2108a80e352041596a496f10",
+      "gitBlobOid": "cf9201dc7cbab7b8450bb94ce737ae356db65828"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/main-ci38772398721-closed-originals-once/pr-original.json",
+      "length": 31968,
+      "sha256": "852fd1c7f6f84e33ce884ab2bec826d40f5c27279bfebf079ad8b7a52ab7855e",
+      "gitBlobOid": "78ea3adc7e5d790e8e89009c3bc963a02d09afba"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/main-ci38772398721-closed-originals-once/pr-reviews-original.json",
+      "length": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "gitBlobOid": "0637a088a01e8ddab3bf3fa98dbe804cbde1a0dc"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/main-ci38772398721-closed-originals-once/readiness-proofs-derived.json",
+      "length": 33504,
+      "sha256": "e9b1754ab85302e9681682e6b68bde6438f00cac684c2e8e17dc8374f0789f67",
+      "gitBlobOid": "52d5c98da207c29b711c19968fea155ea430e0f5"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/main-ci38772398721-closed-originals-once/run-original.json",
+      "length": 12122,
+      "sha256": "2c90f06107206bb4bdb799a458e15a3d80a58f486c6c741ca9841a70daca5388",
+      "gitBlobOid": "0798de0a7cc5c38b2370d644e53882c54d9a102a"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/main-ci38772398721-closed-originals-once/scope-original.json",
+      "length": 6545,
+      "sha256": "16e9b64f1e0729e6c8d66a18e5099b2ac88d00ee1199bea528df8c28563a6b34",
+      "gitBlobOid": "b2141c6fd2a707909b5def97fcadf0d5df38c350"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/main-ci38772398721-closed-originals-once/server-tests-original.log",
+      "length": 3812479,
+      "sha256": "0e53b22ff86bfd2be417d2b0ff2f6f7fe499c5c594ad3c68a54e7064d2460bf7",
+      "gitBlobOid": "1719b9e19c126f7a70601ab9cda13f73e722afe7"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/main-ci38772398721-closed-originals-once/source-pass-original.json",
+      "length": 8010,
+      "sha256": "184b61b81a83ee40832800c1ade276ccebaf1542e534bb6a12e0cfed19fa024c",
+      "gitBlobOid": "50001dad3fec711ccbb1d2350be13fd9ceb499b9"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/main-ci38772398721-closed-originals-once/workflow-original.yml",
+      "length": 2785,
+      "sha256": "602236753ac1d7096c257927f6192b93800f8a8da96af1cc0a1580251950fcf5",
+      "gitBlobOid": "8b2c6894ec2fc855b21adc245501a15370f4f5ae"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/retain-startup-main-ci38772398721-complete-originals-once.py",
+      "length": 15032,
+      "sha256": "804bc10d36bdbdba9baf99954cfa7447087580df0199c726734c247f22c67e92",
+      "gitBlobOid": "9c013d2e1d09a1ffa0c0178c3f6cd6b4a40f1c2a"
+    },
+    {
+      "path": "WP/audit-release-eb6de2e8/README.md",
+      "length": 640319,
+      "sha256": "254e264b1540206ff5c1cf7777cd62406fa0ff26201cc651623a64c6f684133a",
+      "gitBlobOid": "8bf862bf6c8c48f377ef36ed4ead02c6325e6783"
+    },
+    {
+      "path": "WP/runtime-recovery-kobo/README.md",
+      "length": 389612,
+      "sha256": "3a6b06e1ceb3be5fc062bdd8a2be7dbc4ffb276d2dc6b0b1efcc0542a5249e1f",
+      "gitBlobOid": "d7130fc25f6c8468acd7f6bb120da4d61d31e71f"
+    },
+    {
+      "path": "WP/backlog-resume-20261013/retain-startup-main-ci38772398721-closed-originals-once.py",
+      "length": 14852,
+      "sha256": "e29ad743781d980d7d3d4f932dca1ec1cb8aeb20de4d25f669e6067d060dc00e",
+      "gitBlobOid": "2a67fc639f59a514c77d639b0cf011261f33539f"
+    },
+    {
+      "path": "WP/startup-order-readiness-20261015/main-ci38772398721-retention-preflight-refusal-once/refusal-and-resolution.json",
+      "length": 1028,
+      "sha256": "0ea68d40f00ad4de3289ce91c47a21aeb4ef339526640cdfc1ad02f143f44ba6",
+      "gitBlobOid": "b401af8fca5188135f155719d8affde6d23a5578"
+    }
+  ],
+  "productionOperations": 0
+}
