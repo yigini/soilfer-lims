@@ -1,0 +1,10 @@
+{
+  "closedUtc": "2026-10-15T20:24:28.546576+00:00",
+  "status": "REVIEWED_R2_LAUNCHER_CLOSED_INSPECT_SAME_UNIT",
+  "exitCode": 0,
+  "error": null,
+  "root": "/opt/lims/cleanup-receipts/r2-cache-acc15844-20261015T213000Z",
+  "unit": "lims-r2-cache-acc15844-20261015t213000z",
+  "operationComplete": false,
+  "retryAllowed": false
+}
