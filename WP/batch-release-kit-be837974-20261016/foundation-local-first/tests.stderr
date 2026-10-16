@@ -1,0 +1,12 @@
+test_actual_retained_timings_do_not_prove_nine_to_ten_minutes (verify_kit_contract.KitRefusals.test_actual_retained_timings_do_not_prove_nine_to_ten_minutes) ... ok
+test_any_oom_refuses_and_peak_does_not_override_counters (verify_kit_contract.KitRefusals.test_any_oom_refuses_and_peak_does_not_override_counters) ... ok
+test_exact_disk_floor_and_unexplained_boundary (verify_kit_contract.KitRefusals.test_exact_disk_floor_and_unexplained_boundary) ... ok
+test_failure_never_restarts_or_restores_even_without_commit_receipt (verify_kit_contract.KitRefusals.test_failure_never_restarts_or_restores_even_without_commit_receipt) ... ok
+test_fresh_gate_binds_release_impact_and_human_workload (verify_kit_contract.KitRefusals.test_fresh_gate_binds_release_impact_and_human_workload) ... ok
+test_missing_outage_phase_cannot_imply_fit (verify_kit_contract.KitRefusals.test_missing_outage_phase_cannot_imply_fit) ... ok
+test_postflight_permits_only_exact_intake_count_deltas (verify_kit_contract.KitRefusals.test_postflight_permits_only_exact_intake_count_deltas) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.029s
+
+OK

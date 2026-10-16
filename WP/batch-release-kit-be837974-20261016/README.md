@@ -1,0 +1,15 @@
+Release kit foundation for `be837974` / `acc15844`
+
+Claudio accepted qualification result 6212737130 in [6212990400](https://github.com/yigini/soilfer-lims/issues/162#issuecomment-6212990400). The complete production coordinator, exact source review, frozen kit review, and fresh YY single-use gate remain required. No release command is executable in this foundation.
+
+The coordinator will quiesce Apache with 503, stop the exact predecessor with `docker stop -t 10`, record its actual exit, establish no remaining volume writers, check stopped live-volume integrity/FK, retain the original DB/WAL/SHM and a consistent backup, install the additive 206/214/209 changes, start the exact candidate once, require readiness and 200/200/401 under 600 seconds, and reopen only after all guards pass. Every phase records UTC and monotonic durations. No container or retained evidence is removed.
+
+At 600 seconds without readiness, ingress stays at 503, the exact candidate is stopped and retained, the partial receipt is sealed and reported on #162, and recovery requires a separately reviewed forward fix. No database is restored. No automatic predecessor restart exists. #187 pin 4 permits a proven unchanged pre-COMMIT restart, but this release's later rule is stricter after **any** installer or default-entrypoint attempt; missing installer receipts do not prove that no COMMIT happened.
+
+Postflights use **after-natural-sync counts with explicit intake deltas**. Sample and AuditLog may grow only as the full source/fetch/occurrence/hold/audit comparator permits. Result, Batch and BatchQcResult must remain unchanged. The second natural sync must be idempotent against the first. Counts never replace the full preservation checks.
+
+YY's gate must explicitly accept the measured intake list: **193 new samples, 23 holds, 20 existing cross-submission duplicates, and one ZMB manager notification; other labs unchanged**. Production may see more submissions. The same fresh YY answer must confirm lab/hub workload control and the release-day disk-abort policy. Existing historic confirmations cannot serve this new gate.
+
+The 805306368-byte memory limit, empty NODE_OPTIONS, zero swap, zero oom/oom_kill, sampled nonreclaimable guard, existing disk floor plus 10 GB, exact retained allocation budget, and 500 MB unexplained-drop abort remain. A reviewed read-only host inventory must establish that local autoheal/monitoring does not act on the temporary unhealthy state before a gate is created. That has not yet been checked for this kit.
+
+The timing evidence is being derived from retained originals. The accepted 100000 and 233000 runs started an **already installed** database. They prove startup readiness, not a full production outage containing the three new installers. Historical measured installer times are listed separately and retain their older image/source context. A 9–10 minute whole-outage fit is not established and must not be inferred from the approximately 395–425 second startup alone.
