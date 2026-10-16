@@ -213,7 +213,7 @@ describe('Stage D: Desk Ergonomics & Hardware Contract Tests (RC-16 - RC-18)', (
             where: { id: { in: sampleIds } }
         }), select: { id: true } })).map(row => row.id), { single: false });
         await prisma.consignment.deleteMany({
-            where: { id: csgId }
+            where: { id: csgId, custodyEvents: { none: {} } }
         });
     });
 });

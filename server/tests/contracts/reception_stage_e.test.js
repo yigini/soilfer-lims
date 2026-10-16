@@ -119,9 +119,9 @@ describe('Stage E: Distinct RECEIVED_REJECTED State & Immutable Chain of Custody
         expect(res.body.rejectionReason).toBe('Bag compromised with petroleum hydrocarbon contamination');
 
         // Verify DB record
-        const dbSample = await prisma.sample.findUnique({
+        const dbSample = await receivedView(await prisma.sample.findUnique({
             where: { id: testRejectSampleId }
-        });
+        }));
         expect(dbSample.status).toBe('RECEIVED_REJECTED');
         expect(dbSample.rejectionReason).toBe('Bag compromised with petroleum hydrocarbon contamination');
         expect(dbSample.custodyCarrierName).toBe('DHL Express Driver Gomez');
@@ -145,7 +145,7 @@ describe('Stage E: Distinct RECEIVED_REJECTED State & Immutable Chain of Custody
     });
 
     // 2. RC-19: Separate Handover Timestamp & Officer Counter-Signature for Accepted Samples
-    test('RC-19: Accepted intake separates custody handover timestamp from system entry and immutably records officer counter-signature', async () => {
+    test('RC-19: Accepted intake separates custody handover timestamp from system entry and immutably records authenticated officer acknowledgement', async () => {
         // Pre-create expected sample
         await createSampleFixture(prisma, {
             data: {
@@ -192,14 +192,14 @@ describe('Stage E: Distinct RECEIVED_REJECTED State & Immutable Chain of Custody
         expect(res.body.labId).toBeTruthy();
 
         // Verify DB record
-        const dbSample = await prisma.sample.findUnique({
+        const dbSample = await receivedView(await prisma.sample.findUnique({
             where: { id: testAcceptSampleId }
-        });
+        }));
         expect(dbSample.status).toBe('ACCEPTED');
         expect(dbSample.custodyCarrierName).toBe('AgroExtension Officer Perez');
         expect(dbSample.custodyTrackingNumber).toBe('EXT-WAYBILL-2026-09');
-        expect(dbSample.custodySenderSignature).toBe('Perez / MOA');
-        expect(dbSample.receivingOfficerSignature).toContain('CONFIRMED');
+        expect(dbSample.custodySenderSignature).toBeNull();
+        expect(dbSample.receivingOfficerSignature).toBeNull();
 
         // Handover timestamp must be preserved separately from receptionDate/createdAt
         const recordedHandover = new Date(dbSample.custodyHandoverAt).getTime();
@@ -259,9 +259,9 @@ describe('Stage E: Distinct RECEIVED_REJECTED State & Immutable Chain of Custody
         createdConsignmentId = res.body.consignment.id;
 
         // Verify rejected sample has RECEIVED_REJECTED in database
-        const dbRejected = await prisma.sample.findFirst({
+        const dbRejected = await receivedView(await prisma.sample.findFirst({
             where: { originalId: batchSample2 }
-        });
+        }));
         expect(dbRejected).toBeTruthy();
         expect(dbRejected.status).toBe('RECEIVED_REJECTED');
         expect(dbRejected.rejectionReason).toContain('loss of core matrix');
@@ -270,9 +270,9 @@ describe('Stage E: Distinct RECEIVED_REJECTED State & Immutable Chain of Custody
         expect(new Date(dbRejected.custodyHandoverAt).toISOString()).toBe(handoverTime.toISOString());
 
         // Verify accepted sample has ACCEPTED status
-        const dbAccepted = await prisma.sample.findFirst({
+        const dbAccepted = await receivedView(await prisma.sample.findFirst({
             where: { originalId: batchSample1 }
-        });
+        }));
         expect(dbAccepted).toBeTruthy();
         expect(dbAccepted.status).toBe('ACCEPTED');
         expect(dbAccepted.custodyCarrierName).toBe('SpeedyLogistics Driver Silva');
@@ -296,3 +296,14 @@ describe('Stage E: Distinct RECEIVED_REJECTED State & Immutable Chain of Custody
         expect(workflow.isValidSampleState('RECEIVED_REJECTED')).toBe(true);
     });
 });
+
+async function receivedView(record) {
+    expect(record.custodyCarrierName).toBeNull();
+    expect(record.custodyHandoverAt).toBeNull();
+    expect(record.custodySenderSignature).toBeNull();
+    expect(record.receivingOfficerSignature).toBeNull();
+    const view = await require('../../services/custodyService').receiptView(prisma, record);
+    expect(view.custodyAcknowledgement).toMatchObject({ authenticated: true, source: 'LIVE' });
+    expect(view.custodyAcknowledgement.actorId).toBe(view.receivingOfficerId);
+    return view;
+}

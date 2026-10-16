@@ -9,10 +9,14 @@ const { createSampleFixture } = require('../helpers/workflowFixtures');
 const { getAuthToken } = require('../setup');
 const labId = `HOLD-LAB-${randomUUID()}`;
 let actor;
+const locations = {};
 
 beforeAll(async () => {
     await prisma.lab.create({ data: { id: labId, code: labId, name: 'Hold authority laboratory', country: 'GTM' } });
     actor = jwt.decode(await getAuthToken('LAB_MANAGER', labId));
+    for (const name of ['Reviewed shelf', 'New shelf', 'Stale shelf', 'Faulted shelf', 'Busy shelf']) {
+        const location = await prisma.inventoryLocation.create({ data: { id: randomUUID(), labId, purpose: 'SAMPLE', name } }); locations[name] = location.id;
+    }
 });
 
 async function sample(extra = {}) {
@@ -244,9 +248,9 @@ function holdRoutes(user) {
 }
 
 test.each(['{unparseable', '[]', 'null', '"primitive root"', '42'])('storage movement refuses unreadable metadata %s, retaining every byte, hold and table', async metadata => {
-    const s = await sample({ metadata }), before = snapshot();
+    const s = await sample({ status: 'RECEIVED', metadata }), before = snapshot();
     expect(await holds.isHeld(prisma, s)).toBe(true);
-    const response = await request(holdRoutes(actor)).post(`/api/samples/${s.id}/custody/move`).send({ location: 'Reviewed shelf' });
+    const response = await request(holdRoutes(actor)).post(`/api/samples/${s.id}/custody/move`).send({ toLocationId: locations['Reviewed shelf'], reason: 'Storage inventory reconciliation' });
     expect(response).toMatchObject({ status: 409, body: { code: 'SAMPLE_METADATA_INVALID' } });
     expect(snapshot()).toEqual(before);
     const fresh = await prisma.sample.findUnique({ where: { id: s.id } });
@@ -255,17 +259,19 @@ test.each(['{unparseable', '[]', 'null', '"primitive root"', '42'])('storage mov
 
 test('storage movement preserves readable hold markers and resolution history and writes its audit atomically', async () => {
     const marker = { status: holds.ACTIVE, reason: 'REVISED_FIELD_EVIDENCE: custody review', resolutions: [{ holdId: 'historical', reason: 'Earlier review' }] };
-    const s = await sample({ metadata: JSON.stringify({ archiveLocation: 'Old shelf', provenanceHold: marker, untouched: { value: 'kept' } }) });
-    const response = await request(holdRoutes(actor)).post(`/api/samples/${s.id}/custody/move`).send({ location: 'New shelf', reason: 'Storage inventory' });
-    expect(response).toMatchObject({ status: 200, body: { success: true, oldLocation: 'Old shelf', location: 'New shelf' } });
+    const s = await sample({ status: 'RECEIVED', metadata: JSON.stringify({ archiveLocation: 'Old shelf', provenanceHold: marker, untouched: { value: 'kept' } }) });
+    const response = await request(holdRoutes(actor)).post(`/api/samples/${s.id}/custody/move`).send({ toLocationId: locations['New shelf'], reason: 'Storage inventory' });
+    expect(response).toMatchObject({ status: 200, body: { success: true, location: 'New shelf', event: { fromLocationId: null, toLocationId: locations['New shelf'] } } });
     const fresh = await prisma.sample.findUnique({ where: { id: s.id } });
-    expect(JSON.parse(fresh.metadata)).toMatchObject({ archiveLocation: 'New shelf', provenanceHold: marker, untouched: { value: 'kept' }, lastMovementBy: actor.username });
+    expect(fresh.metadata).toBe(s.metadata);
+    expect(JSON.parse(fresh.metadata)).toMatchObject({ archiveLocation: 'Old shelf', provenanceHold: marker, untouched: { value: 'kept' } });
+    expect(await prisma.custodyEvent.findFirst({ where: { sampleId: s.id } })).toMatchObject({ type: 'MOVED', toLocationId: locations['New shelf'], actorId: actor.id });
     expect(await holds.isHeld(prisma, fresh)).toBe(true);
     expect(await prisma.auditLog.count({ where: { sampleId: s.id, action: 'STORAGE_MOVEMENT' } })).toBe(1);
 });
 
 test.each(['raise', 'resolve'])('storage movement refuses a stale read after a concurrent hold %s and preserves the committed hold history', async action => {
-    const s = await sample({ metadata: '{"untouched":"original source"}' });
+    const s = await sample({ status: 'RECEIVED', metadata: '{"untouched":"original source"}' });
     const existing = action === 'resolve' ? await boundHold(s.id, 'REVISED_FIELD_EVIDENCE: original hold') : null;
     const stale = await prisma.sample.findUnique({ where: { id: s.id } });
     const transaction = prisma.$transaction.bind(prisma);
@@ -286,7 +292,7 @@ test.each(['raise', 'resolve'])('storage movement refuses a stale read after a c
         } } }));
     });
     try {
-        const response = await request(holdRoutes(actor)).post(`/api/samples/${s.id}/custody/move`).send({ location: 'Stale shelf' });
+        const response = await request(holdRoutes(actor)).post(`/api/samples/${s.id}/custody/move`).send({ toLocationId: locations['Stale shelf'], reason: 'Storage inventory reconciliation' });
         expect(response).toMatchObject({ status: 409, body: { code: 'SAMPLE_STATE_CHANGED' } });
         expect(snapshot()).toEqual(concurrentState);
         const fresh = await prisma.sample.findUnique({ where: { id: s.id } });
@@ -298,28 +304,28 @@ test.each(['raise', 'resolve'])('storage movement refuses a stale read after a c
 });
 
 test('storage audit insertion failure rolls back the location and every table', async () => {
-    const s = await sample({ metadata: '{"archiveLocation":"Original shelf","untouched":1.2300}' }), before = snapshot();
+    const s = await sample({ status: 'RECEIVED', metadata: '{"archiveLocation":"Original shelf","untouched":1.2300}' }), before = snapshot();
     const transaction = prisma.$transaction.bind(prisma);
-    let metadataWasWritten = false;
+    let movementWasWritten = false;
     const spy = jest.spyOn(prisma, '$transaction').mockImplementationOnce(callback => transaction(tx => callback({ ...tx,
         auditLog: { ...tx.auditLog, create: async () => {
-            const attempted = await tx.sample.findUnique({ where: { id: s.id } });
-            metadataWasWritten = JSON.parse(attempted.metadata).archiveLocation === 'Faulted shelf';
+            const attempted = await tx.custodyEvent.findFirst({ where: { sampleId: s.id } });
+            movementWasWritten = attempted?.toLocationId === locations['Faulted shelf'];
             throw new Error('Owned storage audit fault');
         } }
     })));
     try {
-        const response = await request(holdRoutes(actor)).post(`/api/samples/${s.id}/custody/move`).send({ location: 'Faulted shelf' });
+        const response = await request(holdRoutes(actor)).post(`/api/samples/${s.id}/custody/move`).send({ toLocationId: locations['Faulted shelf'], reason: 'Storage inventory reconciliation' });
         expect(response).toMatchObject({ status: 500, body: { code: 'SAMPLE_MOVEMENT_ERROR' } });
-        expect(metadataWasWritten).toBe(true); expect(snapshot()).toEqual(before);
+        expect(movementWasWritten).toBe(true); expect(snapshot()).toEqual(before);
     } finally { spy.mockRestore(); }
 });
 
 test('storage movement busy errors return a stable conflict', async () => {
-    const s = await sample(), before = snapshot();
+    const s = await sample({ status: 'RECEIVED' }), before = snapshot();
     const spy = jest.spyOn(prisma, '$transaction').mockRejectedValueOnce(Object.assign(new Error('database is locked'), { code: 'SQLITE_BUSY' }));
     try {
-        expect(await request(holdRoutes(actor)).post(`/api/samples/${s.id}/custody/move`).send({ location: 'Busy shelf' }))
+        expect(await request(holdRoutes(actor)).post(`/api/samples/${s.id}/custody/move`).send({ toLocationId: locations['Busy shelf'], reason: 'Storage inventory reconciliation' }))
             .toMatchObject({ status: 409, body: { code: 'SAMPLE_STATE_CHANGED' } });
         expect(snapshot()).toEqual(before);
     } finally { spy.mockRestore(); }

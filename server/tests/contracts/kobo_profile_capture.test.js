@@ -130,6 +130,12 @@ describe('Actual mounted Kobo capture, hold and force-refresh paths',()=>{
         const response=await request(app).post(`/api/kobo/sync-sample/${sample.id}`).set('Authorization',`Bearer ${token}`);
         expect(response.status).toBe(200);
         expect(JSON.parse((await prisma.sample.findUnique({where:{id:sample.id}})).fieldMetadata).profileReference.code).toBe('MANUAL-PIT');
+        // This test now declares the manager's review of its owned source hold
+        // before exercising the existing disposed-specimen refresh refusal.
+        for (const hold of await prisma.sampleHold.findMany({where:{sampleId:sample.id,resolvedAt:null}}))
+            await prisma.$transaction(tx=>require('../../services/sampleHoldService').resolveHold(tx,{sampleId:sample.id,holdId:hold.id,
+                actor:jwt.decode(token),reason:'Owned fixture source reconciled after the recorded manual correction'}));
+        expect(await require('../../services/sampleHoldService').isHeld(prisma,await prisma.sample.findUnique({where:{id:sample.id}}))).toBe(false);
         await transitionSample(sample.id, 'RECEIVED_REJECTED', jwt.decode(token), 'Fixture rejected before disposal', {}, prisma);
         await transitionSample(sample.id, 'DISPOSED', jwt.decode(token), 'Fixture disposal', {approvedAt:new Date()}, prisma);
         fetch.mockClear();

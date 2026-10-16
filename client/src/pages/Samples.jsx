@@ -12,6 +12,7 @@ import { ChevronLeft, ChevronRight, AlertTriangle, X, Printer, Trash2 } from 'lu
 import LabelPrintDialog from '../components/common/LabelPrintDialog';
 import ExportModal from '../components/common/ExportModal';
 import LegacyBackfillModal from '../components/projects/LegacyBackfillModal';
+import DisposalQueue from '../components/samples/DisposalQueue';
 
 const extractUrlState = (searchParams) => {
     const urlView = searchParams.get('view') || 'daily';
@@ -36,7 +37,7 @@ const extractUrlState = (searchParams) => {
 };
 
 const Samples = () => {
-    const { token, user } = useAuth();
+    const { token, user, hasPermission } = useAuth();
     const { showDialog } = useDialog();
     const { t } = useLanguage();
     const [searchParams, setSearchParams] = useSearchParams();
@@ -485,6 +486,7 @@ const Samples = () => {
                 onToggleQuickFilter={handleQuickFilter}
             />
 
+            {hasPermission('DISPOSE_SAMPLE') && <DisposalQueue />}
             <SamplesFilterBar
                 search={search}
                 onSearchChange={handleSearchChange}

@@ -371,6 +371,7 @@ bash "${entryScript.replace(/\\/g, '/')}"
         require('../../scripts/install_lab_policy_schema').installLabPolicySchema({ dbPath: targetDb, apply: true });
         require('../../scripts/install_control_charts').installControlCharts({ dbPath: targetDb, apply: true });
         require('../../scripts/install_order_revisions').installOrderRevisions({ dbPath: targetDb, apply: true });
+        require('../../scripts/install_sample_custody').installSampleCustody({ dbPath: targetDb, apply: true });
         const hashDb = () => createHash('sha256').update(fs.readFileSync(targetDb)).digest('hex');
         const beforeSha = hashDb();
         fs.writeFileSync(path.join(testDir, 'prisma', '.seed_complete'), 'done');
@@ -432,6 +433,8 @@ bash "${entryScript.replace(/\\/g, '/')}"
                 `node "${path.join(serverDir, 'scripts/install_control_charts.js').replace(/\\/g, '/')}"`)
             .replaceAll('node scripts/install_order_revisions.js',
                 `node "${path.join(serverDir, 'scripts/install_order_revisions.js').replace(/\\/g, '/')}"`)
+            .replaceAll('node scripts/install_sample_custody.js',
+                `node "${path.join(serverDir, 'scripts/install_sample_custody.js').replace(/\\/g, '/')}"`)
             .replaceAll('node scripts/install_lab_policy_schema.js',
                 `node "${path.join(serverDir, 'scripts/install_lab_policy_schema.js').replace(/\\/g, '/')}"`)
             .replaceAll('node scripts/install_result_raw_input.js',

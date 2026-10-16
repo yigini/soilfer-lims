@@ -31,6 +31,10 @@ const QC_MEMBERSHIP_LOADER_SHA256 = '40c0af827c4d22b6fce1ee5b770f2c0146f456cfeea
 const QC_MEMBERSHIP_SQL_SHA256 = '1bc85113a3b6b7da327265bc7005eb4a1c97855943c599b1fe5ed8b126cf8572';
 // #189 additive evidence sources are inspected, never exempted as writers.
 const QC_EVIDENCE_SOURCES = Object.freeze([
+    // #207: inspect only exact additive custody DDL; no workflow writer exemption.
+    Object.freeze({ functionName: 'loadCustodyMigrationSource', loader: 'services/custodyMigrationSource.js',
+        loaderSha256: '319f7d1a14b784c34e7ee8c94b9c513ca5793224158346e3b028a09145619f1d', directory: '20261016000100_sample_custody_retention',
+        sqlSha256: '6572f75c9663d0aaece1bd6139694fe1ad41142f2723404a811852f8eaede685', boundary: '-- Contract guards' }),
     // #209/6163271808: inspect the exact additive source; no writer exemption.
     Object.freeze({ functionName: 'loadOrderRevisionMigrationSource', loader: 'services/orderRevisionMigrationSource.js',
         loaderSha256: 'ba6baba68eceb2355cbc68a7a6bba83a1e3c7f168a30bdf8a35df80c8dde1093',

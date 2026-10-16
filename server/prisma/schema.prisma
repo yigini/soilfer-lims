@@ -132,6 +132,8 @@ model Sample {
   preparationStatus String?    // PENDING, DONE
   receptionDate     DateTime?
   receivedBy        String?
+  retainUntil       DateTime?
+  custodyEvents     CustodyEvent[]
 
   // Depth & Horizon (First-Class SOSA Feature of Interest)
   depthTop          Float?     // e.g. 0 (cm)
@@ -224,6 +226,7 @@ model Sample {
 
 // Stage C: RC-12 Consignment Entity
 model Consignment {
+  custodyEvents     CustodyEvent[]
   id              String       @id @default(uuid())
   code            String       @unique // e.g. CSG-20260904-001
   labId           String       // Receiving laboratory
@@ -919,6 +922,9 @@ model InventoryLot {
 model InventoryLocation {
   id               String   @id
   labId            String
+  purpose          String   @default("REAGENT")
+  custodyFrom      CustodyEvent[] @relation("CustodyFrom")
+  custodyTo        CustodyEvent[] @relation("CustodyTo")
   name             String
   locationType     String   @default("SHELF") // ROOM | FRIDGE | FREEZER | CABINET | SHELF | OTHER
   parentLocationId String?
@@ -2348,6 +2354,35 @@ model SampleContainer {
   createdBy         String
   storageLocationId String?
   status            String @default("ACTIVE")
+  custodyEvents     CustodyEvent[]
   @@index([sampleId])
   @@index([parentId])
+}
+
+// Append-only physical custody; retained legacy columns are compatibility evidence.
+model CustodyEvent {
+  id               String @id
+  labId            String
+  sampleId         String?
+  sample           Sample? @relation(fields: [sampleId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  containerId      String?
+  container        SampleContainer? @relation(fields: [containerId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  consignmentId    String?
+  consignment      Consignment? @relation(fields: [consignmentId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  type             String
+  fromLocationId   String?
+  fromLocation     InventoryLocation? @relation("CustodyFrom", fields: [fromLocationId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  toLocationId     String?
+  toLocation       InventoryLocation? @relation("CustodyTo", fields: [toLocationId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  by               String
+  actorId          String?
+  at               DateTime @default(now())
+  source           String @default("LIVE")
+  acknowledgement  Boolean @default(true)
+  counterparty     String?
+  reference        String?
+  evidence         String?
+  @@index([sampleId, at])
+  @@index([consignmentId, at])
+  @@index([labId, at])
 }

@@ -35,6 +35,7 @@ async function guarded({items=[itemRow('item'),itemRow('other','Q'),itemRow('ano
         const modelColumns=loadWorkRepeatMigrationSource();
         const shape=new Database(file);shape.exec(modelColumns.schemaSql);shape.close();
     }
+    require('../helpers/custodyFixtureSchema').extendHistoricalCustodyFixture(file);
     db=new Database(file);db.pragma('foreign_keys=ON');client=new PrismaClient({adapter:new PrismaBetterSqlite3({url:'file:'+file})});
 }
 afterEach(async()=>{

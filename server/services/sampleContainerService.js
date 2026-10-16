@@ -23,8 +23,13 @@ async function scopedSample(db, sampleId, actor) {
 }
 async function list(db, sampleId, actor) {
     if (!hasPermission(actor, 'VIEW_SAMPLES')) throw new rules.TransitionError('Sample access is required.', 403, 'SAMPLE_CONTAINER_FORBIDDEN');
-    await scopedSample(db, sampleId, actor);
-    return db.sampleContainer.findMany({ where: { sampleId }, orderBy: [{ createdAt: 'asc' }, { id: 'asc' }] });
+    const sample = await scopedSample(db, sampleId, actor);
+    const rows = await db.sampleContainer.findMany({ where: { sampleId }, orderBy: [{ createdAt: 'asc' }, { id: 'asc' }] });
+    const events = await db.custodyEvent.findMany({ where: { sampleId }, orderBy: [{ at: 'asc' }, { id: 'asc' }] });
+    const current = new Map(events.map(event => [event.containerId, event]));
+    return rows.map(row => { const event = current.get(row.id) || current.get(null); return { ...row,
+        storageLocationId: event ? event.toLocationId : row.storageLocationId,
+        status: sample.status === 'DISPOSED' || event?.type === 'DISPOSED' ? 'DISPOSED' : row.status }; });
 }
 async function create(db, sampleId, actor, input) {
     if (!hasPermission(actor, 'MANAGE_CONTAINERS')) throw new rules.TransitionError('Container management is required.', 403, 'SAMPLE_CONTAINER_FORBIDDEN');

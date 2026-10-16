@@ -265,6 +265,11 @@ function beforeGuards(options) {
             // #209 adds only this nullable new-line identity. The captured
             // historical DDL and every other expected gap remain unchanged.
             expected.push({table:'OrderLine',fields:['workItemId']});
+            // #207 adds exactly these custody/retention gaps; preserve the pinned baseline.
+            const sampleGap = expected.find(row => row.table === 'Sample');
+            if (sampleGap) sampleGap.fields.push('retainUntil');
+            else expected.push({table:'Sample',fields:['retainUntil']});
+            expected.push({table:'InventoryLocation',fields:['purpose']},{table:'CustodyEvent',missingTable:true});
             const order = Prisma.dmmf.datamodel.models.map(model => model.dbName || model.name);
             expected.sort((left, right) => order.indexOf(left.table) - order.indexOf(right.table));
         }
@@ -342,7 +347,7 @@ function beforeGuards(options) {
             const tables = source.prepare("SELECT name, sql FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name NOT LIKE '_prisma_%' AND name NOT IN ('ResultEvidenceEvent','ContainerSequence')").all();
             // Copy schema-only indexes, leaving every additive release guard
             // and partial index for its actual installer on this new file.
-            const indexes = source.prepare("SELECT sql FROM sqlite_master WHERE type='index' AND sql IS NOT NULL AND tbl_name != 'ResultEvidenceEvent' AND name NOT IN ('ReferenceValue_current_generic','ReferenceValue_current_method','QcRule_scope_version_unique','BatchAnalyte_crm_ordinal_unique','BatchPositionReference_current_unique','QcMeasurement_current_unique','WorkAttempt_workItemId_attemptNo_unique','result_one_current','ReportedValueSelection_one_root','ResultOverrideRequest_one_active_cell','Report_amendmentId_key','ControlLimitSet_one_approved_series')").all();
+            const indexes = source.prepare("SELECT sql FROM sqlite_master WHERE type='index' AND sql IS NOT NULL AND tbl_name != 'ResultEvidenceEvent' AND name NOT IN ('ReferenceValue_current_generic','ReferenceValue_current_method','QcRule_scope_version_unique','BatchAnalyte_crm_ordinal_unique','BatchPositionReference_current_unique','QcMeasurement_current_unique','WorkAttempt_workItemId_attemptNo_unique','result_one_current','ReportedValueSelection_one_root','ResultOverrideRequest_one_active_cell','Report_amendmentId_key','ControlLimitSet_one_approved_series','CustodyEvent_first_sample_receipt','CustodyEvent_first_consignment_receipt')").all();
             source.close();
             for (const table of tables) db.exec(['Sample', 'WorkItem'].includes(table.name)
                 ? table.sql.replace(/,\s*"(?:holdPriorStatus|legacyStatus)"\s+TEXT(?=\s*[,)])/g, '') : table.sql);
@@ -572,7 +577,9 @@ async function createLegacyClosureDatabase({ analysis, labId, samples = [], work
     const sampleId = randomUUID(), workItemId = randomUUID(), now = Date.now();
     const database = beforeGuards({ actor: 'system:fixture', preMigrationSnapshot, batches, samples: [
         { id: sampleId, originalId: sampleId, status: 'APPROVED', assignedLab: labId, dryingStatus: 'DONE',
-            preparationStatus: 'DONE', createdAt: now, updatedAt: now }, ...samples], workItems: [
+            preparationStatus: 'DONE', createdAt: now, updatedAt: now,
+            ...(require('../../workflowContract').CLOSURE_TASK_SAMPLE_STATES[analysis] === 'DISPOSED' && {
+                retainUntil: Date.parse('2020-01-01T00:00:00Z'), metadata: '{"disposalReason":"Retained laboratory SOP disposal"}' }) }, ...samples], workItems: [
         { id: workItemId, sampleId, analysis, status: 'PENDING', assignedLab: labId, result: '6.2', history: '[]',
             createdAt: now, updatedAt: now }, ...workItems.map(row => ({ ...row, sampleId: row.sampleId || sampleId }))] });
     const { file } = database;

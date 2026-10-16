@@ -152,6 +152,7 @@ const checkPermission = (permissionKey) => {
         if (!allowedRoles.includes(currentRole)) {
             console.warn(`[AUTH] RBAC Denied: User ${user.username} (${currentRole}) attempted ${currentKey}. Allowed roles: ${JSON.stringify(allowedRoles)}`);
             const payload = { error: `Access denied. Role '${currentRole}' lacks permission '${currentKey}'.` };
+            if (['ARCHIVE_SAMPLE', 'DISPOSE_SAMPLE'].includes(currentKey)) payload.code = 'CUSTODY_FORBIDDEN';
             if (currentKey === 'MANAGE_WORK_ATTEMPTS') {
                 payload.code = 'WORK_ATTEMPT_FORBIDDEN';
             } else if (currentKey === 'MANAGE_LAB_APPEARANCE') {

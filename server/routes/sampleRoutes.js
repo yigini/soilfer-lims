@@ -5,6 +5,11 @@ const sampleAmendmentController = require('../controllers/sampleAmendmentControl
 const { checkPermission } = require('../middleware/authMiddleware');
 
 const containers = require('../controllers/sampleContainerController');
+const custody = require('../controllers/custodyController');
+router.get('/disposal-queue', checkPermission('DISPOSE_SAMPLE'), custody.queue);
+router.get('/:id/custody', checkPermission('VIEW_SAMPLES'), custody.events);
+router.get('/:id/storage-locations', checkPermission('VIEW_SAMPLES'), custody.locations);
+router.post('/:id/custody', checkPermission('ARCHIVE_SAMPLE'), custody.record);
 router.get('/:id/containers', checkPermission('VIEW_SAMPLES'), containers.list);
 router.post('/:id/containers', checkPermission('MANAGE_CONTAINERS'), containers.create);
 
@@ -40,7 +45,7 @@ router.post('/:id/orders', checkPermission('EDIT_ANALYSES'), sampleController.ap
 router.post('/:id/amendments', checkPermission('APPROVE_RESULTS'), sampleController.createAmendment);
 router.get('/:id/amendments', checkPermission('APPROVE_RESULTS'), sampleAmendmentController.list);
 router.post('/:id/amendments/:amendmentId/authorise', checkPermission('APPROVE_RESULTS'), sampleAmendmentController.authorise);
-router.post('/:id/custody/move', checkPermission('ARCHIVE_SAMPLE'), sampleController.recordStorageMovement);
+router.post('/:id/custody/move', checkPermission('ARCHIVE_SAMPLE'), custody.move);
 
 // Final Approval + Closure
 router.post('/:id/approve', checkPermission('APPROVE_RESULTS'), sampleController.approveSample);

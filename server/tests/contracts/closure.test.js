@@ -9,11 +9,13 @@ const { setFixtureQcRequirement } = require('../helpers/qcPolicyFixture');
 
 describe('8.1 Section E: Approval & Closure Rules', () => {
     let mgrToken, techToken, technicianUsername;
-    let sampleId, workItemId;
+    let sampleId, workItemId, storageLocationId;
 
     beforeAll(async () => {
         await ensureTestLab('LAB-CLO', 'CLO');
         const suffix = Date.now();
+        storageLocationId = `closure-location-${suffix}`;
+        await prisma.inventoryLocation.create({ data: { id: storageLocationId, labId: 'LAB-CLO', purpose: 'SAMPLE', name: 'Shelf A' } });
         const mgr = usersDb.create({ username: `mgr_clo_${suffix}`, role: 'LAB_MANAGER', labId: 'LAB-CLO', countries: ['CLO'] });
         const tech = usersDb.create({ username: `tech_clo_${suffix}`, role: 'LAB_TECHNICIAN', labId: 'LAB-CLO' });
         technicianUsername = tech.username;
@@ -93,7 +95,7 @@ describe('8.1 Section E: Approval & Closure Rules', () => {
         const res = await request(app)
             .post(`/api/samples/${sampleId}/archive`)
             .set('Authorization', `Bearer ${mgrToken}`)
-            .send({ archiveLocation: 'Shelf A', notes: 'Done' });
+            .send({ storageLocationId, notes: 'Done' });
 
         expect(res.status).toBe(200);
         expect(res.body.message).toMatch(/Archiving task created/i);
@@ -105,7 +107,8 @@ describe('8.1 Section E: Approval & Closure Rules', () => {
 
         const finalSample = samplesDb.findById(sampleId);
         expect(finalSample.status).toBe('ARCHIVED');
-        expect(finalSample.archiveLocation).toBe('Shelf A');
+        const archived = await prisma.custodyEvent.findFirst({ where: { sampleId, type: 'MOVED' }, include: { toLocation: true } });
+        expect(archived.toLocation.name).toBe('Shelf A');
     });
 
     test('Scenario 5: Immutability (Cannot revert Archived)', async () => {

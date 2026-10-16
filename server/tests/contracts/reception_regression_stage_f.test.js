@@ -163,7 +163,7 @@ describe('Stage F: Reception Contract and End-to-End Regression Suite (RC-20)', 
             expect(res.body.success).toBe(true);
 
             // Verify in DB that sample persisted mass and acknowledgment
-            const dbSample = await prisma.sample.findUnique({ where: { id: res.body.id || sampleId } });
+            const dbSample = await receivedView(await prisma.sample.findUnique({ where: { id: res.body.id || sampleId } }));
             expect(dbSample).toBeTruthy();
             expect(dbSample.receivedMass).toBe(60.0);
             expect(dbSample.massWarningAcknowledged).toBe(true);
@@ -322,7 +322,7 @@ describe('Stage F: Reception Contract and End-to-End Regression Suite (RC-20)', 
                 });
 
             expect(res.status).toBe(200);
-            const dbSample = await prisma.sample.findUnique({ where: { id: sampleId } });
+            const dbSample = await receivedView(await prisma.sample.findUnique({ where: { id: sampleId } }));
             const fieldMeta = JSON.parse(dbSample.fieldMetadata || '{}');
             // Must have been downgraded to MEDIUM or LOW, never HIGH
             expect(fieldMeta.locationConfidence?.value).toBe('MEDIUM');
@@ -502,7 +502,7 @@ describe('Stage F: Reception Contract and End-to-End Regression Suite (RC-20)', 
         });
 
         it('ensures rejected sample has status RECEIVED_REJECTED in database', async () => {
-            const dbSample = await prisma.sample.findUnique({ where: { id: rejectedSampleId } });
+            const dbSample = await receivedView(await prisma.sample.findUnique({ where: { id: rejectedSampleId } }));
             expect(dbSample).toBeTruthy();
             expect(dbSample.status).toBe('RECEIVED_REJECTED');
         });
@@ -545,7 +545,7 @@ describe('Stage F: Reception Contract and End-to-End Regression Suite (RC-20)', 
     // 8. RC-19: Three Custody Timestamps & Counter-Signature
     // -------------------------------------------------------------------------
     describe('8. Custody Timestamps and Counter-Signature (RC-19)', () => {
-        it('records physical handover separate from system entry with officer counter-signature', async () => {
+        it('records physical handover separate from system entry with authenticated officer acknowledgement', async () => {
             const sampleId = `REG-CUSTODY-${Date.now()}`;
             trackedSampleIds.add(sampleId);
 
@@ -578,7 +578,7 @@ describe('Stage F: Reception Contract and End-to-End Regression Suite (RC-20)', 
                 });
 
             expect(res.status).toBe(200);
-            const dbSample = await prisma.sample.findUnique({ where: { id: sampleId } });
+            const dbSample = await receivedView(await prisma.sample.findUnique({ where: { id: sampleId } }));
             expect(dbSample).toBeTruthy();
 
             // 1. Handover timestamp vs System entry timestamp
@@ -588,12 +588,23 @@ describe('Stage F: Reception Contract and End-to-End Regression Suite (RC-20)', 
             // 2. Carrier & courier tracking
             expect(dbSample.custodyCarrierName).toBe('AeroFlash Cargo Express Driver Ortiz');
             expect(dbSample.custodyTrackingNumber).toBe('AF-WB-90901');
-            expect(dbSample.custodySenderSignature).toBe('Ortiz / Courier');
+            expect(dbSample.custodySenderSignature).toBeNull();
 
             // 3. Officer identification & counter-signature
             expect(dbSample.receivingOfficerId).toBeDefined();
             expect(dbSample.receivingOfficerName).toBeDefined();
-            expect(dbSample.receivingOfficerSignature).toBe('CONFIRMED:receiving_officer_sig');
+            expect(dbSample.receivingOfficerSignature).toBeNull();
         });
     });
 });
+
+async function receivedView(record) {
+    expect(record.custodyCarrierName).toBeNull();
+    expect(record.custodyHandoverAt).toBeNull();
+    expect(record.custodySenderSignature).toBeNull();
+    expect(record.receivingOfficerSignature).toBeNull();
+    const view = await require('../../services/custodyService').receiptView(prisma, record);
+    expect(view.custodyAcknowledgement).toMatchObject({ authenticated: true, source: 'LIVE' });
+    expect(view.custodyAcknowledgement.actorId).toBe(view.receivingOfficerId);
+    return view;
+}

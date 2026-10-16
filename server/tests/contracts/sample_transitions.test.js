@@ -15,7 +15,8 @@ describe('WP-11: Canonical Sample State Transition Authority', () => {
                 originalId: `ORIG-${id}`,
                 status: 'EXPECTED',
                 country: 'GTM',
-                assignedLab: 'GTM-LAB1'
+                assignedLab: 'GTM-LAB1',
+                retainUntil: new Date('2020-01-01T00:00:00Z')
             }
         });
     });
@@ -127,10 +128,11 @@ describe('WP-11: Canonical Sample State Transition Authority', () => {
             }
         });
 
+        const archiveLocation = await prisma.inventoryLocation.create({ data: { id: testSample.id + '-archive', labId: 'GTM-LAB1', purpose: 'SAMPLE', name: 'Owned archive shelf' } });
         const req = {
             params: { id: testSample.id },
             user: { username: 'test_mgr', role: 'LAB_MANAGER', labId: 'GTM-LAB1', permissions: ['DISPOSE_SAMPLE', 'ARCHIVE_SAMPLE'] },
-            body: {}
+            body: { reason: 'Expired retention disposal', storageLocationId: archiveLocation.id }
         };
         const res = {
             status: jest.fn().mockReturnThis(),
@@ -164,7 +166,7 @@ describe('WP-11: Canonical Sample State Transition Authority', () => {
         const req = {
             params: { id: testSample.id },
             user: { username: 'test_mgr', role: 'LAB_MANAGER', labId: 'GTM-LAB1', permissions: ['DISPOSE_SAMPLE'] },
-            body: { disposalMethod: 'INCINERATION' }
+            body: { disposalMethod: 'INCINERATION', reason: 'Expired retention disposal' }
         };
         const res = {
             status: jest.fn().mockReturnThis(),

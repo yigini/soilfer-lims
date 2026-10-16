@@ -477,6 +477,10 @@ class SampleWorkspaceService {
             parsedMetadata = {};
         }
 
+        const receipt = await require('./custodyService').receiptView(prisma, sample);
+        const custodyEvents = await require('./custodyService').list(prisma, sample.id, user);
+        const lastLocationEvent = [...custodyEvents].reverse().find(event => !event.containerId && ['RECEIVED', 'MOVED', 'RETURNED', 'ISSUED', 'SENT_OUT', 'DISPOSED'].includes(event.type));
+        const storage = lastLocationEvent?.toLocationId ? await prisma.inventoryLocation.findUnique({ where: { id: lastLocationEvent.toLocationId } }) : null;
         const materialCustody = {
             status: isDisposed ? 'DISPOSED' : (isArchived ? 'ARCHIVED' : (sample.status === 'EXPECTED' ? 'NOT_RECEIVED' : 'ACTIVE')),
             isDisposed,
@@ -484,11 +488,15 @@ class SampleWorkspaceService {
             receivedMass: sample.receivedMass,
             massWarningAcknowledged: sample.massWarningAcknowledged,
             moistureOnArrival: sample.moistureOnArrival,
-            storageLocation: parsedMetadata.archiveLocation || 'Not recorded',
-            carrierName: sample.custodyCarrierName || 'Not recorded',
-            trackingNumber: sample.custodyTrackingNumber || 'Not recorded',
-            handoverAt: sample.custodyHandoverAt,
-            receivingOfficerName: sample.receivingOfficerName || sample.receivedBy || 'Not recorded'
+            storageLocation: storage?.name || (!lastLocationEvent || lastLocationEvent.type === 'RECEIVED' ? parsedMetadata.archiveLocation || null : null),
+            storageLocationId: storage?.id || null,
+            carrierName: receipt.custodyCarrierName || null,
+            trackingNumber: receipt.custodyTrackingNumber || null,
+            handoverAt: receipt.custodyHandoverAt,
+            receivingOfficerName: receipt.receivingOfficerName || sample.receivedBy || null,
+            acknowledgement: receipt.custodyAcknowledgement || null,
+            retainUntil: sample.retainUntil,
+            events: custodyEvents
         };
 
         // 13. Integrity issues summary
@@ -599,8 +607,10 @@ class SampleWorkspaceService {
                 reason: sample.status !== 'APPROVED' ? 'Sample must be APPROVED before archiving' : null
             },
             canDispose: {
-                allowed: isManagerOrAdmin && ['APPROVED', 'ARCHIVED'].includes(sample.status) && !isDisposed,
-                reason: isDisposed ? 'Material already disposed' : (['APPROVED', 'ARCHIVED'].includes(sample.status) ? null : 'Sample must be Approved or Archived')
+                allowed: hasPermission(user, 'DISPOSE_SAMPLE') && ['APPROVED', 'ARCHIVED', 'RECEIVED_REJECTED'].includes(sample.status) && !held &&
+                    !await require('./sampleRetentionService').hasOpenAmendment(prisma, sample.id) &&
+                    (sample.status === 'RECEIVED_REJECTED' || Boolean(sample.retainUntil && sample.retainUntil < new Date())),
+                reason: isDisposed ? 'Material already disposed' : 'Retention must expire and holds and amendments must be resolved'
             },
             canAmend: {
                 allowed: isManagerOrAdmin && ['APPROVED', 'ARCHIVED', 'DISPOSED'].includes(sample.status),

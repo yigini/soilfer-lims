@@ -42,7 +42,9 @@ describe('Audit 0.6: review state and atomic status/version compare-and-set', ()
         }
         const sampleId = id('S-06');
         await createSampleFixture(prisma, { data: { id: sampleId, originalId: sampleId, labId: sampleId, assignedLab: labId,
-            status: sampleStatus, dryingStatus: 'DONE', preparationStatus: 'DONE' } });
+            status: sampleStatus, dryingStatus: 'DONE', preparationStatus: 'DONE',
+            // The closure review fixture represents already expired retained material.
+            ...(workflow.CLOSURE_TASK_SAMPLE_STATES[analysis] === 'DISPOSED' && { retainUntil: new Date('2020-01-01T00:00:00Z'), metadata: '{"disposalReason":"Recorded laboratory SOP disposal"}' }) } });
         const batch = batchStatus ? await prisma.batch.create({ data: { id: id('B-06'), analysis, labId, status: batchStatus, createdBy: 'test',
             qcResults: batchStatus === 'QC_FAIL' ? JSON.stringify({ blanks: [{ value: 2, maxAllowed: 1, status: 'FAIL' }], duplicates: [], controls: [] }) : null } }) : null;
         const item = await createWorkItemFixture(prisma, { data: { id: id('WI-06'), sampleId, analysis, assignedLab: labId,

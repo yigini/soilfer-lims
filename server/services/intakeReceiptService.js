@@ -60,11 +60,13 @@ async function receiveSample(tx, { sampleId, body = {}, user, createDataFactory 
     const events = typeof sample.history === 'string' ? JSON.parse(sample.history) : sample.history || [];
     if (!Array.isArray(events)) throw new IntakeError(409, { code: 'INTAKE_HISTORY_INVALID', message: 'The stored custody history needs review.' });
     events.push({ status: 'RECEIVED', changedBy: user.username, timestamp: now.toISOString(), note: 'Physical arrival recorded; acceptance pending.' });
-    return transitionSample(sample.id, 'RECEIVED', user, 'Physical arrival recorded; acceptance pending.', {
-        ...custody, receptionDate: now, receivedBy: user.username, receivingOfficerId: user.id ? String(user.id) : null, receivingOfficerName: user.name || user.username,
+    await require('./custodyService').acknowledgeReceipt(tx, { sample, actor: user, input: { ...custody, ...body } });
+    const updated = await transitionSample(sample.id, 'RECEIVED', user, 'Physical arrival recorded; acceptance pending.', {
+        receptionDate: now, receivedBy: user.username,
         requiredAnalyses: JSON.stringify(codes), ...(mass !== undefined ? { receivedMass: mass } : {}),
         receptionData: JSON.stringify({ ...reception, receivedBy: user.username, receivedAt: now.toISOString() }), history: JSON.stringify(events)
     }, tx, { action: 'SAMPLE_RECEIVED', details: JSON.stringify({ summary: 'Physical arrival recorded; acceptance pending.', provenanceHold: metadata.provenanceHold || null }),
         before: JSON.stringify({ status: sample.status }), after: JSON.stringify({ status: 'RECEIVED' }) });
+    return require('./custodyService').receiptView(tx, updated);
 }
 module.exports = { receiveSample, validateMass };

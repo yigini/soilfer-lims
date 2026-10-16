@@ -14,6 +14,7 @@ describe.each([['Prisma-generated', 'CONSIGNMENT_PRE_1_1_A'], ['deployed legacy 
             { id: 'old-negative', code: 'CSG-old-negative', labId: 'lab', receivedBy: 'reception', expectedCount: -3, notes: 'historical observation', metadata: '{}', updatedAt: '2026-10-01T10:00:00Z' }
         ] } });
         db = new Database(rehearsal.file); db.pragma('foreign_keys = ON');
+        require('../helpers/custodyFixtureSchema').extendHistoricalCustodyFixture(rehearsal.file);
         client = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${rehearsal.file}` }) });
         await createSampleFixture(client, { data: { id: 'child', originalId: 'child', consignmentId: 'old-zero', status: 'RECEIVED' } });
         child = db.prepare('SELECT * FROM Sample').all();

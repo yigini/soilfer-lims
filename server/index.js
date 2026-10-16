@@ -102,6 +102,9 @@ try {
     const orderReadyBegan = beginReadinessStage();
     const orderReady=require('./scripts/install_order_revisions').assertOrderRevisionStartupReady(dbPath, startupContext);
     console.log(JSON.stringify({event:'ORDER_REVISION_STARTUP_READY',...orderReady, ...readinessTelemetry(orderReadyBegan)}));
+    const custodyReadyBegan = beginReadinessStage();
+    const custodyReady = require('./scripts/install_sample_custody').assertSampleCustodyStartupReady(dbPath, startupContext);
+    console.log(JSON.stringify({event:'SAMPLE_CUSTODY_STARTUP_READY',...custodyReady, ...readinessTelemetry(custodyReadyBegan)}));
 } catch (error) {
     console.error(JSON.stringify({ error: error.code || 'WORKFLOW_STARTUP_REFUSED', message: error.message,
         nextStep: error.code?.startsWith('QC_GATE_SCOPE_') ? 'Keep the lab stopped and follow docs/audit/2.4-qc-gate.md.'
@@ -109,6 +112,7 @@ try {
             : error.code?.startsWith('AMENDMENT_') || error.code?.startsWith('REPORT_WITHDRAWAL_') ? 'Keep the lab stopped and follow docs/audit/210-amendment-authorisation.md.'
             : error.code?.startsWith('IMPORT_') ? 'Keep the lab stopped and follow docs/audit/200-instrument-import.md.'
             : error.code?.startsWith('SAMPLE_CONTAINER_') ? 'Keep the lab stopped and follow docs/audit/206-containers-and-aliquots.md.'
+            : error.code?.startsWith('CUSTODY_') ? 'Keep the lab stopped and follow docs/audit/207-custody-and-retention.md.'
             : error.code?.startsWith('ORDER_REVISION_') || error.code === 'ORDER_LINE_REQUIRED' ? 'Keep the lab stopped and follow docs/audit/209-order-revisions.md.'
             : error.code?.startsWith('QC_CHART_') || error.code?.startsWith('LAB_POLICY_') ? 'Keep the lab stopped and follow docs/audit/214-control-charts.md.'
             : error.code?.startsWith('OVERRIDE_') ? 'Keep the lab stopped and follow docs/audit/197-value-validation.md.'

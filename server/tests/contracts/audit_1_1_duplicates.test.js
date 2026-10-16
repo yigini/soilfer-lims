@@ -137,6 +137,7 @@ describe('Audit 1.1: additive, audited duplicate resolution', () => {
                 // the real additive hold DDL before using that current client.
                 changed.exec('CREATE TABLE IF NOT EXISTS "_schema_migrations" ("id" TEXT PRIMARY KEY NOT NULL, "appliedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, "details" TEXT)');
                 require('../../scripts/install_sample_holds').installSampleHolds({ dbPath: file, apply: true });
+                require('../helpers/custodyFixtureSchema').extendHistoricalCustodyFixture(file);
                 const client = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${file}` }) });
                 try { await createWorkItemFixture(client, { data: { id: 'third', sampleId: 'sample', analysis: 'PH', status: 'NOT_ASSIGNED' } }); }
                 finally { await client.$disconnect(); }

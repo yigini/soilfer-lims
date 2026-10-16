@@ -31,7 +31,7 @@ describe('8.2 Integration: Golden Path Scenarios', () => {
     let mgrRedUsername, techRedUsername;
     let mgrBlueToken, techBlueToken;
     let mgrBlueUsername, techBlueUsername;
-    let specEquipId;
+    let specEquipId, storageLocationId;
 
     beforeAll(async () => {
         await ensureTestLab('LAB-GOLD', 'GLD');
@@ -39,6 +39,8 @@ describe('8.2 Integration: Golden Path Scenarios', () => {
         await ensureTestLab('LAB-RED', 'RED');
         await ensureTestLab('LAB-BLUE', 'BLU');
         const suffix = Date.now();
+        storageLocationId = `gold-storage-${suffix}`;
+        await prisma.inventoryLocation.create({ data: { id: storageLocationId, labId: 'LAB-GOLD', purpose: 'SAMPLE', name: 'A1' } });
         mgrUsername = `mgr_gold_${suffix}`;
         techUsername = `tech_gold_${suffix}`;
 
@@ -189,7 +191,7 @@ describe('8.2 Integration: Golden Path Scenarios', () => {
         expect(reviewRes.status).toBe(200);expect(reviewRes.body.errors).toEqual([]);
 
         await request(app).post(`/api/samples/${sampleId}/approve`).set('Authorization', `Bearer ${mgrToken}`);
-        const archiveRes = await request(app).post(`/api/samples/${sampleId}/archive`).set('Authorization', `Bearer ${mgrToken}`).send({ archiveLocation: 'A1' });
+        const archiveRes = await request(app).post(`/api/samples/${sampleId}/archive`).set('Authorization', `Bearer ${mgrToken}`).send({ storageLocationId });
         expect(archiveRes.status).toBe(200);
         const archItem = archiveRes.body.workItem;
         expect(archItem).toBeDefined();
@@ -235,11 +237,16 @@ describe('8.2 Integration: Golden Path Scenarios', () => {
         if (approveRes.status !== 200) console.log('DEBUG Scenario B Approval Failure:', approveRes.body);
         expect(approveRes.status).toBe(200);
 
-        // 3. Dispose
+        // 3. Publish with an explicitly configured zero-day fixture retention,
+        // then dispose only after the actual publication deadline has elapsed.
+        await require('../../services/policyService').change(require('jsonwebtoken').decode(mgrSilverToken), 'LAB-SILVER', {
+            reason: 'Explicit zero-day retention for the isolated disposal scenario', changes: [{ key: 'sample.retentionDaysAfterReport', value: 0 }]
+        }, { db: prisma });
+        expect((await request(app).post(`/api/reports/generate/${sampleId}`).set('Authorization', `Bearer ${mgrSilverToken}`).send({})).status).toBe(200);
         const disposeRes = await request(app)
             .post(`/api/samples/${sampleId}/dispose`)
             .set('Authorization', `Bearer ${mgrSilverToken}`)
-            .send({ disposalMethod: 'Standard protocol' });
+            .send({ disposalMethod: 'Standard protocol', reason: 'Retention expired; standard laboratory disposal procedure' });
         expect(disposeRes.status).toBe(200);
         const dispItem = disposeRes.body.workItem;
         expect(dispItem).toBeDefined();

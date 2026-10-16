@@ -20,6 +20,7 @@ async function fixture() {
     // The captured historical source, original guards and prior owner receipts are unchanged.
     const orderShape = new Database(file);
     try { orderShape.exec(orderSource.schemaSql); } finally { orderShape.close(); }
+    require('../helpers/custodyFixtureSchema').extendHistoricalCustodyFixture(file);
     const db = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: 'file:' + file }) });
     const labId = 'cross-lab-' + randomUUID();
     let sample;

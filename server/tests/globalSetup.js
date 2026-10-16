@@ -92,6 +92,7 @@ module.exports = async function globalSetup() {
         require('../scripts/install_sample_containers').installSampleContainers({dbPath:testDbPath,apply:true});
         require('../scripts/install_control_charts').installControlCharts({dbPath:testDbPath,apply:true});
         require('../scripts/install_order_revisions').installOrderRevisions({dbPath:testDbPath,apply:true});
+        require('../scripts/install_sample_custody').installSampleCustody({dbPath:testDbPath,apply:true});
     }
 
     process.env.DATABASE_PATH = testDbPath;

@@ -447,6 +447,12 @@ test('a complete guarded database passes the read-only gate, listens and answers
     expect(require('../../scripts/install_control_charts').installControlCharts({dbPath:fixture.file,apply:true}))
         .toMatchObject({classification:'COMPLETE_214',previousClassification:'FRESH_PRISMA_214',backfilledCount:0,totalChanges:1});
     require('../../scripts/install_order_revisions').installOrderRevisions({dbPath:fixture.file,apply:true});
+    const beforeCustody=fingerprint(fixture.file), missingCustody=await realStartup(fixture.file,false);
+    expect(missingCustody.code).toBe(1); expect(JSON.parse(missingCustody.stderr).error).toBe('CUSTODY_STARTUP_REQUIRED');
+    expect(missingCustody.stdout).not.toMatch(/Enterprise Server running on|\[PRISMA\]|SCHEDULER/);
+    expect(fingerprint(fixture.file)).toBe(beforeCustody);
+    expect(require('../../scripts/install_sample_custody').installSampleCustody({dbPath:fixture.file,apply:true}))
+        .toMatchObject({classification:'COMPLETE_207',mode:'APPLIED'});
     const child = await realStartup(fixture.file, true);
     expect(child.accepted).toBe(true);
     const benchReady=JSON.parse(child.stdout.split('\n').find(line=>line.startsWith('{"event":"BENCH_CREDENTIAL_STARTUP_READY"')));

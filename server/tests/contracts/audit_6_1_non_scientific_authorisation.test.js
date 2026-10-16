@@ -248,8 +248,8 @@ test('a late scientific request audit failure rolls back the request without cha
   .rejects.toMatchObject({code:'P2003'});expect(f.snapshot()).toEqual(before);
 });
 
-async function scientificFixture(){
- const f=await fixture();
+async function scientificFixture(status='APPROVED'){
+ const f=await fixture(status);
  f.original=await createExecutionResultFixture(f.db,{attemptStatus:'ACCEPTED',data:{id:randomUUID(),sampleId:f.sample.id,
   param:'PH_H2O',value:'6.3',unit:'pH_units',replicateNo:1,isCurrent:true}});
  f.report=await f.db.report.create({data:{id:randomUUID(),sampleId:f.sample.id,labId:f.labId,status:'PUBLISHED',version:1,
@@ -379,9 +379,15 @@ test('a line override without the existing NCR assessment refuses the request at
  expect(f.snapshot()).toEqual(before);
 });
 
-test.each(['ARCHIVED','DISPOSED'])('a pending scientific amendment cannot reopen a subsequently %s sample',async status=>{
- const f=await scientificFixture(),{amendment}=await scientificRequest(f);
- await require('../../services/sampleStateService').transitionSample(f.sample.id,status,f.other,'Retained lifecycle decision',{},f.db);
+test.each(['ARCHIVED','DISPOSED'])('a retained pending scientific amendment cannot reopen %s material',async status=>{
+ const f=await scientificFixture(status==='DISPOSED'?'DISPOSED':'APPROVED');
+ // A disposed row with a retained pending request is historical evidence: #207
+ // now prevents creating this combination through a live disposal command.
+ const amendment=status==='DISPOSED'?await f.db.sampleAmendment.create({data:{id:randomUUID(),sampleId:f.sample.id,type:'SCIENTIFIC',status:'PENDING',
+  reason:f.scientificInput.reason,createdBy:f.actor.username,version:1,
+  requestPayload:JSON.stringify({contract:'210-v1',reasonCode:f.scientificInput.reasonCode}),
+  selectedWorkItemIds:JSON.stringify([f.item.id]),affectedOrderLines:JSON.stringify([f.item.id])}}):(await scientificRequest(f)).amendment;
+ if(status==='ARCHIVED')await require('../../services/sampleStateService').transitionSample(f.sample.id,status,f.other,'Retained lifecycle decision',{},f.db);
  const before=f.snapshot();await expect(scientificApprove(f,amendment.id)).rejects.toMatchObject({statusCode:409,code:'AMENDMENT_SAMPLE_UNAVAILABLE'});expect(f.snapshot()).toEqual(before);
 });
 

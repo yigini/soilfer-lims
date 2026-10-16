@@ -329,7 +329,7 @@ async function prepareIntake(prisma, { body: rawBody, user, newSampleId, initial
             const custodySenderSignature = body.custodySenderSignature || coc.senderSignature || null;
             const receivingOfficerId = user.id ? String(user.id) : null;
             const receivingOfficerName = user.name || user.username || receivedBy;
-            const receivingOfficerSignature = body.receivingOfficerSignature || coc.officerSignature || `CONFIRMED:${receivedBy}:${now.toISOString()}`;
+            const receivingOfficerSignature = null;
 
             const { transitionSample } = require('../services/sampleStateService');
             const rejectedOrder = await orderedAnalyses(prisma, sample, body, user);
@@ -701,7 +701,7 @@ async function prepareIntake(prisma, { body: rawBody, user, newSampleId, initial
             custodySenderSignature: body.custodySenderSignature || body.coc?.senderSignature || null,
             receivingOfficerId: user.id ? String(user.id) : null,
             receivingOfficerName: user.name || user.username || receivedBy,
-            receivingOfficerSignature: body.receivingOfficerSignature || body.coc?.officerSignature || `CONFIRMED:${receivedBy}:${now.toISOString()}`,
+            receivingOfficerSignature: null,
 
             receptionData: JSON.stringify({
                 checklist, notes, receivedBy, labLocation: labId, at: now,
