@@ -124,7 +124,8 @@ class CaptureScience:
         require(not self.started,'Capture sequence cannot resume or retry')
         self.started=True
         binding=capture_source_review(self.index,self.source)
-        fresh=self.authority.authorize()
+        if self.authority.result is None:self.authority.authorize()
+        fresh=self.authority.consume()
         require(fresh['sourceBinding']==binding,'Capture fresh provider authority differs')
         exclusive_record(self.root,'capture-science-intent.json',{'sourceBinding':binding,
             'captureTableSha256':CAPTURE_TABLE_SHA,'neverRetry':True,'productionSqliteConnections':0},self.disk.sync)

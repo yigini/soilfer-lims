@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "applicationHead": "be8379745bdfae52ce46496ff26514dc7d729640",
+  "originalWrapper": {
+    "path": "server/scripts/order_revision_impact.js",
+    "bytes": 4773,
+    "sha256": "6cf3712c20cead275f8ea41e258ca321b03932f23a559d550670b40e03f4cb76",
+    "gitBlob": "39cd8daf96b10740d63e35ed1d22e6a59cf0f0a0"
+  },
+  "unchangedScientificOwner": {
+    "path": "server/scripts/install_order_revisions.js",
+    "bytes": 19077,
+    "sha256": "1e4fdbe8ff12c7e6bc8b751c3b47bcb0ef2f9ee80dd6840bd56abfd86f52057e",
+    "gitBlob": "c531d9f997967dffd52a28c677747cc253570ccd"
+  },
+  "newReleaseOwnedWrapper": "order_impact.cjs",
+  "newOuterChildArgv": ["/release/order_impact.cjs", "--db", "/app/server/prisma/dev.db"],
+  "scientificChildArgv": ["/app/server/scripts/install_order_revisions.js", "--db", "/app/server/prisma/dev.db", "--dry-run"],
+  "changes": [
+    "Only the order-impact wrapper is replaced. The exact pinned dry-run installer computes every scientific value; no application source or APPLY command changes.",
+    "TEMP/TMP/TMPDIR now point directly to the existing owned retained /tmp bind. No extra lims-order-impact-* outer directory is created. The same two policy-owner snapshots remain independently admitted and verified.",
+    "Both private original streams reserve67108865 bytes each, including one overflow sentinel, plus an8192-byte exit record and all ledger entries/directories BEFORE tmp mkdir/container creation. The reservations remain in the existing shared3200MiB ledger; no new allowance is added.",
+    "Pipe reads request at most65536 bytes and at most the exact remaining allowance BEFORE each synchronous write. Both EOFs, complete originals, status0/no signal/no spawn error, source triple equality and exact read-only proof are mandatory before parsing/success.",
+    "Overflow kills ONLY this read-only --dry-run child, retains each bounded prefix and records incomplete originals. It introduces no APPLY transaction killpoint or new timer; the existing owner600-second clock remains.",
+    "Original streams are fsynced/sealed before the exit record. Parent closure independently checks lengths/hashes/EOF/identity/link counts before the existing final-memory/exit permission. Missing, reused or changed evidence refuses; no retry/cleanup.",
+    "The returned scientific object and known retention metadata preserve the original wrapper semantics. File allocation records now cover the three originals plus both policy snapshots; separate controller admission records are already charged and are not duplicated in that list."
+  ],
+  "maximumStreamBytes": 67108864,
+  "overflowSentinelBytes": 1,
+  "maximumExitRecordBytes": 8192,
+  "applicationSourceChanged": false,
+  "outerWrapperArgvChanged": true,
+  "scientificChildArgvChanged": false,
+  "installerTransactionsChanged": false,
+  "defaultHeapChanged": false,
+  "existingOwnerClockSeconds": 600,
+  "completeFreshCaptureLauncherImplemented": false,
+  "sqlScratchOrWriterFilesClosed": false,
+  "daemonAndUnitOutputClosed": false,
+  "physicalMetadataClosureClaimed": false,
+  "filesystemClosureClaimed": false
+}

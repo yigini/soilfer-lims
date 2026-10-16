@@ -108,6 +108,8 @@ def package_fixture():
     files['capture-receipt.json']=canonical(capture)+b'\n'
     from verify_kit_capture_review import synthetic_capture_payload
     synthetic_capture_payload(files,idx,source)
+    from verify_kit_capture_package import synthetic_unit_payload
+    files.update(synthetic_unit_payload(files,idx,source))
     for target,source_path in [
         ('qualified-build-receipt.json',BUILD/'first-build-190000-closed-originals-once/build-receipt.json'),
         ('qualified-image-inspect-original.json',BUILD/'first-build-190000-closed-originals-once/image-inspect-original.json'),
@@ -235,6 +237,8 @@ class Package(unittest.TestCase):
             capture=exact_json(files['capture-receipt.json']);capture['apacheCaptureSha256']=sha(files['apache-capture.json'])
             for name in refs:capture['files'][name]={'sha256':sha(files[name]),'bytes':len(files[name])}
             files['capture-receipt.json']=canonical(capture)+b'\n'
+            from verify_kit_capture_package import synthetic_unit_payload
+            files.update(synthetic_unit_payload(files,idx,source))
             manifest=freeze_manifest(files,idx,source,4800)
             self.assertEqual(manifest['originalIngressSha256'],sha(input_file.read_bytes()))
 
@@ -303,14 +307,14 @@ class Package(unittest.TestCase):
             calls.append(argv)
             return types.SimpleNamespace(returncode=0,stdout=b'not-found\n' if argv[0]=='systemctl' else b'LOCAL STANDIN',stderr=b'')
         fake_pathlib=types.SimpleNamespace(Path=lambda value:root)
+        fake_os=types.SimpleNamespace(**{**vars(os),'name':'posix','O_DIRECTORY':0,
+            'open':lambda *args:123,'fsync':lambda fd:None,'close':lambda fd:None})
         def execute():
             # LOCAL kernel/directory-fsync/platform boundaries only. The actual
             # rendered upload inventory, hashes, syntax checks, final manifest
             # and actual-provider-record shape checks still execute.
-            with patch.dict('sys.modules',{'pathlib':fake_pathlib,'subprocess':types.SimpleNamespace(run=run),
+            with patch.dict('sys.modules',{'pathlib':fake_pathlib,'os':fake_os,'subprocess':types.SimpleNamespace(run=run),
                     'time':types.SimpleNamespace(time=lambda:confirmation['createdEpoch']+1)}),\
-                 patch('os.name','posix'),patch.object(os,'O_DIRECTORY',0,create=True),\
-                 patch('os.open',return_value=123),patch('os.fsync'),patch('os.close'),\
                  patch('kit_package.read_package',return_value=final),patch('sys.path',list(sys.path)),\
                  contextlib.redirect_stdout(io.StringIO()):
                 exec(code,{})

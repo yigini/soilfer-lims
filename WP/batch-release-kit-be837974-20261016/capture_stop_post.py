@@ -689,8 +689,9 @@ def gate(sample):
 
 # Exact AST definitions from kit_capture_controller.py
 
-def capture_controller_snapshot(reader=bounded_read, resolver=canonical_cgroup, evidence=None):
-    pid = os.getpid()
+def capture_controller_snapshot(reader=bounded_read, resolver=canonical_cgroup, evidence=None, pid_reader=None):
+    current_pid = os.getpid if pid_reader is None else pid_reader
+    pid = current_pid()
     require(type(pid) is int and pid > 0, 'Numeric current capture PID required')
     proc = '/proc/' + str(pid)
 
@@ -712,11 +713,11 @@ def capture_controller_snapshot(reader=bounded_read, resolver=canonical_cgroup, 
         if fields[4] == '/sys/fs/cgroup':
             matches.append((fields, at))
     require(len(matches) == 1 and matches[0][0][3] == '/' and (matches[0][0][matches[0][1] + 1] == 'cgroup2'), 'One canonical unified capture cgroup mount required')
-    group = pathlib.Path('/sys/fs/cgroup/system.slice') / CAPTURE_UNIT
+    group = pathlib.PurePosixPath('/sys/fs/cgroup/system.slice') / CAPTURE_UNIT
     before = resolver(group)
     require(isinstance(before, dict) and before.get('path') == group.as_posix() and all((type(before.get(k)) is int and before[k] >= 0 for k in ('device', 'inode'))), 'Exact capture cgroup directory identity required')
     raw = {name: read(str(group / name), 16384) for name in ('memory.events', 'memory.stat', 'memory.current', 'memory.peak', 'memory.max', 'memory.swap.max')}
-    require(read(proc + '/cgroup', 4096) == member and read(proc + '/mountinfo', 256 * 1024) == mount and (resolver(group) == before) and (os.getpid() == pid), 'Capture PID, membership, mount or directory changed')
+    require(read(proc + '/cgroup', 4096) == member and read(proc + '/mountinfo', 256 * 1024) == mount and (resolver(group) == before) and (current_pid() == pid), 'Capture PID, membership, mount or directory changed')
     sample = {'memoryEvents': pairs(raw['memory.events'], EVENT_REQUIRED), 'memoryStat': pairs(raw['memory.stat'], STAT_REQUIRED), 'memoryPeakBytesObservation': scalar(raw['memory.peak']), 'memoryMaxBytes': scalar(raw['memory.max']), 'memorySwapMaxBytes': scalar(raw['memory.swap.max'])}
     current = scalar(raw['memory.current'])
     nonreclaimable = gate(sample)
@@ -770,13 +771,37 @@ def capture_content_commitment(root):
     require(output_pin(root / 'capture-receipt.json', 16 * 1024 ** 2) == receipt_pin, 'Capture receipt changed after originals')
     return {'receipt': {'file': 'capture-receipt.json', **receipt_pin}, 'originalFileCount': len(CAPTURE_REVIEW_FILES), 'allOriginalContentPinsVerified': True, 'fullContentSemanticsRechecked': False, 'independentFullSemanticPackageReviewStillRequired': True}
 
+def capture_run_commitment(root):
+    root = pathlib.Path(root)
+    require(root.as_posix() == CAPTURE_ROOT.as_posix(), 'Exact capture run commitment root required')
+    name = 'capture-controller-complete.json'
+    path = root / name
+    expected = output_pin(path, 16 * 1024 ** 2, 2)
+    pending = root / (name + '.pending')
+    require(output_pin(pending, 16 * 1024 ** 2, 2) == expected and (path.stat().st_dev, path.stat().st_ino) == (pending.stat().st_dev, pending.stat().st_ino), 'Capture run completion requires its original immutable control pair')
+    with path.open('rb') as stream:
+        raw = stream.read(16 * 1024 ** 2 + 1)
+    require(expected == {'sha256': sha(raw), 'bytes': len(raw)} and output_pin(path, 16 * 1024 ** 2, 2) == expected, 'Capture run completion changed')
+    value = exact_json(raw)
+    require(raw == canonical(value) + b'\n' and type(value.get('version')) is int and (value['version'] == 1) and (value.get('root') == CAPTURE_ROOT.as_posix()) and (value.get('captureTableSha256') == CAPTURE_TABLE_SHA) and (value.get('neverRetry') is True) and (value.get('releaseAuthorityGranted') is False) and (value.get('releaseGateConsumed') is False), 'Canonical exact capture completion required')
+    pins = value.get('memoryFiles')
+    require(isinstance(pins, dict) and 0 < len(pins) <= 60000, 'Complete bounded memory pin map required')
+    for original, pin in pins.items():
+        require(isinstance(original, str) and pathlib.PurePosixPath(original).name == original and (original.startswith('controller-memory-') or any((original.startswith(label + '-memory-') for label in CAPTURE_COMMANDS))) and ('refus' not in original), 'Unknown or refused memory original')
+        actual = output_pin(root / original, 16 * 1024 ** 2, 2 if original.startswith('controller-memory-') and original.endswith('.json') else 1)
+        require(canonical(actual) == canonical(pin), 'Capture memory original changed before independent unit outcome')
+    receipt = output_pin(root / 'capture-receipt.json', 16 * 1024 ** 2)
+    require(canonical(value.get('contentReceipt')) == canonical({'file': 'capture-receipt.json', **receipt}), 'Run completion does not bind the closed content receipt')
+    return {'completion': {'file': name, **expected}, 'originalMemoryFileCount': len(pins), 'allOriginalMemoryPinsVerified': True, 'fullMemorySemanticsRechecked': False, 'independentFullSemanticPackageReviewStillRequired': True}
+
 def capture_stop_outcome(root, call, controller_probe, store):
     stops = stop_capture_owners(call)
     errors = []
     controller = None
     transport = None
     content = None
-    for phase, operation in (('controller', lambda: controller_probe()), ('transport', lambda: capture_controller_closure(root)), ('content', lambda: capture_content_commitment(root))):
+    run = None
+    for phase, operation in (('controller', lambda: controller_probe()), ('transport', lambda: capture_controller_closure(root)), ('content', lambda: capture_content_commitment(root)), ('controllerRun', lambda: capture_run_commitment(root))):
         try:
             value = operation()
             if phase == 'controller':
@@ -785,15 +810,17 @@ def capture_stop_outcome(root, call, controller_probe, store):
                 controller = value
             elif phase == 'transport':
                 transport = value
-            else:
+            elif phase == 'content':
                 content = value
+            else:
+                run = value
         except BaseException as failure:
             errors.append({'phase': phase, 'errorType': type(failure).__name__})
     retention = list(call.retention_errors)
     if content is not None and (stops['observedAbsentOwners'] or stops['nonvacuousStoppedOwnerCount'] != len(CAPTURE_COMMANDS)):
         errors.append({'phase': 'retainedOwners', 'errorType': 'IncompleteRetainedCaptureOwnerSet'})
     complete = not stops['errors'] and (not retention) and (not errors)
-    result = {'version': 1, 'root': CAPTURE_ROOT.as_posix(), 'unit': CAPTURE_UNIT, 'captureTableSha256': CAPTURE_TABLE_SHA, 'status': 'CAPTURE_CONTROLLER_CLOSED_CONTENT_SEALED_PENDING_PACKAGE_REVIEW' if complete else 'CAPTURE_STOPPED_OR_REFUSED_RETAIN_ALL', 'stops': stops, 'errors': errors, 'retentionErrors': retention, 'controller': controller, 'transport': transport, 'contentCommitment': content, 'allChecksComplete': complete, 'fullContentSemanticsRechecked': False, 'releaseAuthorityGranted': False, 'releaseGateConsumed': False, 'productionRestartPermitted': False, 'servingPermitGranted': False, 'neverRetry': True}
+    result = {'version': 1, 'root': CAPTURE_ROOT.as_posix(), 'unit': CAPTURE_UNIT, 'captureTableSha256': CAPTURE_TABLE_SHA, 'status': 'CAPTURE_CONTROLLER_CLOSED_CONTENT_SEALED_PENDING_PACKAGE_REVIEW' if complete else 'CAPTURE_STOPPED_OR_REFUSED_RETAIN_ALL', 'stops': stops, 'errors': errors, 'retentionErrors': retention, 'controller': controller, 'transport': transport, 'contentCommitment': content, 'controllerRunCommitment': run, 'allChecksComplete': complete, 'fullContentSemanticsRechecked': False, 'releaseAuthorityGranted': False, 'releaseGateConsumed': False, 'productionRestartPermitted': False, 'servingPermitGranted': False, 'neverRetry': True}
     store(result)
     return result
 

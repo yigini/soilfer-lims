@@ -102,7 +102,9 @@ def prepare(index_file,source_file,capture_directory,destination,whole_outage_se
     profile=exact_json(raw[REL+'predecessor-copy-source-binding.json'][0])
     validate_old({n:r[0] for n,r in raw_git(OLD_HEAD,list(profile['files'])).items()},profile)
     capture=read_package(pathlib.Path(capture_directory),require_posix_permissions=os.name=='posix')
-    expected=REQUIRED_PAYLOAD-{'source-index.json','source-review.json','whole-outage-disclosure.json'}
+    from kit_capture_package import capture_unit_payload
+    unit_files=capture_unit_payload(capture,index,source)
+    expected=(REQUIRED_PAYLOAD-{'source-index.json','source-review.json','whole-outage-disclosure.json'})|unit_files
     require(set(capture)==expected,'Capture directory contains missing/extra inputs')
     files={**capture,'source-index.json':canonical(index)+b'\n','source-review.json':canonical(source)+b'\n',
         'whole-outage-disclosure.json':raw[REL+'whole-outage-disclosure.json'][0]}

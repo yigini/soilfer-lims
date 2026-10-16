@@ -68,6 +68,7 @@ def capture_selected(value,spec,running=None,emergency=False):
         ['/release/capture_cli_guard.cjs','/tmp',spec['label'],*spec['child']],running,emergency)
 
 class CaptureOwnedCli(OwnedCli):
+    owner_label=CAPTURE_LABEL
     specification_validator=staticmethod(validate_capture_spec)
     selection=staticmethod(capture_selected)
 

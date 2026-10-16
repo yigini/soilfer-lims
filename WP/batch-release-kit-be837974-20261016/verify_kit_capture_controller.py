@@ -190,7 +190,7 @@ class CaptureController(unittest.TestCase):
         def probe():self.assertEqual(len(events),6);raise RuntimeError('LOCAL cgroup failure')
         with projected(root):result=outcome.capture_stop_outcome(root,Calls(),probe,stored.append)
         self.assertEqual(len(events),6);self.assertEqual(len(result['stops']['errors']),6)
-        self.assertEqual([r['phase'] for r in result['errors']],['controller','transport','content'])
+        self.assertEqual([r['phase'] for r in result['errors']],['controller','transport','content','controllerRun'])
         self.assertFalse(result['allChecksComplete']);self.assertEqual(stored,[result])
 
     def test_actual_local_content_and_transport_seal_require_same_cgroup_and_all_originals(self):
@@ -198,6 +198,12 @@ class CaptureController(unittest.TestCase):
             current.review_controller.execute();closed(current.root)
             raws,reads,reader,resolver=kernel();guard=memory.CaptureControllerGuard(current.root,reader,resolver,False)
             before=guard.observe('before');sample=guard.observe('before-stop')
+            memory_files={p.name:common.output_pin(p,16*1024**2,2 if p.name.endswith('.json') else 1)
+                for p in current.root.iterdir() if p.name.startswith('controller-memory-') and not p.name.endswith('.pending')}
+            exclusive_record(current.root,'capture-controller-complete.json',{'version':1,'root':current.root.as_posix(),
+                'captureTableSha256':outcome.CAPTURE_TABLE_SHA,'memoryFiles':memory_files,
+                'contentReceipt':{'file':'capture-receipt.json',**common.output_pin(current.root/'capture-receipt.json',16*1024**2)},
+                'releaseAuthorityGranted':False,'releaseGateConsumed':False,'neverRetry':True},False)
             class Calls:
                 retention_errors=[]
                 def __init__(self):
@@ -228,10 +234,28 @@ class CaptureController(unittest.TestCase):
             retention_errors=[]
             def __call__(self,argv):return b''
         with projected(root),patch.object(outcome,'capture_controller_closure',return_value={'LOCAL_TRANSPORT_STANDIN':True}),\
-             patch.object(outcome,'capture_content_commitment',return_value={'LOCAL_CONTENT_STANDIN':True}):
+             patch.object(outcome,'capture_content_commitment',return_value={'LOCAL_CONTENT_STANDIN':True}),\
+             patch.object(outcome,'capture_run_commitment',return_value={'LOCAL_RUN_STANDIN':True}):
             result=outcome.capture_stop_outcome(root,Calls(),lambda:sample,lambda value:None)
         self.assertFalse(result['allChecksComplete'])
         self.assertEqual(result['errors'],[{'phase':'retainedOwners','errorType':'IncompleteRetainedCaptureOwnerSet'}])
+
+    def test_independent_run_commitment_requires_complete_control_pair_and_unchanged_memory_originals(self):
+        root=directory();raws,reads,reader,resolver=kernel()
+        with projected(root):
+            guard=memory.CaptureControllerGuard(root,reader,resolver,False);guard.observe('before');guard.observe('after')
+            receipt=root/'capture-receipt.json';receipt.write_bytes(b'LOCAL RAW RECEIPT STANDIN');receipt.chmod(0o400)
+            with self.assertRaises(FileNotFoundError):outcome.capture_run_commitment(root)
+            pins={p.name:common.output_pin(p,16*1024**2,2 if p.name.endswith('.json') else 1)
+                for p in root.iterdir() if p.name.startswith('controller-memory-') and not p.name.endswith('.pending')}
+            exclusive_record(root,'capture-controller-complete.json',{'version':1,'root':root.as_posix(),
+                'captureTableSha256':outcome.CAPTURE_TABLE_SHA,'memoryFiles':pins,'neverRetry':True,
+                'contentReceipt':{'file':'capture-receipt.json',**common.output_pin(receipt,16*1024**2)},
+                'releaseAuthorityGranted':False,'releaseGateConsumed':False},False)
+            value=outcome.capture_run_commitment(root);self.assertEqual(value['originalMemoryFileCount'],22)
+            self.assertFalse(value['fullMemorySemanticsRechecked'])
+            raw=root/'controller-memory-before-raw-03.stdout';raw.chmod(0o600);raw.write_bytes(b'CHANGED');raw.chmod(0o400)
+            with self.assertRaises(RuntimeError):outcome.capture_run_commitment(root)
 
     def test_generated_capture_hook_remains_self_contained_silent_and_source_only(self):
         import build_capture_stop_post

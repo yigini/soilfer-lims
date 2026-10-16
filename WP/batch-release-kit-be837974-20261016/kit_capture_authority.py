@@ -18,7 +18,15 @@ class CaptureAuthority:
     def __init__(self,root,index,source,provider,require_directory_sync=True):
         require(pathlib.Path(root).as_posix()==CAPTURE_ROOT.as_posix(),'Exact separate capture authority root required')
         self.root=pathlib.Path(root);self.index=index;self.source=source;self.provider=provider
-        self.sync=require_directory_sync;self.started=False;self.result=None
+        self.sync=require_directory_sync;self.started=False;self.result=None;self.consumed=False
+
+    def consume(self):
+        require(self.started and self.result is not None and not self.consumed,
+            'One successful fresh capture authority may be consumed only once')
+        self.consumed=True
+        require(self.result['sourceBinding']==capture_source_review(self.index,self.source),
+            'Capture authority inputs changed after refresh')
+        return self.result
 
     def authorize(self):
         require(not self.started,'Capture authority refresh is single-use')

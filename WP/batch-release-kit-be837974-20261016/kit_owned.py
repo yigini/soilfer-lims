@@ -149,6 +149,7 @@ def completion(raw,spec):
     return value
 
 class OwnedCli:
+    owner_label=LABEL
     specification_validator=staticmethod(validate_spec)
     selection=staticmethod(selected)
     def __init__(self,runner,reader,journal,memory_factory,prepare_tmp,read_completion,publish_permit,stopper,
@@ -183,7 +184,7 @@ class OwnedCli:
         self.journal.append('ownedCliIntent',{'specification':spec,'specificationSha256':sha(canonical(spec))})
         self.prepare_tmp(spec)
         inventory=self.reader.inventory()
-        require(all(row.get('Name')!='/'+spec['name'] and row.get('Config',{}).get('Labels',{}).get(LABEL)!=spec['owner']
+        require(all(row.get('Name')!='/'+spec['name'] and row.get('Config',{}).get('Labels',{}).get(self.owner_label)!=spec['owner']
                     for row in inventory.values()),'CLI name or owner already exists')
         self.evidence_window=self.evidence_factory(label)
         envelope=None if self.evidence_window is None else self.evidence_window.receipt()

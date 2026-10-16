@@ -29,6 +29,8 @@ REQUIRED_SOURCE={
     'kit_capture_owned.py','kit_capture_memory.py','capture_cli_guard.cjs','build_capture_stop_post.py','capture_stop_post.py',
     'kit_capture_budget.py','kit_capture_copy.py','kit_capture_authority.py','kit_capture_science.py','kit_capture_review.py',
     'capture_controller_output.py','kit_capture_controller.py','kit_capture_outcome.py',
+    'kit_capture_construction.py','kit_capture_package.py','run_capture.py',
+    'kit_capture_inputs.py','kit_capture_launch.py','prepare_capture.py','launch_capture.py',
     'kit_ops.py','run_release.py','stop_post.py','prepare_release.py','launch_release.py',
     'application-source-binding.json','copy-site-closure.json','whole-outage-disclosure.json',
     'startup-expectations.json','probe-source-map.json','compose-source.yml',

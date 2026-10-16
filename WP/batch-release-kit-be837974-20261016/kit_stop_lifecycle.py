@@ -25,7 +25,9 @@ def private_file(root,name,maximum=16*1024**2):
     path=root/name
     for part in (path,*path.parents):require(not part.is_symlink(),'Private hook input alias refused')
     s=path.stat()
-    require(stat.S_ISREG(s.st_mode) and stat.S_IMODE(s.st_mode)==0o400 and 0<s.st_size<=maximum,
+    empty_original=re.fullmatch(r'capture-unit/(controller-original|emergency-stop-post-[0-9]{6})[.](stdout|stderr)',name) is not None
+    require(stat.S_ISREG(s.st_mode) and stat.S_IMODE(s.st_mode)==0o400 and
+        (0<s.st_size or s.st_size==0 and empty_original and s.st_nlink==1) and s.st_size<=maximum,
         'Complete immutable bounded hook input required')
     raw=path.read_bytes();require(len(raw)==s.st_size,'Hook input changed while reading')
     return raw

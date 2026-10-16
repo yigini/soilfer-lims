@@ -105,6 +105,14 @@ class CaptureOwners(unittest.TestCase):
         with self.assertRaises(RuntimeError):manager.run(spec)
         self.assertNotIn('permit',stand.events);self.assertEqual(stand.stop_calls,[[spec['label']]])
 
+    def test_same_capture_owner_under_foreign_name_refuses_before_create(self):
+        spec=capture.capture_spec('capture-206-prepare');stand=StandIn(spec)
+        manager=self.manager(spec,stand,directory())
+        observed=capture_object(spec,False);observed['Name']='/FOREIGN_NAME'
+        stand.inventory=lambda:{observed['Id']:observed}
+        with self.assertRaises(RuntimeError):manager.run(spec)
+        self.assertNotIn('create',stand.events);self.assertEqual(stand.stop_calls,[[spec['label']]])
+
     def test_independent_capture_stop_preserves_exact_mount_identity_and_ignores_resource_violation(self):
         for foreign in ('none','label','live-volume','release-command'):
             spec=capture.capture_spec('capture-214-prepare');value=capture_object(spec);stops=[]

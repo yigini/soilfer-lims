@@ -106,6 +106,14 @@ def controller_fixture():
 
 
 class CaptureSequence(unittest.TestCase):
+    def test_constructed_fresh_authority_is_consumed_once_without_second_provider_dispatch(self):
+        with controller_fixture() as current:
+            current.authority.authorize();calls=list(current.provider_runner.calls)
+            result=current.controller.execute()
+            self.assertEqual(current.provider_runner.calls,calls)
+            self.assertTrue(current.authority.consumed);self.assertEqual(result['version'],2)
+            with self.assertRaises(RuntimeError):current.authority.consume()
+
     def test_fresh_provider_full_standing_originals_then_native_preservation_and_full_science(self):
         with controller_fixture() as current:
             before=identity_record(triple(current.source));connections=[];connect=sqlite3.connect

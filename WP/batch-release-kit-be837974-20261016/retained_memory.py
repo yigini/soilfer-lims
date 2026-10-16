@@ -51,7 +51,7 @@ def cgroup_path(container_id,membership,mountinfo):
         if fields[4]=='/sys/fs/cgroup':matches.append((fields,at))
     require(len(matches)==1,'Exactly one canonical host cgroup mount required')
     fields,at=matches[0];require(fields[3]=='/' and fields[at+1]=='cgroup2','Host unified cgroup root required')
-    return CGROUP_ROOT/relative.lstrip('/')
+    return pathlib.PurePosixPath(CGROUP_ROOT.as_posix())/relative.lstrip('/')
 
 def bounded_read(path,limit=65536):
     p=pathlib.Path(path)

@@ -28,7 +28,7 @@ SPECS={
         'pairs','scalar','bounded_read','canonical_cgroup','gate'),
     'kit_capture_controller.py':('capture_controller_snapshot','capture_controller_same_group'),
     'capture_controller_output.py':('capture_controller_argv','capture_controller_closure'),
-    'kit_capture_outcome.py':('capture_content_commitment','capture_stop_outcome'),
+    'kit_capture_outcome.py':('capture_content_commitment','capture_run_commitment','capture_stop_outcome'),
 }
 MAIN='''
 def main():

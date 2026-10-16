@@ -28,7 +28,7 @@ REQUIRED_PAYLOAD={'source-index.json','source-review.json','whole-outage-disclos
     'qualified-build-receipt.json','qualified-image-inspect-original.json','application-index.json',
     'capture-receipt.json','apache-capture.json',
     'capture-206-prepare-original.json','capture-206-preservation.json',
-    'capture-214-prepare-original.json','capture-214-preservation.json'}|CAPTURE_REVIEW_FILES
+    'capture-214-prepare-original.json','capture-214-preservation.json','capture-unit-index.json'}|CAPTURE_REVIEW_FILES
 
 
 def package_name(name):
@@ -37,8 +37,14 @@ def package_name(name):
     return name
 
 
-def file_pin(raw):
-    require(isinstance(raw,bytes) and 0<len(raw)<=MAX_FILE_BYTES,'Bounded nonempty package input required')
+def empty_capture_original(name):
+    return isinstance(name,str) and re.fullmatch(
+        r'capture-unit/(controller-original|emergency-stop-post-[0-9]{6})[.](stdout|stderr)',name) is not None
+
+
+def file_pin(raw,name=None):
+    require(isinstance(raw,bytes) and (0<len(raw) or empty_capture_original(name)) and len(raw)<=MAX_FILE_BYTES,
+        'Complete bounded package file or exact empty native original required')
     return {'sha256':sha(raw),'bytes':len(raw)}
 
 
@@ -46,7 +52,7 @@ def payload_map(files):
     require(isinstance(files,dict) and REQUIRED_PAYLOAD<=set(files) and
         not set(files)&POST_MANIFEST_FILES and 1<=len(files)<=MAX_PACKAGE_FILES,
         'Complete payload required; later review/gate inputs cannot enter the manifest hash')
-    pins={package_name(name):file_pin(raw) for name,raw in sorted(files.items())}
+    pins={package_name(name):file_pin(raw,name) for name,raw in sorted(files.items())}
     require(sum(p['bytes'] for p in pins.values())<=MAX_PACKAGE_BYTES,'Package total byte bound exceeded')
     return pins
 
@@ -59,7 +65,8 @@ def allocation(pins):
         package_name(name)
         require(isinstance(pin,dict) and set(pin)=={'sha256','bytes'} and
             re.fullmatch('[a-f0-9]{64}',pin.get('sha256','')) and type(pin.get('bytes')) is int and
-            0<pin['bytes']<=MAX_FILE_BYTES,'Invalid complete package pin')
+            (0<pin['bytes'] or pin['bytes']==0 and empty_capture_original(name)) and
+            pin['bytes']<=MAX_FILE_BYTES,'Invalid complete package pin')
         total+=((pin['bytes']+4095)//4096)*4096
         parents=name.split('/')[:-1]
         for end in range(1,len(parents)+1):directories.add('/'.join(parents[:end]))
@@ -103,6 +110,8 @@ def freeze_manifest(files,index,source,whole_outage_seconds):
     capture=exact_json(files['capture-receipt.json'])
     from kit_capture_review import verify_capture_receipt
     verify_capture_receipt(capture,lambda name:files[name],index,source)
+    from kit_capture_package import capture_unit_payload
+    unit_files=capture_unit_payload(files,index,source)
     from kit_apache_capture import verify_apache_capture
     verify_apache_capture(exact_json(files['apache-capture.json']),files['ingress-original.conf'],
         files['ingress-held.conf'],index,source)
@@ -135,7 +144,7 @@ def freeze_manifest(files,index,source,whole_outage_seconds):
         'All actual pinned application sources required')
     validate_sources({name:files['application/'+name] for name in APP_PINS},
         {row['path']:row for row in application['entries']})
-    allowed=REQUIRED_PAYLOAD|tooling_names(index)|app_names
+    allowed=REQUIRED_PAYLOAD|unit_files|tooling_names(index)|app_names
     require(set(files)==allowed,'Expanded unreviewed package payload refused')
     result=source_review(source,index)
     return {'version':1,'scope':SOURCE_SCOPE,'root':str(ROOT),'head':HEAD,'tree':TREE,'image':IMAGE,
@@ -178,7 +187,7 @@ def verify_final(files,now):
     disclosure=exact_json(payload['whole-outage-disclosure.json'])
     confirmation=exact_json(files['yy-confirmation.json']);human=exact_json(files['yy-comment-original.json'])
     human_gate_comment(human,confirmation,now,disclosure,sha(canonical(manifest)),result)
-    pins={name:file_pin(raw) for name,raw in files.items()}
+    pins={name:file_pin(raw,name) for name,raw in files.items()}
     require(len(pins)<=MAX_PACKAGE_FILES+4,'Expanded final package refused')
     return {'manifest':manifest,'index':index,'source':source,'kit':review,'confirmation':confirmation,
         'human':human,'filePins':pins,'futurePackageAllocationBytes':allocation(pins)}
@@ -195,7 +204,7 @@ def sync_directory(path,required=True):
 
 def write_new_file(root,name,raw,require_directory_sync=True):
     """Independent immutable file; no hardlink, replacement or removal."""
-    root=pathlib.Path(root);package_name(name);file_pin(raw)
+    root=pathlib.Path(root);package_name(name);file_pin(raw,name)
     require(root.is_absolute() and root.is_dir(),'Existing absolute new package directory required')
     path=root/name
     for part in (root,*root.parents):require(not part.is_symlink(),'Package root alias refused')
@@ -212,7 +221,7 @@ def write_new_file(root,name,raw,require_directory_sync=True):
         os.fsync(fd) # The immutable inode mode follows the already-fsynced bytes.
     finally:os.close(fd)
     sync_directory(path.parent,require_directory_sync)
-    return file_pin(raw)
+    return file_pin(raw,name)
 
 
 def read_package(root,allow_later=False,require_posix_permissions=True):
@@ -229,7 +238,8 @@ def read_package(root,allow_later=False,require_posix_permissions=True):
             (not require_posix_permissions or stat.S_IMODE(mode.st_mode)==0o400),
             'Independent immutable regular package file required')
         name=path.relative_to(root).as_posix();package_name(name)
-        require(0<mode.st_size<=MAX_FILE_BYTES,'Complete bounded package file required')
+        require((0<mode.st_size or mode.st_size==0 and empty_capture_original(name)) and
+            mode.st_size<=MAX_FILE_BYTES,'Complete bounded package file required')
         with path.open('rb') as stream:raw=stream.read(MAX_FILE_BYTES+1)
         after=path.stat()
         require((mode.st_dev,mode.st_ino,mode.st_size,mode.st_mtime_ns)==

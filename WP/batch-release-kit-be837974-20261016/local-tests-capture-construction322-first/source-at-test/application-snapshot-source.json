@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "applicationHead": "be8379745bdfae52ce46496ff26514dc7d729640",
+  "files": {
+    "server/scripts/install_lab_policy_schema.js": {
+      "bytes": 12099,
+      "sha256": "b4d867b31c798981de10665ee929696343257fdac16fdcd2fd4a56a35cbdd4ba",
+      "gitBlob": "446e5f3a1fe1cff5198f8dbc5daf51626b717787"
+    },
+    "server/scripts/install_control_charts.js": {
+      "bytes": 9109,
+      "sha256": "fd5bdc007ac2e995dd25a65822169135c3c41252dc5d86c50fe45b99bd72125b",
+      "gitBlob": "799be75d6a945cd5fdfa83712d2168a64b822bfa"
+    },
+    "server/scripts/install_order_revisions.js": {
+      "bytes": 19077,
+      "sha256": "1e4fdbe8ff12c7e6bc8b751c3b47bcb0ef2f9ee80dd6840bd56abfd86f52057e",
+      "gitBlob": "c531d9f997967dffd52a28c677747cc253570ccd"
+    },
+    "server/scripts/order_revision_impact.js": {
+      "bytes": 4773,
+      "sha256": "6cf3712c20cead275f8ea41e258ca321b03932f23a559d550670b40e03f4cb76",
+      "gitBlob": "39cd8daf96b10740d63e35ed1d22e6a59cf0f0a0"
+    }
+  },
+  "sourceDerivation": [
+    "install_lab_policy_schema.reviewReadonlySnapshot creates one lims-policy-schema-readonly-* directory and copies only main/WAL/SHM with COPYFILE_EXCL before opening an ordinary readonly native connection.",
+    "install_control_charts invokes the policy prerequisite once before its read transaction and any writer transaction.",
+    "install_order_revisions first retains its primary policy copy, then invokes the chart prerequisite against that copy, retaining one secondary policy copy. Both precede any writer transaction.",
+    "Historical order_revision_impact runs the same dry-run order owner in one child. The new release-owned order_impact.cjs transport now calls that exact scientific owner directly, with TEMP/TMP/TMPDIR at the existing retained /tmp bind and no extra outer directory; see order-impact-transport-source.json.",
+    "Quiescence is a required precondition: complete fresh no-volume-writer checks bracket original triple hashes and held admission before the owned container exists. The only later child writes to the source are the pinned installer transaction after its copies. Application copy/race guards remain unchanged.",
+    "Nested readers can change shared-memory index/lock bytes. Both copied main and WAL must retain the admitted source SHA256/length; SHM bytes need not equal, but its complete length must fit the ordinary-reader index bound."
+  ],
+  "nativeSqliteSourceProof": "live-backup-sqlite-source.json",
+  "nativeSqliteSourceProofSha256": "86a8caa2c4d075311ab90d7226478719974c43b3fbc356e18c771d582e168a63",
+  "snapshotCounts": {
+    "canonical-policy": 1,
+    "214-each-phase": 1,
+    "209-each-phase": 2,
+    "order-impact": 2
+  },
+  "beforeCreateAdmission": true,
+  "applicationSourceChanged": false,
+  "childArgvChanged": true,
+  "installerTransactionsChanged": false,
+  "filesystemQuota": false,
+  "hardContentLimitEnforced": false,
+  "sqlScratchFilesClosed": false,
+  "writerJournalOrWalGrowthClosed": false,
+  "candidateStartupClosed": false,
+  "orderImpactChildOutputClosed": true,
+  "daemonAndUnitOutputClosed": false,
+  "physicalMetadataClosureClaimed": false,
+  "filesystemClosureClaimed": false,
+  "scientificInstallerChildArgvChanged": false,
+  "orderImpactTransportProof": "order-impact-transport-source.json"
+}

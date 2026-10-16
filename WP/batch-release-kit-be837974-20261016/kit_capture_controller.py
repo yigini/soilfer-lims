@@ -15,8 +15,9 @@ from kit_evidence import admit_evidence
 from kit_journal import exclusive_record
 
 
-def capture_controller_snapshot(reader=bounded_read,resolver=canonical_cgroup,evidence=None):
-    pid=os.getpid();require(type(pid) is int and pid>0,'Numeric current capture PID required')
+def capture_controller_snapshot(reader=bounded_read,resolver=canonical_cgroup,evidence=None,pid_reader=None):
+    current_pid=os.getpid if pid_reader is None else pid_reader
+    pid=current_pid();require(type(pid) is int and pid>0,'Numeric current capture PID required')
     proc='/proc/'+str(pid)
     def read(path,limit):
         raw=reader(path,limit)
@@ -33,7 +34,7 @@ def capture_controller_snapshot(reader=bounded_read,resolver=canonical_cgroup,ev
         if fields[4]=='/sys/fs/cgroup':matches.append((fields,at))
     require(len(matches)==1 and matches[0][0][3]=='/' and matches[0][0][matches[0][1]+1]=='cgroup2',
         'One canonical unified capture cgroup mount required')
-    group=pathlib.Path('/sys/fs/cgroup/system.slice')/CAPTURE_UNIT
+    group=pathlib.PurePosixPath('/sys/fs/cgroup/system.slice')/CAPTURE_UNIT
     before=resolver(group)
     require(isinstance(before,dict) and before.get('path')==group.as_posix() and
         all(type(before.get(k)) is int and before[k]>=0 for k in ('device','inode')),
@@ -41,7 +42,7 @@ def capture_controller_snapshot(reader=bounded_read,resolver=canonical_cgroup,ev
     raw={name:read(str(group/name),16384) for name in
         ('memory.events','memory.stat','memory.current','memory.peak','memory.max','memory.swap.max')}
     require(read(proc+'/cgroup',4096)==member and read(proc+'/mountinfo',256*1024)==mount and
-        resolver(group)==before and os.getpid()==pid,'Capture PID, membership, mount or directory changed')
+        resolver(group)==before and current_pid()==pid,'Capture PID, membership, mount or directory changed')
     sample={'memoryEvents':pairs(raw['memory.events'],EVENT_REQUIRED),
         'memoryStat':pairs(raw['memory.stat'],STAT_REQUIRED),
         'memoryPeakBytesObservation':scalar(raw['memory.peak']),'memoryMaxBytes':scalar(raw['memory.max']),
@@ -73,6 +74,7 @@ class CaptureControllerGuard:
         self.root=pathlib.Path(root)
         require(self.root.as_posix()==CAPTURE_ROOT.as_posix(),'Exact capture controller root required')
         self.reader=reader;self.resolver=resolver;self.sync=sync;self.before=None;self.last=None;self.labels=set()
+        self.records=[]
 
     def observe(self,label):
         require(isinstance(label,str) and re.fullmatch('[a-z][a-z0-9-]{0,70}',label) and label not in self.labels and
@@ -87,8 +89,9 @@ class CaptureControllerGuard:
         try:
             value=capture_controller_snapshot(self.reader,self.resolver,retain)
             if self.before is not None:capture_controller_same_group(self.before,value)
-            exclusive_record(self.root,'controller-memory-'+label+'.json',
+            reference=exclusive_record(self.root,'controller-memory-'+label+'.json',
                 {**value,'originalKernelReads':reads},self.sync)
+            self.records.append({k:reference[k] for k in ('file','sha256','bytes')})
             if self.before is None:self.before=value
             self.last=value;return value
         except BaseException as failure:
