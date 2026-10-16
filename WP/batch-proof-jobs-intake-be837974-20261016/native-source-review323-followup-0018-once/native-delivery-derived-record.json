@@ -1,0 +1,17 @@
+{
+  "observedAt": "2026-10-16T00:19:06.548Z",
+  "source": "04c99271e761198937aa798131075f199e86b679",
+  "requestId": 6204775812,
+  "window": {
+    "app": "Claude_pzs8sxrjxfjjc!Claude",
+    "id": 2888208,
+    "title": "Claude"
+  },
+  "delivery": "VISUALLY_VERIFIED_SENT_BUBBLE_AND_EMPTY_RIGHT_COMPOSER_AFTER_ONE_RETURN",
+  "screenObservation": "Correct LIMS Audit / Lab workflow audit and plan. Own follow-up displayed as sent user bubble, right composer empty. Updated checklist says hashes, 149 bindings and 323/323 guards all check out; writing verdict. Working status listing 53 new jobs guard test names. This is progress only, NOT actual SourcePASS.",
+  "accessibilityCaveat": "Accessibility lagged the sent-bubble and empty-composer screenshot, retaining former prompt text. Screenshot governed; no repeated typing/Return/click.",
+  "humanPreservation": "Centre empty, no card choices/drafts modified. No activation/navigation needed.",
+  "noDuplicateNative": true,
+  "productionOperations": 0,
+  "sourceOperators": 0
+}
