@@ -1,0 +1,35 @@
+"""Retain the one actual result delivery and current review boundary."""
+import pathlib,json,sys,subprocess
+sys.dont_write_bytecode=True
+W=pathlib.Path(__file__).resolve().parents[2];H=W/'WP/backlog-resume-20261013';sys.path.insert(0,str(H))
+from prechecks6210209468_evidence import git,sha,canonical,save,utc,verify_publication
+from prechecks6210209468_boundary_publication import boundary_publish
+REL='WP/batch-proof-mount-order-forward-be837974-20261016/';B=W/REL;sys.path.insert(0,str(B))
+from proof_contract import require,approval,no_later_failure
+D=B/'actual-mount-order100000-closed-result-review-once';Q=B/'closed-result6212737130-handoff-publication-once';BASE='e5689d026138f5ecef76ade70ac6d3ee58518a95'
+require(git('rev-parse','HEAD').decode().strip()==BASE and not git('diff','--cached','--name-only').strip() and not Q.exists(),'One handoff, exact same writer required')
+r=json.loads((D/'delivery-record.json').read_bytes());request=json.loads((D/'post-request.json').read_bytes());response=json.loads((D/'actual-post-response.json').read_bytes());readback=json.loads((D/'actual-fresh-readback.json').read_bytes())
+require(r['commentId']==6212737130 and r['sourcePassAckOnlyHere']==6211327371 and request['body']==response['body']==readback['body'] and sha(request['body'].encode())==r['bodySha256'],'One exact actual result required')
+V=B/'mount-order100000-closed-qualified-evidence-complete-publication-once';verify_publication(BASE,(V/'publication-index.json').relative_to(W).as_posix(),11663)
+captures={}
+def gh(n,path,pages=False):
+ a=['gh','api']+(['--paginate','--slurp'] if pages else [])+[path];p=subprocess.run(a,capture_output=True,timeout=120);require(p.returncode==0,'Fresh API unavailable');captures[n]=(p.stdout,p.stderr,a);return json.loads(p.stdout)
+fresh=gh('actual-result-fresh','repos/yigini/soilfer-lims/issues/comments/6212737130');require(fresh['body']==request['body'] and fresh['created_at']==fresh['updated_at']==r['createdUtc'],'Actual result edited')
+pages=gh('current-later-comments','repos/yigini/soilfer-lims/issues/162/comments?per_page=100&since='+r['createdUtc'],True);comments=[v for page in pages for v in page]
+main=gh('current-main','repos/yigini/soilfer-lims/git/ref/heads/main');ci=gh('current-ci','repos/yigini/soilfer-lims/actions/runs/38772398721');issue=gh('current-191','repos/yigini/soilfer-lims/issues/191')
+require(main['object']['sha']=='be8379745bdfae52ce46496ff26514dc7d729640' and ci['head_sha']==main['object']['sha'] and ci['status']=='completed' and ci['conclusion']=='success' and ci['event']=='push' and ci['run_attempt']==1 and issue['state']=='closed','Main/CI/issue boundary changed')
+index=json.loads((B/'actual-source-pass6211327371-once/tooling-source-index.json').read_bytes());review=json.loads((B/'actual-source-pass6211327371-once/actual-source-pass-original.json').read_bytes());approval(review,index);no_later_failure(comments,review,index)
+later=[c for c in comments if c['id']>r['commentId'] and (c.get('performed_via_github_app') or {}).get('id')==1236702 and (c.get('performed_via_github_app') or {}).get('slug')=='claude']
+Q.mkdir()
+for n,(raw,err,argv) in captures.items():save(Q,n+'-original.json',raw);save(Q,n+'-stderr.log',err);save(Q,n+'-command.json',canonical({'argv':argv,'returnCode':0,'length':len(raw),'sha256':sha(raw)})+b'\n')
+boundary={**r,'freshBoundaryUtc':utc(),'actualLaterClaudeIds':[c['id'] for c in later],'actualResultAcceptanceNotInferred':True,'sourceFallbackCancelledForever':True,'noDuplicateAckNativeOrGh':True,'oldPromptHistoryToBePreservedVerbatim':True}
+save(Q,'handoff-boundary.json',canonical(boundary)+b'\n')
+lead=f'''LATEST ACTUAL CLOSED QUALIFICATION RESULT6212737130 POSTED - {r['createdUtc']}.
+ONE @claude162 result https://github.com/yigini/soilfer-lims/issues/162#issuecomment-6212737130 / bodySHA{r['bodySha256']} / requestJSON==actualresponse==fresh unedited readback. SourcePASS6211327371 ACK ONLYHERE; old621098 source fallback08:24:55 CANCELLED forever/no duplicate ACK/GH/native. CLOSED100000 qualification checks PASS, NOT DEPLOYED; runtime receipt a82a8f53 plus nonvacuous stop-post36516567 and successful09:19:58.494170 lifecycle independently accepted together. Complete publication e5689d026138f5ecef76ade70ac6d3ee58518a95/{11664}raw GitOID-SHA-length files. No kit graph/gate/deployment exists yet.
+All668health810memory6480kernel24controller3041telemetry/12787rootfiles/65package37source1333app732source-publication bindings validated. Natural first193Sample23Hold239Audit1Notification/20old exactprovenance pairs; second0adds0changes;76healthy1025.228491s/15min/four refused configs18pairsEACH72total. Public evidence independently checked; frozen runtime computed raw-value/HMAC/new-hold-audit predicates, not retainer SQL/key replay. ALL156jobsONlogs17222252B240246lines+94287149BembeddingtransportWITHHELD/full hashes-lengths-line hashes public; DBs/BOTHkeys/12inspectstreamsHOST0400/0privatebytesfetched. Terminalphysical free65193848832required24851118190/unexplained1241088<500MB; all inputs/assets/historical+exactowned stopped containers preserved. All consumed source/root/unit/operators/oncehelpers immutable/no retries/cleanup.
+Fresh authority {boundary['freshBoundaryUtc']}: mainbe837974/CI38772398721attempt1pushCLOSEDSUCCESS/#191CLOSED; actual later Claude IDs{boundary['actualLaterClaudeIds']}. Empty means THIS result acceptance and concrete new kit direction remain PENDING, never infer PASS from unrelated parallel-work6212445417. Next read FULL actual answer; only then implement a concrete new kit graph for exact review/fresh single-use gate. No new qualification attempt. Conditional native fallback ONLY if THIS result remains unanswered/no earlier10:04:23UTC/fresh actual correct target EMPTY composer/humans preserved; never repeat old source fallback.
+User says delivery is too slow and expected issues closed this morning. Explain merged vs deployed honestly; reduce repeated checkpoint overhead, prioritize actual release milestones. Claude6212445417 records YY approval for isolated parallel source work208/207 then216/215 then203/204 then217/release-first/host one-writer/merges held. Direct user confirmation of replacing earlier noagents/newworktree restriction was requested asynchronously in this turn; do not infer its answer. MainMERGEHOLD/233000KEEPIT/R2COMPLETE/noprune/nohostgrowrestart/no103/human drafts held. Futurekit actual counts may differ; actual stop-grace+exit included9to10minrestart/exact600failure. Same heartbeat ACTIVE2min; restore10 ONLYactualbeDEPLOYED+ClactualpostdeployPASS. Preserve ALL older history verbatim below.
+
+'''
+out=boundary_publish(Q,[*D.iterdir(),H/'post-mount-order100000-closed-actual-result-once.py',pathlib.Path(__file__)],'Retain actual closed qualification result6212737130 and review handoff',lead)
+print(json.dumps({**out,'commentId':r['commentId'],'fallbackNoEarlierUtc':r['nativeFallbackNoEarlierUtc'],'actualLaterClaudeIds':boundary['actualLaterClaudeIds'],'freshBoundaryUtc':boundary['freshBoundaryUtc']}))
