@@ -18,6 +18,7 @@ from kit_cli_evidence import begin_cli_evidence
 from kit_copy_admission import live_backup_limit
 from kit_app_snapshots import CLI_SNAPSHOTS,snapshot_plan,unchanged_source,verify_snapshots
 from kit_budget import CLI_SITE
+from kit_order_output import OUTPUT_ADMISSION,reserve_output,close_output
 
 LABEL='io.soilfer.release-owned'
 DATABASE='/app/server/prisma/dev.db'
@@ -26,7 +27,7 @@ ALLOWED={
     'stopped-integrity':('/release/stopped_integrity.cjs',None),
     'canonical-policy':('/app/server/scripts/install_lab_policy_schema.js','--dry-run'),
     'chart-impact':('/app/server/scripts/control_chart_prebinding_impact.js',None),
-    'order-impact':('/app/server/scripts/order_revision_impact.js',None),
+    'order-impact':('/release/order_impact.cjs',None),
     'first-sync-backup':('/release/live_backup.cjs',None),
     'postflight-backup':('/release/live_backup.cjs',None),
 }
@@ -234,7 +235,7 @@ def filesystem_controls(root,require_directory_sync=True,disk=None,no_writers=No
         validate_spec(spec);p=root/(spec['label']+'-retained-temp')
         require(p.as_posix()==spec['tmp'] and p.parent==root and not p.is_symlink(),'Exact private control directory required')
         return p
-    snapshot_admissions={};snapshot_closures=set()
+    snapshot_admissions={};snapshot_closures=set();output_admissions={};output_closures=set()
     def prepare(spec):
         p=directory(spec)
         require(not p.exists(),'Fresh CLI control directory required')
@@ -242,6 +243,8 @@ def filesystem_controls(root,require_directory_sync=True,disk=None,no_writers=No
         # hardlink. Charge its full envelope before any container is created;
         # no controller admission runs inside the installer transaction.
         admit_evidence(p/'cli-child-complete.json',8192,pending=True,future_directory=p)
+        output=None
+        if spec['label']=='order-impact':output=reserve_output(p)
         limit=None
         if spec['label'] in ('first-sync-backup','postflight-backup'):
             require(disk is not None,'Live backup requires its held before-create content admission')
@@ -262,6 +265,9 @@ def filesystem_controls(root,require_directory_sync=True,disk=None,no_writers=No
         if snapshot is not None:
             exclusive_record(p,'snapshot-admission.json',snapshot,require_directory_sync)
             snapshot_admissions[spec['label']]=snapshot
+        if output is not None:
+            exclusive_record(p,'order-impact-admission.json',OUTPUT_ADMISSION,require_directory_sync)
+            output_admissions[spec['label']]=output
     def read(spec):
         p=directory(spec)/'cli-child-complete.json'
         if not p.exists():return None
@@ -269,6 +275,10 @@ def filesystem_controls(root,require_directory_sync=True,disk=None,no_writers=No
         with p.open('rb') as stream:raw=stream.read(8193)
         require(len(raw)<=8192,'Completion grew beyond bound')
         label=spec['label']
+        if label in output_admissions and label not in output_closures:
+            result=close_output(directory(spec),output_admissions[label],snapshot_admissions[label]['sourceDbWalShm'])
+            exclusive_record(directory(spec),'order-impact-output-closure.json',result,require_directory_sync)
+            output_closures.add(label)
         if label in snapshot_admissions and label not in snapshot_closures:
             # The real child has closed its SQLite handles and returned. Any
             # refusal here precedes the existing final-memory/exit permission.

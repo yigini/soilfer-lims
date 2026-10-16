@@ -10,7 +10,7 @@ const { spawnSync } = require('node:child_process');
 const scripts = new Set([
   'install_sample_containers.js', 'install_control_charts.js',
   'install_order_revisions.js', 'install_lab_policy_schema.js',
-  'control_chart_prebinding_impact.js', 'order_revision_impact.js'
+  'control_chart_prebinding_impact.js'
 ]);
 const hash = raw => crypto.createHash('sha256').update(raw).digest('hex');
 function requireValue(value, message) { if (!value) throw new Error(message); }
@@ -33,7 +33,7 @@ function writeOnce(filename, raw) {
 function validateMain(argv) {
   requireValue(argv[0] === '/tmp', 'Exact retained control directory required');
   const child = argv.slice(1);
-  if (['/release/stopped_integrity.cjs', '/release/live_backup.cjs'].includes(child[0])) {
+  if (['/release/stopped_integrity.cjs', '/release/live_backup.cjs', '/release/order_impact.cjs'].includes(child[0])) {
     requireValue(child.length === 3 && child[1] === '--db' && child[2] === '/app/server/prisma/dev.db', 'Exact stopped integrity arguments required');
     return { directory: argv[0], child };
   }

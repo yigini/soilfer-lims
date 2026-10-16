@@ -1,0 +1,81 @@
+test_admission_requires_exact_canonical_limits_before_any_child_or_stream (verify_kit_order_output.OrderOutput.test_admission_requires_exact_canonical_limits_before_any_child_or_stream) ... ok
+test_binary_simultaneous_streams_exact_bound_empty_and_fast_exit_are_complete (verify_kit_order_output.OrderOutput.test_binary_simultaneous_streams_exact_bound_empty_and_fast_exit_are_complete) ... ok
+test_each_burst_overflow_stays_at_one_sentinel_and_refuses_reuse (verify_kit_order_output.OrderOutput.test_each_burst_overflow_stays_at_one_sentinel_and_refuses_reuse) ... ok
+test_full_output_reservation_refuses_before_temporary_directory (verify_kit_order_output.OrderOutput.test_full_output_reservation_refuses_before_temporary_directory) ... ok
+test_nonzero_and_spawn_failure_preserve_original_outcomes (verify_kit_order_output.OrderOutput.test_nonzero_and_spawn_failure_preserve_original_outcomes) ... FAIL
+test_parent_checks_every_stream_and_exit_before_settling_reservations (verify_kit_order_output.OrderOutput.test_parent_checks_every_stream_and_exit_before_settling_reservations) ... ok
+test_pinned_owner_sources_unchanged_and_old_unbounded_wrapper_is_not_compiled (verify_kit_order_output.OrderOutput.test_pinned_owner_sources_unchanged_and_old_unbounded_wrapper_is_not_compiled) ... ok
+test_real_node_child_and_parent_ledger_close_before_existing_exit_permission (verify_kit_order_output.OrderOutput.test_real_node_child_and_parent_ledger_close_before_existing_exit_permission) ... FAIL
+test_changed_shm_or_fk_failure_cannot_be_integrity_pass (verify_kit_owned.IntegrityTests.test_changed_shm_or_fk_failure_cannot_be_integrity_pass) ... ok
+test_readonly_container_check_is_before_backup_and_preserves_full_original_shm (verify_kit_owned.IntegrityTests.test_readonly_container_check_is_before_backup_and_preserves_full_original_shm) ... ok
+test_actual_journal_intent_precedes_create_and_final_memory_precedes_exit (verify_kit_owned.OwnedTests.test_actual_journal_intent_precedes_create_and_final_memory_precedes_exit) ... ok
+test_all_fifteen_compiled_commands_have_exact_limits_mounts_and_modes (verify_kit_owned.OwnedTests.test_all_fifteen_compiled_commands_have_exact_limits_mounts_and_modes) ... ok
+test_child_failure_still_gets_final_memory_and_retained_exit_then_stop_attempt (verify_kit_owned.OwnedTests.test_child_failure_still_gets_final_memory_and_retained_exit_then_stop_attempt) ... ok
+test_completion_wrong_argv_duplicate_key_boolean_exit_and_nonfinite_clock_refuse (verify_kit_owned.OwnedTests.test_completion_wrong_argv_duplicate_key_boolean_exit_and_nonfinite_clock_refuse) ... ok
+test_each_operational_field_mutation_refuses (verify_kit_owned.OwnedTests.test_each_operational_field_mutation_refuses) ... ok
+test_lost_create_or_start_return_stops_by_intended_owner_and_never_retries (verify_kit_owned.OwnedTests.test_lost_create_or_start_return_stops_by_intended_owner_and_never_retries) ... ok
+test_wait_output_status_identity_and_original_deadline_are_all_required (verify_kit_owned.OwnedTests.test_wait_output_status_identity_and_original_deadline_are_all_required) ... ok
+test_exact_stop_uses_full_mount_objects_independent_of_all_permutations (verify_kit_owned.StopTests.test_exact_stop_uses_full_mount_objects_independent_of_all_permutations) ... ok
+test_foreign_identity_is_never_stopped_but_resource_failure_cannot_block_owned_stop (verify_kit_owned.StopTests.test_foreign_identity_is_never_stopped_but_resource_failure_cannot_block_owned_stop) ... ok
+test_one_failed_owner_does_not_prevent_next_owner_and_empty_is_not_nonvacuous (verify_kit_owned.StopTests.test_one_failed_owner_does_not_prevent_next_owner_and_empty_is_not_nonvacuous) ... ok
+test_real_local_emergency_transport_launches_before_failed_retention (verify_kit_owned.StopTests.test_real_local_emergency_transport_launches_before_failed_retention) ... ok
+test_atomic_record_charges_data_once_and_both_retained_names (verify_kit_evidence.SharedEvidence.test_atomic_record_charges_data_once_and_both_retained_names) ... ok
+test_child_completion_full_envelope_is_charged_before_container_creation (verify_kit_evidence.SharedEvidence.test_child_completion_full_envelope_is_charged_before_container_creation) ... ok
+test_each_covered_producer_has_one_share_across_all_owners (verify_kit_evidence.SharedEvidence.test_each_covered_producer_has_one_share_across_all_owners) ... ok
+test_existing_4gib_reserve_is_not_reinterpreted_as_covered_global_closure (verify_kit_evidence.SharedEvidence.test_existing_4gib_reserve_is_not_reinterpreted_as_covered_global_closure) ... ok
+test_failed_write_reservation_cannot_be_reused_and_unknown_root_refuses (verify_kit_evidence.SharedEvidence.test_failed_write_reservation_cannot_be_reused_and_unknown_root_refuses) ... ok
+test_independent_record_exception_cannot_bypass_for_other_names_or_sizes (verify_kit_evidence.SharedEvidence.test_independent_record_exception_cannot_bypass_for_other_names_or_sizes) ... ok
+test_insufficient_completion_or_foreign_future_parent_refuses_before_mkdir (verify_kit_evidence.SharedEvidence.test_insufficient_completion_or_foreign_future_parent_refuses_before_mkdir) ... ok
+test_insufficient_stream_admission_never_launches_child (verify_kit_evidence.SharedEvidence.test_insufficient_stream_admission_never_launches_child) ... ok
+test_nested_metadata_counts_all_new_directories_and_entries_once (verify_kit_evidence.SharedEvidence.test_nested_metadata_counts_all_new_directories_and_entries_once) ... ok
+test_real_command_reserves_complete_streams_before_launch_then_settles (verify_kit_evidence.SharedEvidence.test_real_command_reserves_complete_streams_before_launch_then_settles) ... ok
+
+======================================================================
+FAIL: test_nonzero_and_spawn_failure_preserve_original_outcomes (verify_kit_order_output.OrderOutput.test_nonzero_and_spawn_failure_preserve_original_outcomes)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\WP\batch-release-kit-be837974-20261016\verify_kit_order_output.py", line 71, in test_nonzero_and_spawn_failure_preserve_original_outcomes
+    self.node(r'''
+  File "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\WP\batch-release-kit-be837974-20261016\verify_kit_order_output.py", line 33, in node
+    self.assertEqual(result.returncode,0,result.stderr.decode('utf-8',errors='replace'))
+AssertionError: 1 != 0 : AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+9 !== 10
+
+    at [eval]:7:77
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5) {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: 9,
+  expected: 10,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+
+======================================================================
+FAIL: test_real_node_child_and_parent_ledger_close_before_existing_exit_permission (verify_kit_order_output.OrderOutput.test_real_node_child_and_parent_ledger_close_before_existing_exit_permission)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\WP\batch-release-kit-be837974-20261016\verify_kit_order_output.py", line 162, in test_real_node_child_and_parent_ledger_close_before_existing_exit_permission
+    self.node(code,root);self.assertIsNone(read(spec))
+    ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\WP\batch-release-kit-be837974-20261016\verify_kit_order_output.py", line 33, in node
+    self.assertEqual(result.returncode,0,result.stderr.decode('utf-8',errors='replace'))
+AssertionError: 1 != 0 : Error: Independent regular impact file required
+    at need (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\WP\batch-release-kit-be837974-20261016\order_impact.cjs:14:51)
+    at regular (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\WP\batch-release-kit-be837974-20261016\order_impact.cjs:21:3)
+    at fileRecord (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\WP\batch-release-kit-be837974-20261016\order_impact.cjs:28:18)
+    at readAdmission (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\WP\batch-release-kit-be837974-20261016\order_impact.cjs:56:15)
+    at collect (C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\WP\batch-release-kit-be837974-20261016\order_impact.cjs:160:3)
+    at [eval]:13:1
+    at runScriptInThisContext (node:internal/vm:219:10)
+    at node:internal/process/execution:451:12
+    at [eval]-wrapper:6:24
+    at runScriptInContext (node:internal/process/execution:449:60)
+
+
+----------------------------------------------------------------------
+Ran 31 tests in 1.542s
+
+FAILED (failures=2)

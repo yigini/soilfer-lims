@@ -18,7 +18,7 @@ SOURCE_SCOPE='PRODUCTION_FORWARD_206_214_209_QUALIFIED_ACC158_REVIEWED_WHOLE_OUT
 REQUIRED_SOURCE={
     'kit_contract.py','kit_sequence.py','kit_journal.py','kit_io.py','kit_evidence.py','kit_docker.py','kit_consumer_inventory.py',
     'kit_owned.py','kit_cli_evidence.py','kit_integrity.py','stopped_integrity.cjs','cli_guard.cjs','live_backup.cjs',
-    'live-backup-sqlite-source.json',
+    'live-backup-sqlite-source.json','order_impact.cjs','kit_order_output.py','order-impact-transport-source.json',
     'kit_install.py','kit_runtime.py','kit_readiness.py','kit_natural.py','kit_no_writers.py','kit_ingress.py',
     'kit_budget.py','kit_disk.py','kit_copy_admission.py','kit_app_snapshots.py','application-snapshot-source.json','kit_probes.py','kit_frozen.py',
     'kit_preservation.py','kit_recovery.py','kit_emergency_ingress.py','kit_stop.py','kit_stop_lifecycle.py',

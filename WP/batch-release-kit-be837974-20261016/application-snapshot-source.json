@@ -27,7 +27,7 @@
     "install_lab_policy_schema.reviewReadonlySnapshot creates one lims-policy-schema-readonly-* directory and copies only main/WAL/SHM with COPYFILE_EXCL before opening an ordinary readonly native connection.",
     "install_control_charts invokes the policy prerequisite once before its read transaction and any writer transaction.",
     "install_order_revisions first retains its primary policy copy, then invokes the chart prerequisite against that copy, retaining one secondary policy copy. Both precede any writer transaction.",
-    "order_revision_impact runs that same dry-run order owner in one child; TEMP/TMP/TMPDIR point into one retained outer impact directory.",
+    "Historical order_revision_impact runs the same dry-run order owner in one child. The new release-owned order_impact.cjs transport now calls that exact scientific owner directly, with TEMP/TMP/TMPDIR at the existing retained /tmp bind and no extra outer directory; see order-impact-transport-source.json.",
     "Quiescence is a required precondition: complete fresh no-volume-writer checks bracket original triple hashes and held admission before the owned container exists. The only later child writes to the source are the pinned installer transaction after its copies. Application copy/race guards remain unchanged.",
     "Nested readers can change shared-memory index/lock bytes. Both copied main and WAL must retain the admitted source SHA256/length; SHM bytes need not equal, but its complete length must fit the ordinary-reader index bound."
   ],
@@ -41,15 +41,17 @@
   },
   "beforeCreateAdmission": true,
   "applicationSourceChanged": false,
-  "childArgvChanged": false,
+  "childArgvChanged": true,
   "installerTransactionsChanged": false,
   "filesystemQuota": false,
   "hardContentLimitEnforced": false,
   "sqlScratchFilesClosed": false,
   "writerJournalOrWalGrowthClosed": false,
   "candidateStartupClosed": false,
-  "orderImpactChildOutputClosed": false,
+  "orderImpactChildOutputClosed": true,
   "daemonAndUnitOutputClosed": false,
   "physicalMetadataClosureClaimed": false,
-  "filesystemClosureClaimed": false
+  "filesystemClosureClaimed": false,
+  "scientificInstallerChildArgvChanged": false,
+  "orderImpactTransportProof": "order-impact-transport-source.json"
 }

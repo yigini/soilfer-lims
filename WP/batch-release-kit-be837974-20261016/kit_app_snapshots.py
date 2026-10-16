@@ -1,9 +1,11 @@
 """Scoped admission for the pinned installers' retained policy copies.
 
-The child remains the unmodified application CLI. Its source-derived copy
+The installer remains the unmodified application CLI. Its source-derived copy
 bound requires the separately verified absence of other writers. This is not
 a filesystem quota: SQL scratch files, writer journals and daemon output are
 explicitly outside this admission. No SQLite connection is opened here.
+Order-impact uses the separately bound pipe transport around that same dry-run
+installer; it no longer creates the historical outer impact directory.
 """
 import pathlib
 import re
