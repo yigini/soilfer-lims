@@ -24,7 +24,7 @@ REQUIRED_SOURCE={
     'build_stop_post.py','predecessor-startup-expectations.json',
     'retained_app_copy.py','kit_recovery_copy.py','predecessor-copy-source-binding.json',
     'retained_authority.py','kit_provider.py','kit_authority.py','kit_science.py','kit_construction.py','kit_outage.py','timing-evidence.json',
-    'kit_package.py','kit_launch_programs.py',
+    'kit_package.py','kit_launch_programs.py','kit_apache_capture.py',
     'kit_ops.py','run_release.py','stop_post.py','prepare_release.py','launch_release.py',
     'application-source-binding.json','copy-site-closure.json','whole-outage-disclosure.json',
     'startup-expectations.json','probe-source-map.json','compose-source.yml',

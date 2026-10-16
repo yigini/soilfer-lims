@@ -72,12 +72,19 @@ def repeat_identity(before,after,result,issue,evidence_dir=None,label='repeat-by
 
 def copy_file(src,dst,expected,check,live_evidence=None):
     require(not pathlib.Path(src).is_symlink() and not pathlib.Path(dst).exists() and not pathlib.Path(dst).is_symlink(),'Copy alias or reused destination')
+    require(isinstance(expected,dict) and type(expected.get('bytes')) is int and 0<=expected['bytes']<=BYTE_LIMIT and
+        isinstance(expected.get('sha256'),str) and re.fullmatch('[a-f0-9]{64}',expected['sha256']),
+        'Exact bounded source length/hash required before copy creation')
+    check()
     count=0
     with pathlib.Path(src).open('rb') as f,pathlib.Path(dst).open('xb') as out:
         while True:
             b=f.read(1024**2)
             if not b:break
-            out.write(b);count+=len(b);compared_guard(count<=expected['bytes'],'Source grew during copy',live_evidence,'copy-size-'+sha(str(src).encode())[:24],expected,{'copiedBytes':count,'sourceFdMetadata':stat_record(os.fstat(f.fileno()))})
+            # Refuse BEFORE the next write. A growing source must never spend
+            # even one unreserved chunk beyond its original byte allowance.
+            compared_guard(count+len(b)<=expected['bytes'],'Source grew during copy',live_evidence,'copy-size-'+sha(str(src).encode())[:24],expected,{'copiedBytes':count,'nextChunkBytes':len(b),'sourceFdMetadata':stat_record(os.fstat(f.fileno()))})
+            out.write(b);count+=len(b)
             if count%(32*1024**2)==0:out.flush();check()
     pathlib.Path(dst).chmod(0o400)
     actual=file_state(dst);compared_guard(actual['sha256']==expected['sha256'] and actual['bytes']==expected['bytes'],'Copy differs; no retry',live_evidence,'copy-bytes-'+sha(str(src).encode())[:24],expected,actual);check();return actual

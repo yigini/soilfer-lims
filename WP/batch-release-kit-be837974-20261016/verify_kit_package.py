@@ -69,7 +69,21 @@ def package_fixture():
         'noHostConsumerActsOnUnhealthyWindow':True,'reviewedAllowedProcessCommandSha256':['e'*64],
         'reviewedAllowedActiveTimerNames':[]}
     files['consumer-inventory.json']=canonical(inventory)+b'\n';files['consumer-review.json']=canonical(consumer)+b'\n'
-    files['ingress-original.conf']=b'# SYNTHETIC ORIGINAL\n';files['ingress-held.conf']=b'# SYNTHETIC HELD\n'
+    from verify_kit_apache_capture import original
+    from kit_apache_capture import render_held,CONF
+    files['ingress-original.conf']=original();files['ingress-held.conf'],rendering=render_held(original())
+    # Pure synthetic metadata in a NEW LOCAL package fixture. No host capture.
+    synthetic_stat={'st_dev':7,'st_ino':123,'st_size':len(original()),'st_mode':0o100644,'st_nlink':1,
+        'st_uid':0,'st_gid':0,'st_mtime_ns':1000,'st_ctime_ns':1000,'allocatedBytes':4096}
+    apache={'path':CONF,'head':HEAD,'captureSourceReviewId':source['id'],'sourceBinding':source_review(source,idx),
+        'capturedAt':'2026-10-16T11:00:20Z','neverRetry':True,'before':synthetic_stat,'after':synthetic_stat,
+        'extendedAttributesBase64':{},'extendedAttributesSha256':sha(canonical({})),
+        'originalSha256':sha(files['ingress-original.conf']),'heldSha256':sha(files['ingress-held.conf']),
+        'rendering':rendering,'sourceWrites':0,'certificateOrPrivateKeyFilesOpened':0,
+        'configurationInstalled':False,'metadataCaptureNotGlobalFilesystemClosure':True}
+    files['apache-capture.json']=canonical(apache)+b'\n'
+    capture=exact_json(files['capture-receipt.json']);capture['apacheCaptureSha256']=sha(files['apache-capture.json'])
+    files['capture-receipt.json']=canonical(capture)+b'\n'
     for target,source_path in [
         ('qualified-build-receipt.json',BUILD/'first-build-190000-closed-originals-once/build-receipt.json'),
         ('qualified-image-inspect-original.json',BUILD/'first-build-190000-closed-originals-once/image-inspect-original.json'),
@@ -141,6 +155,35 @@ class Package(unittest.TestCase):
             elif mode=='extra':changed['unexpected.json']=b'{}'
             else:now=confirmation['createdEpoch']+601
             with self.subTest(mode=mode),self.assertRaises(RuntimeError):verify_final(changed,now)
+
+    def test_apache_capture_requires_this_source_fresh_time_full_metadata_and_exact_rendered_bytes(self):
+        files,idx,source,*_=package_fixture()
+        original=exact_json(files['apache-capture.json'])
+        for mode in ('missing','source','before-source','path','identity','links','attribute-hash',
+                     'invalid-base64','rendering','source-write','held-hash','receipt-binding'):
+            changed=dict(files);value=copy.deepcopy(original)
+            if mode=='missing':del changed['apache-capture.json']
+            elif mode=='source':value['captureSourceReviewId']+=1
+            elif mode=='before-source':value['capturedAt']='2026-10-15T01:00:00Z'
+            elif mode=='path':value['path']='/etc/httpd/other.conf'
+            elif mode=='identity':value['after']['st_ino']+=1
+            elif mode=='links':value['before']['st_nlink']=value['after']['st_nlink']=2
+            elif mode=='attribute-hash':value['extendedAttributesSha256']='a'*64
+            elif mode=='invalid-base64':value['extendedAttributesBase64']={'user.local':'***'}
+            elif mode=='rendering':value['rendering']['insertedDirectiveCount']=1
+            elif mode=='source-write':value['sourceWrites']=False
+            elif mode=='held-hash':value['heldSha256']='a'*64
+            else:
+                capture=exact_json(changed['capture-receipt.json']);capture['apacheCaptureSha256']='a'*64
+                changed['capture-receipt.json']=canonical(capture)
+            if mode!='missing':changed['apache-capture.json']=canonical(value)+b'\n'
+            # Refresh the ordinary file hash so semantic checks, not a stale
+            # generic package pin, must catch each false capture assertion.
+            if mode not in ('missing','receipt-binding'):
+                capture=exact_json(changed['capture-receipt.json']);capture['apacheCaptureSha256']=sha(changed['apache-capture.json'])
+                changed['capture-receipt.json']=canonical(capture)
+            with self.subTest(mode=mode),self.assertRaises((RuntimeError,ValueError)):
+                freeze_manifest(changed,idx,source,4800)
 
     def test_independent_files_exclusive_writes_and_link_refusal_use_real_local_files(self):
         FIXTURES.mkdir(exist_ok=True);root=pathlib.Path(tempfile.mkdtemp(prefix='owned-',dir=FIXTURES)).resolve()

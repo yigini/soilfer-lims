@@ -22,7 +22,7 @@ REQUIRED_PAYLOAD={'source-index.json','source-review.json','whole-outage-disclos
     'consumer-inventory.json','consumer-review.json','actual-scientific-impact.json',
     'actual-impact-214.json','actual-impact-209.json','ingress-original.conf','ingress-held.conf',
     'qualified-build-receipt.json','qualified-image-inspect-original.json','application-index.json',
-    'capture-receipt.json'}
+    'capture-receipt.json','apache-capture.json'}
 
 
 def package_name(name):
@@ -95,9 +95,13 @@ def freeze_manifest(files,index,source,whole_outage_seconds):
         timestamp(science['capturedAt'])>=timestamp(source['created_at']),
         'Fresh scientific capture must follow this exact source PASS')
     capture=exact_json(files['capture-receipt.json'])
+    from kit_apache_capture import verify_apache_capture
+    verify_apache_capture(exact_json(files['apache-capture.json']),files['ingress-original.conf'],
+        files['ingress-held.conf'],index,source)
     require(capture.get('root')==str(ROOT) and capture.get('head')==HEAD and
         capture.get('sourceReviewId')==source['id'] and capture.get('productionSqliteConnections')==0 and
-        capture.get('scienceSha256')==sha(canonical(science)),
+        capture.get('scienceSha256')==sha(canonical(science)) and
+        capture.get('apacheCaptureSha256')==sha(files['apache-capture.json']),
         'Fresh actual retained-copy capture receipt required')
     inventory=exact_json(files['consumer-inventory.json']);review=exact_json(files['consumer-review.json'])
     from kit_consumer_inventory import require_reviewed_inventory
