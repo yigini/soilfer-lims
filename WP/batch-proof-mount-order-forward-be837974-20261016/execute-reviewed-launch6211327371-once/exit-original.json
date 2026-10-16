@@ -1,0 +1,10 @@
+{
+  "closedUtc": "2026-10-16T08:32:24.356942+00:00",
+  "status": "REVIEWED_JOBS_LAUNCHER_CLOSED_INSPECT_SAME_UNIT",
+  "exitCode": 0,
+  "error": null,
+  "root": "/opt/lims/releases/workflow-batch-mount-order-forward-be837974-20261016T100000Z",
+  "unit": "lims-workflow-batch-mount-order-forward-be837974-20261016t100000z",
+  "proofComplete": false,
+  "retryAllowed": false
+}

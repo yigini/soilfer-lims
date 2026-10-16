@@ -1,0 +1,15 @@
+{
+  "utc": "2026-10-16T08:31:15.805208+00:00",
+  "argv": [
+    "C:\\Users\\yigin\\AppData\\Local\\Programs\\Python\\Python312-arm64\\python.exe",
+    "-B",
+    "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\WP\\batch-proof-mount-order-forward-be837974-20261016\\launch_proof.py",
+    "--package",
+    "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\WP\\batch-proof-mount-order-forward-be837974-20261016\\proof-package-workflow-batch-mount-order-forward-be837974-20261016T100000Z"
+  ],
+  "packagePublication": "e131ec4e4dc883ba4563bc60c0fbfc679d2d932c",
+  "sourceReviewId": 6211327371,
+  "futurePackageAllocationBytes": 11296768,
+  "oneAttempt": true,
+  "neverReplay": true
+}
