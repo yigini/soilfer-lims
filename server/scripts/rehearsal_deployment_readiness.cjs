@@ -19,6 +19,45 @@ const cp = require('child_process');
 const net = require('net');
 const os = require('os');
 
+// Preserve the predecessor's full column domain; #180 may add only this one
+// nullable Sample column here. Whole SELECT * equality cannot span that DDL.
+function assertCalculationPredecessorPreserved(before, after) {
+    const tables = ['Sample', 'Result', 'WorkAttempt', 'AuditLog', 'QcMeasurement', 'QcEvaluation', 'BatchDisposition'];
+    const names = [...tables, '_schema_migrations'], same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+    const keys = value => Object.keys(value || {}).sort();
+    const schemaError = () => { throw Error('208 default entrypoint column additions or original schema differ'); };
+    if (!same(keys(before.columns), [...names].sort()) || !same(keys(after.columns), [...names].sort()) ||
+        !same(keys(before.schemas), [...names].sort()) || !same(keys(after.schemas), [...names].sort()) ||
+        !same(keys(before.rows), [...tables].sort()) || !same(keys(after.rows), [...tables].sort())) schemaError();
+    if (before.columns.Sample.some(column => column.name === 'labSampleCode')) schemaError();
+    for (const name of names) {
+        const original = before.columns[name], addition = { cid: original.length, name: 'labSampleCode', type: 'TEXT', notnull: 0, dflt_value: null, pk: 0, hidden: 0 };
+        if (!same(after.columns[name], name === 'Sample' ? [...original, addition] : original)) schemaError();
+        const sql = after.schemas[name];
+        if (typeof sql !== 'string' || typeof before.schemas[name] !== 'string') schemaError();
+        // SQLite inserts this exact segment before the original trailing table
+        // constraints, if any. Keep that tail through the final ')' verbatim.
+        const added = name === 'Sample' ? sql.match(/^([\s\S]*), "labSampleCode" TEXT([\s\S]*\))$/) : null;
+        const retainedSql = name === 'Sample' && added?.[0] === sql ? added[1] + added[2] : sql;
+        if (name === 'Sample' && (!added || added[0] !== sql || (sql.match(/\blabSampleCode\b/gi) || []).length !== 1) ||
+            retainedSql !== before.schemas[name]) schemaError();
+    }
+    for (const [snapshot, side] of [[before, 'before'], [after, 'after']]) {
+        for (const name of names) {
+            const rows = name === '_schema_migrations' ? snapshot.receipts : snapshot.rows[name];
+            if (!Array.isArray(rows) || rows.some(row => !same(keys(row), snapshot.columns[name].map(column => column.name).sort()))) schemaError();
+        }
+        if (side === 'after' && snapshot.rows.Sample.some(row => row.labSampleCode !== null))
+            throw Error('208 default entrypoint backfilled a historical sample code');
+    }
+    const projected = Object.fromEntries(tables.map(name => [name, after.rows[name].map(row =>
+        Object.fromEntries(before.columns[name].map(column => [column.name, row[column.name]])))]));
+    if (!same(projected, before.rows) || before.receipts.some(row => {
+        const retained = after.receipts.filter(receipt => receipt.id === row.id);
+        return retained.length !== 1 || !same(retained[0], row);
+    })) throw Error('199 default entrypoint changed retained analytical, audit or receipt rows');
+}
+
 console.log('================================================================');
 console.log('  REAL DISPOSABLE DOCKER DEPLOYMENT READINESS ACCEPTANCE        ');
 console.log('  Testing Default-Entrypoint Containers on Empty Volumes        ');
@@ -1313,7 +1352,11 @@ async function runSuite() {
            crypto.createHash('sha256').update(fs.readFileSync(dbPath)).digest('hex')!==before)throw Error('199 entrypoint predecessor differs');
          const db=new Database(dbPath,{readonly:true,fileMustExist:true});
          try { const tables=['Sample','Result','WorkAttempt','AuditLog','QcMeasurement','QcEvaluation','BatchDisposition'];
-           console.log(JSON.stringify({dry,rows:Object.fromEntries(tables.map(name=>[name,db.prepare('SELECT * FROM "'+name+'" ORDER BY rowid').all()])),
+           const names=[...tables,'_schema_migrations'],quote=name=>'"'+name.replaceAll('"','""')+'"';
+           console.log(JSON.stringify({dry,
+             columns:Object.fromEntries(names.map(name=>[name,db.prepare('PRAGMA table_xinfo('+quote(name)+')').all()])),
+             schemas:Object.fromEntries(names.map(name=>[name,db.prepare('SELECT sql FROM sqlite_master WHERE name=?').get(name).sql])),
+             rows:Object.fromEntries(tables.map(name=>[name,db.prepare('SELECT * FROM "'+name+'" ORDER BY rowid').all()])),
              receipts:db.prepare('SELECT * FROM _schema_migrations ORDER BY id').all()}));
          }finally{db.close();}`
     ], { encoding: 'utf8' }).trim();
@@ -1415,15 +1458,16 @@ async function runSuite() {
            if(db.pragma('integrity_check',{simple:true})!=='ok'||db.pragma('foreign_key_check').length)throw Error('199 integrity differs');
            for(const table of ['CalcTemplateActivation','CalibrationCurve','CalibrationPoint','ResultCalculation'])
              if(db.prepare('SELECT count(*) n FROM "'+table+'"').get().n!==0)throw Error('199 startup activated or backfilled calculations');
+           const names=[...tables,'_schema_migrations'],quote=name=>'"'+name.replaceAll('"','""')+'"';
            console.log(JSON.stringify({ready,again,noOpBytesPreserved:true,
+             columns:Object.fromEntries(names.map(name=>[name,db.prepare('PRAGMA table_xinfo('+quote(name)+')').all()])),
+             schemas:Object.fromEntries(names.map(name=>[name,db.prepare('SELECT sql FROM sqlite_master WHERE name=?').get(name).sql])),
              rows:Object.fromEntries(tables.map(name=>[name,db.prepare('SELECT * FROM "'+name+'" ORDER BY rowid').all()])),
              receipts:db.prepare('SELECT * FROM _schema_migrations ORDER BY id').all()}));
          }finally{db.close();}`
     ], { encoding: 'utf8' }).trim();
     const calculationAfter = JSON.parse(calculationAfterOutput);
-    if (JSON.stringify(calculationAfter.rows) !== JSON.stringify(calculationBefore.rows) ||
-        calculationBefore.receipts.some(before => !calculationAfter.receipts.some(after => JSON.stringify(after) === JSON.stringify(before))))
-        throw Error('199 default entrypoint changed retained analytical, audit or receipt rows');
+    assertCalculationPredecessorPreserved(calculationBefore, calculationAfter);
     console.log('  ✓ calculation-default-entrypoint-pre199: PRE_199 → shipped default docker-entrypoint.sh → COMPLETE; inactive references 11, activations/backfill 0; retained evidence preserved; direct installer-module repeat NO_OP writes 0');
     console.log(JSON.stringify({calculationEntrypointProof:{scenario:'calculation-default-entrypoint-pre199',repeatInvocation:'direct installer module (not a second entrypoint run)',dry:calculationBefore.dry,ready:calculationAfter.ready,
         again:calculationAfter.again,retainedRowsAndReceiptBytesPreserved:true,noOpBytesPreserved:calculationAfter.noOpBytesPreserved}}));
