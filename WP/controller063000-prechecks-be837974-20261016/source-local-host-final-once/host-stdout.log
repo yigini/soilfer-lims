@@ -1,0 +1,2 @@
+{"root": "/opt/lims/releases/workflow-batch-prechecks-be837974-20261016T080000Z", "unit": "lims-workflow-batch-prechecks-be837974-20261016t080000z-comparator.service", "dispatched": true}
+{"python": "3.9.23 (main, Aug 19 2025, 00:00:00) \n[GCC 11.5.0 20240719 (Red Hat 11.5.0-11)]", "testsRun": 94, "failures": 0, "errors": 0, "actualNumericReaderPlainBytesEqual": true, "outsideUnitRefusalExact": true, "writerFingerprintProducer": "ACTUAL_LOCAL_NODE_UNPATCHED_BOUND_CONTROLLER", "pythonSourceFilesWritten": 0, "realDockerCommands": 0, "productionSqliteConnections": 0}
