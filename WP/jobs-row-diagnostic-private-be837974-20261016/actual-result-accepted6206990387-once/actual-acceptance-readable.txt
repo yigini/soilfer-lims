@@ -1,0 +1,39 @@
+Diagnostic result review: ACCEPTED (023000, Step 1 only, not release qualified)
+
+Nice work, Pip. I checked the closed 023000 evidence at 3365c306d937b0b6cf7ca70960be5dc5fb7ecc35 myself, and I accept it as the Step 1 row diagnostic for be837974, run from source 46338c544e44e56091eb3b18edc515ece5d44095 under my Source review: PASS 6206544265. It finds nothing that needs YY. It does not qualify the release, and it does not authorize a Step 2 run, a kit, a gate or a deploy.
+
+**What I checked**
+- **Publication.** `public-diagnostic-result.json` hashes to 0dc410de… and `public-terminal.json` to 0911f2d5…. All 69 publication-index bindings match the tree (blob id, sha256, length). Nothing outside WP/ changed since 46338c54, and the 8 sources and 3 data files there are unchanged. The closing root inventory (475 files) has the same sha256 for all 11 reviewed files, and the 17 public sink files decode byte-for-byte from the observer's base64.
+- **Inputs.** `input-before.json` and `input-after.json` are identical and equal the six pins in `diagnostic-pins.json` and retention record a7b32e11 (sha, inode, size, mode, mtime, nlink 1), with both WALs at 0 bytes. Both mains are 137,530 × 4096 = 563,322,880 B with quick_check ok and header bytes 18/19 = 2, recorded before any table was read.
+- **One run.** The journal has exactly four PID 1 records for invocation 9026c0ad… (start 02:31:15.57Z, deactivated 02:32:56.58Z), and the unit argv carries the reviewed sandbox. Terminal: `DIAGNOSTIC_OBSERVED_CLASSIFIED_AWAITING_CLAUDIO_ACCEPTANCE`, failure null, stop classes `[]`, retry false. All 443 private files are 0400 with nlink 1, and none was fetched.
+- **The 112 tables.** For every table, after = before + added − deleted, and the before/after stream hashes are equal exactly when nothing changed. Both schema hashes match, the 42 receipts are unchanged, and the before counts equal `baseline-logical-original.json` for all 112 tables. (That file's hashes use a different row encoding, so only the 44 empty tables share a hash. That's expected, because the comparator checks counts only.) The 442 public rows are exactly 20 changed Samples, 174 added Samples, 22 added holds, 218 added audits, 1 notification and 7 changed configs. There are no deletions, and nothing else changed.
+- **The 20 changed Samples.** All are CROSS_SUBMISSION_DUPLICATE with no refusal. The only changed columns are `metadata`, `rejectionReason` and `updatedAt`. Status is EXPECTED before and after, `rejectionReason` went from empty to the exact hold text, and `fieldMetadata` is unchanged. In `metadata`, only `$.conflictingSubmissions` and `$.provenanceHold` were added, and every old value is still there. All are scoped to config 897c1fb0 (ZMB-LAB1). The conflicts come from 9 submissions that each claim both a D1 and a D2 barcode (42195 to 42204, without 42202), plus 42348 and 42375. All of them fall inside that config's retained first fetch (42173 to 42393). Each sample has exactly one hold, one HOLD_RAISED audit and one KOBO_CONFLICTING_PROVENANCE audit. The 20 hold ids and 40 audit ids are distinct and all appear among the added rows.
+- **The added rows add up.** 218 audits = 174 CREATE_KOBO_SYNC + 22 HOLD_RAISED + 22 KOBO_CONFLICTING_PROVENANCE (or intra-duplicate). The comparator requires exactly one create per new sample and exactly one HOLD_RAISED per hold, and the 20 originals account for exactly 20 holds. So the other 2 holds (06a39c05…, 34ff2e3d…) belong to samples created earlier in the same sync. That fits koboController.js, which adds each new sample to `existingSamplesByNormId` after creating it, so a later submission in the same fetch is treated as a conflict on it. The configs show 6 clock-only changes and 1 cursor advance. All 7 are outside the refusal list.
+- **Privacy.** Public rows carry only ids, column names, key paths, counts, classifications and keyed HMACs. The only Kobo values are submission ids, and those are already public in `first-fetch-original.json`. My scan of all 70 published files for coordinate-like values and for field keys carrying values found none. The decimals it did find are stage timings and quoted comment text.
+- **Memory.** memory.peak reached 805306368 with `max` 6859 and `oom`/`oom_kill` 0, which is the same page-cache pattern we saw in 230000/233000. As before, this is an observation only.
+
+**What this means.** The 003000 stop was the copy verifier forbidding the designed Kobo conflict path (recordCrossSubDuplicates + raiseKoboHold). It was not a regression: the app code is byte-identical to the live 959d17e. The 003000 proof stays a consumed stop, and 233000 stays the latest passing startup-only proof.
+
+**Conditions for Step 2.** These add to my direction 6205724552, which still stands:
+1. Holds and audits on samples created in the same sync need the same strict checks as the originals: the conflict entry's scope must be one active non-refusal config, the `kobo_id` must be in the retained fetch, the occurrence key must match, and the pairing must be exact. This diagnostic checked those 2 holds only for type, actor and audit pairing. If an intra-submission duplicate occurs instead, it must pair exactly with its hold and its KOBO_INTRA_SUBMISSION_DUPLICATE audit.
+2. Keep checking every added row by class, as this comparator does: one create per new sample, each hold bound by exactly one HOLD_RAISED, one notification per config with new samples (exact count and link), and config changes limited to clock and cursor. Add a guard that refuses any orphan or extra audit, including a CREATE_KOBO_SYNC whose entity is a changed original.
+3. The kit and gate must also tell YY what the first production Kobo sync is expected to do. Here it created 174 new EXPECTED samples and raised 22 provenance holds, 20 of them on existing ZMB-LAB1 samples. Lab managers will see those holds, and the numbers at deploy may differ. This is in addition to the 9 to 10 minute restart window and the exact behavior if production readiness passes 600 s.
+
+Next: the Step 2 graph as new source, a new root and unit, one attempt, and fresh R4 + 10 GB. It needs my exact Source review: PASS before it runs. There's no production action and nothing for YY yet. Main merges stay held.
+
+Bindings:
+```
+acceptedResult=0dc410dea0be27916082224488a409bb10e99a05ff1ec690e28bc0bd4b69a536
+acceptedTerminal=0911f2d5dcd2e519d3bbfa1abf0079ef014417acc5d2aa0d5fd87f559505a25c
+invocation=9026c0ad2c4849e3ac5f2595aeaeec77
+publicationHead=3365c306d937b0b6cf7ca70960be5dc5fb7ecc35
+sourceHead=46338c544e44e56091eb3b18edc515ece5d44095
+sourceReviewId=6206544265
+stepDirectionId=6205724552
+diagnosticScope=STEP1_ONLY_NOT_RELEASE_QUALIFIED
+step2Authorized=false
+```
+
+
+---
+_Generated by [Claude Code](https://claude.ai/code)_

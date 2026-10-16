@@ -1,0 +1,46 @@
+Proof result review: 003000 closed refusal accepted (not release qualified)
+
+Thanks, Pip. That's a clean, fail-closed stop, and holding back the jobs-ON logs was the right call. I checked the published evidence at b73a299bc10f79e41b6e52d78d65c7cce4e8ece7. The terminal refusal hashes to 651b2b63… and closed-result.json to edfe0cd1…. The journal traceback is run_stopped_proof.py:56 → proof_jobs.py:217 → proof_jobs.py:181 (`verify_copy(backup, first-sync.db)`) → kobo_copy_preservation.py:142 (`Original row changed: Sample`), and those line numbers match the reviewed source. The 26 reviewed sources are unchanged and nothing outside WP/ changed. The 003000 root, unit and my PASS 6205111918 are consumed. 233000 stays the latest passing startup proof. Main merges stay held.
+
+**Likely cause (my inference from the code, to be confirmed).** The Kobo sync code in be837974 (koboController, koboService, koboScheduler, sampleHoldService, intakeProfileService) is byte-identical to the live predecessor 959d17e, so this isn't new release code. In that code, when a new submission claims a barcode that already belongs to an EXPECTED sample in the same lab and project, the submission is counted as skipped. `recordCrossSubDuplicates` then changes that existing Sample (koboController.js:840-1080):
+- appends to `metadata` (conflictingSubmissions/revisions);
+- sets `rejectionReason` to `PROVENANCE_HOLD: Conflicting field submissions claimed this barcode` if it was empty;
+- calls `raiseKoboHold`, which adds a PROVENANCE SampleHold and rewrites the `metadata`/`fieldMetadata` hold marker;
+- writes a `KOBO_CONFLICTING_PROVENANCE` AuditLog.
+
+The 22 skipped can include exactly these cases. The copy verifier came from PR293, whose natural run had 0 new and 0 skipped. It forbids any change to an original row and any hold on an original Sample, so this designed path was never exercised. That points to a verifier gap rather than an app regression, but it has to be shown before anything is relaxed.
+
+**Step 1: a narrow read-only diagnostic (new small source, my exact Source review: PASS first, one attempt).**
+- Inputs are only the two owned files in the 003000 root: the jobs-OFF stopped seal and first-sync.db. Open both `mode=ro&immutable=1` and refuse if either has a WAL. Check their retained SHA-256/stat before and after. No production files, no old-input SQL, no containers, no network, and no writes inside the 003000 root. Output goes to a new small root and unit. It makes no copies, so a floor + log-reserve free-space check is enough. It doesn't need the 64-equivalent R4.
+- Compare all 112 tables, not just Sample. `verify_copy` stopped at Sample, so SampleHold and every table after it were never checked. For each table, list changed original rows (id + column names), deleted originals and added rows.
+- For each changed original Sample, report:
+  - the columns that changed;
+  - status before and after;
+  - lab/project and whether they belong to an active, non-refusal config;
+  - `rejectionReason` before (empty or not) and after (exact string or not);
+  - a structural diff of `metadata` and `fieldMetadata`: key paths added or changed, which arrays grew, and whether every old value is still there;
+  - whether each new conflict entry's `kobo_id` is in the retained first-fetch ids;
+  - the matching new SampleHold and AuditLog rows by count, type, raisedBy, marker and action.
+
+  Classify each row as CROSS_SUBMISSION_DUPLICATE, PRIMARY_REVISION or UNEXPLAINED.
+- The public output holds ids, column names, key paths, counts, classifications and value hashes only. Raw values (coordinates, surveyor names, payload) stay retained and withheld, like the logs.
+- Stop and report, with no remedy drafted, on any of these: an UNEXPLAINED change, a change in a protected non-intake table, a deleted original, a changed original that wasn't EXPECTED, or a change to status, scientific, reception or approval columns. Any of those is an app question for YY, not a verifier fix.
+
+**Step 2: only after I accept the diagnostic, a new proof graph with a tightly enumerated allowance.**
+- An original Sample may change only if all of these hold:
+  - it was EXPECTED in the baseline;
+  - its lab/project belongs to an active non-refusal config whose retained fetch contains the conflicting `kobo_id`;
+  - every column other than the ones the diagnostic and the code show (expected: `metadata`, `fieldMetadata`, `rejectionReason` empty → the exact PROVENANCE_HOLD text, and a monotonic `updatedAt`) is byte-equal;
+  - the `metadata` change is append-only exactly as the code writes it.
+- Each changed Sample must pair with the new PROVENANCE hold(s) and KOBO_CONFLICTING_PROVENANCE AuditLog(s) that `raiseKoboHold`/`recordCrossSubDuplicates` actually produce. No unpaired hold or audit is allowed either way.
+- The second natural sync must be idempotent for conflicts already recorded. Those rows can't change again unless a genuinely new submission id (above the first-fetch maximum) is involved.
+- Everything else stays as reviewed: protected tables byte-equal, no deletions, schema and the 42 receipts, refusal pairing, the memory.events gate on every container, 600 s readiness, a new root and unit, one attempt, and fresh R4 + 10 GB.
+- New guards: a synthetic conflict on an original EXPECTED sample passes only with exact pairing. It refuses for a non-EXPECTED or foreign-scope sample, a status change, a `rejectionReason` overwrite, a removed or modified old metadata value, a hold without an audit, an audit without a hold, an unfetched `kobo_id`, or a second-sync re-append.
+- Please also make sure a killed controller can't leave the owned jobs-ON container running. It has network access and real Kobo tokens. For example, a reviewed stop step that stops only containers carrying this root's exact owner label, plus recording the controller unit's own memory.events. The 806,354,944 B controller peak is an observation like the app's, with no OOM, but the controller unit has no guard of its own.
+
+Timing note for the kit: Docker called the containers healthy at about 514 s (OFF) and 483 s (ON), against 333 s and 392 s in 233000, so the margin to the 600 s guard is down to about 85 s. The kit and its gate need to disclose a restart window of up to about 9 to 10 minutes and say exactly what happens if production readiness runs past its guard. The 600 s proof guard stays as it is.
+
+No production action and nothing for YY yet. I'll review the diagnostic source when you post it.
+
+---
+_Generated by [Claude Code](https://claude.ai/code)_
