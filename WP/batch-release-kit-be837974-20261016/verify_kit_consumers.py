@@ -5,7 +5,7 @@ import unittest
 from kit_contract import canonical,sha
 from kit_consumer_inventory import (collect,unit_catalogue,loaded_catalogue,docker_projection,process_commands,
     require_reviewed_inventory,unit_behavior,exec_configuration,passive_scope,own_controller,
-    EXEC_PROPERTIES,BEHAVIOR_PROPERTIES)
+    EXEC_PROPERTIES,BEHAVIOR_PROPERTIES,own_capture_controller)
 from kit_docker import ContainerReader
 
 CID='a'*64
@@ -156,6 +156,22 @@ class ConsumerGuards(unittest.TestCase):
             with self.assertRaises(RuntimeError):require_reviewed_inventory(changed,review)
         for raw in (b'',b'a.service not-found inactive dead Missing\n',b'a.service loaded active running\na.service loaded active running\n'):
             with self.assertRaises(RuntimeError):loaded_catalogue(raw)
+
+    def test_capture_controller_requires_distinct_exact_root_transport_and_nonignored_hook(self):
+        from kit_capture_owned import CAPTURE_ROOT,CAPTURE_UNIT
+        value=behavior(CAPTURE_UNIT);value['Transient']='yes'
+        value['FragmentPath']='/run/systemd/transient/'+CAPTURE_UNIT
+        value['ExecStart']=exec_record('/usr/bin/python3 -B '+str(CAPTURE_ROOT/'tooling/capture_controller_output.py')+' --root '+str(CAPTURE_ROOT))
+        value['ExecStopPost']=exec_record('/usr/bin/python3 -B '+str(CAPTURE_ROOT/'tooling/capture_stop_post.py'))
+        current=unit_behavior(show_bytes(value),CAPTURE_UNIT);own_capture_controller(current)
+        for key,content in [('Id','similar.service'),('ExecStopPost',[]),('ExecStartPost',['unknown']),
+            ('FragmentPath','/run/systemd/transient/other.service'),('OnFailure','heal.service'),
+            ('RefuseManualStop','yes')]:
+            changed=copy.deepcopy(current);changed[key]=content
+            with self.assertRaises(RuntimeError):own_capture_controller(changed)
+        changed=copy.deepcopy(current)
+        changed['ExecStopPost']=[x.replace('ignore_errors=no','ignore_errors=yes') for x in changed['ExecStopPost']]
+        with self.assertRaises(RuntimeError):own_capture_controller(changed)
 
     def test_only_exact_new_controller_can_appear_between_review_and_runtime_inventory(self):
         from retained_contract import ROOT,ROOT_NAME

@@ -14,6 +14,10 @@ from retained_contract import ROOT,exact_json
 from kit_frozen import SOURCE_SCOPE,source_index,source_review,kit_review,human_gate_comment
 from kit_science import verify_scientific_originals
 
+# Imported lazily by the capture collector itself; this constant-only import
+# does not construct a controller, provider, reader or host operation.
+from kit_capture_review import CAPTURE_REVIEW_FILES
+
 MAX_PACKAGE_FILES=1024
 MAX_PACKAGE_BYTES=128*1024**2
 MAX_FILE_BYTES=16*1024**2
@@ -24,7 +28,7 @@ REQUIRED_PAYLOAD={'source-index.json','source-review.json','whole-outage-disclos
     'qualified-build-receipt.json','qualified-image-inspect-original.json','application-index.json',
     'capture-receipt.json','apache-capture.json',
     'capture-206-prepare-original.json','capture-206-preservation.json',
-    'capture-214-prepare-original.json','capture-214-preservation.json'}
+    'capture-214-prepare-original.json','capture-214-preservation.json'}|CAPTURE_REVIEW_FILES
 
 
 def package_name(name):
@@ -97,6 +101,8 @@ def freeze_manifest(files,index,source,whole_outage_seconds):
         timestamp(science['capturedAt'])>=timestamp(source['created_at']),
         'Fresh scientific capture must follow this exact source PASS')
     capture=exact_json(files['capture-receipt.json'])
+    from kit_capture_review import verify_capture_receipt
+    verify_capture_receipt(capture,lambda name:files[name],index,source)
     from kit_apache_capture import verify_apache_capture
     verify_apache_capture(exact_json(files['apache-capture.json']),files['ingress-original.conf'],
         files['ingress-held.conf'],index,source)

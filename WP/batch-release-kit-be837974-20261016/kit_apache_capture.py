@@ -77,7 +77,7 @@ def metadata(value):
         'st_uid','st_gid','st_mtime_ns','st_ctime_ns')} | {'allocatedBytes':getattr(value,'st_blocks',0)*512}
 
 
-def read_apache(path=CONF,production=True):
+def read_apache(path=CONF,production=True,retain_original=None):
     path=pathlib.Path(path)
     require(path.is_absolute() and (not production or path.as_posix()==CONF and os.name=='posix'),
         'Exact Linux Apache capture path required')
@@ -95,6 +95,9 @@ def read_apache(path=CONF,production=True):
     after=path.stat();extended_after=attributes(path,production)
     require(metadata(before)==metadata(opened_after)==metadata(after) and extended==extended_after and
         len(original)==before.st_size and len(original)<=LIMIT,'Apache bytes/identity/mode/owner/xattrs changed during capture')
+    # Keep a complete stable original before the supported-profile predicate.
+    # A refusal still preserves the source bytes that caused it.
+    if retain_original is not None:retain_original(original)
     held,rendering=render_held(original)
     encoded={name:base64.b64encode(value).decode('ascii') for name,value in sorted(extended.items())}
     return original,held,{'path':path.as_posix(),'before':metadata(before),'after':metadata(after),
@@ -106,6 +109,7 @@ def read_apache(path=CONF,production=True):
 
 def capture_apache(root,index,review,production=True,source=CONF):
     from kit_package import write_new_file
+    from kit_evidence import admit_evidence
     # The exact new source verdict is mandatory BEFORE any Apache read or write.
     binding=source_review(review,index)
     root=pathlib.Path(root)
@@ -116,9 +120,14 @@ def capture_apache(root,index,review,production=True,source=CONF):
     require(all(not (root/name).exists() and not (root/name).is_symlink() for name in (*names,intent)),
         'Apache capture output already consumed; never retry')
     for part in (root,*root.parents):require(not part.is_symlink(),'Apache capture output ancestor alias refused')
-    write_new_file(root,intent,canonical({'sourceReviewId':review['id'],'sourceBinding':binding,
-        'source':str(source),'neverRetry':True,'configurationWillNotBeInstalled':True})+b'\n',production)
-    original,held,value=read_apache(source,production)
+    intent_raw=canonical({'sourceReviewId':review['id'],'sourceBinding':binding,
+        'source':str(source),'neverRetry':True,'configurationWillNotBeInstalled':True})+b'\n'
+    admit_evidence(root/intent,len(intent_raw));write_new_file(root,intent,intent_raw,production)
+    captured={}
+    def retain(raw):
+        admit_evidence(root/names[0],len(raw))
+        captured[names[0]]=write_new_file(root,names[0],raw,production)
+    original,held,value=read_apache(source,production,retain)
     value.update(head=HEAD,captureSourceReviewId=review['id'],sourceBinding=binding,
         capturedAt=datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'),neverRetry=True)
     raws=(original,held,canonical(value)+b'\n')
@@ -126,7 +135,9 @@ def capture_apache(root,index,review,production=True,source=CONF):
     # The capture launcher must reserve this allocation before creating its root.
     require(sum(((len(raw)+4095)//4096)*4096+4096 for raw in raws)<=8*1024**2,
         'Apache capture exceeds its fixed8MiB file/entry allowance')
-    return {name:write_new_file(root,name,raw,production) for name,raw in zip(names,raws)}
+    for name,raw in zip(names[1:],raws[1:]):
+        admit_evidence(root/name,len(raw));captured[name]=write_new_file(root,name,raw,production)
+    return captured
 
 
 def verify_apache_capture(value,original,held,index,review):

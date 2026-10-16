@@ -27,6 +27,11 @@ class CaptureAuthority:
         # precede this pure full-source PASS predicate and primary refresh.
         binding=capture_source_review(self.index,self.source)
         fresh=self.provider.source_snapshot(self.source['id'])
+        from kit_package import write_new_file
+        from kit_evidence import admit_evidence
+        raw=canonical(fresh)+b'\n';admit_evidence(self.root/'capture-primary-snapshot.json',len(raw))
+        original={'file':'capture-primary-snapshot.json',**write_new_file(
+            self.root,'capture-primary-snapshot.json',raw,self.sync)}
         standing_authority(fresh)
         require(review_projection(fresh['source'])==review_projection(self.source),
             'Current capture source PASS was edited or replaced')
@@ -34,6 +39,7 @@ class CaptureAuthority:
         no_later_release_direction(fresh['releaseComments'],fresh['source'],fresh['source'])
         self.result={'root':self.root.as_posix(),'unit':CAPTURE_UNIT,'sourceBinding':binding,
             'captureTableSha256':CAPTURE_TABLE_SHA,'freshProviderSnapshotSha256':sha(canonical(fresh)),
+            'primarySnapshotOriginal':{k:original[k] for k in ('file','sha256','bytes')},
             'collectionSeconds':fresh['collectionSeconds'],'collectedUtc':utc(),
             'readOnlyFreshAuthority':True,'releaseGateConsumed':False,'neverRetry':True}
         exclusive_record(self.root,'capture-fresh-authority.json',self.result,self.sync)

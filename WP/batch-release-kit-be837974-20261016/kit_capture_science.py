@@ -20,7 +20,6 @@ from kit_integrity import EXPECTED
 from kit_install import CHAIN,Installations
 from kit_journal import exclusive_record
 from kit_evidence import admit_evidence
-from kit_package import write_new_file
 from kit_science import scientific_projection,verify_scientific_originals
 from kit_no_writers import assert_no_volume_writers
 
@@ -35,6 +34,7 @@ def capture_no_writers(root,reader):
 
 
 def retain_capture_original(root,name,raw,sync=True):
+    from kit_package import write_new_file
     require(isinstance(raw,bytes) and 0<len(raw)<=LIMIT,'Full bounded capture original required')
     require('/' not in name and name.endswith('.json'),'Direct capture original basename required')
     admit_evidence(pathlib.Path(root)/name,len(raw))
@@ -62,7 +62,14 @@ class CaptureScience:
         self.root=pathlib.Path(root);self.index=index;self.source=source;self.authority=authority
         self.disk=disk;self.reader=reader;self.cli=CaptureBudgetedCli(cli,disk);self.journal=journal
         self.no_writers=no_writers;self.started=False;self.stage=0;self.preparation={};self.originals={}
-        self.target=self.root/'scientific-database/dev.db';self.previous_state=None
+        self.target=self.root/'scientific-database/dev.db';self.previous_state=None;self.closures=[]
+
+    def filesystem_snapshot(self):
+        return capture_snapshot(self.root,self.index,self.source,self.reader,self.disk)
+
+    def review_observations(self):
+        """The complete review collector adds consumers inside the last stage."""
+        return None
 
     def readonly(self,label):
         self.no_writers();verify_capture_clone(self.root);before=triple(self.target)
@@ -107,9 +114,10 @@ class CaptureScience:
         require(self.started and self.authority.result is not None and
             self.stage<len(CAPTURE_TABLE) and CAPTURE_TABLE[self.stage]['stage']==label,
             'Capture controller stage order/replay refused')
-        self.disk.begin(label);value=action()
+        self.disk.begin(label);before=self.disk.stage_before;value=action()
         self.journal.append('captureStageComplete',{'stage':label,'result':value})
-        closure=self.disk.finish(label);self.stage+=1
+        closure=self.disk.finish(label)
+        self.closures.append({'closure':closure,'before':before,'after':self.disk.last});self.stage+=1
         return value,closure
 
     def execute(self):
@@ -120,8 +128,7 @@ class CaptureScience:
         require(fresh['sourceBinding']==binding,'Capture fresh provider authority differs')
         exclusive_record(self.root,'capture-science-intent.json',{'sourceBinding':binding,
             'captureTableSha256':CAPTURE_TABLE_SHA,'neverRetry':True,'productionSqliteConnections':0},self.disk.sync)
-        snapshot,_=self.run_stage('capture-filesystem-snapshot',lambda:capture_snapshot(
-            self.root,self.index,self.source,self.reader,self.disk))
+        snapshot,_=self.run_stage('capture-filesystem-snapshot',self.filesystem_snapshot)
         self.run_stage('capture-clone',lambda:capture_clone(self.root,self.index,self.source,self.disk))
         self.previous_state=exact_json((self.root/'fresh-production-snapshot/logical-state.json').read_bytes())
         require(capture_reference(self.root/'fresh-production-snapshot/logical-state.json')==snapshot['logicalState'],
@@ -141,6 +148,7 @@ class CaptureScience:
                 value,ref=self.readonly(label)
                 if issue=='209':Installations.verify_impact_allocations(value,self.root/(label+'-retained-temp'))
                 values[issue]=scientific_projection(issue,value);self.originals[issue]=ref
+                if issue=='209':self.review_observations()
                 return ref
             self.run_stage(label,collect)
         self.no_writers();verify_capture_clone(self.root);verify_capture_snapshot(self.root,binding)

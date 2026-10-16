@@ -98,7 +98,8 @@ def own_controller(behavior):
     require(behavior['Id']==expected and behavior['Transient']=='yes' and behavior['DropInPaths']=='',
         'Unexpected release controller definition')
     require(behavior['FragmentPath'] in ('','/run/systemd/transient/'+expected) and behavior['SourcePath']=='' and
-        behavior['StopWhenUnneeded']=='no','Unreviewed controller source or automatic stop')
+        behavior['StopWhenUnneeded']=='no' and behavior['RefuseManualStart']==behavior['RefuseManualStop']=='no',
+        'Unreviewed controller source, automatic stop or manual lifecycle refusal')
     for name in EXEC_PROPERTIES:
         command=('/usr/bin/python3 -B '+str(ROOT/'tooling/controller_output.py')+' --root '+str(ROOT)) if name=='ExecStart' else (
             '/usr/bin/python3 -B '+str(ROOT/'tooling/stop_post.py') if name=='ExecStopPost' else None)
@@ -120,6 +121,27 @@ def unit_catalogue(raw):
         result[fields[0]]=fields[1:]
     require(result and len(result)<=MAX_UNITS,'Missing or excessive unit catalogue')
     return result
+
+def own_capture_controller(behavior):
+    """Validate the exact capture unit; all process commands still need review."""
+    from kit_capture_owned import CAPTURE_ROOT,CAPTURE_UNIT
+    from retained_contract import ROOT,ROOT_NAME
+    require(behavior['Id']==CAPTURE_UNIT,'Unexpected capture controller name')
+    projected=dict(behavior);expected='lims-'+ROOT_NAME.lower()+'.service'
+    projected['Id']=expected
+    if behavior['FragmentPath']=='/run/systemd/transient/'+CAPTURE_UNIT:
+        projected['FragmentPath']='/run/systemd/transient/'+expected
+    for name,script in (('ExecStart','capture_controller_output.py'),('ExecStopPost','capture_stop_post.py')):
+        command='/usr/bin/python3 -B '+str(CAPTURE_ROOT/'tooling'/script)
+        if name=='ExecStart':command+=' --root '+str(CAPTURE_ROOT)
+        require(behavior[name]==['{ path=/usr/bin/python3 ; argv[]='+command+' ; ignore_errors=no }'],
+            'Capture controller executable/hook differs from compiled source')
+        release_script='controller_output.py' if name=='ExecStart' else 'stop_post.py'
+        command='/usr/bin/python3 -B '+str(ROOT/'tooling'/release_script)
+        if name=='ExecStart':command+=' --root '+str(ROOT)
+        projected[name]=['{ path=/usr/bin/python3 ; argv[]='+command+' ; ignore_errors=no }']
+    own_controller(projected)
+
 
 def cron_projection(roots=CRON_ROOTS,retain=None,progress=lambda:None):
     """Content remains private; metadata is bound before any public verdict."""
@@ -197,13 +219,14 @@ def collect(reader,runner,clock=time.monotonic,cron_reader=cron_projection,names
     loaded_args=['systemctl','list-units','--all','--no-pager','--no-legend','--plain']
     timer_args=['systemctl','list-timers','--all','--no-pager','--no-legend','--plain']
     from retained_contract import ROOT_NAME
+    from kit_capture_owned import CAPTURE_UNIT
     own_unit='lims-'+ROOT_NAME.lower()+'.service'
     def observation(number):
         prefix='pass-'+str(number)+'-'
         catalogue=unit_catalogue(bounded(file_args,prefix+'unit-catalogue'))
         loaded=loaded_catalogue(bounded(loaded_args,prefix+'loaded-catalogue'))
         require(len(set(catalogue)|loaded)<=MAX_UNITS,'Combined persistent/loaded unit bound reached')
-        unit_rows={};scope_classes=set();scope_originals=[];own_seen=False
+        unit_rows={};scope_classes=set();scope_originals=[];own_seen=False;capture_seen=False
         for ordinal,unit in enumerate(sorted(set(catalogue)|loaded)):
             label=prefix+'unit-'+str(ordinal+1).zfill(4)
             behavior=None
@@ -212,6 +235,8 @@ def collect(reader,runner,clock=time.monotonic,cron_reader=cron_projection,names
                     '--property='+','.join(BEHAVIOR_PROPERTIES)],label+'-behavior'),unit)
                 if unit==own_unit:
                     own_controller(behavior);own_seen=True;continue
+                if unit==CAPTURE_UNIT:
+                    own_capture_controller(behavior);capture_seen=True;continue
                 if unit.endswith('.scope') and unit not in catalogue:
                     scope_classes.add(sha(canonical(passive_scope(behavior))));scope_originals.append(unit);continue
             raw=bounded(['systemctl','cat','--no-pager',unit],label+'-definition')
@@ -241,7 +266,8 @@ def collect(reader,runner,clock=time.monotonic,cron_reader=cron_projection,names
         return {'configuration':{'units':unit_rows,'passiveScopeClasses':sorted(scope_classes),
             'cron':cron,'containers':containers},'timerNames':timer_names,'commands':commands,
             'timerRawSha256':sha(timers),'processRawSha256':sha(processes),
-            'passiveScopeOriginalNames':sorted(scope_originals),'compiledControllerObserved':own_seen}
+            'passiveScopeOriginalNames':sorted(scope_originals),'compiledControllerObserved':own_seen,
+            'compiledCaptureControllerObserved':capture_seen}
     first=observation(1);second=observation(2)
     require(first['configuration']==second['configuration'] and first['timerNames']==second['timerNames'],
         'Consumer configuration changed between full independent collection passes')

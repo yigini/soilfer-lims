@@ -44,6 +44,10 @@ def package_fixture():
         idx['files'][name]={'sha256':sha(raw),'bytes':len(raw),
             'gitBlob':hashlib.sha1(('blob '+str(len(raw))+'\0').encode()+raw).hexdigest()}
     source=source_pass(idx)
+    from kit_capture_owned import CAPTURE_UNIT
+    source['body']+='\n'+'\n'.join([CAPTURE_ROOT.as_posix(),CAPTURE_UNIT,
+        'captureTableSha256='+CAPTURE_TABLE_SHA,'captureFilesystemOnlyProductionCopy=true',
+        'captureRawMastersNeverSqlite=true','capturePreparationIssues=206,214','capture209ApplyForbidden=true'])
     files['source-index.json']=canonical(idx)+b'\n';files['source-review.json']=canonical(source)+b'\n'
     disclosure=whole_outage_disclosure({name:{'kind':'REVIEWED_ALLOWANCE','seconds':1,
         'basis':'SYNTHETIC LOCAL TEST ONLY'} for name in PHASES})
@@ -102,6 +106,8 @@ def package_fixture():
     files['apache-capture.json']=canonical(apache)+b'\n'
     capture=exact_json(files['capture-receipt.json']);capture['apacheCaptureSha256']=sha(files['apache-capture.json'])
     files['capture-receipt.json']=canonical(capture)+b'\n'
+    from verify_kit_capture_review import synthetic_capture_payload
+    synthetic_capture_payload(files,idx,source)
     for target,source_path in [
         ('qualified-build-receipt.json',BUILD/'first-build-190000-closed-originals-once/build-receipt.json'),
         ('qualified-image-inspect-original.json',BUILD/'first-build-190000-closed-originals-once/image-inspect-original.json'),
@@ -227,6 +233,7 @@ class Package(unittest.TestCase):
             refs=apache.capture_apache(output,idx,source,False,input_file)
             for name in refs:files[name]=(output/name).read_bytes()
             capture=exact_json(files['capture-receipt.json']);capture['apacheCaptureSha256']=sha(files['apache-capture.json'])
+            for name in refs:capture['files'][name]={'sha256':sha(files[name]),'bytes':len(files[name])}
             files['capture-receipt.json']=canonical(capture)+b'\n'
             manifest=freeze_manifest(files,idx,source,4800)
             self.assertEqual(manifest['originalIngressSha256'],sha(input_file.read_bytes()))
