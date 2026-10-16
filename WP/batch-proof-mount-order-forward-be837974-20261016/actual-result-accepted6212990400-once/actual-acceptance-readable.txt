@@ -1,0 +1,33 @@
+Result review: mount-order100000 qualification run accepted as reported. Not deployed. Kit scope below.
+
+Great work Pip, this is the clean run we were after. Both natural syncs, the stop hook and the memory guard all came through on the real host.
+
+**What I checked**
+- **Publication.** `e5689d02` only adds files under WP/ (plus the two README appends). All 11,663 bindings in the closed publication index match on git blob id, length and SHA-256. The 38 tooling files the host ran (in `remote-originals`) are byte-identical to graph `187636984895aec44044635fb63498b0fcb3102e`, and the host's `tooling-source-index.json` equals the index I reviewed. Main is still `be837974` with CI 38772398721 green.
+- **Closure.** `proof-receipt.json` hashes to `a82a8f53…` (STEP2_RUNTIME_CHECKS_COMPLETE_AWAITING_EXEC_STOP_POST_NOT_DEPLOYED, review 6211327371, prechecks 6210719791, zero production mutations, SQLite connections and deployments). `stop-post-result.json` hashes to `36516567…`: both exact owners stopped and retained, `errors` and `postStopErrors` empty. The unit's own journal shows "Deactivated successfully" at 09:19:58.494Z for invocation `119b9c19…`, so the non-ignored ExecStopPost succeeded. The rendered unit carries Type=exec, RuntimeMaxSec=5400, MemoryMax=805306368, MemorySwapMax=0, TimeoutStopSec=300 and UMask=0077.
+- **Memory.** I re-derived all 810 app-container samples from their raw kernel reads. Every raw hash matches, memory.max is 805306368, swap is 0, oom and oom_kill are 0, and each startup has one identity throughout. The highest non-reclaimable total is 274,006,224 bytes (startup 1) and 228,856,056 (startup 2), well under 603,979,776. The controller's `memory.stat` read worked on the real host (8 raws, anon and file present).
+- **Startups.** Jobs-OFF was ready at 424.8 s and jobs-ON at 394.9 s, both under 600 s, with 200/200/401 probes, 31/31 API checks and all 6 read-only probes at exit 0.
+- **Natural intake.** The first sync (08:53:11Z) added 193 Sample (98 D1 and 95 D2 from 99 submissions), 23 SampleHold, 239 AuditLog and 1 Notification, all on ZMB-LAB1. The 20 changed old samples are all CROSS_SUBMISSION_DUPLICATE with one appended pair each. Integrity is ok, FK violations 0, and only ZMB's cursor moved. The second sync (09:08:56Z) added and changed nothing, and the full baseline-to-final comparison agrees.
+- **Accounting.** Free drop 10,823,077,888 against known growth 10,821,836,800 leaves 1,241,088 bytes unexplained. Terminal free is 65.19 GB against 24.85 GB required.
+- **Privacy.** I scanned every added file for secrets, tokens, coordinates, names and e-mail addresses. Only synthetic sentinels, schema column names, timestamps and the text of my own comments came up. Logs, DBs, keys and inspect streams stay withheld. Kobo submission ids appear in the clear, as in the earlier accepted publications.
+
+**Notes (none blocking)**
+- The ZMB config hashes don't chain between the first-sync and second-sync files. That's expected: `value_hash` covers only the changed fields (`kobo_copy_preservation.py:150-152`), and the field sets differ (lastSyncAt, lastSubmissionId, updatedAt in the first; lastSyncAt, updatedAt in the second). Noting it so nobody chases it.
+- Docker shows the app as "unhealthy" for about 5 minutes of each startup (331 s and 301 s), because the healthcheck gives up after its 30 s start period and 3 retries while the startup verifiers run.
+- Memory sits at the 768 MiB cap through page cache. The app containers logged 44k to 59k memory.max events and the controller unit 199,547 (anon 13 MB against file 634 MB). There was no OOM anywhere, so this is fine, and it matches what I guessed for C1.
+- About 159 GB of retained proof roots sit under /opt/lims/releases. Please leave them for now; after the post-deploy check we can agree an exact cleanup list with YY.
+
+**Kit scope**
+Please build the release kit for main `be837974`, image `acc15844` (receipt `cd3a2757`), bound to this acceptance, and send it for my exact source review. YY's fresh single-use gate comes after that. The kit needs:
+1. **Measured downtime.** Quiesce (Apache 503), stop, stopped-writer backup, start, ready, reopen, with each step timed from this run and from the 233000 install-path startup. State how the predecessor is stopped: `docker stop -t 10` should end in SIGKILL and exit 137, since the app ignores SIGTERM. Check integrity and FK on the live volume after the stop and before the backup, and show that the whole sequence fits the 9 to 10 minute window.
+2. **The 600 s failure path.** If the new container isn't ready by 600 s, say exactly what happens, forward-only: ingress stays at 503, nothing is restored, the container is stopped and retained, and the kit posts its receipt so far on #162. If the release's installers have not committed by then, say whether the retained predecessor image may restart, as in #187 pin 4.
+3. **The unhealthy window.** Confirm that nothing on the production host acts on Docker's "unhealthy" state (autoheal, restart policy, monitoring) during the roughly 5 minute startup window.
+4. **First-sync impact for YY.** The first production sync runs a few seconds after ready. Before the gate, show YY in plain words what this run found: 193 new samples, 23 holds, 20 existing samples marked as cross-submission duplicates, 1 notification to the ZMB manager, and nothing for the other labs. Say that production may see more if new Kobo submissions arrive first. YY's gate is the acceptance of that list.
+5. **Postflight counts.** The usual equality of Sample, Result, Batch, BatchQcResult and AuditLog can't hold once the first sync runs. Either compare them at ready before the first sync, or compare after it with the intake delta stated per table. Pick one and bind it.
+6. **Memory and disk guards.** Production stays at 805306368 with NODE_OPTIONS empty. Record memory.events before and after, and report any oom or oom_kill above 0. Keep the release-day disk aborts (free below max(3×(DB+image), 5 GB) before the backup, or an unexplained drop over 500 MB before reopen) and the lab/hub workload control with a fresh YY confirmation.
+7. **The receipt for my post-deploy check.** Free bytes, backup SHA (dev.db plus wal/shm), image digest `acc15844`, quiesce/stop/start/ready/reopen times, the predecessor's exit code, the installer receipts, integrity ok and FK 0, the five counts, the first and second sync results per config, memory.events and the 200/200/401 probes.
+
+Main stays on merge hold. The parallel backlog PRs get audited as they arrive and wait for the post-deploy check before merging.
+
+---
+_Generated by [Claude Code](https://claude.ai/code)_
