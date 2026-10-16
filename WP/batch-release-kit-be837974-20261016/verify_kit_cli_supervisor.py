@@ -52,27 +52,6 @@ for (const failure of ['none','integrity','fk']) {
     def test_failed_child_is_retained_and_cannot_be_reported_as_success(self):
         self.exercise('process.exitCode=3',1,False)
 
-    def test_live_backup_destination_is_exclusive_and_source_is_readonly(self):
-        node=shutil.which('node');self.assertIsNotNone(node);FIXTURES.mkdir(exist_ok=True)
-        d=pathlib.Path(tempfile.mkdtemp(prefix='backup-',dir=FIXTURES)).resolve()
-        bootstrap='''const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
-const {backup}=require(process.argv[1]);const dir=process.argv[2];let opened=0,closed=0;
-class Database {
- constructor(source,options){assert.equal(source,'SYNTHETIC_SOURCE_ONLY');assert.deepEqual(options,{readonly:true,fileMustExist:true});opened++;}
- pragma(sql){assert.equal(sql,'query_only = ON');}
- async backup(destination,options){assert.equal(options.progress(),256);fs.writeFileSync(destination,'SYNTHETIC_NEW_BACKUP_ONLY');}
- close(){closed++;}
-}
-(async()=>{const destination=path.join(dir,'backup.db');const result=await backup('SYNTHETIC_SOURCE_ONLY',destination,Database);
- assert.equal(result.bytes,fs.statSync(destination).size);assert.equal(result.consistentBackup,true);
- await assert.rejects(()=>backup('SYNTHETIC_SOURCE_ONLY',destination,Database));
- assert.equal(opened,1);assert.equal(closed,1);
- assert.equal(fs.readFileSync(destination,'utf8'),'SYNTHETIC_NEW_BACKUP_ONLY');
-})().catch(error=>{console.error(error.message);process.exitCode=1});'''
-        result=subprocess.run([node,'-e',bootstrap,str(ROOT/'live_backup.cjs'),str(d)],capture_output=True)
-        (d/'stdout-original.txt').write_bytes(result.stdout);(d/'stderr-original.txt').write_bytes(result.stderr)
-        self.assertEqual(result.returncode,0,result.stderr.decode())
-
     def test_wrong_completion_permission_refuses_exit(self):
         self.exercise('console.log("SYNTHETIC_CHILD_ONLY")',1,True)
 

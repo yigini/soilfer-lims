@@ -10,7 +10,7 @@ from kit_copy_admission import copy_layout
 from kit_budget import Budget,SEAL_DIRECTORY_BYTES,TABLE
 from kit_disk import Disk
 import kit_disk
-from retained_files import clone_backup,copy_triple,copy_tree,file_state,seal,memory_temporaries
+from retained_files import clone_backup,copy_triple,copy_tree,file_state,seal,memory_temporaries,reader_index_bound,verify_reader_index
 from verify_kit_apache_capture import local_directory
 
 
@@ -19,7 +19,7 @@ class Owner:
     def check(self):self.checks+=1
     def claim(self,site):self.claims.append(site)
     def admit_copy(self,site,destination,plan):
-        assert not destination.exists()
+        assert site=='reader-index' or not destination.exists()
         self.plans.append((site,destination,plan))
         if plan['declaredAllocationBytes']>self.maximum:raise RuntimeError('LOCAL held copy allowance exhausted')
 
@@ -88,7 +88,7 @@ class CopyAdmissions(unittest.TestCase):
         plans=[row for row in owner.plans if row[0]=='backup'];self.assertEqual(len(plans),1)
         self.assertEqual(plans[0][1],backup);self.assertEqual(plans[0][2]['contentBytes'],backup.stat().st_size)
         self.assertEqual(state['tables']['retained_value']['count'],1);self.assertEqual(file_state(source),before)
-        self.assertEqual(owner.claims,['seal-directory','triple','triple','backup'])
+        self.assertEqual(owner.claims,['seal-directory','triple','triple','reader-index','backup'])
 
     def test_outer_seal_directory_is_admitted_before_any_destination_or_source_read(self):
         root=local_directory();owner=Owner(1)
@@ -119,11 +119,69 @@ class CopyAdmissions(unittest.TestCase):
             backup,state=seal(root,'wal-seal',source,Owner(10*1024**2).check)
             self.assertEqual(state['tables']['retained_value']['count'],1)
             self.assertEqual({suffix:pathlib.Path(str(source)+suffix).read_bytes() for suffix in before},before)
-            self.assertEqual(sorted(p.name for p in backup.parent.iterdir()),['backup.db','logical-state.json','raw','reader','seal.json'])
+            self.assertEqual(sorted(p.name for p in backup.parent.iterdir()),['backup.db','logical-state.json','raw','reader','reader-index-bound.json','seal.json'])
             with sqlite3.connect(backup.as_uri()+'?mode=ro',uri=True) as check:
                 self.assertEqual(check.execute('PRAGMA journal_mode').fetchone(),('delete',))
                 self.assertEqual(check.execute('SELECT length(value) FROM retained_value').fetchone(),(100000,))
         finally:writer.close()
+
+    def test_reader_index_allocation_refusal_precedes_any_sqlite_connection(self):
+        root=local_directory();source=root/'source.db';source.write_bytes(b'not opened as SQL')
+        owner=Owner(10*1024**2);admit=owner.admit_copy
+        def refuse(site,destination,plan):
+            if site=='reader-index':raise RuntimeError('LOCAL reader index allowance refused')
+            admit(site,destination,plan)
+        owner.admit_copy=refuse
+        with patch('retained_files.sqlite3.connect',side_effect=AssertionError('No SQL before index admission')),\
+            self.assertRaisesRegex(RuntimeError,'index allowance refused'):
+            seal(root,'refused-reader',source,owner.check)
+        self.assertFalse((root/'refused-reader/reader-index-bound.json').exists())
+        self.assertFalse((root/'refused-reader/backup.db').exists())
+
+    def test_reader_index_formula_covers_first_and_later_units_and_existing_larger_index(self):
+        for frames,expected,existing in [(0,32768,0),(4062,32768,0),(4063,65536,0),
+            (8158,65536,0),(8159,98304,0),(1,131072,100000)]:
+            root=local_directory();reader=root/'reader';reader.mkdir();database=reader/'dev.db';database.write_bytes(b'x')
+            (reader/'dev.db-wal').write_bytes(b'w'*(32+frames*536))
+            if existing:(reader/'dev.db-shm').write_bytes(b's'*existing)
+            owner=Owner(10*1024**2);bound=reader_index_bound(database,owner.check)
+            self.assertEqual(bound['maximumIndexBytes'],expected)
+            self.assertEqual(bound['layout']['fileCount'],2)
+            self.assertEqual(owner.claims,['reader-index'])
+            self.assertEqual(len(owner.plans),1)
+            verify_reader_index(database,bound)
+            with self.assertRaises(FileExistsError):reader_index_bound(database,owner.check)
+
+    def test_owned_wal_reader_can_create_missing_index_within_allowance_without_bypassing_wal(self):
+        root=local_directory();source=root/'new-source.db';writer=sqlite3.connect(source)
+        try:
+            writer.execute('PRAGMA journal_mode=WAL');writer.execute('PRAGMA wal_autocheckpoint=0')
+            writer.execute('CREATE TABLE only_in_wal(value)');writer.execute("INSERT INTO only_in_wal VALUES('retained')");writer.commit()
+            reader=root/'reader';reader.mkdir();database=reader/'dev.db'
+            for suffix in ('','-wal'):pathlib.Path(str(database)+suffix).write_bytes(pathlib.Path(str(source)+suffix).read_bytes())
+            before={suffix:pathlib.Path(str(source)+suffix).read_bytes() for suffix in ('','-wal','-shm')}
+            owner=Owner(10*1024**2);bound=reader_index_bound(database,owner.check)
+            self.assertFalse(pathlib.Path(str(database)+'-shm').exists())
+            db=sqlite3.connect(database.as_uri()+'?mode=ro',uri=True)
+            try:
+                memory_temporaries(db);db.execute('PRAGMA query_only=ON')
+                self.assertEqual(db.execute('SELECT * FROM only_in_wal').fetchall(),[('retained',)])
+                self.assertTrue(pathlib.Path(str(database)+'-shm').exists())
+                verify_reader_index(database,bound)
+            finally:db.close()
+            self.assertEqual({suffix:pathlib.Path(str(source)+suffix).read_bytes() for suffix in before},before)
+            verify_reader_index(database,bound)
+        finally:writer.close()
+
+    def test_reader_index_integrity_refuses_main_wal_index_or_journal_changes(self):
+        for mutation in ('main','wal','index','journal'):
+            root=local_directory();reader=root/'reader';reader.mkdir();database=reader/'dev.db';database.write_bytes(b'x')
+            bound=reader_index_bound(database,Owner(10*1024**2).check)
+            if mutation=='main':database.write_bytes(b'y')
+            elif mutation=='wal':(reader/'dev.db-wal').write_bytes(b'changed')
+            elif mutation=='index':(reader/'dev.db-shm').write_bytes(b'x'*(bound['maximumIndexBytes']+1))
+            else:(reader/'dev.db-journal').write_bytes(b'')
+            with self.assertRaises(RuntimeError):verify_reader_index(database,bound)
 
     def test_memory_temp_storage_refuses_compile_override_and_unaccepted_pragma(self):
         class Reply:

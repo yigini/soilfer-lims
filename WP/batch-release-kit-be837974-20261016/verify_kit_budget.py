@@ -1,18 +1,18 @@
 """Consumption-aware all-stage reservation and physical/topology negatives."""
 import copy
 import unittest
-from kit_budget import Budget,TABLE,DB_EQUIVALENTS,TOTAL_DB_COPIES,LOG_RESERVE,CONTROLLER_COPY_SITES
+from kit_budget import Budget,TABLE,DB_EQUIVALENTS,TOTAL_DB_COPIES,LOG_RESERVE,COPY_ADMISSION_SITES
 from kit_disk import BOUND,ALLOCATION,free_gate,disjoint_growth
 from retained_accounting import mount_guard
 
 class CopyBudgets(unittest.TestCase):
-    def test_all37_maximum_copy_equivalents_keep_min64_and_original4gib_log_shares(self):
-        self.assertEqual(TOTAL_DB_COPIES,37);self.assertEqual(DB_EQUIVALENTS,64)
+    def test_all41_maximum_copy_equivalents_keep_min64_and_original4gib_log_shares(self):
+        self.assertEqual(TOTAL_DB_COPIES,41);self.assertEqual(DB_EQUIVALENTS,64)
         self.assertEqual(sum(r['logGrowthShareBytes'] for r in TABLE),4*1024**3)
         by_name={r['stage']:r for r in TABLE}
         self.assertEqual(by_name['candidate-startup']['dbTriples'],8)
-        self.assertEqual(by_name['issue-214']['dbTriples'],7)
-        self.assertEqual(by_name['issue-209']['dbTriples'],10)
+        self.assertEqual(by_name['issue-214']['dbTriples'],8)
+        self.assertEqual(by_name['issue-209']['dbTriples'],11)
 
     def test_complete_source_maxima_consume_once_without_doublecounting_own_active_stage(self):
         budget=Budget(600000000,6000000,414683521);initial=budget.required();seen=[]
@@ -21,7 +21,7 @@ class CopyBudgets(unittest.TestCase):
             for site,count in row['sites'].items():
                 for i in range(count):
                     budget.claim(site)
-                    if site in CONTROLLER_COPY_SITES:budget.copy_ceiling(site)
+                    if site in COPY_ADMISSION_SITES:budget.copy_ceiling(site)
             self.assertLessEqual(budget.required(),initial)
             result=budget.finish(row['stage'],0);seen.append(result)
         self.assertEqual(budget.remaining(),0);self.assertEqual(len(seen),len(TABLE))
@@ -34,7 +34,7 @@ class CopyBudgets(unittest.TestCase):
         for site,count in TABLE[0]['sites'].items():
             for i in range(count):
                 budget.claim(site)
-                if site in CONTROLLER_COPY_SITES:budget.copy_ceiling(site)
+                if site in COPY_ADMISSION_SITES:budget.copy_ceiling(site)
         with self.assertRaises(RuntimeError):budget.finish('stopped-backup',100000000000)
         with self.assertRaises(RuntimeError):budget.claim('backup')
 

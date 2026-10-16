@@ -1,0 +1,28 @@
+{
+  "diagnosticsIdenticalAfterPathOrdering": true,
+  "current": [
+    {
+      "file": "src\\components\\projects\\ProjectActionsModal.jsx",
+      "errors": 0,
+      "warnings": 6
+    },
+    {
+      "file": "src\\pages\\Reception.jsx",
+      "errors": 6,
+      "warnings": 10
+    }
+  ],
+  "baseline": [
+    {
+      "file": "src\\components\\projects\\ProjectActionsModal.jsx",
+      "errors": 0,
+      "warnings": 6
+    },
+    {
+      "file": "src\\pages\\Reception.jsx",
+      "errors": 6,
+      "warnings": 10
+    }
+  ],
+  "sourceArtifact": "audit-6218788735-client-focused-lint.json"
+}

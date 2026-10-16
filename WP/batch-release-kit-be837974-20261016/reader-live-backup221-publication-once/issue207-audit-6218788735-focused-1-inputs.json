@@ -1,0 +1,24 @@
+{
+  "head": "ad9d2660041c4db380d73a759871987d625f7404",
+  "files": {
+    "client/src/components/projects/ProjectActionsModal.jsx": "483f6d82d1be7b17945c68d2ef8e66f932552400e5aecac7904b6c3611578d3b",
+    "client/src/pages/Reception.jsx": "43edc05e82684d16bdd4b1524ef8ba4af8824568f042496ae83e0a0136b9c63d",
+    "client/src/translations/en.json": "165c1d96306c65334b44e163ffff03389625eac96161ae0f4c96f3062560801b",
+    "client/src/translations/es-419.json": "f98a458e5bac0b93dd1de83d26f51dfe87f241ac838dab216118804fb1289f0b",
+    "client/src/translations/es.json": "e686700bf1610f3f9e56c01594baa342d7b0243ddb6eac6eab9ffeed4cd58671",
+    "client/src/translations/fr.json": "9275660a1fa17080bae1e345a3a0c68ce83334363d8605dc4d5f69c0fc3b6579",
+    "client/src/translations/pt.json": "85da3c92945808e1631600ccb0b16d2fbad7b2f86806bb732d104c7af0586019",
+    "server/controllers/projectController.js": "0d8b43799c3870d6b52fb79705071bb40f8344a28d58766a26d6225751f978df",
+    "server/scripts/install_sample_custody.js": "ad1e8b8cea9e294d0d87ccd38c66f2567e5bd7a4c6c10ac64de8a3ae816fa8e4",
+    "server/services/custodyService.js": "dd6c4b8981b17c858e169e7a092d121d8c60f7d606703f8ffb659e5bbbb9ab0e",
+    "server/services/intakePreparationService.js": "95bc0a82130f841433685e8ccbfa91808f7154882692c1706f68f2997f8fb2d8",
+    "server/services/intakeReceiptService.js": "f9ed1c14db9d152214fa6c90f3c889d19a788a097b1c76577ed17f32f3f70683",
+    "server/services/sampleRetentionService.js": "ddaca66627dc84b10f9963d741d24008987a97c36b65794e89cd0aaed20b2b3f",
+    "server/tests/contracts/audit_5_3_custody_retention.test.js": "8835a7c4ec30b878fb8449565d5392c412f460e42de6a011e04134f68fcb71b8",
+    "server/tests/contracts/reception_regression_stage_f.test.js": "2b8d4f42710f1f809dcc1047a55a4d0034dd66b37e4bcd5a88b899ccb017927a",
+    "server/tests/contracts/reception_stage_e.test.js": "9a211fbd2e8b922896b884e9f2c28f88449a095882b097080dab29ca2a852f8b"
+  },
+  "patch": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\audit-6218788735-local-1.patch",
+  "patchSha256": "f10be973b0a52d90fdb219e37dd8b9525ec3bf6eafc487bf38a6dfd82aaf3e82",
+  "authorization": "local focused correction/tests only; no commit/push/fullrun/CI"
+}

@@ -2,7 +2,7 @@
 import base64, datetime, hashlib, os, pathlib, sqlite3, stat, time
 from retained_contract import *
 from kit_evidence import admit_evidence
-from kit_copy_admission import admit_copy
+from kit_copy_admission import admit_copy,copy_layout
 
 def claim_copy(check,site):
     owner=getattr(check,'__self__',None)
@@ -193,6 +193,54 @@ def memory_temporaries(db):
     require(db.execute('PRAGMA temp_store').fetchone()==(2,),
         'SQLite memory temporary storage was not accepted')
 
+def reader_index_bound(reader,check):
+    # Only a NEW independent owned reader may acquire a writable WAL-index.
+    # SQLite WAL-format uses32KiB for the first4062 frames and each4096
+    # thereafter. The minimum valid page512 plus frame header24 gives an
+    # upper bound without interpreting an untrusted WAL's commit/header data.
+    # Existing copied SHM can be larger; reserve that entire size again.
+    reader=pathlib.Path(reader)
+    require(reader.name=='dev.db' and reader.parent.name=='reader' and reader.is_file(),
+        'WAL-index allowance is restricted to the new owned reader')
+    for p in [reader,*reader.parents]:require(not p.is_symlink(),'Owned reader alias refused')
+    original=triple(reader)
+    require(all(r is None or pathlib.Path(str(reader)+s).stat().st_nlink==1 for s,r in original.items()),
+        'Owned reader must have independent file inodes')
+    wal_bytes=0 if original['-wal'] is None else original['-wal']['bytes']
+    frames=max(0,wal_bytes-32)//(512+24)
+    units=1+(max(0,frames-4062)+4095)//4096
+    existing=0 if original['-shm'] is None else original['-shm']['bytes']
+    index_bytes=max(units*32768,((existing+32767)//32768)*32768)
+    # A missing/empty WAL may also gain a zero-byte entry on read-only open.
+    # Both entries/inodes are charged even when already copied: no credit is
+    # taken for shared allocation or deletion of an existing SQLite sidefile.
+    layout=copy_layout([index_bytes,0],0)
+    claim_copy(check,'reader-index')
+    owner=getattr(check,'__self__',None)
+    if owner is not None:
+        require(callable(getattr(owner,'admit_copy',None)),'Owned reader requires pre-SQL index admission')
+        owner.admit_copy('reader-index',pathlib.Path(str(reader)+'-shm'),layout)
+    check()
+    value={'maximumIndexBytes':index_bytes,'maximumFramesFromRetainedWalLength':frames,
+        'original':original,'layout':layout,'beforeSqliteOpen':True,
+        'ordinaryReadOnlyWalRequired':True,'immutableWalBypass':False,'globalFilesystemClosureClaimed':False}
+    write_new(reader.parent.parent/'reader-index-bound.json',value)
+    return value
+
+def verify_reader_index(reader,bound):
+    current=triple(reader);before=bound['original']
+    require(identity_record({'':current['']})==identity_record({'':before['']}),
+        'Read-only owned reader changed its main file')
+    old_wal=before['-wal'];new_wal=current['-wal']
+    require((old_wal is None and (new_wal is None or new_wal['bytes']==0)) or
+        old_wal is not None and new_wal is not None and
+        all(old_wal[k]==new_wal[k] for k in ('bytes','sha256')),
+        'Read-only owned reader changed retained WAL bytes')
+    require(current['-shm'] is None or current['-shm']['bytes']<=bound['maximumIndexBytes'],
+        'Owned reader WAL-index exceeded its pre-SQL allowance')
+    require(not pathlib.Path(str(reader)+'-journal').exists(),'Read-only owned reader created a rollback journal')
+    return {'mainAndWalPreserved':True,'indexWithinDeclaredAllowance':True}
+
 def logical(path):
     db=sqlite3.connect(pathlib.Path(path).as_uri()+'?mode=ro',uri=True,timeout=10)
     try:
@@ -214,7 +262,8 @@ def seal(root,label,source,check,live_source=False):
     raw,original=copy_triple(source,d/'raw',check,live_source);reader,_=copy_triple(raw,d/'reader',check)
     for s,r in triple(reader).items():
         if r is not None:pathlib.Path(str(reader)+s).chmod(0o600)
-    state=logical(reader);backup=d/'backup.db'
+    index_bound=reader_index_bound(reader,check)
+    state=logical(reader);verify_reader_index(reader,index_bound);backup=d/'backup.db'
     # WAL is read by a normal read-only connection to the OWNED reader. immutable=1 is never used here.
     claim_copy(check,'backup')
     before=sqlite3.connect(reader.as_uri()+'?mode=ro',uri=True,timeout=10);after=None
@@ -241,6 +290,7 @@ def seal(root,label,source,check,live_source=False):
     finally:
         if after is not None:after.close()
         before.close()
+    verify_reader_index(reader,index_bound)
     require(not any(pathlib.Path(str(backup)+suffix).exists() for suffix in ('-journal','-wal','-shm')),
         'Detached backup has unexpected SQLite side files')
     with backup.open('r+b') as stream:stream.flush();os.fsync(stream.fileno())

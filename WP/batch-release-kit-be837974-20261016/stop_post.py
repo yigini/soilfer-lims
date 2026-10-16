@@ -111,9 +111,12 @@ class EvidenceLedger:
         self.active_window = None
         self.window_number = 0
 
-    def reserve(self, paths, maximum_bytes, category):
+    def reserve(self, paths, maximum_bytes, category, future_directory=None):
         require(category in self.shares and isinstance(paths, tuple) and (len(paths) in (1, 2)), 'Declared evidence category and one/two entry paths required')
         names = tuple((pathlib.Path(p) for p in paths))
+        if future_directory is not None:
+            future_directory = pathlib.Path(future_directory)
+            require(future_directory.is_absolute() and self.root in future_directory.parents and future_directory.parent.is_dir() and (not future_directory.exists()) and (not future_directory.is_symlink()) and all((p.parent == future_directory for p in names)), 'Only one exact unused direct parent may be admitted before mkdir')
         relative = []
         parents = set()
         for p in names:
@@ -123,7 +126,7 @@ class EvidenceLedger:
             for parent in (p.parent, *p.parent.parents):
                 if parent == self.root:
                     break
-                require(not parent.is_symlink() and parent.is_dir(), 'Evidence parent alias/missing directory refused')
+                require(not parent.is_symlink() and (parent.is_dir() or parent == future_directory), 'Evidence parent alias/missing directory refused')
                 parents.add(parent.relative_to(self.root).as_posix())
             relative.append(p.relative_to(self.root).as_posix())
         require(len(set(names)) == len(names) and all((n not in self.paths for n in relative)) and all((not p.exists() and (not p.is_symlink()) for p in names)), 'Evidence path is aliased or consumed')
@@ -197,7 +200,7 @@ def bind_runtime(root):
     _runtime = EvidenceLedger(root)
     return _runtime
 
-def admit_evidence(path, byte_count, pending=False, reservation=False):
+def admit_evidence(path, byte_count, pending=False, reservation=False, future_directory=None):
     """Inert outside the explicitly bound runtime; local reader fixtures stay local.
 
     The standalone emergency hook intentionally has no bound runtime ledger:
@@ -210,7 +213,7 @@ def admit_evidence(path, byte_count, pending=False, reservation=False):
     name = p.name
     category = 'controller' if name.startswith('controller-memory-') else 'memory' if '-memory-' in name else 'commands' if name.endswith(('.stdout', '.stderr')) else 'journal'
     paths = (p, p.with_name(p.name + '.pending')) if pending else (p,)
-    ticket = _runtime.reserve(paths, byte_count, category)
+    ticket = _runtime.reserve(paths, byte_count, category, future_directory)
     if not reservation:
         _runtime.settle(ticket, byte_count)
     return (_runtime, ticket)

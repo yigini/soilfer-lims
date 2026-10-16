@@ -1,0 +1,471 @@
+diff --git a/client/src/components/projects/ProjectActionsModal.jsx b/client/src/components/projects/ProjectActionsModal.jsx
+index 685de1ece..46821d777 100644
+--- a/client/src/components/projects/ProjectActionsModal.jsx
++++ b/client/src/components/projects/ProjectActionsModal.jsx
+@@ -262,6 +262,8 @@ export default function ProjectActionsModal({
+             return;
+         }
+ 
++        const retentionDays = editRetention === '' ? null : Number(editRetention);
++        const previousRetention = retentionSetting(project);
+         const payload = {
+             name: editName.trim(),
+             client: editClient.trim(),
+@@ -269,7 +271,7 @@ export default function ProjectActionsModal({
+             expectedSampleCount: editExpectedCount ? parseInt(editExpectedCount, 10) : 0,
+             deliveryDeadline: editDeadline || null,
+             defaultAnalysisBundle: editBundle || null,
+-            retentionDaysAfterReport: editRetention === '' ? null : Number(editRetention),
++            ...(retentionDays !== (previousRetention === '' ? null : previousRetention) ? { retentionDaysAfterReport: retentionDays } : {}),
+             status: editStatus
+         };
+ 
+diff --git a/client/src/pages/Reception.jsx b/client/src/pages/Reception.jsx
+index b32615a7a..b4b1ab270 100644
+--- a/client/src/pages/Reception.jsx
++++ b/client/src/pages/Reception.jsx
+@@ -1307,7 +1307,6 @@ const Reception = () => {
+             custodyCarrierName: custodyCarrierName.trim() || null,
+             custodyTrackingNumber: custodyTrackingNumber.trim() || null,
+             custodySenderSignature: custodySenderSignature.trim() || null,
+-            receivingOfficerSignature: custodyCounterSigned ? `CONFIRMED:${user.username}:${new Date().toISOString()}` : null,
+             coc: {
+                 deliveredBy: custodyCarrierName.trim() || null,
+                 receivedBy: user.username,
+@@ -2367,19 +2366,19 @@ const Reception = () => {
+ 
+                                 <div>
+                                     <label className="block text-xs font-bold text-sf-text mb-1">
+-                                        Deliverer / Submitter Signature Confirmation
++                                        {t('custody.senderDeclaration', 'Deliverer / submitter declaration (unauthenticated)')}
+                                     </label>
+                                     <input
+                                         type="text"
+                                         value={custodySenderSignature}
+                                         onChange={e => setCustodySenderSignature(e.target.value)}
+-                                        placeholder="Printed name or delivery signature token"
++                                        placeholder={t('custody.senderDeclarationPlaceholder', 'Declared name or delivery confirmation')}
+                                         className="w-full p-2.5 text-sm bg-sf-canvas border border-sf-divider text-sf-text rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                                     />
+                                 </div>
+                             </div>
+ 
+-                            {/* Receiving Officer Counter-Signature */}
++                            {/* Receiving officer acknowledgement */}
+                             <div className="bg-sf-canvas p-3 rounded-lg border border-sf-divider flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                                 <div className="flex items-center gap-2">
+                                     <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 flex items-center justify-center font-bold text-xs">
+@@ -2389,7 +2388,7 @@ const Reception = () => {
+                                         <div className="text-xs font-bold text-sf-text">
+                                             Receiving Officer: <span className="text-indigo-600 dark:text-indigo-400">{user?.name || user?.username}</span> ({user?.labId || 'Desk'})
+                                         </div>
+-                                        <div className="text-[11px] text-sf-muted">Authenticated custody receiver counter-signature</div>
++                                        <div className="text-[11px] text-sf-muted">{t('custody.acknowledgement', 'Authenticated acknowledgement')}</div>
+                                     </div>
+                                 </div>
+                                 <label className="inline-flex items-center gap-2 cursor-pointer text-xs font-semibold text-sf-text">
+diff --git a/client/src/translations/en.json b/client/src/translations/en.json
+index 10dbf7785..51084f171 100644
+--- a/client/src/translations/en.json
++++ b/client/src/translations/en.json
+@@ -1783,6 +1783,8 @@
+     "saveFailed": "Could not save custody change.",
+     "retainUntil": "Retain until",
+     "acknowledgement": "Authenticated acknowledgement",
++    "senderDeclaration": "Deliverer / submitter declaration (unauthenticated)",
++    "senderDeclarationPlaceholder": "Declared name or delivery confirmation",
+     "history": "Custody events",
+     "legacy": "Preserved historical evidence",
+     "types": {
+diff --git a/client/src/translations/es-419.json b/client/src/translations/es-419.json
+index e8d109248..cfc568dc8 100644
+--- a/client/src/translations/es-419.json
++++ b/client/src/translations/es-419.json
+@@ -1783,6 +1783,8 @@
+     "saveFailed": "No se pudo guardar el cambio de custodia.",
+     "retainUntil": "Conservar hasta",
+     "acknowledgement": "Confirmación autenticada",
++    "senderDeclaration": "Declaración del transportista / remitente (sin autenticar)",
++    "senderDeclarationPlaceholder": "Nombre declarado o confirmación de entrega",
+     "history": "Eventos de custodia",
+     "legacy": "Evidencia histórica conservada",
+     "types": {
+diff --git a/client/src/translations/es.json b/client/src/translations/es.json
+index e412ab9f0..42218cc40 100644
+--- a/client/src/translations/es.json
++++ b/client/src/translations/es.json
+@@ -1783,6 +1783,8 @@
+     "saveFailed": "No se pudo guardar el cambio de custodia.",
+     "retainUntil": "Conservar hasta",
+     "acknowledgement": "Confirmación autenticada",
++    "senderDeclaration": "Declaración del transportista / remitente (sin autenticar)",
++    "senderDeclarationPlaceholder": "Nombre declarado o confirmación de entrega",
+     "history": "Eventos de custodia",
+     "legacy": "Evidencia histórica conservada",
+     "types": {
+diff --git a/client/src/translations/fr.json b/client/src/translations/fr.json
+index b9e673d87..5110cee88 100644
+--- a/client/src/translations/fr.json
++++ b/client/src/translations/fr.json
+@@ -1783,6 +1783,8 @@
+     "saveFailed": "Impossible d’enregistrer la modification de garde.",
+     "retainUntil": "Conserver jusqu’au",
+     "acknowledgement": "Accusé de réception authentifié",
++    "senderDeclaration": "Déclaration du livreur / déposant (non authentifiée)",
++    "senderDeclarationPlaceholder": "Nom déclaré ou confirmation de livraison",
+     "history": "Événements de garde",
+     "legacy": "Preuves historiques conservées",
+     "types": {
+diff --git a/client/src/translations/pt.json b/client/src/translations/pt.json
+index f22726db6..157772f71 100644
+--- a/client/src/translations/pt.json
++++ b/client/src/translations/pt.json
+@@ -1783,6 +1783,8 @@
+     "saveFailed": "Não foi possível salvar a alteração de custódia.",
+     "retainUntil": "Reter até",
+     "acknowledgement": "Confirmação autenticada",
++    "senderDeclaration": "Declaração do entregador / remetente (não autenticada)",
++    "senderDeclarationPlaceholder": "Nome declarado ou confirmação de entrega",
+     "history": "Eventos de custódia",
+     "legacy": "Evidências históricas preservadas",
+     "types": {
+diff --git a/server/controllers/projectController.js b/server/controllers/projectController.js
+index 7dac86f8c..68cead339 100644
+--- a/server/controllers/projectController.js
++++ b/server/controllers/projectController.js
+@@ -652,8 +652,15 @@ exports.updateProject = async (req, res) => {
+                 await validateProjectClosure(currentProject, tx);
+             }
+ 
+-            if (updates.retentionDaysAfterReport !== undefined)
+-                data.policyConfig = require('../services/sampleRetentionService').projectSettings(currentProject.policyConfig, updates.retentionDaysAfterReport);
++            let retentionChange;
++            if (updates.retentionDaysAfterReport !== undefined) {
++                const policyConfig = require('../services/sampleRetentionService').projectSettings(currentProject.policyConfig, updates.retentionDaysAfterReport);
++                if (policyConfig !== currentProject.policyConfig) {
++                    data.policyConfig = policyConfig;
++                    retentionChange = { old: JSON.parse(currentProject.policyConfig || '{}').sample?.retentionDaysAfterReport ?? null,
++                        new: updates.retentionDaysAfterReport };
++                }
++            }
+ 
+             const proj = await tx.project.update({
+                 where: { id: project.id },
+@@ -665,7 +672,8 @@ exports.updateProject = async (req, res) => {
+                 entity: 'PROJECT',
+                 entityId: project.id,
+                 action: 'PROJECT_UPDATED',
+-                details: `Updated fields: ${Object.keys(data).join(', ')}`,
++                details: retentionChange ? JSON.stringify({ summary: `Updated fields: ${Object.keys(data).join(', ')}`,
++                    retentionDaysAfterReport: retentionChange }) : `Updated fields: ${Object.keys(data).join(', ')}`,
+                 performedBy: req.user.username,
+                 timestamp: new Date()
+             };
+diff --git a/server/scripts/install_sample_custody.js b/server/scripts/install_sample_custody.js
+index fa420492c..9bbc9c3f6 100644
+--- a/server/scripts/install_sample_custody.js
++++ b/server/scripts/install_sample_custody.js
+@@ -10,6 +10,7 @@ const hash = value => createHash('sha256').update(JSON.stringify(value)).digest(
+ const fail = (code, message, differences = []) => Object.assign(new Error(message), { statusCode: 409, code, differences, totalChanges: 0 });
+ const normalize = sql => sql.replace(/\s+/g, ' ').trim().replace(/;$/, '');
+ function recordedDate(value) {
++    if (value == null || typeof value === 'string' && !value.trim()) return new Date(NaN);
+     if (typeof value === 'string' && /^\d{4}-\d\d-\d\d[ T]\d\d:\d\d:\d\d(?:\.\d+)?$/.test(value)) value = value.replace(' ', 'T') + 'Z';
+     return new Date(value);
+ }
+diff --git a/server/services/custodyService.js b/server/services/custodyService.js
+index d997de7a4..6c3c8f670 100644
+--- a/server/services/custodyService.js
++++ b/server/services/custodyService.js
+@@ -12,13 +12,16 @@ function authenticated(actor) {
+ }
+ function receiptFacts(input = {}, actor) {
+     const coc = input.coc || {};
+-    for (const value of [input.custodyCarrierName, input.custodyTrackingNumber, coc.deliveredBy, coc.carrierName, coc.trackingNumber, coc.waybillRef, input.deliveredBy, input.deliveryNoteRef])
++    for (const value of [input.custodyCarrierName, input.custodyTrackingNumber, input.custodySenderSignature, coc.senderSignature, coc.deliveredBy, coc.carrierName, coc.trackingNumber, coc.waybillRef, input.deliveredBy, input.deliveryNoteRef])
+         if (value != null && typeof value !== 'string') throw fail('INTAKE_CUSTODY_INVALID', 'Custody names and references must be text.', 422);
+     const handover = input.custodyHandoverAt || coc.handoverAt || coc.date;
+     if (handover && !Number.isFinite(new Date(handover).getTime())) throw fail('INTAKE_CUSTODY_INVALID', 'The custody handover date must be valid.', 422);
++    const senderDeclaration = input.custodySenderSignature || coc.senderSignature || null;
+     return { custodyHandoverAt: handover ? new Date(handover).toISOString() : null,
+         custodyCarrierName: input.custodyCarrierName || coc.deliveredBy || coc.carrierName || input.deliveredBy || null,
+         custodyTrackingNumber: input.custodyTrackingNumber || coc.trackingNumber || coc.waybillRef || input.deliveryNoteRef || null,
++        custodySenderSignature: senderDeclaration,
++        custodySenderDeclaration: senderDeclaration == null ? null : { text: senderDeclaration, authenticated: false },
+         receivingOfficerId: String(actor.id), receivingOfficerName: actor.name || actor.username };
+ }
+ function withoutReceiptFields(data) {
+@@ -28,14 +31,15 @@ async function acknowledgeReceipt(tx, { sample, consignment, actor, input = {} }
+     rules.requireTransaction(tx);
+     if (!hasPermission(actor, 'RECEIVE_SAMPLE')) throw fail('CUSTODY_FORBIDDEN', 'Physical receipt permission is required.', 403);
+     const by = authenticated(actor);
+-    const entity = sample || consignment;
++    const labId = sample ? sample.assignedLab : consignment.labId;
++    if (!labId) throw fail('CUSTODY_LAB_REQUIRED', 'Record the receiving laboratory before acknowledging custody.', 409);
+     if (sample) rules.assertScope(actor, sample);
+     else scope.ensureScope(actor, consignment, { entityType: 'Consignment', altLabField: null });
+     const where = sample ? { sampleId: sample.id, containerId: null } : { consignmentId: consignment.id, sampleId: null, containerId: null };
+     const first = await tx.custodyEvent.findFirst({ where: { ...where, type: 'RECEIVED' }, orderBy: [{ at: 'asc' }, { id: 'asc' }] });
+     if (first) return first;
+     const facts = receiptFacts(input, actor);
+-    return tx.custodyEvent.create({ data: { id: randomUUID(), ...where, labId: entity.assignedLab || entity.labId,
++    return tx.custodyEvent.create({ data: { id: randomUUID(), ...where, labId,
+         consignmentId: sample ? sample.consignmentId || null : consignment.id, type: 'RECEIVED', by, actorId: String(actor.id),
+         at: new Date(), source: 'LIVE', acknowledgement: true, counterparty: facts.custodyCarrierName,
+         reference: facts.custodyTrackingNumber, evidence: JSON.stringify(facts) } });
+@@ -47,6 +51,7 @@ async function receiptView(db, record, kind = 'sample') {
+     if (!first) return record;
+     const evidence = JSON.parse(first.evidence || '{}');
+     return { ...record, ...Object.fromEntries(RECEIPT_FIELDS.map(key => [key, evidence[key] ?? null])),
++        custodySenderDeclaration: evidence.custodySenderSignature == null ? null : { text: evidence.custodySenderSignature, authenticated: false },
+         custodyHandoverAt: evidence.custodyHandoverAt ? new Date(evidence.custodyHandoverAt) : first.at,
+         custodyAcknowledgement: { by: first.by, actorId: first.actorId, at: first.at, authenticated: first.acknowledgement, source: first.source } };
+ }
+diff --git a/server/services/intakePreparationService.js b/server/services/intakePreparationService.js
+index 32a5e5b74..3f1f1c0f5 100644
+--- a/server/services/intakePreparationService.js
++++ b/server/services/intakePreparationService.js
+@@ -334,6 +334,7 @@ async function prepareIntake(prisma, { body: rawBody, user, newSampleId, initial
+             const { transitionSample } = require('../services/sampleStateService');
+             const rejectedOrder = await orderedAnalyses(prisma, sample, body, user);
+             const rejectionData = {
++                assignedLab: user.labId,
+                 requiredAnalyses: JSON.stringify(Array.from(rejectedOrder.requiredAnalyses)),
+                 analysisGroupIds: JSON.stringify(rejectedOrder.canonicalGroupIds),
+                 receivedMass: receivedMass === undefined ? undefined : receivedMass === null || receivedMass === '' ? null : Number(receivedMass),
+diff --git a/server/services/intakeReceiptService.js b/server/services/intakeReceiptService.js
+index 3f53232d5..83e19c2ff 100644
+--- a/server/services/intakeReceiptService.js
++++ b/server/services/intakeReceiptService.js
+@@ -60,13 +60,13 @@ async function receiveSample(tx, { sampleId, body = {}, user, createDataFactory
+     const events = typeof sample.history === 'string' ? JSON.parse(sample.history) : sample.history || [];
+     if (!Array.isArray(events)) throw new IntakeError(409, { code: 'INTAKE_HISTORY_INVALID', message: 'The stored custody history needs review.' });
+     events.push({ status: 'RECEIVED', changedBy: user.username, timestamp: now.toISOString(), note: 'Physical arrival recorded; acceptance pending.' });
+-    await require('./custodyService').acknowledgeReceipt(tx, { sample, actor: user, input: { ...custody, ...body } });
+     const updated = await transitionSample(sample.id, 'RECEIVED', user, 'Physical arrival recorded; acceptance pending.', {
+-        receptionDate: now, receivedBy: user.username,
++        receptionDate: now, receivedBy: user.username, assignedLab: labId,
+         requiredAnalyses: JSON.stringify(codes), ...(mass !== undefined ? { receivedMass: mass } : {}),
+         receptionData: JSON.stringify({ ...reception, receivedBy: user.username, receivedAt: now.toISOString() }), history: JSON.stringify(events)
+     }, tx, { action: 'SAMPLE_RECEIVED', details: JSON.stringify({ summary: 'Physical arrival recorded; acceptance pending.', provenanceHold: metadata.provenanceHold || null }),
+         before: JSON.stringify({ status: sample.status }), after: JSON.stringify({ status: 'RECEIVED' }) });
++    await require('./custodyService').acknowledgeReceipt(tx, { sample: updated, actor: user, input: { ...custody, ...body } });
+     return require('./custodyService').receiptView(tx, updated);
+ }
+ module.exports = { receiveSample, validateMass };
+diff --git a/server/services/sampleRetentionService.js b/server/services/sampleRetentionService.js
+index 33d0d5c72..33b500f78 100644
+--- a/server/services/sampleRetentionService.js
++++ b/server/services/sampleRetentionService.js
+@@ -12,6 +12,7 @@ function projectSettings(raw, override) {
+     if (!settings || typeof settings !== 'object' || Array.isArray(settings) || settings.sample != null &&
+         (typeof settings.sample !== 'object' || Array.isArray(settings.sample))) throw fail('PROJECT_RETENTION_INVALID', 'Project retention settings need review.');
+     if (override !== null && !valid(KEY, override)) throw fail('PROJECT_RETENTION_INVALID', 'Project retention must be a non-negative whole number of days.', 400);
++    if ((settings.sample?.retentionDaysAfterReport ?? null) === override) return raw;
+     const sample = { ...settings.sample };
+     if (override === null) delete sample.retentionDaysAfterReport; else sample.retentionDaysAfterReport = override;
+     return JSON.stringify({ ...settings, sample });
+diff --git a/server/tests/contracts/audit_5_3_custody_retention.test.js b/server/tests/contracts/audit_5_3_custody_retention.test.js
+index 17e05079b..68bb42c17 100644
+--- a/server/tests/contracts/audit_5_3_custody_retention.test.js
++++ b/server/tests/contracts/audit_5_3_custody_retention.test.js
+@@ -49,14 +49,19 @@ test('malformed closure/custody fields and missing receiving-lab attribution ret
+ test('receipt acknowledgement is authenticated, immutable, first-receipt based and does not write legacy signatures', async () => {
+     const row = await sample({ status: 'EXPECTED' });
+     await prisma.$transaction(tx => custody.acknowledgeReceipt(tx, { sample: row, actor,
+-        input: { custodyCarrierName: 'Recorded courier', custodyTrackingNumber: 'DN-1', receivingOfficerSignature: 'forged', custodySenderSignature: 'forged' } }));
++        input: { custodyCarrierName: 'Recorded courier', custodyTrackingNumber: 'DN-1', receivingOfficerSignature: 'forged', custodySenderSignature: 'Declared courier / MOA' } }));
+     await prisma.$transaction(tx => custody.acknowledgeReceipt(tx, { sample: row, actor, input: { custodyCarrierName: 'Later courier' } }));
+     const view = await custody.receiptView(prisma, row);
+     expect(view.custodyCarrierName).toBe('Recorded courier');
++    expect(view.custodySenderSignature).toBe('Declared courier / MOA');
++    expect(view.custodySenderDeclaration).toEqual({ text: 'Declared courier / MOA', authenticated: false });
+     expect(view.custodyAcknowledgement).toMatchObject({ by: actor.username, actorId: actor.id, authenticated: true, source: 'LIVE' });
+     expect(view.receivingOfficerSignature).toBeNull();
+     expect((await prisma.sample.findUnique({ where: { id: row.id } })).receivingOfficerSignature).toBeNull();
+     const events = await custody.list(prisma, row.id, actor); expect(events).toHaveLength(1);
++    expect(JSON.parse(events[0].evidence)).toMatchObject({ custodySenderSignature: 'Declared courier / MOA',
++        custodySenderDeclaration: { text: 'Declared courier / MOA', authenticated: false } });
++    expect((await prisma.sample.findUnique({ where: { id: row.id } })).custodySenderSignature).toBeNull();
+     const db = new Database(process.env.DATABASE_PATH, { fileMustExist: true });
+     try {
+         expect(() => db.prepare('UPDATE CustodyEvent SET "by"=? WHERE id=?').run('another', events[0].id)).toThrow(/CUSTODY_EVENT_IMMUTABLE/);
+@@ -64,6 +69,38 @@ test('receipt acknowledgement is authenticated, immutable, first-receipt based a
+     } finally { db.close(); }
+     expect(await custody.list(prisma, row.id, actor)).toEqual(events);
+ });
++test('sender declarations must be text and an invalid receipt rolls back the transition and audit', async () => {
++    const row = await sample({ status: 'EXPECTED' });
++    const audits = await prisma.auditLog.count({ where: { entityId: row.id } });
++    const response = await request(app).post(`/api/samples/${row.id}/receive`).set('Authorization', `Bearer ${token}`)
++        .send({ custodySenderSignature: { forged: 'identity' } });
++    expect(response.status).toBe(422); expect(response.body.code).toBe('INTAKE_CUSTODY_INVALID');
++    expect(await prisma.sample.findUnique({ where: { id: row.id } })).toEqual(row);
++    expect(await prisma.custodyEvent.count({ where: { sampleId: row.id } })).toBe(0);
++    expect(await prisma.auditLog.count({ where: { entityId: row.id } })).toBe(audits);
++});
++test('receipt acknowledgement refuses a missing assignedLab instead of using the lab sample code alias', async () => {
++    const row = await sample({ status: 'EXPECTED', assignedLab: null, labId: 'SAMPLE-ALIAS-' + randomUUID() });
++    await expect(prisma.$transaction(tx => custody.acknowledgeReceipt(tx, { sample: row, actor })))
++        .rejects.toMatchObject({ statusCode: 409, code: 'CUSTODY_LAB_REQUIRED' });
++    expect(await prisma.sample.findUnique({ where: { id: row.id } })).toEqual(row);
++    expect(await prisma.custodyEvent.count({ where: { sampleId: row.id } })).toBe(0);
++});
++test('physical receive and rejected intake assign the resolved receiving lab before acknowledging a null-assignedLab sample', async () => {
++    const globalToken = await getAuthToken('SUPER_ADMIN', null), globalActor = jwt.decode(globalToken);
++    for (const rejected of [false, true]) {
++        const row = await sample({ status: 'EXPECTED', assignedLab: null, labId: null });
++        const response = await request(app).post(rejected ? '/api/reception/intake' : `/api/samples/${row.id}/receive`)
++            .set('Authorization', `Bearer ${globalToken}`).send({ assignedLab: labId,
++                ...(rejected ? { originalId: row.originalId, decision: 'REJECTED', ncReason: 'Packaging failed',
++                    checklist: { container: { status: 'FAIL', reason: 'Packaging failed' } } } : {}) });
++        expect(response.status).toBe(200);
++        const updated = await prisma.sample.findUnique({ where: { id: row.id } });
++        expect(updated).toMatchObject({ assignedLab: labId, status: rejected ? 'RECEIVED_REJECTED' : 'RECEIVED' });
++        const event = await prisma.custodyEvent.findFirst({ where: { sampleId: row.id, type: 'RECEIVED' } });
++        expect(event).toMatchObject({ labId, actorId: globalActor.id, by: globalActor.username, acknowledgement: true });
++    }
++});
+ test('moves use same-lab sample locations and preserve immutable container identity', async () => {
+     const row = await sample();
+     const foreign = await prisma.inventoryLocation.create({ data: { id: randomUUID(), labId: otherLabId, purpose: 'SAMPLE', name: 'Other lab shelf' } });
+@@ -81,12 +118,14 @@ test('moves use same-lab sample locations and preserve immutable container ident
+ test('consignment custody views use the first authenticated receipt and cannot be read across laboratories', async () => {
+     const own = await prisma.consignment.create({ data: { id: randomUUID(), code: randomUUID(), labId, receivedBy: actor.username } });
+     const foreign = await prisma.consignment.create({ data: { id: randomUUID(), code: randomUUID(), labId: otherLabId, receivedBy: 'Other receiver' } });
+-    await prisma.$transaction(tx => custody.acknowledgeReceipt(tx, { consignment: own, actor, input: { deliveredBy: 'Consignment courier', deliveryNoteRef: 'Header-ack' } }));
++    await prisma.$transaction(tx => custody.acknowledgeReceipt(tx, { consignment: own, actor, input: {
++        deliveredBy: 'Consignment courier', deliveryNoteRef: 'Header-ack', custodySenderSignature: 'Declared header submitter' } }));
+     const stored = await prisma.consignment.findUnique({ where: { id: own.id } });
+     expect(stored.custodyCarrierName).toBeNull(); expect(stored.receivingOfficerSignature).toBeNull();
+     const listing = await request(app).get('/api/reception/consignments').set('Authorization', `Bearer ${token}`);
+     expect(listing.status).toBe(200); expect(listing.body.data.map(row => row.id)).not.toContain(foreign.id);
+     expect(listing.body.data.find(row => row.id === own.id)).toMatchObject({ custodyCarrierName: 'Consignment courier', custodyTrackingNumber: 'Header-ack',
++        custodySenderSignature: 'Declared header submitter', custodySenderDeclaration: { text: 'Declared header submitter', authenticated: false },
+         custodyAcknowledgement: { authenticated: true, by: actor.username } });
+     const detail = await request(app).get(`/api/reception/consignments/${foreign.id}`).set('Authorization', `Bearer ${token}`);
+     expect(detail.status).toBe(403); expect(detail.body.code).toBeTruthy();
+@@ -130,14 +169,28 @@ test('project retention setting is owner-scoped, validates integers, preserves o
+         policyConfig: JSON.stringify({ allowedChannels: ['DESK'], sample: { otherSetting: 'preserved' } }) } });
+     const update = value => request(app).put(`/api/projects/${project.id}`).set('Authorization', `Bearer ${token}`).send({ retentionDaysAfterReport: value });
+     expect((await update(12)).status).toBe(200);
++    expect(JSON.parse((await prisma.auditLog.findFirst({ where: { entityId: project.id, action: 'PROJECT_UPDATED' }, orderBy: { timestamp: 'desc' } })).details))
++        .toMatchObject({ retentionDaysAfterReport: { old: null, new: 12 } });
+     expect(JSON.parse((await prisma.project.findUnique({ where: { id: project.id } })).policyConfig))
+         .toEqual({ allowedChannels: ['DESK'], sample: { otherSetting: 'preserved', retentionDaysAfterReport: 12 } });
+     for (const value of [-1, 2.5, '12']) { const response = await update(value); expect(response.status).toBe(400); expect(response.body.code).toBe('PROJECT_RETENTION_INVALID'); }
+     expect((await update(null)).status).toBe(200);
++    expect(JSON.parse((await prisma.auditLog.findFirst({ where: { entityId: project.id, action: 'PROJECT_UPDATED' }, orderBy: { timestamp: 'desc' } })).details))
++        .toMatchObject({ retentionDaysAfterReport: { old: 12, new: null } });
+     expect(JSON.parse((await prisma.project.findUnique({ where: { id: project.id } })).policyConfig)).toEqual({ allowedChannels: ['DESK'], sample: { otherSetting: 'preserved' } });
+     const foreignToken = await getAuthToken('LAB_MANAGER', otherLabId);
+     expect((await request(app).put(`/api/projects/${project.id}`).set('Authorization', `Bearer ${foreignToken}`).send({ retentionDaysAfterReport: 2 })).status).toBe(403);
+ });
++test('no-op project retention saves preserve null and exact existing config bytes without a policyConfig audit change', async () => {
++    for (const policyConfig of [null, '{ "sample": { "retentionDaysAfterReport": 12 }, "other": true }']) {
++        const project = await prisma.project.create({ data: { id: randomUUID(), code: randomUUID(), name: 'Unchanged retention', status: 'ACTIVE', labId, policyConfig } });
++        const response = await request(app).put(`/api/projects/${project.id}`).set('Authorization', `Bearer ${token}`)
++            .send({ name: 'Saved other setting', retentionDaysAfterReport: policyConfig ? 12 : null });
++        expect(response.status).toBe(200);
++        expect((await prisma.project.findUnique({ where: { id: project.id } })).policyConfig).toBe(policyConfig);
++        expect((await prisma.auditLog.findFirst({ where: { entityId: project.id, action: 'PROJECT_UPDATED' } })).details).toBe('Updated fields: name');
++    }
++});
+ test('disposal queue contains only overdue same-lab material without canonical/legacy hold or open amendment', async () => {
+     const now = new Date(), past = new Date(now.getTime() - 86400000);
+     const eligible = await sample({ status: 'APPROVED', retainUntil: past });
+@@ -187,7 +240,7 @@ test('expiry, holds and amendments are rechecked in the shared disposal transiti
+     await prisma.sampleAmendment.create({ data: { sampleId: amended.id, type: 'CLERICAL', status: 'APPROVED', reason: 'Correction', createdBy: actor.username } });
+     await expect(transitionSample(amended.id, 'DISPOSED', actor, 'Disposal', {}, prisma)).rejects.toMatchObject({ code: 'SAMPLE_AMENDMENT_OPEN' });
+ });
+-test('installer dry-run preserves bytes; apply preserves every legacy custody field and JSON; repeat is a no-op', async () => {
++async function legacyCustodyCopy(data = {}) {
+     const file = path.resolve(__dirname, '../.tmp/custody-install-' + randomUUID() + '.db');
+     const reader = new Database(process.env.DATABASE_PATH, { readonly: true, fileMustExist: true });
+     await reader.backup(file); reader.close();
+@@ -198,13 +251,17 @@ test('installer dry-run preserves bytes; apply preserves every legacy custody fi
+     try { await createSampleFixture(fixtureDb, { data: { id, originalId: id, assignedLab: labId, status: 'RECEIVED',
+         receptionDate: new Date(at), receivedBy: 'legacy-officer', custodyCarrierName: 'Courier',
+         receivingOfficerSignature: 'CONFIRMED:legacy:old', receptionData: '{ "coc": {"tracking":"legacy"} }',
+-        metadata: '{"archiveLocation":"old shelf"}', updatedAt: new Date(at) } }); } finally { await fixtureDb.$disconnect(); }
++        metadata: '{"archiveLocation":"old shelf"}', updatedAt: new Date(at), ...data } }); } finally { await fixtureDb.$disconnect(); }
+     const db = new Database(file);
+     const guards = [...loadCustodyMigrationSource().guardsSql.matchAll(/CREATE (?:UNIQUE )?(?:TRIGGER|INDEX) "([^"]+)"/g)].map(m => m[1]);
+     for (const name of guards) db.exec(`DROP ${name.includes('first_') ? 'INDEX' : 'TRIGGER'} "${name}"`);
+     db.exec('DROP TABLE CustodyEvent; ALTER TABLE Sample DROP COLUMN retainUntil; ALTER TABLE InventoryLocation DROP COLUMN purpose;');
+     db.prepare('DELETE FROM _schema_migrations WHERE id=?').run('207_sample_custody');
+     const before = db.prepare('SELECT * FROM Sample WHERE id=?').get(id); db.close();
++    return { file, id, before };
++}
++test('installer dry-run preserves bytes; apply preserves every legacy custody field and JSON; repeat is a no-op', async () => {
++    const { file, id, before } = await legacyCustodyCopy();
+     const bytes = fs.readFileSync(file);
+     expect(installSampleCustody({ dbPath: file })).toMatchObject({ classification: 'PRE_207', mode: 'DRY_RUN', totalChanges: 0 });
+     expect(fs.readFileSync(file)).toEqual(bytes);
+@@ -223,6 +280,31 @@ test('installer dry-run preserves bytes; apply preserves every legacy custody fi
+     expect(() => installSampleCustody({ dbPath: file, apply: true })).toThrow(/differs/);
+     expect(fs.readFileSync(file)).toEqual(tamperedBytes);
+ });
++test('legacy receipt facts without a recorded date refuse dry-run and apply with no schema, event or byte mutations', async () => {
++    const { file, id, before } = await legacyCustodyCopy({ status: 'EXPECTED', receptionDate: null, custodyHandoverAt: null,
++        receivingOfficerName: 'Recorded legacy receiver', receivedBy: null, receivingOfficerSignature: null });
++    const bytes = fs.readFileSync(file);
++    for (const apply of [false, true]) {
++        let refusal;
++        try { installSampleCustody({ dbPath: file, apply }); } catch (error) { refusal = error; }
++        expect(refusal).toMatchObject({ statusCode: 409, code: 'CUSTODY_BACKFILL_REVIEW_REQUIRED', totalChanges: 0 });
++        expect(refusal.differences).toContainEqual({ table: 'Sample', id, code: 'LEGACY_CUSTODY_PROVENANCE_REQUIRED' });
++        expect(fs.readFileSync(file)).toEqual(bytes);
++    }
++    const db = new Database(file, { readonly: true, fileMustExist: true });
++    try {
++        expect(db.prepare('SELECT * FROM Sample WHERE id=?').get(id)).toEqual(before);
++        expect(db.prepare("SELECT name FROM sqlite_master WHERE name='CustodyEvent'").get()).toBeUndefined();
++        expect(db.prepare("SELECT id FROM _schema_migrations WHERE id='207_sample_custody'").get()).toBeUndefined();
++    } finally { db.close(); }
++});
++test('missing and empty recorded dates are invalid while zone-less recorded timestamps remain UTC', () => {
++    const source = fs.readFileSync(path.resolve(__dirname, '../../scripts/install_sample_custody.js'), 'utf8');
++    const declaration = require('@babel/parser').parse(source).program.body.find(node => node.type === 'FunctionDeclaration' && node.id.name === 'recordedDate');
++    const recordedDate = require('node:vm').runInNewContext('(' + source.slice(declaration.start, declaration.end) + ')');
++    for (const value of [null, undefined, '', ' \t ']) expect(Number.isNaN(recordedDate(value).getTime())).toBe(true);
++    expect(recordedDate('2026-09-01 08:00:00').toISOString()).toBe('2026-09-01T08:00:00.000Z');
++});
+ 
+ // Load only the pure comparison; importing the operator script would run Docker.
+ const readinessSource = fs.readFileSync(path.resolve(__dirname, '../../scripts/rehearsal_deployment_readiness.cjs'), 'utf8');
+diff --git a/server/tests/contracts/reception_regression_stage_f.test.js b/server/tests/contracts/reception_regression_stage_f.test.js
+index 5ab383a21..e3527d06a 100644
+--- a/server/tests/contracts/reception_regression_stage_f.test.js
++++ b/server/tests/contracts/reception_regression_stage_f.test.js
+@@ -588,7 +588,7 @@ describe('Stage F: Reception Contract and End-to-End Regression Suite (RC-20)',
+             // 2. Carrier & courier tracking
+             expect(dbSample.custodyCarrierName).toBe('AeroFlash Cargo Express Driver Ortiz');
+             expect(dbSample.custodyTrackingNumber).toBe('AF-WB-90901');
+-            expect(dbSample.custodySenderSignature).toBeNull();
++            expect(dbSample.custodySenderSignature).toBe('Ortiz / Courier');
+ 
+             // 3. Officer identification & counter-signature
+             expect(dbSample.receivingOfficerId).toBeDefined();
+diff --git a/server/tests/contracts/reception_stage_e.test.js b/server/tests/contracts/reception_stage_e.test.js
+index f4bafe8e0..d00b6b2e5 100644
+--- a/server/tests/contracts/reception_stage_e.test.js
++++ b/server/tests/contracts/reception_stage_e.test.js
+@@ -198,7 +198,7 @@ describe('Stage E: Distinct RECEIVED_REJECTED State & Immutable Chain of Custody
+         expect(dbSample.status).toBe('ACCEPTED');
+         expect(dbSample.custodyCarrierName).toBe('AgroExtension Officer Perez');
+         expect(dbSample.custodyTrackingNumber).toBe('EXT-WAYBILL-2026-09');
+-        expect(dbSample.custodySenderSignature).toBeNull();
++        expect(dbSample.custodySenderSignature).toBe('Perez / MOA');
+         expect(dbSample.receivingOfficerSignature).toBeNull();
+ 
+         // Handover timestamp must be preserved separately from receptionDate/createdAt
+@@ -256,6 +256,8 @@ describe('Stage E: Distinct RECEIVED_REJECTED State & Immutable Chain of Custody
+         expect(res.body.consignment.acceptedCount).toBe(1);
+         expect(res.body.consignment.rejectedCount).toBe(1);
+         expect(res.body.consignment.status).toBe('PARTIAL');
++        expect(res.body.consignment.custodySenderSignature).toBe('Silva / Driver');
++        expect(res.body.consignment.custodySenderDeclaration).toEqual({ text: 'Silva / Driver', authenticated: false });
+         createdConsignmentId = res.body.consignment.id;
+ 
+         // Verify rejected sample has RECEIVED_REJECTED in database

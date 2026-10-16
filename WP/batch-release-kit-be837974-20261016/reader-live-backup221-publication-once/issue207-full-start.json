@@ -1,0 +1,23 @@
+{
+  "startedAt": "2026-10-16T18:50:30.444Z",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+    "test"
+  ],
+  "cwd": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\app\\server",
+  "sourceHead": "ad9d2660041c4db380d73a759871987d625f7404",
+  "manifest": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\inputs-audit-6218788735-full-1.json",
+  "manifestSha256": "ab972e52dd03cc0051a0ee51c4477431743219d9aba6ec30a96597493c3697d7",
+  "sourceBuildMapSha256": "3387f436f8e686f79cd3d5f36a491823d7b86bf109538cbaeecae9e5ff905c46",
+  "runtimeMapSha256": "1e21424bf201a67240eefa0100ac943e3efa70890880e6df12e918956908f948",
+  "index": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\audit-6218788735-full-1-index",
+  "indexSha256": "eb34ad2825fd43b5319ab79b10684ca0601435dc0f957c725c75f68d04ce1229",
+  "inventory": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\audit-6218788735-full-1-inventory-before.json",
+  "inventorySha256": "e8531cebd45778e29e8be59271889f79c45418b094177f399dc298235d2385f7",
+  "nodeOptions": null,
+  "workerConfiguration": "stock maxWorkers=1, workerIdleMemoryLimit=512MB; no heap override",
+  "log": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\audit-6218788735-full-1.log",
+  "pid": 25440,
+  "spawnConfirmedAt": "2026-10-16T18:50:30.469Z"
+}

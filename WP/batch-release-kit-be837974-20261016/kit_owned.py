@@ -15,6 +15,7 @@ from retained_contract import ROOT,LIVE_DATA,exact_json
 from kit_journal import exclusive_record
 from kit_evidence import admit_evidence
 from kit_cli_evidence import begin_cli_evidence
+from kit_copy_admission import live_backup_limit
 
 LABEL='io.soilfer.release-owned'
 DATABASE='/app/server/prisma/dev.db'
@@ -222,7 +223,7 @@ class OwnedCli:
                 result['exitCode']==0 and not stderr,'CLI failed; retained child and wrapper outcome must both succeed')
         return stdout,result
 
-def filesystem_controls(root,require_directory_sync=True):
+def filesystem_controls(root,require_directory_sync=True,disk=None):
     """Production control-file callbacks. Exact root, fresh directories only."""
     root=pathlib.Path(root)
     require(root.as_posix()==str(ROOT) and root.resolve()==root and root.is_dir() and not root.is_symlink(),
@@ -232,16 +233,25 @@ def filesystem_controls(root,require_directory_sync=True):
         require(p.as_posix()==spec['tmp'] and p.parent==root and not p.is_symlink(),'Exact private control directory required')
         return p
     def prepare(spec):
-        p=directory(spec);p.mkdir(mode=0o700)
-        require(not list(p.iterdir()),'Fresh empty CLI control directory required')
+        p=directory(spec)
+        require(not p.exists(),'Fresh CLI control directory required')
         # The child produces at most one completion plus its retained atomic
         # hardlink. Charge its full envelope before any container is created;
         # no controller admission runs inside the installer transaction.
-        admit_evidence(p/'cli-child-complete.json',8192,pending=True)
+        admit_evidence(p/'cli-child-complete.json',8192,pending=True,future_directory=p)
+        limit=None
+        if spec['label'] in ('first-sync-backup','postflight-backup'):
+            require(disk is not None,'Live backup requires its held before-create content admission')
+            limit,plan=live_backup_limit(disk.budget.db)
+            disk.admit_copy('cli-backup',p/'backup.db',plan)
+        p.mkdir(mode=0o700)
+        require(not list(p.iterdir()),'Fresh empty CLI control directory required')
+        if limit is not None:exclusive_record(p,'backup-admission.json',limit,require_directory_sync)
     def read(spec):
         p=directory(spec)/'cli-child-complete.json'
         if not p.exists():return None
         require(not p.is_symlink() and p.is_file() and p.stat().st_size<=8192,'Bounded real completion file required')
-        raw=p.read_bytes();require(len(raw)<=8192,'Completion grew beyond bound');return raw
+        with p.open('rb') as stream:raw=stream.read(8193)
+        require(len(raw)<=8192,'Completion grew beyond bound');return raw
     def permit(spec,value):exclusive_record(directory(spec),'cli-exit-permit.json',value,require_directory_sync)
     return prepare,read,permit

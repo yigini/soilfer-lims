@@ -121,4 +121,17 @@ class SharedEvidence(unittest.TestCase):
         self.assertFalse(path.exists());self.assertFalse(path.with_name(path.name+'.pending').exists())
         self.assertEqual(book.used['journal'],7*4096)
 
+    def test_insufficient_completion_or_foreign_future_parent_refuses_before_mkdir(self):
+        from kit_owned import filesystem_controls,cli_spec
+        from kit_integrity import DATA_MOUNT
+        root=directory();book=ledger(root,journal=6*4096)
+        with patch('kit_evidence._runtime',book),patch('kit_owned.ROOT',pathlib.PurePosixPath(root.as_posix())):
+            spec=cli_spec('206-apply',DATA_MOUNT);prepare,_,_=filesystem_controls(root,False)
+            with self.assertRaisesRegex(RuntimeError,'exhausted'):prepare(spec)
+            self.assertFalse(pathlib.Path(spec['tmp']).exists())
+        p=root/'future'/'child.json'
+        for future in (root/'other',root/'missing'/'nested'):
+            with self.assertRaises(RuntimeError):book.reserve((p,),1,'journal',future)
+        with self.assertRaises(RuntimeError):book.reserve((p,),1,'journal')
+
 if __name__=='__main__':unittest.main()

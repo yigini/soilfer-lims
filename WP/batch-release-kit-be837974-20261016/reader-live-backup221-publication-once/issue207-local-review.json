@@ -1,0 +1,61 @@
+{
+  "head": "ad9d2660041c4db380d73a759871987d625f7404",
+  "uncommitted": true,
+  "sourceFileCount": 16,
+  "patchSha256": "f10be973b0a52d90fdb219e37dd8b9525ec3bf6eafc487bf38a6dfd82aaf3e82",
+  "focused": {
+    "exitCode": 0,
+    "suites": 5,
+    "tests": 176,
+    "seconds": 177.847,
+    "sourceChangesDuringRun": []
+  },
+  "client": {
+    "jsxCompiled": 2,
+    "locales": 5,
+    "focusedLintExitCode": 1,
+    "errors": 6,
+    "warnings": 16,
+    "diagnosticsIdenticalToAuditedHead": true,
+    "standardLintUsesDefaultJsDiscovery": true
+  },
+  "files": {
+    "patch": {
+      "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\audit-6218788735-local-1.patch",
+      "sha256": "f10be973b0a52d90fdb219e37dd8b9525ec3bf6eafc487bf38a6dfd82aaf3e82"
+    },
+    "inputs": {
+      "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\audit-6218788735-focused-1-inputs.json",
+      "sha256": "8edb4f38de412bf412eb820fd2d37bbc1644d2b41c89f16135851336a8e6b184"
+    },
+    "focusedLog": {
+      "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\audit-6218788735-focused-1.log",
+      "sha256": "f5d007052056444ca85546e6308ce8f33f8f08642bfeaccb85b17100ff5b35df"
+    },
+    "focusedInventory": {
+      "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\audit-6218788735-focused-1-inventory.json",
+      "sha256": "9c2704037d505920459a577f257d4fa24a4876b45ab636cc4aefafebb36b5634"
+    },
+    "clientLint": {
+      "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\audit-6218788735-client-focused-lint.json",
+      "sha256": "3d065bb7d1cd87131c2a224667d5dda7692051872abcd94cba61cb28a05ccbe2"
+    },
+    "clientLintComparison": {
+      "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\audit-6218788735-client-lint-comparison.json",
+      "sha256": "c52f8670d6433a51141cb1bd734adb0e8c3237b79bd9bf3168c219be328aa65c"
+    },
+    "clientSyntaxLocales": {
+      "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\audit-6218788735-client-syntax-locales.json",
+      "sha256": "1c2bf5a05bfbb751f6308eee5331b6baa0ea226d55c0d92de0356c48293978ee"
+    },
+    "descriptionDraft": {
+      "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\pr300-body-after-audit-draft.md",
+      "sha256": "622ece517412bb9d5c59d219a7d6baab933eec181fb05bb2fd3018b24458d99e"
+    },
+    "auditIdentity": {
+      "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\audit-6218788735-identity.json",
+      "sha256": "c5db4beb775befd7c3d860dd25cb150bd4bb122ae187c1c24bdef21d4c579f68"
+    }
+  },
+  "boundary": "No stage/commit/push/full server run/new CI/PR description publication/ready/audit/labels/merge; green38911857904 remains on ad9d; audit6218788735 failed independently."
+}

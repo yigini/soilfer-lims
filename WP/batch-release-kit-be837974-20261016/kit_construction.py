@@ -118,7 +118,7 @@ def construct(root=ROOT):
     predecessor=ExactPredecessor(observed,runner,reader,emergency,journal)
     spec=candidate_spec(observed,load_health(root/'tooling'))
     candidate=Candidate(spec,runner,reader,journal,lambda:exact_candidate_tmp(root))
-    prepare,read_completion,publish_permit=filesystem_controls(root)
+    prepare,read_completion,publish_permit=filesystem_controls(root,disk=disk)
     owned=OwnedCli(runner,reader,journal,lambda label,identity,owner:MemoryHistory(root,label,identity,owner),
         prepare,read_completion,publish_permit,stop_clis)
     cli=BudgetedCli(owned,disk)

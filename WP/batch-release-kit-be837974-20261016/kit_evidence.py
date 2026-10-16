@@ -66,10 +66,16 @@ class EvidenceLedger:
         self.used=dict.fromkeys(self.shares,0);self.paths=set();self.directories=set();self.open={};self.number=0
         self.active_window=None;self.window_number=0
 
-    def reserve(self,paths,maximum_bytes,category):
+    def reserve(self,paths,maximum_bytes,category,future_directory=None):
         require(category in self.shares and isinstance(paths,tuple) and len(paths) in (1,2),
             'Declared evidence category and one/two entry paths required')
         names=tuple(pathlib.Path(p) for p in paths)
+        if future_directory is not None:
+            future_directory=pathlib.Path(future_directory)
+            require(future_directory.is_absolute() and self.root in future_directory.parents and
+                future_directory.parent.is_dir() and not future_directory.exists() and not future_directory.is_symlink() and
+                all(p.parent==future_directory for p in names),
+                'Only one exact unused direct parent may be admitted before mkdir')
         relative=[];parents=set()
         for p in names:
             require(p.is_absolute() and self.root in p.parents,'Evidence file outside exact root')
@@ -77,7 +83,8 @@ class EvidenceLedger:
             require(0<len(parts)<=8 and all(x not in ('','.','..') for x in parts),'Bounded canonical evidence path required')
             for parent in (p.parent,*p.parent.parents):
                 if parent==self.root:break
-                require(not parent.is_symlink() and parent.is_dir(),'Evidence parent alias/missing directory refused')
+                require(not parent.is_symlink() and (parent.is_dir() or parent==future_directory),
+                    'Evidence parent alias/missing directory refused')
                 parents.add(parent.relative_to(self.root).as_posix())
             relative.append(p.relative_to(self.root).as_posix())
         require(len(set(names))==len(names) and all(n not in self.paths for n in relative) and
@@ -162,7 +169,7 @@ def bind_runtime(root):
     require(_runtime is None,'Shared runtime evidence ledger cannot resume or rebind')
     _runtime=EvidenceLedger(root);return _runtime
 
-def admit_evidence(path,byte_count,pending=False,reservation=False):
+def admit_evidence(path,byte_count,pending=False,reservation=False,future_directory=None):
     """Inert outside the explicitly bound runtime; local reader fixtures stay local.
 
     The standalone emergency hook intentionally has no bound runtime ledger:
@@ -176,6 +183,6 @@ def admit_evidence(path,byte_count,pending=False,reservation=False):
         'memory' if '-memory-' in name else
         'commands' if name.endswith(('.stdout','.stderr')) else 'journal')
     paths=(p,p.with_name(p.name+'.pending')) if pending else (p,)
-    ticket=_runtime.reserve(paths,byte_count,category)
+    ticket=_runtime.reserve(paths,byte_count,category,future_directory)
     if not reservation:_runtime.settle(ticket,byte_count)
     return _runtime,ticket

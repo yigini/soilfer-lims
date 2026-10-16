@@ -28,6 +28,17 @@ def copy_layout(sizes,directories):
         'declaredAllocationBytes':content+metadata,'physicalFilesystemClosureClaimed':False}
 
 
+def live_backup_limit(database_allocated):
+    """Reserve one complete output file; SQLite internal files stay unclosed."""
+    require(type(database_allocated) is int and database_allocated>0,
+        'Measured live-backup allocation required')
+    ceiling=(database_allocated*125+99)//100
+    maximum=min(MAX_CONTENT_BYTES,((ceiling-2*BLOCK)//BLOCK)*BLOCK)
+    require(maximum>=512,'Live-backup content and file entries do not fit')
+    return {'version':1,'maximumMainBytes':maximum,
+        'journalAndFilesystemClosureClaimed':False},copy_layout([maximum],0)
+
+
 def admit_copy(check,site,destination,sizes,directories):
     plan=copy_layout(sizes,directories)
     destination=pathlib.Path(destination)

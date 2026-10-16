@@ -140,7 +140,7 @@ def remote_programs(pins):
     definitions+=selected_definitions('kit_budget.py',[
         'MARGIN_PERCENT','MINIMUM_DB_EQUIVALENTS','ASSET_COPIES','SCHEMA_BYTES','FIXED_STARTUP','DB_COST',
         'RECOVERY_SCHEMA_BYTES','RECOVERY_FIXED','RECOVERY_DB_COPIES','EARLY_PREFIX_MAX_DB_COPIES','RECOVERY_EVIDENCE_SHARE',
-        'STAGES','SEAL_DIRECTORY_BYTES','CONTROLLER_COPY_SITES','CLI_SITE','TABLE','TOTAL_DB_COPIES','DB_EQUIVALENTS','TABLE_SHA','Budget'])
+        'STAGES','SEAL_DIRECTORY_BYTES','CONTROLLER_COPY_SITES','COPY_ADMISSION_SITES','CLI_SITE','TABLE','TOTAL_DB_COPIES','DB_EQUIVALENTS','TABLE_SHA','Budget'])
     definitions+=selected_definitions('kit_disk.py',['BOUND','hardware','free_gate','measure_inputs'])
     # Definitions need imports/helpers before their top-level derived constants.
     prefix=ast.parse('import os,pathlib,re,time,collections,math,json,hashlib\n'

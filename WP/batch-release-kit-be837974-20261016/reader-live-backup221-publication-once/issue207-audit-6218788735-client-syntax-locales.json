@@ -1,0 +1,39 @@
+{
+  "syntax": [
+    {
+      "file": "client/src/pages/Reception.jsx",
+      "compiled": true
+    },
+    {
+      "file": "client/src/components/projects/ProjectActionsModal.jsx",
+      "compiled": true
+    }
+  ],
+  "locales": [
+    {
+      "locale": "en",
+      "senderDeclaration": "Deliverer / submitter declaration (unauthenticated)",
+      "senderDeclarationPlaceholder": "Declared name or delivery confirmation"
+    },
+    {
+      "locale": "es",
+      "senderDeclaration": "Declaración del transportista / remitente (sin autenticar)",
+      "senderDeclarationPlaceholder": "Nombre declarado o confirmación de entrega"
+    },
+    {
+      "locale": "es-419",
+      "senderDeclaration": "Declaración del transportista / remitente (sin autenticar)",
+      "senderDeclarationPlaceholder": "Nombre declarado o confirmación de entrega"
+    },
+    {
+      "locale": "fr",
+      "senderDeclaration": "Déclaration du livreur / déposant (non authentifiée)",
+      "senderDeclarationPlaceholder": "Nom déclaré ou confirmation de livraison"
+    },
+    {
+      "locale": "pt",
+      "senderDeclaration": "Declaração do entregador / remetente (não autenticada)",
+      "senderDeclarationPlaceholder": "Nome declarado ou confirmação de entrega"
+    }
+  ]
+}

@@ -1,0 +1,1599 @@
+
+> server@1.9.0 test
+> jest --maxWorkers=1 --workerIdleMemoryLimit=512MB --testMatch **/tests/contracts/audit_5_3_custody_retention.test.js **/tests/contracts/reception_stage_e.test.js **/tests/contracts/reception_regression_stage_f.test.js **/tests/security/audit_1_2_state_writes.test.js **/tests/contracts/project_governance_retry_preview.test.js
+
+  console.log
+    [AUTH] Verifying token for ID: b6016457-8ba3-4492-af15-9195b10c1b9d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b6016457-8ba3-4492-af15-9195b10c1b9d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b6016457-8ba3-4492-af15-9195b10c1b9d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b6016457-8ba3-4492-af15-9195b10c1b9d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b6016457-8ba3-4492-af15-9195b10c1b9d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: cf1d1a4f-75b0-4764-a8d5-ea2e21dff212 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: cf1d1a4f-75b0-4764-a8d5-ea2e21dff212 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: cf1d1a4f-75b0-4764-a8d5-ea2e21dff212 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for cf67b708-f082-4a2c-a6c8-5fd5f0011fb6 by test_super_admin_global
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [AUTH] Verifying token for ID: b6016457-8ba3-4492-af15-9195b10c1b9d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b6016457-8ba3-4492-af15-9195b10c1b9d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b6016457-8ba3-4492-af15-9195b10c1b9d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b6016457-8ba3-4492-af15-9195b10c1b9d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b6016457-8ba3-4492-af15-9195b10c1b9d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b6016457-8ba3-4492-af15-9195b10c1b9d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User test_lab_manager_custodyeba26a4905744ebeaa74a89c23867e46 (Lab: CUSTODY-eba26a49-0574-4ebe-aa74-a89c23867e46) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at Object.ensureScope (services/workflowStateRules.js:63:26)
+      at assertScope (services/custodyService.js:61:11)
+      at services/custodyService.js:85:24
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at Object.inTransaction (services/workflowStateRules.js:189:60)
+      at controllers/custodyController.js:7:27
+
+  console.log
+    [AUTH] Verifying token for ID: b6016457-8ba3-4492-af15-9195b10c1b9d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b6016457-8ba3-4492-af15-9195b10c1b9d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b6016457-8ba3-4492-af15-9195b10c1b9d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b6016457-8ba3-4492-af15-9195b10c1b9d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [SCOPE_GUARD] ACCESS DENIED: User test_lab_manager_custodyeba26a4905744ebeaa74a89c23867e46 (Lab: CUSTODY-eba26a49-0574-4ebe-aa74-a89c23867e46) attempted to access entity outside scope.
+
+      392 |     if (!canAccessEntity(user, entity, options)) {
+      393 |         // Log the security event (could be enhanced to write to audit log)
+    > 394 |         console.warn(`[SCOPE_GUARD] ACCESS DENIED: User ${user.username} (Lab: ${user.labId}) attempted to access entity outside scope.`);
+          |                 ^
+      395 |
+      396 |         const error = new Error('Access Denied: You do not have permission to access this resource.');
+      397 |         error.statusCode = 403;
+
+      at Object.warn [as ensureScope] (utils/scopeGuard.js:394:17)
+      at ensureScope (controllers/receptionController.js:666:40)
+
+  console.error
+    [getConsignmentDetail] ERROR: Error: Access Denied: You do not have permission to access this resource.
+        at Object.ensureScope (C:\Users\yigin\.codex\worktrees\issue-207-custody\soilfer-lims\server\utils\scopeGuard.js:396:23)
+        at ensureScope (C:\Users\yigin\.codex\worktrees\issue-207-custody\soilfer-lims\server\controllers\receptionController.js:666:40)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5) {
+      statusCode: 403
+    }
+
+      668 |         return res.json({ success: true, consignment: require('../services/consignmentResponseService').consignmentResponse(await require('../services/custodyService').receiptView(prisma, consignment, 'consignment')) });
+      669 |     } catch (err) {
+    > 670 |         console.error('[getConsignmentDetail] ERROR:', err);
+          |                 ^
+      671 |         return res.status(err.statusCode || 500).json({ code: err.code || 'CONSIGNMENT_FETCH_ERROR', error: 'Failed to fetch consignment detail: ' + err.message });
+      672 |     }
+      673 | };
+
+      at error (controllers/receptionController.js:670:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b6016457-8ba3-4492-af15-9195b10c1b9d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b6016457-8ba3-4492-af15-9195b10c1b9d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b6016457-8ba3-4492-af15-9195b10c1b9d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b6016457-8ba3-4492-af15-9195b10c1b9d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b6016457-8ba3-4492-af15-9195b10c1b9d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b6016457-8ba3-4492-af15-9195b10c1b9d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 33e40879-9f48-48ca-865b-a50856334923 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.warn
+    [AUTH] RBAC Denied: User test_lab_technician_custodyeba26a4905744ebeaa74a89c23867e46 (LAB_TECHNICIAN) attempted ARCHIVE_SAMPLE. Allowed roles: ["SUPER_ADMIN","MASTER_USER","LAB_MANAGER"]
+
+      151 |
+      152 |         if (!allowedRoles.includes(currentRole)) {
+    > 153 |             console.warn(`[AUTH] RBAC Denied: User ${user.username} (${currentRole}) attempted ${currentKey}. Allowed roles: ${JSON.stringify(allowedRoles)}`);
+          |                     ^
+      154 |             const payload = { error: `Access denied. Role '${currentRole}' lacks permission '${currentKey}'.` };
+      155 |             if (['ARCHIVE_SAMPLE', 'DISPOSE_SAMPLE'].includes(currentKey)) payload.code = 'CUSTODY_FORBIDDEN';
+      156 |             if (currentKey === 'MANAGE_WORK_ATTEMPTS') {
+
+      at warn (middleware/authMiddleware.js:153:21)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at Route.dispatch (node_modules/router/lib/route.js:117:3)
+      at handle (node_modules/router/index.js:435:11)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at node_modules/router/index.js:295:15
+      at param (node_modules/router/index.js:600:14)
+      at param (node_modules/router/index.js:610:14)
+      at processParams (node_modules/router/index.js:664:3)
+      at next (node_modules/router/index.js:291:5)
+      at router.handle (node_modules/router/index.js:186:3)
+      at router (node_modules/router/index.js:60:12)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at next (middleware/authMiddleware.js:123:9)
+
+  console.log
+    [AUTH] Verifying token for ID: b6016457-8ba3-4492-af15-9195b10c1b9d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b6016457-8ba3-4492-af15-9195b10c1b9d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b6016457-8ba3-4492-af15-9195b10c1b9d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b6016457-8ba3-4492-af15-9195b10c1b9d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b6016457-8ba3-4492-af15-9195b10c1b9d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b6016457-8ba3-4492-af15-9195b10c1b9d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b6016457-8ba3-4492-af15-9195b10c1b9d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b6016457-8ba3-4492-af15-9195b10c1b9d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b6016457-8ba3-4492-af15-9195b10c1b9d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b6016457-8ba3-4492-af15-9195b10c1b9d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 54e7877b-c1df-4b05-a9b8-b12cca8b87d1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: 54e7877b-c1df-4b05-a9b8-b12cca8b87d1 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b6016457-8ba3-4492-af15-9195b10c1b9d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b6016457-8ba3-4492-af15-9195b10c1b9d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b6016457-8ba3-4492-af15-9195b10c1b9d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b6016457-8ba3-4492-af15-9195b10c1b9d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b6016457-8ba3-4492-af15-9195b10c1b9d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b6016457-8ba3-4492-af15-9195b10c1b9d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b6016457-8ba3-4492-af15-9195b10c1b9d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: b6016457-8ba3-4492-af15-9195b10c1b9d (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/audit_5_3_custody_retention.test.js (118.179 s)
+  √ move without a controlled location returns 400 with no event or sample mutation (332 ms)
+  √ malformed closure/custody fields and missing receiving-lab attribution return stable 4xx responses (130 ms)
+  √ receipt acknowledgement is authenticated, immutable, first-receipt based and does not write legacy signatures (113 ms)
+  √ sender declarations must be text and an invalid receipt rolls back the transition and audit (163 ms)
+  √ receipt acknowledgement refuses a missing assignedLab instead of using the lab sample code alias (7 ms)
+  √ physical receive and rejected intake assign the resolved receiving lab before acknowledging a null-assignedLab sample (419 ms)
+  √ moves use same-lab sample locations and preserve immutable container identity (148 ms)
+  √ consignment custody views use the first authenticated receipt and cannot be read across laboratories (149 ms)
+  √ publication retention reads registry/lab policy and optional project override; invalid override rolls back (73 ms)
+  √ container movement is ledger-derived and never rewrites its physical identity; outgoing custody requires a counterparty (413 ms)
+  √ project retention setting is owner-scoped, validates integers, preserves other policy settings and can inherit again (224 ms)
+  √ no-op project retention saves preserve null and exact existing config bytes without a policyConfig audit change (36 ms)
+  √ disposal queue contains only overdue same-lab material without canonical/legacy hold or open amendment (143 ms)
+  √ a rejected sample is disposed through the shared transition with a reason and cannot be moved again (61 ms)
+  √ expiry, holds and amendments are rechecked in the shared disposal transition (32 ms)
+  √ installer dry-run preserves bytes; apply preserves every legacy custody field and JSON; repeat is a no-op (53610 ms)
+  √ legacy receipt facts without a recorded date refuse dry-run and apply with no schema, event or byte mutations (51460 ms)
+  √ missing and empty recorded dates are invalid while zone-less recorded timestamps remain UTC (15 ms)
+  √ readiness preserves exact predecessor values while allowing only declared custody columns, defaults and receipt (3 ms)
+  √ readiness rejects changed old sample value (16 ms)
+  √ readiness rejects changed audit evidence (3 ms)
+  √ readiness rejects changed predecessor receipt (2 ms)
+  √ readiness rejects removed old row (2 ms)
+  √ readiness rejects undeclared Sample column (1 ms)
+  √ readiness rejects changed old column definition (3 ms)
+  √ readiness rejects invented historical retention (1 ms)
+  √ readiness rejects changed location default (2 ms)
+  √ readiness rejects changed old location (1 ms)
+  √ readiness rejects unexpected custody backfill (1 ms)
+  √ readiness rejects changed new receipt (1 ms)
+  √ readiness rejects new receipt for other original rows (1 ms)
+
+PASS tests/security/audit_1_2_state_writes.test.js (44.312 s)
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.workItem.deleteMany({where:{sampleId:id}})) (15 ms)
+  √ audit gap form is one scanner finding (tests/contracts/canary.test.js / prisma.sample.deleteMany({where:{id}})) (2 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / state.removeUnstartedWorkItems(prisma, {}, {actor,reason})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.project.create({data:{samples:{create:[{status:"APPROVED"}]}}})) (3 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / const nested={create:[{status:"APPROVED"}]};prisma.project.create({data:{samples:nested}})) (4 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / const key="workItems";const op="deleteMany";prisma.sample.update({data:{[key]:{[op]:{}}}})) (2 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.sample.create({data:{workItems:{connect:[{id:otherSampleItem}]}}})) (2 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / const relation={set:[{id}]};prisma.project.update({data:{samples:relation}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / const op="disconnect";prisma.sample.update({data:{workItems:{[op]:[{id}]}}})) (2 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.sample.update({where:{id},data:{workItems:{upsert:{create:{status:"ACCEPTED"},update:{status:"ACCEPTED"}}}}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.sample?.update({data:{status:"APPROVED"}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / prisma.sample.update?.({data:{status:"APPROVED"}})) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / db.prepare("UPDATE main.Sample SET status = ?")) (3 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / db.prepare("UPDATE OR ABORT main.WorkItem SET status = ?")) (2 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / db.exec("REPLACE INTO Sample (id,status) VALUES (1,2)")) (1 ms)
+  √ audit gap form is one scanner finding (controllers/canary.js / db.exec("INSERT OR REPLACE INTO main.WorkItem (id,status) VALUES (1,2)"))
+  √ the original rehearsal cannot reintroduce a direct Sample deletion (1 ms)
+  √ nested connect association has one actual authority finding (2 ms)
+  √ nested set association has one actual authority finding
+  √ nested disconnect association has one actual authority finding (1 ms)
+  √ the closed FK runner refuses unknown case (199 ms)
+  √ the closed FK runner refuses configured candidate (161 ms)
+  √ the #192 loader is independently byte-bound; a changed loader remains unresolved (8 ms)
+  √ the previous #191 release digest is refused; only the exact current loader and DDL are inspected (6 ms)
+  √ the #193 source resolver inspects byte-bound sql without granting workflow writer authority (4 ms)
+  √ the #193 source resolver inspects byte-bound schemaSql without granting workflow writer authority (3 ms)
+  √ the #193 source resolver inspects byte-bound guardsSql without granting workflow writer authority (2 ms)
+  √ the #206 resolver inspects only pinned sql and retains workflow write restrictions (4 ms)
+  √ the #206 resolver inspects only pinned schemaSql and retains workflow write restrictions (2 ms)
+  √ the #206 resolver inspects only pinned prismaSql and retains workflow write restrictions (2 ms)
+  √ the #206 resolver inspects only pinned counterSql and retains workflow write restrictions (2 ms)
+  √ the #206 resolver inspects only pinned guardsSql and retains workflow write restrictions (4 ms)
+  √ the #206 resolver refuses altered bytes in services/sampleContainerMigrationSource.js (1 ms)
+  √ the #206 resolver refuses altered bytes in prisma/migrations/20261013000100_sample_containers/migration.sql (3 ms)
+  √ the #207 resolver inspects only exact sql while retaining workflow writer restrictions (5 ms)
+  √ the #207 resolver inspects only exact schemaSql while retaining workflow writer restrictions (4 ms)
+  √ the #207 resolver inspects only exact guardsSql while retaining workflow writer restrictions (2 ms)
+  √ the #207 resolver refuses altered exact source services/custodyMigrationSource.js (2 ms)
+  √ the #207 resolver refuses altered exact source prisma/migrations/20261016000100_sample_custody_retention/migration.sql (2 ms)
+  √ legacy CLI launchers cannot import any fixture or test module (4 ms)
+  √ FK OFF is confined to the exact pinned synthetic branch, export and helper file (10 ms)
+  √ the #190 source resolver inspects the exact checked-in sql asset (2 ms)
+  √ the #190 source resolver inspects the exact checked-in schemaSql asset (1 ms)
+  √ the #190 source resolver inspects the exact checked-in guardsSql asset (1 ms)
+  √ the #190 historical factory cannot be imported by runtime or client: services/probe.js (1 ms)
+  √ the #190 historical factory cannot be imported by runtime or client: controllers/probe.js
+  √ the #190 historical factory cannot be imported by runtime or client: routes/probe.js (1 ms)
+  √ the #190 historical factory cannot be imported by runtime or client: scripts/probe.js
+  √ the #190 historical factory cannot be imported by runtime or client: ../client/src/probe.js (1 ms)
+  √ the #190 factory import allowlist is exact, including the named spectral refusal (3 ms)
+  √ the #191 owned result-set export is confined to seven inventoried test files without writer exemptions (17 ms)
+  √ the #190 composite positive fixture has exactly two named publication callers (8 ms)
+  √ positive attempt fixtures cannot be imported by runtime or client: services/probe.js
+  √ positive attempt fixtures cannot be imported by runtime or client: controllers/probe.js (1 ms)
+  √ positive attempt fixtures cannot be imported by runtime or client: routes/probe.js
+  √ positive attempt fixtures cannot be imported by runtime or client: scripts/probe.js (1 ms)
+  √ positive attempt fixtures cannot be imported by runtime or client: ../client/src/probe.js
+  √ a direct sample write in a #190 test remains a finding outside the factory (1 ms)
+  √ a direct workItem write in a #190 test remains a finding outside the factory
+  √ a direct result write in a #190 test remains a finding outside the factory (1 ms)
+  √ a changed #190 historical factory digest is a scanner finding (20 ms)
+  √ a changed #190 historical DDL digest is a scanner finding (32 ms)
+  √ an altered #190 loader or SQL digest restores a failing source finding: services/workAttemptMigrationSource.js (6 ms)
+  √ an altered #190 loader or SQL digest restores a failing source finding: prisma/migrations/20261008000100_work_attempt_contract/migration.sql (4 ms)
+  √ the unchanged duplicate-marker prerequisite loadWorkItemDuplicateMarkerSource is inspected without writer exemptions (4 ms)
+  √ the unchanged duplicate-marker prerequisite loadActiveWorkItemIndexSource is inspected without writer exemptions (3 ms)
+  √ an altered prerequisite source is a failing finding: loadWorkItemDuplicateMarkerSource / services/workItemUniquenessMigrationSource.js (2 ms)
+  √ an altered prerequisite source is a failing finding: loadActiveWorkItemIndexSource / services/workItemUniquenessMigrationSource.js (2 ms)
+  √ an altered prerequisite source is a failing finding: loadWorkItemDuplicateMarkerSource / prisma/migrations/20261004190000_add_workitem_duplicate_marker/migration.sql (2 ms)
+  √ an altered prerequisite source is a failing finding: loadActiveWorkItemIndexSource / prisma/migrations/20261004190100_unique_active_workitem/migration.sql (2 ms)
+  √ all handwritten runtime, script, seed and test Sample/WorkItem writes use central authorities (42495 ms)
+  √ embedded literal programs cannot hide workflow DML: const vm=require('vm');vm.runInNewContext("db.exec('REPLACE INTO main.Sample (id,status) VALUES (1,2)')") (1 ms)
+  √ embedded literal programs cannot hide workflow DML: const {spawnSync}=require('child_process');spawnSync('node',['-e',"db.exec('INSERT OR REPLACE INTO main.WorkItem (id,status) VALUES (1,2)')"]) (1 ms)
+  √ embedded literal programs cannot hide workflow DML: const vm=require('vm');vm.runInNewContext("db.exec('UPDATE OR ABORT main.Sample SET status = 1')") (1 ms)
+  √ embedded literal programs cannot hide workflow DML: import {execSync as launch} from 'node:child_process';launch("node -e `db.exec('DELETE FROM Sample')`") (2 ms)
+  √ embedded literal programs cannot hide workflow DML: import {writeFileSync as saveProgram} from 'node:fs';saveProgram('program.cjs',"db.exec('UPDATE WorkItem SET metadata = 1')") (1 ms)
+  √ embedded literal programs cannot hide workflow DML: const {spawnSync}=require('node:child_process');spawnSync('node',['-e',"db.exec('INSERT INTO Sample (id) VALUES (1)')"]) (1 ms)
+  √ embedded literal programs cannot hide workflow DML: const cp=require('child_process');const code=`db.prepare('UPDATE \"WorkItem\" SET result = 1')`;cp.spawn('node',['-e',code]) (1 ms)
+  √ embedded literal programs cannot hide workflow DML: const cp=require('child_process');cp.exec(`node -e \"db.exec('delete from \\\"Sample\\\"')\"`)
+  √ embedded literal programs cannot hide workflow DML: const fs=require('fs');fs.writeFileSync('program.cjs',`db.exec('UPDATE \"WorkItem\" SET status = 1')`)
+  √ embedded literal programs cannot hide workflow DML: const fs=require('fs');fs.writeFile('program.mjs','db.exec(`insert into [WorkItem] (id) values (1)`)') (2 ms)
+  √ embedded literal programs cannot hide workflow DML: new Function("db.exec('INSERT INTO \"Sample\" (id) VALUES (1)')")
+  √ embedded literal programs cannot hide workflow DML: const vm=require('vm');vm.runInNewContext("db.exec('DELETE FROM WorkItem')") (1 ms)
+  √ embedded literal programs cannot hide workflow DML: const vm=require('vm');new vm.Script("db.exec('UPDATE Sample SET metadata = 1')") (1 ms)
+  √ a new physical source file with embedded node-e Sample inserts fails the inventory (17 ms)
+  √ the sole deferral is byte-bound inventory; a one-byte change becomes a failing embedded writer (120 ms)
+  √ the source guard catches aliases, data variables and spreads: prisma.sample.create({data: {originalId:'fixture'}}) (1 ms)
+  √ the source guard catches aliases, data variables and spreads: const model=prisma.workItem; model.updateMany({data:{status:'ACCEPTED'}}) (1 ms)
+  √ the source guard catches aliases, data variables and spreads: const {sample: alias}=prisma; const data={status:'APPROVED'}; alias.update({data}) (1 ms)
+  √ the source guard catches aliases, data variables and spreads: const data={clientName:'safe'}; data.status='APPROVED'; prisma.sample.update({data})
+  √ the source guard catches aliases, data variables and spreads: const data={clientName:'safe'}; const key='status'; data[key]='APPROVED'; prisma.sample.update({data}) (1 ms)
+  √ the source guard catches aliases, data variables and spreads: const patch={status:'APPROVED'}; const data={...patch}; prisma.sample.update({data}) (1 ms)
+  √ the source guard catches aliases, data variables and spreads: const args={data:{status:'APPROVED'}}; prisma.sample.update(args)
+  √ the source guard catches aliases, data variables and spreads: const {update: write}=prisma.sample; write({data:{status:'APPROVED'}}) (1 ms)
+  √ the source guard catches aliases, data variables and spreads: const write=prisma.sample.update.bind(prisma.sample); write({data:{status:'APPROVED'}}) (1 ms)
+  √ the source guard catches aliases, data variables and spreads: const entity='workItem'; prisma[entity].upsert({create:{sampleId:'s'},update:{status:'ACCEPTED'}}) (1 ms)
+  √ the source guard catches aliases, data variables and spreads: const delegate=prisma[Math.random()?'sample':'workItem']; delegate.create({data:{}}) (1 ms)
+  √ the source guard catches aliases, data variables and spreads: function mutate(data) { prisma.sample.update({data:{...data}}) } (1 ms)
+  √ the source guard catches aliases, data variables and spreads: const sql='UPDATE Sample SET '+'status = ?'; db.prepare(sql).run('APPROVED') (1 ms)
+  √ the source guard catches aliases, data variables and spreads: const table='WorkItem'; db.exec(`INSERT INTO ${table} (id,status) VALUES ('x','ACCEPTED')`)
+  √ the source guard catches aliases, data variables and spreads: prisma.$executeRaw`UPDATE WorkItem SET status=${'ACCEPTED'}` (1 ms)
+  √ the source guard catches aliases, data variables and spreads: function rawWrite(statement) { db.exec(statement) } (1 ms)
+  √ the source guard catches aliases, data variables and spreads: const fields=['status = ?']; db.prepare(`UPDATE Sample SET ${fields.join(',')}`)
+  √ a real temporary non-allowlisted test file fails the source guard (4 ms)
+  √ a shadowed file reader cannot impersonate a known schema load (1 ms)
+  √ the two exceptions apply to the named export only, never to the caller or the rest of its file (3 ms)
+  √ runtime cannot import the test helper tests/helpers/legacyWorkflowDatabase.js (2 ms)
+  √ runtime cannot import the test helper tests/helpers/rejectedGuardWrite.js (2 ms)
+  √ metadata-only updates and other models are permitted, and guard disabling is always refused (30 ms)
+  √ native pragma calls cannot disable constraints: db.pragma('foreign_keys = OFF') (1 ms)
+  √ native pragma calls cannot disable constraints: const setting='recursive_triggers=0'; database.pragma(setting)
+  √ native pragma calls cannot disable constraints: const {pragma: configure}=db; configure('foreign_keys=0') (1 ms)
+  √ native pragma calls cannot disable constraints: const method='pragma'; client[method]('foreign_keys = OFF') (1 ms)
+  √ native pragma reads and enabled constraints remain permitted
+  √ loaded SQL is inspected without a caller exemption: UPDATE Consignment SET declaredExpectedCount = ? WHERE id = ? (4 ms)
+  √ loaded SQL is inspected without a caller exemption: UPDATE Sample SET status = ? WHERE id = ? (3 ms)
+  √ loaded SQL is inspected without a caller exemption: PRAGMA foreign_keys = OFF (3 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f4a49d57-484a-4e80-a54c-09df6cf46dcb (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f4a49d57-484a-4e80-a54c-09df6cf46dcb (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f4a49d57-484a-4e80-a54c-09df6cf46dcb (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f4a49d57-484a-4e80-a54c-09df6cf46dcb (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-MASS-FAIL-1792165438579 by test_sample_reception_labgtm
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: REG-MASS-FAIL-1792165438579 linked to Project: PROJ-REG-1792165437875
+
+      at log (services/intakePreparationService.js:255:21)
+
+  console.log
+    [AUTH] Verifying token for ID: f4a49d57-484a-4e80-a54c-09df6cf46dcb (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f4a49d57-484a-4e80-a54c-09df6cf46dcb (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-MASS-PASS-1792165438787 by test_sample_reception_labgtm
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: REG-MASS-PASS-1792165438787 linked to Project: PROJ-REG-1792165437875
+
+      at log (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample REG-MASS-PASS-1792165438787 with status RECEIVED
+
+      at log (services/intakePreparationService.js:747:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f4a49d57-484a-4e80-a54c-09df6cf46dcb (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f4a49d57-484a-4e80-a54c-09df6cf46dcb (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f4a49d57-484a-4e80-a54c-09df6cf46dcb (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f4a49d57-484a-4e80-a54c-09df6cf46dcb (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f4a49d57-484a-4e80-a54c-09df6cf46dcb (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f4a49d57-484a-4e80-a54c-09df6cf46dcb (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f4a49d57-484a-4e80-a54c-09df6cf46dcb (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f4a49d57-484a-4e80-a54c-09df6cf46dcb (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-UNCERT-1792165439044 by test_sample_reception_labgtm
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: REG-UNCERT-1792165439044 linked to Project: PROJ-REG-1792165437875
+
+      at log (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample REG-UNCERT-1792165439044 with status RECEIVED
+
+      at log (services/intakePreparationService.js:747:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f4a49d57-484a-4e80-a54c-09df6cf46dcb (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f4a49d57-484a-4e80-a54c-09df6cf46dcb (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-CONF-RESIST-1792165439141 by test_sample_reception_labgtm
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: REG-CONF-RESIST-1792165439141 linked to Project: PROJ-REG-1792165437875
+
+      at log (services/intakePreparationService.js:255:21)
+
+  console.warn
+    [INTAKE] Resisting unevidenced HIGH confidence for method DESK_PASTE (downgraded to MEDIUM)
+
+      597 |             let finalConfidence = samplingDetails.locationConfidence || maxConfidence;
+      598 |             if (finalConfidence === 'HIGH' && maxConfidence !== 'HIGH') {
+    > 599 |                 console.warn(`[INTAKE] Resisting unevidenced HIGH confidence for method ${captureMethod} (downgraded to ${maxConfidence})`);
+          |                         ^
+      600 |                 finalConfidence = maxConfidence;
+      601 |             }
+      602 |
+
+      at warn (services/intakePreparationService.js:599:25)
+      at acceptSample (services/intakeService.js:86:34)
+      at Proxy._transactionWithCallback (prisma_client/runtime/client.js:79:4390)
+      at exports.processIntake (controllers/receptionController.js:27:24)
+
+  console.log
+    [INTAKE] Updating sample REG-CONF-RESIST-1792165439141 with status RECEIVED
+
+      at log (services/intakePreparationService.js:747:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f4a49d57-484a-4e80-a54c-09df6cf46dcb (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f4a49d57-484a-4e80-a54c-09df6cf46dcb (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f4a49d57-484a-4e80-a54c-09df6cf46dcb (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f4a49d57-484a-4e80-a54c-09df6cf46dcb (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1792165439523-01 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: 6611558f-743f-4a4e-8452-baf24d9a3093 linked to Project: PROJ-REG-1792165437875
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample 6611558f-743f-4a4e-8452-baf24d9a3093 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:747:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1792165439523-02 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: 6efe7eab-6e2d-4943-b456-41a8904e16a9 linked to Project: PROJ-REG-1792165437875
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample 6efe7eab-6e2d-4943-b456-41a8904e16a9 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:747:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1792165439523-03 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: 06ef443f-3bd8-4dc7-a255-297b0479bd50 linked to Project: PROJ-REG-1792165437875
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample 06ef443f-3bd8-4dc7-a255-297b0479bd50 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:747:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1792165439523-04 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: da1494f4-2fd2-4df7-8417-9f887439cd8f linked to Project: PROJ-REG-1792165437875
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample da1494f4-2fd2-4df7-8417-9f887439cd8f with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:747:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1792165439523-05 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: fe7f4172-0995-4c83-ae21-f0369c04d258 linked to Project: PROJ-REG-1792165437875
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample fe7f4172-0995-4c83-ae21-f0369c04d258 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:747:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1792165439523-06 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: 75bd2237-e545-424b-8e3f-37ff8df47ada linked to Project: PROJ-REG-1792165437875
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample 75bd2237-e545-424b-8e3f-37ff8df47ada with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:747:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1792165439523-07 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: 10d2d5e3-ac06-4498-8a0e-2e8af1bb20a1 linked to Project: PROJ-REG-1792165437875
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample 10d2d5e3-ac06-4498-8a0e-2e8af1bb20a1 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:747:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1792165439523-08 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: f22d73d6-4003-42a5-b6fc-f1f6185ce984 linked to Project: PROJ-REG-1792165437875
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample f22d73d6-4003-42a5-b6fc-f1f6185ce984 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:747:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1792165439523-09 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: 4643b30e-2f20-4cd2-b8d0-ce7233fef7d8 linked to Project: PROJ-REG-1792165437875
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample 4643b30e-2f20-4cd2-b8d0-ce7233fef7d8 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:747:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1792165439523-10 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: d379cc74-bd43-4de8-ad39-c0a40eaf75da linked to Project: PROJ-REG-1792165437875
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample d379cc74-bd43-4de8-ad39-c0a40eaf75da with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:747:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1792165439523-11 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: 8a44e0d5-61aa-4312-94a8-768f6c8c6835 linked to Project: PROJ-REG-1792165437875
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample 8a44e0d5-61aa-4312-94a8-768f6c8c6835 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:747:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1792165439523-12 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: ae40d419-eac1-4c44-8891-ca54091fa0b6 linked to Project: PROJ-REG-1792165437875
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample ae40d419-eac1-4c44-8891-ca54091fa0b6 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:747:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1792165439523-13 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: 7e164597-4b02-45bd-b96f-d30e52774384 linked to Project: PROJ-REG-1792165437875
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1792165439523-14 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: 76681e0d-4baf-44be-a274-37ac89aa0e64 linked to Project: PROJ-REG-1792165437875
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample 76681e0d-4baf-44be-a274-37ac89aa0e64 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:747:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1792165439523-15 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: b2d93965-02ba-4e44-8a89-c31f868c9125 linked to Project: PROJ-REG-1792165437875
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample b2d93965-02ba-4e44-8a89-c31f868c9125 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:747:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1792165439523-16 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: ce5a805b-a644-416e-a4f6-396123259f7e linked to Project: PROJ-REG-1792165437875
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample ce5a805b-a644-416e-a4f6-396123259f7e with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:747:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1792165439523-17 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: 814140b0-43a1-4e6e-b79d-9e54d0a6ec4f linked to Project: PROJ-REG-1792165437875
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample 814140b0-43a1-4e6e-b79d-9e54d0a6ec4f with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:747:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1792165439523-18 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: ca6450ad-7703-4a17-992f-43936d4d208a linked to Project: PROJ-REG-1792165437875
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample ca6450ad-7703-4a17-992f-43936d4d208a with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:747:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1792165439523-19 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: 507a05d3-6b53-4fc4-a819-1bca1daa8bd6 linked to Project: PROJ-REG-1792165437875
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample 507a05d3-6b53-4fc4-a819-1bca1daa8bd6 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:747:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1792165439523-20 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: a3cbcc7c-3fd7-4c7b-94e1-3eebc8fc4e1e linked to Project: PROJ-REG-1792165437875
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample a3cbcc7c-3fd7-4c7b-94e1-3eebc8fc4e1e with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:747:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1792165439523-21 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: 91cb999f-e6f3-4346-af4b-cdeacb13baf8 linked to Project: PROJ-REG-1792165437875
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample 91cb999f-e6f3-4346-af4b-cdeacb13baf8 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:747:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1792165439523-22 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: 06a6c36e-5206-4fb1-986d-55b2634a1cde linked to Project: PROJ-REG-1792165437875
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample 06a6c36e-5206-4fb1-986d-55b2634a1cde with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:747:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1792165439523-23 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: 661087f5-54b3-4552-8283-c704642c3bff linked to Project: PROJ-REG-1792165437875
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample 661087f5-54b3-4552-8283-c704642c3bff with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:747:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1792165439523-24 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: 24d3ecbd-cae5-45f2-bf1e-59d2cfeff62e linked to Project: PROJ-REG-1792165437875
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample 24d3ecbd-cae5-45f2-bf1e-59d2cfeff62e with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:747:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1792165439523-25 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: e84e5abb-0a88-48ef-aa3a-9510f7bf078d linked to Project: PROJ-REG-1792165437875
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample e84e5abb-0a88-48ef-aa3a-9510f7bf078d with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:747:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1792165439523-26 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: 250ea805-cdb1-4e7f-8561-3172a1cdb819 linked to Project: PROJ-REG-1792165437875
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample 250ea805-cdb1-4e7f-8561-3172a1cdb819 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:747:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1792165439523-27 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: 0d561f3e-2929-4406-9d3c-7500a65bd3e1 linked to Project: PROJ-REG-1792165437875
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1792165439523-28 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: 72ee079b-60cc-4f0c-92e1-5e46f198db78 linked to Project: PROJ-REG-1792165437875
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample 72ee079b-60cc-4f0c-92e1-5e46f198db78 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:747:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1792165439523-29 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: b0a13869-e716-4c8d-8921-86aadc5fed6f linked to Project: PROJ-REG-1792165437875
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample b0a13869-e716-4c8d-8921-86aadc5fed6f with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:747:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1792165439523-30 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: d5dddd04-ae1c-4862-a8db-5e6ddb7515ef linked to Project: PROJ-REG-1792165437875
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample d5dddd04-ae1c-4862-a8db-5e6ddb7515ef with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:747:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1792165439523-31 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: b4a06e60-a025-4f05-91ac-dfb8dfd7a26f linked to Project: PROJ-REG-1792165437875
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample b4a06e60-a025-4f05-91ac-dfb8dfd7a26f with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:747:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1792165439523-32 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: 0474b5a5-d7fc-4674-b8bf-4d86f7a0f870 linked to Project: PROJ-REG-1792165437875
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample 0474b5a5-d7fc-4674-b8bf-4d86f7a0f870 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:747:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1792165439523-33 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: 2233d638-ba8b-471a-9856-3c0d19c701f5 linked to Project: PROJ-REG-1792165437875
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample 2233d638-ba8b-471a-9856-3c0d19c701f5 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:747:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1792165439523-34 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: ed00431d-c0c2-4925-9b0a-71db04a92552 linked to Project: PROJ-REG-1792165437875
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample ed00431d-c0c2-4925-9b0a-71db04a92552 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:747:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1792165439523-35 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: af8360db-5ba2-4592-8fae-6d23cbe0a20e linked to Project: PROJ-REG-1792165437875
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample af8360db-5ba2-4592-8fae-6d23cbe0a20e with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:747:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1792165439523-36 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: 5f90dc33-1b94-40e7-9818-6f50343438b8 linked to Project: PROJ-REG-1792165437875
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample 5f90dc33-1b94-40e7-9818-6f50343438b8 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:747:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1792165439523-37 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: 06926094-4f12-4217-a6a5-4f69ff2b6625 linked to Project: PROJ-REG-1792165437875
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample 06926094-4f12-4217-a6a5-4f69ff2b6625 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:747:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1792165439523-38 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: d78ba7ff-4a46-4f13-8166-297b05fc753d linked to Project: PROJ-REG-1792165437875
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample d78ba7ff-4a46-4f13-8166-297b05fc753d with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:747:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1792165439523-39 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: 077f4599-f585-442f-94ce-41c7d97b30e1 linked to Project: PROJ-REG-1792165437875
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample 077f4599-f585-442f-94ce-41c7d97b30e1 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:747:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-40B-1792165439523-40 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: 87e5a1e7-9cd3-4921-b41f-a2ae58bf3fb7 linked to Project: PROJ-REG-1792165437875
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample 87e5a1e7-9cd3-4921-b41f-a2ae58bf3fb7 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:747:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f4a49d57-484a-4e80-a54c-09df6cf46dcb (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f4a49d57-484a-4e80-a54c-09df6cf46dcb (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-DISTINCT-REJ-1792165441275 by test_sample_reception_labgtm
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: REG-DISTINCT-REJ-1792165441275 linked to Project: PROJ-REG-1792165437875
+
+      at log (services/intakePreparationService.js:255:21)
+
+  console.log
+    [AUTH] Verifying token for ID: f4a49d57-484a-4e80-a54c-09df6cf46dcb (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] searchExpectedSamples: START. q="REG-DISTINCT-REJ-1792165441275", projectId="undefined", user="test_sample_reception_labgtm"
+
+      at log (controllers/sampleController.js:102:13)
+
+  console.log
+    [DEBUG] Building scope for user: test_sample_reception_labgtm
+
+      at log (controllers/sampleController.js:114:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f4a49d57-484a-4e80-a54c-09df6cf46dcb (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f4a49d57-484a-4e80-a54c-09df6cf46dcb (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: f4a49d57-484a-4e80-a54c-09df6cf46dcb (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for REG-CUSTODY-1792165441396 by test_sample_reception_labgtm
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: REG-CUSTODY-1792165441396 linked to Project: PROJ-REG-1792165437875
+
+      at log (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample REG-CUSTODY-1792165441396 with status RECEIVED
+
+      at log (services/intakePreparationService.js:747:17)
+
+  console.error
+    [afterAll cleanup] Error: 
+    Invalid `prisma.consignment.deleteMany()` invocation in
+    C:\Users\yigin\.codex\worktrees\issue-207-custody\soilfer-lims\server\tests\contracts\reception_regression_stage_f.test.js:73:42
+    
+      70     }), select: { id: true } })).map(row => row.id), { single: false });
+      71 }
+      72 if (trackedConsignmentId) {
+    → 73     await prisma.consignment.deleteMany(
+    Foreign key constraint violated on the foreign key
+
+      82 |             });
+      83 |         } catch (err) {
+    > 84 |             console.error('[afterAll cleanup] Error:', err.message);
+         |                     ^
+      85 |         }
+      86 |     });
+      87 |
+
+      at Object.error (tests/contracts/reception_regression_stage_f.test.js:84:21)
+
+PASS tests/contracts/reception_regression_stage_f.test.js (11.004 s)
+  Stage F: Reception Contract and End-to-End Regression Suite (RC-20)
+    1. Mass Sufficiency and Deficit Acknowledgement (RC-01)
+      √ calculates mass requirement accurately across catalogue + 100g retention (134 ms)
+      √ rejects under-mass sample without explicit acknowledgement (207 ms)
+      √ accepts under-mass sample WITH explicit acknowledgement and records override (220 ms)
+    2. Three Coordinate Formats Conversion (RC-05)
+      √ parses Decimal Degrees accurately (2 ms)
+      √ parses Degrees Minutes Seconds (DMS) accurately into Decimal Degrees (2 ms)
+      √ parses UTM with Zone & Hemisphere accurately into WGS84 Decimal Degrees (1 ms)
+      √ POST /api/reception/parse-coordinates exposes all three formats over API (32 ms)
+    3. Positional Uncertainty Defaults & Composite Depth (RC-06, RC-11)
+      √ persists uncertainty, composite radius, and numeric depths (95 ms)
+    4. Derived Location Confidence Resisting Unevidenced HIGH (RC-07)
+      √ derives HIGH confidence ONLY for evidenced GPS with tight accuracy
+      √ resists HIGH confidence for manual desk entry even if claimed tight uncertainty (1 ms)
+      √ downgrades intake claiming HIGH confidence on DESK_PASTE method (62 ms)
+    5. Offline Reverse Geocoding Fallback (RC-08)
+      √ falls back to offline administrative boundaries safely (319 ms)
+    6. 40-Sample Consignment Intake with 2 Exceptions (RC-12, RC-13, RC-14)
+      √ processes 40-sample atomic batch with 2 rejected exceptions resulting in PARTIAL status (1752 ms)
+    7. Rejected State Distinctness (RC-19)
+      √ ensures rejected sample has status RECEIVED_REJECTED in database (4 ms)
+      √ strictly excludes rejected sample from GET /api/samples/expected backlog (62 ms)
+      √ returns rejected sample under status=RECEIVED_REJECTED query (23 ms)
+      √ enforces workflow transition bounds: permits DISPOSED, rejects PROCESSING
+    8. Custody Timestamps and Counter-Signature (RC-19)
+      √ records physical handover separate from system entry with authenticated officer acknowledgement (35 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ee429f5c-b807-4d69-80cb-20b7ae7f0e5f (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ee429f5c-b807-4d69-80cb-20b7ae7f0e5f (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for TEST-E-REJ-1792165442280 by test_sample_reception_labgtm
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [AUTH] Verifying token for ID: ee429f5c-b807-4d69-80cb-20b7ae7f0e5f (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [DEBUG] searchExpectedSamples: START. q="TEST-E-REJ-1792165442280", projectId="PROJ-E-1792165442280", user="test_sample_reception_labgtm"
+
+      at log (controllers/sampleController.js:102:13)
+
+  console.log
+    [DEBUG] Building scope for user: test_sample_reception_labgtm
+
+      at log (controllers/sampleController.js:114:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ee429f5c-b807-4d69-80cb-20b7ae7f0e5f (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ee429f5c-b807-4d69-80cb-20b7ae7f0e5f (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for TEST-E-ACC-1792165442280 by test_sample_reception_labgtm
+
+      at log (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Updating sample TEST-E-ACC-1792165442280 with status RECEIVED
+
+      at log (services/intakePreparationService.js:747:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ee429f5c-b807-4d69-80cb-20b7ae7f0e5f (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: ee429f5c-b807-4d69-80cb-20b7ae7f0e5f (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [INTAKE] Processing intake for TEST-E-CSG1-1792165442862 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: 78fb9e65-e010-43fc-804a-dae98811eca3 linked to Project: PROJ-E-1792165442280
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.log
+    [INTAKE] Updating sample 78fb9e65-e010-43fc-804a-dae98811eca3 with status RECEIVED
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:747:17)
+
+  console.log
+    [INTAKE] Processing intake for TEST-E-CSG2-1792165442862 by test_sample_reception_labgtm
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:56:13)
+
+  console.log
+    [INTAKE] Creating new sample: 5fb8ac46-595a-4362-be8a-ec6540142452 linked to Project: PROJ-E-1792165442280
+
+      at Object.log [as prepareIntake] (services/intakePreparationService.js:255:21)
+
+  console.error
+    Error cleaning up Stage E test artifacts: PrismaClientKnownRequestError: 
+    Invalid `prisma.consignment.deleteMany()` invocation in
+    C:\Users\yigin\.codex\worktrees\issue-207-custody\soilfer-lims\server\tests\contracts\reception_stage_e.test.js:65:42
+    
+      62     await prisma.auditLog.deleteMany({ where: { sampleId: s.id } });
+      63 }
+      64 await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { consignmentId: createdConsignmentId } }), select: { id: true } })).map(row => row.id), { single: false });
+    → 65 await prisma.consignment.deleteMany(
+    Foreign key constraint violated on the foreign key
+        at zr.handleRequestError (C:\Users\yigin\.codex\worktrees\issue-207-custody\soilfer-lims\server\prisma_client\runtime\client.js:69:8172)
+        at zr.handleRequestError [as handleAndLogRequestError] (C:\Users\yigin\.codex\worktrees\issue-207-custody\soilfer-lims\server\prisma_client\runtime\client.js:69:7467)
+        at zr.handleAndLogRequestError [as request] (C:\Users\yigin\.codex\worktrees\issue-207-custody\soilfer-lims\server\prisma_client\runtime\client.js:69:7174)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at a (C:\Users\yigin\.codex\worktrees\issue-207-custody\soilfer-lims\server\prisma_client\runtime\client.js:79:5816)
+        at Object.<anonymous> (C:\Users\yigin\.codex\worktrees\issue-207-custody\soilfer-lims\server\tests\contracts\reception_stage_e.test.js:65:17) {
+      code: 'P2003',
+      meta: {
+        modelName: 'Consignment',
+        driverAdapterError: DriverAdapterError: ForeignKeyConstraintViolation
+            at PrismaBetterSqlite3Adapter.onError (C:\Users\yigin\.codex\worktrees\issue-207-custody\soilfer-lims\server\node_modules\@prisma\adapter-better-sqlite3\dist\index.js:568:11)
+            at PrismaBetterSqlite3Adapter.executeIO (C:\Users\yigin\.codex\worktrees\issue-207-custody\soilfer-lims\server\node_modules\@prisma\adapter-better-sqlite3\dist\index.js:535:12)
+            at PrismaBetterSqlite3Adapter.executeRaw (C:\Users\yigin\.codex\worktrees\issue-207-custody\soilfer-lims\server\node_modules\@prisma\adapter-better-sqlite3\dist\index.js:521:24)
+            at executeRaw (C:\Users\yigin\.codex\worktrees\issue-207-custody\soilfer-lims\server\prisma_client\runtime\client.js:15:43338)
+            at o (C:\Users\yigin\.codex\worktrees\issue-207-custody\soilfer-lims\server\prisma_client\runtime\client.js:15:25753)
+            at e.xr (C:\Users\yigin\.codex\worktrees\issue-207-custody\soilfer-lims\server\prisma_client\runtime\client.js:15:46795)
+            at e.interpretNode (C:\Users\yigin\.codex\worktrees\issue-207-custody\soilfer-lims\server\prisma_client\runtime\client.js:15:43307)
+            at e.interpretNode (C:\Users\yigin\.codex\worktrees\issue-207-custody\soilfer-lims\server\prisma_client\runtime\client.js:15:45162)
+            at e.interpretNode [as run] (C:\Users\yigin\.codex\worktrees\issue-207-custody\soilfer-lims\server\prisma_client\runtime\client.js:15:42253)
+            at e.run [as execute] (C:\Users\yigin\.codex\worktrees\issue-207-custody\soilfer-lims\server\prisma_client\runtime\client.js:61:829)
+            at qt.execute (C:\Users\yigin\.codex\worktrees\issue-207-custody\soilfer-lims\server\prisma_client\runtime\client.js:62:2335)
+            at processTicksAndRejections (node:internal/process/task_queues:103:5)
+            at Object.singleLoader (C:\Users\yigin\.codex\worktrees\issue-207-custody\soilfer-lims\server\prisma_client\runtime\client.js:69:6569)
+            at zr.request (C:\Users\yigin\.codex\worktrees\issue-207-custody\soilfer-lims\server\prisma_client\runtime\client.js:69:7061)
+            at a (C:\Users\yigin\.codex\worktrees\issue-207-custody\soilfer-lims\server\prisma_client\runtime\client.js:79:5816)
+            at Object.<anonymous> (C:\Users\yigin\.codex\worktrees\issue-207-custody\soilfer-lims\server\tests\contracts\reception_stage_e.test.js:65:17) {
+          cause: [Object]
+        }
+      },
+      clientVersion: '7.10.0'
+    }
+
+      70 |             });
+      71 |         } catch (e) {
+    > 72 |             console.error('Error cleaning up Stage E test artifacts:', e);
+         |                     ^
+      73 |         }
+      74 |     });
+      75 |
+
+      at Object.error (tests/contracts/reception_stage_e.test.js:72:21)
+
+PASS tests/contracts/reception_stage_e.test.js
+  Stage E: Distinct RECEIVED_REJECTED State & Immutable Chain of Custody (RC-19)
+    √ RC-19: Intake rejection transitions sample to RECEIVED_REJECTED (not EXPECTED) and excludes it from expected backlog (124 ms)
+    √ RC-19: Accepted intake separates custody handover timestamp from system entry and immutably records authenticated officer acknowledgement (229 ms)
+    √ RC-19: Consignment batch registers mixed accepted and RECEIVED_REJECTED with structured chain of custody (135 ms)
+    √ RC-19: State machine permits valid RECEIVED_REJECTED transitions and rejects illegal legacy states (1 ms)
+
+  console.log
+    [SCHEDULER] Background schedulers suppressed (writer hold active)
+
+      at log (app.js:140:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-owner-GOV-1792165443755 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-owner-GOV-1792165443755 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-owner-GOV-1792165443755 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-owner-GOV-1792165443755 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-owner-GOV-1792165443755 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-owner-GOV-1792165443755 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-owner-GOV-1792165443755 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-owner-GOV-1792165443755 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-owner-GOV-1792165443755 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-owner-GOV-1792165443755 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-owner-GOV-1792165443755 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-owner-GOV-1792165443755 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-owner-GOV-1792165443755 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-owner-GOV-1792165443755 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-owner-GOV-1792165443755 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+  console.log
+    [AUTH] Verifying token for ID: usr-owner-GOV-1792165443755 (Type: string)
+
+      at log (middleware/authMiddleware.js:43:17)
+
+PASS tests/contracts/project_governance_retry_preview.test.js
+  Project Governance Retry Recovery & Preview Contracts (C01, C02)
+    C01: Real UI Retry Recovery & Receipt Resolution
+      √ first execution commits, retry with same key returns cached receipt with exactly 1 audit & 1 receipt (92 ms)
+      √ changed form payload reusing a pending/completed key is rejected with 409 collision (24 ms)
+      √ stale revision on PUT returns 409 STALE_REVISION (9 ms)
+      √ archiveProject supports idempotency replay, receipt lookup, and rejects stale revision (68 ms)
+    C02: Preview/Commit Agreement & Stale Revision Binding
+      √ mixed manifest (existing + new) signs validSampleIds and commits valid rows cleanly (52 ms)
+      √ stale preview token is rejected with 409 PREVIEW_STALE_REVISION even when fresh If-Match header is passed (74 ms)
+
+Test Suites: 5 passed, 5 total
+Tests:       176 passed, 176 total
+Snapshots:   0 total
+Time:        177.847 s
+Ran all test suites.

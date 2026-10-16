@@ -46,7 +46,7 @@ class IntegratedBudget(unittest.TestCase):
         disk.begin('stopped-backup')
         with self.assertRaises(RuntimeError):wrapped.run(cli_spec('canonical-policy',DATA_MOUNT))
         self.assertFalse(cli.calls)
-        for site in ('seal-directory','triple','triple','backup','assets'):budget.claim(site);budget.copy_ceiling(site)
+        for site in ('seal-directory','triple','triple','reader-index','backup','assets'):budget.claim(site);budget.copy_ceiling(site)
         disk.finish('stopped-backup')
         class Installs:
             def canonical_policy(self):return wrapped.run(cli_spec('canonical-policy',DATA_MOUNT))
@@ -57,7 +57,7 @@ class IntegratedBudget(unittest.TestCase):
                 budget.claim('clone');budget.copy_ceiling('clone');return wrapped.run(cli_spec(issue+'-dry',DATA_MOUNT))
             def apply_once(self,issue):return wrapped.run(cli_spec(issue+'-apply',DATA_MOUNT))
             def preserve(self,issue):
-                for site in ('seal-directory','triple','triple','backup'):budget.claim(site);budget.copy_ceiling(site)
+                for site in ('seal-directory','triple','triple','reader-index','backup'):budget.claim(site);budget.copy_ceiling(site)
                 return {'retained':True}
             def repeat(self,issue):return wrapped.run(cli_spec(issue+'-repeat',DATA_MOUNT))
         ops.installs=Installs();ops.require_canonical_policy_noop()
