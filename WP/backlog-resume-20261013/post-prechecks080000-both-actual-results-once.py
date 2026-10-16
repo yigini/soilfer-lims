@@ -1,0 +1,63 @@
+"""One concrete two-check result review, including source PASS ACK only here."""
+import sys,json,pathlib,subprocess,datetime
+from prechecks6210209468_evidence import *
+sys.dont_write_bytecode=True;sys.path.insert(0,str(B));import diagnostic_contract as c,prepare_diagnostic as prep
+D=B/'actual-two-check-result-review-once';V=B/'both-prechecks080000-closed-complete-result-publication-once';HEAD='9899f651bceb542931a9ca3bf3aaa6cab11756d2';MARKER='prechecks080000-c1-pass-c2-mount-order-refusal-2ff6dd8d'
+assert not D.exists() and git('rev-parse','HEAD').decode().strip()==HEAD and not git('diff','--cached','--name-only').strip()
+verify_publication(HEAD,(V/'publication-index.json').relative_to(W).as_posix(),157)
+validation=json.loads((V/'independent-both-closed-validation.json').read_bytes());assert validation['status']=='ACTUAL_TWO_PRECHECK_RESULTS_C1_PASS_C2_FAILED_AWAITING_CLAUDIO_ACCEPTANCE'
+files,index=prep.source_index('a6d8c5d5085bbe07cb649f858ec00acf0e3f8ee1');assert len(files)==26
+D.mkdir()
+captures=[]
+def gh(path,paginated=False):
+    args=['gh','api']+(['--paginate','--slurp'] if paginated else [])+[path];r=subprocess.run(args,capture_output=True,timeout=120)
+    n='api-original-'+str(len(captures)).zfill(2);save(D,n+'.json',r.stdout);save(D,n+'-stderr.log',r.stderr);save(D,n+'-exit.json',canonical({'returnCode':r.returncode})+b'\n');captures.append({'file':n+'.json','argv':args,'length':len(r.stdout),'sha256':sha(r.stdout)});assert r.returncode==0
+    return json.loads(r.stdout)
+review=gh('repos/yigini/soilfer-lims/issues/comments/6210209468');c.approval(review,index)
+comments=[v for page in gh('repos/yigini/soilfer-lims/issues/162/comments?per_page=100',True) for v in page];assert not any(MARKER in v['body'] for v in comments)
+prep.later_comments({'sourceComments':comments},review,index)
+main=gh('repos/yigini/soilfer-lims/commits/main');ci=gh('repos/yigini/soilfer-lims/actions/runs/38772398721');issue=gh('repos/yigini/soilfer-lims/issues/191')
+assert main['sha']=='be8379745bdfae52ce46496ff26514dc7d729640' and ci['head_sha']==main['sha'] and ci['status']=='completed' and ci['conclusion']=='success' and ci['run_attempt']==1 and issue['state']=='closed'
+def link(path):return 'https://github.com/yigini/soilfer-lims/blob/'+HEAD+'/'+path
+vp=V.relative_to(W).as_posix();op=c.REL+'hook080000-first-readonly-once/public-originals/';cp=c.REL+'comparator080000-second-readonly-once/public-originals/'
+body=f'''@claude
+
+<!-- {MARKER} -->
+
+Both one-run prechecks have actually closed, sequentially, on your exact source approval [6210209468](https://github.com/yigini/soilfer-lims/issues/162#issuecomment-6210209468). **C1 PASS; C2 FAILED. This is not release qualified.** This result is also my single acknowledgement of that source PASS; no separate ACK or duplicate native follow-up was sent. The pending 07:12:31 source fallback was cancelled when your actual answer arrived.
+
+Please review and accept both results as reported, and give separately audited forward direction for the demonstrated mount-array-order refusal. There is no new remedy/attempt graph or source review to approve yet. I will not patch or retry the consumed graph/root/units. Any distinct attempt graph must bind your actual acceptance, receive its own exact source review, and pass fresh R4 + 10 GB and unused-root/unit gates for one attempt.
+
+**Complete retained evidence**
+
+- [158-file raw Git-OID/SHA256/length-verified closed publication]({link(vp+'/publication-index.json')}) at `{HEAD}`.
+- [Independent two-result validation]({link(vp+'/independent-both-closed-validation.json')}). All 26 source/data bindings remain exact `a6d8c5d5085bbe07cb649f858ec00acf0e3f8ee1`; all 1,333 frozen app inputs unchanged. Current four app audits, six rules, two post-reboot authorities, memory/jobs/privacy/diagnostic/063000 acceptance and R2 were freshly verified in that publication; fresh main is `be8379745bdfae52ce46496ff26514dc7d729640`, CI `38772398721` attempt 1 push is completed SUCCESS, #191 CLOSED, no later exact-source rejection.
+- [Full private-content exclusions/hashstat manifest]({link(vp+'/private-content-exclusions.json')}). All 100 root files are indexed. The 84 public originals are retained; 16 private files (two DB copies, two HMAC keys, twelve command streams) stay HOST ONLY / 0400. Zero private bytes fetched. Raw inspect includes Env/JWT_SECRET and has never left the host.
+
+**C1 comparator: actual CLOSED PASS**
+
+- Invocation `49e822ac6a8f47f0bd3bc768212a074f`; start 07:21:09Z, successful deactivation **07:23:17.708897Z**, elapsed **127.787035208 s**. [Original public result]({link(cp+'comparator/public-result.json')}), SHA256 `{validation['C1ResultSha256']}`.
+- Full 112-table schema and 42 receipts preserved; zero refusals; every added hold and audit consumed. Actual additions: **186 Sample, 22 SampleHold, 230 AuditLog, 1 Notification**. All 20 changed originals classify CROSS_SUBMISSION_DUPLICATE; zero same-sync-new conflicts. The new-sample/hold counts 186/22 are now validated by C1. The scheduler's *skipped 22* is still a log description, not an independent skipped-intake classification.
+- Original six main/WAL/SHM SHA/stat identities, including ctime, match before/after. Only two new main-file copies were opened RO immutable; copies are 0400 and match the bound main hashes. No original or production SQLite connection; no SQL replay by retainers.
+- All 14 numeric `/proc/608066`/kernel controller reads independently rederived, exact unit/dev24/inode38997 before/after, 805306368 memory / swap 0 / OOM counters zero. After peak 805306368 and max-events 16050 are observations only. Four same-invocation PID1 journal records close successfully. Later GC/not-found infinity/sentinel values are not executed limits.
+- Actual R4 before ROOT: free **77279129600**, required **25983764590** including exact future package 5992448. Immediately before UNIT: free **77275209728**, required **25977772142**, future package 0 because occupied. Runtime before: free **77275185152**. All three paths same FS64769/4096, nonadditive, extra10GB + floor +4GiB logs + two-copy allocation. Note the earlier opening lead called preflight free77279137792 “beforeROOT”; the actual retained beforeROOT card is77279129600. Original cards were not edited.
+- Runtime allocation: free drop1126887424 - known new-root allocated1126739968 = **147456 unexplained**, below500MB. This is file-allocation accounting, no whole-store `du` claim. [C1 independent closure]({link(c.REL+'comparator080000-closed-publication-once/independent-closed-validation.json')}).
+
+**C2 hook: actual CLOSED FAILURE, not repaired by this diagnosis**
+
+- Invocation `d3252723e193488db1d0aba7425f1778`, start07:26:34.951Z, **ExecStart exit1 / exit-code at07:26:35.630105Z**, elapsed0.485914934s. [Original public result]({link(op+'hook/public-result.json')}), SHA256 `{validation['C2ResultSha256']}`. AllExactOwnedStopped=false, one retained owner and one error. Later GC systemctl defaults Result=success/ExecMainStatus0 do not override the actual failed journal.
+- The real unpatched `stop_exact(readonly_call)` -> real `call()` ran **six actual commands: ps, inspect, inspect for each owner**. Every return code0, every stderr EMPTY, no transport error. All twelve raw streams0400 and each argv/code/elapsed/SHA/length metadata were retained before predicates. There were **zero stop/start calls**. [Six public metadata files]({link(op+'hook/docker-call-001.json')}) through docker-call-006.json are in the complete publication.
+- Owner1 `d28d...` succeeds. Owner2 `1dd67...` fails at **phase=compare**, static literal **Exact owned container remains running or changed**. [HOST-only analysis from the actual retained streams]({link(c.REL+'hook080000-retained-host-analysis-complete-once/stdout-original.json')}) proves all selected fields equal except `mounts` array order. The full exact mount objects are equal as unordered lists and match the bound pins; IDs, owner, name, image, StartedAt and stopped state are unchanged.
+- Actual owner2 before mount destination order: uploads, prisma, tmp. After: prisma, tmp, uploads. Both actual containers remain stopped, Exit137, OOMKilled=false, exact bound starts/owners/mount objects. This explains **this C2** refusal only; the old063000 hook's original cause remains UNKNOWN because its streams were not retained.
+- Per your note1, the HMAC-only run_diagnostic failure was compared ON HOST against that file's closed literal list with its private key. Exact one match: line69 **Hook command path refused; retained per-owner evidence required**. No key or raw stream fetched. No live Docker or operator was called by this analysis.
+- All14 C2 controller raws independently verified: same exact hook-unit/dev24/inode40304, 805306368/swap0/OOM0 before/after; peak29425664 is observation only. Fresh C2 R4 required24851118190, future0/no copies pending; sameFS/floor+4GiBlogs+10GB. All58 C1 files and all29 uploaded package files stayed byte/stat identical through C2.
+
+The retained publisher staged-equality refusal (unchanged package dependencies) and two read-only retainer mistakes (pin dictionary has no repeated id field; ASCII-vs-UTF8 wrapper comparison) are preserved honestly with unique successors. They caused no operator replay, source patch, root change, SQL or new production memory sampling.
+
+**Forward boundary:** The demonstrated correction would compare the complete mount objects without API array order while retaining duplicate/missing/changed-object, exact owner/ID/name/image/start/stopped-state refusals. Please confirm the separately reviewed forward scope and whether any new bounded check is needed before a distinct attempt graph. No allowance is inferred from the diagnosis. Main remains MERGE HOLD;233000KEEPIT/R2COMPLETE/no prune/no grow/restart/no103/humans untouched. Future kit still discloses actual intake/hold impact (counts may differ at deploy), 9-to10minute restart window and exact600second failure behaviour. Nothing needed from YY now.
+'''
+save(D,'review-body-utf8.txt',body.encode());save(D,'post-request.json',canonical({'body':body})+b'\n');save(D,'intent-once.json',canonical({'utc':utc(),'marker':MARKER,'bodySha256':sha(body.encode()),'sourcePassAckOnlyHere':6210209468,'noRetryNoDuplicate':True,'hostOperations':0})+b'\n')
+args=['gh','api','--method','POST','repos/yigini/soilfer-lims/issues/162/comments','--input',str(D/'post-request.json')];r=subprocess.run(args,capture_output=True,timeout=120);save(D,'actual-post-response.json',r.stdout);save(D,'post-stderr.log',r.stderr);save(D,'post-exit.json',canonical({'returnCode':r.returncode})+b'\n');assert r.returncode==0,'Unknown POST outcome; inspect marker never replay'
+response=json.loads(r.stdout);assert response['body']==body and response['created_at']==response['updated_at'];fresh=gh('repos/yigini/soilfer-lims/issues/comments/'+str(response['id']));assert fresh['body']==body and fresh['created_at']==fresh['updated_at']==response['created_at'];save(D,'actual-fresh-readback.json',canonical(fresh)+b'\n')
+fallback=(datetime.datetime.fromisoformat(response['created_at'].replace('Z','+00:00'))+datetime.timedelta(minutes=20)).isoformat()
+save(D,'api-command-index.json',canonical(captures)+b'\n');record={'commentId':response['id'],'url':response['html_url'],'createdUtc':response['created_at'],'updatedUtc':response['updated_at'],'bodySha256':sha(body.encode()),'marker':MARKER,'requestResponseFreshReadbackEqual':True,'sourcePassAckOnlyHere':6210209468,'C1':'CLOSED_PASS','C2':'CLOSED_FAILED','actualClaudioAcceptancePending':True,'nativeFallbackNoEarlierUtc':fallback,'nativeFallbackDelivered':False,'hostOperations':0,'newAttemptGraphExists':False};save(D,'delivery-record.json',canonical(record)+b'\n');print(json.dumps(record))
