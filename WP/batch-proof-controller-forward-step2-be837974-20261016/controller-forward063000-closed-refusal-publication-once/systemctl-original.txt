@@ -1,0 +1,15 @@
+TimeoutStopUSec=5min
+RuntimeMaxUSec=1h 30min
+MainPID=0
+Result=exit-code
+ExecMainStartTimestamp=Fri 2026-10-16 06:44:50 CEST
+ExecMainExitTimestamp=Fri 2026-10-16 07:07:51 CEST
+ExecMainStatus=1
+ExecStopPost={ path=/usr/bin/python3 ; argv[]=/usr/bin/python3 -B /opt/lims/releases/workflow-batch-controller-forward-step2-be837974-20261016T063000Z/stop_owned.py ; ignore_errors=no ; start_time=[Fri 2026-10-16 07:07:51 CEST] ; stop_time=[Fri 2026-10-16 07:07:51 CEST] ; pid=494887 ; code=exited ; status=1 }
+MemoryPeak=805658624
+MemoryMax=805306368
+MemorySwapMax=0
+LoadState=loaded
+ActiveState=failed
+SubState=failed
+InvocationID=797d78bb476a4fff8b8ffce6c9445847
