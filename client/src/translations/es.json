@@ -1783,6 +1783,8 @@
     "saveFailed": "No se pudo guardar el cambio de custodia.",
     "retainUntil": "Conservar hasta",
     "acknowledgement": "Confirmación autenticada",
+    "senderDeclaration": "Declaración del transportista / remitente (sin autenticar)",
+    "senderDeclarationPlaceholder": "Nombre declarado o confirmación de entrega",
     "history": "Eventos de custodia",
     "legacy": "Evidencia histórica conservada",
     "types": {

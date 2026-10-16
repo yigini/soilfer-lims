@@ -1307,7 +1307,6 @@ const Reception = () => {
             custodyCarrierName: custodyCarrierName.trim() || null,
             custodyTrackingNumber: custodyTrackingNumber.trim() || null,
             custodySenderSignature: custodySenderSignature.trim() || null,
-            receivingOfficerSignature: custodyCounterSigned ? `CONFIRMED:${user.username}:${new Date().toISOString()}` : null,
             coc: {
                 deliveredBy: custodyCarrierName.trim() || null,
                 receivedBy: user.username,
@@ -2367,19 +2366,19 @@ const Reception = () => {
 
                                 <div>
                                     <label className="block text-xs font-bold text-sf-text mb-1">
-                                        Deliverer / Submitter Signature Confirmation
+                                        {t('custody.senderDeclaration', 'Deliverer / submitter declaration (unauthenticated)')}
                                     </label>
                                     <input
                                         type="text"
                                         value={custodySenderSignature}
                                         onChange={e => setCustodySenderSignature(e.target.value)}
-                                        placeholder="Printed name or delivery signature token"
+                                        placeholder={t('custody.senderDeclarationPlaceholder', 'Declared name or delivery confirmation')}
                                         className="w-full p-2.5 text-sm bg-sf-canvas border border-sf-divider text-sf-text rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                                     />
                                 </div>
                             </div>
 
-                            {/* Receiving Officer Counter-Signature */}
+                            {/* Receiving officer acknowledgement */}
                             <div className="bg-sf-canvas p-3 rounded-lg border border-sf-divider flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                                 <div className="flex items-center gap-2">
                                     <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 flex items-center justify-center font-bold text-xs">
@@ -2389,7 +2388,7 @@ const Reception = () => {
                                         <div className="text-xs font-bold text-sf-text">
                                             Receiving Officer: <span className="text-indigo-600 dark:text-indigo-400">{user?.name || user?.username}</span> ({user?.labId || 'Desk'})
                                         </div>
-                                        <div className="text-[11px] text-sf-muted">Authenticated custody receiver counter-signature</div>
+                                        <div className="text-[11px] text-sf-muted">{t('custody.acknowledgement', 'Authenticated acknowledgement')}</div>
                                     </div>
                                 </div>
                                 <label className="inline-flex items-center gap-2 cursor-pointer text-xs font-semibold text-sf-text">

@@ -12,6 +12,7 @@ function projectSettings(raw, override) {
     if (!settings || typeof settings !== 'object' || Array.isArray(settings) || settings.sample != null &&
         (typeof settings.sample !== 'object' || Array.isArray(settings.sample))) throw fail('PROJECT_RETENTION_INVALID', 'Project retention settings need review.');
     if (override !== null && !valid(KEY, override)) throw fail('PROJECT_RETENTION_INVALID', 'Project retention must be a non-negative whole number of days.', 400);
+    if ((settings.sample?.retentionDaysAfterReport ?? null) === override) return raw;
     const sample = { ...settings.sample };
     if (override === null) delete sample.retentionDaysAfterReport; else sample.retentionDaysAfterReport = override;
     return JSON.stringify({ ...settings, sample });

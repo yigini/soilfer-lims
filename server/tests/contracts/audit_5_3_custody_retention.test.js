@@ -49,20 +49,57 @@ test('malformed closure/custody fields and missing receiving-lab attribution ret
 test('receipt acknowledgement is authenticated, immutable, first-receipt based and does not write legacy signatures', async () => {
     const row = await sample({ status: 'EXPECTED' });
     await prisma.$transaction(tx => custody.acknowledgeReceipt(tx, { sample: row, actor,
-        input: { custodyCarrierName: 'Recorded courier', custodyTrackingNumber: 'DN-1', receivingOfficerSignature: 'forged', custodySenderSignature: 'forged' } }));
+        input: { custodyCarrierName: 'Recorded courier', custodyTrackingNumber: 'DN-1', receivingOfficerSignature: 'forged', custodySenderSignature: 'Declared courier / MOA' } }));
     await prisma.$transaction(tx => custody.acknowledgeReceipt(tx, { sample: row, actor, input: { custodyCarrierName: 'Later courier' } }));
     const view = await custody.receiptView(prisma, row);
     expect(view.custodyCarrierName).toBe('Recorded courier');
+    expect(view.custodySenderSignature).toBe('Declared courier / MOA');
+    expect(view.custodySenderDeclaration).toEqual({ text: 'Declared courier / MOA', authenticated: false });
     expect(view.custodyAcknowledgement).toMatchObject({ by: actor.username, actorId: actor.id, authenticated: true, source: 'LIVE' });
     expect(view.receivingOfficerSignature).toBeNull();
     expect((await prisma.sample.findUnique({ where: { id: row.id } })).receivingOfficerSignature).toBeNull();
     const events = await custody.list(prisma, row.id, actor); expect(events).toHaveLength(1);
+    expect(JSON.parse(events[0].evidence)).toMatchObject({ custodySenderSignature: 'Declared courier / MOA',
+        custodySenderDeclaration: { text: 'Declared courier / MOA', authenticated: false } });
+    expect((await prisma.sample.findUnique({ where: { id: row.id } })).custodySenderSignature).toBeNull();
     const db = new Database(process.env.DATABASE_PATH, { fileMustExist: true });
     try {
         expect(() => db.prepare('UPDATE CustodyEvent SET "by"=? WHERE id=?').run('another', events[0].id)).toThrow(/CUSTODY_EVENT_IMMUTABLE/);
         expect(() => db.prepare('DELETE FROM CustodyEvent WHERE id=?').run(events[0].id)).toThrow(/CUSTODY_EVENT_IMMUTABLE/);
     } finally { db.close(); }
     expect(await custody.list(prisma, row.id, actor)).toEqual(events);
+});
+test('sender declarations must be text and an invalid receipt rolls back the transition and audit', async () => {
+    const row = await sample({ status: 'EXPECTED' });
+    const audits = await prisma.auditLog.count({ where: { entityId: row.id } });
+    const response = await request(app).post(`/api/samples/${row.id}/receive`).set('Authorization', `Bearer ${token}`)
+        .send({ custodySenderSignature: { forged: 'identity' } });
+    expect(response.status).toBe(422); expect(response.body.code).toBe('INTAKE_CUSTODY_INVALID');
+    expect(await prisma.sample.findUnique({ where: { id: row.id } })).toEqual(row);
+    expect(await prisma.custodyEvent.count({ where: { sampleId: row.id } })).toBe(0);
+    expect(await prisma.auditLog.count({ where: { entityId: row.id } })).toBe(audits);
+});
+test('receipt acknowledgement refuses a missing assignedLab instead of using the lab sample code alias', async () => {
+    const row = await sample({ status: 'EXPECTED', assignedLab: null, labId: 'SAMPLE-ALIAS-' + randomUUID() });
+    await expect(prisma.$transaction(tx => custody.acknowledgeReceipt(tx, { sample: row, actor })))
+        .rejects.toMatchObject({ statusCode: 409, code: 'CUSTODY_LAB_REQUIRED' });
+    expect(await prisma.sample.findUnique({ where: { id: row.id } })).toEqual(row);
+    expect(await prisma.custodyEvent.count({ where: { sampleId: row.id } })).toBe(0);
+});
+test('physical receive and rejected intake assign the resolved receiving lab before acknowledging a null-assignedLab sample', async () => {
+    const globalToken = await getAuthToken('SUPER_ADMIN', null), globalActor = jwt.decode(globalToken);
+    for (const rejected of [false, true]) {
+        const row = await sample({ status: 'EXPECTED', assignedLab: null, labId: null });
+        const response = await request(app).post(rejected ? '/api/reception/intake' : `/api/samples/${row.id}/receive`)
+            .set('Authorization', `Bearer ${globalToken}`).send({ assignedLab: labId,
+                ...(rejected ? { originalId: row.originalId, decision: 'REJECTED', ncReason: 'Packaging failed',
+                    checklist: { container: { status: 'FAIL', reason: 'Packaging failed' } } } : {}) });
+        expect(response.status).toBe(200);
+        const updated = await prisma.sample.findUnique({ where: { id: row.id } });
+        expect(updated).toMatchObject({ assignedLab: labId, status: rejected ? 'RECEIVED_REJECTED' : 'RECEIVED' });
+        const event = await prisma.custodyEvent.findFirst({ where: { sampleId: row.id, type: 'RECEIVED' } });
+        expect(event).toMatchObject({ labId, actorId: globalActor.id, by: globalActor.username, acknowledgement: true });
+    }
 });
 test('moves use same-lab sample locations and preserve immutable container identity', async () => {
     const row = await sample();
@@ -81,12 +118,14 @@ test('moves use same-lab sample locations and preserve immutable container ident
 test('consignment custody views use the first authenticated receipt and cannot be read across laboratories', async () => {
     const own = await prisma.consignment.create({ data: { id: randomUUID(), code: randomUUID(), labId, receivedBy: actor.username } });
     const foreign = await prisma.consignment.create({ data: { id: randomUUID(), code: randomUUID(), labId: otherLabId, receivedBy: 'Other receiver' } });
-    await prisma.$transaction(tx => custody.acknowledgeReceipt(tx, { consignment: own, actor, input: { deliveredBy: 'Consignment courier', deliveryNoteRef: 'Header-ack' } }));
+    await prisma.$transaction(tx => custody.acknowledgeReceipt(tx, { consignment: own, actor, input: {
+        deliveredBy: 'Consignment courier', deliveryNoteRef: 'Header-ack', custodySenderSignature: 'Declared header submitter' } }));
     const stored = await prisma.consignment.findUnique({ where: { id: own.id } });
     expect(stored.custodyCarrierName).toBeNull(); expect(stored.receivingOfficerSignature).toBeNull();
     const listing = await request(app).get('/api/reception/consignments').set('Authorization', `Bearer ${token}`);
     expect(listing.status).toBe(200); expect(listing.body.data.map(row => row.id)).not.toContain(foreign.id);
     expect(listing.body.data.find(row => row.id === own.id)).toMatchObject({ custodyCarrierName: 'Consignment courier', custodyTrackingNumber: 'Header-ack',
+        custodySenderSignature: 'Declared header submitter', custodySenderDeclaration: { text: 'Declared header submitter', authenticated: false },
         custodyAcknowledgement: { authenticated: true, by: actor.username } });
     const detail = await request(app).get(`/api/reception/consignments/${foreign.id}`).set('Authorization', `Bearer ${token}`);
     expect(detail.status).toBe(403); expect(detail.body.code).toBeTruthy();
@@ -130,13 +169,27 @@ test('project retention setting is owner-scoped, validates integers, preserves o
         policyConfig: JSON.stringify({ allowedChannels: ['DESK'], sample: { otherSetting: 'preserved' } }) } });
     const update = value => request(app).put(`/api/projects/${project.id}`).set('Authorization', `Bearer ${token}`).send({ retentionDaysAfterReport: value });
     expect((await update(12)).status).toBe(200);
+    expect(JSON.parse((await prisma.auditLog.findFirst({ where: { entityId: project.id, action: 'PROJECT_UPDATED' }, orderBy: { timestamp: 'desc' } })).details))
+        .toMatchObject({ retentionDaysAfterReport: { old: null, new: 12 } });
     expect(JSON.parse((await prisma.project.findUnique({ where: { id: project.id } })).policyConfig))
         .toEqual({ allowedChannels: ['DESK'], sample: { otherSetting: 'preserved', retentionDaysAfterReport: 12 } });
     for (const value of [-1, 2.5, '12']) { const response = await update(value); expect(response.status).toBe(400); expect(response.body.code).toBe('PROJECT_RETENTION_INVALID'); }
     expect((await update(null)).status).toBe(200);
+    expect(JSON.parse((await prisma.auditLog.findFirst({ where: { entityId: project.id, action: 'PROJECT_UPDATED' }, orderBy: { timestamp: 'desc' } })).details))
+        .toMatchObject({ retentionDaysAfterReport: { old: 12, new: null } });
     expect(JSON.parse((await prisma.project.findUnique({ where: { id: project.id } })).policyConfig)).toEqual({ allowedChannels: ['DESK'], sample: { otherSetting: 'preserved' } });
     const foreignToken = await getAuthToken('LAB_MANAGER', otherLabId);
     expect((await request(app).put(`/api/projects/${project.id}`).set('Authorization', `Bearer ${foreignToken}`).send({ retentionDaysAfterReport: 2 })).status).toBe(403);
+});
+test('no-op project retention saves preserve null and exact existing config bytes without a policyConfig audit change', async () => {
+    for (const policyConfig of [null, '{ "sample": { "retentionDaysAfterReport": 12 }, "other": true }']) {
+        const project = await prisma.project.create({ data: { id: randomUUID(), code: randomUUID(), name: 'Unchanged retention', status: 'ACTIVE', labId, policyConfig } });
+        const response = await request(app).put(`/api/projects/${project.id}`).set('Authorization', `Bearer ${token}`)
+            .send({ name: 'Saved other setting', retentionDaysAfterReport: policyConfig ? 12 : null });
+        expect(response.status).toBe(200);
+        expect((await prisma.project.findUnique({ where: { id: project.id } })).policyConfig).toBe(policyConfig);
+        expect((await prisma.auditLog.findFirst({ where: { entityId: project.id, action: 'PROJECT_UPDATED' } })).details).toBe('Updated fields: name');
+    }
 });
 test('disposal queue contains only overdue same-lab material without canonical/legacy hold or open amendment', async () => {
     const now = new Date(), past = new Date(now.getTime() - 86400000);
@@ -187,7 +240,7 @@ test('expiry, holds and amendments are rechecked in the shared disposal transiti
     await prisma.sampleAmendment.create({ data: { sampleId: amended.id, type: 'CLERICAL', status: 'APPROVED', reason: 'Correction', createdBy: actor.username } });
     await expect(transitionSample(amended.id, 'DISPOSED', actor, 'Disposal', {}, prisma)).rejects.toMatchObject({ code: 'SAMPLE_AMENDMENT_OPEN' });
 });
-test('installer dry-run preserves bytes; apply preserves every legacy custody field and JSON; repeat is a no-op', async () => {
+async function legacyCustodyCopy(data = {}) {
     const file = path.resolve(__dirname, '../.tmp/custody-install-' + randomUUID() + '.db');
     const reader = new Database(process.env.DATABASE_PATH, { readonly: true, fileMustExist: true });
     await reader.backup(file); reader.close();
@@ -198,13 +251,17 @@ test('installer dry-run preserves bytes; apply preserves every legacy custody fi
     try { await createSampleFixture(fixtureDb, { data: { id, originalId: id, assignedLab: labId, status: 'RECEIVED',
         receptionDate: new Date(at), receivedBy: 'legacy-officer', custodyCarrierName: 'Courier',
         receivingOfficerSignature: 'CONFIRMED:legacy:old', receptionData: '{ "coc": {"tracking":"legacy"} }',
-        metadata: '{"archiveLocation":"old shelf"}', updatedAt: new Date(at) } }); } finally { await fixtureDb.$disconnect(); }
+        metadata: '{"archiveLocation":"old shelf"}', updatedAt: new Date(at), ...data } }); } finally { await fixtureDb.$disconnect(); }
     const db = new Database(file);
     const guards = [...loadCustodyMigrationSource().guardsSql.matchAll(/CREATE (?:UNIQUE )?(?:TRIGGER|INDEX) "([^"]+)"/g)].map(m => m[1]);
     for (const name of guards) db.exec(`DROP ${name.includes('first_') ? 'INDEX' : 'TRIGGER'} "${name}"`);
     db.exec('DROP TABLE CustodyEvent; ALTER TABLE Sample DROP COLUMN retainUntil; ALTER TABLE InventoryLocation DROP COLUMN purpose;');
     db.prepare('DELETE FROM _schema_migrations WHERE id=?').run('207_sample_custody');
     const before = db.prepare('SELECT * FROM Sample WHERE id=?').get(id); db.close();
+    return { file, id, before };
+}
+test('installer dry-run preserves bytes; apply preserves every legacy custody field and JSON; repeat is a no-op', async () => {
+    const { file, id, before } = await legacyCustodyCopy();
     const bytes = fs.readFileSync(file);
     expect(installSampleCustody({ dbPath: file })).toMatchObject({ classification: 'PRE_207', mode: 'DRY_RUN', totalChanges: 0 });
     expect(fs.readFileSync(file)).toEqual(bytes);
@@ -222,6 +279,31 @@ test('installer dry-run preserves bytes; apply preserves every legacy custody fi
     const tamperedBytes = fs.readFileSync(file);
     expect(() => installSampleCustody({ dbPath: file, apply: true })).toThrow(/differs/);
     expect(fs.readFileSync(file)).toEqual(tamperedBytes);
+});
+test('legacy receipt facts without a recorded date refuse dry-run and apply with no schema, event or byte mutations', async () => {
+    const { file, id, before } = await legacyCustodyCopy({ status: 'EXPECTED', receptionDate: null, custodyHandoverAt: null,
+        receivingOfficerName: 'Recorded legacy receiver', receivedBy: null, receivingOfficerSignature: null });
+    const bytes = fs.readFileSync(file);
+    for (const apply of [false, true]) {
+        let refusal;
+        try { installSampleCustody({ dbPath: file, apply }); } catch (error) { refusal = error; }
+        expect(refusal).toMatchObject({ statusCode: 409, code: 'CUSTODY_BACKFILL_REVIEW_REQUIRED', totalChanges: 0 });
+        expect(refusal.differences).toContainEqual({ table: 'Sample', id, code: 'LEGACY_CUSTODY_PROVENANCE_REQUIRED' });
+        expect(fs.readFileSync(file)).toEqual(bytes);
+    }
+    const db = new Database(file, { readonly: true, fileMustExist: true });
+    try {
+        expect(db.prepare('SELECT * FROM Sample WHERE id=?').get(id)).toEqual(before);
+        expect(db.prepare("SELECT name FROM sqlite_master WHERE name='CustodyEvent'").get()).toBeUndefined();
+        expect(db.prepare("SELECT id FROM _schema_migrations WHERE id='207_sample_custody'").get()).toBeUndefined();
+    } finally { db.close(); }
+});
+test('missing and empty recorded dates are invalid while zone-less recorded timestamps remain UTC', () => {
+    const source = fs.readFileSync(path.resolve(__dirname, '../../scripts/install_sample_custody.js'), 'utf8');
+    const declaration = require('@babel/parser').parse(source).program.body.find(node => node.type === 'FunctionDeclaration' && node.id.name === 'recordedDate');
+    const recordedDate = require('node:vm').runInNewContext('(' + source.slice(declaration.start, declaration.end) + ')');
+    for (const value of [null, undefined, '', ' \t ']) expect(Number.isNaN(recordedDate(value).getTime())).toBe(true);
+    expect(recordedDate('2026-09-01 08:00:00').toISOString()).toBe('2026-09-01T08:00:00.000Z');
 });
 
 // Load only the pure comparison; importing the operator script would run Docker.

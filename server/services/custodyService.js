@@ -12,13 +12,16 @@ function authenticated(actor) {
 }
 function receiptFacts(input = {}, actor) {
     const coc = input.coc || {};
-    for (const value of [input.custodyCarrierName, input.custodyTrackingNumber, coc.deliveredBy, coc.carrierName, coc.trackingNumber, coc.waybillRef, input.deliveredBy, input.deliveryNoteRef])
+    for (const value of [input.custodyCarrierName, input.custodyTrackingNumber, input.custodySenderSignature, coc.senderSignature, coc.deliveredBy, coc.carrierName, coc.trackingNumber, coc.waybillRef, input.deliveredBy, input.deliveryNoteRef])
         if (value != null && typeof value !== 'string') throw fail('INTAKE_CUSTODY_INVALID', 'Custody names and references must be text.', 422);
     const handover = input.custodyHandoverAt || coc.handoverAt || coc.date;
     if (handover && !Number.isFinite(new Date(handover).getTime())) throw fail('INTAKE_CUSTODY_INVALID', 'The custody handover date must be valid.', 422);
+    const senderDeclaration = input.custodySenderSignature || coc.senderSignature || null;
     return { custodyHandoverAt: handover ? new Date(handover).toISOString() : null,
         custodyCarrierName: input.custodyCarrierName || coc.deliveredBy || coc.carrierName || input.deliveredBy || null,
         custodyTrackingNumber: input.custodyTrackingNumber || coc.trackingNumber || coc.waybillRef || input.deliveryNoteRef || null,
+        custodySenderSignature: senderDeclaration,
+        custodySenderDeclaration: senderDeclaration == null ? null : { text: senderDeclaration, authenticated: false },
         receivingOfficerId: String(actor.id), receivingOfficerName: actor.name || actor.username };
 }
 function withoutReceiptFields(data) {
@@ -28,14 +31,15 @@ async function acknowledgeReceipt(tx, { sample, consignment, actor, input = {} }
     rules.requireTransaction(tx);
     if (!hasPermission(actor, 'RECEIVE_SAMPLE')) throw fail('CUSTODY_FORBIDDEN', 'Physical receipt permission is required.', 403);
     const by = authenticated(actor);
-    const entity = sample || consignment;
+    const labId = sample ? sample.assignedLab : consignment.labId;
+    if (!labId) throw fail('CUSTODY_LAB_REQUIRED', 'Record the receiving laboratory before acknowledging custody.', 409);
     if (sample) rules.assertScope(actor, sample);
     else scope.ensureScope(actor, consignment, { entityType: 'Consignment', altLabField: null });
     const where = sample ? { sampleId: sample.id, containerId: null } : { consignmentId: consignment.id, sampleId: null, containerId: null };
     const first = await tx.custodyEvent.findFirst({ where: { ...where, type: 'RECEIVED' }, orderBy: [{ at: 'asc' }, { id: 'asc' }] });
     if (first) return first;
     const facts = receiptFacts(input, actor);
-    return tx.custodyEvent.create({ data: { id: randomUUID(), ...where, labId: entity.assignedLab || entity.labId,
+    return tx.custodyEvent.create({ data: { id: randomUUID(), ...where, labId,
         consignmentId: sample ? sample.consignmentId || null : consignment.id, type: 'RECEIVED', by, actorId: String(actor.id),
         at: new Date(), source: 'LIVE', acknowledgement: true, counterparty: facts.custodyCarrierName,
         reference: facts.custodyTrackingNumber, evidence: JSON.stringify(facts) } });
@@ -47,6 +51,7 @@ async function receiptView(db, record, kind = 'sample') {
     if (!first) return record;
     const evidence = JSON.parse(first.evidence || '{}');
     return { ...record, ...Object.fromEntries(RECEIPT_FIELDS.map(key => [key, evidence[key] ?? null])),
+        custodySenderDeclaration: evidence.custodySenderSignature == null ? null : { text: evidence.custodySenderSignature, authenticated: false },
         custodyHandoverAt: evidence.custodyHandoverAt ? new Date(evidence.custodyHandoverAt) : first.at,
         custodyAcknowledgement: { by: first.by, actorId: first.actorId, at: first.at, authenticated: first.acknowledgement, source: first.source } };
 }

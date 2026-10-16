@@ -1783,6 +1783,8 @@
     "saveFailed": "Impossible d’enregistrer la modification de garde.",
     "retainUntil": "Conserver jusqu’au",
     "acknowledgement": "Accusé de réception authentifié",
+    "senderDeclaration": "Déclaration du livreur / déposant (non authentifiée)",
+    "senderDeclarationPlaceholder": "Nom déclaré ou confirmation de livraison",
     "history": "Événements de garde",
     "legacy": "Preuves historiques conservées",
     "types": {

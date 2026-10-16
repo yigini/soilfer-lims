@@ -198,7 +198,7 @@ describe('Stage E: Distinct RECEIVED_REJECTED State & Immutable Chain of Custody
         expect(dbSample.status).toBe('ACCEPTED');
         expect(dbSample.custodyCarrierName).toBe('AgroExtension Officer Perez');
         expect(dbSample.custodyTrackingNumber).toBe('EXT-WAYBILL-2026-09');
-        expect(dbSample.custodySenderSignature).toBeNull();
+        expect(dbSample.custodySenderSignature).toBe('Perez / MOA');
         expect(dbSample.receivingOfficerSignature).toBeNull();
 
         // Handover timestamp must be preserved separately from receptionDate/createdAt
@@ -256,6 +256,8 @@ describe('Stage E: Distinct RECEIVED_REJECTED State & Immutable Chain of Custody
         expect(res.body.consignment.acceptedCount).toBe(1);
         expect(res.body.consignment.rejectedCount).toBe(1);
         expect(res.body.consignment.status).toBe('PARTIAL');
+        expect(res.body.consignment.custodySenderSignature).toBe('Silva / Driver');
+        expect(res.body.consignment.custodySenderDeclaration).toEqual({ text: 'Silva / Driver', authenticated: false });
         createdConsignmentId = res.body.consignment.id;
 
         // Verify rejected sample has RECEIVED_REJECTED in database

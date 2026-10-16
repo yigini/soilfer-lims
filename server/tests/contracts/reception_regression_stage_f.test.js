@@ -588,7 +588,7 @@ describe('Stage F: Reception Contract and End-to-End Regression Suite (RC-20)', 
             // 2. Carrier & courier tracking
             expect(dbSample.custodyCarrierName).toBe('AeroFlash Cargo Express Driver Ortiz');
             expect(dbSample.custodyTrackingNumber).toBe('AF-WB-90901');
-            expect(dbSample.custodySenderSignature).toBeNull();
+            expect(dbSample.custodySenderSignature).toBe('Ortiz / Courier');
 
             // 3. Officer identification & counter-signature
             expect(dbSample.receivingOfficerId).toBeDefined();

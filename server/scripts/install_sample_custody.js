@@ -10,6 +10,7 @@ const hash = value => createHash('sha256').update(JSON.stringify(value)).digest(
 const fail = (code, message, differences = []) => Object.assign(new Error(message), { statusCode: 409, code, differences, totalChanges: 0 });
 const normalize = sql => sql.replace(/\s+/g, ' ').trim().replace(/;$/, '');
 function recordedDate(value) {
+    if (value == null || typeof value === 'string' && !value.trim()) return new Date(NaN);
     if (typeof value === 'string' && /^\d{4}-\d\d-\d\d[ T]\d\d:\d\d:\d\d(?:\.\d+)?$/.test(value)) value = value.replace(' ', 'T') + 'Z';
     return new Date(value);
 }

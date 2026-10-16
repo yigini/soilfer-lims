@@ -262,6 +262,8 @@ export default function ProjectActionsModal({
             return;
         }
 
+        const retentionDays = editRetention === '' ? null : Number(editRetention);
+        const previousRetention = retentionSetting(project);
         const payload = {
             name: editName.trim(),
             client: editClient.trim(),
@@ -269,7 +271,7 @@ export default function ProjectActionsModal({
             expectedSampleCount: editExpectedCount ? parseInt(editExpectedCount, 10) : 0,
             deliveryDeadline: editDeadline || null,
             defaultAnalysisBundle: editBundle || null,
-            retentionDaysAfterReport: editRetention === '' ? null : Number(editRetention),
+            ...(retentionDays !== (previousRetention === '' ? null : previousRetention) ? { retentionDaysAfterReport: retentionDays } : {}),
             status: editStatus
         };
 

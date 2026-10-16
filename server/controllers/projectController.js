@@ -652,8 +652,15 @@ exports.updateProject = async (req, res) => {
                 await validateProjectClosure(currentProject, tx);
             }
 
-            if (updates.retentionDaysAfterReport !== undefined)
-                data.policyConfig = require('../services/sampleRetentionService').projectSettings(currentProject.policyConfig, updates.retentionDaysAfterReport);
+            let retentionChange;
+            if (updates.retentionDaysAfterReport !== undefined) {
+                const policyConfig = require('../services/sampleRetentionService').projectSettings(currentProject.policyConfig, updates.retentionDaysAfterReport);
+                if (policyConfig !== currentProject.policyConfig) {
+                    data.policyConfig = policyConfig;
+                    retentionChange = { old: JSON.parse(currentProject.policyConfig || '{}').sample?.retentionDaysAfterReport ?? null,
+                        new: updates.retentionDaysAfterReport };
+                }
+            }
 
             const proj = await tx.project.update({
                 where: { id: project.id },
@@ -665,7 +672,8 @@ exports.updateProject = async (req, res) => {
                 entity: 'PROJECT',
                 entityId: project.id,
                 action: 'PROJECT_UPDATED',
-                details: `Updated fields: ${Object.keys(data).join(', ')}`,
+                details: retentionChange ? JSON.stringify({ summary: `Updated fields: ${Object.keys(data).join(', ')}`,
+                    retentionDaysAfterReport: retentionChange }) : `Updated fields: ${Object.keys(data).join(', ')}`,
                 performedBy: req.user.username,
                 timestamp: new Date()
             };

@@ -334,6 +334,7 @@ async function prepareIntake(prisma, { body: rawBody, user, newSampleId, initial
             const { transitionSample } = require('../services/sampleStateService');
             const rejectedOrder = await orderedAnalyses(prisma, sample, body, user);
             const rejectionData = {
+                assignedLab: user.labId,
                 requiredAnalyses: JSON.stringify(Array.from(rejectedOrder.requiredAnalyses)),
                 analysisGroupIds: JSON.stringify(rejectedOrder.canonicalGroupIds),
                 receivedMass: receivedMass === undefined ? undefined : receivedMass === null || receivedMass === '' ? null : Number(receivedMass),

@@ -1783,6 +1783,8 @@
     "saveFailed": "Could not save custody change.",
     "retainUntil": "Retain until",
     "acknowledgement": "Authenticated acknowledgement",
+    "senderDeclaration": "Deliverer / submitter declaration (unauthenticated)",
+    "senderDeclarationPlaceholder": "Declared name or delivery confirmation",
     "history": "Custody events",
     "legacy": "Preserved historical evidence",
     "types": {

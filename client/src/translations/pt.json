@@ -1783,6 +1783,8 @@
     "saveFailed": "Não foi possível salvar a alteração de custódia.",
     "retainUntil": "Reter até",
     "acknowledgement": "Confirmação autenticada",
+    "senderDeclaration": "Declaração do entregador / remetente (não autenticada)",
+    "senderDeclarationPlaceholder": "Nome declarado ou confirmação de entrega",
     "history": "Eventos de custódia",
     "legacy": "Evidências históricas preservadas",
     "types": {
