@@ -1,0 +1,17 @@
+C:\Users\yigin\AppData\Local\Temp\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\audit-6218788735-full-1-postflight.cjs:1
+const fs=require('fs'),path=require('path'),cp=require('child_process'),crypto=require('crypto'),v8=require('v8');const parent=__dirname,source=process.cwd(),manifestPath=path.join(parent,'inputs-audit-6218788735-full-1.json'),m=JSON.parse(fs.readFileSync(manifestPath,'utf8')),closedPath=path.join(parent,'audit-6218788735-full-1-closed.json'),closed=JSON.parse(fs.readFileSync(closedPath,'utf8')),hash=p=>crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex'),assert=(b,msg)=>{if(!b)throw Error(msg)},git=(...args)=>cp.execFileSync('git',args,{cwd:source,encoding:'utf8',stdio:['ignore','pipe','ignore']}).trim();assert(closed.exitCode===0,'not a closed successful run');assert(hash(closed.log)===closed.logSha256,'closed original log drift');assert(hash(manifestPath)===closed.manifestSha256,'input manifest drift');
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   ^
+
+Error: template drift/readOnly
+    at assert (C:\Users\yigin\AppData\Local\Temp\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\audit-6218788735-full-1-postflight.cjs:1:506)
+    at Object.<anonymous> (C:\Users\yigin\AppData\Local\Temp\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\audit-6218788735-full-1-postflight.cjs:3:249)
+    at Module._compile (node:internal/modules/cjs/loader:1761:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1893:10)
+    at Module.load (node:internal/modules/cjs/loader:1481:32)
+    at Module._load (node:internal/modules/cjs/loader:1300:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47
+
+Node.js v24.13.0

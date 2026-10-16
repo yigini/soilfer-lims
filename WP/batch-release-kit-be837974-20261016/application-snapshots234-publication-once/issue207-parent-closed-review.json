@@ -1,0 +1,19 @@
+{
+  "checkedUtc": "2026-10-16T19:35:59.034697+00:00",
+  "reviewSha256": "3974ff5c46d87b6607afc3173335a7b94b109e90ad8634dbb8e02850f79b1099",
+  "actualClosedSuites": 374,
+  "actualClosedTests": 5716,
+  "evidenceOriginalHashesVerified": 19,
+  "sourceFixtureGeneratedRuntimeTemplateHashReads": 4928,
+  "literalSummaryAndExactUniqueSuiteDiscoveryVerified": true,
+  "all6269SavedReporterAndContextLinesMatchOriginalAfterExactCp1252Utf8Inverse": true,
+  "originalInventoryBytesKeptUnchanged": true,
+  "parentEarlierReadOnlyVerifierRefusal": "Expected reporterLines to be test-only5716; actual6269 also includes553context lines. Refused before any review-file/stage/commit/push/source mutation; original log and all inputs untouched. Corrected independent test-only count uses originalUTF8 sqrt prefixes and saved tests arrays.",
+  "exact16FilePreviouslyReviewedPatchUnchanged": true,
+  "indexUnchangedAndFrozenCopyReadonly": true,
+  "templateFileAttributesWritableAndSqliteReaderReadonlyDistinctionRetained": true,
+  "helpOutputCapturedAndRestoredOnlyAfterClosure": true,
+  "head": "ad9d2660041c4db380d73a759871987d625f7404",
+  "stagedPaths": [],
+  "authorizedNext": "ONE exact reviewed16-file correction commit/push to existingPR300 and automatic ordinary new-head CI; no source edits, extra runs, PR body edits, ready/audit/native/labels or merge"
+}

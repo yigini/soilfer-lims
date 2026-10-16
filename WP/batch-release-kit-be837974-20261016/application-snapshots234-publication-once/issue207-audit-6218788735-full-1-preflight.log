@@ -1,0 +1,22 @@
+node:fs:559
+  return binding.open(
+                 ^
+
+Error: ENOENT: no such file or directory, open 'C:\Users\yigin\.codex\worktrees\issue-207-custody\soilfer-lims\server\node_modules\jest-worker\build\workers\processChild.js'
+    at Object.openSync (node:fs:559:18)
+    at Object.readFileSync (node:fs:443:35)
+    at hash (C:\Users\yigin\AppData\Local\Temp\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\audit-6218788735-full-1-preflight.cjs:3:53)
+    at C:\Users\yigin\AppData\Local\Temp\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\audit-6218788735-full-1-preflight.cjs:8:467
+    at Array.map (<anonymous>)
+    at Object.<anonymous> (C:\Users\yigin\AppData\Local\Temp\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\audit-6218788735-full-1-preflight.cjs:8:457)
+    at Module._compile (node:internal/modules/cjs/loader:1761:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1893:10)
+    at Module.load (node:internal/modules/cjs/loader:1481:32)
+    at Module._load (node:internal/modules/cjs/loader:1300:12) {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\yigin\\.codex\\worktrees\\issue-207-custody\\soilfer-lims\\server\\node_modules\\jest-worker\\build\\workers\\processChild.js'
+}
+
+Node.js v24.13.0

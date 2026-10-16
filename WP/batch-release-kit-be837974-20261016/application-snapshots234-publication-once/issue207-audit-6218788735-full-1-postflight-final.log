@@ -1,0 +1,20 @@
+{
+  "postflight": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\audit-6218788735-full-1-postflight.json",
+  "postflightSha256": "07c10bee749faa823b015b39db3ff41cff0d0b006a62034725719028886268d6",
+  "inventory": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\audit-6218788735-full-1-inventory-closed.json",
+  "inventorySha256": "638665325acd50a2ff4b4d1581d1cfe0edee4e9ed63febda2c2705b03e12711d",
+  "log": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\audit-6218788735-full-1.log",
+  "logSha256": "7f85cd3fd987d94e620d42469d7bcdc567b5e220eee18fd3da10271125fbb739",
+  "literalSummary": "Test Suites: 374 passed, 374 total\nTests:       5716 passed, 5716 total\nSnapshots:   0 total\nTime:        2238.129 s, estimated 2755 s\nRan all test suites.",
+  "sourceUnchanged": true,
+  "onlyFixtureMutation": [
+    {
+      "path": "server/data/help/RELEASE_MANIFEST_v1.json",
+      "before": "6c3d66602ee2269ed2ebbb8b13ca4c527ea63985696f48bb8b30dd4bea44c2c3",
+      "after": "2d1e65f5d89872e6d373321adbccc4ac0c73c3fe2b727d63d639f2a2b9a55ba4"
+    }
+  ],
+  "helpRestoredSha256": "6c3d66602ee2269ed2ebbb8b13ca4c527ea63985696f48bb8b30dd4bea44c2c3",
+  "indexSha256": "eb34ad2825fd43b5319ab79b10684ca0601435dc0f957c725c75f68d04ce1229",
+  "reviewedPatchSha256": "f10be973b0a52d90fdb219e37dd8b9525ec3bf6eafc487bf38a6dfd82aaf3e82"
+}

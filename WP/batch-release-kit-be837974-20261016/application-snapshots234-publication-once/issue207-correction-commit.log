@@ -1,0 +1,11 @@
+{
+  "command": [
+    "git",
+    "commit",
+    "-m",
+    "fix(custody): preserve receipt declarations and audit retention"
+  ],
+  "exitCode": 0,
+  "stdout": "[codex/issue-207-custody f83f3cddf] fix(custody): preserve receipt declarations and audit retention\n 16 files changed, 131 insertions(+), 20 deletions(-)\n",
+  "stderr": ""
+}

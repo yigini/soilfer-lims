@@ -8,7 +8,7 @@ import unittest
 from unittest.mock import patch
 from prepare_release import raw_git
 from kit_recovery_copy import HEAD,derive,validate,FIXED_BYTES
-from kit_budget import Budget,RECOVERY_FIXED,RECOVERY_EVIDENCE_SHARE,TABLE
+from kit_budget import Budget,RECOVERY_FIXED,RECOVERY_EVIDENCE_SHARE,TABLE,COPY_ADMISSION_SITES
 from kit_natural import admit_natural_transcript,NATURAL_COMMAND_RESERVATION,NaturalIntake
 
 HERE=pathlib.Path(__file__).resolve().parent
@@ -51,7 +51,7 @@ class RecoveryCopy(unittest.TestCase):
             for name,count in row['sites'].items():
                 for _ in range(count):
                     budget.claim(name)
-                    if name in ('triple','backup','clone','assets','seal-directory','reader-index'):budget.copy_ceiling(name)
+                    if name in COPY_ADMISSION_SITES:budget.copy_ceiling(name)
             budget.finish(row['stage'],0)
         budget.begin('issue-206',10**12);budget.claim('clone')
         budget.reserve_recovery()

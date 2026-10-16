@@ -1,0 +1,26 @@
+{
+  "command": [
+    "git",
+    "add",
+    "--",
+    "client/src/components/projects/ProjectActionsModal.jsx",
+    "client/src/pages/Reception.jsx",
+    "client/src/translations/en.json",
+    "client/src/translations/es-419.json",
+    "client/src/translations/es.json",
+    "client/src/translations/fr.json",
+    "client/src/translations/pt.json",
+    "server/controllers/projectController.js",
+    "server/scripts/install_sample_custody.js",
+    "server/services/custodyService.js",
+    "server/services/intakePreparationService.js",
+    "server/services/intakeReceiptService.js",
+    "server/services/sampleRetentionService.js",
+    "server/tests/contracts/audit_5_3_custody_retention.test.js",
+    "server/tests/contracts/reception_regression_stage_f.test.js",
+    "server/tests/contracts/reception_stage_e.test.js"
+  ],
+  "exitCode": 0,
+  "stdout": "",
+  "stderr": "warning: in the working copy of 'client/src/translations/en.json', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'client/src/translations/es-419.json', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'client/src/translations/es.json', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'client/src/translations/fr.json', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'client/src/translations/pt.json', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'server/scripts/install_sample_custody.js', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'server/services/custodyService.js', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'server/services/sampleRetentionService.js', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'server/tests/contracts/audit_5_3_custody_retention.test.js', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'server/tests/contracts/reception_regression_stage_f.test.js', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'server/tests/contracts/reception_stage_e.test.js', LF will be replaced by CRLF the next time Git touches it\n"
+}

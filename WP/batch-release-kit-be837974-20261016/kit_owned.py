@@ -16,6 +16,8 @@ from kit_journal import exclusive_record
 from kit_evidence import admit_evidence
 from kit_cli_evidence import begin_cli_evidence
 from kit_copy_admission import live_backup_limit
+from kit_app_snapshots import CLI_SNAPSHOTS,snapshot_plan,unchanged_source,verify_snapshots
+from kit_budget import CLI_SITE
 
 LABEL='io.soilfer.release-owned'
 DATABASE='/app/server/prisma/dev.db'
@@ -223,7 +225,7 @@ class OwnedCli:
                 result['exitCode']==0 and not stderr,'CLI failed; retained child and wrapper outcome must both succeed')
         return stdout,result
 
-def filesystem_controls(root,require_directory_sync=True,disk=None):
+def filesystem_controls(root,require_directory_sync=True,disk=None,no_writers=None):
     """Production control-file callbacks. Exact root, fresh directories only."""
     root=pathlib.Path(root)
     require(root.as_posix()==str(ROOT) and root.resolve()==root and root.is_dir() and not root.is_symlink(),
@@ -232,6 +234,7 @@ def filesystem_controls(root,require_directory_sync=True,disk=None):
         validate_spec(spec);p=root/(spec['label']+'-retained-temp')
         require(p.as_posix()==spec['tmp'] and p.parent==root and not p.is_symlink(),'Exact private control directory required')
         return p
+    snapshot_admissions={};snapshot_closures=set()
     def prepare(spec):
         p=directory(spec)
         require(not p.exists(),'Fresh CLI control directory required')
@@ -244,14 +247,34 @@ def filesystem_controls(root,require_directory_sync=True,disk=None):
             require(disk is not None,'Live backup requires its held before-create content admission')
             limit,plan=live_backup_limit(disk.budget.db)
             disk.admit_copy('cli-backup',p/'backup.db',plan)
+        snapshot=None
+        if spec['label'] in CLI_SNAPSHOTS:
+            require(disk is not None and callable(no_writers),
+                'Application snapshot admission requires its held budget and fresh no-writer check')
+            no_writers()
+            target=pathlib.Path(spec['mounts'][0]['Source'])/'dev.db'
+            snapshot=snapshot_plan(target,CLI_SNAPSHOTS[spec['label']])
+            disk.admit_copy(CLI_SITE[spec['label']],p,snapshot['layout'])
+            no_writers();unchanged_source(target,snapshot)
         p.mkdir(mode=0o700)
         require(not list(p.iterdir()),'Fresh empty CLI control directory required')
         if limit is not None:exclusive_record(p,'backup-admission.json',limit,require_directory_sync)
+        if snapshot is not None:
+            exclusive_record(p,'snapshot-admission.json',snapshot,require_directory_sync)
+            snapshot_admissions[spec['label']]=snapshot
     def read(spec):
         p=directory(spec)/'cli-child-complete.json'
         if not p.exists():return None
         require(not p.is_symlink() and p.is_file() and p.stat().st_size<=8192,'Bounded real completion file required')
         with p.open('rb') as stream:raw=stream.read(8193)
-        require(len(raw)<=8192,'Completion grew beyond bound');return raw
+        require(len(raw)<=8192,'Completion grew beyond bound')
+        label=spec['label']
+        if label in snapshot_admissions and label not in snapshot_closures:
+            # The real child has closed its SQLite handles and returned. Any
+            # refusal here precedes the existing final-memory/exit permission.
+            result=verify_snapshots(directory(spec),snapshot_admissions[label])
+            exclusive_record(directory(spec),'snapshot-closure.json',result,require_directory_sync)
+            snapshot_closures.add(label)
+        return raw
     def permit(spec,value):exclusive_record(directory(spec),'cli-exit-permit.json',value,require_directory_sync)
     return prepare,read,permit

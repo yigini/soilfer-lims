@@ -1,0 +1,86 @@
+{
+  "checkedAfterClosureAt": "2026-10-16T19:30:23.697Z",
+  "closedAt": "2026-10-16T19:27:51.853Z",
+  "head": "ad9d2660041c4db380d73a759871987d625f7404",
+  "stagedPaths": [],
+  "reviewedPatchSha256": "f10be973b0a52d90fdb219e37dd8b9525ec3bf6eafc487bf38a6dfd82aaf3e82",
+  "sourceBuildCount": 2441,
+  "sourceDifferences": [],
+  "fixtureDifferences": [
+    {
+      "path": "server/data/help/RELEASE_MANIFEST_v1.json",
+      "before": "6c3d66602ee2269ed2ebbb8b13ca4c527ea63985696f48bb8b30dd4bea44c2c3",
+      "after": "2d1e65f5d89872e6d373321adbccc4ac0c73c3fe2b727d63d639f2a2b9a55ba4"
+    }
+  ],
+  "generatedCount": 21,
+  "generatedDifferences": [],
+  "runtimeAfter": {
+    "C:\\Program Files\\nodejs\\node.exe": "91e25b2ef61ee30a9e6afce0f336b4d55d688c3717244e496fa11d69fc3a1717",
+    "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js": "3ce7cba6f5128dd5f54c98b6a5036b0f850496878cc2e21044b675fe3c594e3e",
+    "C:\\Users\\yigin\\.codex\\worktrees\\issue-207-custody\\soilfer-lims\\server\\node_modules\\jest\\bin\\jest.js": "2a9b435eab8a343bd09fe285b2e2043ff9ff89fae4e1d1f46ba3df28659d8a2c",
+    "C:\\Users\\yigin\\.codex\\worktrees\\issue-207-custody\\soilfer-lims\\server\\node_modules\\jest-worker\\build\\processChild.js": "81776822e8ec47077a6b67864e3f6984972d23480d34a8f6d100803b17e4c92c",
+    "C:\\Users\\yigin\\.codex\\worktrees\\issue-207-custody\\soilfer-lims\\server\\node_modules\\better-sqlite3\\build\\Release\\better_sqlite3.node": "ea687d1228417aaeb9dc3c57a2bb074cafded007c3e3c5bd15dae5c1d04b19d7"
+  },
+  "runtimeUnchanged": true,
+  "templates": {
+    "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\app\\server\\tests\\.owned-templates\\test_template_c131df5e-544d-4cb3-b841-5e7a9761468b.db": {
+      "source": "C:\\Users\\yigin\\.codex\\worktrees\\issue-207-custody\\soilfer-lims\\server\\prisma\\dev.db",
+      "sha256": "d92d6f06e43b54728daf60018179363fea31e6acde96880a9ac76e6937cf7c5d",
+      "afterSha256": "d92d6f06e43b54728daf60018179363fea31e6acde96880a9ac76e6937cf7c5d",
+      "readOnly": false
+    },
+    "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\app\\server\\prisma\\dev.db": {
+      "source": "C:\\Users\\yigin\\.codex\\worktrees\\issue-207-custody\\soilfer-lims\\server\\prisma\\dev.db",
+      "sha256": "d92d6f06e43b54728daf60018179363fea31e6acde96880a9ac76e6937cf7c5d",
+      "afterSha256": "d92d6f06e43b54728daf60018179363fea31e6acde96880a9ac76e6937cf7c5d",
+      "readOnly": false
+    }
+  },
+  "templateAttributeNote": "Both retained templates have writable Windows file attributes; stock globalSetup opens them via SQLite readonly:true. The complete-backup provenance used readonly source connections. Byte hashes are exactly unchanged. Original postflight attribute-assumption failure retained.",
+  "dependencies": {
+    "server/node_modules": {
+      "target": "C:\\Users\\yigin\\.codex\\worktrees\\issue-207-custody\\soilfer-lims\\server\\node_modules",
+      "actual": "C:\\Users\\yigin\\.codex\\worktrees\\issue-207-custody\\soilfer-lims\\server\\node_modules",
+      "sameTarget": true
+    },
+    "client/node_modules": {
+      "target": "C:\\Users\\yigin\\.codex\\worktrees\\issue-207-custody\\soilfer-lims\\client\\node_modules",
+      "actual": "C:\\Users\\yigin\\.codex\\worktrees\\issue-207-custody\\soilfer-lims\\client\\node_modules",
+      "sameTarget": true
+    },
+    "server/prisma_client": {
+      "target": "C:\\Users\\yigin\\.codex\\worktrees\\issue-207-custody\\soilfer-lims\\server\\prisma_client",
+      "actual": "C:\\Users\\yigin\\.codex\\worktrees\\issue-207-custody\\soilfer-lims\\server\\prisma_client",
+      "sameTarget": true
+    }
+  },
+  "index": {
+    "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\audit-6218788735-full-1-index",
+    "beforeSha256": "eb34ad2825fd43b5319ab79b10684ca0601435dc0f957c725c75f68d04ce1229",
+    "afterSha256": "eb34ad2825fd43b5319ab79b10684ca0601435dc0f957c725c75f68d04ce1229",
+    "readOnly": true,
+    "liveIndexAfterSha256": "eb34ad2825fd43b5319ab79b10684ca0601435dc0f957c725c75f68d04ce1229"
+  },
+  "fixtureHasGit": false,
+  "expectedGeneratedHelp": {
+    "path": "server/data/help/RELEASE_MANIFEST_v1.json",
+    "retained": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\audit-6218788735-full-1-generated-help-RELEASE_MANIFEST_v1.json",
+    "sha256": "2d1e65f5d89872e6d373321adbccc4ac0c73c3fe2b727d63d639f2a2b9a55ba4",
+    "capturedAfterClosure": true,
+    "restoredAt": "2026-10-16T19:30:23.705Z",
+    "restoredSha256": "6c3d66602ee2269ed2ebbb8b13ca4c527ea63985696f48bb8b30dd4bea44c2c3"
+  },
+  "node": {
+    "version": "v24.13.0",
+    "arch": "arm64",
+    "v8": "13.6.233.17-node.37",
+    "defaultHeapSizeLimit": 4496293888,
+    "nodeOptions": null
+  },
+  "literalSummary": "Test Suites: 374 passed, 374 total\nTests:       5716 passed, 5716 total\nSnapshots:   0 total\nTime:        2238.129 s, estimated 2755 s\nRan all test suites.",
+  "inventory": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\audit-6218788735-full-1-inventory-closed.json",
+  "inventorySha256": "638665325acd50a2ff4b4d1581d1cfe0edee4e9ed63febda2c2705b03e12711d",
+  "knownUnrelatedDirt": "D server/node_modules retained; dependency directory not staged",
+  "all2441FixtureHashesAfterRestoreMatch": true
+}

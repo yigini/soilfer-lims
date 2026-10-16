@@ -8,7 +8,7 @@ import types
 import unittest
 from unittest.mock import patch
 from kit_contract import MEMORY_MAX,SAMPLED_NONRECLAIMABLE_MAX,sha
-from kit_budget import Budget,TABLE
+from kit_budget import Budget,TABLE,CLI_SITE,COPY_ADMISSION_SITES
 from kit_ops import ProductionOps,BudgetedCli
 from kit_owned import cli_spec
 from kit_integrity import DATA_MOUNT
@@ -40,7 +40,11 @@ class IntegratedBudget(unittest.TestCase):
         disk=Disk();ops=ProductionOps.__new__(ProductionOps);ops.disk=disk
         class Cli:
             def __init__(self):self.calls=[]
-            def run(self,spec):self.calls.append(spec['label']);return b'{}',{}
+            def run(self,spec):
+                self.calls.append(spec['label'])
+                site=CLI_SITE.get(spec['label'])
+                if site in COPY_ADMISSION_SITES:budget.copy_ceiling(site)
+                return b'{}',{}
         cli=Cli();wrapped=BudgetedCli(cli,disk)
         # Refuse an undeclared copy producer before starting its actual CLI.
         disk.begin('stopped-backup')

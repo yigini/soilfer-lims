@@ -1,0 +1,135 @@
+{
+  "createdAt": "2026-10-16T19:30:55.585Z",
+  "scope": "ONE authorized complete ordinary LOCAL full server run; closed, no extra test execution",
+  "source": "C:\\Users\\yigin\\.codex\\worktrees\\issue-207-custody\\soilfer-lims",
+  "root": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\app",
+  "head": "ad9d2660041c4db380d73a759871987d625f7404",
+  "stagedPaths": [],
+  "workingStatus": "M client/src/components/projects/ProjectActionsModal.jsx\n M client/src/pages/Reception.jsx\n M client/src/translations/en.json\n M client/src/translations/es-419.json\n M client/src/translations/es.json\n M client/src/translations/fr.json\n M client/src/translations/pt.json\n M server/controllers/projectController.js\n D server/node_modules\n M server/scripts/install_sample_custody.js\n M server/services/custodyService.js\n M server/services/intakePreparationService.js\n M server/services/intakeReceiptService.js\n M server/services/sampleRetentionService.js\n M server/tests/contracts/audit_5_3_custody_retention.test.js\n M server/tests/contracts/reception_regression_stage_f.test.js\n M server/tests/contracts/reception_stage_e.test.js",
+  "reviewedPatchSha256": "f10be973b0a52d90fdb219e37dd8b9525ec3bf6eafc487bf38a6dfd82aaf3e82",
+  "startedAt": "2026-10-16T18:50:30.444Z",
+  "closedAt": "2026-10-16T19:27:51.853Z",
+  "exitCode": 0,
+  "literalSummary": "Test Suites: 374 passed, 374 total\nTests:       5716 passed, 5716 total\nSnapshots:   0 total\nTime:        2238.129 s, estimated 2755 s\nRan all test suites.",
+  "discoveryAndExecutionExactSuiteSet": true,
+  "actualVerboseTestInventoryCount": 5716,
+  "finalAll2441MappedSourceAndFixtureBytesMatch": true,
+  "generated21Unchanged": true,
+  "runtimeMapUnchanged": true,
+  "readonlyIndexUnchanged": true,
+  "templateBytesUnchanged": true,
+  "templateAttributes": "Both Windows file attributes writable; SQLite globalSetup/source backup connections readonly:true. No OS-readonly claim.",
+  "soleExpectedGeneratedOutput": {
+    "path": "server/data/help/RELEASE_MANIFEST_v1.json",
+    "retained": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\audit-6218788735-full-1-generated-help-RELEASE_MANIFEST_v1.json",
+    "sha256": "2d1e65f5d89872e6d373321adbccc4ac0c73c3fe2b727d63d639f2a2b9a55ba4",
+    "capturedAfterClosure": true,
+    "restoredAt": "2026-10-16T19:30:23.705Z",
+    "restoredSha256": "6c3d66602ee2269ed2ebbb8b13ca4c527ea63985696f48bb8b30dd4bea44c2c3"
+  },
+  "baselineJsxLint": "6 errors and 16 warnings, identical to untouched ad9d; comparison retained. No unrelated lint changes.",
+  "limitations": "Local server full run only; retained prior client/dist mapped bytes, no newly authorized client build or CI. Green38911857904 remains immutable on ad9d; audit6218788735FAILED independent. Corrections remain local unstaged.",
+  "retainedEvidenceFailures": [
+    "Preflight package-export/path resolution errors before any tests; corrected only local evidence script runtime mapping.",
+    "Postflight initial assertion confused SQLite readonly connections with OS readonly attributes; actual bytes unchanged and writable attribute recorded.",
+    "Postflight discovery app-relative server/tests paths compared to Jest server-relative tests paths; exact 374 set comparison succeeds after explicit single server/ prefix normalization. All earlier failing logs retained; no tests rerun."
+  ],
+  "authorizationBoundary": "No stage, commit, push, new CI, PR body publication, ready/audit/native/labels or merge.",
+  "artifacts": {
+    "audit-6218788735-full-1.log": {
+      "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\audit-6218788735-full-1.log",
+      "bytes": 2401210,
+      "sha256": "7f85cd3fd987d94e620d42469d7bcdc567b5e220eee18fd3da10271125fbb739"
+    },
+    "audit-6218788735-full-1-closed.json": {
+      "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\audit-6218788735-full-1-closed.json",
+      "bytes": 1770,
+      "sha256": "f6dbc1265532b33ad8d878fda6635aee1c5a51062a3d05cf8516c532c4f8f89a"
+    },
+    "audit-6218788735-full-1-summary.txt": {
+      "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\audit-6218788735-full-1-summary.txt",
+      "bytes": 156,
+      "sha256": "ce57768a77fb51837cba06c09b9927e202e8f6e421ec6b760bd9cf6a71695386"
+    },
+    "audit-6218788735-full-1-inventory-before.json": {
+      "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\audit-6218788735-full-1-inventory-before.json",
+      "bytes": 23603,
+      "sha256": "e8531cebd45778e29e8be59271889f79c45418b094177f399dc298235d2385f7"
+    },
+    "audit-6218788735-full-1-inventory-closed.json": {
+      "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\audit-6218788735-full-1-inventory-closed.json",
+      "bytes": 1276947,
+      "sha256": "638665325acd50a2ff4b4d1581d1cfe0edee4e9ed63febda2c2705b03e12711d"
+    },
+    "inputs-audit-6218788735-full-1.json": {
+      "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\inputs-audit-6218788735-full-1.json",
+      "bytes": 318762,
+      "sha256": "ab972e52dd03cc0051a0ee51c4477431743219d9aba6ec30a96597493c3697d7"
+    },
+    "audit-6218788735-full-1-postflight.json": {
+      "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\audit-6218788735-full-1-postflight.json",
+      "bytes": 5449,
+      "sha256": "07c10bee749faa823b015b39db3ff41cff0d0b006a62034725719028886268d6"
+    },
+    "audit-6218788735-full-1-generated-help-RELEASE_MANIFEST_v1.json": {
+      "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\audit-6218788735-full-1-generated-help-RELEASE_MANIFEST_v1.json",
+      "bytes": 94717,
+      "sha256": "2d1e65f5d89872e6d373321adbccc4ac0c73c3fe2b727d63d639f2a2b9a55ba4"
+    },
+    "audit-6218788735-full-1-index": {
+      "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\audit-6218788735-full-1-index",
+      "bytes": 286597,
+      "sha256": "eb34ad2825fd43b5319ab79b10684ca0601435dc0f957c725c75f68d04ce1229"
+    },
+    "audit-6218788735-local-1.patch": {
+      "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\audit-6218788735-local-1.patch",
+      "bytes": 36682,
+      "sha256": "f10be973b0a52d90fdb219e37dd8b9525ec3bf6eafc487bf38a6dfd82aaf3e82"
+    },
+    "audit-6218788735-local-review.json": {
+      "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\audit-6218788735-local-review.json",
+      "bytes": 3122,
+      "sha256": "95097f18fb7c92de269484d64d2758a81dd51f62bf02b385bb801adafcb507b0"
+    },
+    "audit-6218788735-client-focused-lint.json": {
+      "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\audit-6218788735-client-focused-lint.json",
+      "bytes": 527661,
+      "sha256": "3d065bb7d1cd87131c2a224667d5dda7692051872abcd94cba61cb28a05ccbe2"
+    },
+    "audit-6218788735-client-lint-comparison.json": {
+      "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\audit-6218788735-client-lint-comparison.json",
+      "bytes": 588,
+      "sha256": "c52f8670d6433a51141cb1bd734adb0e8c3237b79bd9bf3168c219be328aa65c"
+    },
+    "audit-6218788735-full-1-provisioning-note.json": {
+      "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\audit-6218788735-full-1-provisioning-note.json",
+      "bytes": 591,
+      "sha256": "0d2d98b276d6cd9a2aef80f5505ea68c0b2ac3e8e40613591dff40aa18ade54f"
+    },
+    "audit-6218788735-full-1-preflight.log": {
+      "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\audit-6218788735-full-1-preflight.log",
+      "bytes": 1302,
+      "sha256": "8e8c6b613f340977b599fe2095b3f5e13e4612f7b93eb2801ed92018b6a96ecf"
+    },
+    "audit-6218788735-full-1-preflight-path-corrected.log": {
+      "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\audit-6218788735-full-1-preflight-path-corrected.log",
+      "bytes": 1372,
+      "sha256": "350200854ffa3192c07e4ba3db429835a5ba6ef45fc0dc45dcb00414dbd7884b"
+    },
+    "audit-6218788735-full-1-postflight.log": {
+      "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\audit-6218788735-full-1-postflight.log",
+      "bytes": 2377,
+      "sha256": "0b37cedcf2ca788bccc336fbab055ea54a49eff49e915e8b42c4c6406258b88b"
+    },
+    "audit-6218788735-full-1-postflight-attribute-corrected.log": {
+      "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\audit-6218788735-full-1-postflight-attribute-corrected.log",
+      "bytes": 2436,
+      "sha256": "f3f13e1acb6d57bd7eaa227c7fffff7b57886000949107fde8a415c360fc98de"
+    },
+    "audit-6218788735-full-1-postflight-final.log": {
+      "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\audit-6218788735-full-1-postflight-final.log",
+      "bytes": 1488,
+      "sha256": "0c6b42ce06c468683dee94b432ce56e5fe4fa10ed771b8b613d3fc1ab456885f"
+    }
+  }
+}

@@ -41,7 +41,7 @@ SEAL_DIRECTORY_BYTES=3*4096
 STAGES=tuple((name,{**sites,**({'seal-directory':sites['backup'],'reader-index':sites['backup']} if 'backup' in sites else {})},
     fixed+sites.get('backup',0)*SEAL_DIRECTORY_BYTES) for name,sites,fixed in STAGES)
 CONTROLLER_COPY_SITES=('triple','backup','clone','assets','seal-directory','reader-index')
-COPY_ADMISSION_SITES=CONTROLLER_COPY_SITES+('cli-backup',)
+COPY_ADMISSION_SITES=CONTROLLER_COPY_SITES+('cli-backup','cli-policy','cli-charts','cli-orders','cli-order-impact')
 CLI_SITE={'canonical-policy':'cli-policy','order-impact':'cli-order-impact',
           'first-sync-backup':'cli-backup','postflight-backup':'cli-backup',
           **{'214-'+phase:'cli-charts' for phase in ('dry','apply','repeat')},
@@ -106,7 +106,7 @@ class Budget:
         require(self.copy_admissions[site]<self.claims[site],'Copy admission cannot reuse an earlier producer claim')
         self.copy_admissions[site]+=1
         if site=='seal-directory':return SEAL_DIRECTORY_BYTES
-        return self.assets if site=='assets' else (self.db*125+99)//100
+        return self.assets if site=='assets' else (self.db*DB_COST[site]*125+99)//100
 
     def finish(self,label,physical_growth):
         require(self.recovery is None and self.active==label and dict(self.claims)==TABLE[self.completed]['sites'],'Missing/changed source copy claims')

@@ -1,0 +1,5 @@
+{
+  "at": "2026-10-16T18:50:09.709Z",
+  "fullTestsStarted": false,
+  "previousPreflight": "Completed old source/fixture 2441 hashes, generated/dependency/template checks, copied reviewed16files and copied read-only current index. Stopped before discovery because jest-worker package exports deny subpath resolution. Corrected evidence-runtime path resolution using package root, no application/test changes. Previous tool output lost after code-host stale-generation response; this records the actual observed error: Package subpath ./build/workers/processChild is not defined by exports."
+}

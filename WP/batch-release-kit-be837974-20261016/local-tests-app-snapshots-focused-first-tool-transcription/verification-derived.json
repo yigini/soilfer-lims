@@ -1,0 +1,45 @@
+{
+  "provenance": "TOOL_OUTPUT_TRANSCRIPTION; original command output remains in chat, not retained as original raw files",
+  "observedUtc": "2026-10-16T19:32:41.891570+00:00",
+  "tests": 56,
+  "passed": 50,
+  "failures": 4,
+  "errors": 2,
+  "seconds": 1.644,
+  "sourceSnapshotTiming": "after focused command, before any source edits",
+  "issues": [
+    "LOCAL Windows posix ROOT projection missing in new refusal fixture",
+    "synthetic Ops CLI missing newly mandatory snapshot admission",
+    "four source-generated stop_post equality failures; source build not yet updated"
+  ],
+  "sources": {
+    "kit_app_snapshots.py": {
+      "bytes": 5834,
+      "sha256": "769d0c7ada2004d6a4cd753401d36366d4109098b53833005bc633653ddfd5df"
+    },
+    "application-snapshot-source.json": {
+      "bytes": 3008,
+      "sha256": "22671af25697a8f18de74259fc63aed5bcc4c4b00aa3d161ede1ec84f1fd380c"
+    },
+    "kit_budget.py": {
+      "bytes": 9205,
+      "sha256": "ae24cd587c779dea34ded741707ae53893416ebda39afc5e31acac0a5218a38a"
+    },
+    "kit_owned.py": {
+      "bytes": 18298,
+      "sha256": "248be75610536fc81e2a024adb859761da5ef6aa2ad8f07fd676b723941acec7"
+    },
+    "kit_construction.py": {
+      "bytes": 8151,
+      "sha256": "6351ca2e4b3a1b28c5e2c6b939036e8e5abf52b0d1761feea2bd3362a29dec90"
+    },
+    "kit_frozen.py": {
+      "bytes": 11086,
+      "sha256": "de8182e9d3a3e12864a8c139c7e36b67767b9dc088f6bf4e9293ea90406360e9"
+    },
+    "verify_kit_app_snapshots.py": {
+      "bytes": 9413,
+      "sha256": "fd736b2ce1152c122bf60429b0c9a26784903bbbbbcc674fee4d8a936dff68e3"
+    }
+  }
+}
