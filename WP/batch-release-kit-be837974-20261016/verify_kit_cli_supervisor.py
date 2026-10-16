@@ -60,7 +60,7 @@ for (const failure of ['none','integrity','fk']) {
         d=pathlib.Path(tempfile.mkdtemp(prefix='owned-',dir=FIXTURES)).resolve()
         from kit_cli_output import admission
         exclusive_record(d,'cli-output-admission.json',admission(['-e',child_code]),require_directory_sync=os.name=='posix')
-        bootstrap='require('+json.dumps(str(ROOT/'cli_guard.cjs'))+').runChild('+json.dumps(str(d))+',["-e",'+json.dumps(child_code)+']).catch(()=>process.exitCode=1)'
+        bootstrap='require('+json.dumps(str(ROOT/'cli_guard.cjs'))+').runChild('+json.dumps(str(d))+',["-e",'+json.dumps(child_code)+'],()=>({check(){},close(){}})).catch(()=>process.exitCode=1)' # Explicit LOCAL Linux-directory stand-in.
         with (d/'stdout-original.txt').open('xb') as out,(d/'stderr-original.txt').open('xb') as err:
             process=subprocess.Popen([node,'-e',bootstrap],stdout=out,stderr=err)
             try:

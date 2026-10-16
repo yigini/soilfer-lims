@@ -186,7 +186,7 @@ const a=require('node:assert/strict'),fs=require('node:fs'),path=require('node:p
         with patch.object(kit_owned,'ROOT',pathlib.PurePosixPath(root.as_posix())),\
              patch.object(kit_owned,'validate_spec',lambda value:value),patch.object(kit_evidence,'_runtime',book):
             prepare,read,permit=filesystem_controls(root,False);prepare(spec);temp=pathlib.Path(spec['tmp'])
-            code='require('+json.dumps(str(HERE/'cli_guard.cjs'))+').runChild('+json.dumps(str(temp))+','+json.dumps(spec['child'])+').catch(()=>process.exitCode=1)'
+            code='require('+json.dumps(str(HERE/'cli_guard.cjs'))+').runChild('+json.dumps(str(temp))+','+json.dumps(spec['child'])+',()=>({check(){},close(){}})).catch(()=>process.exitCode=1)' # Explicit LOCAL Linux-directory stand-in.
             with (root/'wrapper.stdout').open('wb') as out,(root/'wrapper.stderr').open('wb') as err:
                 process=subprocess.Popen([shutil.which('node'),'-e',code],stdout=out,stderr=err)
                 try:

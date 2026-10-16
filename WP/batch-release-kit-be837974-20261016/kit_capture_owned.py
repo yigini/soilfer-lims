@@ -45,7 +45,7 @@ def capture_spec(label):
         {'Type':'bind','Source':tmp,'Destination':'/tmp','RW':True}]
     environment={'NODE_OPTIONS':'','ALLOW_PRISMA_DB_PUSH':'false','ALLOW_AUTO_SEED':'false',
         'DISABLE_BACKGROUND_JOBS':'true','DATABASE_PATH':CAPTURE_DATABASE,'DATABASE_URL':'file:'+CAPTURE_DATABASE,
-        'TMPDIR':'/tmp','TMP':'/tmp','TEMP':'/tmp'}
+        'SQLITE_TMPDIR':'/tmp','TMPDIR':'/tmp','TMP':'/tmp','TEMP':'/tmp'}
     args=['docker','create','--name',name,'--label',CAPTURE_LABEL+'='+owner,'--network','none',
         '--memory',str(MEMORY_MAX),'--memory-swap',str(MEMORY_MAX),'--restart','no',
         '--entrypoint','node','--workdir','/app/server','--no-healthcheck','--log-driver','none']

@@ -7,6 +7,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
 const output = require('./cli_output.cjs');
+const { temporaryDirectory } = require('./sqlite_temp_directory.cjs');
 const scripts = new Set([
   'install_sample_containers.js', 'install_control_charts.js',
   'install_order_revisions.js', 'install_lab_policy_schema.js',
@@ -44,13 +45,20 @@ function validateMain(argv) {
   requireValue(!child[0].endsWith('/install_lab_policy_schema.js') || child[3] === '--dry-run', 'Existing canonical policy may only be checked read-only');
   return { directory: argv[0], child };
 }
-async function runChild(directory, child) {
+async function runChild(directory, child, routing = temporaryDirectory) {
   const complete = path.join(directory, 'cli-child-complete.json');
   const permit = path.join(directory, 'cli-exit-permit.json');
   requireValue(!fs.existsSync(complete) && !fs.existsSync(permit), 'CLI control paths already consumed');
   output.readAdmission(directory, child);
+  const temporary = routing(directory);
   const began = process.hrtime.bigint();
-  const result = await output.capture(directory, child);
+  let result;
+  try {
+    result = await output.capture(directory, child);
+    // The scientific child has really closed. Routing failure never signals
+    // it or creates a new transaction deadline, and cannot publish success.
+    temporary.check();
+  } finally { temporary.close(); }
   const record = Buffer.from(JSON.stringify({ childStatus: result.status, childSignal: result.signal,
     childErrorType: result.errorType,
     childSeconds: Number(process.hrtime.bigint() - began) / 1e9,
