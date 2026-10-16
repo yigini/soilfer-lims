@@ -19,7 +19,7 @@ SPECS={
         'EMERGENCY_METADATA_LIMIT','EMERGENCY_NAMESPACE_BYTES','INDEPENDENT_EMERGENCY_BYTES',
         '_runtime','allocation','fixed_envelope_bounds','EvidenceLedger','EvidenceWindow','bind_runtime','admit_evidence'),
     'kit_journal.py':('real_directory','exclusive_record'),
-    'kit_owned.py':('LABEL','DATABASE','INSTALLERS','ALLOWED','cli_spec','validate_spec','selected','same_retained'),
+    'kit_owned.py':('LABEL','DATABASE','INSTALLERS','ALLOWED','cli_spec','validate_spec','selected','selected_fields','same_retained'),
     'kit_integrity.py':('DATA_MOUNT',),
     'retained_health.py':('assert_healthcheck',),
     'kit_runtime.py':('PREDECESSOR_ID','PREDECESSOR_IMAGE','PREDECESSOR_HEAD','CANDIDATE_OWNER','VOLUMES',

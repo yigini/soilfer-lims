@@ -82,11 +82,19 @@ def selected(value,spec,running=None,emergency=False):
     reads. Docker's API mount ARRAY order is never treated as semantic.
     """
     validate_spec(spec)
+    return selected_fields(value,spec,LABEL,['/release/cli_guard.cjs','/tmp',*spec['child']],running,emergency)
+
+def selected_fields(value,spec,label_key,command,running=None,emergency=False):
+    """Shared inspection predicates; callers first validate their typed spec.
+
+    Release and fresh-capture owners have different roots, labels, commands
+    and database mounts. Neither wrapper accepts the other specification.
+    """
     require(isinstance(value,dict) and re.fullmatch('[a-f0-9]{64}',value.get('Id','')),'Exact full owned ID required')
     config=value.get('Config',{});host=value.get('HostConfig',{});state=value.get('State',{})
     require(value.get('Name')=='/'+spec['name'] and value.get('Image')==IMAGE and
-            config.get('Labels',{}).get(LABEL)==spec['owner'],'Owned name/image/owner differs')
-    require(config.get('Entrypoint')==['node'] and config.get('Cmd')==['/release/cli_guard.cjs','/tmp',*spec['child']] and
+            config.get('Labels',{}).get(label_key)==spec['owner'],'Owned name/image/owner differs')
+    require(config.get('Entrypoint')==['node'] and config.get('Cmd')==command and
             config.get('WorkingDir')=='/app/server','Owned CLI entrypoint/command differs')
     env=config.get('Env',[]);pairs={}
     require(isinstance(env,list),'Owned environment absent')
@@ -141,6 +149,8 @@ def completion(raw,spec):
     return value
 
 class OwnedCli:
+    specification_validator=staticmethod(validate_spec)
+    selection=staticmethod(selected)
     def __init__(self,runner,reader,journal,memory_factory,prepare_tmp,read_completion,publish_permit,stopper,
                  clock=time.monotonic,sleep=time.sleep,evidence_factory=begin_cli_evidence,output_reader=None):
         self.runner=runner;self.reader=reader;self.journal=journal;self.memory_factory=memory_factory
@@ -150,7 +160,7 @@ class OwnedCli:
         self.output_reader=output_reader
 
     def run(self,spec):
-        validate_spec(spec);label=spec['label']
+        self.specification_validator(spec);label=spec['label']
         require(label not in self.consumed,'CLI owner consumed; never retry')
         self.consumed.add(label)
         try:return self._run(spec)
@@ -180,13 +190,13 @@ class OwnedCli:
         raw,_,_=self.runner.run(spec['argv'],label+'-create',30,
             output_limits={'stdout':128,'stderr':64*1024**2})
         require(re.fullmatch(rb'[a-f0-9]{64}\n?',raw) is not None,'Exact create ID output required')
-        identity=raw.decode().strip();created=selected(self.reader.inspect(identity),spec,False)
+        identity=raw.decode().strip();created=self.selection(self.reader.inspect(identity),spec,False)
         self.journal.append('ownedCliCreated',{'owner':spec['owner'],'id':identity,'selected':created})
         began=self.clock()
         start_raw,_,_=self.runner.run(['docker','start',identity],label+'-start',15,
             output_limits={'stdout':128,'stderr':64*1024**2})
         require(start_raw in (identity.encode(),identity.encode()+b'\n'),'Exact started CLI ID output required')
-        started=selected(self.reader.inspect(identity),spec,True)
+        started=self.selection(self.reader.inspect(identity),spec,True)
         require(all(created[k]==started[k] for k in ('id','owner','name','image','mounts','configSha256','hostConfigSha256')),
                 'Created CLI configuration changed at start')
         history=self.memory_factory(label,identity,spec['owner'])
@@ -202,7 +212,7 @@ class OwnedCli:
         require(child is not None,'Existing CLI 600 second deadline reached; never retry')
         require(callable(self.output_reader),'Independent original CLI output reader required')
         self.output_reader(spec,completion_raw,False)
-        final_before=selected(self.reader.inspect(identity),spec,True)
+        final_before=self.selection(self.reader.inspect(identity),spec,True)
         same_retained(started,final_before)
         history.observe('before-stop')
         memory=history.summary(0)
@@ -217,7 +227,7 @@ class OwnedCli:
             output_limits={'stdout':16,'stderr':64*1024})
         require(re.fullmatch(rb'(0|[1-9][0-9]{0,2})\n?',waited) is not None and int(waited)<=255,
             'Exact retained wrapper wait status required')
-        obj=self.reader.inspect(identity);after=selected(obj,spec,False);same_retained(started,after)
+        obj=self.reader.inspect(identity);after=self.selection(obj,spec,False);same_retained(started,after)
         require(self.clock()-began<600,'CLI wrapper failed to exit within original 600 second deadline')
         require(type(obj['State'].get('ExitCode')) is int and obj['State']['ExitCode']==int(waited),
             'Wrapper wait and final complete inspection exit status differ')
@@ -242,6 +252,16 @@ def filesystem_controls(root,require_directory_sync=True,disk=None,no_writers=No
         validate_spec(spec);p=root/(spec['label']+'-retained-temp')
         require(p.as_posix()==spec['tmp'] and p.parent==root and not p.is_symlink(),'Exact private control directory required')
         return p
+    return control_callbacks(root,directory,require_directory_sync,disk,no_writers,CLI_SNAPSHOTS,CLI_SITE,
+        'order-impact',('first-sync-backup','postflight-backup'))
+
+def control_callbacks(root,directory,require_directory_sync,disk,no_writers,snapshot_counts,snapshot_sites,
+                      order_label,backup_labels):
+    """Transport only: each typed caller supplies its exact directory guard.
+
+    Complete raw-stream and copy admissions still precede mkdir/create. This
+    grants no source review, budget, writable source mount or retry authority.
+    """
     snapshot_admissions={};snapshot_closures=set();output_admissions={};output_closures=set()
     cli_admissions={};cli_closed=set()
     def prepare(spec):
@@ -253,20 +273,20 @@ def filesystem_controls(root,require_directory_sync=True,disk=None,no_writers=No
         admit_evidence(p/'cli-child-complete.json',8192,pending=True,future_directory=p)
         cli_admissions[spec['label']]=reserve_cli_output(p)
         output=None
-        if spec['label']=='order-impact':output=reserve_output(p)
+        if spec['label']==order_label:output=reserve_output(p)
         limit=None
-        if spec['label'] in ('first-sync-backup','postflight-backup'):
+        if spec['label'] in backup_labels:
             require(disk is not None,'Live backup requires its held before-create content admission')
             limit,plan=live_backup_limit(disk.budget.db)
             disk.admit_copy('cli-backup',p/'backup.db',plan)
         snapshot=None
-        if spec['label'] in CLI_SNAPSHOTS:
+        if spec['label'] in snapshot_counts:
             require(disk is not None and callable(no_writers),
                 'Application snapshot admission requires its held budget and fresh no-writer check')
             no_writers()
             target=pathlib.Path(spec['mounts'][0]['Source'])/'dev.db'
-            snapshot=snapshot_plan(target,CLI_SNAPSHOTS[spec['label']])
-            disk.admit_copy(CLI_SITE[spec['label']],p,snapshot['layout'])
+            snapshot=snapshot_plan(target,snapshot_counts[spec['label']])
+            disk.admit_copy(snapshot_sites[spec['label']],p,snapshot['layout'])
             no_writers();unchanged_source(target,snapshot)
         p.mkdir(mode=0o700)
         require(not list(p.iterdir()),'Fresh empty CLI control directory required')
