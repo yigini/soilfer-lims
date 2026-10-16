@@ -1,0 +1,42 @@
+[
+  {
+    "path": "C:\\Users\\yigin\\.codex\\worktrees\\issue-208-labels\\soilfer-lims\\server\\tests\\.tmp_issue208\\pr299-ci-38915551182-run.json",
+    "sha256": "6506a176f93437ff0c4e29c213a0693cebc8cb4f0282b27ae36c04720ce2cf81"
+  },
+  {
+    "path": "C:\\Users\\yigin\\.codex\\worktrees\\issue-208-labels\\soilfer-lims\\server\\tests\\.tmp_issue208\\pr299-ci-38915551182-job.json",
+    "sha256": "15a7d0edbad1accb5ed78bc212f614bf4916d550cf9aef60797c5be406df66a8"
+  },
+  {
+    "path": "C:\\Users\\yigin\\.codex\\worktrees\\issue-208-labels\\soilfer-lims\\server\\tests\\.tmp_issue208\\pr299-ci-38915551182.log",
+    "sha256": "ecfb28579448eb69510ed81870d6040b672ad6039658b0759c0bd7e68d8e5b44"
+  },
+  {
+    "path": "C:\\Users\\yigin\\.codex\\worktrees\\issue-208-labels\\soilfer-lims\\server\\tests\\.tmp_issue208\\pr299-ci-38915551182-original-logs.zip",
+    "sha256": "295b440095d35327457fff6e795e3021b3367608fcd9079e56a770f60a40072a"
+  },
+  {
+    "path": "C:\\Users\\yigin\\.codex\\worktrees\\issue-208-labels\\soilfer-lims\\server\\tests\\.tmp_issue208\\pr299-ci-38915551182-inventory.json",
+    "sha256": "81ccb6382672243bdc81c8decc71fd666d01154909ea88205d4ea83c056c3995"
+  },
+  {
+    "path": "C:\\Users\\yigin\\.codex\\worktrees\\issue-208-labels\\soilfer-lims\\server\\tests\\.tmp_issue208\\pr299-ci-38915551182-entry-sha256.json",
+    "sha256": "7e828f5ea154837fea87fa476ddb9c13d9836fa4d0c9307fb867cfca1babe04f"
+  },
+  {
+    "path": "C:\\Users\\yigin\\.codex\\worktrees\\issue-208-labels\\soilfer-lims\\server\\tests\\.tmp_issue208\\pr299-ci-38915551182-evidence.json",
+    "sha256": "998fe855a5bdd45a6d62b708905be10375b75a4a15c3e2938cdfcc46a48d4ac3"
+  },
+  {
+    "path": "C:\\Users\\yigin\\.codex\\worktrees\\issue-208-labels\\soilfer-lims\\server\\tests\\.tmp_issue208\\pr299-ci-38915551182-watch.log",
+    "sha256": "e0efb560ba0a5845716e5bc722a95eb30d7ad8b6367bd840ec64bc21368e9ea5"
+  },
+  {
+    "path": "C:\\Users\\yigin\\.codex\\worktrees\\issue-208-labels\\soilfer-lims\\server\\tests\\.tmp_issue208\\pr299-ci-38915551182-watch-exit.json",
+    "sha256": "85ce79a8ab337db8b5aec7ecc1aba9bea27ed2ce5f7f79e9cc0b3ee3179a8bc7"
+  },
+  {
+    "path": "C:\\Users\\yigin\\.codex\\worktrees\\issue-208-labels\\soilfer-lims\\server\\tests\\.tmp_issue208\\pr299-ci-38915551182-preservation-domain.json",
+    "sha256": "3c8d3b06ceeba512894fc483d7a8fd4cf628e79c1f7115f63d9c155fd09ba818"
+  }
+]

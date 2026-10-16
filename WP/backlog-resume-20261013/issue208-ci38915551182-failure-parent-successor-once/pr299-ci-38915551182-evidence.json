@@ -1,0 +1,114 @@
+{
+  "runId": 38915551182,
+  "attempt": 1,
+  "status": "completed",
+  "conclusion": "failure",
+  "head": "72adbe43b36319e6f9d8088baa61b0fbe26bb3ff",
+  "tree": "2e562ca28eff2229b321db490b4f243882e44021",
+  "base": "be8379745bdfae52ce46496ff26514dc7d729640",
+  "jobId": 117021961656,
+  "server": [
+    "Test Suites: 376 passed, 376 total",
+    "Tests:       5725 passed, 5725 total",
+    "Time:        1888.137 s",
+    "Ran all test suites."
+  ],
+  "exactLocalFrozenInventoryMatch": true,
+  "steps": [
+    {
+      "name": "Set up job",
+      "conclusion": "success"
+    },
+    {
+      "name": "Checkout repository",
+      "conclusion": "success"
+    },
+    {
+      "name": "Setup Node.js",
+      "conclusion": "success"
+    },
+    {
+      "name": "Install server dependencies",
+      "conclusion": "success"
+    },
+    {
+      "name": "Install client dependencies",
+      "conclusion": "success"
+    },
+    {
+      "name": "Verify theme catalog and tokens drift",
+      "conclusion": "success"
+    },
+    {
+      "name": "Build client production bundle",
+      "conclusion": "success"
+    },
+    {
+      "name": "Setup test database and generate Prisma client",
+      "conclusion": "success"
+    },
+    {
+      "name": "Install Chromium for keyboard-only recording contract",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run server test suite",
+      "conclusion": "success"
+    },
+    {
+      "name": "Set up Docker Buildx",
+      "conclusion": "success"
+    },
+    {
+      "name": "Build Docker image",
+      "conclusion": "success"
+    },
+    {
+      "name": "Build Supported Baseline Docker Image (v3.5.30 / 48d0e52)",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run Real Disposable Docker Boundary Rehearsal",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run Real Docker Deployment Readiness Acceptance",
+      "conclusion": "failure"
+    },
+    {
+      "name": "Post Build Docker image",
+      "conclusion": "success"
+    },
+    {
+      "name": "Post Set up Docker Buildx",
+      "conclusion": "success"
+    },
+    {
+      "name": "Post Setup Node.js",
+      "conclusion": "skipped"
+    },
+    {
+      "name": "Post Checkout repository",
+      "conclusion": "success"
+    },
+    {
+      "name": "Complete job",
+      "conclusion": "success"
+    }
+  ],
+  "failure": {
+    "script": "server/scripts/rehearsal_deployment_readiness.cjs",
+    "line": 1426,
+    "message": "199 default entrypoint changed retained analytical, audit or receipt rows"
+  },
+  "retained": {
+    "zip": {
+      "bytes": 1380610,
+      "sha256": "295b440095d35327457fff6e795e3021b3367608fcd9079e56a770f60a40072a"
+    },
+    "entries": 21,
+    "logSha256": "ecfb28579448eb69510ed81870d6040b672ad6039658b0759c0bd7e68d8e5b44",
+    "inventorySha256": "81ccb6382672243bdc81c8decc71fd666d01154909ea88205d4ea83c056c3995",
+    "entryHashesSha256": "7e828f5ea154837fea87fa476ddb9c13d9836fa4d0c9307fb867cfca1babe04f"
+  }
+}

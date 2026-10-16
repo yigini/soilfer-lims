@@ -1,0 +1,313 @@
+{
+  "basis": "Static source-derived PRE_199 column domain, not recovered CI row payloads",
+  "tables": {
+    "Sample": {
+      "columns": [
+        "id",
+        "originalId",
+        "projectCode",
+        "projectId",
+        "countryName",
+        "country",
+        "assignedLab",
+        "labId",
+        "status",
+        "dryingStatus",
+        "preparationStatus",
+        "receptionDate",
+        "receivedBy",
+        "depthTop",
+        "depthBottom",
+        "horizon",
+        "clientName",
+        "metadata",
+        "fieldMetadata",
+        "receptionData",
+        "requiredAnalyses",
+        "analysisGroupIds",
+        "history",
+        "rejectionReason",
+        "receivedMass",
+        "massWarningAcknowledged",
+        "moistureOnArrival",
+        "foreignMaterial",
+        "intakePhotos",
+        "isResubmission",
+        "latitude",
+        "longitude",
+        "elevation",
+        "positionalUncertaintyM",
+        "locationSource",
+        "locationCapturedAt",
+        "locationCapturedBy",
+        "compositeRadiusM",
+        "depthTopCm",
+        "depthBottomCm",
+        "admin1",
+        "admin2",
+        "village",
+        "siteName",
+        "custodyHandoverAt",
+        "custodyCarrierName",
+        "custodyTrackingNumber",
+        "custodySenderSignature",
+        "receivingOfficerId",
+        "receivingOfficerName",
+        "receivingOfficerSignature",
+        "matrix",
+        "plantPart",
+        "growthStage",
+        "acceptedBy",
+        "acceptedAt",
+        "approvedBy",
+        "approvedAt",
+        "lastSubmissionId",
+        "lastSubmissionType",
+        "lastSubmissionAt",
+        "createdAt",
+        "updatedAt",
+        "consignmentId",
+        "holdPriorStatus",
+        "legacyStatus"
+      ],
+      "createdFrom": "server/tests/helpers/fixtures/raw_input_supported_baseline.sql",
+      "addedBeforeCapture": [
+        {
+          "column": "holdPriorStatus",
+          "source": "server/prisma/migrations/20261005000000_workflow_state_evidence/migration.sql"
+        },
+        {
+          "column": "legacyStatus",
+          "source": "server/prisma/migrations/20261005000000_workflow_state_evidence/migration.sql"
+        }
+      ]
+    },
+    "Result": {
+      "columns": [
+        "id",
+        "sampleId",
+        "param",
+        "value",
+        "numericValue",
+        "unit",
+        "flags",
+        "isValid",
+        "censoring",
+        "basis",
+        "provenance",
+        "methodologyId",
+        "replicateNo",
+        "isCurrent",
+        "supersededBy",
+        "enteredBy",
+        "analysedAt",
+        "equipmentId",
+        "batchId",
+        "createdAt",
+        "updatedAt",
+        "attemptId",
+        "equipmentReadiness",
+        "rawInput"
+      ],
+      "createdFrom": "server/tests/helpers/fixtures/raw_input_supported_baseline.sql",
+      "addedBeforeCapture": [
+        {
+          "column": "attemptId",
+          "source": "server/prisma/migrations/20261006000000_result_attempt_link/migration.sql"
+        },
+        {
+          "column": "equipmentReadiness",
+          "source": "server/prisma/migrations/20261007000400_result_equipment_evidence/migration.sql"
+        },
+        {
+          "column": "rawInput",
+          "source": "server/prisma/migrations/20261004064500_add_result_raw_input/migration.sql"
+        }
+      ]
+    },
+    "WorkAttempt": {
+      "columns": [
+        "id",
+        "workItemId",
+        "orderLineId",
+        "attemptNo",
+        "executedMethodRevision",
+        "author",
+        "authorName",
+        "materialAliquot",
+        "instrumentId",
+        "qcBatchId",
+        "version",
+        "status",
+        "evidenceHash",
+        "evidenceData",
+        "createdAt",
+        "updatedAt",
+        "batchId",
+        "reason",
+        "requestedBy",
+        "requestedAt",
+        "rawData",
+        "calcVersion",
+        "dilutionFactor",
+        "aliquotId",
+        "legacyAttemptNoConflict",
+        "parentAttemptId",
+        "note"
+      ],
+      "createdFrom": "server/tests/helpers/fixtures/raw_input_supported_baseline.sql",
+      "addedBeforeCapture": [
+        {
+          "column": "batchId",
+          "source": "server/prisma/migrations/20261008000100_work_attempt_contract/migration.sql"
+        },
+        {
+          "column": "reason",
+          "source": "server/prisma/migrations/20261008000100_work_attempt_contract/migration.sql"
+        },
+        {
+          "column": "requestedBy",
+          "source": "server/prisma/migrations/20261008000100_work_attempt_contract/migration.sql"
+        },
+        {
+          "column": "requestedAt",
+          "source": "server/prisma/migrations/20261008000100_work_attempt_contract/migration.sql"
+        },
+        {
+          "column": "rawData",
+          "source": "server/prisma/migrations/20261008000100_work_attempt_contract/migration.sql"
+        },
+        {
+          "column": "calcVersion",
+          "source": "server/prisma/migrations/20261008000100_work_attempt_contract/migration.sql"
+        },
+        {
+          "column": "dilutionFactor",
+          "source": "server/prisma/migrations/20261008000100_work_attempt_contract/migration.sql"
+        },
+        {
+          "column": "aliquotId",
+          "source": "server/prisma/migrations/20261008000100_work_attempt_contract/migration.sql"
+        },
+        {
+          "column": "legacyAttemptNoConflict",
+          "source": "server/prisma/migrations/20261008000100_work_attempt_contract/migration.sql"
+        },
+        {
+          "column": "parentAttemptId",
+          "source": "server/prisma/migrations/20261008000200_repeat_correction_contract/migration.sql"
+        },
+        {
+          "column": "note",
+          "source": "server/prisma/migrations/20261008000200_repeat_correction_contract/migration.sql"
+        }
+      ]
+    },
+    "AuditLog": {
+      "columns": [
+        "id",
+        "entity",
+        "entityId",
+        "action",
+        "details",
+        "performedBy",
+        "performedByName",
+        "timestamp",
+        "sampleId",
+        "labId",
+        "analysisCode",
+        "before",
+        "after"
+      ],
+      "createdFrom": "server/tests/helpers/fixtures/raw_input_supported_baseline.sql"
+    },
+    "QcMeasurement": {
+      "columns": [
+        "id",
+        "batchId",
+        "positionId",
+        "analysisCode",
+        "replicateNo",
+        "value",
+        "rawInput",
+        "censoring",
+        "censoringLimit",
+        "enteredBy",
+        "enteredAt",
+        "supersededById",
+        "correctionReason",
+        "legacySource"
+      ],
+      "createdFrom": "server/prisma/migrations/20261006000400_normalized_qc_runs/migration.sql"
+    },
+    "QcEvaluation": {
+      "columns": [
+        "id",
+        "batchId",
+        "analysisCode",
+        "version",
+        "ruleId",
+        "ruleVersion",
+        "policyVersion",
+        "verdict",
+        "details",
+        "evaluatedBy",
+        "evaluatedAt",
+        "supersedesId",
+        "legacySource"
+      ],
+      "createdFrom": "server/prisma/migrations/20261006000400_normalized_qc_runs/migration.sql"
+    },
+    "BatchDisposition": {
+      "columns": [
+        "id",
+        "batchId",
+        "analysisCode",
+        "decision",
+        "reason",
+        "decidedBy",
+        "decidedAt",
+        "legacySource",
+        "scope"
+      ],
+      "createdFrom": "server/prisma/migrations/20261006000400_normalized_qc_runs/migration.sql",
+      "addedBeforeCapture": [
+        {
+          "column": "scope",
+          "source": "server/prisma/migrations/20261007000100_qc_gate_scope/migration.sql"
+        }
+      ]
+    }
+  },
+  "receiptColumns": [
+    "id",
+    "appliedAt",
+    "details"
+  ],
+  "expected180Delta": {
+    "Sample": [
+      {
+        "name": "labSampleCode",
+        "type": "TEXT",
+        "nullable": true,
+        "default": null
+      }
+    ],
+    "outsideComparedTables": {
+      "WorkItem": [
+        {
+          "name": "legacyLabId",
+          "type": "TEXT",
+          "nullable": true,
+          "default": null
+        }
+      ],
+      "LabSequence": "new empty table",
+      "Sample_labSampleCode_key": "new unique index"
+    }
+  },
+  "failureEvidence": {
+    "guaranteed": "SELECT * after startup contains the added Sample.labSampleCode key, absent before startup; JSON.stringify whole-row equality therefore fails for retained Sample rows",
+    "unavailable": "The CI process did not emit calculationBefore/After row arrays or old-receipt arrays before throwing; cleanup removed volumes and tmpDir. Sole actual mismatch and exact old-value/receipt preservation cannot be established from retained closed logs alone."
+  }
+}

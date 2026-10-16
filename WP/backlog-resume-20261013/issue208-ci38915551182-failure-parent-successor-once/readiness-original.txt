@@ -1,0 +1,106 @@
+﻿2026-10-16T15:02:01.8932737Z ##[group]Run node server/scripts/rehearsal_deployment_readiness.cjs
+2026-10-16T15:02:01.8933317Z [36;1mnode server/scripts/rehearsal_deployment_readiness.cjs[0m
+2026-10-16T15:02:01.8996140Z shell: /usr/bin/bash -e {0}
+2026-10-16T15:02:01.8996441Z env:
+2026-10-16T15:02:01.8996682Z   IMAGE_TAG: soilfer-lims:ci
+2026-10-16T15:02:01.8996968Z   CI: true
+2026-10-16T15:02:01.8997185Z ##[endgroup]
+2026-10-16T15:02:01.9352116Z ================================================================
+2026-10-16T15:02:01.9354030Z   REAL DISPOSABLE DOCKER DEPLOYMENT READINESS ACCEPTANCE        
+2026-10-16T15:02:01.9355372Z   Testing Default-Entrypoint Containers on Empty Volumes        
+2026-10-16T15:02:01.9356581Z ================================================================
+2026-10-16T15:02:01.9357132Z 
+2026-10-16T15:02:01.9977667Z Image Tag:    soilfer-lims:ci
+2026-10-16T15:02:01.9978707Z Immutable ID: sha256:f3e41d6c9183e6463bd42ce7736782a3a491f465a6a6790362853abfe2005f0b
+2026-10-16T15:02:01.9979371Z 
+2026-10-16T15:02:02.0015647Z ▶ [Scenario 1] Default Entrypoint Empty-Volume Local Mode First-Start...
+2026-10-16T15:02:12.4829811Z   ✓ Container healthy on port 42809
+2026-10-16T15:02:12.8496332Z   ✓ Fresh shipped entrypoint healthy: schema COMPLETE, 11 references deferred, catalogue inserts 0, reference receipts 0, repeat NO_OP/byte-preserved
+2026-10-16T15:02:13.1762112Z   ✓ Initial admin login succeeded (mustChangePassword=true)
+2026-10-16T15:02:13.4513346Z   ✓ Password change succeeded
+2026-10-16T15:02:13.5659474Z   ✓ Pre-restart token issued and verified active on operational API
+2026-10-16T15:02:13.7607253Z   ✓ Persisted secret verified on volume (5f691d96...)
+2026-10-16T15:02:23.9202261Z   ✓ Quiesced container 1
+2026-10-16T15:02:23.9202552Z 
+2026-10-16T15:02:23.9203068Z ▶ [Scenario 2] Container Restart on Same Volume (Secret Persistence & No Reseed)...
+2026-10-16T15:02:29.2180750Z   ✓ Restarted container healthy on port 43513
+2026-10-16T15:02:29.7804172Z   ✓ Pre-restart JWT token remains valid across container restart without re-login
+2026-10-16T15:02:29.9915228Z   ✓ Persisted secret byte-for-byte identical across restart
+2026-10-16T15:02:30.1058226Z   ✓ Login with updated password confirmed on restarted container
+2026-10-16T15:02:30.1297298Z   ✓ Verified seed.js was safely skipped on restart
+2026-10-16T15:02:30.1298582Z   Preparing 199 conflict proof: quiescing its disposable source containers
+2026-10-16T15:02:40.2917436Z   Source containers stopped; starting bounded WAL-aware owned snapshot/conflict proof
+2026-10-16T15:02:40.6219652Z   ✓ Actual shipped installer refuses conflicting pct_mass in both modes, writes 0, owned/source bytes unchanged
+2026-10-16T15:02:40.8683040Z   Loading owned catalogue prerequisite through existing units authority
+2026-10-16T15:02:41.6382958Z   Loading owned catalogue prerequisite through existing references authority
+2026-10-16T15:02:42.4018318Z   Loading owned catalogue prerequisite through existing catalogue authority
+2026-10-16T15:02:59.6412679Z   ✓ Explicit existing catalogue authorities → next shipped entrypoint adds exactly 11 inactive references/11 receipts; all old rows/schema/receipts retained; repeat NO_OP/byte-preserved
+2026-10-16T15:02:59.6414892Z 
+2026-10-16T15:02:59.6415628Z ▶ [Scenario 3] Interrupted-Init (Partial Seed Recovery) in Docker...
+2026-10-16T15:03:03.2928917Z Loaded Prisma config from prisma.config.ts.
+2026-10-16T15:03:03.2929502Z 
+2026-10-16T15:03:03.2929935Z Prisma schema loaded from prisma/schema.prisma.
+2026-10-16T15:03:10.6377412Z   ✓ Container booted on partial volume and became healthy on port 42263
+2026-10-16T15:03:10.9548987Z   ✓ Partial initialization was cleanly resumed and admin user created without LAB01 conflict
+2026-10-16T15:03:21.1146721Z 
+2026-10-16T15:03:21.1148053Z ▶ [Scenario 4] Default Entrypoint Empty-Volume Global Mode First-Start...
+2026-10-16T15:03:31.5179751Z   ✓ Global mode container healthy on port 38881
+2026-10-16T15:03:31.8202140Z   ✓ Global SUPER_ADMIN login verified
+2026-10-16T15:03:32.2104312Z   ✓ Created Lab Alpha (ALPHA_1792162921997) and Lab Beta (BETA_1792162921997)
+2026-10-16T15:03:32.2263272Z   ✓ Activated both laboratories
+2026-10-16T15:03:32.2264234Z 
+2026-10-16T15:03:32.2265346Z ▶ [Scenario 5] Multi-Lab Workload, Real Export, Schedulers & Quiesced Backup Serialization...
+2026-10-16T15:03:33.8264820Z   ✓ Ingested 10 representative samples concurrently across Lab Alpha & Lab Beta
+2026-10-16T15:03:33.8385547Z   ✓ Manager A real data export returned exactly 5 scoped samples with 1:1 multiplicity and verified accession Lab IDs
+2026-10-16T15:03:33.8447019Z   ✓ Manager B real data export returned exactly 5 scoped samples with 1:1 multiplicity and verified accession Lab IDs
+2026-10-16T15:03:33.8506881Z   ✓ Super Admin real data export returned all 10 cross-facility samples with complete IDs, multiplicity, and accession Lab IDs
+2026-10-16T15:03:33.9017062Z Loaded Prisma config from prisma.config.ts.
+2026-10-16T15:03:33.9017559Z 
+2026-10-16T15:03:33.9017898Z Prisma schema loaded from prisma/schema.prisma.
+2026-10-16T15:03:33.9030997Z   ✓ Verified background escalation scheduler initialized during container boot
+2026-10-16T15:03:44.0752727Z   ✓ Quiesced active writer container before generating database backup
+2026-10-16T15:03:44.3689743Z   ✓ Pre-restore backup executed cleanly
+2026-10-16T15:03:44.3691035Z   ✓ Bound exact backup artifact matching runbook regex: soilfer_lims_backup_2026-10-16T15-03-44-235Z.db.gz
+2026-10-16T15:03:44.6489959Z   ✓ Backup artifact verification PASSED: Users=3, Samples=10
+2026-10-16T15:03:44.9811249Z   ✓ Restore into fresh target volume PASSED with epoch invalidation
+2026-10-16T15:03:50.2759134Z   ✓ Restored container healthy on port 33489
+2026-10-16T15:03:50.5727465Z   ✓ Post-restore admin login confirmed
+2026-10-16T15:03:50.7241233Z   ✓ Post-restore sample count confirmed (exactly 5 samples preserved for Manager Alpha)
+2026-10-16T15:04:00.8942271Z 
+2026-10-16T15:04:00.8943876Z ▶ [Scenario 6] Populated Supported-Baseline Upgrade, Assets, Staged Route B & Epoch Invalidation...
+2026-10-16T15:04:00.9101756Z   ✓ Bound supported baseline: soilfer-lims:baseline-v3.5.30 (Tree: 48d0e526ded03232ac8516dd867f4b14923bdb58, ID: sha256:839181d2092157cdb93744c43319b05d4ed70f2c1c124729515864c7b3dd08a7)
+2026-10-16T15:04:00.9103194Z   ✓ Bound candidate target:   soilfer-lims:ci (ID: sha256:f3e41d6c9183e6463bd42ce7736782a3a491f465a6a6790362853abfe2005f0b)
+2026-10-16T15:04:04.7297970Z Loaded Prisma config from prisma.config.ts.
+2026-10-16T15:04:04.7298313Z 
+2026-10-16T15:04:04.7298530Z Prisma schema loaded from prisma/schema.prisma.
+2026-10-16T15:04:04.7299333Z   ✓ Initialized real baseline database with 2 labs and 3 users
+2026-10-16T15:04:04.9124857Z   ✓ Uploaded reference asset (spectral_cal_curve.json) to assets volume
+2026-10-16T15:04:06.1040115Z   ✓ Baseline container healthy on port 36387
+2026-10-16T15:04:06.4593855Z   ✓ Baseline operational login and API access verified
+2026-10-16T15:04:06.8623034Z   ✓ Created ten EXPECTED samples through baseline project manifests; API and read-only preservation record agree
+2026-10-16T15:04:17.9502866Z Unable to find image 'alpine:latest' locally
+2026-10-16T15:04:17.9503398Z latest: Pulling from library/alpine
+2026-10-16T15:04:17.9503714Z e2de96513ba9: Already exists
+2026-10-16T15:04:17.9504214Z Digest: sha256:294b683cb724975bec92580e1e685676bd4b50bda910ddb8c51d4cabeaec77e6
+2026-10-16T15:04:17.9504755Z Status: Downloaded newer image for alpine:latest
+2026-10-16T15:04:18.1383357Z   ✓ Generated Route B tarballs: db_snapshot_1792162921997.tar.gz & assets_snapshot_1792162921997.tar.gz
+2026-10-16T15:04:18.3342959Z   ✓ Staged recovery safely aborted on corrupt tarball without touching target volume
+2026-10-16T15:04:18.5801201Z   ✓ Live volume verified intact after corrupt staging abort
+2026-10-16T15:04:19.8576156Z   ✓ Owned baseline → #190 COMPLETE → #191 PRE_191 dry-run → COMPLETE; NULL reasons 0, backfill 0, blocked RECORDED owners 0; all retained rows and both receipts verified; NO_OP writes 0
+2026-10-16T15:04:20.4227485Z   ✓ Owned #191 COMPLETE → #192 PRE_192 dry-run → COMPLETE; retained history unchanged, new selections 0, NO_OP writes 0
+2026-10-16T15:04:21.1055657Z   ✓ cross-check-installer-pre201: direct installer PRE_201 dry-run → COMPLETE_201; retained rows/objects/receipts preserved, evidence/backfill0, repeat NO_OP writes0/bytes preserved
+2026-10-16T15:04:21.1076254Z {"crossCheckInstallerProof":{"scenario":"cross-check-installer-pre201","invocation":"DIRECT_INSTALLER_MODULE","dry":{"classification":"PRE_201","sources":{"migrationSha256":"7579e84f62aa8561b4746a6360e83757d067046ad97fcadace05660fb6bf44a4","oracleSha256":"97cc1f211adb71056ed3c2d82ea94385d63f812071ba44a57674be24c4905de0","predecessorMigrationSha256":"52b4df85d07ef6f63b35249e317037b64450ba718fda72c0a9e4df946cb628f7"},"evaluationCount":0,"mode":"DRY_RUN","totalChanges":0,"newEvaluationCount":0,"backfilledCount":0},"applied":{"classification":"COMPLETE_201","sources":{"migrationSha256":"7579e84f62aa8561b4746a6360e83757d067046ad97fcadace05660fb6bf44a4","oracleSha256":"97cc1f211adb71056ed3c2d82ea94385d63f812071ba44a57674be24c4905de0","predecessorMigrationSha256":"52b4df85d07ef6f63b35249e317037b64450ba718fda72c0a9e4df946cb628f7"},"evaluationCount":0,"receipt":{"sources":{"migrationSha256":"7579e84f62aa8561b4746a6360e83757d067046ad97fcadace05660fb6bf44a4","oracleSha256":"97cc1f211adb71056ed3c2d82ea94385d63f812071ba44a57674be24c4905de0","predecessorMigrationSha256":"52b4df85d07ef6f63b35249e317037b64450ba718fda72c0a9e4df946cb628f7"},"originalRowsSha256":"2fb66122e7671bcefc02ad4eed3f8c142549fe8391f4aa13d4265829fc652175","originalRowsPreserved":true,"newEvaluationCount":0,"backfilledCount":0,"receiptSha256":"a9df0be7ef224756e5d451a29b23f06bd4632ca5899de8873967c730527fec9a"},"previousClassification":"PRE_201","mode":"APPLIED","newEvaluationCount":0,"backfilledCount":0,"totalChanges":1},"ready":{"classification":"COMPLETE_201","sources":{"migrationSha256":"7579e84f62aa8561b4746a6360e83757d067046ad97fcadace05660fb6bf44a4","oracleSha256":"97cc1f211adb71056ed3c2d82ea94385d63f812071ba44a57674be24c4905de0","predecessorMigrationSha256":"52b4df85d07ef6f63b35249e317037b64450ba718fda72c0a9e4df946cb628f7"},"evaluationCount":0,"receipt":{"sources":{"migrationSha256":"7579e84f62aa8561b4746a6360e83757d067046ad97fcadace05660fb6bf44a4","oracleSha256":"97cc1f211adb71056ed3c2d82ea94385d63f812071ba44a57674be24c4905de0","predecessorMigrationSha256":"52b4df85d07ef6f63b35249e317037b64450ba718fda72c0a9e4df946cb628f7"},"originalRowsSha256":"2fb66122e7671bcefc02ad4eed3f8c142549fe8391f4aa13d4265829fc652175","originalRowsPreserved":true,"newEvaluationCount":0,"backfilledCount":0,"receiptSha256":"a9df0be7ef224756e5d451a29b23f06bd4632ca5899de8873967c730527fec9a"},"mode":"DRY_RUN","totalChanges":0,"newEvaluationCount":0,"backfilledCount":0},"again":{"classification":"COMPLETE_201","sources":{"migrationSha256":"7579e84f62aa8561b4746a6360e83757d067046ad97fcadace05660fb6bf44a4","oracleSha256":"97cc1f211adb71056ed3c2d82ea94385d63f812071ba44a57674be24c4905de0","predecessorMigrationSha256":"52b4df85d07ef6f63b35249e317037b64450ba718fda72c0a9e4df946cb628f7"},"evaluationCount":0,"receipt":{"sources":{"migrationSha256":"7579e84f62aa8561b4746a6360e83757d067046ad97fcadace05660fb6bf44a4","oracleSha256":"97cc1f211adb71056ed3c2d82ea94385d63f812071ba44a57674be24c4905de0","predecessorMigrationSha256":"52b4df85d07ef6f63b35249e317037b64450ba718fda72c0a9e4df946cb628f7"},"originalRowsSha256":"2fb66122e7671bcefc02ad4eed3f8c142549fe8391f4aa13d4265829fc652175","originalRowsPreserved":true,"newEvaluationCount":0,"backfilledCount":0,"receiptSha256":"a9df0be7ef224756e5d451a29b23f06bd4632ca5899de8873967c730527fec9a"},"mode":"NO_OP","totalChanges":0,"newEvaluationCount":0,"backfilledCount":0},"retainedRowsAndObjectsPreserved":true,"dryRunBytesPreserved":true,"noOpBytesPreserved":true}}
+2026-10-16T15:04:21.4517514Z   ✓ Owned #272 ABSENT → shipped additive rawInput owner → ALREADY_PRESENT; all old fields/receipts preserved, backfill0, repeat NO_OP bytes unchanged
+2026-10-16T15:04:21.7104704Z   Loading owned catalogue prerequisite through existing units authority
+2026-10-16T15:04:22.4812328Z   Loading owned catalogue prerequisite through existing references authority
+2026-10-16T15:04:23.2657501Z   Loading owned catalogue prerequisite through existing catalogue authority
+2026-10-16T15:04:42.1889673Z {"policyChartEntrypointProof":{"scenario":"PRE_199-default-entrypoint-COMPLETE_214","before":{"dry":{"classification":"ABSENT","sourceSha256":"fa6ef0563f80704dbc4ee08d90ceae91f632c912813ca037221b02aa03ef7b70","addReportPolicyVersion":true,"plannedSql":"CREATE TABLE \"LabPolicy\" (\n  \"id\" TEXT NOT NULL PRIMARY KEY,\n  \"labId\" TEXT NOT NULL,\n  \"presetCode\" TEXT CHECK (\"presetCode\" IS NULL OR \"presetCode\" IN ('ISO17025_STRICT','BASIC','ADVISORY')),\n  \"version\" INTEGER NOT NULL DEFAULT 1 CHECK (\"version\" >= 1),\n  \"updatedBy\" TEXT NOT NULL,\n  \"updatedAt\" DATETIME NOT NULL,\n  FOREIGN KEY (\"labId\") REFERENCES \"Lab\"(\"id\") ON DELETE RESTRICT ON UPDATE CASCADE\n);\nCREATE UNIQUE INDEX \"LabPolicy_labId_key\" ON \"LabPolicy\"(\"labId\");\nCREATE TABLE \"LabPolicyOverride\" (\n  \"id\" TEXT NOT NULL PRIMARY KEY,\n  \"labId\" TEXT NOT NULL,\n  \"key\" TEXT NOT NULL,\n  \"analysisCode\" TEXT,\n  \"methodologyId\" TEXT,\n  \"value\" TEXT NOT NULL CHECK (json_valid(\"value\")),\n  \"reason\" TEXT NOT NULL CHECK (length(trim(\"reason\")) > 0),\n  \"setBy\" TEXT NOT NULL,\n  \"setAt\" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  \"revokedAt\" DATETIME,\n  \"revokedBy\" TEXT,\n  FOREIGN KEY (\"labId\") REFERENCES \"Lab\"(\"id\") ON DELETE RESTRICT ON UPDATE CASCADE\n);\nCREATE INDEX \"LabPolicyOverride_labId_key_idx\" ON \"LabPolicyOverride\"(\"labId\",\"key\");\nCREATE UNIQUE INDEX \"LabPolicyOverride_one_current_scope\" ON \"LabPolicyOverride\"(\n  \"labId\",\"key\",COALESCE(\"analysisCode\",''),COALESCE(\"methodologyId\",'')\n) WHERE \"revokedAt\" IS NULL;\nALTER TABLE \"Report\" ADD COLUMN \"policyVersion\" INTEGER;\n","plannedDdlCount":6,"readonlySnapshot":{"path":"/tmp/lims-policy-schema-readonly-cgOGIi/snapshot.db","originalDbWalShmSha256":{"":"74248727a10334133ae410f73ac55de31d2322e0ddb79a95593fef8ba92033cf","-wal":"96a6d1639a9d952cf82ddeb6ac08cb0044152371079de55f85e8280b5144491a","-shm":"38a125cdf5321f4356bba1201d642718530de8ae9e63e74ac87ae0e7dd1e96a2"},"originalFilesPreserved":true},"mode":"DRY_RUN","totalChanges":0,"dataWrites":0},"dbWalShmPreserved":true},"after":{"ready":{"classification":"PRESENT","shape":"CANONICAL","sourceSha256":"fa6ef0563f80704dbc4ee08d90ceae91f632c912813ca037221b02aa03ef7b70","addReportPolicyVersion":false,"plannedSql":"","plannedDdlCount":0,"readonlySnapshot":{"path":"/tmp/lims-policy-schema-readonly-ngiBlP/snapshot.db","originalDbWalShmSha256":{"":"47ef95eaae1c514929bc8b0c74ad8f10f4e8dc5430efb22cfd1c8899191c288d","-wal":null,"-shm":null},"originalFilesPreserved":true},"mode":"NO_OP","totalChanges":0,"dataWrites":0},"again":{"classification":"PRESENT","shape":"CANONICAL","sourceSha256":"fa6ef0563f80704dbc4ee08d90ceae91f632c912813ca037221b02aa03ef7b70","addReportPolicyVersion":false,"plannedSql":"","plannedDdlCount":0,"readonlySnapshot":{"path":"/tmp/lims-policy-schema-readonly-Hepkna/snapshot.db","originalDbWalShmSha256":{"":"47ef95eaae1c514929bc8b0c74ad8f10f4e8dc5430efb22cfd1c8899191c288d","-wal":null,"-shm":null},"originalFilesPreserved":true},"mode":"NO_OP","totalChanges":0,"dataWrites":0},"charts":{"classification":"COMPLETE_214","sources":{"migrationSha256":"49b378296a8a0ede3318ae1e543060478b55827db0ec981d8cc4bd6180a56df6","contractVersion":"214-v1"},"receipt":{"sources":{"migrationSha256":"49b378296a8a0ede3318ae1e543060478b55827db0ec981d8cc4bd6180a56df6","contractVersion":"214-v1"},"originalRowsSha256":"06dd9e8c693ade55ec3f86e704324aac74a60e6b54126dc39cf2c6dc2ba0a5f2","originalRowsPreserved":true,"backfilledCount":0,"receiptSha256":"5d131da9ae745aefadfc39e0756dbc925e2715bd30c82fd0359ff5c47bbb2591"},"mode":"DRY_RUN","totalChanges":0,"backfilledCount":0},"counts":{"LabPolicy":0,"LabPolicyOverride":0},"dbWalShmPreserved":true,"secondaryInspectionsOnRetainedSnapshot":true}}}
+2026-10-16T15:04:43.4324193Z 
+2026-10-16T15:04:43.4325813Z ❌ REHEARSAL FAILED: Error: 199 default entrypoint changed retained analytical, audit or receipt rows
+2026-10-16T15:04:43.4327993Z     at runSuite (/home/runner/work/soilfer-lims/soilfer-lims/server/scripts/rehearsal_deployment_readiness.cjs:1426:15)
+2026-10-16T15:04:43.4329249Z     at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+2026-10-16T15:04:43.4329732Z 
+2026-10-16T15:04:43.4330043Z 🧹 Cleaning up disposable test resources...
+2026-10-16T15:04:43.7925372Z ✓ Cleanup complete.
+2026-10-16T15:04:43.7926111Z 
+2026-10-16T15:04:43.8020996Z ##[error]Process completed with exit code 1.
