@@ -27,9 +27,11 @@ def timestamp(value):
 
 
 class GitHubProvider:
-    def __init__(self,runner,namespace,clock=time.monotonic):
+    def __init__(self,runner,namespace,clock=time.monotonic,transport='curl'):
         require(re.fullmatch('[a-z][a-z0-9-]{0,35}',namespace),'Exclusive authority namespace required')
+        require(transport in ('curl','gh'),'Only explicit primary GitHub transports allowed')
         self.runner=runner;self.namespace=namespace;self.clock=clock;self.sequence=0;self.calls=0;self.deadline=None
+        self.transport=transport
 
     def get(self,path):
         allowed=(path=='git/ref/heads/main' or path=='issues/191' or
@@ -42,10 +44,20 @@ class GitHubProvider:
         timeout=15 if self.deadline is None else min(15,int(self.deadline-self.clock()))
         require(timeout>=1,'Authority collection deadline reached before network dispatch')
         label=self.namespace+'-github-'+str(self.calls).zfill(4)
-        raw,err,_=self.runner.run(['curl','--silent','--show-error','--fail','--proto','=https',
+        argv=['curl','--silent','--show-error','--fail','--proto','=https',
             '--tlsv1.2','--connect-timeout','5','--max-time',str(timeout),'--max-filesize',str(MAX_RESPONSE),
             '--header','Accept: application/vnd.github+json','--header','X-GitHub-Api-Version: 2022-11-28',
-            '--header','Cache-Control: no-cache',PREFIX+path],label,timeout)
+            '--header','Cache-Control: no-cache',PREFIX+path]
+        if self.transport=='gh':
+            # Local preparation/launch uses the user's already connected gh
+            # account without reading/exporting credentials or putting a token
+            # into argv/logs. Each fresh response has the same retention and
+            # complete pagination predicates as the host's bounded TLS curl.
+            argv=['gh','api','--hostname','github.com','--method','GET',
+                '--header','Accept: application/vnd.github+json',
+                '--header','X-GitHub-Api-Version: 2022-11-28','--header','Cache-Control: no-cache',
+                'repos/yigini/soilfer-lims/'+path]
+        raw,err,_=self.runner.run(argv,label,timeout)
         require(not err and 0<len(raw)<=MAX_RESPONSE,'Incomplete or oversized GitHub primary record')
         value=exact_json(raw)
         require(isinstance(value,(dict,list)),'GitHub response is not a primary object/list')
@@ -79,16 +91,24 @@ class GitHubProvider:
 
     def snapshot(self,source_id,kit_id,human_id):
         require(len({source_id,kit_id,human_id})==3,'Three distinct current review/human records required')
+        return self._snapshot(source_id,kit_id,human_id)
+
+    def source_snapshot(self,source_id):
+        """Fresh standing authority before capture/package; no invented kit/human."""
+        return self._snapshot(source_id)
+
+    def _snapshot(self,source_id,kit_id=None,human_id=None):
         began=self.clock();self.deadline=began+300;self.sequence+=1
         # Memoization is deliberately confined to this one fresh snapshot.
         records={}
         def comment(identity):
             if identity not in records:records[identity]=self.comment(identity)
             return records[identity]
-        source=comment(source_id);kit=comment(kit_id);human=comment(human_id)
-        out={'source':source,'kit':kit,'human':human,
+        source=comment(source_id)
+        out={'source':source,
             'main':self.get('git/ref/heads/main'),'ci':self.get('actions/runs/'+str(MAIN_CI)),
             'issue191':self.get('issues/191'),'prs':{},'verdicts':{},'comments':{}}
+        if kit_id is not None:out.update(kit=comment(kit_id),human=comment(human_id))
         for pr,identity,head,merge in AUDITS:
             key=str(pr);verdict=comment(identity);out['verdicts'][key]=verdict
             out['prs'][key]=self.get('pulls/'+key)

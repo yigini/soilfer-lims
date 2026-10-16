@@ -38,7 +38,8 @@ def frozen_hook_authority(root):
     kit_review(review,manifest,index,source)
     frozen_source_bytes(pathlib.Path(root)/'tooling',index)
     files=manifest.get('packageFiles')
-    require(isinstance(files,dict) and 1<=len(files)<=512 and
+    require(isinstance(files,dict) and 1<=len(files)<=1024 and
+        sum(pin.get('bytes',0) for pin in files.values() if isinstance(pin,dict))<=128*1024**2 and
         sha(canonical(files))==manifest['packageFilesSha256'],'Exact full frozen package file map required')
     for name,pin in files.items():
         raw=private_file(root,name)

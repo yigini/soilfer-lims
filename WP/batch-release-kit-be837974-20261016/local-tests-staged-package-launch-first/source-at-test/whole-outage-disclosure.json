@@ -1,0 +1,161 @@
+{
+  "candidateReadinessSeconds": 600,
+  "controllerMaximumSeconds": 5400,
+  "expectedMinutesRoundedUp": 50,
+  "expectedOutageSeconds": 2997.171478350916,
+  "failureMaintenanceCanContinueBeyondController": true,
+  "noNewInstallerTransactionKillPoints": true,
+  "phaseEstimates": {
+    "apiAndReadOnlyPostflights": {
+      "basis": "Proposed explicit allowance pending exact source/kit review; phase has not been measured on this production sequence.",
+      "kind": "REVIEWED_ALLOWANCE",
+      "seconds": 300
+    },
+    "apply206": {
+      "basis": "Retained cde8/B5 206 apply command, including its historical transport; new CLI wrapper and production sequence are unmeasured.",
+      "kind": "RETAINED_MEASUREMENT_OTHER_CONTEXT",
+      "seconds": 89.34753287798958
+    },
+    "apply209": {
+      "basis": "Retained cde8/B5 209 apply command, including its historical transport; new CLI wrapper and production sequence are unmeasured.",
+      "kind": "RETAINED_MEASUREMENT_OTHER_CONTEXT",
+      "seconds": 190.743764851999
+    },
+    "apply214": {
+      "basis": "Retained cde8/B5 214 apply command, including its historical transport; new CLI wrapper and production sequence are unmeasured.",
+      "kind": "RETAINED_MEASUREMENT_OTHER_CONTEXT",
+      "seconds": 130.24121453298721
+    },
+    "candidateIntent": {
+      "basis": "Proposed explicit allowance pending exact source/kit review; phase has not been measured on this production sequence.",
+      "kind": "REVIEWED_ALLOWANCE",
+      "seconds": 5
+    },
+    "candidateReady": {
+      "basis": "Accepted acc158100000 ordinary jobs-on startup, already-installed112/42; not a new three-installer production run.",
+      "kind": "RETAINED_MEASUREMENT_OTHER_CONTEXT",
+      "seconds": 394.88604018800106
+    },
+    "candidateStart": {
+      "basis": "Proposed explicit allowance pending exact source/kit review; phase has not been measured on this production sequence.",
+      "kind": "REVIEWED_ALLOWANCE",
+      "seconds": 60
+    },
+    "canonicalPolicyNoOp": {
+      "basis": "Proposed explicit allowance pending exact source/kit review; phase has not been measured on this production sequence.",
+      "kind": "REVIEWED_ALLOWANCE",
+      "seconds": 60
+    },
+    "dry206": {
+      "basis": "Retained cde8/B5 206 dry command, including its historical transport; new CLI wrapper and production sequence are unmeasured.",
+      "kind": "RETAINED_MEASUREMENT_OTHER_CONTEXT",
+      "seconds": 7.589790696976706
+    },
+    "dry209": {
+      "basis": "Retained cde8/B5 209 dry command, including its historical transport; new CLI wrapper and production sequence are unmeasured.",
+      "kind": "RETAINED_MEASUREMENT_OTHER_CONTEXT",
+      "seconds": 77.65669673902448
+    },
+    "dry214": {
+      "basis": "Retained cde8/B5 214 dry command, including its historical transport; new CLI wrapper and production sequence are unmeasured.",
+      "kind": "RETAINED_MEASUREMENT_OTHER_CONTEXT",
+      "seconds": 31.108099657983985
+    },
+    "firstNaturalSync": {
+      "basis": "Proposed explicit allowance pending exact source/kit review; phase has not been measured on this production sequence.",
+      "kind": "REVIEWED_ALLOWANCE",
+      "seconds": 300
+    },
+    "freshDiskBeforeBackup": {
+      "basis": "Proposed explicit allowance pending exact source/kit review; phase has not been measured on this production sequence.",
+      "kind": "REVIEWED_ALLOWANCE",
+      "seconds": 120
+    },
+    "freshDiskBeforeReopen": {
+      "basis": "Proposed explicit allowance pending exact source/kit review; phase has not been measured on this production sequence.",
+      "kind": "REVIEWED_ALLOWANCE",
+      "seconds": 120
+    },
+    "impactBefore206": {
+      "basis": "Proposed explicit allowance pending exact source/kit review; phase has not been measured on this production sequence.",
+      "kind": "REVIEWED_ALLOWANCE",
+      "seconds": 5
+    },
+    "impactBefore209": {
+      "basis": "Proposed explicit allowance pending exact source/kit review; phase has not been measured on this production sequence.",
+      "kind": "REVIEWED_ALLOWANCE",
+      "seconds": 120
+    },
+    "impactBefore214": {
+      "basis": "Proposed explicit allowance pending exact source/kit review; phase has not been measured on this production sequence.",
+      "kind": "REVIEWED_ALLOWANCE",
+      "seconds": 90
+    },
+    "noLiveVolumeWriters": {
+      "basis": "Proposed explicit allowance pending exact source/kit review; phase has not been measured on this production sequence.",
+      "kind": "REVIEWED_ALLOWANCE",
+      "seconds": 30
+    },
+    "predecessorStop": {
+      "basis": "Proposed explicit allowance pending exact source/kit review; phase has not been measured on this production sequence.",
+      "kind": "REVIEWED_ALLOWANCE",
+      "seconds": 25
+    },
+    "preserve206": {
+      "basis": "Proposed explicit allowance pending exact source/kit review; phase has not been measured on this production sequence.",
+      "kind": "REVIEWED_ALLOWANCE",
+      "seconds": 120
+    },
+    "preserve209": {
+      "basis": "Proposed explicit allowance pending exact source/kit review; phase has not been measured on this production sequence.",
+      "kind": "REVIEWED_ALLOWANCE",
+      "seconds": 120
+    },
+    "preserve214": {
+      "basis": "Proposed explicit allowance pending exact source/kit review; phase has not been measured on this production sequence.",
+      "kind": "REVIEWED_ALLOWANCE",
+      "seconds": 120
+    },
+    "quiesce503": {
+      "basis": "Proposed explicit allowance pending exact source/kit review; phase has not been measured on this production sequence.",
+      "kind": "REVIEWED_ALLOWANCE",
+      "seconds": 45
+    },
+    "reopen": {
+      "basis": "Proposed explicit allowance pending exact source/kit review; phase has not been measured on this production sequence.",
+      "kind": "REVIEWED_ALLOWANCE",
+      "seconds": 60
+    },
+    "repeat206": {
+      "basis": "Retained cde8/B5 206 repeat command, including its historical transport; new CLI wrapper and production sequence are unmeasured.",
+      "kind": "RETAINED_MEASUREMENT_OTHER_CONTEXT",
+      "seconds": 7.725301861995831
+    },
+    "repeat209": {
+      "basis": "Retained cde8/B5 209 repeat command, including its historical transport; new CLI wrapper and production sequence are unmeasured.",
+      "kind": "RETAINED_MEASUREMENT_OTHER_CONTEXT",
+      "seconds": 68.08242682996206
+    },
+    "repeat214": {
+      "basis": "Retained cde8/B5 214 repeat command, including its historical transport; new CLI wrapper and production sequence are unmeasured.",
+      "kind": "RETAINED_MEASUREMENT_OTHER_CONTEXT",
+      "seconds": 29.79061011399608
+    },
+    "retainStoppedPredecessorName": {
+      "basis": "Proposed explicit allowance pending exact source/kit review; phase has not been measured on this production sequence.",
+      "kind": "REVIEWED_ALLOWANCE",
+      "seconds": 30
+    },
+    "stoppedBackup": {
+      "basis": "Proposed explicit allowance pending exact source/kit review; phase has not been measured on this production sequence.",
+      "kind": "REVIEWED_ALLOWANCE",
+      "seconds": 180
+    },
+    "stoppedIntegrityFk": {
+      "basis": "Proposed explicit allowance pending exact source/kit review; phase has not been measured on this production sequence.",
+      "kind": "REVIEWED_ALLOWANCE",
+      "seconds": 60
+    }
+  },
+  "plainGateText": "Expected maintenance outage: about 50 minutes, based on the listed earlier measurements and explicit allowances. The release controller can run for at most 90 minutes, with the existing individual operation deadlines and a 10-minute candidate readiness deadline. If an abort occurs after any APPLY starts, the site remains at503 until a separately reviewed forward fix; reopening within90 minutes is not promised. Before any APPLY, only a proven unchanged DB/WAL/SHM raw backup permits the retained predecessor to restart without restoring data."
+}

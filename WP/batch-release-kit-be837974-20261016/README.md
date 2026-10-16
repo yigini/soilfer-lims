@@ -53,3 +53,73 @@ The latest local suite has104 passing tests on Windows with actual local Node ch
 A complete synthetic106-table/39-receipt chain reaches112/42 while preserving old columns and refusing value/receipt/backfill tampering. The earlier59-test run had one faulty test stub that also blocked subprocess launch; its successor60 passed. Installer65 and runtime72 passed. A later syntax refusal occurred before test discovery, followed by77 tests with one Windows-only missing os.O_ACCMODE export; the portable POSIX access-bit parser resolves it in82. Further89 and100-test frozen runs passed. The first104 run passed103 with one Windows permission-metadata fixture error: read-only files report0444 rather than Linux0400. Its104-pass successor adapts only that local test's permission projection; the production0400 guard is unchanged. All original failed snapshots/logs remain retained. The syntax refusal has tool-output provenance, not a fabricated original subprocess log. No actual host Docker, cgroup, Linux directory fsync, HTTP, SQL, new qualification or deployment result is claimed.
 
 The proposed new owner root is `/opt/lims/releases/workflow-batch-release-be837974-20261016T150000Z`. It is a source binding only: no corresponding remote root, package, unit, gate or attempt exists. Required remaining work includes actual controller construction/entry point and the closed all-phase/copy-site sweep, reviewed preflight metadata/inventory/Apache bytes/whole-outage allowances, complete fresh provider authority/freeze/single-use YY gate/package/launcher, and integration of the standalone hook with the actual Linux unit. Source-index validation explicitly rejects the current incomplete graph. Source review will be requested only when the complete graph exists. Old SourcePASS records authorize no new operation.
+## 2026-10-16 staged package and launcher source — 135 LOCAL tests pass
+
+`kit_package.py`, `prepare_release.py`, `kit_launch_programs.py` and
+`launch_release.py` now implement the package and dispatch path as source.
+They have **not** prepared a real release package, touched the production host,
+created the proposed root, launched a Linux unit, consumed a real gate or
+deployed anything. The complete new source review is still not requested.
+
+The initial frozen manifest binds the complete immutable payload: reviewed raw
+Git tooling, all 458 pinned application sources, qualified build originals,
+fresh scientific originals and projection, capture receipt, consumer inventory
+and reviewed classes, original/held ingress bytes and full outage disclosure.
+The exact-kit verdict is appended afterward, followed by the original actual
+human acknowledgement and its binding. Those later records bind the manifest;
+they cannot enter their own manifest hash. All appends are exclusive. Partial
+packages and failed/uncertain launch attempts have no resume/replace/delete path.
+The fixed package/launch paths prevent choosing another evidence directory to
+retry the same release attempt. The bounded map permits 1024 payload files and
+128 MiB total, with a 16 MiB per-file bound. Directory allocation includes one
+full block for every file/child-directory entry and two base/index blocks per
+directory. Bytes and the later immutable inode mode are both fsynced.
+
+The preparer reads regular raw Git blobs with complete bounded batch identity
+checks and requires fresh primary source/standing authority before creating a
+package. Local primary reads use the already connected GitHub CLI account;
+credentials are neither read/exported nor put into arguments. The host runtime
+keeps the bounded TLS curl reader. Rendering inserts AST literals once and
+compiles every actual remote program before the first SSH. Stat-only capacity
+programs embed the exact runtime budget and reader AST bodies, charge the whole
+future package before ROOT and zero future package after upload, and refuse a
+changed device topology. The upload/unit program rejects extra/missing files,
+aliases, links and extra empty directories, verifies bytes before imports,
+requires immutable files and POSIX directory fsync, recompiles all Python, then
+revalidates the full package and unexpired actual human record. The new unit has
+805306368 bytes / Swap0 / RuntimeMax5400 / Restart=no / TimeoutStop300 and a
+nonignored standalone `ExecStopPost`; no systemd command has actually run.
+
+All 135 LOCAL tests passed in `local-tests-package-directory-allocation-final`
+with every source hash unchanged. Earlier staged-package runs passed 131,
+131 and 134 tests. Full frozen-file authority preflight and single-use consumption
+run against new local files, retained real standing authority/build/app bytes
+and clearly synthetic future source/kit/human records. Apache drift after a
+successful preflight consumes the attempt without creating a gate. The actual
+rendered unit program runs against new local uploaded files and fake systemd,
+kernel/platform and directory-fsync boundaries, including extra-directory
+refusal before dispatch. These tests do not establish Linux fsync, real SSH,
+Docker, cgroup, HTTP, production SQL, a production copy or a real unit result.
+The new package-fixture bytes remain local; public inventory contains hashes.
+
+**Still implement before a complete source review:** whole-graph retained-copy
+and evidence closure (37 normal-path copies / min64 is still NOT capacity PASS,
+and the early-recovery branch needs explicit closure); an executable fresh
+source-reviewed capture path for current host consumers, Apache original/held
+bytes and full scientific lists; complete loaded/transient consumer coverage
+and collection-race closure. `copy-site-closure.json` remains absent, so the
+actual source-index completeness check continues to refuse this graph. No old
+qualification or source PASS authorizes these new operators. After completion,
+obtain one actual new source review, actual fresh capture, exact frozen-kit
+review and fresh human workload/intake/scientific-list/whole-outage gate.
+
+6212990400 and 6213266959 still govern. ACK621326 only in the next complete
+concrete source review; both answered questions and all native fallbacks remain
+closed, with no duplicate acknowledgement. Whole outage remains a proposed
+50 minutes / 2997.171478350916 seconds, not a measured or accepted production
+duration; candidate readiness600 and controller5400 are unchanged. After any
+APPLY intent/unknown outcome/default entrypoint, failure remains forward503 /
+stop and retain / partial162; no recovery promise or new transaction killpoint.
+No historical root, image, stopped container, raw DB/WAL/SHM, private key, human
+file, draft or card was changed, replayed, restarted, restored or cleaned up.
+
