@@ -1,0 +1,22 @@
+{
+  "observedAt": "2026-10-16T03:46:43.479Z",
+  "requestId": 6207359773,
+  "sourceHead": "937901c7514437fc3937639454e621d1bfd68dc4",
+  "window": {
+    "app": "Claude_pzs8sxrjxfjjc!Claude",
+    "id": 2888208,
+    "title": "Claude"
+  },
+  "delivery": "VISUALLY_VERIFIED_SENT_BUBBLE_AND_EMPTY_RIGHT_COMPOSER_AFTER_ONE_RETURN",
+  "evidenceBasis": "Screenshots automatically shown by sky.get_window_state; pixels retained in conversation only, no local pixel copy claimed. Accessibility lagged type/send; screenshot governed; no repeated text entry or Return.",
+  "draftExactReadback": true,
+  "wholeDraftHeadAndEndInspected": true,
+  "returnCount": 1,
+  "noDuplicateNative": true,
+  "centreComposerEmptyAndPreserved": true,
+  "humanDraftsAndCardsPreserved": true,
+  "displayedReviewerProgress": "398/398 Python3.12 and3.9; four pins/170 bindings checked; stop-post/controller source review in progress; posting verdict not done. Displayed reviewer progress only, not independent test/process/final verdict evidence.",
+  "productionOperations": 0,
+  "sourceOperators": 0,
+  "testsReplayed": 0
+}
