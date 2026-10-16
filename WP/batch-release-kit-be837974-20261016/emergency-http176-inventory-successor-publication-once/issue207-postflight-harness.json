@@ -1,0 +1,30 @@
+{
+  "fullSuite": {
+    "result": "PASS",
+    "suites": 374,
+    "tests": 5710,
+    "seconds": 2780.266,
+    "log": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\full-server-harness.log",
+    "logSha256": "9ad7cfbb758611546827e1ed414ee77c0745e5da8ad5374cf1bc0062a27ed339",
+    "exitCode": 0
+  },
+  "sourceChanges": [],
+  "fixtureChanges": [
+    {
+      "file": "server/data/help/RELEASE_MANIFEST_v1.json",
+      "actual": "0dab7ab8d5cf0c5b5f5aa5ad593602c05922dca9885c2725c893fe9812b0c3fa",
+      "expected": "6c3d66602ee2269ed2ebbb8b13ca4c527ea63985696f48bb8b30dd4bea44c2c3"
+    }
+  ],
+  "generatedChanges": [],
+  "templateChanges": [],
+  "indexChanged": false,
+  "sourceHead": "827760b8b83c5a4bd0581ee1369648b91818d584",
+  "patch": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\harness-correction.patch",
+  "patchSha256": "72e08434fe22e77c093aa5eb246a5968abf0914fbb93525fd4af051b022bc4d6",
+  "testedFiles": {
+    "server/scripts/rehearsal_deployment_readiness.cjs": "98adf23b5447249d1d3d316bf2583ca81f480e84292f69c0f407ec13edeb1cbe",
+    "server/tests/contracts/audit_5_3_custody_retention.test.js": "4458a9edb3ec7eeb955af0da813bc8e18283176d034c469b29b224f8d333a922"
+  },
+  "originalCiLogSha256": "a06d06eff0cf0275d384d428c1a61dfce00240468dba8a587c58043967788406"
+}

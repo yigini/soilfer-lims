@@ -36,7 +36,7 @@ from kit_recovery import RecoveryReadiness
 from kit_probes import Probes
 from kit_no_writers import assert_no_volume_writers
 from kit_consumer_inventory import collect
-from kit_evidence import bind_runtime
+from kit_evidence import bind_runtime,admit_evidence
 
 
 class ResourceGuard:
@@ -90,6 +90,9 @@ def construct(root=ROOT):
     disk=Disk(root,reader,runner,budget);guard.bind(disk);guard(0)
     configure_reader(reader)
     exclusive_record(root,'runtime-measured-inputs.json',inputs)
+    # Preserve the accepted private-key initializer unchanged. Its fixed
+    # 32-byte key JSON has a full pre-write allocation in the common ledger.
+    admit_evidence(root/'private-value-hmac-key.json',512)
     initialize_private_key(root)
     journal=Journal(root,str(root),sha(canonical(manifest)))
     emergency=EmergencyCommands(root,namespace='controller')

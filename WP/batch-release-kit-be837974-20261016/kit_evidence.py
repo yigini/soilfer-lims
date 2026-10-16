@@ -5,9 +5,10 @@ admission precedes creation; unused command-stream reservations settle only
 after all pipe descriptors close and the original files are sealed. Failed
 admissions never authorize deletion, replacement, truncation, or a retry.
 
-These four producer groups share 3 GiB. The remaining 1 GiB is deliberately
-unassigned pending closure of fetch/HTTP/control-file/emergency/hook writers.
-Consequently this module does NOT claim complete global 4 GiB closure.
+These four producer groups share 3 GiB. Two independent emergency namespaces
+each have a fixed400MiB envelope, enforced only after actual commands so a
+retention refusal cannot suppress a stop.224MiB remains unassigned pending
+the rest of the hook and complete producer/copy sweep. This is not closure.
 """
 import pathlib
 from kit_contract import require
@@ -15,6 +16,11 @@ from kit_contract import require
 BLOCK=4096
 SHARES={'commands':1536*1024**2,'memory':512*1024**2,
     'controller':512*1024**2,'journal':512*1024**2}
+EMERGENCY_CALL_LIMIT=96
+EMERGENCY_STREAM_LIMITS={'stdout':4*1024**2,'stderr':64*1024}
+EMERGENCY_METADATA_LIMIT=8192
+EMERGENCY_NAMESPACE_BYTES=400*1024**2
+INDEPENDENT_EMERGENCY_BYTES=2*EMERGENCY_NAMESPACE_BYTES
 _runtime=None
 
 def allocation(byte_count,entries=1):
@@ -72,7 +78,8 @@ class EvidenceLedger:
             'openReservations':len(self.open),'directoryEntriesCounted':len(self.paths),
             'nestedDirectoriesCounted':len(self.directories),
             'coveredProducerMaximumBytes':sum(self.shares.values()),
-            'unassignedWithinExisting4GiBBytes':4*1024**3-sum(self.shares.values()),
+            'independentEmergencyEnvelopesBytes':INDEPENDENT_EMERGENCY_BYTES,
+            'unassignedWithinExisting4GiBBytes':4*1024**3-sum(self.shares.values())-INDEPENDENT_EMERGENCY_BYTES,
             'fullGlobalEvidenceClosure':False,'allOriginalsPrivate':True}
 
 def bind_runtime(root):

@@ -13,6 +13,7 @@ import time
 from kit_contract import IMAGE,MEMORY_MAX,canonical,require,sha
 from retained_contract import ROOT,LIVE_DATA,exact_json
 from kit_journal import exclusive_record
+from kit_evidence import admit_evidence
 
 LABEL='io.soilfer.release-owned'
 DATABASE='/app/server/prisma/dev.db'
@@ -183,19 +184,26 @@ class OwnedCli:
         memory=history.summary(0)
         require(self.clock()-began<600,'CLI original deadline reached before final memory permission')
         self.publish_permit(spec,{'childCompletionSha256':sha(completion_raw),'finalHostMemoryEventsCaptured':True})
-        after=final_before;obj=None
-        while self.clock()-began<600:
-            obj=self.reader.inspect(identity);after=selected(obj,spec)
-            same_retained(started,after)
-            if not after['running']:break
-            self.runner.check(0);self.sleep(0.1)
-        require(after['running'] is False,'CLI wrapper failed to exit within original 600 second deadline')
+        # One daemon wait replaces potentially thousands of retained full
+        # inspections. The real child, final memory permission and original
+        # 600-second deadline stay unchanged; no new installer action occurs.
+        remaining=math.floor(600-(self.clock()-began))
+        require(remaining>0,'CLI original deadline reached before wrapper wait')
+        waited,_,wait_metadata=self.runner.run(['docker','wait',identity],label+'-wait',remaining,
+            output_limits={'stdout':16,'stderr':64*1024})
+        require(re.fullmatch(rb'(0|[1-9][0-9]{0,2})\n?',waited) is not None and int(waited)<=255,
+            'Exact retained wrapper wait status required')
+        obj=self.reader.inspect(identity);after=selected(obj,spec,False);same_retained(started,after)
+        require(self.clock()-began<600,'CLI wrapper failed to exit within original 600 second deadline')
+        require(type(obj['State'].get('ExitCode')) is int and obj['State']['ExitCode']==int(waited),
+            'Wrapper wait and final complete inspection exit status differ')
         # The logs include the original child's unmodified stdout/stderr. They
         # stay private pending the same content review as other CLI streams.
         stdout,stderr,metadata=self.runner.run(['docker','logs',identity],label+'-logs',15,allow_stderr=True)
         result={'containerId':identity,'owner':spec['owner'],'child':child,'memory':memory,
                 'elapsedSeconds':self.clock()-began,'stoppedAndRetained':True,
-                'exitCode':obj['State'].get('ExitCode'),'logs':metadata,'dataWritable':spec['dataWritable']}
+                'exitCode':obj['State'].get('ExitCode'),'wrapperWait':wait_metadata,
+                'logs':metadata,'dataWritable':spec['dataWritable']}
         self.journal.append('ownedCliComplete',result)
         require(child['childStatus']==0 and child['childSignal'] is None and child['childErrorType'] is None and
                 result['exitCode']==0 and not stderr,'CLI failed; retained child and wrapper outcome must both succeed')
@@ -213,6 +221,10 @@ def filesystem_controls(root,require_directory_sync=True):
     def prepare(spec):
         p=directory(spec);p.mkdir(mode=0o700)
         require(not list(p.iterdir()),'Fresh empty CLI control directory required')
+        # The child produces at most one completion plus its retained atomic
+        # hardlink. Charge its full envelope before any container is created;
+        # no controller admission runs inside the installer transaction.
+        admit_evidence(p/'cli-child-complete.json',8192,pending=True)
     def read(spec):
         p=directory(spec)/'cli-child-complete.json'
         if not p.exists():return None

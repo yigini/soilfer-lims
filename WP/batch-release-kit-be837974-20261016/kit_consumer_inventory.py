@@ -10,6 +10,7 @@ import pathlib
 import re
 import time
 from kit_contract import canonical,require,sha
+from kit_evidence import admit_evidence
 
 CRON_ROOTS=('/etc/crontab','/etc/anacrontab','/etc/cron.d','/etc/cron.hourly',
             '/etc/cron.daily','/etc/cron.weekly','/etc/cron.monthly','/var/spool/cron')
@@ -227,6 +228,7 @@ def collect(reader,runner,clock=time.monotonic,cron_reader=cron_projection,names
             raw_bytes+=len(raw);require(raw_bytes<=MAX_CONFIG_BYTES,'Complete consumer originals exceed bound')
             # Both complete originals are independent, retained before predicates.
             destination=runner.root/(namespace+'-'+prefix+'cron-'+sha(path.encode())[:32]+'.private')
+            admit_evidence(destination,len(raw))
             with destination.open('xb') as stream:stream.write(raw);stream.flush();os.fsync(stream.fileno())
             destination.chmod(0o400)
         cron=cron_reader(retain=retain_cron,progress=progress)

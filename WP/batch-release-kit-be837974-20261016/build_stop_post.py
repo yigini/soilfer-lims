@@ -12,13 +12,16 @@ SPECS={
     'kit_contract.py':('HEAD','IMAGE','TREE','BUILD_RECEIPT_SHA','ACCEPTANCE_ID','TIMING_DIRECTION_ID',
         'POSTFLIGHT_POLICY','MEMORY_MAX','canonical','require','sha'),
     'retained_contract.py':('ROOT_NAME','ROOT','MEMORY','LIVE_DATA','LIVE_ASSETS','exact_json'),
-    'kit_evidence.py':('BLOCK','SHARES','_runtime','allocation','EvidenceLedger','bind_runtime','admit_evidence'),
+    'kit_evidence.py':('BLOCK','SHARES','EMERGENCY_CALL_LIMIT','EMERGENCY_STREAM_LIMITS',
+        'EMERGENCY_METADATA_LIMIT','EMERGENCY_NAMESPACE_BYTES','INDEPENDENT_EMERGENCY_BYTES',
+        '_runtime','allocation','EvidenceLedger','bind_runtime','admit_evidence'),
     'kit_journal.py':('real_directory','exclusive_record'),
     'kit_owned.py':('LABEL','DATABASE','INSTALLERS','ALLOWED','cli_spec','validate_spec','selected','same_retained'),
     'kit_integrity.py':('DATA_MOUNT',),
     'retained_health.py':('assert_healthcheck',),
     'kit_runtime.py':('PREDECESSOR_ID','PREDECESSOR_IMAGE','PREDECESSOR_HEAD','CANDIDATE_OWNER','VOLUMES',
         'full_mounts','environment','predecessor_projection','candidate_projection'),
+    'kit_io.py':('OUTPUT_LIMIT','READ_CHUNK','drain_streams'),
     'kit_stop.py':('MAX_OUTPUT','EmergencyCommands','stop_cli_owners'),
     'kit_emergency_ingress.py':('CONF','BASE','attributes','atomic_config','EmergencyIngress'),
     'kit_frozen.py':('SOURCE_SCOPE','REQUIRED_SOURCE','source_index','actual_claude','require_tokens','source_review',
@@ -82,7 +85,7 @@ if __name__=='__main__':
 
 def render():
     chunks=['"""GENERATED self-contained exact-root stop-post. No local imports; no import actions."""',
-        'import datetime,hashlib,json,os,pathlib,re,stat,subprocess,sys,threading,time']
+        'import datetime,hashlib,io,json,os,pathlib,re,stat,subprocess,sys,time']
     for filename,names in SPECS.items():
         source=(HERE/filename).read_text(encoding='utf-8')
         chunks.append('# Exact AST definitions from '+filename)

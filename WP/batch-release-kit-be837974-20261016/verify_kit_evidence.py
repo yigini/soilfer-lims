@@ -89,11 +89,34 @@ class SharedEvidence(unittest.TestCase):
         root=directory();book=evidence.EvidenceLedger(root)
         summary=book.summary()
         self.assertEqual(summary['coveredProducerMaximumBytes'],3*1024**3)
-        self.assertEqual(summary['unassignedWithinExisting4GiBBytes'],1024**3)
+        self.assertEqual(summary['independentEmergencyEnvelopesBytes'],800*1024**2)
+        self.assertEqual(summary['unassignedWithinExisting4GiBBytes'],224*1024**2)
         self.assertFalse(summary['fullGlobalEvidenceClosure'])
         with patch('kit_evidence._runtime',None):
             self.assertIs(evidence.bind_runtime(root),evidence._runtime)
             with self.assertRaises(RuntimeError):evidence.bind_runtime(root)
         with self.assertRaises(RuntimeError):evidence.EvidenceLedger(root,dict.fromkeys(evidence.SHARES,1024**3))
+
+    def test_independent_record_exception_cannot_bypass_for_other_names_or_sizes(self):
+        root=directory();book=ledger(root,journal=4096)
+        with patch('kit_evidence._runtime',book):
+            exclusive_record(root,'emergency-stop-post-000001.json',{'synthetic':True},False,
+                independent_namespace='stop-post')
+            for name,value in [('arbitrary.json',{}),('emergency-stop-post-000097.json',{}),
+                               ('emergency-stop-post-000002.json',{'oversized':'X'*8192})]:
+                with self.assertRaises(RuntimeError):exclusive_record(root,name,value,False,
+                    independent_namespace='stop-post')
+        self.assertEqual(book.used['journal'],0)
+
+    def test_child_completion_full_envelope_is_charged_before_container_creation(self):
+        from kit_owned import filesystem_controls,cli_spec
+        from kit_integrity import DATA_MOUNT
+        root=directory();book=ledger(root,journal=7*4096)
+        with patch('kit_evidence._runtime',book),patch('kit_owned.ROOT',pathlib.PurePosixPath(root.as_posix())):
+            spec=cli_spec('206-apply',DATA_MOUNT);prepare,_,_=filesystem_controls(root,False)
+            prepare(spec)
+        path=root/'206-apply-retained-temp'/'cli-child-complete.json'
+        self.assertFalse(path.exists());self.assertFalse(path.with_name(path.name+'.pending').exists())
+        self.assertEqual(book.used['journal'],7*4096)
 
 if __name__=='__main__':unittest.main()

@@ -9,7 +9,7 @@ import pathlib
 import re
 import stat
 from kit_contract import canonical,require,sha
-from kit_evidence import admit_evidence
+from kit_evidence import admit_evidence,EMERGENCY_CALL_LIMIT,EMERGENCY_METADATA_LIMIT
 
 def utc():return datetime.datetime.now(datetime.timezone.utc).isoformat()
 
@@ -20,7 +20,7 @@ def real_directory(value):
         require(not part.is_symlink(),'Journal directory alias refused')
     return path
 
-def exclusive_record(directory,name,value,require_directory_sync=True):
+def exclusive_record(directory,name,value,require_directory_sync=True,independent_namespace=None):
     directory=real_directory(directory)
     require(isinstance(name,str) and re.fullmatch('[a-z0-9][a-z0-9.-]{0,150}',name),'Exact record basename required')
     raw=canonical(value)+b'\n'
@@ -28,7 +28,12 @@ def exclusive_record(directory,name,value,require_directory_sync=True):
     path=directory/name;pending=directory/(name+'.pending')
     if path.exists() or path.is_symlink():raise FileExistsError('Published record already consumed')
     # One data allocation and BOTH permanently retained directory entries.
-    admit_evidence(path,len(raw),pending=True)
+    if independent_namespace is None:admit_evidence(path,len(raw),pending=True)
+    else:
+        require(independent_namespace in ('controller','stop-post'),'Unknown independent record namespace')
+        match=re.fullmatch('emergency-'+independent_namespace+'-([0-9]{6})[.]json',name)
+        require(match is not None and 1<=int(match.group(1))<=EMERGENCY_CALL_LIMIT and
+            len(raw)<=EMERGENCY_METADATA_LIMIT,'Independent emergency record outside its fixed envelope')
     descriptor=os.open(str(pending),os.O_WRONLY|os.O_CREAT|os.O_EXCL|getattr(os,'O_NOFOLLOW',0),0o600)
     try:
         with os.fdopen(descriptor,'wb',closefd=False) as stream:

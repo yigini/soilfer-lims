@@ -91,4 +91,34 @@ class PrivateTransport(unittest.TestCase):
         self.assertEqual(out,b'O'*262144+raw);self.assertEqual(err,b'E'*262144)
         self.assertTrue(result['streamCapture']['allOriginalBytesRetained'])
 
+    def test_asymmetric_stream_limits_reserve_and_retain_each_exact_original(self):
+        root,run=self.runner()
+        out,err,result=run.run([sys.executable,'-c',
+            "import os;os.write(1,b'O'*4096);os.write(2,b'E'*17)"],
+            'asymmetric',5,allow_stderr=True,output_limits={'stdout':4096,'stderr':17})
+        self.assertEqual(out,b'O'*4096);self.assertEqual(err,b'E'*17)
+        self.assertEqual(result['streamCapture']['perStreamLimitsBytes'],{'stdout':4096,'stderr':17})
+        intent=json.loads((root/'asymmetric-command-intent.json').read_bytes())
+        self.assertEqual(intent['outputLimitsBytes'],{'stdout':4096,'stderr':17})
+
+    def test_smaller_stderr_burst_is_incomplete_and_stops_at_its_sentinel(self):
+        root,run=self.runner()
+        with self.assertRaises(RuntimeError):run.run([sys.executable,'-c',
+            "import os;os.write(2,b'E'*65536)"],'stderr-small',5,allow_stderr=True,
+            output_limits={'stdout':4096,'stderr':17})
+        result=json.loads((root/'stderr-small-command-result.json').read_bytes())
+        self.assertEqual((root/'stderr-small.stderr').read_bytes(),b'E'*18)
+        self.assertFalse(result['streamCapture']['allOriginalBytesRetained'])
+        self.assertTrue(result['streamCapture']['outputLimitExceeded']['stderr'])
+
+    def test_bad_or_raised_stream_bounds_refuse_before_intent_and_process(self):
+        root,run=self.runner()
+        with patch('kit_io.subprocess.Popen') as spawn:
+            for limits in ({'stdout':1},{'stdout':True,'stderr':2},{'stdout':1,'stderr':0},
+                           {'stdout':64*1024**2+1,'stderr':1}):
+                with self.assertRaises(RuntimeError):run.run([sys.executable,'-c','pass'],
+                    'bad-bound',5,output_limits=limits)
+            spawn.assert_not_called()
+        self.assertFalse(list(root.iterdir()))
+
 if __name__=='__main__':unittest.main()

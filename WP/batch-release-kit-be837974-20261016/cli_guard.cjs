@@ -54,6 +54,7 @@ function runChild(directory, child) {
     childErrorType: result.error ? result.error.name : null,
     childSeconds: Number(process.hrtime.bigint() - began) / 1e9,
     argvSha256: hash(Buffer.from(JSON.stringify(child))), neverRetry: true }) + '\n');
+  requireValue(record.length <= 8192, 'CLI completion exceeds its pre-create envelope');
   writeOnce(complete, record);
   const timer = setInterval(() => {
     if (!fs.existsSync(permit)) return;

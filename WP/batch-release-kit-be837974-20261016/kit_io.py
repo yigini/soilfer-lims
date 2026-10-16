@@ -22,25 +22,26 @@ PROGRAMS=frozenset(('docker','systemctl','httpd','apachectl','curl','containerd'
 
 class CommandOutputLimitError(RuntimeError):pass
 
-def drain_streams(streams,outputs,captured,eof,exceeded,rounds=16):
+def drain_streams(streams,outputs,captured,eof,exceeded,rounds=16,limits=None):
     """Copy bounded original pipe bytes; no reader threads or direct child files.
 
     Each descriptor is nonblocking. An inherited pipe can therefore neither
     strand a writer after sealing nor hide behind the direct child's exit.
     Only a fully drained, EOF-observed stream can be called complete.
     """
+    limits=limits or dict.fromkeys(('stdout','stderr'),OUTPUT_LIMIT)
     progress=False
     for _ in range(rounds):
         changed=False
         for name,pipe in streams.items():
             if eof[name] or exceeded[name]:continue
-            remaining=OUTPUT_RETAINED_LIMIT-captured[name]
+            remaining=limits[name]+1-captured[name]
             require(remaining>0,'No unreserved output read permitted')
             try:raw=os.read(pipe.fileno(),min(READ_CHUNK,remaining))
             except BlockingIOError:continue
             if not raw:eof[name]=True;changed=True;continue
             outputs[name].write(raw);captured[name]+=len(raw);changed=True
-            if captured[name]>OUTPUT_LIMIT:exceeded[name]=True
+            if captured[name]>limits[name]:exceeded[name]=True
         progress=progress or changed
         if not changed:break
     return progress
@@ -58,12 +59,15 @@ class CommandRunner:
     def __init__(self,root,check,require_directory_sync=True,programs=PROGRAMS):
         self.root=real_directory(root);self.check=check;self.sync=require_directory_sync;self.programs=programs
 
-    def run(self,argv,label,timeout=30,input_bytes=None,allow_stderr=False,observer=None):
+    def run(self,argv,label,timeout=30,input_bytes=None,allow_stderr=False,observer=None,output_limits=None):
         require(isinstance(argv,list) and len(argv)>1 and all(isinstance(x,str) and '\x00' not in x for x in argv),'Explicit argv required')
         require(argv[0] in self.programs and '--rm' not in argv,'Unreviewed program or automatic container deletion refused')
         require(isinstance(label,str) and re.fullmatch('[a-z0-9][a-z0-9-]{0,110}',label),'Unique command label required')
         require(type(timeout) is int and 0<timeout<=600,'Existing bounded operation timeout required')
         require(input_bytes is None or isinstance(input_bytes,bytes) and 0<len(input_bytes)<=1024**2,'Bounded reviewed stdin required')
+        limits=dict.fromkeys(('stdout','stderr'),OUTPUT_LIMIT) if output_limits is None else dict(output_limits)
+        require(set(limits)=={'stdout','stderr'} and all(type(n) is int and 0<n<=OUTPUT_LIMIT for n in limits.values()),
+            'Two exact positive stream limits within the existing maximum required')
         self.check(timeout)
         out=self.root/(label+'.stdout');err=self.root/(label+'.stderr')
         # The intent contains only argv hash/length. Secrets, if any, never
@@ -71,10 +75,10 @@ class CommandRunner:
         exclusive_record(self.root,label+'-command-intent.json',{
             'argvSha256':sha(canonical(argv)),'argvEntries':len(argv),'timeoutSeconds':timeout,
             'stdinSha256':None if input_bytes is None else sha(input_bytes),
-            'rawStreamsPrivateUntilReviewed':True,'neverRetry':True},self.sync)
+            'outputLimitsBytes':limits,'rawStreamsPrivateUntilReviewed':True,'neverRetry':True},self.sync)
         # Both complete streams, including an over-limit sentinel, have space
         # admitted before launch. Other runtime producers cannot spend it.
-        reservations=[admit_evidence(p,OUTPUT_RETAINED_LIMIT,reservation=True) for p in (out,err)]
+        reservations=[admit_evidence(p,limits[name]+1,reservation=True) for name,p in [('stdout',out),('stderr',err)]]
         began=time.monotonic();code=None;error=None;process=None;streams={}
         captured={'stdout':0,'stderr':0};eof={'stdout':False,'stderr':False};exceeded={'stdout':False,'stderr':False}
         with out.open('xb') as stdout,err.open('xb') as stderr:
@@ -88,7 +92,7 @@ class CommandRunner:
                 if input_bytes is not None:os.set_blocking(process.stdin.fileno(),False)
                 next_guard=began
                 while process.poll() is None or not all(eof.values()):
-                    progress=drain_streams(streams,outputs,captured,eof,exceeded)
+                    progress=drain_streams(streams,outputs,captured,eof,exceeded,limits=limits)
                     if any(exceeded.values()):raise CommandOutputLimitError('Command output bound reached')
                     if input_bytes is not None and written<len(input_bytes):
                         try:written+=os.write(process.stdin.fileno(),input_bytes[written:written+4096])
@@ -116,7 +120,7 @@ class CommandRunner:
                 # Retain only the still-readable prefix after a failure. Never
                 # wait for descendants holding pipes, or label this as complete.
                 try:
-                    while drain_streams(streams,outputs,captured,eof,exceeded):pass
+                    while drain_streams(streams,outputs,captured,eof,exceeded,limits=limits):pass
                 finally:
                     for pipe in streams.values():pipe.close()
                 stdout.flush();stderr.flush();os.fsync(stdout.fileno());os.fsync(stderr.fileno())
@@ -125,11 +129,13 @@ class CommandRunner:
             if reservation is not None:reservation[0].settle(reservation[1],path.stat().st_size)
         metadata={'exitCode':code,'errorType':error,'elapsedSeconds':time.monotonic()-began,
                   'stdout':stream_identity(out),'stderr':stream_identity(err),'neverRetry':True,
-                  'streamCapture':{'perStreamLimitBytes':OUTPUT_LIMIT,
-                      'retainedMaximumBytesPerStream':OUTPUT_RETAINED_LIMIT,
+                  'streamCapture':{'perStreamLimitBytes':max(limits.values()),'perStreamLimitsBytes':limits,
+                      'retainedMaximumBytesPerStream':max(limits.values())+1,
                       'eofObserved':eof,'outputLimitExceeded':exceeded,
                       'allOriginalBytesRetained':error is None and all(eof.values()) and not any(exceeded.values())}}
         exclusive_record(self.root,label+'-command-result.json',metadata,self.sync)
-        require(error is None and code==0 and metadata['streamCapture']['allOriginalBytesRetained'] and max(metadata['stdout']['bytes'],metadata['stderr']['bytes'])<=OUTPUT_LIMIT,'Command failed; inspect the retained private streams and do not retry')
+        require(error is None and code==0 and metadata['streamCapture']['allOriginalBytesRetained'] and
+            all(metadata[name]['bytes']<=limits[name] for name in limits),
+            'Command failed; inspect the retained private streams and do not retry')
         require(allow_stderr or metadata['stderr']['bytes']==0,'Command stderr refused after original stream retention')
         return out.read_bytes(),err.read_bytes(),metadata

@@ -43,6 +43,7 @@ class StandIn:
     def __init__(self,spec):
         self.spec=spec;self.value=obj(spec,False);self.permitted=False;self.events=[];self.now=0
         self.failure=None;self.status=0;self.reads=0;self.memory=[];self.stop_calls=[]
+        self.wait_raw=None;self.wait_seconds=0;self.change_after_wait=False
     def check(self,seconds):self.events.append('check')
     def inventory(self):self.events.append('inventory');return {'b'*64:{'Name':'/predecessor','Config':{'Labels':{}}}}
     def inspect(self,identity):
@@ -53,6 +54,13 @@ class StandIn:
         if self.failure==argv[1]:raise RuntimeError('SYNTHETIC_LOST_RETURN')
         if argv[1]=='create':return (ID+'\n').encode(),b'',{}
         if argv[1]=='start':self.value['State']['Running']=True;return ID.encode(),b'',{}
+        if argv[1]=='wait':
+            assert self.permitted and self.memory[-1]=='before-stop'
+            assert kw['output_limits']=={'stdout':16,'stderr':64*1024}
+            self.now+=self.wait_seconds;self.value['State']['Running']=False
+            self.value['State']['ExitCode']=self.status
+            if self.change_after_wait:self.value['State']['StartedAt']='SYNTHETIC_CHANGED_START'
+            return (str(self.status)+'\n').encode() if self.wait_raw is None else self.wait_raw,b'',{'privateWait':True}
         if argv[1]=='logs':return b'{"synthetic":true}\n',b'',{'private':True}
         raise AssertionError(argv)
     def clock(self):self.now+=0.1;return self.now
@@ -120,16 +128,30 @@ class OwnedTests(unittest.TestCase):
         self.assertEqual(phases[0]['phase'],'ownedCliIntent')
         self.assertEqual(phases[0]['value']['specification'],spec)
         self.assertLess(stand.events.index('memory:before-stop'),stand.events.index('permit'))
+        self.assertLess(stand.events.index('permit'),stand.events.index('wait'))
+        self.assertEqual(stand.events.count('wait'),1)
+        self.assertEqual(stand.events.count('inspect'),4)
+        self.assertEqual(result['wrapperWait'],{'privateWait':True})
         self.assertEqual(phases[-1]['phase'],'ownedCliComplete')
 
     def test_lost_create_or_start_return_stops_by_intended_owner_and_never_retries(self):
-        for failure in ('create','start'):
+        for failure in ('create','start','wait'):
             spec=cli_spec('209-apply',DATA_MOUNT);stand=StandIn(spec);stand.failure=failure;d=directory()
             journal=Journal(d,str(d),'f'*64,require_directory_sync=False);manager=stand.manager(journal)
             with self.assertRaises(RuntimeError):manager.run(spec)
             self.assertEqual(stand.stop_calls,[[spec['label']]])
             with self.assertRaises(RuntimeError):manager.run(spec)
             self.assertEqual(stand.events.count(failure),1)
+
+    def test_wait_output_status_identity_and_original_deadline_are_all_required(self):
+        cases=[{'wait_raw':b'0\n0\n'},{'wait_raw':b'256\n'},{'wait_raw':b'1\n'},
+               {'change_after_wait':True},{'wait_seconds':600}]
+        for changed in cases:
+            spec=cli_spec('206-apply',DATA_MOUNT);stand=StandIn(spec);d=directory()
+            for key,value in changed.items():setattr(stand,key,value)
+            journal=Journal(d,str(d),'f'*64,require_directory_sync=False)
+            with self.subTest(changed=changed),self.assertRaises(RuntimeError):stand.manager(journal).run(spec)
+            self.assertEqual(stand.events.count('wait'),1);self.assertEqual(stand.stop_calls,[[spec['label']]])
 
     def test_child_failure_still_gets_final_memory_and_retained_exit_then_stop_attempt(self):
         spec=cli_spec('214-dry',DATA_MOUNT);stand=StandIn(spec);stand.status=3;d=directory()

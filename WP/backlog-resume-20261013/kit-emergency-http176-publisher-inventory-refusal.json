@@ -1,0 +1,19 @@
+{
+  "actualInventory": {
+    "discovered": 374,
+    "executed": 374,
+    "identical": true,
+    "uniqueSuitePaths": 374
+  },
+  "beforeEvidenceDirectoryCreation": true,
+  "beforeREADMEStageGitOrHostMutation": true,
+  "error": "AssertionError: inventory suites field is a list, not integer374",
+  "exitCode": 1,
+  "helperNeverReplayed": true,
+  "kind": "TOOL_OUTPUT_TRANSCRIPTION",
+  "originalHelper": "WP/backlog-resume-20261013/publish-kit-emergency-http176-once.py",
+  "originalHelperSha256": "84161550e7c61fe004d7497699c6fe2cb42bff0cd059819e21c5d51b72e731be",
+  "rawToolStderrNotSeparatelyCaptured": true,
+  "recordedUtc": "2026-10-16T13:57:05.508409+00:00",
+  "successor": "WP/backlog-resume-20261013/publish-kit-emergency-http176-inventory-successor-once.py"
+}

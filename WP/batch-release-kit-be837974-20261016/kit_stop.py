@@ -3,18 +3,21 @@
 No reserve/headroom/memory predicate may suppress an exact owned stop. Raw
 calls stay private. Retention errors are collected and reported after all
 owners have been attempted; they never authorize a foreign container stop.
-Candidate/predecessor stop bindings are still separate, unfinished work.
+Compiled candidate/predecessor lifecycle bindings use this same transport.
 """
 import os
+import io
 import re
 import subprocess
-import threading
 import time
 from kit_contract import canonical,require,sha
 from retained_contract import exact_json
 from kit_owned import ALLOWED,LABEL,cli_spec,selected,same_retained
 from kit_integrity import DATA_MOUNT
-from kit_journal import exclusive_record
+from kit_journal import exclusive_record,real_directory
+from kit_io import drain_streams
+from kit_evidence import (allocation,EMERGENCY_CALL_LIMIT,EMERGENCY_STREAM_LIMITS,
+    EMERGENCY_METADATA_LIMIT,EMERGENCY_NAMESPACE_BYTES)
 
 MAX_OUTPUT=4*1024**2
 
@@ -26,11 +29,20 @@ class EmergencyCommands:
         self.sequence=0;self.retention_errors=[]
 
     def retain(self,label,raw,metadata):
+        # These checks are deliberately AFTER launch/pipe closure. Even an
+        # unexpected extra call or failed allocation must still attempt stop.
+        directory=real_directory(self.root)
+        require(self.sequence<=EMERGENCY_CALL_LIMIT,'Independent emergency retained-call envelope exhausted')
+        require(all(len(content)<=EMERGENCY_STREAM_LIMITS[name]+1 for name,content in zip(('stdout','stderr'),raw)),
+            'Independent emergency stream envelope exceeded')
+        require(len(canonical(metadata))+1<=EMERGENCY_METADATA_LIMIT,'Independent emergency metadata bound exceeded')
+        worst=sum(allocation(n+1) for n in EMERGENCY_STREAM_LIMITS.values())+allocation(EMERGENCY_METADATA_LIMIT,2)
+        require(EMERGENCY_CALL_LIMIT*worst<=EMERGENCY_NAMESPACE_BYTES,'Independent emergency namespace declaration insufficient')
         for suffix,content in zip(('stdout','stderr'),raw):
-            path=self.root/(label+'.'+suffix)
+            path=directory/(label+'.'+suffix)
             fd=os.open(str(path),os.O_WRONLY|os.O_CREAT|os.O_EXCL,0o400)
             with os.fdopen(fd,'wb') as handle:handle.write(content);handle.flush();os.fsync(handle.fileno())
-        exclusive_record(self.root,label+'.json',metadata,self.sync)
+        exclusive_record(directory,label+'.json',metadata,self.sync,independent_namespace=self.namespace)
 
     def __call__(self,argv):
         docker=isinstance(argv,list) and len(argv)>=3 and argv[0]=='docker' and argv[1] in ('ps','inspect','stop')
@@ -45,24 +57,17 @@ class EmergencyCommands:
         # Keep bounded originals in RAM until the command has completed. A full
         # evidence filesystem cannot stop the actual emergency command launch.
         began=time.monotonic();process=None;error=None;code=None
-        buffers=[bytearray(),bytearray()];overflow=threading.Event();threads=[]
-        def consume(stream,index):
-            try:
-                while True:
-                    chunk=stream.read(65536)
-                    if not chunk:break
-                    room=MAX_OUTPUT-len(buffers[index]);buffers[index].extend(chunk[:max(0,room)])
-                    if len(chunk)>room:overflow.set();break
-            except BaseException:overflow.set()
-            finally:stream.close()
+        outputs={name:io.BytesIO() for name in ('stdout','stderr')};streams={}
+        captured=dict.fromkeys(outputs,0);eof=dict.fromkeys(outputs,False);exceeded=dict.fromkeys(outputs,False)
         try:
-            process=self.spawn(argv,stdout=subprocess.PIPE,stderr=subprocess.PIPE,stdin=subprocess.DEVNULL)
-            for index,stream in enumerate((process.stdout,process.stderr)):
-                thread=threading.Thread(target=consume,args=(stream,index),daemon=True);thread.start();threads.append(thread)
-            while process.poll() is None:
-                require(not overflow.is_set(),'Emergency output incomplete/oversized')
+            process=self.spawn(argv,stdout=subprocess.PIPE,stderr=subprocess.PIPE,stdin=subprocess.DEVNULL,bufsize=0)
+            streams={'stdout':process.stdout,'stderr':process.stderr}
+            for pipe in streams.values():os.set_blocking(pipe.fileno(),False)
+            while process.poll() is None or not all(eof.values()):
+                progress=drain_streams(streams,outputs,captured,eof,exceeded,limits=EMERGENCY_STREAM_LIMITS)
+                require(not any(exceeded.values()),'Emergency output incomplete/oversized')
                 require(time.monotonic()-began<30,'Emergency transport deadline reached')
-                time.sleep(0.02)
+                if not progress:time.sleep(0.005)
             code=process.returncode
         except BaseException as failure:
             error=type(failure).__name__
@@ -70,11 +75,17 @@ class EmergencyCommands:
                 process.kill()
                 try:process.wait(timeout=5)
                 except BaseException:pass
-        for thread in threads:thread.join(timeout=5)
-        complete=not overflow.is_set() and not any(t.is_alive() for t in threads) and error is None
-        raw=[bytes(x) for x in buffers]
+        finally:
+            try:
+                while drain_streams(streams,outputs,captured,eof,exceeded,limits=EMERGENCY_STREAM_LIMITS):pass
+            except BaseException as failure:error=error or type(failure).__name__
+            finally:
+                for pipe in streams.values():pipe.close()
+        complete=all(eof.values()) and not any(exceeded.values()) and error is None
+        raw=[outputs[name].getvalue() for name in ('stdout','stderr')]
         metadata={'argvSha256':sha(canonical(argv)),'exitCode':code,'errorType':error,
             'elapsedSeconds':time.monotonic()-began,'completeNotTruncated':complete,'neverRetry':True,
+            'streamLimitsBytes':dict(EMERGENCY_STREAM_LIMITS),'eofObserved':eof,'outputLimitExceeded':exceeded,
             'stdout':{'sha256':sha(raw[0]),'bytes':len(raw[0])},
             'stderr':{'sha256':sha(raw[1]),'bytes':len(raw[1])},'rawHostOnly':True}
         # Best effort preservation is intentionally AFTER the stop command. A

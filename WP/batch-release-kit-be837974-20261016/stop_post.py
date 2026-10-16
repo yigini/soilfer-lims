@@ -1,6 +1,6 @@
 """GENERATED self-contained exact-root stop-post. No local imports; no import actions."""
 
-import datetime,hashlib,json,os,pathlib,re,stat,subprocess,sys,threading,time
+import datetime,hashlib,io,json,os,pathlib,re,stat,subprocess,sys,time
 
 # Exact AST definitions from kit_contract.py
 
@@ -57,6 +57,16 @@ def exact_json(raw):
 BLOCK = 4096
 
 SHARES = {'commands': 1536 * 1024 ** 2, 'memory': 512 * 1024 ** 2, 'controller': 512 * 1024 ** 2, 'journal': 512 * 1024 ** 2}
+
+EMERGENCY_CALL_LIMIT = 96
+
+EMERGENCY_STREAM_LIMITS = {'stdout': 4 * 1024 ** 2, 'stderr': 64 * 1024}
+
+EMERGENCY_METADATA_LIMIT = 8192
+
+EMERGENCY_NAMESPACE_BYTES = 400 * 1024 ** 2
+
+INDEPENDENT_EMERGENCY_BYTES = 2 * EMERGENCY_NAMESPACE_BYTES
 
 _runtime = None
 
@@ -115,7 +125,7 @@ class EvidenceLedger:
         del self.open[ticket]
 
     def summary(self):
-        return {'sharesBytes': dict(self.shares), 'chargedOrReservedBytes': dict(self.used), 'openReservations': len(self.open), 'directoryEntriesCounted': len(self.paths), 'nestedDirectoriesCounted': len(self.directories), 'coveredProducerMaximumBytes': sum(self.shares.values()), 'unassignedWithinExisting4GiBBytes': 4 * 1024 ** 3 - sum(self.shares.values()), 'fullGlobalEvidenceClosure': False, 'allOriginalsPrivate': True}
+        return {'sharesBytes': dict(self.shares), 'chargedOrReservedBytes': dict(self.used), 'openReservations': len(self.open), 'directoryEntriesCounted': len(self.paths), 'nestedDirectoriesCounted': len(self.directories), 'coveredProducerMaximumBytes': sum(self.shares.values()), 'independentEmergencyEnvelopesBytes': INDEPENDENT_EMERGENCY_BYTES, 'unassignedWithinExisting4GiBBytes': 4 * 1024 ** 3 - sum(self.shares.values()) - INDEPENDENT_EMERGENCY_BYTES, 'fullGlobalEvidenceClosure': False, 'allOriginalsPrivate': True}
 
 def bind_runtime(root):
     global _runtime
@@ -150,7 +160,7 @@ def real_directory(value):
         require(not part.is_symlink(), 'Journal directory alias refused')
     return path
 
-def exclusive_record(directory, name, value, require_directory_sync=True):
+def exclusive_record(directory, name, value, require_directory_sync=True, independent_namespace=None):
     directory = real_directory(directory)
     require(isinstance(name, str) and re.fullmatch('[a-z0-9][a-z0-9.-]{0,150}', name), 'Exact record basename required')
     raw = canonical(value) + b'\n'
@@ -159,7 +169,12 @@ def exclusive_record(directory, name, value, require_directory_sync=True):
     pending = directory / (name + '.pending')
     if path.exists() or path.is_symlink():
         raise FileExistsError('Published record already consumed')
-    admit_evidence(path, len(raw), pending=True)
+    if independent_namespace is None:
+        admit_evidence(path, len(raw), pending=True)
+    else:
+        require(independent_namespace in ('controller', 'stop-post'), 'Unknown independent record namespace')
+        match = re.fullmatch('emergency-' + independent_namespace + '-([0-9]{6})[.]json', name)
+        require(match is not None and 1 <= int(match.group(1)) <= EMERGENCY_CALL_LIMIT and (len(raw) <= EMERGENCY_METADATA_LIMIT), 'Independent emergency record outside its fixed envelope')
     descriptor = os.open(str(pending), os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, 'O_NOFOLLOW', 0), 384)
     try:
         with os.fdopen(descriptor, 'wb', closefd=False) as stream:
@@ -333,6 +348,46 @@ def candidate_projection(value, spec, running=None, emergency=False):
         assert_healthcheck(config.get('Healthcheck'), spec['health'])
     return {'id': value['Id'], 'owner': CANDIDATE_OWNER, 'name': value['Name'], 'image': value['Image'], 'startedAt': state['StartedAt'], 'running': state['Running'], 'mounts': mounts, 'configSha256': sha(canonical(config)), 'hostConfigSha256': sha(canonical(host))}
 
+# Exact AST definitions from kit_io.py
+
+OUTPUT_LIMIT = 64 * 1024 ** 2
+
+READ_CHUNK = 65536
+
+def drain_streams(streams, outputs, captured, eof, exceeded, rounds=16, limits=None):
+    """Copy bounded original pipe bytes; no reader threads or direct child files.
+
+    Each descriptor is nonblocking. An inherited pipe can therefore neither
+    strand a writer after sealing nor hide behind the direct child's exit.
+    Only a fully drained, EOF-observed stream can be called complete.
+    """
+    limits = limits or dict.fromkeys(('stdout', 'stderr'), OUTPUT_LIMIT)
+    progress = False
+    for _ in range(rounds):
+        changed = False
+        for name, pipe in streams.items():
+            if eof[name] or exceeded[name]:
+                continue
+            remaining = limits[name] + 1 - captured[name]
+            require(remaining > 0, 'No unreserved output read permitted')
+            try:
+                raw = os.read(pipe.fileno(), min(READ_CHUNK, remaining))
+            except BlockingIOError:
+                continue
+            if not raw:
+                eof[name] = True
+                changed = True
+                continue
+            outputs[name].write(raw)
+            captured[name] += len(raw)
+            changed = True
+            if captured[name] > limits[name]:
+                exceeded[name] = True
+        progress = progress or changed
+        if not changed:
+            break
+    return progress
+
 # Exact AST definitions from kit_stop.py
 
 MAX_OUTPUT = 4 * 1024 ** 2
@@ -349,14 +404,20 @@ class EmergencyCommands:
         self.retention_errors = []
 
     def retain(self, label, raw, metadata):
+        directory = real_directory(self.root)
+        require(self.sequence <= EMERGENCY_CALL_LIMIT, 'Independent emergency retained-call envelope exhausted')
+        require(all((len(content) <= EMERGENCY_STREAM_LIMITS[name] + 1 for name, content in zip(('stdout', 'stderr'), raw))), 'Independent emergency stream envelope exceeded')
+        require(len(canonical(metadata)) + 1 <= EMERGENCY_METADATA_LIMIT, 'Independent emergency metadata bound exceeded')
+        worst = sum((allocation(n + 1) for n in EMERGENCY_STREAM_LIMITS.values())) + allocation(EMERGENCY_METADATA_LIMIT, 2)
+        require(EMERGENCY_CALL_LIMIT * worst <= EMERGENCY_NAMESPACE_BYTES, 'Independent emergency namespace declaration insufficient')
         for suffix, content in zip(('stdout', 'stderr'), raw):
-            path = self.root / (label + '.' + suffix)
+            path = directory / (label + '.' + suffix)
             fd = os.open(str(path), os.O_WRONLY | os.O_CREAT | os.O_EXCL, 256)
             with os.fdopen(fd, 'wb') as handle:
                 handle.write(content)
                 handle.flush()
                 os.fsync(handle.fileno())
-        exclusive_record(self.root, label + '.json', metadata, self.sync)
+        exclusive_record(directory, label + '.json', metadata, self.sync, independent_namespace=self.namespace)
 
     def __call__(self, argv):
         docker = isinstance(argv, list) and len(argv) >= 3 and (argv[0] == 'docker') and (argv[1] in ('ps', 'inspect', 'stop'))
@@ -370,35 +431,22 @@ class EmergencyCommands:
         process = None
         error = None
         code = None
-        buffers = [bytearray(), bytearray()]
-        overflow = threading.Event()
-        threads = []
-
-        def consume(stream, index):
-            try:
-                while True:
-                    chunk = stream.read(65536)
-                    if not chunk:
-                        break
-                    room = MAX_OUTPUT - len(buffers[index])
-                    buffers[index].extend(chunk[:max(0, room)])
-                    if len(chunk) > room:
-                        overflow.set()
-                        break
-            except BaseException:
-                overflow.set()
-            finally:
-                stream.close()
+        outputs = {name: io.BytesIO() for name in ('stdout', 'stderr')}
+        streams = {}
+        captured = dict.fromkeys(outputs, 0)
+        eof = dict.fromkeys(outputs, False)
+        exceeded = dict.fromkeys(outputs, False)
         try:
-            process = self.spawn(argv, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.DEVNULL)
-            for index, stream in enumerate((process.stdout, process.stderr)):
-                thread = threading.Thread(target=consume, args=(stream, index), daemon=True)
-                thread.start()
-                threads.append(thread)
-            while process.poll() is None:
-                require(not overflow.is_set(), 'Emergency output incomplete/oversized')
+            process = self.spawn(argv, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.DEVNULL, bufsize=0)
+            streams = {'stdout': process.stdout, 'stderr': process.stderr}
+            for pipe in streams.values():
+                os.set_blocking(pipe.fileno(), False)
+            while process.poll() is None or not all(eof.values()):
+                progress = drain_streams(streams, outputs, captured, eof, exceeded, limits=EMERGENCY_STREAM_LIMITS)
+                require(not any(exceeded.values()), 'Emergency output incomplete/oversized')
                 require(time.monotonic() - began < 30, 'Emergency transport deadline reached')
-                time.sleep(0.02)
+                if not progress:
+                    time.sleep(0.005)
             code = process.returncode
         except BaseException as failure:
             error = type(failure).__name__
@@ -408,11 +456,18 @@ class EmergencyCommands:
                     process.wait(timeout=5)
                 except BaseException:
                     pass
-        for thread in threads:
-            thread.join(timeout=5)
-        complete = not overflow.is_set() and (not any((t.is_alive() for t in threads))) and (error is None)
-        raw = [bytes(x) for x in buffers]
-        metadata = {'argvSha256': sha(canonical(argv)), 'exitCode': code, 'errorType': error, 'elapsedSeconds': time.monotonic() - began, 'completeNotTruncated': complete, 'neverRetry': True, 'stdout': {'sha256': sha(raw[0]), 'bytes': len(raw[0])}, 'stderr': {'sha256': sha(raw[1]), 'bytes': len(raw[1])}, 'rawHostOnly': True}
+        finally:
+            try:
+                while drain_streams(streams, outputs, captured, eof, exceeded, limits=EMERGENCY_STREAM_LIMITS):
+                    pass
+            except BaseException as failure:
+                error = error or type(failure).__name__
+            finally:
+                for pipe in streams.values():
+                    pipe.close()
+        complete = all(eof.values()) and (not any(exceeded.values())) and (error is None)
+        raw = [outputs[name].getvalue() for name in ('stdout', 'stderr')]
+        metadata = {'argvSha256': sha(canonical(argv)), 'exitCode': code, 'errorType': error, 'elapsedSeconds': time.monotonic() - began, 'completeNotTruncated': complete, 'neverRetry': True, 'streamLimitsBytes': dict(EMERGENCY_STREAM_LIMITS), 'eofObserved': eof, 'outputLimitExceeded': exceeded, 'stdout': {'sha256': sha(raw[0]), 'bytes': len(raw[0])}, 'stderr': {'sha256': sha(raw[1]), 'bytes': len(raw[1])}, 'rawHostOnly': True}
         try:
             self.retain(label, raw, metadata)
         except BaseException as failure:
