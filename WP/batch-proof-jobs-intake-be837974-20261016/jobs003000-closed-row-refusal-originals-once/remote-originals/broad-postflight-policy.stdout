@@ -1,0 +1,5 @@
+PASS SUPER_ADMIN: own-scope policy read, resolved registered settings, inherited version 0
+PASS LAB_MANAGER: own-scope policy read, resolved registered settings, inherited version 0
+PASS LAB_TECHNICIAN: own-scope policy read, resolved registered settings, inherited version 0
+PASS additive declaration CHECK, canonical partial index, three migration receipts and zero automatic resolutions
+PASS SemVer health, policy reads create no rows, existing report policyVersion remains NULL

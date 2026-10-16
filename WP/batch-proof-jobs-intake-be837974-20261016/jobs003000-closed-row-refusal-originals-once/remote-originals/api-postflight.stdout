@@ -1,0 +1,48 @@
+============================================================
+  SOILFER-LIMS ISSUE #140 BOUNDED POSTFLIGHT VERIFICATION   
+============================================================
+Database Path: /app/server/prisma/dev.db
+Target URL:    http://127.0.0.1:3000
+
+--- 1. Database Schema & Integrity Checks ---
+[PASS] Database file exists - /app/server/prisma/dev.db
+[PASS] PRAGMA integrity_check - [{"integrity_check":"ok"}]
+[PASS] PRAGMA foreign_key_check - 0 errors
+[PASS] Table presence: _exchange_journal - Found
+[PASS] Table presence: _exchange_snapshots - Found
+[PASS] Table presence: _exchange_connections - Found
+[PASS] Table presence: _exchange_connection_keys - Found
+[PASS] Table presence: _exchange_receipts - Found
+[PASS] Table presence: _exchange_meta - Found
+
+--- 2. Public Endpoint Health & Discovery ---
+[PASS] GET /api/health -> 200 - Got 200
+[PASS] GET /api/v2/data-exchange/capabilities -> 200 - Got 200, version: 2.0.0
+
+--- 3. Anonymous Protection Policy (HTTP 401 Denials) ---
+[PASS] Anonymous GET /api/labs/directory -> 401 - Got 401
+[PASS] Anonymous GET /api/v1/data-exchange/stats -> 401 - Got 401
+[PASS] Anonymous GET /api/v1/sis/stats -> 401 - Got 401
+[PASS] Anonymous GET /api/v2/data-exchange/stats -> 401 - Got 401
+[PASS] Anonymous GET /api/v2/data-exchange/samples -> 401 - Got 401
+[PASS] Anonymous GET /api/v2/data-exchange/observations -> 401 - Got 401
+[PASS] Anonymous GET /api/v2/data-exchange/geojson -> 401 - Got 401
+[PASS] Anonymous GET /api/v2/data-exchange/spectra -> 401 - Got 401
+[PASS] Anonymous GET /api/v2/data-exchange/changes -> 401 - Got 401
+[PASS] Anonymous POST /api/v2/data-exchange/snapshots -> 401 - Got 401
+[PASS] Anonymous POST /api/v2/data-exchange/receipts -> 401 - Got 401
+
+--- 4. Role-Based Access Control & Scoped Catalogue ---
+[PASS] SUPER_ADMIN GET /api/labs/directory (projection policy) - Got 200, valid: true, items: 8
+[PASS] SUPER_ADMIN GET /api/v1/data-exchange/connections -> 200 - Got 200
+[PASS] SUPER_ADMIN GET /api/v1/data-exchange/keys -> 200 - Got 200
+[PASS] SUPER_ADMIN GET /api/labs -> 200 - Got 200
+[PASS] LAB_MANAGER GET /api/labs/directory (projection policy) - Got 200, valid: true
+[PASS] LAB_MANAGER GET /api/v1/data-exchange/connections -> 403 Forbidden - Got 403
+[PASS] LAB_MANAGER GET /api/v1/data-exchange/keys -> 403 Forbidden - Got 403
+[PASS] LAB_MANAGER GET /api/labs (scoped catalogue) - Status: 200, Scoped: true (returned 1 labs)
+[PASS] Negative fixture: forged token GET /api/labs/directory -> 401 - Got 401
+
+============================================================
+  POSTFLIGHT SUMMARY: 31/31 checks passed (0 failed)
+============================================================

@@ -1,0 +1,230 @@
+{
+  "closedUtc": "2026-10-15T19:19:41.759023+00:00",
+  "head": "be8379745bdfae52ce46496ff26514dc7d729640",
+  "tree": "676b01e71211786d1aeace50f19a0b2c9f9c482e",
+  "scope": "STARTUP_PERFORMANCE_NEW_APP_BUILD_ONLY_NO_DATABASE_CONNECTION_OR_VOLUME",
+  "exitCode": 0,
+  "error": null,
+  "elapsedSeconds": 3.773966252047103,
+  "freeBytesBefore": {
+    "/opt/lims": 28576542720,
+    "/var/lib/docker": 28576542720,
+    "/var/lib/containerd": 28576542720
+  },
+  "freeBytesAfter": {
+    "/opt/lims": 28510281728,
+    "/var/lib/docker": 28510281728,
+    "/var/lib/containerd": 28510281728
+  },
+  "reserveFloorBytes": 10556150894,
+  "buildAllocationReserveBytes": 4294967296,
+  "diskGrowth": {
+    "policy": "OWNED_BUILD_ROOT_AND_DISJOINT_DOCKER_AND_CONTAINERD_ALLOCATIONS",
+    "abortBytes": 500000000,
+    "filesystems": {
+      "/opt/lims": {
+        "freeByteDrop": 66260992,
+        "knownAllocatedGrowthBytes": 66822144,
+        "unexplainedGrowthBytes": 0
+      },
+      "/var/lib/docker": {
+        "freeByteDrop": 66260992,
+        "knownAllocatedGrowthBytes": 66822144,
+        "unexplainedGrowthBytes": 0
+      },
+      "/var/lib/containerd": {
+        "freeByteDrop": 66260992,
+        "knownAllocatedGrowthBytes": 66822144,
+        "unexplainedGrowthBytes": 0
+      }
+    },
+    "beforeAllocations": {
+      "/opt/lims/releases/workflow-batch-build-be837974-20261015T190000Z": {
+        "bytes": 41631744,
+        "device": 64769,
+        "exists": true,
+        "symlink": false
+      },
+      "/var/lib/docker/buildkit": {
+        "bytes": 94449664,
+        "device": 64769,
+        "exists": true,
+        "symlink": false
+      },
+      "/var/lib/docker/overlay2": {
+        "bytes": 0,
+        "device": 64769,
+        "exists": false,
+        "symlink": false
+      },
+      "/var/lib/docker/image": {
+        "bytes": 0,
+        "device": 64769,
+        "exists": false,
+        "symlink": false
+      },
+      "/var/lib/docker/containerd": {
+        "bytes": 0,
+        "device": 64769,
+        "exists": false,
+        "symlink": false
+      },
+      "/var/lib/containerd": {
+        "bytes": 42540838912,
+        "device": 64769,
+        "exists": true,
+        "symlink": false
+      }
+    },
+    "afterAllocations": {
+      "/opt/lims/releases/workflow-batch-build-be837974-20261015T190000Z": {
+        "bytes": 107847680,
+        "device": 64769,
+        "exists": true,
+        "symlink": false
+      },
+      "/var/lib/docker/buildkit": {
+        "bytes": 94449664,
+        "device": 64769,
+        "exists": true,
+        "symlink": false
+      },
+      "/var/lib/docker/overlay2": {
+        "bytes": 0,
+        "device": 64769,
+        "exists": false,
+        "symlink": false
+      },
+      "/var/lib/docker/image": {
+        "bytes": 0,
+        "device": 64769,
+        "exists": false,
+        "symlink": false
+      },
+      "/var/lib/docker/containerd": {
+        "bytes": 0,
+        "device": 64769,
+        "exists": false,
+        "symlink": false
+      },
+      "/var/lib/containerd": {
+        "bytes": 42541445120,
+        "device": 64769,
+        "exists": true,
+        "symlink": false
+      }
+    }
+  },
+  "productionDatabaseMounts": 0,
+  "productionDatabaseConnections": 0,
+  "proofLaunches": 0,
+  "productionDeployments": 0,
+  "neverRetry": true,
+  "status": "NEW_STARTUP_APP_IMAGE_BUILT_NOT_PROVED_OR_DEPLOYED",
+  "image": "sha256:acc158447f5571068bf150fc0e8fa6f0889aeb38f9aec8be08978d903bd5be6a",
+  "imageBytes": 414683521,
+  "tag": "soilfer-lims:audit-workflow-batch-build-be837974-20261015T190000Z",
+  "toolingCommit": "4de3e334d8e498783a4cf20df4a5f93acfdbeb21",
+  "sourceReviewId": 6200145007,
+  "sourceReviewRawSha256": "519b789c69895a82028c338da0e79f5b8faeddd5bf9dca97fdea53c136143937",
+  "toolingSourceIndexSha256": "d5aae4d1753e40969091ceeaee597234a4e8cc16b784e4c580f39f791334fa87",
+  "archiveSha256": "b086b15bf69f69df82f0278128aa6752dd94ebdbde6e21baf68bce29fd4b9e74",
+  "applicationIndexSha256": "c7ee2de3e0cbad7aad9be99b8a74f5ddc070f033b70b9595b7f7c754e99156db",
+  "verifiedApplicationGitBlobCount": 1568,
+  "builderSha256": "e68acfe1760abc9740a509f52f8ab2092f56175b73000ef90feff2951a2c8ad8",
+  "dockerBuildLogSha256": "0114ea23ccf28a5bf519852f91bba48954f51ce5cd1c097cc5628b1e4b841b5d",
+  "imageInspectSha256": "3cd29d941248204a6709939c80ba7c5f1fc673e374e2fc413eda74935eab35c3",
+  "individualAudits": [
+    {
+      "issue": 206,
+      "pr": 295,
+      "source": "1a0702b3be410ac1dcdd9dc92f0f0c3dd2774a3a",
+      "merge": "6d750914d8565acdd496767a7dd935811b5a89b2",
+      "comment": 6146939836
+    },
+    {
+      "issue": 214,
+      "pr": 296,
+      "source": "5e0b32830f961b3236c7cf8f74cf8f676e98fbaa",
+      "merge": "2242bcb4861a7085bb95e78e0e7b1e4edf11d1b8",
+      "comment": 6163165778
+    },
+    {
+      "issue": 209,
+      "pr": 297,
+      "source": "6bd516c42a07332d0b0653ed150d1526bf7e424e",
+      "merge": "cde8c8896f5f9d5f1ab07b0ae16b1a765e0a6367",
+      "comment": 6178123314
+    },
+    {
+      "issue": "startup-performance",
+      "pr": 298,
+      "source": "eba02837eaa2ab797cad0572fecada686f660346",
+      "merge": "be8379745bdfae52ce46496ff26514dc7d729640",
+      "comment": 6195167175
+    }
+  ],
+  "mainCiRun": 38772398721,
+  "capacityPlan": {
+    "model": "RAW_GIT_SOURCE_BLOCKS_PLUS25PCT_PACKAGE_4GIB_BUILD_PLUS_FIXED_FLOOR_PLUS10GB",
+    "blockBytes": 4096,
+    "packageInputLengths": {
+      "pr298-comments-original.json": 14628,
+      "main-ci-original.json": 12122,
+      "source-index.json": 413542,
+      "source.tar.gz": 40691311,
+      "main-original.json": 336,
+      "pr296-original.json": 65850,
+      "pr297-comments-original.json": 20259,
+      "original-build-failure.json": 2047,
+      "fallback-direction-original.json": 6613,
+      "authority-6189669837-original.json": 4262,
+      "authority-6189658753-original.json": 6654,
+      "launch_batch_build.py": 10426,
+      "pr295-original.json": 23239,
+      "source-review-original.json": 8852,
+      "startup-180000-build-failure.json": 2068,
+      "verify_build_guards.py": 30425,
+      "pr295-actual-pass-original.json": 6787,
+      "pr296-actual-pass-original.json": 8178,
+      "authority-6189025975-original.json": 6545,
+      "pr297-actual-pass-original.json": 5571,
+      "batch_build.py": 16003,
+      "metadata-analysis-original.json": 48734,
+      "pr295-comments-original.json": 10644,
+      "pr297-original.json": 33502,
+      "batch_build_contract.py": 25371,
+      "prepare_batch_build.py": 10083,
+      "authority-6191219093-original.json": 5365,
+      "tooling-source-index.json": 1643,
+      "pr298-actual-pass-original.json": 8010,
+      "pr298-original.json": 31968,
+      "pr296-comments-original.json": 13709
+    },
+    "packageAllocationAllowanceBytes": 43700224,
+    "sourceFileCount": 1567,
+    "sourceDirectoryCount": 141,
+    "sourceRoundedFileBytes": 65540096,
+    "sourceExtractionAllowanceBytes": 84680704,
+    "sourceMarginNumerator": 5,
+    "sourceMarginDenominator": 4,
+    "specLengthLimitBytes": 1048576,
+    "buildAllocationReserveBytes": 4294967296,
+    "reserveFloorBytes": 10556150894,
+    "additionalHeadroomBytes": 10000000000
+  },
+  "r4AdditionalHeadroomBytes": 10000000000,
+  "cachePruningPerformed": false,
+  "proofDatabaseRemovalPerformed": false,
+  "newBuildCount": 1,
+  "retainedOwnedSourceAndLogs": true,
+  "rebuildOrRetagAllowed": false,
+  "originalFailedRoot": "/opt/lims/releases/workflow-batch-build-cde8c889-20261014T221500Z",
+  "originalFailedRecordSha256": "4474dcd30269c0710e17723e2f702114f09d48129ccc070b499aa65a69ab30c2",
+  "metadataAnalysisAudit": "850cc7670aceaa4fc2823aa3e0b5b5cf58c347da",
+  "metadataAnalysisSha256": "c2f4fc6d15d064f4e4a08255edbfd450494adb3f3625224ce7267550f66e6d25",
+  "originalFailureRemainsFailed": true,
+  "oldUnexplainedGrowthNotRetroactivelyAttributed": true,
+  "cacheMayYieldSameImageId": true,
+  "currentQualificationRequiresThisSeparateBuildReceiptAndLaterProof": true
+}
