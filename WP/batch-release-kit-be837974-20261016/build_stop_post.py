@@ -12,6 +12,8 @@ SPECS={
     'kit_contract.py':('HEAD','IMAGE','TREE','BUILD_RECEIPT_SHA','ACCEPTANCE_ID','TIMING_DIRECTION_ID',
         'POSTFLIGHT_POLICY','MEMORY_MAX','canonical','require','sha'),
     'retained_contract.py':('ROOT_NAME','ROOT','MEMORY','LIVE_DATA','LIVE_ASSETS','exact_json'),
+    'controller_output.py':('CONTROLLER_OUTPUT_BYTES','CONTROLLER_STREAM_LIMIT','CONTROLLER_METADATA_LIMIT','CONTROLLER_NAMES',
+        'output_require','output_canonical','output_root','output_pin','output_read_record','controller_argv','controller_output_closure'),
     'kit_evidence.py':('BLOCK','SHARES','MAIN_POOL_BYTES','HOOK_RECORD_LIMIT','HOOK_RESULT_NAMES',
         'HOOK_NAMESPACE_BYTES','APACHE_TRANSITION_LIMIT','APACHE_NAMESPACE_BYTES','EMERGENCY_CALL_LIMIT','EMERGENCY_STREAM_LIMITS',
         'EMERGENCY_METADATA_LIMIT','EMERGENCY_NAMESPACE_BYTES','INDEPENDENT_EMERGENCY_BYTES',
@@ -75,12 +77,13 @@ def main():
             manifest['heldIngressSha256'],namespace='stop-post')()
     result=stop_post_lifecycle(root,call,validate,hold,controller,
         lambda value:exclusive_record(root,'stop-post-result.json',value,True,independent_namespace='hook-results'))
-    # This fixed public line contains no private command, configuration or data.
-    print('RELEASE_STOP_POST_COMPLETE' if not result['errors'] and not result['postStopErrors'] else 'RELEASE_STOP_POST_FAILED_RETAIN_ALL')
+    # The complete result is retained above. This hook emits no journal stream.
     return 0 if not result['errors'] and not result['postStopErrors'] else 1
 
 if __name__=='__main__':
-    sys.exit(main())
+    try:code=main()
+    except BaseException:code=1
+    sys.exit(code)
 '''
 
 

@@ -5,18 +5,21 @@ admission precedes creation; unused command-stream reservations settle only
 after all pipe descriptors close and the original files are sealed. Failed
 admissions never authorize deletion, replacement, truncation, or a retry.
 
-The four producer groups share3200MiB. Independent emergency streams use
+The four producer groups share3184MiB plus a fixed16MiB controller pipe
+namespace carved out of their former journal640MiB share. Together these
+remain the same3200MiB. Independent emergency streams use
 800MiB, fixed hook records64MiB and Apache transitions32MiB: all existing
 4GiB is assigned. Admissions remain a source allowance, NOT a filesystem
 measurement or whole-graph copy/producer closure. Emergency actions precede
 retention and never depend on a new quota check.
 """
 import pathlib
+from controller_output import CONTROLLER_OUTPUT_BYTES,CONTROLLER_NAMES
 from kit_contract import require
 
 BLOCK=4096
 SHARES={'commands':1536*1024**2,'memory':512*1024**2,
-    'controller':512*1024**2,'journal':640*1024**2}
+    'controller':512*1024**2,'journal':624*1024**2}
 MAIN_POOL_BYTES=3200*1024**2
 HOOK_RECORD_LIMIT=16*1024**2
 HOOK_RESULT_NAMES=frozenset(('stop-post-controller-1.json','stop-post-controller-2.json','stop-post-result.json'))
@@ -47,7 +50,8 @@ def fixed_envelope_bounds():
     apache=APACHE_TRANSITION_LIMIT*(allocation(1024**2)+allocation(1024**2,256)+4*BLOCK)
     require(hook<=HOOK_NAMESPACE_BYTES and apache<=APACHE_NAMESPACE_BYTES,
         'Fixed independent record/Apache allowances do not cover source maxima')
-    require(sum(SHARES.values())+INDEPENDENT_EMERGENCY_BYTES+HOOK_NAMESPACE_BYTES+APACHE_NAMESPACE_BYTES==4*1024**3,
+    require(sum(SHARES.values())+CONTROLLER_OUTPUT_BYTES==MAIN_POOL_BYTES and
+        MAIN_POOL_BYTES+INDEPENDENT_EMERGENCY_BYTES+HOOK_NAMESPACE_BYTES+APACHE_NAMESPACE_BYTES==4*1024**3,
         'Declared evidence allowances must partition the unchanged4GiB')
     return {'hookRecordAllocationBytes':hook,'apacheDeclaredAllocationBytes':apache,
         'physicalFilesystemClosureClaimed':False}
@@ -61,7 +65,8 @@ class EvidenceLedger:
             'Real absolute evidence root required')
         self.shares=dict(SHARES if shares is None else shares)
         require(set(self.shares)==set(SHARES) and all(type(n) is int and n>0 for n in self.shares.values()) and
-            sum(self.shares.values())<=MAIN_POOL_BYTES,'Shared runtime evidence shares exceed their declared3200MiB subset')
+            sum(self.shares.values())<=MAIN_POOL_BYTES-CONTROLLER_OUTPUT_BYTES,
+            'Shared runtime evidence shares would double-spend the fixed controller namespace')
         for part in (self.root,*self.root.parents):require(not part.is_symlink(),'Evidence root ancestor alias refused')
         self.used=dict.fromkeys(self.shares,0);self.paths=set();self.directories=set();self.open={};self.number=0
         self.active_window=None;self.window_number=0
@@ -70,6 +75,8 @@ class EvidenceLedger:
         require(category in self.shares and isinstance(paths,tuple) and len(paths) in (1,2),
             'Declared evidence category and one/two entry paths required')
         names=tuple(pathlib.Path(p) for p in paths)
+        require(all(p.parent!=self.root or p.name not in CONTROLLER_NAMES for p in names),
+            'Controller pipe namespace is already held by its independent fixed admission')
         if future_directory is not None:
             future_directory=pathlib.Path(future_directory)
             require(future_directory.is_absolute() and self.root in future_directory.parents and
@@ -141,9 +148,10 @@ class EvidenceLedger:
             'directoryEntriesCounted':len(self.paths),
             'nestedDirectoriesCounted':len(self.directories),
             'coveredProducerMaximumBytes':sum(self.shares.values()),
+            'controllerOutputNamespaceBytesWithinSharedPool':CONTROLLER_OUTPUT_BYTES,
             'independentEmergencyEnvelopesBytes':INDEPENDENT_EMERGENCY_BYTES,
             'independentHookRecordsBytes':HOOK_NAMESPACE_BYTES,'apacheTransitionAllowanceBytes':APACHE_NAMESPACE_BYTES,
-            'unassignedWithinExisting4GiBBytes':4*1024**3-sum(self.shares.values())-INDEPENDENT_EMERGENCY_BYTES-HOOK_NAMESPACE_BYTES-APACHE_NAMESPACE_BYTES,
+            'unassignedWithinExisting4GiBBytes':4*1024**3-sum(self.shares.values())-CONTROLLER_OUTPUT_BYTES-INDEPENDENT_EMERGENCY_BYTES-HOOK_NAMESPACE_BYTES-APACHE_NAMESPACE_BYTES,
             'fullGlobalEvidenceClosure':False,'allOriginalsPrivate':True}
 
 

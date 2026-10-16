@@ -15,6 +15,7 @@ from kit_runtime import (PREDECESSOR_ID,PREDECESSOR_IMAGE,CANDIDATE_OWNER,VOLUME
     full_mounts,predecessor_projection,candidate_projection)
 from kit_stop import stop_cli_owners
 from kit_frozen import frozen_source_bytes,kit_review
+from controller_output import controller_output_closure
 
 
 def private_file(root,name,maximum=16*1024**2):
@@ -64,6 +65,9 @@ def serving_permit(root,manifest,call):
         'Actual consumed single-use gate required')
     require(receipt.get('ingressReopened') is True and not receipt.get('holdErrors'),
         'Serving permit may not conceal a failed ingress rehold/owner stop')
+    # The transport closes AFTER the real controller exits. A missing, partial,
+    # overflowing or mutated original defeats even an otherwise valid permit.
+    controller_output_closure(root,0 if receipt['status']=='DEPLOYED_AWAITING_CLAUDIO_POSTCHECK' else 1)
     if receipt['status']=='DEPLOYED_AWAITING_CLAUDIO_POSTCHECK':
         require(receipt.get('anyApplyAttempted') is True and receipt.get('anyEntrypointAttempted') is True and
             permit.get('candidateId')==receipt.get('candidateId') and

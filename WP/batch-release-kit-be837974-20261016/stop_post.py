@@ -52,11 +52,101 @@ def exact_json(raw):
         return out
     return json.loads(raw, object_pairs_hook=pairs)
 
+# Exact AST definitions from controller_output.py
+
+CONTROLLER_OUTPUT_BYTES = 16 * 1024 ** 2
+
+CONTROLLER_STREAM_LIMIT = 4 * 1024 ** 2
+
+CONTROLLER_METADATA_LIMIT = 8192
+
+CONTROLLER_NAMES = frozenset(('controller-original.stdout', 'controller-original.stderr', 'controller-output-intent.json', 'controller-output-intent.json.pending', 'controller-output-closed.json', 'controller-output-closed.json.pending', 'controller-output-bootstrap-failure.json', 'controller-output-bootstrap-failure.json.pending'))
+
+def output_require(value, message):
+    if not value:
+        raise RuntimeError(message)
+
+def output_canonical(value):
+    return json.dumps(value, sort_keys=True, separators=(',', ':'), ensure_ascii=True).encode() + b'\n'
+
+def output_root(root):
+    root = pathlib.Path(root)
+    output_require(root.is_absolute() and root.is_dir(), 'Existing absolute output root required')
+    for part in (root, *root.parents):
+        output_require(not part.is_symlink(), 'Controller output ancestor alias refused')
+    return root
+
+def output_pin(path, maximum, links=1, immutable=True):
+    path = pathlib.Path(path)
+    for part in (path, *path.parents):
+        output_require(not part.is_symlink(), 'Controller original alias refused')
+    before = path.lstat()
+    output_require(stat.S_ISREG(before.st_mode) and before.st_nlink == links and (0 <= before.st_size <= maximum), 'Bounded independent controller original required')
+    if immutable:
+        output_require(stat.S_IMODE(before.st_mode) == 256 if os.name == 'posix' else not before.st_mode & 146, 'Immutable controller original required')
+    keys = ('st_dev', 'st_ino', 'st_size', 'st_mode', 'st_nlink', 'st_mtime_ns', 'st_ctime_ns', 'st_uid', 'st_gid')
+    cross = keys if os.name == 'posix' else tuple((k for k in keys if k != 'st_ctime_ns'))
+    fields = lambda s, selected=keys: tuple((getattr(s, k) for k in selected))
+    descriptor = os.open(str(path), os.O_RDONLY | getattr(os, 'O_NOFOLLOW', 0) | getattr(os, 'O_BINARY', 0))
+    digest = hashlib.sha256()
+    count = 0
+    try:
+        opened = os.fstat(descriptor)
+        output_require(fields(opened, cross) == fields(before, cross), 'Controller original changed before read')
+        while count <= before.st_size:
+            raw = os.read(descriptor, min(65536, before.st_size + 1 - count))
+            if not raw:
+                break
+            digest.update(raw)
+            count += len(raw)
+        after = os.fstat(descriptor)
+        at_path = path.lstat()
+        output_require(count == before.st_size and fields(after) == fields(opened) and (fields(at_path) == fields(before)) and (fields(after, cross) == fields(at_path, cross)), 'Controller original changed while hashing')
+    finally:
+        os.close(descriptor)
+    return {'bytes': count, 'sha256': digest.hexdigest()}
+
+def output_read_record(root, name):
+    path = root / name
+    pending = root / (name + '.pending')
+    pin = output_pin(path, CONTROLLER_METADATA_LIMIT, 2)
+    output_pin(pending, CONTROLLER_METADATA_LIMIT, 2)
+    output_require(os.path.samefile(path, pending), 'Exact same-inode controller control pair required')
+    with path.open('rb') as stream:
+        raw = stream.read(CONTROLLER_METADATA_LIMIT + 1)
+    output_require(len(raw) == pin['bytes'] and hashlib.sha256(raw).hexdigest() == pin['sha256'] and (output_pin(path, CONTROLLER_METADATA_LIMIT, 2) == pin), 'Controller control changed while reading')
+
+    def pairs(values):
+        result = {}
+        for key, value in values:
+            output_require(key not in result, 'Duplicate controller control key')
+            result[key] = value
+        return result
+    value = json.loads(raw, object_pairs_hook=pairs)
+    output_require(raw == output_canonical(value), 'Canonical controller control required')
+    return value
+
+def controller_argv(root):
+    return ['/usr/bin/python3', '-B', str(root / 'tooling/run_release.py'), '--root', str(root)]
+
+def controller_output_closure(root, expected_status):
+    root = output_root(root)
+    intent = output_read_record(root, 'controller-output-intent.json')
+    expected = {'version': 1, 'childArgv': controller_argv(root), 'maximumStreamBytes': CONTROLLER_STREAM_LIMIT, 'sentinelBytes': 1, 'namespaceBytes': CONTROLLER_OUTPUT_BYTES, 'newControllerDeadline': False, 'controllerTerminationOnCaptureFailure': False, 'neverRetry': True, 'filesystemClosureClaimed': False}
+    output_require(intent == expected and type(intent['version']) is int, 'Exact before-child controller output admission required')
+    closed = output_read_record(root, 'controller-output-closed.json')
+    output_require(set(closed) == {'version', 'childArgv', 'status', 'errorType', 'streams', 'completeOriginals', 'controllerSignalledByCapture', 'neverRetry'} and type(closed['version']) is int and (closed['version'] == 1) and (closed['childArgv'] == expected['childArgv']) and (type(closed['status']) is int) and (closed['status'] == expected_status) and (closed['errorType'] is None) and (closed['completeOriginals'] is True) and (closed['controllerSignalledByCapture'] is False) and (closed['neverRetry'] is True) and isinstance(closed['streams'], dict) and (set(closed['streams']) == {'stdout', 'stderr'}), 'Complete successful controller output closure required')
+    output_require(not (root / 'controller-output-bootstrap-failure.json').exists() and (not (root / 'controller-output-bootstrap-failure.json.pending').exists()), 'Controller transport failure retained')
+    for name, record in closed['streams'].items():
+        pin = output_pin(root / ('controller-original.' + name), CONTROLLER_STREAM_LIMIT)
+        output_require(isinstance(record, dict) and set(record) == {'bytes', 'sha256', 'eof', 'overflow', 'unretainedBytesObserved'} and (type(record['bytes']) is int) and ({'bytes': record['bytes'], 'sha256': record['sha256']} == pin) and (record['eof'] is True) and (record['overflow'] is False) and (record['unretainedBytesObserved'] is False), 'Full unchanged EOF-observed controller originals required')
+    return closed
+
 # Exact AST definitions from kit_evidence.py
 
 BLOCK = 4096
 
-SHARES = {'commands': 1536 * 1024 ** 2, 'memory': 512 * 1024 ** 2, 'controller': 512 * 1024 ** 2, 'journal': 640 * 1024 ** 2}
+SHARES = {'commands': 1536 * 1024 ** 2, 'memory': 512 * 1024 ** 2, 'controller': 512 * 1024 ** 2, 'journal': 624 * 1024 ** 2}
 
 MAIN_POOL_BYTES = 3200 * 1024 ** 2
 
@@ -90,7 +180,7 @@ def fixed_envelope_bounds():
     hook = len(HOOK_RESULT_NAMES) * allocation(HOOK_RECORD_LIMIT, 2)
     apache = APACHE_TRANSITION_LIMIT * (allocation(1024 ** 2) + allocation(1024 ** 2, 256) + 4 * BLOCK)
     require(hook <= HOOK_NAMESPACE_BYTES and apache <= APACHE_NAMESPACE_BYTES, 'Fixed independent record/Apache allowances do not cover source maxima')
-    require(sum(SHARES.values()) + INDEPENDENT_EMERGENCY_BYTES + HOOK_NAMESPACE_BYTES + APACHE_NAMESPACE_BYTES == 4 * 1024 ** 3, 'Declared evidence allowances must partition the unchanged4GiB')
+    require(sum(SHARES.values()) + CONTROLLER_OUTPUT_BYTES == MAIN_POOL_BYTES and MAIN_POOL_BYTES + INDEPENDENT_EMERGENCY_BYTES + HOOK_NAMESPACE_BYTES + APACHE_NAMESPACE_BYTES == 4 * 1024 ** 3, 'Declared evidence allowances must partition the unchanged4GiB')
     return {'hookRecordAllocationBytes': hook, 'apacheDeclaredAllocationBytes': apache, 'physicalFilesystemClosureClaimed': False}
 
 class EvidenceLedger:
@@ -100,7 +190,7 @@ class EvidenceLedger:
         self.root = pathlib.Path(root)
         require(self.root.is_absolute() and self.root.is_dir() and (not self.root.is_symlink()), 'Real absolute evidence root required')
         self.shares = dict(SHARES if shares is None else shares)
-        require(set(self.shares) == set(SHARES) and all((type(n) is int and n > 0 for n in self.shares.values())) and (sum(self.shares.values()) <= MAIN_POOL_BYTES), 'Shared runtime evidence shares exceed their declared3200MiB subset')
+        require(set(self.shares) == set(SHARES) and all((type(n) is int and n > 0 for n in self.shares.values())) and (sum(self.shares.values()) <= MAIN_POOL_BYTES - CONTROLLER_OUTPUT_BYTES), 'Shared runtime evidence shares would double-spend the fixed controller namespace')
         for part in (self.root, *self.root.parents):
             require(not part.is_symlink(), 'Evidence root ancestor alias refused')
         self.used = dict.fromkeys(self.shares, 0)
@@ -114,6 +204,7 @@ class EvidenceLedger:
     def reserve(self, paths, maximum_bytes, category, future_directory=None):
         require(category in self.shares and isinstance(paths, tuple) and (len(paths) in (1, 2)), 'Declared evidence category and one/two entry paths required')
         names = tuple((pathlib.Path(p) for p in paths))
+        require(all((p.parent != self.root or p.name not in CONTROLLER_NAMES for p in names)), 'Controller pipe namespace is already held by its independent fixed admission')
         if future_directory is not None:
             future_directory = pathlib.Path(future_directory)
             require(future_directory.is_absolute() and self.root in future_directory.parents and future_directory.parent.is_dir() and (not future_directory.exists()) and (not future_directory.is_symlink()) and all((p.parent == future_directory for p in names)), 'Only one exact unused direct parent may be admitted before mkdir')
@@ -172,7 +263,7 @@ class EvidenceLedger:
         return window
 
     def summary(self):
-        return {'sharesBytes': dict(self.shares), 'chargedOrReservedBytes': dict(self.used), 'openReservations': len(self.open), 'activePreStartWindow': None if self.active_window is None else self.active_window.receipt(), 'directoryEntriesCounted': len(self.paths), 'nestedDirectoriesCounted': len(self.directories), 'coveredProducerMaximumBytes': sum(self.shares.values()), 'independentEmergencyEnvelopesBytes': INDEPENDENT_EMERGENCY_BYTES, 'independentHookRecordsBytes': HOOK_NAMESPACE_BYTES, 'apacheTransitionAllowanceBytes': APACHE_NAMESPACE_BYTES, 'unassignedWithinExisting4GiBBytes': 4 * 1024 ** 3 - sum(self.shares.values()) - INDEPENDENT_EMERGENCY_BYTES - HOOK_NAMESPACE_BYTES - APACHE_NAMESPACE_BYTES, 'fullGlobalEvidenceClosure': False, 'allOriginalsPrivate': True}
+        return {'sharesBytes': dict(self.shares), 'chargedOrReservedBytes': dict(self.used), 'openReservations': len(self.open), 'activePreStartWindow': None if self.active_window is None else self.active_window.receipt(), 'directoryEntriesCounted': len(self.paths), 'nestedDirectoriesCounted': len(self.directories), 'coveredProducerMaximumBytes': sum(self.shares.values()), 'controllerOutputNamespaceBytesWithinSharedPool': CONTROLLER_OUTPUT_BYTES, 'independentEmergencyEnvelopesBytes': INDEPENDENT_EMERGENCY_BYTES, 'independentHookRecordsBytes': HOOK_NAMESPACE_BYTES, 'apacheTransitionAllowanceBytes': APACHE_NAMESPACE_BYTES, 'unassignedWithinExisting4GiBBytes': 4 * 1024 ** 3 - sum(self.shares.values()) - CONTROLLER_OUTPUT_BYTES - INDEPENDENT_EMERGENCY_BYTES - HOOK_NAMESPACE_BYTES - APACHE_NAMESPACE_BYTES, 'fullGlobalEvidenceClosure': False, 'allOriginalsPrivate': True}
 
 class EvidenceWindow:
 
@@ -676,7 +767,7 @@ class EmergencyIngress:
 
 SOURCE_SCOPE = 'PRODUCTION_FORWARD_206_214_209_QUALIFIED_ACC158_REVIEWED_WHOLE_OUTAGE'
 
-REQUIRED_SOURCE = {'kit_contract.py', 'kit_sequence.py', 'kit_journal.py', 'kit_io.py', 'kit_evidence.py', 'kit_docker.py', 'kit_consumer_inventory.py', 'kit_owned.py', 'kit_cli_evidence.py', 'kit_integrity.py', 'stopped_integrity.cjs', 'cli_guard.cjs', 'live_backup.cjs', 'live-backup-sqlite-source.json', 'order_impact.cjs', 'kit_order_output.py', 'order-impact-transport-source.json', 'kit_install.py', 'kit_runtime.py', 'kit_readiness.py', 'kit_natural.py', 'kit_no_writers.py', 'kit_ingress.py', 'kit_budget.py', 'kit_disk.py', 'kit_copy_admission.py', 'kit_app_snapshots.py', 'application-snapshot-source.json', 'kit_probes.py', 'kit_frozen.py', 'kit_preservation.py', 'kit_recovery.py', 'kit_emergency_ingress.py', 'kit_stop.py', 'kit_stop_lifecycle.py', 'build_stop_post.py', 'predecessor-startup-expectations.json', 'retained_app_copy.py', 'kit_recovery_copy.py', 'predecessor-copy-source-binding.json', 'retained_authority.py', 'kit_provider.py', 'kit_authority.py', 'kit_science.py', 'kit_construction.py', 'kit_outage.py', 'timing-evidence.json', 'kit_package.py', 'kit_launch_programs.py', 'kit_apache_capture.py', 'kit_ops.py', 'run_release.py', 'stop_post.py', 'prepare_release.py', 'launch_release.py', 'application-source-binding.json', 'copy-site-closure.json', 'whole-outage-disclosure.json', 'startup-expectations.json', 'probe-source-map.json', 'compose-source.yml', 'retained_accounting.py', 'retained_files.py', 'retained_contract.py', 'retained_health.py', 'retained_memory.py', 'retained_controller.py', 'retained_intake.py', 'retained_fetch.py', 'retained_provenance.py', 'retained_privacy.py', 'retained_runtime_policy.py', 'postflight-roles.cjs', 'postflight-auth.cjs', 'postflight-reference.cjs', 'postflight-qc-runs.cjs', 'postflight-policy.cjs', 'readonly-smoke.cjs'}
+REQUIRED_SOURCE = {'kit_contract.py', 'kit_sequence.py', 'kit_journal.py', 'kit_io.py', 'kit_evidence.py', 'controller_output.py', 'kit_docker.py', 'kit_consumer_inventory.py', 'kit_owned.py', 'kit_cli_evidence.py', 'kit_integrity.py', 'stopped_integrity.cjs', 'cli_guard.cjs', 'live_backup.cjs', 'live-backup-sqlite-source.json', 'order_impact.cjs', 'kit_order_output.py', 'order-impact-transport-source.json', 'kit_install.py', 'kit_runtime.py', 'kit_readiness.py', 'kit_natural.py', 'kit_no_writers.py', 'kit_ingress.py', 'kit_budget.py', 'kit_disk.py', 'kit_copy_admission.py', 'kit_app_snapshots.py', 'application-snapshot-source.json', 'kit_probes.py', 'kit_frozen.py', 'kit_preservation.py', 'kit_recovery.py', 'kit_emergency_ingress.py', 'kit_stop.py', 'kit_stop_lifecycle.py', 'build_stop_post.py', 'predecessor-startup-expectations.json', 'retained_app_copy.py', 'kit_recovery_copy.py', 'predecessor-copy-source-binding.json', 'retained_authority.py', 'kit_provider.py', 'kit_authority.py', 'kit_science.py', 'kit_construction.py', 'kit_outage.py', 'timing-evidence.json', 'kit_package.py', 'kit_launch_programs.py', 'kit_apache_capture.py', 'kit_ops.py', 'run_release.py', 'stop_post.py', 'prepare_release.py', 'launch_release.py', 'application-source-binding.json', 'copy-site-closure.json', 'whole-outage-disclosure.json', 'startup-expectations.json', 'probe-source-map.json', 'compose-source.yml', 'retained_accounting.py', 'retained_files.py', 'retained_contract.py', 'retained_health.py', 'retained_memory.py', 'retained_controller.py', 'retained_intake.py', 'retained_fetch.py', 'retained_provenance.py', 'retained_privacy.py', 'retained_runtime_policy.py', 'postflight-roles.cjs', 'postflight-auth.cjs', 'postflight-reference.cjs', 'postflight-qc-runs.cjs', 'postflight-policy.cjs', 'readonly-smoke.cjs'}
 
 def source_index(value):
     require(isinstance(value, dict) and value.get('version') == 1 and (value.get('scope') == SOURCE_SCOPE) and (value.get('root') == str(ROOT)) and (value.get('head') == HEAD) and (value.get('tree') == TREE) and (value.get('image') == IMAGE) and (value.get('buildReceiptSha256') == BUILD_RECEIPT_SHA), 'Exact new production source-index target required')
@@ -835,6 +926,7 @@ def serving_permit(root, manifest, call):
     consumed = exact_json(private_file(root, 'production-gate-consumed.json'))
     require(consumed.get('manifestSha256') == sha(canonical(manifest)) and consumed.get('exclusive') is True, 'Actual consumed single-use gate required')
     require(receipt.get('ingressReopened') is True and (not receipt.get('holdErrors')), 'Serving permit may not conceal a failed ingress rehold/owner stop')
+    controller_output_closure(root, 0 if receipt['status'] == 'DEPLOYED_AWAITING_CLAUDIO_POSTCHECK' else 1)
     if receipt['status'] == 'DEPLOYED_AWAITING_CLAUDIO_POSTCHECK':
         require(receipt.get('anyApplyAttempted') is True and receipt.get('anyEntrypointAttempted') is True and (permit.get('candidateId') == receipt.get('candidateId')) and re.fullmatch('[a-f0-9]{64}', receipt.get('candidateId', '')), 'Exact deployed candidate receipt required')
         intent = exact_json(private_file(root, 'candidate-stop-intent.json'))
@@ -969,10 +1061,11 @@ def main():
             manifest['heldIngressSha256'],namespace='stop-post')()
     result=stop_post_lifecycle(root,call,validate,hold,controller,
         lambda value:exclusive_record(root,'stop-post-result.json',value,True,independent_namespace='hook-results'))
-    # This fixed public line contains no private command, configuration or data.
-    print('RELEASE_STOP_POST_COMPLETE' if not result['errors'] and not result['postStopErrors'] else 'RELEASE_STOP_POST_FAILED_RETAIN_ALL')
+    # The complete result is retained above. This hook emits no journal stream.
     return 0 if not result['errors'] and not result['postStopErrors'] else 1
 
 if __name__=='__main__':
-    sys.exit(main())
+    try:code=main()
+    except BaseException:code=1
+    sys.exit(code)
 

@@ -18,7 +18,7 @@ def tree(name):return ast.parse((HERE/name).read_bytes())
 class FixedEnvelopes(unittest.TestCase):
     def test_declared_partition_assigns_the_existing_four_gib_without_filesystem_pass(self):
         result=evidence.fixed_envelope_bounds()
-        total=sum(evidence.SHARES.values())+evidence.INDEPENDENT_EMERGENCY_BYTES+evidence.HOOK_NAMESPACE_BYTES+evidence.APACHE_NAMESPACE_BYTES
+        total=sum(evidence.SHARES.values())+evidence.CONTROLLER_OUTPUT_BYTES+evidence.INDEPENDENT_EMERGENCY_BYTES+evidence.HOOK_NAMESPACE_BYTES+evidence.APACHE_NAMESPACE_BYTES
         self.assertEqual(total,4*1024**3)
         self.assertLessEqual(result['hookRecordAllocationBytes'],64*1024**2)
         self.assertLessEqual(result['apacheDeclaredAllocationBytes'],32*1024**2)

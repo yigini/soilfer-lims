@@ -88,6 +88,8 @@ class RecoveryBoundaries(unittest.TestCase):
                 'status':value['status'],'candidateId':IDENTITY,'candidateIntent':intent,
                 'receipt':{'file':'production-receipt.json','sha256':sha(raw),'bytes':len(raw)}})
         records(receipt)
+        from verify_kit_controller_output import closed_controller
+        closed_controller(root)
         call=lambda argv:json.dumps([candidate]).encode()
         # Windows read-only metadata reports0444, not Linux0400. Adapt only
         # stat's permission projection in this LOCAL fixture. The production

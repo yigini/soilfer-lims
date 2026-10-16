@@ -278,7 +278,8 @@ class Package(unittest.TestCase):
                  contextlib.redirect_stdout(io.StringIO()):
                 exec(code,{})
         execute();self.assertEqual(len(calls),2)
-        self.assertEqual(calls[1][-5:],['/usr/bin/python3','-B',str(root/'tooling/run_release.py'),'--root',str(root)])
+        self.assertEqual(calls[1][-5:],['/usr/bin/python3','-B',str(root/'tooling/controller_output.py'),'--root',str(root)])
+        self.assertIn('--property=StandardOutput=null',calls[1]);self.assertIn('--property=StandardError=null',calls[1])
         self.assertIn('--property=ExecStopPost=/usr/bin/python3 -B '+str(root/'tooling/stop_post.py'),calls[1])
         (root/'unreviewed-empty-directory').mkdir()
         with self.assertRaises(RuntimeError):execute()

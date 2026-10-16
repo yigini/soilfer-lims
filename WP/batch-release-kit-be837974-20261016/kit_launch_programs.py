@@ -91,10 +91,12 @@ args=['systemd-run','--unit',unit,'--property=Type=exec','--property=RuntimeMaxS
     '--property=MemoryMax=805306368','--property=MemorySwapMax=0','--property=Restart=no',
     '--property=TimeoutStopSec=300','--property=UMask=0077',
     '--property=ExecStopPost=/usr/bin/python3 -B '+str(root/'tooling/stop_post.py'),
-    '--property=StandardOutput=journal','--property=StandardError=journal',
-    '--working-directory',str(root),'/usr/bin/python3','-B',str(root/'tooling/run_release.py'),'--root',str(root)]
+    '--property=StandardOutput=null','--property=StandardError=null',
+    '--working-directory',str(root),'/usr/bin/python3','-B',str(root/'tooling/controller_output.py'),'--root',str(root)]
 # A lost/failed start return consumes this attempt. The independent nonignored
-# hook remains registered even if run_release fails during imports/construction.
+# hook remains registered even if the silent stdlib transport or run_release
+# fails during imports/construction. The real controller streams are pipes;
+# null applies only to the silent transport and silent independent hook.
 result=subprocess.run(args,capture_output=True,timeout=30)
 print(json.dumps({'unit':unit,'root':str(root),'exitCode':result.returncode,
     'stdout':result.stdout.decode('utf-8','replace'),'stderr':result.stderr.decode('utf-8','replace'),
