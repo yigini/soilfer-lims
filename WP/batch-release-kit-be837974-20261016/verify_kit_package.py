@@ -14,6 +14,8 @@ import unittest
 from unittest.mock import patch
 from kit_contract import HEAD,TREE,IMAGE,BUILD_RECEIPT_SHA,PHASES,canonical,sha,whole_outage_disclosure
 from retained_contract import ROOT,exact_json
+from kit_capture_owned import CAPTURE_ROOT
+from kit_capture_budget import CAPTURE_TABLE_SHA
 from kit_frozen import REQUIRED_SOURCE,SOURCE_SCOPE,source_review,kit_review
 from kit_package import (MAX_PACKAGE_FILES,REQUIRED_PAYLOAD,POST_MANIFEST_FILES,payload_map,allocation,
     freeze_manifest,validate_payload,verify_final,read_package,write_new_file)
@@ -48,7 +50,22 @@ def package_fixture():
     files['whole-outage-disclosure.json']=canonical(disclosure)+b'\n'
     chart=authority_fixtures.Science().chart();order=exact_json((OLD/'actual-order-impact.json').read_bytes())
     for issue,value in [('214',chart),('209',order)]:files['actual-impact-'+issue+'.json']=canonical(value)+b'\n'
-    science={'version':1,'root':str(ROOT),'head':HEAD,'image':IMAGE,
+    prep={}
+    from kit_install import CHAIN
+    for issue in ('206','214'):
+        rows={'original':{'classification':'COMPLETE_'+issue,'previousClassification':'PRE_'+issue,
+            'mode':'APPLIED','backfilledCount':0,'totalChanges':1,'receipt':{'originalRowsPreserved':True}},
+            'preservation':{'allOriginalRowsAndReceiptsPreserved':True,'priorStateFromBoundRecordNoSql':True,
+                'newTables':sorted(CHAIN[issue][0]),'emptyEvidenceTables':True,'backfilledCount':0,
+                'marker':CHAIN[issue][1],'totalTables':108 if issue=='206' else 112,
+                'schemaReceiptCount':40 if issue=='206' else 41}}
+        prep[issue]={}
+        for kind,value in rows.items():
+            name='capture-'+issue+('-prepare-original.json' if kind=='original' else '-preservation.json')
+            files[name]=canonical(value)+b'\n'
+            prep[issue][kind]={'file':name,'sha256':sha(files[name]),'bytes':len(files[name])}
+    science={'version':2,'root':CAPTURE_ROOT.as_posix(),'releaseRoot':str(ROOT),
+        'captureTableSha256':CAPTURE_TABLE_SHA,'preparationReferences':prep,'head':HEAD,'image':IMAGE,
         'context':'FRESH_REVIEWED_PRODUCTION_COPY_BEFORE_RELEASE_GATE','productionSqliteConnections':0,
         'captureSourceReviewId':source['id'],'capturedAt':'2026-10-16T11:00:20Z',
         'issues':{'206':scientific_projection('206',{'issue':'206','additiveEmptyTablesOnly':True}),
@@ -57,7 +74,8 @@ def package_fixture():
             'sha256':sha(files['actual-impact-'+issue+'.json']),'bytes':len(files['actual-impact-'+issue+'.json'])}
             for issue in ('214','209')}}
     files['actual-scientific-impact.json']=canonical(science)+b'\n'
-    files['capture-receipt.json']=canonical({'root':str(ROOT),'head':HEAD,'sourceReviewId':source['id'],
+    files['capture-receipt.json']=canonical({'root':CAPTURE_ROOT.as_posix(),'releaseRoot':str(ROOT),
+        'captureTableSha256':CAPTURE_TABLE_SHA,'head':HEAD,'sourceReviewId':source['id'],
         'productionSqliteConnections':0,'scienceSha256':sha(canonical(science))})+b'\n'
     projection={'units':{'SYNTHETIC.service':{'definitionSha256':'d'*64}},'cron':{},'containers':{}}
     inventory={'configuration':projection,'configurationSha256':sha(canonical(projection)),
@@ -141,6 +159,18 @@ class Package(unittest.TestCase):
             with self.subTest(name=name),self.assertRaises((RuntimeError,ValueError,KeyError)):
                 validate_payload(changed,manifest,idx,source)
         changed=dict(files);changed['ingress-held.conf']=files['ingress-original.conf']
+        with self.assertRaises(RuntimeError):freeze_manifest(changed,idx,source,4800)
+        for field,value in (('root',str(ROOT)),('releaseRoot',CAPTURE_ROOT.as_posix()),('captureTableSha256','f'*64)):
+            changed=dict(files);receipt=exact_json(changed['capture-receipt.json']);receipt[field]=value
+            changed['capture-receipt.json']=canonical(receipt)
+            with self.subTest(captureField=field),self.assertRaises(RuntimeError):freeze_manifest(changed,idx,source,4800)
+        changed=dict(files);name='capture-214-preservation.json';report=exact_json(changed[name])
+        report['allOriginalRowsAndReceiptsPreserved']=False;changed[name]=canonical(report)+b'\n'
+        science=exact_json(changed['actual-scientific-impact.json'])
+        science['preparationReferences']['214']['preservation'].update(sha256=sha(changed[name]),bytes=len(changed[name]))
+        changed['actual-scientific-impact.json']=canonical(science)+b'\n'
+        receipt=exact_json(changed['capture-receipt.json']);receipt['scienceSha256']=sha(canonical(science))
+        changed['capture-receipt.json']=canonical(receipt)+b'\n'
         with self.assertRaises(RuntimeError):freeze_manifest(changed,idx,source,4800)
 
     def test_no_late_record_can_rewrite_manifest_or_refresh_expired_human(self):

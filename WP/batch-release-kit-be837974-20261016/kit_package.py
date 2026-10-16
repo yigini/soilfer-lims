@@ -22,7 +22,9 @@ REQUIRED_PAYLOAD={'source-index.json','source-review.json','whole-outage-disclos
     'consumer-inventory.json','consumer-review.json','actual-scientific-impact.json',
     'actual-impact-214.json','actual-impact-209.json','ingress-original.conf','ingress-held.conf',
     'qualified-build-receipt.json','qualified-image-inspect-original.json','application-index.json',
-    'capture-receipt.json','apache-capture.json'}
+    'capture-receipt.json','apache-capture.json',
+    'capture-206-prepare-original.json','capture-206-preservation.json',
+    'capture-214-prepare-original.json','capture-214-preservation.json'}
 
 
 def package_name(name):
@@ -98,7 +100,10 @@ def freeze_manifest(files,index,source,whole_outage_seconds):
     from kit_apache_capture import verify_apache_capture
     verify_apache_capture(exact_json(files['apache-capture.json']),files['ingress-original.conf'],
         files['ingress-held.conf'],index,source)
-    require(capture.get('root')==str(ROOT) and capture.get('head')==HEAD and
+    from kit_capture_owned import CAPTURE_ROOT
+    from kit_capture_budget import CAPTURE_TABLE_SHA
+    require(capture.get('root')==CAPTURE_ROOT.as_posix() and capture.get('releaseRoot')==str(ROOT) and
+        capture.get('captureTableSha256')==CAPTURE_TABLE_SHA and capture.get('head')==HEAD and
         capture.get('sourceReviewId')==source['id'] and capture.get('productionSqliteConnections')==0 and
         capture.get('scienceSha256')==sha(canonical(science)) and
         capture.get('apacheCaptureSha256')==sha(files['apache-capture.json']),

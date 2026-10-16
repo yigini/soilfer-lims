@@ -45,17 +45,29 @@ def scientific_projection(issue,value):
 
 
 def validate_scientific_capture(value):
-    require(isinstance(value,dict) and value.get('version')==1 and value.get('root')==str(ROOT) and
+    from kit_capture_owned import CAPTURE_ROOT
+    from kit_capture_budget import CAPTURE_TABLE_SHA
+    require(isinstance(value,dict) and type(value.get('version')) is int and value['version']==2 and
+        value.get('root')==CAPTURE_ROOT.as_posix() and value.get('releaseRoot')==str(ROOT) and
+        value.get('captureTableSha256')==CAPTURE_TABLE_SHA and
         value.get('head')==HEAD and value.get('image')==IMAGE and
         value.get('context')=='FRESH_REVIEWED_PRODUCTION_COPY_BEFORE_RELEASE_GATE' and
-        value.get('productionSqliteConnections')==0 and value.get('captureSourceReviewId',0)>6213266959 and
+        type(value.get('productionSqliteConnections')) is int and value['productionSqliteConnections']==0 and
+        type(value.get('captureSourceReviewId')) is int and value['captureSourceReviewId']>6213266959 and
         isinstance(value.get('capturedAt'),str),'Fresh source-reviewed production-copy impact capture required')
     require(set(value.get('issues',{}))=={'206','214','209'} and set(value.get('originalReferences',{}))=={'214','209'},
         'Both complete actual scientific impact lists and original references required')
+    require(set(value.get('preparationReferences',{}))=={'206','214'},'Both clone preparation original and preservation records required')
+    references=[]
     for issue in ('214','209'):
-        reference=value['originalReferences'][issue]
+        references.append((value['originalReferences'][issue],'actual-impact-'+issue+'.json'))
+    for issue,records in value['preparationReferences'].items():
+        require(isinstance(records,dict) and set(records)=={'original','preservation'},'Complete preparation record pair required')
+        references.extend([(records['original'],'capture-'+issue+'-prepare-original.json'),
+            (records['preservation'],'capture-'+issue+'-preservation.json')])
+    for reference,name in references:
         require(isinstance(reference,dict) and set(reference)=={'file','sha256','bytes'} and
-            reference['file']=='actual-impact-'+issue+'.json' and re.fullmatch('[a-f0-9]{64}',reference.get('sha256','')) and
+            reference['file']==name and re.fullmatch('[a-f0-9]{64}',reference.get('sha256','')) and
             type(reference.get('bytes')) is int and 0<reference['bytes']<=16*1024**2,'Exact retained full impact original required')
     return value
 
@@ -70,6 +82,20 @@ def verify_scientific_originals(value,read_private):
             'Frozen scientific projection omitted or changed original list fields')
     require(value['issues']['206']==scientific_projection('206',{'issue':'206','additiveEmptyTablesOnly':True}),
         'Additive206 impact binding differs')
+    from retained_contract import plan
+    from kit_install import CHAIN
+    for issue,records in value['preparationReferences'].items():
+        originals={}
+        for kind,reference in records.items():
+            raw=read_private(reference['file'])
+            require(sha(raw)==reference['sha256'] and len(raw)==reference['bytes'],'Capture preparation original changed')
+            originals[kind]=exact_json(raw)
+        plan(originals['original'],issue,'APPLIED')
+        tables,marker=CHAIN[issue]
+        require(originals['preservation']=={'allOriginalRowsAndReceiptsPreserved':True,
+            'priorStateFromBoundRecordNoSql':True,'newTables':sorted(tables),'emptyEvidenceTables':True,
+            'backfilledCount':0,'marker':marker,'totalTables':108 if issue=='206' else 112,
+            'schemaReceiptCount':40 if issue=='206' else 41},'Full capture preparation preservation report differs')
     return value
 
 
