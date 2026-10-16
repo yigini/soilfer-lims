@@ -23,6 +23,7 @@ REQUIRED_SOURCE={
     'kit_preservation.py','kit_recovery.py','kit_emergency_ingress.py','kit_stop.py','kit_stop_lifecycle.py',
     'build_stop_post.py','predecessor-startup-expectations.json',
     'retained_app_copy.py',
+    'retained_authority.py','kit_provider.py','kit_authority.py','kit_science.py','kit_construction.py','kit_outage.py','timing-evidence.json',
     'kit_ops.py','run_release.py','stop_post.py','prepare_release.py','launch_release.py',
     'application-source-binding.json','copy-site-closure.json','whole-outage-disclosure.json',
     'startup-expectations.json','probe-source-map.json','compose-source.yml',
@@ -118,7 +119,8 @@ def human_gate_comment(comment,confirmation,now,disclosure,manifest_sha,kit_pass
     # Human-visible acceptance text, not merely an agent-created JSON object.
     require_tokens(comment.get('body',''),[HEAD,manifest_sha,'I accept the disclosed whole outage',
         '193 samples','23 holds','20 existing','one notification','ZMB','Other labs unchanged',
-        'production may have more','I control lab and hub builds/imports',confirmation.get('releaseWindowControl','MISSING')])
+        'production may have more','I accept the scientific impact lists',
+        'I control lab and hub builds/imports',confirmation.get('releaseWindowControl','MISSING')])
     require(confirmation.get('manifestSha256')==manifest_sha and confirmation.get('exactKitReviewId')==kit_pass['id'],
         'Human confirmation belongs to another exact kit')
     validate_fresh_yy_confirmation(confirmation,now,disclosure)

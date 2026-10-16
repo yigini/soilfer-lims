@@ -1,0 +1,1 @@
+{"configurationSha256":"6e28ca9df35aa70d96f8bfaeaeff4130db5693955f9c841e8772218c0391ac57","holding":true,"http":[{"method":"GET","path":"/api/health","status":503},{"method":"GET","path":"/login","status":503}]}

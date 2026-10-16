@@ -1,7 +1,7 @@
-"""Release sequence with injected operations; no real production adapter exists yet.
+"""Release sequence with concrete production operations and injected test doubles.
 
-This module fixes ordering and failure behavior while the whole-outage budget
-is being clarified. It cannot be invoked as an operational release script.
+The separate entry point requires the complete frozen graph, actual exact
+reviews and a fresh human gate. Importing this module performs no operation.
 """
 from kit_contract import *
 

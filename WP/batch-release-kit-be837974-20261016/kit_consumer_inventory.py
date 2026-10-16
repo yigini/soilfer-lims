@@ -90,28 +90,29 @@ def docker_projection(rows):
             'healthcheck':config.get('Healthcheck'),'fullEnvironmentPrivateOnly':True}
     return result
 
-def collect(reader,runner,clock=time.monotonic,cron_reader=cron_projection):
+def collect(reader,runner,clock=time.monotonic,cron_reader=cron_projection,namespace='consumer'):
+    require(re.fullmatch('[a-z][a-z0-9-]{0,35}',namespace),'Exclusive consumer inventory namespace required')
     began=clock();deadline=began+120;raw_bytes=0;unit_rows={}
     def bounded(argv,label):
         nonlocal raw_bytes
         require(clock()<deadline,'Consumer inventory deadline reached')
-        raw,err,_=runner.run(argv,label,15)
+        raw,err,_=runner.run(argv,namespace+'-'+label,15)
         raw_bytes+=len(raw)+len(err)
         require(not err and raw_bytes<=MAX_CONFIG_BYTES and clock()<deadline,'Consumer inventory incomplete or excessive')
         return raw
-    catalogue=unit_catalogue(bounded(['systemctl','list-unit-files','--all','--no-pager','--no-legend','--plain'],'consumer-unit-catalogue'))
+    catalogue=unit_catalogue(bounded(['systemctl','list-unit-files','--all','--no-pager','--no-legend','--plain'],'unit-catalogue'))
     for number,unit in enumerate(sorted(catalogue)):
-        raw=bounded(['systemctl','cat','--no-pager',unit],'consumer-unit-'+str(number+1).zfill(4))
+        raw=bounded(['systemctl','cat','--no-pager',unit],'unit-'+str(number+1).zfill(4))
         require(raw,'Empty systemd unit definition is not absence evidence')
         unit_rows[unit]={'catalogueState':catalogue[unit],'definitionSha256':sha(raw),'definitionBytes':len(raw)}
-    timers=bounded(['systemctl','list-timers','--all','--no-pager','--no-legend','--plain'],'consumer-active-timers')
-    processes=bounded(['ps','-eo','pid,ppid,comm,args','--no-headers'],'consumer-processes')
+    timers=bounded(['systemctl','list-timers','--all','--no-pager','--no-legend','--plain'],'active-timers')
+    processes=bounded(['ps','-eo','pid,ppid,comm,args','--no-headers'],'processes')
     containers=docker_projection(reader.inventory())
     def progress():require(clock()<deadline,'Consumer filesystem inventory deadline reached')
     def retain_cron(path,raw):
         # Write originals privately before their predicates. Nothing here
         # authorizes fetching or publishing cron command/credential bytes.
-        name='consumer-cron-'+sha(path.encode())[:32]+'.private'
+        name=namespace+'-cron-'+sha(path.encode())[:32]+'.private'
         destination=runner.root/name
         with destination.open('xb') as stream:stream.write(raw);stream.flush();os.fsync(stream.fileno())
         destination.chmod(0o400)
