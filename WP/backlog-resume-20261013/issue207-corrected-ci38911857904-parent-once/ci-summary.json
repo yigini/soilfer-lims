@@ -1,0 +1,247 @@
+{
+  "url": "https://github.com/yigini/soilfer-lims/actions/runs/38911857904",
+  "run": 38911857904,
+  "attempt": 1,
+  "status": "completed",
+  "conclusion": "success",
+  "head": "ad9d2660041c4db380d73a759871987d625f7404",
+  "tree": "0470e4a5549e4048ae35f39f8b8a2e22d9cd5bfa",
+  "base": "be8379745bdfae52ce46496ff26514dc7d729640",
+  "serverSuites": 374,
+  "serverTests": 5710,
+  "exactLocalSuiteInventoryMatches": true,
+  "allJobSteps": [
+    {
+      "name": "Set up job",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Checkout repository",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Setup Node.js",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Install server dependencies",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Install client dependencies",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Verify theme catalog and tokens drift",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Build client production bundle",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Setup test database and generate Prisma client",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Install Chromium for keyboard-only recording contract",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run server test suite",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Set up Docker Buildx",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Build Docker image",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Build Supported Baseline Docker Image (v3.5.30 / 48d0e52)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run Real Disposable Docker Boundary Rehearsal",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run Real Docker Deployment Readiness Acceptance",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Post Build Docker image",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Post Set up Docker Buildx",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Post Setup Node.js",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Post Checkout repository",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Complete job",
+      "status": "completed",
+      "conclusion": "success"
+    }
+  ],
+  "boundaryScenarios": [
+    "✓ Scenario 1 PASSED: Full wrapper pipeline succeeded in real Docker; 4 samples admitted; live traffic restored.",
+    "✓ Scenario 2 PASSED: Wrapper caught partial-apply failure; restored volume DB bit-for-bit; retained 503 ingress.",
+    "✓ Scenario 3 PASSED: Interrupted wrapper terminated live container writer before restoring DB bit-for-bit.",
+    "✓ Scenario 4 PASSED: Failed health check executed cleanup and preserved committed database state.",
+    "✓ Scenario 5 PASSED: Wrapper rejected image mismatch before mutation; live container, proxy, and DB untouched."
+  ],
+  "readinessChecks": [
+    "✓ Container healthy on port 35171",
+    "✓ Fresh shipped entrypoint healthy: schema COMPLETE, 11 references deferred, catalogue inserts 0, reference receipts 0, repeat NO_OP/byte-preserved",
+    "✓ Initial admin login succeeded (mustChangePassword=true)",
+    "✓ Password change succeeded",
+    "✓ Pre-restart token issued and verified active on operational API",
+    "✓ Persisted secret verified on volume (e84d91b6...)",
+    "✓ Quiesced container 1",
+    "✓ Restarted container healthy on port 33891",
+    "✓ Pre-restart JWT token remains valid across container restart without re-login",
+    "✓ Persisted secret byte-for-byte identical across restart",
+    "✓ Login with updated password confirmed on restarted container",
+    "✓ Verified seed.js was safely skipped on restart",
+    "✓ Actual shipped installer refuses conflicting pct_mass in both modes, writes 0, owned/source bytes unchanged",
+    "✓ Explicit existing catalogue authorities → next shipped entrypoint adds exactly 11 inactive references/11 receipts; all old rows/schema/receipts retained; repeat NO_OP/byte-preserved",
+    "✓ Container booted on partial volume and became healthy on port 42853",
+    "✓ Partial initialization was cleanly resumed and admin user created without LAB01 conflict",
+    "✓ Global mode container healthy on port 34461",
+    "✓ Global SUPER_ADMIN login verified",
+    "✓ Created Lab Alpha (ALPHA_1792161288137) and Lab Beta (BETA_1792161288137)",
+    "✓ Activated both laboratories",
+    "✓ Ingested 10 representative samples concurrently across Lab Alpha & Lab Beta",
+    "✓ Manager A real data export returned exactly 5 scoped samples with 1:1 multiplicity and verified accession Lab IDs",
+    "✓ Manager B real data export returned exactly 5 scoped samples with 1:1 multiplicity and verified accession Lab IDs",
+    "✓ Super Admin real data export returned all 10 cross-facility samples with complete IDs, multiplicity, and accession Lab IDs",
+    "✓ Verified background escalation scheduler initialized during container boot",
+    "✓ Quiesced active writer container before generating database backup",
+    "✓ Pre-restore backup executed cleanly",
+    "✓ Bound exact backup artifact matching runbook regex: soilfer_lims_backup_2026-10-16T14-36-26-467Z.db.gz",
+    "✓ Backup artifact verification PASSED: Users=3, Samples=10",
+    "✓ Restore into fresh target volume PASSED with epoch invalidation",
+    "✓ Restored container healthy on port 40289",
+    "✓ Post-restore admin login confirmed",
+    "✓ Post-restore sample count confirmed (exactly 5 samples preserved for Manager Alpha)",
+    "✓ Bound supported baseline: soilfer-lims:baseline-v3.5.30 (Tree: 48d0e526ded03232ac8516dd867f4b14923bdb58, ID: sha256:cf6e9974c7ddd75d95ad95ae48f575ec50a65f6035ff7a399d3768233e84b1ab)",
+    "✓ Bound candidate target:   soilfer-lims:ci (ID: sha256:729138a16b6ec4bd8cfb9bbfedd413c6689cb2679ba180f8145c2199b8437e65)",
+    "✓ Initialized real baseline database with 2 labs and 3 users",
+    "✓ Uploaded reference asset (spectral_cal_curve.json) to assets volume",
+    "✓ Baseline container healthy on port 46567",
+    "✓ Baseline operational login and API access verified",
+    "✓ Created ten EXPECTED samples through baseline project manifests; API and read-only preservation record agree",
+    "✓ Generated Route B tarballs: db_snapshot_1792161288137.tar.gz & assets_snapshot_1792161288137.tar.gz",
+    "✓ Staged recovery safely aborted on corrupt tarball without touching target volume",
+    "✓ Live volume verified intact after corrupt staging abort",
+    "✓ Owned baseline → #190 COMPLETE → #191 PRE_191 dry-run → COMPLETE; NULL reasons 0, backfill 0, blocked RECORDED owners 0; all retained rows and both receipts verified; NO_OP writes 0",
+    "✓ Owned #191 COMPLETE → #192 PRE_192 dry-run → COMPLETE; retained history unchanged, new selections 0, NO_OP writes 0",
+    "✓ cross-check-installer-pre201: direct installer PRE_201 dry-run → COMPLETE_201; retained rows/objects/receipts preserved, evidence/backfill0, repeat NO_OP writes0/bytes preserved",
+    "✓ Owned #272 ABSENT → shipped additive rawInput owner → ALREADY_PRESENT; all old fields/receipts preserved, backfill0, repeat NO_OP bytes unchanged",
+    "✓ calculation-default-entrypoint-pre199: PRE_199 → shipped default docker-entrypoint.sh → COMPLETE; inactive references 11, activations/backfill 0; retained evidence preserved; direct installer-module repeat NO_OP writes 0",
+    "✓ amendment-default-entrypoint-pre210: PRE_210 → shipped default docker-entrypoint.sh → COMPLETE_210; request/link/withdrawal/backfill0; retained rows and receipts preserved; direct installer-module repeat NO_OP writes0",
+    "✓ Upgraded target container healthy on port 46225",
+    "✓ Target container verified running candidate image ID: sha256:729138a16b6ec4bd8cfb9bbfedd413c6689cb2679ba180f8145c2199b8437e65",
+    "✓ Upgraded installer classification COMPLETE; candidates/unmapped/blocked 0; read-only gate writes 0",
+    "✓ Baseline ABSENT → duplicate-marker COMPLETE → #190 COMPLETE; both source receipts and preservation verified; read-only writes 0",
+    "✓ Pre-upgrade JWT token remains valid on upgraded target container without re-login",
+    "✓ Credentials preserved across upgrade: all baseline accounts authenticated successfully",
+    "✓ Exact data preservation across upgrade: all 10 sample records, assigned labs, and statuses verified intact",
+    "✓ Asset preservation across upgrade: spectral_cal_curve.json preserved byte-for-byte",
+    "✓ Restore rotated exchange epoch and invalidated pre-restore cursor (EPOCH_MISMATCH confirmed)",
+    "✓ Rollback container healthy on port 36503",
+    "✓ Rollback container verified running immutable baseline image ID: sha256:cf6e9974c7ddd75d95ad95ae48f575ec50a65f6035ff7a399d3768233e84b1ab",
+    "✓ Post-rollback accounts verified: all 3 baseline accounts authenticated successfully",
+    "✓ Post-rollback data verified: all 10 sample records, assigned labs, and statuses preserved with exact values in restored volume",
+    "✓ Post-rollback asset verified: spectral_cal_curve.json preserved byte-for-byte",
+    "🎉 ALL REAL DOCKER DEPLOYMENT READINESS SCENARIOS PASSED!",
+    "✓ Cleanup complete."
+  ],
+  "calculationAndCustodyPreservation": {
+    "retainedRowsAndReceiptBytesPreserved": true,
+    "noOpBytesPreserved": true,
+    "custody": {
+      "ready": {
+        "classification": "COMPLETE_207",
+        "mode": "DRY_RUN",
+        "totalChanges": 0,
+        "backfilledCount": 0,
+        "backfillSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "again": {
+        "classification": "COMPLETE_207",
+        "mode": "NO_OP",
+        "totalChanges": 0,
+        "backfilledCount": 0,
+        "backfillSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "dbWalShmPreserved": true,
+      "sourceSha256": "6572f75c9663d0aaece1bd6139694fe1ad41142f2723404a811852f8eaede685",
+      "ledgerCount": 0,
+      "originalRowsSha256": "2716c89bffb2481388fce0d44fb1a181a435497ae051a98abf2a905e5b1186b8"
+    }
+  },
+  "files": {
+    "result": {
+      "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\ci-38911857904-result.json",
+      "sha256": "96803a1cdf8dfe3224644cb7c07c0f04b4c5628f7abfe94e09a5173f93c6de8a"
+    },
+    "fullLog": {
+      "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\ci-38911857904-full.log",
+      "sha256": "7654f2140937cd625c2b82124036e04012218adf8833f769fe3e09fba09fb331"
+    },
+    "inventory": {
+      "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\ci-38911857904-inventory.json",
+      "sha256": "b6d02e8eb011626c61b069346e6e545d399ed2a89b3f945820b5d3ec03287ead"
+    },
+    "dockerResults": {
+      "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\ci-38911857904-docker-results.txt",
+      "sha256": "57d0a487a4f8f7ad0a11daecf55c721f6b7f91dce78898729fad3878ce7da163"
+    },
+    "commit": {
+      "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\correction-commit.json",
+      "sha256": "3f5cbe3b69cfe52d34fb2a98b4a55990802da8b1f7c62e0db11747959f7880e9"
+    },
+    "normalization": {
+      "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\pre-push-reviewed-source.json",
+      "sha256": "51a035ed98d6bcc28d1dc583939d3c111257a0e9a44b093af7dbcc3a7874c768"
+    }
+  },
+  "originalCi": {
+    "run": 38898969962,
+    "attempt": 1,
+    "conclusion": "failure",
+    "log": "C:\\Users\\yigin\\.codex\\worktrees\\issue-207-custody\\soilfer-lims\\scratch\\ci-38898969962-full.log",
+    "logSha256": "a06d06eff0cf0275d384d428c1a61dfce00240468dba8a587c58043967788406"
+  },
+  "noRetryDispatchAuditLabelOrMerge": true
+}

@@ -1,0 +1,494 @@
+{
+  "head": "ad9d2660041c4db380d73a759871987d625f7404",
+  "tree": "0470e4a5549e4048ae35f39f8b8a2e22d9cd5bfa",
+  "run": {
+    "id": 38911857904,
+    "name": "CI",
+    "node_id": "WFR_kwLOROLhSM8AAAAJD1PU8A",
+    "head_branch": "codex/issue-207-custody",
+    "head_sha": "ad9d2660041c4db380d73a759871987d625f7404",
+    "path": ".github/workflows/ci.yml",
+    "display_title": "feat(custody): controlled sample storage and policy retention",
+    "run_number": 721,
+    "event": "pull_request",
+    "status": "completed",
+    "conclusion": "success",
+    "workflow_id": 348556237,
+    "check_suite_id": 105453132029,
+    "check_suite_node_id": "CS_kwDOROLhSM8AAAAYjX8Y_Q",
+    "url": "https://api.github.com/repos/yigini/soilfer-lims/actions/runs/38911857904",
+    "html_url": "https://github.com/yigini/soilfer-lims/actions/runs/38911857904",
+    "pull_requests": [
+      {
+        "url": "https://api.github.com/repos/yigini/soilfer-lims/pulls/300",
+        "id": 4888190507,
+        "number": 300,
+        "head": {
+          "ref": "codex/issue-207-custody",
+          "sha": "ad9d2660041c4db380d73a759871987d625f7404",
+          "repo": {
+            "id": 1155719496,
+            "url": "https://api.github.com/repos/yigini/soilfer-lims",
+            "name": "soilfer-lims"
+          }
+        },
+        "base": {
+          "ref": "main",
+          "sha": "be8379745bdfae52ce46496ff26514dc7d729640",
+          "repo": {
+            "id": 1155719496,
+            "url": "https://api.github.com/repos/yigini/soilfer-lims",
+            "name": "soilfer-lims"
+          }
+        }
+      }
+    ],
+    "created_at": "2026-10-16T13:57:11Z",
+    "updated_at": "2026-10-16T14:38:09Z",
+    "actor": {
+      "login": "yigini",
+      "id": 32960535,
+      "node_id": "MDQ6VXNlcjMyOTYwNTM1",
+      "avatar_url": "https://avatars.githubusercontent.com/u/32960535?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/yigini",
+      "html_url": "https://github.com/yigini",
+      "followers_url": "https://api.github.com/users/yigini/followers",
+      "following_url": "https://api.github.com/users/yigini/following{/other_user}",
+      "gists_url": "https://api.github.com/users/yigini/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/yigini/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/yigini/subscriptions",
+      "organizations_url": "https://api.github.com/users/yigini/orgs",
+      "repos_url": "https://api.github.com/users/yigini/repos",
+      "events_url": "https://api.github.com/users/yigini/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/yigini/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "run_attempt": 1,
+    "referenced_workflows": [],
+    "run_started_at": "2026-10-16T13:57:11Z",
+    "triggering_actor": {
+      "login": "yigini",
+      "id": 32960535,
+      "node_id": "MDQ6VXNlcjMyOTYwNTM1",
+      "avatar_url": "https://avatars.githubusercontent.com/u/32960535?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/yigini",
+      "html_url": "https://github.com/yigini",
+      "followers_url": "https://api.github.com/users/yigini/followers",
+      "following_url": "https://api.github.com/users/yigini/following{/other_user}",
+      "gists_url": "https://api.github.com/users/yigini/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/yigini/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/yigini/subscriptions",
+      "organizations_url": "https://api.github.com/users/yigini/orgs",
+      "repos_url": "https://api.github.com/users/yigini/repos",
+      "events_url": "https://api.github.com/users/yigini/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/yigini/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "jobs_url": "https://api.github.com/repos/yigini/soilfer-lims/actions/runs/38911857904/jobs",
+    "logs_url": "https://api.github.com/repos/yigini/soilfer-lims/actions/runs/38911857904/logs",
+    "check_suite_url": "https://api.github.com/repos/yigini/soilfer-lims/check-suites/105453132029",
+    "artifacts_url": "https://api.github.com/repos/yigini/soilfer-lims/actions/runs/38911857904/artifacts",
+    "cancel_url": "https://api.github.com/repos/yigini/soilfer-lims/actions/runs/38911857904/cancel",
+    "rerun_url": "https://api.github.com/repos/yigini/soilfer-lims/actions/runs/38911857904/rerun",
+    "previous_attempt_url": null,
+    "workflow_url": "https://api.github.com/repos/yigini/soilfer-lims/actions/workflows/348556237",
+    "head_commit": {
+      "id": "ad9d2660041c4db380d73a759871987d625f7404",
+      "tree_id": "0470e4a5549e4048ae35f39f8b8a2e22d9cd5bfa",
+      "message": "test(readiness): preserve predecessor evidence across custody schema",
+      "timestamp": "2026-10-16T13:56:23Z",
+      "author": {
+        "name": "SoilFER-LIMS",
+        "email": "admin@soilfer-lims.local"
+      },
+      "committer": {
+        "name": "SoilFER-LIMS",
+        "email": "admin@soilfer-lims.local"
+      }
+    },
+    "repository": {
+      "id": 1155719496,
+      "node_id": "R_kgDOROLhSA",
+      "name": "soilfer-lims",
+      "full_name": "yigini/soilfer-lims",
+      "private": false,
+      "owner": {
+        "login": "yigini",
+        "id": 32960535,
+        "node_id": "MDQ6VXNlcjMyOTYwNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/32960535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/yigini",
+        "html_url": "https://github.com/yigini",
+        "followers_url": "https://api.github.com/users/yigini/followers",
+        "following_url": "https://api.github.com/users/yigini/following{/other_user}",
+        "gists_url": "https://api.github.com/users/yigini/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/yigini/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/yigini/subscriptions",
+        "organizations_url": "https://api.github.com/users/yigini/orgs",
+        "repos_url": "https://api.github.com/users/yigini/repos",
+        "events_url": "https://api.github.com/users/yigini/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/yigini/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/yigini/soilfer-lims",
+      "description": "Laboratory Information Management System for Soil Analysis",
+      "fork": false,
+      "url": "https://api.github.com/repos/yigini/soilfer-lims",
+      "forks_url": "https://api.github.com/repos/yigini/soilfer-lims/forks",
+      "keys_url": "https://api.github.com/repos/yigini/soilfer-lims/keys{/key_id}",
+      "collaborators_url": "https://api.github.com/repos/yigini/soilfer-lims/collaborators{/collaborator}",
+      "teams_url": "https://api.github.com/repos/yigini/soilfer-lims/teams",
+      "hooks_url": "https://api.github.com/repos/yigini/soilfer-lims/hooks",
+      "issue_events_url": "https://api.github.com/repos/yigini/soilfer-lims/issues/events{/number}",
+      "events_url": "https://api.github.com/repos/yigini/soilfer-lims/events",
+      "assignees_url": "https://api.github.com/repos/yigini/soilfer-lims/assignees{/user}",
+      "branches_url": "https://api.github.com/repos/yigini/soilfer-lims/branches{/branch}",
+      "tags_url": "https://api.github.com/repos/yigini/soilfer-lims/tags",
+      "blobs_url": "https://api.github.com/repos/yigini/soilfer-lims/git/blobs{/sha}",
+      "git_tags_url": "https://api.github.com/repos/yigini/soilfer-lims/git/tags{/sha}",
+      "git_refs_url": "https://api.github.com/repos/yigini/soilfer-lims/git/refs{/sha}",
+      "trees_url": "https://api.github.com/repos/yigini/soilfer-lims/git/trees{/sha}",
+      "statuses_url": "https://api.github.com/repos/yigini/soilfer-lims/statuses/{sha}",
+      "languages_url": "https://api.github.com/repos/yigini/soilfer-lims/languages",
+      "stargazers_url": "https://api.github.com/repos/yigini/soilfer-lims/stargazers",
+      "contributors_url": "https://api.github.com/repos/yigini/soilfer-lims/contributors",
+      "subscribers_url": "https://api.github.com/repos/yigini/soilfer-lims/subscribers",
+      "subscription_url": "https://api.github.com/repos/yigini/soilfer-lims/subscription",
+      "commits_url": "https://api.github.com/repos/yigini/soilfer-lims/commits{/sha}",
+      "git_commits_url": "https://api.github.com/repos/yigini/soilfer-lims/git/commits{/sha}",
+      "comments_url": "https://api.github.com/repos/yigini/soilfer-lims/comments{/number}",
+      "issue_comment_url": "https://api.github.com/repos/yigini/soilfer-lims/issues/comments{/number}",
+      "contents_url": "https://api.github.com/repos/yigini/soilfer-lims/contents/{+path}",
+      "compare_url": "https://api.github.com/repos/yigini/soilfer-lims/compare/{base}...{head}",
+      "merges_url": "https://api.github.com/repos/yigini/soilfer-lims/merges",
+      "archive_url": "https://api.github.com/repos/yigini/soilfer-lims/{archive_format}{/ref}",
+      "downloads_url": "https://api.github.com/repos/yigini/soilfer-lims/downloads",
+      "issues_url": "https://api.github.com/repos/yigini/soilfer-lims/issues{/number}",
+      "pulls_url": "https://api.github.com/repos/yigini/soilfer-lims/pulls{/number}",
+      "milestones_url": "https://api.github.com/repos/yigini/soilfer-lims/milestones{/number}",
+      "notifications_url": "https://api.github.com/repos/yigini/soilfer-lims/notifications{?since,all,participating}",
+      "labels_url": "https://api.github.com/repos/yigini/soilfer-lims/labels{/name}",
+      "releases_url": "https://api.github.com/repos/yigini/soilfer-lims/releases{/id}",
+      "deployments_url": "https://api.github.com/repos/yigini/soilfer-lims/deployments"
+    },
+    "head_repository": {
+      "id": 1155719496,
+      "node_id": "R_kgDOROLhSA",
+      "name": "soilfer-lims",
+      "full_name": "yigini/soilfer-lims",
+      "private": false,
+      "owner": {
+        "login": "yigini",
+        "id": 32960535,
+        "node_id": "MDQ6VXNlcjMyOTYwNTM1",
+        "avatar_url": "https://avatars.githubusercontent.com/u/32960535?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/yigini",
+        "html_url": "https://github.com/yigini",
+        "followers_url": "https://api.github.com/users/yigini/followers",
+        "following_url": "https://api.github.com/users/yigini/following{/other_user}",
+        "gists_url": "https://api.github.com/users/yigini/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/yigini/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/yigini/subscriptions",
+        "organizations_url": "https://api.github.com/users/yigini/orgs",
+        "repos_url": "https://api.github.com/users/yigini/repos",
+        "events_url": "https://api.github.com/users/yigini/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/yigini/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "html_url": "https://github.com/yigini/soilfer-lims",
+      "description": "Laboratory Information Management System for Soil Analysis",
+      "fork": false,
+      "url": "https://api.github.com/repos/yigini/soilfer-lims",
+      "forks_url": "https://api.github.com/repos/yigini/soilfer-lims/forks",
+      "keys_url": "https://api.github.com/repos/yigini/soilfer-lims/keys{/key_id}",
+      "collaborators_url": "https://api.github.com/repos/yigini/soilfer-lims/collaborators{/collaborator}",
+      "teams_url": "https://api.github.com/repos/yigini/soilfer-lims/teams",
+      "hooks_url": "https://api.github.com/repos/yigini/soilfer-lims/hooks",
+      "issue_events_url": "https://api.github.com/repos/yigini/soilfer-lims/issues/events{/number}",
+      "events_url": "https://api.github.com/repos/yigini/soilfer-lims/events",
+      "assignees_url": "https://api.github.com/repos/yigini/soilfer-lims/assignees{/user}",
+      "branches_url": "https://api.github.com/repos/yigini/soilfer-lims/branches{/branch}",
+      "tags_url": "https://api.github.com/repos/yigini/soilfer-lims/tags",
+      "blobs_url": "https://api.github.com/repos/yigini/soilfer-lims/git/blobs{/sha}",
+      "git_tags_url": "https://api.github.com/repos/yigini/soilfer-lims/git/tags{/sha}",
+      "git_refs_url": "https://api.github.com/repos/yigini/soilfer-lims/git/refs{/sha}",
+      "trees_url": "https://api.github.com/repos/yigini/soilfer-lims/git/trees{/sha}",
+      "statuses_url": "https://api.github.com/repos/yigini/soilfer-lims/statuses/{sha}",
+      "languages_url": "https://api.github.com/repos/yigini/soilfer-lims/languages",
+      "stargazers_url": "https://api.github.com/repos/yigini/soilfer-lims/stargazers",
+      "contributors_url": "https://api.github.com/repos/yigini/soilfer-lims/contributors",
+      "subscribers_url": "https://api.github.com/repos/yigini/soilfer-lims/subscribers",
+      "subscription_url": "https://api.github.com/repos/yigini/soilfer-lims/subscription",
+      "commits_url": "https://api.github.com/repos/yigini/soilfer-lims/commits{/sha}",
+      "git_commits_url": "https://api.github.com/repos/yigini/soilfer-lims/git/commits{/sha}",
+      "comments_url": "https://api.github.com/repos/yigini/soilfer-lims/comments{/number}",
+      "issue_comment_url": "https://api.github.com/repos/yigini/soilfer-lims/issues/comments{/number}",
+      "contents_url": "https://api.github.com/repos/yigini/soilfer-lims/contents/{+path}",
+      "compare_url": "https://api.github.com/repos/yigini/soilfer-lims/compare/{base}...{head}",
+      "merges_url": "https://api.github.com/repos/yigini/soilfer-lims/merges",
+      "archive_url": "https://api.github.com/repos/yigini/soilfer-lims/{archive_format}{/ref}",
+      "downloads_url": "https://api.github.com/repos/yigini/soilfer-lims/downloads",
+      "issues_url": "https://api.github.com/repos/yigini/soilfer-lims/issues{/number}",
+      "pulls_url": "https://api.github.com/repos/yigini/soilfer-lims/pulls{/number}",
+      "milestones_url": "https://api.github.com/repos/yigini/soilfer-lims/milestones{/number}",
+      "notifications_url": "https://api.github.com/repos/yigini/soilfer-lims/notifications{?since,all,participating}",
+      "labels_url": "https://api.github.com/repos/yigini/soilfer-lims/labels{/name}",
+      "releases_url": "https://api.github.com/repos/yigini/soilfer-lims/releases{/id}",
+      "deployments_url": "https://api.github.com/repos/yigini/soilfer-lims/deployments"
+    }
+  },
+  "jobs": {
+    "total_count": 1,
+    "jobs": [
+      {
+        "id": 117009411361,
+        "run_id": 38911857904,
+        "workflow_name": "CI",
+        "head_branch": "codex/issue-207-custody",
+        "run_url": "https://api.github.com/repos/yigini/soilfer-lims/actions/runs/38911857904",
+        "run_attempt": 1,
+        "node_id": "CR_kwDOROLhSM8AAAAbPk3tIQ",
+        "head_sha": "ad9d2660041c4db380d73a759871987d625f7404",
+        "url": "https://api.github.com/repos/yigini/soilfer-lims/actions/jobs/117009411361",
+        "html_url": "https://github.com/yigini/soilfer-lims/actions/runs/38911857904/job/117009411361",
+        "status": "completed",
+        "conclusion": "success",
+        "created_at": "2026-10-16T13:57:12Z",
+        "started_at": "2026-10-16T13:57:14Z",
+        "completed_at": "2026-10-16T14:38:08Z",
+        "name": "Test & Build",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-10-16T13:57:15Z",
+            "completed_at": "2026-10-16T13:57:17Z"
+          },
+          {
+            "name": "Checkout repository",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-10-16T13:57:17Z",
+            "completed_at": "2026-10-16T13:57:29Z"
+          },
+          {
+            "name": "Setup Node.js",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-10-16T13:57:29Z",
+            "completed_at": "2026-10-16T13:57:30Z"
+          },
+          {
+            "name": "Install server dependencies",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-10-16T13:57:30Z",
+            "completed_at": "2026-10-16T13:57:48Z"
+          },
+          {
+            "name": "Install client dependencies",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5,
+            "started_at": "2026-10-16T13:57:48Z",
+            "completed_at": "2026-10-16T13:57:58Z"
+          },
+          {
+            "name": "Verify theme catalog and tokens drift",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6,
+            "started_at": "2026-10-16T13:57:58Z",
+            "completed_at": "2026-10-16T13:57:58Z"
+          },
+          {
+            "name": "Build client production bundle",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-10-16T13:57:58Z",
+            "completed_at": "2026-10-16T13:58:11Z"
+          },
+          {
+            "name": "Setup test database and generate Prisma client",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8,
+            "started_at": "2026-10-16T13:58:11Z",
+            "completed_at": "2026-10-16T13:58:19Z"
+          },
+          {
+            "name": "Install Chromium for keyboard-only recording contract",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9,
+            "started_at": "2026-10-16T13:58:19Z",
+            "completed_at": "2026-10-16T13:58:39Z"
+          },
+          {
+            "name": "Run server test suite",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10,
+            "started_at": "2026-10-16T13:58:39Z",
+            "completed_at": "2026-10-16T14:30:25Z"
+          },
+          {
+            "name": "Set up Docker Buildx",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 11,
+            "started_at": "2026-10-16T14:30:25Z",
+            "completed_at": "2026-10-16T14:30:32Z"
+          },
+          {
+            "name": "Build Docker image",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 12,
+            "started_at": "2026-10-16T14:30:32Z",
+            "completed_at": "2026-10-16T14:31:55Z"
+          },
+          {
+            "name": "Build Supported Baseline Docker Image (v3.5.30 / 48d0e52)",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 13,
+            "started_at": "2026-10-16T14:31:55Z",
+            "completed_at": "2026-10-16T14:32:57Z"
+          },
+          {
+            "name": "Run Real Disposable Docker Boundary Rehearsal",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 14,
+            "started_at": "2026-10-16T14:32:57Z",
+            "completed_at": "2026-10-16T14:34:48Z"
+          },
+          {
+            "name": "Run Real Docker Deployment Readiness Acceptance",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 15,
+            "started_at": "2026-10-16T14:34:48Z",
+            "completed_at": "2026-10-16T14:37:57Z"
+          },
+          {
+            "name": "Post Build Docker image",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 27,
+            "started_at": "2026-10-16T14:37:57Z",
+            "completed_at": "2026-10-16T14:37:58Z"
+          },
+          {
+            "name": "Post Set up Docker Buildx",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 28,
+            "started_at": "2026-10-16T14:37:58Z",
+            "completed_at": "2026-10-16T14:38:06Z"
+          },
+          {
+            "name": "Post Setup Node.js",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 29,
+            "started_at": "2026-10-16T14:38:06Z",
+            "completed_at": "2026-10-16T14:38:06Z"
+          },
+          {
+            "name": "Post Checkout repository",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 30,
+            "started_at": "2026-10-16T14:38:06Z",
+            "completed_at": "2026-10-16T14:38:06Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 31,
+            "started_at": "2026-10-16T14:38:06Z",
+            "completed_at": "2026-10-16T14:38:06Z"
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/yigini/soilfer-lims/check-runs/117009411361",
+        "labels": [
+          "ubuntu-latest"
+        ],
+        "runner_id": 1000000758,
+        "runner_name": "GitHub Actions 1000000758",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      }
+    ]
+  },
+  "remoteCommit": {
+    "sha": "ad9d2660041c4db380d73a759871987d625f7404",
+    "node_id": "C_kwDOROLhSNoAKGFkOWQyNjYwMDQxYzRkYjM4MGQ3M2E3NTk4NzE5ODdkNjI1Zjc0MDQ",
+    "url": "https://api.github.com/repos/yigini/soilfer-lims/git/commits/ad9d2660041c4db380d73a759871987d625f7404",
+    "html_url": "https://github.com/yigini/soilfer-lims/commit/ad9d2660041c4db380d73a759871987d625f7404",
+    "author": {
+      "name": "SoilFER-LIMS",
+      "email": "admin@soilfer-lims.local",
+      "date": "2026-10-16T13:56:23Z"
+    },
+    "committer": {
+      "name": "SoilFER-LIMS",
+      "email": "admin@soilfer-lims.local",
+      "date": "2026-10-16T13:56:23Z"
+    },
+    "tree": {
+      "sha": "0470e4a5549e4048ae35f39f8b8a2e22d9cd5bfa",
+      "url": "https://api.github.com/repos/yigini/soilfer-lims/git/trees/0470e4a5549e4048ae35f39f8b8a2e22d9cd5bfa"
+    },
+    "message": "test(readiness): preserve predecessor evidence across custody schema",
+    "parents": [
+      {
+        "sha": "827760b8b83c5a4bd0581ee1369648b91818d584",
+        "url": "https://api.github.com/repos/yigini/soilfer-lims/git/commits/827760b8b83c5a4bd0581ee1369648b91818d584",
+        "html_url": "https://github.com/yigini/soilfer-lims/commit/827760b8b83c5a4bd0581ee1369648b91818d584"
+      }
+    ],
+    "verification": {
+      "verified": false,
+      "reason": "unsigned",
+      "signature": null,
+      "payload": null,
+      "verified_at": null
+    }
+  },
+  "pr": {
+    "number": 300,
+    "url": "https://github.com/yigini/soilfer-lims/pull/300",
+    "head": "ad9d2660041c4db380d73a759871987d625f7404",
+    "base": "be8379745bdfae52ce46496ff26514dc7d729640"
+  },
+  "originalRun": {
+    "id": 38898969962,
+    "attempt": 1,
+    "status": "completed",
+    "conclusion": "failure"
+  },
+  "log": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\ci-38911857904-full.log",
+  "logSha256": "7654f2140937cd625c2b82124036e04012218adf8833f769fe3e09fba09fb331"
+}
