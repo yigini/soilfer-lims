@@ -87,7 +87,10 @@ def capture_filesystem_controls(root,require_directory_sync=True,disk=None,no_wr
         validate_capture_spec(spec)
         require(callable(no_writers),'Capture requires a fresh retained-clone writer inventory')
         before=capture_clone_state(root)
+        from kit_capture_copy import verify_capture_clone
+        verify_capture_clone(root)
         no_writers();prepare(spec)
+        verify_capture_clone(root)
         require(capture_clone_state(root)==before,'Retained clone changed before capture container creation')
     return guarded_prepare,read,permit
 

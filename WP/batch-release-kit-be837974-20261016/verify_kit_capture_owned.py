@@ -172,6 +172,7 @@ class CaptureOwners(unittest.TestCase):
                 if failure=='source' and events.count('writers')==3:(db/'dev.db').write_bytes(b'changed')
             with patch.object(capture,'CAPTURE_ROOT',pathlib.PurePosixPath(root.as_posix())),\
                  patch.object(capture,'APACHE_CAPTURE_ROOT',root.as_posix()),patch.object(kit_evidence,'_runtime',book),\
+                 patch('kit_capture_copy.verify_capture_clone',lambda root:None),\
                  patch.object(capture,'capture_mountinfo',lambda:b'23 0 0:1 / / rw - ext4 /dev/sda rw\n'):
                 spec=capture.capture_spec('capture-canonical-policy');temp=pathlib.Path(spec['tmp'])
                 prepare,read,permit=capture.capture_filesystem_controls(root,False,disk,no_writers)
