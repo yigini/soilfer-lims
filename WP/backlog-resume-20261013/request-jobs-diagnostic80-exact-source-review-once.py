@@ -1,0 +1,46 @@
+"""One exact source review request, bundling the actual empty-WAL scope ACK."""
+import datetime,json,pathlib,subprocess,sys
+R=pathlib.Path(__file__).resolve().parents[2];S=R/'WP/jobs-row-diagnostic-be837974-20261016';D=S/'exact-source-review80-once';HEAD='bb2d337dc4e39021bf413dbe31c2749bb02da65a'
+sys.path.insert(0,str(S));import prepare_diagnostic as prep
+from diagnostic_contract import *
+def git(*a):return subprocess.check_output(['git','-c','core.longpaths=true',*a],cwd=R)
+assert git('rev-parse','HEAD').decode().strip()==HEAD and git('branch','--show-current').decode().strip()=='audit/release-eb6de2e8' and not git('diff','--cached','--name-only').strip() and not D.exists()
+D.mkdir();records=[]
+def capture(*args):
+ assert args[:2]==('gh','api');i=len(records);r=subprocess.run(args,cwd=R,capture_output=True,timeout=90)
+ for suffix,b in [('stdout.json',r.stdout),('stderr',r.stderr),('command.json',canonical({'argv':args,'exitCode':r.returncode}))]:(D/('api-'+str(i).zfill(2)+'-'+suffix)).write_bytes(b)
+ records.append(args);assert r.returncode==0,'Failed read is not no answer; consumed helper';return r.stdout
+prep.command=capture
+index={'head':HEAD,'files':{},'data':{}}
+for group,names in [('files',FILES),('data',DATA)]:
+ for n in sorted(names):
+  b=git('show',HEAD+':'+(prep.REL/n).as_posix());assert b==(S/n).read_bytes();index[group][n]={'path':(prep.REL/n).as_posix(),'bytes':len(b),'sha256':sha(b),'blob':git('rev-parse',HEAD+':'+(prep.REL/n).as_posix()).decode().strip()}
+prep.published(index);evidence=prep.current_evidence();marker='row-diagnostic-bb2d337d-80-exact-six-empty-wal'
+assert not any(marker in c['body'] for c in evidence['sourceComments'])
+publication=strict((S/'source80-publication-once/publication-index.json').read_bytes())
+for pin in publication['bindings']:
+ b=git('show',HEAD+':'+pin['path']);assert len(b)==pin['bytes'] and sha(b)==pin['sha256']
+prefix='https://github.com/yigini/soilfer-lims/blob/'+HEAD+'/'
+lines=['@claude','', 'Source review requested: NEW complete Step 1 row diagnostic only, exact '+HEAD+'.','',
+'Acknowledging actual scope answer 6205842415 (2026-10-16T01:20:31Z) ONLY here: the exact-empty-WAL exception and all added requirements are implemented for review. This answers clarification 6205771455; no native follow-up or separate ACK is needed. Both 6205842415 and 6205724552 are bound as fresh semantic authorities. Your explanation of the old row-change cause remains an inference until an actual diagnostic establishes it.','',
+'Complete new graph: '+prefix+prep.REL.as_posix()+'/README.md',
+'Full 184 raw-file source/test/scope/API publication: '+prefix+prep.REL.as_posix()+'/source80-publication-once/publication-index.json','',
+'All eight source files (Git blob OID, SHA-256 and length):']
+for n,pin in index['files'].items():lines.append('- '+n+' | '+pin['blob']+' | '+pin['sha256']+' | '+str(pin['bytes'])+' bytes | '+prefix+pin['path'])
+lines+=['','Three exact retained METADATA inputs (no database is copied):']
+for n,pin in index['data'].items():lines.append('- '+n+' | '+pin['sha256']+' | '+str(pin['bytes'])+' bytes | '+prefix+pin['path'])
+lines+=['',
+'Current final suites: 80/80 LOCAL and 80/80 ACTUAL host Python 3.9.23, closed success, all 8 final source hashes unchanged. Host source is loaded in memory; real subprocess/network/Docker/cache/operator interfaces are blocked; SQLite is exercised only on NEW synthetic files or in-memory fixtures. Full original logs/source-at-attempt/exit results retained at guards-code-bound-local-host-once. Earlier 61/61 and 77/77 both-version snapshots are retained honestly. Static source audit corrected their draft ACTIVE fixture literal to the actual AMBIGUOUS_PROVENANCE_HOLD before final 80 and this first review request. No old source/test/operator/root/PASS was replayed. All 26 reviewed 003000 sources and all 1333 application inputs remain unchanged.','',
+'Input boundary: only 003000 startup-1-stopped-seal/backup.db and first-sync.db, with their exact six original SHA/stat pins. Nonempty/nonzero-allocated WAL, -journal, missing/extra selected database sidecar, symlink, alias, or ANY pin mismatch refuses before SQL. Before/after includes ctimeNs and nlink; atime excluded. Each main opens ONLY file: URI mode=ro&immutable=1 with uri=True, no ATTACH/writing pragma/checkpoint. Each page_count*page_size must be 563322880 and quick_check exactly ok; extent/check/header18/19 observations retained before reading tables. SHM hashed as bytes only. Any after change voids the result.','',
+'Compare ALL112 tables plus schema and all42 receipts using separate read-only connections, streaming primary-key/rowid order. Public lists every changed original ID/column names, deleted originals and additions with hashes. Changed originals get detailed metadata/fieldMetadata structural diff, arrays/old-value retention, status/scope/rejection booleans and hashes, exact source/config/non-refusal and retained first-fetch membership, plus paired new PROVENANCE holds/HOLD_RAISED and KOBO_CONFLICTING_PROVENANCE audits with actor/marker/action/count checks. Classifications CROSS_SUBMISSION_DUPLICATE, PRIMARY_REVISION or UNEXPLAINED. Conservative old-conflict in-place revisions or any shape outside the exact append path remain UNEXPLAINED, rather than inferring an allowance.','',
+'Any unexplained/protected non-intake change, deleted original, non-EXPECTED original or status/scientific/reception/approval change produces STOP_REPORT_NO_REMEDY after enumerating all tables. No Step2 source/remedy is drafted. Private raw rows, metadata and coordinates remain in exclusive 0400 private-row files in the NEW root; stdout/journal/public result contain only classifications, IDs, column/key paths, counts and value hashes. No original logs or embedded raw payload is republished. The future actual result must be accepted by you before any Step2.','',
+'New proposed single-use root '+str(ROOT)+' and unit '+UNIT+' remain UNCREATED by us; no operational package/launcher/diagnostic SQL has run. Five actual remote programs compile BEFORE first SSH. Fresh unused unit/root and floor '+str(FLOOR)+' + existing4GiB log reserve are checked before root, immediately before unit and at runtime; exact future package allocation is charged only before root. No 64-equivalent copy budget is used for this explicitly no-copy scope. No production/old-input SQL, copies, runtime network, containers or writes to003000. Runtime systemd PrivateNetwork, IPAddressDeny=any, AF_UNIX only, ProtectSystem=strict, ReadWritePaths only newroot; MemoryMax805306368/Swap0/1800s/no restart. Controller own memory.events retained and oom/oom_kill0 checked.','',
+'This does not qualify release/kit/gate/deploy, relax the old verifier or authorize retry. 003000/PASS620511 remain consumed failed; 233000 remains latest passing KEEPIT; Main MERGE HOLD; R2 complete/no prune; no host grow/restart/#103 action. Step2 will separately implement killed-controller exact-owner stop and every-container memory policy, second natural conflict idempotence/new IDs above first-fetch max, exact allowances, all42 receipt/refusal preservation, fresh R4+10GB/newroot/oneattempt. Future kit/gate must disclose9-to10minute restartwindow and exact production600s deadline failure behavior.','',
+'Please review this complete source and final guards, not a prospective graph. If acceptable, return an unedited exact Source review: PASS including ALL eight hashes and ALL literal bindings below; otherwise give findings. This request itself is no source approval.','', 'Literal approval bindings:','```',*tokens(index),'```','', '<!-- '+marker+' -->']
+body='\n'.join(lines)
+(D/'source-index.json').write_bytes(canonical(index)+b'\n');(D/'actual-request-body-utf8.txt').write_bytes(body.encode());(D/'post-request.json').write_bytes(canonical({'body':body})+b'\n');(D/'post-intent.json').write_bytes(canonical({'marker':marker,'bodySha256':sha(body.encode()),'neverReplay':True})+b'\n')
+r=subprocess.run(['gh','api','--method','POST','repos/yigini/soilfer-lims/issues/162/comments','--input',str(D/'post-request.json')],cwd=R,capture_output=True,timeout=90)
+(D/'post-response-original.json').write_bytes(r.stdout);(D/'post-stderr').write_bytes(r.stderr);(D/'post-exit.json').write_bytes(canonical({'exitCode':r.returncode})+b'\n');assert r.returncode==0,'Unknown/failed post; inspect actual marker, NEVER repost'
+posted=strict(r.stdout);fresh=strict(capture('gh','api','repos/yigini/soilfer-lims/issues/comments/'+str(posted['id'])));assert posted['body']==fresh['body']==body and fresh['created_at']==fresh['updated_at']
+record={'status':'EXACT_DIAGNOSTIC_SOURCE_REVIEW_POSTED_ONCE_NOT_APPROVED_NOT_EXECUTED','id':posted['id'],'url':posted['html_url'],'createdAt':posted['created_at'],'bodySha256':sha(body.encode()),'sourceHead':HEAD,'marker':marker,'sourcePassPending':True,'scopeAnswerAcknowledgedOnlyHere':6205842415,'nativeFallbackEarliestUtc':(datetime.datetime.fromisoformat(posted['created_at'].replace('Z','+00:00'))+datetime.timedelta(minutes=20)).isoformat(),'sqlConnections':0,'hostOperatorCalls':0}
+(D/'delivery-record.json').write_bytes(canonical(record)+b'\n');print(json.dumps(record))

@@ -1,0 +1,1 @@
+{"rawOriginalFilesRewritten":false,"sourceOnlyReadErrors":["A source-print inspection hit cp1252 on a Unicode arrow; JSON-safe read succeeded.","One read_text() without explicit UTF-8 could not decode app source; UTF-8 read succeeded."],"sourceOrHostOrSqlMutations":0}
