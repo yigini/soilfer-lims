@@ -1,0 +1,77 @@
+"""Exclusive, durable release records. Importing performs no filesystem I/O.
+
+All records remain private on the host until individually reviewed for public
+retention. A journal cannot be resumed or used for a second execution.
+"""
+import datetime
+import os
+import pathlib
+import re
+import stat
+from kit_contract import canonical,require,sha
+
+def utc():return datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+def real_directory(value):
+    path=pathlib.Path(value)
+    require(path.is_absolute() and path.is_dir(),'Existing absolute journal directory required')
+    for part in (path,*path.parents):
+        require(not part.is_symlink(),'Journal directory alias refused')
+    return path
+
+def exclusive_record(directory,name,value,require_directory_sync=True):
+    directory=real_directory(directory)
+    require(isinstance(name,str) and re.fullmatch('[a-z0-9][a-z0-9.-]{0,150}',name),'Exact record basename required')
+    raw=canonical(value)+b'\n'
+    require(len(raw)<=16*1024**2,'Record exceeds bounded receipt size')
+    path=directory/name
+    descriptor=os.open(str(path),os.O_WRONLY|os.O_CREAT|os.O_EXCL|getattr(os,'O_NOFOLLOW',0),0o600)
+    try:
+        with os.fdopen(descriptor,'wb',closefd=False) as stream:
+            stream.write(raw);stream.flush();os.fsync(stream.fileno())
+        os.chmod(path,0o400)
+        require(stat.S_ISREG(path.stat().st_mode),'Journal record is not regular')
+    finally:os.close(descriptor)
+    directory_synced=False
+    if os.name=='posix':
+        descriptor=os.open(str(directory),os.O_RDONLY|getattr(os,'O_DIRECTORY',0))
+        try:os.fsync(descriptor);directory_synced=True
+        finally:os.close(descriptor)
+    require(directory_synced or not require_directory_sync,'Directory fsync unavailable; no operational call may follow')
+    return {'file':name,'sha256':sha(raw),'bytes':len(raw),'directorySynced':directory_synced}
+
+class Journal:
+    def __init__(self,directory,owner,source_manifest_sha,require_directory_sync=True):
+        self.directory=real_directory(directory)
+        require(isinstance(owner,str) and owner==str(self.directory),'Exact journal owner required')
+        require(re.fullmatch('[a-f0-9]{64}',source_manifest_sha or ''),'Source manifest hash required')
+        self.sync=require_directory_sync;self.sequence=0;self.previous=None;self.terminal=False
+        self.owner=exclusive_record(self.directory,'execution-journal-owner.json',{
+            'owner':owner,'sourceManifestSha256':source_manifest_sha,'utc':utc(),
+            'neverResume':True,'neverRetry':True,'rawRecordsPrivateUntilReviewed':True},self.sync)
+
+    def append(self,phase,value):
+        require(not self.terminal,'Terminal journal cannot continue')
+        require(isinstance(phase,str) and re.fullmatch('[A-Za-z][A-Za-z0-9]{0,80}',phase),'Invalid phase name')
+        record={'sequence':self.sequence+1,'phase':phase,'utc':utc(),'previous':self.previous,'value':value}
+        name='phase-'+str(self.sequence+1).zfill(6)+'-'+phase.lower()+'.json'
+        reference=exclusive_record(self.directory,name,record,self.sync)
+        self.sequence+=1;self.previous=reference
+        return reference
+
+    def phase_intent(self,phase,receipt):
+        # Persist the latest safety flags before dispatch, not raw environment,
+        # keys, SQL rows, or a fabricated success/COMMIT result.
+        return self.append(phase,{'kind':'BEFORE_CALL_INTENT',
+            'anyInstallerAttempted':receipt['anyInstallerAttempted'],
+            'anyApplyAttempted':receipt['anyApplyAttempted'],
+            'anyEntrypointAttempted':receipt['anyEntrypointAttempted'],
+            'ingressReopened':receipt['ingressReopened']})
+
+    def seal(self,receipt):
+        require(not self.terminal,'Terminal receipt already consumed')
+        reference=exclusive_record(self.directory,'production-receipt.json',{
+            **receipt,'journalTail':self.previous,'journalRecords':self.sequence,
+            'sealedUtc':utc(),'privateUntilReviewed':True},self.sync)
+        self.terminal=True
+        return reference

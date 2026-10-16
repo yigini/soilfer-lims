@@ -24,14 +24,18 @@ def exclusive_record(directory,name,value,require_directory_sync=True):
     require(isinstance(name,str) and re.fullmatch('[a-z0-9][a-z0-9.-]{0,150}',name),'Exact record basename required')
     raw=canonical(value)+b'\n'
     require(len(raw)<=16*1024**2,'Record exceeds bounded receipt size')
-    path=directory/name
-    descriptor=os.open(str(path),os.O_WRONLY|os.O_CREAT|os.O_EXCL|getattr(os,'O_NOFOLLOW',0),0o600)
+    path=directory/name;pending=directory/(name+'.pending')
+    if path.exists() or path.is_symlink():raise FileExistsError('Published record already consumed')
+    descriptor=os.open(str(pending),os.O_WRONLY|os.O_CREAT|os.O_EXCL|getattr(os,'O_NOFOLLOW',0),0o600)
     try:
         with os.fdopen(descriptor,'wb',closefd=False) as stream:
             stream.write(raw);stream.flush();os.fsync(stream.fileno())
-        os.chmod(path,0o400)
-        require(stat.S_ISREG(path.stat().st_mode),'Journal record is not regular')
+        os.chmod(pending,0o400)
+        require(stat.S_ISREG(pending.stat().st_mode),'Journal record is not regular')
     finally:os.close(descriptor)
+    # Atomic visibility without replacing or deleting anything. The pending
+    # hardlink is retained as evidence and is counted once by physical du.
+    os.link(pending,path)
     directory_synced=False
     if os.name=='posix':
         descriptor=os.open(str(directory),os.O_RDONLY|getattr(os,'O_DIRECTORY',0))

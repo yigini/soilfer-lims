@@ -4,6 +4,7 @@ import os
 import pathlib
 import tempfile
 import unittest
+from unittest import mock
 from kit_contract import sha
 from kit_journal import Journal,exclusive_record
 
@@ -41,5 +42,13 @@ class DurableEvidence(unittest.TestCase):
             (d/'alias.json').symlink_to(target)
             with self.assertRaises(FileExistsError):exclusive_record(d,'alias.json',{},True)
             self.assertEqual(target.read_bytes(),b'original')
+
+    def test_failed_atomic_publish_never_exposes_a_partial_final_record(self):
+        d=self.directory()
+        with mock.patch('kit_journal.os.link',side_effect=OSError('SYNTHETIC_PUBLICATION_FAILURE')):
+            with self.assertRaises(OSError):exclusive_record(d,'atomic.json',{'complete':'SYNTHETIC_ONLY'},False)
+        self.assertFalse((d/'atomic.json').exists())
+        self.assertEqual(json.loads((d/'atomic.json.pending').read_bytes()),{'complete':'SYNTHETIC_ONLY'})
+        with self.assertRaises(FileExistsError):exclusive_record(d,'atomic.json',{'different':True},False)
 
 if __name__=='__main__':unittest.main()
