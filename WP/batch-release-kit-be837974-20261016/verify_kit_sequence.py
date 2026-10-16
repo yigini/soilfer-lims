@@ -53,7 +53,7 @@ class SequenceRefusals(unittest.TestCase):
     def test_full_order_and_counts_before_ingress_reopens(self):
         ops=Operations();r=execute(ops,plan())
         self.assertEqual(r['status'],'DEPLOYED_AWAITING_CLAUDIO_POSTCHECK')
-        for first,second in [('503','stop-old'),('stop-old','integrity'),('integrity','backup'),('backup','dry-206'),('dry-206','apply-206'),('apply-206','repeat-206'),('preserve-209','start'),('first','postflights'),('postflights','reopen'),('reopen','second')]:
+        for first,second in [('503','stop-old'),('stop-old','integrity'),('integrity','backup'),('backup','dry-206'),('dry-206','apply-206'),('apply-206','preserve-206'),('preserve-206','repeat-206'),('repeat-209','start'),('first','postflights'),('postflights','reopen'),('reopen','second')]:
             self.assertLess(ops.calls.index(first),ops.calls.index(second))
         self.assertEqual(ops.calls.count('start'),1)
 

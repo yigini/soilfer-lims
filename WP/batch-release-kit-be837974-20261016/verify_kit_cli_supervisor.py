@@ -23,8 +23,55 @@ class CliSupervisor(unittest.TestCase):
     def test_actual_child_completion_stays_alive_until_final_memory_permission(self):
         self.exercise('console.log("SYNTHETIC_CHILD_ONLY")',0,False)
 
+    def test_stopped_integrity_command_is_exact_and_uses_only_readonly_sql(self):
+        node=shutil.which('node');self.assertIsNotNone(node)
+        bootstrap='''const assert=require('node:assert/strict');
+const guard=require(process.argv[1]);const integrity=require(process.argv[2]);
+assert.deepEqual(guard.validateMain(['/tmp','/release/stopped_integrity.cjs','--db','/app/server/prisma/dev.db']).child,
+ ['/release/stopped_integrity.cjs','--db','/app/server/prisma/dev.db']);
+assert.throws(()=>guard.validateMain(['/tmp','/release/stopped_integrity.cjs','--db','/other.db']));
+for (const failure of ['none','integrity','fk']) {
+ const calls=[];
+ class Database {
+  constructor(filename,options) {assert.equal(filename,'SYNTHETIC_ONLY');assert.deepEqual(options,{readonly:true,fileMustExist:true});}
+  pragma(sql) {calls.push(sql);if(sql==='query_only = ON')return [];
+   if(sql==='integrity_check')return [{integrity_check:failure==='integrity'?'SYNTHETIC_BAD':'ok'}];
+   if(sql==='foreign_key_check')return failure==='fk'?[{table:'SYNTHETIC_ONLY'}]:[];
+   throw new Error('UNREVIEWED_SQL');}
+  close(){calls.push('close');}
+ }
+ if(failure==='none')assert.equal(integrity.check('SYNTHETIC_ONLY',Database).integrity,'ok');
+ else assert.throws(()=>integrity.check('SYNTHETIC_ONLY',Database));
+ assert.deepEqual(calls,['query_only = ON','integrity_check','foreign_key_check','close']);
+}'''
+        FIXTURES.mkdir(exist_ok=True);d=pathlib.Path(tempfile.mkdtemp(prefix='integrity-',dir=FIXTURES))
+        result=subprocess.run([node,'-e',bootstrap,str(ROOT/'cli_guard.cjs'),str(ROOT/'stopped_integrity.cjs')],capture_output=True)
+        (d/'stdout-original.txt').write_bytes(result.stdout);(d/'stderr-original.txt').write_bytes(result.stderr)
+        self.assertEqual(result.returncode,0,result.stderr.decode())
+
     def test_failed_child_is_retained_and_cannot_be_reported_as_success(self):
         self.exercise('process.exitCode=3',1,False)
+
+    def test_live_backup_destination_is_exclusive_and_source_is_readonly(self):
+        node=shutil.which('node');self.assertIsNotNone(node);FIXTURES.mkdir(exist_ok=True)
+        d=pathlib.Path(tempfile.mkdtemp(prefix='backup-',dir=FIXTURES)).resolve()
+        bootstrap='''const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
+const {backup}=require(process.argv[1]);const dir=process.argv[2];let opened=0,closed=0;
+class Database {
+ constructor(source,options){assert.equal(source,'SYNTHETIC_SOURCE_ONLY');assert.deepEqual(options,{readonly:true,fileMustExist:true});opened++;}
+ pragma(sql){assert.equal(sql,'query_only = ON');}
+ async backup(destination,options){assert.equal(options.progress(),256);fs.writeFileSync(destination,'SYNTHETIC_NEW_BACKUP_ONLY');}
+ close(){closed++;}
+}
+(async()=>{const destination=path.join(dir,'backup.db');const result=await backup('SYNTHETIC_SOURCE_ONLY',destination,Database);
+ assert.equal(result.bytes,fs.statSync(destination).size);assert.equal(result.consistentBackup,true);
+ await assert.rejects(()=>backup('SYNTHETIC_SOURCE_ONLY',destination,Database));
+ assert.equal(opened,1);assert.equal(closed,1);
+ assert.equal(fs.readFileSync(destination,'utf8'),'SYNTHETIC_NEW_BACKUP_ONLY');
+})().catch(error=>{console.error(error.message);process.exitCode=1});'''
+        result=subprocess.run([node,'-e',bootstrap,str(ROOT/'live_backup.cjs'),str(d)],capture_output=True)
+        (d/'stdout-original.txt').write_bytes(result.stdout);(d/'stderr-original.txt').write_bytes(result.stderr)
+        self.assertEqual(result.returncode,0,result.stderr.decode())
 
     def test_wrong_completion_permission_refuses_exit(self):
         self.exercise('console.log("SYNTHETIC_CHILD_ONLY")',1,True)

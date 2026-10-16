@@ -1,0 +1,121 @@
+"""Independent CLI stop path, also usable by the future ExecStopPost hook.
+
+No reserve/headroom/memory predicate may suppress an exact owned stop. Raw
+calls stay private. Retention errors are collected and reported after all
+owners have been attempted; they never authorize a foreign container stop.
+Candidate/predecessor stop bindings are still separate, unfinished work.
+"""
+import os
+import re
+import subprocess
+import threading
+import time
+from kit_contract import canonical,require,sha
+from retained_contract import exact_json
+from kit_owned import ALLOWED,LABEL,cli_spec,selected,same_retained
+from kit_integrity import DATA_MOUNT
+from kit_journal import exclusive_record
+
+MAX_OUTPUT=4*1024**2
+
+class EmergencyCommands:
+    def __init__(self,record_root,require_directory_sync=True,spawn=subprocess.Popen):
+        self.root=record_root;self.sync=require_directory_sync;self.spawn=spawn
+        self.sequence=0;self.retention_errors=[]
+
+    def retain(self,label,raw,metadata):
+        for suffix,content in zip(('stdout','stderr'),raw):
+            path=self.root/(label+'.'+suffix)
+            fd=os.open(str(path),os.O_WRONLY|os.O_CREAT|os.O_EXCL,0o400)
+            with os.fdopen(fd,'wb') as handle:handle.write(content);handle.flush();os.fsync(handle.fileno())
+        exclusive_record(self.root,label+'.json',metadata,self.sync)
+
+    def __call__(self,argv):
+        require(isinstance(argv,list) and all(isinstance(x,str) for x in argv) and argv[:1]==['docker'] and
+                len(argv)>=3 and argv[1] in ('ps','inspect','stop') and '--rm' not in argv,
+                'Emergency path permits only exact Docker ps/inspect/stop')
+        self.sequence+=1;label='emergency-'+str(self.sequence).zfill(6)
+        # Keep bounded originals in RAM until the command has completed. A full
+        # evidence filesystem cannot stop the actual emergency command launch.
+        began=time.monotonic();process=None;error=None;code=None
+        buffers=[bytearray(),bytearray()];overflow=threading.Event();threads=[]
+        def consume(stream,index):
+            try:
+                while True:
+                    chunk=stream.read(65536)
+                    if not chunk:break
+                    room=MAX_OUTPUT-len(buffers[index]);buffers[index].extend(chunk[:max(0,room)])
+                    if len(chunk)>room:overflow.set();break
+            except BaseException:overflow.set()
+            finally:stream.close()
+        try:
+            process=self.spawn(argv,stdout=subprocess.PIPE,stderr=subprocess.PIPE,stdin=subprocess.DEVNULL)
+            for index,stream in enumerate((process.stdout,process.stderr)):
+                thread=threading.Thread(target=consume,args=(stream,index),daemon=True);thread.start();threads.append(thread)
+            while process.poll() is None:
+                require(not overflow.is_set(),'Emergency output incomplete/oversized')
+                require(time.monotonic()-began<30,'Emergency transport deadline reached')
+                time.sleep(0.02)
+            code=process.returncode
+        except BaseException as failure:
+            error=type(failure).__name__
+            if process is not None and process.poll() is None:
+                process.kill()
+                try:process.wait(timeout=5)
+                except BaseException:pass
+        for thread in threads:thread.join(timeout=5)
+        complete=not overflow.is_set() and not any(t.is_alive() for t in threads) and error is None
+        raw=[bytes(x) for x in buffers]
+        metadata={'argvSha256':sha(canonical(argv)),'exitCode':code,'errorType':error,
+            'elapsedSeconds':time.monotonic()-began,'completeNotTruncated':complete,'neverRetry':True,
+            'stdout':{'sha256':sha(raw[0]),'bytes':len(raw[0])},
+            'stderr':{'sha256':sha(raw[1]),'bytes':len(raw[1])},'rawHostOnly':True}
+        # Best effort preservation is intentionally AFTER the stop command. A
+        # failed write is an explicit hook failure, not permission to skip stop.
+        try:
+            self.retain(label,raw,metadata)
+        except BaseException as failure:
+            self.retention_errors.append({'call':label,'errorType':type(failure).__name__,
+                'metadata':metadata,'_privateUnretainedOriginals':raw})
+        require(complete and code==0 and not raw[1],'Emergency Docker interface refused; never retry')
+        return raw[0]
+
+def stop_cli_owners(call,owners=None):
+    """Look up exact compiled owners even after lost create/start output.
+
+    All 14 possible CLI owners are inspected when called by an independent
+    hook. Empty inventories are explicit per-owner absence observations; they
+    are never described as a nonvacuous successful container stop.
+    """
+    owners=sorted(ALLOWED) if owners is None else list(owners)
+    require(len(owners)==len(set(owners)) and all(x in ALLOWED for x in owners),'Only exact reviewed CLI owners permitted')
+    stopped=[];absent=[];errors=[]
+    for label in owners:
+        phase='inventory'
+        try:
+            spec=cli_spec(label,DATA_MOUNT)
+            raw=call(['docker','ps','-aq','--no-trunc','--filter','label='+LABEL+'='+spec['owner']])
+            require(len(raw)<=512*1024,'Bounded owner inventory required')
+            ids=raw.decode('ascii').splitlines()
+            require(len(ids)<=1 and len(ids)==len(set(ids)) and all(re.fullmatch('[a-f0-9]{64}',x) for x in ids),
+                    'Duplicate/malformed exact-owner inventory')
+            if not ids:absent.append({'owner':spec['owner'],'observedAbsent':True});continue
+            identity=ids[0];phase='inspectBefore'
+            rows=exact_json(call(['docker','inspect',identity]));require(isinstance(rows,list) and len(rows)==1 and rows[0].get('Id')==identity,'Exact inspected owner ID required')
+            before=selected(rows[0],spec,emergency=True)
+            runtime_violation=False
+            try:selected(rows[0],spec)
+            except BaseException:runtime_violation=True
+            if before['running']:
+                phase='stop'
+                call(['docker','stop','-t','10',identity])
+            phase='inspectAfter'
+            rows=exact_json(call(['docker','inspect',identity]));require(isinstance(rows,list) and len(rows)==1 and rows[0].get('Id')==identity,'Exact stopped owner ID required')
+            after=selected(rows[0],spec,False,emergency=True);same_retained(before,after)
+            stopped.append({'before':before,'after':after,'stoppedAndRetained':True,
+                'actualExitCode':rows[0]['State'].get('ExitCode'),'runtimeViolationObservedBeforeStop':runtime_violation})
+        except BaseException as failure:
+            errors.append({'ownerLabel':label,'phase':phase,'errorType':type(failure).__name__})
+    return {'stoppedAndRetained':stopped,'observedAbsentOwners':absent,'errors':errors,
+        'allObservedExactCliOwnersStopped':not errors,'nonvacuousStoppedOwnerCount':len(stopped),
+        'noForeignStops':True,'noRemovalOrRestore':True}

@@ -62,8 +62,8 @@ def execute(ops,reviewed_plan):
             # attempt, even when no successful response/COMMIT is observed.
             receipt['anyApplyAttempted']=True
             installer['apply']=stage('apply'+issue,lambda issue=issue:ops.installer_apply_once(issue))
-            installer['repeat']=stage('repeat'+issue,lambda issue=issue:ops.installer_repeat_noop(issue))
             installer['preservation']=stage('preserve'+issue,lambda issue=issue:ops.preserve_installer_full_state(issue))
+            installer['repeat']=stage('repeat'+issue,lambda issue=issue:ops.installer_repeat_noop(issue))
         outage_guard()
         stage('retainStoppedPredecessorName',ops.retain_predecessor_under_reviewed_name)
         candidate_intent=stage('candidateIntent',ops.record_exact_candidate_intent)

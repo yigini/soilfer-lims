@@ -13,7 +13,7 @@ from kit_contract import canonical,require,sha
 from kit_journal import exclusive_record,real_directory
 
 OUTPUT_LIMIT=64*1024**2
-PROGRAMS=frozenset(('docker','systemctl','httpd','du','df','python3','ps'))
+PROGRAMS=frozenset(('docker','systemctl','httpd','apachectl','curl','containerd','du','df','python3','ps'))
 
 def stream_identity(path):
     h=__import__('hashlib').sha256();size=0

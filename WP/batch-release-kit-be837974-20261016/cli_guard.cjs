@@ -33,6 +33,10 @@ function writeOnce(filename, raw) {
 function validateMain(argv) {
   requireValue(argv[0] === '/tmp', 'Exact retained control directory required');
   const child = argv.slice(1);
+  if (['/release/stopped_integrity.cjs', '/release/live_backup.cjs'].includes(child[0])) {
+    requireValue(child.length === 3 && child[1] === '--db' && child[2] === '/app/server/prisma/dev.db', 'Exact stopped integrity arguments required');
+    return { directory: argv[0], child };
+  }
   requireValue(child.length >= 3 && child[0].startsWith('/app/server/scripts/') && scripts.has(path.posix.basename(child[0])) && path.posix.dirname(child[0]) === '/app/server/scripts', 'Only bound release CLI scripts permitted');
   requireValue(child[1] === '--db' && child[2] === '/app/server/prisma/dev.db', 'Exact release database path required');
   const impact = child[0].endsWith('_impact.js');

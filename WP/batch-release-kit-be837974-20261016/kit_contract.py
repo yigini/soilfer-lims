@@ -49,7 +49,7 @@ UNIT_SECONDS=5400
 UNIT_HEADROOM=600
 PHASES=('quiesce503','predecessorStop','noLiveVolumeWriters','stoppedIntegrityFk',
         'freshDiskBeforeBackup','stoppedBackup','canonicalPolicyNoOp',
-        *(name+issue for issue in ('206','214','209') for name in ('impactBefore','dry','apply','repeat','preserve')),
+        *(name+issue for issue in ('206','214','209') for name in ('impactBefore','dry','apply','preserve','repeat')),
         'retainStoppedPredecessorName','candidateIntent','candidateStart','candidateReady',
         'firstNaturalSync','apiAndReadOnlyPostflights','freshDiskBeforeReopen','reopen')
 
