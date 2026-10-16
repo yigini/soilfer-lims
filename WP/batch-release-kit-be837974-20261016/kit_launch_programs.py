@@ -139,6 +139,7 @@ def remote_programs(pins):
     definitions+=selected_definitions('retained_contract.py',['LIVE_DATA','LIVE_ASSETS'])
     definitions+=selected_definitions('kit_copy_admission.py',[
         'BLOCK','MAX_FILES','MAX_DIRECTORIES','MAX_CONTENT_BYTES','copy_layout'])
+    definitions+=selected_definitions('kit_target_reader.py',['TARGET_READER_SITES'])
     definitions+=selected_definitions('kit_budget.py',[
         'MARGIN_PERCENT','MINIMUM_DB_EQUIVALENTS','ASSET_COPIES','SCHEMA_BYTES','FIXED_STARTUP','DB_COST',
         'RECOVERY_SCHEMA_BYTES','RECOVERY_FIXED','RECOVERY_DB_COPIES','EARLY_PREFIX_MAX_DB_COPIES','RECOVERY_EVIDENCE_SHARE',

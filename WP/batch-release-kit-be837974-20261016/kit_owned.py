@@ -18,6 +18,7 @@ from kit_cli_evidence import begin_cli_evidence
 from kit_copy_admission import live_backup_limit
 from kit_app_snapshots import CLI_SNAPSHOTS,snapshot_plan,unchanged_source,verify_snapshots
 from kit_budget import CLI_SITE
+from kit_target_reader import TARGET_READER_SITES,target_reader_plan,close_target_reader
 from kit_order_output import OUTPUT_ADMISSION,reserve_output,close_output
 from kit_cli_output import reserve_cli_output,publish_cli_admission,verify_cli_output,verify_completion_record
 
@@ -244,7 +245,7 @@ class OwnedCli:
                 result['exitCode']==0 and not stderr,'CLI failed; retained child and wrapper outcome must both succeed')
         return stdout,result
 
-def filesystem_controls(root,require_directory_sync=True,disk=None,no_writers=None):
+def filesystem_controls(root,require_directory_sync=True,disk=None,no_writers=None,target_no_writers=None):
     """Production control-file callbacks. Exact root, fresh directories only."""
     root=pathlib.Path(root)
     require(root.as_posix()==str(ROOT) and root.resolve()==root and root.is_dir() and not root.is_symlink(),
@@ -254,17 +255,17 @@ def filesystem_controls(root,require_directory_sync=True,disk=None,no_writers=No
         require(p.as_posix()==spec['tmp'] and p.parent==root and not p.is_symlink(),'Exact private control directory required')
         return p
     return control_callbacks(root,directory,require_directory_sync,disk,no_writers,CLI_SNAPSHOTS,CLI_SITE,
-        'order-impact',('first-sync-backup','postflight-backup'))
+        'order-impact',('first-sync-backup','postflight-backup'),target_no_writers)
 
 def control_callbacks(root,directory,require_directory_sync,disk,no_writers,snapshot_counts,snapshot_sites,
-                      order_label,backup_labels):
+                      order_label,backup_labels,target_no_writers=None):
     """Transport only: each typed caller supplies its exact directory guard.
 
     Complete raw-stream and copy admissions still precede mkdir/create. This
     grants no source review, budget, writable source mount or retry authority.
     """
     snapshot_admissions={};snapshot_closures=set();output_admissions={};output_closures=set()
-    cli_admissions={};cli_closed=set()
+    cli_admissions={};cli_closed=set();target_admissions={};target_closed=set()
     def prepare(spec):
         p=directory(spec)
         require(not p.exists(),'Fresh CLI control directory required')
@@ -289,6 +290,14 @@ def control_callbacks(root,directory,require_directory_sync,disk,no_writers,snap
             snapshot=snapshot_plan(target,snapshot_counts[spec['label']])
             disk.admit_copy(snapshot_sites[spec['label']],p,snapshot['layout'])
             no_writers();unchanged_source(target,snapshot)
+        target_plan=None
+        if spec['label'] in TARGET_READER_SITES:
+            require(disk is not None and callable(no_writers) and callable(target_no_writers),
+                'Target reader requires held capacity and fresh original AND target writer inventories')
+            no_writers();target_no_writers(spec);target_plan=target_reader_plan(spec)
+            disk.admit_copy(TARGET_READER_SITES[spec['label']],
+                pathlib.Path(target_plan['source']+'-shm'),target_plan['layout'])
+            no_writers();target_no_writers(spec);unchanged_source(target_plan['source'],target_plan)
         p.mkdir(mode=0o700)
         require(not list(p.iterdir()),'Fresh empty CLI control directory required')
         publish_cli_admission(p,spec['child'],cli_admissions[spec['label']],require_directory_sync)
@@ -299,6 +308,9 @@ def control_callbacks(root,directory,require_directory_sync,disk,no_writers,snap
         if output is not None:
             exclusive_record(p,'order-impact-admission.json',OUTPUT_ADMISSION,require_directory_sync)
             output_admissions[spec['label']]=output
+        if target_plan is not None:
+            exclusive_record(p,'target-reader-admission.json',target_plan,require_directory_sync)
+            target_admissions[spec['label']]=target_plan
     def read(spec):
         p=directory(spec)/'cli-child-complete.json'
         if not p.exists():return None
@@ -306,6 +318,10 @@ def control_callbacks(root,directory,require_directory_sync,disk,no_writers,snap
         with p.open('rb') as stream:raw=stream.read(8193)
         require(len(raw)<=8192,'Completion grew beyond bound')
         label=spec['label']
+        if label in target_admissions and label not in target_closed:
+            result=close_target_reader(target_admissions[label])
+            exclusive_record(directory(spec),'target-reader-closure.json',result,require_directory_sync)
+            target_closed.add(label)
         if label in output_admissions and label not in output_closures:
             result=close_output(directory(spec),output_admissions[label],snapshot_admissions[label]['sourceDbWalShm'])
             exclusive_record(directory(spec),'order-impact-output-closure.json',result,require_directory_sync)

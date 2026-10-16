@@ -112,9 +112,12 @@ class Disk:
         require(plan['declaredAllocationBytes']<=ceiling,
             'Copy content/entries exceed the held source-derived producer allowance')
         self.check()
+        target_index=site=='target-reader-index'
         exclusive_record(self.root,'copy-admission-'+sha(str(destination).encode())[:32]+'.json',{
             'site':site,'destination':str(destination),'layout':plan,'maximumBytes':ceiling,
-            'beforeDestinationCreation':True,'stageTableSha256':TABLE_SHA,'neverRetry':True,
+            'beforeDestinationCreation':not pathlib.Path(destination).exists() if target_index else True,
+            **({'beforeReaderCanCreateOrExtendIndex':True} if target_index else {}),
+            'stageTableSha256':TABLE_SHA,'neverRetry':True,
             'sqliteTemporaryFilesAndGlobalFilesystemClosureClaimed':False},self.sync)
 
     def read(self,argv,label,timeout=15):

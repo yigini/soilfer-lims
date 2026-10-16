@@ -12,7 +12,7 @@ import re
 import stat
 from kit_contract import require
 from kit_copy_admission import copy_layout
-from retained_files import file_state,identity_record
+from retained_files import file_state,identity_record,reader_mapping_precondition
 
 # Each order owner retains the primary policy copy, then the chart
 # prerequisite's secondary policy copy. The impact CLI calls that same owner.
@@ -48,6 +48,7 @@ def index_bytes(wal_bytes,existing_bytes):
 
 def snapshot_plan(target,count):
     require(type(count) is int and count in (1,2),'Only the compiled CLI snapshot maxima are admitted')
+    mapping=reader_mapping_precondition()
     target=pathlib.Path(target)
     require(target.is_absolute(),'Absolute source database required')
     require(not pathlib.Path(str(target)+'-journal').exists(),'Source rollback journal makes snapshot admission uncertain')
@@ -61,7 +62,7 @@ def snapshot_plan(target,count):
     layout=copy_layout([before['']['bytes'],wal,maximum_index]*count,count)
     return {'version':1,'source':str(target),'maximumSnapshots':count,
         'sourceDbWalShm':identity_record(before),'maximumIndexBytes':maximum_index,
-        'layout':layout,'sourceQuiescenceRequired':True,
+        'layout':layout,'sourceQuiescenceRequired':True,'mappingPrecondition':mapping,
         'sourceDerivedCopyAndReaderIndexAdmission':True,
         'contentHardLimitEnforced':False,'sqlTemporaryFilesBounded':False,
         'writerJournalsAndWalGrowthBounded':False,'filesystemClosureClaimed':False}

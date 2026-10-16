@@ -193,12 +193,25 @@ def memory_temporaries(db):
     require(db.execute('PRAGMA temp_store').fetchone()==(2,),
         'SQLite memory temporary storage was not accepted')
 
+def reader_mapping_precondition():
+    # Pinned unixShmRegionPerMap rounds mappings to system pages. The existing
+    #32KiB formula is valid only when a system page is no larger than32KiB.
+    # Refuse unsupported hardware BEFORE SQL, never inside a transaction.
+    page=os.sysconf('SC_PAGESIZE') if os.name=='posix' else None
+    require(os.name!='posix' and page is None or
+        type(page) is int and 0<page<=32768 and page&(page-1)==0,
+        'SQLite WAL-index admission requires Linux system pages at most32KiB')
+    return {'systemPageBytes':page,'maximumSupportedSystemPageBytes':32768,
+        'localNonLinuxProjection':os.name!='posix','beforeSqliteOpen':True}
+
+
 def reader_index_bound(reader,check):
     # Only a NEW independent owned reader may acquire a writable WAL-index.
     # SQLite WAL-format uses32KiB for the first4062 frames and each4096
     # thereafter. The minimum valid page512 plus frame header24 gives an
     # upper bound without interpreting an untrusted WAL's commit/header data.
     # Existing copied SHM can be larger; reserve that entire size again.
+    mapping=reader_mapping_precondition()
     reader=pathlib.Path(reader)
     require(reader.name=='dev.db' and reader.parent.name=='reader' and reader.is_file(),
         'WAL-index allowance is restricted to the new owned reader')
@@ -222,7 +235,7 @@ def reader_index_bound(reader,check):
         owner.admit_copy('reader-index',pathlib.Path(str(reader)+'-shm'),layout)
     check()
     value={'maximumIndexBytes':index_bytes,'maximumFramesFromRetainedWalLength':frames,
-        'original':original,'layout':layout,'beforeSqliteOpen':True,
+        'original':original,'layout':layout,'beforeSqliteOpen':True,'mappingPrecondition':mapping,
         'ordinaryReadOnlyWalRequired':True,'immutableWalBypass':False,'globalFilesystemClosureClaimed':False}
     write_new(reader.parent.parent/'reader-index-bound.json',value)
     return value

@@ -119,7 +119,8 @@ def construct(root=ROOT):
     spec=candidate_spec(observed,load_health(root/'tooling'))
     candidate=Candidate(spec,runner,reader,journal,lambda:exact_candidate_tmp(root))
     prepare,read_completion,publish_permit=filesystem_controls(root,disk=disk,
-        no_writers=lambda:assert_no_volume_writers(reader))
+        no_writers=lambda:assert_no_volume_writers(reader),
+        target_no_writers=lambda spec:assert_no_volume_writers(reader,paths=(spec['mounts'][0]['Source'],)))
     owned=OwnedCli(runner,reader,journal,lambda label,identity,owner:MemoryHistory(root,label,identity,owner),
         prepare,read_completion,publish_permit,stop_clis,output_reader=read_completion.output)
     cli=BudgetedCli(owned,disk)

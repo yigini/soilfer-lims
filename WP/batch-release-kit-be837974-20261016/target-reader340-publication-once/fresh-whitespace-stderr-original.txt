@@ -1,0 +1,11 @@
+warning: in the working copy of 'WP/batch-release-kit-be837974-20261016/kit_app_snapshots.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'WP/batch-release-kit-be837974-20261016/kit_budget.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'WP/batch-release-kit-be837974-20261016/kit_construction.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'WP/batch-release-kit-be837974-20261016/kit_disk.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'WP/batch-release-kit-be837974-20261016/kit_frozen.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'WP/batch-release-kit-be837974-20261016/kit_launch_programs.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'WP/batch-release-kit-be837974-20261016/kit_owned.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'WP/batch-release-kit-be837974-20261016/retained_files.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'WP/batch-release-kit-be837974-20261016/stop_post.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'WP/batch-release-kit-be837974-20261016/verify_kit_budget.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'WP/batch-release-kit-be837974-20261016/verify_kit_ops.py', LF will be replaced by CRLF the next time Git touches it

@@ -6,12 +6,12 @@ from kit_disk import BOUND,ALLOCATION,free_gate,disjoint_growth
 from retained_accounting import mount_guard
 
 class CopyBudgets(unittest.TestCase):
-    def test_all41_maximum_copy_equivalents_keep_min64_and_original4gib_log_shares(self):
-        self.assertEqual(TOTAL_DB_COPIES,41);self.assertEqual(DB_EQUIVALENTS,64)
+    def test_all43_maximum_copy_equivalents_keep_min64_and_original4gib_log_shares(self):
+        self.assertEqual(TOTAL_DB_COPIES,43);self.assertEqual(DB_EQUIVALENTS,64)
         self.assertEqual(sum(r['logGrowthShareBytes'] for r in TABLE),4*1024**3)
         by_name={r['stage']:r for r in TABLE}
         self.assertEqual(by_name['candidate-startup']['dbTriples'],8)
-        self.assertEqual(by_name['issue-214']['dbTriples'],8)
+        self.assertEqual(by_name['issue-214']['dbTriples'],9)
         self.assertEqual(by_name['issue-209']['dbTriples'],11)
 
     def test_complete_source_maxima_consume_once_without_doublecounting_own_active_stage(self):

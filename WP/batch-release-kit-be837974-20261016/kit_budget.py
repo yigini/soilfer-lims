@@ -5,6 +5,7 @@ this table can become operational authority. No filesystem action on import.
 """
 import collections
 import math
+from kit_target_reader import TARGET_READER_SITES
 from kit_contract import FLOOR,LOG_RESERVE,ADDITIONAL_HEADROOM,disk_required,canonical,require,sha
 
 MARGIN_PERCENT=25
@@ -21,13 +22,14 @@ RECOVERY_DB_COPIES=0
 EARLY_PREFIX_MAX_DB_COPIES=5
 RECOVERY_EVIDENCE_SHARE=LOG_RESERVE-3*256*1024**2
 DB_COST={'triple':1,'backup':1,'clone':1,'assets':0,'cli-policy':1,'cli-charts':1,
-         'cli-orders':2,'cli-order-impact':2,'startup-policy-chain':8,'cli-backup':1,'seal-directory':0,'reader-index':1}
+         'cli-orders':2,'cli-order-impact':2,'startup-policy-chain':8,'cli-backup':1,'seal-directory':0,'reader-index':1,
+         'target-reader-index':1}
 STAGES=(
     ('stopped-backup',{'triple':2,'backup':1,'assets':1},0),
     ('canonical-policy',{'cli-policy':1},0),
-    ('issue-206',{'clone':1,'triple':2,'backup':1},0),
+    ('issue-206',{'clone':1,'triple':2,'backup':1,'target-reader-index':1},0),
     ('chart-impact',{},0),
-    ('issue-214',{'clone':1,'triple':2,'backup':1,'cli-charts':3},0),
+    ('issue-214',{'clone':1,'triple':2,'backup':1,'cli-charts':3,'target-reader-index':1},0),
     ('order-impact',{'cli-order-impact':1},0),
     ('issue-209',{'clone':1,'triple':2,'backup':1,'cli-orders':3},0),
     ('candidate-startup',{'startup-policy-chain':1},FIXED_STARTUP),
@@ -41,7 +43,7 @@ SEAL_DIRECTORY_BYTES=3*4096
 STAGES=tuple((name,{**sites,**({'seal-directory':sites['backup'],'reader-index':sites['backup']} if 'backup' in sites else {})},
     fixed+sites.get('backup',0)*SEAL_DIRECTORY_BYTES) for name,sites,fixed in STAGES)
 CONTROLLER_COPY_SITES=('triple','backup','clone','assets','seal-directory','reader-index')
-COPY_ADMISSION_SITES=CONTROLLER_COPY_SITES+('cli-backup','cli-policy','cli-charts','cli-orders','cli-order-impact')
+COPY_ADMISSION_SITES=CONTROLLER_COPY_SITES+('cli-backup','cli-policy','cli-charts','cli-orders','cli-order-impact','target-reader-index')
 CLI_SITE={'canonical-policy':'cli-policy','order-impact':'cli-order-impact',
           'first-sync-backup':'cli-backup','postflight-backup':'cli-backup',
           **{'214-'+phase:'cli-charts' for phase in ('dry','apply','repeat')},
@@ -97,6 +99,7 @@ class Budget:
     def cli(self,label):
         site=CLI_SITE.get(label)
         if site is not None:self.claim(site)
+        if label in TARGET_READER_SITES:self.claim(TARGET_READER_SITES[label])
 
     def copy_ceiling(self,site):
         require(self.recovery is None and self.active is not None and site in
