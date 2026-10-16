@@ -1,0 +1,87 @@
+[
+  {
+    "path": "closed-test-inventory.json",
+    "sha256": "5a588350ade8997f34d03d244290919df74adbab2e012217008e0e1feebec1cb",
+    "bytes": 23764
+  },
+  {
+    "path": "comparator.patch",
+    "sha256": "2aa9f0c8be0852ce1feb84bff50e5bc61c17aa1540d31e305f18c5a701274e7d",
+    "bytes": 17555
+  },
+  {
+    "path": "final-comparator-full-report.json",
+    "sha256": "a1533d156c3433c65c3cf739768f811a7f68f1cdde21c384fa6e49e3d7f56593",
+    "bytes": 3966
+  },
+  {
+    "path": "frozen-index",
+    "sha256": "888d0bb2d8a813721a83a5f3a0f73e6db096ea4b4b230894d46f2e23a24590ec",
+    "bytes": 286839
+  },
+  {
+    "path": "frozen-inputs.json",
+    "sha256": "81e855b66e6d95c1d2e225c9b66bf884f559b09a0ab14ae39bcf83504ddab2ec",
+    "bytes": 409020
+  },
+  {
+    "path": "help-manifest-after-complete-run.json",
+    "sha256": "60101eaaa00f91c2592d504fbb5bba53137d33c45454fc96153222e6311f0aad",
+    "bytes": 94717
+  },
+  {
+    "path": "help-manifest-before.json",
+    "sha256": "2cb934079979b70c240b5eacf432e8511918b75a42a112ef627945be64720156",
+    "bytes": 94717
+  },
+  {
+    "path": "post-restoration-input-check.json",
+    "sha256": "a1a799f1a6e1f3bc6b74930d4b55118ca8f1032581605bf600e64b266958ddc1",
+    "bytes": 124
+  },
+  {
+    "path": "post-run-input-check.json",
+    "sha256": "8cc92aa2fba84a30647812b2c52c44f1300ec5c6817c1d4311524ed5fc6503d0",
+    "bytes": 370
+  },
+  {
+    "path": "post-run-native-metadata.json",
+    "sha256": "cf6b4830f088e3ce4ca6b221683b1aae2fa8489c8a7ea9a6b3e31f1d097d431d",
+    "bytes": 295
+  },
+  {
+    "path": "pre-run-input-check.json",
+    "sha256": "4b68f32c667d97531c20e4a3dd89a2e69e17d06db6d57657f5646ac98e8ff77e",
+    "bytes": 124
+  },
+  {
+    "path": "pre-run-native-metadata.json",
+    "sha256": "1e6a1c67e97669d142e8164b5ce2b06ee34085c501e19f22ad67201056973711",
+    "bytes": 295
+  },
+  {
+    "path": "run-contract.json",
+    "sha256": "a8355fa445a3d0fe492837570a61e16af01c0c6a0ae26a456b1d24782ca976ba",
+    "bytes": 2947
+  },
+  {
+    "path": "scanner-git-inventory.bin",
+    "sha256": "010982508eda03c749210bea61edb982f441cf71de948aa8cb7459abca28c700",
+    "bytes": 124628
+  },
+  {
+    "path": "server-full-exit.json",
+    "sha256": "b74fd7f7d500dbc33a11507751d19d038a0d4c802ae0bdf4b7421fa34a63088a",
+    "bytes": 73
+  },
+  {
+    "path": "server-full.log",
+    "sha256": "a0123bfddb8efab11385dcba51d49b19e8b16b2ff8cb159157a77477eefe6af4",
+    "bytes": 2419802
+  },
+  {
+    "path": "test-inventory.json",
+    "sha256": "b932b165ee44e7e4bcb4a78dbe7dfb925098063ca6767561bd15fdd903e2e6ea",
+    "bytes": 56398
+  }
+]

@@ -1,0 +1,35 @@
+test_admission_parser_rejects_duplicate_keys_and_oversized_input (verify_kit_live_backup.LiveBackup.test_admission_parser_rejects_duplicate_keys_and_oversized_input) ... ok
+test_exact_dependency_files_and_small_page_spilling_backups (verify_kit_live_backup.LiveBackup.test_exact_dependency_files_and_small_page_spilling_backups) ... FAIL
+test_existing_sidecars_and_wrong_native_engine_refuse_before_output (verify_kit_live_backup.LiveBackup.test_existing_sidecars_and_wrong_native_engine_refuse_before_output) ... ok
+test_main_plus_journal_and_two_entries_fit_the_held_envelope (verify_kit_live_backup.LiveBackup.test_main_plus_journal_and_two_entries_fit_the_held_envelope) ... ok
+test_missing_or_small_admission_refuses_before_output_and_failures_retain_output (verify_kit_live_backup.LiveBackup.test_missing_or_small_admission_refuses_before_output_and_failures_retain_output) ... ok
+test_parent_requires_admission_before_directory_and_consumes_backup_claim_once (verify_kit_live_backup.LiveBackup.test_parent_requires_admission_before_directory_and_consumes_backup_claim_once) ... ok
+test_real_wal_snapshot_stays_pinned_when_other_writer_grows_source_before_backup (verify_kit_live_backup.LiveBackup.test_real_wal_snapshot_stays_pinned_when_other_writer_grows_source_before_backup) ... ok
+test_stage_cannot_close_with_an_unadmitted_live_backup (verify_kit_live_backup.LiveBackup.test_stage_cannot_close_with_an_unadmitted_live_backup) ... ok
+
+======================================================================
+FAIL: test_exact_dependency_files_and_small_page_spilling_backups (verify_kit_live_backup.LiveBackup.test_exact_dependency_files_and_small_page_spilling_backups)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\WP\batch-release-kit-be837974-20261016\verify_kit_live_backup.py", line 109, in test_exact_dependency_files_and_small_page_spilling_backups
+    self.node(r'''
+  File "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\WP\batch-release-kit-be837974-20261016\verify_kit_live_backup.py", line 28, in node
+    self.assertEqual(value.returncode,0,value.stderr.decode('utf-8',errors='replace'))
+AssertionError: 1 != 0 : AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+
+  assert(calls>1)
+
+    at [eval]:18:37 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}
+
+
+----------------------------------------------------------------------
+Ran 8 tests in 1.687s
+
+FAILED (failures=1)

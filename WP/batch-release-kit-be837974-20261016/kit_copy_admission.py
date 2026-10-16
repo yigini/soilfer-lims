@@ -11,6 +11,7 @@ BLOCK=4096
 MAX_FILES=200000
 MAX_DIRECTORIES=200001
 MAX_CONTENT_BYTES=32*1024**3
+LIVE_BACKUP_JOURNAL_BYTES=2*65536
 
 
 def copy_layout(sizes,directories):
@@ -29,14 +30,19 @@ def copy_layout(sizes,directories):
 
 
 def live_backup_limit(database_allocated):
-    """Reserve one complete output file; SQLite internal files stay unclosed."""
+    """Empty-destination backup: main file plus two maximum journal headers.
+
+    The exact dependency/source proof is live-backup-sqlite-source.json. This
+    does not cover application/daemon producers or physical filesystem metadata.
+    """
     require(type(database_allocated) is int and database_allocated>0,
         'Measured live-backup allocation required')
     ceiling=(database_allocated*125+99)//100
-    maximum=min(MAX_CONTENT_BYTES,((ceiling-2*BLOCK)//BLOCK)*BLOCK)
+    maximum=min(MAX_CONTENT_BYTES-LIVE_BACKUP_JOURNAL_BYTES,
+        ((ceiling-LIVE_BACKUP_JOURNAL_BYTES-4*BLOCK)//BLOCK)*BLOCK)
     require(maximum>=512,'Live-backup content and file entries do not fit')
-    return {'version':1,'maximumMainBytes':maximum,
-        'journalAndFilesystemClosureClaimed':False},copy_layout([maximum],0)
+    return {'version':2,'maximumMainBytes':maximum,'maximumJournalBytes':LIVE_BACKUP_JOURNAL_BYTES,
+        'filesystemClosureClaimed':False},copy_layout([maximum,LIVE_BACKUP_JOURNAL_BYTES],0)
 
 
 def admit_copy(check,site,destination,sizes,directories):

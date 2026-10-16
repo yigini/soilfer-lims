@@ -1,0 +1,92 @@
+{
+  "head": "72adbe43b36319e6f9d8088baa61b0fbe26bb3ff",
+  "tree": "34f6d9be9c00b2fd923989e4d4291a06ec333e32",
+  "base": "be8379745bdfae52ce46496ff26514dc7d729640",
+  "paths": [
+    "server/scripts/rehearsal_deployment_readiness.cjs",
+    "server/tests/contracts/issue_208_sample_code_schema.test.js"
+  ],
+  "patchSha256": "2aa9f0c8be0852ce1feb84bff50e5bc61c17aa1540d31e305f18c5a701274e7d",
+  "files": [
+    {
+      "path": "server/scripts/rehearsal_deployment_readiness.cjs",
+      "sha256": "02cf270798cfec3602fe2eced45995aad316614b469b414e1d8d7106629b79d4",
+      "stagedMatch": "CRLF_TO_LF_ONLY"
+    },
+    {
+      "path": "server/tests/contracts/issue_208_sample_code_schema.test.js",
+      "sha256": "345347235afe8001fb43c37382a678690c6ab44c9729e2f32080d5d3778299ee",
+      "stagedMatch": "RAW_EQUAL"
+    }
+  ],
+  "applicationPins": [
+    {
+      "path": "server/scripts/install_sample_code_schema.js",
+      "unchangedFromHead": true,
+      "sha256": "7a9d0eee09e15a4680c57dbc58609610d059508d113c4adf06e79020b92fc0a6"
+    },
+    {
+      "path": "server/services/sampleCodeMigrationSource.js",
+      "unchangedFromHead": true,
+      "sha256": "db7095ec42d405039093a4b39c4a2b2bd61ff80b6a45e447b49d627cef4b4e16"
+    },
+    {
+      "path": "server/prisma/migrations/20261004170000_add_atomic_sample_codes/migration.sql",
+      "unchangedFromHead": true,
+      "sha256": "e52a11bb7fc8dfee678184025dda8e8342cde3896d3b5f1c89b83897702d8ff0"
+    }
+  ],
+  "sourceAuthority": "C:\\Users\\yigin\\.codex\\worktrees\\issue-208-labels\\soilfer-lims",
+  "fixture": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-issue208-comparator-full-o776za\\source",
+  "evidence": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-issue208-comparator-full-o776za\\evidence",
+  "server": {
+    "suites": 376,
+    "tests": 5761,
+    "snapshots": 0,
+    "seconds": 13327.782,
+    "exitCode": 0,
+    "closedAtUtc": "2026-10-16T19:11:38.8809970Z",
+    "exactInventoryMatch": true,
+    "logSha256": "a0123bfddb8efab11385dcba51d49b19e8b16b2ff8cb159157a77477eefe6af4"
+  },
+  "sourceAndFixture": {
+    "mappedInputsUnchanged": 2445,
+    "linkedRuntimeUnchangedPerDomain": 21,
+    "sourceDomain": "source/<entry.sourcePath || entry.path>",
+    "fixtureDomain": "fixture/<entry.path>",
+    "inputManifestSha256": "81e855b66e6d95c1d2e225c9b66bf884f559b09a0ab14ae39bcf83504ddab2ec",
+    "frozenAndCurrentIndexSha256": "888d0bb2d8a813721a83a5f3a0f73e6db096ea4b4b230894d46f2e23a24590ec",
+    "frozenIndexReadOnly": true
+  },
+  "unmappedSourceDefaultDb": {
+    "before": "c780dc93adec916239008d16e63472c8d99343b0df99af68ffa8806801e3c0d7",
+    "after": "c780dc93adec916239008d16e63472c8d99343b0df99af68ffa8806801e3c0d7",
+    "unchanged": true
+  },
+  "expectedGeneratedOutput": {
+    "path": "server/data/help/RELEASE_MANIFEST_v1.json",
+    "before": "2cb934079979b70c240b5eacf432e8511918b75a42a112ef627945be64720156",
+    "after": "60101eaaa00f91c2592d504fbb5bba53137d33c45454fc96153222e6311f0aad",
+    "beforeAndAfterBytesRetained": true,
+    "fixtureOnlyRestoredAfterClosedRun": true
+  },
+  "focused": {
+    "suites": 4,
+    "tests": 190,
+    "seconds": 35.648,
+    "logSha256": "d2fb253b1a9a21e9addcc35de40a0c61e7d985671e9ba6cfa74f534b823f6e12"
+  },
+  "retainedOriginals": [
+    {
+      "path": "pr299-ci-38898578537-original-logs.zip",
+      "sha256": "0eb7352c810296cb2966bc8a796a88fddc799747bf9dd715ff9efe112bb023d5"
+    },
+    {
+      "path": "pr299-ci-38915551182-original-logs.zip",
+      "sha256": "295b440095d35327457fff6e795e3021b3367608fcd9079e56a770f60a40072a"
+    }
+  ],
+  "controllerObservation": "One status-polling code-mode connection timed out and became stale; the original unified exec session76116 stayed active and was observed again without restarting or rerunning tests.",
+  "scope": "LOCAL full run only. Two reviewed paths remain staged/uncommitted. No source changes,commit,push,new-head CI,PR update,ready,audit or merge.",
+  "closedReportAtUtc": "2026-10-16T19:12:51.194Z"
+}

@@ -1,0 +1,57 @@
+{
+  "head": "72adbe43b36319e6f9d8088baa61b0fbe26bb3ff",
+  "tree": "34f6d9be9c00b2fd923989e4d4291a06ec333e32",
+  "patchSha256": "2aa9f0c8be0852ce1feb84bff50e5bc61c17aa1540d31e305f18c5a701274e7d",
+  "sourceAuthority": "C:\\Users\\yigin\\.codex\\worktrees\\issue-208-labels\\soilfer-lims",
+  "fixture": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-issue208-comparator-full-o776za\\source",
+  "evidence": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-issue208-comparator-full-o776za\\evidence",
+  "frozenInputs": 2445,
+  "linkedRuntime": 21,
+  "testFiles": 376,
+  "setupFiles": [
+    "<rootDir>/tests/ownedSuiteSetup.js",
+    "<rootDir>/tests/setup.js"
+  ],
+  "command": "npm test -- --testMatch '**/tests/**/*.test.js'",
+  "databaseMapping": {
+    "source": "server/tests/.owned-templates/test_template_1f5926a4-6fda-4b37-9c08-da831a2478fe.db",
+    "default": "server/prisma/dev.db",
+    "selected": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-issue208-comparator-full-o776za\\source\\server\\tests\\.owned-templates\\test_template_1f5926a4-6fda-4b37-9c08-da831a2478fe.db",
+    "sha256": "f90e9f7ea9cd431b993d2f8c4fbc2a0f26142ec8a36b550b3a1fb87e6a0deb11",
+    "sourceDomain": "source/<entry.sourcePath || entry.path>",
+    "fixtureDomain": "fixture/<entry.path>",
+    "rawSourceDefault": "Outside frozen-input domain; no assertion that the worktree default database equals selected fixture."
+  },
+  "gitDiscovery": {
+    "optionalLocks": "0",
+    "readOnlyIndexRequired": true,
+    "workTree": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-issue208-comparator-full-o776za\\source",
+    "indexSha256": "888d0bb2d8a813721a83a5f3a0f73e6db096ea4b4b230894d46f2e23a24590ec",
+    "gitDir": "C:/Users/yigin/Documents/soilfer-lims/.git/worktrees/soilfer-lims6",
+    "index": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-issue208-comparator-full-o776za\\evidence\\frozen-index",
+    "trackedEntries": 2348
+  },
+  "generatedOutputException": [
+    "server/data/help/RELEASE_MANIFEST_v1.json"
+  ],
+  "generatedOutputHandling": "Preserve before/after bytes and hashes; restore only fixture manifest after complete run closure. Every mapped source input remains unchanged.",
+  "focused": {
+    "suites": 4,
+    "tests": 190,
+    "seconds": 35.648,
+    "logSha256": "d2fb253b1a9a21e9addcc35de40a0c61e7d985671e9ba6cfa74f534b823f6e12"
+  },
+  "originalZips": [
+    {
+      "path": "pr299-ci-38898578537-original-logs.zip",
+      "sha256": "0eb7352c810296cb2966bc8a796a88fddc799747bf9dd715ff9efe112bb023d5"
+    },
+    {
+      "path": "pr299-ci-38915551182-original-logs.zip",
+      "sha256": "295b440095d35327457fff6e795e3021b3367608fcd9079e56a770f60a40072a"
+    }
+  ],
+  "authorization": "ONE local complete frozen run only; no source edits,commit,push,new CI,PR update,ready,audit or merge.",
+  "preparedAtUtc": "2026-10-16T15:29:10.146Z",
+  "startedAtUtc": "2026-10-16T15:29:27.4082281Z"
+}

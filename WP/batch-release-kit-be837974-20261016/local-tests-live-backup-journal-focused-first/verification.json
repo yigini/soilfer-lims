@@ -1,0 +1,21 @@
+{
+  "start": "2026-10-16T19:09:51.878453+00:00",
+  "closed": "2026-10-16T19:09:53.840177+00:00",
+  "exitCode": 1,
+  "sourceBefore": {
+    "live_backup.cjs": "e807eb6c724f55e65f56a2c390182c901ea6ef5433d809eca4ca550e2e9062d7",
+    "kit_copy_admission.py": "cbb2abbfcaf6e0ca241cfe1516546be3279d56b365aa7e5ff4a19b5793af8afc",
+    "kit_frozen.py": "3ea98c33443878401b3430378ba8bd899b907b13f8f971f2928ffd556df60f2e",
+    "live-backup-sqlite-source.json": "a76a05b9cb902363114d3a4d8bd5f4c9747b2be9e26ce94d3e62c4ead6a4845e",
+    "verify_kit_live_backup.py": "49c4a951c097fcc1a782d3fab3b6e9023fa4e54c7d865f79ac97c7393ffff56f"
+  },
+  "sourceAfter": {
+    "live_backup.cjs": "e807eb6c724f55e65f56a2c390182c901ea6ef5433d809eca4ca550e2e9062d7",
+    "kit_copy_admission.py": "cbb2abbfcaf6e0ca241cfe1516546be3279d56b365aa7e5ff4a19b5793af8afc",
+    "kit_frozen.py": "3ea98c33443878401b3430378ba8bd899b907b13f8f971f2928ffd556df60f2e",
+    "live-backup-sqlite-source.json": "a76a05b9cb902363114d3a4d8bd5f4c9747b2be9e26ce94d3e62c4ead6a4845e",
+    "verify_kit_live_backup.py": "49c4a951c097fcc1a782d3fab3b6e9023fa4e54c7d865f79ac97c7393ffff56f"
+  },
+  "hostCalls": 0,
+  "productionCalls": 0
+}

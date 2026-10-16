@@ -1,0 +1,19 @@
+{
+  "authorization": "One reviewed two-file correction commit/push to EXISTING PR299 and one ordinary new-head CI; no retry of prior failed CI, PR body edit, ready/audit/native/merge. Main merges held for be deployment plus actual Claudio postcheck.",
+  "checkedUtc": "2026-10-16T19:15:28.877554+00:00",
+  "closureSha256": "54496e3e4a8fa09c927ebbc1e19ab3d2ee66653e2901d8c188668fe2d4b522ce",
+  "exactTwoStagedPaths": [
+    "server/scripts/rehearsal_deployment_readiness.cjs",
+    "server/tests/contracts/issue_208_sample_code_schema.test.js"
+  ],
+  "exitCode": 0,
+  "head": "72adbe43b36319e6f9d8088baa61b0fbe26bb3ff",
+  "patchSha256": "2aa9f0c8be0852ce1feb84bff50e5bc61c17aa1540d31e305f18c5a701274e7d",
+  "reportSha256": "a1533d156c3433c65c3cf739768f811a7f68f1cdde21c384fa6e49e3d7f56593",
+  "reportedTests": 5761,
+  "retainedFilesVerified": 17,
+  "review": "Parent read complete two-file patch; exact sole canonical nullable TEXT Sample.labSampleCode addition; all old column/value/SQL/row/receipt domains guarded, no whitespace normalization. Original failed CI payload equality remains unknown.",
+  "sourceAndFixtureHashReads": 4932,
+  "tree": "34f6d9be9c00b2fd923989e4d4291a06ec333e32",
+  "uniquePassedSuites": 376
+}

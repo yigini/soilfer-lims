@@ -1,0 +1,13 @@
+{
+  "checkedAt": "2026-10-16T19:12:03.691Z",
+  "inputs": 2445,
+  "runtime": 21,
+  "changed": [],
+  "generated": [
+    {
+      "path": "server/data/help/RELEASE_MANIFEST_v1.json",
+      "before": "2cb934079979b70c240b5eacf432e8511918b75a42a112ef627945be64720156",
+      "after": "60101eaaa00f91c2592d504fbb5bba53137d33c45454fc96153222e6311f0aad"
+    }
+  ]
+}

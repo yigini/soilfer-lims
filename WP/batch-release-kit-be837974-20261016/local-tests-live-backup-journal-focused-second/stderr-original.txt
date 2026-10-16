@@ -1,0 +1,13 @@
+test_admission_parser_rejects_duplicate_keys_and_oversized_input (verify_kit_live_backup.LiveBackup.test_admission_parser_rejects_duplicate_keys_and_oversized_input) ... ok
+test_exact_dependency_files_and_small_page_spilling_backups (verify_kit_live_backup.LiveBackup.test_exact_dependency_files_and_small_page_spilling_backups) ... ok
+test_existing_sidecars_and_wrong_native_engine_refuse_before_output (verify_kit_live_backup.LiveBackup.test_existing_sidecars_and_wrong_native_engine_refuse_before_output) ... ok
+test_main_plus_journal_and_two_entries_fit_the_held_envelope (verify_kit_live_backup.LiveBackup.test_main_plus_journal_and_two_entries_fit_the_held_envelope) ... ok
+test_missing_or_small_admission_refuses_before_output_and_failures_retain_output (verify_kit_live_backup.LiveBackup.test_missing_or_small_admission_refuses_before_output_and_failures_retain_output) ... ok
+test_parent_requires_admission_before_directory_and_consumes_backup_claim_once (verify_kit_live_backup.LiveBackup.test_parent_requires_admission_before_directory_and_consumes_backup_claim_once) ... ok
+test_real_wal_snapshot_stays_pinned_when_other_writer_grows_source_before_backup (verify_kit_live_backup.LiveBackup.test_real_wal_snapshot_stays_pinned_when_other_writer_grows_source_before_backup) ... ok
+test_stage_cannot_close_with_an_unadmitted_live_backup (verify_kit_live_backup.LiveBackup.test_stage_cannot_close_with_an_unadmitted_live_backup) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 2.803s
+
+OK

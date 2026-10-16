@@ -1,0 +1,106 @@
+{
+  "derivation": [
+    "PagerBegin sets dbOrigSize to zero from the empty destination. Backup holds this single destination write transaction across all backup_step calls. Positive page numbers cannot satisfy pgno<=dbOrigSize, so no old-page rollback records are written. There are no savepoints or SQL statements on the destination, hence no statement journal, sort temporary file or super-journal.",
+    "pager_open_journal writes one initial sector-sized header. The first cache spill may call syncJournal(newHdr=1), append one more sector header and set state WRITER_DBMOD while clearing all NEED_SYNC page flags. Later new-page writes in that state do not set NEED_SYNC; later spills cannot append another header. Large-sector propagation only propagates existing flags; it cannot originate a flag after the first sync. Backup uses pager writes, not pager page moves.",
+    "Commit calls syncJournal(newHdr=0), never appends a third header; its super-journal argument is null. Failure ends this transaction through rollback and has no retry. Sector size is clamped to MAX_SECTOR_SIZE=65536. Thus two headers reserve 131072 bytes even when the VFS uses smaller sectors or keeps the journal in memory.",
+    "Destination page size is set to source size before the write transaction. Expected main content plus the full 131072-byte journal and both files entry/inode allowances must fit the already held cli-backup 25 percent envelope BEFORE tmp directory/container creation. No success is returned with an internal sidecar.",
+    "These are source-derived byte bounds and declared entry allowances. Local progress observations are samples, not continuous filesystem measurements or production proof. Other application, daemon, unit journal and physical metadata closure remains separate."
+  ],
+  "files": {
+    "deps/sqlite3/sqlite3.c": {
+      "bytes": 9389807,
+      "sha256": "2bbdd0eff3f46852e954d7881b7945990bf78c1421f806cf7978bc22e187100a"
+    },
+    "lib/methods/backup.js": {
+      "bytes": 2380,
+      "sha256": "ea29d34992bb02e006d0fdeda9675ac5d2bb227aaf57468decd997e9fc9c7dbf"
+    },
+    "package.json": {
+      "bytes": 1427,
+      "sha256": "2477bed8910fa9e3a842f20721f86927ef6d1424851f423539c644e48ec20e84"
+    },
+    "src/objects/backup.cpp": {
+      "bytes": 4146,
+      "sha256": "16a67102c49c9312eb1deecd08c27064325840df51d6957fe134b871f5d8798c"
+    }
+  },
+  "filesystemClosureClaimed": false,
+  "maximumJournalBytes": 131072,
+  "packageIntegrity": "sha512-8VYKM3MjCa9WcaSAI3hzwhmyHVlH8tiGFwf0RlTsZPWJ1I5MkzjiudCo4KC4DxOaL/53A5B1sI/IbldNFDbsKA==",
+  "packageVersion": "12.6.2",
+  "preconditions": [
+    "Exact qualified acc158 image and all four dependency source bytes plus native sqlite_source_id()/sqlite_version() are required.",
+    "Output main and journal/WAL/SHM names are absent before source open. Main is exclusively precreated at zero bytes, regular, one link, held by descriptor through backup; owned output directory has one writer.",
+    "Native backup.cpp opens its own fresh destination handle, only main, default rollback mode; no attached database, SQL statement, savepoint, extension, URI or custom VFS is used on that handle.",
+    "Source has an established read transaction before page_count/page_size and backup; main length is pinned. No installer or production journal setting is changed."
+  ],
+  "primaryDocumentation": [
+    "https://www.sqlite.org/backup.html",
+    "https://www.sqlite.org/c3ref/backup_finish.html",
+    "https://www.sqlite.org/tempfiles.html"
+  ],
+  "sourceVerification": "Fetched primary npm tarball in memory, checked full SHA512 against actual be837974 package-lock integrity, checked all four listed files byte-for-byte against local installed package; no package install/build/host operation.",
+  "sqliteSourceExcerpts": [
+    {
+      "firstLine": 59330,
+      "lastLine": 59340,
+      "text": "*/\n#define UNKNOWN_LOCK                (EXCLUSIVE_LOCK+1)\n\n/*\n** The maximum allowed sector size. 64KiB. If the xSectorsize() method\n** returns a value larger than this, then MAX_SECTOR_SIZE is used instead.\n** This could conceivably cause corruption following a power failure on\n** such a system. This is currently an undocumented limit.\n*/\n#define MAX_SECTOR_SIZE 0x10000\n\n"
+    },
+    {
+      "firstLine": 61612,
+      "lastLine": 61624,
+      "text": "/*\n** Return a sanitized version of the sector-size of OS file pFile. The\n** return value is guaranteed to lie between 32 and MAX_SECTOR_SIZE.\n*/\nSQLITE_PRIVATE int sqlite3SectorSize(sqlite3_file *pFile){\n  int iRet = sqlite3OsSectorSize(pFile);\n  if( iRet<32 ){\n    iRet = 512;\n  }else if( iRet>MAX_SECTOR_SIZE ){\n    assert( MAX_SECTOR_SIZE>=512 );\n    iRet = MAX_SECTOR_SIZE;\n  }\n  return iRet;\n"
+    },
+    {
+      "firstLine": 60360,
+      "lastLine": 60384,
+      "text": "static int writeJournalHdr(Pager *pPager){\n  int rc = SQLITE_OK;                 /* Return code */\n  char *zHeader = pPager->pTmpSpace;  /* Temporary space used to build header */\n  u32 nHeader = (u32)pPager->pageSize;/* Size of buffer pointed to by zHeader */\n  u32 nWrite;                         /* Bytes of header sector written */\n  int ii;                             /* Loop counter */\n\n  assert( isOpen(pPager->jfd) );      /* Journal file must be open. */\n\n  if( nHeader>JOURNAL_HDR_SZ(pPager) ){\n    nHeader = JOURNAL_HDR_SZ(pPager);\n  }\n\n  /* If there are active savepoints and any of them were created\n  ** since the most recent journal header was written, update the\n  ** PagerSavepoint.iHdrOffset fields now.\n  */\n  for(ii=0; ii<pPager->nSavepoint; ii++){\n    if( pPager->aSavepoint[ii].iHdrOffset==0 ){\n      pPager->aSavepoint[ii].iHdrOffset = pPager->journalOff;\n    }\n  }\n\n  pPager->journalHdr = pPager->journalOff = journalHdrOffset(pPager);\n\n"
+    },
+    {
+      "firstLine": 60459,
+      "lastLine": 60481,
+      "text": "  ** Pager.journalOff variable by JOURNAL_HDR_SZ so that the next\n  ** record is written to the following sector (leaving a gap in the file\n  ** that will be implicitly filled in by the OS).\n  **\n  ** However it has been discovered that on some systems this pattern can\n  ** be significantly slower than contiguously writing data to the file,\n  ** even if that means explicitly writing data to the block of\n  ** (JOURNAL_HDR_SZ - 28) bytes that will not be used. So that is what\n  ** is done.\n  **\n  ** The loop is required here in case the sector-size is larger than the\n  ** database page size. Since the zHeader buffer is only Pager.pageSize\n  ** bytes in size, more than one call to sqlite3OsWrite() may be required\n  ** to populate the entire journal header sector.\n  */\n  for(nWrite=0; rc==SQLITE_OK&&nWrite<JOURNAL_HDR_SZ(pPager); nWrite+=nHeader){\n    IOTRACE((\"JHDR %p %lld %d\\n\", pPager, pPager->journalHdr, nHeader))\n    rc = sqlite3OsWrite(pPager->jfd, zHeader, nHeader, pPager->journalOff);\n    assert( pPager->journalHdr <= pPager->journalOff );\n    pPager->journalOff += nHeader;\n  }\n\n  return rc;\n"
+    },
+    {
+      "firstLine": 64882,
+      "lastLine": 64897,
+      "text": "    if( rc==SQLITE_OK ){\n      /* Change to WRITER_LOCKED state.\n      **\n      ** WAL mode sets Pager.eState to PAGER_WRITER_LOCKED or CACHEMOD\n      ** when it has an open transaction, but never to DBMOD or FINISHED.\n      ** This is because in those states the code to roll back savepoint\n      ** transactions may copy data from the sub-journal into the database\n      ** file as well as into the page cache. Which would be incorrect in\n      ** WAL mode.\n      */\n      pPager->eState = PAGER_WRITER_LOCKED;\n      pPager->dbHintSize = pPager->dbSize;\n      pPager->dbFileSize = pPager->dbSize;\n      pPager->dbOrigSize = pPager->dbSize;\n      pPager->journalOff = 0;\n    }\n"
+    },
+    {
+      "firstLine": 64994,
+      "lastLine": 65040,
+      "text": "  if( pPager->eState==PAGER_WRITER_LOCKED ){\n    rc = pager_open_journal(pPager);\n    if( rc!=SQLITE_OK ) return rc;\n  }\n  assert( pPager->eState>=PAGER_WRITER_CACHEMOD );\n  assert( assert_pager_state(pPager) );\n\n  /* Mark the page that is about to be modified as dirty. */\n  sqlite3PcacheMakeDirty(pPg);\n\n  /* If a rollback journal is in use, them make sure the page that is about\n  ** to change is in the rollback journal, or if the page is a new page off\n  ** then end of the file, make sure it is marked as PGHDR_NEED_SYNC.\n  */\n  assert( (pPager->pInJournal!=0) == isOpen(pPager->jfd) );\n  if( pPager->pInJournal!=0\n   && sqlite3BitvecTestNotNull(pPager->pInJournal, pPg->pgno)==0\n  ){\n    assert( pagerUseWal(pPager)==0 );\n    if( pPg->pgno<=pPager->dbOrigSize ){\n      rc = pagerAddPageToRollbackJournal(pPg);\n      if( rc!=SQLITE_OK ){\n        return rc;\n      }\n    }else{\n      if( pPager->eState!=PAGER_WRITER_DBMOD ){\n        pPg->flags |= PGHDR_NEED_SYNC;\n      }\n      PAGERTRACE((\"APPEND %d page %d needSync=%d\\n\",\n              PAGERID(pPager), pPg->pgno,\n             ((pPg->flags&PGHDR_NEED_SYNC)?1:0)));\n    }\n  }\n\n  /* The PGHDR_DIRTY bit is set above when the page was added to the dirty-list\n  ** and before writing the page into the rollback journal.  Wait until now,\n  ** after the page has been successfully journalled, before setting the\n  ** PGHDR_WRITEABLE bit that indicates that the page can be safely modified.\n  */\n  pPg->flags |= PGHDR_WRITEABLE;\n\n  /* If the statement journal is open and the page is not in it,\n  ** then write the page into the statement journal.\n  */\n  if( pPager->nSavepoint>0 ){\n    rc = subjournalPageIfRequired(pPg);\n  }\n"
+    },
+    {
+      "firstLine": 63294,
+      "lastLine": 63314,
+      "text": "      }\n\n      pPager->journalHdr = pPager->journalOff;\n      if( newHdr && 0==(iDc&SQLITE_IOCAP_SAFE_APPEND) ){\n        pPager->nRec = 0;\n        rc = writeJournalHdr(pPager);\n        if( rc!=SQLITE_OK ) return rc;\n      }\n    }else{\n      pPager->journalHdr = pPager->journalOff;\n    }\n  }\n\n  /* Unless the pager is in noSync mode, the journal file was just\n  ** successfully synced. Either way, clear the PGHDR_NEED_SYNC flag on\n  ** all pages.\n  */\n  sqlite3PcacheClearSyncFlags(pPager->pPCache);\n  pPager->eState = PAGER_WRITER_DBMOD;\n  assert( assert_pager_state(pPager) );\n  return SQLITE_OK;\n"
+    },
+    {
+      "firstLine": 63573,
+      "lastLine": 63591,
+      "text": "#ifdef SQLITE_ENABLE_BATCH_ATOMIC_WRITE\n    if( pPager->tempFile==0 ){\n      rc = sqlite3JournalCreate(pPager->jfd);\n      if( rc!=SQLITE_OK ) return pager_error(pPager, rc);\n    }\n#endif\n\n    /* Sync the journal file if required. */\n    if( pPg->flags&PGHDR_NEED_SYNC\n     || pPager->eState==PAGER_WRITER_CACHEMOD\n    ){\n      rc = syncJournal(pPager, 1);\n    }\n\n    /* Write the contents of the page out to the database file. */\n    if( rc==SQLITE_OK ){\n      assert( (pPg->flags&PGHDR_NEED_SYNC)==0 );\n      rc = pager_write_pagelist(pPager, pPg);\n    }\n"
+    },
+    {
+      "firstLine": 84339,
+      "lastLine": 84365,
+      "text": "    /* If the destination database has not yet been locked (i.e. if this\n    ** is the first call to backup_step() for the current backup operation),\n    ** try to set its page size to the same as the source database. This\n    ** is especially important on ZipVFS systems, as in that case it is\n    ** not possible to create a database file that uses one page size by\n    ** writing to it with another.  */\n    if( p->bDestLocked==0 && rc==SQLITE_OK && setDestPgsz(p)==SQLITE_NOMEM ){\n      rc = SQLITE_NOMEM;\n    }\n\n    /* Lock the destination database, if it is not locked already. */\n    if( SQLITE_OK==rc && p->bDestLocked==0\n     && SQLITE_OK==(rc = sqlite3BtreeBeginTrans(p->pDest, 2,\n                                                (int*)&p->iDestSchema))\n    ){\n      p->bDestLocked = 1;\n    }\n\n    /* Do not allow backup if the destination database is in WAL mode\n    ** and the page sizes are different between source and destination */\n    pgszSrc = sqlite3BtreeGetPageSize(p->pSrc);\n    pgszDest = sqlite3BtreeGetPageSize(p->pDest);\n    destMode = sqlite3PagerGetJournalMode(sqlite3BtreePager(p->pDest));\n    if( SQLITE_OK==rc\n     && (destMode==PAGER_JOURNALMODE_WAL || sqlite3PagerIsMemdb(pDestPager))\n     && pgszSrc!=pgszDest\n    ){\n"
+    },
+    {
+      "firstLine": 84513,
+      "lastLine": 84523,
+      "text": "        }else{\n          sqlite3PagerTruncateImage(pDestPager, nDestTruncate);\n          rc = sqlite3PagerCommitPhaseOne(pDestPager, 0, 0);\n        }\n\n        /* Finish committing the transaction to the destination database. */\n        if( SQLITE_OK==rc\n         && SQLITE_OK==(rc = sqlite3BtreeCommitPhaseTwo(p->pDest, 0))\n        ){\n          rc = SQLITE_DONE;\n        }\n"
+    },
+    {
+      "firstLine": 84583,
+      "lastLine": 84584,
+      "text": "  /* If a transaction is still open on the Btree, roll it back. */\n  sqlite3BtreeRollback(p->pDest, SQLITE_OK, 0);\n"
+    }
+  ],
+  "sqliteSourceId": "2026-01-09 17:27:48 b270f8339eb13b504d0b2ba154ebca966b7dde08e40c3ed7d559749818cb2075",
+  "sqliteVersion": "3.51.2",
+  "tarballBytes": 2623137,
+  "tarballSha256": "ac3bfaa50b31d1fc878f84b64b3fa7ec1b5b6603b9be089b0501f8f5900ac7e7",
+  "tarballUrl": "https://registry.npmjs.org/better-sqlite3/-/better-sqlite3-12.6.2.tgz",
+  "version": 1
+}
