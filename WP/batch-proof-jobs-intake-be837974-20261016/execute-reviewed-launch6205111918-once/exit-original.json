@@ -1,0 +1,10 @@
+{
+  "closedUtc": "2026-10-16T00:27:48.995408+00:00",
+  "status": "REVIEWED_JOBS_LAUNCHER_CLOSED_INSPECT_SAME_UNIT",
+  "exitCode": 0,
+  "error": null,
+  "root": "/opt/lims/releases/workflow-batch-jobs-intake-be837974-20261016T003000Z",
+  "unit": "lims-workflow-batch-jobs-intake-be837974-20261016t003000z",
+  "proofComplete": false,
+  "retryAllowed": false
+}

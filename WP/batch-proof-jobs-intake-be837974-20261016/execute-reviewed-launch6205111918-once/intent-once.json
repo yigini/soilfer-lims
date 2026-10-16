@@ -1,0 +1,15 @@
+{
+  "utc": "2026-10-16T00:26:52.293334+00:00",
+  "argv": [
+    "C:\\Users\\yigin\\AppData\\Local\\Programs\\Python\\Python312-arm64\\python.exe",
+    "-B",
+    "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\WP\\batch-proof-jobs-intake-be837974-20261016\\launch_proof.py",
+    "--package",
+    "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\WP\\batch-proof-jobs-intake-be837974-20261016\\proof-package-workflow-batch-jobs-intake-be837974-20261016T003000Z"
+  ],
+  "packagePublication": "879b89689454a8b46b5b61007c9ee8a21dbb87d5",
+  "sourceReviewId": 6205111918,
+  "futurePackageAllocationBytes": 10412032,
+  "oneAttempt": true,
+  "neverReplay": true
+}

@@ -1,0 +1,1 @@
+{"correctField":"futurePackageBytes; exact package allowance separately bound in launch-intent.json; original capacity JSON unchanged","error":"KeyError: futurePackageAllocationBytes in local compact diagnostic of original before-root capacity JSON","hostCalls":0,"kind":"TOOL_OUTPUT_TRANSCRIPTION","proofOrLauncherFailure":false,"sourceChanged":false}
