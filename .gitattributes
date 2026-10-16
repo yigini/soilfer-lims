@@ -97,3 +97,5 @@ server/prisma/migrations/20261014000100_order_revision_contract/migration.sql te
 server/services/orderRevisionMigrationSource.js text eol=lf
 server/prisma/migrations/20261016000100_label_print_events/migration.sql text eol=lf
 server/services/labelPrintMigrationSource.js text eol=lf
+server/prisma/migrations/20261004170000_add_atomic_sample_codes/migration.sql text eol=lf
+server/services/sampleCodeMigrationSource.js text eol=lf

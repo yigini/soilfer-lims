@@ -63,6 +63,7 @@ function snapshot(db){
 function installLabelPrintEvents({dbPath,apply=false, startupContext}={}){
  if(typeof dbPath!=='string'||!dbPath.trim())throw fail('LABEL_PRINT_DATABASE_REQUIRED','Provide an explicit database path.');
  const target=path.resolve(dbPath),source=loadLabelPrintMigrationSource();
+ require('./install_sample_code_schema').assertSampleCodeStartupReady(target, apply ? undefined : startupContext);
  require('./install_sample_containers').assertSampleContainerStartupReady(target, apply ? undefined : startupContext);
  const reader=openReadonlyDatabase(Database, target, {readonly:true,fileMustExist:true}, apply ? undefined : startupContext);let reviewed;
  try{reviewed=reader.transaction(()=>classify(reader,source))();}finally{reader.close();}

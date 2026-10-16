@@ -429,6 +429,8 @@ bash "${entryScript.replace(/\\/g, '/')}"
                 `node "${path.join(serverDir, 'scripts/install_instrument_imports.js').replace(/\\/g, '/')}"`)
             .replaceAll('node scripts/install_sample_containers.js',
                 `node "${path.join(serverDir, 'scripts/install_sample_containers.js').replace(/\\/g, '/')}"`)
+            .replaceAll('node scripts/install_sample_code_schema.js',
+                `node "${path.join(serverDir, 'scripts/install_sample_code_schema.js').replace(/\\/g, '/')}"`)
             .replaceAll('node scripts/install_control_charts.js',
                 `node "${path.join(serverDir, 'scripts/install_control_charts.js').replace(/\\/g, '/')}"`)
             .replaceAll('node scripts/install_order_revisions.js',

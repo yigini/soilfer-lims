@@ -31,6 +31,10 @@ const QC_MEMBERSHIP_LOADER_SHA256 = '40c0af827c4d22b6fce1ee5b770f2c0146f456cfeea
 const QC_MEMBERSHIP_SQL_SHA256 = '1bc85113a3b6b7da327265bc7005eb4a1c97855943c599b1fe5ed8b126cf8572';
 // #189 additive evidence sources are inspected, never exempted as writers.
 const QC_EVIDENCE_SOURCES = Object.freeze([
+    // #208 prerequisite: inspect unchanged #180 schema DDL, without writer authority.
+    Object.freeze({ functionName: 'loadSampleCodeMigrationSource', loader: 'services/sampleCodeMigrationSource.js',
+        loaderSha256: 'db7095ec42d405039093a4b39c4a2b2bd61ff80b6a45e447b49d627cef4b4e16',
+        directory: '20261004170000_add_atomic_sample_codes', sqlSha256: 'e52a11bb7fc8dfee678184025dda8e8342cde3896d3b5f1c89b83897702d8ff0', wholeSql: true }),
     // #208: inspect exact additive print-event DDL without writer authority.
     Object.freeze({ functionName: 'loadLabelPrintMigrationSource', loader: 'services/labelPrintMigrationSource.js',
         loaderSha256: '2740c2688b8b0fa845d5ef08ef9715617c6bc881edb555b91e8f71db16b54eca', directory: '20261016000100_label_print_events',

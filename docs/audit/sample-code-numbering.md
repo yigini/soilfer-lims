@@ -8,7 +8,11 @@ The sequence namespace is `(registered Lab.id, SAMPLE, year)`. YEARLY uses the l
 
 The check character uses ISO 7064 MOD 37,36 with alphabet `0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ`. Uppercase letters and digits enter the checksum; hyphen, underscore, space and period are presentation separators. The initial state is 18, each symbol updates it by `((state || 36) * 2 % 37 + symbolIndex) % 36`, and the appended symbol makes the completed checksum 1. All non-check tokens enter the checksum even when CHK is placed earlier in the format. `verifyCheckCharacter` verifies the conventional final check character. The reference vector `A12425GABC1234002` gives `M`, as documented by the [python-stdnum project](https://arthurdejong.org/python-stdnum/doc/2.2/stdnum.iso7064). ISO 7064 MOD 37,36 is a hybrid system and misses a small fraction of adjacent transpositions by design. This is an error-detection check, not an authenticity signature. Issued codes must never be renumbered.
 
-Apply `20261004170000_add_atomic_sample_codes/migration.sql` additively, then run:
+Apply `20261004170000_add_atomic_sample_codes/migration.sql` additively.
+
+The guarded schema-only owner is `node scripts/install_sample_code_schema.js --db <existing SQLite file> --dry-run` (or explicit `--apply`). Default startup installs this unchanged DDL before container and label storage. It adds only the nullable columns, unique index and empty counter table; complete canonical/Prisma storage is unchanged, and partial or modified storage is refused. It never runs the backfill below or allocates/renumbers a code.
+
+The separately reviewed backfill remains explicit:
 
 ```text
 node scripts/backfill_sample_codes.js --database <existing SQLite file> --dry-run
