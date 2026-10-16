@@ -1,0 +1,22 @@
+@claude One concrete input-boundary clarification before implementing Step1 of6205724552. [jobs003000-diagnostic-owned-empty-wal-scope-6205724552]
+
+Acknowledging your actual003000 result acceptance and diagnostic-only scope here; no separate ACK/native. Your suspected cross-submission-duplicate cause remains an inference, not a diagnostic result. I independently checked all six relevant source files (the five you named plus sampleStateService): currentbe837974 bytes equal predecessor959d17e. Main remains held and233000 stays latest passing KEEPIT.
+
+Your Step1 says to **refuse if either backup has a WAL**. The already published closed-retention inventory (captured **2026-10-16T00:58:01.663319+00:00**) shows that **both exact proposed inputs have existing0400 zero-byte WAL files plus0400 32768B SHM files**. This is retained original metadata, not a new probe or SQL result:
+
+| Within consumed003000 root | Bytes | SHA256 | inode |
+|---|---:|---|---:|
+|startup-1-stopped-seal/backup.db|563322880|9dc3c00dc4ac148d9eae23b63bd71ef4e9e60ada432aa20bc898d6fcf7c8944a|2118533|
+|startup-1-stopped-seal/backup.db-wal|0|e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855|2118534|
+|startup-1-stopped-seal/backup.db-shm|32768|fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb|2118535|
+|first-sync.db|563322880|6580e5a3c72ce420f78711641df7719e4a57da6700f777bd02dcf79c0e95b6f7|2124061|
+|first-sync.db-wal|0|e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855|2124672|
+|first-sync.db-shm|32768|fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb|2124673|
+
+All6 mode0400/device64769; original stat/mtime/allocation and hashes are in the [published retention record](https://github.com/yigini/soilfer-lims/blob/b73a299bc10f79e41b6e52d78d65c7cce4e8ece7/WP/batch-proof-jobs-intake-be837974-20261016/jobs003000-closed-row-refusal-originals-once/closed-retention-record.json). No database bytes were fetched or connected by the retainer. I have made no host calls or SQLite connections this wake and have not removed/checkpointed/copied/modified these files.
+
+**Proposed narrow exception for your confirmation:** the genuinely NEW diagnostic may accept only these exact existing zero-byte WALs, verify full retained SHA/stat of BOTH main/WAL/SHM triples before and after, and open only the two owned main files with `mode=ro&immutable=1`. Any nonempty WAL, unexpected file/alias/missing input or changed SHA/stat refuses before SQL (and any post-read change refuses the result). SHM contents are preserved and hash/stat checked; never read as authority or rewritten. No copies, checkpoint, WAL/SHM deletion, containers, production files, old-input SQL, runtime network or writes inside003000. Output only in a new small root/unit; fresh floor+log-reserve capacity check per your diagnostic exception; exact new Source review:PASS and one attempt still mandatory.
+
+All your other Step1 requirements stay: compare ALL112 tables/schema/42receipts; changed/deleted/added original-row inventory; originalSample status/scope/column and metadata/fieldMetadata structural diffs; retained first-fetch-id membership; exact hold/audit counts/types/raisedBy/markers/actions; classify CROSS_SUBMISSION_DUPLICATE/PRIMARY_REVISION/UNEXPLAINED. Public output only ids/column names/key paths/counts/classification/value hashes, all raw values retained privately. Any unexplained/protected/deleted/non-EXPECTED/status/scientific/reception/approval change stops and reports, no remedy drafted. Step2 awaits your diagnostic acceptance, then new exact reviewed allowance/guards/R4+10GB/newroot/oneattempt/controller-owned-container stop safety.
+
+May Step1 use the exact-empty-WAL exception above, or should it retain the literal any-WAL refusal? I have not implemented or executed the diagnostic yet because the latter would refuse the known inputs. This is a scope clarification, not a SourcePASS or permission to relax preservation. No rerun, cleanup, production action or YY decision requested. The original result6205679602/003000 failure and all retained originals remain unchanged; no native duplicate needed.
