@@ -5,9 +5,10 @@ from build_stop_post import nodes
 
 HERE=pathlib.Path(__file__).resolve().parent
 SPECS={
-    'kit_contract.py':('IMAGE','MEMORY_MAX','canonical','require','sha'),
-    'retained_contract.py':('exact_json',),
-    'controller_output.py':('CONTROLLER_OUTPUT_BYTES','CONTROLLER_NAMES'),
+    'kit_contract.py':('HEAD','IMAGE','MEMORY_MAX','LOG_RESERVE','canonical','require','sha'),
+    'retained_contract.py':('ROOT_NAME','ROOT','MEMORY','exact_json'),
+    'controller_output.py':('CONTROLLER_OUTPUT_BYTES','CONTROLLER_STREAM_LIMIT','CONTROLLER_METADATA_LIMIT','CONTROLLER_NAMES',
+        'output_require','output_canonical','output_root','output_pin','output_read_record'),
     'kit_evidence.py':('BLOCK','SHARES','MAIN_POOL_BYTES','HOOK_RECORD_LIMIT','HOOK_RESULT_NAMES',
         'HOOK_NAMESPACE_BYTES','APACHE_TRANSITION_LIMIT','APACHE_NAMESPACE_BYTES','EMERGENCY_CALL_LIMIT',
         'EMERGENCY_STREAM_LIMITS','EMERGENCY_METADATA_LIMIT','EMERGENCY_NAMESPACE_BYTES',
@@ -20,6 +21,14 @@ SPECS={
     'kit_apache_capture.py':('CAPTURE_ROOT',),
     'kit_capture_owned.py':('CAPTURE_ROOT','CAPTURE_UNIT','CAPTURE_LABEL','CAPTURE_DATABASE',
         'CAPTURE_COMMANDS','capture_spec','validate_capture_spec','capture_selected','stop_capture_owners'),
+    'kit_budget.py':('MARGIN_PERCENT','MINIMUM_DB_EQUIVALENTS','SEAL_DIRECTORY_BYTES'),
+    'kit_capture_budget.py':('CAPTURE_DB_COST','CAPTURE_APACHE_BYTES','CAPTURE_STAGES','CAPTURE_TABLE','CAPTURE_TABLE_SHA'),
+    'kit_capture_review.py':('CAPTURE_REVIEW_FILES','CONTROL_FILES'),
+    'retained_memory.py':('NON_RECLAIMABLE_FIELDS','NON_RECLAIMABLE_MAX','STAT_REQUIRED','EVENT_REQUIRED','CGROUP_ROOT',
+        'pairs','scalar','bounded_read','canonical_cgroup','gate'),
+    'kit_capture_controller.py':('capture_controller_snapshot','capture_controller_same_group'),
+    'capture_controller_output.py':('capture_controller_argv','capture_controller_closure'),
+    'kit_capture_outcome.py':('capture_content_commitment','capture_stop_outcome'),
 }
 MAIN='''
 def main():
@@ -28,9 +37,16 @@ def main():
     call=EmergencyCommands(root,True,namespace='stop-post')
     # Stop attempts precede ALL source, controller, receipt and filesystem
     # authority reads. Capture has no serving permit or production restart.
-    result=stop_capture_owners(call)
-    exclusive_record(root,'stop-post-result.json',result,True,independent_namespace='hook-results')
-    return 0 if not result['errors'] and not call.retention_errors else 1
+    def controller_probe():
+        raws=[]
+        try:
+            return capture_controller_snapshot(evidence=lambda path,raw:raws.append(
+                {'path':path,'rawAscii':raw.decode('ascii'),'sha256':sha(raw),'bytes':len(raw)}))
+        finally:
+            exclusive_record(root,'stop-post-controller-1.json',{'raws':raws},True,independent_namespace='hook-results')
+    result=capture_stop_outcome(root,call,controller_probe,lambda value:
+        exclusive_record(root,'stop-post-result.json',value,True,independent_namespace='hook-results'))
+    return 0 if result['allChecksComplete'] else 1
 
 if __name__=='__main__':
     try:code=main()

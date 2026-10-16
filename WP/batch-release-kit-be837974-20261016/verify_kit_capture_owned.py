@@ -265,7 +265,9 @@ class CaptureOwners(unittest.TestCase):
                 if isinstance(node,(ast.FunctionDef,ast.ClassDef)):
                     self.assertEqual(ast.dump(node,include_attributes=False),ast.dump(definitions[node.name],include_attributes=False))
         main=ast.unparse(definitions['main'])
-        self.assertLess(main.index('stop_capture_owners(call)'),main.index('exclusive_record('))
+        lifecycle=ast.unparse(definitions['capture_stop_outcome'])
+        self.assertLess(lifecycle.index('stop_capture_owners(call)'),lifecycle.index('controller_probe()'))
+        self.assertIn('capture_stop_outcome(root, call, controller_probe',main)
         for forbidden in ('stop_candidate','serving_permit','systemctl','restart','EmergencyIngress','source_review'):
             self.assertNotIn(forbidden,main)
         # Do not execute the generated hook, even with stand-in commands.

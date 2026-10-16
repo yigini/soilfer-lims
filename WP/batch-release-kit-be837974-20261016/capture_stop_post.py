@@ -4,9 +4,13 @@ import hashlib,io,json,os,pathlib,re,stat,subprocess,sys,time
 
 # Exact AST definitions from kit_contract.py
 
+HEAD = 'be8379745bdfae52ce46496ff26514dc7d729640'
+
 IMAGE = 'sha256:acc158447f5571068bf150fc0e8fa6f0889aeb38f9aec8be08978d903bd5be6a'
 
 MEMORY_MAX = 805306368
+
+LOG_RESERVE = 4 * 1024 ** 3
 
 def canonical(value):
     return json.dumps(value, sort_keys=True, separators=(',', ':'), ensure_ascii=True).encode()
@@ -19,6 +23,12 @@ def sha(raw):
     return hashlib.sha256(raw).hexdigest()
 
 # Exact AST definitions from retained_contract.py
+
+ROOT_NAME = 'workflow-batch-release-be837974-20261016T150000Z'
+
+ROOT = pathlib.PurePosixPath('/opt/lims/releases') / ROOT_NAME
+
+MEMORY = 805306368
 
 def exact_json(raw):
 
@@ -34,7 +44,75 @@ def exact_json(raw):
 
 CONTROLLER_OUTPUT_BYTES = 16 * 1024 ** 2
 
+CONTROLLER_STREAM_LIMIT = 4 * 1024 ** 2
+
+CONTROLLER_METADATA_LIMIT = 8192
+
 CONTROLLER_NAMES = frozenset(('controller-original.stdout', 'controller-original.stderr', 'controller-output-intent.json', 'controller-output-intent.json.pending', 'controller-output-closed.json', 'controller-output-closed.json.pending', 'controller-output-bootstrap-failure.json', 'controller-output-bootstrap-failure.json.pending'))
+
+def output_require(value, message):
+    if not value:
+        raise RuntimeError(message)
+
+def output_canonical(value):
+    return json.dumps(value, sort_keys=True, separators=(',', ':'), ensure_ascii=True).encode() + b'\n'
+
+def output_root(root):
+    root = pathlib.Path(root)
+    output_require(root.is_absolute() and root.is_dir(), 'Existing absolute output root required')
+    for part in (root, *root.parents):
+        output_require(not part.is_symlink(), 'Controller output ancestor alias refused')
+    return root
+
+def output_pin(path, maximum, links=1, immutable=True):
+    path = pathlib.Path(path)
+    for part in (path, *path.parents):
+        output_require(not part.is_symlink(), 'Controller original alias refused')
+    before = path.lstat()
+    output_require(stat.S_ISREG(before.st_mode) and before.st_nlink == links and (0 <= before.st_size <= maximum), 'Bounded independent controller original required')
+    if immutable:
+        output_require(stat.S_IMODE(before.st_mode) == 256 if os.name == 'posix' else not before.st_mode & 146, 'Immutable controller original required')
+    keys = ('st_dev', 'st_ino', 'st_size', 'st_mode', 'st_nlink', 'st_mtime_ns', 'st_ctime_ns', 'st_uid', 'st_gid')
+    cross = keys if os.name == 'posix' else tuple((k for k in keys if k != 'st_ctime_ns'))
+    fields = lambda s, selected=keys: tuple((getattr(s, k) for k in selected))
+    descriptor = os.open(str(path), os.O_RDONLY | getattr(os, 'O_NOFOLLOW', 0) | getattr(os, 'O_BINARY', 0))
+    digest = hashlib.sha256()
+    count = 0
+    try:
+        opened = os.fstat(descriptor)
+        output_require(fields(opened, cross) == fields(before, cross), 'Controller original changed before read')
+        while count <= before.st_size:
+            raw = os.read(descriptor, min(65536, before.st_size + 1 - count))
+            if not raw:
+                break
+            digest.update(raw)
+            count += len(raw)
+        after = os.fstat(descriptor)
+        at_path = path.lstat()
+        output_require(count == before.st_size and fields(after) == fields(opened) and (fields(at_path) == fields(before)) and (fields(after, cross) == fields(at_path, cross)), 'Controller original changed while hashing')
+    finally:
+        os.close(descriptor)
+    return {'bytes': count, 'sha256': digest.hexdigest()}
+
+def output_read_record(root, name):
+    path = root / name
+    pending = root / (name + '.pending')
+    pin = output_pin(path, CONTROLLER_METADATA_LIMIT, 2)
+    output_pin(pending, CONTROLLER_METADATA_LIMIT, 2)
+    output_require(os.path.samefile(path, pending), 'Exact same-inode controller control pair required')
+    with path.open('rb') as stream:
+        raw = stream.read(CONTROLLER_METADATA_LIMIT + 1)
+    output_require(len(raw) == pin['bytes'] and hashlib.sha256(raw).hexdigest() == pin['sha256'] and (output_pin(path, CONTROLLER_METADATA_LIMIT, 2) == pin), 'Controller control changed while reading')
+
+    def pairs(values):
+        result = {}
+        for key, value in values:
+            output_require(key not in result, 'Duplicate controller control key')
+            result[key] = value
+        return result
+    value = json.loads(raw, object_pairs_hook=pairs)
+    output_require(raw == output_canonical(value), 'Canonical controller control required')
+    return value
 
 # Exact AST definitions from kit_evidence.py
 
@@ -512,6 +590,213 @@ def stop_capture_owners(call, owners=None):
             errors.append({'ownerLabel': label, 'phase': phase, 'errorType': type(failure).__name__})
     return {'stoppedAndRetained': stopped, 'observedAbsentOwners': absent, 'errors': errors, 'allObservedExactCaptureOwnersStopped': not errors, 'nonvacuousStoppedOwnerCount': len(stopped), 'noForeignStops': True, 'noRemovalOrRestore': True, 'productionVolumeMounted': False}
 
+# Exact AST definitions from kit_budget.py
+
+MARGIN_PERCENT = 25
+
+MINIMUM_DB_EQUIVALENTS = 64
+
+SEAL_DIRECTORY_BYTES = 3 * 4096
+
+# Exact AST definitions from kit_capture_budget.py
+
+CAPTURE_DB_COST = {'triple': 1, 'backup': 1, 'reader-index': 1, 'clone': 1, 'assets': 0, 'seal-directory': 0, 'capture-policy-snapshot': 1, 'capture-214-snapshot': 1, 'capture-order-snapshots': 2}
+
+CAPTURE_APACHE_BYTES = 8 * 1024 ** 2
+
+CAPTURE_STAGES = (('capture-filesystem-snapshot', {'triple': 2, 'backup': 1, 'reader-index': 1, 'seal-directory': 1, 'assets': 1}, SEAL_DIRECTORY_BYTES + CAPTURE_APACHE_BYTES), ('capture-clone', {'clone': 1}, 0), ('capture-integrity', {}, 0), ('capture-canonical-policy', {'capture-policy-snapshot': 1}, 0), ('capture-206-prepare', {'triple': 2, 'backup': 1, 'reader-index': 1, 'seal-directory': 1}, SEAL_DIRECTORY_BYTES), ('capture-214-prepare', {'capture-214-snapshot': 1, 'triple': 2, 'backup': 1, 'reader-index': 1, 'seal-directory': 1}, SEAL_DIRECTORY_BYTES), ('capture-chart-impact', {}, 0), ('capture-order-impact', {'capture-order-snapshots': 1}, 0))
+
+CAPTURE_TABLE = [{'stage': name, 'sites': sites, 'dbTriples': sum((CAPTURE_DB_COST[site] * count for site, count in sites.items())), 'assetCopies': sites.get('assets', 0), 'fixedBytes': fixed, 'logGrowthShareBytes': LOG_RESERVE // 8} for name, sites, fixed in CAPTURE_STAGES]
+
+CAPTURE_TABLE_SHA = sha(canonical({'root': CAPTURE_ROOT.as_posix(), 'unit': CAPTURE_UNIT, 'stages': CAPTURE_TABLE, 'marginPercent': MARGIN_PERCENT, 'minimumDatabaseEquivalents': MINIMUM_DB_EQUIVALENTS, 'productionSqliteConnections': 0, 'preparationIssues': [206, 214], 'issue209ApplyPermitted': False, 'physicalFilesystemClosureClaimed': False}))
+
+# Exact AST definitions from kit_capture_review.py
+
+CAPTURE_REVIEW_FILES = frozenset(('capture-fresh-authority.json', 'capture-primary-snapshot.json', 'capture-snapshot-provenance.json', 'capture-clone-provenance.json', 'capture-stage-closures.json', 'capture-final-physical.json', 'actual-scientific-impact.json', 'actual-impact-214.json', 'actual-impact-209.json', 'capture-integrity-original.json', 'capture-canonical-policy-original.json', 'capture-206-prepare-original.json', 'capture-206-preservation.json', 'capture-214-prepare-original.json', 'capture-214-preservation.json', 'consumer-inventory.json', 'apache-capture.json', 'ingress-original.conf', 'ingress-held.conf'))
+
+CONTROL_FILES = frozenset(('capture-fresh-authority.json', 'capture-snapshot-provenance.json', 'capture-clone-provenance.json'))
+
+# Exact AST definitions from retained_memory.py
+
+NON_RECLAIMABLE_FIELDS = ('anon', 'shmem', 'slab_unreclaimable', 'kernel_stack', 'pagetables', 'percpu', 'sock')
+
+NON_RECLAIMABLE_MAX = MEMORY * 3 // 4
+
+STAT_REQUIRED = set(NON_RECLAIMABLE_FIELDS) | {'file', 'slab_reclaimable', 'pgscan', 'pgsteal'}
+
+EVENT_REQUIRED = {'oom', 'oom_kill', 'max', 'high'}
+
+CGROUP_ROOT = pathlib.Path('/sys/fs/cgroup')
+
+def pairs(raw, required):
+    require(isinstance(raw, bytes) and 0 < len(raw) <= 65536, 'Missing or unbounded cgroup keyed file')
+    out = {}
+    for line in raw.decode('ascii', 'strict').splitlines():
+        parts = line.split()
+        require(len(parts) == 2 and re.fullmatch('[a-z_][a-z0-9_]*', parts[0]) and re.fullmatch('0|[1-9][0-9]*', parts[1]), 'Malformed cgroup counter')
+        require(parts[0] not in out, 'Duplicate cgroup counter')
+        out[parts[0]] = int(parts[1])
+        require(out[parts[0]] < 2 ** 64, 'Counter overflow')
+    require(set(required) <= set(out), 'Required cgroup counters absent')
+    return out
+
+def scalar(raw):
+    require(isinstance(raw, bytes) and re.fullmatch(b'(0|[1-9][0-9]*)\\n?', raw) is not None, 'Exact numeric cgroup scalar required')
+    value = int(raw)
+    require(value < 2 ** 64, 'Cgroup scalar overflow')
+    return value
+
+def bounded_read(path, limit=65536):
+    p = pathlib.Path(path)
+    for q in [p, *p.parents]:
+        require(not q.is_symlink(), 'Cgroup/proc alias refused')
+    fd = os.open(str(p), os.O_RDONLY | getattr(os, 'O_NOFOLLOW', 0))
+    try:
+        require(stat.S_ISREG(os.fstat(fd).st_mode), 'Regular kernel counter file required')
+        chunks = []
+        total = 0
+        while True:
+            b = os.read(fd, min(4096, limit + 1 - total))
+            if not b:
+                break
+            chunks.append(b)
+            total += len(b)
+            require(total <= limit, 'Kernel counter output exceeds bound')
+        return b''.join(chunks)
+    finally:
+        os.close(fd)
+
+def canonical_cgroup(path):
+    p = pathlib.Path(path)
+    require(CGROUP_ROOT in p.parents and p != CGROUP_ROOT, 'Non-root container cgroup required')
+    for q in [p, *p.parents]:
+        require(not q.is_symlink(), 'Cgroup ancestor alias refused')
+    require(str(p.resolve(strict=True)) == str(p) and p.is_dir(), 'Canonical cgroup directory required')
+    s = p.stat()
+    return {'path': str(p), 'device': s.st_dev, 'inode': s.st_ino}
+
+def gate(sample):
+    events = sample['memoryEvents']
+    counters = sample['memoryStat']
+    require(all((type(sample.get(n)) is int and sample[n] >= 0 for n in ['memoryPeakBytesObservation', 'memoryMaxBytes', 'memorySwapMaxBytes'])), 'Exact integer cgroup scalar observations required')
+    require(set(EVENT_REQUIRED) <= set(events) and all((type(x) is int and x >= 0 for x in events.values())), 'Complete exact memory.events counters required')
+    require(events['oom'] == events['oom_kill'] == 0, 'Container cgroup oom/oom_kill memory STOP')
+    require(set(STAT_REQUIRED) <= set(counters) and all((type(x) is int and x >= 0 for x in counters.values())), 'Complete exact memory.stat counters required')
+    require(sample['memoryMaxBytes'] == MEMORY and sample['memorySwapMaxBytes'] == 0, 'Host cgroup memory/swap limits changed')
+    total = sum((counters[n] for n in NON_RECLAIMABLE_FIELDS))
+    require(total <= NON_RECLAIMABLE_MAX, 'Sampled non-reclaimable memory exceeds75percent STOP')
+    return total
+
+# Exact AST definitions from kit_capture_controller.py
+
+def capture_controller_snapshot(reader=bounded_read, resolver=canonical_cgroup, evidence=None):
+    pid = os.getpid()
+    require(type(pid) is int and pid > 0, 'Numeric current capture PID required')
+    proc = '/proc/' + str(pid)
+
+    def read(path, limit):
+        raw = reader(path, limit)
+        require(isinstance(raw, bytes) and 0 < len(raw) <= limit, 'Bounded capture kernel original required')
+        if evidence is not None:
+            evidence(path, raw)
+        return raw
+    member = read(proc + '/cgroup', 4096)
+    require(member == ('0::/system.slice/' + CAPTURE_UNIT + '\n').encode(), 'Exact separate capture unit membership required')
+    mount = read(proc + '/mountinfo', 256 * 1024)
+    matches = []
+    for line in mount.decode('ascii').splitlines():
+        fields = line.split()
+        require(len(fields) >= 10 and fields.count('-') == 1, 'Malformed capture cgroup mount inventory')
+        at = fields.index('-')
+        require(at >= 6 and len(fields) >= at + 4, 'Incomplete capture cgroup mount inventory')
+        if fields[4] == '/sys/fs/cgroup':
+            matches.append((fields, at))
+    require(len(matches) == 1 and matches[0][0][3] == '/' and (matches[0][0][matches[0][1] + 1] == 'cgroup2'), 'One canonical unified capture cgroup mount required')
+    group = pathlib.Path('/sys/fs/cgroup/system.slice') / CAPTURE_UNIT
+    before = resolver(group)
+    require(isinstance(before, dict) and before.get('path') == group.as_posix() and all((type(before.get(k)) is int and before[k] >= 0 for k in ('device', 'inode'))), 'Exact capture cgroup directory identity required')
+    raw = {name: read(str(group / name), 16384) for name in ('memory.events', 'memory.stat', 'memory.current', 'memory.peak', 'memory.max', 'memory.swap.max')}
+    require(read(proc + '/cgroup', 4096) == member and read(proc + '/mountinfo', 256 * 1024) == mount and (resolver(group) == before) and (os.getpid() == pid), 'Capture PID, membership, mount or directory changed')
+    sample = {'memoryEvents': pairs(raw['memory.events'], EVENT_REQUIRED), 'memoryStat': pairs(raw['memory.stat'], STAT_REQUIRED), 'memoryPeakBytesObservation': scalar(raw['memory.peak']), 'memoryMaxBytes': scalar(raw['memory.max']), 'memorySwapMaxBytes': scalar(raw['memory.swap.max'])}
+    current = scalar(raw['memory.current'])
+    nonreclaimable = gate(sample)
+    return {**sample, 'unit': CAPTURE_UNIT, 'pid': pid, 'membershipRaw': member.decode('ascii'), 'cgroup': before, 'memoryCurrentBytesObservation': current, 'nonReclaimableBytes': nonreclaimable, 'nonReclaimableMaximumBytes': NON_RECLAIMABLE_MAX, 'nonReclaimableFields': list(NON_RECLAIMABLE_FIELDS), 'samplingIsNotContinuousPeakMeasurement': True, 'peakMaxHighPgscanPgstealAreObservationsOnly': True}
+
+def capture_controller_same_group(before, after):
+    for value in (before, after):
+        require(isinstance(value, dict) and value.get('unit') == CAPTURE_UNIT and (value.get('membershipRaw') == '0::/system.slice/' + CAPTURE_UNIT + '\n'), 'Exact capture controller unit guard required')
+        group = value.get('cgroup')
+        require(isinstance(group, dict) and set(group) == {'path', 'device', 'inode'} and (group['path'] == '/sys/fs/cgroup/system.slice/' + CAPTURE_UNIT) and all((type(group[k]) is int and group[k] >= 0 for k in ('device', 'inode'))), 'Strict numeric capture controller directory identity required')
+        gate(value)
+    require(canonical(before['cgroup']) == canonical(after['cgroup']), 'Capture controller cgroup differs from initial guard')
+
+# Exact AST definitions from capture_controller_output.py
+
+def capture_controller_argv(root):
+    root = pathlib.Path(root)
+    output_require(root.as_posix() == CAPTURE_ROOT.as_posix(), 'Exact separate capture transport root required')
+    return ['/usr/bin/python3', '-B', str(root / 'tooling/run_capture.py'), '--root', str(root)]
+
+def capture_controller_closure(root):
+    expected_argv = capture_controller_argv(root)
+    root = output_root(root)
+    intent = output_read_record(root, 'controller-output-intent.json')
+    expected = {'version': 1, 'childArgv': expected_argv, 'maximumStreamBytes': CONTROLLER_STREAM_LIMIT, 'sentinelBytes': 1, 'namespaceBytes': CONTROLLER_OUTPUT_BYTES, 'newControllerDeadline': False, 'controllerTerminationOnCaptureFailure': False, 'neverRetry': True, 'filesystemClosureClaimed': False}
+    output_require(output_canonical(intent) == output_canonical(expected), 'Exact capture before-child transport admission required')
+    closed = output_read_record(root, 'controller-output-closed.json')
+    output_require(set(closed) == {'version', 'childArgv', 'status', 'errorType', 'streams', 'completeOriginals', 'controllerSignalledByCapture', 'neverRetry'} and type(closed['version']) is int and (closed['version'] == 1) and (closed['childArgv'] == expected_argv) and (type(closed['status']) is int) and (closed['status'] == 0) and (closed['errorType'] is None) and (closed['completeOriginals'] is True) and (closed['controllerSignalledByCapture'] is False) and (closed['neverRetry'] is True) and isinstance(closed['streams'], dict) and (set(closed['streams']) == {'stdout', 'stderr'}), 'Complete exit-zero capture controller transport required')
+    output_require(all((not (root / name).exists() and (not (root / name).is_symlink()) for name in ('controller-output-bootstrap-failure.json', 'controller-output-bootstrap-failure.json.pending'))), 'Capture bootstrap failure retained')
+    for name, record in closed['streams'].items():
+        pin = output_pin(root / ('controller-original.' + name), CONTROLLER_STREAM_LIMIT)
+        output_require(isinstance(record, dict) and set(record) == {'bytes', 'sha256', 'eof', 'overflow', 'unretainedBytesObserved'} and (type(record['bytes']) is int) and ({'bytes': record['bytes'], 'sha256': record['sha256']} == pin) and (record['eof'] is True) and (record['overflow'] is False) and (record['unretainedBytesObserved'] is False), 'Full unchanged capture controller originals required')
+    return closed
+
+# Exact AST definitions from kit_capture_outcome.py
+
+def capture_content_commitment(root):
+    root = pathlib.Path(root)
+    require(root.as_posix() == CAPTURE_ROOT.as_posix(), 'Exact independent capture outcome root required')
+    receipt_pin = output_pin(root / 'capture-receipt.json', 16 * 1024 ** 2)
+    with (root / 'capture-receipt.json').open('rb') as stream:
+        raw = stream.read(16 * 1024 ** 2 + 1)
+    require(receipt_pin == {'bytes': len(raw), 'sha256': sha(raw)} and output_pin(root / 'capture-receipt.json', 16 * 1024 ** 2) == receipt_pin, 'Capture content receipt changed')
+    receipt = exact_json(raw)
+    require(type(receipt.get('version')) is int and receipt['version'] == 2 and (receipt.get('status') == 'REVIEW_CAPTURE_CONTENT_COMPLETE') and (receipt.get('root') == root.as_posix()) and (receipt.get('releaseRoot') == str(ROOT)) and (receipt.get('unit') == CAPTURE_UNIT) and (receipt.get('head') == HEAD) and (receipt.get('image') == IMAGE) and (receipt.get('captureTableSha256') == CAPTURE_TABLE_SHA) and (type(receipt.get('productionSqliteConnections')) is int) and (receipt['productionSqliteConnections'] == 0) and (receipt.get('releaseGateConsumed') is False) and (receipt.get('releaseAuthorityGranted') is False) and (receipt.get('physicalFilesystemClosureClaimed') is False) and (receipt.get('neverRetry') is True) and isinstance(receipt.get('files'), dict) and (set(receipt['files']) == CAPTURE_REVIEW_FILES), 'Exact capture content commitment required')
+    for name, claimed in receipt['files'].items():
+        pin = output_pin(root / name, 16 * 1024 ** 2, 2 if name in CONTROL_FILES else 1)
+        require(isinstance(claimed, dict) and set(claimed) == {'bytes', 'sha256'} and (type(claimed.get('bytes')) is int) and (canonical(pin) == canonical(claimed)), 'Capture original content seal differs')
+        if name in CONTROL_FILES:
+            output_read_record(root, name)
+    require(output_pin(root / 'capture-receipt.json', 16 * 1024 ** 2) == receipt_pin, 'Capture receipt changed after originals')
+    return {'receipt': {'file': 'capture-receipt.json', **receipt_pin}, 'originalFileCount': len(CAPTURE_REVIEW_FILES), 'allOriginalContentPinsVerified': True, 'fullContentSemanticsRechecked': False, 'independentFullSemanticPackageReviewStillRequired': True}
+
+def capture_stop_outcome(root, call, controller_probe, store):
+    stops = stop_capture_owners(call)
+    errors = []
+    controller = None
+    transport = None
+    content = None
+    for phase, operation in (('controller', lambda: controller_probe()), ('transport', lambda: capture_controller_closure(root)), ('content', lambda: capture_content_commitment(root))):
+        try:
+            value = operation()
+            if phase == 'controller':
+                before = output_read_record(pathlib.Path(root), 'controller-memory-before.json')
+                capture_controller_same_group(before, value)
+                controller = value
+            elif phase == 'transport':
+                transport = value
+            else:
+                content = value
+        except BaseException as failure:
+            errors.append({'phase': phase, 'errorType': type(failure).__name__})
+    retention = list(call.retention_errors)
+    if content is not None and (stops['observedAbsentOwners'] or stops['nonvacuousStoppedOwnerCount'] != len(CAPTURE_COMMANDS)):
+        errors.append({'phase': 'retainedOwners', 'errorType': 'IncompleteRetainedCaptureOwnerSet'})
+    complete = not stops['errors'] and (not retention) and (not errors)
+    result = {'version': 1, 'root': CAPTURE_ROOT.as_posix(), 'unit': CAPTURE_UNIT, 'captureTableSha256': CAPTURE_TABLE_SHA, 'status': 'CAPTURE_CONTROLLER_CLOSED_CONTENT_SEALED_PENDING_PACKAGE_REVIEW' if complete else 'CAPTURE_STOPPED_OR_REFUSED_RETAIN_ALL', 'stops': stops, 'errors': errors, 'retentionErrors': retention, 'controller': controller, 'transport': transport, 'contentCommitment': content, 'allChecksComplete': complete, 'fullContentSemanticsRechecked': False, 'releaseAuthorityGranted': False, 'releaseGateConsumed': False, 'productionRestartPermitted': False, 'servingPermitGranted': False, 'neverRetry': True}
+    store(result)
+    return result
+
 
 def main():
     require(os.name=='posix','Linux fresh-capture stop-post required')
@@ -519,9 +804,16 @@ def main():
     call=EmergencyCommands(root,True,namespace='stop-post')
     # Stop attempts precede ALL source, controller, receipt and filesystem
     # authority reads. Capture has no serving permit or production restart.
-    result=stop_capture_owners(call)
-    exclusive_record(root,'stop-post-result.json',result,True,independent_namespace='hook-results')
-    return 0 if not result['errors'] and not call.retention_errors else 1
+    def controller_probe():
+        raws=[]
+        try:
+            return capture_controller_snapshot(evidence=lambda path,raw:raws.append(
+                {'path':path,'rawAscii':raw.decode('ascii'),'sha256':sha(raw),'bytes':len(raw)}))
+        finally:
+            exclusive_record(root,'stop-post-controller-1.json',{'raws':raws},True,independent_namespace='hook-results')
+    result=capture_stop_outcome(root,call,controller_probe,lambda value:
+        exclusive_record(root,'stop-post-result.json',value,True,independent_namespace='hook-results'))
+    return 0 if result['allChecksComplete'] else 1
 
 if __name__=='__main__':
     try:code=main()
