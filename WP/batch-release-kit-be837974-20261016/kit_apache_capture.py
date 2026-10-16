@@ -120,7 +120,7 @@ def capture_apache(root,index,review,production=True,source=CONF):
         'source':str(source),'neverRetry':True,'configurationWillNotBeInstalled':True})+b'\n',production)
     original,held,value=read_apache(source,production)
     value.update(head=HEAD,captureSourceReviewId=review['id'],sourceBinding=binding,
-        capturedAt=datetime.datetime.now(datetime.timezone.utc).isoformat(),neverRetry=True)
+        capturedAt=datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'),neverRetry=True)
     raws=(original,held,canonical(value)+b'\n')
     # Fixed pre-admitted source envelope, separate from the future release4GiB.
     # The capture launcher must reserve this allocation before creating its root.

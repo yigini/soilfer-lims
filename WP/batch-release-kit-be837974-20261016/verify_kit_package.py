@@ -185,6 +185,22 @@ class Package(unittest.TestCase):
             with self.subTest(mode=mode),self.assertRaises((RuntimeError,ValueError)):
                 freeze_manifest(changed,idx,source,4800)
 
+    def test_new_local_capture_timestamp_roundtrips_through_real_package_semantic_checks(self):
+        files,idx,source,*_=package_fixture()
+        from verify_kit_apache_capture import local_directory,original,local_metadata
+        import kit_apache_capture as apache
+        directory=local_directory();input_file=directory/'new-synthetic-apache.conf';input_file.write_bytes(original())
+        output=directory/'new-capture';output.mkdir()
+        # Explicit LOCAL path/stat stand-ins; the real capture, timestamp,
+        # immutable file writer, source binding and package checks run here.
+        with patch.object(apache,'CONF',input_file.as_posix()),patch.object(apache,'metadata',side_effect=local_metadata):
+            refs=apache.capture_apache(output,idx,source,False,input_file)
+            for name in refs:files[name]=(output/name).read_bytes()
+            capture=exact_json(files['capture-receipt.json']);capture['apacheCaptureSha256']=sha(files['apache-capture.json'])
+            files['capture-receipt.json']=canonical(capture)+b'\n'
+            manifest=freeze_manifest(files,idx,source,4800)
+            self.assertEqual(manifest['originalIngressSha256'],sha(input_file.read_bytes()))
+
     def test_independent_files_exclusive_writes_and_link_refusal_use_real_local_files(self):
         FIXTURES.mkdir(exist_ok=True);root=pathlib.Path(tempfile.mkdtemp(prefix='owned-',dir=FIXTURES)).resolve()
         write_new_file(root,'tooling/test.py',b'# SYNTHETIC\n',False)

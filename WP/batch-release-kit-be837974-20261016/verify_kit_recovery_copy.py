@@ -49,7 +49,9 @@ class RecoveryCopy(unittest.TestCase):
         for row in TABLE[:2]:
             budget.begin(row['stage'],10**12)
             for name,count in row['sites'].items():
-                for _ in range(count):budget.claim(name)
+                for _ in range(count):
+                    budget.claim(name)
+                    if name in ('triple','backup','clone','assets'):budget.copy_ceiling(name)
             budget.finish(row['stage'],0)
         budget.begin('issue-206',10**12);budget.claim('clone')
         budget.reserve_recovery()

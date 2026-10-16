@@ -16,6 +16,17 @@ def local_directory():
     return pathlib.Path(tempfile.mkdtemp(prefix='owned-',dir=FIXTURES)).resolve()
 
 
+def local_metadata(value):
+    # LOCAL Windows path/fd creation-time projection only. Production's complete
+    # Linux stat/ctime predicate is unchanged and is not tested by this stand-in.
+    result=ORIGINAL_METADATA(value)
+    if os.name!='posix':result['st_ctime_ns']=0
+    return result
+
+
+ORIGINAL_METADATA=apache.metadata
+
+
 def original(newline=b'\n'):
     # This is a new synthetic configuration, not a retained production original.
     return newline.join([b'# NEW LOCAL synthetic Apache profile',
@@ -23,6 +34,11 @@ def original(newline=b'\n'):
 
 
 class ApacheCapture(unittest.TestCase):
+    def setUp(self):
+        if os.name!='posix':
+            local=patch.object(apache,'metadata',side_effect=local_metadata)
+            local.start();self.addCleanup(local.stop)
+
     def test_supported_complete_profile_preserves_every_original_byte_and_adds_only_https_rule(self):
         for newline in (b'\n',b'\r\n'):
             raw=original(newline);held,proof=apache.render_held(raw)
@@ -94,6 +110,9 @@ class ApacheCapture(unittest.TestCase):
             with self.assertRaises(RuntimeError):apache.capture_apache(output,{}, {'id':6213266960},False,source)
         self.assertEqual(set(refs),{'ingress-original.conf','ingress-held.conf','apache-capture.json'})
         self.assertEqual((output/'ingress-original.conf').read_bytes(),source.read_bytes())
+        from kit_provider import timestamp
+        from retained_contract import exact_json
+        timestamp(exact_json((output/'apache-capture.json').read_bytes())['capturedAt'])
         for name,row in refs.items():
             path=output/name;self.assertEqual(sha(path.read_bytes()),row['sha256']);self.assertEqual(path.stat().st_nlink,1)
         failed=directory/'failed-capture';failed.mkdir()

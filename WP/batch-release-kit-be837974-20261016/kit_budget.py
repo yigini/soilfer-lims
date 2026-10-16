@@ -64,6 +64,7 @@ class Budget:
         self.padding=DB_EQUIVALENTS*self.db-sum(self.db_allowances)
         require(self.padding>=0,'Stage rounding exceeds minimum64/25percent copy allowance')
         self.completed=0;self.active=None;self.claims=collections.Counter()
+        self.copy_admissions=collections.Counter()
         self.recovery=None
         self.recovery_allowance=(RECOVERY_FIXED*125+99)//100
 
@@ -79,7 +80,7 @@ class Budget:
     def begin(self,label,free):
         require(self.recovery is None and self.active is None and self.completed<len(TABLE) and TABLE[self.completed]['stage']==label,'Physical stage order/replay refused')
         require(type(free) is int and free>=disk_required(self.db,self.image,self.assets,self.remaining()),'Complete remaining-copy reserve unavailable')
-        self.active=label;self.claims=collections.Counter()
+        self.active=label;self.claims=collections.Counter();self.copy_admissions=collections.Counter()
 
     def claim(self,site):
         require(self.recovery is None and self.active is not None and site in TABLE[self.completed]['sites'],'Undeclared retained-copy producer')
@@ -90,8 +91,19 @@ class Budget:
         site=CLI_SITE.get(label)
         if site is not None:self.claim(site)
 
+    def copy_ceiling(self,site):
+        require(self.recovery is None and self.active is not None and site in
+            TABLE[self.completed]['sites'] and self.claims.get(site,0)>0,
+            'Copy admission requires its consumed active-stage source claim')
+        require(site in ('triple','backup','clone','assets'),'Only controller file-copy producers use this admission')
+        require(self.copy_admissions[site]<self.claims[site],'Copy admission cannot reuse an earlier producer claim')
+        self.copy_admissions[site]+=1
+        return self.assets if site=='assets' else (self.db*125+99)//100
+
     def finish(self,label,physical_growth):
         require(self.recovery is None and self.active==label and dict(self.claims)==TABLE[self.completed]['sites'],'Missing/changed source copy claims')
+        require(dict(self.copy_admissions)=={site:n for site,n in self.claims.items() if site in
+            ('triple','backup','clone','assets')},'Missing before-create content/entry admissions')
         allowance=self.db_allowances[self.completed]+self.fixed[self.completed]+TABLE[self.completed]['assetCopies']*self.assets+TABLE[self.completed]['logGrowthShareBytes']
         require(type(physical_growth) is int and 0<=physical_growth<=allowance,'Stage physical growth exceeds copy/fixed/evidence allowance')
         result={'stage':label,'declared':TABLE[self.completed],'claims':dict(self.claims),'measuredPhysicalGrowthBytes':physical_growth,

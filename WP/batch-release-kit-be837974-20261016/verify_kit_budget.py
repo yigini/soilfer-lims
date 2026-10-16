@@ -19,7 +19,9 @@ class CopyBudgets(unittest.TestCase):
         for row in TABLE:
             budget.begin(row['stage'],budget.required()+100000000000)
             for site,count in row['sites'].items():
-                for i in range(count):budget.claim(site)
+                for i in range(count):
+                    budget.claim(site)
+                    if site in ('triple','backup','clone','assets'):budget.copy_ceiling(site)
             self.assertLessEqual(budget.required(),initial)
             result=budget.finish(row['stage'],0);seen.append(result)
         self.assertEqual(budget.remaining(),0);self.assertEqual(len(seen),len(TABLE))
@@ -30,7 +32,9 @@ class CopyBudgets(unittest.TestCase):
         with self.assertRaises(RuntimeError):budget.finish('stopped-backup',0)
         with self.assertRaises(RuntimeError):budget.claim('undeclared')
         for site,count in TABLE[0]['sites'].items():
-            for i in range(count):budget.claim(site)
+            for i in range(count):
+                budget.claim(site)
+                if site in ('triple','backup','clone','assets'):budget.copy_ceiling(site)
         with self.assertRaises(RuntimeError):budget.finish('stopped-backup',100000000000)
         with self.assertRaises(RuntimeError):budget.claim('backup')
 

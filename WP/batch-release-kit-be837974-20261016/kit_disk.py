@@ -14,6 +14,7 @@ from kit_budget import Budget,TABLE,TABLE_SHA,DB_EQUIVALENTS,TOTAL_DB_COPIES
 from retained_accounting import mount_guard
 from retained_contract import exact_json,LIVE_DATA,LIVE_ASSETS
 from kit_journal import exclusive_record
+from kit_copy_admission import copy_layout
 
 BOUND=('/opt/lims','/var/lib/docker','/var/lib/containerd')
 ALLOCATION=('/opt/lims/releases','/var/lib/docker','/var/lib/containerd')
@@ -80,8 +81,15 @@ def measure_inputs():
     after={suffix:row(pathlib.Path(str(database)+suffix)) for suffix in before}
     require(before==after,'Stat-only input changed; no retry')
     allocation=lambda r:max(r[4],((r[2]+4095)//4096)*4096)
-    return {'databaseAllocatedBytes':sum(allocation(r) for r in before.values() if r is not None),
-        'assetsAllocatedBytes':sum(allocation(r) for r in asset_rows),'assetDirectoryCount':directories,
+    db_rows=[r for r in before.values() if r is not None]
+    db_layout=copy_layout([r[2] for r in db_rows],1)
+    asset_layout=copy_layout([r[2] for r in asset_rows],directories)
+    db_observed=sum(allocation(r) for r in db_rows);asset_observed=sum(allocation(r) for r in asset_rows)
+    return {'databaseAllocatedBytes':db_observed+db_layout['entryAndInodeAllowanceBytes'],
+        'assetsAllocatedBytes':asset_observed+asset_layout['entryAndInodeAllowanceBytes'],
+        'databaseObservedFileAllocationBytes':db_observed,'assetsObservedFileAllocationBytes':asset_observed,
+        'copyMetadataIsDeclaredAllowanceNotFilesystemMeasurement':True,
+        'databaseContentAndEntries':db_layout,'assetContentAndEntries':asset_layout,'assetDirectoryCount':directories,
         'metadataOnly':True,'productionSqlConnections':0,'productionContentOpens':0}
 
 class Disk:
@@ -98,6 +106,16 @@ class Disk:
         return free
 
     def claim(self,site):self.budget.claim(site);self.check()
+
+    def admit_copy(self,site,destination,plan):
+        ceiling=self.budget.copy_ceiling(site)
+        require(plan['declaredAllocationBytes']<=ceiling,
+            'Copy content/entries exceed the held source-derived producer allowance')
+        self.check()
+        exclusive_record(self.root,'copy-admission-'+sha(str(destination).encode())[:32]+'.json',{
+            'site':site,'destination':str(destination),'layout':plan,'maximumBytes':ceiling,
+            'beforeDestinationCreation':True,'stageTableSha256':TABLE_SHA,'neverRetry':True,
+            'sqliteTemporaryFilesAndGlobalFilesystemClosureClaimed':False},self.sync)
 
     def read(self,argv,label,timeout=15):
         raw,err,_=self.runner.run(argv,label,timeout)

@@ -2,6 +2,7 @@
 import base64, datetime, hashlib, os, pathlib, sqlite3, stat, time
 from retained_contract import *
 from kit_evidence import admit_evidence
+from kit_copy_admission import admit_copy
 
 def claim_copy(check,site):
     owner=getattr(check,'__self__',None)
@@ -35,15 +36,29 @@ def file_state(path,live_evidence=None):
     fd=os.open(str(p),os.O_RDONLY|getattr(os,'O_NOFOLLOW',0))
     try:
         opened=os.fstat(fd);compared_guard((opened.st_ino,opened.st_dev)==(before.st_ino,before.st_dev),'File replaced before open',live_evidence,'file-open-'+sha(str(p).encode())[:24],stat_record(before),stat_record(opened))
+        count=0
         with os.fdopen(fd,'rb',closefd=False) as f:
             while True:
-                b=f.read(1024**2)
+                # One original overflow byte is sufficient to refuse growth.
+                # An evolving source cannot keep this hash read open forever.
+                b=f.read(min(1024**2,before.st_size+1-count))
                 if not b:break
+                count+=len(b)
+                compared_guard(count<=before.st_size,'File grew during sampling; no retry',live_evidence,
+                    'file-growth-'+sha(str(p).encode())[:24],stat_record(before),
+                    {'sampledBytes':count,'sourceFdMetadata':stat_record(os.fstat(fd))})
                 h.update(b)
+        opened_after=os.fstat(fd)
         after=p.stat()
     finally:os.close(fd)
-    keys=['st_dev','st_ino','st_size','st_mtime_ns','st_mode']
-    compared_guard(all(getattr(before,k)==getattr(after,k) for k in keys),'File changed during sampling; no retry',live_evidence,'file-sampling-'+sha(str(p).encode())[:24],stat_record(before),stat_record(after))
+    keys=['st_dev','st_ino','st_size','st_mtime_ns','st_ctime_ns','st_mode','st_nlink','st_uid','st_gid']
+    # Windows projects creation time differently through path/descriptor stat.
+    # Compare each independently there. Linux also requires exact ctime across
+    # both views; no Linux identity guard is projected away.
+    cross_keys=keys if os.name=='posix' else [k for k in keys if k!='st_ctime_ns']
+    stable=(all(getattr(before,k)==getattr(after,k) and getattr(opened,k)==getattr(opened_after,k) for k in keys)
+        and all(getattr(before,k)==getattr(opened_after,k)==getattr(after,k) for k in cross_keys))
+    compared_guard(count==before.st_size and stable,'File changed during sampling; no retry',live_evidence,'file-sampling-'+sha(str(p).encode())[:24],stat_record(before),{'openedAfter':stat_record(opened_after),'pathAfter':stat_record(after),'sampledBytes':count})
     return {'sha256':h.hexdigest(),'bytes':after.st_size,'device':after.st_dev,'inode':after.st_ino,'mtimeNs':after.st_mtime_ns,'mode':stat.S_IMODE(after.st_mode),'allocatedBytes':getattr(after,'st_blocks',0)*512}
 def triple(path,live_evidence=None):
     result={s:file_state(str(path)+s,live_evidence) for s in ['', '-wal','-shm']}
@@ -91,8 +106,10 @@ def copy_file(src,dst,expected,check,live_evidence=None):
 def copy_triple(src,directory,check,live_source=False):
     claim_copy(check,'triple')
     require(type(live_source) is bool and (not live_source or pathlib.Path(src)==pathlib.Path(LIVE_DATA)/'dev.db'),'Production handoff only for the pinned live DB')
-    d=pathlib.Path(directory);require(not d.exists() and not d.is_symlink(),'Triple destination consumed');d.mkdir(mode=0o700)
-    evidence=d if live_source else None;started=utc_now();before=triple(src,evidence);target=d/'dev.db';copied={s:None for s in before}
+    d=pathlib.Path(directory);require(not d.exists() and not d.is_symlink(),'Triple destination consumed')
+    evidence=d.parent if live_source else None;started=utc_now();before=triple(src,evidence)
+    admit_copy(check,'triple',d,[r['bytes'] for r in before.values() if r is not None],1)
+    d.mkdir(mode=0o700);evidence=d if live_source else None;target=d/'dev.db';copied={s:None for s in before}
     for s,row in before.items():
         if row is not None:copied[s]=copy_file(str(src)+s,str(target)+s,row,check,evidence)
     after=triple(src,evidence)
@@ -119,7 +136,9 @@ def copy_tree(src,dst,check,live_source=False,handoff_path=None):
     require(type(live_source) is bool and (not live_source or pathlib.Path(src)==pathlib.Path(LIVE_ASSETS) and handoff_path is not None),'Production asset handoff only for pinned live assets')
     evidence=pathlib.Path(handoff_path).parent if live_source else None
     if live_source:require(pathlib.Path(handoff_path)==pathlib.Path(dst).parent/'assets-snapshot-handoff.json','Asset handoff must remain outside runtime asset tree')
-    started=utc_now();before=tree_state(src,evidence);dst=pathlib.Path(dst);require(not dst.exists() and not dst.is_symlink(),'Asset destination consumed');dst.mkdir(mode=0o700)
+    started=utc_now();before=tree_state(src,evidence);dst=pathlib.Path(dst);require(not dst.exists() and not dst.is_symlink(),'Asset destination consumed')
+    admit_copy(check,'assets',dst,[r['bytes'] for r in before['files'].values()],len(before['directories']))
+    dst.mkdir(mode=0o700)
     for n in sorted(before['directories'],key=lambda v:(len(pathlib.Path(v).parts),v)):
         if n!='.':(dst/n).mkdir(mode=0o700)
     for n,row in before['files'].items():copy_file(pathlib.Path(src)/n,dst/n,row,check,evidence)
@@ -184,9 +203,23 @@ def seal(root,label,source,check,live_source=False):
     state=logical(reader);backup=d/'backup.db'
     # WAL is read by a normal read-only connection to the OWNED reader. immutable=1 is never used here.
     claim_copy(check,'backup')
-    before=sqlite3.connect(reader.as_uri()+'?mode=ro',uri=True,timeout=10);after=sqlite3.connect(str(backup))
-    try:before.backup(after,pages=256,sleep=0.05)
-    finally:after.close();before.close()
+    before=sqlite3.connect(reader.as_uri()+'?mode=ro',uri=True,timeout=10);after=None
+    try:
+        before.execute('PRAGMA query_only=ON');before.execute('BEGIN')
+        # Pin one OWNED-reader snapshot before sizing or creating destination.
+        # A progress callback after a backup step is not a pre-write ceiling.
+        pages=before.execute('PRAGMA page_count').fetchone()[0]
+        page_size=before.execute('PRAGMA page_size').fetchone()[0]
+        require(type(pages) is int and pages>0 and type(page_size) is int and
+            512<=page_size<=65536 and page_size&(page_size-1)==0 and pages*page_size<=BYTE_LIMIT,
+            'Exact bounded owned-reader backup page layout required')
+        admit_copy(check,'backup',backup,[pages*page_size],0)
+        with backup.open('xb') as stream:stream.flush();os.fsync(stream.fileno())
+        after=sqlite3.connect(str(backup));before.backup(after,pages=256,sleep=0.05)
+        require(backup.stat().st_size==pages*page_size,'Owned backup exceeded or differs from pinned source page layout')
+    finally:
+        if after is not None:after.close()
+        before.close()
     backup.chmod(0o400);require(logical(backup)==state,'Detached WAL-aware backup differs')
     handoff=exact_json((d/'raw/snapshot-handoff.json').read_bytes()) if live_source else None
     require((live_source or triple(source)==original) and identity_record(triple(raw))==(handoff['rawCopyByteIdentity'] if live_source else identity_record(original)),'Original or raw master changed while reading owned copy')
@@ -194,8 +227,11 @@ def seal(root,label,source,check,live_source=False):
     check();return backup,state
 def clone_backup(root,label,backup,check):
     claim_copy(check,'clone')
-    d=child_path(root,pathlib.Path(root)/label);require(not d.exists(),'Database clone consumed');d.mkdir(mode=0o700)
-    copy_file(backup,d/'dev.db',file_state(backup),check);(d/'dev.db').chmod(0o600);return d
+    d=child_path(root,pathlib.Path(root)/label);require(not d.exists(),'Database clone consumed')
+    source=file_state(backup);require(source is not None,'Clone source backup missing')
+    admit_copy(check,'clone',d,[source['bytes']],1)
+    d.mkdir(mode=0o700)
+    copy_file(backup,d/'dev.db',source,check);(d/'dev.db').chmod(0o600);return d
 def delta(before_backup,after_backup,new_tables,marker,order_column=False):
     before,after=logical(before_backup),logical(after_backup)
     require(set(after['tables'])-set(before['tables'])==new_tables and set(before['tables'])<=set(after['tables']),'Unexpected table delta')
