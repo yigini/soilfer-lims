@@ -21,7 +21,7 @@ RECOVERY_DB_COPIES=0
 EARLY_PREFIX_MAX_DB_COPIES=5
 RECOVERY_EVIDENCE_SHARE=LOG_RESERVE-3*256*1024**2
 DB_COST={'triple':1,'backup':1,'clone':1,'assets':0,'cli-policy':1,'cli-charts':1,
-         'cli-orders':2,'cli-order-impact':2,'startup-policy-chain':8,'cli-backup':1}
+         'cli-orders':2,'cli-order-impact':2,'startup-policy-chain':8,'cli-backup':1,'seal-directory':0}
 STAGES=(
     ('stopped-backup',{'triple':2,'backup':1,'assets':1},0),
     ('canonical-policy',{'cli-policy':1},0),
@@ -35,6 +35,12 @@ STAGES=(
     ('postflight',{'cli-backup':1},0),
     ('second-sync',{},0),
 )
+# Each controller seal owns one outer directory in addition to its two triple
+# directories. Charge that entry before mkdir, independently of later DB size.
+SEAL_DIRECTORY_BYTES=3*4096
+STAGES=tuple((name,{**sites,**({'seal-directory':sites['backup']} if 'backup' in sites else {})},
+    fixed+sites.get('backup',0)*SEAL_DIRECTORY_BYTES) for name,sites,fixed in STAGES)
+CONTROLLER_COPY_SITES=('triple','backup','clone','assets','seal-directory')
 CLI_SITE={'canonical-policy':'cli-policy','order-impact':'cli-order-impact',
           'first-sync-backup':'cli-backup','postflight-backup':'cli-backup',
           **{'214-'+phase:'cli-charts' for phase in ('dry','apply','repeat')},
@@ -95,15 +101,16 @@ class Budget:
         require(self.recovery is None and self.active is not None and site in
             TABLE[self.completed]['sites'] and self.claims.get(site,0)>0,
             'Copy admission requires its consumed active-stage source claim')
-        require(site in ('triple','backup','clone','assets'),'Only controller file-copy producers use this admission')
+        require(site in CONTROLLER_COPY_SITES,'Only controller file-copy producers use this admission')
         require(self.copy_admissions[site]<self.claims[site],'Copy admission cannot reuse an earlier producer claim')
         self.copy_admissions[site]+=1
+        if site=='seal-directory':return SEAL_DIRECTORY_BYTES
         return self.assets if site=='assets' else (self.db*125+99)//100
 
     def finish(self,label,physical_growth):
         require(self.recovery is None and self.active==label and dict(self.claims)==TABLE[self.completed]['sites'],'Missing/changed source copy claims')
         require(dict(self.copy_admissions)=={site:n for site,n in self.claims.items() if site in
-            ('triple','backup','clone','assets')},'Missing before-create content/entry admissions')
+            CONTROLLER_COPY_SITES},'Missing before-create content/entry admissions')
         allowance=self.db_allowances[self.completed]+self.fixed[self.completed]+TABLE[self.completed]['assetCopies']*self.assets+TABLE[self.completed]['logGrowthShareBytes']
         require(type(physical_growth) is int and 0<=physical_growth<=allowance,'Stage physical growth exceeds copy/fixed/evidence allowance')
         result={'stage':label,'declared':TABLE[self.completed],'claims':dict(self.claims),'measuredPhysicalGrowthBytes':physical_growth,

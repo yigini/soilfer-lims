@@ -1,0 +1,1800 @@
+#!/usr/bin/env node
+'use strict';
+
+/**
+ * Real Disposable Docker Deployment Readiness Acceptance Suite
+ * File: server/scripts/rehearsal_deployment_readiness.cjs
+ *
+ * Verifies default-entrypoint Docker runtime behavior in an isolated environment:
+ * 1. Scenario 1: Default entrypoint empty-volume local mode installation, health, login & password change.
+ * 2. Scenario 2: Container restart on same volume — persistent JWT secret, pre-restart token validation & no reseed.
+ * 3. Scenario 3: Interrupted-init (partial seed) recovery on startup with default entrypoint.
+ * 5. Scenario 5: Multi-lab representative workload, concurrent intake, real data export, background jobs & quiesced backup serialization.
+ * 6. Scenario 6: Populated supported-baseline-to-target upgrade, assets preservation, staged Route B recovery, failure behavior & epoch cursor invalidation.
+ */
+
+const fs = require('fs');
+const path = require('path');
+const cp = require('child_process');
+const net = require('net');
+const os = require('os');
+
+// Preserve the predecessor's full column domain; #180 may add only this one
+// nullable Sample column here. Whole SELECT * equality cannot span that DDL.
+function assertCalculationPredecessorPreserved(before, after) {
+    const tables = ['Sample', 'Result', 'WorkAttempt', 'AuditLog', 'QcMeasurement', 'QcEvaluation', 'BatchDisposition'];
+    const names = [...tables, '_schema_migrations'], same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+    const keys = value => Object.keys(value || {}).sort();
+    const schemaError = () => { throw Error('208 default entrypoint column additions or original schema differ'); };
+    if (!same(keys(before.columns), [...names].sort()) || !same(keys(after.columns), [...names].sort()) ||
+        !same(keys(before.schemas), [...names].sort()) || !same(keys(after.schemas), [...names].sort()) ||
+        !same(keys(before.rows), [...tables].sort()) || !same(keys(after.rows), [...tables].sort())) schemaError();
+    if (before.columns.Sample.some(column => column.name === 'labSampleCode')) schemaError();
+    for (const name of names) {
+        const original = before.columns[name], addition = { cid: original.length, name: 'labSampleCode', type: 'TEXT', notnull: 0, dflt_value: null, pk: 0, hidden: 0 };
+        if (!same(after.columns[name], name === 'Sample' ? [...original, addition] : original)) schemaError();
+        const sql = after.schemas[name];
+        if (typeof sql !== 'string' || typeof before.schemas[name] !== 'string') schemaError();
+        // SQLite inserts this exact segment before the original trailing table
+        // constraints, if any. Keep that tail through the final ')' verbatim.
+        const added = name === 'Sample' ? sql.match(/^([\s\S]*), "labSampleCode" TEXT([\s\S]*\))$/) : null;
+        const retainedSql = name === 'Sample' && added?.[0] === sql ? added[1] + added[2] : sql;
+        if (name === 'Sample' && (!added || added[0] !== sql || (sql.match(/\blabSampleCode\b/gi) || []).length !== 1) ||
+            retainedSql !== before.schemas[name]) schemaError();
+    }
+    for (const [snapshot, side] of [[before, 'before'], [after, 'after']]) {
+        for (const name of names) {
+            const rows = name === '_schema_migrations' ? snapshot.receipts : snapshot.rows[name];
+            if (!Array.isArray(rows) || rows.some(row => !same(keys(row), snapshot.columns[name].map(column => column.name).sort()))) schemaError();
+        }
+        if (side === 'after' && snapshot.rows.Sample.some(row => row.labSampleCode !== null))
+            throw Error('208 default entrypoint backfilled a historical sample code');
+    }
+    const projected = Object.fromEntries(tables.map(name => [name, after.rows[name].map(row =>
+        Object.fromEntries(before.columns[name].map(column => [column.name, row[column.name]])))]));
+    if (!same(projected, before.rows) || before.receipts.some(row => {
+        const retained = after.receipts.filter(receipt => receipt.id === row.id);
+        return retained.length !== 1 || !same(retained[0], row);
+    })) throw Error('199 default entrypoint changed retained analytical, audit or receipt rows');
+}
+
+console.log('================================================================');
+console.log('  REAL DISPOSABLE DOCKER DEPLOYMENT READINESS ACCEPTANCE        ');
+console.log('  Testing Default-Entrypoint Containers on Empty Volumes        ');
+console.log('================================================================\n');
+
+// 1. Check Docker Daemon
+try {
+    cp.execFileSync('docker', ['info'], { stdio: 'ignore' });
+} catch (e) {
+    if (process.env.CI) {
+        console.error('FATAL: Docker daemon is required in CI environment but failed to respond!');
+        process.exit(1);
+    } else {
+        console.log('NOTICE: Docker daemon is not running in this local environment.');
+        console.log('Skipping real Docker deployment readiness rehearsal. This suite executes in GitHub Actions CI (ubuntu-latest).');
+        process.exit(0);
+    }
+}
+
+const IMAGE_TAG = process.env.IMAGE_TAG || 'soilfer-lims:ci';
+
+// Verify image exists and resolve immutable ID
+let IMMUTABLE_IMAGE_ID;
+try {
+    IMMUTABLE_IMAGE_ID = cp.execFileSync('docker', ['image', 'inspect', IMAGE_TAG, '--format', '{{.Id}}'], { encoding: 'utf8' }).trim();
+    console.log(`Image Tag:    ${IMAGE_TAG}`);
+    console.log(`Immutable ID: ${IMMUTABLE_IMAGE_ID}\n`);
+} catch (e) {
+    console.error(`FATAL: Required image '${IMAGE_TAG}' not found in Docker daemon!`);
+    console.error('Build the image first, e.g.: docker build -t soilfer-lims:ci .');
+    process.exit(1);
+}
+
+const TS = Date.now();
+const disposableContainers = [];
+const disposableVolumes = [];
+const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), `lims_deploy_acceptance_${TS}_`));
+
+function registerContainer(id) {
+    disposableContainers.push(id);
+    return id;
+}
+
+function registerVolume(vol) {
+    disposableVolumes.push(vol);
+    return vol;
+}
+
+// #199 pins6091161064/6091749172: verify the actual image's shipped
+// installer, including row/source receipts, without pre-seeding startup.
+function inspectCalculationInstallation(volume, expectedInstalled, expectedDeferred) {
+    const output = cp.execFileSync('docker', ['run', '--rm', '-v', `${volume}:/app/server/prisma`,
+        IMAGE_TAG, 'node', '-e',
+        `const fs=require('node:fs'),crypto=require('node:crypto'),Database=require('better-sqlite3');
+         const file='/app/server/prisma/dev.db',installer=require('./scripts/install_calculation_templates');
+         const hash=()=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
+         const before=hash(),ready=installer.assertCalculationStartupReady(file),again=installer.installCalculationTemplates({dbPath:file,apply:true});
+         if(!ready.ready||ready.references.installedReferenceCount!==${expectedInstalled}||ready.references.deferredReferenceCount!==${expectedDeferred}||
+           again.mode!=='NO_OP'||again.totalChanges!==0||hash()!==before)throw Error('199 installed/deferred restart proof differs');
+         const db=new Database(file,{readonly:true,fileMustExist:true});try{
+           if(db.pragma('integrity_check',{simple:true})!=='ok'||db.pragma('foreign_key_check').length)throw Error('199 integrity differs');
+           const receipts=db.prepare("SELECT * FROM _schema_migrations WHERE id LIKE '199_calculation_reference:%' ORDER BY id").all();
+           if(receipts.length!==${expectedInstalled})throw Error('199 reference receipts differ');
+           if(${expectedDeferred}===11&&(db.prepare('SELECT count(*) n FROM Analysis').get().n||db.prepare('SELECT count(*) n FROM Unit').get().n))
+             throw Error('199 fresh installer inserted catalogue rows');
+           const excluded=new Set(['CalcTemplate','_schema_migrations']);
+           const tables=db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name").all();
+           console.log(JSON.stringify({ready,again,noOpBytesPreserved:true,referenceReceipts:receipts,
+             schema:db.prepare("SELECT type,name,tbl_name,sql FROM sqlite_master WHERE name NOT LIKE 'sqlite_%' ORDER BY type,name").all(),
+             rows:Object.fromEntries(tables.filter(r=>!excluded.has(r.name)).map(({name})=>[name,db.prepare('SELECT * FROM "'+name+'" ORDER BY rowid').all()])),
+             receipts:db.prepare('SELECT * FROM _schema_migrations ORDER BY id').all()}));
+         }finally{db.close();}`], { encoding: 'utf8' }).trim();
+    return JSON.parse(output);
+}
+
+function loadEmptyCalculationCatalogue(volume) {
+    const absent = cp.execFileSync('docker', ['run', '--rm', '-v', `${volume}:/app/server/prisma`, IMAGE_TAG, 'node', '-e',
+        `const Database=require('better-sqlite3');const db=new Database('/app/server/prisma/dev.db',{readonly:true,fileMustExist:true});try{
+           if(db.prepare('SELECT count(*) n FROM Analysis').get().n||db.prepare('SELECT count(*) n FROM Unit').get().n)
+             throw Error('Owned catalogue-load proof refuses existing catalogue rows');console.log('CATALOGUE_PREREQUISITES_ABSENT');
+         }finally{db.close();}`], { encoding: 'utf8', timeout: 120000 });
+    if (!absent.includes('CATALOGUE_PREREQUISITES_ABSENT')) throw Error('Empty catalogue proof missing');
+    // Existing authorities run explicitly on the disposable lab database.
+    // The calculation installer does not insert analyses, units or offers.
+    for (const [script, args] of [['units', []], ['references', []], ['catalogue', ['--confirm']]]) {
+        console.log(`  Loading owned catalogue prerequisite through existing ${script} authority`);
+        cp.execFileSync('docker', ['run', '--rm', '-v', `${volume}:/app/server/prisma`,
+            '-e', 'DATABASE_PATH=/app/server/prisma/dev.db', IMAGE_TAG, 'node', `seeds/${script}.js`, ...args], { stdio: 'pipe', timeout: 120000 });
+    }
+}
+
+function extractTokenAndUser(data) {
+    const token = data.token || data.data?.token;
+    const user = data.user || data.data?.user || {};
+    return { token, user };
+}
+
+function cleanup() {
+    console.log('\n🧹 Cleaning up disposable test resources...');
+    for (const c of disposableContainers) {
+        try { cp.execFileSync('docker', ['rm', '-f', c], { stdio: 'ignore' }); } catch (_) {}
+    }
+    for (const v of disposableVolumes) {
+        try { cp.execFileSync('docker', ['volume', 'rm', '-f', v], { stdio: 'ignore' }); } catch (_) {}
+    }
+    try { fs.rmSync(tmpDir, { recursive: true, force: true }); } catch (_) {}
+    console.log('✓ Cleanup complete.\n');
+}
+
+process.on('exit', cleanup);
+process.on('SIGINT', () => { cleanup(); process.exit(1); });
+process.on('SIGTERM', () => { cleanup(); process.exit(1); });
+
+async function getFreePort() {
+    return new Promise((resolve, reject) => {
+        const srv = net.createServer();
+        srv.listen(0, '127.0.0.1', () => {
+            const port = srv.address().port;
+            srv.close(() => resolve(port));
+        });
+        srv.on('error', reject);
+    });
+}
+
+async function waitForHealth(port, containerName = null, maxWaitMs = 60000) {
+    const start = Date.now();
+    const url = `http://127.0.0.1:${port}/api/health`;
+    while (Date.now() - start < maxWaitMs) {
+        if (containerName) {
+            try {
+                const status = cp.execFileSync('docker', ['inspect', containerName, '--format', '{{.State.Status}}'], { encoding: 'utf8' }).trim();
+                if (status === 'exited' || status === 'dead') {
+                    const logs = cp.execFileSync('docker', ['logs', containerName], { encoding: 'utf8' });
+                    throw new Error(`Container '${containerName}' exited unexpectedly with status '${status}'. Logs:\n${logs}`);
+                }
+            } catch (err) {
+                if (err.message.includes('exited unexpectedly')) throw err;
+            }
+        }
+        try {
+            const res = await fetch(url);
+            if (res.status === 200) {
+                return true;
+            }
+        } catch (_) {}
+        await new Promise(r => setTimeout(r, 1000));
+    }
+    throw new Error(`Timeout waiting for health endpoint on port ${port} after ${maxWaitMs}ms`);
+}
+
+async function runSuite() {
+    // ─────────────────────────────────────────────────────────────
+    // SCENARIO 1: Default-Entrypoint Local Mode First-Start & Login
+    // ─────────────────────────────────────────────────────────────
+    console.log('▶ [Scenario 1] Default Entrypoint Empty-Volume Local Mode First-Start...');
+    const localVol = registerVolume(`lims_vol_local_${TS}`);
+    const localPort = await getFreePort();
+    const localContainer = registerContainer(`lims_c_local_${TS}`);
+
+    // Run container with DEFAULT ENTRYPOINT (no entrypoint override!)
+    cp.execFileSync('docker', [
+        'run', '-d',
+        '--name', localContainer,
+        '-p', `127.0.0.1:${localPort}:3000`,
+        '-v', `${localVol}:/app/server/prisma`,
+        '-e', 'DEPLOYMENT_MODE=local',
+        '-e', 'ADMIN_INITIAL_PASSWORD=InitialSecretLocal123!',
+        '-e', 'PORT=3000',
+        '-e', 'NODE_ENV=production',
+        IMAGE_TAG
+    ]);
+
+    await waitForHealth(localPort, localContainer);
+    console.log(`  ✓ Container healthy on port ${localPort}`);
+    const freshCalculations = inspectCalculationInstallation(localVol, 0, 11);
+    fs.writeFileSync(path.join(tmpDir, '199-fresh-deferred-proof.json'), JSON.stringify(freshCalculations));
+    console.log('  ✓ Fresh shipped entrypoint healthy: schema COMPLETE, 11 references deferred, catalogue inserts 0, reference receipts 0, repeat NO_OP/byte-preserved');
+
+    // Initial Login
+    const loginRes = await fetch(`http://127.0.0.1:${localPort}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: 'admin', password: 'InitialSecretLocal123!' })
+    });
+    if (loginRes.status !== 200) {
+        const txt = await loginRes.text();
+        throw new Error(`Initial login failed with status ${loginRes.status}: ${txt}`);
+    }
+    const loginData = await loginRes.json();
+    const { token: localToken, user: localUser } = extractTokenAndUser(loginData);
+    if (!localToken || !localUser.mustChangePassword) {
+        throw new Error(`Expected token and user.mustChangePassword=true, got: ${JSON.stringify(loginData)}`);
+    }
+    console.log('  ✓ Initial admin login succeeded (mustChangePassword=true)');
+
+    // Mandatory Password Change
+    const changeRes = await fetch(`http://127.0.0.1:${localPort}/api/auth/change-password`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localToken}`
+        },
+        body: JSON.stringify({
+            currentPassword: 'InitialSecretLocal123!',
+            newPassword: 'UpdatedSecretLocal456!'
+        })
+    });
+    if (changeRes.status !== 200) {
+        const txt = await changeRes.text();
+        throw new Error(`Password change failed with status ${changeRes.status}: ${txt}`);
+    }
+    console.log('  ✓ Password change succeeded');
+
+    // Login with new password to get active operational token before container stop
+    const postChangeLoginRes = await fetch(`http://127.0.0.1:${localPort}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: 'admin', password: 'UpdatedSecretLocal456!' })
+    });
+    if (postChangeLoginRes.status !== 200) {
+        throw new Error(`Post-change login failed: ${postChangeLoginRes.status}`);
+    }
+    const { token: preRestartToken } = extractTokenAndUser(await postChangeLoginRes.json());
+
+    // Verify preRestartToken works on operational endpoint before restart
+    const preRestartCheck = await fetch(`http://127.0.0.1:${localPort}/api/labs`, {
+        headers: { 'Authorization': `Bearer ${preRestartToken}` }
+    });
+    if (preRestartCheck.status !== 200) {
+        throw new Error(`Pre-restart token check failed: ${preRestartCheck.status}`);
+    }
+    console.log('  ✓ Pre-restart token issued and verified active on operational API');
+
+    // Inspect persisted secret before restart
+    const secretBefore = cp.execFileSync('docker', [
+        'run', '--rm',
+        '-v', `${localVol}:/app/server/prisma`,
+        IMAGE_TAG,
+        'cat', '/app/server/prisma/.jwt_secret'
+    ], { encoding: 'utf8' }).trim();
+    if (!secretBefore || secretBefore.length < 32) {
+        throw new Error('Persisted .jwt_secret on volume is missing or too short');
+    }
+    console.log(`  ✓ Persisted secret verified on volume (${secretBefore.slice(0, 8)}...)`);
+
+    // Stop container 1
+    cp.execFileSync('docker', ['stop', localContainer]);
+    console.log('  ✓ Quiesced container 1');
+
+    // ─────────────────────────────────────────────────────────────
+    // SCENARIO 2: Container Restart on Same Volume (Stable JWT, No Reseed)
+    // ─────────────────────────────────────────────────────────────
+    console.log('\n▶ [Scenario 2] Container Restart on Same Volume (Secret Persistence & No Reseed)...');
+    const restartContainer = registerContainer(`lims_c_restart_${TS}`);
+    const restartPort = await getFreePort();
+
+    // Start with blank secret on the SAME volume
+    cp.execFileSync('docker', [
+        'run', '-d',
+        '--name', restartContainer,
+        '-p', `127.0.0.1:${restartPort}:3000`,
+        '-v', `${localVol}:/app/server/prisma`,
+        '-e', 'DEPLOYMENT_MODE=local',
+        '-e', 'PORT=3000',
+        '-e', 'NODE_ENV=production',
+        IMAGE_TAG
+    ]);
+
+    await waitForHealth(restartPort, restartContainer);
+    console.log(`  ✓ Restarted container healthy on port ${restartPort}`);
+    const restartedCalculations = inspectCalculationInstallation(localVol, 0, 11);
+    if (JSON.stringify(restartedCalculations.referenceReceipts) !== JSON.stringify(freshCalculations.referenceReceipts) ||
+        JSON.stringify(restartedCalculations.receipts.find(row => row.id === '199_calculation_templates')) !==
+        JSON.stringify(freshCalculations.receipts.find(row => row.id === '199_calculation_templates')))
+        throw Error('199 fresh restart changed its original schema/reference receipts');
+    fs.writeFileSync(path.join(tmpDir, '199-deferred-restart-proof.json'), JSON.stringify(restartedCalculations));
+
+    // Cross-restart assertion: Pre-restart token MUST authenticate without re-login!
+    const preRestartAuthRes = await fetch(`http://127.0.0.1:${restartPort}/api/labs`, {
+        headers: { 'Authorization': `Bearer ${preRestartToken}` }
+    });
+    if (preRestartAuthRes.status !== 200) {
+        throw new Error(`Pre-restart JWT token failed to authenticate after restart: status ${preRestartAuthRes.status}`);
+    }
+    console.log('  ✓ Pre-restart JWT token remains valid across container restart without re-login');
+
+    // Cross-restart assertion: Verify persisted secret is byte-for-byte identical
+    const secretAfter = cp.execFileSync('docker', [
+        'run', '--rm',
+        '-v', `${localVol}:/app/server/prisma`,
+        IMAGE_TAG,
+        'cat', '/app/server/prisma/.jwt_secret'
+    ], { encoding: 'utf8' }).trim();
+    if (secretBefore !== secretAfter) {
+        throw new Error(`JWT secret changed across restart! before=${secretBefore}, after=${secretAfter}`);
+    }
+    console.log('  ✓ Persisted secret byte-for-byte identical across restart');
+
+    // Verify login with updated password
+    const restartLoginRes = await fetch(`http://127.0.0.1:${restartPort}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: 'admin', password: 'UpdatedSecretLocal456!' })
+    });
+    if (restartLoginRes.status !== 200) {
+        throw new Error(`Post-restart login failed with status ${restartLoginRes.status}`);
+    }
+    const restartData = await restartLoginRes.json();
+    const { user: restartUser } = extractTokenAndUser(restartData);
+    if (restartUser.mustChangePassword) {
+        throw new Error('mustChangePassword should be false after previous password change');
+    }
+    console.log('  ✓ Login with updated password confirmed on restarted container');
+
+    // Check logs to ensure seed was NOT re-run
+    const restartLogs = cp.execFileSync('docker', ['logs', restartContainer], { encoding: 'utf8' });
+    if (restartLogs.includes('Seeding initial administrator')) {
+        throw new Error('FATAL: Container reseeded an already-populated database on restart!');
+    }
+    console.log('  ✓ Verified seed.js was safely skipped on restart');
+    console.log('  Preparing 199 conflict proof: quiescing its disposable source containers');
+    cp.execFileSync('docker', ['stop', restartContainer], { timeout: 60000 });
+    const stoppedSourceStates = cp.execFileSync('docker', ['inspect', '--format', '{{.State.Running}}', localContainer, restartContainer],
+        { encoding: 'utf8', timeout: 60000 }).trim().split(/\r?\n/);
+    if (stoppedSourceStates.length !== 2 || stoppedSourceStates.some(state => state !== 'false'))
+        throw Error('199 owned conflict snapshot requires both source writers stopped');
+    console.log('  Source containers stopped; starting bounded WAL-aware owned snapshot/conflict proof');
+
+    // A conflicting controlled prerequisite is injected only into a new owned
+    // backup of this empty lab. Both modes must refuse before any installer
+    // write, and the source volume remains byte-identical.
+    const conflictVolume = registerVolume(`lims_199_unit_conflict_${TS}`);
+    const conflictProofOutput = cp.execFileSync('docker', ['run', '--rm', '-v', `${localVol}:/source:ro`,
+        '-v', `${conflictVolume}:/owned-conflict`, IMAGE_TAG, 'node', '-e',
+        `(()=>{const fs=require('node:fs'),crypto=require('node:crypto'),Database=require('better-sqlite3');
+          const hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
+          const source='/source/dev.db',file='/owned-conflict/dev.db';
+          // The two source containers are stopped and the mount remains read-only.
+          // Copy the complete quiesced SQLite file set, including committed WAL;
+          // SQLite must not create its WAL index on the read-only source mount.
+          const components=['','-wal','-shm','-journal'];
+          const manifest=base=>Object.fromEntries(components.map(suffix=>[suffix,fs.existsSync(base+suffix)?hash(base+suffix):null]));
+          const sourceBefore=manifest(source);
+          if(!sourceBefore[''])throw Error('199 owned source database is absent');
+          if(components.some(suffix=>fs.existsSync(file+suffix)))throw Error('199 snapshot refuses an existing owned destination');
+          for(const suffix of components){
+            if(sourceBefore[suffix]!==null)fs.copyFileSync(source+suffix,file+suffix,fs.constants.COPYFILE_EXCL);
+          }
+          if(JSON.stringify(manifest(file))!==JSON.stringify(sourceBefore)||JSON.stringify(manifest(source))!==JSON.stringify(sourceBefore))
+            throw Error('199 quiesced SQLite snapshot bytes differ');
+          const db=new Database(file,{fileMustExist:true});try{
+            if(db.pragma('integrity_check',{simple:true})!=='ok'||db.pragma('foreign_key_check').length)
+              throw Error('199 owned SQLite snapshot integrity differs');
+            if(db.prepare('SELECT count(*) n FROM Unit').get().n)throw Error('Conflicting-unit proof requires the owned empty catalogue');
+            db.prepare('INSERT INTO Unit(code,display,quantityKind,factorToBase,synonyms,updatedAt) VALUES(?,?,?,?,?,?)')
+              .run('pct_mass','%','RATIO',1,'[]','2026-10-10T00:00:00.000Z');
+          }finally{db.close();}
+          const before=hash(file),installer=require('./scripts/install_calculation_templates');
+          for(const apply of [false,true]){let refused=false;try{installer.installCalculationTemplates({dbPath:file,apply});}
+            catch(error){if(error.code!=='UNIT_CATALOGUE_CONFLICT')throw error;refused=true;}
+            if(!refused||hash(file)!==before)throw Error('199 controlled conflict was not a zero-write refusal');}
+          if(JSON.stringify(manifest(source))!==JSON.stringify(sourceBefore))throw Error('199 owned conflict proof changed a source artifact');
+          console.log(JSON.stringify({code:'UNIT_CATALOGUE_CONFLICT',dryRunAndApplyRefused:true,totalChanges:0,
+            refusedDatabaseBytesPreserved:true,sourceDatabaseBytesPreserved:true,sourceArtifactsPreserved:true,
+            quiescedSqliteFileSetCopied:true,sourceBefore}));
+        })();`], { encoding: 'utf8', timeout: 120000 }).trim();
+    const conflictProof = JSON.parse(conflictProofOutput);
+    if (!conflictProof.dryRunAndApplyRefused || !conflictProof.sourceDatabaseBytesPreserved) throw Error('199 controlled conflict proof missing');
+    fs.writeFileSync(path.join(tmpDir, '199-controlled-unit-conflict-proof.json'), JSON.stringify(conflictProof));
+    console.log('  ✓ Actual shipped installer refuses conflicting pct_mass in both modes, writes 0, owned/source bytes unchanged');
+
+    // Catalogue arrival makes the eleven deferred references installable. The
+    // next shipped entrypoint must add only those references and their receipts.
+    loadEmptyCalculationCatalogue(localVol);
+    const loadedCatalogue = cp.execFileSync('docker', ['run', '--rm', '-v', `${localVol}:/app/server/prisma`, IMAGE_TAG, 'node', '-e',
+        `const Database=require('better-sqlite3'),installer=require('./scripts/install_calculation_templates'),file='/app/server/prisma/dev.db';
+         const plan=installer.installCalculationTemplates({dbPath:file});
+         if(plan.ready||plan.classification!=='COMPLETE'||plan.plannedReferenceInsertCount!==11||plan.references.deferredReferenceCount!==0||plan.totalChanges!==0)
+           throw Error('199 later catalogue did not make exactly eleven references installable');
+         const db=new Database(file,{readonly:true,fileMustExist:true});try{
+           const excluded=new Set(['CalcTemplate','_schema_migrations']);
+           const tables=db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name").all();
+           console.log(JSON.stringify({plan,schema:db.prepare("SELECT type,name,tbl_name,sql FROM sqlite_master WHERE name NOT LIKE 'sqlite_%' ORDER BY type,name").all(),
+             rows:Object.fromEntries(tables.filter(r=>!excluded.has(r.name)).map(({name})=>[name,db.prepare('SELECT * FROM "'+name+'" ORDER BY rowid').all()])),
+             receipts:db.prepare('SELECT * FROM _schema_migrations ORDER BY id').all()}));
+         }finally{db.close();}`], { encoding: 'utf8' }).trim();
+    const beforeCatalogueRestart = JSON.parse(loadedCatalogue);
+    const catalogueContainer = registerContainer(`lims_199_catalogue_${TS}`), cataloguePort = await getFreePort();
+    cp.execFileSync('docker', ['run', '-d', '--name', catalogueContainer, '-p', `127.0.0.1:${cataloguePort}:3000`,
+        '-v', `${localVol}:/app/server/prisma`, '-e', 'DEPLOYMENT_MODE=local', '-e', 'PORT=3000', '-e', 'NODE_ENV=production',
+        '-e', 'ALLOW_PRISMA_DB_PUSH=false', '-e', 'ALLOW_AUTO_SEED=false', '-e', 'DISABLE_BACKGROUND_JOBS=true', IMAGE_TAG]);
+    await waitForHealth(cataloguePort, catalogueContainer);
+    cp.execFileSync('docker', ['stop', catalogueContainer]);
+    const afterCatalogueRestart = inspectCalculationInstallation(localVol, 11, 0);
+    if (JSON.stringify(afterCatalogueRestart.rows) !== JSON.stringify(beforeCatalogueRestart.rows) ||
+        JSON.stringify(afterCatalogueRestart.schema) !== JSON.stringify(beforeCatalogueRestart.schema) ||
+        beforeCatalogueRestart.receipts.some(row => !afterCatalogueRestart.receipts.some(after => JSON.stringify(row) === JSON.stringify(after))) ||
+        afterCatalogueRestart.receipts.length !== beforeCatalogueRestart.receipts.length + 11)
+        throw Error('199 later catalogue startup changed retained rows, schema or receipts');
+    fs.writeFileSync(path.join(tmpDir, '199-later-catalogue-proof.json'), JSON.stringify({ beforeCatalogueRestart, afterCatalogueRestart }));
+    console.log('  ✓ Explicit existing catalogue authorities → next shipped entrypoint adds exactly 11 inactive references/11 receipts; all old rows/schema/receipts retained; repeat NO_OP/byte-preserved');
+
+    // ─────────────────────────────────────────────────────────────
+    // SCENARIO 3: Interrupted-Init (Partial Seed Recovery) in Docker
+    // ─────────────────────────────────────────────────────────────
+    console.log('\n▶ [Scenario 3] Interrupted-Init (Partial Seed Recovery) in Docker...');
+    const partialVol = registerVolume(`lims_vol_partial_${TS}`);
+    const partialPort = await getFreePort();
+    const partialContainer = registerContainer(`lims_c_partial_${TS}`);
+
+    // Initialize schema and inject pre-existing LAB01 with 0 users
+    cp.execFileSync('docker', [
+        'run', '--rm',
+        '-v', `${partialVol}:/app/server/prisma`,
+        IMAGE_TAG,
+        'sh', '-c',
+        `npx prisma db push && node -e "
+            const Database = require('better-sqlite3');
+            const db = new Database('prisma/dev.db');
+            db.prepare(\\"INSERT INTO Lab (id, name, code, country, isActive, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?)\\")
+              .run('pre-lab-1', 'Existing Default Lab', 'LAB01', 'INT', 1, new Date().toISOString(), new Date().toISOString());
+            db.close();
+        "`
+    ]);
+
+    // Boot container with default entrypoint on the partially initialized volume
+    cp.execFileSync('docker', [
+        'run', '-d',
+        '--name', partialContainer,
+        '-p', `127.0.0.1:${partialPort}:3000`,
+        '-v', `${partialVol}:/app/server/prisma`,
+        '-e', 'DEPLOYMENT_MODE=local',
+        '-e', 'ADMIN_INITIAL_PASSWORD=ResumedPass789!',
+        '-e', 'PORT=3000',
+        '-e', 'NODE_ENV=production',
+        IMAGE_TAG
+    ]);
+
+    await waitForHealth(partialPort, partialContainer);
+    console.log(`  ✓ Container booted on partial volume and became healthy on port ${partialPort}`);
+
+    // Login must succeed with ResumedPass789!
+    const partialLoginRes = await fetch(`http://127.0.0.1:${partialPort}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: 'admin', password: 'ResumedPass789!' })
+    });
+    if (partialLoginRes.status !== 200) {
+        throw new Error(`Partial resumption login failed with status ${partialLoginRes.status}`);
+    }
+    console.log('  ✓ Partial initialization was cleanly resumed and admin user created without LAB01 conflict');
+    cp.execFileSync('docker', ['stop', partialContainer]);
+
+    // ─────────────────────────────────────────────────────────────
+    // SCENARIO 4: Global Mode First-Start & SUPER_ADMIN Coordination
+    // ─────────────────────────────────────────────────────────────
+    console.log('\n▶ [Scenario 4] Default Entrypoint Empty-Volume Global Mode First-Start...');
+    const globalVol = registerVolume(`lims_vol_global_${TS}`);
+    const globalPort = await getFreePort();
+    const globalContainer = registerContainer(`lims_c_global_${TS}`);
+
+    cp.execFileSync('docker', [
+        'run', '-d',
+        '--name', globalContainer,
+        '-p', `127.0.0.1:${globalPort}:3000`,
+        '-v', `${globalVol}:/app/server/prisma`,
+        '-e', 'DEPLOYMENT_MODE=global',
+        '-e', 'ADMIN_INITIAL_PASSWORD=GlobalSuperPass123!',
+        '-e', 'PORT=3000',
+        '-e', 'NODE_ENV=production',
+        IMAGE_TAG
+    ]);
+
+    await waitForHealth(globalPort, globalContainer);
+    console.log(`  ✓ Global mode container healthy on port ${globalPort}`);
+
+    const globalLoginRes = await fetch(`http://127.0.0.1:${globalPort}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: 'admin', password: 'GlobalSuperPass123!' })
+    });
+    if (globalLoginRes.status !== 200) {
+        throw new Error(`Global admin login failed with status ${globalLoginRes.status}`);
+    }
+    const globalLoginData = await globalLoginRes.json();
+    const { token: globalInitialToken, user: globalUser } = extractTokenAndUser(globalLoginData);
+    if (globalUser.role !== 'SUPER_ADMIN') {
+        throw new Error(`Expected role SUPER_ADMIN in global mode, got ${globalUser.role}`);
+    }
+    console.log('  ✓ Global SUPER_ADMIN login verified');
+
+    // Update password for global admin
+    const globalChangeRes = await fetch(`http://127.0.0.1:${globalPort}/api/auth/change-password`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${globalInitialToken}`
+        },
+        body: JSON.stringify({
+            currentPassword: 'GlobalSuperPass123!',
+            newPassword: 'UpdatedGlobalPass456!'
+        })
+    });
+    if (globalChangeRes.status !== 200) {
+        throw new Error(`Global password change failed`);
+    }
+
+    // Login with new password to get permanent token
+    const tokenRes = await fetch(`http://127.0.0.1:${globalPort}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: 'admin', password: 'UpdatedGlobalPass456!' })
+    });
+    const { token: superToken } = extractTokenAndUser(await tokenRes.json());
+
+    // Create Laboratory A and Laboratory B via Admin API
+    const labARes = await fetch(`http://127.0.0.1:${globalPort}/api/labs`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${superToken}` },
+        body: JSON.stringify({ id: `lab-alpha-${TS}`, name: 'Accredited Lab Alpha', code: `ALPHA_${TS}`, country: 'GHA' })
+    });
+    const labBRes = await fetch(`http://127.0.0.1:${globalPort}/api/labs`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${superToken}` },
+        body: JSON.stringify({ id: `lab-beta-${TS}`, name: 'Accredited Lab Beta', code: `BETA_${TS}`, country: 'KEN' })
+    });
+    if (labARes.status !== 200 || labBRes.status !== 200) {
+        throw new Error(`Failed to create laboratories: A=${labARes.status}, B=${labBRes.status}`);
+    }
+    const { lab: labA } = await labARes.json();
+    const { lab: labB } = await labBRes.json();
+    console.log(`  ✓ Created Lab Alpha (${labA.code}) and Lab Beta (${labB.code})`);
+
+    // Activate both laboratories
+    await fetch(`http://127.0.0.1:${globalPort}/api/labs/${labA.id}/toggle-active`, {
+        method: 'PATCH',
+        headers: { 'Authorization': `Bearer ${superToken}` }
+    });
+    await fetch(`http://127.0.0.1:${globalPort}/api/labs/${labB.id}/toggle-active`, {
+        method: 'PATCH',
+        headers: { 'Authorization': `Bearer ${superToken}` }
+    });
+    console.log('  ✓ Activated both laboratories');
+
+    // ─────────────────────────────────────────────────────────────
+    // SCENARIO 5: Multi-Lab Workload, Real Export, Schedulers & Quiesced Backup Serialization
+    // ─────────────────────────────────────────────────────────────
+    console.log('\n▶ [Scenario 5] Multi-Lab Workload, Real Export, Schedulers & Quiesced Backup Serialization...');
+    // Create Manager A and Manager B accounts
+    const userARes = await fetch(`http://127.0.0.1:${globalPort}/api/users`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${superToken}` },
+        body: JSON.stringify({
+            username: 'manager_alpha',
+            email: 'mgr_a@alpha.local',
+            password: 'AlphaManagerPass123!',
+            role: 'LAB_MANAGER',
+            labId: labA.id,
+            isActive: true
+        })
+    });
+    const userBRes = await fetch(`http://127.0.0.1:${globalPort}/api/users`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${superToken}` },
+        body: JSON.stringify({
+            username: 'manager_beta',
+            email: 'mgr_b@beta.local',
+            password: 'BetaManagerPass123!',
+            role: 'LAB_MANAGER',
+            labId: labB.id,
+            isActive: true
+        })
+    });
+    if ((userARes.status !== 200 && userARes.status !== 201) || (userBRes.status !== 200 && userBRes.status !== 201)) {
+        throw new Error(`Failed to create managers: A=${userARes.status}, B=${userBRes.status}`);
+    }
+
+    // 1. Manager A Onboarding & Operational Token
+    const loginARes = await fetch(`http://127.0.0.1:${globalPort}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: 'manager_alpha', password: 'AlphaManagerPass123!' })
+    });
+    if (loginARes.status !== 200) throw new Error(`Manager A login failed: ${loginARes.status}`);
+    const { token: initTokenA, user: initUserA } = extractTokenAndUser(await loginARes.json());
+    if (!initUserA.mustChangePassword) throw new Error('Expected Manager A mustChangePassword=true');
+
+    await fetch(`http://127.0.0.1:${globalPort}/api/auth/change-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${initTokenA}` },
+        body: JSON.stringify({ currentPassword: 'AlphaManagerPass123!', newPassword: 'UpdatedAlphaPass789!' })
+    });
+    const permLoginARes = await fetch(`http://127.0.0.1:${globalPort}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: 'manager_alpha', password: 'UpdatedAlphaPass789!' })
+    });
+    const { token: tokenA } = extractTokenAndUser(await permLoginARes.json());
+
+    // 2. Manager B Onboarding & Operational Token
+    const loginBRes = await fetch(`http://127.0.0.1:${globalPort}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: 'manager_beta', password: 'BetaManagerPass123!' })
+    });
+    if (loginBRes.status !== 200) throw new Error(`Manager B login failed: ${loginBRes.status}`);
+    const { token: initTokenB, user: initUserB } = extractTokenAndUser(await loginBRes.json());
+    if (!initUserB.mustChangePassword) throw new Error('Expected Manager B mustChangePassword=true');
+
+    await fetch(`http://127.0.0.1:${globalPort}/api/auth/change-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${initTokenB}` },
+        body: JSON.stringify({ currentPassword: 'BetaManagerPass123!', newPassword: 'UpdatedBetaPass789!' })
+    });
+    const permLoginBRes = await fetch(`http://127.0.0.1:${globalPort}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: 'manager_beta', password: 'UpdatedBetaPass789!' })
+    });
+    const { token: tokenB } = extractTokenAndUser(await permLoginBRes.json());
+
+    // 3. Multi-Lab Sample Intake: Concurrent ingestion across Lab Alpha & Lab Beta
+    const createdAlphaSamples = [];
+    const createdBetaSamples = [];
+    const intakePromises = [];
+    async function acceptArrived(sample, token) {
+        if (sample.status !== 'RECEIVED' || sample.labId != null || sample.labSampleCode != null) throw new Error('Arrival must record custody without allocating a lab code');
+        const accepted = await fetch(`http://127.0.0.1:${globalPort}/api/samples/${encodeURIComponent(sample.id)}/accept`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ checklist: { container: 'PASS', label: 'PASS', quantity: 'PASS', condition: 'PASS', coc: 'PASS' }, receivedMass: 250, massWarningAcknowledged: true })
+        });
+        if (accepted.status !== 200) throw new Error(`Final acceptance failed: ${accepted.status} ${JSON.stringify(await accepted.json())}`);
+        return await accepted.json();
+    }
+    for (let i = 1; i <= 5; i++) {
+        intakePromises.push(
+            fetch(`http://127.0.0.1:${globalPort}/api/samples/walkin`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${tokenA}` },
+                body: JSON.stringify({ submitter: `Farm Alpha ${i}`, description: `Soil Alpha Sample ${i}`, sampleType: 'ROUTINE' })
+            }).then(async r => {
+                if (r.status !== 200 && r.status !== 201) throw new Error(`Alpha sample ${i} failed: ${r.status}`);
+                const resJson = await r.json();
+                createdAlphaSamples.push(await acceptArrived(resJson.sample, tokenA));
+            })
+        );
+        intakePromises.push(
+            fetch(`http://127.0.0.1:${globalPort}/api/samples/walkin`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${tokenB}` },
+                body: JSON.stringify({ submitter: `Farm Beta ${i}`, description: `Soil Beta Sample ${i}`, sampleType: 'ROUTINE' })
+            }).then(async r => {
+                if (r.status !== 200 && r.status !== 201) throw new Error(`Beta sample ${i} failed: ${r.status}`);
+                const resJson = await r.json();
+                createdBetaSamples.push(await acceptArrived(resJson.sample, tokenB));
+            })
+        );
+    }
+    await Promise.all(intakePromises);
+    console.log('  ✓ Ingested 10 representative samples concurrently across Lab Alpha & Lab Beta');
+
+    const expectedAlphaMap = new Map();
+    for (const s of createdAlphaSamples) {
+        expectedAlphaMap.set(s.originalId || s.id, { labId: s.labId, status: s.status || 'RECEIVED' });
+    }
+    const expectedBetaMap = new Map();
+    for (const s of createdBetaSamples) {
+        expectedBetaMap.set(s.originalId || s.id, { labId: s.labId, status: s.status || 'RECEIVED' });
+    }
+
+    // 4. Real Data Export Endpoint: POST /api/exports/data
+    const exportARes = await fetch(`http://127.0.0.1:${globalPort}/api/exports/data`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${tokenA}` },
+        body: JSON.stringify({ type: 'REGISTER' })
+    });
+    if (exportARes.status !== 200) throw new Error(`Manager A export failed with status ${exportARes.status}`);
+    const exportDataA = await exportARes.json();
+    const rowsA = Array.isArray(exportDataA.data) ? exportDataA.data : (Array.isArray(exportDataA.rows) ? exportDataA.rows : []);
+    if (rowsA.length !== expectedAlphaMap.size) throw new Error(`Expected exactly ${expectedAlphaMap.size} rows in Manager A export, got ${rowsA.length}`);
+    if (rowsA.some(r => (r['Sample ID'] && r['Sample ID'].includes('Beta')) || (r['Lab ID'] && r['Lab ID'].includes('Beta')))) {
+        throw new Error('Manager A export contained Lab Beta records!');
+    }
+    const seenAlphaIds = new Set();
+    for (const r of rowsA) {
+        const sId = r['Sample ID'];
+        const lId = r['Lab ID'];
+        if (!sId || typeof sId !== 'string') throw new Error(`Manager A export missing or non-string Sample ID in row: ${JSON.stringify(r)}`);
+        if (!lId || typeof lId !== 'string') throw new Error(`Manager A export missing or non-string Lab ID in row: ${JSON.stringify(r)}`);
+        if (seenAlphaIds.has(sId)) throw new Error(`Manager A export contained duplicate Sample ID: ${sId}`);
+        seenAlphaIds.add(sId);
+        if (!expectedAlphaMap.has(sId)) throw new Error(`Manager A export contained unexpected sample ID: ${sId}`);
+        const exp = expectedAlphaMap.get(sId);
+        if (lId !== exp.labId) throw new Error(`Manager A export Lab ID mismatch for sample ${sId}: expected ${exp.labId}, got ${lId}`);
+        if (r['Status'] !== exp.status) throw new Error(`Manager A export Status mismatch for sample ${sId}: expected ${exp.status}, got ${r['Status']}`);
+    }
+    if (seenAlphaIds.size !== expectedAlphaMap.size) {
+        throw new Error(`Manager A export missing expected sample IDs: expected ${expectedAlphaMap.size}, got ${seenAlphaIds.size}`);
+    }
+    console.log(`  ✓ Manager A real data export returned exactly ${rowsA.length} scoped samples with 1:1 multiplicity and verified accession Lab IDs`);
+
+    const exportBRes = await fetch(`http://127.0.0.1:${globalPort}/api/exports/data`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${tokenB}` },
+        body: JSON.stringify({ type: 'REGISTER' })
+    });
+    if (exportBRes.status !== 200) throw new Error(`Manager B export failed with status ${exportBRes.status}`);
+    const exportDataB = await exportBRes.json();
+    const rowsB = Array.isArray(exportDataB.data) ? exportDataB.data : (Array.isArray(exportDataB.rows) ? exportDataB.rows : []);
+    if (rowsB.length !== expectedBetaMap.size) throw new Error(`Expected exactly ${expectedBetaMap.size} rows in Manager B export, got ${rowsB.length}`);
+    if (rowsB.some(r => (r['Sample ID'] && r['Sample ID'].includes('Alpha')) || (r['Lab ID'] && r['Lab ID'].includes('Alpha')))) {
+        throw new Error('Manager B export contained Lab Alpha records!');
+    }
+    const seenBetaIds = new Set();
+    for (const r of rowsB) {
+        const sId = r['Sample ID'];
+        const lId = r['Lab ID'];
+        if (!sId || typeof sId !== 'string') throw new Error(`Manager B export missing or non-string Sample ID in row: ${JSON.stringify(r)}`);
+        if (!lId || typeof lId !== 'string') throw new Error(`Manager B export missing or non-string Lab ID in row: ${JSON.stringify(r)}`);
+        if (seenBetaIds.has(sId)) throw new Error(`Manager B export contained duplicate Sample ID: ${sId}`);
+        seenBetaIds.add(sId);
+        if (!expectedBetaMap.has(sId)) throw new Error(`Manager B export contained unexpected sample ID: ${sId}`);
+        const exp = expectedBetaMap.get(sId);
+        if (lId !== exp.labId) throw new Error(`Manager B export Lab ID mismatch for sample ${sId}: expected ${exp.labId}, got ${lId}`);
+        if (r['Status'] !== exp.status) throw new Error(`Manager B export Status mismatch for sample ${sId}: expected ${exp.status}, got ${r['Status']}`);
+    }
+    if (seenBetaIds.size !== expectedBetaMap.size) {
+        throw new Error(`Manager B export missing expected sample IDs: expected ${expectedBetaMap.size}, got ${seenBetaIds.size}`);
+    }
+    console.log(`  ✓ Manager B real data export returned exactly ${rowsB.length} scoped samples with 1:1 multiplicity and verified accession Lab IDs`);
+
+    const exportSuperRes = await fetch(`http://127.0.0.1:${globalPort}/api/exports/data`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${superToken}` },
+        body: JSON.stringify({ type: 'REGISTER' })
+    });
+    if (exportSuperRes.status !== 200) throw new Error(`Super Admin export failed: ${exportSuperRes.status}`);
+    const exportSuperData = await exportSuperRes.json();
+    const rowsSuper = Array.isArray(exportSuperData.data) ? exportSuperData.data : (Array.isArray(exportSuperData.rows) ? exportSuperData.rows : []);
+    const expectedSuperMap = new Map([...expectedAlphaMap, ...expectedBetaMap]);
+    if (rowsSuper.length !== expectedSuperMap.size) throw new Error(`Expected exactly ${expectedSuperMap.size} rows in Super Admin export, got ${rowsSuper.length}`);
+    const seenSuperIds = new Set();
+    for (const r of rowsSuper) {
+        const sId = r['Sample ID'];
+        const lId = r['Lab ID'];
+        if (!sId || typeof sId !== 'string') throw new Error(`Super Admin export missing or non-string Sample ID in row: ${JSON.stringify(r)}`);
+        if (!lId || typeof lId !== 'string') throw new Error(`Super Admin export missing or non-string Lab ID in row: ${JSON.stringify(r)}`);
+        if (seenSuperIds.has(sId)) throw new Error(`Super Admin export contained duplicate Sample ID: ${sId}`);
+        seenSuperIds.add(sId);
+        if (!expectedSuperMap.has(sId)) throw new Error(`Super Admin export contained unexpected sample ID: ${sId}`);
+        const exp = expectedSuperMap.get(sId);
+        if (lId !== exp.labId) throw new Error(`Super Admin export Lab ID mismatch for sample ${sId}: expected ${exp.labId}, got ${lId}`);
+        if (r['Status'] !== exp.status) throw new Error(`Super Admin export Status mismatch for sample ${sId}: expected ${exp.status}, got ${r['Status']}`);
+    }
+    if (seenSuperIds.size !== expectedSuperMap.size) {
+        throw new Error(`Super Admin export missing expected sample IDs: expected ${expectedSuperMap.size}, got ${seenSuperIds.size}`);
+    }
+    console.log(`  ✓ Super Admin real data export returned all ${rowsSuper.length} cross-facility samples with complete IDs, multiplicity, and accession Lab IDs`);
+
+    // 5. Background Scheduler Verification
+    const globalLogs = cp.execFileSync('docker', ['logs', globalContainer], { encoding: 'utf8' });
+    if (!globalLogs.includes('[SCHEDULER] Escalation background scheduler initialized')) {
+        throw new Error('FATAL: Background escalation scheduler initialization marker not found in logs!');
+    }
+    console.log('  ✓ Verified background escalation scheduler initialized during container boot');
+
+    // 6. Safe Serialization: Quiesce container before offline backup (no writer race)
+    cp.execFileSync('docker', ['stop', globalContainer]);
+    console.log('  ✓ Quiesced active writer container before generating database backup');
+
+    // 8. Execute verified backup command
+    const backupHostDir = path.join(tmpDir, 'backups');
+    fs.mkdirSync(backupHostDir, { recursive: true });
+
+    const backupOutput = cp.execFileSync('docker', [
+        'run', '--rm',
+        '-v', `${globalVol}:/app/server/prisma`,
+        '-v', `${backupHostDir}:/app/server/backups`,
+        IMAGE_TAG,
+        'node', 'scripts/backup_db.js'
+    ], { encoding: 'utf8' });
+    console.log('  ✓ Pre-restore backup executed cleanly');
+
+    // Extract filename using documented regex pattern
+    const match = backupOutput.match(/(soilfer_lims_backup_|backup_)[^ ')]+\.db\.gz/);
+    if (!match) {
+        throw new Error(`Documented regex failed to match generated backup filename in output: ${backupOutput}`);
+    }
+    const backupFile = match[0];
+    if (!fs.existsSync(path.join(backupHostDir, backupFile))) {
+        throw new Error(`Identified backup file does not exist on disk: ${backupFile}`);
+    }
+    console.log(`  ✓ Bound exact backup artifact matching runbook regex: ${backupFile}`);
+
+    // Verify backup artifact with exact table counts (3 users, 2 labs, 10 samples)
+    const verifyBackupJson = cp.execFileSync('docker', [
+        'run', '--rm',
+        '-v', `${backupHostDir}:/backup`,
+        IMAGE_TAG,
+        'node', '-e',
+        `const { verifyBackup } = require('./scripts/verify_backup');
+         (async () => {
+             const check = await verifyBackup('/backup/${backupFile}');
+             if (!check.valid) {
+                 console.error('Backup verification failed:', check.error);
+                 process.exit(1);
+             }
+             console.log(JSON.stringify(check.tables));
+         })();`
+    ], { encoding: 'utf8' }).trim();
+    const tableCounts = JSON.parse(verifyBackupJson);
+    if (tableCounts.userCount !== 3 || tableCounts.sampleCount !== 10) {
+        throw new Error(`Expected 3 users and 10 samples in backup, got: ${JSON.stringify(tableCounts)}`);
+    }
+    console.log(`  ✓ Backup artifact verification PASSED: Users=${tableCounts.userCount}, Samples=${tableCounts.sampleCount}`);
+
+    // Restore into a fresh target volume
+    const restoredVol = registerVolume(`lims_vol_restored_${TS}`);
+    const restoreOutput = cp.execFileSync('docker', [
+        'run', '--rm',
+        '-v', `${restoredVol}:/app/server/prisma`,
+        '-v', `${backupHostDir}:/app/server/backups`,
+        IMAGE_TAG,
+        'node', 'scripts/restore_db.js', `/app/server/backups/${backupFile}`
+    ], { encoding: 'utf8' });
+    if (!restoreOutput.includes('[RESTORE] SUCCESS')) {
+        throw new Error(`Restore CLI did not report success: ${restoreOutput}`);
+    }
+    console.log('  ✓ Restore into fresh target volume PASSED with epoch invalidation');
+
+    // Boot container on restored volume and verify health & exact data
+    const restoredPort = await getFreePort();
+    const restoredContainer = registerContainer(`lims_c_restored_${TS}`);
+
+    cp.execFileSync('docker', [
+        'run', '-d',
+        '--name', restoredContainer,
+        '-p', `127.0.0.1:${restoredPort}:3000`,
+        '-v', `${restoredVol}:/app/server/prisma`,
+        '-e', 'DEPLOYMENT_MODE=global',
+        '-e', 'PORT=3000',
+        '-e', 'NODE_ENV=production',
+        IMAGE_TAG
+    ]);
+
+    await waitForHealth(restoredPort, restoredContainer);
+    console.log(`  ✓ Restored container healthy on port ${restoredPort}`);
+
+    // Verify login on restored database
+    const verifyRestoredLogin = await fetch(`http://127.0.0.1:${restoredPort}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: 'admin', password: 'UpdatedGlobalPass456!' })
+    });
+    if (verifyRestoredLogin.status !== 200) {
+        throw new Error(`Login on restored database failed with status ${verifyRestoredLogin.status}`);
+    }
+    console.log('  ✓ Post-restore admin login confirmed');
+
+    // Verify Manager Alpha login and sample preservation on restored database
+    const verifyMgrLogin = await fetch(`http://127.0.0.1:${restoredPort}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: 'manager_alpha', password: 'UpdatedAlphaPass789!' })
+    });
+    if (verifyMgrLogin.status !== 200) {
+        throw new Error(`Manager login on restored database failed with status ${verifyMgrLogin.status}`);
+    }
+    const { token: restoredTokenA } = extractTokenAndUser(await verifyMgrLogin.json());
+
+    const restoredSamplesRes = await fetch(`http://127.0.0.1:${restoredPort}/api/samples`, {
+        headers: { 'Authorization': `Bearer ${restoredTokenA}` }
+    });
+    const restoredData = await restoredSamplesRes.json();
+    const restoredCount = Array.isArray(restoredData?.data) ? restoredData.data.length : 0;
+    if (restoredCount !== 5) {
+        throw new Error(`Expected exactly 5 preserved samples for Manager Alpha on restored DB, got ${restoredCount}`);
+    }
+    console.log(`  ✓ Post-restore sample count confirmed (exactly ${restoredCount} samples preserved for Manager Alpha)`);
+    cp.execFileSync('docker', ['stop', restoredContainer]);
+
+    // ─────────────────────────────────────────────────────────────
+    // SCENARIO 6: Populated Supported-Baseline Upgrade, Assets, Staged Route B & Epoch Invalidation
+    // ─────────────────────────────────────────────────────────────
+    console.log('\n▶ [Scenario 6] Populated Supported-Baseline Upgrade, Assets, Staged Route B & Epoch Invalidation...');
+    const upgDataVol = registerVolume(`lims_vol_upg_data_${TS}`);
+    const upgAssetsVol = registerVolume(`lims_vol_upg_assets_${TS}`);
+    const upgBackupDir = path.join(tmpDir, 'upg_backups');
+    fs.mkdirSync(upgBackupDir, { recursive: true });
+
+    // 1. Declare and establish supported baseline image identity (representing v3.5.30 / commit 48d0e52)
+    const BASELINE_COMMIT = '48d0e526ded03232ac8516dd867f4b14923bdb58';
+    const BASELINE_IMAGE_TAG = process.env.BASELINE_IMAGE_TAG || 'soilfer-lims:baseline-v3.5.30';
+    let baselineImageId;
+    try {
+        baselineImageId = cp.execFileSync('docker', ['inspect', BASELINE_IMAGE_TAG, '--format', '{{.Id}}'], { encoding: 'utf8' }).trim();
+    } catch (_) {
+        console.log(`  Building genuine supported baseline image from verified pinned tree ${BASELINE_COMMIT}...`);
+        const baselineTreeDir = path.join(tmpDir, 'baseline_tree');
+        fs.mkdirSync(baselineTreeDir, { recursive: true });
+        try {
+            cp.execFileSync('git', ['rev-parse', '--verify', `${BASELINE_COMMIT}^{commit}`], { encoding: 'utf8' });
+        } catch (e) {
+            throw new Error(`Real supported baseline commit ${BASELINE_COMMIT} is not available in git repository! Cannot synthesize baseline.`);
+        }
+        const tarPath = path.join(tmpDir, 'baseline.tar');
+        const tarBuf = cp.execFileSync('git', ['archive', '--format=tar', BASELINE_COMMIT]);
+        fs.writeFileSync(tarPath, tarBuf);
+        cp.execFileSync('tar', ['-xf', tarPath, '-C', baselineTreeDir]);
+        cp.execFileSync('docker', ['build', '-t', BASELINE_IMAGE_TAG, baselineTreeDir], { stdio: 'inherit' });
+        baselineImageId = cp.execFileSync('docker', ['inspect', BASELINE_IMAGE_TAG, '--format', '{{.Id}}'], { encoding: 'utf8' }).trim();
+    }
+    if (!baselineImageId) {
+        throw new Error(`Failed to obtain Docker image ID for supported baseline image ${BASELINE_IMAGE_TAG}`);
+    }
+    if (baselineImageId === IMMUTABLE_IMAGE_ID) {
+        throw new Error('Baseline image must have a distinct immutable image ID from candidate target image!');
+    }
+    console.log(`  ✓ Bound supported baseline: ${BASELINE_IMAGE_TAG} (Tree: ${BASELINE_COMMIT}, ID: ${baselineImageId})`);
+    console.log(`  ✓ Bound candidate target:   ${IMAGE_TAG} (ID: ${IMMUTABLE_IMAGE_ID})`);
+
+    // 2. Initialize baseline labs, users and signing secret. Samples are
+    // created through this real baseline's own API (#179 pin 5993497236).
+    const baselineSecretHex = '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
+    cp.execFileSync('docker', [
+        'run', '--rm',
+        '-v', `${upgDataVol}:/app/server/prisma`,
+        BASELINE_IMAGE_TAG,
+        'sh', '-c',
+        `mkdir -p /app/server/prisma && printf "${baselineSecretHex}" > /app/server/prisma/.jwt_secret`
+    ]);
+
+    cp.execFileSync('docker', [
+        'run', '--rm',
+        '-v', `${upgDataVol}:/app/server/prisma`,
+        BASELINE_IMAGE_TAG,
+        'sh', '-c',
+        `npx prisma db push && node -e "
+            const Database = require('better-sqlite3');
+            const bcrypt = require('bcryptjs');
+            const db = new Database('prisma/dev.db');
+
+            const now = new Date().toISOString();
+            const hash = bcrypt.hashSync('BaselinePass123!', 10);
+
+            // 2 Baseline Labs
+            db.prepare('INSERT INTO Lab (id, name, code, country, isActive, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?)')
+              .run('lab-base-1', 'Baseline Lab 1', 'BASE01', 'GHA', 1, now, now);
+            db.prepare('INSERT INTO Lab (id, name, code, country, isActive, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?)')
+              .run('lab-base-2', 'Baseline Lab 2', 'BASE02', 'KEN', 1, now, now);
+
+            // 3 Baseline Users (Super Admin + 2 Lab Managers)
+            db.prepare('INSERT INTO User (id, username, password, email, role, isActive, mustChangePassword, tokenVersion, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+              .run('u-base-admin', 'admin', hash, 'admin@baseline.local', 'SUPER_ADMIN', 1, 0, 1, now, now);
+            db.prepare('INSERT INTO User (id, username, password, email, role, labId, isActive, mustChangePassword, tokenVersion, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+              .run('u-base-mgr1', 'base_mgr1', hash, 'mgr1@baseline.local', 'LAB_MANAGER', 'lab-base-1', 1, 0, 1, now, now);
+            db.prepare('INSERT INTO User (id, username, password, email, role, labId, isActive, mustChangePassword, tokenVersion, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+              .run('u-base-mgr2', 'base_mgr2', hash, 'mgr2@baseline.local', 'LAB_MANAGER', 'lab-base-2', 1, 0, 1, now, now);
+
+            db.close();
+        "`
+    ], { encoding: 'utf8' });
+
+    console.log('  ✓ Initialized real baseline database with 2 labs and 3 users');
+
+    // 3. Populate uploaded asset file in assets volume
+    const assetJson = JSON.stringify({ calibrationVersion: '1.0', curve: [0.12, 0.45, 0.89], timestamp: TS });
+    cp.execFileSync('docker', [
+        'run', '--rm',
+        '-v', `${upgAssetsVol}:/app/server/uploads`,
+        BASELINE_IMAGE_TAG,
+        'sh', '-c',
+        `mkdir -p /app/server/uploads && echo '${assetJson}' > /app/server/uploads/spectral_cal_curve.json`
+    ]);
+    console.log('  ✓ Uploaded reference asset (spectral_cal_curve.json) to assets volume');
+
+    // 4. Boot baseline container to establish verified runtime and obtain pre-upgrade operational token
+    const baseContainer = registerContainer(`lims_c_base_${TS}`);
+    const basePort = await getFreePort();
+    cp.execFileSync('docker', [
+        'run', '-d',
+        '--name', baseContainer,
+        '-p', `127.0.0.1:${basePort}:3000`,
+        '-v', `${upgDataVol}:/app/server/prisma`,
+        '-v', `${upgAssetsVol}:/app/server/uploads`,
+        '-e', 'DEPLOYMENT_MODE=global',
+        '-e', 'PORT=3000',
+        '-e', 'NODE_ENV=production',
+        '-e', `JWT_SECRET=${baselineSecretHex}`,
+        BASELINE_IMAGE_TAG
+    ]);
+    await waitForHealth(basePort, baseContainer);
+    console.log(`  ✓ Baseline container healthy on port ${basePort}`);
+
+    const baseLoginRes = await fetch(`http://127.0.0.1:${basePort}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: 'admin', password: 'BaselinePass123!' })
+    });
+    if (baseLoginRes.status !== 200) throw new Error(`Baseline login failed: ${baseLoginRes.status}`);
+    const { token: preUpgradeToken } = extractTokenAndUser(await baseLoginRes.json());
+    const baseApiRes = await fetch(`http://127.0.0.1:${basePort}/api/labs`, {
+        headers: { 'Authorization': `Bearer ${preUpgradeToken}` }
+    });
+    if (baseApiRes.status !== 200) throw new Error(`Baseline API call failed: ${baseApiRes.status}`);
+    console.log('  ✓ Baseline operational login and API access verified');
+
+    // The pinned historical API creates canonical EXPECTED manifest samples.
+    // A route refusal is fatal; there is no raw or Prisma fixture fallback.
+    const expectedSampleCodes = Array.from({ length: 10 }, (_, i) => 'BASE-SMP-' + String(i + 1).padStart(3, '0'));
+    for (let index = 0; index < 2; index++) {
+        const code = `BASE-P${index + 1}`;
+        const projectRes = await fetch(`http://127.0.0.1:${basePort}/api/projects`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${preUpgradeToken}` },
+            body: JSON.stringify({ code, name: `Baseline manifest ${index + 1}`,
+                projectType: 'TEMPLATE_PREDEFINED_IDS', expectedSampleCount: 5,
+                labId: `lab-base-${index + 1}`, sampleIds: expectedSampleCodes.slice(index * 5, index * 5 + 5) })
+        });
+        if (!projectRes.ok) throw new Error(`Baseline manifest ${code} refused (${projectRes.status}): ${await projectRes.text()}`);
+        const project = await projectRes.json();
+        if (project.code !== code || !project.id) throw new Error(`Baseline project response mismatch: ${JSON.stringify(project)}`);
+        const statsRes = await fetch(`http://127.0.0.1:${basePort}/api/projects/${encodeURIComponent(project.id)}/stats`, {
+            headers: { 'Authorization': `Bearer ${preUpgradeToken}` }
+        });
+        if (!statsRes.ok) throw new Error(`Baseline manifest stats refused (${statsRes.status}): ${await statsRes.text()}`);
+        const stats = await statsRes.json();
+        if (stats.total !== 5 || stats.expected !== 5) throw new Error(`Baseline manifest ${code} expected five EXPECTED samples: ${JSON.stringify(stats)}`);
+    }
+    const baselineRecordsOutput = cp.execFileSync('docker', [
+        'run', '--rm', '-v', `${upgDataVol}:/app/server/prisma`, BASELINE_IMAGE_TAG, 'node', '-e',
+        `const Database = require('better-sqlite3');
+         const db = new Database('prisma/dev.db', { readonly: true });
+         const samples = db.prepare('SELECT id, originalId, labId, assignedLab, projectCode, status, createdAt FROM Sample ORDER BY originalId').all();
+         db.close(); console.log(JSON.stringify(samples));`
+    ], { encoding: 'utf8' }).trim();
+    const expectedSampleRecords = JSON.parse(baselineRecordsOutput);
+    if (!Array.isArray(expectedSampleRecords) || expectedSampleRecords.length !== 10) throw new Error('Baseline manifests must create exactly ten samples');
+    for (let index = 0; index < 10; index++) {
+        const row = expectedSampleRecords[index], code = expectedSampleCodes[index];
+        const lab = index < 5 ? 'lab-base-1' : 'lab-base-2';
+        const project = index < 5 ? 'BASE-P1' : 'BASE-P2';
+        if (row.id !== code || row.originalId !== code || row.labId !== lab || row.assignedLab !== lab ||
+            row.projectCode !== project || row.status !== 'EXPECTED' || !row.createdAt) {
+            throw new Error(`Baseline manifest row mismatch for ${code}: ${JSON.stringify(row)}`);
+        }
+    }
+    console.log('  ✓ Created ten EXPECTED samples through baseline project manifests; API and read-only preservation record agree');
+
+    // Quiesce baseline container before creating backup snapshots
+    cp.execFileSync('docker', ['stop', baseContainer]);
+
+    // Preserve the existing stopped-writer epoch/cursor setup after the real
+    // baseline manifests have been captured (#179 pin 5993497236).
+    const initBaselineOut = cp.execFileSync('docker', [
+        'run', '--rm', '-v', `${upgDataVol}:/app/server/prisma`, BASELINE_IMAGE_TAG, 'node', '-e',
+        `const Database = require('better-sqlite3');
+         const exchange = require('./services/exchangeStateService');
+         const { ensureTriggers, encodeCursor, getCurrentEpoch } = exchange;
+         const db = typeof exchange.getDb === 'function' ? exchange.getDb() : new Database('prisma/dev.db');
+         if (typeof exchange.initTables === 'function') exchange.initTables(db);
+         ensureTriggers(db);
+         db.prepare("INSERT OR REPLACE INTO _exchange_meta (key, value, updated_at) VALUES ('epoch', 'epoch-baseline-initial', ?)").run(new Date().toISOString());
+         const cursor = encodeCursor({ lastId: 'BASE-SMP-005', issuedAt: Date.now() }, db);
+         console.log('[BASELINE_CURSOR]:' + cursor);
+         console.log('[BASELINE_EPOCH]:' + getCurrentEpoch(db));
+         db.close();`
+    ], { encoding: 'utf8' });
+    const cursorMatch = initBaselineOut.match(/\[BASELINE_CURSOR\]:(.+)/);
+    const initialCursor = cursorMatch ? cursorMatch[1].trim() : null;
+    if (!initialCursor) throw new Error('Failed to generate initial baseline exchange cursor');
+
+    // 5. Create Route B full volume tarball snapshots
+    cp.execFileSync('docker', [
+        'run', '--rm',
+        '-v', `${upgDataVol}:/data`,
+        '-v', `${upgBackupDir}:/backup`,
+        'alpine', 'tar', '-czf', `/backup/db_snapshot_${TS}.tar.gz`, '-C', '/data', '.'
+    ]);
+    cp.execFileSync('docker', [
+        'run', '--rm',
+        '-v', `${upgAssetsVol}:/assets`,
+        '-v', `${upgBackupDir}:/backup`,
+        'alpine', 'tar', '-czf', `/backup/assets_snapshot_${TS}.tar.gz`, '-C', '/assets', '.'
+    ]);
+    console.log(`  ✓ Generated Route B tarballs: db_snapshot_${TS}.tar.gz & assets_snapshot_${TS}.tar.gz`);
+
+    // 6. Test Route B Staged Recovery Failure Behavior First (Fail Closed on Corrupt Archive)
+    fs.writeFileSync(path.join(upgBackupDir, 'db_corrupt.tar.gz'), 'CORRUPT_INVALID_ARCHIVE_DATA_PAYLOAD_GARBAGE');
+    let corruptStagingFailed = false;
+    try {
+        cp.execFileSync('docker', [
+            'run', '--rm',
+            '-v', `${upgBackupDir}:/backup`,
+            BASELINE_IMAGE_TAG,
+            'sh', '-c',
+            `set -e
+             rm -rf /backup/staging
+             mkdir -p /backup/staging/db
+             tar -xzf /backup/db_corrupt.tar.gz -C /backup/staging/db
+             node -e "
+               const Database = require('better-sqlite3');
+               const db = new Database('/backup/staging/db/dev.db', { readonly: true });
+               const integrity = db.pragma('integrity_check');
+               if (integrity[0]?.integrity_check !== 'ok') process.exit(1);
+             "`
+        ], { stdio: 'pipe' });
+    } catch (_) {
+        corruptStagingFailed = true;
+    }
+    if (!corruptStagingFailed) {
+        throw new Error('FATAL: Corrupted tarball did NOT fail closed during staged extraction!');
+    }
+    console.log('  ✓ Staged recovery safely aborted on corrupt tarball without touching target volume');
+
+    // Assert live volume was untouched
+    const verifyUntouched = cp.execFileSync('docker', [
+        'run', '--rm',
+        '-v', `${upgDataVol}:/app/server/prisma`,
+        IMAGE_TAG,
+        'node', '-e',
+        `const Database = require('better-sqlite3');
+         const db = new Database('prisma/dev.db', { readonly: true });
+         const samples = db.prepare('SELECT count(*) as n FROM Sample').get().n;
+         const integrity = db.pragma('integrity_check');
+         db.close();
+         if (samples !== 10 || integrity[0]?.integrity_check !== 'ok') process.exit(1);
+         console.log('UNTOUCHED_OK');`
+    ], { encoding: 'utf8' });
+    if (!verifyUntouched.includes('UNTOUCHED_OK')) {
+        throw new Error('Target volume was corrupted after failed staging test!');
+    }
+    console.log('  ✓ Live volume verified intact after corrupt staging abort');
+
+    // #191 audit6071516042: use a separate copy of the quiesced, genuine
+    // baseline, before candidate startup can install the successor. This is
+    // a disposable local/CI volume, never a production connection.
+    const repeatProofVolume = registerVolume(`lims_191_release_copy_${TS}`);
+    cp.execFileSync('docker', ['volume', 'create', repeatProofVolume], { stdio: 'pipe' });
+    cp.execFileSync('docker', ['run', '--rm', '-v', `${upgDataVol}:/source:ro`,
+        '-v', `${repeatProofVolume}:/owned`, 'alpine', 'cp', '/source/dev.db', '/owned/dev.db']);
+    const repeatProofOutput = cp.execFileSync('docker', ['run', '--rm',
+        '-v', `${repeatProofVolume}:/owned-191`, IMAGE_TAG, 'node', '-e',
+        `const fs=require('node:fs'),crypto=require('node:crypto'),Database=require('better-sqlite3');
+         const dbPath='/owned-191/dev.db';
+         const hash=()=>crypto.createHash('sha256').update(fs.readFileSync(dbPath)).digest('hex');
+         const fail=message=>{throw new Error(message)};
+         // Same shipped release order, with no backfill approval synthesized
+         // from a dry-run. The real #186 installer refuses unreviewed evidence.
+         for(const [moduleName,method] of [
+           ['workflow_state_guards','installWorkflowStateGuards'],['result_attempt_links','installResultAttemptLinks'],
+           ['sample_holds','installSampleHolds'],['reference_materials','installReferenceMaterials'],
+           ['qc_rules','installQcRules'],['qc_runs','installQcRuns'],['qc_gate_scope','installQcGateScope'],
+           ['proficiency_evidence','installProficiencyEvidence'],['result_equipment_evidence','installResultEquipmentEvidence'],
+           ['workitem_uniqueness','installWorkItemUniqueness'],['work_attempt_contract','installWorkAttemptContract']
+         ])require('./scripts/install_'+moduleName)[method]({dbPath,apply:true});
+         const predecessor=require('./scripts/install_work_attempt_contract');
+         const successor=require('./scripts/install_work_repeat_contract');
+         const before190=predecessor.assertWorkAttemptStartupReady(dbPath);
+         if(before190.classification!=='COMPLETE'||before190.totalChanges!==0)fail('190 prerequisite incomplete');
+         const reader=new Database(dbPath,{readonly:true,fileMustExist:true});
+         const names=reader.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name").all().map(r=>r.name);
+         const quote=name=>'"'+name.replaceAll('"','""')+'"';
+         const columns=Object.fromEntries(names.map(name=>[name,reader.prepare('PRAGMA table_info('+quote(name)+')').all().map(c=>c.name)]));
+         const snapshot=db=>Object.fromEntries(names.map(name=>[name,db.prepare('SELECT '+columns[name].map(quote).join(',')+' FROM '+quote(name)).all()
+           .filter(row=>name!=='_schema_migrations'||row.id!=='191_repeat_correction_contract')
+           .sort((a,b)=>JSON.stringify(a).localeCompare(JSON.stringify(b)))]));
+         const beforeRows=snapshot(reader);
+         const original190=reader.prepare("SELECT details FROM _schema_migrations WHERE id='190_work_attempt_contract'").get().details;
+         const receiptCount=reader.prepare('SELECT count(*) n FROM _schema_migrations').get().n;
+         reader.close();
+         const beforeBytes=hash(),dry=successor.installWorkRepeatContract({dbPath});
+         if(dry.classification!=='PRE_191'||dry.mode!=='DRY_RUN'||dry.totalChanges!==0||hash()!==beforeBytes)fail('191 dry-run changed bytes or was not PRE_191');
+         if(dry.plan.backfilledCount!==0||!dry.plan.originalReasonFieldsPreserved)fail('191 reason plan changed history');
+         if(dry.releaseInventory.blockedWorkItemCount!==0)fail('191 release blocked: submitted/accepted work has RECORDED current owners');
+         const applied=successor.installWorkRepeatContract({dbPath,apply:true});
+         const after190=predecessor.assertWorkAttemptStartupReady(dbPath),after191=successor.assertWorkRepeatStartupReady(dbPath);
+         if(applied.mode!=='APPLIED'||applied.previousClassification!=='PRE_191'||applied.classification!=='COMPLETE'||
+           applied.backfilledCount!==0||applied.newAttemptCount!==0||applied.linkedResultCount!==0||
+           after190.classification!=='COMPLETE'||after191.classification!=='COMPLETE'||
+           after190.totalChanges!==0||after191.totalChanges!==0)fail('191 apply/startup proof differs');
+         const after=new Database(dbPath,{readonly:true,fileMustExist:true});
+         if(JSON.stringify(snapshot(after))!==JSON.stringify(beforeRows))fail('191 changed a retained original row or field');
+         const receipt190=after.prepare("SELECT details FROM _schema_migrations WHERE id='190_work_attempt_contract'").get().details;
+         const receipt191=after.prepare("SELECT details FROM _schema_migrations WHERE id='191_repeat_correction_contract'").get().details;
+         if(receipt190!==original190||after.prepare('SELECT count(*) n FROM _schema_migrations').get().n!==receiptCount+1)fail('191 changed predecessor receipts');
+         if(after.pragma('integrity_check',{simple:true})!=='ok'||after.pragma('foreign_key_check').length)fail('191 integrity differs');
+         after.close();
+         const installedBytes=hash(),again=successor.installWorkRepeatContract({dbPath,apply:true});
+         if(again.mode!=='NO_OP'||again.totalChanges!==0||hash()!==installedBytes)fail('191 repeat apply changed bytes');
+         console.log(JSON.stringify({dry,applied,after190,after191,receipts:{original190:JSON.parse(receipt190),successor191:JSON.parse(receipt191)},
+           retainedCounts:Object.fromEntries(names.map(name=>[name,beforeRows[name].length])),allOriginalRowsAndFieldsPreserved:true,
+           predecessorReceiptBytesPreserved:true,dryRunBytesPreserved:true,noOpBytesPreserved:true}));`
+    ], { encoding: 'utf8' }).trim();
+    const repeatProof = JSON.parse(repeatProofOutput);
+    console.log(`  ✓ Owned baseline → #190 COMPLETE → #191 PRE_191 dry-run → COMPLETE; NULL reasons ${repeatProof.dry.plan.reasonNotRecordedCount}, backfill 0, blocked RECORDED owners ${repeatProof.dry.releaseInventory.blockedWorkItemCount}; all retained rows and both receipts verified; NO_OP writes 0`);
+
+    // The same disposable copy now supplies #192's real predecessor receipts.
+    // Installation creates no analytical choices and never repairs history.
+    const selectionProofOutput=cp.execFileSync('docker',['run','--rm','-v',`${repeatProofVolume}:/owned-192`,IMAGE_TAG,'node','-e',
+        `const fs=require('node:fs'),crypto=require('node:crypto'),Database=require('better-sqlite3');
+         const installer=require('./scripts/install_reported_value_selections'),dbPath='/owned-192/dev.db';
+         const hash=()=>crypto.createHash('sha256').update(fs.readFileSync(dbPath)).digest('hex');
+         const fail=message=>{throw Error(message)};
+         const snapshot=()=>{const db=new Database(dbPath,{readonly:true,fileMustExist:true});try{
+           const names=db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name<>'ReportedValueSelection' ORDER BY name").all();
+           return Object.fromEntries(names.map(({name})=>[name,db.prepare('SELECT * FROM "'+name.replaceAll('"','""')+'" ORDER BY rowid').all()
+             .filter(row=>name!=='_schema_migrations'||row.id!=='192_reported_value_selection')]));
+         }finally{db.close()}};
+         const before=hash(),retained=JSON.stringify(snapshot()),dry=installer.installReportedValueSelections({dbPath});
+         if(dry.classification!=='PRE_192'||dry.totalChanges!==0||hash()!==before)fail('192 dry-run differs');
+         const applied=installer.installReportedValueSelections({dbPath,apply:true}),ready=installer.assertReportedValueStartupReady(dbPath);
+         if(applied.classification!=='COMPLETE'||applied.newSelectionCount!==0||ready.totalChanges!==0||JSON.stringify(snapshot())!==retained)fail('192 retained history differs');
+         const installed=hash(),again=installer.installReportedValueSelections({dbPath,apply:true});
+         if(again.mode!=='NO_OP'||again.totalChanges!==0||hash()!==installed)fail('192 repeat installation changed bytes');
+         console.log(JSON.stringify({dry,applied,ready,retainedRowsPreserved:true,dryRunBytesPreserved:true,noOpBytesPreserved:true}));`
+    ],{encoding:'utf8'}).trim();
+    const selectionProof=JSON.parse(selectionProofOutput);
+    if(!selectionProof.retainedRowsPreserved)throw Error('192 rehearsal retained-data proof missing');
+    console.log('  ✓ Owned #191 COMPLETE → #192 PRE_192 dry-run → COMPLETE; retained history unchanged, new selections 0, NO_OP writes 0');
+
+    // Keep the direct PRE_201 rehearsal before the full target entrypoint,
+    // which itself installs #201. The subsequent #199 scenario still uses
+    // the unmodified default entrypoint and retains this new receipt.
+    // Explicit installer-module rehearsal; command arguments bypass the
+    // default entrypoint. Default entrypoint health is exercised separately.
+    const crossCheckProofOutput=cp.execFileSync('docker',['run','--rm','-v',`${repeatProofVolume}:/owned-201`,IMAGE_TAG,'node','-e',
+        `const fs=require('node:fs'),crypto=require('node:crypto'),Database=require('better-sqlite3');
+         const installer=require('./scripts/install_cross_check_evaluations'),dbPath='/owned-201/dev.db';
+         const hash=()=>crypto.createHash('sha256').update(fs.readFileSync(dbPath)).digest('hex');
+         const fail=message=>{throw Error(message)};
+         const snapshot=()=>{const db=new Database(dbPath,{readonly:true,fileMustExist:true});try{
+           const names=db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name<>'CrossCheckEvaluation' ORDER BY name").all();
+           return {objects:db.prepare("SELECT type,name,tbl_name,sql FROM sqlite_master WHERE name NOT LIKE 'sqlite_%' AND tbl_name<>'CrossCheckEvaluation' ORDER BY type,name").all(),
+             rows:Object.fromEntries(names.map(({name})=>[name,db.prepare('SELECT * FROM "'+name.replaceAll('"','""')+'" ORDER BY rowid').all()
+               .filter(row=>name!=='_schema_migrations'||row.id!=='201_cross_check_evaluations')]))};
+         }finally{db.close()}};
+         const before=hash(),retained=JSON.stringify(snapshot()),dry=installer.installCrossCheckEvaluations({dbPath});
+         if(dry.classification!=='PRE_201'||dry.totalChanges!==0||dry.backfilledCount!==0||hash()!==before)fail('201 dry-run differs');
+         const applied=installer.installCrossCheckEvaluations({dbPath,apply:true}),ready=installer.assertCrossCheckStartupReady(dbPath);
+         if(applied.classification!=='COMPLETE_201'||applied.newEvaluationCount!==0||applied.backfilledCount!==0||ready.totalChanges!==0||JSON.stringify(snapshot())!==retained)fail('201 retained evidence differs');
+         const installed=hash(),again=installer.installCrossCheckEvaluations({dbPath,apply:true});
+         if(again.mode!=='NO_OP'||again.totalChanges!==0||hash()!==installed||JSON.stringify(snapshot())!==retained)fail('201 repeat installation changed evidence or bytes');
+         console.log(JSON.stringify({scenario:'cross-check-installer-pre201',invocation:'DIRECT_INSTALLER_MODULE',dry,applied,ready,again,retainedRowsAndObjectsPreserved:true,dryRunBytesPreserved:true,noOpBytesPreserved:true}));`
+    ],{encoding:'utf8'}).trim();
+    const crossCheckProof=JSON.parse(crossCheckProofOutput);
+    if(!crossCheckProof.retainedRowsAndObjectsPreserved||!crossCheckProof.noOpBytesPreserved)throw Error('201 rehearsal preservation proof missing');
+    console.log('  ✓ cross-check-installer-pre201: direct installer PRE_201 dry-run → COMPLETE_201; retained rows/objects/receipts preserved, evidence/backfill0, repeat NO_OP writes0/bytes preserved');
+    console.log(JSON.stringify({crossCheckInstallerProof:crossCheckProof}));
+
+    // The supported baseline predates #272. Use its shipped additive owner
+    // before the #199 prerequisite check; never preinstall calculations here.
+    const rawInputProofOutput = cp.execFileSync('docker', ['run', '--rm',
+        '-v', `${repeatProofVolume}:/owned-272`, IMAGE_TAG, 'node', '-e',
+        `const fs=require('node:fs'),crypto=require('node:crypto'),Database=require('better-sqlite3');
+         const dbPath='/owned-272/dev.db',installer=require('./scripts/install_result_raw_input');
+         const hash=()=>crypto.createHash('sha256').update(fs.readFileSync(dbPath)).digest('hex');
+         const reader=new Database(dbPath,{readonly:true,fileMustExist:true});
+         const names=reader.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name").all().map(row=>row.name);
+         const quote=name=>'"'+name.replaceAll('"','""')+'"';
+         const columns=Object.fromEntries(names.map(name=>[name,reader.prepare('PRAGMA table_xinfo('+quote(name)+')').all().map(row=>row.name)]));
+         const snapshot=db=>JSON.stringify(Object.fromEntries(names.map(name=>[name,
+           db.prepare('SELECT '+columns[name].map(quote).join(',')+' FROM '+quote(name)+' ORDER BY rowid').all()])));
+         const retained=snapshot(reader);reader.close();
+         const before=hash(),dry=installer.installResultRawInput({dbPath});
+         if(dry.classification!=='ABSENT'||dry.backfillCount!==0||dry.totalChanges!==0||hash()!==before)throw Error('272 owned dry-run differs');
+         const applied=installer.installResultRawInput({dbPath,apply:true});
+         const after=new Database(dbPath,{readonly:true,fileMustExist:true});
+         try{
+           if(applied.classification!=='ALREADY_PRESENT'||applied.previousClassification!=='ABSENT'||applied.backfillCount!==0||
+             applied.counts.recordedRawInputs!==0||snapshot(after)!==retained||
+             after.pragma('integrity_check',{simple:true})!=='ok'||after.pragma('foreign_key_check').length)throw Error('272 owned original evidence differs');
+         }finally{after.close()}
+         const installed=hash(),again=installer.installResultRawInput({dbPath,apply:true});
+         if(again.mode!=='NO_OP'||again.totalChanges!==0||again.backfillCount!==0||hash()!==installed)throw Error('272 owned repeat differs');
+         console.log(JSON.stringify({dry,applied,again,allOriginalRowsFieldsAndReceiptsPreserved:true,noOpBytesPreserved:true}));`
+    ], { encoding: 'utf8', timeout: 120000 }).trim();
+    const rawInputProof = JSON.parse(rawInputProofOutput);
+    if (!rawInputProof.allOriginalRowsFieldsAndReceiptsPreserved || !rawInputProof.noOpBytesPreserved)
+        throw Error('272 owned prerequisite preservation proof missing');
+    console.log('  ✓ Owned #272 ABSENT → shipped additive rawInput owner → ALREADY_PRESENT; all old fields/receipts preserved, backfill0, repeat NO_OP bytes unchanged');
+
+    // #199 pin6090475511: this copy still has no calculation tables. Exercise
+    // the shipped default entrypoint, rather than preinstalling its successor.
+    loadEmptyCalculationCatalogue(repeatProofVolume);
+    const calculationBeforeOutput = cp.execFileSync('docker', ['run', '--rm',
+        '-v', `${repeatProofVolume}:/owned-199`, IMAGE_TAG, 'node', '-e',
+        `const fs=require('node:fs'),crypto=require('node:crypto'),Database=require('better-sqlite3');
+         const dbPath='/owned-199/dev.db',before=crypto.createHash('sha256').update(fs.readFileSync(dbPath)).digest('hex');
+         const dry=require('./scripts/install_calculation_templates').installCalculationTemplates({dbPath});
+         if(dry.classification!=='PRE_199'||dry.plannedReferenceInsertCount!==11||dry.references.deferredReferenceCount!==0||dry.plannedUnitInsertCount!==0||dry.totalChanges!==0||dry.backfillCount!==0||
+           crypto.createHash('sha256').update(fs.readFileSync(dbPath)).digest('hex')!==before)throw Error('199 entrypoint predecessor differs');
+         const db=new Database(dbPath,{readonly:true,fileMustExist:true});
+         try { const tables=['Sample','Result','WorkAttempt','AuditLog','QcMeasurement','QcEvaluation','BatchDisposition'];
+           const names=[...tables,'_schema_migrations'],quote=name=>'"'+name.replaceAll('"','""')+'"';
+           console.log(JSON.stringify({dry,
+             columns:Object.fromEntries(names.map(name=>[name,db.prepare('PRAGMA table_xinfo('+quote(name)+')').all()])),
+             schemas:Object.fromEntries(names.map(name=>[name,db.prepare('SELECT sql FROM sqlite_master WHERE name=?').get(name).sql])),
+             rows:Object.fromEntries(tables.map(name=>[name,db.prepare('SELECT * FROM "'+name+'" ORDER BY rowid').all()])),
+             receipts:db.prepare('SELECT * FROM _schema_migrations ORDER BY id').all()}));
+         }finally{db.close();}`
+    ], { encoding: 'utf8' }).trim();
+    const calculationBefore = JSON.parse(calculationBeforeOutput);
+    // #210 uses this same owned predecessor and the actual shipped default
+    // entrypoint. Keep #199's PRE_199 proof intact: neither successor is
+    // preinstalled by this rehearsal.
+    const amendmentBeforeOutput=cp.execFileSync('docker',['run','--rm',
+        '-v',`${repeatProofVolume}:/owned-210`,IMAGE_TAG,'node','-e',
+        `const fs=require('node:fs'),crypto=require('node:crypto'),Database=require('better-sqlite3');
+         const dbPath='/owned-210/dev.db',hash=()=>crypto.createHash('sha256').update(fs.readFileSync(dbPath)).digest('hex');
+         const before=hash(),dry=require('./scripts/install_sample_amendment_authorisation').installSampleAmendmentAuthorisation({dbPath});
+         if(dry.classification!=='PRE_210'||dry.mode!=='DRY_RUN'||dry.totalChanges!==0||dry.backfilledCount!==0||hash()!==before)
+           throw Error('210 entrypoint predecessor or dry-run differs');
+         const db=new Database(dbPath,{readonly:true,fileMustExist:true});
+         try{const names=db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name").all().map(row=>row.name);
+           const quote=name=>'"'+name.replaceAll('"','""')+'"';
+           const columns=Object.fromEntries(names.map(name=>[name,db.prepare('PRAGMA table_xinfo('+quote(name)+')').all().filter(row=>row.hidden===0).map(row=>row.name)]));
+           console.log(JSON.stringify({dry,columns,rows:Object.fromEntries(names.map(name=>[name,db.prepare('SELECT * FROM '+quote(name)+' ORDER BY rowid').all()])),
+             receipts:db.prepare('SELECT * FROM _schema_migrations ORDER BY id').all()}));
+         }finally{db.close();}`
+    ],{encoding:'utf8'}).trim();
+    const amendmentBefore=JSON.parse(amendmentBeforeOutput);
+    if (amendmentBefore.columns.OrderLine.includes('workItemId')) throw Error('209 default-entrypoint predecessor already contains its new link');
+    const policyBeforeOutput=cp.execFileSync('docker',['run','--rm',
+        '-v',`${repeatProofVolume}:/owned-policy`,IMAGE_TAG,'node','-e',
+        `const fs=require('node:fs'),crypto=require('node:crypto');
+         const dbPath='/owned-policy/dev.db',hash=()=>Object.fromEntries(['','-wal','-shm'].map(suffix=>[suffix,
+           fs.existsSync(dbPath+suffix)?crypto.createHash('sha256').update(fs.readFileSync(dbPath+suffix)).digest('hex'):null]));
+         const before=hash(),dry=require('./scripts/install_lab_policy_schema').installLabPolicySchema({dbPath});
+         if(dry.classification!=='ABSENT'||dry.mode!=='DRY_RUN'||dry.totalChanges!==0||!dry.plannedSql||JSON.stringify(hash())!==JSON.stringify(before))
+           throw Error('Policy PRE_199 absence/dry-run proof differs');
+         console.log(JSON.stringify({dry,dbWalShmPreserved:true}));`
+    ],{encoding:'utf8'}).trim();
+    const policyBefore=JSON.parse(policyBeforeOutput);
+    const calculationContainer = registerContainer(`lims_199_entrypoint_${TS}`), calculationPort = await getFreePort();
+    cp.execFileSync('docker', ['run', '-d', '--name', calculationContainer,
+        '-p', `127.0.0.1:${calculationPort}:3000`, '-v', `${repeatProofVolume}:/app/server/prisma`,
+        '-e', 'DEPLOYMENT_MODE=global', '-e', 'PORT=3000', '-e', 'NODE_ENV=production',
+        '-e', 'ALLOW_PRISMA_DB_PUSH=false', '-e', 'ALLOW_AUTO_SEED=false', '-e', 'DISABLE_BACKGROUND_JOBS=true', IMAGE_TAG]);
+    await waitForHealth(calculationPort, calculationContainer);
+    cp.execFileSync('docker', ['stop', calculationContainer]);
+    const calculationStartupLog = cp.execFileSync('docker', ['logs', calculationContainer], { encoding: 'utf8' });
+    if (!calculationStartupLog.includes('Installing inactive calculation references and evidence guards') ||
+        !calculationStartupLog.includes('"previousClassification": "PRE_199"') ||
+        !calculationStartupLog.includes('CALCULATION_STARTUP_READY')) throw Error('199 default-entrypoint installation proof missing');
+    fs.writeFileSync(path.join(tmpDir, '199-default-entrypoint.log'), calculationStartupLog);
+    if(!calculationStartupLog.includes('Installing canonical lab policy schema prerequisite')||
+        !calculationStartupLog.includes('"previousClassification": "ABSENT"')||
+        !calculationStartupLog.includes('LAB_POLICY_STARTUP_READY')||!calculationStartupLog.includes('CONTROL_CHART_STARTUP_READY')||
+        calculationStartupLog.indexOf('LAB_POLICY_STARTUP_READY')>=calculationStartupLog.indexOf('CONTROL_CHART_STARTUP_READY'))
+        throw Error('Policy/214 default-entrypoint prerequisite order proof missing');
+    const policyAfterOutput=cp.execFileSync('docker',['run','--rm',
+        '-v',`${repeatProofVolume}:/owned-policy`,IMAGE_TAG,'node','-e',
+        `const fs=require('node:fs'),crypto=require('node:crypto'),Database=require('better-sqlite3');
+         const dbPath='/owned-policy/dev.db',hash=()=>Object.fromEntries(['','-wal','-shm'].map(suffix=>[suffix,
+           fs.existsSync(dbPath+suffix)?crypto.createHash('sha256').update(fs.readFileSync(dbPath+suffix)).digest('hex'):null]));
+         const before=hash(),installer=require('./scripts/install_lab_policy_schema');
+         const ready=installer.assertLabPolicyStartupReady(dbPath),again=installer.installLabPolicySchema({dbPath,apply:true});
+         const inspected=ready.readonlySnapshot.path;
+         const charts=require('./scripts/install_control_charts').assertControlChartStartupReady(inspected);
+         const db=new Database(inspected,{readonly:true,fileMustExist:true});
+         const counts=Object.fromEntries(['LabPolicy','LabPolicyOverride'].map(name=>[name,db.prepare('SELECT count(*) n FROM "'+name+'"').get().n]));db.close();
+         if(ready.classification!=='PRESENT'||again.mode!=='NO_OP'||again.totalChanges!==0||charts.classification!=='COMPLETE_214'||charts.totalChanges!==0||
+           Object.values(counts).some(Boolean)||JSON.stringify(ready.readonlySnapshot.originalDbWalShmSha256)!==JSON.stringify(before)||
+           JSON.stringify(hash())!==JSON.stringify(before))throw Error('Policy/214 startup or repeat preservation differs');
+         console.log(JSON.stringify({ready,again,charts,counts,dbWalShmPreserved:true,secondaryInspectionsOnRetainedSnapshot:true}));`
+    ],{encoding:'utf8'}).trim();
+    const policyAfter=JSON.parse(policyAfterOutput);
+    console.log(JSON.stringify({policyChartEntrypointProof:{scenario:'PRE_199-default-entrypoint-COMPLETE_214',before:policyBefore,after:policyAfter}}));
+    if (!calculationStartupLog.includes('ORDER_REVISION_STARTUP_READY') ||
+        calculationStartupLog.indexOf('CONTROL_CHART_STARTUP_READY') >= calculationStartupLog.indexOf('ORDER_REVISION_STARTUP_READY'))
+        throw Error('209 default-entrypoint prerequisite order proof missing');
+    const orderAfterOutput = cp.execFileSync('docker', ['run','--rm',
+        '-v',`${repeatProofVolume}:/owned-order`,IMAGE_TAG,'node','-e',
+        `const fs=require('node:fs'),crypto=require('node:crypto');
+         const dbPath='/owned-order/dev.db',hash=()=>Object.fromEntries(['','-wal','-shm'].map(suffix=>[suffix,
+           fs.existsSync(dbPath+suffix)?crypto.createHash('sha256').update(fs.readFileSync(dbPath+suffix)).digest('hex'):null]));
+         const before=hash(),owner=require('./scripts/install_order_revisions');
+         const ready=owner.assertOrderRevisionStartupReady(dbPath),again=owner.installOrderRevisions({dbPath,apply:true});
+         const impact=require('./scripts/order_revision_impact').collectOrderRevisionImpact({dbPath});
+         if(ready.classification!=='COMPLETE_209'||ready.totalChanges!==0||again.mode!=='NO_OP'||again.totalChanges!==0||
+           ready.receipt.originalRowsPreserved!==true||!impact.originalFilesPreserved||impact.totalChanges!==0||
+           process.platform==='linux'&&!impact.retainedAllocation.allocationMeasured||
+           JSON.stringify(hash())!==JSON.stringify(before))throw Error('209 default-entrypoint repeat or read-only preservation differs');
+         console.log(JSON.stringify({ready,again,impact,dbWalShmPreserved:true,secondaryInspectionsOnRetainedSnapshot:true}));`
+    ], { encoding:'utf8' }).trim();
+    const orderAfter = JSON.parse(orderAfterOutput);
+    const calculationAfterOutput = cp.execFileSync('docker', ['run', '--rm',
+        '-v', `${repeatProofVolume}:/owned-199`, IMAGE_TAG, 'node', '-e',
+        `const fs=require('node:fs'),crypto=require('node:crypto'),Database=require('better-sqlite3');
+         const dbPath='/owned-199/dev.db',installer=require('./scripts/install_calculation_templates');
+         const ready=installer.assertCalculationStartupReady(dbPath),before=crypto.createHash('sha256').update(fs.readFileSync(dbPath)).digest('hex');
+         const again=installer.installCalculationTemplates({dbPath,apply:true});
+         if(!ready.ready||ready.references.installedReferenceCount!==11||ready.references.deferredReferenceCount!==0||ready.totalChanges!==0||again.mode!=='NO_OP'||again.totalChanges!==0||
+           crypto.createHash('sha256').update(fs.readFileSync(dbPath)).digest('hex')!==before)throw Error('199 repeat changed bytes');
+         const db=new Database(dbPath,{readonly:true,fileMustExist:true});
+         try { const tables=['Sample','Result','WorkAttempt','AuditLog','QcMeasurement','QcEvaluation','BatchDisposition'];
+           if(db.pragma('integrity_check',{simple:true})!=='ok'||db.pragma('foreign_key_check').length)throw Error('199 integrity differs');
+           for(const table of ['CalcTemplateActivation','CalibrationCurve','CalibrationPoint','ResultCalculation'])
+             if(db.prepare('SELECT count(*) n FROM "'+table+'"').get().n!==0)throw Error('199 startup activated or backfilled calculations');
+           const names=[...tables,'_schema_migrations'],quote=name=>'"'+name.replaceAll('"','""')+'"';
+           console.log(JSON.stringify({ready,again,noOpBytesPreserved:true,
+             columns:Object.fromEntries(names.map(name=>[name,db.prepare('PRAGMA table_xinfo('+quote(name)+')').all()])),
+             schemas:Object.fromEntries(names.map(name=>[name,db.prepare('SELECT sql FROM sqlite_master WHERE name=?').get(name).sql])),
+             rows:Object.fromEntries(tables.map(name=>[name,db.prepare('SELECT * FROM "'+name+'" ORDER BY rowid').all()])),
+             receipts:db.prepare('SELECT * FROM _schema_migrations ORDER BY id').all()}));
+         }finally{db.close();}`
+    ], { encoding: 'utf8' }).trim();
+    const calculationAfter = JSON.parse(calculationAfterOutput);
+    assertCalculationPredecessorPreserved(calculationBefore, calculationAfter);
+    console.log('  ✓ calculation-default-entrypoint-pre199: PRE_199 → shipped default docker-entrypoint.sh → COMPLETE; inactive references 11, activations/backfill 0; retained evidence preserved; direct installer-module repeat NO_OP writes 0');
+    console.log(JSON.stringify({calculationEntrypointProof:{scenario:'calculation-default-entrypoint-pre199',repeatInvocation:'direct installer module (not a second entrypoint run)',dry:calculationBefore.dry,ready:calculationAfter.ready,
+        again:calculationAfter.again,retainedRowsAndReceiptBytesPreserved:true,noOpBytesPreserved:calculationAfter.noOpBytesPreserved}}));
+    if(!calculationStartupLog.includes('Installing immutable amendment requests, attempt links and report withdrawals')||
+        !calculationStartupLog.includes('"previousClassification": "PRE_210"')||!calculationStartupLog.includes('AMENDMENT_STARTUP_READY'))
+        throw Error('210 default-entrypoint installation proof missing');
+    fs.writeFileSync(path.join(tmpDir,'210-default-entrypoint.log'),calculationStartupLog);
+    const amendmentAfterOutput=cp.execFileSync('docker',['run','--rm',
+        '-v',`${repeatProofVolume}:/owned-210`,IMAGE_TAG,'node','-e',
+        `const fs=require('node:fs'),crypto=require('node:crypto'),Database=require('better-sqlite3');
+         const dbPath='/owned-210/dev.db',installer=require('./scripts/install_sample_amendment_authorisation');
+         const hash=()=>crypto.createHash('sha256').update(fs.readFileSync(dbPath)).digest('hex'),before=hash();
+         const ready=installer.assertAmendmentStartupReady(dbPath),again=installer.installSampleAmendmentAuthorisation({dbPath,apply:true});
+         if(ready.classification!=='COMPLETE_210'||ready.totalChanges!==0||again.mode!=='NO_OP'||again.totalChanges!==0||
+           again.newAmendmentCount!==0||again.newAttemptLinkCount!==0||again.newWithdrawalCount!==0||again.backfilledCount!==0||hash()!==before)
+           throw Error('210 startup or direct-module repeat changed bytes');
+         const db=new Database(dbPath,{readonly:true,fileMustExist:true});
+         try{if(db.pragma('integrity_check',{simple:true})!=='ok'||db.pragma('foreign_key_check').length)throw Error('210 integrity differs');
+           for(const table of ['SampleAmendmentAttempt','ReportAmendmentWithdrawal'])
+             if(db.prepare('SELECT count(*) n FROM "'+table+'"').get().n!==0)throw Error('210 startup created analytical links or withdrawals');
+           if(db.prepare('SELECT count(*) n FROM SampleAmendment WHERE requestPayload IS NOT NULL OR version IS NOT NULL OR priorApprovedBy IS NOT NULL OR priorApprovedAt IS NOT NULL OR selectedWorkItemIds IS NOT NULL').get().n)
+             throw Error('210 startup adopted historical amendments');
+           const names=db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name").all().map(row=>row.name);
+           console.log(JSON.stringify({ready,again,noOpBytesPreserved:true,rows:Object.fromEntries(names.map(name=>[name,db.prepare('SELECT * FROM "'+name+'" ORDER BY rowid').all()])),
+             receipts:db.prepare('SELECT * FROM _schema_migrations ORDER BY id').all()}));
+         }finally{db.close();}`
+    ],{encoding:'utf8'}).trim();
+    const amendmentAfter=JSON.parse(amendmentAfterOutput);
+    for(const [table,rows]of Object.entries(amendmentBefore.rows)){
+        const projected=amendmentAfter.rows[table].filter(row=>table!=='_schema_migrations'||amendmentBefore.receipts.some(receipt=>receipt.id===row.id))
+            .map(row=>Object.fromEntries(amendmentBefore.columns[table].map(column=>[column,row[column]])));
+        if(JSON.stringify(projected)!==JSON.stringify(rows))throw Error('210 default entrypoint changed retained '+table+' rows or fields');
+    }
+    if(amendmentBefore.receipts.some(before=>!amendmentAfter.receipts.some(after=>JSON.stringify(after)===JSON.stringify(before))))
+        throw Error('210 default entrypoint changed a predecessor receipt');
+    console.log(JSON.stringify({orderRevisionEntrypointProof:{scenario:'PRE_199-default-entrypoint-COMPLETE_209',
+        before:{workItemIdAbsent:true,orderRevisions:amendmentBefore.rows.SampleOrderRevision.length,
+            orderLines:amendmentBefore.rows.OrderLine.length,attempts:amendmentBefore.rows.WorkAttempt.length},
+        after:orderAfter,retainedRowsAndReceiptsPreserved:true}}));
+    console.log('  ✓ amendment-default-entrypoint-pre210: PRE_210 → shipped default docker-entrypoint.sh → COMPLETE_210; request/link/withdrawal/backfill0; retained rows and receipts preserved; direct installer-module repeat NO_OP writes0');
+    console.log(JSON.stringify({amendmentEntrypointProof:{scenario:'amendment-default-entrypoint-pre210',repeatInvocation:'direct installer module (not a second entrypoint run)',
+        dry:amendmentBefore.dry,ready:amendmentAfter.ready,again:amendmentAfter.again,retainedRowsAndReceiptBytesPreserved:true,noOpBytesPreserved:amendmentAfter.noOpBytesPreserved}}));
+
+    // 7. Upgrade: Run target image on the populated baseline volume
+    const upgTargetContainer = registerContainer(`lims_c_upg_${TS}`);
+    const upgTargetPort = await getFreePort();
+    cp.execFileSync('docker', [
+        'run', '-d',
+        '--name', upgTargetContainer,
+        '-p', `127.0.0.1:${upgTargetPort}:3000`,
+        '-v', `${upgDataVol}:/app/server/prisma`,
+        '-v', `${upgAssetsVol}:/app/server/uploads`,
+        '-e', 'DEPLOYMENT_MODE=global',
+        '-e', 'PORT=3000',
+        '-e', 'NODE_ENV=production',
+        IMAGE_TAG
+    ]);
+    await waitForHealth(upgTargetPort, upgTargetContainer);
+    console.log(`  ✓ Upgraded target container healthy on port ${upgTargetPort}`);
+
+    // Verify running container is bound to the target image ID (distinct from baseline)
+    const targetRunningImageId = cp.execFileSync('docker', ['inspect', upgTargetContainer, '--format', '{{.Image}}'], { encoding: 'utf8' }).trim();
+    if (targetRunningImageId !== IMMUTABLE_IMAGE_ID) {
+        throw new Error(`Target container running unexpected image: ${targetRunningImageId}`);
+    }
+    console.log(`  ✓ Target container verified running candidate image ID: ${targetRunningImageId}`);
+
+    // Use the shipped installer's read-only gate, without an apply or bypass.
+    // The genuine baseline rows need no legacy mapping (#179 pin 5993497236).
+    const workflowStartupOutput = cp.execFileSync('docker', [
+        'run', '--rm', '-v', `${upgDataVol}:/app/server/prisma`, IMAGE_TAG, 'node', '-e',
+        `const { assertWorkflowStartupReady } = require('./scripts/install_workflow_state_guards');
+         console.log(JSON.stringify(assertWorkflowStartupReady('prisma/dev.db')));`
+    ], { encoding: 'utf8' }).trim();
+    const workflowStartup = JSON.parse(workflowStartupOutput);
+    if (workflowStartup.classification !== 'COMPLETE' || workflowStartup.totalChanges !== 0 ||
+        workflowStartup.inventory.candidateCount !== 0 || workflowStartup.inventory.unmappedCount !== 0 ||
+        workflowStartup.inventory.blockedCount !== 0) throw new Error(`Upgraded workflow startup inventory mismatch: ${workflowStartupOutput}`);
+    console.log('  ✓ Upgraded installer classification COMPLETE; candidates/unmapped/blocked 0; read-only gate writes 0');
+
+    // #190 pins6061135570/6061301340: prove the genuine baseline received
+    // the unchanged #178 sources before #190. Inspect; never repair here.
+    const prerequisiteOutput = cp.execFileSync('docker', [
+        'run', '--rm', '-v', `${upgDataVol}:/app/server/prisma`, IMAGE_TAG, 'node', '-e',
+        `const Database = require('better-sqlite3');
+         const { assertWorkItemUniquenessStartupReady, MARKER_ID, INDEX_ID } = require('./scripts/install_workitem_uniqueness');
+         const { assertWorkAttemptStartupReady } = require('./scripts/install_work_attempt_contract');
+         const prerequisite = assertWorkItemUniquenessStartupReady('prisma/dev.db');
+         const attempts = assertWorkAttemptStartupReady('prisma/dev.db');
+         const db = new Database('prisma/dev.db', { readonly: true });
+         const receipts = [MARKER_ID,INDEX_ID].map(id => JSON.parse(db.prepare('SELECT details FROM _schema_migrations WHERE id=?').get(id).details));
+         db.close(); console.log(JSON.stringify({ prerequisite, attempts, receipts }));`
+    ], { encoding: 'utf8' }).trim();
+    const prerequisiteProof = JSON.parse(prerequisiteOutput);
+    if (prerequisiteProof.prerequisite.classification !== 'COMPLETE' || prerequisiteProof.prerequisite.totalChanges !== 0 ||
+        prerequisiteProof.attempts.classification !== 'COMPLETE' || prerequisiteProof.attempts.totalChanges !== 0 ||
+        prerequisiteProof.attempts.receipt.duplicateMarkerPrerequisite.classification !== 'COMPLETE' ||
+        prerequisiteProof.receipts.length !== 2 || prerequisiteProof.receipts.some(receipt =>
+            receipt.classification !== 'ABSENT' || receipt.mode !== 'APPLIED' || receipt.sourceExecuted !== true ||
+            receipt.duplicateGroupCount !== 0 || receipt.preservation.originalRowsAndFieldsPreserved !== true)) {
+        throw new Error(`Upgraded duplicate-marker/attempt prerequisite mismatch: ${prerequisiteOutput}`);
+    }
+    console.log('  ✓ Baseline ABSENT → duplicate-marker COMPLETE → #190 COMPLETE; both source receipts and preservation verified; read-only writes 0');
+
+    // Verify pre-upgrade operational token continues to authenticate (signing secret preservation)
+    const preUpgApiRes = await fetch(`http://127.0.0.1:${upgTargetPort}/api/labs`, {
+        headers: { 'Authorization': `Bearer ${preUpgradeToken}` }
+    });
+    if (preUpgApiRes.status !== 200) {
+        throw new Error(`Pre-upgrade operational token failed post-upgrade: status ${preUpgApiRes.status}`);
+    }
+    console.log('  ✓ Pre-upgrade JWT token remains valid on upgraded target container without re-login');
+
+    // Verify credentials preservation across upgrade
+    for (const [user, pwd] of [['admin', 'BaselinePass123!'], ['base_mgr1', 'BaselinePass123!'], ['base_mgr2', 'BaselinePass123!']]) {
+        const uRes = await fetch(`http://127.0.0.1:${upgTargetPort}/api/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: user, password: pwd })
+        });
+        if (uRes.status !== 200) throw new Error(`Login for ${user} failed post-upgrade: status ${uRes.status}`);
+    }
+    console.log('  ✓ Credentials preserved across upgrade: all baseline accounts authenticated successfully');
+
+    // Verify exact data preservation: all 10 sample codes present with exact IDs
+    const checkDataOutput = cp.execFileSync('docker', [
+        'run', '--rm',
+        '-v', `${upgDataVol}:/app/server/prisma`,
+        IMAGE_TAG,
+        'node', '-e',
+        `const Database = require('better-sqlite3');
+         const db = new Database('prisma/dev.db', { readonly: true });
+         const samples = db.prepare('SELECT id, originalId, labId, assignedLab, projectCode, status, createdAt FROM Sample ORDER BY originalId').all();
+         db.close();
+         console.log(JSON.stringify(samples));`
+    ], { encoding: 'utf8' }).trim();
+    const upgSamples = JSON.parse(checkDataOutput);
+    if (upgSamples.length !== 10) throw new Error(`Expected 10 samples, got ${upgSamples.length}`);
+    for (let i = 0; i < 10; i++) {
+        for (const field of ['id', 'originalId', 'labId', 'assignedLab', 'projectCode', 'status', 'createdAt']) {
+            if (upgSamples[i][field] !== expectedSampleRecords[i][field]) {
+                throw new Error(`Upgraded sample ${expectedSampleCodes[i]} field ${field} changed: expected ${expectedSampleRecords[i][field]}, got ${upgSamples[i][field]}`);
+            }
+        }
+        if (upgSamples[i].status !== 'EXPECTED') throw new Error(`Upgraded sample ${expectedSampleCodes[i]} is not EXPECTED`);
+    }
+    console.log('  ✓ Exact data preservation across upgrade: all 10 sample records, assigned labs, and statuses verified intact');
+
+    // Verify asset preservation across upgrade
+    const assetCheck = cp.execFileSync('docker', [
+        'run', '--rm',
+        '-v', `${upgAssetsVol}:/app/server/uploads`,
+        'alpine', 'cat', '/app/server/uploads/spectral_cal_curve.json'
+    ], { encoding: 'utf8' }).trim();
+    if (assetCheck !== assetJson.trim()) {
+        throw new Error(`Asset file mismatch post-upgrade! Expected ${assetJson}, got ${assetCheck}`);
+    }
+    console.log('  ✓ Asset preservation across upgrade: spectral_cal_curve.json preserved byte-for-byte');
+
+    cp.execFileSync('docker', ['stop', upgTargetContainer]);
+
+    // 8. Staged Route B Disaster Recovery Execution
+    // Stage archives in /backup/staging and validate SQLite integrity before touching target
+    cp.execFileSync('docker', [
+        'run', '--rm',
+        '-v', `${upgBackupDir}:/backup`,
+        BASELINE_IMAGE_TAG,
+        'sh', '-c',
+        `set -e
+         rm -rf /backup/staging
+         mkdir -p /backup/staging/db /backup/staging/assets
+         tar -xzf /backup/db_snapshot_${TS}.tar.gz -C /backup/staging/db
+         tar -xzf /backup/assets_snapshot_${TS}.tar.gz -C /backup/staging/assets
+         node -e "
+           const Database = require('better-sqlite3');
+           const db = new Database('/backup/staging/db/dev.db', { readonly: true });
+           const integrity = db.pragma('integrity_check');
+           const fk = db.pragma('foreign_key_check');
+           db.close();
+           if (integrity[0]?.integrity_check !== 'ok' || fk.length > 0) process.exit(1);
+           console.log('STAGED_INTEGRITY_OK');
+         "`
+    ]);
+
+    // Create full pre-restore safety copy (including hidden .jwt_secret, WAL, SHM) with set -e
+    cp.execFileSync('docker', [
+        'run', '--rm',
+        '-v', `${upgDataVol}:/data`,
+        '-v', `${upgAssetsVol}:/assets`,
+        '-v', `${upgBackupDir}:/backup`,
+        'alpine', 'sh', '-c',
+        `set -e
+         SAFETY_DIR="/backup/pre_restore_safety_${TS}"
+         mkdir -p "$SAFETY_DIR/data" "$SAFETY_DIR/assets"
+         cp -a /data/. "$SAFETY_DIR/data/"
+         cp -a /assets/. "$SAFETY_DIR/assets/"`
+    ]);
+
+    // Sequentially replace target volumes using find -mindepth 1 -delete (fails closed on error)
+    cp.execFileSync('docker', [
+        'run', '--rm',
+        '-v', `${upgDataVol}:/data`,
+        '-v', `${upgAssetsVol}:/assets`,
+        '-v', `${upgBackupDir}:/backup`,
+        'alpine', 'sh', '-c',
+        `set -e
+         find /data -mindepth 1 -delete
+         cp -a /backup/staging/db/. /data/
+         find /assets -mindepth 1 -delete
+         cp -a /backup/staging/assets/. /assets/
+         rm -rf /backup/staging`
+    ]);
+
+    // Verify restored database and rotate data exchange epoch
+    const restoreEpochOutput = cp.execFileSync('docker', [
+        'run', '--rm',
+        '-v', `${upgDataVol}:/app/server/prisma`,
+        BASELINE_IMAGE_TAG,
+        'node', '-e',
+        `const Database = require('better-sqlite3');
+         const exchange = require('./services/exchangeStateService');
+         const { rotateEpoch, ensureTriggers, getCurrentEpoch, decodeCursor } = exchange;
+         const db = typeof exchange.getDb === 'function' ? exchange.getDb() : new Database('prisma/dev.db');
+         if (typeof exchange.initTables === 'function') exchange.initTables(db);
+         ensureTriggers(db);
+         const res = rotateEpoch(db, 'VOLUME_RESTORE');
+         console.log('EPOCH_ROTATION:' + JSON.stringify(res));
+         const decoded = decodeCursor('${initialCursor}', db);
+         console.log('OLD_CURSOR_DECODE:' + JSON.stringify(decoded));
+         db.close();`
+    ], { encoding: 'utf8' });
+
+    if (!restoreEpochOutput.includes('"reason":"EPOCH_MISMATCH"') || !restoreEpochOutput.includes('"expired":true')) {
+        throw new Error(`Expected old cursor rejection with EPOCH_MISMATCH post-restore, got: ${restoreEpochOutput}`);
+    }
+    console.log('  ✓ Restore rotated exchange epoch and invalidated pre-restore cursor (EPOCH_MISMATCH confirmed)');
+
+    // 9. Launch Rollback Container explicitly bound to BASELINE_IMAGE_ID
+    const rollbackTag = `soilfer-lims:rollback-${TS}`;
+    cp.execFileSync('docker', ['tag', baselineImageId, rollbackTag]);
+
+    const rollbackContainer = registerContainer(`lims_c_rollback_${TS}`);
+    const rollbackPort = await getFreePort();
+    cp.execFileSync('docker', [
+        'run', '-d',
+        '--name', rollbackContainer,
+        '-p', `127.0.0.1:${rollbackPort}:3000`,
+        '-v', `${upgDataVol}:/app/server/prisma`,
+        '-v', `${upgAssetsVol}:/app/server/uploads`,
+        '-e', 'DEPLOYMENT_MODE=global',
+        '-e', 'PORT=3000',
+        '-e', 'NODE_ENV=production',
+        '-e', `JWT_SECRET=${baselineSecretHex}`,
+        rollbackTag
+    ]);
+
+    await waitForHealth(rollbackPort, rollbackContainer);
+    console.log(`  ✓ Rollback container healthy on port ${rollbackPort}`);
+
+    const liveImageId = cp.execFileSync('docker', ['inspect', rollbackContainer, '--format', '{{.Image}}'], { encoding: 'utf8' }).trim();
+    if (liveImageId !== baselineImageId) {
+        throw new Error(`Rollback container running unexpected image ${liveImageId}, expected baseline ${baselineImageId}`);
+    }
+    console.log(`  ✓ Rollback container verified running immutable baseline image ID: ${liveImageId}`);
+
+    // Verify all baseline accounts log in successfully on restored container
+    for (const [user, pwd] of [['admin', 'BaselinePass123!'], ['base_mgr1', 'BaselinePass123!'], ['base_mgr2', 'BaselinePass123!']]) {
+        const uRes = await fetch(`http://127.0.0.1:${rollbackPort}/api/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: user, password: pwd })
+        });
+        if (uRes.status !== 200) throw new Error(`Post-rollback login for ${user} failed: status ${uRes.status}`);
+    }
+    console.log('  ✓ Post-rollback accounts verified: all 3 baseline accounts authenticated successfully');
+
+    // Verify exact data preservation in restored volume: all 10 sample codes present
+    const postRollbackData = cp.execFileSync('docker', [
+        'run', '--rm',
+        '-v', `${upgDataVol}:/app/server/prisma`,
+        BASELINE_IMAGE_TAG,
+        'node', '-e',
+        `const Database = require('better-sqlite3');
+         const db = new Database('prisma/dev.db', { readonly: true });
+         const samples = db.prepare('SELECT id, originalId, labId, assignedLab, projectCode, status, createdAt FROM Sample ORDER BY originalId').all();
+         db.close();
+         console.log(JSON.stringify(samples));`
+    ], { encoding: 'utf8' }).trim();
+    const rollbackParsed = JSON.parse(postRollbackData);
+    if (!Array.isArray(rollbackParsed) || rollbackParsed.length !== 10) {
+        throw new Error(`Post-rollback data count mismatch: expected 10, got ${rollbackParsed ? rollbackParsed.length : 0}`);
+    }
+    for (let i = 0; i < 10; i++) {
+        const item = rollbackParsed[i];
+        if (!item || typeof item !== 'object') {
+            throw new Error(`Post-rollback row at index ${i} is not a valid object: ${JSON.stringify(item)}`);
+        }
+        for (const field of ['id', 'originalId', 'labId', 'assignedLab', 'projectCode', 'status', 'createdAt']) {
+            if (item[field] !== expectedSampleRecords[i][field]) {
+                throw new Error(`Post-rollback sample ${expectedSampleCodes[i]} field ${field} changed: expected ${expectedSampleRecords[i][field]}, got ${item[field]}`);
+            }
+        }
+        if (item.status !== 'EXPECTED') throw new Error(`Post-rollback sample ${expectedSampleCodes[i]} is not EXPECTED`);
+    }
+    console.log('  ✓ Post-rollback data verified: all 10 sample records, assigned labs, and statuses preserved with exact values in restored volume');
+
+    // Verify asset preservation in restored volume
+    const postRollbackAsset = cp.execFileSync('docker', [
+        'run', '--rm',
+        '-v', `${upgAssetsVol}:/app/server/uploads`,
+        'alpine', 'cat', '/app/server/uploads/spectral_cal_curve.json'
+    ], { encoding: 'utf8' }).trim();
+    if (postRollbackAsset !== assetJson.trim()) {
+        throw new Error('Post-rollback asset file mismatch!');
+    }
+    console.log('  ✓ Post-rollback asset verified: spectral_cal_curve.json preserved byte-for-byte');
+
+    cp.execFileSync('docker', ['stop', rollbackContainer]);
+
+    console.log('\n================================================================');
+    console.log('  🎉 ALL REAL DOCKER DEPLOYMENT READINESS SCENARIOS PASSED!     ');
+    console.log('================================================================\n');
+}
+
+runSuite()
+    .then(() => process.exit(0))
+    .catch(err => {
+        console.error('\n❌ REHEARSAL FAILED:', err);
+        process.exit(1);
+    });

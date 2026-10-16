@@ -181,10 +181,22 @@ def table_fingerprint(db,name,columns):
     for row in db.execute('SELECT '+cols+' FROM '+quote(name)+' ORDER BY '+cols):
         data=canonical([atom(v) for v in row]);h.update(len(data).to_bytes(8,'big'));h.update(data);count+=1
     return {'count':count,'sha256':h.hexdigest()}
+
+def memory_temporaries(db):
+    # TEMP_STORE=0 overrides PRAGMA temp_store and can still spill to disk.
+    # Refuse it before running integrity checks, sorting or backup queries.
+    options=[r[0] for r in db.execute('PRAGMA compile_options')]
+    settings=[value for value in options if value.startswith('TEMP_STORE=')]
+    require(len(settings)==1 and settings[0] in ('TEMP_STORE=1','TEMP_STORE=2','TEMP_STORE=3'),
+        'SQLite build must support memory-only temporary storage')
+    db.execute('PRAGMA temp_store=MEMORY')
+    require(db.execute('PRAGMA temp_store').fetchone()==(2,),
+        'SQLite memory temporary storage was not accepted')
+
 def logical(path):
     db=sqlite3.connect(pathlib.Path(path).as_uri()+'?mode=ro',uri=True,timeout=10)
     try:
-        db.execute('PRAGMA query_only=ON');db.execute('BEGIN')
+        memory_temporaries(db);db.execute('PRAGMA query_only=ON');db.execute('BEGIN')
         integrity=[r[0] for r in db.execute('PRAGMA integrity_check')];foreign=list(db.execute('PRAGMA foreign_key_check'))
         require(integrity==['ok'] and not foreign,'Copied database integrity/FK refused')
         objects=[list(r) for r in db.execute("SELECT type,name,tbl_name,sql FROM sqlite_master WHERE name NOT LIKE 'sqlite_%' ORDER BY type,name")]
@@ -195,8 +207,10 @@ def logical(path):
         db.rollback();return {'objects':objects,'tables':tables,'integrity':'ok','foreignKeyViolations':0}
     finally:db.close()
 def seal(root,label,source,check,live_source=False):
-    d=child_path(root,pathlib.Path(root)/label);require(not d.exists(),'Seal consumed');d.mkdir(mode=0o700)
+    d=child_path(root,pathlib.Path(root)/label);require(not d.exists(),'Seal consumed')
     require(not live_source or label=='fresh-production-snapshot','Only the production seal uses a live handoff')
+    claim_copy(check,'seal-directory');admit_copy(check,'seal-directory',d,[],1)
+    d.mkdir(mode=0o700)
     raw,original=copy_triple(source,d/'raw',check,live_source);reader,_=copy_triple(raw,d/'reader',check)
     for s,r in triple(reader).items():
         if r is not None:pathlib.Path(str(reader)+s).chmod(0o600)
@@ -205,7 +219,7 @@ def seal(root,label,source,check,live_source=False):
     claim_copy(check,'backup')
     before=sqlite3.connect(reader.as_uri()+'?mode=ro',uri=True,timeout=10);after=None
     try:
-        before.execute('PRAGMA query_only=ON');before.execute('BEGIN')
+        memory_temporaries(before);before.execute('PRAGMA query_only=ON');before.execute('BEGIN')
         # Pin one OWNED-reader snapshot before sizing or creating destination.
         # A progress callback after a backup step is not a pre-write ceiling.
         pages=before.execute('PRAGMA page_count').fetchone()[0]
@@ -215,11 +229,21 @@ def seal(root,label,source,check,live_source=False):
             'Exact bounded owned-reader backup page layout required')
         admit_copy(check,'backup',backup,[pages*page_size],0)
         with backup.open('xb') as stream:stream.flush();os.fsync(stream.fileno())
-        after=sqlite3.connect(str(backup));before.backup(after,pages=256,sleep=0.05)
+        after=sqlite3.connect(str(backup));memory_temporaries(after)
+        require(after.execute('PRAGMA journal_mode=MEMORY').fetchone()==('memory',),
+            'Detached backup memory rollback journal required')
+        before.backup(after,pages=256,sleep=0.05)
+        # Backup can copy the WAL-mode header from the source. Normalize only
+        # this NEW detached output before sealing; raw masters remain exact.
+        require(after.execute('PRAGMA journal_mode=MEMORY').fetchone()==('memory',),
+            'Detached output inherited an unsupported journal mode')
         require(backup.stat().st_size==pages*page_size,'Owned backup exceeded or differs from pinned source page layout')
     finally:
         if after is not None:after.close()
         before.close()
+    require(not any(pathlib.Path(str(backup)+suffix).exists() for suffix in ('-journal','-wal','-shm')),
+        'Detached backup has unexpected SQLite side files')
+    with backup.open('r+b') as stream:stream.flush();os.fsync(stream.fileno())
     backup.chmod(0o400);require(logical(backup)==state,'Detached WAL-aware backup differs')
     handoff=exact_json((d/'raw/snapshot-handoff.json').read_bytes()) if live_source else None
     require((live_source or triple(source)==original) and identity_record(triple(raw))==(handoff['rawCopyByteIdentity'] if live_source else identity_record(original)),'Original or raw master changed while reading owned copy')
@@ -237,6 +261,7 @@ def delta(before_backup,after_backup,new_tables,marker,order_column=False):
     require(set(after['tables'])-set(before['tables'])==new_tables and set(before['tables'])<=set(after['tables']),'Unexpected table delta')
     a=sqlite3.connect(pathlib.Path(before_backup).as_uri()+'?mode=ro',uri=True);b=sqlite3.connect(pathlib.Path(after_backup).as_uri()+'?mode=ro',uri=True)
     try:
+        memory_temporaries(a);memory_temporaries(b)
         for name,info in before['tables'].items():
             expected=info['columns']+(['workItemId'] if order_column and name=='OrderLine' else [])
             require(after['tables'][name]['columns']==expected,'Unexpected column delta '+name)
@@ -257,6 +282,7 @@ def delta_from_state(before,after,after_backup,new_tables,marker,order_column=Fa
     require(set(after['tables'])-set(before['tables'])==new_tables and set(before['tables'])<=set(after['tables']),'Unexpected table delta')
     b=sqlite3.connect(pathlib.Path(after_backup).as_uri()+'?mode=ro',uri=True)
     try:
+        memory_temporaries(b)
         for name,info in before['tables'].items():
             expected=info['columns']+(['workItemId'] if order_column and name=='OrderLine' else [])
             require(after['tables'][name]['columns']==expected,'Unexpected column delta '+name)

@@ -7,10 +7,10 @@ import types
 import unittest
 from unittest.mock import patch
 from kit_copy_admission import copy_layout
-from kit_budget import Budget
+from kit_budget import Budget,SEAL_DIRECTORY_BYTES,TABLE
 from kit_disk import Disk
 import kit_disk
-from retained_files import clone_backup,copy_triple,copy_tree,file_state,seal
+from retained_files import clone_backup,copy_triple,copy_tree,file_state,seal,memory_temporaries
 from verify_kit_apache_capture import local_directory
 
 
@@ -88,7 +88,59 @@ class CopyAdmissions(unittest.TestCase):
         plans=[row for row in owner.plans if row[0]=='backup'];self.assertEqual(len(plans),1)
         self.assertEqual(plans[0][1],backup);self.assertEqual(plans[0][2]['contentBytes'],backup.stat().st_size)
         self.assertEqual(state['tables']['retained_value']['count'],1);self.assertEqual(file_state(source),before)
-        self.assertEqual(owner.claims,['triple','triple','backup'])
+        self.assertEqual(owner.claims,['seal-directory','triple','triple','backup'])
+
+    def test_outer_seal_directory_is_admitted_before_any_destination_or_source_read(self):
+        root=local_directory();owner=Owner(1)
+        with patch('retained_files.file_state',side_effect=AssertionError('Source must not be read')),\
+            self.assertRaisesRegex(RuntimeError,'allowance exhausted'):
+            seal(root,'refused-outer',root/'not-read.db',owner.check)
+        self.assertFalse((root/'refused-outer').exists())
+        self.assertEqual(owner.claims,['seal-directory'])
+        self.assertEqual(owner.plans[0][2]['declaredAllocationBytes'],SEAL_DIRECTORY_BYTES)
+
+    def test_missing_or_reused_outer_directory_admission_refuses_stage_closure(self):
+        budget=Budget(1024**2,1024**2,414683521);budget.begin('stopped-backup',10**12)
+        for site,count in TABLE[0]['sites'].items():
+            for _ in range(count):
+                budget.claim(site)
+                if site!='seal-directory':budget.copy_ceiling(site)
+        with self.assertRaisesRegex(RuntimeError,'before-create'):budget.finish('stopped-backup',0)
+        self.assertEqual(budget.copy_ceiling('seal-directory'),SEAL_DIRECTORY_BYTES)
+        with self.assertRaisesRegex(RuntimeError,'reuse'):budget.copy_ceiling('seal-directory')
+        budget.finish('stopped-backup',0)
+
+    def test_wal_source_becomes_detached_backup_without_side_files_and_preserves_all_originals(self):
+        root=local_directory();source=root/'new-wal-source.db';writer=sqlite3.connect(source)
+        try:
+            writer.execute('PRAGMA journal_mode=WAL');writer.execute('CREATE TABLE retained_value(value BLOB)')
+            writer.execute('INSERT INTO retained_value VALUES(?)',(b'x'*100000,));writer.commit()
+            before={suffix:pathlib.Path(str(source)+suffix).read_bytes() for suffix in ('','-wal','-shm')}
+            backup,state=seal(root,'wal-seal',source,Owner(10*1024**2).check)
+            self.assertEqual(state['tables']['retained_value']['count'],1)
+            self.assertEqual({suffix:pathlib.Path(str(source)+suffix).read_bytes() for suffix in before},before)
+            self.assertEqual(sorted(p.name for p in backup.parent.iterdir()),['backup.db','logical-state.json','raw','reader','seal.json'])
+            with sqlite3.connect(backup.as_uri()+'?mode=ro',uri=True) as check:
+                self.assertEqual(check.execute('PRAGMA journal_mode').fetchone(),('delete',))
+                self.assertEqual(check.execute('SELECT length(value) FROM retained_value').fetchone(),(100000,))
+        finally:writer.close()
+
+    def test_memory_temp_storage_refuses_compile_override_and_unaccepted_pragma(self):
+        class Reply:
+            def __init__(self,value):self.value=value
+            def __iter__(self):return iter(self.value)
+            def fetchone(self):return self.value
+        class Connection:
+            def __init__(self,options,mode=2):self.options=options;self.mode=mode;self.calls=[]
+            def execute(self,sql):
+                self.calls.append(sql)
+                return Reply([(value,) for value in self.options] if sql=='PRAGMA compile_options' else (self.mode,))
+        for options in ([],['TEMP_STORE=0'],['TEMP_STORE=1','TEMP_STORE=2']):
+            db=Connection(options)
+            with self.assertRaisesRegex(RuntimeError,'build'):memory_temporaries(db)
+            self.assertEqual(db.calls,['PRAGMA compile_options'])
+        with self.assertRaisesRegex(RuntimeError,'not accepted'):memory_temporaries(Connection(['TEMP_STORE=1'],1))
+        for value in (1,2,3):memory_temporaries(Connection(['TEMP_STORE='+str(value)]))
 
     def test_owned_backup_admission_refusal_leaves_raw_readers_but_no_backup_destination(self):
         root=local_directory();source=root/'new-source.db';db=sqlite3.connect(source)

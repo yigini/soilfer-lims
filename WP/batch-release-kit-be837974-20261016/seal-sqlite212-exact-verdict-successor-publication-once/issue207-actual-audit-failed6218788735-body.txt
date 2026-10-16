@@ -1,0 +1,55 @@
+Audit failed
+
+Hey Pip! Reviewed head `ad9d2660041c4db380d73a759871987d625f7404` against #207 and its scope update. Most of this is really solid: the append-only ledger and guards, controlled `SAMPLE` locations, ledger-projected container location, policy-read retention with the project override, the disposal queue, and disposal from `RECEIVED_REJECTED` all check out, and the three [test] items are covered. Four things need fixing before it can go. I ran small repro tests in a throwaway copy of this head (not committed) to confirm each one.
+
+**1. The deliverer/submitter confirmation is now thrown away on every new receipt**
+- Repro: a consignment posted with `custodySenderSignature` in the header returns 201. Then `receiptView` shows `null`, and the typed string isn't in any table of the DB at all.
+- Why: `receiptFacts` (`server/services/custodyService.js:13-22`) never stores it, and `withoutReceiptFields` strips it from the Sample write (`server/services/intakeService.js:17`). Meanwhile `consignmentIntakeService.js:61` and `intakeReceiptService.js:47` still pass it in, and the Reception form still asks for it (`client/src/pages/Reception.jsx:2370`).
+- The PR also changes two existing tests from the typed values to `toBeNull()`: `reception_stage_e.test.js:201` (was 'Perez / MOA') and `reception_regression_stage_f.test.js:591` (was 'Ortiz / Courier').
+- Criterion: #207 asks to stop *synthesising* signature strings (the `CONFIRMED:user:ts` officer string) and to move custody columns into the first RECEIVED event. It doesn't ask to drop what the deliverer declared.
+- Fix:
+  - Keep it as declared, unauthenticated text in the RECEIVED event evidence. Validate it as text like the other names and label it as declared rather than a signature.
+  - Show it through `receiptView`.
+  - Restore those two expectations.
+  - While you're there, drop the client-side `CONFIRMED:${user.username}:…` synthesis at `Reception.jsx:1310`, since the server ignores it now.
+
+**2. Receiving a sample whose `assignedLab` is null returns 500**
+- Repro: as SUPER_ADMIN, `POST /api/samples/:id/receive` with body `{assignedLab: 'LAB-GTM'}` on an EXPECTED sample with `assignedLab: null`. It returns 500 ("Invalid `tx.custodyEvent.create()`", ForeignKeyConstraintViolation at `custodyService.js:38`), with no event and the sample still EXPECTED. The same request with `assignedLab` set returns 200 RECEIVED.
+- Why:
+  - `intakeReceiptService.js:63` acknowledges with the row as it was before the transition, and the transition never sets `assignedLab`.
+  - `custodyService.js:38` then falls back to `Sample.labId`. That field becomes the lab sample code alias after acceptance (`intakeService.js:43`), not a lab id.
+  - The insert guard (migration `20261016000100…`, line 46) needs `Sample.assignedLab = labId`, and `intakeErrors.js:14` maps the raw error to 500.
+- The rejected single-intake path probably has the same root cause. Its rejection data sets no `assignedLab`, unlike accept at `intakePreparationService.js:671`. I inferred that one and didn't run it.
+- Criterion: the issue guardrail "Return 4xx with a stable `code` … never 500".
+- Fix:
+  - Have `acknowledgeReceipt` use only `sample.assignedLab`, and refuse with 409 `CUSTODY_LAB_REQUIRED` when it's missing (same as `custodyService.js:88/109`).
+  - Where the receiving lab is already resolved (`intakeReceiptService.js:27-29`, and the rejected intake), set `assignedLab` in the same transition and acknowledge after it, as `commitPrepared` does.
+  - Add a test for `/receive` and for rejected intake with a null `assignedLab`.
+
+**3. The installer invents a 1970 receipt date**
+- Repro: a legacy EXPECTED row with `receivingOfficerName` set and `receptionDate`/`custodyHandoverAt` both null. Apply reports `COMPLETE_207` and writes a LEGACY RECEIVED event at `1970-01-01T00:00:00.000Z`.
+- Why: `install_sample_custody.js:67` calls `recordedDate(null)`, which is `new Date(null)` (epoch). That passes the `Number.isFinite` check.
+- Criterion: `docs/audit/207-custody-and-retention.md:17` says missing receipt time stops installation and that the installer "never invents a receipt date". The ledger is immutable, so this can't be corrected afterwards.
+- Fix: treat a null or empty time as missing, so the row goes to `LEGACY_CUSTODY_PROVENANCE_REQUIRED`, and add that case to the installer test.
+
+**4. The project retention override isn't audited with its values**
+- `ProjectActionsModal.jsx:272` sends `retentionDaysAfterReport` on every save, so `projectController.js:655-656` rewrites `policyConfig` even when nothing changed. A NULL config becomes `{"sample":{}}`.
+- The audit at `:668` only says "Updated fields: …, policyConfig". It records neither the old nor the new number of days.
+- Criterion: #162 multi-lab principle, "Every change is audited". Retention decides when physical material becomes disposable.
+- Fix: only touch `policyConfig` when the value actually changes, and put the old and new `retentionDaysAfterReport` in that PROJECT_UPDATED audit's details.
+
+**Non-blocking, just mention them in the PR description:**
+- Walk-in now needs `RECEIVE_SAMPLE`. My repro gave 403 `CUSTODY_FORBIDDEN` for PROJECT_MANAGER and SURVEYOR (they hold `CREATE_SAMPLE`) and 201 for SAMPLE_RECEPTION. I think that's the right call, since a walk-in is a physical receipt, but please say so.
+- Legacy published samples keep `retainUntil` null, so they never reach the disposal queue. That's correct for this PR (no invented retention); add it to the deferred list for a follow-up.
+- The sample list now does one `receiptView` query per row. Fine for now; worth noting for #204.
+- Release kit: please include a dry run of the custody installer on the prod copy, with planned and blocked counts. Any legacy received row without a lab or receipt time will stop startup.
+
+**Evidence:**
+- CI `Test & Build` is green at this head (run 38911857904).
+- Locally, the theme check, client build and client lint passed.
+- The full local server suite is still running: 51 files passed so far, none failed. I'll run it in full again on the next head.
+
+Ping me with the new SHA when it's ready, and I'll re-audit straight away 🙂
+
+---
+_Generated by [Claude Code](https://claude.ai/code)_

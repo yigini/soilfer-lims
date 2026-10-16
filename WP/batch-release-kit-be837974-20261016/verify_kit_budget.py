@@ -1,7 +1,7 @@
 """Consumption-aware all-stage reservation and physical/topology negatives."""
 import copy
 import unittest
-from kit_budget import Budget,TABLE,DB_EQUIVALENTS,TOTAL_DB_COPIES,LOG_RESERVE
+from kit_budget import Budget,TABLE,DB_EQUIVALENTS,TOTAL_DB_COPIES,LOG_RESERVE,CONTROLLER_COPY_SITES
 from kit_disk import BOUND,ALLOCATION,free_gate,disjoint_growth
 from retained_accounting import mount_guard
 
@@ -21,7 +21,7 @@ class CopyBudgets(unittest.TestCase):
             for site,count in row['sites'].items():
                 for i in range(count):
                     budget.claim(site)
-                    if site in ('triple','backup','clone','assets'):budget.copy_ceiling(site)
+                    if site in CONTROLLER_COPY_SITES:budget.copy_ceiling(site)
             self.assertLessEqual(budget.required(),initial)
             result=budget.finish(row['stage'],0);seen.append(result)
         self.assertEqual(budget.remaining(),0);self.assertEqual(len(seen),len(TABLE))
@@ -34,7 +34,7 @@ class CopyBudgets(unittest.TestCase):
         for site,count in TABLE[0]['sites'].items():
             for i in range(count):
                 budget.claim(site)
-                if site in ('triple','backup','clone','assets'):budget.copy_ceiling(site)
+                if site in CONTROLLER_COPY_SITES:budget.copy_ceiling(site)
         with self.assertRaises(RuntimeError):budget.finish('stopped-backup',100000000000)
         with self.assertRaises(RuntimeError):budget.claim('backup')
 
