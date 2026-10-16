@@ -1,0 +1,15 @@
+{
+  "utc": "2026-10-16T04:43:47.530821+00:00",
+  "argv": [
+    "C:\\Users\\yigin\\AppData\\Local\\Programs\\Python\\Python312-arm64\\python.exe",
+    "-B",
+    "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\WP\\batch-proof-controller-forward-step2-be837974-20261016\\launch_proof.py",
+    "--package",
+    "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\WP\\batch-proof-controller-forward-step2-be837974-20261016\\proof-package-workflow-batch-controller-forward-step2-be837974-20261016T063000Z"
+  ],
+  "packagePublication": "d8c77aa1e002bc1ef77a04c943113c3d822dcb53",
+  "sourceReviewId": 6208186148,
+  "futurePackageAllocationBytes": 10764288,
+  "oneAttempt": true,
+  "neverReplay": true
+}

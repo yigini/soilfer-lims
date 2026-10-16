@@ -1,0 +1,10 @@
+{
+  "closedUtc": "2026-10-16T04:44:50.453468+00:00",
+  "status": "REVIEWED_JOBS_LAUNCHER_CLOSED_INSPECT_SAME_UNIT",
+  "exitCode": 0,
+  "error": null,
+  "root": "/opt/lims/releases/workflow-batch-controller-forward-step2-be837974-20261016T063000Z",
+  "unit": "lims-workflow-batch-controller-forward-step2-be837974-20261016t063000z",
+  "proofComplete": false,
+  "retryAllowed": false
+}
