@@ -183,11 +183,18 @@ class Refusing extends Database {backup(destination,options){return super.backup
                     if site in COPY_ADMISSION_SITES:budget.copy_ceiling(site)
             budget.finish(row['stage'],0)
         budget.begin('first-sync',10**12);budget.cli('first-sync-backup')
-        with patch('kit_owned.ROOT',pathlib.PurePosixPath(root.as_posix())):
+        with patch('kit_owned.ROOT',pathlib.PurePosixPath(root.as_posix())),\
+             patch('kit_evidence._runtime',__import__('kit_evidence').EvidenceLedger(root)):
             spec=cli_spec('first-sync-backup',DATA_MOUNT)
             prepare,_,_=filesystem_controls(root,False)
             with self.assertRaisesRegex(RuntimeError,'held before-create'):prepare(spec)
             self.assertFalse(pathlib.Path(spec['tmp']).exists())
+        # The refused namespace/ledger stays consumed. Positive admission is
+        # an independent LOCAL fixture, never a retry of that namespace.
+        root=directory()
+        with patch('kit_owned.ROOT',pathlib.PurePosixPath(root.as_posix())),\
+             patch('kit_evidence._runtime',__import__('kit_evidence').EvidenceLedger(root)):
+            spec=cli_spec('first-sync-backup',DATA_MOUNT)
             plans=[]
             def admit(site,destination,plan):
                 self.assertFalse(destination.parent.exists());self.assertEqual(site,'cli-backup')

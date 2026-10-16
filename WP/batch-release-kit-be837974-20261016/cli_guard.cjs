@@ -6,7 +6,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
-const { spawnSync } = require('node:child_process');
+const output = require('./cli_output.cjs');
 const scripts = new Set([
   'install_sample_containers.js', 'install_control_charts.js',
   'install_order_revisions.js', 'install_lab_policy_schema.js',
@@ -44,16 +44,17 @@ function validateMain(argv) {
   requireValue(!child[0].endsWith('/install_lab_policy_schema.js') || child[3] === '--dry-run', 'Existing canonical policy may only be checked read-only');
   return { directory: argv[0], child };
 }
-function runChild(directory, child) {
+async function runChild(directory, child) {
   const complete = path.join(directory, 'cli-child-complete.json');
   const permit = path.join(directory, 'cli-exit-permit.json');
   requireValue(!fs.existsSync(complete) && !fs.existsSync(permit), 'CLI control paths already consumed');
+  output.readAdmission(directory, child);
   const began = process.hrtime.bigint();
-  const result = spawnSync(process.execPath, child, { stdio: 'inherit', env: process.env });
+  const result = await output.capture(directory, child);
   const record = Buffer.from(JSON.stringify({ childStatus: result.status, childSignal: result.signal,
-    childErrorType: result.error ? result.error.name : null,
+    childErrorType: result.errorType,
     childSeconds: Number(process.hrtime.bigint() - began) / 1e9,
-    argvSha256: hash(Buffer.from(JSON.stringify(child))), neverRetry: true }) + '\n');
+    argvSha256: hash(Buffer.from(JSON.stringify(child))), neverRetry: true, output: result.output }) + '\n');
   requireValue(record.length <= 8192, 'CLI completion exceeds its pre-create envelope');
   writeOnce(complete, record);
   const timer = setInterval(() => {
@@ -63,16 +64,15 @@ function runChild(directory, child) {
       requireValue(value.childCompletionSha256 === hash(record) && value.finalHostMemoryEventsCaptured === true,
         'Final host memory permission differs');
       clearInterval(timer);
-      process.exit(result.status === 0 && result.signal === null && !result.error ? 0 : 1);
+      process.exit(result.status === 0 && result.signal === null && !result.errorType && result.output.completeOriginals ? 0 : 1);
     } catch (error) {
       clearInterval(timer);
-      process.stderr.write('Release CLI exit permission refused\n');
       process.exit(1);
     }
   }, 50);
 }
 if (require.main === module) {
-  try { const value = validateMain(process.argv.slice(2)); runChild(value.directory, value.child); }
-  catch (error) { process.stderr.write('Release CLI invocation refused\n'); process.exitCode = 1; }
+  (async () => { const value = validateMain(process.argv.slice(2)); await runChild(value.directory, value.child); })()
+    .catch(() => { process.exitCode = 1; });
 }
 module.exports = { validateMain, runChild };

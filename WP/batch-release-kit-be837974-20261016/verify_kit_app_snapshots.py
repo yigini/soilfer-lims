@@ -104,7 +104,8 @@ class ApplicationSnapshots(unittest.TestCase):
                 if failure=='writer':raise RuntimeError('LOCAL writer refusal')
                 if failure=='source' and events.count('writers')==2:source.write_bytes(b'changed')
             with patch.object(kit_owned,'ROOT',pathlib.PurePosixPath(root.as_posix())),patch.object(kit_owned,'validate_spec',lambda value:value),\
-                patch.object(kit_owned,'admit_evidence',lambda *args,**kwargs:None):
+                patch.object(kit_owned,'admit_evidence',lambda *args,**kwargs:None),\
+                patch('kit_evidence._runtime',__import__('kit_evidence').EvidenceLedger(root)):
                 prepare,_,_=filesystem_controls(root,False,LocalDisk(),no_writers)
                 with self.assertRaises(RuntimeError):prepare(spec)
             self.assertFalse(pathlib.Path(spec['tmp']).exists())
@@ -139,7 +140,8 @@ class ApplicationSnapshots(unittest.TestCase):
         spec['mounts'][0]['Source']=str(root)
         with patch.object(kit_owned,'ROOT',pathlib.PurePosixPath(root.as_posix())),\
             patch.object(kit_owned,'validate_spec',lambda value:value),\
-            patch.object(kit_owned,'admit_evidence',lambda *args,**kwargs:None):
+            patch.object(kit_owned,'admit_evidence',lambda *args,**kwargs:None),\
+            patch('kit_evidence._runtime',__import__('kit_evidence').EvidenceLedger(root)):
             prepare,read,permit=filesystem_controls(root,False,disk,lambda:events.append('writers'))
             prepare(spec);temp=pathlib.Path(spec['tmp'])
             self.assertEqual(events,['writers','capacity','writers'])

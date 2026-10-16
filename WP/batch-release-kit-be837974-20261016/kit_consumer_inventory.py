@@ -100,7 +100,7 @@ def own_controller(behavior):
     require(behavior['FragmentPath'] in ('','/run/systemd/transient/'+expected) and behavior['SourcePath']=='' and
         behavior['StopWhenUnneeded']=='no','Unreviewed controller source or automatic stop')
     for name in EXEC_PROPERTIES:
-        command=('/usr/bin/python3 -B '+str(ROOT/'tooling/run_release.py')+' --root '+str(ROOT)) if name=='ExecStart' else (
+        command=('/usr/bin/python3 -B '+str(ROOT/'tooling/controller_output.py')+' --root '+str(ROOT)) if name=='ExecStart' else (
             '/usr/bin/python3 -B '+str(ROOT/'tooling/stop_post.py') if name=='ExecStopPost' else None)
         expected_exec=[] if command is None else ['{ path=/usr/bin/python3 ; argv[]='+command+' ; ignore_errors=no }']
         require(behavior[name]==expected_exec,'Release controller executable/hook differs from compiled source')

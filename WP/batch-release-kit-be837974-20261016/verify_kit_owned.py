@@ -30,14 +30,15 @@ def obj(spec,running=True):
           'WorkingDir':'/app/server','Env':[k+'='+v for k,v in spec['environment'].items()],
           'Labels':{LABEL:spec['owner']},'Healthcheck':{'Test':['NONE']}},
         'HostConfig':{'Memory':805306368,'MemorySwap':805306368,'NetworkMode':'none',
-          'RestartPolicy':{'Name':'no'},'AutoRemove':False},
+          'RestartPolicy':{'Name':'no'},'AutoRemove':False,'LogConfig':{'Type':'none','Config':{}}},
         'Mounts':copy.deepcopy(spec['mounts']),
         'State':{'Running':running,'OOMKilled':False,'Restarting':False,'Dead':False,
           'StartedAt':'2026-10-16T11:00:00Z','ExitCode':0}}
 
 def done(spec,status=0):
     return json.dumps({'childStatus':status,'childSignal':None,'childErrorType':None,'childSeconds':0.01,
-        'argvSha256':sha(json.dumps(spec['child'],separators=(',',':')).encode()),'neverRetry':True}).encode()+b'\n'
+        'argvSha256':sha(json.dumps(spec['child'],separators=(',',':')).encode()),'neverRetry':True,
+        'output':{'LOCAL_OUTPUT_STAND_IN':True}}).encode()+b'\n'
 
 class StandIn:
     def __init__(self,spec):
@@ -80,9 +81,13 @@ class StandIn:
         assert self.memory[-1]=='before-stop';assert value['childCompletionSha256']==sha(done(spec,self.status))
         self.events.append('permit');self.permitted=True
     def stop(self,owners):self.stop_calls.append(owners);return {'allObservedExactCliOwnersStopped':True}
+    def output(self,spec,raw,read_bytes=False):
+        self.events.append('output-final' if read_bytes else 'output-before-memory')
+        assert raw==done(spec,self.status)
+        return b'{"synthetic":true}\n',b'',{'private':True}
     def manager(self,journal):
         return OwnedCli(self,self,journal,self.history,lambda s:self.events.append('prepare'),self.read,self.permit,
-            self.stop,self.clock,self.sleep)
+            self.stop,self.clock,self.sleep,output_reader=self.output)
 
 class OwnedTests(unittest.TestCase):
     def test_all_fifteen_compiled_commands_have_exact_limits_mounts_and_modes(self):
@@ -101,6 +106,7 @@ class OwnedTests(unittest.TestCase):
             ('Config.Labels.'+LABEL,'foreign'),('Config.Cmd',['/app/docker-entrypoint.sh']),
             ('Config.Entrypoint',['sh']),('Config.WorkingDir','/tmp'),('Config.Env',['NODE_OPTIONS=--max-old-space-size=900']),
             ('Config.Healthcheck',{'Test':['CMD','true']}),('HostConfig.Memory',999),('HostConfig.MemorySwap',999),
+            ('HostConfig.LogConfig',{'Type':'json-file','Config':{}}),
             ('HostConfig.AutoRemove',True),('HostConfig.NetworkMode','bridge'),('HostConfig.RestartPolicy.Name','always'),
             ('State.Running',None),('State.OOMKilled',True),('State.Restarting',True),('State.Dead',True)]
         for dotted,replacement in mutations:

@@ -114,13 +114,13 @@ class SharedEvidence(unittest.TestCase):
     def test_child_completion_full_envelope_is_charged_before_container_creation(self):
         from kit_owned import filesystem_controls,cli_spec
         from kit_integrity import DATA_MOUNT
-        root=directory();book=ledger(root,journal=7*4096)
+        root=directory();book=ledger(root,commands=65*1024**2,journal=11*4096)
         with patch('kit_evidence._runtime',book),patch('kit_owned.ROOT',pathlib.PurePosixPath(root.as_posix())):
             spec=cli_spec('206-apply',DATA_MOUNT);prepare,_,_=filesystem_controls(root,False)
             prepare(spec)
         path=root/'206-apply-retained-temp'/'cli-child-complete.json'
         self.assertFalse(path.exists());self.assertFalse(path.with_name(path.name+'.pending').exists())
-        self.assertEqual(book.used['journal'],7*4096)
+        self.assertEqual(book.used['journal'],10*4096)
 
     def test_insufficient_completion_or_foreign_future_parent_refuses_before_mkdir(self):
         from kit_owned import filesystem_controls,cli_spec

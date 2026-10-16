@@ -137,9 +137,12 @@ class ConsumerGuards(unittest.TestCase):
     def test_compiled_controller_requires_exact_start_and_nonignored_stop_post(self):
         from retained_contract import ROOT,ROOT_NAME
         name='lims-'+ROOT_NAME.lower()+'.service';value=behavior(name)
-        value['Transient']='yes';value['ExecStart']=exec_record('/usr/bin/python3 -B '+str(ROOT/'tooling/run_release.py')+' --root '+str(ROOT))
+        value['Transient']='yes';value['ExecStart']=exec_record('/usr/bin/python3 -B '+str(ROOT/'tooling/controller_output.py')+' --root '+str(ROOT))
         value['ExecStopPost']=exec_record('/usr/bin/python3 -B '+str(ROOT/'tooling/stop_post.py'))
         current=unit_behavior(show_bytes(value),name);own_controller(current)
+        old=copy.deepcopy(value)
+        old['ExecStart']=exec_record('/usr/bin/python3 -B '+str(ROOT/'tooling/run_release.py')+' --root '+str(ROOT))
+        with self.assertRaises(RuntimeError):own_controller(unit_behavior(show_bytes(old),name))
         for key,content in [('ExecStart',[]),('ExecStopPost',[]),('ExecStartPost',['unexpected']),
             ('Transient','no'),('Restart','always'),('OnFailure','autoheal.service')]:
             changed=copy.deepcopy(current);changed[key]=content
@@ -165,7 +168,7 @@ class ConsumerGuards(unittest.TestCase):
                 if 'list-units' in argv:raw+=(own+' loaded active running Synthetic reviewed controller\n').encode()
                 if 'show' in argv and argv[2]==own:
                     value=behavior(own);value['Transient']='yes'
-                    value['ExecStart']=exec_record('/usr/bin/python3 -B '+str(ROOT/'tooling/run_release.py')+' --root '+str(ROOT))
+                    value['ExecStart']=exec_record('/usr/bin/python3 -B '+str(ROOT/'tooling/controller_output.py')+' --root '+str(ROOT))
                     value['ExecStopPost']=exec_record('/usr/bin/python3 -B '+str(ROOT/'tooling/stop_post.py')) if not self.bad else ''
                     raw=show_bytes(value)
                 return raw,err,meta

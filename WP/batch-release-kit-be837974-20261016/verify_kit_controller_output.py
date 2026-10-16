@@ -117,7 +117,7 @@ class ControllerOutput(unittest.TestCase):
         for name in output.CONTROLLER_NAMES:
             with self.assertRaises(RuntimeError):book.reserve((book.root/name,),1,'journal')
         from kit_cli_evidence import CLI_ENVELOPE
-        self.assertEqual(sum(CLI_ENVELOPE.values()),3044*1024**2)
+        self.assertEqual(sum(CLI_ENVELOPE.values()),2980*1024**2)
         self.assertLess(sum(CLI_ENVELOPE.values())+2*(64*1024**2+8192),sum(evidence.SHARES.values()))
         self.assertFalse(book.summary()['fullGlobalEvidenceClosure'])
         with self.assertRaises(RuntimeError):evidence.EvidenceLedger(directory(),{**evidence.SHARES,'journal':640*1024**2})

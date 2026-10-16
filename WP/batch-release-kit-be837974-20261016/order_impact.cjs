@@ -152,13 +152,24 @@ async function capture(directory, argv, spawn = cp.spawn, limit = LIMIT, sourceC
 }
 function allocation(root) {
   const files = [];
+  const outerNames = ['cli-output-admission.json', 'cli-output-admission.json.pending', 'cli-original.stdout', 'cli-original.stderr'];
+  if (outerNames.some(n => fs.existsSync(path.join(root, n)))) {
+    // The enclosing supervisor's producer is admitted independently. Its
+    // original pipes may still be open; this child cannot seal or hash them.
+    const outer = require('./cli_output.cjs');
+    outer.readAdmission(root, ['/release/order_impact.cjs', '--db', CHILD[2]]);
+    for (const name of ['cli-original.stdout', 'cli-original.stderr']) {
+      const file = path.join(root, name);
+      if (fs.existsSync(file)) need(regular(file).size <= BigInt(outer.LIMIT + 1), 'Outer CLI prefix exceeds held bound');
+    }
+  }
   function visit(directory) {
     for (const entry of fs.readdirSync(directory, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
       const file = path.join(directory, entry.name), s = fs.lstatSync(file);
       need(!s.isSymbolicLink(), 'Impact allocation alias refused');
       if (directory === root && entry.isFile() && [
         'snapshot-admission.json', 'snapshot-admission.json.pending',
-        'order-impact-admission.json', 'order-impact-admission.json.pending'
+        'order-impact-admission.json', 'order-impact-admission.json.pending', ...outerNames
       ].includes(entry.name)) continue; // Already charged independent controller records.
       if (s.isDirectory()) {
         need(directory === root && /^lims-policy-schema-readonly-[A-Za-z0-9_-]+$/.test(entry.name), 'Unknown impact snapshot directory');

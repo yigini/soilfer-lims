@@ -121,7 +121,7 @@ def construct(root=ROOT):
     prepare,read_completion,publish_permit=filesystem_controls(root,disk=disk,
         no_writers=lambda:assert_no_volume_writers(reader))
     owned=OwnedCli(runner,reader,journal,lambda label,identity,owner:MemoryHistory(root,label,identity,owner),
-        prepare,read_completion,publish_permit,stop_clis)
+        prepare,read_completion,publish_permit,stop_clis,output_reader=read_completion.output)
     cli=BudgetedCli(owned,disk)
     no_writers=lambda:assert_no_volume_writers(reader)
     installations=Installations(root,pathlib.Path(LIVE_DATA)/'dev.db',cli,journal,disk.check,no_writers,authority.review_impact)

@@ -31,7 +31,7 @@ class CliEvidence(unittest.TestCase):
     def test_full_source_bounds_fit_one_shared_pool_without_claiming_all_future_clis_fit(self):
         physical=bounds()
         self.assertEqual(CLI_INSPECTIONS,608);self.assertEqual(CLI_COMMANDS,612)
-        self.assertEqual(sum(CLI_ENVELOPE.values()),3044*1024**2)
+        self.assertEqual(sum(CLI_ENVELOPE.values()),2980*1024**2)
         self.assertTrue(all(physical[k]<=CLI_ENVELOPE[k] for k in physical))
         self.assertLess(sum(CLI_ENVELOPE.values()),sum(evidence.SHARES.values()))
         book=evidence.EvidenceLedger(directory())
@@ -45,9 +45,10 @@ class CliEvidence(unittest.TestCase):
     def test_complete_pool_refusal_precedes_create_and_keeps_existing_stop_order(self):
         root=directory();book=evidence.EvidenceLedger(root)
         # Existing retained originals consume slightly more than this window's
-        # remaining156MiB headroom. No file is allocated by this synthetic claim.
-        ticket=book.reserve((root/'earlier.stdout',),157*1024**2,'commands')
-        book.settle(ticket,157*1024**2)
+        # remaining204MiB headroom. This stand-in has no native pipe files;
+        # the real prepare callback separately holds their64MiB before mkdir.
+        ticket=book.reserve((root/'earlier.stdout',),205*1024**2,'commands')
+        book.settle(ticket,205*1024**2)
         spec=cli_spec('206-apply',DATA_MOUNT);stand=StandIn(spec)
         with patch('kit_evidence._runtime',book):
             journal=Journal(root,str(root),'f'*64,False)

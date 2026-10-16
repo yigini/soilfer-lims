@@ -18,7 +18,7 @@ class CliSupervisor(unittest.TestCase):
         node=shutil.which('node');self.assertIsNotNone(node)
         for script,mode in [('restore_db.js','--apply'),('install_lab_policy_schema.js','--apply'),('install_sample_containers.js','--unknown')]:
             result=subprocess.run([node,str(ROOT/'cli_guard.cjs'),'/tmp','/app/server/scripts/'+script,'--db','/app/server/prisma/dev.db',mode],capture_output=True)
-            self.assertEqual(result.returncode,1);self.assertIn(b'invocation refused',result.stderr)
+            self.assertEqual(result.returncode,1);self.assertEqual(result.stderr,b'')
 
     def test_actual_child_completion_stays_alive_until_final_memory_permission(self):
         self.exercise('console.log("SYNTHETIC_CHILD_ONLY")',0,False)
@@ -58,7 +58,9 @@ for (const failure of ['none','integrity','fk']) {
     def exercise(self,child_code,want,wrong):
         node=shutil.which('node');self.assertIsNotNone(node);FIXTURES.mkdir(exist_ok=True)
         d=pathlib.Path(tempfile.mkdtemp(prefix='owned-',dir=FIXTURES)).resolve()
-        bootstrap='require('+json.dumps(str(ROOT/'cli_guard.cjs'))+').runChild('+json.dumps(str(d))+',["-e",'+json.dumps(child_code)+'])'
+        from kit_cli_output import admission
+        exclusive_record(d,'cli-output-admission.json',admission(['-e',child_code]),require_directory_sync=os.name=='posix')
+        bootstrap='require('+json.dumps(str(ROOT/'cli_guard.cjs'))+').runChild('+json.dumps(str(d))+',["-e",'+json.dumps(child_code)+']).catch(()=>process.exitCode=1)'
         with (d/'stdout-original.txt').open('xb') as out,(d/'stderr-original.txt').open('xb') as err:
             process=subprocess.Popen([node,'-e',bootstrap],stdout=out,stderr=err)
             try:

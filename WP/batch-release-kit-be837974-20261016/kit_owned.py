@@ -19,6 +19,7 @@ from kit_copy_admission import live_backup_limit
 from kit_app_snapshots import CLI_SNAPSHOTS,snapshot_plan,unchanged_source,verify_snapshots
 from kit_budget import CLI_SITE
 from kit_order_output import OUTPUT_ADMISSION,reserve_output,close_output
+from kit_cli_output import reserve_cli_output,publish_cli_admission,verify_cli_output,verify_completion_record
 
 LABEL='io.soilfer.release-owned'
 DATABASE='/app/server/prisma/dev.db'
@@ -58,7 +59,7 @@ def cli_spec(label,data_mount):
         'TMPDIR':'/tmp','TMP':'/tmp','TEMP':'/tmp'}
     args=['docker','create','--name',name,'--label',LABEL+'='+owner,'--network','none',
           '--memory',str(MEMORY_MAX),'--memory-swap',str(MEMORY_MAX),'--restart','no',
-          '--entrypoint','node','--workdir','/app/server','--no-healthcheck']
+          '--entrypoint','node','--workdir','/app/server','--no-healthcheck','--log-driver','none']
     for key,value in sorted(environment.items()):args+=['-e',key+'='+value]
     for mount in mounts:
         source=mount.get('Name') if mount['Type']=='volume' else mount['Source']
@@ -97,6 +98,9 @@ def selected(value,spec,running=None,emergency=False):
             host.get('RestartPolicy',{}).get('Name')=='no' and host.get('AutoRemove') is False,
             'CLI resource/network/restart/retention settings differ')
     if not emergency:require(config.get('Healthcheck')=={'Test':['NONE']},'CLI healthcheck must be disabled explicitly')
+    # A violated runtime logging setting cannot suppress an otherwise exact
+    # emergency stop, just as a changed memory limit cannot suppress it.
+    if not emergency:require(host.get('LogConfig')=={'Type':'none','Config':{}},'CLI daemon logging must be disabled explicitly')
     mounts=value.get('Mounts',[])
     require(isinstance(mounts,list) and len(mounts)==3 and all(isinstance(m,dict) for m in mounts) and
             len({m.get('Destination') for m in mounts})==3,'Complete unique mount inventory required')
@@ -122,7 +126,7 @@ def same_retained(before,after):
 def completion(raw,spec):
     require(isinstance(raw,bytes) and 0<len(raw)<=8192,'Bounded child completion required')
     value=exact_json(raw)
-    require(set(value)=={'childStatus','childSignal','childErrorType','childSeconds','argvSha256','neverRetry'},
+    require(set(value)=={'childStatus','childSignal','childErrorType','childSeconds','argvSha256','neverRetry','output'},
             'Child completion fields differ')
     # Node JSON.stringify arrays use compact UTF-8; this fixed ASCII argv has no
     # serializer ambiguity. It is not the kit authority canonical serializer.
@@ -138,11 +142,12 @@ def completion(raw,spec):
 
 class OwnedCli:
     def __init__(self,runner,reader,journal,memory_factory,prepare_tmp,read_completion,publish_permit,stopper,
-                 clock=time.monotonic,sleep=time.sleep,evidence_factory=begin_cli_evidence):
+                 clock=time.monotonic,sleep=time.sleep,evidence_factory=begin_cli_evidence,output_reader=None):
         self.runner=runner;self.reader=reader;self.journal=journal;self.memory_factory=memory_factory
         self.prepare_tmp=prepare_tmp;self.read_completion=read_completion;self.publish_permit=publish_permit
         self.clock=clock;self.sleep=sleep;self.consumed=set();self.stopper=stopper;self.failure_stop=None
         self.evidence_factory=evidence_factory;self.evidence_window=None
+        self.output_reader=output_reader
 
     def run(self,spec):
         validate_spec(spec);label=spec['label']
@@ -195,6 +200,8 @@ class OwnedCli:
                 history.observe('running-command');last=self.clock()
             self.runner.check(0);self.sleep(0.05)
         require(child is not None,'Existing CLI 600 second deadline reached; never retry')
+        require(callable(self.output_reader),'Independent original CLI output reader required')
+        self.output_reader(spec,completion_raw,False)
         final_before=selected(self.reader.inspect(identity),spec,True)
         same_retained(started,final_before)
         history.observe('before-stop')
@@ -214,9 +221,9 @@ class OwnedCli:
         require(self.clock()-began<600,'CLI wrapper failed to exit within original 600 second deadline')
         require(type(obj['State'].get('ExitCode')) is int and obj['State']['ExitCode']==int(waited),
             'Wrapper wait and final complete inspection exit status differ')
-        # The logs include the original child's unmodified stdout/stderr. They
-        # stay private pending the same content review as other CLI streams.
-        stdout,stderr,metadata=self.runner.run(['docker','logs',identity],label+'-logs',15,allow_stderr=True)
+        # Rehash both sealed originals after the wrapper has stopped. No
+        # Docker log producer exists for these owned CLI containers.
+        stdout,stderr,metadata=self.output_reader(spec,completion_raw,True)
         result={'containerId':identity,'owner':spec['owner'],'child':child,'memory':memory,
                 'elapsedSeconds':self.clock()-began,'stoppedAndRetained':True,
                 'exitCode':obj['State'].get('ExitCode'),'wrapperWait':wait_metadata,
@@ -236,6 +243,7 @@ def filesystem_controls(root,require_directory_sync=True,disk=None,no_writers=No
         require(p.as_posix()==spec['tmp'] and p.parent==root and not p.is_symlink(),'Exact private control directory required')
         return p
     snapshot_admissions={};snapshot_closures=set();output_admissions={};output_closures=set()
+    cli_admissions={};cli_closed=set()
     def prepare(spec):
         p=directory(spec)
         require(not p.exists(),'Fresh CLI control directory required')
@@ -243,6 +251,7 @@ def filesystem_controls(root,require_directory_sync=True,disk=None,no_writers=No
         # hardlink. Charge its full envelope before any container is created;
         # no controller admission runs inside the installer transaction.
         admit_evidence(p/'cli-child-complete.json',8192,pending=True,future_directory=p)
+        cli_admissions[spec['label']]=reserve_cli_output(p)
         output=None
         if spec['label']=='order-impact':output=reserve_output(p)
         limit=None
@@ -261,6 +270,7 @@ def filesystem_controls(root,require_directory_sync=True,disk=None,no_writers=No
             no_writers();unchanged_source(target,snapshot)
         p.mkdir(mode=0o700)
         require(not list(p.iterdir()),'Fresh empty CLI control directory required')
+        publish_cli_admission(p,spec['child'],cli_admissions[spec['label']],require_directory_sync)
         if limit is not None:exclusive_record(p,'backup-admission.json',limit,require_directory_sync)
         if snapshot is not None:
             exclusive_record(p,'snapshot-admission.json',snapshot,require_directory_sync)
@@ -286,5 +296,13 @@ def filesystem_controls(root,require_directory_sync=True,disk=None,no_writers=No
             exclusive_record(directory(spec),'snapshot-closure.json',result,require_directory_sync)
             snapshot_closures.add(label)
         return raw
+    def original_output(spec,raw,read_bytes=False):
+        verify_completion_record(directory(spec),raw)
+        label=spec['label'];child=completion(raw,spec)
+        require(label in cli_admissions,'Missing before-create CLI output claims')
+        result=verify_cli_output(directory(spec),spec['child'],child['output'],
+            None if label in cli_closed else cli_admissions[label],read_bytes)
+        cli_closed.add(label);return result
+    read.output=original_output
     def permit(spec,value):exclusive_record(directory(spec),'cli-exit-permit.json',value,require_directory_sync)
     return prepare,read,permit
