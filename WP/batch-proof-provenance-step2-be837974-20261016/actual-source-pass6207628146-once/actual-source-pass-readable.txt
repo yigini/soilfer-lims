@@ -1,0 +1,202 @@
+Source review: PASS
+
+Nice work, Pip. I reviewed the Step 2 graph at 937901c7514437fc3937639454e621d1bfd68dc4 (31 files) myself, and it passes. This allows the one Step 2 attempt on the new root and unit, under the conditions below. It does not authorize a kit, a gate or a deploy, and main merges stay held.
+
+**What I checked**
+- **Graph.** All 31 files hash to your bindings. I built `tokens()` from the tree myself, and it equals your 170 binding lines exactly: none missing, none extra. The publication commits since 3365c306 touch only WP/.
+- **Authorities.** I recomputed all four Step 2 pins from the live comments (body, created == updated, app 1236702/claude), and all four match. `step2DirectionPinsSha256` is 1f9634a5…, and `step2_authorities` plus `diagnostic_accepted` pass on the live data.
+- **Guards.** 398/398 OK on Python 3.11 and 3.9.23 using your local in-memory harness. One small harness note: the local copy strips `file:///`, which drops the leading slash on Linux, so I used `file://`. That has the same effect as your host harness's resolve. Your recorded `refusal-complete-once` host run binds all 31 current hashes and shows 398 OK.
+- **Condition 1 (same sync).** New samples carrying `conflictingSubmissions` go through the same `checked_cross` as the originals. They are checked against a base rebuilt from the creation path, labelled `RECONSTRUCTED_FROM_EXACT_CREATION_PATH_NOT_RECORDED_SNAPSHOT`. An intra duplicate needs exactly one intra hold and one KOBO_INTRA_SUBMISSION_DUPLICATE audit (KOBO_SCHEDULER, no sampleId, labId or payload), plus the exact entry shape, the same submission at a different depth, and the exact rejection text. I matched all of this against koboController and sampleHoldService at be837974.
+- **Condition 2 (no orphans).** Each new sample needs exactly one CREATE_KOBO_SYNC with the exact details, and each hold needs exactly one HOLD_RAISED from system:kobo-sync whose `after` equals the hold. The final check requires the consumed sets to equal every added hold and audit, so a CREATE on a changed original, or any extra audit, refuses. Notifications are one per active LAB_MANAGER per config with new samples, which matches the app's `findMany`. The full comparison sums both batches. The second comparison runs first-sync.db against the final copy with `prior_ids`, so a re-append refuses.
+- **Stop-post.** `stop_owned` selects only the two exact owners: the startup-1/2 labels, a full id, the deterministic name, IMAGE, restart `no`, and exactly the 3 RW bind mounts. That is exactly what `proof_docker.arguments` creates for both `proof_startup` and `proof_jobs`, and `validate` already refuses any non-bind mount. The stop runs before the memory read, and errors are collected per owner. The unit sets TimeoutStopSec=300, ExecStopPost `python3 -B` on the root's `stop_owned.py`, MemoryMax 805306368 and MemorySwapMax 0. The controller guard's unit name matches the launcher.
+- **Privacy.** A fresh 32-byte key is created `xb`/0400 in the new root. Public errors carry only the type and a keyed HMAC.
+
+**Two notes (non-blocking, for the next graph)**
+1. `stop_owned.main` checks the review, the index and the 31 hashes before it stops anything. If a root file changed mid-run, ExecStopPost would exit without stopping. The root is 0400 and the controller's own except path also stops, so this is fine for this run. Next time, I'd stop first and verify after.
+2. Public failure text is now HMAC only. If this run refuses, please also name the failing `require` by its literal source message (only if it has no interpolated value) so I can find it in the source.
+
+**What the result review will need**
+- `proof-receipt.json` with status `STEP2_RUNTIME_CHECKS_COMPLETE_AWAITING_EXEC_STOP_POST_NOT_DEPLOYED`, or the terminal refusal.
+- `stop-post-result.json` with `allExactOwnedStopped` true, no errors, both containers retained and stopped, and controller memory showing oom/oom_kill 0. The journal should show ExecStopPost exiting 0.
+- `controller-memory-before`/`after` with the same cgroup identity.
+- The first-sync, second-sync and full preservation files, with the same-sync reports labelled as reconstructed.
+- The first production sync impact numbers for the kit, plus the 9 to 10 minute window and the exact 600 s behavior.
+
+Next: you can make the one attempt, with fresh R4 + 10 GB, the unused root and unit, and no retry. Nothing for YY yet.
+
+Bindings:
+```
+step2DirectionPinsSha256=1f9634a5c7a8d1f9a0f1cc5dd71ae76704a06e0e0c98e27b784ed29726d96fe8
+diagnosticAcceptedId=6206990387
+diagnosticAcceptanceSha256=e4ed0595412a6965e33e5fed5118e0d023f0acb9b5cb07035b27936d7b29c829
+strictSameSyncNewSampleConflictPairing=true
+strictIntraSubmissionHoldAuditPairing=true
+noOrphanOrExtraAudit=true
+secondNaturalConflictIdempotence=true
+controllerExactRootOwnerStopPost=true
+controllerOwnMemoryEvents=true
+execStopPostTimeoutSeconds=300
+ownUnitOomKillZeroBeforeAfterAndPostStop=true
+sameSyncTransitionBaselineIsReconstructedAndLabelled=true
+firstProductionSyncImpactMustBeDisclosed=true
+productionRestartWindowMinutes=9to10
+productionReadinessDeadlineSeconds=600
+newPrivateValueHmacKey=true
+937901c7514437fc3937639454e621d1bfd68dc4
+be8379745bdfae52ce46496ff26514dc7d729640
+676b01e71211786d1aeace50f19a0b2c9f9c482e
+sha256:acc158447f5571068bf150fc0e8fa6f0889aeb38f9aec8be08978d903bd5be6a
+959d17e11c357266f7c2a41b0c84ab76914c591e
+sha256:7aebc035254a61b0b4b8ecb59492d582af7f3769c147a35a7e92a43fb7a642d2
+8109d78e228573ead8aa243442192e54b8e1dc09101bc3fa23d03e5a29cbb66b
+cd3a2757d8ecb0bf933f49231031eb7fb61eb5abaac17d05f3585c1baaf89f0a
+proofScope=BOUND_INSTALLED209_STEP2_STRICT_PROVENANCE_NATURAL_INTAKE_AND_BROAD_POSTFLIGHTS
+proofRoot=/opt/lims/releases/workflow-batch-provenance-step2-be837974-20261016T050000Z
+qualifiedBuildSource=4de3e334d8e498783a4cf20df4a5f93acfdbeb21
+qualifiedBuildPass=6200145007
+mainCiRun=38772398721
+labAndHubBuildsOwnedByYY=true
+releaseWindowControl=RELEASE_DAY_DISK_ABORTS_ACCEPTED
+reserveFloorBytes=10556150894
+unexplainedGrowthAbortBytes=500000000
+memoryLimitBytes=805306368
+unitTimeoutSeconds=5400
+readinessSeconds=600
+stageHeadroomSeconds=60
+unitHeadroomSeconds=600
+rawMasterNeverOpenedSqlite=true
+productionSqliteConnections=0
+preserveAllStoppedContainers=true
+policyPresentNoOpOrStop=true
+approvedAmendmentNonzeroStop=true
+jobsOnQualificationStillRequired=true
+declaredDbTripleCopies=25
+dbBudgetEquivalents=64
+budgetMarginPercent=25
+minimumDbBudgetEquivalents=64
+forwardDirection=6188190365
+priorEvidenceCommit=dd496777400e9c2f4f0ace73009f8cf8c86022d0
+priorProofRoot=/opt/lims/releases/workflow-batch-stopped-copy-cde8c889-20261015T080000Z
+priorEvidenceIndexSha256=3ff3d1555c66300ba0752d78211991c9f1c12808d17495a6f29617ab80f82c64
+boundInstalled209JobsQualificationInputs=true
+noInstallerOrPolicyReplay=true
+priorInstalled209Backup=/opt/lims/releases/workflow-batch-stopped-copy-cde8c889-20261015T080000Z/installed-209/backup.db
+deriveHealthcheckFromPinnedCompose=true
+healthTestRepresentation=COMPOSE_EXEC_ARGV_DERIVED_DOCKER_CLI_CMD_SHELL_EXEC
+ordinaryFullStartupVerifierChain=true
+exactDerivedDockerHealthcheckBeforeStart=true
+unhealthyIsRetainedObservation=true
+healthEveryPollFullLog0400=true
+healthTransitionTimingInResult=true
+composeStartPeriodUnchanged=true
+allHttpProbesWithinTotal600Seconds=true
+composeSourceSha256=2c540b13af52ada8cf475ad8aed19757deafd2997bf1e60fc63848d6e5153226
+composeSourceBlob=4e5bfd31f6c0bcc52419f0a55f7f6edbb8f85eec
+noNewProductionSnapshot=true
+inputLogicalStateFromBoundRecordsNoSql=true
+minimum64RetainedForNewJobsGraph=true
+budgetStageTableSha256=ebc3e24f5db48571988b608a46c5551f5249ccbc4a11ba4a02962bf920aff09d
+budgetModel=DECLARED_STAGE_REMAINING_CONSUMPTION_AWARE
+capacityDirection=6183215126
+noopSealDirection=6183663456
+metadataCapacityBeforeRootAndBeforeUnit=true
+allLocalExecutedSourceFilesBound=true
+containerNameAbsenceProof=BOUNDED_COMPLETE_ID_AND_EXACT_NAME_INVENTORY
+containerNameProbeRawIdsRetained=true
+mandatoryKnownPredecessorInInventory=true
+noErrorTextAbsenceInference=true
+snapshotBoundaryDirection=6184356993
+inputAuthority=BOUND_080000_INSTALLED209_RECORDED_SEAL_HASH_STAT_ONLY
+inputRechecksAfterEachCopyAndAtClosure=true
+liveEvolutionObservation=STAT_ONLY_NEVER_SNAPSHOT_AUTHORITY
+databaseAssetsCrossFileAtomicityClaimed=false
+budgetCheckpointCgroupAnonFileRecorded=true
+referenceDbReserveBytes=567558144
+referenceAssetReserveBytes=5787648
+retainedAssetReserveMultiplier=3
+logReserveBytes=4294967296
+allocationMeasurementSeconds=120
+allRetainedReleaseDockerContainerdAllocation=true
+ownedStopIndependentOfReserveHeadroom=true
+allInputPathAncestorsRejectAliases=true
+diskMountPolicy=VERIFIED_DOCKER_OVERLAY_VIEWS_BACKED_BY_COUNTED_CONTAINERD
+physicalDuSingleFilesystem=true
+containerMountComparison=EXACT_OBJECTS_UNORDERED_NO_DUPLICATES
+r4AdditionalHeadroomBytes=10000000000
+futurePackageChargedBeforeRootOnly=true
+fixedStartupSchemaAndMarkersBudgeted=true
+applicationCopySourcesSha256=f4e2498c6690689d2d4811698e29de0b5818dcef7065b1e502bc726cbe4d1f26
+applicationPolicySnapshotMaximumPerStartup=8
+newImageSeparateFromOldInputAuthority=true
+oneProofAttemptNoRetry=true
+renderAllRemoteTemplatesBeforeAnySsh=true
+r2AcceptedComment=6202252017
+r2CompleteNoFurtherPrune=true
+memoryDirection=6203416404
+memoryDirectionSha256=cae90fa72e66f14b03737bee5aa1ea380e11c003d8ad3be877c1ee3bd25cc2ac
+memoryEventsOomAndOomKillMustBeZero=true
+containerHostCgroupExactIdEveryHealthPoll=true
+sampledNonReclaimableMaximumBytes=603979776
+memoryNonReclaimableFields=anon+shmem+slab_unreclaimable+kernel_stack+pagetables+percpu+sock
+memoryPeakAndMaxHighPgscanPgstealObservationOnly=true
+readyMaxRssBytesRecorded=true
+memoryEvidenceMaximumPerStartupBytes=268435456
+memoryTelemetryInsideExisting4GiBLogs=true
+memorySamplesMaximumPerContainer=4096
+jobsScopeAcceptedComment=6204518776
+jobsScopeAcceptedSha256=f80f7eaadca3e6222be296ff9d5660f1ab84756ed59086fc8f9f37ad88403fff
+acceptedStartupReceiptSha256=f9478dd0082a708167ef4569d4496cd50b29995b0e1f610b43517d38701def93
+naturalIntakePolicy=ORIGINAL_CURSOR_ACTUAL_UPSTREAM
+twoNaturalSyncCompletions=true
+healthySoakMinimumSeconds=660
+secondSyncAfterConfiguredIntervalPlusTwoMinutes=true
+schedulerRefusalPairing=STREAM_ORDER_ONE_TO_ONE
+all112Tables42ReceiptsProtected=true
+noStandaloneCliContainers=true
+sameMemoryEventsPolicyEveryContainer=true
+broadPostflights=31_API_CHECKS_PLUS_SIX_READONLY_PROBES
+productionRestartExpectedSeveralMinutesMustBeDisclosed=true
+prior230000ConsumedFailureSha256=ff22ab7627ab90aa3848dd5ae0cf3078cc4fb60b787f33944185a9415e42ab1d
+authority6189025975=071b37b60b7489fc47f53aee5d5a91726e967730ebdf40adbc22aef4b047ee7e
+authority6189658753=1b293cf3d6b7108293599ffabfc1273ebd5f158f69a6e11f58e467d7ffa42708
+authority6189669837=2821ccc164bbf344201e6569f707314a168ae6f308cbece73cc5065d9ad3ac7e
+authority6191219093=84289b1c85e65973f26d52199f539e13423d5803c83c38be34a515b089505f8f
+authority6198899941=9d7e1490880d76d4bbae73851e4a441a8ea7c9dcd3c16383e79250f94fc6e613
+authority6200547786=05604935975efc784fe8d7c52f3a820599c2365de1121370cd345e2eabb0c250
+postRebootAuthority6202595120=267bfc400e7d1ad92a089e05083a4129407451b7ec06267d1b5d98bb640e555b
+postRebootAuthority6202615241=04a0ffc6bbae5b3f6a59586ce8e6f73e46a5040e60d3e5f0e00c5dae0d445cfc
+capture_kobo_fetch.py=643567f716d4dcb79a48dac960197fe1c3d8d4bdd05d946daafc086ae5a7beb0
+controller_guard.py=f49f81956d20e62965d418c0f4255a7e9f19063e880a913d05dcc512f39bd156
+kobo_copy_preservation.py=dabf30a873f01d5da8cacbc093bd64a17e121ef81c8b1623a513fd8eee6d76c9
+launch_proof.py=7b0d9dabad90903c17d705dfa7cea701e5218d3897e326573c57803465768b65
+postflight-auth.cjs=37b96bb2f26f8e2c9d4bd8443f5c3e46364408cc413b07c3f5a4428d91e45192
+postflight-policy.cjs=6380f9b6513318e0b50a6c1fcda51d3b2094326e39f7651a9a923ae68dfe5e51
+postflight-qc-runs.cjs=4a93ec3c536b13813ddc213791039d0acf04250a8722b28ea5af5cd50581cf8f
+postflight-reference.cjs=530162ea19e87a2fb59621d5d3cf570cfe4092bcb4160f0ca40df9debe3e5526
+postflight-roles.cjs=6724d91d89343387adb18db03f396a1eac14d8c9cc0700ac722b36e82ed924da
+prepare_proof.py=6ad3dab98d04d28bd6f349c333007ce7e76962886824524a0a56c2dfba09922b
+proof_app_sources.py=17dbaea3f999b625fc5eeeb3909a5bffbef5869a5ecd30e34ffa427efe13794b
+proof_budget.py=55a7297fba4beedfd805b007310c90136de7ccadd1d628530deba17d08864580
+proof_contract.py=1f582fbb94dda3147c7532b8f844d09e38d318a4f25d83d613045c742df496bf
+proof_disk.py=54556f7d1166b34e2e83b3c0e55eaf10418817d1f72fb44d5e98a4e94647bd79
+proof_docker.py=dc1bbe507d7f199a33450bee5b2c798dca9fbfb36e4c1daaca68dcc5053ad4dd
+proof_files.py=6bd7adb616218b8add259eaf61c2922cfc3d05d88e8dbae4dbf5dda386e1241c
+proof_health.py=ada964f3d86453f61d082961e78b76f7dfb3cd3976ca361e5aadf863f227f846
+proof_inputs.py=fa7dd2f3b151aa78cc27e8ccdb1a7768730875e91b4d9e94ebfcbf36bb48d7d5
+proof_jobs.py=d61bc44b7b1fc7c2650827e5a03fabf7e6f8127edb77e92a21026138237f4d05
+proof_memory.py=5e7b514c8aa7ff54cc370585e4b2d49f1efd6ef09fd355d31ed3028ed7c85866
+proof_render.py=73683b6283e8351d06309242a4b3c883746db1e9d1a9cf74d57fe06aaee24d74
+proof_startup.py=ebdb26074fa294bc8955612f036717ace32bcc5f36728e8e4caeb4d75bcc534d
+provenance_privacy.py=63121661f12485962de6efb149b69ec7b760353510c135902d010fd07f8f5a44
+provenance_rules.py=9ec4740983339d0bf967975c4e9b2dec3c7560590b540d968dd8fb46f8f1e70f
+readonly-smoke.cjs=7fcfb2565d55f2d54aa39a2f8ebd636dcf64dbe04b2713de40f4346a3c93c626
+run_stopped_proof.py=bf13f1bd68086609171a9134876480b58c30b515961eaacfec2fbd19b6f0fad0
+runtime_proof_policies.py=5be42078198be6b6fe56faae09695350fec878f5da16a5346aa39b0d36680f63
+stop_owned.py=65787a6b2e3c3466c7489ee0306040a099f7323f998d91280b642c57fa53ac01
+verify_jobs_guards.py=8dd56a9d2fc339074abec154b671bffc88ad382bc4ba12e3ad04c28debb0c843
+verify_proof_guards.py=c5b106a289d2f5fdb1c2acd47986aef8fa50b3b55f9ef8a8f0bce4c8db71fc7b
+verify_provenance_guards.py=ec5c299902e484d712f252238e7be6274c519d6b4f0362a533e2a5e16c5b86f9
+```
+
+---
+_Generated by [Claude Code](https://claude.ai/code)_
