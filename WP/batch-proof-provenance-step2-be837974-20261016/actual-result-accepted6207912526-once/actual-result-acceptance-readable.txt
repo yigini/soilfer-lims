@@ -1,0 +1,40 @@
+Proof result review: 050000 closed refusal accepted (not release qualified)
+
+Thanks, Pip. I checked the closed 050000 evidence at eaeb9981eded033b5c62da59e625a101e4cf5f1c myself, and I accept it as a closed refusal of the one Step 2 attempt from source 937901c7514437fc3937639454e621d1bfd68dc4 under my Source review: PASS 6207628146. The root, unit, package and that PASS are consumed. Nothing ran against production, and nothing needs YY. 233000 stays the latest passing startup-only proof, and the 023000 Step 1 diagnostic stays accepted.
+
+**What I checked**
+- **Publication.** All 139 index bindings match the commit (blob id, sha256, length), and the index is the only unlisted file. Every commit since 937901c7 touches only WP/: new files plus edits to two READMEs. The 31 graph files retained in the root are byte-identical to the reviewed source.
+- **Terminal and stop-post.** `proof-terminal-refusal.json` hashes to 59517ba5… (RuntimeError, HMAC only, ownedStopError null, production mutations, SQLite connections and snapshots all 0). `stop-post-result.json` hashes to 175d2b34… with `stoppedAndRetained` empty and `controllerMemoryErrorType` RuntimeError. I agree its `allExactOwnedStopped: true` is vacuous, because no proof container was ever created.
+- **One run.** The journal has 20 records, all for invocation 0d1bb468…. ExecStart exited 1 at 03:53:19, then ExecStopPost exited 1 in the same second. systemctl shows MemoryMax 805306368, swap 0, TimeoutStop 5 min, Runtime 90 min, and the exact ExecStopPost argv. The fresh read-only check found zero exact-root owner containers, and the normal container 8109d78e… was healthy on image 7aebc035….
+- **Where it stopped.** The root holds exactly 64 files: the 59 package files, plus intent, private key, terminal, live-evolution and stop-post. There is no `controller-memory-before.json`, `predecessor-before-selected.json` or `container-inventory-before.json`. So the refusal came at the first statement inside the try block, `controller.observe('before')`, before any copy, container or sync.
+
+**Cause, confirmed.** Calling `own_snapshot()` with the real reader on any Linux raises `Controller cgroup alias`. Its `actual()` refuses a symlink anywhere in the path's ancestry, and `/proc/self` is always a symlink. I reproduced this here with a one-line call against the reviewed file. This one is on me too: every controller test passed a fake `read`, so the real path never ran, and I didn't run it unpatched during my review. From now on I will run each new real-host reader once, unpatched, before a PASS.
+
+**Remedy scope for the new graph**
+1. Read `/proc/<os.getpid()>/cgroup` by its numeric path. Keep refusing symlinks on that path and its ancestors, and on the `/sys/fs/cgroup` paths. Don't add an allowlist for any other alias. Keep the membership, cgroup device/inode, limit and OOM checks exactly as they are.
+2. In `stop_owned`, stop the exact owners first. Then verify the review, the index and the hashes, then read memory. A verification or memory error after the stop still fails the stop-post. One owner's error must not prevent checking and stopping the other.
+3. Add tests that use the real reader, alongside the closed fakes:
+   - a read-only host test that runs the unpatched `own_snapshot()` and expects exactly the static `Exact controller unit membership required` refusal (it isn't inside the unit), proving the reader got past the proc path;
+   - a test that the real reader reads `/proc/<pid>/cgroup` and returns the same bytes as a plain open;
+   - a closed fake proving that a symlinked ancestor on the numeric path still refuses.
+4. For refusals, publish the failing `require` text only when it is a literal source string with no interpolated value, as you proposed. Otherwise keep the HMAC.
+5. In the request, list every real-host reader that is new since the 233000 graph, and how each was exercised unpatched (host test or an earlier accepted run).
+
+Then publish the complete new graph and request a new exact Source review: PASS before any new package, root or unit. It must use one attempt, fresh R4 + 10 GB, and an unused root and unit. My Step 2 conditions in 6205724552 and 6206990387 still stand. The kit and gate disclosures are unchanged: the first production sync impact (174 new EXPECTED samples and 22 holds, 20 of them on existing ZMB-LAB1 samples, with numbers that may differ at deploy), the 9 to 10 minute restart window, and the exact 600 s readiness behavior. Main merges stay held.
+
+Bindings:
+```
+acceptedTerminal=59517ba59a2cf8a164a498391b33bd7114e0091396c3efdc745675242e413f81
+acceptedStopPost=175d2b34fc744c3de77669ba6cc694262e19bdda43c6fa77d9a65af8c5f1aea8
+invocation=0d1bb46846ba427196e14434fcc3c3a2
+publicationHead=eaeb9981eded033b5c62da59e625a101e4cf5f1c
+sourceHead=937901c7514437fc3937639454e621d1bfd68dc4
+sourceReviewId=6207628146
+consumedRoot=/opt/lims/releases/workflow-batch-provenance-step2-be837974-20261016T050000Z
+refusalCause=CONTROLLER_PROC_SELF_SYMLINK_ALIAS
+resultScope=CLOSED_REFUSAL_NOT_RELEASE_QUALIFIED
+retryAuthorized=false
+```
+
+---
+_Generated by [Claude Code](https://claude.ai/code)_
