@@ -1,0 +1,10 @@
+{
+  "closedUtc": "2026-10-16T03:53:17.974127+00:00",
+  "status": "REVIEWED_JOBS_LAUNCHER_CLOSED_INSPECT_SAME_UNIT",
+  "exitCode": 0,
+  "error": null,
+  "root": "/opt/lims/releases/workflow-batch-provenance-step2-be837974-20261016T050000Z",
+  "unit": "lims-workflow-batch-provenance-step2-be837974-20261016t050000z",
+  "proofComplete": false,
+  "retryAllowed": false
+}

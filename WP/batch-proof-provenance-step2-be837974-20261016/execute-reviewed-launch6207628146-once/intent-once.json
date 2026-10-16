@@ -1,0 +1,15 @@
+{
+  "utc": "2026-10-16T03:52:19.428419+00:00",
+  "argv": [
+    "C:\\Users\\yigin\\AppData\\Local\\Programs\\Python\\Python312-arm64\\python.exe",
+    "-B",
+    "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\WP\\batch-proof-provenance-step2-be837974-20261016\\launch_proof.py",
+    "--package",
+    "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\WP\\batch-proof-provenance-step2-be837974-20261016\\proof-package-workflow-batch-provenance-step2-be837974-20261016T050000Z"
+  ],
+  "packagePublication": "2a4e51adbe34397bac0d56467146b5affd82fc8b",
+  "sourceReviewId": 6207628146,
+  "futurePackageAllocationBytes": 10653696,
+  "oneAttempt": true,
+  "neverReplay": true
+}
