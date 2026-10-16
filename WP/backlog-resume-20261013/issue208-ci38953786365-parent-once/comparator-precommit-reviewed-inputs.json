@@ -1,0 +1,51 @@
+{
+  "verifiedAtUtc": "2026-10-16T19:16:43.323Z",
+  "head": "72adbe43b36319e6f9d8088baa61b0fbe26bb3ff",
+  "tree": "34f6d9be9c00b2fd923989e4d4291a06ec333e32",
+  "patchSha256": "2aa9f0c8be0852ce1feb84bff50e5bc61c17aa1540d31e305f18c5a701274e7d",
+  "paths": [
+    "server/scripts/rehearsal_deployment_readiness.cjs",
+    "server/tests/contracts/issue_208_sample_code_schema.test.js"
+  ],
+  "files": [
+    {
+      "path": "server/scripts/rehearsal_deployment_readiness.cjs",
+      "sha256": "02cf270798cfec3602fe2eced45995aad316614b469b414e1d8d7106629b79d4",
+      "stagedMatch": "CRLF_TO_LF_ONLY"
+    },
+    {
+      "path": "server/tests/contracts/issue_208_sample_code_schema.test.js",
+      "sha256": "345347235afe8001fb43c37382a678690c6ab44c9729e2f32080d5d3778299ee",
+      "stagedMatch": "RAW_EQUAL"
+    }
+  ],
+  "pr": {
+    "baseRefName": "main",
+    "baseRefOid": "be8379745bdfae52ce46496ff26514dc7d729640",
+    "headRefName": "codex/issue-208-labels",
+    "headRefOid": "72adbe43b36319e6f9d8088baa61b0fbe26bb3ff",
+    "isDraft": true,
+    "number": 299,
+    "state": "OPEN",
+    "url": "https://github.com/yigini/soilfer-lims/pull/299"
+  },
+  "originalRuns": [
+    {
+      "conclusion": "failure",
+      "head_sha": "72adbe43b36319e6f9d8088baa61b0fbe26bb3ff",
+      "id": 38915551182,
+      "run_attempt": 1,
+      "status": "completed"
+    },
+    {
+      "conclusion": "failure",
+      "head_sha": "457fba5cbffe4157e1c2b428800a620f131854d6",
+      "id": 38898578537,
+      "run_attempt": 1,
+      "status": "completed"
+    }
+  ],
+  "parentReviewSha256": "7f50f8f027a7d5654919d4dfbd0b58c62c40d789692cf1a3fe403e6322fa602e",
+  "fullReportSha256": "a1533d156c3433c65c3cf739768f811a7f68f1cdde21c384fa6e49e3d7f56593",
+  "authorization": "ONE exact reviewed two-file commit and push to existingPR299, observe only its ordinary automatic CI once. No source edits or other remote actions."
+}

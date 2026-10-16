@@ -1,0 +1,103 @@
+{
+  "run": 38953786365,
+  "url": "https://github.com/yigini/soilfer-lims/actions/runs/38953786365",
+  "attempt": 1,
+  "status": "completed",
+  "conclusion": "success",
+  "createdAt": "2026-10-16T19:17:12Z",
+  "closedUpdatedAt": "2026-10-16T19:57:07Z",
+  "job": 117151431793,
+  "head": "153f10e6bac02b1a962213431141fd1c54906e99",
+  "tree": "34f6d9be9c00b2fd923989e4d4291a06ec333e32",
+  "base": "be8379745bdfae52ce46496ff26514dc7d729640",
+  "actualCheckout": {
+    "commit": "ca0de122750de6bdc9ef8f878818959f6631330a",
+    "tree": "34f6d9be9c00b2fd923989e4d4291a06ec333e32",
+    "parents": [
+      "be8379745bdfae52ce46496ff26514dc7d729640",
+      "153f10e6bac02b1a962213431141fd1c54906e99"
+    ],
+    "exactTestedTree": true
+  },
+  "committedPatchSha256": "2aa9f0c8be0852ce1feb84bff50e5bc61c17aa1540d31e305f18c5a701274e7d",
+  "testedFiles": [
+    {
+      "path": "server/scripts/rehearsal_deployment_readiness.cjs",
+      "sha256": "02cf270798cfec3602fe2eced45995aad316614b469b414e1d8d7106629b79d4",
+      "stagedMatch": "CRLF_TO_LF_ONLY"
+    },
+    {
+      "path": "server/tests/contracts/issue_208_sample_code_schema.test.js",
+      "sha256": "345347235afe8001fb43c37382a678690c6ab44c9729e2f32080d5d3778299ee",
+      "stagedMatch": "RAW_EQUAL"
+    }
+  ],
+  "server": {
+    "suites": 376,
+    "tests": 5761,
+    "seconds": 1838.22,
+    "exactFrozenDiscoveryMatch": true,
+    "uniquePassPaths": 376,
+    "stepLogSha256": "1aa3963760e40865ba9628a428a3b37d695d7317b1fb904244edb1dc503f3180"
+  },
+  "docker": [
+    {
+      "name": "Build Docker image",
+      "conclusion": "success",
+      "started_at": "2026-10-16T19:49:38Z",
+      "completed_at": "2026-10-16T19:50:59Z"
+    },
+    {
+      "name": "Build Supported Baseline Docker Image (v3.5.30 / 48d0e52)",
+      "conclusion": "success",
+      "started_at": "2026-10-16T19:50:59Z",
+      "completed_at": "2026-10-16T19:51:59Z"
+    },
+    {
+      "name": "Run Real Disposable Docker Boundary Rehearsal",
+      "conclusion": "success",
+      "started_at": "2026-10-16T19:51:59Z",
+      "completed_at": "2026-10-16T19:53:49Z"
+    },
+    {
+      "name": "Run Real Docker Deployment Readiness Acceptance",
+      "conclusion": "success",
+      "started_at": "2026-10-16T19:53:49Z",
+      "completed_at": "2026-10-16T19:56:56Z"
+    }
+  ],
+  "candidateImageId": "sha256:d44a265dc913829e39ad2ae79772378bd77335f17e0a30e1f7e8c41f901e1b7f",
+  "supportedBaseline": {
+    "tag": "v3.5.30",
+    "tree": "48d0e526ded03232ac8516dd867f4b14923bdb58",
+    "imageId": "sha256:2b97d09cd77738af06e06e6ecfa00e3151d1132fbc2b2ff17aedf53c24ba085a"
+  },
+  "pre199": "2026-10-16T19:56:24.8257928Z   ✓ calculation-default-entrypoint-pre199: PRE_199 → shipped default docker-entrypoint.sh → COMPLETE; inactive references 11, activations/backfill 0; retained evidence preserved; direct installer-module repeat NO_OP writes 0",
+  "originalZip": {
+    "bytes": 1387872,
+    "sha256": "caf43c3f13d9673944abd054e6b3f8a2315b4f54086af51be499cba3d39b1230",
+    "entries": 22,
+    "entryHashesSha256": "0050fd5c3fec32ba78809f187a3cfe5df48d320de835ae111728986b93aebdaa"
+  },
+  "originalFailures": [
+    {
+      "path": "pr299-ci-38898578537-original-logs.zip",
+      "sha256": "0eb7352c810296cb2966bc8a796a88fddc799747bf9dd715ff9efe112bb023d5"
+    },
+    {
+      "path": "pr299-ci-38915551182-original-logs.zip",
+      "sha256": "295b440095d35327457fff6e795e3021b3367608fcd9079e56a770f60a40072a"
+    }
+  ],
+  "oldFailedCIRowAndReceiptPayloadEquality": "Unknown; original payloads were not emitted. The new exact-tree actual Docker rehearsal passed its guarded preservation checks.",
+  "pr": {
+    "baseRefOid": "be8379745bdfae52ce46496ff26514dc7d729640",
+    "headRefOid": "153f10e6bac02b1a962213431141fd1c54906e99",
+    "isDraft": true,
+    "number": 299,
+    "state": "OPEN",
+    "url": "https://github.com/yigini/soilfer-lims/pull/299"
+  },
+  "scope": "One authorized commit/push and one ordinary automatic CI attempt observed. No source edits,extra tests/workflow runs,retry/redispatch,PR body edit,ready,audit,native or merge.",
+  "closedEvidenceAtUtc": "2026-10-16T19:59:53.609Z"
+}

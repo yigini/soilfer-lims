@@ -1,0 +1,41 @@
+{
+  "verifiedAtUtc": "2026-10-16T19:17:07.123Z",
+  "head": "153f10e6bac02b1a962213431141fd1c54906e99",
+  "tree": "34f6d9be9c00b2fd923989e4d4291a06ec333e32",
+  "parent": "72adbe43b36319e6f9d8088baa61b0fbe26bb3ff",
+  "paths": [
+    "server/scripts/rehearsal_deployment_readiness.cjs",
+    "server/tests/contracts/issue_208_sample_code_schema.test.js"
+  ],
+  "patchSha256": "2aa9f0c8be0852ce1feb84bff50e5bc61c17aa1540d31e305f18c5a701274e7d",
+  "testedFiles": [
+    {
+      "path": "server/scripts/rehearsal_deployment_readiness.cjs",
+      "sha256": "02cf270798cfec3602fe2eced45995aad316614b469b414e1d8d7106629b79d4",
+      "stagedMatch": "CRLF_TO_LF_ONLY"
+    },
+    {
+      "path": "server/tests/contracts/issue_208_sample_code_schema.test.js",
+      "sha256": "345347235afe8001fb43c37382a678690c6ab44c9729e2f32080d5d3778299ee",
+      "stagedMatch": "RAW_EQUAL"
+    }
+  ],
+  "freshPR": {
+    "baseRefName": "main",
+    "baseRefOid": "be8379745bdfae52ce46496ff26514dc7d729640",
+    "headRefName": "codex/issue-208-labels",
+    "headRefOid": "72adbe43b36319e6f9d8088baa61b0fbe26bb3ff",
+    "isDraft": true,
+    "number": 299,
+    "state": "OPEN",
+    "url": "https://github.com/yigini/soilfer-lims/pull/299"
+  },
+  "remoteRefs": "72adbe43b36319e6f9d8088baa61b0fbe26bb3ff\trefs/heads/codex/issue-208-labels\nbe8379745bdfae52ce46496ff26514dc7d729640\trefs/heads/main\n",
+  "fullLocal": {
+    "suites": 376,
+    "tests": 5761,
+    "seconds": 13327.782,
+    "reportSha256": "a1533d156c3433c65c3cf739768f811a7f68f1cdde21c384fa6e49e3d7f56593"
+  },
+  "originalOldRowAndReceiptCIPayloadEquality": "Unknown; old failed CI did not emit these payloads."
+}

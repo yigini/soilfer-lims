@@ -1,0 +1,43 @@
+﻿2026-10-16T19:51:59.9888907Z ##[group]Run node server/scripts/rehearsal_docker_boundary.cjs
+2026-10-16T19:51:59.9889738Z [36;1mnode server/scripts/rehearsal_docker_boundary.cjs[0m
+2026-10-16T19:52:00.0010125Z shell: /usr/bin/bash -e {0}
+2026-10-16T19:52:00.0010452Z env:
+2026-10-16T19:52:00.0010712Z   IMAGE_TAG: soilfer-lims:ci
+2026-10-16T19:52:00.0011019Z   CI: true
+2026-10-16T19:52:00.0011260Z ##[endgroup]
+2026-10-16T19:52:00.0506344Z ================================================================
+2026-10-16T19:52:00.0507664Z   REAL DISPOSABLE DOCKER BOUNDARY REHEARSAL                     
+2026-10-16T19:52:00.0509297Z   Testing execute_release_pr147.sh Against Real Docker Runtime  
+2026-10-16T19:52:00.0510046Z ================================================================
+2026-10-16T19:52:00.1190350Z Image:        soilfer-lims:ci
+2026-10-16T19:52:00.1191402Z Immutable ID: sha256:d44a265dc913829e39ad2ae79772378bd77335f17e0a30e1f7e8c41f901e1b7f
+2026-10-16T19:52:00.1192146Z 
+2026-10-16T19:52:00.1203909Z [Smoke Test] Packaged Runner Loading & Intake Guard Verification in Real Container...
+2026-10-16T19:52:00.4343046Z ERROR: Must specify either --dry-run or --apply
+2026-10-16T19:52:00.4344174Z Usage: node execute_ghana_apply_146.cjs [--dry-run | --apply] [--snapshot <path>] [--manifest <path>]
+2026-10-16T19:52:00.7941798Z   ✓ Smoke Test PASSED: Packaged runner (/app/server/scripts/execute_ghana_apply_146.cjs) loaded cleanly with Alpine musl native modules; shared intake guards and controller wiring verified, held acceptance refused without writes.
+2026-10-16T19:52:00.7943771Z 
+2026-10-16T19:52:00.7945024Z [Scenario 1] Real Bash Wrapper Success Path with Disposable Docker Volume & Live Container...
+2026-10-16T19:52:12.8929886Z   ✓ Scenario 1 PASSED: Full wrapper pipeline succeeded in real Docker; 4 samples admitted; live traffic restored.
+2026-10-16T19:52:12.8930501Z 
+2026-10-16T19:52:12.8930988Z [Scenario 2] Real Bash Wrapper Partial-Apply Mid-Flight Failure & Bit-for-Bit DB Rollback...
+2026-10-16T19:52:24.8972991Z   ✓ Scenario 2 PASSED: Wrapper caught partial-apply failure; restored volume DB bit-for-bit; retained 503 ingress.
+2026-10-16T19:52:24.8973545Z 
+2026-10-16T19:52:24.8974419Z [Scenario 3] Real Bash Wrapper Interruption While Actual Container Writer is Writing to Volume...
+2026-10-16T19:52:36.5941860Z   Live runner writer active inside Docker (soilfer-lims-apply-20261016_195225). Sending SIGINT...
+2026-10-16T19:53:27.9685908Z   ✓ Scenario 3 PASSED: Interrupted wrapper terminated live container writer before restoring DB bit-for-bit.
+2026-10-16T19:53:27.9686783Z 
+2026-10-16T19:53:27.9687422Z [Scenario 4] Real Bash Wrapper Failed Health Check Preserves Committed Database...
+2026-10-16T19:53:47.1904349Z   ✓ Scenario 4 PASSED: Failed health check executed cleanup and preserved committed database state.
+2026-10-16T19:53:47.1905163Z 
+2026-10-16T19:53:47.1905776Z [Scenario 5] Real Bash Wrapper Image Identity (.Image) Mismatch Rejection...
+2026-10-16T19:53:49.0816968Z   ✓ Scenario 5 PASSED: Wrapper rejected image mismatch before mutation; live container, proxy, and DB untouched.
+2026-10-16T19:53:49.0817563Z 
+2026-10-16T19:53:49.0817775Z ================================================================
+2026-10-16T19:53:49.0818344Z   ALL REAL DOCKER BOUNDARY REHEARSALS COMPLETED SUCCESSFULLY    
+2026-10-16T19:53:49.0818841Z   Smoke | Real Wrapper Success | Partial-Apply Rollback        
+2026-10-16T19:53:49.0819323Z   Writer Interruption | Health-Fail Preserve | Image Identity   
+2026-10-16T19:53:49.0819786Z ================================================================
+2026-10-16T19:53:49.0819998Z 
+2026-10-16T19:53:49.0820019Z 
+2026-10-16T19:53:49.0820194Z Cleaning up disposable Docker resources...

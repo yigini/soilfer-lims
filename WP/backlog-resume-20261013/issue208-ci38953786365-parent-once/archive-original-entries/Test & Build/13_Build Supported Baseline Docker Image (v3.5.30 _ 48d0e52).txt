@@ -1,0 +1,344 @@
+﻿2026-10-16T19:50:59.9532508Z ##[group]Run mkdir -p /tmp/baseline_v3_5_30
+2026-10-16T19:50:59.9533119Z [36;1mmkdir -p /tmp/baseline_v3_5_30[0m
+2026-10-16T19:50:59.9533952Z [36;1mgit archive 48d0e526ded03232ac8516dd867f4b14923bdb58 | tar -x -C /tmp/baseline_v3_5_30[0m
+2026-10-16T19:50:59.9535248Z [36;1mdocker build -t soilfer-lims:baseline-v3.5.30 /tmp/baseline_v3_5_30[0m
+2026-10-16T19:50:59.9614560Z shell: /usr/bin/bash -e {0}
+2026-10-16T19:50:59.9615083Z ##[endgroup]
+2026-10-16T19:51:00.7225331Z #0 building with "default" instance using docker driver
+2026-10-16T19:51:00.7225806Z 
+2026-10-16T19:51:00.7226139Z #1 [internal] load build definition from Dockerfile
+2026-10-16T19:51:00.7226769Z #1 transferring dockerfile: 2.06kB 0.0s done
+2026-10-16T19:51:00.7227239Z #1 DONE 0.0s
+2026-10-16T19:51:00.7227428Z 
+2026-10-16T19:51:00.7227794Z #2 [auth] library/node:pull token for registry-1.docker.io
+2026-10-16T19:51:00.7228334Z #2 DONE 0.0s
+2026-10-16T19:51:00.7228507Z 
+2026-10-16T19:51:00.7228908Z #3 [internal] load metadata for docker.io/library/node:20-alpine
+2026-10-16T19:51:00.9385511Z #3 DONE 0.4s
+2026-10-16T19:51:01.0587875Z 
+2026-10-16T19:51:01.0589257Z #4 [internal] load .dockerignore
+2026-10-16T19:51:01.0590279Z #4 transferring context: 872B done
+2026-10-16T19:51:01.0591220Z #4 DONE 0.0s
+2026-10-16T19:51:01.0591737Z 
+2026-10-16T19:51:01.0592769Z #5 [builder  1/10] FROM docker.io/library/node:20-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293
+2026-10-16T19:51:01.0594528Z #5 resolve docker.io/library/node:20-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293 done
+2026-10-16T19:51:01.0596521Z #5 extracting sha256:6a0ac1617861a677b045b7ff88545213ec31c0ff08763195a70a4a5adda577bb
+2026-10-16T19:51:01.1684278Z #5 sha256:11cedc39e663e7c5d5cb9cc77a461a0d2adc25537b94e6831a6108f09cb2001b 6.52kB / 6.52kB done
+2026-10-16T19:51:01.1686116Z #5 sha256:6a0ac1617861a677b045b7ff88545213ec31c0ff08763195a70a4a5adda577bb 3.86MB / 3.86MB 0.1s done
+2026-10-16T19:51:01.1687531Z #5 sha256:4feea04c154301db6f4a496efa397b3db96603b1c009c797cfdde77bea8b3287 26.21MB / 43.23MB 0.2s
+2026-10-16T19:51:01.1688631Z #5 sha256:b2cbbfe903b0821005780971ddc5892edcc4ce74c5a48d82e1d2b382edac3122 1.26MB / 1.26MB 0.1s done
+2026-10-16T19:51:01.1689865Z #5 sha256:fff4e2c1b189bf87d63ad8bd07f7f4eb288d6f2b6a07a8bb44c60e8c075d2096 445B / 445B 0.1s done
+2026-10-16T19:51:01.1691358Z #5 sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293 7.67kB / 7.67kB done
+2026-10-16T19:51:01.1692777Z #5 sha256:afdf98210b07b586eb71fa22ba2e432e058e4cd1304d31ed60888755b8c865fb 1.72kB / 1.72kB done
+2026-10-16T19:51:01.2805150Z #5 ...
+2026-10-16T19:51:01.2805451Z 
+2026-10-16T19:51:01.2806223Z #6 [internal] load build context
+2026-10-16T19:51:01.2806682Z #6 transferring context: 39.93MB 0.3s done
+2026-10-16T19:51:01.2807147Z #6 DONE 0.3s
+2026-10-16T19:51:01.2807360Z 
+2026-10-16T19:51:01.2808315Z #5 [builder  1/10] FROM docker.io/library/node:20-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293
+2026-10-16T19:51:01.2809698Z #5 extracting sha256:6a0ac1617861a677b045b7ff88545213ec31c0ff08763195a70a4a5adda577bb 0.2s done
+2026-10-16T19:51:01.2810882Z #5 sha256:4feea04c154301db6f4a496efa397b3db96603b1c009c797cfdde77bea8b3287 43.23MB / 43.23MB 0.3s done
+2026-10-16T19:51:01.2812241Z #5 extracting sha256:4feea04c154301db6f4a496efa397b3db96603b1c009c797cfdde77bea8b3287
+2026-10-16T19:51:02.3154553Z #5 extracting sha256:4feea04c154301db6f4a496efa397b3db96603b1c009c797cfdde77bea8b3287 1.0s done
+2026-10-16T19:51:02.7898354Z #5 extracting sha256:b2cbbfe903b0821005780971ddc5892edcc4ce74c5a48d82e1d2b382edac3122
+2026-10-16T19:51:02.9037089Z #5 extracting sha256:b2cbbfe903b0821005780971ddc5892edcc4ce74c5a48d82e1d2b382edac3122 0.0s done
+2026-10-16T19:51:02.9039380Z #5 extracting sha256:fff4e2c1b189bf87d63ad8bd07f7f4eb288d6f2b6a07a8bb44c60e8c075d2096 done
+2026-10-16T19:51:02.9041459Z #5 DONE 1.9s
+2026-10-16T19:51:02.9042785Z 
+2026-10-16T19:51:02.9043388Z #7 [builder  2/10] WORKDIR /app
+2026-10-16T19:51:02.9044054Z #7 DONE 0.0s
+2026-10-16T19:51:02.9045569Z 
+2026-10-16T19:51:02.9046351Z #8 [builder  3/10] COPY client/package.json client/package-lock.json ./client/
+2026-10-16T19:51:02.9048645Z #8 DONE 0.0s
+2026-10-16T19:51:02.9049101Z 
+2026-10-16T19:51:02.9049680Z #9 [stage-1  3/13] RUN apk add --no-cache python3 make g++
+2026-10-16T19:51:03.4342477Z #9 0.569 ( 1/29) Installing libstdc++-dev (15.2.0-r2)
+2026-10-16T19:51:03.6351800Z #9 0.770 ( 2/29) Installing jansson (2.14.1-r0)
+2026-10-16T19:51:03.7688867Z #9 0.778 ( 3/29) Installing zstd-libs (1.5.7-r2)
+2026-10-16T19:51:03.7689822Z #9 0.792 ( 4/29) Installing binutils (2.45.1-r0)
+2026-10-16T19:51:03.7690570Z #9 0.903 ( 5/29) Installing libgomp (15.2.0-r2)
+2026-10-16T19:51:04.0140449Z #9 0.914 ( 6/29) Installing libatomic (15.2.0-r2)
+2026-10-16T19:51:04.0141425Z #9 0.922 ( 7/29) Installing gmp (6.3.0-r4)
+2026-10-16T19:51:04.0142407Z #9 0.942 ( 8/29) Installing isl26 (0.26-r1)
+2026-10-16T19:51:04.0143121Z #9 0.973 ( 9/29) Installing mpfr4 (4.2.2-r0)
+2026-10-16T19:51:04.0143800Z #9 0.987 (10/29) Installing mpc1 (1.3.1-r1)
+2026-10-16T19:51:04.0144475Z #9 0.998 (11/29) Installing gcc (15.2.0-r2)
+2026-10-16T19:51:04.9230137Z #9 2.058 (12/29) Installing musl-dev (1.2.5-r23)
+2026-10-16T19:51:05.1494075Z #9 2.134 (13/29) Installing g++ (15.2.0-r2)
+2026-10-16T19:51:05.3881486Z #9 2.523 (14/29) Installing make (4.4.1-r3)
+2026-10-16T19:51:05.4886970Z #9 2.533 (15/29) Installing libexpat (2.8.5-r0)
+2026-10-16T19:51:05.4888169Z #9 2.541 (16/29) Installing libbz2 (1.0.8-r6)
+2026-10-16T19:51:05.4889011Z #9 2.550 (17/29) Installing libffi (3.5.2-r0)
+2026-10-16T19:51:05.4889802Z #9 2.559 (18/29) Installing gdbm (1.26-r0)
+2026-10-16T19:51:05.4890424Z #9 2.568 (19/29) Installing xz-libs (5.8.4-r0)
+2026-10-16T19:51:05.4890897Z #9 2.579 (20/29) Installing mpdecimal (4.0.1-r0)
+2026-10-16T19:51:05.4891429Z #9 2.593 (21/29) Installing ncurses-terminfo-base (6.5_p20251123-r0)
+2026-10-16T19:51:05.4891975Z #9 2.607 (22/29) Installing libncursesw (6.5_p20251123-r0)
+2026-10-16T19:51:05.4892466Z #9 2.624 (23/29) Installing libpanelw (6.5_p20251123-r0)
+2026-10-16T19:51:05.6818714Z #9 2.633 (24/29) Installing readline (8.3.1-r0)
+2026-10-16T19:51:05.6819723Z #9 2.645 (25/29) Installing sqlite-libs (3.53.4-r0)
+2026-10-16T19:51:05.6820537Z #9 2.666 (26/29) Installing python3 (3.12.15-r0)
+2026-10-16T19:51:05.7397098Z #9 2.874 (27/29) Installing python3-pycache-pyc0 (3.12.15-r0)
+2026-10-16T19:51:05.9037696Z #9 3.039 (28/29) Installing pyc (3.12.15-r0)
+2026-10-16T19:51:05.9039236Z #9 3.039 (29/29) Installing python3-pyc (3.12.15-r0)
+2026-10-16T19:51:06.0745044Z #9 3.039 Executing busybox-1.37.0-r30.trigger
+2026-10-16T19:51:06.0746854Z #9 3.058 OK: 301.3 MiB in 47 packages
+2026-10-16T19:51:06.6525247Z #9 DONE 3.7s
+2026-10-16T19:51:06.6525604Z 
+2026-10-16T19:51:06.6526466Z #10 [stage-1  4/13] COPY server/package.json server/package-lock.json ./server/
+2026-10-16T19:51:06.6527191Z #10 DONE 0.1s
+2026-10-16T19:51:06.6527606Z 
+2026-10-16T19:51:06.6528018Z #11 [builder  4/10] RUN cd client && npm ci --ignore-scripts
+2026-10-16T19:51:06.6529358Z #11 2.861 npm warn deprecated rimraf@3.0.2: Rimraf versions prior to v4 are no longer supported
+2026-10-16T19:51:06.6543206Z #11 3.430 npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+2026-10-16T19:51:06.6547372Z #11 3.629 npm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+2026-10-16T19:51:07.3319942Z #11 4.427 npm warn deprecated @humanwhocodes/config-array@0.13.0: Use @eslint/config-array instead
+2026-10-16T19:51:07.5020157Z #11 4.446 npm warn deprecated @humanwhocodes/object-schema@2.0.3: Use @eslint/object-schema instead
+2026-10-16T19:51:10.8834612Z #11 7.978 npm warn deprecated eslint@8.57.1: This version is no longer supported. Please see https://eslint.org/version-support for other options.
+2026-10-16T19:51:15.7584585Z #11 12.85 
+2026-10-16T19:51:15.7585822Z #11 12.85 added 459 packages, and audited 460 packages in 13s
+2026-10-16T19:51:15.7586941Z #11 12.85 
+2026-10-16T19:51:15.8705182Z #11 12.85 128 packages are looking for funding
+2026-10-16T19:51:15.8706289Z #11 12.85   run `npm fund` for details
+2026-10-16T19:51:15.8706959Z #11 12.97 
+2026-10-16T19:51:15.8707902Z #11 12.97 32 vulnerabilities (1 low, 10 moderate, 20 high, 1 critical)
+2026-10-16T19:51:15.8708816Z #11 12.97 
+2026-10-16T19:51:15.8709443Z #11 12.97 To address issues that do not require attention, run:
+2026-10-16T19:51:15.8709999Z #11 12.97   npm audit fix
+2026-10-16T19:51:15.8710338Z #11 12.97 
+2026-10-16T19:51:15.8710945Z #11 12.97 To address all issues possible (including breaking changes), run:
+2026-10-16T19:51:15.8711633Z #11 12.97   npm audit fix --force
+2026-10-16T19:51:15.8712044Z #11 12.97 
+2026-10-16T19:51:15.8712545Z #11 12.97 Some issues need review, and may require choosing
+2026-10-16T19:51:15.8713017Z #11 12.97 a different dependency.
+2026-10-16T19:51:15.8713278Z #11 12.97 
+2026-10-16T19:51:15.8713540Z #11 12.97 Run `npm audit` for details.
+2026-10-16T19:51:16.0276108Z #11 12.97 npm notice
+2026-10-16T19:51:16.0277163Z #11 12.97 npm notice New major version of npm available! 10.8.2 -> 12.2.0
+2026-10-16T19:51:16.0278249Z #11 12.97 npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.0
+2026-10-16T19:51:16.0279212Z #11 12.97 npm notice To update run: npm install -g npm@12.2.0
+2026-10-16T19:51:16.0279662Z #11 12.97 npm notice
+2026-10-16T19:51:16.7769756Z #11 ...
+2026-10-16T19:51:16.7770030Z 
+2026-10-16T19:51:16.7770511Z #12 [stage-1  5/13] RUN cd server && npm ci --omit=dev --ignore-scripts
+2026-10-16T19:51:17.4386146Z #12 ...
+2026-10-16T19:51:17.4386846Z 
+2026-10-16T19:51:17.4387996Z #11 [builder  4/10] RUN cd client && npm ci --ignore-scripts
+2026-10-16T19:51:17.4389133Z #11 DONE 14.5s
+2026-10-16T19:51:17.6159019Z 
+2026-10-16T19:51:17.6160015Z #13 [builder  5/10] COPY server/package.json server/package-lock.json ./server/
+2026-10-16T19:51:17.6160590Z #13 DONE 0.0s
+2026-10-16T19:51:17.6160747Z 
+2026-10-16T19:51:17.6161152Z #14 [builder  6/10] RUN cd server && npm ci --ignore-scripts
+2026-10-16T19:51:19.7583030Z #14 2.293 npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+2026-10-16T19:51:20.0007215Z #14 2.535 npm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+2026-10-16T19:51:23.0089692Z #14 ...
+2026-10-16T19:51:23.0090147Z 
+2026-10-16T19:51:23.0090862Z #12 [stage-1  5/13] RUN cd server && npm ci --omit=dev --ignore-scripts
+2026-10-16T19:51:23.0091497Z #12 16.35 
+2026-10-16T19:51:23.0092070Z #12 16.35 added 263 packages, and audited 264 packages in 16s
+2026-10-16T19:51:23.0092624Z #12 16.35 
+2026-10-16T19:51:23.1606086Z #12 16.35 49 packages are looking for funding
+2026-10-16T19:51:23.1606818Z #12 16.36   run `npm fund` for details
+2026-10-16T19:51:23.3014270Z #12 16.65 
+2026-10-16T19:51:23.3015911Z #12 16.65 27 vulnerabilities (1 low, 9 moderate, 16 high, 1 critical)
+2026-10-16T19:51:23.3016602Z #12 16.65 
+2026-10-16T19:51:23.3017033Z #12 16.65 To address all issues, run:
+2026-10-16T19:51:23.3017522Z #12 16.65   npm audit fix
+2026-10-16T19:51:23.3017901Z #12 16.65 
+2026-10-16T19:51:23.3018327Z #12 16.65 Run `npm audit` for details.
+2026-10-16T19:51:23.4576227Z #12 16.65 npm notice
+2026-10-16T19:51:23.4577321Z #12 16.65 npm notice New major version of npm available! 10.8.2 -> 12.2.0
+2026-10-16T19:51:23.4578673Z #12 16.65 npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.0
+2026-10-16T19:51:23.4580078Z #12 16.65 npm notice To update run: npm install -g npm@12.2.0
+2026-10-16T19:51:23.4580950Z #12 16.65 npm notice
+2026-10-16T19:51:23.6836383Z #12 DONE 17.0s
+2026-10-16T19:51:23.6837096Z 
+2026-10-16T19:51:23.6837570Z #14 [builder  6/10] RUN cd server && npm ci --ignore-scripts
+2026-10-16T19:51:23.8346194Z #14 ...
+2026-10-16T19:51:23.8346528Z 
+2026-10-16T19:51:23.8347048Z #15 [stage-1  6/13] RUN cd server && npm rebuild better-sqlite3
+2026-10-16T19:51:24.8921541Z #15 1.207 rebuilt dependencies successfully
+2026-10-16T19:51:25.0621696Z #15 DONE 1.4s
+2026-10-16T19:51:25.0622025Z 
+2026-10-16T19:51:25.0622553Z #14 [builder  6/10] RUN cd server && npm ci --ignore-scripts
+2026-10-16T19:51:25.2136812Z #14 ...
+2026-10-16T19:51:25.2137870Z 
+2026-10-16T19:51:25.2138592Z #16 [stage-1  7/13] RUN apk del python3 make g++
+2026-10-16T19:51:25.2146568Z #16 0.152 ( 1/29) Purging g++ (15.2.0-r2)
+2026-10-16T19:51:25.3430664Z #16 0.152 WARNING: opening from cache https://dl-cdn.alpinelinux.org/alpine/v3.23/main/x86_64/APKINDEX.tar.gz: No such file or directory
+2026-10-16T19:51:25.3433099Z #16 0.152 WARNING: opening from cache https://dl-cdn.alpinelinux.org/alpine/v3.23/community/x86_64/APKINDEX.tar.gz: No such file or directory
+2026-10-16T19:51:25.3434977Z #16 0.154 ( 2/29) Purging libstdc++-dev (15.2.0-r2)
+2026-10-16T19:51:25.3435880Z #16 0.224 ( 3/29) Purging gcc (15.2.0-r2)
+2026-10-16T19:51:25.3436736Z #16 0.279 ( 4/29) Purging binutils (2.45.1-r0)
+2026-10-16T19:51:25.4813450Z #16 0.291 ( 5/29) Purging libatomic (15.2.0-r2)
+2026-10-16T19:51:25.4817977Z #16 0.291 ( 6/29) Purging libgomp (15.2.0-r2)
+2026-10-16T19:51:25.4819403Z #16 0.291 ( 7/29) Purging musl-dev (1.2.5-r23)
+2026-10-16T19:51:25.4821694Z #16 0.307 ( 8/29) Purging isl26 (0.26-r1)
+2026-10-16T19:51:25.4823080Z #16 0.308 ( 9/29) Purging jansson (2.14.1-r0)
+2026-10-16T19:51:25.4824947Z #16 0.308 (10/29) Purging make (4.4.1-r3)
+2026-10-16T19:51:25.4828043Z #16 0.308 (11/29) Purging mpc1 (1.3.1-r1)
+2026-10-16T19:51:25.4830887Z #16 0.308 (12/29) Purging mpfr4 (4.2.2-r0)
+2026-10-16T19:51:25.4832664Z #16 0.308 (13/29) Purging python3-pyc (3.12.15-r0)
+2026-10-16T19:51:25.4833707Z #16 0.308 (14/29) Purging python3-pycache-pyc0 (3.12.15-r0)
+2026-10-16T19:51:25.4834283Z #16 0.376 (15/29) Purging pyc (3.12.15-r0)
+2026-10-16T19:51:25.4835487Z #16 0.376 (16/29) Purging python3 (3.12.15-r0)
+2026-10-16T19:51:25.4836802Z #16 0.418 (17/29) Purging readline (8.3.1-r0)
+2026-10-16T19:51:25.6249646Z #16 0.419 (18/29) Purging sqlite-libs (3.53.4-r0)
+2026-10-16T19:51:25.6250462Z #16 0.419 (19/29) Purging xz-libs (5.8.4-r0)
+2026-10-16T19:51:25.6251137Z #16 0.419 (20/29) Purging zstd-libs (1.5.7-r2)
+2026-10-16T19:51:25.6251748Z #16 0.419 (21/29) Purging gdbm (1.26-r0)
+2026-10-16T19:51:25.6252382Z #16 0.419 (22/29) Purging gmp (6.3.0-r4)
+2026-10-16T19:51:25.6254026Z #16 0.420 (23/29) Purging libbz2 (1.0.8-r6)
+2026-10-16T19:51:25.6255139Z #16 0.420 (24/29) Purging libexpat (2.8.5-r0)
+2026-10-16T19:51:25.6259812Z #16 0.420 (25/29) Purging libffi (3.5.2-r0)
+2026-10-16T19:51:25.6260782Z #16 0.420 (26/29) Purging libpanelw (6.5_p20251123-r0)
+2026-10-16T19:51:25.6262851Z #16 0.421 (27/29) Purging libncursesw (6.5_p20251123-r0)
+2026-10-16T19:51:25.6264119Z #16 0.421 (28/29) Purging ncurses-terminfo-base (6.5_p20251123-r0)
+2026-10-16T19:51:25.6266205Z #16 0.432 (29/29) Purging mpdecimal (4.0.1-r0)
+2026-10-16T19:51:25.6267261Z #16 0.433 Executing busybox-1.37.0-r30.trigger
+2026-10-16T19:51:25.6268147Z #16 0.441 OK: 10.9 MiB in 18 packages
+2026-10-16T19:51:25.6268770Z #16 DONE 0.5s
+2026-10-16T19:51:25.6268995Z 
+2026-10-16T19:51:25.6269272Z #17 [stage-1  8/13] COPY server/ ./server/
+2026-10-16T19:51:25.6270141Z #17 DONE 0.1s
+2026-10-16T19:51:25.6270355Z 
+2026-10-16T19:51:25.6270756Z #14 [builder  6/10] RUN cd server && npm ci --ignore-scripts
+2026-10-16T19:51:32.9832976Z #14 15.52 
+2026-10-16T19:51:32.9834134Z #14 15.52 added 556 packages, and audited 557 packages in 15s
+2026-10-16T19:51:32.9834990Z #14 15.52 
+2026-10-16T19:51:33.1338159Z #14 15.52 93 packages are looking for funding
+2026-10-16T19:51:33.1338770Z #14 15.52   run `npm fund` for details
+2026-10-16T19:51:33.2692953Z #14 15.80 
+2026-10-16T19:51:33.2694315Z #14 15.80 63 vulnerabilities (2 low, 12 moderate, 48 high, 1 critical)
+2026-10-16T19:51:33.2695415Z #14 15.80 
+2026-10-16T19:51:33.2696004Z #14 15.80 To address all issues, run:
+2026-10-16T19:51:33.2696664Z #14 15.80   npm audit fix
+2026-10-16T19:51:33.2697156Z #14 15.80 
+2026-10-16T19:51:33.2698056Z #14 15.80 Run `npm audit` for details.
+2026-10-16T19:51:33.6337785Z #14 DONE 16.2s
+2026-10-16T19:51:33.7359576Z 
+2026-10-16T19:51:33.7360325Z #18 [builder  7/10] COPY client/ ./client/
+2026-10-16T19:51:33.7361009Z #18 DONE 0.1s
+2026-10-16T19:51:33.9328091Z 
+2026-10-16T19:51:33.9328861Z #19 [builder  8/10] COPY server/ ./server/
+2026-10-16T19:51:33.9329462Z #19 DONE 0.0s
+2026-10-16T19:51:33.9329686Z 
+2026-10-16T19:51:33.9330093Z #20 [builder  9/10] RUN cd server && npx prisma generate
+2026-10-16T19:51:35.4008793Z #20 1.619 Loaded Prisma config from prisma.config.ts.
+2026-10-16T19:51:35.4009412Z #20 1.619 
+2026-10-16T19:51:36.0098455Z #20 2.228 Prisma schema loaded from prisma/schema.prisma.
+2026-10-16T19:51:37.2051348Z #20 3.423 
+2026-10-16T19:51:37.2053000Z #20 3.423 ✔ Generated Prisma Client (v7.4.0) to ./prisma_client in 824ms
+2026-10-16T19:51:37.2054051Z #20 3.423 
+2026-10-16T19:51:37.2055328Z #20 3.423 Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+2026-10-16T19:51:37.2056166Z #20 3.423 
+2026-10-16T19:51:37.2056484Z #20 3.423 
+2026-10-16T19:51:37.4113528Z #20 DONE 3.5s
+2026-10-16T19:51:37.4113920Z 
+2026-10-16T19:51:37.4114496Z #21 [builder 10/10] RUN cd client && npm run build
+2026-10-16T19:51:37.5628153Z #21 0.302 
+2026-10-16T19:51:37.5628725Z #21 0.302 > client@1.4.0 build
+2026-10-16T19:51:37.5629219Z #21 0.302 > vite build
+2026-10-16T19:51:37.5629607Z #21 0.302 
+2026-10-16T19:51:37.7930067Z #21 0.532 vite v5.4.21 building for production...
+2026-10-16T19:51:38.1241575Z #21 0.863 transforming...
+2026-10-16T19:51:40.0154302Z #21 2.754 Browserslist: browsers data (caniuse-lite) is 10 months old. Please run:
+2026-10-16T19:51:40.0156059Z #21 2.754   npx update-browserslist-db@latest
+2026-10-16T19:51:40.0157428Z #21 2.754   Why you should do it regularly: https://github.com/browserslist/update-db#readme
+2026-10-16T19:51:49.3906534Z #21 12.13 ✓ 2654 modules transformed.
+2026-10-16T19:51:51.7703436Z #21 14.51 rendering chunks...
+2026-10-16T19:51:52.3333166Z #21 15.07 computing gzip size...
+2026-10-16T19:51:52.5448497Z #21 15.13 dist/index.html                                   1.69 kB │ gzip:   0.65 kB
+2026-10-16T19:51:52.5451409Z #21 15.13 dist/assets/SampleWorkflowMap-DxFfliMr.css       14.34 kB │ gzip:   3.55 kB
+2026-10-16T19:51:52.5456041Z #21 15.13 dist/assets/index-CTjA6we4.css                  204.37 kB │ gzip:  33.28 kB
+2026-10-16T19:51:52.5457489Z #21 15.13 dist/assets/play-CyMbORXa.js                      0.30 kB │ gzip:   0.25 kB
+2026-10-16T19:51:52.5459058Z #21 15.13 dist/assets/pen-line-BGckUGcF.js                  0.36 kB │ gzip:   0.28 kB
+2026-10-16T19:51:52.5460175Z #21 15.13 dist/assets/plus-circle-DJBtf4Ge.js               0.37 kB │ gzip:   0.28 kB
+2026-10-16T19:51:52.5461518Z #21 15.13 dist/assets/check-square-m5Fx1uuk.js              0.38 kB │ gzip:   0.29 kB
+2026-10-16T19:51:52.5462833Z #21 15.13 dist/assets/key-round-DwVoMBBZ.js                 0.41 kB │ gzip:   0.32 kB
+2026-10-16T19:51:52.5464063Z #21 15.13 dist/assets/wrench-pzHJP17C.js                    0.43 kB │ gzip:   0.31 kB
+2026-10-16T19:51:52.5465586Z #21 15.13 dist/assets/tag-DLdpIDDw.js                       0.50 kB │ gzip:   0.35 kB
+2026-10-16T19:51:52.5466494Z #21 15.13 dist/assets/share-2-cIXZEFBH.js                   0.52 kB │ gzip:   0.33 kB
+2026-10-16T19:51:52.5467831Z #21 15.13 dist/assets/layout-list-COeJOXYe.js               0.53 kB │ gzip:   0.32 kB
+2026-10-16T19:51:52.5469911Z #21 15.13 dist/assets/scale-0ZSCWoym.js                     0.53 kB │ gzip:   0.34 kB
+2026-10-16T19:51:52.5471241Z #21 15.13 dist/assets/sparkles-C005qFqH.js                  0.59 kB │ gzip:   0.35 kB
+2026-10-16T19:51:52.5472436Z #21 15.13 dist/assets/cpu-zPWPcv0P.js                       0.66 kB │ gzip:   0.36 kB
+2026-10-16T19:51:52.5473867Z #21 15.13 dist/assets/panels-top-left-BtjDQFm7.js           0.72 kB │ gzip:   0.36 kB
+2026-10-16T19:51:52.5476292Z #21 15.13 dist/assets/loader-BcRcqwV7.js                    0.73 kB │ gzip:   0.37 kB
+2026-10-16T19:51:52.5477432Z #21 15.13 dist/assets/thumbs-up-Bnh62C0F.js                 0.90 kB │ gzip:   0.43 kB
+2026-10-16T19:51:52.5478850Z #21 15.13 dist/assets/vendor-flow-Cz6H0wKR.js               0.96 kB │ gzip:   0.60 kB
+2026-10-16T19:51:52.5480116Z #21 15.13 dist/assets/vendor-pdf-D7HrI6pR.js                1.02 kB │ gzip:   0.62 kB
+2026-10-16T19:51:52.5481242Z #21 15.13 dist/assets/settings-2-R_YL1y3C.js                1.30 kB │ gzip:   0.52 kB
+2026-10-16T19:51:52.5482452Z #21 15.13 dist/assets/useRealtimeData-D3EZjvcU.js           2.61 kB │ gzip:   1.17 kB
+2026-10-16T19:51:52.5483692Z #21 15.13 dist/assets/NotFound-B1nEUKo8.js                  2.81 kB │ gzip:   1.17 kB
+2026-10-16T19:51:52.5485223Z #21 15.13 dist/assets/PublicReport-C3Y4KMFj.js              3.75 kB │ gzip:   1.51 kB
+2026-10-16T19:51:52.5486511Z #21 15.13 dist/assets/CountryData-BkpZo8Bn.js               4.20 kB │ gzip:   1.34 kB
+2026-10-16T19:51:52.5487857Z #21 15.13 dist/assets/TopicExplorer-kjEG2Kn7.js             4.36 kB │ gzip:   1.77 kB
+2026-10-16T19:51:52.5489098Z #21 15.13 dist/assets/FAQPage-B1abA75H.js                   6.14 kB │ gzip:   2.29 kB
+2026-10-16T19:51:52.5490374Z #21 15.13 dist/assets/ResetPassword-Dejpol5m.js             6.36 kB │ gzip:   1.88 kB
+2026-10-16T19:51:52.5491911Z #21 15.13 dist/assets/DataSheet-CBMq-WcW.js                 6.62 kB │ gzip:   2.30 kB
+2026-10-16T19:51:52.5493167Z #21 15.13 dist/assets/ScanPage-C0Sx3sjr.js                  6.66 kB │ gzip:   2.59 kB
+2026-10-16T19:51:52.5494388Z #21 15.13 dist/assets/ActivateAccount-DMAbNQCB.js           7.42 kB │ gzip:   2.03 kB
+2026-10-16T19:51:52.5495920Z #21 15.13 dist/assets/AuditLogs-B18NUtzv.js                 8.30 kB │ gzip:   2.87 kB
+2026-10-16T19:51:52.5497331Z #21 15.13 dist/assets/LegacyImport-DEEcj3fn.js             10.41 kB │ gzip:   3.32 kB
+2026-10-16T19:51:52.5499013Z #21 15.13 dist/assets/LabMethods-1HqpOQLW.js               11.50 kB │ gzip:   3.59 kB
+2026-10-16T19:51:52.5500228Z #21 15.13 dist/assets/QADashboard-BShdn-No.js              13.41 kB │ gzip:   3.34 kB
+2026-10-16T19:51:52.5501532Z #21 15.13 dist/assets/MyWork-DpkNZ_6D.js                   14.57 kB │ gzip:   3.88 kB
+2026-10-16T19:51:52.5502782Z #21 15.13 dist/assets/Users-CPHEHOKM.js                    15.34 kB │ gzip:   4.64 kB
+2026-10-16T19:51:52.5504011Z #21 15.13 dist/assets/ResultReports-B1jAsjxS.js            15.64 kB │ gzip:   4.86 kB
+2026-10-16T19:51:52.5505558Z #21 15.13 dist/assets/DataResults-B86B3Iux.js              15.92 kB │ gzip:   5.04 kB
+2026-10-16T19:51:52.5506792Z #21 15.13 dist/assets/ManagerQueue-BOd1YaB6.js             17.98 kB │ gzip:   6.09 kB
+2026-10-16T19:51:52.5507680Z #21 15.13 dist/assets/TechStack-DpwtUx0X.js                18.24 kB │ gzip:   7.11 kB
+2026-10-16T19:51:52.5508354Z #21 15.13 dist/assets/About-CZBZELfw.js                    20.15 kB │ gzip:   4.78 kB
+2026-10-16T19:51:52.5509025Z #21 15.13 dist/assets/Projects-DYI-DHyQ.js                 21.67 kB │ gzip:   6.30 kB
+2026-10-16T19:51:52.5509695Z #21 15.13 dist/assets/SampleWorkflowMap-DdMMSAx4.js        23.60 kB │ gzip:   7.13 kB
+2026-10-16T19:51:52.5510376Z #21 15.13 dist/assets/ArticleReader-yGlP3pKT.js            23.91 kB │ gzip:   5.76 kB
+2026-10-16T19:51:52.5511067Z #21 15.13 dist/assets/AdminHelpEditor-Dy6MDtID.js          28.56 kB │ gzip:   6.83 kB
+2026-10-16T19:51:52.5511770Z #21 15.13 dist/assets/BatchInspectionModal-D9TWKcsn.js     29.69 kB │ gzip:   6.47 kB
+2026-10-16T19:51:52.5512458Z #21 15.13 dist/assets/SuspendUserModal-tsDt8o1F.js         33.29 kB │ gzip:   7.93 kB
+2026-10-16T19:51:52.5513113Z #21 15.13 dist/assets/Profile-HcuB_SDm.js                  35.58 kB │ gzip:   8.78 kB
+2026-10-16T19:51:52.5513768Z #21 15.13 dist/assets/SpectralLibrary-EnIV5ri5.js          36.70 kB │ gzip:   8.64 kB
+2026-10-16T19:51:52.5514431Z #21 15.13 dist/assets/HelpCentre-DrMxvPpW.js               37.95 kB │ gzip:  10.46 kB
+2026-10-16T19:51:52.5515630Z #21 15.13 dist/assets/Equipment-D30t1j7t.js                41.32 kB │ gzip:   8.87 kB
+2026-10-16T19:51:52.5516300Z #21 15.13 dist/assets/Inventory-DYKcJcQT.js                41.43 kB │ gzip:   9.61 kB
+2026-10-16T19:51:52.5517238Z #21 15.13 dist/assets/LabManagement-aq9Aik3N.js            79.25 kB │ gzip:  16.66 kB
+2026-10-16T19:51:52.5517920Z #21 15.13 dist/assets/ProjectWorkspace-DNpkkVxF.js        127.49 kB │ gzip:  28.20 kB
+2026-10-16T19:51:52.5518591Z #21 15.13 dist/assets/TechWorkbench-6Jm1h2pK.js           130.72 kB │ gzip:  31.68 kB
+2026-10-16T19:51:52.5519250Z #21 15.13 dist/assets/vendor-maps-YjeZLIpW.js             156.28 kB │ gzip:  45.73 kB
+2026-10-16T19:51:52.5519907Z #21 15.13 dist/assets/vendor-react-B5HuJjSW.js            163.74 kB │ gzip:  53.53 kB
+2026-10-16T19:51:52.5520557Z #21 15.13 dist/assets/AdminPanel-DwgFz_F1.js              165.66 kB │ gzip:  38.38 kB
+2026-10-16T19:51:52.5521211Z #21 15.13 dist/assets/vendor-charts-Dx6hfPqo.js           383.30 kB │ gzip: 105.42 kB
+2026-10-16T19:51:52.5521876Z #21 15.13 dist/assets/vendor-excel-CKN5doRT.js            424.23 kB │ gzip: 141.75 kB
+2026-10-16T19:51:52.5522527Z #21 15.13 dist/assets/Reception-DaHQAo66.js               558.31 kB │ gzip: 160.17 kB
+2026-10-16T19:51:52.5523180Z #21 15.13 dist/assets/index-kv6Zk4Jq.js                 1,189.96 kB │ gzip: 345.28 kB
+2026-10-16T19:51:52.5523633Z #21 15.13 
+2026-10-16T19:51:52.5524027Z #21 15.13 (!) Some chunks are larger than 1000 kB after minification. Consider:
+2026-10-16T19:51:52.5524542Z #21 15.13 - Using dynamic import() to code-split the application
+2026-10-16T19:51:52.5525627Z #21 15.13 - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+2026-10-16T19:51:52.5526474Z #21 15.13 - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+2026-10-16T19:51:52.5536969Z #21 15.13 ✓ built in 14.57s
+2026-10-16T19:51:52.5631822Z #21 DONE 15.3s
+2026-10-16T19:51:53.3773041Z 
+2026-10-16T19:51:53.3774419Z #22 [stage-1  9/13] COPY --from=builder /app/server/prisma_client ./server/prisma_client/
+2026-10-16T19:51:53.5726215Z #22 DONE 0.0s
+2026-10-16T19:51:53.5726658Z 
+2026-10-16T19:51:53.5727442Z #23 [stage-1 10/13] COPY --from=builder /app/client/dist ./client/dist/
+2026-10-16T19:51:53.5728203Z #23 DONE 0.0s
+2026-10-16T19:51:53.5728692Z 
+2026-10-16T19:51:53.5730054Z #24 [stage-1 11/13] RUN mkdir -p /app/server/.schema-backup &&     cp /app/server/prisma/schema.prisma /app/server/.schema-backup/schema.prisma
+2026-10-16T19:51:53.5731377Z #24 DONE 0.1s
+2026-10-16T19:51:53.7192649Z 
+2026-10-16T19:51:53.7194194Z #25 [stage-1 12/13] COPY docker-entrypoint.sh /app/docker-entrypoint.sh
+2026-10-16T19:51:53.7195656Z #25 DONE 0.0s
+2026-10-16T19:51:53.7196055Z 
+2026-10-16T19:51:53.7197243Z #26 [stage-1 13/13] RUN sed -i 's/\r$//' /app/docker-entrypoint.sh && chmod +x /app/docker-entrypoint.sh
+2026-10-16T19:51:53.7198552Z #26 DONE 0.1s
+2026-10-16T19:51:53.8726753Z 
+2026-10-16T19:51:53.8727720Z #27 exporting to image
+2026-10-16T19:51:53.8728278Z #27 exporting layers
+2026-10-16T19:51:59.9539450Z #27 exporting layers 6.2s done
+2026-10-16T19:51:59.9726929Z #27 writing image sha256:2b97d09cd77738af06e06e6ecfa00e3151d1132fbc2b2ff17aedf53c24ba085a done
+2026-10-16T19:51:59.9728126Z #27 naming to docker.io/library/soilfer-lims:baseline-v3.5.30 done
+2026-10-16T19:51:59.9728843Z #27 DONE 6.2s

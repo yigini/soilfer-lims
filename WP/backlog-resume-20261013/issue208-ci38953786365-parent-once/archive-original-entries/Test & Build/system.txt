@@ -1,0 +1,8 @@
+2026-10-16T19:17:13.7210000Z Evaluating test-and-build.if
+2026-10-16T19:17:13.7210000Z Evaluating: success()
+2026-10-16T19:17:13.7210000Z Result: true
+2026-10-16T19:17:13.8950000Z Requested labels: ubuntu-latest
+2026-10-16T19:17:13.8950000Z Job defined at: yigini/soilfer-lims/.github/workflows/ci.yml@refs/pull/299/merge
+2026-10-16T19:17:13.8950000Z Waiting for a runner to pick up this job...
+2026-10-16T19:17:13.9020000Z Job is waiting for a hosted runner to come online.
+2026-10-16T19:17:13.9040000Z Job is about to start running on the hosted runner: GitHub Actions 1000000760
