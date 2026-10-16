@@ -262,6 +262,9 @@ function beforeGuards(options) {
             // #206 adds exactly one identity model. The independent raw counter
             // is installer-owned; captured historical DDL remains unchanged.
             expected.push({table:'SampleContainer',missingTable:true});
+            // #208 adds only this append-only print evidence model. Keep every
+            // historical SQL byte and all previous gap assertions unchanged.
+            expected.push({table:'LabelPrintEvent',missingTable:true});
             // #209 adds only this nullable new-line identity. The captured
             // historical DDL and every other expected gap remain unchanged.
             expected.push({table:'OrderLine',fields:['workItemId']});

@@ -1,4 +1,30 @@
 {
+  "labelPrint": {
+    "title": "Imprimer les étiquettes",
+    "help": "Chaque demande est enregistrée avant l’ouverture de la boîte d’impression. Les demandes annulées restent enregistrées. Une réimpression exige un motif.",
+    "format": "Format",
+    "standard": "Standard (101 × 54 mm)",
+    "compact": "Compact (50 × 25 mm)",
+    "copies": "Copies par étiquette",
+    "reason": "Motif de réimpression",
+    "print": "Imprimer les étiquettes",
+    "recording": "Enregistrement…",
+    "failed": "Impossible de préparer ou d’enregistrer les étiquettes. Réessayez.",
+    "changed": "L’étiquette émise a changé. Rouvrez cette boîte de dialogue.",
+    "tooLong": "Le code ne tient pas dans ce format avec des barres lisibles. Choisissez le format standard ou demandez une vérification au responsable du laboratoire.",
+    "collected": "Prélèvement",
+    "received": "Réception",
+    "errors": {
+      "LABEL_REPRINT_REASON_REQUIRED": "Indiquez un motif de réimpression.",
+      "LABEL_PRINT_FORBIDDEN": "Votre rôle ne permet pas d’imprimer des étiquettes.",
+      "LABEL_PRINT_STATE_REFUSED": "L’état actuel de ce matériau interdit l’étiquetage.",
+      "LABEL_PRINT_CODE_REQUIRED": "Réceptionnez l’échantillon et attribuez son code de laboratoire avant d’imprimer.",
+      "LABEL_PRINT_CODE_UNSUPPORTED": "Le code émis ne peut pas être encodé en Code128. Demandez sa vérification sans le renuméroter.",
+      "LABEL_PRINT_FIELDS_INVALID": "Choisissez les étiquettes, de 1 à 20 copies et un format valide (200 étiquettes maximum).",
+      "LABEL_PRINT_NOT_FOUND": "L’échantillon ou le contenant est introuvable.",
+      "LABEL_PRINT_CHANGED": "L’état d’impression a changé. Rouvrez la boîte de dialogue."
+    }
+  },
   "orderRevision": {
     "reason": "Motif de révision de la commande",
     "reasonPlaceholder": "Expliquez la sélection complète des analyses…",

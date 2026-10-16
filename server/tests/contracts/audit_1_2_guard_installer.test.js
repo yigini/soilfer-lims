@@ -447,8 +447,17 @@ test('a complete guarded database passes the read-only gate, listens and answers
     expect(require('../../scripts/install_control_charts').installControlCharts({dbPath:fixture.file,apply:true}))
         .toMatchObject({classification:'COMPLETE_214',previousClassification:'FRESH_PRISMA_214',backfilledCount:0,totalChanges:1});
     require('../../scripts/install_order_revisions').installOrderRevisions({dbPath:fixture.file,apply:true});
+    const beforeLabels=fingerprint(fixture.file), missingLabels=await realStartup(fixture.file,false);
+    expect(missingLabels.code).toBe(1); expect(JSON.parse(missingLabels.stderr).error).toBe('LABEL_PRINT_STARTUP_REQUIRED');
+    expect(missingLabels.stdout).not.toMatch(/Enterprise Server running on|\[PRISMA\]|SCHEDULER/);
+    expect(fingerprint(fixture.file)).toBe(beforeLabels);
+    expect(require('../../scripts/install_label_print_events').installLabelPrintEvents({dbPath:fixture.file,apply:true}))
+        .toMatchObject({classification:'COMPLETE_208',previousClassification:'FRESH_PRISMA_208',backfilledCount:0,totalChanges:1});
     const child = await realStartup(fixture.file, true);
     expect(child.accepted).toBe(true);
+    const labelsReady=JSON.parse(child.stdout.split('\n').find(line=>line.startsWith('{"event":"LABEL_PRINT_STARTUP_READY"')));
+    expect(labelsReady).toMatchObject({classification:'COMPLETE_208',totalChanges:0});
+    expect(child.stdout.indexOf('LABEL_PRINT_STARTUP_READY')).toBeLessThan(child.stdout.indexOf('Enterprise Server running on'));
     const benchReady=JSON.parse(child.stdout.split('\n').find(line=>line.startsWith('{"event":"BENCH_CREDENTIAL_STARTUP_READY"')));
     expect(benchReady).toMatchObject({classification:'COMPLETE_202',totalChanges:0});
     expect(child.stdout.indexOf('BENCH_CREDENTIAL_STARTUP_READY')).toBeLessThan(child.stdout.indexOf('Enterprise Server running on'));

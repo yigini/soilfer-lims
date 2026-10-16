@@ -4,6 +4,10 @@ const sampleController = require('../controllers/sampleController');
 const sampleAmendmentController = require('../controllers/sampleAmendmentController');
 const { checkPermission } = require('../middleware/authMiddleware');
 
+const labels = require('../controllers/labelPrintController');
+router.post('/labels/preview', checkPermission('PRINT_LABELS'), labels.preview);
+router.post('/labels/print', checkPermission('PRINT_LABELS'), labels.print);
+
 const containers = require('../controllers/sampleContainerController');
 router.get('/:id/containers', checkPermission('VIEW_SAMPLES'), containers.list);
 router.post('/:id/containers', checkPermission('MANAGE_CONTAINERS'), containers.create);

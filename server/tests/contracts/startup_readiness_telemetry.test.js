@@ -9,7 +9,7 @@ const expectedEvents = [
     'QC_GATE_SCOPE', 'PT', 'NCR', 'RESULT_EQUIPMENT', 'WORK_ATTEMPT', 'WORK_REPEAT',
     'REPORTED_VALUE', 'REAGENT_LOT', 'RESULT_OVERRIDE', 'CALCULATION', 'CROSS_CHECK',
     'AMENDMENT', 'REPORT_REVISION', 'BENCH_CREDENTIAL', 'PREPARATION_RECORD',
-    'INSTRUMENT_IMPORT', 'SAMPLE_CONTAINER', 'LAB_POLICY', 'CONTROL_CHART', 'ORDER_REVISION'
+    'INSTRUMENT_IMPORT', 'SAMPLE_CONTAINER', 'LAB_POLICY', 'CONTROL_CHART', 'LABEL_PRINT', 'ORDER_REVISION'
 ].map(name => `${name}_STARTUP_READY`);
 
 // Run the real entrypoint and telemetry sources with synthetic prerequisites.
@@ -75,20 +75,20 @@ function startup({ refuseAt = null } = {}) {
     return { calls, events, failures, loaded };
 }
 
-test('all 26 real READY call sites retain their order and results, with per-stage timing and RSS', () => {
+test('all 27 real READY call sites retain their order and results, with per-stage timing and RSS', () => {
     const result = startup();
-    expect(result.calls).toBe(26);
+    expect(result.calls).toBe(27);
     expect(result.events.map(row => row.event)).toEqual(expectedEvents);
     result.events.forEach((row, index) => {
         expect(row).toMatchObject({ totalChanges: 0, elapsed_ms: (index + 1) * 7,
             rss_bytes: 64 * 1024 * 1024 + (index + 1) * 4096 });
     });
-    expect(result.events.at(-1).retained).toBe('stage-26');
+    expect(result.events.at(-1).retained).toBe('stage-27');
     expect(result.failures).toEqual([]);
     expect(result.loaded).not.toContain('./app');
 });
 
-test.each([1, 24, 26])('stage %i refusal emits no READY for that stage or any successor, and cannot load the server', refuseAt => {
+test.each([1, 24, 26, 27])('stage %i refusal emits no READY for that stage or any successor, and cannot load the server', refuseAt => {
     const result = startup({ refuseAt });
     expect(result.calls).toBe(refuseAt);
     expect(result.events.map(row => row.event)).toEqual(expectedEvents.slice(0, refuseAt - 1));
