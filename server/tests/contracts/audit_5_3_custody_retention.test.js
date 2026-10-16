@@ -223,3 +223,52 @@ test('installer dry-run preserves bytes; apply preserves every legacy custody fi
     expect(() => installSampleCustody({ dbPath: file, apply: true })).toThrow(/differs/);
     expect(fs.readFileSync(file)).toEqual(tamperedBytes);
 });
+
+// Load only the pure comparison; importing the operator script would run Docker.
+const readinessSource = fs.readFileSync(path.resolve(__dirname, '../../scripts/rehearsal_deployment_readiness.cjs'), 'utf8');
+const readinessAssertion = require('@babel/parser').parse(readinessSource).program.body.find(node =>
+    node.type === 'FunctionDeclaration' && node.id.name === 'assertCalculationPredecessorPreserved');
+const assertReadinessPreservation = require('node:vm').runInNewContext(
+    '(' + readinessSource.slice(readinessAssertion.start, readinessAssertion.end) + ')', { require });
+function readinessSnapshots() {
+    const column = (cid, name, type, notnull = 0, dflt_value = null, pk = 0) => ({ cid, name, type, notnull, dflt_value, pk });
+    const before = { sampleColumns: [column(0, 'id', 'TEXT', 1, null, 1), column(1, 'status', 'TEXT', 1), column(2, 'metadata', 'TEXT')],
+        locationColumns: [column(0, 'id', 'TEXT', 1, null, 1), column(1, 'name', 'TEXT', 1)],
+        locationRows: [{ id: 'shelf', name: 'Legacy shelf' }],
+        rows: { Sample: [{ id: 'retained', status: 'RECEIVED', metadata: '{ "raw": "évidence", "n": 1.00 }' }],
+            Result: [{ id: 'result', value: 0 }], WorkAttempt: [{ id: 'attempt', status: 'PLANNED' }],
+            AuditLog: [{ id: 'audit', details: '{ "original": true }' }], QcMeasurement: [], QcEvaluation: [], BatchDisposition: [] },
+        receipts: [{ id: '199_predecessor', appliedAt: '2026-10-01 12:00:00', details: '{ "old": true }' }] };
+    const after = JSON.parse(JSON.stringify(before));
+    after.sampleColumns.push(column(3, 'retainUntil', 'DATETIME'));
+    after.locationColumns.push(column(2, 'purpose', 'TEXT', 1, "'REAGENT'"));
+    after.rows.Sample[0].retainUntil = null; after.locationRows[0].purpose = 'REAGENT';
+    const hash = value => require('node:crypto').createHash('sha256').update(JSON.stringify(value)).digest('hex');
+    after.custody = { sourceSha256: loadCustodyMigrationSource().sha256, originalRowsSha256: hash(before.rows), ledgerCount: 0 };
+    const receipt = { sourceSha256: after.custody.sourceSha256, originalRowsPreserved: true,
+        originalRowsSha256: after.custody.originalRowsSha256, backfilledCount: 0, backfillSha256: hash([]) };
+    receipt.receiptSha256 = hash(receipt);
+    after.receipts.push({ id: '207_sample_custody', appliedAt: '2026-10-16 12:00:00', details: JSON.stringify(receipt) });
+    return { before, after };
+}
+test('readiness preserves exact predecessor values while allowing only declared custody columns, defaults and receipt', () => {
+    const { before, after } = readinessSnapshots();
+    expect(() => assertReadinessPreservation(before, after)).not.toThrow();
+});
+test.each([
+    ['changed old sample value', after => { after.rows.Sample[0].metadata = '{"raw":"évidence","n":1}'; }, /retained analytical/],
+    ['changed audit evidence', after => { after.rows.AuditLog[0].details = '{"original":true}'; }, /retained analytical/],
+    ['changed predecessor receipt', after => { after.receipts[0].details = '{"old":true}'; }, /retained analytical/],
+    ['removed old row', after => { after.rows.Sample = []; }, /retained analytical/],
+    ['undeclared Sample column', after => { after.sampleColumns.push({ cid: 4, name: 'unreviewed', type: 'TEXT', notnull: 0, dflt_value: null, pk: 0 }); after.rows.Sample[0].unreviewed = null; }, /column additions/],
+    ['changed old column definition', after => { after.sampleColumns[2].type = 'BLOB'; }, /column additions/],
+    ['invented historical retention', after => { after.rows.Sample[0].retainUntil = '2027-01-01'; }, /historical defaults/],
+    ['changed location default', after => { after.locationColumns[2].dflt_value = "'SAMPLE'"; }, /historical defaults/],
+    ['changed old location', after => { after.locationRows[0].name = 'Rewritten shelf'; }, /retained analytical/],
+    ['unexpected custody backfill', after => { after.custody.ledgerCount = 1; }, /exact installation receipt/],
+    ['changed new receipt', after => { after.receipts[1].details = after.receipts[1].details.replace('"backfilledCount":0', '"backfilledCount":1'); }, /exact installation receipt/],
+    ['new receipt for other original rows', after => { after.custody.originalRowsSha256 = 'a'.repeat(64); }, /exact installation receipt/]
+])('readiness rejects %s', (_name, mutate, message) => {
+    const { before, after } = readinessSnapshots(); mutate(after);
+    expect(() => assertReadinessPreservation(before, after)).toThrow(message);
+});
