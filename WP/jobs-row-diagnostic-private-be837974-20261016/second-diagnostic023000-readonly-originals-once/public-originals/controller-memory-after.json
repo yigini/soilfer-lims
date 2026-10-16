@@ -1,0 +1,1 @@
+{"membership":"0::/system.slice/lims-workflow-batch-row-diagnostic-be837974-20261016t023000z.service\n","path":"/sys/fs/cgroup/system.slice/lims-workflow-batch-row-diagnostic-be837974-20261016t023000z.service","raw":{"memory.events":"low 0\nhigh 0\nmax 6859\noom 0\noom_kill 0\noom_group_kill 0\n","memory.max":"805306368\n","memory.peak":"805306368\n","memory.swap.max":"0\n"}}
