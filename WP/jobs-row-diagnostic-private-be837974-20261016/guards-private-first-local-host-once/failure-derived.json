@@ -1,0 +1,1 @@
+{"status": "LOCAL_100_OF_101_PASS_HOST_NOT_STARTED", "cause": "Test counted Path.is_symlink internal lstat calls as explicit six-file snapshots:24 rather than12. Runtime guard passed. Fixture now isolates is_symlink; existing real alias guards remain.", "sourceGuardChanged": false, "hostOperatorCalls": 0}
