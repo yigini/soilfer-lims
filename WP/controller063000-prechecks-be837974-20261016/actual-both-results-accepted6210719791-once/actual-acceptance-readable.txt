@@ -1,0 +1,42 @@
+Result review: 080000 prechecks accepted as reported (C1 pass, C2 closed refusal). Not release qualified. Forward scope below.
+
+Thanks Pip, this is exactly what the prechecks were for. C1 cleared the comparator on the real 063000 data, and C2 found the hook problem without touching anything.
+
+**What I checked**
+- **Publication.** 9899f651 changes only files under WP/: 479 new files, plus additions to the two README files. All 157 bound files in the closed result publication match on git blob id, length and SHA-256, and the index is the 158th file. The 26 source hashes in both launch records equal the 26 in my PASS, before and after each run. No raw inspect stream, DB copy or key is in the tree, and JWT_SECRET appears only in prose.
+- **C1.** `public-result.json` hashes to `3852cacf…`. Zero refusals, 112 tables, 42 receipts, and every added hold and audit consumed.
+  - Additions: 186 Sample, 22 SampleHold, 230 AuditLog (186 creates + 22 HOLD_RAISED + 22 conflict audits) and 1 Notification.
+  - All 20 changed originals are CROSS_SUBMISSION_DUPLICATE.
+  - The six originals match before and after, ctime included. Invocation `49e822ac…` deactivated successfully, with 147,456 bytes unexplained.
+  - So 186 new samples and 22 holds are now validated counts for the 063000 data.
+- **C2.** `public-result.json` hashes to `2ff6dd8d…`.
+  - Six calls (ps, inspect, inspect for each owner), all exit 0 with empty stderr, all streams 0400, no stop or start.
+  - Owner 1's two inspects are byte-identical. Owner 2's two inspects have the same length (11,519 bytes) but different hashes, and your host analysis shows only the Mounts order moved: uploads, prisma, tmp became prisma, tmp, uploads. As unordered sets, the mount objects equal each other and the pins.
+  - The HMAC match to `run_diagnostic.py:69` fits the source. Both owners stayed stopped (Exit 137, OOMKilled false, StartedAt and FinishedAt unchanged).
+
+**Why the order moved.** Docker builds the inspect `Mounts` array by walking a Go map (moby's `GetMountPoints`), so its order can change from one call to the next. `stop_owned.py:82` is the only place that compares that array in order. Line 18 and `proof_contract.py:110` key mounts by Destination, and `run_diagnostic.py:35` sorts them. My stand-in docker returned the same bytes every time, so my review missed this. C2 was the real-host run my own rule asks for, and it caught it.
+
+The 063000 hook very likely hit the same thing. Owner 2 finished at 05:07:50.5, before that run's terminal at 05:07:51.1. So that hook found both owners already stopped and made the same ps/inspect/inspect calls C2 made. That's an inference, since those streams weren't kept, but the fix covers it either way.
+
+**Forward scope for the attempt graph**
+1. **Normalize the mounts once, in `selected()`.** Require unique Destinations, then sort the full mount objects by Destination. The compare at :82 can stay as it is. Every other refusal stays:
+   - an owner still running;
+   - any change to id, owner, name, image or startedAt;
+   - any duplicate, missing, extra or changed mount object, checked on every key and not just Source.
+2. **Sweep the whole attempt graph** for other in-order comparisons of arrays that come from docker inspect, or from anything else built out of a map. List each site with your verdict in the review request. JSON objects are fine, since they load as dicts.
+3. **Add tests through the real `call()` and `stop_exact`**, with a stand-in docker that rotates Mounts between calls:
+   - all 6 × 6 before/after orderings of the real public mount objects pass, for each owner;
+   - each single-field change, a duplicate Destination, a missing mount and an extra mount are refused;
+   - in one case the owner starts out running, so the `stop` phase goes through the real `call()` and the rotated inspect-after still passes.
+
+   Please also say whether any earlier run has sent `docker stop` through this `call()` on the host.
+4. **No new host check before the attempt graph.** C2 already ran the real ps/inspect path end to end on this host. What's left is a pure comparison, and the tests above pin it down exactly. The attempt graph binds this comment as my acceptance of both prechecks and gets its own exact source review. Then it needs fresh R4 + 10 GB, an unused root and unit, and one attempt.
+
+**Notes (none blocking)**
+- **C1 memory.** C1 peaked at the 768 MiB cap with 16,050 `memory.max` events and no OOM. That's most likely page cache from the 1.1 GB of copies, but no `memory.stat` shows it. If the attempt runs the comparator under the same cap, please record `memory.stat` (anon vs file) before and after.
+- **Exit 137.** Both owners exiting with 137 means `docker stop -t 10` ended in SIGKILL. The entrypoint ends with `exec node index.js` and the server has no SIGTERM handler, so Node running as PID 1 ignores SIGTERM. That's existing behaviour, and SQLite rolls back an unfinished transaction safely. Still, the kit should say how production gets stopped (grace period, exit code) and count the grace period in the 9 to 10 minute window.
+
+**The seven issues.** Thanks for the table. YY asked about them this morning, and YY's go-ahead from yesterday (6200547786) still stands. So please start #208 and #207 now, in a separate checkout off be837974, and carry on in the agreed order. That work doesn't touch the release inputs. PRs go up with `ready-for-audit` as usual, and merges stay held until the be837974 post-deploy check.
+
+---
+_Generated by [Claude Code](https://claude.ai/code)_
