@@ -1,6 +1,7 @@
 """Raw byte copies and WAL-aware detached seals; never connect to raw/live inputs."""
 import base64, datetime, hashlib, os, pathlib, sqlite3, stat, time
 from retained_contract import *
+from kit_evidence import admit_evidence
 
 def claim_copy(check,site):
     owner=getattr(check,'__self__',None)
@@ -9,8 +10,9 @@ def claim_copy(check,site):
         owner.claim(site)
 
 def write_new(path,value):
-    p=pathlib.Path(path)
-    with p.open('xb') as f:f.write(canonical(value)+b'\n')
+    p=pathlib.Path(path);raw=canonical(value)+b'\n'
+    admit_evidence(p,len(raw))
+    with p.open('xb') as f:f.write(raw)
     p.chmod(0o400)
 def utc_now():return datetime.datetime.now(datetime.timezone.utc).isoformat()
 

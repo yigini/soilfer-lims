@@ -12,6 +12,7 @@ SPECS={
     'kit_contract.py':('HEAD','IMAGE','TREE','BUILD_RECEIPT_SHA','ACCEPTANCE_ID','TIMING_DIRECTION_ID',
         'POSTFLIGHT_POLICY','MEMORY_MAX','canonical','require','sha'),
     'retained_contract.py':('ROOT_NAME','ROOT','MEMORY','LIVE_DATA','LIVE_ASSETS','exact_json'),
+    'kit_evidence.py':('BLOCK','SHARES','_runtime','allocation','EvidenceLedger','bind_runtime','admit_evidence'),
     'kit_journal.py':('real_directory','exclusive_record'),
     'kit_owned.py':('LABEL','DATABASE','INSTALLERS','ALLOWED','cli_spec','validate_spec','selected','same_retained'),
     'kit_integrity.py':('DATA_MOUNT',),

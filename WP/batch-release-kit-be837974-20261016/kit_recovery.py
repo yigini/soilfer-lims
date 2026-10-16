@@ -14,6 +14,7 @@ from retained_contract import exact_json
 from retained_memory import (bounded_read,canonical_cgroup,cgroup_path,pairs,scalar,
     RAW_NAMES,READ_LIMITS,STAT_REQUIRED,EVENT_REQUIRED,NON_RECLAIMABLE_FIELDS)
 from kit_journal import exclusive_record
+from kit_evidence import admit_evidence
 from kit_runtime import PREDECESSOR_ID,PREDECESSOR_HEAD
 from kit_readiness import startup_log,HTTP_CODE,EXPECTED_HTTP
 
@@ -60,6 +61,7 @@ class RecoveryMemory:
             raw=self.read(path,limit);future=((len(raw)+4095)//4096)*4096
             require(self.allocated+future<=256*1024**2,'Same-predecessor raw memory evidence share exceeded')
             self.allocated+=future;name=prefix+'-raw-'+str(len(raws)).zfill(2)+'.stdout'
+            admit_evidence(self.root/name,len(raw))
             descriptor=os.open(str(self.root/name),os.O_WRONLY|os.O_CREAT|os.O_EXCL,0o600)
             with os.fdopen(descriptor,'wb') as stream:stream.write(raw);stream.flush();os.fsync(stream.fileno())
             (self.root/name).chmod(0o400)

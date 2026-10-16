@@ -20,13 +20,13 @@ from retained_runtime_policy import (TARGET_CONFIG,TARGET_LAB,TARGET_PROJECT,exp
     scheduler_refusals,completed_syncs,intake_summary,observation_end,require_final_observation,utc_seconds)
 from kit_owned import cli_spec
 from kit_integrity import DATA_MOUNT
-from kit_io import OUTPUT_LIMIT
+from kit_io import OUTPUT_RETAINED_LIMIT
 
 # This is only the repeated raw transcript sub-budget, NOT a claim that all
 # host evidence writers fit4GiB. Admission precedes the read-only logs call;
 # no new limit, signal or kill point is introduced inside any installer.
 NATURAL_TRANSCRIPT_LIMIT=1024**3
-NATURAL_COMMAND_RESERVATION=2*((OUTPUT_LIMIT+4095)//4096)*4096+2*16*1024**2+8*4096
+NATURAL_COMMAND_RESERVATION=2*((OUTPUT_RETAINED_LIMIT+4095)//4096)*4096+2*16*1024**2+8*4096
 
 
 def admit_natural_transcript(root):

@@ -9,6 +9,7 @@ import pathlib
 import re
 import stat
 from kit_contract import canonical,require,sha
+from kit_evidence import admit_evidence
 
 def utc():return datetime.datetime.now(datetime.timezone.utc).isoformat()
 
@@ -26,6 +27,8 @@ def exclusive_record(directory,name,value,require_directory_sync=True):
     require(len(raw)<=16*1024**2,'Record exceeds bounded receipt size')
     path=directory/name;pending=directory/(name+'.pending')
     if path.exists() or path.is_symlink():raise FileExistsError('Published record already consumed')
+    # One data allocation and BOTH permanently retained directory entries.
+    admit_evidence(path,len(raw),pending=True)
     descriptor=os.open(str(pending),os.O_WRONLY|os.O_CREAT|os.O_EXCL|getattr(os,'O_NOFOLLOW',0),0o600)
     try:
         with os.fdopen(descriptor,'wb',closefd=False) as stream:

@@ -52,6 +52,95 @@ def exact_json(raw):
         return out
     return json.loads(raw, object_pairs_hook=pairs)
 
+# Exact AST definitions from kit_evidence.py
+
+BLOCK = 4096
+
+SHARES = {'commands': 1536 * 1024 ** 2, 'memory': 512 * 1024 ** 2, 'controller': 512 * 1024 ** 2, 'journal': 512 * 1024 ** 2}
+
+_runtime = None
+
+def allocation(byte_count, entries=1):
+    require(type(byte_count) is int and byte_count >= 0 and (type(entries) is int) and (entries > 0), 'Exact evidence bytes and directory entries required')
+    return (byte_count + BLOCK - 1) // BLOCK * BLOCK + entries * BLOCK
+
+class EvidenceLedger:
+
+    def __init__(self, root, shares=None):
+        self.root = pathlib.Path(root)
+        require(self.root.is_absolute() and self.root.is_dir() and (not self.root.is_symlink()), 'Real absolute evidence root required')
+        self.shares = dict(SHARES if shares is None else shares)
+        require(set(self.shares) == set(SHARES) and all((type(n) is int and n > 0 for n in self.shares.values())) and (sum(self.shares.values()) <= 3 * 1024 ** 3), 'Shared runtime evidence shares exceed their reviewed3GiB subset')
+        for part in (self.root, *self.root.parents):
+            require(not part.is_symlink(), 'Evidence root ancestor alias refused')
+        self.used = dict.fromkeys(self.shares, 0)
+        self.paths = set()
+        self.directories = set()
+        self.open = {}
+        self.number = 0
+
+    def reserve(self, paths, maximum_bytes, category):
+        require(category in self.shares and isinstance(paths, tuple) and (len(paths) in (1, 2)), 'Declared evidence category and one/two entry paths required')
+        names = tuple((pathlib.Path(p) for p in paths))
+        relative = []
+        parents = set()
+        for p in names:
+            require(p.is_absolute() and self.root in p.parents, 'Evidence file outside exact root')
+            parts = p.relative_to(self.root).parts
+            require(0 < len(parts) <= 8 and all((x not in ('', '.', '..') for x in parts)), 'Bounded canonical evidence path required')
+            for parent in (p.parent, *p.parent.parents):
+                if parent == self.root:
+                    break
+                require(not parent.is_symlink() and parent.is_dir(), 'Evidence parent alias/missing directory refused')
+                parents.add(parent.relative_to(self.root).as_posix())
+            relative.append(p.relative_to(self.root).as_posix())
+        require(len(set(names)) == len(names) and all((n not in self.paths for n in relative)) and all((not p.exists() and (not p.is_symlink()) for p in names)), 'Evidence path is aliased or consumed')
+        new_directories = parents - self.directories
+        directory_charge = len(new_directories) * 3 * BLOCK
+        amount = allocation(maximum_bytes, len(names)) + directory_charge
+        require(self.used[category] + amount <= self.shares[category], 'Shared ' + category + ' evidence share exhausted before allocation')
+        self.used[category] += amount
+        self.paths.update(relative)
+        self.directories.update(new_directories)
+        self.number += 1
+        ticket = self.number
+        self.open[ticket] = (category, amount, maximum_bytes, len(names), directory_charge)
+        return ticket
+
+    def settle(self, ticket, actual_bytes):
+        require(type(ticket) is int and ticket in self.open, 'Evidence reservation already settled or absent')
+        category, amount, maximum_bytes, entries, directory_charge = self.open[ticket]
+        require(type(actual_bytes) is int and 0 <= actual_bytes <= maximum_bytes, 'Actual evidence exceeds its pre-allocation reservation')
+        self.used[category] -= amount - allocation(actual_bytes, entries) - directory_charge
+        del self.open[ticket]
+
+    def summary(self):
+        return {'sharesBytes': dict(self.shares), 'chargedOrReservedBytes': dict(self.used), 'openReservations': len(self.open), 'directoryEntriesCounted': len(self.paths), 'nestedDirectoriesCounted': len(self.directories), 'coveredProducerMaximumBytes': sum(self.shares.values()), 'unassignedWithinExisting4GiBBytes': 4 * 1024 ** 3 - sum(self.shares.values()), 'fullGlobalEvidenceClosure': False, 'allOriginalsPrivate': True}
+
+def bind_runtime(root):
+    global _runtime
+    require(_runtime is None, 'Shared runtime evidence ledger cannot resume or rebind')
+    _runtime = EvidenceLedger(root)
+    return _runtime
+
+def admit_evidence(path, byte_count, pending=False, reservation=False):
+    """Inert outside the explicitly bound runtime; local reader fixtures stay local.
+
+    The standalone emergency hook intentionally has no bound runtime ledger:
+    quota/retention failure must never suppress an exact owned stop. Its full
+    separate envelope remains part of the missing global closure.
+    """
+    if _runtime is None:
+        return None
+    p = pathlib.Path(path)
+    name = p.name
+    category = 'controller' if name.startswith('controller-memory-') else 'memory' if '-memory-' in name else 'commands' if name.endswith(('.stdout', '.stderr')) else 'journal'
+    paths = (p, p.with_name(p.name + '.pending')) if pending else (p,)
+    ticket = _runtime.reserve(paths, byte_count, category)
+    if not reservation:
+        _runtime.settle(ticket, byte_count)
+    return (_runtime, ticket)
+
 # Exact AST definitions from kit_journal.py
 
 def real_directory(value):
@@ -70,6 +159,7 @@ def exclusive_record(directory, name, value, require_directory_sync=True):
     pending = directory / (name + '.pending')
     if path.exists() or path.is_symlink():
         raise FileExistsError('Published record already consumed')
+    admit_evidence(path, len(raw), pending=True)
     descriptor = os.open(str(pending), os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, 'O_NOFOLLOW', 0), 384)
     try:
         with os.fdopen(descriptor, 'wb', closefd=False) as stream:
@@ -462,7 +552,7 @@ class EmergencyIngress:
 
 SOURCE_SCOPE = 'PRODUCTION_FORWARD_206_214_209_QUALIFIED_ACC158_REVIEWED_WHOLE_OUTAGE'
 
-REQUIRED_SOURCE = {'kit_contract.py', 'kit_sequence.py', 'kit_journal.py', 'kit_io.py', 'kit_docker.py', 'kit_consumer_inventory.py', 'kit_owned.py', 'kit_integrity.py', 'stopped_integrity.cjs', 'cli_guard.cjs', 'live_backup.cjs', 'kit_install.py', 'kit_runtime.py', 'kit_readiness.py', 'kit_natural.py', 'kit_no_writers.py', 'kit_ingress.py', 'kit_budget.py', 'kit_disk.py', 'kit_probes.py', 'kit_frozen.py', 'kit_preservation.py', 'kit_recovery.py', 'kit_emergency_ingress.py', 'kit_stop.py', 'kit_stop_lifecycle.py', 'build_stop_post.py', 'predecessor-startup-expectations.json', 'retained_app_copy.py', 'kit_recovery_copy.py', 'predecessor-copy-source-binding.json', 'retained_authority.py', 'kit_provider.py', 'kit_authority.py', 'kit_science.py', 'kit_construction.py', 'kit_outage.py', 'timing-evidence.json', 'kit_package.py', 'kit_launch_programs.py', 'kit_ops.py', 'run_release.py', 'stop_post.py', 'prepare_release.py', 'launch_release.py', 'application-source-binding.json', 'copy-site-closure.json', 'whole-outage-disclosure.json', 'startup-expectations.json', 'probe-source-map.json', 'compose-source.yml', 'retained_accounting.py', 'retained_files.py', 'retained_contract.py', 'retained_health.py', 'retained_memory.py', 'retained_controller.py', 'retained_intake.py', 'retained_fetch.py', 'retained_provenance.py', 'retained_privacy.py', 'retained_runtime_policy.py', 'postflight-roles.cjs', 'postflight-auth.cjs', 'postflight-reference.cjs', 'postflight-qc-runs.cjs', 'postflight-policy.cjs', 'readonly-smoke.cjs'}
+REQUIRED_SOURCE = {'kit_contract.py', 'kit_sequence.py', 'kit_journal.py', 'kit_io.py', 'kit_evidence.py', 'kit_docker.py', 'kit_consumer_inventory.py', 'kit_owned.py', 'kit_integrity.py', 'stopped_integrity.cjs', 'cli_guard.cjs', 'live_backup.cjs', 'kit_install.py', 'kit_runtime.py', 'kit_readiness.py', 'kit_natural.py', 'kit_no_writers.py', 'kit_ingress.py', 'kit_budget.py', 'kit_disk.py', 'kit_probes.py', 'kit_frozen.py', 'kit_preservation.py', 'kit_recovery.py', 'kit_emergency_ingress.py', 'kit_stop.py', 'kit_stop_lifecycle.py', 'build_stop_post.py', 'predecessor-startup-expectations.json', 'retained_app_copy.py', 'kit_recovery_copy.py', 'predecessor-copy-source-binding.json', 'retained_authority.py', 'kit_provider.py', 'kit_authority.py', 'kit_science.py', 'kit_construction.py', 'kit_outage.py', 'timing-evidence.json', 'kit_package.py', 'kit_launch_programs.py', 'kit_ops.py', 'run_release.py', 'stop_post.py', 'prepare_release.py', 'launch_release.py', 'application-source-binding.json', 'copy-site-closure.json', 'whole-outage-disclosure.json', 'startup-expectations.json', 'probe-source-map.json', 'compose-source.yml', 'retained_accounting.py', 'retained_files.py', 'retained_contract.py', 'retained_health.py', 'retained_memory.py', 'retained_controller.py', 'retained_intake.py', 'retained_fetch.py', 'retained_provenance.py', 'retained_privacy.py', 'retained_runtime_policy.py', 'postflight-roles.cjs', 'postflight-auth.cjs', 'postflight-reference.cjs', 'postflight-qc-runs.cjs', 'postflight-policy.cjs', 'readonly-smoke.cjs'}
 
 def source_index(value):
     require(isinstance(value, dict) and value.get('version') == 1 and (value.get('scope') == SOURCE_SCOPE) and (value.get('root') == str(ROOT)) and (value.get('head') == HEAD) and (value.get('tree') == TREE) and (value.get('image') == IMAGE) and (value.get('buildReceiptSha256') == BUILD_RECEIPT_SHA), 'Exact new production source-index target required')

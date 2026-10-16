@@ -2,6 +2,7 @@
 import datetime,os,pathlib,re,stat
 from retained_contract import MEMORY,ROOT,require,sha,canonical
 from retained_files import write_new
+from kit_evidence import admit_evidence
 from kit_docker import inspect
 
 NON_RECLAIMABLE_FIELDS=('anon','shmem','slab_unreclaimable','kernel_stack','pagetables','percpu','sock')
@@ -116,6 +117,7 @@ class MemoryHistory:
                 write_new(self.root/(prefix+'-read-refusal.json'),{'path':str(path),'error':type(error).__name__+': '+str(error),'neverRetry':True});raise
             name=prefix+'-raw-'+str(len(raws)).zfill(2)+'-'+pathlib.Path(path).name+'.stdout';p=self.root/name
             self.reserve_evidence(len(raw))
+            admit_evidence(p,len(raw))
             with p.open('xb') as f:f.write(raw)
             p.chmod(0o400);raws.append({'path':name,'kernelPath':str(path),'bytes':len(raw),'sha256':sha(raw)})
             return raw

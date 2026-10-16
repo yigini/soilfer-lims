@@ -36,6 +36,7 @@ from kit_recovery import RecoveryReadiness
 from kit_probes import Probes
 from kit_no_writers import assert_no_volume_writers
 from kit_consumer_inventory import collect
+from kit_evidence import bind_runtime
 
 
 class ResourceGuard:
@@ -77,6 +78,7 @@ def construction_inputs(root):
 
 def construct(root=ROOT):
     root,manifest,index,source,kit,confirmation,disclosure,plan=construction_inputs(root)
+    evidence=bind_runtime(root)
     # The independent standalone hook compares this exact BEFORE boundary to
     # its post-stop numeric PID/cgroup reads. No call uses /proc/self aliases.
     controller=ControllerGuard(root);controller.observe('before')

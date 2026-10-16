@@ -66,6 +66,7 @@ class Construction(unittest.TestCase):
         def disk(root,reader,runner,budget):return Disk(root,reader,runner,budget,False,hardware_reader=hardware)
         module=importlib.import_module('kit_construction')
         with contextlib.ExitStack() as stack:
+            stack.enter_context(patch('kit_evidence._runtime',None))
             stack.enter_context(patch('kit_construction.construction_inputs',return_value=(root,manifest,idx,source,kit,confirmation,disclosure,{'SYNTHETIC_TEST_PLAN':True})))
             stack.enter_context(patch('kit_construction.ControllerGuard',Controller))
             stack.enter_context(patch('kit_construction.CommandRunner',Runner))
