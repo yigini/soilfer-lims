@@ -7,6 +7,8 @@ The later receipt does not attribute intervening human writes to Kobo.
 import contextlib
 import datetime
 import pathlib
+import re
+import stat
 import sqlite3
 import time
 from kit_contract import FIVE_COUNTS,require,validate_postflight_counts
@@ -18,6 +20,31 @@ from retained_runtime_policy import (TARGET_CONFIG,TARGET_LAB,TARGET_PROJECT,exp
     scheduler_refusals,completed_syncs,intake_summary,observation_end,require_final_observation,utc_seconds)
 from kit_owned import cli_spec
 from kit_integrity import DATA_MOUNT
+from kit_io import OUTPUT_LIMIT
+
+# This is only the repeated raw transcript sub-budget, NOT a claim that all
+# host evidence writers fit4GiB. Admission precedes the read-only logs call;
+# no new limit, signal or kill point is introduced inside any installer.
+NATURAL_TRANSCRIPT_LIMIT=1024**3
+NATURAL_COMMAND_RESERVATION=2*((OUTPUT_LIMIT+4095)//4096)*4096+2*16*1024**2+8*4096
+
+
+def admit_natural_transcript(root):
+    seen=set();used=0;entries=0
+    for path in pathlib.Path(root).glob('natural-logs-*'):
+        require(re.fullmatch(r'natural-logs-[0-9]{6}(?:\.stdout|\.stderr|-command-(?:intent|result)\.json(?:\.pending)?)',path.name),
+            'Unexpected retained natural transcript entry')
+        info=path.lstat();entries+=1
+        require(entries<=256*6 and stat.S_ISREG(info.st_mode) and not path.is_symlink() and info.st_nlink<=2,
+            'Natural transcript alias/type/count refused')
+        used+=4096 # Every pending/final name consumes directory allocation.
+        identity=(info.st_dev,info.st_ino)
+        if identity not in seen:
+            seen.add(identity);used+=max(getattr(info,'st_blocks',0)*512,((info.st_size+4095)//4096)*4096)
+    require(used+NATURAL_COMMAND_RESERVATION<=NATURAL_TRANSCRIPT_LIMIT,
+        'No complete next natural-log transcript reservation; refuse before Docker logs')
+    return {'retainedAllocatedBytes':used,'reservedNextCommandBytes':NATURAL_COMMAND_RESERVATION,
+        'transcriptMaximumBytes':NATURAL_TRANSCRIPT_LIMIT,'allEvidenceClosureClaimed':False}
 
 def utc():return datetime.datetime.now(datetime.timezone.utc).isoformat()
 
@@ -66,6 +93,8 @@ class NaturalIntake:
             'activeConfigsWithoutSecrets':self.configs,'expectedRefusals':self.refusals})
 
     def observation(self):
+        require(len(self.observations)<256,'Bounded natural observation inventory exceeded before capture')
+        admission=admit_natural_transcript(self.root)
         self.runner.check(180);self.monitor.observe('natural-intake',True)
         value=self.candidate()
         require(value['State'].get('Health',{}).get('Status')=='healthy' and value.get('RestartCount')==0,
@@ -77,12 +106,11 @@ class NaturalIntake:
         require('[KOBO_SCHEDULER] Initial sync error' not in stdout+stderr,'Initial natural scheduler error')
         refusals=scheduler_refusals(stdout,stderr,self.refusals)
         completions=completed_syncs(stdout)
-        require(len(self.observations)<256,'Bounded natural observation inventory exceeded')
         per_lab={lab:completed_syncs(stdout,lab) for lab in sorted({r['labId'] for r in self.configs.values()})}
         observation={'utc':utc(),'completedTargetSyncs':completions,'exactPairedRefusals':refusals,
             'perLabCompletions':per_lab,
             'perConfigCompletions':{key:per_lab[row['labId']] for key,row in self.valid.items()},
-            'healthy':True,'metadata':metadata}
+            'healthy':True,'metadata':metadata,'rawTranscriptAdmission':admission}
         self.journal.append('naturalObservation',observation);self.observations.append(observation)
         return observation
 

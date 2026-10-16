@@ -21,7 +21,7 @@ from retained_controller import ControllerGuard
 from retained_memory import MemoryHistory
 from retained_privacy import initialize_private_key
 from retained_health import load_health
-from kit_budget import Budget
+from kit_budget import Budget,RECOVERY_FIXED,RECOVERY_DB_COPIES
 from kit_disk import Disk,measure_inputs
 from kit_owned import OwnedCli,filesystem_controls
 from kit_stop import EmergencyCommands,stop_cli_owners
@@ -67,6 +67,11 @@ def construction_inputs(root):
     result=kit_review(kit,manifest,index,source)
     confirmation=read('yy-confirmation.json');disclosure=read('whole-outage-disclosure.json')
     plan=reviewed_plan(manifest,disclosure,result)
+    profile=read('tooling/predecessor-copy-source-binding.json')
+    from kit_recovery_copy import HEAD as OLD_HEAD,FIXED_BYTES
+    require(profile.get('head')==OLD_HEAD and profile.get('maximumStartupDatabaseCopies')==RECOVERY_DB_COPIES==0 and
+        profile.get('fixedAllocationBytesIncludingMarkersAndDirectories')==RECOVERY_FIXED==FIXED_BYTES,
+        'Frozen same-predecessor source/budget branch differs')
     return root,manifest,index,source,kit,confirmation,disclosure,plan
 
 

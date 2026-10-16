@@ -62,6 +62,8 @@ def package_fixture():
     projection={'units':{'SYNTHETIC.service':{'definitionSha256':'d'*64}},'cron':{},'containers':{}}
     inventory={'configuration':projection,'configurationSha256':sha(canonical(projection)),
         'completeCollection':True,'readOnly':True,'activeTimerNames':[],
+        'loadedAndTransientUnitsIncluded':True,'independentCompletePasses':2,
+        'configurationEqualAcrossBothPasses':True,'cataloguesReenumeratedAfterEachPass':True,
         'observedProcessCommandSha256':['e'*64]}
     consumer={'exactKitReviewPassed':True,'reviewedConsumerConfigurationSha256':inventory['configurationSha256'],
         'noHostConsumerActsOnUnhealthyWindow':True,'reviewedAllowedProcessCommandSha256':['e'*64],

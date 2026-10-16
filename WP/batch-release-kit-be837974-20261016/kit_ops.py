@@ -209,11 +209,15 @@ class ProductionOps:
             'currentStoppedTriple':identity_record(triple(pathlib.Path(LIVE_DATA)/'dev.db'))}
         self.journal.append('preApplyRawRecoveryProof',result);return result
 
-    def restart_exact_retained_predecessor_once(self):return self.predecessor.restart_preapply_once()
+    def restart_exact_retained_predecessor_once(self):
+        self.disk.begin_recovery()
+        return self.predecessor.restart_preapply_once()
     def verify_restarted_predecessor_ready(self,deadline):
         # Separate exact-old reader preserves its existing swap allowance and
         # original configuration. The new candidate's Swap0 reader is not used.
-        return self.recovery_ready(self.predecessor,deadline)
+        value=self.recovery_ready(self.predecessor,deadline)
+        value['physicalRecoveryBranch']=self.disk.finish_recovery()
+        return value
 
     def seal_terminal_receipt(self,receipt):
         if receipt['status']=='DEPLOYED_AWAITING_CLAUDIO_POSTCHECK':

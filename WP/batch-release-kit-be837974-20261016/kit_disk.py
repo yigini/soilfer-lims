@@ -177,3 +177,20 @@ class Disk:
         result=self.budget.finish(label,measured)
         exclusive_record(self.root,'budget-'+label+'-complete.json',result,self.sync)
         self.stage_before=None;self.check();return result
+
+    def begin_recovery(self):
+        # Called only after sequence/raw-equality/no-writer checks, before the
+        # sole same-old restart. No normal installer may resume this budget.
+        self.budget.reserve_recovery()
+        self.check(600)
+        self.recovery_before=self.sample('before-preapply-recovery')
+        self.budget.claim_recovery_start()
+        exclusive_record(self.root,'budget-preapply-recovery-intent.json',{
+            'branch':'sameRetained959d','neverRetry':True,'remainingCopyBytes':self.budget.remaining()},self.sync)
+
+    def finish_recovery(self):
+        after=self.sample('after-preapply-recovery')
+        growth=max(0,sum(after['allocations'][p]['bytes']-self.recovery_before['allocations'][p]['bytes'] for p in ALLOCATION))
+        result=self.budget.finish_recovery(growth)
+        exclusive_record(self.root,'budget-preapply-recovery-complete.json',result,self.sync)
+        self.check();return result

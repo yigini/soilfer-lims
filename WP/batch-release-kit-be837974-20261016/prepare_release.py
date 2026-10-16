@@ -98,6 +98,9 @@ def prepare(index_file,source_file,capture_directory,destination,whole_outage_se
     # half-written source graph cannot acquire authority from an old PASS.
     raw=raw_git(index['sourceCommit'],[REL+name for name in index['files']])
     require(all(raw[REL+name][1]==pin for name,pin in index['files'].items()),'Published source index differs from raw Git')
+    from kit_recovery_copy import HEAD as OLD_HEAD,validate as validate_old
+    profile=exact_json(raw[REL+'predecessor-copy-source-binding.json'][0])
+    validate_old({n:r[0] for n,r in raw_git(OLD_HEAD,list(profile['files'])).items()},profile)
     capture=read_package(pathlib.Path(capture_directory),require_posix_permissions=os.name=='posix')
     expected=REQUIRED_PAYLOAD-{'source-index.json','source-review.json','whole-outage-disclosure.json'}
     require(set(capture)==expected,'Capture directory contains missing/extra inputs')

@@ -137,6 +137,7 @@ def remote_programs(pins):
     definitions+=selected_definitions('retained_contract.py',['LIVE_DATA','LIVE_ASSETS'])
     definitions+=selected_definitions('kit_budget.py',[
         'MARGIN_PERCENT','MINIMUM_DB_EQUIVALENTS','ASSET_COPIES','SCHEMA_BYTES','FIXED_STARTUP','DB_COST',
+        'RECOVERY_SCHEMA_BYTES','RECOVERY_FIXED','RECOVERY_DB_COPIES','EARLY_PREFIX_MAX_DB_COPIES','RECOVERY_EVIDENCE_SHARE',
         'STAGES','CLI_SITE','TABLE','TOTAL_DB_COPIES','DB_EQUIVALENTS','TABLE_SHA','Budget'])
     definitions+=selected_definitions('kit_disk.py',['BOUND','hardware','free_gate','measure_inputs'])
     # Definitions need imports/helpers before their top-level derived constants.

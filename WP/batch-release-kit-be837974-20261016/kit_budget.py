@@ -12,6 +12,14 @@ MINIMUM_DB_EQUIVALENTS=64
 ASSET_COPIES=3
 SCHEMA_BYTES=89556
 FIXED_STARTUP=((SCHEMA_BYTES+4095)//4096)*4096+2*4096+32*4096
+# The alternative pre-APPLY branch retains at most stopped3+policy1+206dry1
+# copies. Exact160-file959d source derivation has ZERO startup DB producers;
+# its schema copy, two possible markers and32 directories remain reserved.
+RECOVERY_SCHEMA_BYTES=86118
+RECOVERY_FIXED=((RECOVERY_SCHEMA_BYTES+4095)//4096)*4096+2*4096+32*4096
+RECOVERY_DB_COPIES=0
+EARLY_PREFIX_MAX_DB_COPIES=5
+RECOVERY_EVIDENCE_SHARE=LOG_RESERVE-3*256*1024**2
 DB_COST={'triple':1,'backup':1,'clone':1,'assets':0,'cli-policy':1,'cli-charts':1,
          'cli-orders':2,'cli-order-impact':2,'startup-policy-chain':8,'cli-backup':1}
 STAGES=(
@@ -40,7 +48,10 @@ TABLE=[{'stage':name,'sites':sites,'dbTriples':sum(DB_COST[s]*n for s,n in sites
        for name,sites,fixed in STAGES]
 TOTAL_DB_COPIES=sum(r['dbTriples'] for r in TABLE)
 DB_EQUIVALENTS=max(MINIMUM_DB_EQUIVALENTS,math.ceil(TOTAL_DB_COPIES*1.25))
-TABLE_SHA=sha(canonical(TABLE))
+TABLE_SHA=sha(canonical({'normal':TABLE,'preApplyRecovery':{
+    'maximumRetainedPrefixDatabaseCopies':EARLY_PREFIX_MAX_DB_COPIES,
+    'startupDatabaseCopies':RECOVERY_DB_COPIES,'fixedBytes':RECOVERY_FIXED,
+    'evidenceShareBytes':RECOVERY_EVIDENCE_SHARE,'sameRetained959dOnly':True}}))
 require(sum(r['logGrowthShareBytes'] for r in TABLE)==LOG_RESERVE,'Physical evidence shares must equal unchanged4GiB reserve')
 
 class Budget:
@@ -53,21 +64,25 @@ class Budget:
         self.padding=DB_EQUIVALENTS*self.db-sum(self.db_allowances)
         require(self.padding>=0,'Stage rounding exceeds minimum64/25percent copy allowance')
         self.completed=0;self.active=None;self.claims=collections.Counter()
+        self.recovery=None
+        self.recovery_allowance=(RECOVERY_FIXED*125+99)//100
 
     def remaining(self,include_active=True):
+        if self.recovery is not None:
+            return self.recovery_allowance if self.recovery=='reserved' or self.recovery=='active' and include_active else 0
         if self.completed==len(TABLE):return 0
         first=self.completed+(1 if self.active is not None and not include_active else 0)
-        return self.padding+sum(self.db_allowances[first:])+sum(self.fixed[first:])
+        return self.padding+sum(self.db_allowances[first:])+sum(self.fixed[first:])+self.recovery_allowance
 
     def required(self):return disk_required(self.db,self.image,self.assets,self.remaining(include_active=False))
 
     def begin(self,label,free):
-        require(self.active is None and self.completed<len(TABLE) and TABLE[self.completed]['stage']==label,'Physical stage order/replay refused')
+        require(self.recovery is None and self.active is None and self.completed<len(TABLE) and TABLE[self.completed]['stage']==label,'Physical stage order/replay refused')
         require(type(free) is int and free>=disk_required(self.db,self.image,self.assets,self.remaining()),'Complete remaining-copy reserve unavailable')
         self.active=label;self.claims=collections.Counter()
 
     def claim(self,site):
-        require(self.active is not None and site in TABLE[self.completed]['sites'],'Undeclared retained-copy producer')
+        require(self.recovery is None and self.active is not None and site in TABLE[self.completed]['sites'],'Undeclared retained-copy producer')
         self.claims[site]+=1
         require(self.claims[site]<=TABLE[self.completed]['sites'][site],'Retained-copy producer exceeded its source maximum')
 
@@ -76,7 +91,7 @@ class Budget:
         if site is not None:self.claim(site)
 
     def finish(self,label,physical_growth):
-        require(self.active==label and dict(self.claims)==TABLE[self.completed]['sites'],'Missing/changed source copy claims')
+        require(self.recovery is None and self.active==label and dict(self.claims)==TABLE[self.completed]['sites'],'Missing/changed source copy claims')
         allowance=self.db_allowances[self.completed]+self.fixed[self.completed]+TABLE[self.completed]['assetCopies']*self.assets+TABLE[self.completed]['logGrowthShareBytes']
         require(type(physical_growth) is int and 0<=physical_growth<=allowance,'Stage physical growth exceeds copy/fixed/evidence allowance')
         result={'stage':label,'declared':TABLE[self.completed],'claims':dict(self.claims),'measuredPhysicalGrowthBytes':physical_growth,
@@ -84,3 +99,25 @@ class Budget:
         self.completed+=1;self.active=None;self.claims=collections.Counter()
         result.update(remainingCopyBytes=self.remaining(),minimumFreeBytes=self.required())
         return result
+
+    def reserve_recovery(self):
+        require(self.recovery is None and self.completed<=2 and self.active in
+            (None,'stopped-backup','canonical-policy','issue-206'),
+            'Only the pre-first-APPLY branch has a same-predecessor copy allowance')
+        self.recovery='reserved'
+
+    def claim_recovery_start(self):
+        require(self.recovery=='reserved','Same-predecessor startup copy allowance is consumed')
+        self.recovery='active'
+
+    def finish_recovery(self,physical_growth):
+        require(self.recovery=='active' and type(physical_growth) is int and physical_growth>=0,
+            'Exact one recovery physical stage required')
+        allowance=self.recovery_allowance+RECOVERY_EVIDENCE_SHARE
+        require(physical_growth<=allowance,'Recovery copy/fixed/evidence growth exceeds alternative branch allowance')
+        self.recovery='complete'
+        return {'branch':'preApplySameRetained959d','maximumRetainedPrefixDatabaseCopies':EARLY_PREFIX_MAX_DB_COPIES,
+            'startupDatabaseCopies':RECOVERY_DB_COPIES,'fixedBytes':RECOVERY_FIXED,
+            'measuredPhysicalGrowthBytes':physical_growth,'allowedPhysicalGrowthBytes':allowance,
+            'samePredecessorOnly':True,'noDatabaseRestore':True,'oldSwapConfigurationUnchanged':True,
+            'normalSequenceCannotResume':True,'remainingCopyBytes':0,'minimumFreeBytes':self.required()}
