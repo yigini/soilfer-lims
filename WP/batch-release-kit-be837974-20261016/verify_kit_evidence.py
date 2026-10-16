@@ -88,9 +88,11 @@ class SharedEvidence(unittest.TestCase):
     def test_existing_4gib_reserve_is_not_reinterpreted_as_covered_global_closure(self):
         root=directory();book=evidence.EvidenceLedger(root)
         summary=book.summary()
-        self.assertEqual(summary['coveredProducerMaximumBytes'],3*1024**3)
+        self.assertEqual(summary['coveredProducerMaximumBytes'],3200*1024**2)
         self.assertEqual(summary['independentEmergencyEnvelopesBytes'],800*1024**2)
-        self.assertEqual(summary['unassignedWithinExisting4GiBBytes'],224*1024**2)
+        self.assertEqual(summary['independentHookRecordsBytes'],64*1024**2)
+        self.assertEqual(summary['apacheTransitionAllowanceBytes'],32*1024**2)
+        self.assertEqual(summary['unassignedWithinExisting4GiBBytes'],0)
         self.assertFalse(summary['fullGlobalEvidenceClosure'])
         with patch('kit_evidence._runtime',None):
             self.assertIs(evidence.bind_runtime(root),evidence._runtime)

@@ -9,7 +9,7 @@ import pathlib
 import re
 import stat
 from kit_contract import canonical,require,sha
-from kit_evidence import admit_evidence,EMERGENCY_CALL_LIMIT,EMERGENCY_METADATA_LIMIT
+from kit_evidence import admit_evidence,EMERGENCY_CALL_LIMIT,EMERGENCY_METADATA_LIMIT,HOOK_RESULT_NAMES,HOOK_RECORD_LIMIT
 
 def utc():return datetime.datetime.now(datetime.timezone.utc).isoformat()
 
@@ -29,6 +29,9 @@ def exclusive_record(directory,name,value,require_directory_sync=True,independen
     if path.exists() or path.is_symlink():raise FileExistsError('Published record already consumed')
     # One data allocation and BOTH permanently retained directory entries.
     if independent_namespace is None:admit_evidence(path,len(raw),pending=True)
+    elif independent_namespace=='hook-results':
+        require(name in HOOK_RESULT_NAMES and len(raw)<=HOOK_RECORD_LIMIT,
+            'Independent hook record outside its fixed three-name envelope')
     else:
         require(independent_namespace in ('controller','stop-post'),'Unknown independent record namespace')
         match=re.fullmatch('emergency-'+independent_namespace+'-([0-9]{6})[.]json',name)

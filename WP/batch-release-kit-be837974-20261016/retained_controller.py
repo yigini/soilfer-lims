@@ -1,7 +1,8 @@
 """Controller unit memory evidence, numeric current PID and no path aliases."""
 import os,pathlib,re,stat
-from retained_contract import ROOT,ROOT_NAME,MEMORY,require,sha
+from retained_contract import ROOT,ROOT_NAME,MEMORY,require,sha,canonical
 from retained_files import write_new
+from kit_evidence import admit_evidence
 UNIT='lims-'+ROOT_NAME.lower()+'.service'
 MAX_BYTES=16384
 
@@ -52,9 +53,24 @@ class ControllerGuard:
     def observe(self,label):
         reads=[]
         def retain(path,raw):
-            record={'path':path,'rawAscii':raw.decode('ascii'),'sha256':sha(raw),'bytes':len(raw)};reads.append(record)
-            write_new(self.root/('controller-memory-'+label+'-raw-'+str(len(reads)).zfill(2)+'.json'),record)
+            name='controller-memory-'+label+'-raw-'+str(len(reads)+1).zfill(2)+'.stdout'
+            destination=self.root/name;admit_evidence(destination,len(raw))
+            with destination.open('xb') as stream:
+                stream.write(raw);stream.flush();os.fsync(stream.fileno())
+            destination.chmod(0o400)
+            reads.append({'path':path,'original':name,'sha256':sha(raw),'bytes':len(raw)})
         value=own_snapshot(evidence=retain)
         if self.before is None:self.before=value
         else:require((value['unit'],value['membershipRaw'],value['cgroupDevice'],value['cgroupInode'])==(self.before['unit'],self.before['membershipRaw'],self.before['cgroupDevice'],self.before['cgroupInode']),'Controller cgroup identity changed between guards')
-        self.last=value;write_new(self.root/('controller-memory-'+label+'.json'),value);return value
+        self.last=value
+        # Keep the full BEFORE shape used by the independent hook. Periodic
+        # records bind the unchanged complete predicate result and every raw
+        # byte without repeatedly JSON-escaping/copying the kernel strings.
+        stored=value if label=='before' else {
+            'unit':value['unit'],'cgroupDevice':value['cgroupDevice'],'cgroupInode':value['cgroupInode'],
+            'validatedSnapshotSha256':sha(canonical(value)),
+            'originalKernelReads':reads,'unchangedOwnSnapshotPredicatesApplied':True,
+            'peakMaxHighObservationOnly':True}
+        if label!='before':require(len(canonical(stored))+1<=8192,
+            'Fixed controller reference metadata exceeded its source envelope')
+        write_new(self.root/('controller-memory-'+label+'.json'),stored);return value

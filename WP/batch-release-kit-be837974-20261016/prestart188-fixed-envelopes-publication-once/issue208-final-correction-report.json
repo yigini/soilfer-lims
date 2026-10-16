@@ -1,0 +1,69 @@
+{
+  "tree": "2e562ca28eff2229b321db490b4f243882e44021",
+  "head": "457fba5cbffe4157e1c2b428800a620f131854d6",
+  "base": "be8379745bdfae52ce46496ff26514dc7d729640",
+  "changedPaths": [
+    ".gitattributes",
+    "Dockerfile",
+    "docker-entrypoint.sh",
+    "docs/audit/208-labels.md",
+    "docs/audit/sample-code-numbering.md",
+    "server/scripts/install_label_print_events.js",
+    "server/scripts/install_sample_code_schema.js",
+    "server/services/sampleCodeMigrationSource.js",
+    "server/tests/contracts/deployment_readiness_bootstrap.test.js",
+    "server/tests/contracts/issue_208_sample_code_schema.test.js",
+    "server/tests/globalSetup.js",
+    "server/tests/helpers/workflowWriteScanner.js"
+  ],
+  "patchSha256": "2dbc7d9eab3adcc872e48e2f760b95667a8107debbf625297a852d38ad62744a",
+  "scannerDelta": "diff --git a/server/tests/helpers/workflowWriteScanner.js b/server/tests/helpers/workflowWriteScanner.js\nindex 103d0806a..4fab3731a 100644\n--- a/server/tests/helpers/workflowWriteScanner.js\n+++ b/server/tests/helpers/workflowWriteScanner.js\n@@ -31,6 +31,10 @@ const QC_MEMBERSHIP_LOADER_SHA256 = '40c0af827c4d22b6fce1ee5b770f2c0146f456cfeea\n const QC_MEMBERSHIP_SQL_SHA256 = '1bc85113a3b6b7da327265bc7005eb4a1c97855943c599b1fe5ed8b126cf8572';\n // #189 additive evidence sources are inspected, never exempted as writers.\n const QC_EVIDENCE_SOURCES = Object.freeze([\n+    // #208 prerequisite: inspect unchanged #180 schema DDL, without writer authority.\n+    Object.freeze({ functionName: 'loadSampleCodeMigrationSource', loader: 'services/sampleCodeMigrationSource.js',\n+        loaderSha256: 'db7095ec42d405039093a4b39c4a2b2bd61ff80b6a45e447b49d627cef4b4e16',\n+        directory: '20261004170000_add_atomic_sample_codes', sqlSha256: 'e52a11bb7fc8dfee678184025dda8e8342cde3896d3b5f1c89b83897702d8ff0', wholeSql: true }),\n     // #208: inspect exact additive print-event DDL without writer authority.\n     Object.freeze({ functionName: 'loadLabelPrintMigrationSource', loader: 'services/labelPrintMigrationSource.js',\n         loaderSha256: '2740c2688b8b0fa845d5ef08ef9715617c6bc881edb555b91e8f71db16b54eca', directory: '20261016000100_label_print_events',\n",
+  "scannerReason": "The existing resolver must inspect the digest-bound unchanged #180 DDL. Only its pinned source entry was added; no writer exemption or scanner rule changed.",
+  "server": {
+    "suites": 376,
+    "tests": 5725,
+    "seconds": 3505.14,
+    "exitCode": 0,
+    "closedAtUtc": "2026-10-16T14:17:31.7488450Z",
+    "exactInventoryMatch": true,
+    "logSha256": "0ea265680581b18dc2f3e05cba5c70b047270874e33c72468b3d75f276723e2f"
+  },
+  "focused": {
+    "suites": 10,
+    "tests": 235,
+    "seconds": 155.838
+  },
+  "preflight": {
+    "suites": 14,
+    "tests": 259,
+    "seconds": 99.573
+  },
+  "client": {
+    "build": "PASS",
+    "lint": {
+      "errors": 0,
+      "existingWarnings": 14
+    }
+  },
+  "sourceInputsUnchanged": 2445,
+  "generatedRuntimeUnchangedInSourceAndFixture": 21,
+  "frozenIndexSha256": "a4debc5a78442a2725a0daa8e5620640b37d96433f5660b29f1a2d8e0be28986",
+  "expectedGeneratedOutput": {
+    "path": "server/data/help/RELEASE_MANIFEST_v1.json",
+    "before": "2cb934079979b70c240b5eacf432e8511918b75a42a112ef627945be64720156",
+    "after": "67d80003fba31c398857fbdae43d3aae46591f4eab04d375699a48922fd24eaf",
+    "beforeAndAfterRetained": true,
+    "restoredOnlyAfterClosedRun": true
+  },
+  "originalFailures": {
+    "ciRun": 38898578537,
+    "zipSha256": "0eb7352c810296cb2966bc8a796a88fddc799747bf9dd715ff9efe112bb023d5",
+    "initialFocusedLog": "correction-focused-initial.log",
+    "initialFocusedLogSha256": "92e9da71546bc9d58e21c2dec147fba770ca290811a7f54e35b49ba2162ff958"
+  },
+  "sourceAuthority": "C:\\Users\\yigin\\.codex\\worktrees\\issue-208-labels\\soilfer-lims",
+  "fixture": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-issue208-correction-d4GZfH\\source",
+  "evidence": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-issue208-correction-d4GZfH\\evidence",
+  "gitFreeVisibleFixture": true,
+  "remoteActions": "None: correction remains staged/uncommitted, with no push, replacement CI, ready notice, audit or merge."
+}

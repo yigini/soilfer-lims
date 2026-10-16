@@ -1,0 +1,31 @@
+{
+  "tree": "2e562ca28eff2229b321db490b4f243882e44021",
+  "sourceAuthority": "C:\\Users\\yigin\\.codex\\worktrees\\issue-208-labels\\soilfer-lims",
+  "fixture": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-issue208-correction-d4GZfH\\source",
+  "frozenInputs": 2445,
+  "linkedRuntime": 21,
+  "testFiles": 376,
+  "setupFiles": [
+    "tests/ownedSuiteSetup.js",
+    "tests/setup.js"
+  ],
+  "command": "npm test -- --testMatch '**/tests/**/*.test.js'",
+  "generatedOutputException": [
+    "server/data/help/RELEASE_MANIFEST_v1.json"
+  ],
+  "databaseMapping": {
+    "source": "server/tests/.owned-templates/test_template_1f5926a4-6fda-4b37-9c08-da831a2478fe.db",
+    "default": "server/prisma/dev.db",
+    "selected": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-issue208-correction-d4GZfH\\source\\server\\tests\\.owned-templates\\test_template_1f5926a4-6fda-4b37-9c08-da831a2478fe.db"
+  },
+  "gitDiscovery": {
+    "optionalLocks": "0",
+    "readonly": true,
+    "workTree": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-issue208-correction-d4GZfH\\source",
+    "indexSha256": "a4debc5a78442a2725a0daa8e5620640b37d96433f5660b29f1a2d8e0be28986",
+    "gitDir": "C:/Users/yigin/Documents/soilfer-lims/.git/worktrees/soilfer-lims6",
+    "index": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-issue208-correction-d4GZfH\\evidence\\frozen-index"
+  },
+  "preflight": "14 suites/259 tests PASS; frozen inputs unchanged",
+  "startedAtUtc": "2026-10-16T13:19:03.0782250Z"
+}

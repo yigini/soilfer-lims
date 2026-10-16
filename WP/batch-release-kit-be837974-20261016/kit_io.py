@@ -72,10 +72,12 @@ class CommandRunner:
         out=self.root/(label+'.stdout');err=self.root/(label+'.stderr')
         # The intent contains only argv hash/length. Secrets, if any, never
         # become public metadata or exception messages.
-        exclusive_record(self.root,label+'-command-intent.json',{
+        intent={
             'argvSha256':sha(canonical(argv)),'argvEntries':len(argv),'timeoutSeconds':timeout,
             'stdinSha256':None if input_bytes is None else sha(input_bytes),
-            'outputLimitsBytes':limits,'rawStreamsPrivateUntilReviewed':True,'neverRetry':True},self.sync)
+            'outputLimitsBytes':limits,'rawStreamsPrivateUntilReviewed':True,'neverRetry':True}
+        require(len(canonical(intent))+1<=8192,'Fixed command intent metadata exceeded its source envelope')
+        exclusive_record(self.root,label+'-command-intent.json',intent,self.sync)
         # Both complete streams, including an over-limit sentinel, have space
         # admitted before launch. Other runtime producers cannot spend it.
         reservations=[admit_evidence(p,limits[name]+1,reservation=True) for name,p in [('stdout',out),('stderr',err)]]
@@ -133,6 +135,7 @@ class CommandRunner:
                       'retainedMaximumBytesPerStream':max(limits.values())+1,
                       'eofObserved':eof,'outputLimitExceeded':exceeded,
                       'allOriginalBytesRetained':error is None and all(eof.values()) and not any(exceeded.values())}}
+        require(len(canonical(metadata))+1<=8192,'Fixed command result metadata exceeded its source envelope')
         exclusive_record(self.root,label+'-command-result.json',metadata,self.sync)
         require(error is None and code==0 and metadata['streamCapture']['allOriginalBytesRetained'] and
             all(metadata[name]['bytes']<=limits[name] for name in limits),

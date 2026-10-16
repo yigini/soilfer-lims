@@ -14,6 +14,7 @@ from kit_contract import IMAGE,MEMORY_MAX,canonical,require,sha
 from retained_contract import ROOT,LIVE_DATA,exact_json
 from kit_journal import exclusive_record
 from kit_evidence import admit_evidence
+from kit_cli_evidence import begin_cli_evidence
 
 LABEL='io.soilfer.release-owned'
 DATABASE='/app/server/prisma/dev.db'
@@ -133,10 +134,11 @@ def completion(raw,spec):
 
 class OwnedCli:
     def __init__(self,runner,reader,journal,memory_factory,prepare_tmp,read_completion,publish_permit,stopper,
-                 clock=time.monotonic,sleep=time.sleep):
+                 clock=time.monotonic,sleep=time.sleep,evidence_factory=begin_cli_evidence):
         self.runner=runner;self.reader=reader;self.journal=journal;self.memory_factory=memory_factory
         self.prepare_tmp=prepare_tmp;self.read_completion=read_completion;self.publish_permit=publish_permit
         self.clock=clock;self.sleep=sleep;self.consumed=set();self.stopper=stopper;self.failure_stop=None
+        self.evidence_factory=evidence_factory;self.evidence_window=None
 
     def run(self,spec):
         validate_spec(spec);label=spec['label']
@@ -149,6 +151,12 @@ class OwnedCli:
             try:self.failure_stop=self.stopper([label])
             except BaseException as failure:self.failure_stop={'stopErrorType':type(failure).__name__}
             raise
+        finally:
+            # Synchronous command pipes have closed; on failure eligible exact
+            # stops were attempted first. The only independent child writer
+            # is its separately precharged8192B completion/hardlink pair.
+            if self.evidence_window is not None:
+                self.evidence_window.close();self.evidence_window=None
 
     def _run(self,spec):
         label=spec['label']
@@ -158,12 +166,17 @@ class OwnedCli:
         inventory=self.reader.inventory()
         require(all(row.get('Name')!='/'+spec['name'] and row.get('Config',{}).get('Labels',{}).get(LABEL)!=spec['owner']
                     for row in inventory.values()),'CLI name or owner already exists')
-        raw,_,_=self.runner.run(spec['argv'],label+'-create',30)
+        self.evidence_window=self.evidence_factory(label)
+        envelope=None if self.evidence_window is None else self.evidence_window.receipt()
+        raw,_,_=self.runner.run(spec['argv'],label+'-create',30,
+            output_limits={'stdout':128,'stderr':64*1024**2})
         require(re.fullmatch(rb'[a-f0-9]{64}\n?',raw) is not None,'Exact create ID output required')
         identity=raw.decode().strip();created=selected(self.reader.inspect(identity),spec,False)
         self.journal.append('ownedCliCreated',{'owner':spec['owner'],'id':identity,'selected':created})
         began=self.clock()
-        self.runner.run(['docker','start',identity],label+'-start',15)
+        start_raw,_,_=self.runner.run(['docker','start',identity],label+'-start',15,
+            output_limits={'stdout':128,'stderr':64*1024**2})
+        require(start_raw in (identity.encode(),identity.encode()+b'\n'),'Exact started CLI ID output required')
         started=selected(self.reader.inspect(identity),spec,True)
         require(all(created[k]==started[k] for k in ('id','owner','name','image','mounts','configSha256','hostConfigSha256')),
                 'Created CLI configuration changed at start')
@@ -203,7 +216,7 @@ class OwnedCli:
         result={'containerId':identity,'owner':spec['owner'],'child':child,'memory':memory,
                 'elapsedSeconds':self.clock()-began,'stoppedAndRetained':True,
                 'exitCode':obj['State'].get('ExitCode'),'wrapperWait':wait_metadata,
-                'logs':metadata,'dataWritable':spec['dataWritable']}
+                'logs':metadata,'dataWritable':spec['dataWritable'],'preStartEvidenceEnvelope':envelope}
         self.journal.append('ownedCliComplete',result)
         require(child['childStatus']==0 and child['childSignal'] is None and child['childErrorType'] is None and
                 result['exitCode']==0 and not stderr,'CLI failed; retained child and wrapper outcome must both succeed')

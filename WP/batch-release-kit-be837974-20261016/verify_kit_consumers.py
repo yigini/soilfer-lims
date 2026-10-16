@@ -71,7 +71,8 @@ class ConsumerGuards(unittest.TestCase):
     def test_complete_docker_inventory_requires_exact_ids_not_error_strings(self):
         class Transport:
             def __init__(self,raw):self.raw=raw
-            def run(self,argv,label,timeout):
+            def run(self,argv,label,timeout,output_limits=None):
+                assert output_limits=={'stdout':4*1024**2,'stderr':64*1024**2}
                 raw=self.raw if argv[1]=='ps' else json.dumps([{'Id':CID,'Name':'/synthetic'}]).encode()
                 return raw,b'',{'stdout':{'bytes':len(raw)}}
         reader=ContainerReader(Transport((CID+'\n').encode()),CID)

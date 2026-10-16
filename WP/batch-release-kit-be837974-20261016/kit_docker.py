@@ -25,7 +25,8 @@ class ContainerReader:
 
     def read(self,argv):
         self.number+=1
-        raw,err,metadata=self.runner.run(argv,'docker-read-'+str(self.number).zfill(6),15)
+        raw,err,metadata=self.runner.run(argv,'docker-read-'+str(self.number).zfill(6),15,
+            output_limits={'stdout':4*1024**2,'stderr':64*1024**2})
         require(not err and metadata['stdout']['bytes']<=4*1024**2,'Bounded Docker read refused')
         return raw
 

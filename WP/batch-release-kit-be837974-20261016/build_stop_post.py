@@ -12,9 +12,10 @@ SPECS={
     'kit_contract.py':('HEAD','IMAGE','TREE','BUILD_RECEIPT_SHA','ACCEPTANCE_ID','TIMING_DIRECTION_ID',
         'POSTFLIGHT_POLICY','MEMORY_MAX','canonical','require','sha'),
     'retained_contract.py':('ROOT_NAME','ROOT','MEMORY','LIVE_DATA','LIVE_ASSETS','exact_json'),
-    'kit_evidence.py':('BLOCK','SHARES','EMERGENCY_CALL_LIMIT','EMERGENCY_STREAM_LIMITS',
+    'kit_evidence.py':('BLOCK','SHARES','MAIN_POOL_BYTES','HOOK_RECORD_LIMIT','HOOK_RESULT_NAMES',
+        'HOOK_NAMESPACE_BYTES','APACHE_TRANSITION_LIMIT','APACHE_NAMESPACE_BYTES','EMERGENCY_CALL_LIMIT','EMERGENCY_STREAM_LIMITS',
         'EMERGENCY_METADATA_LIMIT','EMERGENCY_NAMESPACE_BYTES','INDEPENDENT_EMERGENCY_BYTES',
-        '_runtime','allocation','EvidenceLedger','bind_runtime','admit_evidence'),
+        '_runtime','allocation','fixed_envelope_bounds','EvidenceLedger','EvidenceWindow','bind_runtime','admit_evidence'),
     'kit_journal.py':('real_directory','exclusive_record'),
     'kit_owned.py':('LABEL','DATABASE','INSTALLERS','ALLOWED','cli_spec','validate_spec','selected','same_retained'),
     'kit_integrity.py':('DATA_MOUNT',),
@@ -62,7 +63,7 @@ def main():
                 'Stop-post controller cgroup differs from actual before snapshot')
             return value
         finally:
-            exclusive_record(root,'stop-post-controller-'+str(controller_number)+'.json',{'raws':raws},True)
+            exclusive_record(root,'stop-post-controller-'+str(controller_number)+'.json',{'raws':raws},True,independent_namespace='hook-results')
     def validate():
         manifest=frozen_hook_authority(root)
         return serving_permit(root,manifest,call)
@@ -73,7 +74,7 @@ def main():
         return EmergencyIngress(root,call,original,held,manifest['originalIngressSha256'],
             manifest['heldIngressSha256'],namespace='stop-post')()
     result=stop_post_lifecycle(root,call,validate,hold,controller,
-        lambda value:exclusive_record(root,'stop-post-result.json',value,True))
+        lambda value:exclusive_record(root,'stop-post-result.json',value,True,independent_namespace='hook-results'))
     # This fixed public line contains no private command, configuration or data.
     print('RELEASE_STOP_POST_COMPLETE' if not result['errors'] and not result['postStopErrors'] else 'RELEASE_STOP_POST_FAILED_RETAIN_ALL')
     return 0 if not result['errors'] and not result['postStopErrors'] else 1

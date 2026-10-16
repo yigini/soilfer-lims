@@ -56,7 +56,19 @@ def exact_json(raw):
 
 BLOCK = 4096
 
-SHARES = {'commands': 1536 * 1024 ** 2, 'memory': 512 * 1024 ** 2, 'controller': 512 * 1024 ** 2, 'journal': 512 * 1024 ** 2}
+SHARES = {'commands': 1536 * 1024 ** 2, 'memory': 512 * 1024 ** 2, 'controller': 512 * 1024 ** 2, 'journal': 640 * 1024 ** 2}
+
+MAIN_POOL_BYTES = 3200 * 1024 ** 2
+
+HOOK_RECORD_LIMIT = 16 * 1024 ** 2
+
+HOOK_RESULT_NAMES = frozenset(('stop-post-controller-1.json', 'stop-post-controller-2.json', 'stop-post-result.json'))
+
+HOOK_NAMESPACE_BYTES = 64 * 1024 ** 2
+
+APACHE_TRANSITION_LIMIT = 6
+
+APACHE_NAMESPACE_BYTES = 32 * 1024 ** 2
 
 EMERGENCY_CALL_LIMIT = 96
 
@@ -74,13 +86,21 @@ def allocation(byte_count, entries=1):
     require(type(byte_count) is int and byte_count >= 0 and (type(entries) is int) and (entries > 0), 'Exact evidence bytes and directory entries required')
     return (byte_count + BLOCK - 1) // BLOCK * BLOCK + entries * BLOCK
 
+def fixed_envelope_bounds():
+    hook = len(HOOK_RESULT_NAMES) * allocation(HOOK_RECORD_LIMIT, 2)
+    apache = APACHE_TRANSITION_LIMIT * (allocation(1024 ** 2) + allocation(1024 ** 2, 256) + 4 * BLOCK)
+    require(hook <= HOOK_NAMESPACE_BYTES and apache <= APACHE_NAMESPACE_BYTES, 'Fixed independent record/Apache allowances do not cover source maxima')
+    require(sum(SHARES.values()) + INDEPENDENT_EMERGENCY_BYTES + HOOK_NAMESPACE_BYTES + APACHE_NAMESPACE_BYTES == 4 * 1024 ** 3, 'Declared evidence allowances must partition the unchanged4GiB')
+    return {'hookRecordAllocationBytes': hook, 'apacheDeclaredAllocationBytes': apache, 'physicalFilesystemClosureClaimed': False}
+
 class EvidenceLedger:
 
     def __init__(self, root, shares=None):
+        fixed_envelope_bounds()
         self.root = pathlib.Path(root)
         require(self.root.is_absolute() and self.root.is_dir() and (not self.root.is_symlink()), 'Real absolute evidence root required')
         self.shares = dict(SHARES if shares is None else shares)
-        require(set(self.shares) == set(SHARES) and all((type(n) is int and n > 0 for n in self.shares.values())) and (sum(self.shares.values()) <= 3 * 1024 ** 3), 'Shared runtime evidence shares exceed their reviewed3GiB subset')
+        require(set(self.shares) == set(SHARES) and all((type(n) is int and n > 0 for n in self.shares.values())) and (sum(self.shares.values()) <= MAIN_POOL_BYTES), 'Shared runtime evidence shares exceed their declared3200MiB subset')
         for part in (self.root, *self.root.parents):
             require(not part.is_symlink(), 'Evidence root ancestor alias refused')
         self.used = dict.fromkeys(self.shares, 0)
@@ -88,6 +108,8 @@ class EvidenceLedger:
         self.directories = set()
         self.open = {}
         self.number = 0
+        self.active_window = None
+        self.window_number = 0
 
     def reserve(self, paths, maximum_bytes, category):
         require(category in self.shares and isinstance(paths, tuple) and (len(paths) in (1, 2)), 'Declared evidence category and one/two entry paths required')
@@ -108,24 +130,66 @@ class EvidenceLedger:
         new_directories = parents - self.directories
         directory_charge = len(new_directories) * 3 * BLOCK
         amount = allocation(maximum_bytes, len(names)) + directory_charge
-        require(self.used[category] + amount <= self.shares[category], 'Shared ' + category + ' evidence share exhausted before allocation')
-        self.used[category] += amount
+        window = self.active_window
+        if window is None:
+            require(self.used[category] + amount <= self.shares[category] and sum(self.used.values()) + amount <= sum(self.shares.values()), 'Shared ' + category + ' evidence share exhausted before allocation')
+            self.used[category] += amount
+        else:
+            require(window.used[category] + amount <= window.maximum[category], 'Allocation exceeds the complete pre-start ' + category + ' envelope')
+            window.used[category] += amount
         self.paths.update(relative)
         self.directories.update(new_directories)
         self.number += 1
         ticket = self.number
-        self.open[ticket] = (category, amount, maximum_bytes, len(names), directory_charge)
+        self.open[ticket] = (category, amount, maximum_bytes, len(names), directory_charge, window)
         return ticket
 
     def settle(self, ticket, actual_bytes):
         require(type(ticket) is int and ticket in self.open, 'Evidence reservation already settled or absent')
-        category, amount, maximum_bytes, entries, directory_charge = self.open[ticket]
+        category, amount, maximum_bytes, entries, directory_charge, window = self.open[ticket]
+        require(window is None or not window.closed, 'Closed evidence window cannot resume')
         require(type(actual_bytes) is int and 0 <= actual_bytes <= maximum_bytes, 'Actual evidence exceeds its pre-allocation reservation')
-        self.used[category] -= amount - allocation(actual_bytes, entries) - directory_charge
+        refund = amount - allocation(actual_bytes, entries) - directory_charge
+        if window is None:
+            self.used[category] -= refund
+        else:
+            window.used[category] -= refund
         del self.open[ticket]
 
+    def begin_window(self, label, maximum):
+        require(self.active_window is None, 'Concurrent/nested evidence windows refused')
+        require(isinstance(label, str) and 0 < len(label) <= 80 and all((x in 'abcdefghijklmnopqrstuvwxyz0123456789-' for x in label)), 'Exact bounded evidence window label required')
+        require(isinstance(maximum, dict) and set(maximum) == set(self.shares) and all((type(n) is int and n > 0 for n in maximum.values())), 'Complete evidence envelope required')
+        require(sum(self.used.values()) + sum(maximum.values()) <= sum(self.shares.values()), 'Complete CLI evidence envelope does not fit before container creation')
+        self.window_number += 1
+        window = EvidenceWindow(self, label, maximum, self.window_number)
+        for category, amount in maximum.items():
+            self.used[category] += amount
+        self.active_window = window
+        return window
+
     def summary(self):
-        return {'sharesBytes': dict(self.shares), 'chargedOrReservedBytes': dict(self.used), 'openReservations': len(self.open), 'directoryEntriesCounted': len(self.paths), 'nestedDirectoriesCounted': len(self.directories), 'coveredProducerMaximumBytes': sum(self.shares.values()), 'independentEmergencyEnvelopesBytes': INDEPENDENT_EMERGENCY_BYTES, 'unassignedWithinExisting4GiBBytes': 4 * 1024 ** 3 - sum(self.shares.values()) - INDEPENDENT_EMERGENCY_BYTES, 'fullGlobalEvidenceClosure': False, 'allOriginalsPrivate': True}
+        return {'sharesBytes': dict(self.shares), 'chargedOrReservedBytes': dict(self.used), 'openReservations': len(self.open), 'activePreStartWindow': None if self.active_window is None else self.active_window.receipt(), 'directoryEntriesCounted': len(self.paths), 'nestedDirectoriesCounted': len(self.directories), 'coveredProducerMaximumBytes': sum(self.shares.values()), 'independentEmergencyEnvelopesBytes': INDEPENDENT_EMERGENCY_BYTES, 'independentHookRecordsBytes': HOOK_NAMESPACE_BYTES, 'apacheTransitionAllowanceBytes': APACHE_NAMESPACE_BYTES, 'unassignedWithinExisting4GiBBytes': 4 * 1024 ** 3 - sum(self.shares.values()) - INDEPENDENT_EMERGENCY_BYTES - HOOK_NAMESPACE_BYTES - APACHE_NAMESPACE_BYTES, 'fullGlobalEvidenceClosure': False, 'allOriginalsPrivate': True}
+
+class EvidenceWindow:
+
+    def __init__(self, ledger, label, maximum, number):
+        self.ledger = ledger
+        self.label = label
+        self.maximum = dict(maximum)
+        self.number = number
+        self.used = dict.fromkeys(maximum, 0)
+        self.closed = False
+
+    def receipt(self):
+        return {'label': self.label, 'number': self.number, 'maximumBytes': dict(self.maximum), 'chargedOrReservedBytes': dict(self.used), 'heldBeforeContainerCreate': True, 'sharedPoolBytes': sum(self.ledger.shares.values()), 'filesystemPreallocationClaimed': False}
+
+    def close(self):
+        require(not self.closed and self.ledger.active_window is self, 'Evidence window consumed or foreign')
+        for category, maximum in self.maximum.items():
+            self.ledger.used[category] -= maximum - self.used[category]
+        self.closed = True
+        self.ledger.active_window = None
 
 def bind_runtime(root):
     global _runtime
@@ -137,8 +201,8 @@ def admit_evidence(path, byte_count, pending=False, reservation=False):
     """Inert outside the explicitly bound runtime; local reader fixtures stay local.
 
     The standalone emergency hook intentionally has no bound runtime ledger:
-    quota/retention failure must never suppress an exact owned stop. Its full
-    separate envelope remains part of the missing global closure.
+    quota/retention failure must never suppress an exact owned stop. Its fixed
+    namespace envelopes are independent; full filesystem/copy closure is pending.
     """
     if _runtime is None:
         return None
@@ -171,6 +235,8 @@ def exclusive_record(directory, name, value, require_directory_sync=True, indepe
         raise FileExistsError('Published record already consumed')
     if independent_namespace is None:
         admit_evidence(path, len(raw), pending=True)
+    elif independent_namespace == 'hook-results':
+        require(name in HOOK_RESULT_NAMES and len(raw) <= HOOK_RECORD_LIMIT, 'Independent hook record outside its fixed three-name envelope')
     else:
         require(independent_namespace in ('controller', 'stop-post'), 'Unknown independent record namespace')
         match = re.fullmatch('emergency-' + independent_namespace + '-([0-9]{6})[.]json', name)
@@ -607,7 +673,7 @@ class EmergencyIngress:
 
 SOURCE_SCOPE = 'PRODUCTION_FORWARD_206_214_209_QUALIFIED_ACC158_REVIEWED_WHOLE_OUTAGE'
 
-REQUIRED_SOURCE = {'kit_contract.py', 'kit_sequence.py', 'kit_journal.py', 'kit_io.py', 'kit_evidence.py', 'kit_docker.py', 'kit_consumer_inventory.py', 'kit_owned.py', 'kit_integrity.py', 'stopped_integrity.cjs', 'cli_guard.cjs', 'live_backup.cjs', 'kit_install.py', 'kit_runtime.py', 'kit_readiness.py', 'kit_natural.py', 'kit_no_writers.py', 'kit_ingress.py', 'kit_budget.py', 'kit_disk.py', 'kit_probes.py', 'kit_frozen.py', 'kit_preservation.py', 'kit_recovery.py', 'kit_emergency_ingress.py', 'kit_stop.py', 'kit_stop_lifecycle.py', 'build_stop_post.py', 'predecessor-startup-expectations.json', 'retained_app_copy.py', 'kit_recovery_copy.py', 'predecessor-copy-source-binding.json', 'retained_authority.py', 'kit_provider.py', 'kit_authority.py', 'kit_science.py', 'kit_construction.py', 'kit_outage.py', 'timing-evidence.json', 'kit_package.py', 'kit_launch_programs.py', 'kit_ops.py', 'run_release.py', 'stop_post.py', 'prepare_release.py', 'launch_release.py', 'application-source-binding.json', 'copy-site-closure.json', 'whole-outage-disclosure.json', 'startup-expectations.json', 'probe-source-map.json', 'compose-source.yml', 'retained_accounting.py', 'retained_files.py', 'retained_contract.py', 'retained_health.py', 'retained_memory.py', 'retained_controller.py', 'retained_intake.py', 'retained_fetch.py', 'retained_provenance.py', 'retained_privacy.py', 'retained_runtime_policy.py', 'postflight-roles.cjs', 'postflight-auth.cjs', 'postflight-reference.cjs', 'postflight-qc-runs.cjs', 'postflight-policy.cjs', 'readonly-smoke.cjs'}
+REQUIRED_SOURCE = {'kit_contract.py', 'kit_sequence.py', 'kit_journal.py', 'kit_io.py', 'kit_evidence.py', 'kit_docker.py', 'kit_consumer_inventory.py', 'kit_owned.py', 'kit_cli_evidence.py', 'kit_integrity.py', 'stopped_integrity.cjs', 'cli_guard.cjs', 'live_backup.cjs', 'kit_install.py', 'kit_runtime.py', 'kit_readiness.py', 'kit_natural.py', 'kit_no_writers.py', 'kit_ingress.py', 'kit_budget.py', 'kit_disk.py', 'kit_probes.py', 'kit_frozen.py', 'kit_preservation.py', 'kit_recovery.py', 'kit_emergency_ingress.py', 'kit_stop.py', 'kit_stop_lifecycle.py', 'build_stop_post.py', 'predecessor-startup-expectations.json', 'retained_app_copy.py', 'kit_recovery_copy.py', 'predecessor-copy-source-binding.json', 'retained_authority.py', 'kit_provider.py', 'kit_authority.py', 'kit_science.py', 'kit_construction.py', 'kit_outage.py', 'timing-evidence.json', 'kit_package.py', 'kit_launch_programs.py', 'kit_ops.py', 'run_release.py', 'stop_post.py', 'prepare_release.py', 'launch_release.py', 'application-source-binding.json', 'copy-site-closure.json', 'whole-outage-disclosure.json', 'startup-expectations.json', 'probe-source-map.json', 'compose-source.yml', 'retained_accounting.py', 'retained_files.py', 'retained_contract.py', 'retained_health.py', 'retained_memory.py', 'retained_controller.py', 'retained_intake.py', 'retained_fetch.py', 'retained_provenance.py', 'retained_privacy.py', 'retained_runtime_policy.py', 'postflight-roles.cjs', 'postflight-auth.cjs', 'postflight-reference.cjs', 'postflight-qc-runs.cjs', 'postflight-policy.cjs', 'readonly-smoke.cjs'}
 
 def source_index(value):
     require(isinstance(value, dict) and value.get('version') == 1 and (value.get('scope') == SOURCE_SCOPE) and (value.get('root') == str(ROOT)) and (value.get('head') == HEAD) and (value.get('tree') == TREE) and (value.get('image') == IMAGE) and (value.get('buildReceiptSha256') == BUILD_RECEIPT_SHA), 'Exact new production source-index target required')
@@ -888,7 +954,7 @@ def main():
                 'Stop-post controller cgroup differs from actual before snapshot')
             return value
         finally:
-            exclusive_record(root,'stop-post-controller-'+str(controller_number)+'.json',{'raws':raws},True)
+            exclusive_record(root,'stop-post-controller-'+str(controller_number)+'.json',{'raws':raws},True,independent_namespace='hook-results')
     def validate():
         manifest=frozen_hook_authority(root)
         return serving_permit(root,manifest,call)
@@ -899,7 +965,7 @@ def main():
         return EmergencyIngress(root,call,original,held,manifest['originalIngressSha256'],
             manifest['heldIngressSha256'],namespace='stop-post')()
     result=stop_post_lifecycle(root,call,validate,hold,controller,
-        lambda value:exclusive_record(root,'stop-post-result.json',value,True))
+        lambda value:exclusive_record(root,'stop-post-result.json',value,True,independent_namespace='hook-results'))
     # This fixed public line contains no private command, configuration or data.
     print('RELEASE_STOP_POST_COMPLETE' if not result['errors'] and not result['postStopErrors'] else 'RELEASE_STOP_POST_FAILED_RETAIN_ALL')
     return 0 if not result['errors'] and not result['postStopErrors'] else 1

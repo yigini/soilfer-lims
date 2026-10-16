@@ -1,0 +1,58 @@
+[
+  {
+    "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-issue208-correction-d4GZfH\\evidence\\final-correction-report.json",
+    "sha256": "c38d01e4b8257d7a1d73ddcde6ca6da9a21a9cd3739f1c9ce13b94817d38e1ae"
+  },
+  {
+    "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-issue208-correction-d4GZfH\\evidence\\post-run-input-check.json",
+    "sha256": "e5799a9ec8b68d05c7274c8190bcffed5c6bd9a123d666a3fc6e7f40e978ce11"
+  },
+  {
+    "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-issue208-correction-d4GZfH\\evidence\\post-run-index-original-ci-check.json",
+    "sha256": "9d16aeb5cf44e2251ec319af104709aa5e37e725d93c2d52bbc155bf2eb1cb08"
+  },
+  {
+    "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-issue208-correction-d4GZfH\\evidence\\post-restoration-input-check.json",
+    "sha256": "2c4cee9e6601fc3bb3e4464e03f64bc16f1b00dde05e91e7c7f54a938125cab4"
+  },
+  {
+    "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-issue208-correction-d4GZfH\\evidence\\closed-test-inventory.json",
+    "sha256": "5a588350ade8997f34d03d244290919df74adbab2e012217008e0e1feebec1cb"
+  },
+  {
+    "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-issue208-correction-d4GZfH\\evidence\\test-inventory.json",
+    "sha256": "1778c675ad3e9df8f64b5b6d3cc5c76004e74683c09846c10021816dab6f59b0"
+  },
+  {
+    "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-issue208-correction-d4GZfH\\evidence\\correction.patch",
+    "sha256": "2dbc7d9eab3adcc872e48e2f760b95667a8107debbf625297a852d38ad62744a"
+  },
+  {
+    "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-issue208-correction-d4GZfH\\evidence\\server-full.log",
+    "sha256": "0ea265680581b18dc2f3e05cba5c70b047270874e33c72468b3d75f276723e2f"
+  },
+  {
+    "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-issue208-correction-d4GZfH\\evidence\\server-full-exit.json",
+    "sha256": "f0517c1fa768cfa8896dc00881508877fa552217963004a463ab47a81991cc53"
+  },
+  {
+    "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-issue208-correction-d4GZfH\\evidence\\frozen-inputs.json",
+    "sha256": "2d0d484216e14d10784f762fcacd0ac0a64bfbe814622bbfb938f1e1f4de7856"
+  },
+  {
+    "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-issue208-correction-d4GZfH\\evidence\\frozen-index",
+    "sha256": "a4debc5a78442a2725a0daa8e5620640b37d96433f5660b29f1a2d8e0be28986"
+  },
+  {
+    "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-issue208-correction-d4GZfH\\evidence\\run-contract.json",
+    "sha256": "26cf41e47941474054ec96e46c318e0ce4a58ba0cd7350b1f1c5cbd927e698a9"
+  },
+  {
+    "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-issue208-correction-d4GZfH\\evidence\\help-manifest-before.json",
+    "sha256": "2cb934079979b70c240b5eacf432e8511918b75a42a112ef627945be64720156"
+  },
+  {
+    "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-issue208-correction-d4GZfH\\evidence\\help-manifest-after-complete-run.json",
+    "sha256": "67d80003fba31c398857fbdae43d3aae46591f4eab04d375699a48922fd24eaf"
+  }
+]
