@@ -9,6 +9,7 @@ import re
 import stat
 from kit_contract import require,sha
 from kit_journal import exclusive_record
+from kit_emergency_ingress import atomic_config
 
 CONF=pathlib.Path('/etc/httpd/conf/extra/httpd-lims.conf')
 BASE='https://lims.yigini.net'
@@ -51,23 +52,8 @@ class Ingress:
         before=target.stat()
         exclusive_record(self.root,label+'-intent.json',{'holding':holding,'currentSha256':sha(current),
             'desiredSha256':sha(desired),'device':before.st_dev,'inode':before.st_ino,'neverRetry':True},self.sync)
-        if current!=desired:
-            # A new same-directory file permits atomic replacement of the live
-            # configuration. Both prior reviewed byte streams remain frozen in
-            # the release root; no retained release evidence is replaced.
-            pending=target.parent/(target.name+'.'+label+'.'+self.root.name)
-            fd=os.open(str(pending),os.O_WRONLY|os.O_CREAT|os.O_EXCL|getattr(os,'O_NOFOLLOW',0),stat.S_IMODE(before.st_mode))
-            try:
-                with os.fdopen(fd,'wb',closefd=False) as stream:stream.write(desired);stream.flush();os.fsync(stream.fileno())
-                if os.name=='posix':os.fchown(fd,before.st_uid,before.st_gid)
-            finally:os.close(fd)
-            require(target.stat().st_ino==before.st_ino and target.read_bytes()==current,'Apache configuration changed before atomic install')
-            os.replace(pending,target)
-            if os.name=='posix':
-                descriptor=os.open(str(target.parent),os.O_RDONLY|getattr(os,'O_DIRECTORY',0))
-                try:os.fsync(descriptor)
-                finally:os.close(descriptor)
-            else:require(not self.sync,'Linux directory durability required for production Apache transition')
+        atomic_config(target,self.original,self.held,desired,
+            target.parent/(target.name+'.'+label+'.'+self.root.name),self.sync)
         self.runner.run(['apachectl','configtest'],label+'-configtest',15,allow_stderr=True)
         self.runner.run(['systemctl','reload','httpd'],label+'-reload',15)
         statuses=[self.http.external('/api/health','GET',503 if holding else 200),

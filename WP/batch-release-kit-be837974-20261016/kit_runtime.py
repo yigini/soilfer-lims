@@ -6,6 +6,7 @@ and named volumes. They never become public receipt payloads. No import I/O.
 import copy
 import ipaddress
 import re
+import time
 from kit_contract import HEAD,IMAGE,MEMORY_MAX,canonical,require,sha
 from retained_contract import ROOT,LIVE_DATA,LIVE_ASSETS,exact_json
 from retained_health import assert_healthcheck
@@ -74,13 +75,14 @@ def candidate_spec(predecessor,health):
     ports=host.get('PortBindings')
     require(isinstance(ports,dict) and set(ports)=={'3000/tcp'} and isinstance(ports['3000/tcp'],list) and
         0<len(ports['3000/tcp'])<=2,'Exact observed application port bindings required')
-    port_flags=[];seen=set()
+    port_flags=[];seen=set();normalized_ports={'3000/tcp':[]}
     for binding in ports['3000/tcp']:
         require(isinstance(binding,dict) and set(binding)=={'HostIp','HostPort'} and binding['HostPort']=='3000',
             'Unexpected observed application port')
         address=binding['HostIp'] or '0.0.0.0';ip=ipaddress.ip_address(address)
         require((address,binding['HostPort']) not in seen,'Duplicate observed application port binding');seen.add((address,binding['HostPort']))
         port_flags+=['-p',('['+address+']' if ip.version==6 else address)+':3000:3000']
+        normalized_ports['3000/tcp'].append({'HostIp':address,'HostPort':binding['HostPort']})
     nano=host.get('NanoCpus')
     require(type(nano) is int and nano==1500000000,'Observed CPU allocation differs from reviewed 1.5 CPUs')
     log=host.get('LogConfig')
@@ -101,7 +103,7 @@ def candidate_spec(predecessor,health):
     args+=health['createFlags']+[IMAGE]
     # No entrypoint/Cmd override: this is the ordinary shipped default start.
     return {'owner':CANDIDATE_OWNER,'name':'soilfer-lims','image':IMAGE,'head':HEAD,'argv':args,
-        'mounts':expected_mounts,'environment':env,'network':network,'ports':copy.deepcopy(ports),
+        'mounts':expected_mounts,'environment':env,'network':network,'ports':normalized_ports,
         'health':copy.deepcopy(health),'predecessorProjection':before,'privateSpecification':True,'neverRetry':True}
 
 def candidate_projection(value,spec,running=None,emergency=False):
@@ -135,10 +137,11 @@ def candidate_projection(value,spec,running=None,emergency=False):
         'configSha256':sha(canonical(config)),'hostConfigSha256':sha(canonical(host))}
 
 class ExactPredecessor:
-    def __init__(self,observed,runner,reader,emergency,journal):
+    def __init__(self,observed,runner,reader,emergency,journal,clock=time.monotonic):
         self.observed=copy.deepcopy(observed);self.original=predecessor_projection(observed)
         self.runner=runner;self.reader=reader;self.emergency=emergency;self.journal=journal
         self.name='soilfer-lims';self.restarted=False;self.renamed=False;self.stop_count=0
+        self.clock=clock;self.restart_began=None
 
     def exact(self,value):
         projection=predecessor_projection(value,self.name)
@@ -179,13 +182,14 @@ class ExactPredecessor:
         require(value['State']['Running'] is False,'Pre-APPLY predecessor is not stopped')
         self.journal.append('preApplyPredecessorRestartIntent',{'id':PREDECESSOR_ID,'neverRetry':True,'noDatabaseRestore':True})
         self.restarted=True
+        self.restart_began=self.clock()
         self.runner.run(['docker','start',PREDECESSOR_ID],'preapply-predecessor-restart',15)
         return {'id':PREDECESSOR_ID,'sameRetainedPredecessor':True,'noDatabaseRestore':True}
 
 class Candidate:
-    def __init__(self,spec,runner,reader,journal,prepare_tmp):
+    def __init__(self,spec,runner,reader,journal,prepare_tmp,clock=time.monotonic):
         self.spec=copy.deepcopy(spec);self.runner=runner;self.reader=reader;self.journal=journal;self.prepare_tmp=prepare_tmp
-        self.consumed=False;self.id=None;self.created=None;self.started=None
+        self.consumed=False;self.id=None;self.created=None;self.started=None;self.clock=clock;self.start_began=None
 
     def start_once(self):
         require(not self.consumed,'Candidate create/start consumed; never retry');self.consumed=True
@@ -198,8 +202,9 @@ class Candidate:
         require(re.fullmatch(rb'[a-f0-9]{64}\n?',raw) is not None,'Exact candidate create ID required')
         self.id=raw.decode().strip();self.created=candidate_projection(self.reader.inspect(self.id),self.spec,False)
         self.journal.append('candidateStartIntent',{'id':self.id,'owner':CANDIDATE_OWNER,'anyEntrypointAttempted':True,'neverRetry':True})
-        # Caller records monotonic start immediately before this method; the
-        # shared readiness deadline includes creation, start and all probes.
+        # Exact shared readiness clock begins at Docker start dispatch, after
+        # creation. Creation still belongs to the disclosed whole503 outage.
+        self.start_began=self.clock()
         self.runner.run(['docker','start',self.id],'candidate-start',15)
         self.started=candidate_projection(self.reader.inspect(self.id),self.spec,True)
         require(all(self.created[k]==self.started[k] for k in ('id','owner','name','image','mounts','configSha256','hostConfigSha256')),

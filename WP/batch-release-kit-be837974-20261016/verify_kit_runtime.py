@@ -45,6 +45,13 @@ class Journal:
     def append(self,phase,value):self.records.append((phase,value))
 
 class RuntimeTests(unittest.TestCase):
+    def test_blank_observed_host_ip_is_normalized_to_actual_create_binding(self):
+        predecessor=old();predecessor['HostConfig']['PortBindings']['3000/tcp'][0]['HostIp']=''
+        spec=candidate_spec(predecessor,load_health(HERE))
+        self.assertEqual(spec['ports']['3000/tcp'],[{'HostIp':'0.0.0.0','HostPort':'3000'}])
+        self.assertEqual(predecessor['HostConfig']['PortBindings']['3000/tcp'][0]['HostIp'],'')
+        candidate_projection(new(spec),spec,True)
+
     def test_candidate_derives_observed_network_ports_environment_and_mounts_default_start(self):
         predecessor=old();spec=candidate_spec(predecessor,load_health(HERE));value=new(spec)
         candidate_projection(value,spec,True)

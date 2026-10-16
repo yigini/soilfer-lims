@@ -23,6 +23,7 @@ ALLOWED={
     'chart-impact':('/app/server/scripts/control_chart_prebinding_impact.js',None),
     'order-impact':('/app/server/scripts/order_revision_impact.js',None),
     'first-sync-backup':('/release/live_backup.cjs',None),
+    'postflight-backup':('/release/live_backup.cjs',None),
 }
 for _issue,_script in INSTALLERS.items():
     for _phase,_mode in [('dry','--dry-run'),('apply','--apply'),('repeat','--apply')]:

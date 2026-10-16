@@ -1,0 +1,10 @@
+{
+  "destination": "retained_accounting.py",
+  "destinationSha256": "4918b846a373e15aa0d2caecb343ba1fcde4d9c6b4a729badcc8ca7b3000a0ee",
+  "function": "mount_guard",
+  "operationsExecuted": 0,
+  "predicateAstUnchanged": true,
+  "sourceCommit": "187636984895aec44044635fb63498b0fcb3102e",
+  "sourcePath": "WP/batch-proof-mount-order-forward-be837974-20261016/proof_disk.py",
+  "sourceSha256": "54556f7d1166b34e2e83b3c0e55eaf10418817d1f72fb44d5e98a4e94647bd79"
+}

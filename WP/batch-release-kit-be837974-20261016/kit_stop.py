@@ -19,8 +19,10 @@ from kit_journal import exclusive_record
 MAX_OUTPUT=4*1024**2
 
 class EmergencyCommands:
-    def __init__(self,record_root,require_directory_sync=True,spawn=subprocess.Popen):
+    def __init__(self,record_root,require_directory_sync=True,spawn=subprocess.Popen,namespace='controller'):
         self.root=record_root;self.sync=require_directory_sync;self.spawn=spawn
+        require(namespace in ('controller','stop-post'),'Exact independent emergency namespace required')
+        self.namespace=namespace
         self.sequence=0;self.retention_errors=[]
 
     def retain(self,label,raw,metadata):
@@ -31,10 +33,15 @@ class EmergencyCommands:
         exclusive_record(self.root,label+'.json',metadata,self.sync)
 
     def __call__(self,argv):
-        require(isinstance(argv,list) and all(isinstance(x,str) for x in argv) and argv[:1]==['docker'] and
-                len(argv)>=3 and argv[1] in ('ps','inspect','stop') and '--rm' not in argv,
-                'Emergency path permits only exact Docker ps/inspect/stop')
-        self.sequence+=1;label='emergency-'+str(self.sequence).zfill(6)
+        docker=isinstance(argv,list) and len(argv)>=3 and argv[0]=='docker' and argv[1] in ('ps','inspect','stop')
+        apache=argv==['apachectl','configtest']
+        reload=argv==['systemctl','reload','httpd']
+        curl=isinstance(argv,list) and argv[:-1]==['curl','--silent','--show-error','--max-time','15','--proto','=https','--tlsv1.2',
+            '--output','/dev/null','--write-out','%{http_code}'] and argv[-1] in (
+                'https://lims.yigini.net/api/health','https://lims.yigini.net/login')
+        require(isinstance(argv,list) and all(isinstance(x,str) for x in argv) and '--rm' not in argv and
+                (docker or apache or reload or curl),'Emergency path permits only exact owner reads/stops and503 rehold')
+        self.sequence+=1;label='emergency-'+self.namespace+'-'+str(self.sequence).zfill(6)
         # Keep bounded originals in RAM until the command has completed. A full
         # evidence filesystem cannot stop the actual emergency command launch.
         began=time.monotonic();process=None;error=None;code=None
@@ -77,13 +84,13 @@ class EmergencyCommands:
         except BaseException as failure:
             self.retention_errors.append({'call':label,'errorType':type(failure).__name__,
                 'metadata':metadata,'_privateUnretainedOriginals':raw})
-        require(complete and code==0 and not raw[1],'Emergency Docker interface refused; never retry')
+        require(complete and code==0 and (apache or not raw[1]),'Emergency bounded interface refused; never retry')
         return raw[0]
 
 def stop_cli_owners(call,owners=None):
     """Look up exact compiled owners even after lost create/start output.
 
-    All 14 possible CLI owners are inspected when called by an independent
+    All 15 possible CLI owners are inspected when called by an independent
     hook. Empty inventories are explicit per-owner absence observations; they
     are never described as a nonvacuous successful container stop.
     """

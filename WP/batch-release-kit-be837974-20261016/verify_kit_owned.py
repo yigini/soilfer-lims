@@ -77,8 +77,8 @@ class StandIn:
             self.stop,self.clock,self.sleep)
 
 class OwnedTests(unittest.TestCase):
-    def test_all_fourteen_compiled_commands_have_exact_limits_mounts_and_modes(self):
-        self.assertEqual(len(ALLOWED),14)
+    def test_all_fifteen_compiled_commands_have_exact_limits_mounts_and_modes(self):
+        self.assertEqual(len(ALLOWED),15)
         for label in ALLOWED:
             spec=cli_spec(label,DATA_MOUNT);value=obj(spec)
             self.assertEqual(spec['dataWritable'],label.endswith(('-dry','-apply','-repeat')))

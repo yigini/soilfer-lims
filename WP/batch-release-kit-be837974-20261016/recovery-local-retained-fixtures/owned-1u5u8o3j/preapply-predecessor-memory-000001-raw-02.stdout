@@ -1,0 +1,11 @@
+anon 0
+file 0
+kernel_stack 0
+pagetables 0
+percpu 0
+pgscan 0
+pgsteal 0
+shmem 0
+slab_reclaimable 0
+slab_unreclaimable 0
+sock 0

@@ -15,6 +15,7 @@ class Operations:
     def preflight(self,plan):return self.action('preflight')
     def consume_gate_exclusively(self):return self.action('gate')
     def quiesce_and_verify_503(self):return self.action('503')
+    def emergency_quiesce_and_verify_503(self):return self.action('503')
     def stop_exact_predecessor(self,grace):return self.action('stop-old',{'stoppedAndRetained':True,'exitCode':137},grace)
     def assert_no_volume_writers(self):return self.action('no-writers')
     def check_stopped_live_volume_readonly(self):return self.action('integrity',{'integrity':'ok','foreignKeyViolations':0})
@@ -86,6 +87,23 @@ class SequenceRefusals(unittest.TestCase):
         ops=BrokenStop(fail='ready');r=execute(ops,plan())
         self.assertEqual(r['holdErrors'][0]['phase'],'stopRetainCandidate')
         self.assertEqual(ops.calls[-2:],['seal','outbox162'])
+
+    def test_emergency_rehold_and_stop_do_not_depend_on_a_new_journal_write(self):
+        class FailedEvidence(Operations):
+            def record_phase_intent(self,name,receipt):
+                if name in ('hold503','stopRetainCandidate'):raise OSError('SYNTHETIC_FULL_EVIDENCE_DISK')
+                super().record_phase_intent(name,receipt)
+        ops=FailedEvidence(fail='ready');result=execute(ops,plan())
+        self.assertEqual(result['status'],'FAILED_FORWARD_HOLD')
+        self.assertEqual(ops.calls.count('503'),2);self.assertIn('stop-candidate',ops.calls)
+        self.assertFalse(result.get('holdErrors'))
+
+    def test_failed_partial_seal_still_attempts_outbox(self):
+        class FailedSeal(Operations):
+            def seal_terminal_receipt(self,receipt):raise OSError('SYNTHETIC_RECEIPT_STORAGE_FAILURE')
+        ops=FailedSeal(fail='ready')
+        with self.assertRaises(OSError):execute(ops,plan())
+        self.assertIn('stop-candidate',ops.calls);self.assertEqual(ops.calls[-1],'outbox162')
 
     def test_lost_start_return_retains_exact_intent_for_cleanup(self):
         ops=Operations(fail='start');r=execute(ops,plan())

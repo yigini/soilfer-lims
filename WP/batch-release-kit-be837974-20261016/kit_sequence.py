@@ -16,11 +16,13 @@ def execute(ops,reviewed_plan):
              'anyInstallerAttempted':False,'anyApplyAttempted':False,'anyEntrypointAttempted':False,
              'postflightPolicy':POSTFLIGHT_POLICY,'ingressReopened':False}
     held=False;candidate=None;candidate_intent=None;outage_start=None
-    def stage(name,call):
+    def stage(name,call,emergency=False):
         began=ops.monotonic();utc=ops.utc()
         # The durable append-only intent precedes the call, including calls
         # whose return value may be lost after a real Docker mutation.
-        ops.record_phase_intent(name,receipt)
+        # Creation/start/APPLY already have durable exact-owner intents.
+        # Emergency rehold/stop must still run if evidence storage has failed.
+        if not emergency:ops.record_phase_intent(name,receipt)
         try:
             value=call()
         except BaseException as error:
@@ -99,11 +101,11 @@ def execute(ops,reviewed_plan):
         receipt['errorType']=type(error).__name__
         receipt['failurePolicy']=failure_policy(receipt['anyApplyAttempted'],receipt['anyEntrypointAttempted'])
         if held or receipt['anyEntrypointAttempted']:
-            for name,action in [('hold503',ops.quiesce_and_verify_503),
+            for name,action in [('hold503',ops.emergency_quiesce_and_verify_503),
                                 # A missing returned CID is UNKNOWN, never
                                 # evidence that creation/start did not happen.
                                 ('stopRetainCandidate',lambda:ops.stop_exact_candidate_for_intent(candidate_intent,candidate,STOP_GRACE_SECONDS))]:
-                try:stage(name,action)
+                try:stage(name,action,emergency=True)
                 except BaseException as hold_error:receipt.setdefault('holdErrors',[]).append({'phase':name,'errorType':type(hold_error).__name__})
         if held and receipt['failurePolicy']['preApplyRecoveryMayBeAttempted'] and not receipt.get('holdErrors'):
             restart_attempted=False
@@ -121,9 +123,11 @@ def execute(ops,reviewed_plan):
                 receipt['status']='ABORTED_PRE_APPLY_PREDECESSOR_RECOVERED'
             except BaseException as recovery_error:
                 receipt['preApplyRecoveryRefused']={'errorType':type(recovery_error).__name__}
-                for name,action in [('hold503AfterRecoveryRefusal',ops.quiesce_and_verify_503)]+([('stopPredecessorAfterRecoveryRefusal',lambda:ops.stop_exact_predecessor(STOP_GRACE_SECONDS))] if restart_attempted else []):
-                    try:stage(name,action)
+                for name,action in [('hold503AfterRecoveryRefusal',ops.emergency_quiesce_and_verify_503)]+([('stopPredecessorAfterRecoveryRefusal',lambda:ops.stop_exact_predecessor(STOP_GRACE_SECONDS))] if restart_attempted else []):
+                    try:stage(name,action,emergency=True)
                     except BaseException as recovery_hold_error:receipt.setdefault('holdErrors',[]).append({'phase':name,'errorType':type(recovery_hold_error).__name__})
-        ops.seal_terminal_receipt(receipt)
-        ops.enqueue_partial_receipt_for_issue162(receipt)
+        # Failure to seal (for example a full evidence filesystem) must not
+        # suppress the independent partial-receipt delivery attempt.
+        try:ops.seal_terminal_receipt(receipt)
+        finally:ops.enqueue_partial_receipt_for_issue162(receipt)
         return receipt

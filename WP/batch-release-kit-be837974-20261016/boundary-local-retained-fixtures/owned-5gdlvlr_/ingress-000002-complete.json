@@ -1,0 +1,1 @@
+{"configurationSha256":"3d2bfdb441916b55d90b33c35deb033c5c09f22126a54f161d7bbd43d200cdd6","holding":false,"http":[{"method":"GET","path":"/api/health","status":200},{"method":"GET","path":"/login","status":200},{"method":"POST","path":"/api/v2/sis/receipts","status":401}]}
