@@ -1,0 +1,9 @@
+{
+  "status": "NEW_STEP2_SOURCE_SEEDED_INCOMPLETE_NOT_APPROVED_OR_EXECUTED",
+  "acceptedId": 6206990387,
+  "sourcePredecessor": "04c99271e761198937aa798131075f199e86b679",
+  "newFolder": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\WP\\batch-proof-provenance-step2-be837974-20261016",
+  "operatorsExecuted": 0,
+  "testsExecuted": 0,
+  "hostCalls": 0
+}

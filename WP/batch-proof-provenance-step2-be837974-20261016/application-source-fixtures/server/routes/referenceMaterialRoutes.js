@@ -1,0 +1,10 @@
+const router = require('express').Router();
+const { verifyToken, checkPermission } = require('../middleware/authMiddleware');
+const controller = require('../controllers/referenceMaterialController');
+router.use(verifyToken);
+router.get('/', checkPermission('VIEW_INVENTORY'), controller.list);
+router.post('/', checkPermission('MANAGE_ANALYSES'), controller.create);
+router.patch('/:id/status', checkPermission('MANAGE_ANALYSES'), controller.changeStatus);
+router.post('/:id/values', checkPermission('MANAGE_ANALYSES'), controller.addValue);
+router.post('/:id/values/:valueId/correct', checkPermission('MANAGE_ANALYSES'), controller.correctValue);
+module.exports = router;
