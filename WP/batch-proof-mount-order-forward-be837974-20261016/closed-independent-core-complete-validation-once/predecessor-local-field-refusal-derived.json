@@ -1,0 +1,1 @@
+{"failedSource": "validate-mount-order100000-closed-startups-memory-once.py", "literalKeyError": "bytes", "cause": "Published bindings use length instead of bytes; exact source/raw identity checks retained in successor", "hostCalls": 0, "sqlConnections": 0, "originalHelperUnchanged": true}

@@ -1,0 +1,1 @@
+{"cause":"Nested triple-single-quoted source generator ended its outer string at the intended checkpoint f-string","helperCreated":false,"hostCalls":0,"literal":"SyntaxError: invalid decimal literal","operatorReplay":false,"publicationCreated":false,"stageChanges":0,"status":"LOCAL_GENERATOR_SYNTAX_ERROR_BEFORE_HELPER_FILE_CREATION"}

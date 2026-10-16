@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\WP\backlog-resume-20261013\validate-mount-order100000-closed-natural-sync-public-complete-once.py", line 27, in <module>
+    refused_counts=collections.Counter(v['configId'] for v in last['observedRefusals']);assert set(refused_counts)=={v['configId'] for v in expected} and all(n==2 for n in refused_counts.values())
+                                                                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

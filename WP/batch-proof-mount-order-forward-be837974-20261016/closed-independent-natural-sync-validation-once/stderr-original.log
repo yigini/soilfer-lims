@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\WP\backlog-resume-20261013\validate-mount-order100000-closed-natural-sync-public-once.py", line 12, in <module>
+    assert bound['cursorIntervalTimestampOverrides']==0 and len(expected)==4 and len(configs)==7 and configs[TARGET_CONFIG]['labId']==TARGET_LAB and configs[TARGET_CONFIG]['projectCode']==TARGET_PROJECT and interval==15
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

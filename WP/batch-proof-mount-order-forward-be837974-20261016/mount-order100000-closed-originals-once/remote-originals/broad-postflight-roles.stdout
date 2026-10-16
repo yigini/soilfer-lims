@@ -1,0 +1,6 @@
+  ✓ SUPER_ADMIN -> /api/users (200 OK, records: 20)
+  ✓ SUPER_ADMIN -> /api/labs (200 OK, records: 10)
+  ✓ LAB_MANAGER -> /api/dashboard/live (200 OK, records: 0)
+  ✓ LAB_MANAGER -> /api/submissions (200 OK, records: 0)
+  ✓ LAB_TECHNICIAN -> /api/work (200 OK, records: 0)
+✓ Read-only role and route API postflight gates verified.

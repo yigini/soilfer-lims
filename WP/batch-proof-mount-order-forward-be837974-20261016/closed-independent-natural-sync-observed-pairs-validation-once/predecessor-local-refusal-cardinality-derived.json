@@ -1,0 +1,1 @@
+{"cause": "Original unchanged scheduler makes18 fully paired refusals per protected config during two target syncs;source requires at least2, not exactly2. Empty nonparticipating configs have no newSubmissionIds key.", "earlierHelpersUnchanged": true, "newHostCalls": 0, "sqlConnections": 0}

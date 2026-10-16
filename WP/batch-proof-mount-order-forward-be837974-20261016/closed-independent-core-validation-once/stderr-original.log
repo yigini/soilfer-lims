@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "C:\Users\yigin\.codex\worktrees\audit-qc-integration\soilfer-lims\WP\backlog-resume-20261013\validate-mount-order100000-closed-startups-memory-once.py", line 41, in <module>
+    sourceindex=S/'source568-publication-once/publication-index.json';pub=j(sourceindex);bindings=[{**x,'length':x['bytes']} for x in pub['bindings']]
+                                                                                                                 ~^^^^^^^^^
+KeyError: 'bytes'
