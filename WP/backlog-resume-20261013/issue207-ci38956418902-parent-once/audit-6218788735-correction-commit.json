@@ -1,0 +1,150 @@
+{
+  "committedAt": "2026-10-16T19:38:07.063Z",
+  "source": "C:\\Users\\yigin\\.codex\\worktrees\\issue-207-custody\\soilfer-lims",
+  "head": "f83f3cddfee97f9115737ae85a07650c83cef885",
+  "tree": "2555f0b98b14c92cc0f895b6cd44a6ef0423a8ef",
+  "parent": "ad9d2660041c4db380d73a759871987d625f7404",
+  "paths": [
+    "client/src/components/projects/ProjectActionsModal.jsx",
+    "client/src/pages/Reception.jsx",
+    "client/src/translations/en.json",
+    "client/src/translations/es-419.json",
+    "client/src/translations/es.json",
+    "client/src/translations/fr.json",
+    "client/src/translations/pt.json",
+    "server/controllers/projectController.js",
+    "server/scripts/install_sample_custody.js",
+    "server/services/custodyService.js",
+    "server/services/intakePreparationService.js",
+    "server/services/intakeReceiptService.js",
+    "server/services/sampleRetentionService.js",
+    "server/tests/contracts/audit_5_3_custody_retention.test.js",
+    "server/tests/contracts/reception_regression_stage_f.test.js",
+    "server/tests/contracts/reception_stage_e.test.js"
+  ],
+  "workingAndCommittedFiles": {
+    "client/src/components/projects/ProjectActionsModal.jsx": {
+      "workingSha256": "483f6d82d1be7b17945c68d2ef8e66f932552400e5aecac7904b6c3611578d3b",
+      "stagedSha256": "b4057bf39dc29d7c51264ed2c4d0b41c153ce4f0dc20cacab300d75ae0a056e6",
+      "comparison": "ONLY_CRLF_TO_LF",
+      "workingBytes": 79937,
+      "stagedBytes": 78582
+    },
+    "client/src/pages/Reception.jsx": {
+      "workingSha256": "43edc05e82684d16bdd4b1524ef8ba4af8824568f042496ae83e0a0136b9c63d",
+      "stagedSha256": "a43703a6db46fbbe924c0a64b5109b6e3949e53b3ef719c8d23365ce33c0bfba",
+      "comparison": "ONLY_CRLF_TO_LF",
+      "workingBytes": 159110,
+      "stagedBytes": 156436
+    },
+    "client/src/translations/en.json": {
+      "workingSha256": "165c1d96306c65334b44e163ffff03389625eac96161ae0f4c96f3062560801b",
+      "stagedSha256": "165c1d96306c65334b44e163ffff03389625eac96161ae0f4c96f3062560801b",
+      "comparison": "BYTE_IDENTICAL",
+      "workingBytes": 193456,
+      "stagedBytes": 193456
+    },
+    "client/src/translations/es-419.json": {
+      "workingSha256": "f98a458e5bac0b93dd1de83d26f51dfe87f241ac838dab216118804fb1289f0b",
+      "stagedSha256": "f98a458e5bac0b93dd1de83d26f51dfe87f241ac838dab216118804fb1289f0b",
+      "comparison": "BYTE_IDENTICAL",
+      "workingBytes": 212790,
+      "stagedBytes": 212790
+    },
+    "client/src/translations/es.json": {
+      "workingSha256": "e686700bf1610f3f9e56c01594baa342d7b0243ddb6eac6eab9ffeed4cd58671",
+      "stagedSha256": "e686700bf1610f3f9e56c01594baa342d7b0243ddb6eac6eab9ffeed4cd58671",
+      "comparison": "BYTE_IDENTICAL",
+      "workingBytes": 213485,
+      "stagedBytes": 213485
+    },
+    "client/src/translations/fr.json": {
+      "workingSha256": "9275660a1fa17080bae1e345a3a0c68ce83334363d8605dc4d5f69c0fc3b6579",
+      "stagedSha256": "9275660a1fa17080bae1e345a3a0c68ce83334363d8605dc4d5f69c0fc3b6579",
+      "comparison": "BYTE_IDENTICAL",
+      "workingBytes": 218712,
+      "stagedBytes": 218712
+    },
+    "client/src/translations/pt.json": {
+      "workingSha256": "85da3c92945808e1631600ccb0b16d2fbad7b2f86806bb732d104c7af0586019",
+      "stagedSha256": "85da3c92945808e1631600ccb0b16d2fbad7b2f86806bb732d104c7af0586019",
+      "comparison": "BYTE_IDENTICAL",
+      "workingBytes": 211661,
+      "stagedBytes": 211661
+    },
+    "server/controllers/projectController.js": {
+      "workingSha256": "0d8b43799c3870d6b52fb79705071bb40f8344a28d58766a26d6225751f978df",
+      "stagedSha256": "22bc1ee01cbfe9a00f6bc8a7a283b875361a371ae05f532adf072263475ca42c",
+      "comparison": "ONLY_CRLF_TO_LF",
+      "workingBytes": 106185,
+      "stagedBytes": 103919
+    },
+    "server/scripts/install_sample_custody.js": {
+      "workingSha256": "ad1e8b8cea9e294d0d87ccd38c66f2567e5bd7a4c6c10ac64de8a3ae816fa8e4",
+      "stagedSha256": "ad1e8b8cea9e294d0d87ccd38c66f2567e5bd7a4c6c10ac64de8a3ae816fa8e4",
+      "comparison": "BYTE_IDENTICAL",
+      "workingBytes": 11879,
+      "stagedBytes": 11879
+    },
+    "server/services/custodyService.js": {
+      "workingSha256": "dd6c4b8981b17c858e169e7a092d121d8c60f7d606703f8ffb659e5bbbb9ab0e",
+      "stagedSha256": "dd6c4b8981b17c858e169e7a092d121d8c60f7d606703f8ffb659e5bbbb9ab0e",
+      "comparison": "BYTE_IDENTICAL",
+      "workingBytes": 10479,
+      "stagedBytes": 10479
+    },
+    "server/services/intakePreparationService.js": {
+      "workingSha256": "95bc0a82130f841433685e8ccbfa91808f7154882692c1706f68f2997f8fb2d8",
+      "stagedSha256": "074272643e1695fa6c7334d3c9794fa8886c3b4a62ef7285a56a821bde54d78b",
+      "comparison": "ONLY_CRLF_TO_LF",
+      "workingBytes": 47213,
+      "stagedBytes": 46387
+    },
+    "server/services/intakeReceiptService.js": {
+      "workingSha256": "f9ed1c14db9d152214fa6c90f3c889d19a788a097b1c76577ed17f32f3f70683",
+      "stagedSha256": "abbb3f56d369dc8efc438a54f51e0c6110745bc51e97ed0588e059ae9216f6eb",
+      "comparison": "ONLY_CRLF_TO_LF",
+      "workingBytes": 6334,
+      "stagedBytes": 6262
+    },
+    "server/services/sampleRetentionService.js": {
+      "workingSha256": "ddaca66627dc84b10f9963d741d24008987a97c36b65794e89cd0aaed20b2b3f",
+      "stagedSha256": "ddaca66627dc84b10f9963d741d24008987a97c36b65794e89cd0aaed20b2b3f",
+      "comparison": "BYTE_IDENTICAL",
+      "workingBytes": 5207,
+      "stagedBytes": 5207
+    },
+    "server/tests/contracts/audit_5_3_custody_retention.test.js": {
+      "workingSha256": "8835a7c4ec30b878fb8449565d5392c412f460e42de6a011e04134f68fcb71b8",
+      "stagedSha256": "8835a7c4ec30b878fb8449565d5392c412f460e42de6a011e04134f68fcb71b8",
+      "comparison": "BYTE_IDENTICAL",
+      "workingBytes": 32443,
+      "stagedBytes": 32443
+    },
+    "server/tests/contracts/reception_regression_stage_f.test.js": {
+      "workingSha256": "2b8d4f42710f1f809dcc1047a55a4d0034dd66b37e4bcd5a88b899ccb017927a",
+      "stagedSha256": "2b8d4f42710f1f809dcc1047a55a4d0034dd66b37e4bcd5a88b899ccb017927a",
+      "comparison": "BYTE_IDENTICAL",
+      "workingBytes": 27932,
+      "stagedBytes": 27932
+    },
+    "server/tests/contracts/reception_stage_e.test.js": {
+      "workingSha256": "9a211fbd2e8b922896b884e9f2c28f88449a095882b097080dab29ca2a852f8b",
+      "stagedSha256": "9a211fbd2e8b922896b884e9f2c28f88449a095882b097080dab29ca2a852f8b",
+      "comparison": "BYTE_IDENTICAL",
+      "workingBytes": 14698,
+      "stagedBytes": 14698
+    }
+  },
+  "normalizationSummary": {
+    "identical": 11,
+    "onlyCrlfToLf": 5
+  },
+  "reviewedPatchSha256": "f10be973b0a52d90fdb219e37dd8b9525ec3bf6eafc487bf38a6dfd82aaf3e82",
+  "commitLog": {
+    "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\audit-6218788735-correction-commit.log",
+    "sha256": "ea2e31e9b4ee14cbfae1e926c228239306b05595435510720ab69051f6c91ee5"
+  },
+  "status": "D server/node_modules",
+  "pushed": false
+}

@@ -1,0 +1,195 @@
+{
+  "retainedAt": "2026-10-16T20:18:10.366Z",
+  "pr": "https://github.com/yigini/soilfer-lims/pull/300",
+  "runUrl": "https://github.com/yigini/soilfer-lims/actions/runs/38956418902",
+  "run": 38956418902,
+  "attempt": 1,
+  "status": "completed",
+  "conclusion": "success",
+  "head": "f83f3cddfee97f9115737ae85a07650c83cef885",
+  "tree": "2555f0b98b14c92cc0f895b6cd44a6ef0423a8ef",
+  "parent": "ad9d2660041c4db380d73a759871987d625f7404",
+  "mainAndBase": "be8379745bdfae52ce46496ff26514dc7d729640",
+  "serverSummary": [
+    "Test Suites: 374 passed, 374 total",
+    "Tests:       5716 passed, 5716 total",
+    "Snapshots:   0 total",
+    "Time:        1653.038 s",
+    "Ran all test suites."
+  ],
+  "suiteCount": 374,
+  "testCount": 5716,
+  "exactLocalSuiteMatch": true,
+  "localPerSuiteTestCountsMatch": true,
+  "literalCaseNamesIdentical": false,
+  "variableFixtureNameDifferences": [
+    {
+      "path": "tests/contracts/audit_2_1_reference_placement.test.js",
+      "ciOnly": [
+        "recorded batch methods [\"3e4ede58-49f1-4b69-a0bd-999dbf0bf984\"] choose exact then generic; clients cannot force a specific value",
+        "recorded batch methods [\"3e4ede58-49f1-4b69-a0bd-999dbf0bf984\",\"d244bd86-af76-43c1-a30d-b6f998490f22\"] choose exact then generic; clients cannot force a specific value",
+        "recorded batch methods [\"3e4ede58-49f1-4b69-a0bd-999dbf0bf984\",null] choose exact then generic; clients cannot force a specific value",
+        "ambiguous batch [\"3e4ede58-49f1-4b69-a0bd-999dbf0bf984\",\"d244bd86-af76-43c1-a30d-b6f998490f22\"] refuses a catalogue with only method-specific values",
+        "ambiguous batch [\"3e4ede58-49f1-4b69-a0bd-999dbf0bf984\",null] refuses a catalogue with only method-specific values"
+      ],
+      "localOnly": [
+        "recorded batch methods [\"0e882f23-790f-4ef6-863d-78b8762a3e41\"] choose exact then generic; clients cannot force a specific value",
+        "recorded batch methods [\"0e882f23-790f-4ef6-863d-78b8762a3e41\",\"a79cba8c-036a-44e0-a235-fc04e38ed616\"] choose exact then generic; clients cannot force a specific value",
+        "recorded batch methods [\"0e882f23-790f-4ef6-863d-78b8762a3e41\",null] choose exact then generic; clients cannot force a specific value",
+        "ambiguous batch [\"0e882f23-790f-4ef6-863d-78b8762a3e41\",\"a79cba8c-036a-44e0-a235-fc04e38ed616\"] refuses a catalogue with only method-specific values",
+        "ambiguous batch [\"0e882f23-790f-4ef6-863d-78b8762a3e41\",null] refuses a catalogue with only method-specific values"
+      ]
+    }
+  ],
+  "all20JobStepsSuccess": true,
+  "actualDockerSteps": [
+    {
+      "name": "Build Docker image",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 12,
+      "started_at": "2026-10-16T20:07:37Z",
+      "completed_at": "2026-10-16T20:08:48Z"
+    },
+    {
+      "name": "Build Supported Baseline Docker Image (v3.5.30 / 48d0e52)",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 13,
+      "started_at": "2026-10-16T20:08:48Z",
+      "completed_at": "2026-10-16T20:09:37Z"
+    },
+    {
+      "name": "Run Real Disposable Docker Boundary Rehearsal",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 14,
+      "started_at": "2026-10-16T20:09:37Z",
+      "completed_at": "2026-10-16T20:11:25Z"
+    },
+    {
+      "name": "Run Real Docker Deployment Readiness Acceptance",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 15,
+      "started_at": "2026-10-16T20:11:25Z",
+      "completed_at": "2026-10-16T20:14:17Z"
+    }
+  ],
+  "actualFiveBoundaryScenarios": [
+    "  ✓ Scenario 1 PASSED: Full wrapper pipeline succeeded in real Docker; 4 samples admitted; live traffic restored.",
+    "  ✓ Scenario 2 PASSED: Wrapper caught partial-apply failure; restored volume DB bit-for-bit; retained 503 ingress.",
+    "  ✓ Scenario 3 PASSED: Interrupted wrapper terminated live container writer before restoring DB bit-for-bit.",
+    "  ✓ Scenario 4 PASSED: Failed health check executed cleanup and preserved committed database state.",
+    "  ✓ Scenario 5 PASSED: Wrapper rejected image mismatch before mutation; live container, proxy, and DB untouched."
+  ],
+  "readinessFinal": "  🎉 ALL REAL DOCKER DEPLOYMENT READINESS SCENARIOS PASSED!     ",
+  "custodyReadinessProof": {
+    "ready": {
+      "classification": "COMPLETE_207",
+      "mode": "DRY_RUN",
+      "totalChanges": 0,
+      "backfilledCount": 0,
+      "backfillSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "again": {
+      "classification": "COMPLETE_207",
+      "mode": "NO_OP",
+      "totalChanges": 0,
+      "backfilledCount": 0,
+      "backfillSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "dbWalShmPreserved": true,
+    "sourceSha256": "6572f75c9663d0aaece1bd6139694fe1ad41142f2723404a811852f8eaede685",
+    "ledgerCount": 0,
+    "originalRowsSha256": "07e76f34a1421bd26852d22274f842c5cfe932dc5f9e57ad78bb1bc682308f25"
+  },
+  "workingBytesUnchanged": true,
+  "stagedPaths": [],
+  "workingStatus": "D server/node_modules",
+  "normalization": {
+    "identical": 11,
+    "onlyCrlfToLf": 5
+  },
+  "prBodyUnchanged": true,
+  "failedAuditUnchanged": true,
+  "priorFailedAndGreenAttemptsUnchanged": true,
+  "baselineJsxLint": "6 errors/16 warnings identical to untouched ad9d; not corrected in this scope.",
+  "productionBoundary": "CI uses disposable Docker only. No host/prod copy/release inputs accessed; future #207 kit still requires custody-installer dry-run planned/blocked counts on authorized production copy. Current release kit is not #207 deployment.",
+  "authorizationBoundary": "One reviewed16 commit/push and automatic CI attempt1 only; no extra local tests, retry/dispatch, PR body edits, ready/audit/native/labels or merge.",
+  "artifacts": {
+    "result": {
+      "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\ci-38956418902-result.json",
+      "sha256": "643bf9892c8d72a2ad78ece94995d98aaa9ee370e04259a982e6981f3076c069"
+    },
+    "fullLog": {
+      "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\ci-38956418902-full.log",
+      "sha256": "404c9113747483f91e57641ede9a59f78844fa456502cf12bd3438c5aa7f514d"
+    },
+    "inventory": {
+      "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\ci-38956418902-inventory.json",
+      "sha256": "aaea85e35ec7cdeb3fa3a78108f5a22e5d20055414cc59886b180ddda985c9ed"
+    },
+    "dockerResults": {
+      "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\ci-38956418902-docker-results.txt",
+      "sha256": "97cfeb20e0ea1faee6f5f1ad71da23ce17143747200a4880915a191abffc5dfb"
+    },
+    "staging": {
+      "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\audit-6218788735-correction-staging.json",
+      "sha256": "1904eaf9164e0971259e4f433f6780669db012d46515e0e1f625f63246166334"
+    },
+    "commit": {
+      "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\audit-6218788735-correction-commit.json",
+      "sha256": "f07a025c93f36cef2e4b6c07a3f1048ed7cafd1e821e14721441942d98a10e97"
+    },
+    "pushed": {
+      "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\audit-6218788735-correction-pushed.json",
+      "sha256": "ab4048abec543b2367feb72a9bd90aad3b8cdcd4d5b2fc55010fceb7fd52cf34"
+    },
+    "ci-38956418902-run.json": {
+      "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\ci-38956418902-run.json",
+      "bytes": 12533,
+      "sha256": "839b3381884dbf07094d8bd6b59a11397c9814ac308a3f1262881d49a3e09d51"
+    },
+    "ci-38956418902-jobs.json": {
+      "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\ci-38956418902-jobs.json",
+      "bytes": 4328,
+      "sha256": "76b852ecc9ba4f1b4aa658664ca1cfaa3518cd53e60efd49e7131e548b434458"
+    },
+    "ci-38956418902-commit-api.json": {
+      "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\ci-38956418902-commit-api.json",
+      "bytes": 1161,
+      "sha256": "4808036f270d866282d29cbe38ac75d2855fdfd26798b28bdc9f3640f19a2e67"
+    },
+    "ci-38956418902-pr.json": {
+      "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\ci-38956418902-pr.json",
+      "bytes": 18728,
+      "sha256": "fac0678b67f44325b89bd882f5aa2177fc1e6adf5d4fd37495be5529f6efc6de"
+    },
+    "ci-38956418902-main.json": {
+      "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\ci-38956418902-main.json",
+      "bytes": 5237,
+      "sha256": "6b8b6c5a1fa045ff76cfbaf51f4aa56c734f37607425af818d21d2a679821974"
+    },
+    "ci-38956418902-audit.json": {
+      "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\ci-38956418902-audit.json",
+      "bytes": 10018,
+      "sha256": "780e595b152e06b5d6e2947ddd8b09a1fc103d436b0e0a0da801920a56b78f55"
+    },
+    "ci-38956418902-prior-green-run.json": {
+      "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\ci-38956418902-prior-green-run.json",
+      "bytes": 12538,
+      "sha256": "841464a12e6f5ff1ecec7b93168d30af40b5830cc962c335b54558b504a1e394"
+    },
+    "ci-38956418902-original-failed-run.json": {
+      "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\ci-38956418902-original-failed-run.json",
+      "bytes": 12535,
+      "sha256": "f11cd49914082d3f26d94ba519d7d291576498522caaed5ed93d84fd7df1f21c"
+    },
+    "ci-38956418902-full.log": {
+      "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\ci-38956418902-full.log",
+      "bytes": 6004202,
+      "sha256": "404c9113747483f91e57641ede9a59f78844fa456502cf12bd3438c5aa7f514d"
+    }
+  }
+}

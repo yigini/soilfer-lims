@@ -1,0 +1,250 @@
+{
+  "retainedAt": "2026-10-16T20:16:06.369Z",
+  "runId": 38956418902,
+  "head": "f83f3cddfee97f9115737ae85a07650c83cef885",
+  "tree": "2555f0b98b14c92cc0f895b6cd44a6ef0423a8ef",
+  "attempt": 1,
+  "status": "completed",
+  "conclusion": "success",
+  "url": "https://github.com/yigini/soilfer-lims/actions/runs/38956418902",
+  "runCreatedAt": "2026-10-16T19:38:38Z",
+  "runUpdatedAt": "2026-10-16T20:14:43Z",
+  "jobCount": 1,
+  "jobs": [
+    {
+      "id": 117160312350,
+      "name": "Test & Build",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-16T19:38:40Z",
+      "completedAt": "2026-10-16T20:14:43Z",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-16T19:38:41Z",
+          "completed_at": "2026-10-16T19:38:43Z"
+        },
+        {
+          "name": "Checkout repository",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-16T19:38:43Z",
+          "completed_at": "2026-10-16T19:38:55Z"
+        },
+        {
+          "name": "Setup Node.js",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-16T19:38:55Z",
+          "completed_at": "2026-10-16T19:38:56Z"
+        },
+        {
+          "name": "Install server dependencies",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-16T19:38:56Z",
+          "completed_at": "2026-10-16T19:39:09Z"
+        },
+        {
+          "name": "Install client dependencies",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-16T19:39:09Z",
+          "completed_at": "2026-10-16T19:39:16Z"
+        },
+        {
+          "name": "Verify theme catalog and tokens drift",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-16T19:39:16Z",
+          "completed_at": "2026-10-16T19:39:16Z"
+        },
+        {
+          "name": "Build client production bundle",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-10-16T19:39:16Z",
+          "completed_at": "2026-10-16T19:39:25Z"
+        },
+        {
+          "name": "Setup test database and generate Prisma client",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-16T19:39:25Z",
+          "completed_at": "2026-10-16T19:39:31Z"
+        },
+        {
+          "name": "Install Chromium for keyboard-only recording contract",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-10-16T19:39:31Z",
+          "completed_at": "2026-10-16T19:39:52Z"
+        },
+        {
+          "name": "Run server test suite",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-10-16T19:39:52Z",
+          "completed_at": "2026-10-16T20:07:28Z"
+        },
+        {
+          "name": "Set up Docker Buildx",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-10-16T20:07:28Z",
+          "completed_at": "2026-10-16T20:07:37Z"
+        },
+        {
+          "name": "Build Docker image",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-10-16T20:07:37Z",
+          "completed_at": "2026-10-16T20:08:48Z"
+        },
+        {
+          "name": "Build Supported Baseline Docker Image (v3.5.30 / 48d0e52)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-10-16T20:08:48Z",
+          "completed_at": "2026-10-16T20:09:37Z"
+        },
+        {
+          "name": "Run Real Disposable Docker Boundary Rehearsal",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 14,
+          "started_at": "2026-10-16T20:09:37Z",
+          "completed_at": "2026-10-16T20:11:25Z"
+        },
+        {
+          "name": "Run Real Docker Deployment Readiness Acceptance",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15,
+          "started_at": "2026-10-16T20:11:25Z",
+          "completed_at": "2026-10-16T20:14:17Z"
+        },
+        {
+          "name": "Post Build Docker image",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 27,
+          "started_at": "2026-10-16T20:14:17Z",
+          "completed_at": "2026-10-16T20:14:17Z"
+        },
+        {
+          "name": "Post Set up Docker Buildx",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 28,
+          "started_at": "2026-10-16T20:14:17Z",
+          "completed_at": "2026-10-16T20:14:40Z"
+        },
+        {
+          "name": "Post Setup Node.js",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 29,
+          "started_at": "2026-10-16T20:14:40Z",
+          "completed_at": "2026-10-16T20:14:40Z"
+        },
+        {
+          "name": "Post Checkout repository",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 30,
+          "started_at": "2026-10-16T20:14:40Z",
+          "completed_at": "2026-10-16T20:14:40Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 31,
+          "started_at": "2026-10-16T20:14:40Z",
+          "completed_at": "2026-10-16T20:14:40Z"
+        }
+      ]
+    }
+  ],
+  "apiAndLogArtifacts": {
+    "ci-38956418902-run.json": {
+      "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\ci-38956418902-run.json",
+      "bytes": 12533,
+      "sha256": "839b3381884dbf07094d8bd6b59a11397c9814ac308a3f1262881d49a3e09d51"
+    },
+    "ci-38956418902-jobs.json": {
+      "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\ci-38956418902-jobs.json",
+      "bytes": 4328,
+      "sha256": "76b852ecc9ba4f1b4aa658664ca1cfaa3518cd53e60efd49e7131e548b434458"
+    },
+    "ci-38956418902-commit-api.json": {
+      "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\ci-38956418902-commit-api.json",
+      "bytes": 1161,
+      "sha256": "4808036f270d866282d29cbe38ac75d2855fdfd26798b28bdc9f3640f19a2e67"
+    },
+    "ci-38956418902-pr.json": {
+      "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\ci-38956418902-pr.json",
+      "bytes": 18728,
+      "sha256": "fac0678b67f44325b89bd882f5aa2177fc1e6adf5d4fd37495be5529f6efc6de"
+    },
+    "ci-38956418902-main.json": {
+      "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\ci-38956418902-main.json",
+      "bytes": 5237,
+      "sha256": "6b8b6c5a1fa045ff76cfbaf51f4aa56c734f37607425af818d21d2a679821974"
+    },
+    "ci-38956418902-audit.json": {
+      "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\ci-38956418902-audit.json",
+      "bytes": 10018,
+      "sha256": "780e595b152e06b5d6e2947ddd8b09a1fc103d436b0e0a0da801920a56b78f55"
+    },
+    "ci-38956418902-prior-green-run.json": {
+      "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\ci-38956418902-prior-green-run.json",
+      "bytes": 12538,
+      "sha256": "841464a12e6f5ff1ecec7b93168d30af40b5830cc962c335b54558b504a1e394"
+    },
+    "ci-38956418902-original-failed-run.json": {
+      "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\ci-38956418902-original-failed-run.json",
+      "bytes": 12535,
+      "sha256": "f11cd49914082d3f26d94ba519d7d291576498522caaed5ed93d84fd7df1f21c"
+    },
+    "ci-38956418902-full.log": {
+      "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\ci-38956418902-full.log",
+      "bytes": 6004202,
+      "sha256": "404c9113747483f91e57641ede9a59f78844fa456502cf12bd3438c5aa7f514d"
+    }
+  },
+  "priorRunResults": {
+    "green": {
+      "id": 38911857904,
+      "head": "ad9d2660041c4db380d73a759871987d625f7404",
+      "attempt": 1,
+      "conclusion": "success"
+    },
+    "failed": {
+      "id": 38898969962,
+      "head": "827760b8b83c5a4bd0581ee1369648b91818d584",
+      "attempt": 1,
+      "conclusion": "failure"
+    }
+  },
+  "main": "be8379745bdfae52ce46496ff26514dc7d729640",
+  "prBodyUnchanged": true,
+  "failedAuditUnchanged": true,
+  "actions": "Only the authorized one commit/push and automatic CI attempt1; no retry/dispatch/body publication/ready/audit/native/labels/merge."
+}

@@ -1,0 +1,74 @@
+﻿2026-10-16T19:39:25.5685473Z ##[group]Run npx prisma generate
+2026-10-16T19:39:25.5685811Z [36;1mnpx prisma generate[0m
+2026-10-16T19:39:25.5686099Z [36;1mnpx prisma db push --accept-data-loss[0m
+2026-10-16T19:39:25.5686426Z [36;1mnode seeds/profile.js[0m
+2026-10-16T19:39:25.5686681Z [36;1mnode seeds/units.js[0m
+2026-10-16T19:39:25.5686943Z [36;1mnode seeds/references.js[0m
+2026-10-16T19:39:25.5687231Z [36;1mnode seeds/catalogue.js --confirm[0m
+2026-10-16T19:39:25.5687533Z [36;1mnode seed_languages.js[0m
+2026-10-16T19:39:25.5687845Z [36;1mnode scripts/seed_help_content.cjs[0m
+2026-10-16T19:39:25.5688136Z [36;1mnode scripts/publish_help_release.cjs[0m
+2026-10-16T19:39:25.5723060Z shell: /usr/bin/bash -e {0}
+2026-10-16T19:39:25.5723433Z env:
+2026-10-16T19:39:25.5723673Z   NODE_ENV: test
+2026-10-16T19:39:25.5723924Z   JWT_SECRET: ci-test-secret-key-12345
+2026-10-16T19:39:25.5724307Z   DATABASE_PATH: /home/runner/work/soilfer-lims/soilfer-lims/server/prisma/dev.db
+2026-10-16T19:39:25.5724669Z ##[endgroup]
+2026-10-16T19:39:26.2287994Z Loaded Prisma config from prisma.config.ts.
+2026-10-16T19:39:26.2288395Z 
+2026-10-16T19:39:26.3123709Z Prisma schema loaded from prisma/schema.prisma.
+2026-10-16T19:39:27.5347717Z ┌─────────────────────────────────────────────────────────┐
+2026-10-16T19:39:27.5348769Z │  Update available 7.10.0 -> 8.0.0-rc.23                 │
+2026-10-16T19:39:27.5349318Z │                                                         │
+2026-10-16T19:39:27.5350370Z │  This is a major update - please follow the guide at    │
+2026-10-16T19:39:27.5351011Z │  https://pris.ly/d/major-version-upgrade                │
+2026-10-16T19:39:27.5351412Z │                                                         │
+2026-10-16T19:39:27.5351790Z │  Run the following to update                            │
+2026-10-16T19:39:27.5352203Z │    npm i --save-dev prisma@latest                       │
+2026-10-16T19:39:27.5352593Z │    npm i @prisma/client@latest                          │
+2026-10-16T19:39:27.5353020Z └─────────────────────────────────────────────────────────┘
+2026-10-16T19:39:27.5353301Z 
+2026-10-16T19:39:27.5353552Z ✔ Generated Prisma Client (v7.10.0) to ./prisma_client in 747ms
+2026-10-16T19:39:27.5353775Z 
+2026-10-16T19:39:27.5354071Z Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+2026-10-16T19:39:27.5354348Z 
+2026-10-16T19:39:27.5354354Z 
+2026-10-16T19:39:28.1916825Z Loaded Prisma config from prisma.config.ts.
+2026-10-16T19:39:28.1917530Z 
+2026-10-16T19:39:28.2848605Z Prisma schema loaded from prisma/schema.prisma.
+2026-10-16T19:39:28.2924521Z Datasource "db": SQLite database "dev.db" at "file:/home/runner/work/soilfer-lims/soilfer-lims/server/prisma/dev.db"
+2026-10-16T19:39:28.3107278Z 
+2026-10-16T19:39:28.3108712Z SQLite database dev.db created at file:/home/runner/work/soilfer-lims/soilfer-lims/server/prisma/dev.db
+2026-10-16T19:39:28.7263849Z 
+2026-10-16T19:39:28.7265467Z 🚀  Your database is now in sync with your Prisma schema. Done in 415ms
+2026-10-16T19:39:28.7265919Z 
+2026-10-16T19:39:28.8345373Z [PROFILE SEED] Seeding profile: soilfer from /home/runner/work/soilfer-lims/soilfer-lims/profiles/soilfer
+2026-10-16T19:39:28.9342128Z   ✓ Seeded 7 laboratories
+2026-10-16T19:39:28.9669744Z   ✓ Seeded 9 projects
+2026-10-16T19:39:28.9677067Z   ✓ Applied branding configuration
+2026-10-16T19:39:28.9678131Z 
+2026-10-16T19:39:28.9678623Z 🎉 Profile seed 'soilfer' completed successfully.
+2026-10-16T19:39:29.1808786Z [SEED] Seeding 37 controlled units...
+2026-10-16T19:39:29.2967557Z [SEED] Successfully seeded 37 units.
+2026-10-16T19:39:29.5158149Z [SEED] Seeding 73 method references...
+2026-10-16T19:39:29.6676420Z [SEED] Successfully seeded 73 method references.
+2026-10-16T19:39:29.9707576Z [Catalogue Seed] Database has 0 existing analyses.
+2026-10-16T19:39:29.9708756Z [Catalogue Seed] Seeding clean database with 176 standard analyses...
+2026-10-16T19:39:30.2679032Z [Catalogue Seed] ✓ Clean seeding complete: 176 analyses, 467 methodologies.
+2026-10-16T19:39:30.2683707Z 
+2026-10-16T19:39:30.2684349Z Execution Result Summary: { isCleanDb: true, changesApplied: true, seededCount: 176 }
+2026-10-16T19:39:30.3656793Z 🌱 Seeding Languages...
+2026-10-16T19:39:30.4542007Z   ✓ Processed language: English (en)
+2026-10-16T19:39:30.4567314Z   ✓ Processed language: Español (es)
+2026-10-16T19:39:30.4591402Z   ✓ Processed language: Español (Latinoamérica) (es-419)
+2026-10-16T19:39:30.4620610Z   ✓ Processed language: Français (fr)
+2026-10-16T19:39:30.4640498Z   ✓ Processed language: Português (pt)
+2026-10-16T19:39:30.4641035Z ✅ Language seeding complete.
+2026-10-16T19:39:30.4641309Z 
+2026-10-16T19:39:30.7004519Z [HELP_SEED] Starting help content seeding from server/data/help/...
+2026-10-16T19:39:31.0472477Z [HELP_SEED] Seeding completed: 113 created, 0 updated. 0 unreviewed drafts published.
+2026-10-16T19:39:31.1480072Z [HELP_RELEASE] Starting Help Knowledge Base Release publication (dryRun: false)...
+2026-10-16T19:39:31.1578454Z [HELP_RELEASE] Auditing 113 application guides across 5 languages...
+2026-10-16T19:39:31.6392804Z [HELP_RELEASE] Release manifest written to /home/runner/work/soilfer-lims/soilfer-lims/server/data/help/RELEASE_MANIFEST_v1.json
+2026-10-16T19:39:31.6393925Z [HELP_RELEASE] Successfully published 113 guides across all 5 languages (en, es, es-419, fr, pt).
+2026-10-16T19:39:31.6394811Z [HELP_RELEASE] Done.

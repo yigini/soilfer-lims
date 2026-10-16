@@ -1,0 +1,27 @@
+{
+  "pushedAt": "2026-10-16T19:38:35.505Z",
+  "head": "f83f3cddfee97f9115737ae85a07650c83cef885",
+  "tree": "2555f0b98b14c92cc0f895b6cd44a6ef0423a8ef",
+  "main": "be8379745bdfae52ce46496ff26514dc7d729640",
+  "base": "be8379745bdfae52ce46496ff26514dc7d729640",
+  "remoteRefs": "f83f3cddfee97f9115737ae85a07650c83cef885\trefs/heads/codex/issue-207-custody\nbe8379745bdfae52ce46496ff26514dc7d729640\trefs/heads/main",
+  "pushLog": {
+    "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\audit-6218788735-correction-push.log",
+    "sha256": "b7809ffb0728968e98d8d12f3b2977267977c6225e27141856ce4b524dd095ef"
+  },
+  "prePushApi": {
+    "pr": {
+      "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\audit-6218788735-correction-before-push-pr.json",
+      "sha256": "34fcc1c4763dd82a03f1479bcdffb1d95c886520b04a0e457ad2b6b351b0880d"
+    },
+    "main": {
+      "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\audit-6218788735-correction-before-push-main.json",
+      "sha256": "6b8b6c5a1fa045ff76cfbaf51f4aa56c734f37607425af818d21d2a679821974"
+    },
+    "audit": {
+      "path": "C:\\Users\\yigin\\AppData\\Local\\Temp\\soilfer-207-verify-af36ba07-768c-4bb9-8aa6-79263be8c197\\audit-6218788735-correction-before-push-audit.json",
+      "sha256": "780e595b152e06b5d6e2947ddd8b09a1fc103d436b0e0a0da801920a56b78f55"
+    }
+  },
+  "actions": "One ordinary branch push only; no retry/dispatch/PR-body publication/audit/labels/merge"
+}
