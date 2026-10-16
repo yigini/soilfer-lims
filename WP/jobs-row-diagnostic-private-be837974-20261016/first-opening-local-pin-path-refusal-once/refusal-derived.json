@@ -1,0 +1,14 @@
+{
+  "recordedUtc": "2026-10-16T02:35:53.947538+00:00",
+  "status": "LOCAL_PUBLICATION_PIN_PATH_FIELD_REFUSAL_BEFORE_OUTPUT_STAGE_COMMIT_OR_HOST",
+  "originalHelper": "WP/backlog-resume-20261013/publish-private-diagnostic023000-first-opening-once.py",
+  "originalHelperSha256": "b360a1f76ddbf7eddfaea2a8b1f8108f38578b58edbdad6bf85849ce9e4dd352",
+  "actualSession": 21646,
+  "exitCode": 1,
+  "actualError": "KeyError: 'path'",
+  "reason": "Source pin includes path while runtime record uses its enclosing map key; six input data pins remain exact. New successor checks path against map key and compares every runtime pin field.",
+  "originalsUntouched": true,
+  "reviewedSourceChanged": false,
+  "remoteDiagnosticReplayed": false,
+  "oldHelperMustNeverReplay": true
+}

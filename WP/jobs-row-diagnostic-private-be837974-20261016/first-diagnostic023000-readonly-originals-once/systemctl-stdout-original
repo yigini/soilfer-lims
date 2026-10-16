@@ -1,0 +1,33 @@
+Restart=no
+RuntimeMaxUSec=30min
+MainPID=332704
+Result=success
+ExecMainStartTimestamp=Fri 2026-10-16 04:31:15 CEST
+ExecMainExitTimestamp=
+ExecMainCode=0
+ExecMainStatus=0
+ExecStart={ path=/usr/bin/python3 ; argv[]=/usr/bin/python3 -B /opt/lims/releases/workflow-batch-row-diagnostic-be837974-20261016T023000Z/run_diagnostic.py ; ignore_errors=no ; start_time=[Fri 2026-10-16 04:31:15 CEST] ; stop_time=[n/a] ; pid=332704 ; code=(null) ; status=0/0 }
+MemoryCurrent=805244928
+MemoryPeak=805306368
+MemoryMax=805306368
+MemorySwapMax=0
+IPAddressDeny=0.0.0.0/0 ::/0
+Environment=NODE_OPTIONS= PYTHONDONTWRITEBYTECODE=1
+WorkingDirectory=/opt/lims/releases/workflow-batch-row-diagnostic-be837974-20261016T023000Z
+ReadWritePaths=/opt/lims/releases/workflow-batch-row-diagnostic-be837974-20261016T023000Z
+ReadOnlyPaths=/opt/lims/releases/workflow-batch-jobs-intake-be837974-20261016T003000Z
+InaccessiblePaths=-/var/lib/docker/volumes -/opt/lims/backups
+PrivateDevices=yes
+PrivateNetwork=yes
+ProtectHome=yes
+ProtectSystem=strict
+NoNewPrivileges=yes
+RestrictAddressFamilies=AF_UNIX
+RestrictSUIDSGID=yes
+Id=lims-workflow-batch-row-diagnostic-be837974-20261016t023000z.service
+LoadState=loaded
+ActiveState=active
+SubState=running
+ActiveEnterTimestamp=Fri 2026-10-16 04:31:15 CEST
+InactiveEnterTimestamp=
+InvocationID=9026c0ad2c4849e3ac5f2595aeaeec77
