@@ -6,24 +6,27 @@ from derive_timing_evidence import derive
 
 class KitRefusals(unittest.TestCase):
     def confirmation(self):
-        return {'confirmedByYY':True,'issue':162,'commentId':6213000000,
-                'url':'https://github.com/yigini/soilfer-lims/issues/162#issuecomment-6213000000',
+        return {'confirmedByYY':True,'issue':162,'commentId':6214000000,
+                'url':'https://github.com/yigini/soilfer-lims/issues/162#issuecomment-6214000000',
                 'head':HEAD,'image':IMAGE,'createdEpoch':1000,'impactSha256':impact_sha(),
+                'outageDisclosureSha256':sha(canonical({'SYNTHETIC_TEST_ONLY':'outage'})),'acceptsWholeOutage':True,
                 'acceptsFirstSyncImpact':True,'labAndHubBuildsOwnedByYY':True,'controlled':True,
                 'releaseWindowControl':'RELEASE_DAY_DISK_ABORTS_ACCEPTED'}
 
     def test_fresh_gate_binds_release_impact_and_human_workload(self):
-        good=self.confirmation();validate_fresh_yy_confirmation(good,1600)
+        outage={'SYNTHETIC_TEST_ONLY':'outage'}
+        good=self.confirmation();validate_fresh_yy_confirmation(good,1600,outage)
         mutations={'head':'a'*40,'image':'sha256:'+'b'*64,'impactSha256':'c'*64,
                    'confirmedByYY':False,'acceptsFirstSyncImpact':False,'controlled':False,
                    'labAndHubBuildsOwnedByYY':False,'commentId':ACCEPTANCE_ID,
-                   'releaseWindowControl':'AN_OLD_CHOICE','createdEpoch':999}
+                   'releaseWindowControl':'AN_OLD_CHOICE','createdEpoch':999,
+                   'outageDisclosureSha256':'0'*64,'acceptsWholeOutage':False}
         for key,value in mutations.items():
             with self.subTest(key=key),self.assertRaises(RuntimeError):
-                validate_fresh_yy_confirmation({**good,key:value},1600)
-        with self.assertRaises(RuntimeError):validate_fresh_yy_confirmation(good,999)
+                validate_fresh_yy_confirmation({**good,key:value},1600,outage)
+        with self.assertRaises(RuntimeError):validate_fresh_yy_confirmation(good,999,outage)
 
-    def test_failure_never_restarts_or_restores_even_without_commit_receipt(self):
+    def test_apply_or_entrypoint_attempt_never_permits_preapply_recovery(self):
         for install in (False,True):
             for entry in (False,True):
                 result=failure_policy(install,entry)
@@ -31,6 +34,18 @@ class KitRefusals(unittest.TestCase):
                 self.assertFalse(result['restartPredecessor']);self.assertFalse(result['restoreDatabase'])
                 self.assertTrue(result['stopCandidate'] and result['retainCandidate'] and result['postPartialReceiptToIssue162'])
                 self.assertEqual(result['reviewedForwardRecoveryRequired'],install or entry)
+                self.assertEqual(result['preApplyRecoveryMayBeAttempted'],not install and not entry)
+
+    def test_preapply_recovery_requires_all_three_exact_raw_file_identities(self):
+        triple={'':{'bytes':1,'sha256':sha(b'x')},'-wal':None,'-shm':{'bytes':0,'sha256':sha(b'')}}
+        verify_preapply_raw_triple(triple,triple,False,False)
+        for suffix in ('','-wal','-shm'):
+            changed=copy.deepcopy(triple);changed[suffix]={'bytes':1,'sha256':sha(b'y')}
+            with self.subTest(suffix=suffix),self.assertRaises(RuntimeError):verify_preapply_raw_triple(triple,changed,False,False)
+        with self.assertRaises(RuntimeError):verify_preapply_raw_triple(triple,{**triple,'-shm':None},False,False)
+        with self.assertRaises(RuntimeError):verify_preapply_raw_triple(None,triple,False,False)
+        for apply,entry in ((True,False),(False,True),(True,True)):
+            with self.assertRaises(RuntimeError):verify_preapply_raw_triple(triple,triple,apply,entry)
 
     def test_postflight_permits_only_exact_intake_count_deltas(self):
         before=dict(zip(FIVE_COUNTS,(39280,19,6,18,13209)))
@@ -73,5 +88,16 @@ class KitRefusals(unittest.TestCase):
         self.assertFalse(evidence['wholeSequenceUnder600SecondsProved'])
         self.assertTrue(evidence['233000IsStartupOnlyNotAThreeInstallerProductionPath'])
         self.assertEqual(len(evidence['references']),13)
+
+    def test_gate_discloses_every_phase_and_indefinite_forward_hold_honestly(self):
+        estimates={k:{'kind':'REVIEWED_ALLOWANCE','seconds':30,'basis':'SYNTHETIC_TEST_ONLY'} for k in PHASES}
+        disclosure=whole_outage_disclosure(estimates)
+        self.assertEqual(disclosure['controllerMaximumSeconds'],5400)
+        self.assertTrue(disclosure['failureMaintenanceCanContinueBeyondController'])
+        self.assertIn('reopening within90 minutes is not promised',disclosure['plainGateText'])
+        for missing in PHASES:
+            changed=dict(estimates);del changed[missing]
+            with self.assertRaises(RuntimeError):whole_outage_disclosure(changed)
+        with self.assertRaises(RuntimeError):whole_outage_disclosure({**estimates,'apply206':{'kind':'INVENTED_PROOF','seconds':1,'basis':'x'}})
 
 if __name__=='__main__':unittest.main()
