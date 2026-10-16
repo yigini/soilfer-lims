@@ -1,0 +1,7 @@
+{
+  "reason": "411 first run retained: one stale review cutoff fixture, one literal-vs-dynamic error fixture; host not started",
+  "changes": "new fixture approval id/time and later-failure times; genuinely dynamic error sentinel; six complete main/AST binding guards",
+  "runtimeGuardWeakening": false,
+  "sourceOperatorsExecuted": 0,
+  "expectedTests": 417
+}

@@ -1,0 +1,176 @@
+// Policy values live here or in declarative deployment profiles, never in consumers.
+const PRESETS = ['ISO17025_STRICT', 'BASIC', 'ADVISORY'];
+const DEFAULT_RUN_PROFILES = {
+    MICROPLATE_96: { profileKey: 'MICROPLATE_96', name: '96-Well Microplate', capacity: 96, qcSlots: [
+        { position: 1, type: 'BLANK', label: 'Reagent Blank' }, { position: 2, type: 'CONTROL', label: 'Standard Soil CRM' },
+        { position: 48, type: 'DUPLICATE', label: 'Mid-plate Duplicate' }, { position: 96, type: 'DUPLICATE', label: 'End-plate Duplicate' }] },
+    CENTRIFUGE_24: { profileKey: 'CENTRIFUGE_24', name: '24-Place Tube Rack / Digestion Block', capacity: 24, qcSlots: [
+        { position: 1, type: 'BLANK', label: 'Method Blank' }, { position: 2, type: 'CONTROL', label: 'Reference Soil CRM' },
+        { position: 12, type: 'DUPLICATE', label: 'Mid-run Duplicate' }] },
+    RACK_40: { profileKey: 'RACK_40', name: '40-Place Sedimentation / Carousel Rack', capacity: 40, qcSlots: [
+        { position: 1, type: 'BLANK', label: 'Reagent / Hydrometer Blank' }, { position: 2, type: 'CONTROL', label: 'Standard Soil CRM' },
+        { position: 20, type: 'DUPLICATE', label: 'Mid-rack Duplicate' }, { position: 40, type: 'DUPLICATE', label: 'End-rack Duplicate' }] }
+};
+const registry = {};
+function key(name, type, strict, basic = strict, advisory = strict, options = {}) {
+    registry[name] = { key: name, type, scope: 'LAB+METHOD', unit: null,
+        description: `policies.keys.${name.replaceAll('.', '_')}`, ...options,
+        presets: { ISO17025_STRICT: strict, BASIC: basic, ADVISORY: advisory } };
+}
+const integer = { min: 0 };
+key('qc.mode', 'enum', 'REQUIRED_BLOCKING', 'REQUIRED_WARN', 'ADVISORY', { allowedValues: ['REQUIRED_BLOCKING', 'REQUIRED_WARN', 'ADVISORY', 'OFF'] });
+key('qc.requireBatchQc', 'enum', 'AUTO', undefined, undefined, { allowedValues: ['AUTO', 'REQUIRED', 'NOT_REQUIRED'],
+    help: 'policies.help.qc_requireBatchQc' });
+key('qc.maxBatchSize', 'integer', 20, 40, null, { min: 1, nullable: true, unit: 'samples' });
+key('qc.blankPerBatch', 'integer', 1, 1, 0, integer);
+key('qc.duplicateEvery', 'integer', 10, 20, 0, { ...integer, unit: 'samples' });
+key('qc.lrmPerBatch', 'integer', 1, 0, 0, integer);
+key('qc.crmEveryNBatches', 'integer', 10, 0, 0, { ...integer, unit: 'batches' });
+key('qc.ccvEvery', 'integer', 10, 20, 0, { ...integer, unit: 'samples' });
+key('qc.calibrationVerification', 'boolean', false);
+key('qc.reviewedTranscriptionCorrectionEnabled', 'boolean', false, false, false,
+    { scope: 'LAB' });
+key('qc.calibrationFailAction', 'calibrationFailAction', { ICV: 'FAIL_BATCH', CCV: 'REPEAT_BRACKET', CCB: 'REPEAT_BRACKET' }, undefined, undefined, {
+    allowedActions: { ICV: ['FAIL_BATCH', 'WARN'], CCV: ['FAIL_BATCH', 'REPEAT_BRACKET', 'WARN'], CCB: ['FAIL_BATCH', 'REPEAT_BRACKET', 'WARN'] },
+    help: 'policies.help.qc_calibrationFailAction' });
+key('qc.lrmLimitMode', 'enum', 'CONTROL_CHART', 'FIXED_WINDOW', 'FIXED_WINDOW', { allowedValues: ['CONTROL_CHART', 'FIXED_WINDOW'] });
+key('qc.controlChartMinPoints', 'integer', 20, 20, 20, { min: 2, unit: 'observations' });
+key('qc.westgardRules', 'westgard', { reject: ['1-3s', '2-2s', 'R-4s'], warn: ['1-2s'], review: ['4-1s', '10x'] }, { reject: ['1-3s'], warn: [], review: [] }, { reject: [], warn: [], review: [] },
+    { allowedValues: ['1-2s', '1-3s', '2-2s', 'R-4s', '4-1s', '10x'] });
+key('qc.runProfiles', 'runProfiles', DEFAULT_RUN_PROFILES, DEFAULT_RUN_PROFILES, DEFAULT_RUN_PROFILES, { scope: 'LAB' });
+key('qc.blankMaxAllowed', 'number', 0.05, 0.05, 0.05, { min: 0, unit: 'method unit' });
+key('qc.controlMinRecovery', 'number', 90, 90, 90, { min: 0, unit: '%' });
+key('qc.controlMaxRecovery', 'number', 110, 110, 110, { min: 0, unit: '%' });
+key('qc.duplicateNearLoqMultiplier', 'number', 5, 5, 5, { min: 0, unit: 'LOQ multiplier' });
+key('qc.duplicateMaxRpd', 'number', 10, 10, 10, { min: 0, unit: '%' });
+key('qc.duplicateMode', 'enum', 'RPD', undefined, undefined, { allowedValues: ['RPD', 'ABS_DIFF'] });
+key('qc.duplicateAbsMax', 'number', null, null, null, { min: 0, nullable: true, unit: 'method unit' });
+key('qc.duplicateAbsMaxBelow5LOQ', 'number', null, null, null, { min: 0, nullable: true, unit: 'method unit' });
+key('qc.blankLimitMode', 'enum', 'ABSOLUTE', undefined, undefined, { allowedValues: ['ABSOLUTE', 'LT_LOQ', 'LT_HALF_LOQ'] });
+key('qc.crmMode', 'enum', 'RECOVERY', undefined, undefined, { allowedValues: ['RECOVERY', 'ABS_WINDOW', 'EN_SCORE'], unsupportedValues: ['EN_SCORE'] });
+key('qc.crmAbsWindow', 'number', null, null, null, { min: 0, nullable: true, unit: 'method unit' });
+key('qc.lrmWindowPct', 'number', null, null, null, { min: 0, nullable: true, unit: '%' });
+key('qc.ccvMin', 'number', 90, undefined, undefined, { min: 0, unit: '%' });
+key('qc.ccvMax', 'number', 110, undefined, undefined, { min: 0, unit: '%' });
+key('qc.curveMinPoints', 'integer', 5, undefined, undefined, { min: 1 });
+key('qc.curveMinR', 'number', 0.995, undefined, undefined, { min: 0, max: 1 });
+key('qc.repeatabilityLimit', 'number', null, null, null, { min: 0, nullable: true, unit: 'method unit' });
+key('qc.blankCorrection', 'enum', 'NONE', undefined, undefined, { allowedValues: ['NONE', 'SUBTRACT_MEAN_BLANK'], unsupportedValues: ['SUBTRACT_MEAN_BLANK'] });
+key('qc.failAction', 'qcFailAction', { BLANK: 'FAIL_BATCH', DUPLICATE: 'FAIL_BATCH', LRM: 'FAIL_BATCH', CRM: 'FAIL_BATCH' });
+key('results.reportedValueRule', 'enum', 'MEAN_IF_WITHIN_R', 'MEAN_IF_WITHIN_R', 'LATEST_VALID', { allowedValues: ['MEAN_IF_WITHIN_R', 'LATEST_VALID', 'REVIEWER_PICKS'] });
+key('results.replicatesRequired', 'integer', 1, 1, 1, { min: 1, max: 2 });
+key('results.betweenLodLoq', 'enum', 'REPORT_LT_LOQ', 'REPORT_LT_LOQ', 'REPORT_VALUE_FLAGGED', { allowedValues: ['REPORT_LT_LOQ', 'REPORT_VALUE_FLAGGED'] });
+key('results.phMin', 'number', 2, 2, 2, { min: 0, unit: 'pH' });
+key('results.phMax', 'number', 14, 14, 14, { min: 0, unit: 'pH' });
+key('results.typicalMin', 'number', null, null, null, { nullable: true, unit: 'method unit' });
+key('results.typicalMax', 'number', null, null, null, { nullable: true, unit: 'method unit' });
+key('results.calibrationMax', 'number', null, null, null, { nullable: true, unit: 'method unit' });
+// #201 scope pin6092380877: all presets expose laboratory-owned thresholds.
+// #281: an out-of-range value stored before these bounds existed is never rewritten.
+// It resolves as invalid (value null) so only the cross-checks become unavailable,
+// instead of failing every policy read for that laboratory.
+const crossCheckBound = { storedInvalid: 'UNAVAILABLE' };
+key('crossCheck.basesCecFactor', 'number', 1.1, undefined, undefined, { scope: 'LAB', min: 1, ...crossCheckBound });
+key('crossCheck.baseSaturationMaxPct', 'number', 100, undefined, undefined, { scope: 'LAB', unit: '%', min: 0, ...crossCheckBound });
+key('crossCheck.textureClosureTolerancePct', 'number', 2, undefined, undefined, { scope: 'LAB', unit: '%', min: 0, max: 100, ...crossCheckBound });
+key('crossCheck.cnMin', 'number', 8, undefined, undefined, { scope: 'LAB', min: 0, ...crossCheckBound });
+key('crossCheck.cnMax', 'number', 25, undefined, undefined, { scope: 'LAB', min: 0, ...crossCheckBound });
+key('crossCheck.carbonatePhMin', 'number', 7, undefined, undefined, { scope: 'LAB', unit: 'pH', min: 0, max: 14, ...crossCheckBound });
+key('repeats.maxAttemptsBeforeNcr', 'integer', 3, 5, 0, integer);
+key('repeats.technicianSelfRepeatBeforeSubmit', 'boolean', true);
+key('review.secondPersonRequired', 'boolean', true, true, false);
+key('gate.verificationRequired', 'boolean', false, false, false, { scope: 'LAB', analysisOverrides: ['DRYING', 'PREPARATION'] });
+key('report.amendmentRequiresSecondPerson', 'boolean', true, true, false);
+// #211 pin6097077343: null selects the shipped localized statement; laboratories
+// may supply complete five-locale templates with exactly these placeholders.
+key('report.amendedStatement', 'reportAmendmentTemplate', null, undefined, undefined, {
+    scope: 'LAB', nullable: true, allowedLocales: ['en', 'es', 'es-419', 'fr', 'pt'],
+    requiredPlaceholders: ['replacedNumber', 'replacedRevision', 'reason'],
+    localizedDefaults: Object.fromEntries(['en', 'es', 'es-419', 'fr', 'pt'].map(locale =>
+        [locale, require('../locales/' + locale + '.json').resultReports.amendedStatement]))
+});
+key('report.uncertaintyMode', 'enum', 'NOT_REPORTED', 'NOT_REPORTED', 'NOT_REPORTED',
+    { allowedValues: ['NOT_REPORTED', 'EXPANDED_ABSOLUTE', 'EXPANDED_RELATIVE_PCT'] });
+key('report.uncertaintyCoverageFactor', 'number', null, null, null, { min: 1, nullable: true });
+key('report.ovenDryConvertible', 'boolean', false, false, false,
+    { analysisEligible: (code, value) => value !== true || require('../services/ovenDryEligibility').analysisEligible(code) });
+key('report.numberFormat', 'reportFormat', 'RPT-{LAB}-{YYYY}-{SEQ:5}', undefined, undefined, { scope: 'LAB' });
+key('sample.codeFormat', 'sampleFormat', '{LAB}-{YY}-{SEQ:6}{CHK}', undefined, undefined, { scope: 'LAB' });
+key('container.codeFormat', 'sampleFormat', 'C-{LAB}-{YY}-{SEQ:6}{CHK}', undefined, undefined, { scope: 'LAB' });
+key('container.sequenceReset', 'enum', 'YEARLY', 'YEARLY', 'YEARLY', { scope: 'LAB', allowedValues: ['YEARLY', 'NEVER'] });
+key('sample.sequenceReset', 'enum', 'YEARLY', 'YEARLY', 'YEARLY', { scope: 'LAB', allowedValues: ['YEARLY', 'NEVER'] });
+key('consignment.numberFormat', 'consignmentFormat', 'CSG-{LAB}-{YYYY}-{SEQ:5}', undefined, undefined, { scope: 'LAB' });
+key('consignment.sequenceReset', 'enum', 'YEARLY', 'YEARLY', 'YEARLY', { scope: 'LAB', allowedValues: ['YEARLY', 'NEVER'] });
+key('sample.retentionDaysAfterReport', 'integer', 90, 60, 30, { ...integer, scope: 'LAB', unit: 'days' });
+key('bench.idleLockMinutes', 'integer', 5, 15, 0, { ...integer, scope: 'LAB', unit: 'minutes' });
+key('bench.pinAtRecord', 'boolean', true, false, false, { scope: 'LAB' });
+key('numbers.decimalSeparator', 'enum', '.', '.', '.', { scope: 'LAB', allowedValues: ['.', ','] });
+key('numbers.thousandsSeparator', 'enum', null, null, null, { scope: 'LAB', nullable: true, allowedValues: [',', '.', ' ', "'"] });
+key('intake.defaultAnalysisMassG', 'number', 10, 10, 10, { min: 0, unit: 'g' });
+key('intake.retentionMassG', 'number', 100, 100, 100, { scope: 'LAB', min: 0, unit: 'g' });
+key('referenceMaterials.expiryWarningDays', 'integer', 30, 30, 30, { ...integer, scope: 'LAB', unit: 'days' });
+key('equipment.requireEquipment', 'enum', 'AUTO', 'AUTO', 'AUTO', { allowedValues: ['AUTO', 'REQUIRED', 'NOT_REQUIRED'] });
+key('equipment.unconfiguredReadiness', 'equipmentReadinessMap', { CRITICAL: 'BLOCK', IMPORTANT: 'WARN', NON_CRITICAL: 'ALLOW' },
+    undefined, undefined, { scope: 'LAB' });
+key('pt.zScoreLimits', 'ptZScoreLimits', { questionable: 2, unsatisfactory: 3 }, undefined, undefined,
+    { scope: 'LAB', analysisOverridesAll: true });
+
+function clone(value) { return JSON.parse(JSON.stringify(value)); }
+function definition(name) {
+    if (!Object.prototype.hasOwnProperty.call(registry, name)) throw Object.assign(new Error('Unknown policy key.'), { statusCode: 400, code: 'POLICY_KEY_INVALID' });
+    return registry[name];
+}
+function strict(name) { return clone(definition(name).presets.ISO17025_STRICT); }
+function valid(name, value) {
+    const d = definition(name);
+    if (value === null) return d.nullable === true;
+    switch (d.type) {
+    case 'reportAmendmentTemplate':
+        return !!value && typeof value === 'object' && !Array.isArray(value) &&
+            Object.keys(value).length === d.allowedLocales.length && d.allowedLocales.every(locale => {
+                const text = value[locale]; if (typeof text !== 'string' || !text.trim()) return false;
+                const tokens = text.match(/\{[^{}]+\}/g) || [];
+                return tokens.length === d.requiredPlaceholders.length &&
+                    d.requiredPlaceholders.every(name => tokens.includes('{' + name + '}')) &&
+                    !/[{}]/.test(text.replace(/\{(replacedNumber|replacedRevision|reason)\}/g, ''));
+            });
+    case 'enum': return d.allowedValues.includes(value) && !d.unsupportedValues?.includes(value);
+    case 'boolean': return typeof value === 'boolean';
+    case 'integer': return Number.isSafeInteger(value) && value >= (d.min ?? 0) && (d.max === undefined || value <= d.max);
+    case 'number': return typeof value === 'number' && Number.isFinite(value) &&
+        (d.min === undefined || value >= d.min) && (d.max === undefined || value <= d.max);
+    case 'qcFailAction': return !!value && typeof value === 'object' && !Array.isArray(value) &&
+        Object.keys(value).length === 4 && ['BLANK', 'DUPLICATE', 'LRM', 'CRM'].every(type => ['FAIL_BATCH', 'WARN'].includes(value[type]));
+    case 'calibrationFailAction': return !!value && typeof value === 'object' && !Array.isArray(value) &&
+        Object.keys(value).length === Object.keys(d.allowedActions).length &&
+        Object.entries(d.allowedActions).every(([kind, actions]) => actions.includes(value[kind]));
+    case 'equipmentReadinessMap': return !!value && typeof value === 'object' && !Array.isArray(value) &&
+        Object.keys(value).length === 3 && ['CRITICAL', 'IMPORTANT', 'NON_CRITICAL'].every(type => ['BLOCK', 'WARN', 'ALLOW'].includes(value[type]));
+    case 'ptZScoreLimits': return !!value && typeof value === 'object' && !Array.isArray(value) && Object.keys(value).length === 2 &&
+        Number.isFinite(value.questionable) && Number.isFinite(value.unsatisfactory) &&
+        value.questionable > 0 && value.questionable < value.unsatisfactory;
+    case 'westgard': {
+        // #214/6148143929: legacy overrides without review retain their exact
+        // behaviour. Reading them never writes or backfills a policy row.
+        if (!value || typeof value !== 'object' || Array.isArray(value) || Object.keys(value).some(k => !['reject', 'warn', 'review'].includes(k))) return false;
+        if (!['reject', 'warn'].every(k => Array.isArray(value[k]) && value[k].every(v => d.allowedValues.includes(v)))) return false;
+        if (value.review !== undefined && (!Array.isArray(value.review) || !value.review.every(v => d.allowedValues.includes(v)))) return false;
+        const all = [...value.reject, ...value.warn, ...(value.review || [])];
+        return new Set(all).size === all.length;
+    }
+    case 'runProfiles':
+        return !!value && typeof value === 'object' && !Array.isArray(value) && Object.keys(value).length > 0 && Object.entries(value).every(([code, p]) =>
+            /^[A-Za-z0-9_-]+$/.test(code) && p && typeof p.name === 'string' && p.name.trim() && Number.isSafeInteger(p.capacity) && p.capacity >= 1 &&
+            Array.isArray(p.qcSlots) && p.qcSlots.length > 0 && new Set(p.qcSlots.map(s => s?.position)).size === p.qcSlots.length && p.qcSlots.every(s =>
+                s && typeof s === 'object' && !Array.isArray(s) && Number.isSafeInteger(s.position) && s.position >= 1 && s.position <= p.capacity && ['BLANK', 'DUPLICATE', 'CONTROL'].includes(s.type) && typeof s.label === 'string'));
+    case 'reportFormat': case 'sampleFormat': case 'consignmentFormat': {
+        if (typeof value !== 'string' || !value.trim() || value.length > 200 || !/\{SEQ(?::\d+)?\}/.test(value)) return false;
+        const tokens = d.type === 'reportFormat' ? ['LAB', 'YYYY'] : d.type === 'consignmentFormat' ? ['LAB', 'YY', 'YYYY', 'PROJECT'] : ['LAB', 'YY', 'YYYY', 'CHK', 'PROJECT'];
+        const rest = value.replace(/\{SEQ(?::(\d+))?\}/g, (token, width) => !width || Number(width) <= 32 ? '' : token)
+            .replace(/\{([^{}]+)\}/g, (token, name) => tokens.includes(name) ? '' : token);
+        return !/[{}]/.test(rest);
+    }
+    default: return false;
+    }
+}
+module.exports = { registry, PRESETS, DEFAULT_RUN_PROFILES, clone, definition, strict, valid };

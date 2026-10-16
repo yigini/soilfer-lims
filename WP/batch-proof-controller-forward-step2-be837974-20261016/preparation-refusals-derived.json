@@ -1,0 +1,8 @@
+{
+  "recordKind": "HONEST_DERIVED_FROM_ACTUAL_TOOL_RESULTS_NOT_RAW_STDERR",
+  "initialInlineGenerator": "SyntaxError in generator before helper creation/source writes/tests/host",
+  "firstSavedGenerator": "ValueError substring not found at controller_guard read=read or actual;member line; before destination mkdir/source writes/tests/host",
+  "consumedHelper": "WP/backlog-resume-20261013/prepare-controller-forward6207912526-source-once.py",
+  "correctedSuccessor": "WP/backlog-resume-20261013/prepare-controller-forward6207912526-complete-source-once.py",
+  "oldSourceOperatorsReplayed": false
+}

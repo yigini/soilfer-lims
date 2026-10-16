@@ -1,0 +1,6 @@
+{
+  "reason": "Retain stop-post raw reads before predicates too; exercise new verify_retained_graph unpatched on new synthetic files and actual tamper",
+  "prior417BothPassPreserved": true,
+  "expectedTests": 420,
+  "sourceOperatorsExecuted": 0
+}

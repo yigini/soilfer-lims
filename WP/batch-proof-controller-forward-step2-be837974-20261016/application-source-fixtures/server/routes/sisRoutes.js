@@ -1,0 +1,46 @@
+const express = require('express');
+const router = express.Router();
+const sisController = require('../controllers/sisController');
+const spectralExportController = require('../controllers/spectralExportController');
+const apiKeyAuth = require('../middleware/apiKeyAuth');
+const { verifyToken, checkPermission } = require('../middleware/authMiddleware');
+
+// ─── PUBLIC / CONSUMER ENDPOINTS (Secured with API Key or JWT) ───
+
+// 1. Samples Registry & Provenance
+router.get('/samples', apiKeyAuth, sisController.getSamples);
+router.get('/samples/:id', apiKeyAuth, sisController.getSampleById);
+
+// 2. Spatial GeoJSON FeatureCollection for GIS Integration
+router.get('/geojson', apiKeyAuth, sisController.getGeoJson);
+
+// 3. Tabular Analytical Chemistry Matrix
+router.get('/results', apiKeyAuth, sisController.getResultsMatrix);
+
+// 4. Spectroscopy Dataset (NIR/MIR)
+router.get('/spectra', apiKeyAuth, sisController.getSpectra);
+router.get('/spectra/export', apiKeyAuth, spectralExportController.exportSpectra);
+
+// 5. Delta Synchronization Endpoint for Incremental ETL
+router.get('/sync', apiKeyAuth, sisController.syncDelta);
+
+// 6. Dataset Statistics
+router.get('/stats', apiKeyAuth, sisController.getStats);
+
+// ─── ADMIN API KEY & CONNECTION MANAGEMENT (Platform Admins Only) ───
+
+router.get('/keys', verifyToken, checkPermission('MANAGE_BRANDING'), sisController.listApiKeys);
+router.post('/keys', verifyToken, checkPermission('MANAGE_BRANDING'), sisController.createApiKey);
+router.delete('/keys/:id', verifyToken, checkPermission('MANAGE_BRANDING'), sisController.revokeApiKey);
+router.post('/keys/:id/rotate', verifyToken, checkPermission('MANAGE_BRANDING'), sisController.rotateApiKey);
+router.post('/keys/:id/confirm-rotation', verifyToken, checkPermission('MANAGE_BRANDING'), sisController.confirmRotation);
+router.post('/keys/:id/abort-rotation', verifyToken, checkPermission('MANAGE_BRANDING'), sisController.abortRotation);
+
+router.get('/connections', verifyToken, checkPermission('MANAGE_BRANDING'), sisController.listConnections);
+router.post('/connections', verifyToken, checkPermission('MANAGE_BRANDING'), sisController.createConnection);
+router.put('/connections/:id', verifyToken, checkPermission('MANAGE_BRANDING'), sisController.updateConnection);
+
+const { handleExchangeError } = require('../services/exchangePolicyService');
+router.use((err, req, res, next) => handleExchangeError(err, req, res, next));
+
+module.exports = router;

@@ -1,0 +1,11 @@
+Complete controller-forward Step2 source under actual scope6207912526.
+
+Final420 local +420 actual host Python3.9.23 guards passed; source hashes unchanged. The host ran numeric PID actual_reader and own_snapshot unpatched, reading identical bytes to plain open and stopping at exactly Exact controller unit membership required outside the proposed unit. All older consumed sources remain unchanged. See source420-publication-once/real-host-reader-inventory.json for each reader new since233000 and its unpatched exercise or accepted-run identity.
+
+Controller memory reads are retained immediately before evaluating predicates, including post-stop reads. Membership/device-inode/limits/OOM guards and every ancestor symlink refusal remain. ExecStopPost attempts both exact owners first, then review/index/hashes, then memory. Verification/memory/owner errors fail the hook; readable error text is restricted to exact AST-derived literal source sites, checked against the current source in tests. Dynamic errors stay HMAC keyed. The hook creates its independent private32-byte0400 HMAC key after those attempts; both keys stay host.
+
+Strict provenance/second-natural idempotence/all112 tables42 receipts/refusals/science/every container805306368 blankheap Swap0 and600 total readiness remain. N25/MIN64/25percent/3assets/floor10556150894+4GiBlogs+ADDITIONAL10GB/500MB unchanged. No operational package/root/unit has been created. Proposed unused root is /opt/lims/releases/workflow-batch-controller-forward-step2-be837974-20261016T063000Z. This source requires a new exact Source review: PASS before one conditional attempt; freshR4 beforeROOT/immediatelyUNIT/runtime and unusedrootunit remain required.
+
+All earlier failed generator/test evidence is retained honestly. First411 run had one stale approval fixture and one literal/dynamic error fixture failure, no host start;417 both passed; final420 adds unpatched fixture file verification, actual source tamper, poststop raw-before-OOM guards. No consumed operator replay.
+
+Future kit/gate: first production sync impact174newEXPECTED/22holds/20existingZMB-LAB1; managers see holds and counts may differ. Expected9–10 minute restart and exact600-second failure behavior must be disclosed. Main merges remain held;233000latestpassingKEEPIT/R2complete/noprune/no103/no production action.

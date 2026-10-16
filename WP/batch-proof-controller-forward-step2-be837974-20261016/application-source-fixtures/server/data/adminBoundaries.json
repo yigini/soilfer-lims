@@ -1,0 +1,211 @@
+{
+  "GT": {
+    "name": "Guatemala",
+    "departments": [
+      {
+        "name": "Guatemala",
+        "center": [14.6349, -90.5069],
+        "municipalities": [
+          { "name": "Guatemala", "center": [14.6349, -90.5069] },
+          { "name": "Mixco", "center": [14.6311, -90.6064] },
+          { "name": "Villa Nueva", "center": [14.5256, -90.5886] },
+          { "name": "San Juan Sacatepéquez", "center": [14.7189, -90.6442] }
+        ]
+      },
+      {
+        "name": "Quetzaltenango",
+        "center": [14.8347, -91.5181],
+        "municipalities": [
+          { "name": "Quetzaltenango", "center": [14.8347, -91.5181] },
+          { "name": "Salcajá", "center": [14.8806, -91.4583] },
+          { "name": "Olintepeque", "center": [14.8833, -91.5167] }
+        ]
+      },
+      {
+        "name": "Alta Verapaz",
+        "center": [15.5000, -90.2500],
+        "municipalities": [
+          { "name": "Cobán", "center": [15.4708, -90.3708] },
+          { "name": "San Pedro Carchá", "center": [15.4833, -90.3000] },
+          { "name": "Chamelco", "center": [15.4167, -90.2833] }
+        ]
+      },
+      {
+        "name": "Escuintla",
+        "center": [14.3000, -90.7833],
+        "municipalities": [
+          { "name": "Escuintla", "center": [14.3000, -90.7833] },
+          { "name": "Santa Lucía Cotzumalguapa", "center": [14.3333, -91.0167] },
+          { "name": "Puerto San José", "center": [13.9272, -90.8217] }
+        ]
+      },
+      {
+        "name": "Zacapa",
+        "center": [14.9722, -89.5306],
+        "municipalities": [
+          { "name": "Zacapa", "center": [14.9722, -89.5306] },
+          { "name": "Estanzuela", "center": [15.0000, -89.5667] },
+          { "name": "Teculután", "center": [14.9833, -89.7167] }
+        ]
+      }
+    ]
+  },
+  "KE": {
+    "name": "Kenya",
+    "departments": [
+      {
+        "name": "Nairobi County",
+        "center": [-1.286389, 36.817223],
+        "municipalities": [
+          { "name": "Westlands", "center": [-1.2667, 36.8000] },
+          { "name": "Kasarani", "center": [-1.2167, 36.9000] },
+          { "name": "Kibra", "center": [-1.3167, 36.7833] }
+        ]
+      },
+      {
+        "name": "Kiambu County",
+        "center": [-1.1667, 36.8333],
+        "municipalities": [
+          { "name": "Kiambu", "center": [-1.1667, 36.8333] },
+          { "name": "Thika", "center": [-1.0333, 37.0667] },
+          { "name": "Ruiru", "center": [-1.1500, 36.9667] }
+        ]
+      },
+      {
+        "name": "Nakuru County",
+        "center": [-0.3000, 36.0667],
+        "municipalities": [
+          { "name": "Nakuru", "center": [-0.3000, 36.0667] },
+          { "name": "Naivasha", "center": [-0.7167, 36.4333] },
+          { "name": "Molo", "center": [-0.2500, 35.7333] }
+        ]
+      },
+      {
+        "name": "Uasin Gishu County",
+        "center": [0.5167, 35.2833],
+        "municipalities": [
+          { "name": "Eldoret", "center": [0.5167, 35.2833] },
+          { "name": "Turbo", "center": [0.6333, 35.0500] }
+        ]
+      }
+    ]
+  },
+  "RW": {
+    "name": "Rwanda",
+    "departments": [
+      {
+        "name": "Kigali City",
+        "center": [-1.9441, 30.0619],
+        "municipalities": [
+          { "name": "Gasabo", "center": [-1.8833, 30.1333] },
+          { "name": "Kicukiro", "center": [-1.9833, 30.1000] },
+          { "name": "Nyarugenge", "center": [-1.9667, 30.0500] }
+        ]
+      },
+      {
+        "name": "Eastern Province",
+        "center": [-1.9500, 30.4333],
+        "municipalities": [
+          { "name": "Rwamagana", "center": [-1.9500, 30.4333] },
+          { "name": "Nyagatare", "center": [-1.2972, 30.3250] },
+          { "name": "Bugesera", "center": [-2.2167, 30.1500] }
+        ]
+      },
+      {
+        "name": "Northern Province",
+        "center": [-1.5000, 29.9833],
+        "municipalities": [
+          { "name": "Musanze", "center": [-1.5000, 29.6333] },
+          { "name": "Gicumbi", "center": [-1.6000, 30.1167] }
+        ]
+      }
+    ]
+  },
+  "ZM": {
+    "name": "Zambia",
+    "departments": [
+      {
+        "name": "Lusaka Province",
+        "center": [-15.4167, 28.2833],
+        "municipalities": [
+          { "name": "Lusaka", "center": [-15.4167, 28.2833] },
+          { "name": "Chongwe", "center": [-15.3333, 28.6833] },
+          { "name": "Kafue", "center": [-15.7667, 28.1833] }
+        ]
+      },
+      {
+        "name": "Copperbelt Province",
+        "center": [-12.8000, 28.2000],
+        "municipalities": [
+          { "name": "Ndola", "center": [-12.9667, 28.6333] },
+          { "name": "Kitwe", "center": [-12.8167, 28.2167] }
+        ]
+      },
+      {
+        "name": "Southern Province",
+        "center": [-16.5000, 27.0000],
+        "municipalities": [
+          { "name": "Choma", "center": [-16.8000, 26.9833] },
+          { "name": "Livingstone", "center": [-17.8500, 25.8667] },
+          { "name": "Mazabuka", "center": [-15.8500, 27.7500] }
+        ]
+      }
+    ]
+  },
+  "UG": {
+    "name": "Uganda",
+    "departments": [
+      {
+        "name": "Central Region",
+        "center": [0.3167, 32.5833],
+        "municipalities": [
+          { "name": "Kampala", "center": [0.3167, 32.5833] },
+          { "name": "Wakiso", "center": [0.4000, 32.4833] },
+          { "name": "Mukono", "center": [0.3500, 32.7500] }
+        ]
+      }
+    ]
+  },
+  "TZ": {
+    "name": "Tanzania",
+    "departments": [
+      {
+        "name": "Dar es Salaam",
+        "center": [-6.8000, 39.2833],
+        "municipalities": [
+          { "name": "Ilala", "center": [-6.8200, 39.2700] },
+          { "name": "Kinondoni", "center": [-6.7800, 39.2200] }
+        ]
+      },
+      {
+        "name": "Arusha",
+        "center": [-3.3667, 36.6833],
+        "municipalities": [
+          { "name": "Arusha City", "center": [-3.3667, 36.6833] },
+          { "name": "Meru", "center": [-3.2333, 36.8500] }
+        ]
+      }
+    ]
+  },
+  "ET": {
+    "name": "Ethiopia",
+    "departments": [
+      {
+        "name": "Addis Ababa",
+        "center": [9.0300, 38.7400],
+        "municipalities": [
+          { "name": "Bole", "center": [8.9900, 38.7800] },
+          { "name": "Yeka", "center": [9.0500, 38.8000] }
+        ]
+      },
+      {
+        "name": "Oromia",
+        "center": [8.5400, 39.2700],
+        "municipalities": [
+          { "name": "Adama", "center": [8.5400, 39.2700] },
+          { "name": "Bishoftu", "center": [8.7500, 38.9800] }
+        ]
+      }
+    ]
+  }
+}
