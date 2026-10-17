@@ -1,0 +1,12 @@
+import ast,json,pathlib,hashlib,subprocess,sys
+w=pathlib.Path(__file__).resolve().parents[2];k=w/'WP/batch-release-kit-be837974-20261016';h=w/'WP/backlog-resume-20261013';sys.path.insert(0,str(k));from kit_contract import canonical
+sha=lambda b:hashlib.sha256(b).hexdigest()
+p=k/'kit_record_payload.py';s=p.read_text(encoding='utf8');s=s.replace("elif key.endswith('Verified') or key.endswith('Implemented') or key=='physicalFilesystemClosureClaimed':","elif key.endswith('Verified') or key.endswith('Implemented') or key in ('physicalFilesystemClosureClaimed','independentProfileToPrivateDbBytesProof'):")
+s=s.replace("    path=pathlib.Path(value['readerPath']);","    require(type(value['readerPath']) is str,'Exact observed reader path string required')\n    path=pathlib.Path(value['readerPath']);");ast.parse(s);p.write_text(s,encoding='utf8',newline='')
+p=k/'verify_kit_record_payload.py';s=p.read_text(encoding='utf8');s=s.replace("('missing','boolean','count','authority','foreign','data')","('missing','boolean','count','authority','private','foreign','data')");s=s.replace("elif fault=='data':bad['tables']['mixed']['maximumFullSelectedRowRecordBytes']+=1","elif fault=='private':bad['independentProfileToPrivateDbBytesProof']=True\n                elif fault=='data':bad['tables']['mixed']['maximumFullSelectedRowRecordBytes']+=1");ast.parse(s);p.write_text(s,encoding='utf8',newline='')
+p=k/'record-payload-source.json';v=json.loads(p.read_bytes());v['files']={n:{'bytes':len((w/n).read_bytes()),'sha256':sha((w/n).read_bytes())} for n in v['files']};p.write_bytes(canonical(v)+b'\n')
+for name in ['build_stop_post.py','build_capture_stop_post.py']:
+ r=subprocess.run([sys.executable,'-B',str(k/name),'--write-unreviewed-source'],cwd=w,capture_output=True);assert r.returncode==0,r.stderr.decode('utf8','replace')
+p=k/'capture-statement-journal-source.json';v=json.loads(p.read_bytes());v['files']={n:{'bytes':len((k/n).read_bytes()),'sha256':sha((k/n).read_bytes())} for n in v['files']};p.write_bytes(canonical(v)+b'\n')
+(h/'sql-record477-entry-0906-once/pre-test-authority-review.json').write_bytes(canonical({'scope':'SOURCE_REVIEW_BEFORE_FIRST_FROZEN_RUN','independentPrivateByteProofMustRemainFalse':True,'fullProfileReplayFieldTypesTightened':True,'proofSha256':sha((k/'record-payload-source.json').read_bytes()),'hooksExecuted':False,'testRunsSoFar':0})+b'\n')
+print('Explicit private-byte false guard added before first frozen run; exact proof rebound; hooks SOURCE only.')

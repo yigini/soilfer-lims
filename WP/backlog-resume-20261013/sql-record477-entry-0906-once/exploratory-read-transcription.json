@@ -1,0 +1,9 @@
+{
+  "actualRecord": "H/sql-record477-entry-0906-once/source-preparation-record.json",
+  "oldPrivatePayloadsRead": false,
+  "originalDiagnosticFileRetained": false,
+  "read": "H/record-payload-source-preparation-record.json",
+  "result": "MISSING_FILE",
+  "scope": "TOOL_OUTPUT_TRANSCRIPTION_ONLY",
+  "sourceOrHostMutation": false
+}
