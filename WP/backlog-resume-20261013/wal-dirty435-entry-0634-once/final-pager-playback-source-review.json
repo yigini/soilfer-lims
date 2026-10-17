@@ -1,0 +1,23 @@
+{
+  "facts": [
+    "Savepoint playback fetch sets SPILLFLAG_ROLLBACK before PagerGet and resets it afterward; pagerStress refuses spilling under that flag",
+    "Whole WAL transaction rollback dispatches pagerRollbackWal, which undoes frames and cache without submitting a forward frame set",
+    "No continuing SQL/commit after rollback or SQLite error is permitted by the conditional caller profile"
+  ],
+  "nativeFrameRequestsMeasured": false,
+  "nativeSha256": "2bbdd0eff3f46852e954d7881b7945990bf78c1421f806cf7978bc22e187100a",
+  "nativeSource": "server/node_modules/better-sqlite3/deps/sqlite3/sqlite3.c",
+  "operatorsExecuted": 0,
+  "readRanges": [
+    [
+      61362,
+      61398
+    ],
+    [
+      62317,
+      62360
+    ]
+  ],
+  "scope": "SOURCE_REVIEW_ONLY",
+  "sourceFilesChangedAfterFrozenRun": false
+}
