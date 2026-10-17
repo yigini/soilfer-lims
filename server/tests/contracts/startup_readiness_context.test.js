@@ -135,12 +135,12 @@ function changeOwned(file, change) {
     } finally { db.close(); }
 }
 
-test('all 27 startup reports equal the legacy default path; one physical integrity/FK check and one retained policy snapshot', () => {
-    expect(stages).toHaveLength(27);
+test('all 28 startup reports equal the legacy default path; one physical integrity/FK check and one retained policy snapshot', () => {
+    expect(stages).toHaveLength(28);
     const file = cloneFixture(), before = triples(file);
     const old = startup(file), current = startup(file, { shared: true });
     expect(current.outcomes).toEqual(old.outcomes);
-    expect(current.outcomes).toHaveLength(27);
+    expect(current.outcomes).toHaveLength(stages.length);
     expect(current.outcomes.every(row => row.report && !row.error)).toBe(true);
     expect(current.physical.filter(row => row.sql === 'integrity_check')).toHaveLength(1);
     expect(current.physical.filter(row => row.sql === 'foreign_key_check')).toHaveLength(1);
@@ -152,7 +152,7 @@ test('all 27 startup reports equal the legacy default path; one physical integri
     expect(triples(file)).toEqual(before);
     const order = current.outcomes.find(row => row.script === 'install_order_revisions').report;
     expect(order.impact).toHaveProperty('approvedAmendmentKitGate');
-    console.log(JSON.stringify({ event: 'ALL_27_OWNED_STARTUP_COMPARISON', reportsEqual: true,
+    console.log(JSON.stringify({ event: 'ALL_28_OWNED_STARTUP_COMPARISON', reportsEqual: true,
         oldPhysicalChecks: old.physical.length, newPhysicalChecks: current.physical.length,
         oldSnapshotCopies: old.snapshotCopies, newSnapshotCopies: current.snapshotCopies,
         oldStages: old.timings, newStages: current.timings, notProductionTimingOrStartupQualification: true }));
@@ -278,7 +278,7 @@ test.each(['after-policy-capture', 'after-nested-chart'])('an original-file race
     expect(results[1].outcomes).toEqual(results[0].outcomes);
 });
 
-test.each(['absent', 'empty', 'nonempty'])('all27 reports and shared checks remain equivalent with an owned WAL-mode %s WAL', representation => {
+test.each(['absent', 'empty', 'nonempty'])('all 28 reports and shared checks remain equivalent with an owned WAL-mode %s WAL', representation => {
     const file = cloneFixture();
     let writer = new Database(ownedMutationTarget(file), { fileMustExist: true });
     try {
@@ -294,7 +294,7 @@ test.each(['absent', 'empty', 'nonempty'])('all27 reports and shared checks rema
         expect([...fs.readFileSync(file).subarray(18, 20)]).toEqual([2, 2]);
         const old = startup(file), current = startup(file, { shared: true });
         expect(current.outcomes).toEqual(old.outcomes);
-        expect(current.outcomes).toHaveLength(27);
+        expect(current.outcomes).toHaveLength(stages.length);
         expect(current.outcomes.every(row => row.report && !row.error)).toBe(true);
         expect(current.physical.filter(row => row.sql === 'integrity_check')).toHaveLength(1);
         expect(current.physical.filter(row => row.sql === 'foreign_key_check')).toHaveLength(1);
