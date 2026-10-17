@@ -29,6 +29,7 @@ REQUIRED_SOURCE={
     'kit_order_revision_native.py','order-revision-native-source.json',
     'kit_sorter_scratch.py','sorter-scratch-source.json',
     'kit_linux_sorter_vfs.py','linux-sorter-vfs-source.json',
+    'kit_ephemeral_btree.py','ephemeral-btree-source.json',
     'kit_capture_statement.py','capture-statement-journal-source.json',
     'kit_schema_collection.py','schema-collection-source.json',
     'kit_main_mutations.py','kit_capture_native_inventory.py','capture-native-inventory-source.json',

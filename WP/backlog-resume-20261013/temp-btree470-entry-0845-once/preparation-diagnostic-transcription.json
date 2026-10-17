@@ -1,0 +1,12 @@
+{
+  "allTheseDiagnosticsToolOutputTranscriptionsOnly": true,
+  "exploratoryMissingProofFilesKey": "files",
+  "laterPrewriteLiteralAssertionRefusedBeforeSourceWrite": true,
+  "oldPrivatePayloadsRead": false,
+  "operatorExecuted": false,
+  "originalStderrOrPolicyDiagnosticFileRetained": false,
+  "policyReasonReported": "blocked by policy; no further reason supplied",
+  "refusedHelperOrProofExistsAfterCheck": false,
+  "scope": "DERIVED_TRANSCRIPTION_OF_TOOL_DIAGNOSTICS",
+  "sourcePreparationCommandPolicyRefusedBeforeLaunch": true
+}
