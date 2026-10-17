@@ -1,0 +1,17 @@
+{
+  "actualAutomaticWakeObservedUtc": "2026-10-17T08:17:03.457Z",
+  "head": "6e4d1d64813e79043c2bdf0326cfd077c6e06866",
+  "stagedEmpty": true,
+  "issue191Closed": true,
+  "newCommentIds": [],
+  "independentSourcePath": "conditional default Unix sorter VFS file length under exact native WRITE/SIZE_HINT inventory",
+  "runtimeLinuxLockQuiescenceEvidenceRemainsUnobserved": true,
+  "operatorsExecuted": 0,
+  "oldPrivatePayloadsRead": false,
+  "availableLocalCompilers": {
+    "clang": null,
+    "gcc": null,
+    "cl": null,
+    "cc": null
+  }
+}
