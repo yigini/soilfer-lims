@@ -11,7 +11,7 @@ from kit_capture_owned import CAPTURE_ROOT,CAPTURE_UNIT,CAPTURE_COMMANDS,capture
 from kit_capture_budget import CAPTURE_TABLE_SHA
 from kit_capture_copy import capture_source_review
 from kit_capture_controller import capture_controller_snapshot,capture_controller_same_group
-from kit_capture_review import verify_capture_receipt
+from kit_capture_review import verify_capture_receipt,CAPTURE_REVIEW_FILES
 from retained_contract import exact_json
 from retained_memory import (RAW_NAMES,READ_LIMITS,STAT_REQUIRED,EVENT_REQUIRED,NON_RECLAIMABLE_FIELDS,
     NON_RECLAIMABLE_MAX,pairs,scalar,gate,cgroup_path)
@@ -225,7 +225,7 @@ def verify_capture_unit(files,content,index,source):
                 used.add(row['path'])
     require(used==set(memory),'Missing, extra or unbound controller/owner memory original')
     commitment={'receipt':{'file':'capture-receipt.json',**pin(content['capture-receipt.json'])},
-        'originalFileCount':19,'allOriginalContentPinsVerified':True,'fullContentSemanticsRechecked':False,
+        'originalFileCount':len(CAPTURE_REVIEW_FILES),'allOriginalContentPinsVerified':True,'fullContentSemanticsRechecked':False,
         'independentFullSemanticPackageReviewStillRequired':True}
     run_commitment={'completion':{'file':'capture-controller-complete.json',**pin(files['capture-controller-complete.json'])},
         'originalMemoryFileCount':len(memory),'allOriginalMemoryPinsVerified':True,'fullMemorySemanticsRechecked':False,

@@ -37,6 +37,22 @@ def rollback_journal_bound(original_pages,page_size):
         'headerAndAlignmentBytes':overhead,'maximumJournalBytes':records+overhead}
 
 
+def rollback_header_bound(header,main_bytes):
+    """Pure replay of the retained100-byte supported-profile observation."""
+    require(isinstance(header,bytes) and len(header)==100 and header[:16]==b'SQLite format 3\x00' and
+        type(main_bytes) is int and main_bytes>=512,'Complete SQLite header and exact main length required')
+    page_size=int.from_bytes(header[16:18],'big');page_size=65536 if page_size==1 else page_size
+    require(512<=page_size<=65536 and page_size&(page_size-1)==0 and
+        main_bytes%page_size==0,'Whole SQLite pages required')
+    pages=main_bytes//page_size
+    require(header[18:20]==bytes([1,1]),'WAL or unknown database format is outside this rollback profile')
+    require(int.from_bytes(header[28:32],'big')==pages and
+        header[24:28]==header[92:96],'Current exact SQLite header page count required')
+    require(header[52:56]==bytes(4) and header[64:68]==bytes(4),
+        'Auto-vacuum/page-moving databases are outside this rollback proof')
+    return rollback_journal_bound(pages,page_size)
+
+
 def rollback_journal_plan(target):
     target=pathlib.Path(target)
     require(target.is_absolute() and target.resolve()==target and target.is_file(),
@@ -65,22 +81,13 @@ def rollback_journal_plan(target):
         require(len(header)==100 and header[:16]==b'SQLite format 3\x00',
             'Complete native SQLite header required')
     finally:os.close(fd)
-    page_size=int.from_bytes(header[16:18],'big');page_size=65536 if page_size==1 else page_size
-    require(512<=page_size<=65536 and page_size&(page_size-1)==0 and
-        before['']['bytes']%page_size==0,'Whole SQLite pages required')
-    pages=before['']['bytes']//page_size
-    require(header[18:20]==bytes([1,1]),'WAL or unknown database format is outside this rollback profile')
-    require(int.from_bytes(header[28:32],'big')==pages and
-        header[24:28]==header[92:96],'Current exact SQLite header page count required')
-    require(header[52:56]==bytes(4) and header[64:68]==bytes(4),
-        'Auto-vacuum/page-moving databases are outside this rollback proof')
-    bound=rollback_journal_bound(pages,page_size)
+    bound=rollback_header_bound(header,before['']['bytes'])
     # This uses the existing bounded content/entry model. A calculation which
     # exceeds that model refuses; it never silently caps the native allowance.
     layout=copy_layout([bound['maximumJournalBytes']],0)
     plan={'version':1,'scope':'CONDITIONAL_SINGLE_MAIN_ROLLBACK_TRANSACTION',
         'source':str(target),'sourceDbWalShm':identity_record(before),'originalFiles':before,
-        'journal':str(journal),'bound':bound,'layout':layout,
+        'journal':str(journal),'headerHex':header.hex(),'bound':bound,'layout':layout,
         'requiredBeforeWriterCreation':True,'sourceQuiescenceRequired':True,
         'requiresNoPageMoves':True,'requiresNoAttachVacuumOrJournalSettingChange':True,
         'requiresNoContinuingWritesAfterRollbackOrSqliteError':True,

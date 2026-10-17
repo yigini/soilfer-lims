@@ -1,7 +1,7 @@
 """Independent capture stop outcome; no release or scientific approval.
 
 Stops always precede evidence reads. A positive result binds closed transport,
-the original unit cgroup and all19 immutable content references. Full content
+the original unit cgroup and all25 immutable content references. Full content
 semantics and fresh source authority remain mandatory package checks later.
 """
 import pathlib

@@ -14,6 +14,8 @@ from kit_capture_owned import CAPTURE_ROOT,CAPTURE_UNIT
 from kit_frozen import source_review
 from kit_provider import GitHubProvider
 from kit_disk import ALLOCATION,BOUND
+from kit_capture_journal import CAPTURE_JOURNAL_SITES,caller_proof,journal_disk_original,JOURNAL_DB_COST
+from kit_capture_journal_package import journal_profile
 from retained_contract import ROOT,exact_json
 from verify_kit_capture_science import controller_fixture
 from verify_kit_authority import provider_fixture
@@ -27,6 +29,46 @@ def physical(required,label='SYNTHETIC LOCAL PHYSICAL STAND-IN',number=0):
         'requiredBytes':required,'verifiedOverlayViewsBefore':[],'verifiedOverlayViewsAfter':[],
         'overlayViewsCreditedBytes':0,'singleFilesystemDu':True,'hardlinksCountedOnce':True,
         'allRetainedReleaseRootsIncluded':True,'command':{'SYNTHETIC_LOCAL_NOT_HOST':True}}
+
+
+def synthetic_journal_originals(files,budget):
+    """Explicit synthetic headers/identities for pure package negative tests."""
+    import stat
+    target=CAPTURE_ROOT/'scientific-database/dev.db';directory=[7,102];inode=103
+    def profile(pages,digest):
+        header=bytearray(100);header[:16]=b'SQLite format 3\0';header[16:18]=(4096).to_bytes(2,'big')
+        header[18:20]=bytes([1,1]);header[24:28]=(pages).to_bytes(4,'big')
+        header[28:32]=(pages).to_bytes(4,'big');header[92:96]=header[24:28]
+        row={'sha256':digest*64,'bytes':pages*4096,'device':7,'inode':inode,
+            'mtimeNs':pages,'mode':0o600,'allocatedBytes':pages*4096}
+        return journal_profile({'headerHex':header.hex(),'originalFiles':{'':row,'-wal':None,'-shm':None}},target)
+    before=profile(1,'a');initial=exact_json(files['capture-clone-provenance.json'])
+    initial['initialCloneIdentity']={'databaseDirectoryIdentity':directory,
+        'files':{'dev.db':[7,inode,4096,1,1,stat.S_IFREG|0o600,1],'dev.db-wal':None,'dev.db-shm':None}}
+    files['capture-clone-provenance.json']=canonical(initial)+b'\n'
+    for ordinal,(label,site) in enumerate(CAPTURE_JOURNAL_SITES.items(),2):
+        admission={**before,'version':2,'scope':'CAPTURE_MAIN_ROLLBACK_JOURNAL_ADMISSION','label':label,
+            'callerProofSha256':caller_proof(),'directoryIdentity':directory,'containerSource':'/app/server/prisma/dev.db',
+            'writerGraphAdmissionImplemented':True,'completeWriterFilesystemReview':False}
+        name=label+'-retained-temp/writer-journal-admission.json';files[name]=canonical(admission)+b'\n'
+        after=profile(ordinal,'b' if ordinal==2 else 'c')
+        closed={'version':2,'label':label,'admissionSha256':sha(files[name]),'afterProfile':after,
+            'maximumJournalBytes':admission['bound']['maximumJournalBytes'],'journalAbsentAfterChildClose':True,
+            'mainInodePreserved':True,'journalOriginalBytesRetained':False,'continuousPeakMeasured':False,
+            'mainDatabaseGrowthBounded':False,'statementOrSqlScratchBounded':False,
+            'physicalFilesystemClosureClaimed':False,'completeWriterFilesystemReview':False}
+        files[label+'-retained-temp/writer-journal-closure.json']=canonical(closed)+b'\n'
+        reservation={'site':site,'destination':str(target)+'-journal','layout':admission['layout'],
+            'maximumBytes':(budget.db*JOURNAL_DB_COST*125+99)//100,'beforeDestinationCreation':True,
+            'stageTableSha256':CAPTURE_TABLE_SHA,'neverRetry':True,
+            'sqliteTemporaryFilesAndGlobalFilesystemClosureClaimed':False}
+        files[journal_disk_original(label)]=canonical(reservation)+b'\n';before=after
+    impact=exact_json(files['actual-impact-209.json']);impact['originalDbWalShmSha256']=before['sourceDbWalShm']
+    impact['readonlySnapshot']['originalDbWalShmSha256']=before['sourceDbWalShm']
+    files['actual-impact-209.json']=canonical(impact)+b'\n'
+    science_value=exact_json(files['actual-scientific-impact.json'])
+    science_value['originalReferences']['209'].update(sha256=sha(files['actual-impact-209.json']),bytes=len(files['actual-impact-209.json']))
+    files['actual-scientific-impact.json']=canonical(science_value)+b'\n'
 
 
 def synthetic_capture_payload(files,index,source):
@@ -70,6 +112,7 @@ def synthetic_capture_payload(files,index,source):
         'stages':rows}
     files['capture-stage-closures.json']=canonical(record)+b'\n'
     files['capture-final-physical.json']=canonical(physical(budget.required(),'capture-review-complete',9))+b'\n'
+    synthetic_journal_originals(files,budget)
     inventory=exact_json(files['consumer-inventory.json'])
     inventory.update(collectionIsNotAnAtomicHostSnapshot=True,noConsumerVerdict=None,
         passObservations=[{'compiledCaptureControllerObserved':True,'timerNames':inventory['activeTimerNames'],

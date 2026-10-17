@@ -68,6 +68,7 @@ function verifyCaptureWriter(directory, label, options = {}) {
   const header = Buffer.alloc(100);
   try { need(fs.readSync(headerFd, header, 0, 100, 0) === 100 && same(actual.info, fs.fstatSync(headerFd, { bigint: true })), 'Writer header changed'); }
   finally { fs.closeSync(headerFd); }
+  need(plan.headerHex === header.toString('hex'), 'Original admitted writer header differs');
   const page = header.readUInt16BE(16) === 1 ? 65536 : header.readUInt16BE(16), pages = actual.bytes / page;
   need(header.subarray(0, 16).equals(Buffer.from('SQLite format 3\0')) && header[18] === 1 && header[19] === 1 &&
     page >= 512 && page <= 65536 && (page & (page - 1)) === 0 && Number.isInteger(pages) && pages >= 1 &&

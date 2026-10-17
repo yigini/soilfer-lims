@@ -20,6 +20,17 @@ JOURNAL_DB_COST=794
 PROOF_NAME='capture-writer-journal-source.json'
 
 
+def journal_disk_original(label):
+    require(label in CAPTURE_JOURNAL_SITES,'Exact capture writer journal label required')
+    key=CAPTURE_JOURNAL_SITES[label]+'\0scientific-database/dev.db-journal'
+    return 'copy-admission-'+sha(key.encode())[:32]+'.json'
+
+
+JOURNAL_ORIGINALS=frozenset(name for label in CAPTURE_JOURNAL_SITES for name in (
+    label+'-retained-temp/writer-journal-admission.json',
+    label+'-retained-temp/writer-journal-closure.json',journal_disk_original(label)))
+
+
 def caller_proof():
     raw=pathlib.Path(__file__).with_name(PROOF_NAME).read_bytes()
     value=json.loads(raw)
@@ -65,7 +76,7 @@ def close_capture_journal(plan):
         parent.resolve()==parent and not parent.is_symlink(),'Capture journal directory changed')
     require({p.name for p in parent.iterdir()}<={'dev.db','dev.db-wal','dev.db-shm'},
         'Capture writer left a journal or foreign entry')
-    after=rollback_journal_plan(target)['originalFiles']
+    profile=rollback_journal_plan(target);after=profile['originalFiles']
     before=plan['originalFiles'][''];main=after['']
     require(main is not None and all(main[key]==before[key] for key in ('device','inode','mode')),
         'Capture writer replaced its independent main file')
@@ -74,7 +85,8 @@ def close_capture_journal(plan):
         require(row is None or row['bytes']==0,'Capture writer left WAL or shared-memory content')
     # Absence is only a postcondition. The maximum comes from the held source
     # bound and caller review, never from this final observation.
-    return {'version':1,'label':plan['label'],'admissionSha256':sha(canonical(plan)+b'\n'),
+    return {'version':2,'label':plan['label'],'admissionSha256':sha(canonical(plan)+b'\n'),
+        'afterProfile':profile,
         'maximumJournalBytes':plan['bound']['maximumJournalBytes'],'journalAbsentAfterChildClose':True,
         'mainInodePreserved':True,'journalOriginalBytesRetained':False,'continuousPeakMeasured':False,
         'mainDatabaseGrowthBounded':False,'statementOrSqlScratchBounded':False,

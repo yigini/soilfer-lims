@@ -15,7 +15,7 @@ from kit_capture_owned import CaptureOwnedCli,CAPTURE_COPY_SITES,CAPTURE_SNAPSHO
 from kit_capture_budget import CAPTURE_TABLE
 from kit_contract import canonical,sha
 from kit_install import CHAIN
-from kit_journal import Journal
+from kit_journal import Journal,exclusive_record
 from kit_provider import GitHubProvider
 from kit_science import verify_scientific_originals,validate_scientific_capture
 from kit_app_snapshots import snapshot_plan
@@ -46,6 +46,8 @@ class NativeCloneStandIn(CaptureOwnedCli):
                 directory=tmp/('lims-policy-schema-readonly-LOCAL'+str(n));directory.mkdir()
                 destination=directory/'snapshot.db';shutil.copyfile(target,destination);copies.append(destination)
         if label in ('capture-206-prepare','capture-214-prepare'):
+            if not tmp.exists():tmp.mkdir()
+            exclusive_record(tmp,'writer-journal-admission.json',journal_plan,False)
             issue=label.split('-')[1]
             with sqlite3.connect(target) as db:
                 for table in sorted(CHAIN[issue][0]):db.execute('CREATE TABLE "'+table+'"(id TEXT PRIMARY KEY)')
@@ -56,7 +58,7 @@ class NativeCloneStandIn(CaptureOwnedCli):
             value={'classification':'COMPLETE_'+issue,'previousClassification':'PRE_'+issue,'mode':'APPLIED',
                 'backfilledCount':1 if self.fail=='backfill' else 0,'totalChanges':1,'receipt':{'originalRowsPreserved':True}}
             from kit_capture_journal import close_capture_journal
-            close_capture_journal(journal_plan)
+            exclusive_record(tmp,'writer-journal-closure.json',close_capture_journal(journal_plan),False)
         elif label=='capture-integrity':value=science.EXPECTED
         elif label=='capture-canonical-policy':value={'classification':'PRESENT','shape':'CANONICAL','mode':'NO_OP',
             'totalChanges':0,'dataWrites':0,'readonlySnapshot':{'originalFilesPreserved':True}}

@@ -607,7 +607,16 @@ SEAL_DIRECTORY_BYTES = 3 * 4096
 
 # Exact AST definitions from kit_capture_journal.py
 
+CAPTURE_JOURNAL_SITES = {'capture-206-prepare': 'capture-206-main-journal', 'capture-214-prepare': 'capture-214-main-journal'}
+
 JOURNAL_DB_COST = 794
+
+def journal_disk_original(label):
+    require(label in CAPTURE_JOURNAL_SITES, 'Exact capture writer journal label required')
+    key = CAPTURE_JOURNAL_SITES[label] + '\x00scientific-database/dev.db-journal'
+    return 'copy-admission-' + sha(key.encode())[:32] + '.json'
+
+JOURNAL_ORIGINALS = frozenset((name for label in CAPTURE_JOURNAL_SITES for name in (label + '-retained-temp/writer-journal-admission.json', label + '-retained-temp/writer-journal-closure.json', journal_disk_original(label))))
 
 # Exact AST definitions from kit_capture_budget.py
 
@@ -623,9 +632,9 @@ CAPTURE_TABLE_SHA = sha(canonical({'root': CAPTURE_ROOT.as_posix(), 'unit': CAPT
 
 # Exact AST definitions from kit_capture_review.py
 
-CAPTURE_REVIEW_FILES = frozenset(('capture-fresh-authority.json', 'capture-primary-snapshot.json', 'capture-snapshot-provenance.json', 'capture-clone-provenance.json', 'capture-stage-closures.json', 'capture-final-physical.json', 'actual-scientific-impact.json', 'actual-impact-214.json', 'actual-impact-209.json', 'capture-integrity-original.json', 'capture-canonical-policy-original.json', 'capture-206-prepare-original.json', 'capture-206-preservation.json', 'capture-214-prepare-original.json', 'capture-214-preservation.json', 'consumer-inventory.json', 'apache-capture.json', 'ingress-original.conf', 'ingress-held.conf'))
+CAPTURE_REVIEW_FILES = frozenset(('capture-fresh-authority.json', 'capture-primary-snapshot.json', 'capture-snapshot-provenance.json', 'capture-clone-provenance.json', 'capture-stage-closures.json', 'capture-final-physical.json', 'actual-scientific-impact.json', 'actual-impact-214.json', 'actual-impact-209.json', 'capture-integrity-original.json', 'capture-canonical-policy-original.json', 'capture-206-prepare-original.json', 'capture-206-preservation.json', 'capture-214-prepare-original.json', 'capture-214-preservation.json', 'consumer-inventory.json', 'apache-capture.json', 'ingress-original.conf', 'ingress-held.conf')) | JOURNAL_ORIGINALS
 
-CONTROL_FILES = frozenset(('capture-fresh-authority.json', 'capture-snapshot-provenance.json', 'capture-clone-provenance.json'))
+CONTROL_FILES = frozenset(('capture-fresh-authority.json', 'capture-snapshot-provenance.json', 'capture-clone-provenance.json')) | JOURNAL_ORIGINALS
 
 # Exact AST definitions from retained_memory.py
 

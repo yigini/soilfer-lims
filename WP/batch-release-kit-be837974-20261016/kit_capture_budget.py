@@ -10,7 +10,7 @@ import pathlib
 from kit_contract import LOG_RESERVE,canonical,disk_required,require,sha
 from kit_budget import MINIMUM_DB_EQUIVALENTS,MARGIN_PERCENT,SEAL_DIRECTORY_BYTES
 from kit_capture_owned import CAPTURE_ROOT,CAPTURE_UNIT,CAPTURE_COPY_SITES
-from kit_capture_journal import CAPTURE_JOURNAL_SITES,JOURNAL_DB_COST
+from kit_capture_journal import CAPTURE_JOURNAL_SITES,JOURNAL_DB_COST,journal_disk_original
 from kit_disk import Disk
 from kit_journal import exclusive_record
 
@@ -119,8 +119,13 @@ class CaptureDisk(Disk):
         self.check()
         # The physical journal name is reused by two distinct forward
         # transactions. Their source claims and immutable receipts must differ.
-        key=(site+'\0'+str(destination)) if site in CAPTURE_JOURNAL_SITES.values() else str(destination)
-        exclusive_record(self.root,'copy-admission-'+sha(key.encode())[:32]+'.json',{
+        if site in CAPTURE_JOURNAL_SITES.values():
+            require(pathlib.Path(destination)==self.root/'scientific-database/dev.db-journal',
+                'Capture main-journal admission destination differs')
+            label=next(label for label,value in CAPTURE_JOURNAL_SITES.items() if value==site)
+            name=journal_disk_original(label)
+        else:name='copy-admission-'+sha(str(destination).encode())[:32]+'.json'
+        exclusive_record(self.root,name,{
             'site':site,'destination':str(destination),'layout':plan,'maximumBytes':ceiling,
             'beforeDestinationCreation':True,'stageTableSha256':CAPTURE_TABLE_SHA,'neverRetry':True,
             'sqliteTemporaryFilesAndGlobalFilesystemClosureClaimed':False},self.sync)

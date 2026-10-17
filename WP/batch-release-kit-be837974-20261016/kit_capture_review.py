@@ -18,6 +18,7 @@ from kit_authority import standing_authority,review_projection,no_later_release_
 from kit_disk import ALLOCATION,BOUND,disjoint_growth
 from kit_journal import exclusive_record
 from controller_output import output_pin,output_read_record
+from kit_capture_journal import JOURNAL_ORIGINALS
 
 CAPTURE_REVIEW_FILES=frozenset((
     'capture-fresh-authority.json','capture-primary-snapshot.json',
@@ -27,9 +28,9 @@ CAPTURE_REVIEW_FILES=frozenset((
     'capture-integrity-original.json','capture-canonical-policy-original.json',
     'capture-206-prepare-original.json','capture-206-preservation.json',
     'capture-214-prepare-original.json','capture-214-preservation.json',
-    'consumer-inventory.json','apache-capture.json','ingress-original.conf','ingress-held.conf'))
+    'consumer-inventory.json','apache-capture.json','ingress-original.conf','ingress-held.conf'))|JOURNAL_ORIGINALS
 CONTROL_FILES=frozenset(('capture-fresh-authority.json',
-    'capture-snapshot-provenance.json','capture-clone-provenance.json'))
+    'capture-snapshot-provenance.json','capture-clone-provenance.json'))|JOURNAL_ORIGINALS
 
 
 def consumer_capture(value):
@@ -162,6 +163,8 @@ def verify_capture_receipt(receipt,read,index,source):
         receipt.get('apacheCaptureSha256')==pins['apache-capture.json']['sha256'] and
         receipt.get('consumerConfigurationSha256')==values['consumer-inventory.json']['configurationSha256'],
         'Capture scientific, Apache or consumer projection differs')
+    from kit_capture_journal_package import verify_capture_journals
+    verify_capture_journals(files,CAPTURE_ROOT)
     return receipt
 
 

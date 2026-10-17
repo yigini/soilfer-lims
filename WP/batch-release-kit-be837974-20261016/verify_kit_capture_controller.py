@@ -216,7 +216,7 @@ class CaptureController(unittest.TestCase):
                     if argv[1]=='stop':self.values[argv[-1]]['State']['Running']=False;return argv[-1].encode()
                     raise AssertionError('No other host command permitted')
             stored=[];result=outcome.capture_stop_outcome(current.root,Calls(),lambda:sample,stored.append)
-            self.assertTrue(result['allChecksComplete']);self.assertEqual(result['contentCommitment']['originalFileCount'],19)
+            self.assertTrue(result['allChecksComplete']);self.assertEqual(result['contentCommitment']['originalFileCount'],25)
             self.assertFalse(result['fullContentSemanticsRechecked']);self.assertFalse(result['releaseAuthorityGranted'])
             self.assertEqual(len(result['stops']['observedAbsentOwners']),0)
             self.assertEqual(result['stops']['nonvacuousStoppedOwnerCount'],6)

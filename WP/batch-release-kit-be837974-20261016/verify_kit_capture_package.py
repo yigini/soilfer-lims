@@ -97,7 +97,7 @@ def synthetic_unit_payload(content,index,source):
         'captureTableSha256':CAPTURE_TABLE_SHA,'status':'CAPTURE_CONTROLLER_CLOSED_CONTENT_SEALED_PENDING_PACKAGE_REVIEW',
         'stops':stops,'errors':[],'retentionErrors':[],'controller':hook,'transport':transport,
         'contentCommitment':{'receipt':{'file':'capture-receipt.json',**package.pin(content['capture-receipt.json'])},
-            'originalFileCount':19,'allOriginalContentPinsVerified':True,'fullContentSemanticsRechecked':False,
+            'originalFileCount':len(package.CAPTURE_REVIEW_FILES),'allOriginalContentPinsVerified':True,'fullContentSemanticsRechecked':False,
             'independentFullSemanticPackageReviewStillRequired':True},
         'allChecksComplete':True,'fullContentSemanticsRechecked':False,'releaseAuthorityGranted':False,
         'controllerRunCommitment':{'completion':{'file':'capture-controller-complete.json',**package.pin(files['capture-controller-complete.json'])},
