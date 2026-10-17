@@ -1,0 +1,340 @@
+{
+  "completeApplyingFrameInventoryDerived": false,
+  "conditionalBranchesAndDeclarationsIncluded": true,
+  "nativeSource": {
+    "bytes": 9389807,
+    "path": "server/node_modules/better-sqlite3/deps/sqlite3/sqlite3.c",
+    "sha256": "2bbdd0eff3f46852e954d7881b7945990bf78c1421f806cf7978bc22e187100a"
+  },
+  "occurrences": {
+    "pagerWalFrames": [
+      {
+        "line": 59755,
+        "text": "# define pagerWalFrames(v,w,x,y) 0"
+      },
+      {
+        "line": 62101,
+        "text": "static int pagerWalFrames("
+      },
+      {
+        "line": 63569,
+        "text": "      rc = pagerWalFrames(pPager, pPg, 0, 0);"
+      },
+      {
+        "line": 65432,
+        "text": "        rc = pagerWalFrames(pPager, pList, pPager->dbSize, 1);"
+      }
+    ],
+    "sqlite3PagerFlush": [
+      {
+        "line": 16524,
+        "text": "SQLITE_PRIVATE int sqlite3PagerFlush(Pager*);"
+      },
+      {
+        "line": 63606,
+        "text": "SQLITE_PRIVATE int sqlite3PagerFlush(Pager *pPager){"
+      },
+      {
+        "line": 185840,
+        "text": "      rc = sqlite3PagerFlush(pPager);"
+      }
+    ],
+    "sqlite3PagerMovepage": [
+      {
+        "line": 16537,
+        "text": "SQLITE_PRIVATE int sqlite3PagerMovepage(Pager*,DbPage*,Pgno,int);"
+      },
+      {
+        "line": 61370,
+        "text": "    ** populated, then moved using sqlite3PagerMovepage()."
+      },
+      {
+        "line": 66078,
+        "text": "SQLITE_PRIVATE int sqlite3PagerMovepage(Pager *pPager, DbPage *pPg, Pgno pgno, int isCommit){"
+      },
+      {
+        "line": 76375,
+        "text": "  rc = sqlite3PagerMovepage(pPager, pDbPage->pDbPage, iFreePage, isCommit);"
+      }
+    ],
+    "sqlite3PagerRekey": [
+      {
+        "line": 16606,
+        "text": "SQLITE_PRIVATE void sqlite3PagerRekey(DbPage*, Pgno, u16);"
+      },
+      {
+        "line": 66216,
+        "text": "SQLITE_PRIVATE void sqlite3PagerRekey(DbPage *pPg, Pgno iNew, u16 flags){"
+      },
+      {
+        "line": 81130,
+        "text": "      sqlite3PagerRekey(apNew[i]->pDbPage, pgnoTemp, fgB);"
+      },
+      {
+        "line": 81131,
+        "text": "      sqlite3PagerRekey(apNew[iB]->pDbPage, pgnoA, fgA);"
+      },
+      {
+        "line": 81132,
+        "text": "      sqlite3PagerRekey(apNew[i]->pDbPage, pgnoB, fgB);"
+      }
+    ],
+    "sqlite3PagerWrite": [
+      {
+        "line": 16535,
+        "text": "SQLITE_PRIVATE int sqlite3PagerWrite(DbPage*);"
+      },
+      {
+        "line": 59457,
+        "text": "**   This flag is set by sqlite3PagerWrite() when the file-system sector-size"
+      },
+      {
+        "line": 63538,
+        "text": "  ** during calls to sqlite3PagerWrite() while trying to journal multiple"
+      },
+      {
+        "line": 64441,
+        "text": "** point in the future, using a call to sqlite3PagerWrite(), its contents"
+      },
+      {
+        "line": 65050,
+        "text": "** This is a variant of sqlite3PagerWrite() that runs when the sector size"
+      },
+      {
+        "line": 65154,
+        "text": "SQLITE_PRIVATE int sqlite3PagerWrite(PgHdr *pPg){"
+      },
+      {
+        "line": 65174,
+        "text": "** to sqlite3PagerWrite().  In other words, return TRUE if it is ok"
+      },
+      {
+        "line": 65227,
+        "text": "** sqlite3PagerWrite() on page 1, then modifying the contents of the"
+      },
+      {
+        "line": 65278,
+        "text": "      rc = sqlite3PagerWrite(pPgHdr);"
+      },
+      {
+        "line": 66095,
+        "text": "    rc = sqlite3PagerWrite(pPg);"
+      },
+      {
+        "line": 73538,
+        "text": "    *pRC= rc = sqlite3PagerWrite(pDbPage);"
+      },
+      {
+        "line": 74761,
+        "text": "** If in the future we call sqlite3PagerWrite() on this page, that"
+      },
+      {
+        "line": 75955,
+        "text": "  rc = sqlite3PagerWrite(pP1->pDbPage);"
+      },
+      {
+        "line": 76188,
+        "text": "        rc = sqlite3PagerWrite(pPage1->pDbPage);"
+      },
+      {
+        "line": 76413,
+        "text": "    rc = sqlite3PagerWrite(pPtrPage->pDbPage);"
+      },
+      {
+        "line": 76596,
+        "text": "        rc = sqlite3PagerWrite(pBt->pPage1->pDbPage);"
+      },
+      {
+        "line": 76674,
+        "text": "      rc = sqlite3PagerWrite(pBt->pPage1->pDbPage);"
+      },
+      {
+        "line": 77479,
+        "text": "** then sqlite3PagerWrite() is called on pDbPage and nByte bytes"
+      },
+      {
+        "line": 77493,
+        "text": "    int rc = sqlite3PagerWrite(pDbPage);"
+      },
+      {
+        "line": 78893,
+        "text": "** The new page is marked as dirty.  (In other words, sqlite3PagerWrite()"
+      },
+      {
+        "line": 78968,
+        "text": "    rc = sqlite3PagerWrite(pPage1->pDbPage);"
+      },
+      {
+        "line": 79010,
+        "text": "        rc = sqlite3PagerWrite(pTrunk->pDbPage);"
+      },
+      {
+        "line": 79033,
+        "text": "        rc = sqlite3PagerWrite(pTrunk->pDbPage);"
+      },
+      {
+        "line": 79041,
+        "text": "            rc = sqlite3PagerWrite(pPrevTrunk->pDbPage);"
+      },
+      {
+        "line": 79063,
+        "text": "          rc = sqlite3PagerWrite(pNewTrunk->pDbPage);"
+      },
+      {
+        "line": 79076,
+        "text": "            rc = sqlite3PagerWrite(pPrevTrunk->pDbPage);"
+      },
+      {
+        "line": 79132,
+        "text": "          rc = sqlite3PagerWrite(pTrunk->pDbPage);"
+      },
+      {
+        "line": 79141,
+        "text": "            rc = sqlite3PagerWrite((*ppPage)->pDbPage);"
+      },
+      {
+        "line": 79174,
+        "text": "    rc = sqlite3PagerWrite(pBt->pPage1->pDbPage);"
+      },
+      {
+        "line": 79190,
+        "text": "        rc = sqlite3PagerWrite(pPg->pDbPage);"
+      },
+      {
+        "line": 79204,
+        "text": "    rc = sqlite3PagerWrite((*ppPage)->pDbPage);"
+      },
+      {
+        "line": 79257,
+        "text": "  rc = sqlite3PagerWrite(pPage1->pDbPage);"
+      },
+      {
+        "line": 79267,
+        "text": "     ||            ((rc = sqlite3PagerWrite(pPage->pDbPage))!=0)"
+      },
+      {
+        "line": 79328,
+        "text": "      rc = sqlite3PagerWrite(pTrunk->pDbPage);"
+      },
+      {
+        "line": 79351,
+        "text": "  rc = sqlite3PagerWrite(pPage->pDbPage);"
+      },
+      {
+        "line": 79773,
+        "text": "    int rc = sqlite3PagerWrite(pPage->pDbPage);"
+      },
+      {
+        "line": 79863,
+        "text": "    int rc = sqlite3PagerWrite(pPage->pDbPage);"
+      },
+      {
+        "line": 81069,
+        "text": "      rc = sqlite3PagerWrite(pNew->pDbPage);"
+      },
+      {
+        "line": 81460,
+        "text": "  rc = sqlite3PagerWrite(pRoot->pDbPage);"
+      },
+      {
+        "line": 81577,
+        "text": "      rc = sqlite3PagerWrite(pParent->pDbPage);"
+      },
+      {
+        "line": 81675,
+        "text": "      int rc = sqlite3PagerWrite(pPage->pDbPage);"
+      },
+      {
+        "line": 81689,
+        "text": "      int rc = sqlite3PagerWrite(pPage->pDbPage);"
+      },
+      {
+        "line": 82012,
+        "text": "    rc = sqlite3PagerWrite(pPage->pDbPage);"
+      },
+      {
+        "line": 82343,
+        "text": "  rc = sqlite3PagerWrite(pPage->pDbPage);"
+      },
+      {
+        "line": 82375,
+        "text": "    rc = sqlite3PagerWrite(pLeaf->pDbPage);"
+      },
+      {
+        "line": 82553,
+        "text": "      rc = sqlite3PagerWrite(pRoot->pDbPage);"
+      },
+      {
+        "line": 82655,
+        "text": "  }else if( (rc = sqlite3PagerWrite(pPage->pDbPage))==0 ){"
+      },
+      {
+        "line": 82879,
+        "text": "  rc = sqlite3PagerWrite(pBt->pPage1->pDbPage);"
+      },
+      {
+        "line": 83920,
+        "text": "        rc = sqlite3PagerWrite(pBt->pPage1->pDbPage);"
+      },
+      {
+        "line": 84240,
+        "text": "     && SQLITE_OK==(rc = sqlite3PagerWrite(pDestPg))"
+      },
+      {
+        "line": 84480,
+        "text": "                rc = sqlite3PagerWrite(pPg);"
+      },
+      {
+        "line": 230332,
+        "text": "    if( (rc = sqlite3PagerWrite(pDbPage))==SQLITE_OK && pData ){"
+      }
+    ],
+    "sqlite3PcacheMakeDirty": [
+      {
+        "line": 17844,
+        "text": "SQLITE_PRIVATE void sqlite3PcacheMakeDirty(PgHdr*);    /* Make sure page is marked dirty */"
+      },
+      {
+        "line": 56628,
+        "text": "SQLITE_PRIVATE void sqlite3PcacheMakeDirty(PgHdr *p){"
+      },
+      {
+        "line": 61384,
+        "text": "    sqlite3PcacheMakeDirty(pPg);"
+      },
+      {
+        "line": 64989,
+        "text": "  ** This is done before calling sqlite3PcacheMakeDirty() on the page."
+      },
+      {
+        "line": 64990,
+        "text": "  ** Otherwise, if it were done after calling sqlite3PcacheMakeDirty(), then"
+      },
+      {
+        "line": 65002,
+        "text": "  sqlite3PcacheMakeDirty(pPg);"
+      },
+      {
+        "line": 66166,
+        "text": "  sqlite3PcacheMakeDirty(pPg);"
+      },
+      {
+        "line": 66202,
+        "text": "    sqlite3PcacheMakeDirty(pPgHdr);"
+      }
+    ]
+  },
+  "occurrencesAreDynamicOperationCounts": false,
+  "operatorsExecuted": 0,
+  "pendingReview": [
+    "Every actual APPLY caller, transaction, root/meta/schema/receipt/index/trigger/internal mutation",
+    "Native write-mark calls versus clean-to-dirty episodes; same page can spill then become dirty again",
+    "Explicit PagerFlush uses pagerStress as well as cache pressure; final empty dirty-list commit can synthesize page1",
+    "Allocation/free-list/page1/overflow/balance dirty marks, metadata UpdateMeta and initialization",
+    "Direct MakeDirty playback/Movepage/Rekey and alternate handles must be proved excluded or counted",
+    "WAL source geometry/recovered index/SHM and checkpoint MAIN growth are separate"
+  ],
+  "scope": "NATIVE_SOURCE_OCCURRENCE_WORKLIST_NOT_DYNAMIC_WRITE_INVENTORY",
+  "version": 1,
+  "writerGraphAdmissionImplemented": false
+}

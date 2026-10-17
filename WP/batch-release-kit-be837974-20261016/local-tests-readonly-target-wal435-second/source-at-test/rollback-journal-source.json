@@ -1,0 +1,113 @@
+{
+  "completeCallerReviewCompleted": false,
+  "completeOriginalJournalBytesRetained": false,
+  "derivation": [
+    "For one forward transaction with no page moves and no continued writes after savepoint/statement rollback or SQLite error, pInJournal prevents a second main-journal record for an original page. Newly appended pages above dbOrigSize have no original-page record.",
+    "Each record occupies page_size+8 bytes: page number, original page, checksum.",
+    "Charge one initial header, one possible initial CACHEMOD spill, and one later new-header sync for each newly journalled original page: N+2 headers. After sync all NEED_SYNC flags clear and state is DBMOD; later new pages alone do not set NEED_SYNC.",
+    "Charge 65536 bytes for every header and 65536 more for its preceding alignment. This uses the pager maximum, without assuming the usual Linux sector size.",
+    "Maximum conditional content is N*(page_size+8)+2*65536*(N+2). The existing copy-layout model additionally rounds content and charges one entry plus one inode allowance.",
+    "The page-move error path can clear pInJournal and repeat a page. The planner rejects both auto-vacuum header fields and additionally requires complete caller/native-VFS review proving no page moves, ATTACH, VACUUM, setting changes or transaction retries before any writer admission. Savepoint/statement rollback followed by further writes is also excluded: the N+2 header argument assumes the single forward NEED_SYNC/CACHEMOD-to-DBMOD path.",
+    "The input requires rollback-format read/write versions 1, exact current header/physical page count, absent journal and absent/zero WAL/SHM. Full independently hashed source identity is rechecked after the bounded descriptor header read."
+  ],
+  "excluded": [
+    "WAL mode and WAL growth",
+    "main database growth",
+    "statement journals and all SQL sorter/materialization scratch",
+    "auto-vacuum or page moves",
+    "ATTACH/super-journals/VACUUM/custom VFS/settings changes",
+    "multiple transactions or retry paths",
+    "continuous peak or complete original journal bytes",
+    "physical filesystem metadata/allocation guarantees",
+    "continued writes after savepoint/statement rollback or SQLite error"
+  ],
+  "installerTransactionChanged": false,
+  "journalModeChanged": false,
+  "nativePackageProofSha256": "86a8caa2c4d075311ab90d7226478719974c43b3fbc356e18c771d582e168a63",
+  "nativeSource": {
+    "bytes": 9389807,
+    "excerpts": {
+      "commit-no-new-header": {
+        "firstLine": 65514,
+        "lastLine": 65532,
+        "text": "      /* Write the super-journal name into the journal file. If a\n      ** super-journal file name has already been written to the journal file,\n      ** or if zSuper is NULL (no super-journal), then this call is a no-op.\n      */\n      rc = writeSuperJournal(pPager, zSuper);\n      if( rc!=SQLITE_OK ) goto commit_phase_one_exit;\n\n      /* Sync the journal file and write all dirty pages to the database.\n      ** If the atomic-update optimization is being used, this sync will not\n      ** create the journal file or perform any real IO.\n      **\n      ** Because the change-counter page was just modified, unless the\n      ** atomic-update optimization is used it is almost certain that the\n      ** journal requires a sync here. However, in locking_mode=exclusive\n      ** on a system under memory pressure it is just possible that this is\n      ** not the case. In this case it is likely enough that the redundant\n      ** xSync() call will be changed to a no-op by the OS anyhow.\n      */\n      rc = syncJournal(pPager, 0);\n"
+      },
+      "header-alignment": {
+        "firstLine": 60262,
+        "lastLine": 60286,
+        "text": "/*\n** Return the offset of the sector boundary at or immediately\n** following the value in pPager->journalOff, assuming a sector\n** size of pPager->sectorSize bytes.\n**\n** i.e for a sector size of 512:\n**\n**   Pager.journalOff          Return value\n**   ---------------------------------------\n**   0                         0\n**   512                       512\n**   100                       512\n**   2000                      2048\n**\n*/\nstatic i64 journalHdrOffset(Pager *pPager){\n  i64 offset = 0;\n  i64 c = pPager->journalOff;\n  if( c ){\n    offset = ((c-1)/JOURNAL_HDR_SZ(pPager) + 1) * JOURNAL_HDR_SZ(pPager);\n  }\n  assert( offset%JOURNAL_HDR_SZ(pPager)==0 );\n  assert( offset>=c );\n  assert( (offset-c)<JOURNAL_HDR_SZ(pPager) );\n  return offset;\n"
+      },
+      "header-format": {
+        "firstLine": 60345,
+        "lastLine": 60358,
+        "text": "/*\n** The journal file must be open when this routine is called. A journal\n** header (JOURNAL_HDR_SZ bytes) is written into the journal file at the\n** current location.\n**\n** The format for the journal header is as follows:\n** - 8 bytes: Magic identifying journal format.\n** - 4 bytes: Number of records in journal, or -1 no-sync mode is on.\n** - 4 bytes: Random number used for page hash.\n** - 4 bytes: Initial database page count.\n** - 4 bytes: Sector size used by the process that wrote this journal.\n** - 4 bytes: Database page size.\n**\n** Followed by (JOURNAL_HDR_SZ - 28) bytes of unused space.\n"
+      },
+      "header-write": {
+        "firstLine": 60457,
+        "lastLine": 60481,
+        "text": "  /* In theory, it is only necessary to write the 28 bytes that the\n  ** journal header consumes to the journal file here. Then increment the\n  ** Pager.journalOff variable by JOURNAL_HDR_SZ so that the next\n  ** record is written to the following sector (leaving a gap in the file\n  ** that will be implicitly filled in by the OS).\n  **\n  ** However it has been discovered that on some systems this pattern can\n  ** be significantly slower than contiguously writing data to the file,\n  ** even if that means explicitly writing data to the block of\n  ** (JOURNAL_HDR_SZ - 28) bytes that will not be used. So that is what\n  ** is done.\n  **\n  ** The loop is required here in case the sector-size is larger than the\n  ** database page size. Since the zHeader buffer is only Pager.pageSize\n  ** bytes in size, more than one call to sqlite3OsWrite() may be required\n  ** to populate the entire journal header sector.\n  */\n  for(nWrite=0; rc==SQLITE_OK&&nWrite<JOURNAL_HDR_SZ(pPager); nWrite+=nHeader){\n    IOTRACE((\"JHDR %p %lld %d\\n\", pPager, pPager->journalHdr, nHeader))\n    rc = sqlite3OsWrite(pPager->jfd, zHeader, nHeader, pPager->journalOff);\n    assert( pPager->journalHdr <= pPager->journalOff );\n    pPager->journalOff += nHeader;\n  }\n\n  return rc;\n"
+      },
+      "initial-header": {
+        "firstLine": 64800,
+        "lastLine": 64809,
+        "text": "    /* Write the first journal header to the journal file and open\n    ** the sub-journal if necessary.\n    */\n    if( rc==SQLITE_OK ){\n      /* TODO: Check if all of these are really required. */\n      pPager->nRec = 0;\n      pPager->journalOff = 0;\n      pPager->setSuper = 0;\n      pPager->journalHdr = 0;\n      rc = writeJournalHdr(pPager);\n"
+      },
+      "maximum-sector": {
+        "firstLine": 59333,
+        "lastLine": 59339,
+        "text": "/*\n** The maximum allowed sector size. 64KiB. If the xSectorsize() method\n** returns a value larger than this, then MAX_SECTOR_SIZE is used instead.\n** This could conceivably cause corruption following a power failure on\n** such a system. This is currently an undocumented limit.\n*/\n#define MAX_SECTOR_SIZE 0x10000\n"
+      },
+      "new-header-sync": {
+        "firstLine": 63296,
+        "lastLine": 63312,
+        "text": "      pPager->journalHdr = pPager->journalOff;\n      if( newHdr && 0==(iDc&SQLITE_IOCAP_SAFE_APPEND) ){\n        pPager->nRec = 0;\n        rc = writeJournalHdr(pPager);\n        if( rc!=SQLITE_OK ) return rc;\n      }\n    }else{\n      pPager->journalHdr = pPager->journalOff;\n    }\n  }\n\n  /* Unless the pager is in noSync mode, the journal file was just\n  ** successfully synced. Either way, clear the PGHDR_NEED_SYNC flag on\n  ** all pages.\n  */\n  sqlite3PcacheClearSyncFlags(pPager->pPCache);\n  pPager->eState = PAGER_WRITER_DBMOD;\n"
+      },
+      "original-only-write": {
+        "firstLine": 65004,
+        "lastLine": 65025,
+        "text": "  /* If a rollback journal is in use, them make sure the page that is about\n  ** to change is in the rollback journal, or if the page is a new page off\n  ** then end of the file, make sure it is marked as PGHDR_NEED_SYNC.\n  */\n  assert( (pPager->pInJournal!=0) == isOpen(pPager->jfd) );\n  if( pPager->pInJournal!=0\n   && sqlite3BitvecTestNotNull(pPager->pInJournal, pPg->pgno)==0\n  ){\n    assert( pagerUseWal(pPager)==0 );\n    if( pPg->pgno<=pPager->dbOrigSize ){\n      rc = pagerAddPageToRollbackJournal(pPg);\n      if( rc!=SQLITE_OK ){\n        return rc;\n      }\n    }else{\n      if( pPager->eState!=PAGER_WRITER_DBMOD ){\n        pPg->flags |= PGHDR_NEED_SYNC;\n      }\n      PAGERTRACE((\"APPEND %d page %d needSync=%d\\n\",\n              PAGERID(pPager), pPg->pgno,\n             ((pPg->flags&PGHDR_NEED_SYNC)?1:0)));\n    }\n"
+      },
+      "original-page-count": {
+        "firstLine": 64882,
+        "lastLine": 64897,
+        "text": "    if( rc==SQLITE_OK ){\n      /* Change to WRITER_LOCKED state.\n      **\n      ** WAL mode sets Pager.eState to PAGER_WRITER_LOCKED or CACHEMOD\n      ** when it has an open transaction, but never to DBMOD or FINISHED.\n      ** This is because in those states the code to roll back savepoint\n      ** transactions may copy data from the sub-journal into the database\n      ** file as well as into the page cache. Which would be incorrect in\n      ** WAL mode.\n      */\n      pPager->eState = PAGER_WRITER_LOCKED;\n      pPager->dbHintSize = pPager->dbSize;\n      pPager->dbFileSize = pPager->dbSize;\n      pPager->dbOrigSize = pPager->dbSize;\n      pPager->journalOff = 0;\n    }\n"
+      },
+      "page-move-exception": {
+        "firstLine": 66177,
+        "lastLine": 66199,
+        "text": "  if( needSyncPgno ){\n    /* If needSyncPgno is non-zero, then the journal file needs to be\n    ** sync()ed before any data is written to database file page needSyncPgno.\n    ** Currently, no such page exists in the page-cache and the\n    ** \"is journaled\" bitvec flag has been set. This needs to be remedied by\n    ** loading the page into the pager-cache and setting the PGHDR_NEED_SYNC\n    ** flag.\n    **\n    ** If the attempt to load the page into the page-cache fails, (due\n    ** to a malloc() or IO failure), clear the bit in the pInJournal[]\n    ** array. Otherwise, if the page is loaded and written again in\n    ** this transaction, it may be written to the database file before\n    ** it is synced into the journal file. This way, it may end up in\n    ** the journal file twice, but that is not a problem.\n    */\n    PgHdr *pPgHdr;\n    rc = sqlite3PagerGet(pPager, needSyncPgno, &pPgHdr, 0);\n    if( rc!=SQLITE_OK ){\n      if( needSyncPgno<=pPager->dbOrigSize ){\n        assert( pPager->pTmpSpace!=0 );\n        sqlite3BitvecClear(pPager->pInJournal, needSyncPgno, pPager->pTmpSpace);\n      }\n      return rc;\n"
+      },
+      "record-and-bitvec": {
+        "firstLine": 64934,
+        "lastLine": 64958,
+        "text": "  pPg->flags |= PGHDR_NEED_SYNC;\n\n  rc = write32bits(pPager->jfd, iOff, pPg->pgno);\n  if( rc!=SQLITE_OK ) return rc;\n  rc = sqlite3OsWrite(pPager->jfd, pData2, pPager->pageSize, iOff+4);\n  if( rc!=SQLITE_OK ) return rc;\n  rc = write32bits(pPager->jfd, iOff+pPager->pageSize+4, cksum);\n  if( rc!=SQLITE_OK ) return rc;\n\n  IOTRACE((\"JOUT %p %d %lld %d\\n\", pPager, pPg->pgno,\n           pPager->journalOff, pPager->pageSize));\n  PAGER_INCR(sqlite3_pager_writej_count);\n  PAGERTRACE((\"JOURNAL %d page %d needSync=%d hash(%08x)\\n\",\n       PAGERID(pPager), pPg->pgno,\n       ((pPg->flags&PGHDR_NEED_SYNC)?1:0), pager_pagehash(pPg)));\n\n  pPager->journalOff += 8 + pPager->pageSize;\n  pPager->nRec++;\n  assert( pPager->pInJournal!=0 );\n  rc = sqlite3BitvecSet(pPager->pInJournal, pPg->pgno);\n  testcase( rc==SQLITE_NOMEM );\n  assert( rc==SQLITE_OK || rc==SQLITE_NOMEM );\n  rc |= addToSavepointBitvecs(pPager, pPg->pgno);\n  assert( rc==SQLITE_OK || rc==SQLITE_NOMEM );\n  return rc;\n"
+      },
+      "sector-clamp": {
+        "firstLine": 61612,
+        "lastLine": 61624,
+        "text": "/*\n** Return a sanitized version of the sector-size of OS file pFile. The\n** return value is guaranteed to lie between 32 and MAX_SECTOR_SIZE.\n*/\nSQLITE_PRIVATE int sqlite3SectorSize(sqlite3_file *pFile){\n  int iRet = sqlite3OsSectorSize(pFile);\n  if( iRet<32 ){\n    iRet = 512;\n  }else if( iRet>MAX_SECTOR_SIZE ){\n    assert( MAX_SECTOR_SIZE>=512 );\n    iRet = MAX_SECTOR_SIZE;\n  }\n  return iRet;\n"
+      },
+      "spill-trigger": {
+        "firstLine": 63580,
+        "lastLine": 63591,
+        "text": "    /* Sync the journal file if required. */\n    if( pPg->flags&PGHDR_NEED_SYNC\n     || pPager->eState==PAGER_WRITER_CACHEMOD\n    ){\n      rc = syncJournal(pPager, 1);\n    }\n\n    /* Write the contents of the page out to the database file. */\n    if( rc==SQLITE_OK ){\n      assert( (pPg->flags&PGHDR_NEED_SYNC)==0 );\n      rc = pager_write_pagelist(pPager, pPg);\n    }\n"
+      }
+    },
+    "path": "server/node_modules/better-sqlite3/deps/sqlite3/sqlite3.c",
+    "sha256": "2bbdd0eff3f46852e954d7881b7945990bf78c1421f806cf7978bc22e187100a"
+  },
+  "officialReferences": [
+    "https://www.sqlite.org/tempfiles.html",
+    "https://www.sqlite.org/atomiccommit.html",
+    "https://www.sqlite.org/fileformat2.html"
+  ],
+  "operationalExecutionPerformed": false,
+  "physicalFilesystemClosureClaimed": false,
+  "productionProfileObserved": false,
+  "scientificArgvChanged": false,
+  "scope": "CONDITIONAL_SINGLE_MAIN_ROLLBACK_JOURNAL_SIZE_PLANNER_ONLY",
+  "sqlPragmaChanged": false,
+  "version": 1,
+  "writerGraphAdmissionImplemented": false,
+  "writerLimitDeadlineSignalOrQuotaAdded": false
+}
