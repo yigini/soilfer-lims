@@ -1,0 +1,1 @@
+{"originalDiagnosticFileRetained": false, "toolOutputTranscriptionOnly": true, "event": "Two exact public-source outputs were combined in one exec; aggregate truncated. Second command independently reported7016 tokens exceeding6500. Compact exact future reads required. No omitted contents inferred.", "privatePayloadsRead": false}
