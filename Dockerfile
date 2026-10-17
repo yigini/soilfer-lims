@@ -61,7 +61,8 @@ COPY --from=builder /app/client/dist ./client/dist/
 RUN mkdir -p /app/server/.schema-backup && \
     cp /app/server/prisma/schema.prisma /app/server/.schema-backup/schema.prisma
 
-# Exact #179 release DDL must remain visible outside the persistent Prisma volume.
+# Exact release DDL must remain visible outside the persistent Prisma volume.
+COPY server/prisma/migrations/20261004170000_add_atomic_sample_codes/migration.sql /app/server/.migrations-backup/180/20261004170000_add_atomic_sample_codes/migration.sql
 COPY server/prisma/migrations/20261005000000_workflow_state_evidence/migration.sql /app/server/.migrations-backup/179/20261005000000_workflow_state_evidence/migration.sql
 COPY server/prisma/migrations/20261005000100_workflow_state_guards/migration.sql /app/server/.migrations-backup/179/20261005000100_workflow_state_guards/migration.sql
 COPY server/prisma/migrations/20261006000000_result_attempt_link/migration.sql /app/server/.migrations-backup/182/20261006000000_result_attempt_link/migration.sql
@@ -104,6 +105,7 @@ COPY server/prisma/migrations/20261013000100_sample_containers/migration.sql /ap
 COPY server/prisma/migrations/20261013000200_control_charts/migration.sql /app/server/.migrations-backup/214/20261013000200_control_charts/migration.sql
 COPY server/prisma/migrations/20261004085500_add_lab_policy_settings/migration.sql /app/server/.migrations-backup/policy/20261004085500_add_lab_policy_settings/migration.sql
 COPY server/prisma/migrations/20261014000100_order_revision_contract/migration.sql /app/server/.migrations-backup/209/20261014000100_order_revision_contract/migration.sql
+COPY server/prisma/migrations/20261016000100_label_print_events/migration.sql /app/server/.migrations-backup/208/20261016000100_label_print_events/migration.sql
 
 # Copy and set entrypoint
 COPY docker-entrypoint.sh /app/docker-entrypoint.sh

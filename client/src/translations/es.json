@@ -1,4 +1,30 @@
 {
+  "labelPrint": {
+    "title": "Imprimir etiquetas",
+    "help": "Cada solicitud se registra antes de abrir el diálogo de impresión. Las solicitudes canceladas permanecen registradas. Las reimpresiones requieren un motivo.",
+    "format": "Formato",
+    "standard": "Estándar (101 × 54 mm)",
+    "compact": "Compacto (50 × 25 mm)",
+    "copies": "Copias por etiqueta",
+    "reason": "Motivo de reimpresión",
+    "print": "Imprimir etiquetas",
+    "recording": "Registrando impresión…",
+    "failed": "No se pudieron preparar o registrar las etiquetas. Inténtelo de nuevo.",
+    "changed": "La etiqueta emitida ha cambiado. Vuelva a abrir este diálogo.",
+    "tooLong": "El código no cabe con barras legibles. Elija el formato estándar o solicite la revisión del código al responsable del laboratorio.",
+    "collected": "Recogida",
+    "received": "Recepción",
+    "errors": {
+      "LABEL_REPRINT_REASON_REQUIRED": "Introduzca un motivo para la reimpresión.",
+      "LABEL_PRINT_FORBIDDEN": "Su rol no permite imprimir etiquetas.",
+      "LABEL_PRINT_STATE_REFUSED": "Este material no admite etiquetas en su estado actual.",
+      "LABEL_PRINT_CODE_REQUIRED": "Reciba la muestra y emita su código de laboratorio antes de imprimir.",
+      "LABEL_PRINT_CODE_UNSUPPORTED": "El código emitido no admite Code128. Solicite su revisión al responsable; no lo renumere.",
+      "LABEL_PRINT_FIELDS_INVALID": "Elija etiquetas, de 1 a 20 copias y un formato válido (máximo 200 etiquetas).",
+      "LABEL_PRINT_NOT_FOUND": "No se encontró la muestra o el recipiente.",
+      "LABEL_PRINT_CHANGED": "El estado de impresión cambió. Vuelva a abrir el diálogo."
+    }
+  },
   "orderRevision": {
     "reason": "Motivo de la revisión del pedido",
     "reasonPlaceholder": "Explique la selección completa de análisis…",

@@ -32,7 +32,7 @@ export default function SampleContainersPanel({ sampleId, sampleCode, attempts =
         <div className="flex flex-wrap items-center gap-2">
             <strong>{row.code}</strong><span>{t(`containers.kinds.${row.kind}`)}</span>
             {row.massG != null && <span>{row.massG} g</span>}<span>{t(`containers.status.${row.status}`)}</span>
-            <button type="button" onClick={() => setLabel(row)} className="underline">{t('containers.print')}</button>
+            {hasPermission?.('PRINT_LABELS') && <button type="button" onClick={() => setLabel(row)} className="underline">{t('containers.print')}</button>}
         </div>
         <div className="text-xs text-sf-muted">{row.createdBy} · {new Date(row.createdAt).toLocaleString()}</div>
         {attempts.filter(attempt => attempt.aliquotId === row.id).map(attempt => <div key={attempt.id} className="text-xs">

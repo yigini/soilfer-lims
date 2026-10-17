@@ -192,11 +192,13 @@ node scripts/install_preparation_records.js --db "${DATABASE_PATH:-$DB_FILE}" --
 
 echo "📦 Installing retained instrument import templates and receipts..."
 node scripts/install_instrument_imports.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
+node scripts/install_sample_code_schema.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
 node scripts/install_sample_containers.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
 echo "📦 Installing canonical lab policy schema prerequisite..."
 node scripts/install_lab_policy_schema.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
 node scripts/install_control_charts.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
 node scripts/install_order_revisions.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
+node scripts/install_label_print_events.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
 
 # Start the server
 echo "🚀 Starting SoilFER-LIMS..."

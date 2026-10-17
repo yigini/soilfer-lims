@@ -99,6 +99,9 @@ try {
     const chartsReadyBegan = beginReadinessStage();
     const chartsReady=require('./scripts/install_control_charts').assertControlChartStartupReady(dbPath, startupContext);
     console.log(JSON.stringify({event:'CONTROL_CHART_STARTUP_READY',...chartsReady, ...readinessTelemetry(chartsReadyBegan)}));
+    const labelsReadyBegan = beginReadinessStage();
+    const labelsReady = require('./scripts/install_label_print_events').assertLabelPrintStartupReady(dbPath, startupContext);
+    console.log(JSON.stringify({event:'LABEL_PRINT_STARTUP_READY', ...labelsReady, ...readinessTelemetry(labelsReadyBegan)}));
     const orderReadyBegan = beginReadinessStage();
     const orderReady=require('./scripts/install_order_revisions').assertOrderRevisionStartupReady(dbPath, startupContext);
     console.log(JSON.stringify({event:'ORDER_REVISION_STARTUP_READY',...orderReady, ...readinessTelemetry(orderReadyBegan)}));
@@ -108,6 +111,7 @@ try {
             : error.code?.startsWith('CROSS_CHECK_') ? 'Keep the lab stopped and follow docs/audit/201-cross-parameter-checks.md.'
             : error.code?.startsWith('AMENDMENT_') || error.code?.startsWith('REPORT_WITHDRAWAL_') ? 'Keep the lab stopped and follow docs/audit/210-amendment-authorisation.md.'
             : error.code?.startsWith('IMPORT_') ? 'Keep the lab stopped and follow docs/audit/200-instrument-import.md.'
+            : error.code?.startsWith('LABEL_PRINT_') ? 'Keep the lab stopped and follow docs/audit/208-labels.md.'
             : error.code?.startsWith('SAMPLE_CONTAINER_') ? 'Keep the lab stopped and follow docs/audit/206-containers-and-aliquots.md.'
             : error.code?.startsWith('ORDER_REVISION_') || error.code === 'ORDER_LINE_REQUIRED' ? 'Keep the lab stopped and follow docs/audit/209-order-revisions.md.'
             : error.code?.startsWith('QC_CHART_') || error.code?.startsWith('LAB_POLICY_') ? 'Keep the lab stopped and follow docs/audit/214-control-charts.md.'
