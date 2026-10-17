@@ -20,6 +20,74 @@ def directory():
     return pathlib.Path(tempfile.mkdtemp(prefix='owned-',dir=FIXTURES)).resolve()
 
 class LiveBackup(unittest.TestCase):
+    def caller_node(self,code):
+        fixtures=HERE/'backup-caller-local-retained-fixtures';fixtures.mkdir(exist_ok=True)
+        root=pathlib.Path(tempfile.mkdtemp(prefix='caller-',dir=fixtures)).resolve()
+        program=root/'program-original.cjs';program.write_text(code,encoding='utf8')
+        argv=[shutil.which('node'),str(program),str(HERE/'live_backup.cjs'),str(root),str(HERE.parents[1]/'server/node_modules/better-sqlite3')]
+        (root/'argv-original.json').write_text(json.dumps(argv)+'\n',encoding='utf8')
+        value=subprocess.run(argv,capture_output=True,timeout=45)
+        (root/'stdout-original.json').write_bytes(value.stdout);(root/'stderr-original.txt').write_bytes(value.stderr)
+        (root/'exit-original.json').write_text(json.dumps({'exitCode':value.returncode})+'\n',encoding='utf8')
+        self.assertEqual(value.returncode,0,value.stderr.decode('utf8',errors='replace'))
+        return json.loads(value.stdout)
+
+    def test_actual_node_wrapper_progress_does_not_expose_native_status_or_enforce_monotonicity(self):
+        row=self.caller_node(r'''
+const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
+const[owned,dir,dependency]=process.argv.slice(2),method=require(path.join(dependency,'lib/methods/backup')), {cppdb}=require(path.join(dependency,'lib/util'));
+(async()=>{
+ const observations=[];
+ for(const [name,script] of [
+  ['initial-zero',[{totalPages:0,remainingPages:0}]],
+  ['repeated-progress',[{totalPages:5,remainingPages:5},{totalPages:5,remainingPages:5},{totalPages:5,remainingPages:0}]],
+  ['increasing-remaining',[{totalPages:8,remainingPages:8},{totalPages:8,remainingPages:3},{totalPages:8,remainingPages:7},{totalPages:8,remainingPages:0}]],
+  ['callback-refusal',[{totalPages:8,remainingPages:8},{totalPages:8,remainingPages:7}]]]){
+  const destination=path.join(dir,name+'.db');fs.writeFileSync(destination,'',{flag:'wx'});
+  const rates=[];let closed=0,callbacks=0,constructed=0,index=0,result=null,error=null;
+  const bridge={backup(db,attached,file,isNew){constructed++;assert.equal(attached,'main');assert.equal(file,destination);assert.equal(isNew,false);
+   return{transfer(rate){rates.push(rate);assert(index<script.length);return script[index++];},close(){closed++;}};}};
+  try{result=await method.call({[cppdb]:bridge},destination,{progress(){callbacks++;if(name==='callback-refusal'&&callbacks===2)throw Error('SYNTHETIC_CALLBACK_REFUSAL');return 256;}});}
+  catch(e){error=e.message;}
+  assert.equal(constructed,1);assert.equal(closed,1);assert.deepEqual(rates,[0,...Array(script.length-1).fill(256)]);
+  if(name==='callback-refusal')assert.equal(error,'SYNTHETIC_CALLBACK_REFUSAL');else{assert.equal(error,null);assert.equal(result.remainingPages,0);}
+  if(name==='initial-zero')assert.equal(callbacks,0);
+  observations.push({name,rates,callbacks,closed,result,error,progressObjectsContainNativeStatus:false,scriptedBoundaryOnly:true});
+ }
+ process.stdout.write(JSON.stringify({kind:'SCRIPTED_ACTUAL_JS_METHOD_BOUNDARY',observations,nativeSqliteReturnCodesMeasured:false,actualOwnerNoBusyOrRestartProfileVerified:false,physicalFilesystemClosureClaimed:false}));
+})().catch(e=>{console.error(e);process.exitCode=1});''')
+        self.assertEqual(len(row['observations']),4);self.assertFalse(row['nativeSqliteReturnCodesMeasured'])
+
+    def test_actual_foreign_destination_lock_zero_progress_is_refused_by_owned_length_guard(self):
+        row=self.caller_node(r'''
+const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
+const[owned,dir,dependency]=process.argv.slice(2),{backup}=require(owned),D=require(dependency),hash=p=>crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');
+(async()=>{
+ const observations=[];
+ for(const page of [512,4096,65536]){
+  const source=path.join(dir,'source-'+page+'.db'),setup=new D(source);setup.pragma('page_size='+page);setup.exec('CREATE TABLE data(value BLOB)');setup.prepare('INSERT INTO data VALUES(?)').run(Buffer.alloc(8192,7));setup.close();
+  const initial=hash(source),raw=path.join(dir,'raw-'+page+'.db');fs.writeFileSync(raw,'',{flag:'wx'});
+  const src=new D(source,{readonly:true,fileMustExist:true});src.pragma('query_only=ON');src.exec('BEGIN');const pages=src.pragma('page_count',{simple:true});
+  const lock=new D(raw);lock.exec('BEGIN EXCLUSIVE');let nativeMethodProgress;
+  try{nativeMethodProgress=await src.backup(raw,{progress(){throw Error('Initial-zero path must skip callback');}});}
+  finally{lock.exec('ROLLBACK');lock.close();src.exec('ROLLBACK');src.close();}
+  assert.deepEqual(nativeMethodProgress,{totalPages:0,remainingPages:0});assert.equal(fs.statSync(raw).size,0);
+  let opens=0,wrapperProgress=null;
+  class ForeignLocked extends D{
+   constructor(...a){super(...a);opens++;}
+   async backup(destination,options){const held=new D(destination);held.exec('BEGIN EXCLUSIVE');try{wrapperProgress=await super.backup(destination,options);return wrapperProgress;}finally{held.exec('ROLLBACK');held.close();}}
+  }
+  const destination=path.join(dir,'owned-'+page+'.db'),admission={version:2,maximumMainBytes:pages*page,maximumJournalBytes:131072,filesystemClosureClaimed:false};
+  let refusal=null;try{await backup(source,destination,ForeignLocked,admission);}catch(e){refusal=e.message;}
+  assert.equal(refusal,'Exact pinned backup length required');assert.deepEqual(wrapperProgress,{totalPages:0,remainingPages:0});assert(fs.existsSync(destination));assert.equal(fs.statSync(destination).size,0);assert.equal(opens,1);
+  await assert.rejects(()=>backup(source,destination,ForeignLocked,admission),/already consumed/);assert.equal(opens,1);assert.equal(hash(source),initial);
+  observations.push({pageSize:page,sourcePages:pages,nativeMethodProgress,wrapperProgress,ownedRefusal:refusal,retainedDestinationBytes:0,sourceMainShaUnchanged:true,consumedDestinationRefusedBeforeNewSourceOpen:true,
+   foreignDestinationWriterIntentionallyIntroduced:true,strictNoOtherUsersProfileApplicable:false,nativeSqliteReturnCodeMeasured:false,nativeBusyBranchSourceDerived:true});
+ }
+ process.stdout.write(JSON.stringify({kind:'NEW_LOCAL_FOREIGN_DESTINATION_LOCK_DIAGNOSTIC',observations,nativeSourceProfilePass:false,releaseOrCapacityPass:false,physicalFilesystemClosureClaimed:false}));
+})().catch(e=>{console.error(e);process.exitCode=1});''')
+        self.assertEqual([r['pageSize'] for r in row['observations']],[512,4096,65536]);self.assertFalse(row['nativeSourceProfilePass'])
+
     def node(self,code):
         root=directory();node=shutil.which('node');self.assertIsNotNone(node)
         database=HERE.parents[1]/'server/node_modules/better-sqlite3'
