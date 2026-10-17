@@ -1,0 +1,203 @@
+#!/bin/sh
+set -e
+
+cd /app/server
+
+# If command arguments are passed (e.g. rehearsal, CLI tasks), execute them directly
+if [ "$#" -gt 0 ]; then
+    exec "$@"
+fi
+
+echo "╔═══════════════════════════════════════╗"
+echo "║    SoilFER-LIMS Docker Entrypoint     ║"
+echo "╚═══════════════════════════════════════╝"
+
+# Auto-generate or load persistent JWT_SECRET if not provided or still default
+if [ -z "$JWT_SECRET" ] || [ "$JWT_SECRET" = "please-change-this-secret" ]; then
+    SECRET_FILE="prisma/.jwt_secret"
+    if [ ! -d "prisma" ]; then
+        SECRET_FILE=".jwt_secret"
+    fi
+
+    if [ -s "$SECRET_FILE" ]; then
+        export JWT_SECRET=$(cat "$SECRET_FILE")
+        echo "🔑 Loaded persisted JWT_SECRET from $SECRET_FILE"
+    else
+        GENERATED_SECRET=$(node -e "console.log(require('crypto').randomBytes(64).toString('hex'))")
+        if [ -z "$GENERATED_SECRET" ]; then
+            echo "❌ FATAL: Failed to generate random JWT_SECRET." >&2
+            exit 1
+        fi
+        printf "%s" "$GENERATED_SECRET" > "$SECRET_FILE"
+        chmod 600 "$SECRET_FILE" 2>/dev/null || true
+        export JWT_SECRET="$GENERATED_SECRET"
+        echo "⚠ JWT_SECRET was not set — generated and securely saved persistent secret to $SECRET_FILE."
+        echo "  This secret will persist across container restarts."
+    fi
+fi
+if [ -z "$JWT_SECRET" ]; then
+    echo "❌ FATAL: JWT_SECRET could not be determined." >&2
+    exit 1
+fi
+
+# Ensure schema is available (volume mount may overlay prisma dir)
+if [ ! -f prisma/schema.prisma ]; then
+    echo "⚠ schema.prisma not found — copying from backup..."
+    cp /app/server/.schema-backup/schema.prisma prisma/schema.prisma
+fi
+
+DB_FILE="prisma/dev.db"
+SEED_FLAG="prisma/.seed_complete"
+if [ ! -d "prisma" ]; then
+    SEED_FLAG=".seed_complete"
+fi
+
+# Guard existing installations: detect database state safely (Fail-Closed)
+EXISTING_USERS=0
+SCHEMA_READY=0
+if [ -s "$DB_FILE" ]; then
+    INSPECT_JSON=$(node -e '
+        const Database = require("better-sqlite3");
+        try {
+            const db = new Database(process.argv[1]);
+            const tableCheck = db.prepare("SELECT name FROM sqlite_master WHERE type = ? AND name = ?").get("table", "User");
+            if (!tableCheck) {
+                console.log(JSON.stringify({ ok: true, schemaReady: false, userCount: 0 }));
+            } else {
+                const row = db.prepare("SELECT count(*) as count FROM User").get();
+                console.log(JSON.stringify({ ok: true, schemaReady: true, userCount: row ? row.count : 0 }));
+            }
+            db.close();
+        } catch (err) {
+            console.error("FATAL: Database inspection failed:", err.message);
+            process.exit(2);
+        }
+    ' "$DB_FILE")
+    INSPECT_STATUS=$?
+
+    if [ $INSPECT_STATUS -ne 0 ] || [ -z "$INSPECT_JSON" ]; then
+        echo "❌ FATAL: Database inspection failed for $DB_FILE. Halting startup to prevent data corruption." >&2
+        exit 1
+    fi
+
+    EXISTING_USERS=$(node -e 'const r = JSON.parse(process.argv[1]); console.log(r.userCount || 0);' "$INSPECT_JSON")
+    SCHEMA_READY=$(node -e 'const r = JSON.parse(process.argv[1]); console.log(r.schemaReady ? 1 : 0);' "$INSPECT_JSON")
+
+    if [ "$EXISTING_USERS" -gt 0 ] 2>/dev/null; then
+        touch "$SEED_FLAG" 2>/dev/null || true
+    fi
+fi
+
+# Step 1: Initialize database schema if file is missing, empty, or schema is not ready
+if [ ! -f "$DB_FILE" ] || [ ! -s "$DB_FILE" ] || [ "$SCHEMA_READY" -eq 0 ]; then
+    echo "🌱 Initializing database schema with Prisma..."
+    npx prisma db push
+fi
+
+# Step 2: Resumable initial seed (runs if not yet seeded and no users exist)
+if [ ! -f "$SEED_FLAG" ] && [ "$EXISTING_USERS" -eq 0 ]; then
+    echo "🌱 Seeding initial administrator and laboratory (${DEPLOYMENT_MODE:-local} mode)..."
+    node seed.js
+    touch "$SEED_FLAG" 2>/dev/null || true
+fi
+
+# Guarded: Only run prisma db push on existing databases if explicitly requested
+if [ "$ALLOW_PRISMA_DB_PUSH" = "true" ] && [ "$EXISTING_USERS" -gt 0 ]; then
+    echo "⚠ ALLOW_PRISMA_DB_PUSH=true detected: pushing database schema..."
+    npx prisma db push 2>&1 || echo "⚠ Schema push had warnings (may be OK for existing databases)"
+fi
+
+# Guarded: Only run seed on existing databases if explicitly requested
+if [ "$ALLOW_AUTO_SEED" = "true" ] && [ "$EXISTING_USERS" -gt 0 ]; then
+    echo "🌱 ALLOW_AUTO_SEED=true detected: running seed..."
+    node seed.js 2>&1 || echo "⚠ Seeding had warnings (may be OK)"
+fi
+
+# Versioned Lab Operations v3 Migration (Fail-Closed, Idempotent)
+echo "📦 Applying versioned lab operations v3 migration..."
+node scripts/migrate_lab_operations_v3.js --apply
+
+# User Appearance Preference Additive Migration (Fail-Closed, Idempotent)
+echo "📦 Applying appearance preference migration..."
+node scripts/migrate_appearance_preference.js
+
+# Project Templates and Policy Additive Migration (Fail-Closed, Idempotent)
+echo "📦 Applying project templates and policy migration..."
+node scripts/migrate_project_templates_and_policy.js
+
+# Sitewide Theme Library Additive Migration (Fail-Closed, Idempotent)
+echo "📦 Applying sitewide theme library migration..."
+node scripts/migrate_sitewide_theme_library.js
+
+# Mandatory workflow-state schema and guards (Additive, Fail-Closed, Idempotent)
+echo "📦 Installing workflow-state schema and guards..."
+node scripts/install_workflow_state_guards.js --apply
+
+echo "📦 Installing result attempt links..."
+node scripts/install_result_attempt_links.js --apply
+node scripts/install_sample_holds.js --apply
+echo "📦 Installing reference material catalogue..."
+node scripts/install_reference_materials.js --apply
+echo "📦 Installing versioned QC rules..."
+node scripts/install_qc_rules.js --apply
+
+# Existing QC evidence needs a reviewed, quiescent dry-run fingerprint. Never
+# approve a backfill automatically from the container's own dry-run output.
+echo "📦 Installing normalized QC runs..."
+if [ -n "${QC_RUN_PLAN_SHA256:-}" ]; then
+    node scripts/install_qc_runs.js --apply --plan-sha256 "$QC_RUN_PLAN_SHA256"
+else
+    node scripts/install_qc_runs.js --apply
+fi
+
+# #187 must complete before the independent #189 evidence extensions.
+echo "📦 Installing QC disposition scope guards..."
+node scripts/install_qc_gate_scope.js --db "${DATABASE_PATH:-/app/server/prisma/dev.db}" --apply
+
+# Install nullable PT evidence only. Legacy sigma/NCR backfill remains a
+# separate reviewed command; startup never approves its own backfill plan.
+echo "📦 Installing retained raw input column..."
+node scripts/install_result_raw_input.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
+echo "📦 Installing proficiency evidence..."
+node scripts/bootstrap_pt_nonconformity.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
+node scripts/install_result_equipment_evidence.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
+
+echo "📦 Installing duplicate-marker prerequisite..."
+node scripts/install_workitem_uniqueness.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
+
+echo "📦 Installing WorkAttempt execution evidence..."
+node scripts/install_work_attempt_contract.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
+echo "📦 Installing repeat and correction evidence..."
+node scripts/install_work_repeat_contract.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
+echo "📦 Installing reported-value selection evidence..."
+node scripts/install_reported_value_selections.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
+echo "📦 Installing retained run reagent links..."
+node scripts/install_batch_reagent_lots.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
+echo "📦 Installing inactive calculation references and evidence guards..."
+node scripts/install_calculation_templates.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
+
+echo "📦 Installing immutable result override requests..."
+node scripts/install_result_override_requests.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
+
+echo "📦 Installing immutable cross-check evidence..."
+node scripts/install_cross_check_evaluations.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
+echo "📦 Installing immutable amendment requests, attempt links and report withdrawals..."
+node scripts/install_sample_amendment_authorisation.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
+echo "📦 Installing immutable report revision evidence..."
+node scripts/install_report_revisions.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
+echo "📦 Installing bench credential storage..."
+node scripts/install_bench_credentials.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
+echo "📦 Installing preparation record evidence..."
+node scripts/install_preparation_records.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
+
+echo "📦 Installing retained instrument import templates and receipts..."
+node scripts/install_instrument_imports.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
+node scripts/install_sample_containers.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
+echo "📦 Installing canonical lab policy schema prerequisite..."
+node scripts/install_lab_policy_schema.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
+node scripts/install_control_charts.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
+node scripts/install_order_revisions.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
+
+# Start the server
+echo "🚀 Starting SoilFER-LIMS..."
+exec node index.js
