@@ -83,8 +83,9 @@ def capture_filesystem_controls(root,require_directory_sync=True,disk=None,no_wr
         require(p.as_posix()==spec['tmp'] and p.parent==root and not p.is_symlink(),
             'Exact private fresh-capture control directory required')
         return p
+    from kit_capture_main import MAIN_SITES
     prepare,read,permit=control_callbacks(root,directory,require_directory_sync,disk,no_writers,CAPTURE_SNAPSHOTS,
-        CAPTURE_COPY_SITES,'capture-order-impact',(),writer_journal_sites=CAPTURE_JOURNAL_SITES)
+        CAPTURE_COPY_SITES,'capture-order-impact',(),writer_journal_sites=CAPTURE_JOURNAL_SITES,writer_main_sites=MAIN_SITES)
     def guarded_prepare(spec):
         validate_capture_spec(spec)
         require(callable(no_writers),'Capture requires a fresh retained-clone writer inventory')

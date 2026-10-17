@@ -1,0 +1,279 @@
+{
+  "applicationHead": "be8379745bdfae52ce46496ff26514dc7d729640",
+  "callPaths": [
+    "Fresh Node process, blank NODE_OPTIONS, exact compiled capture argv; no startupContext is supplied.",
+    "206 calls instrument-import assert, which calls calculation assert; each prerequisite uses apply=false and its readonly early return. 214 first calls the same 206 readonly chain and policy readonly-copy assert.",
+    "Calculation reference classifier imports only UNITS from seeds/units; seedUnits is not called and its require.main branch is false. Prisma imports in those two uncalled branches are unreachable.",
+    "Each writer creates a fresh default better-sqlite3 handle, sets only foreign_keys=ON before the single immediate transaction, then uses classify, snapshot, digest-checked CREATE TABLE/INDEX/TRIGGER DDL and one bound receipt INSERT.",
+    "Snapshot SQL quotes schema-derived names by doubling every double quote. No ATTACH, VACUUM, journal/page settings, extensions, UDF callbacks, nested transaction, rollback-to or retry is called in either writer body.",
+    "All SQL/DDL or JS errors leave the callback. The binding uses top-level BEGIN IMMEDIATE because the handle is fresh, runs ROLLBACK if still inTransaction, and rethrows. The caller only closes the handle; the CLI only prints the error and exits.",
+    "SQLite trigger programs can execute DML and SELECT, not ATTACH/VACUUM/transaction or PRAGMA statements. Constraint/RAISE errors propagate; IGNORE does not roll back prior changes. No caller catches such an error and continues writing.",
+    "Native sqlite3PagerMovepage has one caller relocatePage. Its DDL create/drop-root callers are guarded by autoVacuum; incremental/full vacuum paths are excluded by the two zero header fields and absence of vacuum/setting commands.",
+    "The binding passes NULL VFS to sqlite3_open_v2. Fresh Linux process uses pinned default Unix VFS; no code registers a custom VFS or automatic extension. Maximum sector remains 65536; no 4096 assumption is used."
+  ],
+  "completeMainJournalCallerReview": true,
+  "completeWriterFilesystemReview": false,
+  "excluded": [
+    "WAL-mode databases",
+    "auto-vacuum",
+    "existing journals",
+    "nonempty WAL/SHM",
+    "changed source",
+    "main database growth",
+    "statement journals and SQL scratch",
+    "continuous peak or full journal originals",
+    "physical allocation and complete filesystem qualification"
+  ],
+  "files": {
+    "server/node_modules/better-sqlite3/binding.gyp": {
+      "bytes": 942,
+      "sha256": "2a48a110d17a692e769e4747dfea3b4471842ba86501db7cdcda33f8dfcb2921"
+    },
+    "server/node_modules/better-sqlite3/deps/common.gypi": {
+      "bytes": 1584,
+      "sha256": "e71a565cd7733e05efc3a2792b54e260126f03f490325aa2a201202acbbdb315"
+    },
+    "server/node_modules/better-sqlite3/deps/copy.js": {
+      "bytes": 897,
+      "sha256": "05a2bd41dbd96e33e2fc6cf4bcbc722b4bc8c529813b882f92113d7dbbbece67"
+    },
+    "server/node_modules/better-sqlite3/deps/defines.gypi": {
+      "bytes": 1128,
+      "sha256": "1ffa84b8af99780a293dcb7a9031c2dccc8b0d013aef434a35c283cc6c984f2e"
+    },
+    "server/node_modules/better-sqlite3/deps/sqlite3.gyp": {
+      "bytes": 2542,
+      "sha256": "a009b8f80cf0a944eacaf71a84e590504f353fbd8f8b341138d0c3094e372d18"
+    },
+    "server/node_modules/better-sqlite3/deps/sqlite3/sqlite3.c": {
+      "bytes": 9389807,
+      "sha256": "2bbdd0eff3f46852e954d7881b7945990bf78c1421f806cf7978bc22e187100a"
+    },
+    "server/node_modules/better-sqlite3/lib/database.js": {
+      "bytes": 4149,
+      "sha256": "02ea23bdd23d7ac5de0675a2f32fc686e76d5c6a32bd3e3891f360e72e07f61f"
+    },
+    "server/node_modules/better-sqlite3/lib/methods/backup.js": {
+      "bytes": 2380,
+      "sha256": "ea29d34992bb02e006d0fdeda9675ac5d2bb227aaf57468decd997e9fc9c7dbf"
+    },
+    "server/node_modules/better-sqlite3/lib/methods/transaction.js": {
+      "bytes": 2792,
+      "sha256": "bc8624a3ef689d8f78e5669020ad121e17acbc93b1d5ee5afe26860b1084c66c"
+    },
+    "server/node_modules/better-sqlite3/package.json": {
+      "bytes": 1427,
+      "sha256": "2477bed8910fa9e3a842f20721f86927ef6d1424851f423539c644e48ec20e84"
+    },
+    "server/node_modules/better-sqlite3/src/objects/backup.cpp": {
+      "bytes": 4146,
+      "sha256": "16a67102c49c9312eb1deecd08c27064325840df51d6957fe134b871f5d8798c"
+    },
+    "server/node_modules/better-sqlite3/src/objects/database.cpp": {
+      "bytes": 14178,
+      "sha256": "0e5806c8d74bcf66ef596516227479f4ae921e58f76c742e564abb15e4360720"
+    },
+    "server/prisma/migrations/20261004085500_add_lab_policy_settings/migration.sql": {
+      "bytes": 1289,
+      "gitBlob": "e3c670f9024ba9ea67339c9778a14f153bfedb88",
+      "runtimePath": "server/.migrations-backup/policy/20261004085500_add_lab_policy_settings/migration.sql",
+      "sha256": "fa6ef0563f80704dbc4ee08d90ceae91f632c912813ca037221b02aa03ef7b70"
+    },
+    "server/prisma/migrations/20261009000400_calculation_templates/fresh-prisma-tables.json": {
+      "bytes": 7268,
+      "gitBlob": "366133b276846101298a8ab11877e9f4c3785814",
+      "runtimePath": "server/.migrations-backup/199/20261009000400_calculation_templates/fresh-prisma-tables.json",
+      "sha256": "684eb3e000930bd52a0c3628f020198bc315c7ace8cb284da91430167007f07d"
+    },
+    "server/prisma/migrations/20261009000400_calculation_templates/migration.sql": {
+      "bytes": 24778,
+      "gitBlob": "579747950ce2d5bc8d63b505edcbda1afde82f06",
+      "runtimePath": "server/.migrations-backup/199/20261009000400_calculation_templates/migration.sql",
+      "sha256": "84f50f90aaa69f96e8b025b4b5932eb374c26900c1470919025ae4c7bf9c3da8"
+    },
+    "server/prisma/migrations/20261010000100_instrument_import_templates/fresh-prisma-tables.json": {
+      "bytes": 2877,
+      "gitBlob": "2d93236cda13929e7134762dfd587c3df373f315",
+      "runtimePath": "server/.migrations-backup/200/20261010000100_instrument_import_templates/fresh-prisma-tables.json",
+      "sha256": "9e098129de487fdb8ae551da9756a48c5627821ebe8da899f965824f815849df"
+    },
+    "server/prisma/migrations/20261010000100_instrument_import_templates/migration.sql": {
+      "bytes": 4342,
+      "gitBlob": "bc0007230856b8903a6ab7ce2425a6a55dfba91f",
+      "runtimePath": "server/.migrations-backup/200/20261010000100_instrument_import_templates/migration.sql",
+      "sha256": "68555c0f9901a48c1c87a7d4ccb8320d0c515e388df094a47865064ee0ad6fc8"
+    },
+    "server/prisma/migrations/20261010000100_instrument_import_templates/post205-draft-tables.json": {
+      "bytes": 8105,
+      "gitBlob": "ee1836b8e5171601a33b023438293ee2544a0cd1",
+      "runtimePath": "server/.migrations-backup/200/20261010000100_instrument_import_templates/post205-draft-tables.json",
+      "sha256": "208c61cfed932cdf44bdc2b36e6d337d7687a71d13ac99dc4d48f406fcdf50ad"
+    },
+    "server/prisma/migrations/20261010000100_instrument_import_templates/pre-prisma-draft-table.sql": {
+      "bytes": 769,
+      "gitBlob": "b940d033dc0c857819693ad005041d2bdef3a05d",
+      "runtimePath": "server/.migrations-backup/200/20261010000100_instrument_import_templates/pre-prisma-draft-table.sql",
+      "sha256": "a523b351ff7046f21c448c637600ddbbc159c38487a4cd982163e0ada13ef6af"
+    },
+    "server/prisma/migrations/20261010000100_instrument_import_templates/upgraded-prisma-draft-table.sql": {
+      "bytes": 874,
+      "gitBlob": "efb20835b91e24b0bac29405e664985612332ef8",
+      "runtimePath": "server/.migrations-backup/200/20261010000100_instrument_import_templates/upgraded-prisma-draft-table.sql",
+      "sha256": "4f444bdf15f710a2c0223764b650713ce6b413c3d4469a950bb8bfaa05bf666b"
+    },
+    "server/prisma/migrations/20261013000100_sample_containers/migration.sql": {
+      "bytes": 3351,
+      "gitBlob": "c2a537a2914555e47e6444412edda001b6bd85db",
+      "runtimePath": "server/.migrations-backup/206/20261013000100_sample_containers/migration.sql",
+      "sha256": "2a239bf9b13820a151e3fcc3e81fc47142a34027ec0502c5c26acd42200254b4"
+    },
+    "server/prisma/migrations/20261013000200_control_charts/migration.sql": {
+      "bytes": 8438,
+      "gitBlob": "06782e4a7cf977992c7478d753aa14588a2921c0",
+      "runtimePath": "server/.migrations-backup/214/20261013000200_control_charts/migration.sql",
+      "sha256": "49b378296a8a0ede3318ae1e543060478b55827db0ec981d8cc4bd6180a56df6"
+    },
+    "server/scripts/install_calculation_templates.js": {
+      "bytes": 6027,
+      "gitBlob": "1c2d614dfaeb9a0cf8def0c6f09249a1ac0e4f28",
+      "sha256": "56c77798bf81c295bdc9b645661473e01c6d3fe90541e3cbe5de1104b8a04380"
+    },
+    "server/scripts/install_control_charts.js": {
+      "bytes": 9109,
+      "gitBlob": "799be75d6a945cd5fdfa83712d2168a64b822bfa",
+      "sha256": "fd5bdc007ac2e995dd25a65822169135c3c41252dc5d86c50fe45b99bd72125b"
+    },
+    "server/scripts/install_instrument_imports.js": {
+      "bytes": 9029,
+      "gitBlob": "c1c7ac484f01126580cf7464c05c1d6b662bfc37",
+      "sha256": "4d1706458dd0730cf2fcc7581c6d08e8c091989e394d45ea100c133faac8f93f"
+    },
+    "server/scripts/install_lab_policy_schema.js": {
+      "bytes": 12099,
+      "gitBlob": "446e5f3a1fe1cff5198f8dbc5daf51626b717787",
+      "sha256": "b4d867b31c798981de10665ee929696343257fdac16fdcd2fd4a56a35cbdd4ba"
+    },
+    "server/scripts/install_sample_containers.js": {
+      "bytes": 9412,
+      "gitBlob": "6a817ccdf11927af162ca9ea0644786604d9d5b7",
+      "sha256": "67bcf2f978e99f50952b5303fbb837bd447c5ff13c625970f6eadb02ab1796b7"
+    },
+    "server/seeds/units.js": {
+      "bytes": 8961,
+      "gitBlob": "302995e5d3cbad2a4e2d34014e1f0a44aa445dda",
+      "sha256": "1d0bb165f0e20037265f317bf0360c9c7dca0a26360d3680fd001826def62104"
+    },
+    "server/services/calculationReferenceInstall.js": {
+      "bytes": 6218,
+      "gitBlob": "8455c6840cfa07e19474e80e20c55904b17e2479",
+      "sha256": "c1e10519be03f2dda63935ed75a3461816cb5469c1707eecc0e4ec5e4af312c3"
+    },
+    "server/services/calculationReferenceLibrary.js": {
+      "bytes": 10558,
+      "gitBlob": "537375b817683f7c43cadfb9e292ede8e57278ec",
+      "sha256": "262440327bd629a2306524382984d40e3e13f4d6074d80ac84cac929dfb1b009"
+    },
+    "server/services/calculationReferenceUnit.js": {
+      "bytes": 1392,
+      "gitBlob": "e7d9e4a99050958c9fdaf5c49d641357bbe86635",
+      "sha256": "82ef435ddb2773b92caaf570b010eb4da63529b109711374000bffc0e74fe932"
+    },
+    "server/services/calculationTemplateMigrationSource.js": {
+      "bytes": 1823,
+      "gitBlob": "ab510e5552c7365061c69c274463013d58fed278",
+      "sha256": "25e9302c060d9ffd3a7ed73f1497232e3a04e448201022f5fca373afbb865cbb"
+    },
+    "server/services/calculationTemplateSchemaService.js": {
+      "bytes": 6241,
+      "gitBlob": "d2ad9edc7f92e4ec16d4bae197e2b7d7f88d5c15",
+      "sha256": "ac263d7a9aba6a83eda0b7efb84072b640bf8f3be545b56eb0e02c4f4ae9c051"
+    },
+    "server/services/controlChartMigrationSource.js": {
+      "bytes": 1145,
+      "gitBlob": "bb08ce21cbbab57c587a54a7426df7a6e2633846",
+      "sha256": "2e79cdf57bb09eed9f5e2e8721aa5c0ab540c16a7312d4ff02d138a20e604df6"
+    },
+    "server/services/instrumentImportMigrationSource.js": {
+      "bytes": 2838,
+      "gitBlob": "cf3e92ec48e9aec3c1fedd8ae317246e58fbad35",
+      "sha256": "28a152d18f76578509c52e2865bbea1f0b3c2154427945fc8151909b9d216688"
+    },
+    "server/services/instrumentImportSchemaService.js": {
+      "bytes": 7312,
+      "gitBlob": "8f5207ed4926cc92ddc0d97919e9e39012185496",
+      "sha256": "897cd427cf8f16cc9199269d259232cc34395049b75d7fb119aa3a15c3fbec41"
+    },
+    "server/services/labPolicyMigrationSource.js": {
+      "bytes": 1326,
+      "gitBlob": "22ce48f61cd62cb034af12f822ca55ca0f70c971",
+      "sha256": "ff0e4a69226b442e97f91b5e569ec4e5c129b6aaef65a0490722e1ba82037bc1"
+    },
+    "server/services/sampleContainerMigrationSource.js": {
+      "bytes": 1344,
+      "gitBlob": "cdf5dbce9276ddfb5a26d106c8d487643a5ec167",
+      "sha256": "ab223052522a5d74e899c4c372204a4a68574819a3f6b3c7bd8837f8ad7bb8d4"
+    },
+    "shared/numberParse.js": {
+      "bytes": 4520,
+      "gitBlob": "60794954d7465a8278d5622de557a4bb3ed8971a",
+      "sha256": "2b8891b92901d55e8e99d5fdf9df667c511bfeeba64c02f9d2fe8fd77fe6e737"
+    },
+    "shared/soilCalculation.js": {
+      "bytes": 12751,
+      "gitBlob": "80dfd8148b77a4d87b9996bddd285198e5263670",
+      "sha256": "d15a5afdae774456647d69651090e5065c9fd8e28629df0a6aa4a66f710671ed"
+    }
+  },
+  "labels": [
+    "capture-206-prepare",
+    "capture-214-prepare"
+  ],
+  "mainJournalDerivation": "rollback-journal-source.json",
+  "maximumSectorBytes": 65536,
+  "nativeExcerpts": {
+    "commit-auto-vacuum-guard": {
+      "firstLine": 76724,
+      "lastLine": 76746,
+      "sha256": "2648afec3751dcc9b970bfd32ed40cb114e9eb6cf24e9e652906d769da8c628e",
+      "text": "  if( p->inTrans==TRANS_WRITE ){\n    BtShared *pBt = p->pBt;\n    sqlite3BtreeEnter(p);\n#ifndef SQLITE_OMIT_AUTOVACUUM\n    if( pBt->autoVacuum ){\n      rc = autoVacuumCommit(p);\n      if( rc!=SQLITE_OK ){\n        sqlite3BtreeLeave(p);\n        return rc;\n      }\n    }\n    if( pBt->bDoTruncate ){\n      sqlite3PagerTruncateImage(pBt->pPager, pBt->nPage);\n    }\n#endif\n    rc = sqlite3PagerCommitPhaseOne(pBt->pPager, zSuperJrnl, 0);\n    sqlite3BtreeLeave(p);\n  }\n  return rc;\n}\n\n/*\n** This function is called from both BtreeCommitPhaseTwo() and BtreeRollback()\n"
+    },
+    "create-autovacuum-guard": {
+      "firstLine": 82463,
+      "lastLine": 82476,
+      "sha256": "ebb199bdc98afe3fa9e06743a77f6975a678718b618d7ec5651fce1a82e8f9d5",
+      "text": "#ifdef SQLITE_OMIT_AUTOVACUUM\n  rc = allocateBtreePage(pBt, &pRoot, &pgnoRoot, 1, 0);\n  if( rc ){\n    return rc;\n  }\n#else\n  if( pBt->autoVacuum ){\n    Pgno pgnoMove;      /* Move a page here to make room for the root-page */\n    MemPage *pPageMove; /* The page to move to. */\n\n    /* Creating a new table may probably require moving an existing database\n    ** to make room for the new tables root page. In case this page turns\n    ** out to be an overflow page, delete all overflow page-map caches\n    ** held by open cursors.\n"
+    },
+    "create-relocation": {
+      "firstLine": 82527,
+      "lastLine": 82548,
+      "sha256": "b0bff526231119be817625498123708f9f68484ad8b8bac9bc974b332cc5e784",
+      "text": "      /* Move the page currently at pgnoRoot to pgnoMove. */\n      rc = btreeGetPage(pBt, pgnoRoot, &pRoot, 0);\n      if( rc!=SQLITE_OK ){\n        return rc;\n      }\n      rc = ptrmapGet(pBt, pgnoRoot, &eType, &iPtrPage);\n      if( eType==PTRMAP_ROOTPAGE || eType==PTRMAP_FREEPAGE ){\n        rc = SQLITE_CORRUPT_PGNO(pgnoRoot);\n      }\n      if( rc!=SQLITE_OK ){\n        releasePage(pRoot);\n        return rc;\n      }\n      assert( eType!=PTRMAP_ROOTPAGE );\n      assert( eType!=PTRMAP_FREEPAGE );\n      rc = relocatePage(pBt, pRoot, eType, iPtrPage, pgnoMove, 0);\n      releasePage(pRoot);\n\n      /* Obtain the page at pgnoRoot */\n      if( rc!=SQLITE_OK ){\n        return rc;\n      }\n"
+    },
+    "drop-autovacuum-guard": {
+      "firstLine": 82748,
+      "lastLine": 82778,
+      "sha256": "75164371e9530ae0f923f7db02bf407dd13f8fc3a4daf8ced2d110992e2ae011",
+      "text": "#ifdef SQLITE_OMIT_AUTOVACUUM\n  freePage(pPage, &rc);\n  releasePage(pPage);\n#else\n  if( pBt->autoVacuum ){\n    Pgno maxRootPgno;\n    sqlite3BtreeGetMeta(p, BTREE_LARGEST_ROOT_PAGE, &maxRootPgno);\n\n    if( iTable==maxRootPgno ){\n      /* If the table being dropped is the table with the largest root-page\n      ** number in the database, put the root page on the free list.\n      */\n      freePage(pPage, &rc);\n      releasePage(pPage);\n      if( rc!=SQLITE_OK ){\n        return rc;\n      }\n    }else{\n      /* The table being dropped does not have the largest root-page\n      ** number in the database. So move the page that does into the\n      ** gap left by the deleted root-page.\n      */\n      MemPage *pMove;\n      releasePage(pPage);\n      rc = btreeGetPage(pBt, maxRootPgno, &pMove, 0);\n      if( rc!=SQLITE_OK ){\n        return rc;\n      }\n      rc = relocatePage(pBt, pMove, PTRMAP_ROOTPAGE, 0, iTable, 0);\n      releasePage(pMove);\n      if( rc!=SQLITE_OK ){\n"
+    },
+    "incremental-auto-vacuum-guard": {
+      "firstLine": 76578,
+      "lastLine": 76604,
+      "sha256": "b50751a9a813e70bdf0c04119ca658a7f989f68f3bc63c3b01459117d1c472ff",
+      "text": "  sqlite3BtreeEnter(p);\n  assert( pBt->inTransaction==TRANS_WRITE && p->inTrans==TRANS_WRITE );\n  if( !pBt->autoVacuum ){\n    rc = SQLITE_DONE;\n  }else{\n    Pgno nOrig = btreePagecount(pBt);\n    Pgno nFree = get4byte(&pBt->pPage1->aData[36]);\n    Pgno nFin = finalDbSize(pBt, nOrig, nFree);\n\n    if( nOrig<nFin || nFree>=nOrig ){\n      rc = SQLITE_CORRUPT_BKPT;\n    }else if( nFree>0 ){\n      rc = saveAllCursors(pBt, 0, 0);\n      if( rc==SQLITE_OK ){\n        invalidateAllOverflowCache(pBt);\n        rc = incrVacuumStep(pBt, nFin, nOrig, 0);\n      }\n      if( rc==SQLITE_OK ){\n        rc = sqlite3PagerWrite(pBt->pPage1->pDbPage);\n        put4byte(&pBt->pPage1->aData[28], pBt->nPage);\n      }\n    }else{\n      rc = SQLITE_DONE;\n    }\n  }\n  sqlite3BtreeLeave(p);\n  return rc;\n"
+    },
+    "page-move-only-caller": {
+      "firstLine": 76353,
+      "lastLine": 76380,
+      "sha256": "914c037abe77ea4e68ebe817684f000443aa1428000e0fe112b9fb94948f42a8",
+      "text": "static int relocatePage(\n  BtShared *pBt,           /* Btree */\n  MemPage *pDbPage,        /* Open page to move */\n  u8 eType,                /* Pointer map 'type' entry for pDbPage */\n  Pgno iPtrPage,           /* Pointer map 'page-no' entry for pDbPage */\n  Pgno iFreePage,          /* The location to move pDbPage to */\n  int isCommit             /* isCommit flag passed to sqlite3PagerMovepage */\n){\n  MemPage *pPtrPage;   /* The page that contains a pointer to pDbPage */\n  Pgno iDbPage = pDbPage->pgno;\n  Pager *pPager = pBt->pPager;\n  int rc;\n\n  assert( eType==PTRMAP_OVERFLOW2 || eType==PTRMAP_OVERFLOW1 ||\n      eType==PTRMAP_BTREE || eType==PTRMAP_ROOTPAGE );\n  assert( sqlite3_mutex_held(pBt->mutex) );\n  assert( pDbPage->pBt==pBt );\n  if( iDbPage<3 ) return SQLITE_CORRUPT_BKPT;\n\n  /* Move page iDbPage from its current location to page number iFreePage */\n  TRACE((\"AUTOVACUUM: Moving %u to free page %u (ptr page %u type %u)\\n\",\n      iDbPage, iFreePage, iPtrPage, eType));\n  rc = sqlite3PagerMovepage(pPager, pDbPage->pDbPage, iFreePage, isCommit);\n  if( rc!=SQLITE_OK ){\n    return rc;\n  }\n  pDbPage->pgno = iFreePage;\n\n"
+    }
+  },
+  "nativePackageProofSha256": "86a8caa2c4d075311ab90d7226478719974c43b3fbc356e18c771d582e168a63",
+  "officialReferences": [
+    "https://www.sqlite.org/lang_createtrigger.html",
+    "https://www.sqlite.org/pragma.html#pragma_auto_vacuum",
+    "https://www.sqlite.org/lang_savepoint.html"
+  ],
+  "scope": "CAPTURE_206_214_MAIN_ROLLBACK_JOURNAL_ONLY",
+  "version": 1
+}

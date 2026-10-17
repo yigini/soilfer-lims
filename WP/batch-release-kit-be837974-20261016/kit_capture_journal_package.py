@@ -100,7 +100,8 @@ def verify_capture_journals(files,root):
             'mainDatabaseGrowthBounded':False,'statementOrSqlScratchBounded':False,
             'physicalFilesystemClosureClaimed':False,'completeWriterFilesystemReview':False}
         require(canonical(closed)==canonical(expected_closed),'Original journal closure, admission link or authority differs')
-        ceiling=(budget.db*794*125+99)//100
+        from kit_capture_budget import capture_ceiling
+        ceiling=capture_ceiling(budget.db,budget.assets,label,site)
         # Use the compiled producer cost, never a caller-provided ceiling.
         from kit_capture_journal import JOURNAL_DB_COST
         require(JOURNAL_DB_COST==794,'Reviewed maximum-sector journal geometry changed')

@@ -178,7 +178,13 @@ class CaptureJournal(unittest.TestCase):
         self.assertLess(guard.index('verifyCaptureWriter(value.directory'),guard.index('await runChild(value.directory'))
 
     def test_real_native_guard_checks_source_and_admitted_bytes_before_scientific_spawn(self):
-        root=directory();target=database(root)
+        root=directory();setup=root/'new-source';setup.mkdir();source=database(setup)
+        from kit_capture_native_inventory import RECEIPT_SQL
+        from retained_files import seal
+        with sqlite3.connect(source) as db:
+            db.execute(RECEIPT_SQL);db.execute('CREATE TABLE WorkAttempt(id TEXT)')
+        backup,_=seal(root,'fresh-production-snapshot',source,lambda:None,schema_original='capture-schema-initial.json')
+        parent=root/'scientific-database';parent.mkdir();target=parent/'dev.db';shutil.copyfile(backup,target);target.chmod(0o600)
         # A short NEW retained runtime avoids Windows MAX_PATH; the source
         # fixture keeps its full reference. No existing private tree is read.
         runtime=pathlib.Path(tempfile.mkdtemp(prefix='cj-native-')).resolve()
@@ -195,6 +201,12 @@ class CaptureJournal(unittest.TestCase):
         with self.context(root):plan=journal.capture_journal_plan(owned.capture_spec('capture-206-prepare'))
         temp=root/'control';temp.mkdir();admission=temp/'writer-journal-admission.json'
         admission.write_bytes(canonical(plan)+b'\n');admission.chmod(0o400);os.link(admission,str(admission)+'.pending')
+        from kit_capture_main import main_plan_fields
+        from kit_contract import sha
+        raw=(root/'capture-schema-initial.json').read_bytes();observation=json.loads(raw)
+        main=main_plan_fields('capture-206-prepare',observation,{'file':'capture-schema-initial.json','bytes':len(raw),'sha256':sha(raw)},plan)
+        main_path=temp/'writer-main-admission.json';main_path.write_bytes(canonical(main)+b'\n')
+        main_path.chmod(0o400);os.link(main_path,str(main_path)+'.pending')
         code="const v=require(process.argv[1]);v.verifyCaptureWriter(process.argv[2],'capture-206-prepare',{platform:'linux',appRoot:process.argv[3],target:process.argv[4]});process.stdout.write('SCIENTIFIC_SPAWN_ALLOWED');"
         command=[shutil.which('node'),'-e',code,str(HERE/'capture_writer_journal.cjs'),str(temp),str(runtime),str(target)]
         env={**os.environ,'NODE_OPTIONS':''}

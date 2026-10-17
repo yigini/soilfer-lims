@@ -37,21 +37,21 @@ def synthetic_journal_originals(files,budget):
     target=CAPTURE_ROOT/'scientific-database/dev.db';directory=[7,102];inode=103
     def profile(pages,digest):
         header=bytearray(100);header[:16]=b'SQLite format 3\0';header[16:18]=(4096).to_bytes(2,'big')
-        header[18:20]=bytes([1,1]);header[24:28]=(pages).to_bytes(4,'big')
+        header[18:20]=bytes([1,1]);header[21:24]=bytes([64,32,32]);header[56:60]=(1).to_bytes(4,'big');header[24:28]=(pages).to_bytes(4,'big')
         header[28:32]=(pages).to_bytes(4,'big');header[92:96]=header[24:28]
         row={'sha256':digest*64,'bytes':pages*4096,'device':7,'inode':inode,
             'mtimeNs':pages,'mode':0o600,'allocatedBytes':pages*4096}
         return journal_profile({'headerHex':header.hex(),'originalFiles':{'':row,'-wal':None,'-shm':None}},target)
-    before=profile(1,'a');initial=exact_json(files['capture-clone-provenance.json'])
+    before=profile(128,'a');initial=exact_json(files['capture-clone-provenance.json'])
     initial['initialCloneIdentity']={'databaseDirectoryIdentity':directory,
-        'files':{'dev.db':[7,inode,4096,1,1,stat.S_IFREG|0o600,1],'dev.db-wal':None,'dev.db-shm':None}}
+        'files':{'dev.db':[7,inode,128*4096,128,128,stat.S_IFREG|0o600,1],'dev.db-wal':None,'dev.db-shm':None}}
     files['capture-clone-provenance.json']=canonical(initial)+b'\n'
-    for ordinal,(label,site) in enumerate(CAPTURE_JOURNAL_SITES.items(),2):
+    for ordinal,(label,site) in enumerate(CAPTURE_JOURNAL_SITES.items(),129):
         admission={**before,'version':2,'scope':'CAPTURE_MAIN_ROLLBACK_JOURNAL_ADMISSION','label':label,
             'callerProofSha256':caller_proof(),'directoryIdentity':directory,'containerSource':'/app/server/prisma/dev.db',
             'writerGraphAdmissionImplemented':True,'completeWriterFilesystemReview':False}
         name=label+'-retained-temp/writer-journal-admission.json';files[name]=canonical(admission)+b'\n'
-        after=profile(ordinal,'b' if ordinal==2 else 'c')
+        after=profile(ordinal,'b' if ordinal==129 else 'c')
         closed={'version':2,'label':label,'admissionSha256':sha(files[name]),'afterProfile':after,
             'maximumJournalBytes':admission['bound']['maximumJournalBytes'],'journalAbsentAfterChildClose':True,
             'mainInodePreserved':True,'journalOriginalBytesRetained':False,'continuousPeakMeasured':False,
@@ -59,7 +59,7 @@ def synthetic_journal_originals(files,budget):
             'physicalFilesystemClosureClaimed':False,'completeWriterFilesystemReview':False}
         files[label+'-retained-temp/writer-journal-closure.json']=canonical(closed)+b'\n'
         reservation={'site':site,'destination':str(target)+'-journal','layout':admission['layout'],
-            'maximumBytes':(budget.db*JOURNAL_DB_COST*125+99)//100,'beforeDestinationCreation':True,
+            'maximumBytes':__import__('kit_capture_budget').capture_ceiling(budget.db,budget.assets,label,site),'beforeDestinationCreation':True,
             'stageTableSha256':CAPTURE_TABLE_SHA,'neverRetry':True,
             'sqliteTemporaryFilesAndGlobalFilesystemClosureClaimed':False}
         files[journal_disk_original(label)]=canonical(reservation)+b'\n';before=after
@@ -72,14 +72,24 @@ def synthetic_journal_originals(files,budget):
 
     from kit_schema_collection import schema_observation
     snapshot=exact_json(files['capture-snapshot-provenance.json'])
+    snapshot['backup']={'bytes':128*4096,'sha256':'a'*64}
+    initial['initialCloneByteIdentity']={'':snapshot['backup'],'-wal':None,'-shm':None}
     triple={'':snapshot['backup'],'-wal':None,'-shm':None}
     snapshot['rawTripleByteIdentity']=triple
     observations={}
     for issue,label,source_bytes in [('initial','fresh-production-snapshot',triple),
         *[(i,'capture-prepared-'+i,exact_json(files['capture-'+i+'-prepare-retained-temp/writer-journal-closure.json'])['afterProfile']['sourceDbWalShm']) for i in ('206','214')]]:
         # This is deliberately synthetic package evidence, not a native collector run.
-        schema={'version':1,'scope':'DECLARED_COMPLETE_SQLITE_SCHEMA','encoding':1,
-            'rows':[['table','fixture','fixture',2,'CREATE TABLE fixture(id TEXT)']]}
+        from kit_capture_native_inventory import RECEIPT_SQL,RECEIPT_INDEX
+        rows=[['table','_schema_migrations','_schema_migrations',2,RECEIPT_SQL],
+            ['index',RECEIPT_INDEX,'_schema_migrations',3,None],
+            ['table','WorkAttempt','WorkAttempt',4,'CREATE TABLE WorkAttempt(id TEXT)']]
+        rows += [['table','t'+str(n),'t'+str(n),5+n,'CREATE TABLE t'+str(n)+'(id TEXT)'] for n in range(104)]
+        if issue!='initial':
+            rows += [['table',name,name,109+n,'CREATE TABLE '+name+'(id TEXT)'] for n,name in enumerate(('SampleContainer','ContainerSequence'))]
+        if issue=='214':
+            rows += [['table',name,name,111+n,'CREATE TABLE '+name+'(id TEXT)'] for n,name in enumerate(('ControlLimitProposal','ControlLimitSet','QcReviewObligation','QcReviewResolution'))]
+        schema={'version':1,'scope':'DECLARED_COMPLETE_SQLITE_SCHEMA','encoding':1,'rows':rows}
         observed=schema_observation(label,schema,{'syntheticLogicalState':issue},
             source_bytes,source_bytes,source_bytes,source_bytes,source_bytes[''])
         name='capture-schema-'+issue+'.json';files[name]=canonical(observed)+b'\n'
@@ -97,6 +107,22 @@ def synthetic_journal_originals(files,budget):
     initial['snapshotProvenance']={'bytes':len(files['capture-snapshot-provenance.json']),
         'sha256':sha(files['capture-snapshot-provenance.json'])}
     files['capture-clone-provenance.json']=canonical(initial)+b'\n'
+
+    from kit_capture_main import MAIN_SITES,MAIN_SCHEMA,main_disk_original,main_plan_fields,main_closure_fields
+    from kit_capture_budget import capture_ceiling
+    for label,site in MAIN_SITES.items():
+        original_name=MAIN_SCHEMA[label];observation=exact_json(files[original_name])
+        original={'file':original_name,'bytes':len(files[original_name]),'sha256':sha(files[original_name])}
+        journal=exact_json(files[label+'-retained-temp/writer-journal-admission.json'])
+        main=main_plan_fields(label,observation,original,journal)
+        files[label+'-retained-temp/writer-main-admission.json']=canonical(main)+b'\n'
+        closed=main_closure_fields(main,exact_json(files[label+'-retained-temp/writer-journal-closure.json']))
+        files[label+'-retained-temp/writer-main-closure.json']=canonical(closed)+b'\n'
+        reservation={'site':site,'destination':str(target),'layout':main['layout'],
+            'maximumBytes':capture_ceiling(budget.db,budget.assets,label,site),'beforeDestinationCreation':False,
+            'beforeMainFileExtension':True,'stageTableSha256':CAPTURE_TABLE_SHA,'neverRetry':True,
+            'sqliteTemporaryFilesAndGlobalFilesystemClosureClaimed':False,'mainFileLengthOrVfsPreallocationBounded':False}
+        files[main_disk_original(label)]=canonical(reservation)+b'\n'
 
 
 def synthetic_capture_payload(files,index,source):

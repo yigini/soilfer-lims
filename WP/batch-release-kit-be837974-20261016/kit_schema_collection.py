@@ -128,10 +128,14 @@ def verify_schema_originals(files):
         canonical(initial['logicalStateOriginal'])==canonical(snapshot['logicalState']) and
         canonical(snapshot.get('fullSchemaOriginal'))==canonical({'bytes':len(files['capture-schema-initial.json']),
             'sha256':sha(files['capture-schema-initial.json'])}),'Initial schema original does not bind the captured backup/source')
+    require(sum(row[0]=='table' and not row[1].startswith('sqlite_') for row in initial['schema']['rows'])==snapshot['tableCount'],
+        'Complete schema table inventory differs from initial logical provenance')
     for issue in ('206','214'):
         name='capture-schema-'+issue+'.json';value=values[name]
         closed=exact_json(files['capture-'+issue+'-prepare-retained-temp/writer-journal-closure.json'])
         preservation=exact_json(files['capture-'+issue+'-preservation.json'])
+        require(sum(row[0]=='table' and not row[1].startswith('sqlite_') for row in value['schema']['rows'])==preservation['totalTables'],
+            'Complete schema table inventory differs from preparation preservation')
         require(value['sealLabel']=='capture-prepared-'+issue and
             canonical(value['copiedSourceDbWalShm'])==canonical(closed['afterProfile']['sourceDbWalShm']) and
             canonical(preservation.get('fullSchemaOriginal'))==canonical({'bytes':len(files[name]),'sha256':sha(files[name])}) and

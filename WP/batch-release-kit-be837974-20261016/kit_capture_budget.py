@@ -13,25 +13,50 @@ from kit_capture_owned import CAPTURE_ROOT,CAPTURE_UNIT,CAPTURE_COPY_SITES
 from kit_capture_journal import CAPTURE_JOURNAL_SITES,JOURNAL_DB_COST,journal_disk_original
 from kit_disk import Disk
 from kit_journal import exclusive_record
+from kit_capture_main import MAIN_SITES,MAIN_GROWTH_MAX,JOURNAL_214_GROWTH_EXTRA,main_disk_original
+from kit_copy_admission import copy_layout
 
 CAPTURE_DB_COST={'triple':1,'backup':1,'reader-index':1,'clone':1,'assets':0,'seal-directory':0,
     'capture-policy-snapshot':1,'capture-214-snapshot':1,'capture-order-snapshots':2,
-    'capture-206-main-journal':JOURNAL_DB_COST,'capture-214-main-journal':JOURNAL_DB_COST}
+    'capture-206-main-journal':JOURNAL_DB_COST,'capture-214-main-journal':JOURNAL_DB_COST,
+    'capture-206-native-main':0,'capture-214-native-main':0}
 CAPTURE_APACHE_BYTES=8*1024**2
+G206=MAIN_GROWTH_MAX['capture-206-prepare']
+G214=MAIN_GROWTH_MAX['capture-214-prepare']
+CAPTURE_EXTRA={
+    'capture-206-prepare':{'triple':copy_layout([G206],0)['declaredAllocationBytes'],
+        'backup':copy_layout([G206],0)['declaredAllocationBytes'],'reader-index':copy_layout([G206],0)['declaredAllocationBytes'],
+        'capture-206-native-main':copy_layout([G206],0)['declaredAllocationBytes']},
+    'capture-214-prepare':{'capture-214-snapshot':copy_layout([G206],0)['declaredAllocationBytes'],
+        'triple':copy_layout([G206+G214],0)['declaredAllocationBytes'],
+        'backup':copy_layout([G206+G214],0)['declaredAllocationBytes'],
+        'reader-index':copy_layout([G206+G214],0)['declaredAllocationBytes'],
+        'capture-214-native-main':copy_layout([G214],0)['declaredAllocationBytes'],
+        'capture-214-main-journal':copy_layout([JOURNAL_214_GROWTH_EXTRA],0)['declaredAllocationBytes']},
+    'capture-order-impact':{'capture-order-snapshots':2*copy_layout([G206+G214],0)['declaredAllocationBytes']}}
+
+
+def capture_ceiling(database,assets,stage,site):
+    if site=='seal-directory':return SEAL_DIRECTORY_BYTES
+    base=assets if site=='assets' else (database*CAPTURE_DB_COST[site]*125+99)//100
+    extra=CAPTURE_EXTRA.get(stage,{}).get(site,0)
+    return base+(extra*125+99)//100
+
+
 CAPTURE_STAGES=(
     ('capture-filesystem-snapshot',{'triple':2,'backup':1,'reader-index':1,'seal-directory':1,'assets':1},
         SEAL_DIRECTORY_BYTES+CAPTURE_APACHE_BYTES),
     ('capture-clone',{'clone':1},0),
     ('capture-integrity',{},0),
     ('capture-canonical-policy',{'capture-policy-snapshot':1},0),
-    ('capture-206-prepare',{'triple':2,'backup':1,'reader-index':1,'seal-directory':1,'capture-206-main-journal':1},SEAL_DIRECTORY_BYTES),
-    ('capture-214-prepare',{'capture-214-snapshot':1,'triple':2,'backup':1,'reader-index':1,'seal-directory':1,'capture-214-main-journal':1},SEAL_DIRECTORY_BYTES),
+    ('capture-206-prepare',{'triple':2,'backup':1,'reader-index':1,'seal-directory':1,'capture-206-main-journal':1,'capture-206-native-main':1},SEAL_DIRECTORY_BYTES),
+    ('capture-214-prepare',{'capture-214-snapshot':1,'triple':2,'backup':1,'reader-index':1,'seal-directory':1,'capture-214-main-journal':1,'capture-214-native-main':1},SEAL_DIRECTORY_BYTES),
     ('capture-chart-impact',{},0),
     ('capture-order-impact',{'capture-order-snapshots':1},0),
 )
 CAPTURE_TABLE=[{'stage':name,'sites':sites,
     'dbTriples':sum(CAPTURE_DB_COST[site]*count for site,count in sites.items()),
-    'assetCopies':sites.get('assets',0),'fixedBytes':fixed,'logGrowthShareBytes':LOG_RESERVE//8}
+    'assetCopies':sites.get('assets',0),'fixedBytes':fixed+sum(count*CAPTURE_EXTRA.get(name,{}).get(site,0) for site,count in sites.items()),'logGrowthShareBytes':LOG_RESERVE//8}
     for name,sites,fixed in CAPTURE_STAGES]
 CAPTURE_TOTAL_DB_COPIES=sum(row['dbTriples'] for row in CAPTURE_TABLE)
 CAPTURE_DB_EQUIVALENTS=max(MINIMUM_DB_EQUIVALENTS,math.ceil(CAPTURE_TOTAL_DB_COPIES*1.25))
@@ -81,14 +106,15 @@ class CaptureBudget:
         if site is not None:self.claim(site)
         site=CAPTURE_JOURNAL_SITES.get(label)
         if site is not None:self.claim(site)
+        site=MAIN_SITES.get(label)
+        if site is not None:self.claim(site)
 
     def copy_ceiling(self,site):
         require(self.active is not None and site in CAPTURE_TABLE[self.completed]['sites'] and
             self.claims.get(site,0)>self.copy_admissions[site],
             'Capture copy requires an unused consumed active-stage claim')
         self.copy_admissions[site]+=1
-        if site=='seal-directory':return SEAL_DIRECTORY_BYTES
-        return self.assets if site=='assets' else (self.db*CAPTURE_DB_COST[site]*125+99)//100
+        return capture_ceiling(self.db,self.assets,self.active,site)
 
     def finish(self,label,physical_growth):
         require(self.active==label and dict(self.claims)==CAPTURE_TABLE[self.completed]['sites'],
@@ -119,6 +145,16 @@ class CaptureDisk(Disk):
         self.check()
         # The physical journal name is reused by two distinct forward
         # transactions. Their source claims and immutable receipts must differ.
+        if site in MAIN_SITES.values():
+            require(pathlib.Path(destination)==self.root/'scientific-database/dev.db','Native MAIN destination differs')
+            label=next(label for label,value in MAIN_SITES.items() if value==site)
+            exclusive_record(self.root,main_disk_original(label),{
+                'site':site,'destination':str(destination),'layout':plan,'maximumBytes':ceiling,
+                'beforeDestinationCreation':False,'beforeMainFileExtension':True,
+                'stageTableSha256':CAPTURE_TABLE_SHA,'neverRetry':True,
+                'sqliteTemporaryFilesAndGlobalFilesystemClosureClaimed':False,
+                'mainFileLengthOrVfsPreallocationBounded':False},self.sync)
+            return
         if site in CAPTURE_JOURNAL_SITES.values():
             require(pathlib.Path(destination)==self.root/'scientific-database/dev.db-journal',
                 'Capture main-journal admission destination differs')

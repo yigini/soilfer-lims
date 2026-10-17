@@ -37,6 +37,9 @@ class NativeCloneStandIn(CaptureOwnedCli):
             # scientific stand-in. This remains explicitly not an app CLI run.
             from kit_capture_journal import capture_journal_plan,CAPTURE_JOURNAL_SITES
             journal_plan=capture_journal_plan(spec)
+            from kit_capture_main import capture_main_plan,MAIN_SITES
+            main_plan=capture_main_plan(spec,journal_plan)
+            current.disk.admit_copy(MAIN_SITES[label],target,main_plan['layout'])
             current.disk.admit_copy(CAPTURE_JOURNAL_SITES[label],pathlib.Path(journal_plan['journal']),journal_plan['layout'])
         if label in CAPTURE_SNAPSHOTS:
             admission=snapshot_plan(target,CAPTURE_SNAPSHOTS[label])
@@ -48,17 +51,21 @@ class NativeCloneStandIn(CaptureOwnedCli):
         if label in ('capture-206-prepare','capture-214-prepare'):
             if not tmp.exists():tmp.mkdir()
             exclusive_record(tmp,'writer-journal-admission.json',journal_plan,False)
+            exclusive_record(tmp,'writer-main-admission.json',main_plan,False)
             issue=label.split('-')[1]
             with sqlite3.connect(target) as db:
                 for table in sorted(CHAIN[issue][0]):db.execute('CREATE TABLE "'+table+'"(id TEXT PRIMARY KEY)')
-                db.execute('INSERT INTO _schema_migrations VALUES(?)',(CHAIN[issue][1],))
+                db.execute('INSERT INTO _schema_migrations(id,details) VALUES(?,?)',(CHAIN[issue][1],'LOCAL scientific SQL stand-in'))
                 if self.fail=='old-row':db.execute("UPDATE t0 SET value='MUTATED OLD VALUE'")
                 if self.fail=='nonempty':db.execute('INSERT INTO "'+sorted(CHAIN[issue][0])[0]+'" VALUES(?)',('new',))
                 if self.fail=='foreign':db.execute('CREATE TABLE unexpected(id TEXT)')
             value={'classification':'COMPLETE_'+issue,'previousClassification':'PRE_'+issue,'mode':'APPLIED',
                 'backfilledCount':1 if self.fail=='backfill' else 0,'totalChanges':1,'receipt':{'originalRowsPreserved':True}}
             from kit_capture_journal import close_capture_journal
-            exclusive_record(tmp,'writer-journal-closure.json',close_capture_journal(journal_plan),False)
+            journal_closed=close_capture_journal(journal_plan)
+            exclusive_record(tmp,'writer-journal-closure.json',journal_closed,False)
+            from kit_capture_main import main_closure_fields
+            exclusive_record(tmp,'writer-main-closure.json',main_closure_fields(main_plan,journal_closed),False)
         elif label=='capture-integrity':value=science.EXPECTED
         elif label=='capture-canonical-policy':value={'classification':'PRESENT','shape':'CANONICAL','mode':'NO_OP',
             'totalChanges':0,'dataWrites':0,'readonlySnapshot':{'originalFilesPreserved':True}}

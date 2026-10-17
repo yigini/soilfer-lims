@@ -42,7 +42,7 @@ class CaptureJournalPackage(unittest.TestCase):
             self.assertTrue(result['allJournalControlSemanticsRechecked'])
             self.assertFalse(any(result[key] for key in ('journalOriginalBytesRetained','continuousPeakMeasured',
                 'physicalFilesystemClosureClaimed','completeWriterFilesystemReview')))
-            self.assertEqual(len(receipt['files']),28)
+            self.assertEqual(len(receipt['files']),34)
             for name in JOURNAL_ORIGINALS:
                 value=output_read_record(current.root,name)
                 self.assertEqual(files[name],canonical(value)+b'\n')

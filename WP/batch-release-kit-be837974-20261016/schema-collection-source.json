@@ -17,8 +17,8 @@
       "sha256": "b06633edfa9dd3780ded96ea028dd6bc53150adb6d1cdfadf612a88848534dc2"
     },
     "kit_capture_review.py": {
-      "bytes": 16339,
-      "sha256": "89d742d4b564f7bff3861cee434a220313d07e9fb3c99212333e1c377bb8587b"
+      "bytes": 16510,
+      "sha256": "bf65fd5e6bfc236beffce3acc70ed05f92d2d673f2d6a3b6725ffae9e9c734c1"
     },
     "kit_capture_science.py": {
       "bytes": 11013,
@@ -37,8 +37,8 @@
       "sha256": "830659a6704d5b82728bca419a712a0feb3e6479323e065a6d433b49faf63052"
     },
     "kit_schema_collection.py": {
-      "bytes": 11223,
-      "sha256": "e31204043e0a088470eff384d258b5f4ef6f735f72415524fbb085edc158d0eb"
+      "bytes": 11662,
+      "sha256": "2c707d3447dd64536bd6166093cc0346e5aae6cb7cd7e1692434f4550853e726"
     },
     "kit_science.py": {
       "bytes": 7469,

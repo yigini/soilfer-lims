@@ -39,9 +39,11 @@ def fixture():
     (assets/'nested/binary').write_bytes(b'\x00\xffLOCAL ASSET')
     source=live/'dev.db';writer=sqlite3.connect(source)
     writer.execute('PRAGMA journal_mode=WAL');writer.execute('PRAGMA wal_autocheckpoint=0')
-    writer.execute('CREATE TABLE _schema_migrations(id TEXT PRIMARY KEY)')
-    writer.executemany('INSERT INTO _schema_migrations VALUES(?)',[(str(n),) for n in range(39)])
-    for n in range(105):writer.execute('CREATE TABLE t'+str(n)+'(id INTEGER PRIMARY KEY,value TEXT)')
+    from kit_capture_native_inventory import RECEIPT_SQL
+    writer.execute(RECEIPT_SQL)
+    writer.executemany('INSERT INTO _schema_migrations(id) VALUES(?)',[(str(n),) for n in range(39)])
+    writer.execute('CREATE TABLE WorkAttempt(id TEXT PRIMARY KEY,aliquotId TEXT)')
+    for n in range(104):writer.execute('CREATE TABLE t'+str(n)+'(id INTEGER PRIMARY KEY,value TEXT)')
     writer.execute("INSERT INTO t0 VALUES(1,'ORIGINAL BEFORE WINDOW')");writer.commit()
     normal=old();normal['State']['Pid']=41234;observations=[]
     def inspect(identity):observations.append(identity);return copy.deepcopy(normal)
@@ -277,7 +279,7 @@ class CaptureCopies(unittest.TestCase):
             prepare,_,_=owned.capture_filesystem_controls(current.root,False,current.disk,lambda:writers.append(True))
             with patch.object(kit_evidence,'_runtime',kit_evidence.EvidenceLedger(current.root)):
                 prepare(spec)
-            self.assertEqual(writers,[True,True,True])
+            self.assertEqual(writers,[True,True,True,True,True])
             self.assertTrue((pathlib.Path(spec['tmp'])/'cli-output-admission.json').exists())
             self.assertEqual(retained.identity_record(retained.triple(current.root/'fresh-production-snapshot/raw/dev.db')),before)
             with self.assertRaises(RuntimeError):prepare(spec)
