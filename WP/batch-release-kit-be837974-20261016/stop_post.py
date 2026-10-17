@@ -200,6 +200,7 @@ class EvidenceLedger:
         self.number = 0
         self.active_window = None
         self.window_number = 0
+        self.ticket_paths = {}
 
     def reserve(self, paths, maximum_bytes, category, future_directory=None):
         require(category in self.shares and isinstance(paths, tuple) and (len(paths) in (1, 2)), 'Declared evidence category and one/two entry paths required')
@@ -236,6 +237,7 @@ class EvidenceLedger:
         self.number += 1
         ticket = self.number
         self.open[ticket] = (category, amount, maximum_bytes, len(names), directory_charge, window)
+        self.ticket_paths[ticket] = tuple(relative)
         return ticket
 
     def settle(self, ticket, actual_bytes):
@@ -318,7 +320,7 @@ def real_directory(value):
         require(not part.is_symlink(), 'Journal directory alias refused')
     return path
 
-def exclusive_record(directory, name, value, require_directory_sync=True, independent_namespace=None):
+def exclusive_record(directory, name, value, require_directory_sync=True, independent_namespace=None, held_admission=None):
     directory = real_directory(directory)
     require(isinstance(name, str) and re.fullmatch('[a-z0-9][a-z0-9.-]{0,150}', name), 'Exact record basename required')
     raw = canonical(value) + b'\n'
@@ -327,7 +329,10 @@ def exclusive_record(directory, name, value, require_directory_sync=True, indepe
     pending = directory / (name + '.pending')
     if path.exists() or path.is_symlink():
         raise FileExistsError('Published record already consumed')
-    if independent_namespace is None:
+    if held_admission is not None:
+        ledger, ticket = held_admission
+        require(independent_namespace is None and ticket in ledger.open and (ledger.open[ticket][2:4] == (8192, 2)) and (len(raw) <= 8192) and (ledger.root in directory.parents) and (ledger.ticket_paths.get(ticket) == tuple((p.relative_to(ledger.root).as_posix() for p in (path, pending)))), 'Exact unconsumed before-mkdir record admission required')
+    elif independent_namespace is None:
         admit_evidence(path, len(raw), pending=True)
     elif independent_namespace == 'hook-results':
         require(name in HOOK_RESULT_NAMES and len(raw) <= HOOK_RECORD_LIMIT, 'Independent hook record outside its fixed three-name envelope')
@@ -355,6 +360,8 @@ def exclusive_record(directory, name, value, require_directory_sync=True, indepe
         finally:
             os.close(descriptor)
     require(directory_synced or not require_directory_sync, 'Directory fsync unavailable; no operational call may follow')
+    if held_admission is not None:
+        ledger.settle(ticket, len(raw))
     return {'file': name, 'sha256': sha(raw), 'bytes': len(raw), 'directorySynced': directory_synced}
 
 # Exact AST definitions from kit_owned.py
@@ -777,7 +784,7 @@ class EmergencyIngress:
 
 SOURCE_SCOPE = 'PRODUCTION_FORWARD_206_214_209_QUALIFIED_ACC158_REVIEWED_WHOLE_OUTAGE'
 
-REQUIRED_SOURCE = {'kit_contract.py', 'kit_sequence.py', 'kit_journal.py', 'kit_io.py', 'kit_evidence.py', 'controller_output.py', 'kit_docker.py', 'kit_consumer_inventory.py', 'kit_owned.py', 'kit_cli_evidence.py', 'kit_cli_output.py', 'cli_output.cjs', 'kit_integrity.py', 'stopped_integrity.cjs', 'cli_guard.cjs', 'live_backup.cjs', 'live-backup-sqlite-source.json', 'sqlite_temp_directory.cjs', 'sqlite-temp-directory-source.json', 'order_impact.cjs', 'kit_order_output.py', 'order-impact-transport-source.json', 'kit_install.py', 'kit_runtime.py', 'kit_readiness.py', 'kit_natural.py', 'kit_no_writers.py', 'kit_ingress.py', 'kit_budget.py', 'kit_disk.py', 'kit_copy_admission.py', 'kit_app_snapshots.py', 'application-snapshot-source.json', 'kit_target_reader.py', 'target-reader-index-source.json', 'kit_rollback_journal.py', 'rollback-journal-source.json', 'kit_probes.py', 'kit_frozen.py', 'kit_preservation.py', 'kit_recovery.py', 'kit_emergency_ingress.py', 'kit_stop.py', 'kit_stop_lifecycle.py', 'build_stop_post.py', 'predecessor-startup-expectations.json', 'retained_app_copy.py', 'kit_recovery_copy.py', 'predecessor-copy-source-binding.json', 'retained_authority.py', 'kit_provider.py', 'kit_authority.py', 'kit_science.py', 'kit_construction.py', 'kit_outage.py', 'timing-evidence.json', 'kit_package.py', 'kit_launch_programs.py', 'kit_apache_capture.py', 'kit_capture_owned.py', 'kit_capture_memory.py', 'capture_cli_guard.cjs', 'build_capture_stop_post.py', 'capture_stop_post.py', 'kit_capture_budget.py', 'kit_capture_copy.py', 'kit_capture_authority.py', 'kit_capture_science.py', 'kit_capture_review.py', 'capture_controller_output.py', 'kit_capture_controller.py', 'kit_capture_outcome.py', 'kit_capture_construction.py', 'kit_capture_package.py', 'run_capture.py', 'kit_capture_inputs.py', 'kit_capture_launch.py', 'prepare_capture.py', 'launch_capture.py', 'kit_ops.py', 'run_release.py', 'stop_post.py', 'prepare_release.py', 'launch_release.py', 'application-source-binding.json', 'copy-site-closure.json', 'whole-outage-disclosure.json', 'startup-expectations.json', 'probe-source-map.json', 'compose-source.yml', 'retained_accounting.py', 'retained_files.py', 'retained_contract.py', 'retained_health.py', 'retained_memory.py', 'retained_controller.py', 'retained_intake.py', 'retained_fetch.py', 'retained_provenance.py', 'retained_privacy.py', 'retained_runtime_policy.py', 'postflight-roles.cjs', 'postflight-auth.cjs', 'postflight-reference.cjs', 'postflight-qc-runs.cjs', 'postflight-policy.cjs', 'readonly-smoke.cjs'}
+REQUIRED_SOURCE = {'kit_contract.py', 'kit_sequence.py', 'kit_journal.py', 'kit_io.py', 'kit_evidence.py', 'controller_output.py', 'kit_docker.py', 'kit_consumer_inventory.py', 'kit_owned.py', 'kit_cli_evidence.py', 'kit_cli_output.py', 'cli_output.cjs', 'kit_integrity.py', 'stopped_integrity.cjs', 'cli_guard.cjs', 'live_backup.cjs', 'live-backup-sqlite-source.json', 'sqlite_temp_directory.cjs', 'sqlite-temp-directory-source.json', 'order_impact.cjs', 'kit_order_output.py', 'order-impact-transport-source.json', 'kit_install.py', 'kit_runtime.py', 'kit_readiness.py', 'kit_natural.py', 'kit_no_writers.py', 'kit_ingress.py', 'kit_budget.py', 'kit_disk.py', 'kit_copy_admission.py', 'kit_app_snapshots.py', 'application-snapshot-source.json', 'kit_target_reader.py', 'target-reader-index-source.json', 'kit_rollback_journal.py', 'rollback-journal-source.json', 'kit_probes.py', 'kit_frozen.py', 'kit_preservation.py', 'kit_recovery.py', 'kit_emergency_ingress.py', 'kit_stop.py', 'kit_stop_lifecycle.py', 'build_stop_post.py', 'predecessor-startup-expectations.json', 'retained_app_copy.py', 'kit_recovery_copy.py', 'predecessor-copy-source-binding.json', 'retained_authority.py', 'kit_provider.py', 'kit_authority.py', 'kit_science.py', 'kit_construction.py', 'kit_outage.py', 'timing-evidence.json', 'kit_package.py', 'kit_launch_programs.py', 'kit_apache_capture.py', 'kit_capture_owned.py', 'kit_capture_memory.py', 'capture_cli_guard.cjs', 'build_capture_stop_post.py', 'capture_stop_post.py', 'kit_capture_budget.py', 'kit_capture_copy.py', 'kit_capture_authority.py', 'kit_capture_science.py', 'kit_capture_review.py', 'kit_capture_journal.py', 'capture_writer_journal.cjs', 'capture-writer-journal-source.json', 'capture_controller_output.py', 'kit_capture_controller.py', 'kit_capture_outcome.py', 'kit_capture_construction.py', 'kit_capture_package.py', 'run_capture.py', 'kit_capture_inputs.py', 'kit_capture_launch.py', 'prepare_capture.py', 'launch_capture.py', 'kit_ops.py', 'run_release.py', 'stop_post.py', 'prepare_release.py', 'launch_release.py', 'application-source-binding.json', 'copy-site-closure.json', 'whole-outage-disclosure.json', 'startup-expectations.json', 'probe-source-map.json', 'compose-source.yml', 'retained_accounting.py', 'retained_files.py', 'retained_contract.py', 'retained_health.py', 'retained_memory.py', 'retained_controller.py', 'retained_intake.py', 'retained_fetch.py', 'retained_provenance.py', 'retained_privacy.py', 'retained_runtime_policy.py', 'postflight-roles.cjs', 'postflight-auth.cjs', 'postflight-reference.cjs', 'postflight-qc-runs.cjs', 'postflight-policy.cjs', 'readonly-smoke.cjs'}
 
 def source_index(value):
     require(isinstance(value, dict) and value.get('version') == 1 and (value.get('scope') == SOURCE_SCOPE) and (value.get('root') == str(ROOT)) and (value.get('head') == HEAD) and (value.get('tree') == TREE) and (value.get('image') == IMAGE) and (value.get('buildReceiptSha256') == BUILD_RECEIPT_SHA), 'Exact new production source-index target required')

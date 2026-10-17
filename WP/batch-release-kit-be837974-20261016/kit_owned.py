@@ -258,7 +258,7 @@ def filesystem_controls(root,require_directory_sync=True,disk=None,no_writers=No
         'order-impact',('first-sync-backup','postflight-backup'),target_no_writers)
 
 def control_callbacks(root,directory,require_directory_sync,disk,no_writers,snapshot_counts,snapshot_sites,
-                      order_label,backup_labels,target_no_writers=None):
+                      order_label,backup_labels,target_no_writers=None,writer_journal_sites=None):
     """Transport only: each typed caller supplies its exact directory guard.
 
     Complete raw-stream and copy admissions still precede mkdir/create. This
@@ -266,6 +266,7 @@ def control_callbacks(root,directory,require_directory_sync,disk,no_writers,snap
     """
     snapshot_admissions={};snapshot_closures=set();output_admissions={};output_closures=set()
     cli_admissions={};cli_closed=set();target_admissions={};target_closed=set()
+    writer_admissions={};writer_closed=set();writer_attempted=set();writer_controls={}
     def prepare(spec):
         p=directory(spec)
         require(not p.exists(),'Fresh CLI control directory required')
@@ -298,6 +299,18 @@ def control_callbacks(root,directory,require_directory_sync,disk,no_writers,snap
             disk.admit_copy(TARGET_READER_SITES[spec['label']],
                 pathlib.Path(target_plan['source']+'-shm'),target_plan['layout'])
             no_writers();target_no_writers(spec);unchanged_source(target_plan['source'],target_plan)
+        writer_plan=None
+        if writer_journal_sites and spec['label'] in writer_journal_sites:
+            from kit_capture_journal import capture_journal_plan,recheck_capture_journal
+            require(disk is not None and callable(no_writers),'Capture writer journal requires held capacity and fresh clone writer inventory')
+            writer_controls[spec['label']]={}
+            for name in ('writer-journal-admission.json','writer-journal-closure.json'):
+                held=admit_evidence(p/name,8192,pending=True,reservation=True,future_directory=p)
+                require(held is not None,'Capture journal controls require the bound evidence ledger before mkdir')
+                writer_controls[spec['label']][name]=held
+            no_writers();writer_plan=capture_journal_plan(spec)
+            disk.admit_copy(writer_journal_sites[spec['label']],pathlib.Path(writer_plan['journal']),writer_plan['layout'])
+            no_writers();recheck_capture_journal(writer_plan)
         p.mkdir(mode=0o700)
         require(not list(p.iterdir()),'Fresh empty CLI control directory required')
         publish_cli_admission(p,spec['child'],cli_admissions[spec['label']],require_directory_sync)
@@ -311,6 +324,10 @@ def control_callbacks(root,directory,require_directory_sync,disk,no_writers,snap
         if target_plan is not None:
             exclusive_record(p,'target-reader-admission.json',target_plan,require_directory_sync)
             target_admissions[spec['label']]=target_plan
+        if writer_plan is not None:
+            exclusive_record(p,'writer-journal-admission.json',writer_plan,require_directory_sync,
+                held_admission=writer_controls[spec['label']]['writer-journal-admission.json'])
+            writer_admissions[spec['label']]=writer_plan
     def read(spec):
         p=directory(spec)/'cli-child-complete.json'
         if not p.exists():return None
@@ -318,6 +335,14 @@ def control_callbacks(root,directory,require_directory_sync,disk,no_writers,snap
         with p.open('rb') as stream:raw=stream.read(8193)
         require(len(raw)<=8192,'Completion grew beyond bound')
         label=spec['label']
+        if label in writer_admissions and label not in writer_closed:
+            from kit_capture_journal import close_capture_journal
+            require(label not in writer_attempted,'Failed capture journal closure is consumed')
+            writer_attempted.add(label)
+            result=close_capture_journal(writer_admissions[label])
+            exclusive_record(directory(spec),'writer-journal-closure.json',result,require_directory_sync,
+                held_admission=writer_controls[label]['writer-journal-closure.json'])
+            writer_closed.add(label)
         if label in target_admissions and label not in target_closed:
             result=close_target_reader(target_admissions[label])
             exclusive_record(directory(spec),'target-reader-closure.json',result,require_directory_sync)

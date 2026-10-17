@@ -10,11 +10,13 @@ import pathlib
 from kit_contract import LOG_RESERVE,canonical,disk_required,require,sha
 from kit_budget import MINIMUM_DB_EQUIVALENTS,MARGIN_PERCENT,SEAL_DIRECTORY_BYTES
 from kit_capture_owned import CAPTURE_ROOT,CAPTURE_UNIT,CAPTURE_COPY_SITES
+from kit_capture_journal import CAPTURE_JOURNAL_SITES,JOURNAL_DB_COST
 from kit_disk import Disk
 from kit_journal import exclusive_record
 
 CAPTURE_DB_COST={'triple':1,'backup':1,'reader-index':1,'clone':1,'assets':0,'seal-directory':0,
-    'capture-policy-snapshot':1,'capture-214-snapshot':1,'capture-order-snapshots':2}
+    'capture-policy-snapshot':1,'capture-214-snapshot':1,'capture-order-snapshots':2,
+    'capture-206-main-journal':JOURNAL_DB_COST,'capture-214-main-journal':JOURNAL_DB_COST}
 CAPTURE_APACHE_BYTES=8*1024**2
 CAPTURE_STAGES=(
     ('capture-filesystem-snapshot',{'triple':2,'backup':1,'reader-index':1,'seal-directory':1,'assets':1},
@@ -22,8 +24,8 @@ CAPTURE_STAGES=(
     ('capture-clone',{'clone':1},0),
     ('capture-integrity',{},0),
     ('capture-canonical-policy',{'capture-policy-snapshot':1},0),
-    ('capture-206-prepare',{'triple':2,'backup':1,'reader-index':1,'seal-directory':1},SEAL_DIRECTORY_BYTES),
-    ('capture-214-prepare',{'capture-214-snapshot':1,'triple':2,'backup':1,'reader-index':1,'seal-directory':1},SEAL_DIRECTORY_BYTES),
+    ('capture-206-prepare',{'triple':2,'backup':1,'reader-index':1,'seal-directory':1,'capture-206-main-journal':1},SEAL_DIRECTORY_BYTES),
+    ('capture-214-prepare',{'capture-214-snapshot':1,'triple':2,'backup':1,'reader-index':1,'seal-directory':1,'capture-214-main-journal':1},SEAL_DIRECTORY_BYTES),
     ('capture-chart-impact',{},0),
     ('capture-order-impact',{'capture-order-snapshots':1},0),
 )
@@ -77,6 +79,8 @@ class CaptureBudget:
             'Capture CLI does not match its active stage')
         site=CAPTURE_COPY_SITES.get(label)
         if site is not None:self.claim(site)
+        site=CAPTURE_JOURNAL_SITES.get(label)
+        if site is not None:self.claim(site)
 
     def copy_ceiling(self,site):
         require(self.active is not None and site in CAPTURE_TABLE[self.completed]['sites'] and
@@ -113,7 +117,10 @@ class CaptureDisk(Disk):
         ceiling=self.budget.copy_ceiling(site)
         require(plan['declaredAllocationBytes']<=ceiling,'Capture copy content/entries exceed its held producer allowance')
         self.check()
-        exclusive_record(self.root,'copy-admission-'+sha(str(destination).encode())[:32]+'.json',{
+        # The physical journal name is reused by two distinct forward
+        # transactions. Their source claims and immutable receipts must differ.
+        key=(site+'\0'+str(destination)) if site in CAPTURE_JOURNAL_SITES.values() else str(destination)
+        exclusive_record(self.root,'copy-admission-'+sha(key.encode())[:32]+'.json',{
             'site':site,'destination':str(destination),'layout':plan,'maximumBytes':ceiling,
             'beforeDestinationCreation':True,'stageTableSha256':CAPTURE_TABLE_SHA,'neverRetry':True,
             'sqliteTemporaryFilesAndGlobalFilesystemClosureClaimed':False},self.sync)

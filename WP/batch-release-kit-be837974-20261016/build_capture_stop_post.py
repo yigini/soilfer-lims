@@ -22,6 +22,7 @@ SPECS={
     'kit_capture_owned.py':('CAPTURE_ROOT','CAPTURE_UNIT','CAPTURE_LABEL','CAPTURE_DATABASE',
         'CAPTURE_COMMANDS','capture_spec','validate_capture_spec','capture_selected','stop_capture_owners'),
     'kit_budget.py':('MARGIN_PERCENT','MINIMUM_DB_EQUIVALENTS','SEAL_DIRECTORY_BYTES'),
+    'kit_capture_journal.py':('JOURNAL_DB_COST',),
     'kit_capture_budget.py':('CAPTURE_DB_COST','CAPTURE_APACHE_BYTES','CAPTURE_STAGES','CAPTURE_TABLE','CAPTURE_TABLE_SHA'),
     'kit_capture_review.py':('CAPTURE_REVIEW_FILES','CONTROL_FILES'),
     'retained_memory.py':('NON_RECLAIMABLE_FIELDS','NON_RECLAIMABLE_MAX','STAT_REQUIRED','EVENT_REQUIRED','CGROUP_ROOT',

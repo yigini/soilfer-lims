@@ -1,0 +1,14 @@
+warning: in the working copy of 'WP/batch-release-kit-be837974-20261016/build_capture_stop_post.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'WP/batch-release-kit-be837974-20261016/capture_cli_guard.cjs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'WP/batch-release-kit-be837974-20261016/capture_stop_post.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'WP/batch-release-kit-be837974-20261016/kit_capture_budget.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'WP/batch-release-kit-be837974-20261016/kit_capture_launch.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'WP/batch-release-kit-be837974-20261016/kit_capture_owned.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'WP/batch-release-kit-be837974-20261016/kit_evidence.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'WP/batch-release-kit-be837974-20261016/kit_frozen.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'WP/batch-release-kit-be837974-20261016/kit_journal.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'WP/batch-release-kit-be837974-20261016/kit_owned.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'WP/batch-release-kit-be837974-20261016/kit_rollback_journal.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'WP/batch-release-kit-be837974-20261016/stop_post.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'WP/batch-release-kit-be837974-20261016/verify_kit_capture_copy.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'WP/batch-release-kit-be837974-20261016/verify_kit_capture_science.py', LF will be replaced by CRLF the next time Git touches it

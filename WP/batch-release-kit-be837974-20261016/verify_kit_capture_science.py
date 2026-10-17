@@ -32,6 +32,12 @@ class NativeCloneStandIn(CaptureOwnedCli):
         owned.validate_capture_spec(spec);label=spec['label'];self.labels.append(label)
         current=self.current;target=current.root/'scientific-database/dev.db';tmp=current.root/(label+'-retained-temp')
         self.current.writers() # no real /proc access on this Windows fixture
+        if label in ('capture-206-prepare','capture-214-prepare'):
+            # Real main-journal planner/admission around the existing native SQL
+            # scientific stand-in. This remains explicitly not an app CLI run.
+            from kit_capture_journal import capture_journal_plan,CAPTURE_JOURNAL_SITES
+            journal_plan=capture_journal_plan(spec)
+            current.disk.admit_copy(CAPTURE_JOURNAL_SITES[label],pathlib.Path(journal_plan['journal']),journal_plan['layout'])
         if label in CAPTURE_SNAPSHOTS:
             admission=snapshot_plan(target,CAPTURE_SNAPSHOTS[label])
             current.disk.admit_copy(CAPTURE_COPY_SITES[label],tmp,admission['layout'])
@@ -49,6 +55,8 @@ class NativeCloneStandIn(CaptureOwnedCli):
                 if self.fail=='foreign':db.execute('CREATE TABLE unexpected(id TEXT)')
             value={'classification':'COMPLETE_'+issue,'previousClassification':'PRE_'+issue,'mode':'APPLIED',
                 'backfilledCount':1 if self.fail=='backfill' else 0,'totalChanges':1,'receipt':{'originalRowsPreserved':True}}
+            from kit_capture_journal import close_capture_journal
+            close_capture_journal(journal_plan)
         elif label=='capture-integrity':value=science.EXPECTED
         elif label=='capture-canonical-policy':value={'classification':'PRESENT','shape':'CANONICAL','mode':'NO_OP',
             'totalChanges':0,'dataWrites':0,'readonlySnapshot':{'originalFilesPreserved':True}}

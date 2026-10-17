@@ -172,6 +172,7 @@ class EvidenceLedger:
         self.number = 0
         self.active_window = None
         self.window_number = 0
+        self.ticket_paths = {}
 
     def reserve(self, paths, maximum_bytes, category, future_directory=None):
         require(category in self.shares and isinstance(paths, tuple) and (len(paths) in (1, 2)), 'Declared evidence category and one/two entry paths required')
@@ -208,6 +209,7 @@ class EvidenceLedger:
         self.number += 1
         ticket = self.number
         self.open[ticket] = (category, amount, maximum_bytes, len(names), directory_charge, window)
+        self.ticket_paths[ticket] = tuple(relative)
         return ticket
 
     def settle(self, ticket, actual_bytes):
@@ -290,7 +292,7 @@ def real_directory(value):
         require(not part.is_symlink(), 'Journal directory alias refused')
     return path
 
-def exclusive_record(directory, name, value, require_directory_sync=True, independent_namespace=None):
+def exclusive_record(directory, name, value, require_directory_sync=True, independent_namespace=None, held_admission=None):
     directory = real_directory(directory)
     require(isinstance(name, str) and re.fullmatch('[a-z0-9][a-z0-9.-]{0,150}', name), 'Exact record basename required')
     raw = canonical(value) + b'\n'
@@ -299,7 +301,10 @@ def exclusive_record(directory, name, value, require_directory_sync=True, indepe
     pending = directory / (name + '.pending')
     if path.exists() or path.is_symlink():
         raise FileExistsError('Published record already consumed')
-    if independent_namespace is None:
+    if held_admission is not None:
+        ledger, ticket = held_admission
+        require(independent_namespace is None and ticket in ledger.open and (ledger.open[ticket][2:4] == (8192, 2)) and (len(raw) <= 8192) and (ledger.root in directory.parents) and (ledger.ticket_paths.get(ticket) == tuple((p.relative_to(ledger.root).as_posix() for p in (path, pending)))), 'Exact unconsumed before-mkdir record admission required')
+    elif independent_namespace is None:
         admit_evidence(path, len(raw), pending=True)
     elif independent_namespace == 'hook-results':
         require(name in HOOK_RESULT_NAMES and len(raw) <= HOOK_RECORD_LIMIT, 'Independent hook record outside its fixed three-name envelope')
@@ -327,6 +332,8 @@ def exclusive_record(directory, name, value, require_directory_sync=True, indepe
         finally:
             os.close(descriptor)
     require(directory_synced or not require_directory_sync, 'Directory fsync unavailable; no operational call may follow')
+    if held_admission is not None:
+        ledger.settle(ticket, len(raw))
     return {'file': name, 'sha256': sha(raw), 'bytes': len(raw), 'directorySynced': directory_synced}
 
 # Exact AST definitions from kit_io.py
@@ -598,13 +605,17 @@ MINIMUM_DB_EQUIVALENTS = 64
 
 SEAL_DIRECTORY_BYTES = 3 * 4096
 
+# Exact AST definitions from kit_capture_journal.py
+
+JOURNAL_DB_COST = 794
+
 # Exact AST definitions from kit_capture_budget.py
 
-CAPTURE_DB_COST = {'triple': 1, 'backup': 1, 'reader-index': 1, 'clone': 1, 'assets': 0, 'seal-directory': 0, 'capture-policy-snapshot': 1, 'capture-214-snapshot': 1, 'capture-order-snapshots': 2}
+CAPTURE_DB_COST = {'triple': 1, 'backup': 1, 'reader-index': 1, 'clone': 1, 'assets': 0, 'seal-directory': 0, 'capture-policy-snapshot': 1, 'capture-214-snapshot': 1, 'capture-order-snapshots': 2, 'capture-206-main-journal': JOURNAL_DB_COST, 'capture-214-main-journal': JOURNAL_DB_COST}
 
 CAPTURE_APACHE_BYTES = 8 * 1024 ** 2
 
-CAPTURE_STAGES = (('capture-filesystem-snapshot', {'triple': 2, 'backup': 1, 'reader-index': 1, 'seal-directory': 1, 'assets': 1}, SEAL_DIRECTORY_BYTES + CAPTURE_APACHE_BYTES), ('capture-clone', {'clone': 1}, 0), ('capture-integrity', {}, 0), ('capture-canonical-policy', {'capture-policy-snapshot': 1}, 0), ('capture-206-prepare', {'triple': 2, 'backup': 1, 'reader-index': 1, 'seal-directory': 1}, SEAL_DIRECTORY_BYTES), ('capture-214-prepare', {'capture-214-snapshot': 1, 'triple': 2, 'backup': 1, 'reader-index': 1, 'seal-directory': 1}, SEAL_DIRECTORY_BYTES), ('capture-chart-impact', {}, 0), ('capture-order-impact', {'capture-order-snapshots': 1}, 0))
+CAPTURE_STAGES = (('capture-filesystem-snapshot', {'triple': 2, 'backup': 1, 'reader-index': 1, 'seal-directory': 1, 'assets': 1}, SEAL_DIRECTORY_BYTES + CAPTURE_APACHE_BYTES), ('capture-clone', {'clone': 1}, 0), ('capture-integrity', {}, 0), ('capture-canonical-policy', {'capture-policy-snapshot': 1}, 0), ('capture-206-prepare', {'triple': 2, 'backup': 1, 'reader-index': 1, 'seal-directory': 1, 'capture-206-main-journal': 1}, SEAL_DIRECTORY_BYTES), ('capture-214-prepare', {'capture-214-snapshot': 1, 'triple': 2, 'backup': 1, 'reader-index': 1, 'seal-directory': 1, 'capture-214-main-journal': 1}, SEAL_DIRECTORY_BYTES), ('capture-chart-impact', {}, 0), ('capture-order-impact', {'capture-order-snapshots': 1}, 0))
 
 CAPTURE_TABLE = [{'stage': name, 'sites': sites, 'dbTriples': sum((CAPTURE_DB_COST[site] * count for site, count in sites.items())), 'assetCopies': sites.get('assets', 0), 'fixedBytes': fixed, 'logGrowthShareBytes': LOG_RESERVE // 8} for name, sites, fixed in CAPTURE_STAGES]
 

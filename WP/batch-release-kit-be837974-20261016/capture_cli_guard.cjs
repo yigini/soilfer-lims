@@ -1,6 +1,7 @@
 /* Fresh review capture on a retained clone. No release/209 APPLY/startup route. */
 'use strict';
 const { runChild } = require('./cli_guard.cjs');
+const { verifyCaptureWriter } = require('./capture_writer_journal.cjs');
 const commands = new Map([
   ['capture-integrity', ['/release/stopped_integrity.cjs', '--db', '/app/server/prisma/dev.db']],
   ['capture-canonical-policy', ['/app/server/scripts/install_lab_policy_schema.js', '--db', '/app/server/prisma/dev.db', '--dry-run']],
@@ -16,7 +17,9 @@ function validateMain(argv) {
   return { directory, label, child };
 }
 if (require.main === module) {
-  (async () => { const value = validateMain(process.argv.slice(2)); await runChild(value.directory, value.child); })()
+  (async () => { const value = validateMain(process.argv.slice(2));
+    if (['capture-206-prepare', 'capture-214-prepare'].includes(value.label)) verifyCaptureWriter(value.directory, value.label);
+    await runChild(value.directory, value.child); })()
     .catch(() => { process.exitCode = 1; });
 }
 module.exports = { validateMain };

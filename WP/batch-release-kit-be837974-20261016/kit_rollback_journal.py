@@ -1,9 +1,10 @@
 """Conditional main rollback-journal sizing; no SQL, operator or settings write.
 
-This component is not wired to the release/capture writer graph. Its supported
+This planner has a separate capture206/214 main-journal admission. Its supported
 profile deliberately excludes WAL, auto-vacuum, existing journals, page moves,
 ATTACH/VACUUM, custom VFS, continued writes after rollback/error, and settings changes. The caller still needs a
-complete reviewed call graph and a separately held before-create admission.
+complete reviewed call graph and a separately held before-create admission;
+the release/WAL writers remain outside that separate capture integration.
 A final absent journal is never evidence of its peak size or original bytes.
 """
 import os

@@ -70,6 +70,7 @@ class EvidenceLedger:
         for part in (self.root,*self.root.parents):require(not part.is_symlink(),'Evidence root ancestor alias refused')
         self.used=dict.fromkeys(self.shares,0);self.paths=set();self.directories=set();self.open={};self.number=0
         self.active_window=None;self.window_number=0
+        self.ticket_paths={}
 
     def reserve(self,paths,maximum_bytes,category,future_directory=None):
         require(category in self.shares and isinstance(paths,tuple) and len(paths) in (1,2),
@@ -113,6 +114,7 @@ class EvidenceLedger:
             window.used[category]+=amount
         self.paths.update(relative);self.directories.update(new_directories);self.number+=1
         ticket=self.number;self.open[ticket]=(category,amount,maximum_bytes,len(names),directory_charge,window)
+        self.ticket_paths[ticket]=tuple(relative)
         return ticket
 
     def settle(self,ticket,actual_bytes):

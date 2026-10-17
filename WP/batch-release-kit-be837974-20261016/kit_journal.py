@@ -20,7 +20,7 @@ def real_directory(value):
         require(not part.is_symlink(),'Journal directory alias refused')
     return path
 
-def exclusive_record(directory,name,value,require_directory_sync=True,independent_namespace=None):
+def exclusive_record(directory,name,value,require_directory_sync=True,independent_namespace=None,held_admission=None):
     directory=real_directory(directory)
     require(isinstance(name,str) and re.fullmatch('[a-z0-9][a-z0-9.-]{0,150}',name),'Exact record basename required')
     raw=canonical(value)+b'\n'
@@ -28,7 +28,14 @@ def exclusive_record(directory,name,value,require_directory_sync=True,independen
     path=directory/name;pending=directory/(name+'.pending')
     if path.exists() or path.is_symlink():raise FileExistsError('Published record already consumed')
     # One data allocation and BOTH permanently retained directory entries.
-    if independent_namespace is None:admit_evidence(path,len(raw),pending=True)
+    if held_admission is not None:
+        ledger,ticket=held_admission
+        require(independent_namespace is None and ticket in ledger.open and
+            ledger.open[ticket][2:4]==(8192,2) and len(raw)<=8192 and
+            ledger.root in directory.parents and
+            ledger.ticket_paths.get(ticket)==tuple(p.relative_to(ledger.root).as_posix() for p in (path,pending)),
+            'Exact unconsumed before-mkdir record admission required')
+    elif independent_namespace is None:admit_evidence(path,len(raw),pending=True)
     elif independent_namespace=='hook-results':
         require(name in HOOK_RESULT_NAMES and len(raw)<=HOOK_RECORD_LIMIT,
             'Independent hook record outside its fixed three-name envelope')
@@ -53,6 +60,7 @@ def exclusive_record(directory,name,value,require_directory_sync=True,independen
         try:os.fsync(descriptor);directory_synced=True
         finally:os.close(descriptor)
     require(directory_synced or not require_directory_sync,'Directory fsync unavailable; no operational call may follow')
+    if held_admission is not None:ledger.settle(ticket,len(raw))
     return {'file':name,'sha256':sha(raw),'bytes':len(raw),'directorySynced':directory_synced}
 
 class Journal:

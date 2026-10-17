@@ -30,6 +30,7 @@ REQUIRED_SOURCE={
     'kit_package.py','kit_launch_programs.py','kit_apache_capture.py',
     'kit_capture_owned.py','kit_capture_memory.py','capture_cli_guard.cjs','build_capture_stop_post.py','capture_stop_post.py',
     'kit_capture_budget.py','kit_capture_copy.py','kit_capture_authority.py','kit_capture_science.py','kit_capture_review.py',
+    'kit_capture_journal.py','capture_writer_journal.cjs','capture-writer-journal-source.json',
     'capture_controller_output.py','kit_capture_controller.py','kit_capture_outcome.py',
     'kit_capture_construction.py','kit_capture_package.py','run_capture.py',
     'kit_capture_inputs.py','kit_capture_launch.py','prepare_capture.py','launch_capture.py',

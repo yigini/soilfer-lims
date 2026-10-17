@@ -71,6 +71,7 @@ def remote_capture_programs(pins):
         ('kit_copy_admission.py',['BLOCK','MAX_FILES','MAX_DIRECTORIES','MAX_CONTENT_BYTES','copy_layout']),
         ('kit_budget.py',['MARGIN_PERCENT','MINIMUM_DB_EQUIVALENTS','SEAL_DIRECTORY_BYTES']),
         ('kit_capture_owned.py',['CAPTURE_ROOT','CAPTURE_UNIT','CAPTURE_COPY_SITES']),
+        ('kit_capture_journal.py',['CAPTURE_JOURNAL_SITES','JOURNAL_DB_COST']),
         ('kit_capture_budget.py',['CAPTURE_DB_COST','CAPTURE_APACHE_BYTES','CAPTURE_STAGES','CAPTURE_TABLE',
             'CAPTURE_TOTAL_DB_COPIES','CAPTURE_DB_EQUIVALENTS','CAPTURE_TABLE_SHA','CaptureBudget']),
         ('kit_disk.py',['BOUND','hardware','free_gate','measure_inputs'])):

@@ -13,6 +13,7 @@ from kit_contract import IMAGE,MEMORY_MAX,require,canonical,sha
 from retained_contract import exact_json
 from kit_owned import OwnedCli,selected_fields,same_retained,control_callbacks
 from kit_apache_capture import CAPTURE_ROOT as APACHE_CAPTURE_ROOT
+from kit_capture_journal import CAPTURE_JOURNAL_SITES
 
 CAPTURE_ROOT=pathlib.Path('/opt/lims/releases/workflow-batch-review-capture-be837974-20261016T170000Z')
 CAPTURE_UNIT='lims-workflow-batch-review-capture-be837974-20261016t170000z.service'
@@ -83,7 +84,7 @@ def capture_filesystem_controls(root,require_directory_sync=True,disk=None,no_wr
             'Exact private fresh-capture control directory required')
         return p
     prepare,read,permit=control_callbacks(root,directory,require_directory_sync,disk,no_writers,CAPTURE_SNAPSHOTS,
-        CAPTURE_COPY_SITES,'capture-order-impact',())
+        CAPTURE_COPY_SITES,'capture-order-impact',(),writer_journal_sites=CAPTURE_JOURNAL_SITES)
     def guarded_prepare(spec):
         validate_capture_spec(spec)
         require(callable(no_writers),'Capture requires a fresh retained-clone writer inventory')

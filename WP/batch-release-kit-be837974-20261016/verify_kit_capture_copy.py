@@ -77,15 +77,15 @@ def snapshot(current):
 
 
 class CaptureCopies(unittest.TestCase):
-    def test_separate17_copy_equivalents_min64_margin_and_no_release_or_recovery_domain(self):
-        self.assertEqual(budgets.CAPTURE_TOTAL_DB_COPIES,17)
-        self.assertEqual(budgets.CAPTURE_DB_EQUIVALENTS,64)
+    def test_capture_copy_and_conditional_journal_ceiling_margin_and_separate_domain(self):
+        self.assertEqual(budgets.CAPTURE_TOTAL_DB_COPIES,1605)
+        self.assertEqual(budgets.CAPTURE_DB_EQUIVALENTS,2007)
         self.assertNotEqual(budgets.CAPTURE_TABLE_SHA,TABLE_SHA)
         self.assertEqual(sum(row['logGrowthShareBytes'] for row in budgets.CAPTURE_TABLE),4*1024**3)
         budget=budgets.CaptureBudget(600000000,6000000,IMAGE_BYTES);initial=budget.required()
         self.assertGreaterEqual(budget.remaining(),64*budget.db)
         for row in budgets.CAPTURE_TABLE:
-            budget.begin(row['stage'],10**12)
+            budget.begin(row['stage'],10**15)
             for site,count in row['sites'].items():
                 for _ in range(count):budget.claim(site);budget.copy_ceiling(site)
             self.assertLessEqual(budget.required(),initial)
@@ -271,12 +271,13 @@ class CaptureCopies(unittest.TestCase):
                     for _ in range(count):current.budget.copy_ceiling(site)
                 current.budget.finish(row['stage'],0)
             current.budget.begin('capture-206-prepare',10**12)
+            current.budget.cli('capture-206-prepare')
             spec=owned.capture_spec('capture-206-prepare');writers=[]
             before=retained.identity_record(retained.triple(current.root/'fresh-production-snapshot/raw/dev.db'))
             prepare,_,_=owned.capture_filesystem_controls(current.root,False,current.disk,lambda:writers.append(True))
             with patch.object(kit_evidence,'_runtime',kit_evidence.EvidenceLedger(current.root)):
                 prepare(spec)
-            self.assertEqual(writers,[True])
+            self.assertEqual(writers,[True,True,True])
             self.assertTrue((pathlib.Path(spec['tmp'])/'cli-output-admission.json').exists())
             self.assertEqual(retained.identity_record(retained.triple(current.root/'fresh-production-snapshot/raw/dev.db')),before)
             with self.assertRaises(RuntimeError):prepare(spec)
