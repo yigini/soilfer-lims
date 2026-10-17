@@ -1,0 +1,46 @@
+services:
+  lims:
+    build: .
+    image: soilfer-lims:${LIMS_IMAGE_TAG:-latest}
+    container_name: soilfer-lims
+    restart: unless-stopped
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - JWT_SECRET=${JWT_SECRET:-}
+      - DEPLOYMENT_MODE=${DEPLOYMENT_MODE:-local}
+      - ADMIN_INITIAL_PASSWORD=${ADMIN_INITIAL_PASSWORD:-}
+      - DISABLE_BACKGROUND_JOBS=${DISABLE_BACKGROUND_JOBS:-}
+    deploy:
+      resources:
+        limits:
+          cpus: '1.5'
+          memory: 1536M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"
+    volumes:
+      # Persistent database storage (only the prisma dir for DB file)
+      - lims-data:/app/server/prisma
+      # Persistent uploaded assets  
+      - lims-assets:/app/server/uploads
+      # Persistent automated database backups
+      - lims-backups:/app/server/backups
+    healthcheck:
+      test: [ "CMD", "wget", "-q", "--spider", "http://localhost:3000/api/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+volumes:
+  lims-data:
+    driver: local
+  lims-assets:
+    driver: local
+  lims-backups:
+    driver: local
