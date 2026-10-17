@@ -1,0 +1,135 @@
+{
+  "balanceOutputPages": 5,
+  "completeApplicationOperationInventory": false,
+  "conditions": [
+    "Valid intact input database and one forward transaction",
+    "Rollback versions1, no autovacuum, current exact physical/header pages, zero reserved bytes, standard payload fractions",
+    "Fresh-key normal insertions and root creation only; no replacement/update/delete/preformatted/transfer operations",
+    "Complete count of every attempted row/index insertion, implicit index, trigger, schema and internal write; bound FULL serialized BtreePayload, never JSON length",
+    "No ATTACH/VACUUM/extensions/custom VFS/settings change, continued writing after rollback/error, or retry",
+    "Separate complete caller/native/VFS proof and held before-create capacity required"
+  ],
+  "cursorDepth": 20,
+  "derivation": [
+    "For a normal non-preformatted fresh-key sqlite3BtreeInsert, fillInCell executes at most once and balance at most once. Each table-row and each index-key insertion is a separate counted call, not one SQL statement.",
+    "With zero reserved bytes, overflow pages carry pageSize-4 payload bytes. Ignoring every local payload byte gives ceil(fullSerializedPayload/(pageSize-4)) overflow allocations. Include nZero in table payload; include the complete serialized index key.",
+    "Runtime cursor descent refuses depth >=20. Non-root balancing has a runtime NB+2=5 page guard BEFORE its allocation loop; existing siblings are reused. Charge all five output pages as allocations at 21 levels, plus a deeper-root child and a separate quick-balance page: 107 allocations per insertion. Parent traversal decreases its stack level; root deepening introduces one additional child iteration.",
+    "No-autovacuum root creation allocates one page. No pointer-map pages or relocations are allowed. Every allocation is charged TWO page-number increments to cover a pending-byte-page gap even though that gap can be crossed only once. No freelist, deletion or rollback credit is taken.",
+    "This bounds logical page count for a completely inventoried prefix, including an insertion attempt that fails. It does not establish a complete application native-operation inventory, VFS file-length/preallocation behavior, physical allocated blocks, statement journals, WAL or SQL scratch.",
+    "Capture DDL updates sqlite_schema and creates implicit indexes; its receipt insert may fire existing receipt-table triggers. Neither SQL/DDL statement counts nor the currently pinned main-journal review prove the required native insertion/root inventory. Do not use this primitive as capture writer admission."
+  ],
+  "excerpts": [
+    {
+      "firstLine": 71886,
+      "lastLine": 71900,
+      "sha256": "a222e945d4a3d422ca2ffbbbcf43d8ad3ea7af0737c7bf786375f54fdea45f62"
+    },
+    {
+      "firstLine": 77855,
+      "lastLine": 77870,
+      "sha256": "9b1d71a18a4bd88d9c9da7210002a734b7bad7e9048e98238fc3aa713cff3519"
+    },
+    {
+      "firstLine": 78632,
+      "lastLine": 78647,
+      "sha256": "7025486b1422039f36efa9f53dc82cd87aee6df61f1a420a5e25f03e3e0c4018"
+    },
+    {
+      "firstLine": 79172,
+      "lastLine": 79205,
+      "sha256": "f0315834476860626a968821ba9ded7bf2dff0dcd415684b976201a05bdd18b4"
+    },
+    {
+      "firstLine": 79460,
+      "lastLine": 79480,
+      "sha256": "22870db92f2228916f27ee663271a4513d5f1602cac6fe91fe602b77e38c0678"
+    },
+    {
+      "firstLine": 79493,
+      "lastLine": 79514,
+      "sha256": "e9df75f8907f9e67b2b83eff4632a9f57e6afe57266a09956798aa0501934b55"
+    },
+    {
+      "firstLine": 79531,
+      "lastLine": 79554,
+      "sha256": "fd2f48f4221e954addbf9aa984bf74d2195c3486e032ed4b72b25fee6ca70db3"
+    },
+    {
+      "firstLine": 79569,
+      "lastLine": 79638,
+      "sha256": "7da8c4c381d7680bf26b7ff31fb624f21eac9a18533c81e6e0dbdee63acf698e"
+    },
+    {
+      "firstLine": 79915,
+      "lastLine": 79920,
+      "sha256": "35be2f04ba5b0e2f4cc9fbf0e87d333c423561939e73aea4df367c55e7f1aed4"
+    },
+    {
+      "firstLine": 80405,
+      "lastLine": 80425,
+      "sha256": "e62dc4b017eb8284e9471699f097b32dbbe4f45dc43414edb6b3dfc1a4ae3a81"
+    },
+    {
+      "firstLine": 80630,
+      "lastLine": 80669,
+      "sha256": "fb44440379a94ac096036b4339a7085a6229625967b4fe84c3ae0782a91ef5bc"
+    },
+    {
+      "firstLine": 80958,
+      "lastLine": 80967,
+      "sha256": "854952673d1c295d182c5df9de790551be43de12ed3bc3fd846a2df42361c837"
+    },
+    {
+      "firstLine": 81060,
+      "lastLine": 81094,
+      "sha256": "95daf2bd5c7b8ce6f34b4bd2a9522ed3458e6e6f2ea9112a208f927a097e2316"
+    },
+    {
+      "firstLine": 81447,
+      "lastLine": 81491,
+      "sha256": "246061fd3f5e27e22f06310ea2658b5664c3af314d3d6d123ba2f086db3408bc"
+    },
+    {
+      "firstLine": 81533,
+      "lastLine": 81651,
+      "sha256": "d16fbe1cbcfbb6b9567398221924136bd0156c04faac3f3670c7df08be348214"
+    },
+    {
+      "firstLine": 81979,
+      "lastLine": 82001,
+      "sha256": "b0f17b0cc0318752288c119a0072b142c0398ad3b7bdbccff49e70c9b910c3ca"
+    },
+    {
+      "firstLine": 82078,
+      "lastLine": 82088,
+      "sha256": "91437445f25de846ead5e8e2d03c2fc475c868b454c1503251a024b3f6f01cff"
+    },
+    {
+      "firstLine": 82463,
+      "lastLine": 82476,
+      "sha256": "ebb199bdc98afe3fa9e06743a77f6975a678718b618d7ec5651fce1a82e8f9d5"
+    },
+    {
+      "firstLine": 82580,
+      "lastLine": 82590,
+      "sha256": "6d79ac1f15bb07ffad5aa3f72311dae06b34200c55ecd52ec087e5855da9400d"
+    }
+  ],
+  "mainFileLengthOrVfsPreallocationBounded": false,
+  "nativePackageProofSha256": "86a8caa2c4d075311ab90d7226478719974c43b3fbc356e18c771d582e168a63",
+  "nativeSource": {
+    "bytes": 9389807,
+    "path": "server/node_modules/better-sqlite3/deps/sqlite3/sqlite3.c",
+    "sha256": "2bbdd0eff3f46852e954d7881b7945990bf78c1421f806cf7978bc22e187100a"
+  },
+  "physicalFilesystemClosureClaimed": false,
+  "primaryReferences": [
+    "https://www.sqlite.org/fileformat2.html",
+    "https://www.sqlite.org/limits.html"
+  ],
+  "scope": "CONDITIONAL_COUNTED_NATIVE_BTREE_INSERTIONS",
+  "statementOrSqlScratchBounded": false,
+  "version": 1,
+  "walGrowthBounded": false,
+  "writerGraphAdmissionImplemented": false
+}

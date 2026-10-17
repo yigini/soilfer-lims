@@ -37,6 +37,7 @@ REQUIRED_SOURCE={
     'kit_reader_initialization.py','reader-initialization-source.json',
     'kit_reader_pragma_checks.py','reader-pragma-checks-source.json',
     'kit_record_profile_scratch.py','record-profile-scratch-source.json',
+    'kit_backup_core.py','backup-core-source.json',
     'kit_capture_statement.py','capture-statement-journal-source.json',
     'kit_schema_collection.py','schema-collection-source.json',
     'kit_main_mutations.py','kit_capture_native_inventory.py','capture-native-inventory-source.json',
