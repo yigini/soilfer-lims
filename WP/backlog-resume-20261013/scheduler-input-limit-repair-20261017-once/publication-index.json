@@ -1,0 +1,37 @@
+{
+  "baseAudit": "dcea0ea56556cc057be910ee72344fc30344900e",
+  "bindings": [
+    {
+      "bytes": 1048,
+      "gitBlobOid": "b742f2add5fa6edf5b0697d9d5334670bb2fc9f4",
+      "path": "WP/backlog-resume-20261013/scheduler-input-limit-repair-20261017-once/diagnosis.json",
+      "sha256": "fdb19b427db16e333e4ef45556f915e5ca1c6f314be13a8012e7ecef4ed29fbb"
+    },
+    {
+      "bytes": 805,
+      "gitBlobOid": "703b28267bb1022c25f438e3eedba768dc36f41d",
+      "path": "WP/backlog-resume-20261013/scheduler-input-limit-repair-20261017-once/repair-readback.json",
+      "sha256": "0858a3ce1f42c114d55de56c80910ed22b2c15ef4e96a88cdb78ba00e5d50b29"
+    },
+    {
+      "bytes": 11811,
+      "gitBlobOid": "a69b40909da3454fc891bff782d9d5594831bb57",
+      "path": "WP/backlog-resume-20261013/scheduler-input-limit-repair-20261017-once/compact-prompt.txt",
+      "sha256": "4f6844de9c52480d54c49f82db484c91568bc11f37ddae0a9cfebdcdc3910fad"
+    },
+    {
+      "bytes": 1594,
+      "gitBlobOid": "e6e5f58c082ec93e7f8c80c2228440e58bddac07",
+      "path": "WP/backlog-resume-20261013/scheduler-input-limit-repair-20261017-once/private-history-hash-inventory.json",
+      "sha256": "5e268ee8c8724bb1d1ab74cb5eff56ec2cddc119b5a5d2a193057de2e6b19b88"
+    },
+    {
+      "bytes": 3493,
+      "gitBlobOid": "c189ccff1ccb48938a5060339d5ce9c7fc65a138",
+      "path": "WP/backlog-resume-20261013/publish-scheduler-input-limit-repair-once.py",
+      "sha256": "a4be615f05cccf1ffaa1ab747f8fbef0ed0154ab1b1e7c27ddee55c10958c5e4"
+    }
+  ],
+  "privatePromptAndOriginalNativeLogsAreNotPublished": true,
+  "sourceKitChanged": false
+}

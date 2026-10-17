@@ -1,0 +1,19 @@
+{
+  "cause": "heartbeat input exceeds desktop maximum character length",
+  "failureLogIsSelectedOriginalLinesNotCompleteDesktopLog": true,
+  "firstNativeFailureUtc": "2026-10-17T01:13:18.236Z",
+  "fix": "compact active prompt; immutable full-history file reference; same timer/thread/schedule",
+  "historyPreservedVerbatim": true,
+  "lastNativeFailureUtc": "2026-10-17T03:58:20.342Z",
+  "lastSourceCommitRome": "2026-10-17T03:10:51+02:00",
+  "lastSuccessfulSourceCommit": "dcea0ea56556cc057be910ee72344fc30344900e",
+  "maximumInputCharacters": 1048576,
+  "observedUtc": "2026-10-17T04:02:44.400957+00:00",
+  "originalPromptUtf8Sha256": "02ac1e9f2202a1bbbc4545075dd9d9424918eb0faa116369a0990ac46c2a0419",
+  "originalTomlSha256": "4d404f5a0640b1e19697cf9631afd7f890ee11ef83734218236fcff5d79d53a5",
+  "overLimitByCharacters": 2470,
+  "productionOperations": 0,
+  "promptCharacters": 1051046,
+  "reasonNoAutomaticTurns": "desktop rejects each oversized heartbeat before dispatch; ACTIVE is configuration only",
+  "selectedNativeFailureLineCount": 74
+}

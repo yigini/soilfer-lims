@@ -1,0 +1,32 @@
+{
+  "activeInputCharacters": 11807,
+  "allHistoryPreservedVerbatim": true,
+  "completeSourceKitUnchanged": true,
+  "originalInputCharacters": 1051046,
+  "privateHistoryFiles": [
+    {
+      "bytes": 1053816,
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\WP\\backlog-resume-20261013\\scheduler-input-limit-repair-20261017-once\\automation-original.toml",
+      "privateBytesPublished": false,
+      "sha256": "4d404f5a0640b1e19697cf9631afd7f890ee11ef83734218236fcff5d79d53a5"
+    },
+    {
+      "bytes": 1051306,
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\WP\\backlog-resume-20261013\\scheduler-input-limit-repair-20261017-once\\prior-automation-prompt-verbatim.txt",
+      "privateBytesPublished": false,
+      "sha256": "02ac1e9f2202a1bbbc4545075dd9d9424918eb0faa116369a0990ac46c2a0419"
+    },
+    {
+      "bytes": 157324,
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\WP\\backlog-resume-20261013\\scheduler-input-limit-repair-20261017-once\\selected-native-failure-lines-original.log",
+      "privateBytesPublished": false,
+      "sha256": "7f7800ee9a75ac4748b284d06ee9b805d7bfe5374052b470bd338779c5504bca"
+    },
+    {
+      "bytes": 12140,
+      "path": "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-integration\\soilfer-lims\\WP\\backlog-resume-20261013\\scheduler-input-limit-repair-20261017-once\\automation-repaired.toml",
+      "privateBytesPublished": false,
+      "sha256": "356ffeeefa987d624cc4ddbf04ebdd204d9bc3fc80e52a3a3c3b0f259e00d62b"
+    }
+  ]
+}

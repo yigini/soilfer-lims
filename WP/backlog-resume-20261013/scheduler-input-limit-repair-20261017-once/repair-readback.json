@@ -1,0 +1,18 @@
+{
+  "exactCanonicalPromptReadbackVerified": true,
+  "firstReadbackExpectedUntrimmedNewlineRefusedBeforeEvidenceWrite": true,
+  "historyArchiveVerbatimVerified": true,
+  "maximumInputCharacters": 1048576,
+  "nextAutomaticTurnActuallyObserved": false,
+  "note": "A successful future automatic turn must be observed separately; enabled configuration is not proof of execution.",
+  "productionOperations": 0,
+  "promptCharacters": 11807,
+  "promptSha256": "4f6844de9c52480d54c49f82db484c91568bc11f37ddae0a9cfebdcdc3910fad",
+  "rrule": "FREQ=MINUTELY;INTERVAL=2",
+  "scheduledDispatchEligibilityFixed": true,
+  "sourceKitUnchanged": true,
+  "status": "ACTIVE",
+  "targetThreadId": "01a10475-07f1-7521-9e0d-3bb89daca083",
+  "toolTrimmedFinalNewline": true,
+  "verifiedUtc": "2026-10-17T04:03:54.069356+00:00"
+}
