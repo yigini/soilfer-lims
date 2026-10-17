@@ -9,6 +9,16 @@
 'use strict';
 
 const dashboardService = require('../services/dashboardService');
+const { getQaDashboard } = require('../services/qaDashboardService');
+
+async function getQa(req, res) {
+    try {
+        res.json(await getQaDashboard(req.user, { labId: req.query.labId, days: req.query.days }));
+    } catch (err) {
+        res.status(err.statusCode || 500).json({ error: err.statusCode ? err.message : 'Failed to load QA dashboard',
+            code: err.code || 'QA_DASHBOARD_ERROR' });
+    }
+}
 
 async function getHome(req, res) {
     try {
@@ -47,6 +57,7 @@ async function getQueue(req, res) {
 }
 
 module.exports = {
+    getQa,
     getHome,
     getQueue
 };

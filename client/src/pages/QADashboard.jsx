@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import BatchInspectionModal from '../components/qc/BatchInspectionModal';
 import NonconformityList from '../components/qc/NonconformityList';
+import QaOverview from '../components/qc/QaOverview';
 
 export default function QADashboard() {
     const { token } = useAuth();
@@ -18,7 +19,7 @@ export default function QADashboard() {
     const batchIdParam = searchParams.get('batchId');
     const tabParam = searchParams.get('tab');
 
-    const [activeTab, setActiveTab] = useState(['amendments', 'audit', 'nonconformities'].includes(tabParam) ? tabParam : 'qc');
+    const [activeTab, setActiveTab] = useState(['overview', 'qc', 'amendments', 'audit', 'nonconformities'].includes(tabParam) ? tabParam : 'overview');
     const [ncrRefreshKey, setNcrRefreshKey] = useState(0);
     const [selectedBatchId, setSelectedBatchId] = useState(batchIdParam);
     const [isInspectionOpen, setIsInspectionOpen] = useState(Boolean(batchIdParam));
@@ -34,7 +35,7 @@ export default function QADashboard() {
     }, [batchIdParam]);
 
     useEffect(() => {
-        if (tabParam && ['qc', 'amendments', 'audit', 'nonconformities'].includes(tabParam)) {
+        if (tabParam && ['overview', 'qc', 'amendments', 'audit', 'nonconformities'].includes(tabParam)) {
             setActiveTab(tabParam);
         }
     }, [tabParam]);
@@ -162,7 +163,7 @@ export default function QADashboard() {
             </div>
 
             {/* Metric Summary Cards */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {activeTab !== 'overview' && <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <div className="p-4 rounded-xl border border-sf-divider bg-sf-surface shadow-sm">
                     <div className="text-xs font-medium text-sf-muted">{t('qaSection.qcBatchesMonitored', 'QC Batches Monitored')}</div>
                     <div className="text-2xl font-bold text-sf-text mt-1">{stats.qcTotal}</div>
@@ -188,11 +189,15 @@ export default function QADashboard() {
                     <div className="text-2xl font-bold text-sf-text mt-1">{stats.auditTotal}</div>
                     <div className="text-[11px] text-gray-400 mt-0.5">{t('qaSection.immutableAuditRecordsSubtitle', 'Security & operational events')}</div>
                 </div>
-            </div>
+            </div>}
 
             {/* Navigation Tabs & Search */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
                 <div className="flex flex-wrap items-center gap-2 border-b sm:border-b-0 border-sf-divider pb-2 sm:pb-0">
+                    <button type="button" onClick={() => setActiveTab('overview')}
+                        className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${activeTab === 'overview' ? 'bg-indigo-600 text-white shadow-sm' : 'text-sf-muted hover:bg-sf-raised'}`}>
+                        {t('qaOverview.title')}
+                    </button>
                     <button type="button" onClick={() => setActiveTab('nonconformities')}
                         className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${activeTab === 'nonconformities' ? 'bg-indigo-600 text-white shadow-sm' : 'text-sf-muted hover:bg-sf-raised'}`}>
                         {t('nonconformity.title')}
@@ -237,7 +242,7 @@ export default function QADashboard() {
                     </button>
                 </div>
 
-                <div className="relative w-full sm:w-72">
+                {activeTab !== 'overview' && <div className="relative w-full sm:w-72">
                     <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                     <input
                         type="search"
@@ -246,12 +251,12 @@ export default function QADashboard() {
                         placeholder={t('qaSection.searchRecords', 'Search records…')}
                         className="w-full pl-9 pr-3 py-1.5 text-xs bg-sf-canvas border border-sf-divider rounded-lg text-sf-text placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sf-emerald shadow-sm"
                     />
-                </div>
+                </div>}
             </div>
 
             {/* Tab Contents */}
             <div className="bg-sf-surface/80 rounded-xl border border-sf-divider/80 shadow-sm overflow-hidden">
-                {activeTab === 'nonconformities' ? <NonconformityList refreshKey={ncrRefreshKey} /> : loading ? (
+                {activeTab === 'overview' ? <QaOverview refreshKey={ncrRefreshKey} /> : activeTab === 'nonconformities' ? <NonconformityList refreshKey={ncrRefreshKey} /> : loading ? (
                     <div className="p-12 text-center text-gray-400 flex flex-col items-center justify-center">
                         <Loader2 className="w-8 h-8 animate-spin text-indigo-600 mb-2" />
                         <span className="text-xs">{t('qaSection.loadingRecords', 'Loading quality records…')}</span>
