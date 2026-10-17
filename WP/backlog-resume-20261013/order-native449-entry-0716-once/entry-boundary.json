@@ -1,0 +1,11 @@
+{
+  "actualAutomaticWakeObservedUtc": "2026-10-17T07:16:54.540Z",
+  "head": "86675b5f8659e6c6533b2ab7ffae9441749ebae2",
+  "independentSourcePath": "strict PRE209 ALTER/index native inventory",
+  "issue191Closed": true,
+  "newCommentIds": [],
+  "oldPrivatePayloadsRead": false,
+  "operatorsExecuted": 0,
+  "runtimeLinuxLockQuiescenceEvidenceRemainsUnobserved": true,
+  "stagedEmpty": true
+}

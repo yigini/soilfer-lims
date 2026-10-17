@@ -26,6 +26,7 @@ REQUIRED_SOURCE={
     'kit_readonly_target_wal.py','readonly-target-wal-source.json',
     'kit_wal_dirty_inventory.py','wal-dirty-inventory-source.json',
     'kit_wal_source_binding.py','wal-source-binding-source.json',
+    'kit_order_revision_native.py','order-revision-native-source.json',
     'kit_capture_statement.py','capture-statement-journal-source.json',
     'kit_schema_collection.py','schema-collection-source.json',
     'kit_main_mutations.py','kit_capture_native_inventory.py','capture-native-inventory-source.json',

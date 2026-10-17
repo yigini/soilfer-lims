@@ -1,0 +1,59 @@
+{
+  "applicationHead": "be8379745bdfae52ce46496ff26514dc7d729640",
+  "applyAndRepeatTargetReadersClosed": false,
+  "beforeContainerCreate": true,
+  "candidateStartupClosed": false,
+  "derivation": [
+    "Only206-dry and214-dry mount independently retained DRY clones writable while the exact --dry-run child opens their main target as readonly. Both return before the writer constructor whenever apply is false. Their initial ordinary reader may create a zero-byte WAL and create/extend SHM; kernel readonly mounts of other standalone read owners do not grant these writes.",
+    "Fresh full no-writer inventories bracket target triple hashing, held source claim and complete admission BEFORE temporary-directory or container creation. All existing SHM length and both possible WAL/SHM file entries are charged without deletion or shared allocation credit.",
+    "At minimum valid database page512 plus frame header24, full retained WAL length bounds frames. WAL-index has first4062 then4096 frames per32768-byte region. unixShmRegionPerMap rounds up to system-page granularity: Linux system pages must be a power of two at most32768, checked BEFORE SQL/container create. Larger or unknown Linux values refuse; LOCAL Windows is an explicit platform projection, not Linux hardware evidence.",
+    "After the native child has closed and before its existing final-memory/exit permission, hash the full target main/WAL again, require original inode/device/mode and exact bytes, bound SHM before content read, require independent regular same-device files and no journal/foreign entries. An originally absent WAL can only remain absent or become empty. SHM locks/content/inode may evolve within the admitted length.",
+    "This does NOT bound APPLY/repeat initial target readers, writer journals/WAL/main growth, SQL scratch, candidate temporary storage, daemon/systemd/journald or physical filesystem metadata. No SQL pragma, journal mode, application byte, scientific child argv, default heap,600owner clock or installer transaction changes."
+  ],
+  "files": {
+    "server/scripts/install_control_charts.js": {
+      "bytes": 9109,
+      "gitBlob": "799be75d6a945cd5fdfa83712d2168a64b822bfa",
+      "sha256": "fd5bdc007ac2e995dd25a65822169135c3c41252dc5d86c50fe45b99bd72125b"
+    },
+    "server/scripts/install_sample_containers.js": {
+      "bytes": 9412,
+      "gitBlob": "6a817ccdf11927af162ca9ea0644786604d9d5b7",
+      "sha256": "67bcf2f978e99f50952b5303fbb837bd447c5ff13c625970f6eadb02ab1796b7"
+    }
+  },
+  "filesystemClosureClaimed": false,
+  "nativeSourceExcerpts": [
+    {
+      "firstLine": 43991,
+      "lastLine": 44005,
+      "text": "** Return the minimum number of 32KB shm regions that should be mapped at\n** a time, assuming that each mapping must be an integer multiple of the\n** current system page-size.\n**\n** Usually, this is 1. The exception seems to be systems that are configured\n** to use 64KB pages - in this case each mapping must cover at least two\n** shm regions.\n*/\nstatic int unixShmRegionPerMap(void){\n  int shmsz = 32*1024;            /* SHM region size */\n  int pgsz = osGetpagesize();   /* System page size */\n  assert( ((pgsz-1)&pgsz)==0 );   /* Page size must be a power of 2 */\n  if( pgsz<shmsz ) return 1;\n  return pgsz/shmsz;\n}\n"
+    },
+    {
+      "firstLine": 44339,
+      "lastLine": 44368,
+      "text": "  assert( pShmNode->hShm<0 || pDbFd->pInode->bProcessLock==0 );\n\n  /* Minimum number of regions required to be mapped. */\n  nReqRegion = ((iRegion+nShmPerMap) / nShmPerMap) * nShmPerMap;\n\n  if( pShmNode->nRegion<nReqRegion ){\n    char **apNew;                      /* New apRegion[] array */\n    int nByte = nReqRegion*szRegion;   /* Minimum required file size */\n    struct stat sStat;                 /* Used by fstat() */\n\n    pShmNode->szRegion = szRegion;\n\n    if( pShmNode->hShm>=0 ){\n      /* The requested region is not mapped into this processes address space.\n      ** Check to see if it has been allocated (i.e. if the wal-index file is\n      ** large enough to contain the requested region).\n      */\n      if( osFstat(pShmNode->hShm, &sStat) ){\n        rc = SQLITE_IOERR_SHMSIZE;\n        goto shmpage_out;\n      }\n\n      if( sStat.st_size<nByte ){\n        /* The requested memory region does not exist. If bExtend is set to\n        ** false, exit early. *pp will be set to NULL and SQLITE_OK returned.\n        */\n        if( !bExtend ){\n          goto shmpage_out;\n        }\n\n"
+    },
+    {
+      "firstLine": 67368,
+      "lastLine": 67386,
+      "text": "**\n** Changing any of these constants will alter the wal-index format and\n** create incompatibilities.\n*/\n#define HASHTABLE_NPAGE      4096                 /* Must be power of 2 */\n#define HASHTABLE_HASH_1     383                  /* Should be prime */\n#define HASHTABLE_NSLOT      (HASHTABLE_NPAGE*2)  /* Must be a power of 2 */\n\n/*\n** The block of page numbers associated with the first hash-table in a\n** wal-index is smaller than usual. This is so that there is a complete\n** hash-table on each aligned 32KB page of the wal-index.\n*/\n#define HASHTABLE_NPAGE_ONE  (HASHTABLE_NPAGE - (WALINDEX_HDR_SIZE/sizeof(u32)))\n\n/* The wal-index is divided into pages of WALINDEX_PGSZ bytes each. */\n#define WALINDEX_PGSZ   (                                         \\\n    sizeof(ht_slot)*HASHTABLE_NSLOT + HASHTABLE_NPAGE*sizeof(u32) \\\n)\n"
+    }
+  ],
+  "nativeSqliteSourceProof": "live-backup-sqlite-source.json",
+  "nativeSqliteSourceProofSha256": "86a8caa2c4d075311ab90d7226478719974c43b3fbc356e18c771d582e168a63",
+  "nativeSqliteSourceSha256": "2bbdd0eff3f46852e954d7881b7945990bf78c1421f806cf7978bc22e187100a",
+  "newDatabaseEquivalentClaims": {
+    "issue-206": 1,
+    "issue-214": 1
+  },
+  "physicalFilesystemClosureClaimed": false,
+  "primaryDocumentation": [
+    "https://www.sqlite.org/wal.html",
+    "https://www.sqlite.org/tempfiles.html"
+  ],
+  "scope": "TWO_RELEASE_DRY_TARGET_READERS_ONLY",
+  "sqlScratchFilesClosed": false,
+  "version": 1,
+  "writerGrowthClosed": false
+}

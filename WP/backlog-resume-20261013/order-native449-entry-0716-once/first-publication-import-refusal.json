@@ -1,0 +1,62 @@
+{
+  "diagnosticProvenance": "TOOL_OUTPUT_TRANSCRIPTION_ONLY_NOT_INDEPENDENT_ORIGINAL_ERROR_FILE",
+  "exception": "ModuleNotFoundError: verify_kit_capture_native_inventory",
+  "exceptionLine": 94,
+  "firstPublisher": "publish-kit-order-native456-once.py",
+  "headUnchanged": true,
+  "operatorsExecuted": 0,
+  "outcome": "REFUSED_MODULE_IMPORT_BEFORE_README_GIT_MUTATION",
+  "retainedPartialPublicationFiles": {
+    "api-audit207-comments-original.json": {
+      "bytes": 12016,
+      "sha256": "fdc47099d4874c238faf4dd5fa8375e7aa613afe7fddef6d645710a4842aa70d"
+    },
+    "api-audit208-comments-original.json": {
+      "bytes": 12529,
+      "sha256": "9d97240bb4e23e24d7c5c6be2da81689d286ad882a5e3597d70d3d821405dbd2"
+    },
+    "api-ci207-original.json": {
+      "bytes": 12533,
+      "sha256": "839b3381884dbf07094d8bd6b59a11397c9814ac308a3f1262881d49a3e09d51"
+    },
+    "api-ci208-original.json": {
+      "bytes": 12526,
+      "sha256": "d3edd2d566288db478082c2a767f34319552758c4f34e65f3724e61f2389e876"
+    },
+    "api-issue191-original.json": {
+      "bytes": 9900,
+      "sha256": "bc4738533768c757f88b972f09cccc22cff5b847d4128bbc0b730b4f7e93e352"
+    },
+    "api-main-ci-original.json": {
+      "bytes": 12122,
+      "sha256": "2c90f06107206bb4bdb799a458e15a3d80a58f486c6c741ca9841a70daca5388"
+    },
+    "api-main-original.json": {
+      "bytes": 336,
+      "sha256": "5dbe45b3d22a65a8a14dc291df3e7fc536f7465cceca1682788cdb46d6448679"
+    },
+    "api-pr207-original.json": {
+      "bytes": 20541,
+      "sha256": "8641990ba9d95f39cd8a6e32eeecb625b490c27d0d177e44918277e845c111be"
+    },
+    "api-pr208-original.json": {
+      "bytes": 20803,
+      "sha256": "5b87b092aa79aabe0a1690ec08da4330a9d7d1c0ec85968917e3434eb4db87b7"
+    },
+    "api-release-comments-original.json": {
+      "bytes": 10251,
+      "sha256": "02fd03842fe2902abd66181243980877d7ac38fd37efc928878f25a42cd3655e"
+    },
+    "fresh-whitespace-stderr-original.txt": {
+      "bytes": 610,
+      "sha256": "734741f835dd32c738cad6ee2f1209bd98c8b0f67915b2d6310f666e47ae204c"
+    },
+    "fresh-whitespace-stdout-original.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "sourceRerunRequired": false,
+  "stagedEmpty": true,
+  "testedSourceFilesUnchanged": true
+}
