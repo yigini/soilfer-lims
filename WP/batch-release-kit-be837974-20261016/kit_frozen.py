@@ -20,6 +20,7 @@ REQUIRED_SOURCE={
     'kit_owned.py','kit_cli_evidence.py','kit_cli_output.py','cli_output.cjs','kit_integrity.py','stopped_integrity.cjs','cli_guard.cjs','live_backup.cjs',
     'live-backup-sqlite-source.json','sqlite_temp_directory.cjs','sqlite-temp-directory-source.json',
     'kit_capture_main.py','capture-native-main-source.json',
+    'kit_linux_main_vfs.py','linux-main-vfs-source.json',
     'kit_schema_collection.py','schema-collection-source.json',
     'kit_main_mutations.py','kit_capture_native_inventory.py','capture-native-inventory-source.json',
     'order_impact.cjs','kit_order_output.py','order-impact-transport-source.json',
