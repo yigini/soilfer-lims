@@ -61,17 +61,17 @@ function classify(db, source) {
     return classification;
 }
 function legacyPlan(db) {
-    const planned = [], blocked = [];
+    const planned = [], deferred = [];
     for (const [table, kind, timeField] of [['Sample', 'sample', 'receptionDate'], ['Consignment', 'consignment', 'receivedAt']]) {
         for (const row of db.prepare(`SELECT * FROM "${table}" ORDER BY id`).iterate()) {
             if (!row[timeField] && !RECEIPT_FIELDS.some(key => row[key] != null && row[key] !== '')) continue;
             const date = recordedDate(row[timeField] ?? row.custodyHandoverAt);
             const labId = kind === 'sample' ? row.assignedLab : row.labId;
-            if (!labId || !Number.isFinite(date.getTime())) { blocked.push({ table, id: row.id, code: 'LEGACY_CUSTODY_PROVENANCE_REQUIRED' }); continue; }
+            if (!labId || !Number.isFinite(date.getTime())) { deferred.push({ table, id: row.id, code: 'LEGACY_CUSTODY_PROVENANCE_REQUIRED' }); continue; }
             const evidence = Object.fromEntries(RECEIPT_FIELDS.map(key => [key, row[key] ?? null]));
             if (evidence.custodyHandoverAt != null) {
                 const handover = recordedDate(evidence.custodyHandoverAt);
-                if (!Number.isFinite(handover.getTime())) { blocked.push({ table, id: row.id, code: 'LEGACY_CUSTODY_PROVENANCE_REQUIRED' }); continue; }
+                if (!Number.isFinite(handover.getTime())) { deferred.push({ table, id: row.id, code: 'LEGACY_CUSTODY_PROVENANCE_REQUIRED' }); continue; }
                 evidence.custodyHandoverAt = handover.toISOString();
             }
             evidence.legacy = { ...Object.fromEntries(RECEIPT_FIELDS.map(key => [key, row[key] ?? null])),
@@ -82,8 +82,7 @@ function legacyPlan(db) {
                 counterparty: row.custodyCarrierName || null, reference: row.custodyTrackingNumber || null, evidence: JSON.stringify(evidence) });
         }
     }
-    if (blocked.length) throw fail('CUSTODY_BACKFILL_REVIEW_REQUIRED', 'Legacy custody needs a laboratory and recorded receipt time.', blocked);
-    return planned;
+    return { planned, deferred };
 }
 function snapshot(db) {
     const out = {};
@@ -107,29 +106,32 @@ function installSampleCustody({ dbPath, apply = false, startupContext } = {}) {
         : new Database(target, { readonly: true, fileMustExist: true });
     let reviewed;
     try { reviewed = reader.transaction(() => { const classification = classify(reader, source); return { classification,
-        plan: classification === 'COMPLETE_207' ? [] : legacyPlan(reader) }; })(); } finally { reader.close(); }
+        plan: classification === 'COMPLETE_207' ? { planned: [], deferred: [] } : legacyPlan(reader) }; })(); } finally { reader.close(); }
     if (!apply || reviewed.classification === 'COMPLETE_207') return { classification: reviewed.classification,
-        mode: apply ? 'NO_OP' : 'DRY_RUN', totalChanges: 0, backfilledCount: reviewed.plan.length, backfillSha256: hash(reviewed.plan) };
+        mode: apply ? 'NO_OP' : 'DRY_RUN', totalChanges: 0, backfilledCount: reviewed.plan.planned.length, backfillSha256: hash(reviewed.plan.planned),
+        deferredCount: reviewed.plan.deferred.length, deferredSha256: hash(reviewed.plan.deferred) };
     const db = new Database(target, { fileMustExist: true, timeout: 5000 });
     try {
         db.pragma('foreign_keys=ON');
         return db.transaction(() => {
             const classification = classify(db, source);
-            if (classification === 'COMPLETE_207') return { classification, mode: 'NO_OP', totalChanges: 0, backfilledCount: 0 };
+            if (classification === 'COMPLETE_207') return { classification, mode: 'NO_OP', totalChanges: 0, backfilledCount: 0, deferredCount: 0, deferredSha256: hash([]) };
             const before = snapshot(db), plan = legacyPlan(db);
             if (hash(plan) !== hash(reviewed.plan)) throw fail('CUSTODY_SOURCE_CHANGED', 'Legacy custody changed after review.');
             const ddl = loadCustodyMigrationSource();
             if (classification === 'PRE_207') db.exec(ddl.sql); else db.exec(ddl.guardsSql);
             const insert = db.prepare(`INSERT INTO CustodyEvent(id,labId,sampleId,consignmentId,type,by,actorId,at,source,acknowledgement,counterparty,reference,evidence)
                 VALUES(@id,@labId,@sampleId,@consignmentId,'RECEIVED',@by,@actorId,@at,'LEGACY',0,@counterparty,@reference,@evidence)`);
-            for (const row of plan) insert.run(row);
+            for (const row of plan.planned) insert.run(row);
             if (before !== snapshot(db)) throw fail('CUSTODY_PRESERVATION_REFUSED', 'Installation changed existing evidence.');
             const receipt = { sourceSha256: source.sha256, originalRowsPreserved: true, originalRowsSha256: before,
-                backfilledCount: plan.length, backfillSha256: hash(plan) };
+                backfilledCount: plan.planned.length, backfillSha256: hash(plan.planned),
+                deferredCount: plan.deferred.length, deferredSha256: hash(plan.deferred), deferred: plan.deferred };
             receipt.receiptSha256 = hash(receipt);
             db.prepare('INSERT INTO _schema_migrations(id,details) VALUES(?,?)').run(MARKER, JSON.stringify(receipt));
             if (db.pragma('foreign_key_check').length) throw fail('CUSTODY_INTEGRITY_REFUSED', 'Custody references failed integrity checks.');
-            return { classification: classify(db, source), mode: 'APPLIED', backfilledCount: plan.length, totalChanges: db.prepare('SELECT total_changes() n').get().n };
+            return { classification: classify(db, source), mode: 'APPLIED', backfilledCount: plan.planned.length,
+                deferredCount: plan.deferred.length, deferredSha256: hash(plan.deferred), totalChanges: db.prepare('SELECT total_changes() n').get().n };
         }).immediate();
     } finally { db.close(); }
 }

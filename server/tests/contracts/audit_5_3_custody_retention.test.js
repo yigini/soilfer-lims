@@ -14,7 +14,7 @@ const { getAuthToken } = require('../setup');
 const { loadCustodyMigrationSource } = require('../../services/custodyMigrationSource');
 const { installSampleCustody } = require('../../scripts/install_sample_custody');
 const labId = 'CUSTODY-' + randomUUID(), otherLabId = 'CUSTODY-OTHER-' + randomUUID();
-let actor, token, app, destination;
+let actor, token, app, destination, legacyTemplate;
 beforeAll(async () => {
     for (const id of [labId, otherLabId]) await prisma.lab.create({ data: { id, code: id, name: 'Custody contract laboratory', country: 'GTM', timezone: 'UTC' } });
     token = await getAuthToken('LAB_MANAGER', labId); actor = jwt.decode(token);
@@ -23,6 +23,10 @@ beforeAll(async () => {
     app.use('/api/projects', require('../../routes/projectRoutes'));
     app.use('/api/reception', require('../../routes/receptionRoutes'));
     destination = await prisma.inventoryLocation.create({ data: { id: randomUUID(), labId, purpose: 'SAMPLE', name: 'Controlled archive shelf' } });
+    // Installer cases start before live-action tests add unrelated legacy receipt facts.
+    legacyTemplate = path.resolve(__dirname, '../.tmp/test_custody_baseline_' + randomUUID() + '.db');
+    const reader = new Database(process.env.DATABASE_PATH, { readonly: true, fileMustExist: true });
+    try { await reader.backup(legacyTemplate); } finally { reader.close(); }
 });
 async function sample(data = {}) {
     const id = randomUUID();
@@ -240,9 +244,9 @@ test('expiry, holds and amendments are rechecked in the shared disposal transiti
     await prisma.sampleAmendment.create({ data: { sampleId: amended.id, type: 'CLERICAL', status: 'APPROVED', reason: 'Correction', createdBy: actor.username } });
     await expect(transitionSample(amended.id, 'DISPOSED', actor, 'Disposal', {}, prisma)).rejects.toMatchObject({ code: 'SAMPLE_AMENDMENT_OPEN' });
 });
-async function legacyCustodyCopy(data = {}) {
+async function legacyCustodyCopy(data = {}, extraSamples = []) {
     const file = path.resolve(__dirname, '../.tmp/custody-install-' + randomUUID() + '.db');
-    const reader = new Database(process.env.DATABASE_PATH, { readonly: true, fileMustExist: true });
+    const reader = new Database(legacyTemplate, { readonly: true, fileMustExist: true });
     await reader.backup(file); reader.close();
     const { PrismaClient } = require('../../prisma_client');
     const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
@@ -251,14 +255,18 @@ async function legacyCustodyCopy(data = {}) {
     try { await createSampleFixture(fixtureDb, { data: { id, originalId: id, assignedLab: labId, status: 'RECEIVED',
         receptionDate: new Date(at), receivedBy: 'legacy-officer', custodyCarrierName: 'Courier',
         receivingOfficerSignature: 'CONFIRMED:legacy:old', receptionData: '{ "coc": {"tracking":"legacy"} }',
-        metadata: '{"archiveLocation":"old shelf"}', updatedAt: new Date(at), ...data } }); } finally { await fixtureDb.$disconnect(); }
+        metadata: '{"archiveLocation":"old shelf"}', updatedAt: new Date(at), ...data } });
+        for (const extra of extraSamples) await createSampleFixture(fixtureDb, { data: { status: 'RECEIVED',
+            receptionDate: new Date(at), receivedBy: 'legacy-officer', updatedAt: new Date(at), ...extra } });
+    } finally { await fixtureDb.$disconnect(); }
     const db = new Database(file);
     const guards = [...loadCustodyMigrationSource().guardsSql.matchAll(/CREATE (?:UNIQUE )?(?:TRIGGER|INDEX) "([^"]+)"/g)].map(m => m[1]);
     for (const name of guards) db.exec(`DROP ${name.includes('first_') ? 'INDEX' : 'TRIGGER'} "${name}"`);
     db.exec('DROP TABLE CustodyEvent; ALTER TABLE Sample DROP COLUMN retainUntil; ALTER TABLE InventoryLocation DROP COLUMN purpose;');
     db.prepare('DELETE FROM _schema_migrations WHERE id=?').run('207_sample_custody');
-    const before = db.prepare('SELECT * FROM Sample WHERE id=?').get(id); db.close();
-    return { file, id, before };
+    const before = db.prepare('SELECT * FROM Sample WHERE id=?').get(id);
+    const extraBefore = extraSamples.map(extra => db.prepare('SELECT * FROM Sample WHERE id=?').get(extra.id)); db.close();
+    return { file, id, before, extraBefore };
 }
 test('installer dry-run preserves bytes; apply preserves every legacy custody field and JSON; repeat is a no-op', async () => {
     const { file, id, before } = await legacyCustodyCopy();
@@ -280,23 +288,45 @@ test('installer dry-run preserves bytes; apply preserves every legacy custody fi
     expect(() => installSampleCustody({ dbPath: file, apply: true })).toThrow(/differs/);
     expect(fs.readFileSync(file)).toEqual(tamperedBytes);
 });
-test('legacy receipt facts without a recorded date refuse dry-run and apply with no schema, event or byte mutations', async () => {
+test('unprovable legacy receipt is deferred without changing its fields or inventing a custody event', async () => {
     const { file, id, before } = await legacyCustodyCopy({ status: 'EXPECTED', receptionDate: null, custodyHandoverAt: null,
         receivingOfficerName: 'Recorded legacy receiver', receivedBy: null, receivingOfficerSignature: null });
     const bytes = fs.readFileSync(file);
-    for (const apply of [false, true]) {
-        let refusal;
-        try { installSampleCustody({ dbPath: file, apply }); } catch (error) { refusal = error; }
-        expect(refusal).toMatchObject({ statusCode: 409, code: 'CUSTODY_BACKFILL_REVIEW_REQUIRED', totalChanges: 0 });
-        expect(refusal.differences).toContainEqual({ table: 'Sample', id, code: 'LEGACY_CUSTODY_PROVENANCE_REQUIRED' });
-        expect(fs.readFileSync(file)).toEqual(bytes);
-    }
+    const deferred = [{ table: 'Sample', id, code: 'LEGACY_CUSTODY_PROVENANCE_REQUIRED' }];
+    const deferredSha256 = require('node:crypto').createHash('sha256').update(JSON.stringify(deferred)).digest('hex');
+    expect(installSampleCustody({ dbPath: file })).toMatchObject({ mode: 'DRY_RUN', totalChanges: 0,
+        backfilledCount: 0, deferredCount: 1, deferredSha256 });
+    expect(fs.readFileSync(file)).toEqual(bytes);
+    expect(installSampleCustody({ dbPath: file, apply: true })).toMatchObject({ classification: 'COMPLETE_207',
+        mode: 'APPLIED', backfilledCount: 0, deferredCount: 1, deferredSha256 });
     const db = new Database(file, { readonly: true, fileMustExist: true });
     try {
-        expect(db.prepare('SELECT * FROM Sample WHERE id=?').get(id)).toEqual(before);
-        expect(db.prepare("SELECT name FROM sqlite_master WHERE name='CustodyEvent'").get()).toBeUndefined();
-        expect(db.prepare("SELECT id FROM _schema_migrations WHERE id='207_sample_custody'").get()).toBeUndefined();
+        const row = db.prepare('SELECT * FROM Sample WHERE id=?').get(id); delete row.retainUntil;
+        expect(row).toEqual(before);
+        expect(db.prepare('SELECT count(*) n FROM CustodyEvent WHERE sampleId=?').get(id).n).toBe(0);
+        const receipt = JSON.parse(db.prepare("SELECT details FROM _schema_migrations WHERE id='207_sample_custody'").get().details);
+        expect(receipt).toMatchObject({ originalRowsPreserved: true, deferredCount: 1, deferredSha256, deferred });
     } finally { db.close(); }
+    expect(installSampleCustody({ dbPath: file, apply: true })).toMatchObject({ mode: 'NO_OP', totalChanges: 0 });
+});
+test('mixed legacy receipts backfill only the provable row and retain the unprovable row for review', async () => {
+    const unknownId = randomUUID();
+    const { file, id, extraBefore: [unknown] } = await legacyCustodyCopy({}, [
+        { id: unknownId, originalId: unknownId, assignedLab: null }
+    ]);
+    expect(installSampleCustody({ dbPath: file })).toMatchObject({ mode: 'DRY_RUN', backfilledCount: 1, deferredCount: 1 });
+    expect(installSampleCustody({ dbPath: file, apply: true })).toMatchObject({ mode: 'APPLIED', backfilledCount: 1, deferredCount: 1 });
+    const after = new Database(file, { readonly: true, fileMustExist: true });
+    try {
+        const row = after.prepare('SELECT * FROM Sample WHERE id=?').get(unknownId); delete row.retainUntil;
+        expect(row).toEqual(unknown);
+        expect(after.prepare('SELECT sampleId,source,acknowledgement FROM CustodyEvent').all())
+            .toEqual([{ sampleId: id, source: 'LEGACY', acknowledgement: 0 }]);
+        const receipt = JSON.parse(after.prepare("SELECT details FROM _schema_migrations WHERE id='207_sample_custody'").get().details);
+        expect(receipt).toMatchObject({ backfilledCount: 1, deferredCount: 1,
+            deferred: [{ table: 'Sample', id: unknownId, code: 'LEGACY_CUSTODY_PROVENANCE_REQUIRED' }] });
+    } finally { after.close(); }
+    expect(installSampleCustody({ dbPath: file, apply: true })).toMatchObject({ mode: 'NO_OP', totalChanges: 0 });
 });
 test('missing and empty recorded dates are invalid while zone-less recorded timestamps remain UTC', () => {
     const source = fs.readFileSync(path.resolve(__dirname, '../../scripts/install_sample_custody.js'), 'utf8');
@@ -328,7 +358,8 @@ function readinessSnapshots() {
     const hash = value => require('node:crypto').createHash('sha256').update(JSON.stringify(value)).digest('hex');
     after.custody = { sourceSha256: loadCustodyMigrationSource().sha256, originalRowsSha256: hash(before.rows), ledgerCount: 0 };
     const receipt = { sourceSha256: after.custody.sourceSha256, originalRowsPreserved: true,
-        originalRowsSha256: after.custody.originalRowsSha256, backfilledCount: 0, backfillSha256: hash([]) };
+        originalRowsSha256: after.custody.originalRowsSha256, backfilledCount: 0, backfillSha256: hash([]),
+        deferredCount: 0, deferredSha256: hash([]), deferred: [] };
     receipt.receiptSha256 = hash(receipt);
     after.receipts.push({ id: '207_sample_custody', appliedAt: '2026-10-16 12:00:00', details: JSON.stringify(receipt) });
     return { before, after };
