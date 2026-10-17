@@ -22,7 +22,7 @@ REQUIRED_SOURCE={
     'order_impact.cjs','kit_order_output.py','order-impact-transport-source.json',
     'kit_install.py','kit_runtime.py','kit_readiness.py','kit_natural.py','kit_no_writers.py','kit_ingress.py',
     'kit_budget.py','kit_disk.py','kit_copy_admission.py','kit_app_snapshots.py','application-snapshot-source.json',
-    'kit_target_reader.py','target-reader-index-source.json','kit_rollback_journal.py','rollback-journal-source.json','kit_probes.py','kit_frozen.py',
+    'kit_target_reader.py','target-reader-index-source.json','kit_rollback_journal.py','rollback-journal-source.json','kit_main_growth.py','main-growth-source.json','kit_probes.py','kit_frozen.py',
     'kit_preservation.py','kit_recovery.py','kit_emergency_ingress.py','kit_stop.py','kit_stop_lifecycle.py',
     'build_stop_post.py','predecessor-startup-expectations.json',
     'retained_app_copy.py','kit_recovery_copy.py','predecessor-copy-source-binding.json',
