@@ -1,0 +1,79 @@
+{
+  "applicationHead": "be8379745bdfae52ce46496ff26514dc7d729640",
+  "childDeadlineAdded": false,
+  "childSignalledOnRoutingFailure": false,
+  "completeCallGraphClosed": false,
+  "derivation": [
+    "Default SQLITE_TEMP_STORE=1 permits file-backed SQL scratch. Neither this guard nor the environment changes the journal_mode or temp_store pragma.",
+    "unixTempFileDir first tries sqlite3_temp_directory, then SQLITE_TMPDIR, TMPDIR, /var/tmp, /usr/tmp, /tmp and dot. It accepts a candidate only after stat identifies a directory and access(path,03) succeeds.",
+    "All fifteen release and six capture specifications explicitly set SQLITE_TMPDIR, TMPDIR, TMP and TEMP to /tmp. Exact stopped-owner inspection verifies the same environment and its independent retained RW bind.",
+    "The shared silent supervisor rejects non-Linux, a different directory, any different or missing environment value, directory or ancestor aliases, a mode other than0700, changed descriptor/path device-inode-mode-owner-group, or failed write/search access before output capture and scientific spawn.",
+    "The directory descriptor stays open until the scientific child has closed. Identity and access are checked again before publishing the existing immutable completion. Failed final checks retain the original pipes and cannot publish a success completion. There is no new timer, signal or transaction interruption.",
+    "The environment makes /tmp the first environment candidate; this is not proof that a later sqlite3_temp_directory override, custom VFS, permission race, or unreviewed future caller cannot change selection. Full source/call-graph and whole-copy closure remain required.",
+    "Native Unix DELETEONCLOSE normally unlinks immediately after open. A final directory inventory cannot prove no file existed, recover original bytes, or establish peak disk allocation.",
+    "No content quota or sorter/statement-journal/rollback-journal/WAL/database-growth bound is established. Candidate startup and all daemon/systemd/physical metadata producers remain separate unfinished work."
+  ],
+  "nativePackageSourceProof": {
+    "file": "live-backup-sqlite-source.json",
+    "sha256": "86a8caa2c4d075311ab90d7226478719974c43b3fbc356e18c771d582e168a63"
+  },
+  "officialReferences": [
+    "https://www.sqlite.org/tempfiles.html",
+    "https://www.sqlite.org/c3ref/temp_directory.html"
+  ],
+  "operationalExecutionPerformed": false,
+  "physicalFilesystemClosureClaimed": false,
+  "scientificArgvChanged": false,
+  "scope": "OWNED_CLI_UNIX_TEMP_DIRECTORY_PRECONDITIONS_ONLY",
+  "sqlPragmaChanged": false,
+  "sqlTemporaryFileBytesBounded": false,
+  "sqliteSource": {
+    "bytes": 9389807,
+    "excerpts": [
+      {
+        "bytes": 773,
+        "firstLine": 15316,
+        "lastLine": 15340,
+        "role": "default-temp-store-and-sorter-worker-count",
+        "sha256": "de8810281e30fa518d6500448b3379818bf962cb6685c88013163b754cc4ede5",
+        "text": "** Provide a default value for SQLITE_TEMP_STORE in case it is not specified\n** on the command-line\n*/\n#ifndef SQLITE_TEMP_STORE\n# define SQLITE_TEMP_STORE 1\n#endif\n\n/*\n** If no value has been provided for SQLITE_MAX_WORKER_THREADS, or if\n** SQLITE_TEMP_STORE is set to 3 (never use temporary files), set it\n** to zero.\n*/\n#if SQLITE_TEMP_STORE==3 || SQLITE_THREADSAFE==0\n# undef SQLITE_MAX_WORKER_THREADS\n# define SQLITE_MAX_WORKER_THREADS 0\n#endif\n#ifndef SQLITE_MAX_WORKER_THREADS\n# define SQLITE_MAX_WORKER_THREADS 8\n#endif\n#ifndef SQLITE_DEFAULT_WORKER_THREADS\n# define SQLITE_DEFAULT_WORKER_THREADS 0\n#endif\n#if SQLITE_DEFAULT_WORKER_THREADS>SQLITE_MAX_WORKER_THREADS\n# undef SQLITE_MAX_WORKER_THREADS\n# define SQLITE_MAX_WORKER_THREADS SQLITE_DEFAULT_WORKER_THREADS\n"
+      },
+      {
+        "bytes": 893,
+        "firstLine": 45461,
+        "lastLine": 45505,
+        "role": "unix-environment-candidates-and-stat-access-predicates",
+        "sha256": "3b0726a661f4d6f0637150d3dd0fde10c17690ac6047fa7855c90141ff892aa0",
+        "text": "/*\n** Directories to consider for temp files.\n*/\nstatic const char *azTempDirs[] = {\n  0,\n  0,\n  \"/var/tmp\",\n  \"/usr/tmp\",\n  \"/tmp\",\n  \".\"\n};\n\n/*\n** Initialize first two members of azTempDirs[] array.\n*/\nstatic void unixTempFileInit(void){\n  azTempDirs[0] = getenv(\"SQLITE_TMPDIR\");\n  azTempDirs[1] = getenv(\"TMPDIR\");\n}\n\n/*\n** Return the name of a directory in which to put temporary files.\n** If no suitable temporary file directory can be found, return NULL.\n*/\nstatic const char *unixTempFileDir(void){\n  unsigned int i = 0;\n  struct stat buf;\n  const char *zDir = sqlite3_temp_directory;\n\n  while(1){\n    if( zDir!=0\n#if OS_VXWORKS\n     && zDir[0]=='/'\n#endif\n     && osStat(zDir, &buf)==0\n     && S_ISDIR(buf.st_mode)\n     && osAccess(zDir, 03)==0\n    ){\n      return zDir;\n    }\n    if( i>=sizeof(azTempDirs)/sizeof(azTempDirs[0]) ) break;\n    zDir = azTempDirs[i++];\n  }\n  return 0;\n}\n"
+      },
+      {
+        "bytes": 268,
+        "firstLine": 45941,
+        "lastLine": 45953,
+        "role": "default-unix-unlink-immediately-after-open",
+        "sha256": "a754cc7f5ba07f9f3bd2f2a6eab85c77ce466600adda1611c5e6420efa513903",
+        "text": "  if( isDelete ){\n#if OS_VXWORKS\n    zPath = zName;\n#elif defined(SQLITE_UNLINK_AFTER_CLOSE)\n    zPath = sqlite3_mprintf(\"%s\", zName);\n    if( zPath==0 ){\n      robust_close(p, fd, __LINE__);\n      return SQLITE_NOMEM_BKPT;\n    }\n#else\n    osUnlink(zName);\n#endif\n  }\n"
+      },
+      {
+        "bytes": 697,
+        "firstLine": 106479,
+        "lastLine": 106498,
+        "role": "sorter-delete-on-close-open-flags",
+        "sha256": "f91b951ef62b6fe08f2154683b7e206bc38ee486dec83583b08829d1d12fe827",
+        "text": "static int vdbeSorterOpenTempFile(\n  sqlite3 *db,                    /* Database handle doing sort */\n  i64 nExtend,                    /* Attempt to extend file to this size */\n  sqlite3_file **ppFd\n){\n  int rc;\n  if( sqlite3FaultSim(202) ) return SQLITE_IOERR_ACCESS;\n  rc = sqlite3OsOpenMalloc(db->pVfs, 0, ppFd,\n      SQLITE_OPEN_TEMP_JOURNAL |\n      SQLITE_OPEN_READWRITE    | SQLITE_OPEN_CREATE |\n      SQLITE_OPEN_EXCLUSIVE    | SQLITE_OPEN_DELETEONCLOSE, &rc\n  );\n  if( rc==SQLITE_OK ){\n    i64 max = SQLITE_MAX_MMAP_SIZE;\n    sqlite3OsFileControlHint(*ppFd, SQLITE_FCNTL_MMAP_SIZE, (void*)&max);\n    if( nExtend>0 ){\n      vdbeSorterExtendFile(db, *ppFd, nExtend);\n    }\n  }\n  return rc;\n"
+      },
+      {
+        "bytes": 559,
+        "firstLine": 106763,
+        "lastLine": 106778,
+        "role": "sorter-PMA-records-and-bytes",
+        "sha256": "a5218b313841de571b13ab1bbaeff84eb8d07fc16f9dcd3107e267c64602fceb",
+        "text": "  if( rc==SQLITE_OK ){\n    SorterRecord *p;\n    SorterRecord *pNext = 0;\n\n    vdbePmaWriterInit(pTask->file.pFd, &writer, pTask->pSorter->pgsz,\n                      pTask->file.iEof);\n    pTask->nPMA++;\n    vdbePmaWriteVarint(&writer, pList->szPMA);\n    for(p=pList->pList; p; p=pNext){\n      pNext = p->u.pNext;\n      vdbePmaWriteVarint(&writer, p->nVal);\n      vdbePmaWriteBlob(&writer, SRVAL(p), p->nVal);\n      if( pList->aMemory==0 ) sqlite3_free(p);\n    }\n    pList->pList = p;\n    rc = vdbePmaWriterFinish(&writer, &pTask->file.iEof, &pTask->nSpill);\n"
+      }
+    ],
+    "path": "server/node_modules/better-sqlite3/deps/sqlite3/sqlite3.c",
+    "sha256": "2bbdd0eff3f46852e954d7881b7945990bf78c1421f806cf7978bc22e187100a"
+  },
+  "temporaryOriginalBytesRetained": false,
+  "version": 1
+}
