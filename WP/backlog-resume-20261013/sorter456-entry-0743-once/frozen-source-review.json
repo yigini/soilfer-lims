@@ -1,0 +1,9 @@
+{
+  "reviewDuringFrozenRun": true,
+  "testedSourceEditedWhileActive": false,
+  "predictedFixtureIssue": "The [1024] PMA partition example uses the all16-task conservative bound, which exceeds32GiB. After full original closure, retain honest outcome then use [512] as an in-envelope positive and explicitly refuse1024.",
+  "parserReview": "A PMA snapshot can include zero tail from native VFS preextension. Count complete nonempty run headers and report trailing zero bytes separately, never count zero bytes as empty PMAs.",
+  "nativeVfsOrPhysicalAuthorityPromoted": false,
+  "sourceAggregateDisclosure": "One parallel source/doc aggregate exceeded tool output budget; exact compact subsequent reads supplied required facts. No omitted output inferred.",
+  "oldPrivatePayloadsRead": false
+}

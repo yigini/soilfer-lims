@@ -1,0 +1,45 @@
+{
+  "nativeSourceSha256": "2bbdd0eff3f46852e954d7881b7945990bf78c1421f806cf7978bc22e187100a",
+  "reviewedModuleRange": [
+    105140,
+    108100
+  ],
+  "sourceOccurrences": [
+    {
+      "line": 105776,
+      "source": "      rc = sqlite3OsFetch(pFd, 0, (int)pFile->iEof, (void**)pp);"
+    },
+    {
+      "line": 106464,
+      "source": "    sqlite3OsFileControlHint(pFd, SQLITE_FCNTL_CHUNK_SIZE, &chunksize);"
+    },
+    {
+      "line": 106465,
+      "source": "    sqlite3OsFileControlHint(pFd, SQLITE_FCNTL_SIZE_HINT, &nByte);"
+    },
+    {
+      "line": 106466,
+      "source": "    sqlite3OsFetch(pFd, 0, (int)nByte, &p);"
+    },
+    {
+      "line": 106486,
+      "source": "  rc = sqlite3OsOpenMalloc(db->pVfs, 0, ppFd,"
+    },
+    {
+      "line": 106493,
+      "source": "    sqlite3OsFileControlHint(*ppFd, SQLITE_FCNTL_MMAP_SIZE, (void*)&max);"
+    },
+    {
+      "line": 106664,
+      "source": "      p->eFWErr = sqlite3OsWrite(p->pFd,"
+    },
+    {
+      "line": 106691,
+      "source": "    p->eFWErr = sqlite3OsWrite(p->pFd,"
+    }
+  ],
+  "staticOccurrencesAreDynamicCounts": false,
+  "nativeRequestScope": "xWrite ends and SIZE_HINT arguments only",
+  "runtimeOrVfsAuthorityGranted": false,
+  "operatorsExecuted": 0
+}
