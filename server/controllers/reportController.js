@@ -174,6 +174,7 @@ async function generateReport(req, res) {
             const maxReport = await tx.report.findFirst({ where: { sampleId }, orderBy: { version: 'desc' } });
             const version = (maxReport?.version || 0) + 1;
             const publishedAt = new Date();
+            const retention = await require('../services/sampleRetentionService').retainAtPublication(tx, currentSample, publishedAt);
             const lab = await tx.lab.findFirst({ where: { OR: [{ id: currentSample.assignedLab || currentSample.labId },
                 { code: currentSample.assignedLab || currentSample.labId }] } });
             const identity = await allocateReportIdentity(tx, { sampleId, lab, publishedAt,
@@ -186,6 +187,7 @@ async function generateReport(req, res) {
             content.reportNumber = displayNumber(identity.reportNumberBase, identity.revision);
             content.publication = { ...identity, publishedAt: publishedAt.toISOString(), status: 'PUBLISHED',
                 issuer: { username: req.user.username, name: req.user.name || req.user.username, role: req.user.role || null } };
+            content.publication.retention = { days: retention.days, retainUntil: retention.retainUntil.toISOString() };
             if (revisionEvidence) revisionService.applyRevision(content, { ...revisionEvidence, locale: content.meta?.locale,
                 statementPolicy: await policyService.get(lab.id, 'report.amendedStatement', { db: tx }) });
             await tx.reportShareLink.updateMany({

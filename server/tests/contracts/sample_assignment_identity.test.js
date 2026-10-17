@@ -288,6 +288,7 @@ describe('Contract: Sample and Assignment Identity, Pagination, and Server-Side 
         await createSampleFixture(prisma, {
             data: {
                 id: sampleApprId,
+                retainUntil: new Date('2020-01-01T00:00:00Z'),
                 labId: 'LAB-APPR-01',
                 originalId: 'ORIG-APPR-01',
                 assignedLab: 'LAB-GTM',

@@ -36,7 +36,7 @@ const SAMPLE_TRANSITIONS = {
     [SAMPLE_STATES.SUBMITTED_FULL]: [SAMPLE_STATES.APPROVED, SAMPLE_STATES.PROCESSING, SAMPLE_STATES.ON_HOLD],
     [SAMPLE_STATES.APPROVED]: [SAMPLE_STATES.ARCHIVED, SAMPLE_STATES.DISPOSED],
     [SAMPLE_STATES.RECEIVED_REJECTED]: [SAMPLE_STATES.DISPOSED, SAMPLE_STATES.ACCEPTED], // Quarantined/disposed or supervisor re-intake override
-    [SAMPLE_STATES.ARCHIVED]: [],  // Final
+    [SAMPLE_STATES.ARCHIVED]: [SAMPLE_STATES.DISPOSED],  // Retained material may later be disposed
     [SAMPLE_STATES.DISPOSED]: [],  // Final
     [SAMPLE_STATES.CANCELLED]: [],
     // The transition service additionally restricts this edge to holdPriorStatus.

@@ -222,11 +222,12 @@ describe('Package P2: Sample Workspace Projection & Transactional Foundations', 
     });
 
     test('6. POST /api/samples/:id/custody/move records physical location change and audit', async () => {
+        const location = await prisma.inventoryLocation.create({ data: { id: testSample.id + '-bench', labId: testSample.assignedLab, purpose: 'SAMPLE', name: 'Room 102 - Shelf 4B' } });
         const res = await request(app)
             .post(`/api/samples/${testSample.id}/custody/move`)
             .set('Authorization', `Bearer ${mgrToken}`)
             .send({
-                location: 'Room 102 - Shelf 4B',
+                toLocationId: location.id,
                 reason: 'Transfer to analytical bench'
             });
 

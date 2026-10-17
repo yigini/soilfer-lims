@@ -90,6 +90,10 @@ function createDisposableDatabase() {
                 '20261005000100_workflow_state_guards',
                 '20261006000100_sample_holds_cancellation'
             ]) tempDb.exec(fs.readFileSync(path.resolve(__dirname, '../prisma/migrations', migration, 'migration.sql'), 'utf8'));
+            // Current-client shape only; this fresh runner schema claims no custody installation receipt.
+            const { loadCustodyMigrationSource } = require('../services/custodyMigrationSource');
+            const custodyShape = loadCustodyMigrationSource();
+            tempDb.exec(custodyShape.schemaSql);
         })();
         const guardSql = fs.readFileSync(path.resolve(__dirname, '../prisma/migrations/20261005000100_workflow_state_guards/migration.sql'), 'utf8');
         const installed = tempDb.prepare("SELECT name,sql FROM sqlite_master WHERE type='trigger'").all();

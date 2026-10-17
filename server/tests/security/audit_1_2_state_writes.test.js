@@ -111,6 +111,18 @@ test.each(['services/sampleContainerMigrationSource.js', 'prisma/migrations/2026
     finally { spy.mockRestore(); }
 });
 
+test.each(['sql', 'schemaSql', 'guardsSql'])('the #207 resolver inspects only exact %s while retaining workflow writer restrictions', field => {
+    const probe = `const {loadCustodyMigrationSource}=require('../services/custodyMigrationSource'); const source=loadCustodyMigrationSource(); db.exec(source.${field});`;
+    expect(scanSource(probe, 'scripts/probe.js', exceptions)).toEqual([]);
+    expect(scanSource(probe + 'db.exec("UPDATE Sample SET status=1");', 'scripts/probe.js', exceptions)).toEqual([expect.objectContaining({ code: 'RAW_WORKFLOW_SQL' })]);
+});
+test.each(['services/custodyMigrationSource.js', 'prisma/migrations/20261016000100_sample_custody_retention/migration.sql'])('the #207 resolver refuses altered exact source %s', filename => {
+    const probe = "const {loadCustodyMigrationSource}=require('../services/custodyMigrationSource'); const source=loadCustodyMigrationSource(); db.exec(source.sql);";
+    const read = fs.readFileSync;
+    const spy = jest.spyOn(fs, 'readFileSync').mockImplementation((file, ...args) => { const value = read(file, ...args); return path.resolve(file) === path.join(serverRoot, filename) ? Buffer.from(String(value) + '\n-- altered source') : value; });
+    try { expect(scanSource(probe, 'scripts/probe.js', exceptions)).toEqual([expect.objectContaining({ code: 'UNRESOLVED_WORKFLOW_SQL' })]); } finally { spy.mockRestore(); }
+});
+
 test('legacy CLI launchers cannot import any fixture or test module', () => {
     for (const filename of ['scripts/run_manager_dashboard_tasklist_side_by_side.cjs', 'scripts/verify_issue149_probe.cjs', 'scripts/run_test_rehearsal.cjs']) {
         for (const specifier of ['../tests/helpers/workflowFixtures', '../tests/helpers/legacyWorkflowDatabase', '../tests/rehearsals/scenario.cjs']) {

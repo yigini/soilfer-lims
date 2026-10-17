@@ -219,6 +219,7 @@ describe('Audit 1.3: additive migration and idempotent back-fill', () => {
             // against the fully guarded owned file, never raw SQL.
             const { PrismaClient } = require('../../prisma_client');
             const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
+            require('../helpers/custodyFixtureSchema').extendHistoricalCustodyFixture(rehearsal.file);
             const client = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${rehearsal.file}` }) });
             const previousPath = process.env.DATABASE_PATH, previousUrl = process.env.DATABASE_URL;
             process.env.DATABASE_PATH = rehearsal.file; process.env.DATABASE_URL = `file:${rehearsal.file}`;

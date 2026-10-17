@@ -25,6 +25,12 @@ async function transitionSample(sampleId, nextStatus, actor, reason = null, extr
         if ('id' in data && data.id !== sample.id) throw new TransitionError('Sample identity cannot change during a transition.', 400, 'WORKFLOW_ID_IMMUTABLE');
         rules.assertScope(actor, { ...sample, ...data });
         const currentStatus = workflow.normalizeSampleState(sample.status);
+        const closureMetadata = require('./sampleHoldService').legacyHoldState(sample).metadata || {};
+        const disposalReason = closureMetadata.disposalReason || reason;
+        if (!migrating && nextStatus === 'DISPOSED' && currentStatus !== nextStatus) {
+            if (!hasPermission(actor, 'DISPOSE_SAMPLE')) throw new TransitionError('Disposal permission required.', 403, 'CLOSURE_PERMISSION_DENIED');
+            await require('./sampleRetentionService').assertDisposable(client, sample, disposalReason);
+        }
         if (!migrating && nextStatus === 'ACCEPTED') await require('./sampleHoldService').assertNotHeld(client, sample);
         let provenance = {};
         let gateAudit = {};
@@ -72,6 +78,10 @@ async function transitionSample(sampleId, nextStatus, actor, reason = null, extr
         });
         if (changed.count !== 1) throw new TransitionError('Sample changed. Reload before retrying.', 409, 'SAMPLE_STATE_CHANGED');
         const updated = await client.sample.findUnique({ where: { id: sample.id } });
+        if (!migrating && nextStatus === 'DISPOSED' && currentStatus !== nextStatus)
+            await require('./custodyService').disposalEvent(client, sample, actor, disposalReason);
+        if (!migrating && nextStatus === 'ARCHIVED' && currentStatus !== nextStatus && closureMetadata.archiveLocationId)
+            await require('./custodyService').record(client, sample.id, actor, { type: 'MOVED', toLocationId: closureMetadata.archiveLocationId, reason: closureMetadata.archiveNotes || reason || 'Archival review completed' });
         if (!migrating && nextStatus === 'ACCEPTED' && ['EXPECTED', 'RECEIVED', 'RECEIVED_REJECTED'].includes(currentStatus)) {
             const requested = typeof updated.requiredAnalyses === 'string' ? JSON.parse(updated.requiredAnalyses) : updated.requiredAnalyses || [];
             if (!Array.isArray(requested)) throw new TransitionError('Requested analyses need review.', 409, 'INTAKE_ANALYSES_INVALID');
@@ -153,6 +163,8 @@ async function removePreAnalyticSample(tx, ids, { actor, reason, code = 'SAMPLE_
         }
     }
     const sampleWhere = { sampleId: { in: uniqueIds } };
+    if (await tx.custodyEvent.count({ where: sampleWhere }))
+        throw new TransitionError('Recorded physical custody must be retained. Cancel the sample instead.', 409, 'SAMPLE_CUSTODY_RETAINED');
     if (await tx.result.count({ where: sampleWhere }) || await tx.spectralData.count({ where: sampleWhere })) {
         throw new TransitionError('Recorded analytical evidence must be retained.', 409, 'CANNOT_DELETE_SAMPLE_WITH_RESULTS');
     }

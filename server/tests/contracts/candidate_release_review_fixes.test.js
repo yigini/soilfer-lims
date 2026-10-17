@@ -1176,6 +1176,7 @@ describe('Candidate Release Review Remediation (R1 - R5)', () => {
             verified.close();
 
             // Query via Prisma Client using Better-Sqlite3 adapter — guarantees NO P2022 column missing errors
+            require('../helpers/custodyFixtureSchema').extendHistoricalCustodyFixture(rehearsalDbPath);
             const adapter = new PrismaBetterSqlite3({ url: 'file:' + rehearsalDbPath, timeout: 5000 });
             const rehearsalPrisma = new PrismaClient({ adapter });
 

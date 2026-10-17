@@ -78,6 +78,7 @@ async function fixture(count = 1, criteria = { crmEveryNBatches: 0 }, recordedAn
     require('../../scripts/install_batch_reagent_lots').installBatchReagentLots({ dbPath: file, apply: true });
     require('../../scripts/install_result_equipment_evidence').installResultEquipmentEvidence({ dbPath: file, apply: true });
     installCalculationReleasePrerequisites(file);
+    require('../helpers/custodyFixtureSchema').extendHistoricalCustodyFixture(file);
     const db = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${file}` }) });
     ownedFile.db = db;
     await db.unit.create({ data: { code: 'fixture-unit', display: 'Fixture unit', quantityKind: 'MASS_FRACTION', factorToBase: 1 } });

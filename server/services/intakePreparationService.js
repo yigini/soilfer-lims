@@ -329,11 +329,12 @@ async function prepareIntake(prisma, { body: rawBody, user, newSampleId, initial
             const custodySenderSignature = body.custodySenderSignature || coc.senderSignature || null;
             const receivingOfficerId = user.id ? String(user.id) : null;
             const receivingOfficerName = user.name || user.username || receivedBy;
-            const receivingOfficerSignature = body.receivingOfficerSignature || coc.officerSignature || `CONFIRMED:${receivedBy}:${now.toISOString()}`;
+            const receivingOfficerSignature = null;
 
             const { transitionSample } = require('../services/sampleStateService');
             const rejectedOrder = await orderedAnalyses(prisma, sample, body, user);
             const rejectionData = {
+                assignedLab: user.labId,
                 requiredAnalyses: JSON.stringify(Array.from(rejectedOrder.requiredAnalyses)),
                 analysisGroupIds: JSON.stringify(rejectedOrder.canonicalGroupIds),
                 receivedMass: receivedMass === undefined ? undefined : receivedMass === null || receivedMass === '' ? null : Number(receivedMass),
@@ -701,7 +702,7 @@ async function prepareIntake(prisma, { body: rawBody, user, newSampleId, initial
             custodySenderSignature: body.custodySenderSignature || body.coc?.senderSignature || null,
             receivingOfficerId: user.id ? String(user.id) : null,
             receivingOfficerName: user.name || user.username || receivedBy,
-            receivingOfficerSignature: body.receivingOfficerSignature || body.coc?.officerSignature || `CONFIRMED:${receivedBy}:${now.toISOString()}`,
+            receivingOfficerSignature: null,
 
             receptionData: JSON.stringify({
                 checklist, notes, receivedBy, labLocation: labId, at: now,

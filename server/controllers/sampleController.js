@@ -501,7 +501,7 @@ exports.getSamples = async (req, res) => {
         });
 
         res.json({
-            data: enriched,
+            data: await Promise.all(enriched.map(row => require('../services/custodyService').receiptView(prisma, row))),
             meta: { page: pageNum, limit: limitNum, total, pages: Math.ceil(total / limitNum) },
             views,
             facets: { lifecycle, projects, countries, labs, views }
@@ -939,7 +939,7 @@ exports.getSampleDetail = async (req, res) => {
         });
 
         res.json({
-            sample: enrichedSample,
+            sample: await require('../services/custodyService').receiptView(prisma, enrichedSample),
             workItems: parsedWorkItems,
             auditLog: parsedAuditLog,
             workflowSummary,  // Phase 2: Centralized workflow state
@@ -1949,41 +1949,7 @@ exports.createAmendment = require('./sampleAmendmentController').request;
  * POST /api/samples/:id/custody/move
  */
 exports.recordStorageMovement = async (req, res) => {
-    const { id } = req.params;
-    const { location, reason, containerId, quantityGrams } = req.body;
-    const user = req.user;
-
-    try {
-        const rules = require('../services/workflowStateRules');
-        const outcome = await prisma.$transaction(async tx => {
-            const sample = await tx.sample.findUnique({ where: { id: String(id) } });
-            if (!sample) throw new rules.TransitionError('Sample not found.', 404, 'SAMPLE_NOT_FOUND');
-            rules.assertScope(user, sample);
-            if (sample.status === 'DISPOSED') throw new rules.TransitionError('Cannot move disposed sample material.', 400, 'DISPOSED_MATERIAL_IMMUTABLE');
-            const meta = sampleHolds.legacyHoldState(sample).metadata;
-            if (!meta) throw new rules.TransitionError('Stored sample metadata needs review before storage movement.', 409, 'SAMPLE_METADATA_INVALID');
-            const oldLocation = meta.archiveLocation || 'Not recorded';
-            const movedAt = new Date();
-            const changed = await tx.sample.updateMany({ where: { id: sample.id, updatedAt: sample.updatedAt }, data: {
-                metadata: JSON.stringify({ ...meta, archiveLocation: location || oldLocation, lastMovementReason: reason || 'Storage movement',
-                    lastMovementAt: movedAt.toISOString(), lastMovementBy: user.username }),
-                updatedAt: new Date(Math.max(movedAt.getTime(), sample.updatedAt.getTime() + 1))
-            } });
-            if (changed.count !== 1) throw new rules.TransitionError('Sample changed. Reload before retrying.', 409, 'SAMPLE_STATE_CHANGED');
-            await tx.auditLog.create({ data: {
-                id: crypto.randomUUID(), entity: 'SAMPLE', entityId: sample.id, action: 'STORAGE_MOVEMENT',
-                details: `Sample material moved from '${oldLocation}' to '${location}' (${reason || 'Storage movement'})`,
-                performedBy: user.username, sampleId: sample.id
-            } });
-            return { success: true, location, oldLocation, sample: await tx.sample.findUnique({ where: { id: sample.id } }) };
-        });
-        res.json(outcome);
-    } catch (err) {
-        const mapped = require('../services/workflowStateRules').mapStateError(err, 'SAMPLE_STATE_CHANGED');
-        if (mapped.statusCode) return res.status(mapped.statusCode).json({ code: mapped.code, error: mapped.message });
-        console.error('[recordStorageMovement] Error:', err);
-        res.status(500).json({ code: 'SAMPLE_MOVEMENT_ERROR', error: 'Failed to record storage movement' });
-    }
+    return require('./custodyController').move(req, res);
 };
 
 /**

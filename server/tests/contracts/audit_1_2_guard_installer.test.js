@@ -453,6 +453,12 @@ test('a complete guarded database passes the read-only gate, listens and answers
     expect(fingerprint(fixture.file)).toBe(beforeLabels);
     expect(require('../../scripts/install_label_print_events').installLabelPrintEvents({dbPath:fixture.file,apply:true}))
         .toMatchObject({classification:'COMPLETE_208',previousClassification:'FRESH_PRISMA_208',backfilledCount:0,totalChanges:1});
+    const beforeCustody=fingerprint(fixture.file), missingCustody=await realStartup(fixture.file,false);
+    expect(missingCustody.code).toBe(1); expect(JSON.parse(missingCustody.stderr).error).toBe('CUSTODY_STARTUP_REQUIRED');
+    expect(missingCustody.stdout).not.toMatch(/Enterprise Server running on|\[PRISMA\]|SCHEDULER/);
+    expect(fingerprint(fixture.file)).toBe(beforeCustody);
+    expect(require('../../scripts/install_sample_custody').installSampleCustody({dbPath:fixture.file,apply:true}))
+        .toMatchObject({classification:'COMPLETE_207',mode:'APPLIED'});
     const child = await realStartup(fixture.file, true);
     expect(child.accepted).toBe(true);
     const labelsReady=JSON.parse(child.stdout.split('\n').find(line=>line.startsWith('{"event":"LABEL_PRINT_STARTUP_READY"')));

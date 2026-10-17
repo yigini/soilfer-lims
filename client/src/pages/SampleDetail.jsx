@@ -166,6 +166,8 @@ const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
     const [reportModal, setReportModal] = useState(null);
     const [selectedSpectraScan, setSelectedSpectraScan] = useState(null);
     const [storageModalOpen, setStorageModalOpen] = useState(false);
+    const [custodyAction, setCustodyAction] = useState('MOVED');
+    const closeStorageModal = useCallback(() => setStorageModalOpen(false), []);
     const [inspectedItem, setInspectedItem] = useState(null);
     const [showFieldMetadata, setShowFieldMetadata] = useState(false);
     const [moreActionsOpen, setMoreActionsOpen] = useState(false);
@@ -463,25 +465,11 @@ const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
     };
 
     const handleArchive = async () => {
-        try {
-            await axios.post(`/api/samples/${id}/archive`, {});
-            showInfo(t('common.success', 'Success'), 'Sample archived successfully.');
-            fetchWorkspaceData();
-        } catch (err) {
-            showInfo(t('common.error', 'Archive Failed'), err.response?.data?.error || err.message);
-        }
+        setCustodyAction('ARCHIVING'); setStorageModalOpen(true);
     };
 
     const handleDispose = async () => {
-        requestConfirmation('Dispose Sample Material', 'Permanently authorize disposal for this sample material? Disposed material is physically immutable.', async () => {
-            try {
-                await axios.post(`/api/samples/${id}/dispose`, {});
-                showInfo(t('common.success', 'Success'), 'Sample marked as DISPOSED.');
-                fetchWorkspaceData();
-            } catch (err) {
-                showInfo(t('common.error', 'Disposal Failed'), err.response?.data?.error || err.message);
-            }
-        });
+        setCustodyAction('DISPOSAL'); setStorageModalOpen(true);
     };
 
     const handleOpenSpectra = (item) => {
@@ -1365,14 +1353,19 @@ const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
                                     </div>
                                 </div>
 
-                                {!materialCustody.isDisposed && (
+                                {hasPermission('ARCHIVE_SAMPLE') && !materialCustody.isDisposed && (
                                     <button
-                                        onClick={() => setStorageModalOpen(true)}
+                                        onClick={() => { setCustodyAction('MOVED'); setStorageModalOpen(true); }}
                                         className="w-full py-2 bg-sf-canvas text-sf-emerald border border-sf-divider hover:bg-sf-raised rounded-xl text-xs font-bold transition-colors"
                                     >
-                                        Record storage movement
+                                        {t('custody.recordMovement')}
                                     </button>
                                 )}
+                                <p className="text-xs">{t('custody.retainUntil')}: {materialCustody.retainUntil ? new Date(materialCustody.retainUntil).toLocaleDateString() : t('custody.notRecorded')}</p>
+                                {materialCustody.acknowledgement && <p className="text-xs">{t(materialCustody.acknowledgement.authenticated ? 'custody.acknowledgement' : 'custody.legacy')}: {materialCustody.acknowledgement.by}</p>}
+                                <details className="text-xs"><summary>{t('custody.history')}</summary><ul className="space-y-2 mt-2">
+                                    {(materialCustody.events || []).map(event => <li key={event.id}>{t(`custody.types.${event.type}`)} · {event.by} · {new Date(event.at).toLocaleString()}{event.containerId && ` · ${event.containerId}`}</li>)}
+                                </ul></details>
                             </div>
                         </div>
 
@@ -1555,12 +1548,13 @@ const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
             {/* Storage Movement Modal */}
             <StorageMovementModal
                 sampleId={id}
+                action={custodyAction}
                 currentLocation={materialCustody.storageLocation}
                 isOpen={storageModalOpen}
-                onClose={() => setStorageModalOpen(false)}
+                onClose={closeStorageModal}
                 onSuccess={() => {
                     fetchWorkspaceData(true);
-                    showInfo(t('common.success', 'Success'), 'Storage movement recorded.');
+                    showInfo(t('common.success', 'Success'), t('custody.saved'));
                 }}
             />
 

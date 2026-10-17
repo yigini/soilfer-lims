@@ -10,7 +10,7 @@ const quote = name => '"' + name.replaceAll('"', '""') + '"';
 // Extract the pure shipped assertion without importing/running the Docker operator.
 const readinessSource = fs.readFileSync(path.join(root, 'scripts/rehearsal_deployment_readiness.cjs'), 'utf8');
 const readinessAssertion = require('@babel/parser').parse(readinessSource).program.body.find(node =>
-    node.type === 'FunctionDeclaration' && node.id.name === 'assertCalculationPredecessorPreserved');
+    node.type === 'FunctionDeclaration' && node.id.name === 'assertSampleCodePredecessorPreserved');
 const assertReadinessPreservation = require('node:vm').runInNewContext(
     '(' + readinessSource.slice(readinessAssertion.start, readinessAssertion.end) + ')');
 const retainedTables = ['Sample', 'Result', 'WorkAttempt', 'AuditLog', 'QcMeasurement', 'QcEvaluation', 'BatchDisposition'];
@@ -300,4 +300,47 @@ test('the unchanged approved DDL is pinned, scanned without writer exceptions, a
     });
     try { expect(() => loadSampleCodeMigrationSource()).toThrow(expect.objectContaining({ code: 'SAMPLE_CODE_SCHEMA_SOURCE_MISMATCH' })); }
     finally { changed.mockRestore(); }
+});
+
+
+// Exercise the actual composed assertion as well as each unchanged narrow check.
+const combinedFunctions = require('@babel/parser').parse(readinessSource).program.body.filter(node =>
+    node.type === 'FunctionDeclaration' && ['assertCalculationPredecessorPreserved',
+        'assertSampleCodePredecessorPreserved', 'assertCustodyPredecessorPreserved'].includes(node.id.name));
+const assertCombinedReadinessPreservation = require('node:vm').runInNewContext(
+    '(() => {' + combinedFunctions.map(node => readinessSource.slice(node.start, node.end)).join('\n') +
+    ';return assertCalculationPredecessorPreserved;})()', { require });
+function combinedReadinessSnapshots() {
+    const { before, after } = comparisonSnapshots();
+    before.locationColumns = [{ cid: 0, name: 'id', type: 'TEXT', notnull: 1, dflt_value: null, pk: 1 }];
+    before.locationRows = [{ id: 'shelf' }];
+    after.locationColumns = [...before.locationColumns,
+        { cid: 1, name: 'purpose', type: 'TEXT', notnull: 1, dflt_value: "'REAGENT'", pk: 0 }];
+    after.locationRows = [{ id: 'shelf', purpose: 'REAGENT' }];
+    after.columns.Sample.push({ cid: 3, name: 'retainUntil', type: 'DATETIME', notnull: 0, dflt_value: null, pk: 0, hidden: 0 });
+    after.schemas.Sample = after.schemas.Sample.replace(', "labSampleCode" TEXT', ', "labSampleCode" TEXT, "retainUntil" DATETIME');
+    after.rows.Sample[0].retainUntil = null;
+    const hash = value => createHash('sha256').update(JSON.stringify(value)).digest('hex');
+    after.custody = { sourceSha256: 'a'.repeat(64), originalRowsSha256: hash(before.rows), ledgerCount: 0 };
+    const receipt = { sourceSha256: after.custody.sourceSha256, originalRowsPreserved: true,
+        originalRowsSha256: after.custody.originalRowsSha256, backfilledCount: 0, backfillSha256: hash([]) };
+    receipt.receiptSha256 = hash(receipt);
+    after.receipts.push({ id: '207_sample_custody', appliedAt: '2026-10-17 15:00:00', details: JSON.stringify(receipt) });
+    return { before, after };
+}
+test('the combined startup comparator admits both exact additions without changing its evidence', () => {
+    const { before, after } = combinedReadinessSnapshots(), original = JSON.stringify({ before, after });
+    expect(() => assertCombinedReadinessPreservation(before, after)).not.toThrow();
+    expect(JSON.stringify({ before, after })).toBe(original);
+});
+test.each([
+    ['sample-code backfill', a => { a.rows.Sample[0].labSampleCode = 'invented'; }],
+    ['retention backfill', a => { a.rows.Sample[0].retainUntil = '2027-01-01'; }],
+    ['location default', a => { a.locationRows[0].purpose = 'SAMPLE'; }],
+    ['old analytical bytes', a => { a.rows.Sample[0].metadata = 'changed'; }],
+    ['extra custody column constraint', a => { a.schemas.Sample = a.schemas.Sample.replace('"retainUntil" DATETIME', '"retainUntil" DATETIME NOT NULL'); }],
+    ['custody receipt', a => { a.receipts = a.receipts.filter(row => row.id !== '207_sample_custody'); }]
+])('the combined startup comparator refuses %s', (_name, mutate) => {
+    const { before, after } = combinedReadinessSnapshots(); mutate(after);
+    expect(() => assertCombinedReadinessPreservation(before, after)).toThrow();
 });

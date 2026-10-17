@@ -43,6 +43,13 @@ async function qcGateFixture({ managedStartup = false, count = 1, criteria = {},
     require('../../scripts/install_preparation_records').installPreparationRecords({dbPath:file,apply:true});
     if (installInstrumentImports) require('../../scripts/install_instrument_imports').installInstrumentImports({ dbPath: file, apply: true });
     if (installInstrumentImports && installSampleContainers) require('../../scripts/install_sample_containers').installSampleContainers({ dbPath: file, apply: true });
+    if (installInstrumentImports && installSampleContainers) require('../../scripts/install_sample_custody').installSampleCustody({ dbPath: file, apply: true });
+    else {
+        // Deliberately pre-container installer fixtures still use the current
+        // generated Sample/Location clients. Declare only their new nullable/default
+        // scalar columns; these fixtures do not claim #207 startup readiness.
+        require('./custodyFixtureSchema').extendHistoricalCustodyFixture(file);
+    }
     if (installInstrumentImports && installSampleContainers && installControlCharts) require('../../scripts/install_control_charts').installControlCharts({ dbPath: file, apply: true });
     const db = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${file}` }) });
     const actor = { username, role: 'SUPER_ADMIN', labId };

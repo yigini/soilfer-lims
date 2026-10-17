@@ -13,7 +13,8 @@ function requireTransaction(tx) {
 }
 async function commitPrepared(tx, plan, { consumeApproval = true } = {}) {
     requireTransaction(tx);
-    const { user, body, now, updateData, nextStatus } = plan;
+    const { user, body, now, nextStatus } = plan;
+    const updateData = require('./custodyService').withoutReceiptFields(plan.updateData);
     let sample = plan.sample;
     if (plan.createData) sample = await createSample({ ...plan.createData,
         status: plan.responseKind === 'draft' ? 'DRAFT' : 'EXPECTED' }, user, { tx });
@@ -49,6 +50,8 @@ async function commitPrepared(tx, plan, { consumeApproval = true } = {}) {
         if (plan.responseKind === 'rejected') await require('./workItemStateService').cancelForIntakeRejection(tx,
             { sampleId: current.id, actor: user, reason: updateData.rejectionReason });
         updated = await transitionSample(current.id, nextStatus, user, plan.responseKind === 'rejected' ? `Sample rejected during intake: ${updateData.rejectionReason || ''}` : 'Intake completed at reception', updateData, tx);
+        await require('./custodyService').acknowledgeReceipt(tx, { sample: updated, actor: user, input: { ...plan.updateData, ...body } });
+        updated = await require('./custodyService').receiptView(tx, updated);
         if (plan.responseKind === 'accepted') await workItems.generate(tx, updated, plan.workPlan, user);
         await tx.auditLog.create({ data: { id: crypto.randomUUID(), entity: 'SAMPLE', entityId: updated.id,
             action: plan.responseKind === 'rejected' ? 'SAMPLE_REJECTED' : 'SAMPLE_RECEIVED',

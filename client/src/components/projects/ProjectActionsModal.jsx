@@ -40,6 +40,8 @@ export default function ProjectActionsModal({
     const [editDescription, setEditDescription] = useState(project?.description || '');
     const [editExpectedCount, setEditExpectedCount] = useState(project?.expectedSampleCount || '');
     const [editDeadline, setEditDeadline] = useState(project?.deliveryDeadline ? String(project.deliveryDeadline).split('T')[0] : '');
+    const retentionSetting = value => { try { return JSON.parse(value?.policyConfig || '{}').sample?.retentionDaysAfterReport ?? ''; } catch { return ''; } };
+    const [editRetention, setEditRetention] = useState(() => retentionSetting(project));
     const [editBundle, setEditBundle] = useState(project?.defaultAnalysisBundle || '');
     const [editStatus, setEditStatus] = useState(project?.status || 'ACTIVE');
     const [catalogueGroups, setCatalogueGroups] = useState([]);
@@ -84,6 +86,7 @@ export default function ProjectActionsModal({
             setEditExpectedCount(project?.expectedSampleCount || '');
             setEditDeadline(project?.deliveryDeadline ? String(project.deliveryDeadline).split('T')[0] : '');
             setEditBundle(project?.defaultAnalysisBundle || '');
+            setEditRetention(retentionSetting(project));
             setEditStatus(project?.status || 'ACTIVE');
             setErrorMessage('');
             setReason('');
@@ -259,6 +262,8 @@ export default function ProjectActionsModal({
             return;
         }
 
+        const retentionDays = editRetention === '' ? null : Number(editRetention);
+        const previousRetention = retentionSetting(project);
         const payload = {
             name: editName.trim(),
             client: editClient.trim(),
@@ -266,6 +271,7 @@ export default function ProjectActionsModal({
             expectedSampleCount: editExpectedCount ? parseInt(editExpectedCount, 10) : 0,
             deliveryDeadline: editDeadline || null,
             defaultAnalysisBundle: editBundle || null,
+            ...(retentionDays !== (previousRetention === '' ? null : previousRetention) ? { retentionDaysAfterReport: retentionDays } : {}),
             status: editStatus
         };
 
@@ -832,6 +838,11 @@ export default function ProjectActionsModal({
                 )}
                 {actionType === 'edit' && canEditPlan && (
                     <form onSubmit={handleSaveSettings} className="space-y-3.5 pt-1">
+                        <label className="block text-xs font-semibold">{t('custody.projectRetention')}
+                            <input type="number" min="0" step="1" value={editRetention} onChange={e => setEditRetention(e.target.value)}
+                                placeholder={t('custody.inheritRetention')} className="w-full rounded-xl border border-sf-border bg-sf-inset px-3 py-2"/>
+                            <span className="text-sf-muted font-normal">{t('custody.retentionHelp')}</span>
+                        </label>
                         <div>
                             <label className="block text-xs font-semibold text-sf-text mb-1">
                                 {t('projects.create.nameLabel', 'Project name *')}

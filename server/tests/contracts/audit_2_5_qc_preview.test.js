@@ -32,6 +32,7 @@ async function fixture(criteria = {}, { mode = 'ADVISORY', start = true } = {}) 
         ['proficiency_evidence', 'installProficiencyEvidence'], ['result_equipment_evidence', 'installResultEquipmentEvidence'], ['batch_reagent_lots', 'installBatchReagentLots']]) {
         require(`../../scripts/install_${script}`)[installer]({ dbPath: file, apply: true });
     }
+    require('../helpers/custodyFixtureSchema').extendHistoricalCustodyFixture(file);
     const db = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${file}` }) }); resource.db = db;
     const actor = { username, role: 'SUPER_ADMIN', labId };
     await db.unit.create({ data: { code: 'preview-unit', display: 'Preview unit', quantityKind: 'MASS_FRACTION', factorToBase: 1 } });

@@ -19,9 +19,39 @@ const cp = require('child_process');
 const net = require('net');
 const os = require('os');
 
+// Compare the predecessor's exact fields while separately checking #207's two
+// declared additions. A whole SELECT * comparison cannot span additive DDL.
+function assertCustodyPredecessorPreserved(before, after) {
+    const sampleAddition = { cid: before.sampleColumns.length, name: 'retainUntil', type: 'DATETIME', notnull: 0, dflt_value: null, pk: 0 };
+    const locationAddition = { cid: before.locationColumns.length, name: 'purpose', type: 'TEXT', notnull: 1, dflt_value: "'REAGENT'", pk: 0 };
+    if (before.sampleColumns.some(column => column.name === 'retainUntil') ||
+        JSON.stringify(after.sampleColumns) !== JSON.stringify([...before.sampleColumns, sampleAddition]) ||
+        after.rows.Sample.some(row => row.retainUntil !== null) ||
+        before.locationColumns.some(column => column.name === 'purpose') ||
+        JSON.stringify(after.locationColumns) !== JSON.stringify([...before.locationColumns, locationAddition]) ||
+        after.locationRows.some(row => row.purpose !== 'REAGENT'))
+        throw Error('207 default entrypoint column additions or historical defaults differ');
+    const rows = { ...after.rows, Sample: after.rows.Sample.map(row =>
+        Object.fromEntries(before.sampleColumns.map(column => [column.name, row[column.name]]))) };
+    const locations = after.locationRows.map(row =>
+        Object.fromEntries(before.locationColumns.map(column => [column.name, row[column.name]])));
+    if (JSON.stringify(rows) !== JSON.stringify(before.rows) ||
+        JSON.stringify(locations) !== JSON.stringify(before.locationRows) ||
+        before.receipts.some(row => !after.receipts.some(receipt => JSON.stringify(receipt) === JSON.stringify(row))))
+        throw Error('199 default entrypoint changed retained analytical, audit or receipt rows');
+    const hash = value => require('node:crypto').createHash('sha256').update(JSON.stringify(value)).digest('hex');
+    const expected = { sourceSha256: after.custody.sourceSha256, originalRowsPreserved: true,
+        originalRowsSha256: after.custody.originalRowsSha256, backfilledCount: 0, backfillSha256: hash([]) };
+    expected.receiptSha256 = hash(expected);
+    const receipts = after.receipts.filter(row => row.id === '207_sample_custody');
+    if (after.custody.ledgerCount !== 0 || !/^[a-f0-9]{64}$/.test(after.custody.originalRowsSha256) ||
+        receipts.length !== 1 || receipts[0].details !== JSON.stringify(expected))
+        throw Error('207 default entrypoint ledger or exact installation receipt differs');
+}
+
 // Preserve the predecessor's full column domain; #180 may add only this one
 // nullable Sample column here. Whole SELECT * equality cannot span that DDL.
-function assertCalculationPredecessorPreserved(before, after) {
+function assertSampleCodePredecessorPreserved(before, after) {
     const tables = ['Sample', 'Result', 'WorkAttempt', 'AuditLog', 'QcMeasurement', 'QcEvaluation', 'BatchDisposition'];
     const names = [...tables, '_schema_migrations'], same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
     const keys = value => Object.keys(value || {}).sort();
@@ -56,6 +86,31 @@ function assertCalculationPredecessorPreserved(before, after) {
         const retained = after.receipts.filter(receipt => receipt.id === row.id);
         return retained.length !== 1 || !same(retained[0], row);
     })) throw Error('199 default entrypoint changed retained analytical, audit or receipt rows');
+}
+
+// Validate the combined default entrypoint with both audited comparators.
+// Remove only the exact custody addition for the sample-code comparison, then
+// check custody against that validated intermediate column/row domain.
+function assertCalculationPredecessorPreserved(before, after) {
+    const columns = after.columns.Sample, last = columns.at(-1);
+    const expected = { cid: columns.length - 1, name: 'retainUntil', type: 'DATETIME', notnull: 0, dflt_value: null, pk: 0, hidden: 0 };
+    const sql = after.schemas.Sample, added = sql.match(/^([\s\S]*), "retainUntil" DATETIME([\s\S]*\))$/);
+    if (before.columns.Sample.some(column => column.name === 'retainUntil') ||
+        JSON.stringify(last) !== JSON.stringify(expected) || !added || added[0] !== sql ||
+        (sql.match(/\bretainUntil\b/gi) || []).length !== 1)
+        throw Error('207 default entrypoint column additions or original schema differ');
+    const intermediate = { ...after,
+        columns: { ...after.columns, Sample: columns.slice(0, -1) },
+        schemas: { ...after.schemas, Sample: added[1] + added[2] },
+        rows: { ...after.rows, Sample: after.rows.Sample.map(row =>
+            Object.fromEntries(Object.entries(row).filter(([name]) => name !== 'retainUntil'))) }
+    };
+    assertSampleCodePredecessorPreserved(before, intermediate);
+    const tableInfo = list => list.map(({ hidden, ...column }) => column);
+    assertCustodyPredecessorPreserved({ ...intermediate,
+        sampleColumns: tableInfo(intermediate.columns.Sample),
+        locationColumns: before.locationColumns, locationRows: before.locationRows
+    }, { ...after, sampleColumns: tableInfo(columns) });
 }
 
 console.log('================================================================');
@@ -1354,6 +1409,7 @@ async function runSuite() {
          try { const tables=['Sample','Result','WorkAttempt','AuditLog','QcMeasurement','QcEvaluation','BatchDisposition'];
            const names=[...tables,'_schema_migrations'],quote=name=>'"'+name.replaceAll('"','""')+'"';
            console.log(JSON.stringify({dry,
+             locationColumns:db.prepare('PRAGMA table_info("InventoryLocation")').all(),locationRows:db.prepare('SELECT * FROM InventoryLocation ORDER BY rowid').all(),
              columns:Object.fromEntries(names.map(name=>[name,db.prepare('PRAGMA table_xinfo('+quote(name)+')').all()])),
              schemas:Object.fromEntries(names.map(name=>[name,db.prepare('SELECT sql FROM sqlite_master WHERE name=?').get(name).sql])),
              rows:Object.fromEntries(tables.map(name=>[name,db.prepare('SELECT * FROM "'+name+'" ORDER BY rowid').all()])),
@@ -1453,15 +1509,31 @@ async function runSuite() {
          const again=installer.installCalculationTemplates({dbPath,apply:true});
          if(!ready.ready||ready.references.installedReferenceCount!==11||ready.references.deferredReferenceCount!==0||ready.totalChanges!==0||again.mode!=='NO_OP'||again.totalChanges!==0||
            crypto.createHash('sha256').update(fs.readFileSync(dbPath)).digest('hex')!==before)throw Error('199 repeat changed bytes');
+         const hashFiles=()=>JSON.stringify(['','-wal','-shm'].map(suffix=>fs.existsSync(dbPath+suffix)?crypto.createHash('sha256').update(fs.readFileSync(dbPath+suffix)).digest('hex'):null));
+         const custodyBefore=hashFiles(),custodyOwner=require('./scripts/install_sample_custody');
+         const custodyReady=custodyOwner.assertSampleCustodyStartupReady(dbPath),custodyAgain=custodyOwner.installSampleCustody({dbPath,apply:true});
+         if(custodyReady.classification!=='COMPLETE_207'||custodyReady.totalChanges!==0||custodyAgain.mode!=='NO_OP'||custodyAgain.totalChanges!==0||hashFiles()!==custodyBefore)
+           throw Error('207 startup or direct-module repeat changed bytes');
          const db=new Database(dbPath,{readonly:true,fileMustExist:true});
          try { const tables=['Sample','Result','WorkAttempt','AuditLog','QcMeasurement','QcEvaluation','BatchDisposition'];
            if(db.pragma('integrity_check',{simple:true})!=='ok'||db.pragma('foreign_key_check').length)throw Error('199 integrity differs');
            for(const table of ['CalcTemplateActivation','CalibrationCurve','CalibrationPoint','ResultCalculation'])
              if(db.prepare('SELECT count(*) n FROM "'+table+'"').get().n!==0)throw Error('199 startup activated or backfilled calculations');
-           const names=[...tables,'_schema_migrations'],quote=name=>'"'+name.replaceAll('"','""')+'"';
+           const quote=name=>'"'+name.replaceAll('"','""')+'"',originalRows={};
+           for(const {name}of db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name <> 'CustodyEvent' ORDER BY name").all()){
+             const columns=db.prepare('PRAGMA table_info('+quote(name)+')').all().map(row=>row.name)
+               .filter(column=>!(name==='Sample'&&column==='retainUntil'||name==='InventoryLocation'&&column==='purpose'));
+             const selected=columns.map(quote).join(','),digest=crypto.createHash('sha256');
+             for(const row of db.prepare('SELECT '+selected+' FROM '+quote(name)+(name==='_schema_migrations'?' WHERE id <> ?':'')+' ORDER BY '+selected).iterate(...(name==='_schema_migrations'?['207_sample_custody']:[])))digest.update(JSON.stringify(row)+'\\n');
+             originalRows[name]=digest.digest('hex');
+           }
+           const names=[...tables,'_schema_migrations'];
            console.log(JSON.stringify({ready,again,noOpBytesPreserved:true,
              columns:Object.fromEntries(names.map(name=>[name,db.prepare('PRAGMA table_xinfo('+quote(name)+')').all()])),
              schemas:Object.fromEntries(names.map(name=>[name,db.prepare('SELECT sql FROM sqlite_master WHERE name=?').get(name).sql])),
+             locationColumns:db.prepare('PRAGMA table_info("InventoryLocation")').all(),locationRows:db.prepare('SELECT * FROM InventoryLocation ORDER BY rowid').all(),
+             custody:{ready:custodyReady,again:custodyAgain,dbWalShmPreserved:true,sourceSha256:require('./services/custodyMigrationSource').loadCustodyMigrationSource().sha256,
+               ledgerCount:db.prepare('SELECT count(*) n FROM CustodyEvent').get().n,originalRowsSha256:crypto.createHash('sha256').update(JSON.stringify(originalRows)).digest('hex')},
              rows:Object.fromEntries(tables.map(name=>[name,db.prepare('SELECT * FROM "'+name+'" ORDER BY rowid').all()])),
              receipts:db.prepare('SELECT * FROM _schema_migrations ORDER BY id').all()}));
          }finally{db.close();}`
@@ -1470,7 +1542,7 @@ async function runSuite() {
     assertCalculationPredecessorPreserved(calculationBefore, calculationAfter);
     console.log('  ✓ calculation-default-entrypoint-pre199: PRE_199 → shipped default docker-entrypoint.sh → COMPLETE; inactive references 11, activations/backfill 0; retained evidence preserved; direct installer-module repeat NO_OP writes 0');
     console.log(JSON.stringify({calculationEntrypointProof:{scenario:'calculation-default-entrypoint-pre199',repeatInvocation:'direct installer module (not a second entrypoint run)',dry:calculationBefore.dry,ready:calculationAfter.ready,
-        again:calculationAfter.again,retainedRowsAndReceiptBytesPreserved:true,noOpBytesPreserved:calculationAfter.noOpBytesPreserved}}));
+        again:calculationAfter.again,retainedRowsAndReceiptBytesPreserved:true,noOpBytesPreserved:calculationAfter.noOpBytesPreserved,custody:calculationAfter.custody}}));
     if(!calculationStartupLog.includes('Installing immutable amendment requests, attempt links and report withdrawals')||
         !calculationStartupLog.includes('"previousClassification": "PRE_210"')||!calculationStartupLog.includes('AMENDMENT_STARTUP_READY'))
         throw Error('210 default-entrypoint installation proof missing');

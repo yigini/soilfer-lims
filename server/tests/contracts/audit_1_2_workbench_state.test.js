@@ -19,6 +19,7 @@ const { setFixtureQcRequirement } = require('../helpers/qcPolicyFixture');
 const labId = randomUUID();
 const technician = { username: `state-tech-${randomUUID()}`, role: 'LAB_TECHNICIAN', labId };
 const manager = { username: `state-manager-${randomUUID()}`, role: 'LAB_MANAGER', labId };
+let storageLocationId;
 
 beforeAll(async () => {
     await prisma.lab.create({ data: { id: labId, code: labId, name: 'Workbench state laboratory', country: 'TEST' } });
@@ -26,6 +27,8 @@ beforeAll(async () => {
         email: `${actor.username}@example.test`, role: actor.role, labId, password: 'isolated-fixture' } });
     await setFixtureQcRequirement(prisma, manager, labId);
     await prisma.analysis.upsert({ where: { code: 'PREPARATION' }, update: {}, create: { code: 'PREPARATION', name: 'Preparation' } });
+    storageLocationId = randomUUID();
+    await prisma.inventoryLocation.create({ data: { id: storageLocationId, labId, purpose: 'SAMPLE', name: 'Shelf 4' } });
 });
 afterEach(() => jest.restoreAllMocks());
 
@@ -88,9 +91,9 @@ test.each(['COMPLETED', 'IN_PROGRESS', 'ASSIGNED'])('undo intake preserves %s wo
     expect(await snapshot([row.sample.id])).toEqual(before);
 });
 
-async function fixture(sampleStatus = 'PROCESSING', itemStatus = 'COMPLETED', analysis = 'PH') {
+async function fixture(sampleStatus = 'PROCESSING', itemStatus = 'COMPLETED', analysis = 'PH', sampleData = {}) {
     const sample = await samples.createSample({ id: randomUUID(), originalId: randomUUID(), assignedLab: labId, status: sampleStatus,
-        dryingStatus: 'DONE', preparationStatus: 'DONE' }, 'system:fixture', { context: 'fixture' });
+        dryingStatus: 'DONE', preparationStatus: 'DONE', ...sampleData }, 'system:fixture', { context: 'fixture' });
     const item = await work.createWorkItem({ id: randomUUID(), sampleId: sample.id, assignedLab: labId, labId,
         analysis, status: itemStatus, assignedTo: technician.username, result: '6.25', version: 1, history: '[{"note":"retained"}]' },
     'system:fixture', { context: 'fixture' });
@@ -414,8 +417,8 @@ test('a failed FULL review lifecycle audit rolls back its decision, history and 
 });
 
 test.each(['ARCHIVING', 'DISPOSAL'])('%s request creates NOT_ASSIGNED through the authority and preserves Sample approval', async analysis => {
-    const row = await fixture('APPROVED', 'ACCEPTED');
-    const result = await requestClosure(row.sample.id, analysis, { archiveLocation: 'Shelf 4', disposalMethod: 'Laboratory procedure' }, manager);
+    const row = await fixture('APPROVED', 'ACCEPTED', 'PH', { retainUntil: new Date('2020-01-01T00:00:00Z') });
+    const result = await requestClosure(row.sample.id, analysis, { storageLocationId, disposalMethod: 'Laboratory procedure', reason: 'Recorded closure procedure' }, manager);
     expect(result).toMatchObject({ status: 'APPROVED', workItem: { status: 'NOT_ASSIGNED', analysis } });
     expect(await prisma.sample.findUnique({ where: { id: row.sample.id } })).toMatchObject({ status: 'APPROVED',
         approvedAt: row.sample.approvedAt, approvedBy: row.sample.approvedBy });
@@ -426,9 +429,9 @@ test.each(['ARCHIVING', 'DISPOSAL'])('%s request creates NOT_ASSIGNED through th
     expect(await prisma.workItem.count({ where: { sampleId: row.sample.id, analysis } })).toBe(1);
 });
 test.each(['ARCHIVING', 'DISPOSAL'])('%s request rolls back creation and metadata if its audit fails', async analysis => {
-    const row = await fixture('APPROVED', 'ACCEPTED'), before = await snapshot([row.sample.id]);
+    const row = await fixture('APPROVED', 'ACCEPTED', 'PH', { retainUntil: new Date('2020-01-01T00:00:00Z') }), before = await snapshot([row.sample.id]);
     failAudit(analysis === 'ARCHIVING' ? 'ARCHIVE_TASK_CREATED' : 'DISPOSAL_TASK_CREATED');
-    await expect(requestClosure(row.sample.id, analysis, { notes: 'Closure note' }, manager)).rejects.toThrow('Injected workflow audit failure');
+    await expect(requestClosure(row.sample.id, analysis, { storageLocationId, notes: 'Closure note' }, manager)).rejects.toThrow('Injected workflow audit failure');
     expect(await snapshot([row.sample.id])).toEqual(before);
 });
 test('closure state/scope refusals happen before creation or metadata writes', async () => {

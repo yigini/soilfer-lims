@@ -394,6 +394,12 @@ exports.createLot = async (req, res) => {
         }
 
         const lot = await prisma.$transaction(async (tx) => {
+            const storageId = locationId || item.defaultLocationId || null;
+            if (storageId) {
+                const storage = await tx.inventoryLocation.findUnique({ where: { id: storageId } });
+                if (!storage || storage.labId !== item.labId || storage.purpose !== 'REAGENT' || !storage.isActive)
+                    throw Object.assign(new Error('Choose an active reagent location in this laboratory.'), { statusCode: 400, code: 'CUSTODY_LOCATION_INVALID' });
+            }
             const newLot = await tx.inventoryLot.create({
                 data: {
                     id: uuid(),
@@ -431,7 +437,7 @@ exports.createLot = async (req, res) => {
         res.status(201).json(lot);
     } catch (e) {
         console.error('[INVENTORY] createLot error:', e);
-        res.status(500).json({ error: e.message });
+        res.status(e.statusCode || 500).json({ error: e.message, ...(e.code && { code: e.code }) });
     }
 };
 
@@ -712,6 +718,7 @@ exports.transferLot = async (req, res) => {
 
         const newLocation = await prisma.inventoryLocation.findUnique({ where: { id: locationId } });
         if (!newLocation) return res.status(404).json({ error: 'Location not found' });
+        if (newLocation.purpose !== 'REAGENT' || !newLocation.isActive) return res.status(400).json({ code: 'CUSTODY_LOCATION_INVALID', error: 'Choose an active reagent storage location.' });
         if (newLocation.labId && lot.labId && newLocation.labId !== lot.labId) {
             return res.status(403).json({
                 error: 'CROSS_LAB_LOCATION_TRANSFER_FORBIDDEN',
@@ -756,7 +763,9 @@ exports.transferLot = async (req, res) => {
 /** GET /api/inventory/locations */
 exports.getLocations = async (req, res) => {
     try {
-        const where = labScope(req.user, { isActive: true });
+        const purpose = req.query.purpose || 'REAGENT';
+        if (!require('../config/custodyContract').LOCATION_PURPOSES.includes(purpose)) return res.status(400).json({ code: 'CUSTODY_LOCATION_INVALID', error: 'Choose a valid location purpose.' });
+        const where = require('../utils/scopeGuard').buildScopedWhere(req.user, { isActive: true, purpose }, { entityType: 'Inventory', altLabField: null });
         const locations = await prisma.inventoryLocation.findMany({
             where,
             orderBy: { name: 'asc' }
@@ -770,15 +779,26 @@ exports.getLocations = async (req, res) => {
 /** POST /api/inventory/locations */
 exports.createLocation = async (req, res) => {
     try {
+        if (!req.body || typeof req.body !== 'object' || Array.isArray(req.body)) return res.status(400).json({ code: 'CUSTODY_LOCATION_INVALID', error: 'Provide a location request.' });
         const user = req.user;
-        const labId = user.role === 'SUPER_ADMIN' ? (req.body.labId || user.labId) : user.labId;
-        if (!labId) return res.status(400).json({ error: 'labId required' });
+        const labId = require('../utils/scopeGuard').hasGlobalAccess(user) ? (req.body.labId || user.labId) : user.labId;
+        if (typeof labId !== 'string' || !labId.trim()) return res.status(400).json({ code: 'CUSTODY_LAB_REQUIRED', error: 'labId required' });
+        const purpose = req.body.purpose || 'REAGENT';
+        if (!require('../config/custodyContract').LOCATION_PURPOSES.includes(purpose) || typeof req.body.name !== 'string' || !req.body.name.trim() ||
+            req.body.parentLocationId != null && typeof req.body.parentLocationId !== 'string')
+            return res.status(400).json({ code: 'CUSTODY_LOCATION_INVALID', error: 'Choose a name and valid location purpose.' });
+        if (req.body.parentLocationId) {
+            const parent = await prisma.inventoryLocation.findUnique({ where: { id: req.body.parentLocationId } });
+            if (!parent || parent.labId !== labId || parent.purpose !== purpose || !parent.isActive)
+                return res.status(400).json({ code: 'CUSTODY_LOCATION_INVALID', error: 'Choose an active parent location with the same laboratory and purpose.' });
+        }
 
         const location = await prisma.inventoryLocation.create({
             data: {
                 id: uuid(),
                 labId,
-                name: req.body.name,
+                purpose,
+                name: req.body.name.trim(),
                 locationType: req.body.locationType || 'SHELF',
                 parentLocationId: req.body.parentLocationId || null,
                 temperatureRange: req.body.temperatureRange || null

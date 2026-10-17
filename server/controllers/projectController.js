@@ -652,6 +652,16 @@ exports.updateProject = async (req, res) => {
                 await validateProjectClosure(currentProject, tx);
             }
 
+            let retentionChange;
+            if (updates.retentionDaysAfterReport !== undefined) {
+                const policyConfig = require('../services/sampleRetentionService').projectSettings(currentProject.policyConfig, updates.retentionDaysAfterReport);
+                if (policyConfig !== currentProject.policyConfig) {
+                    data.policyConfig = policyConfig;
+                    retentionChange = { old: JSON.parse(currentProject.policyConfig || '{}').sample?.retentionDaysAfterReport ?? null,
+                        new: updates.retentionDaysAfterReport };
+                }
+            }
+
             const proj = await tx.project.update({
                 where: { id: project.id },
                 data
@@ -662,7 +672,8 @@ exports.updateProject = async (req, res) => {
                 entity: 'PROJECT',
                 entityId: project.id,
                 action: 'PROJECT_UPDATED',
-                details: `Updated fields: ${Object.keys(data).join(', ')}`,
+                details: retentionChange ? JSON.stringify({ summary: `Updated fields: ${Object.keys(data).join(', ')}`,
+                    retentionDaysAfterReport: retentionChange }) : `Updated fields: ${Object.keys(data).join(', ')}`,
                 performedBy: req.user.username,
                 timestamp: new Date()
             };
@@ -739,6 +750,7 @@ exports.updateProject = async (req, res) => {
 
         res.json(updated);
     } catch (err) {
+        if (err.code === 'PROJECT_RETENTION_INVALID') return res.status(err.statusCode || 400).json({ code: err.code, error: err.message });
         if (err.statusCode === 409 || err.code === 'STALE_REVISION') {
             return res.status(409).json({
                 error: 'STALE_REVISION',

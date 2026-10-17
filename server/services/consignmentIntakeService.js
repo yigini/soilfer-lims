@@ -76,12 +76,9 @@ async function receiveConsignment(tx, { body, user, expectedSnapshots }) {
         deliveredBy: header.deliveredBy || null, deliveredAt: header.deliveredAt ? new Date(header.deliveredAt) : null,
         receivedBy: user.username, receivedAt: now, deliveryNoteRef: header.deliveryNoteRef || null,
         declaredExpectedCount: declared,
-        custodyHandoverAt: header.custodyHandoverAt ? new Date(header.custodyHandoverAt) : header.deliveredAt ? new Date(header.deliveredAt) : now,
-        custodyCarrierName: header.custodyCarrierName || header.deliveredBy || null, custodyTrackingNumber: header.custodyTrackingNumber || header.deliveryNoteRef || null,
-        custodySenderSignature: header.custodySenderSignature || null, receivingOfficerId: user.id ? String(user.id) : null,
-        receivingOfficerName: user.name || user.username, receivingOfficerSignature: header.receivingOfficerSignature || `CONFIRMED:${user.username}:${now.toISOString()}`,
         notes: header.notes || null, metadata: header.metadata ? JSON.stringify(header.metadata) : null
     } });
+    await require('./custodyService').acknowledgeReceipt(tx, { consignment, actor: user, input: header });
     const processed = [], approvals = new Map();
     for (const { index, plan } of plans) {
         const savepoint = `intake_row_${index}`;
@@ -111,7 +108,7 @@ async function receiveConsignment(tx, { body, user, expectedSnapshots }) {
             failedRowCount: errors.length, bulkApplications: applications, discrepancy: discrepancy(declared, processed.length),
             massDeficitAcknowledgements: processed.filter(result => result.sample.massWarningAcknowledged).map(result => result.sample.originalId) }),
         performedBy: user.username, timestamp: now, labId: lab.id } });
-    return { success: true, consignment: { ...consignmentResponse(final), discrepancy: discrepancy(declared, processed.length) },
+    return { success: true, consignment: { ...consignmentResponse(await require('./custodyService').receiptView(tx, final, 'consignment')), discrepancy: discrepancy(declared, processed.length) },
         samples: processed.map(({ response, sample }) => ({ ...response, rejectionReason: sample.rejectionReason, receivedMass: sample.receivedMass })),
         errors: errors.sort((a, b) => a.row - b.row), failedRows: errors.length, message: `Batch received ${processed.length} samples under Consignment ${code}.` };
 }

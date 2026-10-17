@@ -592,10 +592,11 @@ exports.getConsignments = async (req, res) => {
             ];
         }
 
+        const scopedWhere = require('../utils/scopeGuard').buildScopedWhere(req.user, where, { entityType: 'Consignment', altLabField: null });
         const [total, consignments] = await Promise.all([
-            prisma.consignment.count({ where }),
+            prisma.consignment.count({ where: scopedWhere }),
             prisma.consignment.findMany({
-                where,
+                where: scopedWhere,
                 orderBy: { receivedAt: 'desc' },
                 skip,
                 take: limitNum,
@@ -609,7 +610,8 @@ exports.getConsignments = async (req, res) => {
 
         return res.json({
             success: true,
-            data: consignments.map(require('../services/consignmentResponseService').consignmentResponse),
+            data: await Promise.all(consignments.map(async row => require('../services/consignmentResponseService').consignmentResponse(
+                await require('../services/custodyService').receiptView(prisma, row, 'consignment')))),
             total,
             page: pageNum,
             limit: limitNum
@@ -661,11 +663,12 @@ exports.getConsignmentDetail = async (req, res) => {
         if (!consignment) {
             return res.status(404).json({ error: 'Consignment not found' });
         }
+        require('../utils/scopeGuard').ensureScope(req.user, consignment, { entityType: 'Consignment', altLabField: null });
 
-        return res.json({ success: true, consignment: require('../services/consignmentResponseService').consignmentResponse(consignment) });
+        return res.json({ success: true, consignment: require('../services/consignmentResponseService').consignmentResponse(await require('../services/custodyService').receiptView(prisma, consignment, 'consignment')) });
     } catch (err) {
         console.error('[getConsignmentDetail] ERROR:', err);
-        return res.status(500).json({ error: 'Failed to fetch consignment detail: ' + err.message });
+        return res.status(err.statusCode || 500).json({ code: err.code || 'CONSIGNMENT_FETCH_ERROR', error: 'Failed to fetch consignment detail: ' + err.message });
     }
 };
 

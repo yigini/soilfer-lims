@@ -6,6 +6,7 @@ const { createWorkItem } = require('./workItemStateService');
 
 /** Closure requests preserve the approved Sample until manager closure review. */
 async function requestClosure(sampleId, analysis, input, actor, db = null) {
+    if (!input || typeof input !== 'object' || Array.isArray(input)) throw new rules.TransitionError('Provide a closure request.', 400, 'INVALID_CLOSURE_FIELDS');
     const archive = analysis === 'ARCHIVING';
     if (!['ARCHIVING', 'DISPOSAL'].includes(analysis)) throw new rules.TransitionError('Unknown closure task.', 400, 'INVALID_CLOSURE_TASK');
     if (!hasPermission(actor, archive ? 'ARCHIVE_SAMPLE' : 'DISPOSE_SAMPLE')) {
@@ -15,6 +16,14 @@ async function requestClosure(sampleId, analysis, input, actor, db = null) {
         const sample = await tx.sample.findUnique({ where: { id: String(sampleId) } });
         if (!sample) throw new rules.TransitionError('Sample not found.', 404, 'SAMPLE_NOT_FOUND');
         rules.assertScope(actor, sample);
+        if (!archive) {
+            await require('./sampleRetentionService').assertDisposable(tx, sample, input.reason || input.notes);
+            if (['RECEIVED_REJECTED', 'ARCHIVED'].includes(sample.status)) {
+                const updated = await require('./sampleStateService').transitionSample(sample.id, 'DISPOSED', actor,
+                    input.reason || input.notes, {}, tx, { action: 'SAMPLE_DISPOSED' });
+                return { status: updated.status, sample: updated };
+            }
+        }
         if (sample.status !== 'APPROVED') throw new rules.TransitionError('Sample must be APPROVED before requesting closure.', 409, 'SAMPLE_NOT_APPROVED');
         const items = await tx.workItem.findMany({ where: { sampleId: sample.id } });
         const unfinished = items.filter(item => !workflow.CLOSURE_TASK_ANALYSES.includes(item.analysis) &&
@@ -32,10 +41,14 @@ async function requestClosure(sampleId, analysis, input, actor, db = null) {
             if (!metadata || Array.isArray(metadata) || typeof metadata !== 'object') throw new Error('Invalid metadata');
         } catch (_) { throw new rules.TransitionError('Stored sample metadata requires correction before closure.', 409, 'SAMPLE_METADATA_INVALID'); }
         const field = archive ? 'archiveLocation' : 'disposalMethod';
-        if (input[field]) metadata[field] = input[field];
-        if (input.notes) metadata[archive ? 'archiveNotes' : 'disposalNotes'] = input.notes;
+        if (archive) {
+            const location = await require('./custodyService').location(tx, input.storageLocationId || metadata.archiveLocationId, sample.assignedLab);
+            metadata.archiveLocationId = location.id;
+        } else metadata.disposalReason = input.reason || input.notes;
+        if (!archive && input[field]) metadata[field] = input[field];
+        if (input.reason || input.notes) metadata[archive ? 'archiveNotes' : 'disposalNotes'] = input.reason || input.notes;
         const audit = { entity: 'SAMPLE', entityId: sample.id, action: archive ? 'ARCHIVE_TASK_CREATED' : 'DISPOSAL_TASK_CREATED',
-            details: archive ? `Archiving work item created for location ${input.archiveLocation || 'ARCHIVE'}`
+            details: archive ? `Archiving work item created for location ${metadata.archiveLocationId}`
                 : `Disposal work item created via ${input.disposalMethod || 'STANDARD'}` };
         let item = items.find(item => sameTask(item) && item.duplicateOf == null);
         if (!item) item = await createWorkItem({ id: randomUUID(), sampleId: sample.id, analysis, status: 'NOT_ASSIGNED',
@@ -44,7 +57,8 @@ async function requestClosure(sampleId, analysis, input, actor, db = null) {
         else await tx.auditLog.create({ data: { id: randomUUID(), ...audit, sampleId: sample.id,
             performedBy: rules.actorName(actor), labId: sample.assignedLab || null, timestamp: new Date() } });
         await tx.sample.update({ where: { id: sample.id }, data: { metadata: JSON.stringify(metadata) } });
-        return { status: sample.status, workItem: item, [field]: input[field] || metadata[field] || (archive ? 'ARCHIVE' : 'STANDARD') };
+        return { status: sample.status, workItem: item, ...(archive ? { storageLocationId: metadata.archiveLocationId }
+            : { disposalMethod: metadata.disposalMethod || null }) };
     });
 }
 

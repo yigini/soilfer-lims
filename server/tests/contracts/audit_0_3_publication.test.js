@@ -88,6 +88,11 @@ describe('Audit 0.3: reviewed results and policy-aware publication', () => {
         const f = await spectralFixture(analysis);
         expect((await generate(f)).status).toBe(200);
         expect(await prisma.result.count({ where: { sampleId: f.sampleId, param: analysis } })).toBe(0);
+        const issued = await prisma.report.findFirst({ where: { sampleId: f.sampleId, status: 'PUBLISHED' } });
+        const retained = await prisma.sample.findUnique({ where: { id: f.sampleId } });
+        const days = await policyService.get(labId, 'sample.retentionDaysAfterReport');
+        expect(retained.retainUntil.getTime()).toBe(issued.publishedAt.getTime() + days * 86400000);
+        expect(JSON.parse(issued.content).publication.retention).toEqual({ days, retainUntil: retained.retainUntil.toISOString() });
     });
     test.each([
         ['unlinked', { workItemId: null }], ['superseded', { isCurrent: false }],

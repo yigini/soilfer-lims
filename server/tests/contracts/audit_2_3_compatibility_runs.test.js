@@ -68,6 +68,7 @@ async function fixture({ migrated = false, sampleMember = false, finalClear = fa
         require('../../scripts/install_sample_containers').installSampleContainers({ dbPath: record.file, apply: true });
         require('../../scripts/install_control_charts').installControlCharts({ dbPath: record.file, apply: true });
     }
+    require('../helpers/custodyFixtureSchema').extendHistoricalCustodyFixture(record.file);
     const db = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${record.file}` }) }); record.db = db;
     const actor = { id: username, username, role: 'LAB_MANAGER', labId }, f = { db, file: record.file, actor, labId, analysisCode };
     await db.analysis.create({ data: { code: analysisCode, name: 'Compatibility fixture analysis' } });
