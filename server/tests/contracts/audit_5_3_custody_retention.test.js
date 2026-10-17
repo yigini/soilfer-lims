@@ -244,7 +244,7 @@ test('expiry, holds and amendments are rechecked in the shared disposal transiti
     await prisma.sampleAmendment.create({ data: { sampleId: amended.id, type: 'CLERICAL', status: 'APPROVED', reason: 'Correction', createdBy: actor.username } });
     await expect(transitionSample(amended.id, 'DISPOSED', actor, 'Disposal', {}, prisma)).rejects.toMatchObject({ code: 'SAMPLE_AMENDMENT_OPEN' });
 });
-async function legacyCustodyCopy(data = {}) {
+async function legacyCustodyCopy(data = {}, extraSamples = []) {
     const file = path.resolve(__dirname, '../.tmp/custody-install-' + randomUUID() + '.db');
     const reader = new Database(legacyTemplate, { readonly: true, fileMustExist: true });
     await reader.backup(file); reader.close();
@@ -255,14 +255,18 @@ async function legacyCustodyCopy(data = {}) {
     try { await createSampleFixture(fixtureDb, { data: { id, originalId: id, assignedLab: labId, status: 'RECEIVED',
         receptionDate: new Date(at), receivedBy: 'legacy-officer', custodyCarrierName: 'Courier',
         receivingOfficerSignature: 'CONFIRMED:legacy:old', receptionData: '{ "coc": {"tracking":"legacy"} }',
-        metadata: '{"archiveLocation":"old shelf"}', updatedAt: new Date(at), ...data } }); } finally { await fixtureDb.$disconnect(); }
+        metadata: '{"archiveLocation":"old shelf"}', updatedAt: new Date(at), ...data } });
+        for (const extra of extraSamples) await createSampleFixture(fixtureDb, { data: { status: 'RECEIVED',
+            receptionDate: new Date(at), receivedBy: 'legacy-officer', updatedAt: new Date(at), ...extra } });
+    } finally { await fixtureDb.$disconnect(); }
     const db = new Database(file);
     const guards = [...loadCustodyMigrationSource().guardsSql.matchAll(/CREATE (?:UNIQUE )?(?:TRIGGER|INDEX) "([^"]+)"/g)].map(m => m[1]);
     for (const name of guards) db.exec(`DROP ${name.includes('first_') ? 'INDEX' : 'TRIGGER'} "${name}"`);
     db.exec('DROP TABLE CustodyEvent; ALTER TABLE Sample DROP COLUMN retainUntil; ALTER TABLE InventoryLocation DROP COLUMN purpose;');
     db.prepare('DELETE FROM _schema_migrations WHERE id=?').run('207_sample_custody');
-    const before = db.prepare('SELECT * FROM Sample WHERE id=?').get(id); db.close();
-    return { file, id, before };
+    const before = db.prepare('SELECT * FROM Sample WHERE id=?').get(id);
+    const extraBefore = extraSamples.map(extra => db.prepare('SELECT * FROM Sample WHERE id=?').get(extra.id)); db.close();
+    return { file, id, before, extraBefore };
 }
 test('installer dry-run preserves bytes; apply preserves every legacy custody field and JSON; repeat is a no-op', async () => {
     const { file, id, before } = await legacyCustodyCopy();
@@ -306,14 +310,10 @@ test('unprovable legacy receipt is deferred without changing its fields or inven
     expect(installSampleCustody({ dbPath: file, apply: true })).toMatchObject({ mode: 'NO_OP', totalChanges: 0 });
 });
 test('mixed legacy receipts backfill only the provable row and retain the unprovable row for review', async () => {
-    const { file, id, before } = await legacyCustodyCopy();
-    const db = new Database(file);
     const unknownId = randomUUID();
-    const columns = Object.keys(before), quote = value => '"' + value.replaceAll('"', '""') + '"';
-    const unknown = { ...before, id: unknownId, originalId: unknownId, labId: null, labSampleCode: null, assignedLab: null };
-    db.prepare(`INSERT INTO Sample (${columns.map(quote).join(',')}) VALUES (${columns.map(() => '?').join(',')})`)
-        .run(...columns.map(column => unknown[column]));
-    db.close();
+    const { file, id, extraBefore: [unknown] } = await legacyCustodyCopy({}, [
+        { id: unknownId, originalId: unknownId, assignedLab: null }
+    ]);
     expect(installSampleCustody({ dbPath: file })).toMatchObject({ mode: 'DRY_RUN', backfilledCount: 1, deferredCount: 1 });
     expect(installSampleCustody({ dbPath: file, apply: true })).toMatchObject({ mode: 'APPLIED', backfilledCount: 1, deferredCount: 1 });
     const after = new Database(file, { readonly: true, fileMustExist: true });
