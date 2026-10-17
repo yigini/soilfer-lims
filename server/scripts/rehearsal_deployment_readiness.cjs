@@ -41,7 +41,8 @@ function assertCustodyPredecessorPreserved(before, after) {
         throw Error('199 default entrypoint changed retained analytical, audit or receipt rows');
     const hash = value => require('node:crypto').createHash('sha256').update(JSON.stringify(value)).digest('hex');
     const expected = { sourceSha256: after.custody.sourceSha256, originalRowsPreserved: true,
-        originalRowsSha256: after.custody.originalRowsSha256, backfilledCount: 0, backfillSha256: hash([]) };
+        originalRowsSha256: after.custody.originalRowsSha256, backfilledCount: 0, backfillSha256: hash([]),
+        deferredCount: 0, deferredSha256: hash([]), deferred: [] };
     expected.receiptSha256 = hash(expected);
     const receipts = after.receipts.filter(row => row.id === '207_sample_custody');
     if (after.custody.ledgerCount !== 0 || !/^[a-f0-9]{64}$/.test(after.custody.originalRowsSha256) ||

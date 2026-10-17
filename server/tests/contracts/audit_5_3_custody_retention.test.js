@@ -358,7 +358,8 @@ function readinessSnapshots() {
     const hash = value => require('node:crypto').createHash('sha256').update(JSON.stringify(value)).digest('hex');
     after.custody = { sourceSha256: loadCustodyMigrationSource().sha256, originalRowsSha256: hash(before.rows), ledgerCount: 0 };
     const receipt = { sourceSha256: after.custody.sourceSha256, originalRowsPreserved: true,
-        originalRowsSha256: after.custody.originalRowsSha256, backfilledCount: 0, backfillSha256: hash([]) };
+        originalRowsSha256: after.custody.originalRowsSha256, backfilledCount: 0, backfillSha256: hash([]),
+        deferredCount: 0, deferredSha256: hash([]), deferred: [] };
     receipt.receiptSha256 = hash(receipt);
     after.receipts.push({ id: '207_sample_custody', appliedAt: '2026-10-16 12:00:00', details: JSON.stringify(receipt) });
     return { before, after };
