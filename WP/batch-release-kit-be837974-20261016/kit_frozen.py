@@ -39,6 +39,7 @@ REQUIRED_SOURCE={
     'kit_record_profile_scratch.py','record-profile-scratch-source.json',
     'kit_backup_core.py','backup-core-source.json',
     'kit_backup_main.py','backup-main-source.json',
+    'kit_backup_source_binding.py','backup-source-binding-source.json',
     'kit_capture_statement.py','capture-statement-journal-source.json',
     'kit_schema_collection.py','schema-collection-source.json',
     'kit_main_mutations.py','kit_capture_native_inventory.py','capture-native-inventory-source.json',
