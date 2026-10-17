@@ -1,0 +1,23 @@
+{
+  "retainedOriginals": {
+    "WP/r2-cache-cap-render-acc15844-20261015/source-preparation-once/build-receipt.json": {
+      "bytes": 7893,
+      "sha256": "cd3a2757d8ecb0bf933f49231031eb7fb61eb5abaac17d05f3585c1baaf89f0a"
+    },
+    "WP/batch-build-stable-accounting-be837974-20261015/first-build-190000-closed-originals-once/docker-build.log": {
+      "bytes": 11730,
+      "sha256": "0114ea23ccf28a5bf519852f91bba48954f51ce5cd1c097cc5628b1e4b841b5d"
+    }
+  },
+  "qualifiedImage": "sha256:acc158447f5571068bf150fc0e8fa6f0889aeb38f9aec8be08978d903bd5be6a",
+  "nativeBuildStepOriginalLines": [
+    "#64 [stage-1  6/56] RUN cd server && npm rebuild better-sqlite3",
+    "#64 CACHED",
+    ""
+  ],
+  "loadedAddonBinaryDigestInTheseOriginals": false,
+  "defaultVfsObservationInTheseOriginals": false,
+  "runtimeBinaryToSourceBindingVerified": false,
+  "hostCalls": 0,
+  "operatorExecuted": false
+}

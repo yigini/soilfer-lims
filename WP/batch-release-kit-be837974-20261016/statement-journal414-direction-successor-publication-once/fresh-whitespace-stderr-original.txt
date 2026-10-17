@@ -1,0 +1,5 @@
+warning: in the working copy of 'WP/batch-release-kit-be837974-20261016/kit_frozen.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'WP/batch-release-kit-be837974-20261016/kit_linux_main_vfs.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'WP/batch-release-kit-be837974-20261016/linux-main-vfs-source.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'WP/batch-release-kit-be837974-20261016/stop_post.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'WP/batch-release-kit-be837974-20261016/verify_kit_linux_main_vfs.py', LF will be replaced by CRLF the next time Git touches it

@@ -149,10 +149,12 @@ class LinuxMainVfs(unittest.TestCase):
             if row['mode']=='rollback':self.assertEqual(row['originalHash'],row['afterHash'])
             if row['platform']!='linux':
                 with self.assertRaises(RuntimeError):vfs.runtime_option_preconditions(row['platform'],row['version'],row['sourceId'],row['options'])
-        required=['DEFAULT_MMAP_SIZE=0','ENABLE_LOCKING_STYLE=0','MUTEX_PTHREADS','THREADSAFE=2','USE_URI=0','OMIT_SHARED_CACHE','TEMP_STORE=1']
+        required=['DEFAULT_MMAP_SIZE=0','MUTEX_PTHREADS','THREADSAFE=2','USE_URI','OMIT_SHARED_CACHE','TEMP_STORE=1']
         observed=vfs.runtime_option_preconditions('linux','3.51.2',vfs.SOURCE_ID,required)
         self.assertFalse(observed['runtimeBinaryToSourceBindingVerified']);self.assertFalse(observed['runtimeDefaultVfsVerified'])
-        for options in [required[:-1],required+[required[0]],required+['DEFAULT_UNIX_VFS=custom'],required+[True]]:
+        self.assertFalse(observed['compileOptionsDetermineUriValue'])
+        self.assertFalse(vfs.runtime_option_preconditions('linux','3.51.2',vfs.SOURCE_ID,[x for x in required if x!='USE_URI'])['runtimeDefaultVfsVerified'])
+        for options in [required[:-1],required+[required[0]],required+['DEFAULT_UNIX_VFS=custom'],required+['ENABLE_LOCKING_STYLE=1'],required+['USE_URI=0'],required+[True]]:
             with self.assertRaises(RuntimeError):vfs.runtime_option_preconditions('linux','3.51.2',vfs.SOURCE_ID,options)
 
 

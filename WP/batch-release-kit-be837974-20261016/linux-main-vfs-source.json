@@ -16,7 +16,8 @@
     "unixTruncate rounds to chunks if configured. fcntlSizeHint may preallocate a rounded chunk via posix_fallocate or byte writes. Its mmap path can ftruncate with szChunk0: chunk0 alone is never a no-extension proof. The declared default profile requires BOTH chunk0 and default mmap0.",
     "SHM ftruncate uses hShm and is not a MAIN descriptor. Apple conch-file truncation is behind __APPLE__ && SQLITE_ENABLE_LOCKING_STYLE and is outside exact Linux defaults. Neither path is silently counted as MAIN or declared closed for its own file.",
     "Complete source package/lib/addon/gyp inputs and raw be Dockerfile are pinned. npm rebuild runs package install prebuild-install || node-gyp rebuild --release; sourceId/compile_options/default source files alone do NOT bind the actual loaded binary to this source or prove active default Unix VFS.",
-    "Necessary compile-option preconditions are explicitly insufficient; source-bound declaration never becomes an actual Linux observation or writer admission. Existing capture native MAIN runtime/VFS qualification flag remains false."
+    "Necessary compile-option preconditions are explicitly insufficient; source-bound declaration never becomes an actual Linux observation or writer admission. Existing capture native MAIN runtime/VFS qualification flag remains false.",
+    "Pinned compile_options emits USE_URI without its macro value and may omit a default locking-style definition established later in preprocessing. Necessary option checks cannot demand invented USE_URI=0 or infer URI/default locking values from marker presence/absence. These values and compiled/VFS identity remain independently unproved; all runtime/authority flags stay false."
   ],
   "conditions": [
     "Exact pinned default Linux Unix build, ordinary syscall semantics, unchanged initialized global config and MAIN controls, no VFS/systemcall replacement/automatic extensions/URI-selected VFS",
@@ -42,8 +43,8 @@
       "sha256": "cbb2abbfcaf6e0ca241cfe1516546be3279d56b365aa7e5ff4a19b5793af8afc"
     },
     "WP/batch-release-kit-be837974-20261016/kit_linux_main_vfs.py": {
-      "bytes": 7413,
-      "sha256": "e7e6cdcc9ddaad70dfcb7131ca72dd964a265c1c6d66c8e299f7aab9b193ccac"
+      "bytes": 7796,
+      "sha256": "08ae56377de9b89013918829002a28d5648f72076a009295c3c4e6852e982103"
     },
     "WP/batch-release-kit-be837974-20261016/kit_main_growth.py": {
       "bytes": 6004,
@@ -500,6 +501,22 @@
       "startByte": 3908427,
       "startLine": 106450,
       "text": "#if SQLITE_MAX_MMAP_SIZE>0\n/*\n** The first argument is a file-handle open on a temporary file. The file\n** is guaranteed to be nByte bytes or smaller in size. This function\n** attempts to extend the file to nByte bytes in size and to ensure that\n** the VFS has memory mapped it.\n**\n** Whether or not the file does end up memory mapped of course depends on\n** the specific VFS implementation.\n*/\nstatic void vdbeSorterExtendFile(sqlite3 *db, sqlite3_file *pFd, i64 nByte){\n  if( nByte<=(i64)(db->nMaxSorterMmap) && pFd->pMethods->iVersion>=3 ){\n    void *p = 0;\n    int chunksize = 4*1024;\n    sqlite3OsFileControlHint(pFd, SQLITE_FCNTL_CHUNK_SIZE, &chunksize);\n    sqlite3OsFileControlHint(pFd, SQLITE_FCNTL_SIZE_HINT, &nByte);\n    sqlite3OsFetch(pFd, 0, (int)nByte, &p);\n    if( p ) sqlite3OsUnfetch(pFd, 0, p);\n"
+    },
+    {
+      "endByte": 1074094,
+      "endLine": 23376,
+      "label": "compile_option_uri_unvalued",
+      "startByte": 1074052,
+      "startLine": 23374,
+      "text": "#ifdef SQLITE_USE_URI\n  \"USE_URI\",\n#endif\n"
+    },
+    {
+      "endByte": 1062536,
+      "endLine": 22862,
+      "label": "compile_option_locking_conditional",
+      "startByte": 1062425,
+      "startLine": 22860,
+      "text": "#ifdef SQLITE_ENABLE_LOCKING_STYLE\n  \"ENABLE_LOCKING_STYLE=\" CTIMEOPT_VAL(SQLITE_ENABLE_LOCKING_STYLE),\n#endif\n"
     }
   ],
   "nativeSourceSha256": "2bbdd0eff3f46852e954d7881b7945990bf78c1421f806cf7978bc22e187100a",

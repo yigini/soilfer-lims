@@ -113,12 +113,16 @@ def runtime_option_preconditions(platform,version,source_id,options):
     require(type(options) is list and len(options)<=256 and
         all(type(row) is str and row.isascii() and 0<len(row)<=256 for row in options) and
         len(set(options))==len(options),'Complete bounded unique compile-option observation required')
-    required={'DEFAULT_MMAP_SIZE=0','ENABLE_LOCKING_STYLE=0','MUTEX_PTHREADS',
-        'THREADSAFE=2','USE_URI=0','OMIT_SHARED_CACHE','TEMP_STORE=1'}
+    required={'DEFAULT_MMAP_SIZE=0','MUTEX_PTHREADS','THREADSAFE=2','OMIT_SHARED_CACHE','TEMP_STORE=1'}
     require(required<=set(options),'Pinned default Linux compile-option preconditions absent')
+    require(all(not row.startswith('ENABLE_LOCKING_STYLE') or row=='ENABLE_LOCKING_STYLE=0' for row in options),
+        'Explicit nondefault or ambiguous locking-style option refused')
+    require(not any(row.startswith('USE_URI=') for row in options),
+        'Pinned compile_options reports only the unvalued USE_URI marker')
     forbidden=('OS_OTHER','OS_KV','DEFAULT_UNIX_VFS','MMAP_READWRITE','TEST','DEBUG','OMIT_DISKIO')
     require(not any(row==key or row.startswith(key+'=') for row in options for key in forbidden),
         'Custom or test native build profile refused')
-    return {'necessaryCompileOptionPreconditionsMet':True,'runtimeBinaryToSourceBindingVerified':False,
+    return {'necessaryCompileOptionPreconditionsMet':True,'compileOptionsDetermineUriValue':False,
+        'compileOptionsDetermineDefaultLockingStyle':False,'runtimeBinaryToSourceBindingVerified':False,
         'runtimeDefaultVfsVerified':False,'mainFileLengthOrVfsPreallocationBounded':False,
         'writerGraphAdmissionImplemented':False,'physicalFilesystemClosureClaimed':False}

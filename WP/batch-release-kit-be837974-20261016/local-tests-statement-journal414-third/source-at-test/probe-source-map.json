@@ -1,0 +1,53 @@
+{
+  "hostCalls": 0,
+  "probes": {
+    "postflight-auth.cjs": {
+      "bytes": 2045,
+      "copiedByteIdentically": true,
+      "gitBlob": "6521d1c4a8f04e24641df967de4f674e9907dfb8",
+      "sha256": "37b96bb2f26f8e2c9d4bd8443f5c3e46364408cc413b07c3f5a4428d91e45192",
+      "sourceCommit": "187636984895aec44044635fb63498b0fcb3102e",
+      "sourcePath": "WP/batch-proof-mount-order-forward-be837974-20261016/postflight-auth.cjs"
+    },
+    "postflight-policy.cjs": {
+      "bytes": 4035,
+      "copiedByteIdentically": true,
+      "gitBlob": "19e12bb1c77a43f78098eb4af208d05f34f96c46",
+      "sha256": "6380f9b6513318e0b50a6c1fcda51d3b2094326e39f7651a9a923ae68dfe5e51",
+      "sourceCommit": "187636984895aec44044635fb63498b0fcb3102e",
+      "sourcePath": "WP/batch-proof-mount-order-forward-be837974-20261016/postflight-policy.cjs"
+    },
+    "postflight-qc-runs.cjs": {
+      "bytes": 4091,
+      "copiedByteIdentically": true,
+      "gitBlob": "ab7fd7f03555f6d5af423d6750e8de908965d53a",
+      "sha256": "4a93ec3c536b13813ddc213791039d0acf04250a8722b28ea5af5cd50581cf8f",
+      "sourceCommit": "187636984895aec44044635fb63498b0fcb3102e",
+      "sourcePath": "WP/batch-proof-mount-order-forward-be837974-20261016/postflight-qc-runs.cjs"
+    },
+    "postflight-reference.cjs": {
+      "bytes": 2096,
+      "copiedByteIdentically": true,
+      "gitBlob": "6155145febed24f58efabfba236bae91f00e46a3",
+      "sha256": "530162ea19e87a2fb59621d5d3cf570cfe4092bcb4160f0ca40df9debe3e5526",
+      "sourceCommit": "187636984895aec44044635fb63498b0fcb3102e",
+      "sourcePath": "WP/batch-proof-mount-order-forward-be837974-20261016/postflight-reference.cjs"
+    },
+    "postflight-roles.cjs": {
+      "bytes": 12281,
+      "copiedByteIdentically": true,
+      "gitBlob": "bc6fe5f35ccc52e0c7b48a444a9432d05162a4a3",
+      "sha256": "6724d91d89343387adb18db03f396a1eac14d8c9cc0700ac722b36e82ed924da",
+      "sourceCommit": "187636984895aec44044635fb63498b0fcb3102e",
+      "sourcePath": "WP/batch-proof-mount-order-forward-be837974-20261016/postflight-roles.cjs"
+    },
+    "readonly-smoke.cjs": {
+      "bytes": 3255,
+      "copiedByteIdentically": true,
+      "gitBlob": "555a67e4f125160eba990086fa4d0f60c6085bb8",
+      "sha256": "7fcfb2565d55f2d54aa39a2f8ebd636dcf64dbe04b2713de40f4346a3c93c626",
+      "sourceCommit": "187636984895aec44044635fb63498b0fcb3102e",
+      "sourcePath": "WP/batch-proof-mount-order-forward-be837974-20261016/readonly-smoke.cjs"
+    }
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "conditions": [
+    "Only NEW owned reader and NEW detached backup are connected to SQL.",
+    "Collector observations are full unfiltered rows, not proof independent of this collector.",
+    "The descriptor-only target plan rechecks exact preceding observed byte identity and strict PRE profile.",
+    "No capture or release writer calls that native growth plan or holds native growth capacity yet.",
+    "The Linux VFS, WAL, scratch and physical growth remain outside this collector source proof."
+  ],
+  "exactNewDetachedBackupSchemaComparison": true,
+  "files": {
+    "kit_capture_copy.py": {
+      "bytes": 16921,
+      "sha256": "0c6ab5e3e4c8e7d446eeb9bd3aaf562f47f95067ccac5b06f84064de2719ad8e"
+    },
+    "kit_capture_native_inventory.py": {
+      "bytes": 7074,
+      "sha256": "b06633edfa9dd3780ded96ea028dd6bc53150adb6d1cdfadf612a88848534dc2"
+    },
+    "kit_capture_review.py": {
+      "bytes": 16510,
+      "sha256": "bf65fd5e6bfc236beffce3acc70ed05f92d2d673f2d6a3b6725ffae9e9c734c1"
+    },
+    "kit_capture_science.py": {
+      "bytes": 11013,
+      "sha256": "353cc2bb1412a31dd4a1e79267963e61db51e0c5da68d8ff074ae40d0b7b8764"
+    },
+    "kit_contract.py": {
+      "bytes": 12512,
+      "sha256": "2d9662e557863a40fec745718697ef2a5605f0eb75578a381819b7fbe5043364"
+    },
+    "kit_copy_admission.py": {
+      "bytes": 3141,
+      "sha256": "cbb2abbfcaf6e0ca241cfe1516546be3279d56b365aa7e5ff4a19b5793af8afc"
+    },
+    "kit_evidence.py": {
+      "bytes": 11865,
+      "sha256": "830659a6704d5b82728bca419a712a0feb3e6479323e065a6d433b49faf63052"
+    },
+    "kit_schema_collection.py": {
+      "bytes": 11662,
+      "sha256": "2c707d3447dd64536bd6166093cc0346e5aae6cb7cd7e1692434f4550853e726"
+    },
+    "kit_science.py": {
+      "bytes": 7469,
+      "sha256": "c4ae629ae5b32f2377d62b8145a154c3681643ed99f7000a3b6550b2ef116b39"
+    },
+    "retained_contract.py": {
+      "bytes": 3474,
+      "sha256": "ec276428b564487bb0af826f85a9ed7bf35a2c1463d6d9e6a93abcc80ede0614"
+    },
+    "retained_files.py": {
+      "bytes": 29922,
+      "sha256": "e7e6f8ddeb7f4e305a4f1f8ae45711176111fdcd8ab75556fe95ea60d88e471a"
+    }
+  },
+  "includesInternalNamesAndNullSqlImplicitIndexesAndRootPages": true,
+  "independentSchemaToPrivateDbBytesProof": false,
+  "mainFileLengthOrVfsPreallocationBounded": false,
+  "physicalFilesystemClosureClaimed": false,
+  "privateDatabaseBytesIncludedInPackage": false,
+  "rawMastersOpenedSqlite": false,
+  "sameReadTransactionAsLogicalState": true,
+  "scope": "NEW_OWNED_READER_COMPLETE_SCHEMA_COLLECTION",
+  "sql": "SELECT type,name,tbl_name,rootpage,sql FROM sqlite_schema ORDER BY type,name",
+  "version": 1,
+  "writerGraphAdmissionImplemented": false
+}
