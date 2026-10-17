@@ -60,13 +60,14 @@ export default function QaOverview({ refreshKey = 0 }) {
         });
         return () => controller.abort();
     }, [token, labId, days, refreshKey]);
-    const tr = key => t(`qaOverview.${key}`);
+    const tr = (key, params = {}) => t(`qaOverview.${key}`, params);
     const date = value => value ? new Date(value).toLocaleDateString(locale) : tr('unknown');
     const number = value => Number.isFinite(value) ? new Intl.NumberFormat(locale, { maximumFractionDigits: 3 }).format(value) : tr('unknown');
     const rate = row => row.rate == null ? tr('noDenominator') : new Intl.NumberFormat(locale, { style: 'percent', maximumFractionDigits: 1 }).format(row.rate);
     const countRate = row => `${row.repeated} / ${row.executions} (${rate(row)})`;
     const state = value => tr(`statuses.${value}`);
     const empty = tr('empty');
+    const expiryLabel = data ? tr('expiringMaterials', { days: data.expiryWarningDays }) : '';
     const ptGroups = [...new Set((data?.ptResults || []).map(row => row.analysisCode))].map(analysisCode => ({ analysisCode,
         rows: data.ptResults.filter(row => row.analysisCode === analysisCode) }));
     return <div className="p-4 space-y-4 text-sf-text" aria-busy={loading}>
@@ -89,7 +90,7 @@ export default function QaOverview({ refreshKey = 0 }) {
         {data && <>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                 {[[tr('awaitingDisposition'), data.awaitingDisposition], [tr('openNcrs'), data.openNcrs],
-                    [tr('expiringMaterials'), data.expiringMaterials.length], [tr('calibrationDue'), data.calibrationDue.length]].map(([label, value]) =>
+                    [expiryLabel, data.expiringMaterials.length], [tr('calibrationDue'), data.calibrationDue.length]].map(([label, value]) =>
                     <div key={label} className="rounded-xl border border-sf-divider p-4"><p className="text-xs text-sf-muted">{label}</p><p className="text-2xl font-bold mt-1">{value}</p></div>)}
             </div>
             <p className="text-xs text-sf-muted">{tr('currentCounts')}</p>
@@ -99,7 +100,7 @@ export default function QaOverview({ refreshKey = 0 }) {
                 { key: 'rate', label: tr('rate'), render: rate }]} />
             <p className="text-xs text-sf-muted">{tr('qcDefinition')}</p>
             <div className="grid lg:grid-cols-2 gap-4">
-                <Panel title={tr('expiringMaterials')} empty={empty} rows={data.expiringMaterials} columns={[
+                <Panel title={expiryLabel} empty={empty} rows={data.expiringMaterials} columns={[
                     { key: 'code', label: tr('material') }, { key: 'name', label: tr('name') }, { key: 'expiresAt', label: tr('expiry'), render: row => date(row.expiresAt) }]} />
                 <Panel title={tr('calibrationDue')} empty={empty} rows={data.calibrationDue} columns={[
                     { key: 'name', label: tr('equipment') }, { key: 'dueAt', label: tr('due'), render: row => date(row.dueAt) },

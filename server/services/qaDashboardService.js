@@ -21,7 +21,8 @@ function qcRates(batches, since, asOf) {
         const evaluation = batch.evaluations.filter(row => row.analysisCode === analysisCode)
             .reduce((latest, row) => !latest || row.version > latest.version ? row : latest, null);
         const evaluatedAt = evaluation?.evaluatedAt ? new Date(evaluation.evaluatedAt) : null;
-        if (evaluatedAt && (evaluatedAt < since || evaluatedAt > asOf)) continue;
+        const cohortAt = evaluatedAt || new Date(batch.startedAt ?? batch.createdAt);
+        if (cohortAt < since || cohortAt > asOf) continue;
         const row = groups.get(analysisCode) || { analysisCode, evaluated: 0, failed: 0, notEvaluable: 0, undated: 0 };
         if (!evaluatedAt || !['PASS', 'WARN', 'FAIL'].includes(evaluation.verdict) || activeReopenEvent(batch, analysisCode)) {
             row.notEvaluable++; if (!evaluatedAt) row.undated++;
@@ -99,7 +100,6 @@ async function getQaDashboard(actor, query = {}, { db = prisma, now = new Date()
         throw fail(400, 'QA_DASHBOARD_LAB_INVALID', 'Choose a laboratory.');
     }
     const asOf = new Date(now), since = new Date(asOf.getTime() - days * DAY);
-    const expiryThrough = new Date(asOf.getTime() + 30 * DAY);
     return db.$transaction(async tx => {
         const actorLab = await policyService.resolveLab(actor.labId, tx);
         const scopedActor = { ...actor, labId: actorLab?.id || actor.labId };
@@ -112,7 +112,7 @@ async function getQaDashboard(actor, query = {}, { db = prisma, now = new Date()
         if (!lab) throw fail(403, 'QA_DASHBOARD_SCOPE_DENIED', 'Laboratory is outside your scope.');
         scopeGuard.ensureScope(scopedActor, lab, { labField: 'id', altLabField: null });
 
-        const [openNcrs, materials, assets, ptResults, awaitingDisposition, batches, repeats] = await Promise.all([
+        const [openNcrs, materials, assets, ptResults, awaitingDisposition, batches, repeats, expiryWarningDays] = await Promise.all([
             tx.nonconformityReport.count({ where: { labId: lab.id, status: { in: ['OPEN', 'ACTION'] } } }),
             tx.referenceMaterial.findMany({ where: { labId: lab.id, status: 'ACTIVE' },
                 select: { id: true, code: true, name: true, labId: true, status: true, expiryDate: true, inventoryLotId: true,
@@ -124,12 +124,14 @@ async function getQaDashboard(actor, query = {}, { db = prisma, now = new Date()
                 select: { id: true, analysisCode: true, provider: true, roundRef: true, date: true, assignedValue: true,
                     labResult: true, zScore: true, outcome: true, legacyScoreFlag: true }, orderBy: [{ date: 'asc' }, { id: 'asc' }] }),
             tx.batch.count({ where: { labId: lab.id, AND: [unresolvedQcWhere()] } }),
-            tx.batch.findMany({ where: { labId: lab.id }, select: { id: true, analytes: { select: { analysisCode: true } },
+            tx.batch.findMany({ where: { labId: lab.id }, select: { id: true, startedAt: true, createdAt: true, analytes: { select: { analysisCode: true } },
                 evaluations: { where: { OR: [{ evaluatedAt: { lte: asOf } }, { evaluatedAt: null }] },
                     select: { id: true, analysisCode: true, version: true, verdict: true, evaluatedAt: true } },
                 events: { where: { type: 'REOPENED', at: { lte: asOf } }, select: { type: true, at: true, payload: true } } } }),
-            repeatRates(tx, lab.id, since, asOf)
+            repeatRates(tx, lab.id, since, asOf),
+            policyService.get(lab.id, 'referenceMaterials.expiryWarningDays', { db: tx })
         ]);
+        const expiryThrough = new Date(asOf.getTime() + expiryWarningDays * DAY);
         const expiringMaterials = materials.flatMap(material => {
             // The inventory expiry can be earlier than the certificate expiry.
             // A link to another laboratory is never used to disclose its data.
@@ -151,7 +153,7 @@ async function getQaDashboard(actor, query = {}, { db = prisma, now = new Date()
                     : dueAt && status !== 'OVERDUE' ? 'DUE_SOON' : status }];
         }).sort((a, b) => new Date(a.dueAt || 0) - new Date(b.dueAt || 0) || a.id.localeCompare(b.id));
         return { lab, laboratories: laboratories.map(({ id, code, name }) => ({ id, code, name })),
-            asOf, window: { days, since, through: asOf }, expiryThrough,
+            asOf, window: { days, since, through: asOf }, expiryThrough, expiryWarningDays,
             awaitingDisposition, qcFailures: qcRates(batches, since, asOf), repeats,
             openNcrs, expiringMaterials, calibrationDue, ptResults };
     }, { timeout: 15000 });

@@ -23,8 +23,11 @@ function host() {
             if (name === 'react/jsx-runtime') return require('../../../client/node_modules/react/jsx-runtime');
             if (name === 'axios') return axios;
             if (name.includes('AuthContext')) return { useAuth: () => ({ token: 'owned-ui-token' }) };
-            if (name.includes('LanguageContext')) return { useLanguage: () => ({ locale: 'en', t: (key, fallback) =>
-                key.split('.').reduce((value, part) => value?.[part], en) ?? fallback ?? key }) };
+            if (name.includes('LanguageContext')) return { useLanguage: () => ({ locale: 'en', t: (key, paramsOrFallback = {}) => {
+                const value = key.split('.').reduce((value, part) => value?.[part], en);
+                return (value ?? (typeof paramsOrFallback === 'string' ? paramsOrFallback : key))
+                    .replace(/\{(\w+)\}/g, (_, name) => paramsOrFallback[name]);
+            } }) };
             throw Error('Unexpected import ' + name);
         }
     });
@@ -39,7 +42,7 @@ function host() {
     };
 }
 const snapshot = (labId = 'a') => ({ lab: { id: labId }, laboratories: [{ id: 'a', name: 'Lab A' }, { id: 'b', name: 'Lab B' }],
-    asOf: '2031-01-01T12:00:00Z', awaitingDisposition: 7, openNcrs: 2, expiringMaterials: [], calibrationDue: [],
+    asOf: '2031-01-01T12:00:00Z', expiryWarningDays: 10, awaitingDisposition: 7, openNcrs: 2, expiringMaterials: [], calibrationDue: [],
     qcFailures: [{ analysisCode: 'PH', evaluated: 4, failed: 1, notEvaluable: 2, rate: 0.25 }],
     ptResults: [{ id: 'pt1', analysisCode: 'PH', date: '2030-12-01', zScore: 1.23456789, labResult: 12,
         provider: 'Provider', roundRef: 'Round', outcome: 'SATISFACTORY' },
@@ -53,6 +56,7 @@ test('overview renders the scoped rates, exclusions, unknown attribution and ret
     expect(view.all().some(node => node.props?.role === 'status')).toBe(true);
     await view.respond(0, snapshot()); await view.render();
     expect(view.text()).toContain('25%'); expect(view.text()).toContain('Not evaluable');
+    expect(view.text()).toContain('RMs expiring within 10 days');
     expect(view.text()).toContain('Preparation error'); expect(view.text()).toContain('Unknown');
     expect(view.text()).toContain('1 / 4 (25%)');
     expect(view.all().filter(node => node.type === 'circle')).toHaveLength(1);

@@ -29,18 +29,31 @@ async function fixture() {
     const f = await qcGateFixture({ criteria: { blankPerBatch: 1, lrmPerBatch: 0, duplicateEvery: 0, crmEveryNBatches: 0 } });
     owned.push(f);
     f.view = (query = {}, actor = f.actor) => getQaDashboard(actor, { labId: f.labId, ...query }, { db: f.db, now: NOW });
-    f.run = (date, value = 0) => at(date, async () => {
+    f.run = (date, value = 0, { started = true } = {}) => at(date, async () => {
         const sample = await createSampleFixture(f.db, { data: { id: randomUUID(), originalId: randomUUID(), assignedLab: f.labId,
             status: 'PROCESSING', dryingStatus: 'DONE', preparationStatus: 'DONE' } });
         const item = await createWorkItemFixture(f.db, { data: { id: randomUUID(), sampleId: sample.id, labId: f.labId,
             analysis: f.analysisCode, methodologyId: f.method.id, status: 'IN_PROGRESS' } });
         const built = await buildNativeRun(f.db, f.actor, { instrumentId: f.instrument.id, workItemIds: [item.id], seed: randomUUID() });
+        if (!started) return built;
         const run = await startNativeRun(f.db, built.id, f.actor);
         return value === null ? run : writeNativeMeasurements(f.db, run.id, f.actor, {
             measurements: [{ positionId: run.positions.find(row => row.kind === 'BLANK').id, value }] });
     });
     return f;
 }
+
+test('unevaluated analytes use batch start or creation dates and cannot remain in every reporting window', async () => {
+    const f = await fixture();
+    await f.run(ago(40), null);
+    await f.run(ago(5), null);
+    await f.run(ago(35), null, { started: false });
+    await f.run(ago(2), null, { started: false });
+    await f.run(new Date(NOW.getTime() + DAY), null, { started: false });
+    expect((await f.view()).qcFailures).toEqual([{ analysisCode: f.analysisCode,
+        evaluated: 0, failed: 0, notEvaluable: 2, undated: 2, rate: null }]);
+    expect((await f.view({ days: 90 })).qcFailures[0]).toMatchObject({ notEvaluable: 4, undated: 4 });
+});
 
 test('rates reconcile with actual current normalized evaluations, retaining failed deviations and exposing exclusions', async () => {
     const f = await fixture();
@@ -82,6 +95,7 @@ test('the latest evaluation is selected before its window; superseded and reopen
 
 test('repeat rates count execution owners, open child requests and retained attribution, never requester or replicate rows', async () => {
     const f = await fixture(), manager = { id: randomUUID(), username: 'qa-requester-' + randomUUID(), role: 'LAB_MANAGER', labId: f.labId };
+    await f.setPolicy([{ key: 'results.replicatesRequired', value: 2 }]);
     await f.db.user.create({ data: { ...manager, email: manager.username + '@example.test', password: 'fixture' } });
     const rows = await at(ago(20), () => require('../../services/workflowStateRules').inTransaction(f.db, tx =>
         require('../../services/resultWriteService').writeResultsExecution(tx, { sampleId: f.items[0].sampleId,
@@ -153,6 +167,12 @@ test('lab-scoped operational rows reconcile across NCR, effective inventory expi
     expect(view.ptResults.map(row => row.date)).toEqual([ago(20), ago(5)]);
     expect((await f.view({ days: 90 })).ptResults).toHaveLength(3);
     expect(await sources(f)).toEqual(before);
+    await f.setPolicy([{ key: 'referenceMaterials.expiryWarningDays', value: 10 }]);
+    const overriddenBefore = await sources(f), shorter = await f.view();
+    expect(shorter.expiryWarningDays).toBe(10);
+    expect(shorter.expiryThrough).toEqual(new Date(NOW.getTime() + 10 * DAY));
+    expect(shorter.expiringMaterials).toHaveLength(2);
+    expect(await sources(f)).toEqual(overriddenBefore);
     const selected = await f.view({ labId: other.id }); expect(selected.lab.id).toBe(other.id);
     expect(selected.qcFailures).toEqual([]); expect(selected.repeats.executions).toBe(0);
 });
