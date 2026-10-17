@@ -62,8 +62,8 @@ class CaptureJournal(unittest.TestCase):
                 if bound['maximumJournalBytes']>32*1024**3:continue
                 self.assertLessEqual(copy_layout([bound['maximumJournalBytes']],0)['declaredAllocationBytes'],
                     journal.JOURNAL_DB_COST*pages*page)
-        self.assertEqual(budgets.CAPTURE_TOTAL_DB_COPIES,1605)
-        self.assertEqual(budgets.CAPTURE_DB_EQUIVALENTS,2007)
+        self.assertEqual(budgets.CAPTURE_TOTAL_DB_COPIES,1641)
+        self.assertEqual(budgets.CAPTURE_DB_EQUIVALENTS,2052)
 
     def test_two_forward_transactions_hold_distinct_receipts_for_same_journal_name(self):
         root=directory();target=database(root)
@@ -207,6 +207,11 @@ class CaptureJournal(unittest.TestCase):
         main=main_plan_fields('capture-206-prepare',observation,{'file':'capture-schema-initial.json','bytes':len(raw),'sha256':sha(raw)},plan)
         main_path=temp/'writer-main-admission.json';main_path.write_bytes(canonical(main)+b'\n')
         main_path.chmod(0o400);os.link(main_path,str(main_path)+'.pending')
+        from kit_capture_statement import statement_plan_fields
+        statement=statement_plan_fields('capture-206-prepare',main,plan)
+        statement_path=temp/'writer-statement-admission.json'
+        statement_path.write_bytes(canonical(statement)+b'\n');statement_path.chmod(0o400)
+        os.link(statement_path,str(statement_path)+'.pending')
         code="const v=require(process.argv[1]);v.verifyCaptureWriter(process.argv[2],'capture-206-prepare',{platform:'linux',appRoot:process.argv[3],target:process.argv[4]});process.stdout.write('SCIENTIFIC_SPAWN_ALLOWED');"
         command=[shutil.which('node'),'-e',code,str(HERE/'capture_writer_journal.cjs'),str(temp),str(runtime),str(target)]
         env={**os.environ,'NODE_OPTIONS':''}
@@ -216,6 +221,23 @@ class CaptureJournal(unittest.TestCase):
             return result
         result=run('native-preflight');self.assertEqual(result.returncode,0,result.stderr.decode())
         self.assertEqual(result.stdout,b'SCIENTIFIC_SPAWN_ALLOWED')
+        for fault in ('missing-statement','boolean-statement','count-statement','pair-statement'):
+            controls=root/fault;controls.mkdir()
+            for kind in ('journal','main','statement'):
+                if kind=='statement' and fault=='missing-statement':continue
+                source=temp/('writer-'+kind+'-admission.json');raw=source.read_bytes()
+                if kind=='statement' and fault in ('boolean-statement','count-statement'):
+                    altered=json.loads(raw)
+                    if fault=='boolean-statement':altered['collectorSourceByteBindingVerified']=1
+                    else:altered['bound']['maximumStatementStarts']=9
+                    raw=canonical(altered)+b'\n'
+                destination=controls/source.name;destination.write_bytes(raw);destination.chmod(0o400)
+                if not(kind=='statement' and fault=='pair-statement'):os.link(destination,str(destination)+'.pending')
+            modified=list(command);modified[4]=str(controls)
+            refused=subprocess.run(modified,capture_output=True,env=env,cwd=WORK/'server')
+            (root/(fault+'.stdout-original')).write_bytes(refused.stdout)
+            (root/(fault+'.stderr-original')).write_bytes(refused.stderr)
+            self.assertNotEqual(refused.returncode,0);self.assertEqual(refused.stdout,b'')
         source=runtime/'server/scripts/install_sample_containers.js';old=source.read_bytes();source.write_bytes(old+b'\n// changed\n')
         result=run('changed-caller');self.assertNotEqual(result.returncode,0);self.assertEqual(result.stdout,b'')
         source.write_bytes(old);pathlib.Path(str(target)+'-wal').write_bytes(b'not rollback')

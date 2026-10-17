@@ -21,6 +21,7 @@ from controller_output import output_pin,output_read_record
 from kit_capture_journal import JOURNAL_ORIGINALS
 from kit_schema_collection import SCHEMA_ORIGINALS
 from kit_capture_main import MAIN_ORIGINALS
+from kit_capture_statement import STATEMENT_ORIGINALS
 
 CAPTURE_REVIEW_FILES=frozenset((
     'capture-fresh-authority.json','capture-primary-snapshot.json',
@@ -30,9 +31,9 @@ CAPTURE_REVIEW_FILES=frozenset((
     'capture-integrity-original.json','capture-canonical-policy-original.json',
     'capture-206-prepare-original.json','capture-206-preservation.json',
     'capture-214-prepare-original.json','capture-214-preservation.json',
-    'consumer-inventory.json','apache-capture.json','ingress-original.conf','ingress-held.conf'))|JOURNAL_ORIGINALS|SCHEMA_ORIGINALS|MAIN_ORIGINALS
+    'consumer-inventory.json','apache-capture.json','ingress-original.conf','ingress-held.conf'))|JOURNAL_ORIGINALS|SCHEMA_ORIGINALS|MAIN_ORIGINALS|STATEMENT_ORIGINALS
 CONTROL_FILES=frozenset(('capture-fresh-authority.json',
-    'capture-snapshot-provenance.json','capture-clone-provenance.json'))|JOURNAL_ORIGINALS|MAIN_ORIGINALS
+    'capture-snapshot-provenance.json','capture-clone-provenance.json'))|JOURNAL_ORIGINALS|MAIN_ORIGINALS|STATEMENT_ORIGINALS
 
 
 def consumer_capture(value):
@@ -171,6 +172,8 @@ def verify_capture_receipt(receipt,read,index,source):
     verify_schema_originals(files)
     from kit_capture_main import verify_capture_main
     verify_capture_main(files,CAPTURE_ROOT)
+    from kit_capture_statement import verify_capture_statements
+    verify_capture_statements(files,CAPTURE_ROOT)
     return receipt
 
 

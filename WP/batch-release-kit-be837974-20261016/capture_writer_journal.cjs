@@ -84,9 +84,12 @@ function verifyCaptureWriter(directory, label, options = {}) {
     } catch (error) { if (error.code !== 'ENOENT') throw error; }
   }
   absent(target + '-journal');
-  verifyMainAdmission(directory, label, input, plan, header, page, pages);
+  const main = verifyMainAdmission(directory, label, input, plan, header, page, pages);
+  verifyStatementAdmission(directory, label, input, main, appRoot);
   need(same(actual.info, fs.lstatSync(target, { bigint: true })), 'Writer changed before scientific spawn');
-  return { label, checkedMainJournalAdmission: true, checkedNativeMainLogicalGrowthAdmission: true, completeWriterFilesystemReview: false };
+  return { label, checkedMainJournalAdmission: true, checkedNativeMainLogicalGrowthAdmission: true,
+    checkedStatementJournalContentAdmission: true, statementJournalFileLengthOrVfsBounded: false,
+    completeWriterFilesystemReview: false };
 }
 function sorted(value) {
   if (Array.isArray(value)) return value.map(sorted);
@@ -156,6 +159,71 @@ function verifyMainAdmission(directory, label, journalInput, journal, header, pa
   for (const name of ['independentSchemaToPrivateDbBytesProof','mainFileLengthOrVfsPreallocationBounded',
     'statementOrSqlScratchBounded','walGrowthBounded','physicalFilesystemClosureClaimed','completeWriterFilesystemReview'])
     need(plan[name] === false, 'Native MAIN admission cannot invent filesystem authority');
+  return {input, plan};
+}
+
+function verifyStatementAdmission(directory, label, journalInput, main, appRoot) {
+  const filename = path.join(directory, 'writer-statement-admission.json');
+  const input = readFile(filename, 8192, 2), pending = readFile(filename + '.pending', 8192, 2);
+  const immutable = process.platform === 'win32' ? (input.info.mode & 0o222n) === 0n : (input.info.mode & 0o777n) === 0o400n;
+  need(immutable && input.info.dev === pending.info.dev && input.info.ino === pending.info.ino &&
+    input.sha256 === pending.sha256, 'Immutable statement content admission pair required');
+  const sourceInput = readFile(path.join(__dirname, 'capture-statement-journal-source.json'), 65536);
+  const source = JSON.parse(sourceInput.raw);
+  need(source.scope === 'CAPTURE_STRICT_PRE_STATEMENT_JOURNAL_CONTENT_ADMISSION' &&
+    source.restrictedStatementSourceInventoryVerified === true && source.statementJournalFileLengthOrVfsBounded === false &&
+    source.physicalFilesystemClosureClaimed === false, 'Exact conditional statement content source required');
+  for (const [name, pin] of Object.entries(source.files)) {
+    const actual = readFile(path.join(__dirname, name), 1024 ** 2);
+    need(actual.bytes === pin.bytes && actual.sha256 === pin.sha256, 'Statement tooling/proof source changed');
+  }
+  const proofInput = readFile(path.join(__dirname, 'statement-journal-source.json'), 65536);
+  const proof = JSON.parse(proofInput.raw), prefix = 'WP/batch-release-kit-be837974-20261016/';
+  need(source.statementSourceProofSha256 === proofInput.sha256 &&
+    proof.scope === 'CONDITIONAL_FORWARD_STATEMENT_JOURNAL_CONTENT' && proof.completeRestrictedCaptureStatementInventory === true &&
+    proof.runtimeBinaryToSourceBindingVerified === false && proof.writerGraphAdmissionImplemented === false &&
+    proof.sqlScratchSizeBounded === false && proof.physicalFilesystemClosureClaimed === false,
+    'Exact native statement source declaration required');
+  for (const [name, pin] of Object.entries(proof.files)) {
+    need(!path.posix.isAbsolute(name) && !name.split('/').includes('..'), 'Foreign statement source path');
+    const filename = name.startsWith(prefix) ? path.join(__dirname, name.slice(prefix.length)) : path.join(appRoot, name);
+    const actual = readFile(filename, 10 * 1024 ** 2);
+    need(actual.bytes === pin.bytes && actual.sha256 === pin.sha256, 'Native statement caller/source changed');
+  }
+  const count = label === 'capture-206-prepare' ? 10 : 24;
+  need(proof.captureStatementStarts[label] === count, 'Complete source SQL statement count differs');
+  const native = main.plan.bound, size = native.pageSize, pages = native.maximumLogicalMainPages;
+  const per = pages * (size + 4), total = count * per, rounded = count * Math.ceil(per / 4096) * 4096;
+  need(Number.isSafeInteger(total) && total <= 32 * 1024 ** 3, 'Complete statement content too large; never clip');
+  const layout = {fileCount: count, directoryCount: 0, contentBytes: total, roundedContentBytes: rounded,
+    entryAndInodeAllowanceBytes: count * 8192, declaredAllocationBytes: rounded + count * 8192,
+    physicalFilesystemClosureClaimed: false};
+  const statements = {version: 1, scope: 'DECLARED_FORWARD_SQL_WRITE_STATEMENTS', maximumStatementStarts: count,
+    maximumSimultaneousStatementSavepoints: 1, explicitSavepoints: false, continuedWritingAfterRollbackOrSqlError: false};
+  const bound = {version: 1, scope: 'CONDITIONAL_FORWARD_STATEMENT_JOURNAL_CONTENT', sourceProofSha256: proofInput.sha256,
+    declaredStatements: statements, nativeMutationBound: native, maximumStatementStarts: count,
+    maximumRecordsPerStatement: pages, maximumCumulativePageRecords: count * pages,
+    recordBytes: size + 4, recordHeaderBytes: 4, journalHeaderBytes: 0,
+    maximumCumulativeLogicalContentBytes: total, maximumSingleFileLogicalContentBytes: total,
+    maximumFileCreations: count, aggregateAllocationCharges: layout, memoryBufferCreditBytes: 0,
+    truncateReuseDeleteRollbackCreditBytes: 0, statementJournalLogicalContentBounded: true,
+    requiresCompleteNativeAndStatementInventories: true, requiresNoExplicitOrOverlappingSavepoints: true,
+    requiresNoContinuedWritingAfterRollbackOrSqlError: true, callerReviewVerified: false, collectorBindingImplemented: false,
+    runtimeBinaryToSourceBindingVerified: false, runtimeDefaultVfsVerified: false, writerGraphAdmissionImplemented: false,
+    statementJournalFileLengthOrVfsBounded: false, sqlScratchSizeBounded: false, walGrowthBounded: false,
+    fullLifetimeOriginalsRetained: false, continuousPeakMeasured: false, physicalFilesystemClosureClaimed: false};
+  const expected = {version: 1, scope: 'CAPTURE_STATEMENT_JOURNAL_CONTENT_ADMISSION', label,
+    statementAdmissionProofSha256: sourceInput.sha256, mainAdmissionSha256: main.input.sha256,
+    journalAdmissionSha256: journalInput.sha256, schemaOriginal: main.plan.schemaOriginal,
+    collectorProofSha256: main.plan.collectorProofSha256, bound, layout,
+    collectorSourceByteBindingVerified: true, restrictedStatementSourceInventoryVerified: true,
+    conditionalStatementContentWriterAdmissionImplemented: true, independentSchemaToPrivateDbBytesProof: false,
+    runtimeBinaryToSourceBindingVerified: false, runtimeDefaultVfsVerified: false, temporaryDirectoryRoutingVerified: false,
+    statementJournalFileLengthOrVfsBounded: false, sqlScratchSizeBounded: false, walGrowthBounded: false,
+    fullLifetimeOriginalsRetained: false, continuousPeakMeasured: false, physicalFilesystemClosureClaimed: false,
+    completeWriterFilesystemReview: false};
+  need(input.raw.equals(Buffer.from(JSON.stringify(sorted(expected)) + '\n')),
+    'Canonical complete statement arithmetic/source admission differs');
 }
 
 module.exports = { verifyCaptureWriter, readFile };

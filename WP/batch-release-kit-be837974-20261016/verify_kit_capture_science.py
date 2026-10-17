@@ -39,6 +39,9 @@ class NativeCloneStandIn(CaptureOwnedCli):
             journal_plan=capture_journal_plan(spec)
             from kit_capture_main import capture_main_plan,MAIN_SITES
             main_plan=capture_main_plan(spec,journal_plan)
+            from kit_capture_statement import capture_statement_plan,STATEMENT_SITES
+            statement_plan=capture_statement_plan(spec,journal_plan,main_plan)
+            current.disk.admit_copy(STATEMENT_SITES[label],tmp,statement_plan['layout'])
             current.disk.admit_copy(MAIN_SITES[label],target,main_plan['layout'])
             current.disk.admit_copy(CAPTURE_JOURNAL_SITES[label],pathlib.Path(journal_plan['journal']),journal_plan['layout'])
         if label in CAPTURE_SNAPSHOTS:
@@ -52,6 +55,7 @@ class NativeCloneStandIn(CaptureOwnedCli):
             if not tmp.exists():tmp.mkdir()
             exclusive_record(tmp,'writer-journal-admission.json',journal_plan,False)
             exclusive_record(tmp,'writer-main-admission.json',main_plan,False)
+            exclusive_record(tmp,'writer-statement-admission.json',statement_plan,False)
             issue=label.split('-')[1]
             with sqlite3.connect(target) as db:
                 for table in sorted(CHAIN[issue][0]):db.execute('CREATE TABLE "'+table+'"(id TEXT PRIMARY KEY)')
@@ -65,7 +69,10 @@ class NativeCloneStandIn(CaptureOwnedCli):
             journal_closed=close_capture_journal(journal_plan)
             exclusive_record(tmp,'writer-journal-closure.json',journal_closed,False)
             from kit_capture_main import main_closure_fields
-            exclusive_record(tmp,'writer-main-closure.json',main_closure_fields(main_plan,journal_closed),False)
+            main_closed=main_closure_fields(main_plan,journal_closed)
+            exclusive_record(tmp,'writer-main-closure.json',main_closed,False)
+            from kit_capture_statement import statement_closure_fields
+            exclusive_record(tmp,'writer-statement-closure.json',statement_closure_fields(statement_plan,main_closed,journal_closed),False)
         elif label=='capture-integrity':value=science.EXPECTED
         elif label=='capture-canonical-policy':value={'classification':'PRESENT','shape':'CANONICAL','mode':'NO_OP',
             'totalChanges':0,'dataWrites':0,'readonlySnapshot':{'originalFilesPreserved':True}}

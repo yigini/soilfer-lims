@@ -163,7 +163,7 @@ class FullSchemaCollection(unittest.TestCase):
             with patch.object(sqlite3,'connect',side_effect=AssertionError('No package target SQL')):
                 result=collector.verify_schema_originals(files)
             self.assertEqual(result['completeSchemaOriginalsReplayed'],3)
-            self.assertEqual(len(receipt['files']),34)
+            self.assertEqual(len(receipt['files']),40)
             for name in collector.SCHEMA_ORIGINALS:
                 missing=dict(files);del missing[name]
                 with self.subTest(name=name),self.assertRaises(RuntimeError):collector.verify_schema_originals(missing)

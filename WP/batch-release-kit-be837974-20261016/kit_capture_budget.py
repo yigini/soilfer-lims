@@ -15,24 +15,28 @@ from kit_disk import Disk
 from kit_journal import exclusive_record
 from kit_capture_main import MAIN_SITES,MAIN_GROWTH_MAX,JOURNAL_214_GROWTH_EXTRA,main_disk_original
 from kit_copy_admission import copy_layout
+from kit_capture_statement import STATEMENT_SITES,STATEMENT_DB_COST,STATEMENT_FIXED,statement_disk_original,statement_disk_fields
 
 CAPTURE_DB_COST={'triple':1,'backup':1,'reader-index':1,'clone':1,'assets':0,'seal-directory':0,
     'capture-policy-snapshot':1,'capture-214-snapshot':1,'capture-order-snapshots':2,
     'capture-206-main-journal':JOURNAL_DB_COST,'capture-214-main-journal':JOURNAL_DB_COST,
-    'capture-206-native-main':0,'capture-214-native-main':0}
+    'capture-206-native-main':0,'capture-214-native-main':0,
+    **{STATEMENT_SITES[label]:cost for label,cost in STATEMENT_DB_COST.items()}}
 CAPTURE_APACHE_BYTES=8*1024**2
 G206=MAIN_GROWTH_MAX['capture-206-prepare']
 G214=MAIN_GROWTH_MAX['capture-214-prepare']
 CAPTURE_EXTRA={
     'capture-206-prepare':{'triple':copy_layout([G206],0)['declaredAllocationBytes'],
         'backup':copy_layout([G206],0)['declaredAllocationBytes'],'reader-index':copy_layout([G206],0)['declaredAllocationBytes'],
-        'capture-206-native-main':copy_layout([G206],0)['declaredAllocationBytes']},
+        'capture-206-native-main':copy_layout([G206],0)['declaredAllocationBytes'],
+        STATEMENT_SITES['capture-206-prepare']:STATEMENT_FIXED['capture-206-prepare']},
     'capture-214-prepare':{'capture-214-snapshot':copy_layout([G206],0)['declaredAllocationBytes'],
         'triple':copy_layout([G206+G214],0)['declaredAllocationBytes'],
         'backup':copy_layout([G206+G214],0)['declaredAllocationBytes'],
         'reader-index':copy_layout([G206+G214],0)['declaredAllocationBytes'],
         'capture-214-native-main':copy_layout([G214],0)['declaredAllocationBytes'],
-        'capture-214-main-journal':copy_layout([JOURNAL_214_GROWTH_EXTRA],0)['declaredAllocationBytes']},
+        'capture-214-main-journal':copy_layout([JOURNAL_214_GROWTH_EXTRA],0)['declaredAllocationBytes'],
+        STATEMENT_SITES['capture-214-prepare']:STATEMENT_FIXED['capture-214-prepare']},
     'capture-order-impact':{'capture-order-snapshots':2*copy_layout([G206+G214],0)['declaredAllocationBytes']}}
 
 
@@ -49,8 +53,8 @@ CAPTURE_STAGES=(
     ('capture-clone',{'clone':1},0),
     ('capture-integrity',{},0),
     ('capture-canonical-policy',{'capture-policy-snapshot':1},0),
-    ('capture-206-prepare',{'triple':2,'backup':1,'reader-index':1,'seal-directory':1,'capture-206-main-journal':1,'capture-206-native-main':1},SEAL_DIRECTORY_BYTES),
-    ('capture-214-prepare',{'capture-214-snapshot':1,'triple':2,'backup':1,'reader-index':1,'seal-directory':1,'capture-214-main-journal':1,'capture-214-native-main':1},SEAL_DIRECTORY_BYTES),
+    ('capture-206-prepare',{'triple':2,'backup':1,'reader-index':1,'seal-directory':1,'capture-206-main-journal':1,'capture-206-native-main':1,'capture-206-statement-journal':1},SEAL_DIRECTORY_BYTES),
+    ('capture-214-prepare',{'capture-214-snapshot':1,'triple':2,'backup':1,'reader-index':1,'seal-directory':1,'capture-214-main-journal':1,'capture-214-native-main':1,'capture-214-statement-journal':1},SEAL_DIRECTORY_BYTES),
     ('capture-chart-impact',{},0),
     ('capture-order-impact',{'capture-order-snapshots':1},0),
 )
@@ -108,6 +112,8 @@ class CaptureBudget:
         if site is not None:self.claim(site)
         site=MAIN_SITES.get(label)
         if site is not None:self.claim(site)
+        site=STATEMENT_SITES.get(label)
+        if site is not None:self.claim(site)
 
     def copy_ceiling(self,site):
         require(self.active is not None and site in CAPTURE_TABLE[self.completed]['sites'] and
@@ -145,6 +151,12 @@ class CaptureDisk(Disk):
         self.check()
         # The physical journal name is reused by two distinct forward
         # transactions. Their source claims and immutable receipts must differ.
+        if site in STATEMENT_SITES.values():
+            label=next(label for label,value in STATEMENT_SITES.items() if value==site)
+            require(pathlib.Path(destination)==self.root/(label+'-retained-temp'),'Statement accounting directory differs')
+            exclusive_record(self.root,statement_disk_original(label),statement_disk_fields(
+                self.root,label,{'layout':plan},ceiling,CAPTURE_TABLE_SHA),self.sync)
+            return
         if site in MAIN_SITES.values():
             require(pathlib.Path(destination)==self.root/'scientific-database/dev.db','Native MAIN destination differs')
             label=next(label for label,value in MAIN_SITES.items() if value==site)

@@ -123,6 +123,13 @@ def synthetic_journal_originals(files,budget):
             'beforeMainFileExtension':True,'stageTableSha256':CAPTURE_TABLE_SHA,'neverRetry':True,
             'sqliteTemporaryFilesAndGlobalFilesystemClosureClaimed':False,'mainFileLengthOrVfsPreallocationBounded':False}
         files[main_disk_original(label)]=canonical(reservation)+b'\n'
+        from kit_capture_statement import statement_plan_fields,statement_closure_fields,statement_disk_fields,statement_disk_original,STATEMENT_SITES
+        statement=statement_plan_fields(label,main,journal)
+        files[label+'-retained-temp/writer-statement-admission.json']=canonical(statement)+b'\n'
+        statement_closed=statement_closure_fields(statement,closed,exact_json(files[label+'-retained-temp/writer-journal-closure.json']))
+        files[label+'-retained-temp/writer-statement-closure.json']=canonical(statement_closed)+b'\n'
+        ceiling=capture_ceiling(budget.db,budget.assets,label,STATEMENT_SITES[label])
+        files[statement_disk_original(label)]=canonical(statement_disk_fields(CAPTURE_ROOT,label,statement,ceiling,CAPTURE_TABLE_SHA))+b'\n'
 
 
 def synthetic_capture_payload(files,index,source):

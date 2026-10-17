@@ -1,6 +1,7 @@
 """Conditional forward statement-journal CONTENT, not SQL scratch closure.
 
-No writer calls this primitive. A complete native-operation inventory bounds
+Standalone declarations grant no writer admission. A separately bound capture
+wrapper holds its own capacity and controls. A complete native inventory bounds
 live logical pages; a separately complete SQL statement inventory bounds the
 number of possible implicit statement savepoints. Neither count replaces the
 other. Binary/VFS binding, held capacity and physical allocation remain open.

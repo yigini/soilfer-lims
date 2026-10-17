@@ -72,12 +72,12 @@ class CaptureNativeMain(unittest.TestCase):
                 if label=='capture-206-prepare':journal_extra.append(bound['maximumAdditionalPages']*(size+8+2*65536))
             maxima[label]=max(values)
         self.assertEqual(maxima,main.MAIN_GROWTH_MAX);self.assertEqual(max(journal_extra),main.JOURNAL_214_GROWTH_EXTRA)
-        self.assertEqual(budgets.CAPTURE_TOTAL_DB_COPIES,1605);self.assertEqual(budgets.CAPTURE_DB_EQUIVALENTS,2007)
+        self.assertEqual(budgets.CAPTURE_TOTAL_DB_COPIES,1641);self.assertEqual(budgets.CAPTURE_DB_EQUIVALENTS,2052)
         for label,site in main.MAIN_SITES.items():
             self.assertGreaterEqual(budgets.capture_ceiling(512,0,label,site),main.MAIN_GROWTH_MAX[label])
         self.assertGreaterEqual(budgets.CAPTURE_EXTRA['capture-214-prepare']['triple'],sum(main.MAIN_GROWTH_MAX.values()))
         self.assertGreaterEqual(budgets.CAPTURE_EXTRA['capture-order-impact']['capture-order-snapshots'],2*sum(main.MAIN_GROWTH_MAX.values()))
-        self.assertEqual(sum(row['fixedBytes'] for row in budgets.CAPTURE_TABLE),8118001664)
+        self.assertEqual(sum(row['fixedBytes'] for row in budgets.CAPTURE_TABLE),8118001664+sum(__import__('kit_capture_statement').STATEMENT_FIXED.values()))
 
     def test_actual_capture_callbacks_hold_both_controls_before_mkdir_then_close_native_commit(self):
         with ready() as current:
@@ -86,7 +86,7 @@ class CaptureNativeMain(unittest.TestCase):
             def held(site,destination,layout):
                 self.assertFalse(current.temp.exists());calls.append(site);return admit(site,destination,layout)
             with patch.object(current.disk,'admit_copy',held):current.prepare(current.spec)
-            self.assertEqual(set(calls),{'capture-206-main-journal','capture-206-native-main'})
+            self.assertEqual(set(calls),{'capture-206-main-journal','capture-206-native-main','capture-206-statement-journal'})
             self.assertGreaterEqual(len(current.events),5);self.assertEqual(target.read_bytes(),before)
             self.assertIsNone(current.read(current.spec))
             for kind in ('journal','main'):
@@ -134,7 +134,7 @@ class CaptureNativeMain(unittest.TestCase):
 
     def test_independent_package_replays_all_six_main_controls_and_refuses_rebound_substitution(self):
         with review_fixtures.review_fixture() as current:
-            receipt=current.review_controller.execute();self.assertEqual(len(receipt['files']),34)
+            receipt=current.review_controller.execute();self.assertEqual(len(receipt['files']),40)
             baseline={n:(current.root/n).read_bytes() for n in receipt['files']}
             with patch.object(sqlite3,'connect',side_effect=AssertionError('No package target SQL')):
                 self.assertTrue(main.verify_capture_main(baseline,current.root)['allSixNativeMainOriginalsReplayed'])

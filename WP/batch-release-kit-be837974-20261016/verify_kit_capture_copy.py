@@ -80,8 +80,8 @@ def snapshot(current):
 
 class CaptureCopies(unittest.TestCase):
     def test_capture_copy_and_conditional_journal_ceiling_margin_and_separate_domain(self):
-        self.assertEqual(budgets.CAPTURE_TOTAL_DB_COPIES,1605)
-        self.assertEqual(budgets.CAPTURE_DB_EQUIVALENTS,2007)
+        self.assertEqual(budgets.CAPTURE_TOTAL_DB_COPIES,1641)
+        self.assertEqual(budgets.CAPTURE_DB_EQUIVALENTS,2052)
         self.assertNotEqual(budgets.CAPTURE_TABLE_SHA,TABLE_SHA)
         self.assertEqual(sum(row['logGrowthShareBytes'] for row in budgets.CAPTURE_TABLE),4*1024**3)
         budget=budgets.CaptureBudget(600000000,6000000,IMAGE_BYTES);initial=budget.required()
@@ -279,7 +279,7 @@ class CaptureCopies(unittest.TestCase):
             prepare,_,_=owned.capture_filesystem_controls(current.root,False,current.disk,lambda:writers.append(True))
             with patch.object(kit_evidence,'_runtime',kit_evidence.EvidenceLedger(current.root)):
                 prepare(spec)
-            self.assertEqual(writers,[True,True,True,True,True])
+            self.assertEqual(writers,[True,True,True,True,True,True,True])
             self.assertTrue((pathlib.Path(spec['tmp'])/'cli-output-admission.json').exists())
             self.assertEqual(retained.identity_record(retained.triple(current.root/'fresh-production-snapshot/raw/dev.db')),before)
             with self.assertRaises(RuntimeError):prepare(spec)

@@ -73,6 +73,8 @@ def remote_capture_programs(pins):
         ('kit_capture_owned.py',['CAPTURE_ROOT','CAPTURE_UNIT','CAPTURE_COPY_SITES']),
         ('kit_capture_journal.py',['CAPTURE_JOURNAL_SITES','JOURNAL_DB_COST']),
         ('kit_capture_main.py',['MAIN_SITES','MAIN_GROWTH_MAX','JOURNAL_214_GROWTH_EXTRA']),
+        ('kit_statement_journal.py',['CAPTURE_STATEMENTS']),
+        ('kit_capture_statement.py',['STATEMENT_SITES','STATEMENT_DB_COST','STATEMENT_GROWTH','STATEMENT_FIXED']),
         ('kit_capture_budget.py',['CAPTURE_DB_COST','CAPTURE_APACHE_BYTES','G206','G214','CAPTURE_EXTRA','capture_ceiling','CAPTURE_STAGES','CAPTURE_TABLE',
             'CAPTURE_TOTAL_DB_COPIES','CAPTURE_DB_EQUIVALENTS','CAPTURE_TABLE_SHA','CaptureBudget']),
         ('kit_disk.py',['BOUND','hardware','free_gate','measure_inputs'])):

@@ -649,9 +649,29 @@ def main_disk_original(label):
 
 MAIN_ORIGINALS = frozenset((name for label in MAIN_SITES for name in (label + '-retained-temp/writer-main-admission.json', label + '-retained-temp/writer-main-closure.json', main_disk_original(label))))
 
+# Exact AST definitions from kit_statement_journal.py
+
+CAPTURE_STATEMENTS = {'capture-206-prepare': 10, 'capture-214-prepare': 24}
+
+# Exact AST definitions from kit_capture_statement.py
+
+STATEMENT_SITES = {'capture-206-prepare': 'capture-206-statement-journal', 'capture-214-prepare': 'capture-214-statement-journal'}
+
+STATEMENT_DB_COST = {label: (count * 129 + 127) // 128 for label, count in CAPTURE_STATEMENTS.items()}
+
+STATEMENT_GROWTH = {'capture-206-prepare': MAIN_GROWTH_MAX['capture-206-prepare'], 'capture-214-prepare': sum(MAIN_GROWTH_MAX.values())}
+
+STATEMENT_FIXED = {label: copy_layout([(STATEMENT_GROWTH[label] * 129 + 127) // 128] * count, 0)['declaredAllocationBytes'] + count * 4096 for label, count in CAPTURE_STATEMENTS.items()}
+
+def statement_disk_original(label):
+    require(label in STATEMENT_SITES, 'Exact capture statement writer required')
+    return 'copy-admission-' + sha((STATEMENT_SITES[label] + '\x00' + label + '-retained-temp').encode())[:32] + '.json'
+
+STATEMENT_ORIGINALS = frozenset((name for label in STATEMENT_SITES for name in (label + '-retained-temp/writer-statement-admission.json', label + '-retained-temp/writer-statement-closure.json', statement_disk_original(label))))
+
 # Exact AST definitions from kit_capture_budget.py
 
-CAPTURE_DB_COST = {'triple': 1, 'backup': 1, 'reader-index': 1, 'clone': 1, 'assets': 0, 'seal-directory': 0, 'capture-policy-snapshot': 1, 'capture-214-snapshot': 1, 'capture-order-snapshots': 2, 'capture-206-main-journal': JOURNAL_DB_COST, 'capture-214-main-journal': JOURNAL_DB_COST, 'capture-206-native-main': 0, 'capture-214-native-main': 0}
+CAPTURE_DB_COST = {'triple': 1, 'backup': 1, 'reader-index': 1, 'clone': 1, 'assets': 0, 'seal-directory': 0, 'capture-policy-snapshot': 1, 'capture-214-snapshot': 1, 'capture-order-snapshots': 2, 'capture-206-main-journal': JOURNAL_DB_COST, 'capture-214-main-journal': JOURNAL_DB_COST, 'capture-206-native-main': 0, 'capture-214-native-main': 0, **{STATEMENT_SITES[label]: cost for label, cost in STATEMENT_DB_COST.items()}}
 
 CAPTURE_APACHE_BYTES = 8 * 1024 ** 2
 
@@ -659,9 +679,9 @@ G206 = MAIN_GROWTH_MAX['capture-206-prepare']
 
 G214 = MAIN_GROWTH_MAX['capture-214-prepare']
 
-CAPTURE_EXTRA = {'capture-206-prepare': {'triple': copy_layout([G206], 0)['declaredAllocationBytes'], 'backup': copy_layout([G206], 0)['declaredAllocationBytes'], 'reader-index': copy_layout([G206], 0)['declaredAllocationBytes'], 'capture-206-native-main': copy_layout([G206], 0)['declaredAllocationBytes']}, 'capture-214-prepare': {'capture-214-snapshot': copy_layout([G206], 0)['declaredAllocationBytes'], 'triple': copy_layout([G206 + G214], 0)['declaredAllocationBytes'], 'backup': copy_layout([G206 + G214], 0)['declaredAllocationBytes'], 'reader-index': copy_layout([G206 + G214], 0)['declaredAllocationBytes'], 'capture-214-native-main': copy_layout([G214], 0)['declaredAllocationBytes'], 'capture-214-main-journal': copy_layout([JOURNAL_214_GROWTH_EXTRA], 0)['declaredAllocationBytes']}, 'capture-order-impact': {'capture-order-snapshots': 2 * copy_layout([G206 + G214], 0)['declaredAllocationBytes']}}
+CAPTURE_EXTRA = {'capture-206-prepare': {'triple': copy_layout([G206], 0)['declaredAllocationBytes'], 'backup': copy_layout([G206], 0)['declaredAllocationBytes'], 'reader-index': copy_layout([G206], 0)['declaredAllocationBytes'], 'capture-206-native-main': copy_layout([G206], 0)['declaredAllocationBytes'], STATEMENT_SITES['capture-206-prepare']: STATEMENT_FIXED['capture-206-prepare']}, 'capture-214-prepare': {'capture-214-snapshot': copy_layout([G206], 0)['declaredAllocationBytes'], 'triple': copy_layout([G206 + G214], 0)['declaredAllocationBytes'], 'backup': copy_layout([G206 + G214], 0)['declaredAllocationBytes'], 'reader-index': copy_layout([G206 + G214], 0)['declaredAllocationBytes'], 'capture-214-native-main': copy_layout([G214], 0)['declaredAllocationBytes'], 'capture-214-main-journal': copy_layout([JOURNAL_214_GROWTH_EXTRA], 0)['declaredAllocationBytes'], STATEMENT_SITES['capture-214-prepare']: STATEMENT_FIXED['capture-214-prepare']}, 'capture-order-impact': {'capture-order-snapshots': 2 * copy_layout([G206 + G214], 0)['declaredAllocationBytes']}}
 
-CAPTURE_STAGES = (('capture-filesystem-snapshot', {'triple': 2, 'backup': 1, 'reader-index': 1, 'seal-directory': 1, 'assets': 1}, SEAL_DIRECTORY_BYTES + CAPTURE_APACHE_BYTES), ('capture-clone', {'clone': 1}, 0), ('capture-integrity', {}, 0), ('capture-canonical-policy', {'capture-policy-snapshot': 1}, 0), ('capture-206-prepare', {'triple': 2, 'backup': 1, 'reader-index': 1, 'seal-directory': 1, 'capture-206-main-journal': 1, 'capture-206-native-main': 1}, SEAL_DIRECTORY_BYTES), ('capture-214-prepare', {'capture-214-snapshot': 1, 'triple': 2, 'backup': 1, 'reader-index': 1, 'seal-directory': 1, 'capture-214-main-journal': 1, 'capture-214-native-main': 1}, SEAL_DIRECTORY_BYTES), ('capture-chart-impact', {}, 0), ('capture-order-impact', {'capture-order-snapshots': 1}, 0))
+CAPTURE_STAGES = (('capture-filesystem-snapshot', {'triple': 2, 'backup': 1, 'reader-index': 1, 'seal-directory': 1, 'assets': 1}, SEAL_DIRECTORY_BYTES + CAPTURE_APACHE_BYTES), ('capture-clone', {'clone': 1}, 0), ('capture-integrity', {}, 0), ('capture-canonical-policy', {'capture-policy-snapshot': 1}, 0), ('capture-206-prepare', {'triple': 2, 'backup': 1, 'reader-index': 1, 'seal-directory': 1, 'capture-206-main-journal': 1, 'capture-206-native-main': 1, 'capture-206-statement-journal': 1}, SEAL_DIRECTORY_BYTES), ('capture-214-prepare', {'capture-214-snapshot': 1, 'triple': 2, 'backup': 1, 'reader-index': 1, 'seal-directory': 1, 'capture-214-main-journal': 1, 'capture-214-native-main': 1, 'capture-214-statement-journal': 1}, SEAL_DIRECTORY_BYTES), ('capture-chart-impact', {}, 0), ('capture-order-impact', {'capture-order-snapshots': 1}, 0))
 
 CAPTURE_TABLE = [{'stage': name, 'sites': sites, 'dbTriples': sum((CAPTURE_DB_COST[site] * count for site, count in sites.items())), 'assetCopies': sites.get('assets', 0), 'fixedBytes': fixed + sum((count * CAPTURE_EXTRA.get(name, {}).get(site, 0) for site, count in sites.items())), 'logGrowthShareBytes': LOG_RESERVE // 8} for name, sites, fixed in CAPTURE_STAGES]
 
@@ -673,9 +693,9 @@ SCHEMA_ORIGINALS = frozenset(('capture-schema-initial.json', 'capture-schema-206
 
 # Exact AST definitions from kit_capture_review.py
 
-CAPTURE_REVIEW_FILES = frozenset(('capture-fresh-authority.json', 'capture-primary-snapshot.json', 'capture-snapshot-provenance.json', 'capture-clone-provenance.json', 'capture-stage-closures.json', 'capture-final-physical.json', 'actual-scientific-impact.json', 'actual-impact-214.json', 'actual-impact-209.json', 'capture-integrity-original.json', 'capture-canonical-policy-original.json', 'capture-206-prepare-original.json', 'capture-206-preservation.json', 'capture-214-prepare-original.json', 'capture-214-preservation.json', 'consumer-inventory.json', 'apache-capture.json', 'ingress-original.conf', 'ingress-held.conf')) | JOURNAL_ORIGINALS | SCHEMA_ORIGINALS | MAIN_ORIGINALS
+CAPTURE_REVIEW_FILES = frozenset(('capture-fresh-authority.json', 'capture-primary-snapshot.json', 'capture-snapshot-provenance.json', 'capture-clone-provenance.json', 'capture-stage-closures.json', 'capture-final-physical.json', 'actual-scientific-impact.json', 'actual-impact-214.json', 'actual-impact-209.json', 'capture-integrity-original.json', 'capture-canonical-policy-original.json', 'capture-206-prepare-original.json', 'capture-206-preservation.json', 'capture-214-prepare-original.json', 'capture-214-preservation.json', 'consumer-inventory.json', 'apache-capture.json', 'ingress-original.conf', 'ingress-held.conf')) | JOURNAL_ORIGINALS | SCHEMA_ORIGINALS | MAIN_ORIGINALS | STATEMENT_ORIGINALS
 
-CONTROL_FILES = frozenset(('capture-fresh-authority.json', 'capture-snapshot-provenance.json', 'capture-clone-provenance.json')) | JOURNAL_ORIGINALS | MAIN_ORIGINALS
+CONTROL_FILES = frozenset(('capture-fresh-authority.json', 'capture-snapshot-provenance.json', 'capture-clone-provenance.json')) | JOURNAL_ORIGINALS | MAIN_ORIGINALS | STATEMENT_ORIGINALS
 
 # Exact AST definitions from retained_memory.py
 

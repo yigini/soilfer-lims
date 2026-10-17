@@ -25,6 +25,8 @@ SPECS={
     'kit_capture_journal.py':('CAPTURE_JOURNAL_SITES','JOURNAL_DB_COST','journal_disk_original','JOURNAL_ORIGINALS'),
     'kit_copy_admission.py':('BLOCK','MAX_FILES','MAX_DIRECTORIES','MAX_CONTENT_BYTES','copy_layout'),
     'kit_capture_main.py':('MAIN_SITES','MAIN_GROWTH_MAX','JOURNAL_214_GROWTH_EXTRA','main_disk_original','MAIN_ORIGINALS'),
+    'kit_statement_journal.py':('CAPTURE_STATEMENTS',),
+    'kit_capture_statement.py':('STATEMENT_SITES','STATEMENT_DB_COST','STATEMENT_GROWTH','STATEMENT_FIXED','statement_disk_original','STATEMENT_ORIGINALS'),
     'kit_capture_budget.py':('CAPTURE_DB_COST','CAPTURE_APACHE_BYTES','G206','G214','CAPTURE_EXTRA','CAPTURE_STAGES','CAPTURE_TABLE','CAPTURE_TABLE_SHA'),
     'kit_schema_collection.py':('SCHEMA_ORIGINALS',),
     'kit_capture_review.py':('CAPTURE_REVIEW_FILES','CONTROL_FILES'),
