@@ -34,6 +34,7 @@ REQUIRED_SOURCE={
     'kit_general_sorter.py','general-sorter-source.json',
     'kit_fingerprint_sorter.py','fingerprint-sorter-source.json',
     'kit_reader_schema_scratch.py','reader-schema-scratch-source.json',
+    'kit_reader_initialization.py','reader-initialization-source.json',
     'kit_capture_statement.py','capture-statement-journal-source.json',
     'kit_schema_collection.py','schema-collection-source.json',
     'kit_main_mutations.py','kit_capture_native_inventory.py','capture-native-inventory-source.json',

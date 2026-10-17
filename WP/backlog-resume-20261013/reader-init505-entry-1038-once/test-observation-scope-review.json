@@ -1,0 +1,1 @@
+{"frozenKBytesChanged":false,"newTestsDispatched":false,"review":"Negative probe observes first schema-requiring statement refusal across combined db.prepare(...).all(); it does not instrument exact internal prepare-versus-step failure phase. Pinned source phase remains CONDITIONAL. Current README successor explicitly distinguishes those scopes.","runtimeAuthorityPromoted":false}
