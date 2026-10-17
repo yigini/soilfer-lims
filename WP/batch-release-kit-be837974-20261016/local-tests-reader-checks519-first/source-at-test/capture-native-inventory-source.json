@@ -1,0 +1,477 @@
+{
+  "applicationHead": "be8379745bdfae52ce46496ff26514dc7d729640",
+  "callerReviewVerified": false,
+  "collectorBindingImplemented": false,
+  "derivation": [
+    "Only the PRE_206 and PRE_214 branches execute the entire digest-pinned DDL. FRESH_PRISMA, COMPLETE, partial and colliding shapes are not supported by this new conditional inventory.",
+    "Every table creates one root, inserts a six-byte null schema placeholder, and updates that exact new schema row once. Count both normal BtreeInsert calls and conservatively one native BtreeDelete for each UPDATE even when omitted or marked no-op by the pinned build.",
+    "Each implicit primary/unique index creates a separate root and inserts one schema row. Each explicit index does the same; every target table was newly created empty in this DDL, so refill inserts zero data keys. No CREATE TABLE AS SELECT, AUTOINCREMENT, WITHOUT ROWID, preformatted transfer, seed row or other DML occurs in these exact DDLs.",
+    "Each trigger declaration inserts one schema row and no root. CREATE does not fire application table triggers. Existing triggers on other tables are not invoked by these DDLs or the receipt insert.",
+    "Full unfiltered sqlite_schema rows, including sqlite_ names and null-SQL autoindexes, must show the exact ordinary receipt table and its sole TEXT PRIMARY KEY implicit index. Every extra receipt trigger/index/object, custom default, FK, CHECK, generated column, collation or table variation refuses. Filtered logical-state.objects is expressly insufficient.",
+    "The pinned receipt JSON contains exactly the static source digest and contract version, two 64-byte lowercase hexadecimal fingerprints, originalRowsPreserved true and backfilledCount integer zero. Compact JSON byte length is fixed. Default CURRENT_TIMESTAMP is the built-in 19-byte UTC text; the canonical receipt table excludes any custom default or side effect.",
+    "Complete UTF-8 schema record payload: five fields; combined type/name/tbl_name plus SQL is less than full DDL bytes plus 512. This includes up to nine bytes for each serial-type varint and header-length varint and eight rootpage bytes. Exact pinned ASCII object names are below 128 bytes combined. SQL reconstruction changes only a fixed CREATE prefix; trigger SQL escaping is decoded by nested parse. The full DDL byte charge is used for EVERY schema record.",
+    "Complete receipt table record payload is marker UTF-8 bytes plus timestamp 19 plus fixed JSON bytes plus 128 for all serial-type/header/integer allowance. Receipt index payload is marker bytes plus 128 for record header and rowid. These are serialized BtreePayload bounds, not claims that JSON byte length alone bounds records.",
+    "Normal BtreeInsert replacement has no additional allocation path beyond fillInCell once and the existing single balance traversal. Same-size overwrite modifies existing payload pages only. Native BtreeDelete can balance twice; charge 2*107 allocation calls per delete, no new overflow chain, no freed-page credit. Each allocation still charges two page increments for a possible pending-byte gap.",
+    "Intact pinned default-handle input, rollback profile, auto-vacuum zero, zero reserved bytes, standard payload fractions and UTF-8 encoding remain required. No writes continue after rollback or SQL error. No direct blob writes, root drop, VACUUM, ATTACH, custom VFS/UDF/collation/module, preformat/transfer or uncounted caller operation is admitted.",
+    "This source-only inventory does not collect or verify a full schema observation, bind it to before-create target bytes, measure a production profile or supply held capacity. Existing capture journal admission is unchanged. A complete collector/caller/package/writer binding and a separate exact Linux VFS/file-extension review remain required before use."
+  ],
+  "files": {
+    "server/prisma/migrations/20261013000100_sample_containers/migration.sql": {
+      "bytes": 3351,
+      "gitBlob": "c2a537a2914555e47e6444412edda001b6bd85db",
+      "sha256": "2a239bf9b13820a151e3fcc3e81fc47142a34027ec0502c5c26acd42200254b4"
+    },
+    "server/prisma/migrations/20261013000200_control_charts/migration.sql": {
+      "bytes": 8438,
+      "gitBlob": "06782e4a7cf977992c7478d753aa14588a2921c0",
+      "sha256": "49b378296a8a0ede3318ae1e543060478b55827db0ec981d8cc4bd6180a56df6"
+    },
+    "server/scripts/install_control_charts.js": {
+      "bytes": 9109,
+      "gitBlob": "799be75d6a945cd5fdfa83712d2168a64b822bfa",
+      "sha256": "fd5bdc007ac2e995dd25a65822169135c3c41252dc5d86c50fe45b99bd72125b"
+    },
+    "server/scripts/install_sample_containers.js": {
+      "bytes": 9412,
+      "gitBlob": "6a817ccdf11927af162ca9ea0644786604d9d5b7",
+      "sha256": "67bcf2f978e99f50952b5303fbb837bd447c5ff13c625970f6eadb02ab1796b7"
+    },
+    "server/scripts/install_workflow_state_guards.js": {
+      "bytes": 16129,
+      "gitBlob": "d6b08598d760408d5fad431b1c12e0e545b2425c",
+      "sha256": "3b8654b4f8ead1286985110ae6db42e23be5620cc1f080bf1f732f66f9277306"
+    },
+    "server/services/controlChartMigrationSource.js": {
+      "bytes": 1145,
+      "gitBlob": "bb08ce21cbbab57c587a54a7426df7a6e2633846",
+      "sha256": "2e79cdf57bb09eed9f5e2e8721aa5c0ab540c16a7312d4ff02d138a20e604df6"
+    },
+    "server/services/sampleContainerMigrationSource.js": {
+      "bytes": 1344,
+      "gitBlob": "cdf5dbce9276ddfb5a26d106c8d487643a5ec167",
+      "sha256": "ab223052522a5d74e899c4c372204a4a68574819a3f6b3c7bd8837f8ad7bb8d4"
+    }
+  },
+  "mainFileLengthOrVfsPreallocationBounded": false,
+  "mainJournalCallerProofSha256": "1986db56017d15ac09fc1ea7e0adcec86381e281c2b4456461f0764f6caa6c5a",
+  "nativeExcerpts": [
+    {
+      "firstLine": 81662,
+      "lastLine": 81774,
+      "purpose": "overwrite uses existing local and overflow pages only",
+      "sha256": "3dbd3ccbc8e8f41b4ffab1072afa0a835e6b0e7c4a5d7eb773576d915bd52f64"
+    },
+    {
+      "firstLine": 81868,
+      "lastLine": 81905,
+      "purpose": "same-length table overwrite optimization",
+      "sha256": "ae71c0a1e46500cdac41ad9c69c17405b27dfb397ce1742788764d846b6fb586"
+    },
+    {
+      "firstLine": 81944,
+      "lastLine": 81957,
+      "purpose": "same-length index overwrite optimization",
+      "sha256": "c5a119526a89505146380a4053bb3e4c8d73650e93fcd7a555cc5cd8c0a35bb9"
+    },
+    {
+      "firstLine": 81979,
+      "lastLine": 82054,
+      "purpose": "normal replacement fill once, clear old cell, insert new cell",
+      "sha256": "81f9db16a318a9922dfa154047d81817f89620798eacf29df7554a73b105daa3"
+    },
+    {
+      "firstLine": 82078,
+      "lastLine": 82088,
+      "purpose": "one balance traversal after normal insertion",
+      "sha256": "91437445f25de846ead5e8e2d03c2fc475c868b454c1503251a024b3f6f01cff"
+    },
+    {
+      "firstLine": 82239,
+      "lastLine": 82264,
+      "purpose": "native delete entry",
+      "sha256": "ef4756ae5024e09ec1ec8d09d2bdd528bb0747297f7ea1c8772d5ea14d95a37f"
+    },
+    {
+      "firstLine": 82340,
+      "lastLine": 82415,
+      "purpose": "delete frees old overflow, transfers existing internal cell and balances at most twice",
+      "sha256": "59ec8e31150ef7030563794352bc5ff16559a3fa7a8b41df8b75da31d513bf3d"
+    },
+    {
+      "firstLine": 125700,
+      "lastLine": 125726,
+      "purpose": "ordinary table root and six-byte schema placeholder",
+      "sha256": "61436c1d389766efb1347fd06e57988bf8e8c193df12968744d93ecd59c23954"
+    },
+    {
+      "firstLine": 127233,
+      "lastLine": 127258,
+      "purpose": "schema row overwrite by exact rowid",
+      "sha256": "bcdcea6625ba35ecbac47fa3170f94f6df66788a80b0ece6791c45ec62635d50"
+    },
+    {
+      "firstLine": 128774,
+      "lastLine": 128816,
+      "purpose": "implicit and explicit index roots and schema inserts, refill only explicit indexes",
+      "sha256": "a4bfb4bb3054a3c71cdd81700142bf6381c730c92a0210052224ea2257ba909d"
+    },
+    {
+      "firstLine": 156416,
+      "lastLine": 156430,
+      "purpose": "CREATE TRIGGER schema insert, no trigger execution",
+      "sha256": "17499f113e5d947ef9a46270a3cd3ca687f95fc030d302a200a7db6b8aa0bd6b"
+    },
+    {
+      "firstLine": 158674,
+      "lastLine": 158719,
+      "purpose": "UPDATE may delete old row then normal insertion; no rowid or foreign-key change here",
+      "sha256": "b09dd243c5882b3b1eb2a6b5712b37ed181ac8a9f135e9f5e5081c945c687a65"
+    },
+    {
+      "firstLine": 139515,
+      "lastLine": 139544,
+      "purpose": "each affected index insertion plus table insertion",
+      "sha256": "c2f471f7f0f1b0ec681be5fe274dd86521530139ed120c98cf1dcff8ed0e973e"
+    },
+    {
+      "firstLine": 101103,
+      "lastLine": 101107,
+      "purpose": "table Insert dispatches once",
+      "sha256": "8f52b55cddf34d47f9a7d324ef5399ad9e7a6a9cc2214a62caa115b4d2c73e38"
+    },
+    {
+      "firstLine": 101249,
+      "lastLine": 101276,
+      "purpose": "Delete dispatch and no-op hook guard",
+      "sha256": "c3f6c4a586d03e399a6efddd9e0c65a8f4298c2ba389d1c737e57217ab3ab442"
+    },
+    {
+      "firstLine": 128113,
+      "lastLine": 128209,
+      "purpose": "explicit CREATE INDEX empty-table refill and sorter loop; no stat-table write",
+      "sha256": "3636a399463293141c842d932099b02cc58e4bbbd8e9a634e26f07f4237b57ab"
+    }
+  ],
+  "nativeSource": {
+    "bytes": 9389807,
+    "path": "server/node_modules/better-sqlite3/deps/sqlite3/sqlite3.c",
+    "sha256": "2bbdd0eff3f46852e954d7881b7945990bf78c1421f806cf7978bc22e187100a"
+  },
+  "normalInsertionProofSha256": "a34249c195bc627dfb166ec52033c6c60506887c5aa2d89cdd562b49b8af1826",
+  "officialReferences": [
+    "https://sqlite.org/fileformat2.html#record_format",
+    "https://sqlite.org/schematab.html",
+    "https://sqlite.org/lang_createtrigger.html"
+  ],
+  "physicalFilesystemClosureClaimed": false,
+  "profiles": {
+    "capture-206-prepare": {
+      "ddlPath": "server/prisma/migrations/20261013000100_sample_containers/migration.sql",
+      "ddlSha256": "2a239bf9b13820a151e3fcc3e81fc47142a34027ec0502c5c26acd42200254b4",
+      "existingTriggerTables": [
+        "WorkAttempt"
+      ],
+      "maximumReceiptIndexPayloadBytes": 149,
+      "maximumReceiptTablePayloadBytes": 513,
+      "maximumSchemaPayloadBytes": 3863,
+      "newTables": [
+        "ContainerSequence",
+        "SampleContainer"
+      ],
+      "objects": [
+        {
+          "implicit": false,
+          "name": "SampleContainer",
+          "sqlSha256": "b50db128fdb7539051b2e6824a9a9c3fed06c6b4f4265e54483b26b40831e22e",
+          "table": "SampleContainer",
+          "type": "table"
+        },
+        {
+          "implicit": true,
+          "name": "sqlite_autoindex_SampleContainer_1",
+          "sqlSha256": null,
+          "table": "SampleContainer",
+          "type": "index"
+        },
+        {
+          "implicit": false,
+          "name": "SampleContainer_code_key",
+          "sqlSha256": "524ccd7183ba4d9f82962710fc7534036809157b8fd48c6d68f734b73c1cbbac",
+          "table": "SampleContainer",
+          "type": "index"
+        },
+        {
+          "implicit": false,
+          "name": "SampleContainer_sampleId_idx",
+          "sqlSha256": "80bb69805d06c1ef9aef385e59d35dd8d0b1c842f32a9fe91e05e3866f9df975",
+          "table": "SampleContainer",
+          "type": "index"
+        },
+        {
+          "implicit": false,
+          "name": "SampleContainer_parentId_idx",
+          "sqlSha256": "2ce975eb16b54776d887f4ba23453f3b4df8504f7356c73e2295595e1f05955d",
+          "table": "SampleContainer",
+          "type": "index"
+        },
+        {
+          "implicit": false,
+          "name": "ContainerSequence",
+          "sqlSha256": "8fa84971bc2a327bed46d641f03488c86056dec9109115f0520bb4f0376de568",
+          "table": "ContainerSequence",
+          "type": "table"
+        },
+        {
+          "implicit": true,
+          "name": "sqlite_autoindex_ContainerSequence_1",
+          "sqlSha256": null,
+          "table": "ContainerSequence",
+          "type": "index"
+        },
+        {
+          "implicit": false,
+          "name": "SampleContainer_validate_insert",
+          "sqlSha256": "e7ffbf8938692f2d6bf07f4918a488c9c1949d65a6fcefc7bc4021c9474ffa52",
+          "table": "SampleContainer",
+          "type": "trigger"
+        },
+        {
+          "implicit": false,
+          "name": "SampleContainer_no_update",
+          "sqlSha256": "3cb410c78fd298b93798aa71cc8df042a40b12e1cb9e7fe9db574c913a218492",
+          "table": "SampleContainer",
+          "type": "trigger"
+        },
+        {
+          "implicit": false,
+          "name": "SampleContainer_no_delete",
+          "sqlSha256": "67c10b9304faae3e1d2c78d2c0dddf93c984850ec69de3ff6f349bf92972605a",
+          "table": "SampleContainer",
+          "type": "trigger"
+        },
+        {
+          "implicit": false,
+          "name": "WorkAttempt_aliquot_insert",
+          "sqlSha256": "c6da898eee9ae091034131821c75901e6a82bd31e3f9b03e6bc1d5e6d0eccba1",
+          "table": "WorkAttempt",
+          "type": "trigger"
+        }
+      ],
+      "profile": "PRE_206",
+      "receiptJsonBytes": 345,
+      "receiptMarker": "206_sample_containers"
+    },
+    "capture-214-prepare": {
+      "ddlPath": "server/prisma/migrations/20261013000200_control_charts/migration.sql",
+      "ddlSha256": "49b378296a8a0ede3318ae1e543060478b55827db0ec981d8cc4bd6180a56df6",
+      "existingTriggerTables": [],
+      "maximumReceiptIndexPayloadBytes": 146,
+      "maximumReceiptTablePayloadBytes": 510,
+      "maximumSchemaPayloadBytes": 8950,
+      "newTables": [
+        "ControlLimitProposal",
+        "ControlLimitSet",
+        "QcReviewObligation",
+        "QcReviewResolution"
+      ],
+      "objects": [
+        {
+          "implicit": false,
+          "name": "ControlLimitProposal",
+          "sqlSha256": "5c510442acd4f313f72a02d6c0f9bc13523dee4fa14d394107b421964fdf44f5",
+          "table": "ControlLimitProposal",
+          "type": "table"
+        },
+        {
+          "implicit": true,
+          "name": "sqlite_autoindex_ControlLimitProposal_1",
+          "sqlSha256": null,
+          "table": "ControlLimitProposal",
+          "type": "index"
+        },
+        {
+          "implicit": false,
+          "name": "ControlLimitSet",
+          "sqlSha256": "1036a57bcc6566c2bb2dfb21460a0ade7b021475372952dd5d0c81db7458f213",
+          "table": "ControlLimitSet",
+          "type": "table"
+        },
+        {
+          "implicit": true,
+          "name": "sqlite_autoindex_ControlLimitSet_1",
+          "sqlSha256": null,
+          "table": "ControlLimitSet",
+          "type": "index"
+        },
+        {
+          "implicit": false,
+          "name": "QcReviewObligation",
+          "sqlSha256": "e5177f809652ffab6a0e6c429ab28e720493fde439072d3a439b703b79b7d468",
+          "table": "QcReviewObligation",
+          "type": "table"
+        },
+        {
+          "implicit": true,
+          "name": "sqlite_autoindex_QcReviewObligation_1",
+          "sqlSha256": null,
+          "table": "QcReviewObligation",
+          "type": "index"
+        },
+        {
+          "implicit": false,
+          "name": "QcReviewResolution",
+          "sqlSha256": "13a48299c03b89e780cffbe35160898f88badd673443bfece1b90174415cef55",
+          "table": "QcReviewResolution",
+          "type": "table"
+        },
+        {
+          "implicit": true,
+          "name": "sqlite_autoindex_QcReviewResolution_1",
+          "sqlSha256": null,
+          "table": "QcReviewResolution",
+          "type": "index"
+        },
+        {
+          "implicit": false,
+          "name": "ControlLimitProposal_labId_analysisCode_methodologyId_referenceMaterialId_idx",
+          "sqlSha256": "aa03ad66fff417ffc1916a31ed5deec4ea04603fbf2323b2de8aef3d08ee71fd",
+          "table": "ControlLimitProposal",
+          "type": "index"
+        },
+        {
+          "implicit": false,
+          "name": "ControlLimitSet_proposalId_key",
+          "sqlSha256": "5beb7de85f774a8dec45f605ee8bdb96859fa58d5bf917da437bc4951e73a056",
+          "table": "ControlLimitSet",
+          "type": "index"
+        },
+        {
+          "implicit": false,
+          "name": "ControlLimitSet_labId_analysisCode_methodologyId_referenceMaterialId_idx",
+          "sqlSha256": "d686635752767f90a71e8fabdfb1833766f8f0ca5b45d8b883367b433ddbea6d",
+          "table": "ControlLimitSet",
+          "type": "index"
+        },
+        {
+          "implicit": false,
+          "name": "QcReviewObligation_labId_createdAt_idx",
+          "sqlSha256": "bd6dab61804ebaa4c030c785eda2752e2f08099bc2e8f34281372e512b87dc4b",
+          "table": "QcReviewObligation",
+          "type": "index"
+        },
+        {
+          "implicit": false,
+          "name": "QcReviewObligation_evaluationId_rule_key",
+          "sqlSha256": "1e6e791bb35ca8529207120a0c03eccc416e5ca19f6b31c17f096ad93156d714",
+          "table": "QcReviewObligation",
+          "type": "index"
+        },
+        {
+          "implicit": false,
+          "name": "QcReviewResolution_obligationId_key",
+          "sqlSha256": "e129989091c305392edf9936afb50172e057911ed7c0e0d14256574eda843195",
+          "table": "QcReviewResolution",
+          "type": "index"
+        },
+        {
+          "implicit": false,
+          "name": "ControlLimitSet_one_approved_series",
+          "sqlSha256": "b0007d3bc96007d1fa4971158fad644cab9764a219980ba1fe31167e91eac546",
+          "table": "ControlLimitSet",
+          "type": "index"
+        },
+        {
+          "implicit": false,
+          "name": "control_limit_proposal_insert",
+          "sqlSha256": "19c8693885d85e622884f7d5c24e16e81c552a237a86f1d36e8b51cbc20601eb",
+          "table": "ControlLimitProposal",
+          "type": "trigger"
+        },
+        {
+          "implicit": false,
+          "name": "control_limit_set_insert",
+          "sqlSha256": "01d3cc740395a8e406994a3ae43b1a0ca0e38fec0df25dad292788f77a51bd09",
+          "table": "ControlLimitSet",
+          "type": "trigger"
+        },
+        {
+          "implicit": false,
+          "name": "qc_review_obligation_insert",
+          "sqlSha256": "a4de679113a84b709b8b06776618ffd9624a3945a2f072073468d1d38fc9bdcb",
+          "table": "QcReviewObligation",
+          "type": "trigger"
+        },
+        {
+          "implicit": false,
+          "name": "qc_review_resolution_insert",
+          "sqlSha256": "ac2cdd4f7f48040fb6ca7dce2b65246af442c6d8fc87008ccec1a18377c7a9da",
+          "table": "QcReviewResolution",
+          "type": "trigger"
+        },
+        {
+          "implicit": false,
+          "name": "control_limit_set_supersede_only",
+          "sqlSha256": "22ebe89551a495d59af4f67fc626a50560bddb8ec9d6620ed31cbdc28d1ccf01",
+          "table": "ControlLimitSet",
+          "type": "trigger"
+        },
+        {
+          "implicit": false,
+          "name": "ControlLimitProposal_update_refused",
+          "sqlSha256": "26c8845a7c7359f081519176757a70d00280fad0524fe2e069c15888840387b6",
+          "table": "ControlLimitProposal",
+          "type": "trigger"
+        },
+        {
+          "implicit": false,
+          "name": "ControlLimitProposal_delete_refused",
+          "sqlSha256": "1f217063bcc5d35627d7fd444e4be42b1ff8d61ce19b97a8aaf746ac2959865a",
+          "table": "ControlLimitProposal",
+          "type": "trigger"
+        },
+        {
+          "implicit": false,
+          "name": "ControlLimitSet_delete_refused",
+          "sqlSha256": "45e21267f8521f398979fb7a854570095d19bdb25b076645d43d42b45b4aedf9",
+          "table": "ControlLimitSet",
+          "type": "trigger"
+        },
+        {
+          "implicit": false,
+          "name": "QcReviewObligation_update_refused",
+          "sqlSha256": "df374c60769bff8196f9a6ff0fabbc0194277f5e70ad303a25c46efcd9e15551",
+          "table": "QcReviewObligation",
+          "type": "trigger"
+        },
+        {
+          "implicit": false,
+          "name": "QcReviewObligation_delete_refused",
+          "sqlSha256": "c462a7371d58932741edc4fea36bf499518d34304409c382c915b2acf3b32745",
+          "table": "QcReviewObligation",
+          "type": "trigger"
+        },
+        {
+          "implicit": false,
+          "name": "QcReviewResolution_update_refused",
+          "sqlSha256": "c6a71c51672080663cc8f940ccf8cd6cee67335ec657c315d2a586628f57f125",
+          "table": "QcReviewResolution",
+          "type": "trigger"
+        },
+        {
+          "implicit": false,
+          "name": "QcReviewResolution_delete_refused",
+          "sqlSha256": "08e84062d1344248554a93298ac0d591b78fc0542e35df6fbb2c16fb4523053e",
+          "table": "QcReviewResolution",
+          "type": "trigger"
+        }
+      ],
+      "profile": "PRE_214",
+      "receiptJsonBytes": 345,
+      "receiptMarker": "214_control_charts"
+    }
+  },
+  "scope": "CONDITIONAL_CAPTURE_PRE_SCHEMA_NATIVE_WRITES",
+  "statementOrSqlScratchBounded": false,
+  "version": 1,
+  "writerGraphAdmissionImplemented": false
+}
