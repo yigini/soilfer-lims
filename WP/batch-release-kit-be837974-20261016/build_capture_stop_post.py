@@ -24,6 +24,7 @@ SPECS={
     'kit_budget.py':('MARGIN_PERCENT','MINIMUM_DB_EQUIVALENTS','SEAL_DIRECTORY_BYTES'),
     'kit_capture_journal.py':('CAPTURE_JOURNAL_SITES','JOURNAL_DB_COST','journal_disk_original','JOURNAL_ORIGINALS'),
     'kit_capture_budget.py':('CAPTURE_DB_COST','CAPTURE_APACHE_BYTES','CAPTURE_STAGES','CAPTURE_TABLE','CAPTURE_TABLE_SHA'),
+    'kit_schema_collection.py':('SCHEMA_ORIGINALS',),
     'kit_capture_review.py':('CAPTURE_REVIEW_FILES','CONTROL_FILES'),
     'retained_memory.py':('NON_RECLAIMABLE_FIELDS','NON_RECLAIMABLE_MAX','STAT_REQUIRED','EVENT_REQUIRED','CGROUP_ROOT',
         'pairs','scalar','bounded_read','canonical_cgroup','gate'),

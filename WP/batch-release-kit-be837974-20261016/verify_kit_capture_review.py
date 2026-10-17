@@ -70,6 +70,34 @@ def synthetic_journal_originals(files,budget):
     science_value['originalReferences']['209'].update(sha256=sha(files['actual-impact-209.json']),bytes=len(files['actual-impact-209.json']))
     files['actual-scientific-impact.json']=canonical(science_value)+b'\n'
 
+    from kit_schema_collection import schema_observation
+    snapshot=exact_json(files['capture-snapshot-provenance.json'])
+    triple={'':snapshot['backup'],'-wal':None,'-shm':None}
+    snapshot['rawTripleByteIdentity']=triple
+    observations={}
+    for issue,label,source_bytes in [('initial','fresh-production-snapshot',triple),
+        *[(i,'capture-prepared-'+i,exact_json(files['capture-'+i+'-prepare-retained-temp/writer-journal-closure.json'])['afterProfile']['sourceDbWalShm']) for i in ('206','214')]]:
+        # This is deliberately synthetic package evidence, not a native collector run.
+        schema={'version':1,'scope':'DECLARED_COMPLETE_SQLITE_SCHEMA','encoding':1,
+            'rows':[['table','fixture','fixture',2,'CREATE TABLE fixture(id TEXT)']]}
+        observed=schema_observation(label,schema,{'syntheticLogicalState':issue},
+            source_bytes,source_bytes,source_bytes,source_bytes,source_bytes[''])
+        name='capture-schema-'+issue+'.json';files[name]=canonical(observed)+b'\n'
+        observations[issue]=observed
+        pin={'bytes':len(files[name]),'sha256':sha(files[name])}
+        if issue=='initial':snapshot.update(fullSchemaOriginal=pin,logicalState=observed['logicalStateOriginal'])
+        else:
+            preservation=exact_json(files['capture-'+issue+'-preservation.json'])
+            preservation.update(fullSchemaOriginal=pin,logicalStateOriginal=observed['logicalStateOriginal'])
+            files['capture-'+issue+'-preservation.json']=canonical(preservation)+b'\n'
+            science_value['preparationReferences'][issue]['preservation'].update(
+                bytes=len(files['capture-'+issue+'-preservation.json']),sha256=sha(files['capture-'+issue+'-preservation.json']))
+    files['actual-scientific-impact.json']=canonical(science_value)+b'\n'
+    files['capture-snapshot-provenance.json']=canonical(snapshot)+b'\n'
+    initial['snapshotProvenance']={'bytes':len(files['capture-snapshot-provenance.json']),
+        'sha256':sha(files['capture-snapshot-provenance.json'])}
+    files['capture-clone-provenance.json']=canonical(initial)+b'\n'
+
 
 def synthetic_capture_payload(files,index,source):
     """Explicit synthetic future receipt for package tests; never operational."""

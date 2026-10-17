@@ -19,6 +19,7 @@ from kit_disk import ALLOCATION,BOUND,disjoint_growth
 from kit_journal import exclusive_record
 from controller_output import output_pin,output_read_record
 from kit_capture_journal import JOURNAL_ORIGINALS
+from kit_schema_collection import SCHEMA_ORIGINALS
 
 CAPTURE_REVIEW_FILES=frozenset((
     'capture-fresh-authority.json','capture-primary-snapshot.json',
@@ -28,7 +29,7 @@ CAPTURE_REVIEW_FILES=frozenset((
     'capture-integrity-original.json','capture-canonical-policy-original.json',
     'capture-206-prepare-original.json','capture-206-preservation.json',
     'capture-214-prepare-original.json','capture-214-preservation.json',
-    'consumer-inventory.json','apache-capture.json','ingress-original.conf','ingress-held.conf'))|JOURNAL_ORIGINALS
+    'consumer-inventory.json','apache-capture.json','ingress-original.conf','ingress-held.conf'))|JOURNAL_ORIGINALS|SCHEMA_ORIGINALS
 CONTROL_FILES=frozenset(('capture-fresh-authority.json',
     'capture-snapshot-provenance.json','capture-clone-provenance.json'))|JOURNAL_ORIGINALS
 
@@ -165,6 +166,8 @@ def verify_capture_receipt(receipt,read,index,source):
         'Capture scientific, Apache or consumer projection differs')
     from kit_capture_journal_package import verify_capture_journals
     verify_capture_journals(files,CAPTURE_ROOT)
+    from kit_schema_collection import verify_schema_originals
+    verify_schema_originals(files)
     return receipt
 
 

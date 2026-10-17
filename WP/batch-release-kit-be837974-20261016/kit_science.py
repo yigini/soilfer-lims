@@ -92,10 +92,15 @@ def verify_scientific_originals(value,read_private):
             originals[kind]=exact_json(raw)
         plan(originals['original'],issue,'APPLIED')
         tables,marker=CHAIN[issue]
-        require(originals['preservation']=={'allOriginalRowsAndReceiptsPreserved':True,
+        schema_pins={key:originals['preservation'].get(key) for key in ('fullSchemaOriginal','logicalStateOriginal')}
+        for pin in schema_pins.values():
+            require(type(pin) is dict and set(pin)=={'bytes','sha256'} and type(pin['bytes']) is int and
+                0<pin['bytes']<=16*1024**2 and type(pin['sha256']) is str and
+                re.fullmatch('[a-f0-9]{64}',pin['sha256']),'Full schema and logical-state original references required')
+        require(canonical(originals['preservation'])==canonical({'allOriginalRowsAndReceiptsPreserved':True,
             'priorStateFromBoundRecordNoSql':True,'newTables':sorted(tables),'emptyEvidenceTables':True,
             'backfilledCount':0,'marker':marker,'totalTables':108 if issue=='206' else 112,
-            'schemaReceiptCount':40 if issue=='206' else 41},'Full capture preparation preservation report differs')
+            'schemaReceiptCount':40 if issue=='206' else 41,**schema_pins}),'Full capture preparation preservation report differs')
     return value
 
 

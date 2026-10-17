@@ -630,9 +630,13 @@ CAPTURE_TABLE = [{'stage': name, 'sites': sites, 'dbTriples': sum((CAPTURE_DB_CO
 
 CAPTURE_TABLE_SHA = sha(canonical({'root': CAPTURE_ROOT.as_posix(), 'unit': CAPTURE_UNIT, 'stages': CAPTURE_TABLE, 'marginPercent': MARGIN_PERCENT, 'minimumDatabaseEquivalents': MINIMUM_DB_EQUIVALENTS, 'productionSqliteConnections': 0, 'preparationIssues': [206, 214], 'issue209ApplyPermitted': False, 'physicalFilesystemClosureClaimed': False}))
 
+# Exact AST definitions from kit_schema_collection.py
+
+SCHEMA_ORIGINALS = frozenset(('capture-schema-initial.json', 'capture-schema-206.json', 'capture-schema-214.json'))
+
 # Exact AST definitions from kit_capture_review.py
 
-CAPTURE_REVIEW_FILES = frozenset(('capture-fresh-authority.json', 'capture-primary-snapshot.json', 'capture-snapshot-provenance.json', 'capture-clone-provenance.json', 'capture-stage-closures.json', 'capture-final-physical.json', 'actual-scientific-impact.json', 'actual-impact-214.json', 'actual-impact-209.json', 'capture-integrity-original.json', 'capture-canonical-policy-original.json', 'capture-206-prepare-original.json', 'capture-206-preservation.json', 'capture-214-prepare-original.json', 'capture-214-preservation.json', 'consumer-inventory.json', 'apache-capture.json', 'ingress-original.conf', 'ingress-held.conf')) | JOURNAL_ORIGINALS
+CAPTURE_REVIEW_FILES = frozenset(('capture-fresh-authority.json', 'capture-primary-snapshot.json', 'capture-snapshot-provenance.json', 'capture-clone-provenance.json', 'capture-stage-closures.json', 'capture-final-physical.json', 'actual-scientific-impact.json', 'actual-impact-214.json', 'actual-impact-209.json', 'capture-integrity-original.json', 'capture-canonical-policy-original.json', 'capture-206-prepare-original.json', 'capture-206-preservation.json', 'capture-214-prepare-original.json', 'capture-214-preservation.json', 'consumer-inventory.json', 'apache-capture.json', 'ingress-original.conf', 'ingress-held.conf')) | JOURNAL_ORIGINALS | SCHEMA_ORIGINALS
 
 CONTROL_FILES = frozenset(('capture-fresh-authority.json', 'capture-snapshot-provenance.json', 'capture-clone-provenance.json')) | JOURNAL_ORIGINALS
 

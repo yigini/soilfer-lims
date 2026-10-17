@@ -1,0 +1,14 @@
+warning: in the working copy of 'WP/batch-release-kit-be837974-20261016/build_capture_stop_post.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'WP/batch-release-kit-be837974-20261016/capture_stop_post.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'WP/batch-release-kit-be837974-20261016/kit_capture_copy.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'WP/batch-release-kit-be837974-20261016/kit_capture_outcome.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'WP/batch-release-kit-be837974-20261016/kit_capture_review.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'WP/batch-release-kit-be837974-20261016/kit_capture_science.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'WP/batch-release-kit-be837974-20261016/kit_frozen.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'WP/batch-release-kit-be837974-20261016/kit_science.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'WP/batch-release-kit-be837974-20261016/retained_files.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'WP/batch-release-kit-be837974-20261016/stop_post.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'WP/batch-release-kit-be837974-20261016/verify_kit_capture_controller.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'WP/batch-release-kit-be837974-20261016/verify_kit_capture_journal_package.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'WP/batch-release-kit-be837974-20261016/verify_kit_capture_review.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'WP/batch-release-kit-be837974-20261016/verify_kit_package.py', LF will be replaced by CRLF the next time Git touches it

@@ -254,20 +254,32 @@ def verify_reader_index(reader,bound):
     require(not pathlib.Path(str(reader)+'-journal').exists(),'Read-only owned reader created a rollback journal')
     return {'mainAndWalPreserved':True,'indexWithinDeclaredAllowance':True}
 
-def logical(path):
+def logical(path,full_schema=False):
     db=sqlite3.connect(pathlib.Path(path).as_uri()+'?mode=ro',uri=True,timeout=10)
     try:
         memory_temporaries(db);db.execute('PRAGMA query_only=ON');db.execute('BEGIN')
         integrity=[r[0] for r in db.execute('PRAGMA integrity_check')];foreign=list(db.execute('PRAGMA foreign_key_check'))
         require(integrity==['ok'] and not foreign,'Copied database integrity/FK refused')
         objects=[list(r) for r in db.execute("SELECT type,name,tbl_name,sql FROM sqlite_master WHERE name NOT LIKE 'sqlite_%' ORDER BY type,name")]
+        schema=None
+        if full_schema:
+            from kit_schema_collection import collect_full_schema
+            schema=collect_full_schema(db)
         tables={}
         for name, in db.execute("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name"):
             cols=[r[1] for r in db.execute('PRAGMA table_info('+quote(name)+')')]
             tables[name]={'columns':cols,**table_fingerprint(db,name,cols)}
-        db.rollback();return {'objects':objects,'tables':tables,'integrity':'ok','foreignKeyViolations':0}
+        state={'objects':objects,'tables':tables,'integrity':'ok','foreignKeyViolations':0}
+        db.rollback();return (state,schema) if full_schema else state
     finally:db.close()
-def seal(root,label,source,check,live_source=False):
+def seal(root,label,source,check,live_source=False,schema_original=None):
+    if schema_original is not None:
+        from kit_schema_collection import SCHEMA_ORIGINALS
+        names={'fresh-production-snapshot':'capture-schema-initial.json',
+            'capture-prepared-206':'capture-schema-206.json','capture-prepared-214':'capture-schema-214.json'}
+        require(label in names and schema_original==names[label] and schema_original in SCHEMA_ORIGINALS and
+            not (pathlib.Path(root)/schema_original).exists() and not (pathlib.Path(root)/schema_original).is_symlink(),
+            'Exact unused capture schema original required before seal creation')
     d=child_path(root,pathlib.Path(root)/label);require(not d.exists(),'Seal consumed')
     require(not live_source or label=='fresh-production-snapshot','Only the production seal uses a live handoff')
     claim_copy(check,'seal-directory');admit_copy(check,'seal-directory',d,[],1)
@@ -276,7 +288,10 @@ def seal(root,label,source,check,live_source=False):
     for s,r in triple(reader).items():
         if r is not None:pathlib.Path(str(reader)+s).chmod(0o600)
     index_bound=reader_index_bound(reader,check)
-    state=logical(reader);verify_reader_index(reader,index_bound);backup=d/'backup.db'
+    reader_before=identity_record(triple(reader))
+    observed=logical(reader,full_schema=schema_original is not None)
+    state,schema=observed if schema_original is not None else (observed,None)
+    verify_reader_index(reader,index_bound);backup=d/'backup.db'
     # WAL is read by a normal read-only connection to the OWNED reader. immutable=1 is never used here.
     claim_copy(check,'backup')
     before=sqlite3.connect(reader.as_uri()+'?mode=ro',uri=True,timeout=10);after=None
@@ -307,9 +322,17 @@ def seal(root,label,source,check,live_source=False):
     require(not any(pathlib.Path(str(backup)+suffix).exists() for suffix in ('-journal','-wal','-shm')),
         'Detached backup has unexpected SQLite side files')
     with backup.open('r+b') as stream:stream.flush();os.fsync(stream.fileno())
-    backup.chmod(0o400);require(logical(backup)==state,'Detached WAL-aware backup differs')
+    backup.chmod(0o400)
+    detached=logical(backup,full_schema=schema_original is not None)
+    require(detached==((state,schema) if schema_original is not None else state),'Detached WAL-aware backup or full schema differs')
     handoff=exact_json((d/'raw/snapshot-handoff.json').read_bytes()) if live_source else None
     require((live_source or triple(source)==original) and identity_record(triple(raw))==(handoff['rawCopyByteIdentity'] if live_source else identity_record(original)),'Original or raw master changed while reading owned copy')
+    if schema_original is not None:
+        from kit_schema_collection import SCHEMA_ORIGINALS,schema_observation
+        require(schema_original in SCHEMA_ORIGINALS,'Only the three declared capture schema original names are supported')
+        observation=schema_observation(label,schema,state,identity_record(original),identity_record(triple(raw)),
+            reader_before,identity_record(triple(reader)),identity_record({'':file_state(backup)})[''])
+        write_new(pathlib.Path(root)/schema_original,observation)
     write_new(d/'logical-state.json',state);write_new(d/'seal.json',{'rawMaster':str(raw),'rawMasterNeverOpenedSqlite':True,'backup':str(backup),'backupSha256':file_state(backup)['sha256'],'logicalStateSha256':sha(canonical(state)),'originalFiles':original,'countsIncludeWal':True,'productionSnapshotHandoff':handoff})
     check();return backup,state
 def clone_backup(root,label,backup,check):

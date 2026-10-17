@@ -96,9 +96,12 @@ class CaptureScience:
         original=retain_capture_original(self.root,label+'-original.json',raw,self.disk.sync)
         self.no_writers();verify_capture_clone(self.root)
         result=exact_json(raw);plan(result,issue,'APPLIED')
-        installed,state=seal(self.root,'capture-prepared-'+issue,self.target,self.disk.check)
+        installed,state=seal(self.root,'capture-prepared-'+issue,self.target,self.disk.check,
+            schema_original='capture-schema-'+issue+'.json')
         tables,marker=CHAIN[issue]
         preservation=delta_from_state(self.previous_state,state,installed,tables,marker)
+        preservation['fullSchemaOriginal']=capture_reference(self.root/('capture-schema-'+issue+'.json'))
+        preservation['logicalStateOriginal']=capture_reference(self.root/('capture-prepared-'+issue)/'logical-state.json')
         expected=(108,40) if issue=='206' else (112,41)
         require((preservation['totalTables'],preservation['schemaReceiptCount'])==expected,
             'Prepared capture schema or receipt inventory differs')

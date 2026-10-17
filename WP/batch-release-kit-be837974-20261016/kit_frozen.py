@@ -19,6 +19,7 @@ REQUIRED_SOURCE={
     'kit_contract.py','kit_sequence.py','kit_journal.py','kit_io.py','kit_evidence.py','controller_output.py','kit_docker.py','kit_consumer_inventory.py',
     'kit_owned.py','kit_cli_evidence.py','kit_cli_output.py','cli_output.cjs','kit_integrity.py','stopped_integrity.cjs','cli_guard.cjs','live_backup.cjs',
     'live-backup-sqlite-source.json','sqlite_temp_directory.cjs','sqlite-temp-directory-source.json',
+    'kit_schema_collection.py','schema-collection-source.json',
     'kit_main_mutations.py','kit_capture_native_inventory.py','capture-native-inventory-source.json',
     'order_impact.cjs','kit_order_output.py','order-impact-transport-source.json',
     'kit_install.py','kit_runtime.py','kit_readiness.py','kit_natural.py','kit_no_writers.py','kit_ingress.py',

@@ -62,7 +62,8 @@ def package_fixture():
             'preservation':{'allOriginalRowsAndReceiptsPreserved':True,'priorStateFromBoundRecordNoSql':True,
                 'newTables':sorted(CHAIN[issue][0]),'emptyEvidenceTables':True,'backfilledCount':0,
                 'marker':CHAIN[issue][1],'totalTables':108 if issue=='206' else 112,
-                'schemaReceiptCount':40 if issue=='206' else 41}}
+                'schemaReceiptCount':40 if issue=='206' else 41,
+                'fullSchemaOriginal':{'bytes':1,'sha256':'a'*64},'logicalStateOriginal':{'bytes':1,'sha256':'b'*64}}}
         prep[issue]={}
         for kind,value in rows.items():
             name='capture-'+issue+('-prepare-original.json' if kind=='original' else '-preservation.json')

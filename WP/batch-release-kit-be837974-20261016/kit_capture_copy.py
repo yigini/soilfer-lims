@@ -126,7 +126,7 @@ def capture_snapshot(root,index,review,reader,disk):
     started=utc_now();normal_before=capture_predecessor(reader.inspect(PREDECESSOR_ID))
     exclusive_record(root,'capture-normal-before.json',normal_before,disk.sync)
     source_directory=capture_live_directory()
-    backup,state=seal(root,'fresh-production-snapshot',pathlib.Path(LIVE_DATA)/'dev.db',disk.check,True)
+    backup,state=seal(root,'fresh-production-snapshot',pathlib.Path(LIVE_DATA)/'dev.db',disk.check,True,schema_original='capture-schema-initial.json')
     # Count the owned WAL-aware backup, not a live connection or raw master.
     require(len(state['tables'])==106 and state['tables'].get('_schema_migrations',{}).get('count')==39,
         'Fresh owned production copy is not the expected106-table39-receipt predecessor')
@@ -151,6 +151,7 @@ def capture_snapshot(root,index,review,reader,disk):
         'normalBefore':capture_reference(root/'capture-normal-before.json'),
         'normalAfter':capture_reference(root/'capture-normal-after.json'),
         'rawTripleByteIdentity':identity_record(triple(raw)),'backup':capture_reference(backup),
+        'fullSchemaOriginal':capture_reference(root/'capture-schema-initial.json'),
         'logicalState':capture_reference(snapshot/'logical-state.json'),'handoff':capture_reference(handoff_path),
         'copyWindow':capture_reference(snapshot/'raw/copy-window-comparison.json'),
         'assetsHandoff':capture_reference(root/'assets-snapshot-handoff.json'),
@@ -181,6 +182,7 @@ def verify_capture_snapshot(root,binding):
         'Raw capture directory contains missing or foreign evidence')
     require(identity_record(triple(raw))==value['rawTripleByteIdentity'],'Raw capture master changed')
     for path,key in [(backup,'backup'),(snapshot/'logical-state.json','logicalState'),
+        (root/'capture-schema-initial.json','fullSchemaOriginal'),
         (snapshot/'raw/snapshot-handoff.json','handoff'),(snapshot/'raw/copy-window-comparison.json','copyWindow'),
         (root/'assets-snapshot-handoff.json','assetsHandoff'),(root/'capture-normal-before.json','normalBefore'),
         (root/'capture-normal-after.json','normalAfter')]:
