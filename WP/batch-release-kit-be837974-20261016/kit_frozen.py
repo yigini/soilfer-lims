@@ -41,6 +41,7 @@ REQUIRED_SOURCE={
     'kit_backup_main.py','backup-main-source.json',
     'kit_backup_source_binding.py','backup-source-binding-source.json',
     'kit_header_normalization.py','header-normalization-source.json',
+    'kit_checkpoint_requests.py','checkpoint-requests-source.json',
     'kit_capture_statement.py','capture-statement-journal-source.json',
     'kit_schema_collection.py','schema-collection-source.json',
     'kit_main_mutations.py','kit_capture_native_inventory.py','capture-native-inventory-source.json',
