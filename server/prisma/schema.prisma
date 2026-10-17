@@ -214,6 +214,7 @@ model Sample {
   amendments        SampleAmendment[]
   preparationRecords PreparationRecord[]
   containers        SampleContainer[]
+  labelPrintEvents  LabelPrintEvent[]
   reviewDecisions   ReviewDecision[]
   resultEvidenceEvents ResultEvidenceEvent[]
   holds             SampleHold[]
@@ -2347,6 +2348,7 @@ model SampleContainer {
   parentId          String?
   parent            SampleContainer? @relation("ContainerHierarchy", fields: [parentId], references: [id], onDelete: Restrict)
   children          SampleContainer[] @relation("ContainerHierarchy")
+  labelPrintEvents  LabelPrintEvent[]
   kind              String
   code              String @unique
   massG             Float?
@@ -2385,4 +2387,25 @@ model CustodyEvent {
   @@index([sampleId, at])
   @@index([consignmentId, at])
   @@index([labId, at])
+}
+
+// Browser print requests, including cancellations, are immutable evidence.
+model LabelPrintEvent {
+  id          String @id
+  entity      String
+  entityId    String
+  sampleId    String
+  containerId String?
+  code        String
+  count       Int
+  ordinal     Int
+  format      String
+  reason      String?
+  by          String
+  at          DateTime @default(now())
+  sample      Sample @relation(fields: [sampleId], references: [id], onDelete: Restrict)
+  container   SampleContainer? @relation(fields: [containerId], references: [id], onDelete: Restrict)
+  @@unique([entity, entityId, ordinal])
+  @@index([sampleId])
+  @@index([containerId])
 }

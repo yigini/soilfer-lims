@@ -35,6 +35,14 @@ const QC_EVIDENCE_SOURCES = Object.freeze([
     Object.freeze({ functionName: 'loadCustodyMigrationSource', loader: 'services/custodyMigrationSource.js',
         loaderSha256: '319f7d1a14b784c34e7ee8c94b9c513ca5793224158346e3b028a09145619f1d', directory: '20261016000100_sample_custody_retention',
         sqlSha256: '6572f75c9663d0aaece1bd6139694fe1ad41142f2723404a811852f8eaede685', boundary: '-- Contract guards' }),
+    // #208 prerequisite: inspect unchanged #180 schema DDL, without writer authority.
+    Object.freeze({ functionName: 'loadSampleCodeMigrationSource', loader: 'services/sampleCodeMigrationSource.js',
+        loaderSha256: 'db7095ec42d405039093a4b39c4a2b2bd61ff80b6a45e447b49d627cef4b4e16',
+        directory: '20261004170000_add_atomic_sample_codes', sqlSha256: 'e52a11bb7fc8dfee678184025dda8e8342cde3896d3b5f1c89b83897702d8ff0', wholeSql: true }),
+    // #208: inspect exact additive print-event DDL without writer authority.
+    Object.freeze({ functionName: 'loadLabelPrintMigrationSource', loader: 'services/labelPrintMigrationSource.js',
+        loaderSha256: '2740c2688b8b0fa845d5ef08ef9715617c6bc881edb555b91e8f71db16b54eca', directory: '20261016000100_label_print_events',
+        sqlSha256: 'c7e0cb8c76c5dc08881392e2d2a1e17bc2fed56f6be8e3e779b7099a99054d28', boundary: '-- Contract guards' }),
     // #209/6163271808: inspect the exact additive source; no writer exemption.
     Object.freeze({ functionName: 'loadOrderRevisionMigrationSource', loader: 'services/orderRevisionMigrationSource.js',
         loaderSha256: 'ba6baba68eceb2355cbc68a7a6bba83a1e3c7f168a30bdf8a35df80c8dde1093',

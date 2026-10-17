@@ -21,7 +21,7 @@ const os = require('os');
 
 // Compare the predecessor's exact fields while separately checking #207's two
 // declared additions. A whole SELECT * comparison cannot span additive DDL.
-function assertCalculationPredecessorPreserved(before, after) {
+function assertCustodyPredecessorPreserved(before, after) {
     const sampleAddition = { cid: before.sampleColumns.length, name: 'retainUntil', type: 'DATETIME', notnull: 0, dflt_value: null, pk: 0 };
     const locationAddition = { cid: before.locationColumns.length, name: 'purpose', type: 'TEXT', notnull: 1, dflt_value: "'REAGENT'", pk: 0 };
     if (before.sampleColumns.some(column => column.name === 'retainUntil') ||
@@ -47,6 +47,70 @@ function assertCalculationPredecessorPreserved(before, after) {
     if (after.custody.ledgerCount !== 0 || !/^[a-f0-9]{64}$/.test(after.custody.originalRowsSha256) ||
         receipts.length !== 1 || receipts[0].details !== JSON.stringify(expected))
         throw Error('207 default entrypoint ledger or exact installation receipt differs');
+}
+
+// Preserve the predecessor's full column domain; #180 may add only this one
+// nullable Sample column here. Whole SELECT * equality cannot span that DDL.
+function assertSampleCodePredecessorPreserved(before, after) {
+    const tables = ['Sample', 'Result', 'WorkAttempt', 'AuditLog', 'QcMeasurement', 'QcEvaluation', 'BatchDisposition'];
+    const names = [...tables, '_schema_migrations'], same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+    const keys = value => Object.keys(value || {}).sort();
+    const schemaError = () => { throw Error('208 default entrypoint column additions or original schema differ'); };
+    if (!same(keys(before.columns), [...names].sort()) || !same(keys(after.columns), [...names].sort()) ||
+        !same(keys(before.schemas), [...names].sort()) || !same(keys(after.schemas), [...names].sort()) ||
+        !same(keys(before.rows), [...tables].sort()) || !same(keys(after.rows), [...tables].sort())) schemaError();
+    if (before.columns.Sample.some(column => column.name === 'labSampleCode')) schemaError();
+    for (const name of names) {
+        const original = before.columns[name], addition = { cid: original.length, name: 'labSampleCode', type: 'TEXT', notnull: 0, dflt_value: null, pk: 0, hidden: 0 };
+        if (!same(after.columns[name], name === 'Sample' ? [...original, addition] : original)) schemaError();
+        const sql = after.schemas[name];
+        if (typeof sql !== 'string' || typeof before.schemas[name] !== 'string') schemaError();
+        // SQLite inserts this exact segment before the original trailing table
+        // constraints, if any. Keep that tail through the final ')' verbatim.
+        const added = name === 'Sample' ? sql.match(/^([\s\S]*), "labSampleCode" TEXT([\s\S]*\))$/) : null;
+        const retainedSql = name === 'Sample' && added?.[0] === sql ? added[1] + added[2] : sql;
+        if (name === 'Sample' && (!added || added[0] !== sql || (sql.match(/\blabSampleCode\b/gi) || []).length !== 1) ||
+            retainedSql !== before.schemas[name]) schemaError();
+    }
+    for (const [snapshot, side] of [[before, 'before'], [after, 'after']]) {
+        for (const name of names) {
+            const rows = name === '_schema_migrations' ? snapshot.receipts : snapshot.rows[name];
+            if (!Array.isArray(rows) || rows.some(row => !same(keys(row), snapshot.columns[name].map(column => column.name).sort()))) schemaError();
+        }
+        if (side === 'after' && snapshot.rows.Sample.some(row => row.labSampleCode !== null))
+            throw Error('208 default entrypoint backfilled a historical sample code');
+    }
+    const projected = Object.fromEntries(tables.map(name => [name, after.rows[name].map(row =>
+        Object.fromEntries(before.columns[name].map(column => [column.name, row[column.name]])))]));
+    if (!same(projected, before.rows) || before.receipts.some(row => {
+        const retained = after.receipts.filter(receipt => receipt.id === row.id);
+        return retained.length !== 1 || !same(retained[0], row);
+    })) throw Error('199 default entrypoint changed retained analytical, audit or receipt rows');
+}
+
+// Validate the combined default entrypoint with both audited comparators.
+// Remove only the exact custody addition for the sample-code comparison, then
+// check custody against that validated intermediate column/row domain.
+function assertCalculationPredecessorPreserved(before, after) {
+    const columns = after.columns.Sample, last = columns.at(-1);
+    const expected = { cid: columns.length - 1, name: 'retainUntil', type: 'DATETIME', notnull: 0, dflt_value: null, pk: 0, hidden: 0 };
+    const sql = after.schemas.Sample, added = sql.match(/^([\s\S]*), "retainUntil" DATETIME([\s\S]*\))$/);
+    if (before.columns.Sample.some(column => column.name === 'retainUntil') ||
+        JSON.stringify(last) !== JSON.stringify(expected) || !added || added[0] !== sql ||
+        (sql.match(/\bretainUntil\b/gi) || []).length !== 1)
+        throw Error('207 default entrypoint column additions or original schema differ');
+    const intermediate = { ...after,
+        columns: { ...after.columns, Sample: columns.slice(0, -1) },
+        schemas: { ...after.schemas, Sample: added[1] + added[2] },
+        rows: { ...after.rows, Sample: after.rows.Sample.map(row =>
+            Object.fromEntries(Object.entries(row).filter(([name]) => name !== 'retainUntil'))) }
+    };
+    assertSampleCodePredecessorPreserved(before, intermediate);
+    const tableInfo = list => list.map(({ hidden, ...column }) => column);
+    assertCustodyPredecessorPreserved({ ...intermediate,
+        sampleColumns: tableInfo(intermediate.columns.Sample),
+        locationColumns: before.locationColumns, locationRows: before.locationRows
+    }, { ...after, sampleColumns: tableInfo(columns) });
 }
 
 console.log('================================================================');
@@ -1343,8 +1407,11 @@ async function runSuite() {
            crypto.createHash('sha256').update(fs.readFileSync(dbPath)).digest('hex')!==before)throw Error('199 entrypoint predecessor differs');
          const db=new Database(dbPath,{readonly:true,fileMustExist:true});
          try { const tables=['Sample','Result','WorkAttempt','AuditLog','QcMeasurement','QcEvaluation','BatchDisposition'];
-           console.log(JSON.stringify({dry,sampleColumns:db.prepare('PRAGMA table_info("Sample")').all(),
+           const names=[...tables,'_schema_migrations'],quote=name=>'"'+name.replaceAll('"','""')+'"';
+           console.log(JSON.stringify({dry,
              locationColumns:db.prepare('PRAGMA table_info("InventoryLocation")').all(),locationRows:db.prepare('SELECT * FROM InventoryLocation ORDER BY rowid').all(),
+             columns:Object.fromEntries(names.map(name=>[name,db.prepare('PRAGMA table_xinfo('+quote(name)+')').all()])),
+             schemas:Object.fromEntries(names.map(name=>[name,db.prepare('SELECT sql FROM sqlite_master WHERE name=?').get(name).sql])),
              rows:Object.fromEntries(tables.map(name=>[name,db.prepare('SELECT * FROM "'+name+'" ORDER BY rowid').all()])),
              receipts:db.prepare('SELECT * FROM _schema_migrations ORDER BY id').all()}));
          }finally{db.close();}`
@@ -1460,8 +1527,10 @@ async function runSuite() {
              for(const row of db.prepare('SELECT '+selected+' FROM '+quote(name)+(name==='_schema_migrations'?' WHERE id <> ?':'')+' ORDER BY '+selected).iterate(...(name==='_schema_migrations'?['207_sample_custody']:[])))digest.update(JSON.stringify(row)+'\\n');
              originalRows[name]=digest.digest('hex');
            }
+           const names=[...tables,'_schema_migrations'];
            console.log(JSON.stringify({ready,again,noOpBytesPreserved:true,
-             sampleColumns:db.prepare('PRAGMA table_info("Sample")').all(),
+             columns:Object.fromEntries(names.map(name=>[name,db.prepare('PRAGMA table_xinfo('+quote(name)+')').all()])),
+             schemas:Object.fromEntries(names.map(name=>[name,db.prepare('SELECT sql FROM sqlite_master WHERE name=?').get(name).sql])),
              locationColumns:db.prepare('PRAGMA table_info("InventoryLocation")').all(),locationRows:db.prepare('SELECT * FROM InventoryLocation ORDER BY rowid').all(),
              custody:{ready:custodyReady,again:custodyAgain,dbWalShmPreserved:true,sourceSha256:require('./services/custodyMigrationSource').loadCustodyMigrationSource().sha256,
                ledgerCount:db.prepare('SELECT count(*) n FROM CustodyEvent').get().n,originalRowsSha256:crypto.createHash('sha256').update(JSON.stringify(originalRows)).digest('hex')},

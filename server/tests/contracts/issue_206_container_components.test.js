@@ -14,7 +14,7 @@ function render(file, props, values = [], dependencies = {}) {
         { React: hooks, module, exports: module.exports, document: { body: {} }, window: { print: jest.fn() }, require: name => {
             if (name === 'react') return hooks;
             if (name.includes('LanguageContext')) return { useLanguage: () => ({ t }) };
-            if (name.includes('AuthContext')) return { useAuth: () => ({ hasPermission: () => false }) };
+            if (name.includes('AuthContext')) return { useAuth: () => ({ hasPermission: permission => dependencies.permissions?.includes(permission) || false }) };
             if (name in dependencies) return dependencies[name];
             if (name === 'axios') return { get: jest.fn(), post: jest.fn() };
             if (name === './ContainerLabelDialog') return () => null;
@@ -31,13 +31,15 @@ test('sample detail renders the physical hierarchy and the linked attempt withou
     const rows = [{ id: 'bulk', parentId: null, kind: 'BULK', code: 'C-BULK', createdBy: 'operator', createdAt: '2026-10-13T09:00:00Z', status: 'ACTIVE' },
         { id: 'fine', parentId: 'bulk', kind: 'FINE_EARTH', code: 'C-FINE', createdBy: 'operator', createdAt: '2026-10-13T09:01:00Z', status: 'ACTIVE' },
         { id: 'aliquot', parentId: 'fine', kind: 'ALIQUOT', code: 'C-ALIQUOT', createdBy: 'operator', createdAt: '2026-10-13T09:02:00Z', status: 'ACTIVE' }];
-    const { tree } = render('components/sample/SampleContainersPanel.jsx', { sampleId: 'sample', attempts: [{ id: 'attempt-new', attemptNo: 2, aliquotId: 'aliquot' }, { id: 'legacy', attemptNo: 1 }] }, [rows]);
+    const { tree } = render('components/sample/SampleContainersPanel.jsx', { sampleId: 'sample', attempts: [{ id: 'attempt-new', attemptNo: 2, aliquotId: 'aliquot' }, { id: 'legacy', attemptNo: 1 }] }, [rows], { permissions: ['PRINT_LABELS'] });
     const nodes = elements(tree, row => row.type === 'li');
     expect(nodes.map(row => row.key)).toEqual(['bulk', 'fine', 'aliquot']);
     expect(elements(nodes[0], row => row.type === 'li').length).toBe(3);
     const text = JSON.stringify(tree);
     expect(text).toContain('attempt-new'); expect(text).not.toContain('legacy');
     expect(elements(tree, row => row.type === 'button').map(row => row.props.children)).toEqual(Array(3).fill('Print container label'));
+    const viewer = render('components/sample/SampleContainersPanel.jsx', { sampleId: 'sample' }, [rows]);
+    expect(elements(viewer.tree, row => row.type === 'button')).toHaveLength(0);
 });
 test('aliquot selector never lists bulk or disposed material and emits the explicit chosen identity', async () => {
     const get = jest.fn().mockResolvedValue({ data: { containers: [{ id: 'new', kind: 'ALIQUOT', status: 'ACTIVE', code: 'C-NEW' },
@@ -53,18 +55,11 @@ test('aliquot selector never lists bulk or disposed material and emits the expli
     select.props.onChange({ target: { value: 'new' } }); expect(onChange).toHaveBeenCalledWith('new');
     select.props.onChange({ target: { value: '' } }); expect(onChange).toHaveBeenLastCalledWith(null);
 });
-test('offline label QR encodes the issued container code and the printed card identifies its parent sample', async () => {
-    const toDataURL = jest.fn().mockResolvedValue('data:image/png;base64,fixture');
-    const props = { container: { code: 'C-ISSUED-7', kind: 'ALIQUOT', massG: 10 }, sampleCode: 'SAMPLE-8', onClose: jest.fn() };
-    const dependencies = { qrcode: { toDataURL }, 'react-dom': { createPortal: child => child } };
-    const view = render('components/sample/ContainerLabelDialog.jsx', props, ['', false], dependencies);
-    view.effects[0](); await Promise.resolve();
-    expect(toDataURL).toHaveBeenCalledWith('C-ISSUED-7', { width: 240, margin: 1 });
-    const { tree } = render('components/sample/ContainerLabelDialog.jsx', props, ['data:image/png;base64,fixture', false], dependencies);
-    expect(JSON.stringify(tree)).toContain('SAMPLE-8');
-    const print = elements(tree, row => row.type === 'button' && row.props.children === 'Print container label')[0];
-    expect(print.props.disabled).toBe(false);
-    expect(elements(tree, row => row.type === 'img').every(row => row.props.alt === 'C-ISSUED-7')).toBe(true);
+test('container labels delegate the immutable container identity to the shared audited QR and Code128 dialog', () => {
+    const Dialog = () => null;
+    const container = { id: 'container-id', code: 'C-ISSUED-7', kind: 'ALIQUOT', sampleId: 'sample-id' };
+    const { tree } = render('components/sample/ContainerLabelDialog.jsx', { container, onClose: jest.fn() }, [], { '../common/LabelPrintDialog': Dialog });
+    expect(tree.type).toBe(Dialog); expect(tree.props.container).toBe(container); expect(tree.props.isOpen).toBe(true);
 });
 
 test('a dilution repeat sends the explicitly selected physical aliquot identity', async () => {

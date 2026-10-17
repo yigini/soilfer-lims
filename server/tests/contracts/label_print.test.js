@@ -91,9 +91,10 @@ describe('Contract: Sample Label Printing, Sizing & Offline QR Code Isolation (I
         expect(wsRejected.capabilities.canPrintLabel.allowed).toBe(false);
     });
 
-    test('3. Pre-arrival EXPECTED sample allows printing with Pending permanent lab identifier', async () => {
+    test('3. Pre-arrival EXPECTED sample without an issued code refuses permanent label printing', async () => {
         const wsExpected = await sampleWorkspaceService.getSampleWorkspace(expectedSampleId, { role: 'SAMPLE_RECEPTION', labId: 'LAB-GTM' });
-        expect(wsExpected.capabilities.canPrintLabel.allowed).toBe(true);
+        expect(wsExpected.capabilities.canPrintLabel.allowed).toBe(false);
+        expect(wsExpected.capabilities.canPrintLabel.code).toBe('LABEL_PRINT_CODE_REQUIRED');
         expect(wsExpected.identity.labSampleCode).toBe('Not assigned');
         expect(wsExpected.identity.originalId).toBeDefined();
     });

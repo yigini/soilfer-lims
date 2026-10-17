@@ -1,4 +1,30 @@
 {
+  "labelPrint": {
+    "title": "Print labels",
+    "help": "Each print request is recorded before the browser print dialog opens. Cancelled requests remain recorded. Reprints need a reason.",
+    "format": "Format",
+    "standard": "Standard (101 × 54 mm)",
+    "compact": "Compact (50 × 25 mm)",
+    "copies": "Copies per label",
+    "reason": "Reason for reprint",
+    "print": "Print labels",
+    "recording": "Recording print…",
+    "failed": "Labels could not be prepared or recorded. Try again.",
+    "changed": "The issued label changed. Reopen this dialog before printing.",
+    "tooLong": "This code does not fit this label at a readable bar width. Choose the standard format or ask the laboratory manager to review the issued code.",
+    "collected": "Collected",
+    "received": "Received",
+    "errors": {
+      "LABEL_REPRINT_REASON_REQUIRED": "Enter a reason for the reprint.",
+      "LABEL_PRINT_FORBIDDEN": "Your role cannot print labels.",
+      "LABEL_PRINT_STATE_REFUSED": "This material cannot be labelled in its current state.",
+      "LABEL_PRINT_CODE_REQUIRED": "Receive the sample and issue its laboratory code before printing.",
+      "LABEL_PRINT_CODE_UNSUPPORTED": "The issued code cannot be encoded as Code128. Ask the laboratory manager to review it; do not renumber it.",
+      "LABEL_PRINT_FIELDS_INVALID": "Choose labels, 1–20 copies, and a supported format (maximum 200 labels).",
+      "LABEL_PRINT_NOT_FOUND": "The sample or container was not found.",
+      "LABEL_PRINT_CHANGED": "The print state changed. Reopen the dialog and try again."
+    }
+  },
   "orderRevision": {
     "reason": "Reason for order revision",
     "reasonPlaceholder": "Explain the complete analysis selection…",

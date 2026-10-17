@@ -561,6 +561,14 @@ class SampleWorkspaceService {
         const reviewEval = require('./workEligibility').canReview({ status: 'PENDING_REVIEW' }, sample, user, {
             qcGates: enrichedWorkItems.filter(item => item.status === 'SUBMITTED').flatMap(item => item.qcDetails.gates) });
 
+        let issuedLabelCode = null, labelCodeRefusal = null;
+        try { issuedLabelCode = await require('./sampleCodeService').issuedCode(sample, prisma); }
+        catch (error) {
+            if (!['AMBIGUOUS_LAB_OR_CODE', 'SAMPLE_CODE_CONFLICT'].includes(error.code)) throw error;
+            // Historical identity review must remain accessible even when the
+            // numbering authority refuses that identifier for label printing.
+            labelCodeRefusal = error.code;
+        }
         const capabilities = {
             canReceive: {
                 allowed: isReception && sample.status === 'EXPECTED',
@@ -620,10 +628,7 @@ class SampleWorkspaceService {
                 allowed: (hasPermission(user, 'RECEIVE_SAMPLE') || hasPermission(user, 'APPROVE_RESULTS')) && !sample.approvedAt && !['APPROVED', 'RELEASED', 'ARCHIVED', 'DISPOSED'].includes(sample.status),
                 reason: null
             },
-            canPrintLabel: {
-                allowed: sample.status !== 'RECEIVED_REJECTED' && sample.status !== 'REJECTED',
-                reason: null
-            }
+            canPrintLabel: labelCodeRefusal ? { allowed: false, code: labelCodeRefusal } : require('./labelPrintService').capability(sample, user, issuedLabelCode)
         };
 
         // Determine Primary Next Action
@@ -666,7 +671,7 @@ class SampleWorkspaceService {
             identity: {
                 profileReference,
                 id: sample.id,
-                labSampleCode: sample.labId || 'Not assigned',
+                labSampleCode: issuedLabelCode || 'Not assigned',
                 originalId: sample.originalId,
                 fieldId: sample.originalId,
                 displayId: sample.labId || sample.originalId,

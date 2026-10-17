@@ -1,4 +1,30 @@
 {
+  "labelPrint": {
+    "title": "Imprimir etiquetas",
+    "help": "Cada pedido é registado antes de abrir a caixa de impressão. Os pedidos cancelados permanecem registados. As reimpressões exigem um motivo.",
+    "format": "Formato",
+    "standard": "Padrão (101 × 54 mm)",
+    "compact": "Compacto (50 × 25 mm)",
+    "copies": "Cópias por etiqueta",
+    "reason": "Motivo da reimpressão",
+    "print": "Imprimir etiquetas",
+    "recording": "A registar impressão…",
+    "failed": "Não foi possível preparar ou registar as etiquetas. Tente novamente.",
+    "changed": "A etiqueta emitida mudou. Volte a abrir esta caixa de diálogo.",
+    "tooLong": "O código não cabe com barras legíveis. Escolha o formato padrão ou peça a revisão do código ao responsável do laboratório.",
+    "collected": "Colheita",
+    "received": "Receção",
+    "errors": {
+      "LABEL_REPRINT_REASON_REQUIRED": "Introduza um motivo para a reimpressão.",
+      "LABEL_PRINT_FORBIDDEN": "A sua função não permite imprimir etiquetas.",
+      "LABEL_PRINT_STATE_REFUSED": "Este material não pode ser etiquetado no estado atual.",
+      "LABEL_PRINT_CODE_REQUIRED": "Receba a amostra e emita o seu código de laboratório antes de imprimir.",
+      "LABEL_PRINT_CODE_UNSUPPORTED": "O código emitido não pode ser codificado em Code128. Peça a sua revisão sem o renumerar.",
+      "LABEL_PRINT_FIELDS_INVALID": "Escolha etiquetas, de 1 a 20 cópias e um formato válido (máximo de 200 etiquetas).",
+      "LABEL_PRINT_NOT_FOUND": "A amostra ou o recipiente não foi encontrado.",
+      "LABEL_PRINT_CHANGED": "O estado da impressão mudou. Volte a abrir a caixa de diálogo."
+    }
+  },
   "orderRevision": {
     "reason": "Motivo da revisão do pedido",
     "reasonPlaceholder": "Explique a seleção completa de análises…",

@@ -16,6 +16,7 @@ const normalize = value => JSON.parse(JSON.stringify(value, (key, item) => key =
 beforeAll(async () => {
     const fixture = await qcGateFixture({ managedStartup: true, resolvedRules: false, fixedWindowPolicy: false });
     held.push(fixture);
+    require('../../scripts/install_label_print_events').installLabelPrintEvents({ dbPath: fixture.file, apply: true });
     await fixture.db.$disconnect();
     fixtureFile = fixture.file;
 });

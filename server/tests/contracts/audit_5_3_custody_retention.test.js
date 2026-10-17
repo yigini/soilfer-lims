@@ -309,7 +309,7 @@ test('missing and empty recorded dates are invalid while zone-less recorded time
 // Load only the pure comparison; importing the operator script would run Docker.
 const readinessSource = fs.readFileSync(path.resolve(__dirname, '../../scripts/rehearsal_deployment_readiness.cjs'), 'utf8');
 const readinessAssertion = require('@babel/parser').parse(readinessSource).program.body.find(node =>
-    node.type === 'FunctionDeclaration' && node.id.name === 'assertCalculationPredecessorPreserved');
+    node.type === 'FunctionDeclaration' && node.id.name === 'assertCustodyPredecessorPreserved');
 const assertReadinessPreservation = require('node:vm').runInNewContext(
     '(' + readinessSource.slice(readinessAssertion.start, readinessAssertion.end) + ')', { require });
 function readinessSnapshots() {

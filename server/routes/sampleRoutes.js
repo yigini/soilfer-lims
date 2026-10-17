@@ -4,6 +4,10 @@ const sampleController = require('../controllers/sampleController');
 const sampleAmendmentController = require('../controllers/sampleAmendmentController');
 const { checkPermission } = require('../middleware/authMiddleware');
 
+const labels = require('../controllers/labelPrintController');
+router.post('/labels/preview', checkPermission('PRINT_LABELS'), labels.preview);
+router.post('/labels/print', checkPermission('PRINT_LABELS'), labels.print);
+
 const containers = require('../controllers/sampleContainerController');
 const custody = require('../controllers/custodyController');
 router.get('/disposal-queue', checkPermission('DISPOSE_SAMPLE'), custody.queue);
