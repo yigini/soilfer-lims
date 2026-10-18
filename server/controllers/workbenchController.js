@@ -488,6 +488,33 @@ exports.getQueue = async (req, res) => {
             spectralMap[key].push(s);
         });
 
+        // Reuse identical reads only during this queue projection. Keep the
+        // complete Prisma arguments in the key: lab, method, batch, selection
+        // and item-specific predicates must never share another scope's data.
+        // Clone every result so a service's projection cannot mutate the cache.
+        const reads = new Map();
+        const readOperations = new Set(['findUnique', 'findFirst', 'findMany', 'count']);
+        const queueDb = new Proxy(prisma, {
+            get(client, model) {
+                const delegate = client[model];
+                if (!delegate || typeof delegate.findMany !== 'function') {
+                    return typeof delegate === 'function' ? delegate.bind(client) : delegate;
+                }
+                return new Proxy(delegate, {
+                    get(target, operation) {
+                        const method = target[operation];
+                        if (!readOperations.has(operation)) {
+                            return typeof method === 'function' ? method.bind(target) : method;
+                        }
+                        return (...args) => {
+                            const key = JSON.stringify([model, operation, args]);
+                            if (!reads.has(key)) reads.set(key, Promise.resolve(method.apply(target, args)));
+                            return reads.get(key).then(value => structuredClone(value));
+                        };
+                    }
+                });
+            }
+        });
         const equipmentOptions = new Map();
 
         // Group by analysis
@@ -500,7 +527,7 @@ exports.getQueue = async (req, res) => {
             if (!numberFormats.has(labId)) numberFormats.set(labId, await getNumberFormat(labId));
             const equipKey = JSON.stringify([labId, code, item.methodologyId || null]);
             if (!equipmentOptions.has(equipKey)) equipmentOptions.set(equipKey,
-                await readinessService.eligibleEquipmentForItem(prisma, item, labId));
+                await readinessService.eligibleEquipmentForItem(queueDb, item, labId));
             const { eligibleEquipment } = equipmentOptions.get(equipKey);
 
             if (!groupsMap[code]) {
@@ -523,20 +550,20 @@ exports.getQueue = async (req, res) => {
 
             const resultKey = `${item.sampleId}::${code}`;
             const itemDraft = draftMap[item.id] || null;
-            const runContext = await require('../services/resultWriteService').resolveResultRunContext(prisma, item);
+            const runContext = await require('../services/resultWriteService').resolveResultRunContext(queueDb, item);
             const selectedEquipId = runContext.instrumentSource === 'RUN' ? runContext.equipmentId : item.equipmentId || itemDraft?.instrumentId || null;
-            const readiness = await readinessService.evaluateExecutionReadiness(prisma, item, user, {
+            const readiness = await readinessService.evaluateExecutionReadiness(queueDb, item, user, {
                 selectedEquipmentId: selectedEquipId
             });
             groupsMap[code].equipmentRequired ||= readiness.equipmentRequired;
             const stepsKey = JSON.stringify([labId, code]);
             if (operationalChecklists[code] && !preparationSteps.has(stepsKey)) preparationSteps.set(stepsKey,
-                await require('../services/preparationRecordService').requiredSteps(prisma, labId, code));
+                await require('../services/preparationRecordService').requiredSteps(queueDb, labId, code));
 
             const isSpectral = SPECTRAL_ACQUISITION_CODES.includes(code);
             const isTexture = ['TEXTURE', 'SOIL_PSD_TEXTURE', 'SOIL_TEXTURE', 'PSA', 'pSA', 'Particle Size Analysis'].includes(code);
             const sampleReplicates = !isSpectral && !isTexture && !operationalChecklists[code]
-                ? await sampleReplicateQueueView(prisma, item, user, readiness) : null;
+                ? await sampleReplicateQueueView(queueDb, item, user, readiness) : null;
             if (!['ready_to_submit', 'submitted', 'completed'].includes(view) && item.status === 'COMPLETED' &&
                 !sampleReplicates?.canAppend && targetScopedItem?.id !== item.id) continue;
             const modality = (code === 'SPEC_MIR' || code === 'SPEC_FTIR') ? 'MIR' : 'NIR';
@@ -546,15 +573,15 @@ exports.getQueue = async (req, res) => {
                 : (['TEXTURE', 'SOIL_PSD_TEXTURE', 'SOIL_TEXTURE', 'PSA', 'pSA', 'Particle Size Analysis'].includes(code)
                     ? 'TEXTURE' : (groupsMap[code].category === 'Operational Gates' ? 'OPERATIONAL' : 'NUMERIC'));
             const valueContext = editorKind === 'NUMERIC' && valueAnalyses.has(code)
-                ? await require('../services/resultValueRulesService').resolveNumericValueRules(prisma, {
+                ? await require('../services/resultValueRulesService').resolveNumericValueRules(queueDb, {
                     labId, analysis: valueAnalyses.get(code), method: valueMethods.get(item.methodologyId) || null
                 }) : null;
 
             const calculationScope = JSON.stringify([labId,code,item.methodologyId || null]);
             if (!calculationSelections.has(calculationScope)) {
                 const active = isSpectral || groupsMap[code].category === 'Operational Gates' ? null :
-                    await require('../services/policyService').calcTemplate(labId,{analysisCode:code,methodologyId:item.methodologyId || null},{db:prisma});
-                const template = active && await prisma.calcTemplate.findUnique({where:{id:active.templateId}});
+                    await require('../services/policyService').calcTemplate(labId,{analysisCode:code,methodologyId:item.methodologyId || null},{db:queueDb});
+                const template = active && await queueDb.calcTemplate.findUnique({where:{id:active.templateId}});
                 calculationSelections.set(calculationScope, active ? {...active,
                     requiresCurve:Boolean(require('../services/calculationTemplateService').decode(template).curve)} : null);
             }
@@ -570,7 +597,7 @@ exports.getQueue = async (req, res) => {
                 numberFormat: valueContext?.numberFormat || numberFormats.get(labId),
                 valueRules: valueContext?.rules || null,
                 dilutionOpportunity: editorKind === 'NUMERIC'
-                    ? await require('../services/workbenchValueValidationService').dilutionOpportunity(prisma,item,user) : null,
+                    ? await require('../services/workbenchValueValidationService').dilutionOpportunity(queueDb,item,user) : null,
                 calculationTemplate: calculationSelections.get(calculationScope),
                 projectCode: item.sample?.projectCode || null,
                 analysis: code,
