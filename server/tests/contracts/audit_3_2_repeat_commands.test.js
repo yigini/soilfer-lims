@@ -495,3 +495,192 @@ test.each([
     expect(await f.db.workItem.findUnique({where:{id:f.items[0].id}})).toMatchObject({status:'REPEAT_REQUIRED',batchId:null,rackPosition:null,submissionId:null});
     expect(await f.db.workAttempt.findFirst({where:{workItemId:f.items[0].id,status:'OPEN'}})).toMatchObject({parentAttemptId:parent.id,reason:'REVIEW_OUTLIER'});
 });
+
+async function partialFixture({state='IN_PROGRESS',native=false,blankValue=0}={}) {
+    const f=await fixture({replicates:3,role:'LAB_MANAGER',...(native && {criteria:{blankPerBatch:1,lrmPerBatch:0,duplicateEvery:0,crmEveryNBatches:0}})});
+    await f.setPolicy([{key:'results.replicatesRequired',value:1},{key:'repeats.maxAttemptsBeforeNcr',value:0}]);
+    expect((await f.command({reason:'CONFIRMATION',note:'Remeasure all three retained replicas'})).status).toBe(201);
+    if(native) {
+        const service=require('../../services/qcNativeRunService');
+        f.run=await service.buildNativeRun(f.db,f.actor,f.input);
+        f.run=await service.startNativeRun(f.db,f.run.id,f.actor);
+    }
+    if(state!=='REPEAT_REQUIRED')await require('../../services/workItemStateService').transitionWorkItem(f.items[0].id,'IN_PROGRESS',f.actor,'Begin the repeat execution',{},f.db);
+    await f.record(1);
+    if(native && blankValue!==null)await require('../../services/qcNativeMeasurementService').writeNativeMeasurements(f.db,f.run.id,f.actor,
+        {measurements:[{positionId:f.run.positions.find(row=>row.kind==='BLANK').id,value:blankValue}]});
+    if(state==='COMPLETED')await require('../../services/workItemStateService').transitionWorkItem(f.items[0].id,'COMPLETED',f.actor,'Recorded partial repeat ready for review',{},f.db);
+    f.partial=await f.db.workAttempt.findFirst({where:{workItemId:f.items[0].id,status:'RECORDED'}});
+    f.replace=async(extra={},actor=f.actor,override=false)=>{
+        const item=await f.db.workItem.findUnique({where:{id:f.items[0].id}});
+        let response;
+        await f.http(actor,async(app,token)=>{response=await request(app)
+            .post('/api/work-items/'+item.id+'/repeats/replace-partial'+(override?'/limit-override':''))
+            .set('Authorization','Bearer '+token).send({attemptId:f.partial.id,expectedVersion:item.version,
+                reason:'INSTRUMENT_FAULT',note:'Instrument failed after a partial execution',...extra});});
+        return response;
+    };
+    return f;
+}
+
+test.each(['IN_PROGRESS','COMPLETED'])('manager partial replacement from %s freezes all actual owners and moves the complete lineage union one Result at a time',async state=>{
+    const f=await partialFixture({state}),before=await f.all();
+    const originals=await f.db.result.findMany({where:{sampleId:f.items[0].sampleId,isCurrent:true},orderBy:{replicateNo:'asc'}});
+    expect((await f.command({reason:'INSTRUMENT_FAULT'})).status).toBe(409);
+    expect(await f.all()).toEqual(before);
+    const response=await f.replace();expect(response.status).toBe(201);
+    const child=response.body.attempt;
+    expect(child).toMatchObject({status:'OPEN',parentAttemptId:f.partial.id,reason:'INSTRUMENT_FAULT',requestedBy:f.actor.username});
+    expect((await f.db.workAttempt.findMany({where:{workItemId:f.items[0].id,status:'OPEN'}})).map(row=>row.id)).toEqual([child.id]);
+    expect(await f.db.workAttempt.findUnique({where:{id:f.partial.id}})).toEqual({...f.partial,status:'INVALIDATED'});
+    for(const row of originals)expect(await f.db.result.findUnique({where:{id:row.id}})).toEqual(row);
+    const event=await f.db.auditLog.findFirst({where:{entity:'WORK_ATTEMPT',entityId:child.id,action:'CREATED'}});
+    expect(event.performedBy).toBe(f.actor.username);
+    expect(JSON.parse(event.details)).toMatchObject({from:null,to:'OPEN',reason:'INSTRUMENT_FAULT',
+        oldResultIds:originals.map(row=>row.id).sort()});
+    // First fill replica 2: three actual current owners now exist. The next
+    // save must prove the frozen source identities instead of guessing latest.
+    const save=replicateNo=>f.save([{param:f.analysisCode,value:String(7+replicateNo/10),replicateNo,equipmentId:f.instrument.id}]);
+    expect((await save(2)).status).toBe(200);
+    expect(new Set((await f.db.result.findMany({where:{sampleId:f.items[0].sampleId,isCurrent:true}})).map(row=>row.attemptId)).size).toBe(3);
+    expect((await save(1)).status).toBe(200);
+    await require('../../services/workItemStateService').transitionWorkItem(f.items[0].id,'COMPLETED',f.actor,'Partial replacement ready',{},f.db);
+    const incomplete=await f.all();
+    await expect(require('../../services/submissionStateService').createSubmissionForItems({db:f.db,actor:f.actor,
+        sampleId:f.items[0].sampleId,type:'FULL',workItemIds:[f.items[0].id]})).rejects.toMatchObject({statusCode:409,
+        code:'ATTEMPT_REPLICATE_SET_INCOMPLETE',details:{missingReplicateNumbers:[3]}});
+    expect(await f.all()).toEqual(incomplete);
+    expect((await save(3)).status).toBe(200);
+    const current=await f.db.result.findMany({where:{sampleId:f.items[0].sampleId,isCurrent:true},orderBy:{replicateNo:'asc'}});
+    expect(current.map(row=>row.replicateNo)).toEqual([1,2,3]);expect(current.every(row=>row.attemptId===child.id)).toBe(true);
+    for(const old of originals)expect(await f.db.result.findUnique({where:{id:old.id}})).toEqual({...old,isCurrent:false,
+        supersededBy:current.find(row=>row.replicateNo===old.replicateNo).id});
+    await f.submit();expect(await f.db.workAttempt.findUnique({where:{id:child.id}})).toMatchObject({status:'SUBMITTED'});
+});
+
+test.each(['LAB_TECHNICIAN','PROJECT_MANAGER','SAMPLE_RECEPTION','SURVEYOR','VIEWER'])('partial replacement refuses %s without changing any retained execution evidence',async role=>{
+    const f=await partialFixture(),actor=await reviewer(f,role),before=await f.all();
+    expect((await f.replace({},actor)).status).toBe(403);expect(await f.all()).toEqual(before);
+});
+
+test.each([{expectedVersion:999},{attemptId:'missing'},{nonconformityId:'old-ncr'}])('partial replacement refuses stale or caller-authored context %j with zero writes',async extra=>{
+    const f=await partialFixture(),before=await f.all(),response=await f.replace(extra);
+    expect([400,409]).toContain(response.status);expect(await f.all()).toEqual(before);
+});
+
+test('partial replacement respects scope, the explicit repeat-limit NCR path and reservation conflicts',async()=>{
+    const f=await partialFixture();
+    const foreign=await f.db.lab.create({data:{id:randomUUID(),code:randomUUID(),name:'Foreign partial-repeat lab',country:'TEST'}});
+    const actor={...f.actor,labId:foreign.id};let before=await f.all();
+    expect((await f.replace({},actor)).status).toBe(403);expect(await f.all()).toEqual(before);
+    await f.setPolicy([{key:'repeats.maxAttemptsBeforeNcr',value:2}]);before=await f.all();
+    const reports=await f.db.nonconformityReport.findMany();
+    expect((await f.replace()).body.code).toBe('ATTEMPT_LIMIT');expect(await f.all()).toEqual(before);
+    expect(await f.db.nonconformityReport.findMany()).toEqual(reports);
+    expect((await f.replace({},f.actor,true)).body.code).toBe('NCR_ASSESSMENT_REQUIRED');expect(await f.all()).toEqual(before);
+    const response=await f.replace({description:'Partial execution lost to an instrument fault',impactAssessment:'All three replicas must be measured again'},f.actor,true);
+    expect(response.status).toBe(201);
+    const report=await f.db.nonconformityReport.findFirst({where:{source:'REPEAT_LIMIT',refId:response.body.attempt.id}});
+    expect(report).toBeTruthy();
+    const event=await f.db.auditLog.findFirst({where:{entity:'WORK_ATTEMPT',entityId:response.body.attempt.id,action:'CREATED'}});
+    expect(JSON.parse(event.details).nonconformityId).toBe(report.id);
+    before=await f.all();expect((await f.replace()).status).toBe(409);expect(await f.all()).toEqual(before);
+});
+
+test('failure to store partial replacement CREATED rolls back invalidation, the reservation and work state atomically',async()=>{
+    const f=await partialFixture(),item=await f.db.workItem.findUnique({where:{id:f.items[0].id}}),before=await f.all();
+    const fault=f.db.$extends({query:{auditLog:{create({args,query}){
+        if(args.data.entity==='WORK_ATTEMPT'&&args.data.action==='CREATED')throw Error('Owned partial replacement event failure');
+        return query(args);
+    }}}});
+    await expect(require('../../services/workRepeatService').replacePartialRepeat(fault,item.id,f.actor,{attemptId:f.partial.id,
+        expectedVersion:item.version,reason:'INSTRUMENT_FAULT',note:'Instrument failure after replica one'})).rejects.toThrow('Owned partial replacement event failure');
+    expect(await f.all()).toEqual(before);
+});
+
+test('competing partial replacements reserve exactly one OPEN child on the expected work version',async()=>{
+    const f=await partialFixture(),item=await f.db.workItem.findUnique({where:{id:f.items[0].id}});
+    const input={attemptId:f.partial.id,expectedVersion:item.version,reason:'INSTRUMENT_FAULT',note:'Instrument failed mid-execution'};
+    const command=()=>require('../../services/workRepeatService').replacePartialRepeat(f.db,item.id,f.actor,input);
+    const outcomes=await Promise.allSettled([command(),command()]);
+    expect(outcomes.filter(row=>row.status==='fulfilled')).toHaveLength(1);
+    expect(outcomes.find(row=>row.status==='rejected').reason).toMatchObject({statusCode:409});
+    const open=await f.db.workAttempt.findMany({where:{workItemId:item.id,status:'OPEN'}});
+    expect(open).toHaveLength(1);expect(open[0].parentAttemptId).toBe(f.partial.id);
+    expect(await f.db.workAttempt.count({where:{workItemId:item.id}})).toBe(3);
+});
+
+test('a second instrument failure preserves the complete union across all replacement generations',async()=>{
+    const f=await partialFixture(),first=await f.replace();expect(first.status).toBe(201);
+    const save=replicateNo=>f.save([{param:f.analysisCode,value:String(7+replicateNo/10),replicateNo,equipmentId:f.instrument.id}]);
+    await require('../../services/workItemStateService').transitionWorkItem(f.items[0].id,'IN_PROGRESS',f.actor,'Begin replacement execution',{},f.db);
+    expect((await save(2)).status).toBe(200);
+    f.partial=await f.db.workAttempt.findUnique({where:{id:first.body.attempt.id}});
+    const second=await f.replace();expect(second.status).toBe(201);
+    for(const number of [3,1,2])expect((await save(number)).status).toBe(200);
+    const current=await f.db.result.findMany({where:{sampleId:f.items[0].sampleId,isCurrent:true},orderBy:{replicateNo:'asc'}});
+    expect(current.map(row=>row.replicateNo)).toEqual([1,2,3]);
+    expect(current.every(row=>row.attemptId===second.body.attempt.id)).toBe(true);
+    expect(await f.db.workAttempt.findUnique({where:{id:first.body.attempt.id}})).toEqual({...f.partial,status:'INVALIDATED'});
+    await f.submit();
+});
+
+test('the batched REPEAT_REQUIRED boundary refuses before any write and retains the exact #191 source',async()=>{
+    const f=await partialFixture({state:'REPEAT_REQUIRED',native:true}),before=await f.all();
+    const run=await f.db.batch.findUnique({where:{id:f.run.id},include:require('../../services/qcRunViewService').QC_RUN_INCLUDE});
+    expect(run.analytes[0].status).toBe('QC_PASS');
+    const response=await f.replace();
+    expect({status:response.status,code:response.body.code}).toEqual({status:409,code:'REPEAT_REPLACEMENT_BATCH_FROZEN'});
+    expect(response.body.error).toContain('REPEAT_REQUIRED');expect(await f.all()).toEqual(before);
+    expect(await f.db.batch.findUnique({where:{id:f.run.id},include:require('../../services/qcRunViewService').QC_RUN_INCLUDE})).toEqual(run);
+    expect(require('../../services/workRepeatMigrationSource').loadWorkRepeatMigrationSource().sha256)
+        .toBe('600a4d92ef55c91ffcf6f308a14e2591f929ac6299dc0818961a20225771c7dd');
+});
+
+test.each(['IN_PROGRESS','COMPLETED'])('partial replacement from an accepted native run in %s retains all QC and membership evidence',async state=>{
+    const f=await partialFixture({state,native:true});
+    const readRun=()=>f.db.batch.findUnique({where:{id:f.run.id},include:require('../../services/qcRunViewService').QC_RUN_INCLUDE});
+    const before=await readRun();expect(before.analytes[0].status).toBe('QC_PASS');
+    const response=await f.replace();expect(response.status).toBe(201);
+    expect(response.body.attempt).toMatchObject({status:'OPEN',parentAttemptId:f.partial.id});
+    const after=await readRun();
+    for(const key of ['analytes','measurements','evaluations','dispositions','events'])expect(after[key]).toEqual(before[key]);
+    const memberships=run=>run.positions.map(position=>({...position,workItems:position.workItems.map(({workItem,...link})=>link)}));
+    expect(memberships(after)).toEqual(memberships(before));
+});
+
+test.each([null,9.123456789])('an unaccepted native run (%s blank) refuses partial replacement atomically',async blankValue=>{
+    const f=await partialFixture({native:true,blankValue}),before=await f.all();
+    const readRun=()=>f.db.batch.findUnique({where:{id:f.run.id},include:require('../../services/qcRunViewService').QC_RUN_INCLUDE});
+    const run=await readRun(),response=await f.replace();
+    expect({status:response.status,code:response.body.code}).toEqual({status:409,code:'ATTEMPT_REPEAT_RUN_DISPOSITION_REQUIRED'});
+    expect(await f.all()).toEqual(before);expect(await readRun()).toEqual(run);
+});
+
+test('a submitted execution cannot use partial replacement to reopen sealed work',async()=>{
+    const f=await fixture({replicates:2,role:'LAB_MANAGER'});await f.submit();
+    const item=await f.db.workItem.findUnique({where:{id:f.items[0].id}}),before=await f.all();let response;
+    await f.http(f.actor,async(app,token)=>{response=await request(app).post('/api/work-items/'+item.id+'/repeats/replace-partial')
+        .set('Authorization','Bearer '+token).send({attemptId:f.attempt.id,expectedVersion:item.version,reason:'INSTRUMENT_FAULT',note:'Sealed work must remain sealed'});});
+    expect(response.status).toBe(409);expect(await f.all()).toEqual(before);
+});
+
+test('a mismatched run seen by the transaction refuses partial replacement with zero retained changes',async()=>{
+    const f=await partialFixture(),item=await f.db.workItem.findUnique({where:{id:f.items[0].id}}),before=await f.all();
+    const changedRead=f.db.$extends({query:{workItem:{async findUnique({args,query}){
+        const row=await query(args);return row?.id===item.id?{...row,batchId:'unavailable-run'}:row;
+    }}}});
+    await expect(require('../../services/workRepeatService').replacePartialRepeat(changedRead,item.id,f.actor,
+        {attemptId:f.partial.id,expectedVersion:item.version,reason:'INSTRUMENT_FAULT',note:'Recorded run context no longer matches'}))
+        .rejects.toMatchObject({statusCode:409,code:'ATTEMPT_REPEAT_RUN_DISPOSITION_REQUIRED'});
+    expect(await f.all()).toEqual(before);
+});
+
+test('a membership guard refusal during reservation rolls back all changes and exposes the stable partial-replacement code',async()=>{
+    const f=await partialFixture(),item=await f.db.workItem.findUnique({where:{id:f.items[0].id}}),before=await f.all();
+    const fault=f.db.$extends({query:{workItem:{updateMany(){throw Error('BATCH_MEMBERSHIP_FROZEN');}}}});
+    await expect(require('../../services/workRepeatService').replacePartialRepeat(fault,item.id,f.actor,
+        {attemptId:f.partial.id,expectedVersion:item.version,reason:'INSTRUMENT_FAULT',note:'Instrument fault with a membership conflict'}))
+        .rejects.toMatchObject({statusCode:409,code:'REPEAT_REPLACEMENT_BATCH_FROZEN'});
+    expect(await f.all()).toEqual(before);
+});

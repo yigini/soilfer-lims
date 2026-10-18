@@ -67,6 +67,7 @@ async function recordedExecution(db, item, param) {
         }
         if (replacements.length === 1) attempt = replacements[0];
     }
+    if (!attempt) attempt = await require('./workRepeatLineageService').recordedReplacement(db,item,attempts,results);
     if(!attempt || attempt.status!=='RECORDED' || ['SUBMITTED','ACCEPTED'].includes(item.status)) {
         throw new TransitionError('Use the correction route or request a reasoned repeat.',409,'ATTEMPT_CORRECTION_REQUIRED');
     }
@@ -229,7 +230,9 @@ async function appendResult(tx, ctx, measurement, values, now) {
                 throw new TransitionError('Use the correction route or request a reasoned repeat.',409,'ATTEMPT_CORRECTION_REQUIRED');
             const current = await tx.result.findMany({ where: { sampleId: ctx.sample.id, param: measurement.param,
                 replicateNo: ctx.replicateNo, isCurrent: true } });
-            if (current.length > 1 || current.some(row => row.attemptId !== child.parentAttemptId)) {
+            const sources = await require('./workRepeatLineageService').replacementSources(tx,ctx.item,child);
+            if (current.length > 1 || current.some(row => sources ? !sources.some(source => source.id === row.id && source.replicateNo === ctx.replicateNo)
+                : row.attemptId !== child.parentAttemptId) || sources && sources.some(row => row.replicateNo === ctx.replicateNo) && current.length !== 1) {
                 throw new TransitionError('The replacement replica does not belong to its parent.',409,'ATTEMPT_CONTEXT_MISMATCH');
             }
             if (current.length === 1) { targetId = current[0].id; targetUpdatedAt = current[0].updatedAt; }

@@ -3,6 +3,8 @@ const router = express.Router();
 const { verifyToken, checkPermission } = require('../middleware/authMiddleware');
 const controller = require('../controllers/workRepeatController');
 router.use(verifyToken);
+router.post('/:id/repeats/replace-partial', checkPermission('APPROVE_RESULTS'), controller.replacePartialRepeat);
+router.post('/:id/repeats/replace-partial/limit-override', checkPermission('APPROVE_RESULTS'), controller.replacePartialRepeatLimitOverride);
 router.post('/:id/repeats',checkPermission('MANAGE_WORK_ATTEMPTS'),controller.requestRepeat);
 router.post('/:id/repeats/limit-override',checkPermission('APPROVE_RESULTS'),controller.requestRepeatLimitOverride);
 module.exports = router;

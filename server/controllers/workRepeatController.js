@@ -12,6 +12,14 @@ exports.requestRepeatLimitOverride = async (req,res) => {
     try { res.status(201).json(await require('../services/workRepeatService').requestRepeatLimitOverride(prisma,req.params.id,req.user,req.body)); }
     catch (error) { refuse(res,error); }
 };
+exports.replacePartialRepeat = async (req,res) => {
+    try { res.status(201).json(await require('../services/workRepeatService').replacePartialRepeat(prisma,req.params.id,req.user,req.body)); }
+    catch (error) { refuse(res,error); }
+};
+exports.replacePartialRepeatLimitOverride = async (req,res) => {
+    try { res.status(201).json(await require('../services/workRepeatService').replacePartialRepeat(prisma,req.params.id,req.user,req.body,true)); }
+    catch (error) { refuse(res,error); }
+};
 exports.correctAttempt = async (req,res) => {
     try { res.status(201).json(await require('../services/workAttemptCorrectionService').correctAttempt(prisma,req.params.id,req.user,req.body)); }
     catch (error) { refuse(res,error); }

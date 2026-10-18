@@ -57,6 +57,7 @@ async function submitRecordedAttempt(tx,item,actor) {
     const parents=await tx.workAttempt.findMany({where:{workItemId:item.id,status:{in:['QUESTIONED','INVALIDATED']}},select:{id:true}});
     const children=await tx.workAttempt.findMany({where:{workItemId:item.id,status:{in:['OPEN','RECORDED']},parentAttemptId:{not:null}}});
     for(const child of children){
+        await require('./workRepeatLineageService').assertReplacementComplete(tx,item,child);
         const parent=await tx.workAttempt.findUnique({where:{id:child.parentAttemptId}});
         if(parent?.status==='ACCEPTED'){
             if(!await require('./amendmentReopenWitness').readAmendmentReopenWitness(tx,{item,parent,child}))
