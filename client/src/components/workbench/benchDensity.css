@@ -15,7 +15,7 @@
     height: 44px !important;
     flex-shrink: 0;
 }
-.workbench-density-bench :is(p, span, label, th, td, dt, dd, button, a, legend) {
+.workbench-density-bench :is(p, span, label, li, th, td, dt, dd, button, a, legend) {
     font-size: max(14px, 1em) !important;
 }
 .workbench-density-bench :is(input, select, textarea, button, a, [tabindex]):focus-visible {

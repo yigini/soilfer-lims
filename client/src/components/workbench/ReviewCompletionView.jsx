@@ -135,7 +135,7 @@ export default function ReviewCompletionView({
                     ))}
                     {included.length === 0 && (
                         <div className="p-4 text-center text-xs text-sf-muted">
-                            No items meet the completion readiness requirements.
+                            <span>No items meet the completion readiness requirements.</span>
                         </div>
                     )}
                 </div>
@@ -157,9 +157,9 @@ export default function ReviewCompletionView({
                                     </span>
                                     <span className="text-sf-muted mx-2">·</span>
                                     <span className="text-sf-muted">{getAnalysisDisplayName(item.analysis, item.analysisName)}</span>
-                                    <div>{t('benchErgonomics.position')}: {item.rackPosition ?? t('benchErgonomics.unknown')} | {valueText(item)} {!item.checks && (item.displayUnit || t('benchErgonomics.unitUnknown'))}</div>
+                                    <div><span>{t('benchErgonomics.position')}: {item.rackPosition ?? t('benchErgonomics.unknown')} | {valueText(item)} {!item.checks && (item.displayUnit || t('benchErgonomics.unitUnknown'))}</span></div>
                                     <div className="text-[11px] text-red-600 dark:text-red-400 mt-0.5">
-                                        • {messages(item).join('; ') || t('benchErgonomics.incomplete')}
+                                        <span>• {messages(item).join('; ') || t('benchErgonomics.incomplete')}</span>
                                     </div>
                                 </div>
                                 <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-500/15 text-amber-800 dark:text-amber-300">
