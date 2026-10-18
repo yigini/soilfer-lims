@@ -58,9 +58,10 @@ async function assertSampleReplicateNumbers(db, ctx, measurements, allocation) {
     if (!ctx.item || numbers.every(number => number === 1)) return;
     const attempt = ctx.recordedAttempt || (allocation?.existing
         ? await db.workAttempt.findUnique({ where: { id: allocation.id } }) : null);
-    const parentRows = attempt?.parentAttemptId ? await db.result.findMany({ where: {
+    const replacement = attempt ? await require('./workRepeatLineageService').replacementSources(db, ctx.item, attempt) : null;
+    const parentRows = replacement || (attempt?.parentAttemptId ? await db.result.findMany({ where: {
         attemptId: attempt.parentAttemptId, sampleId: ctx.sample.id, param: measurements[0].param
-    }, select: { replicateNo: true } }) : [];
+    }, select: { replicateNo: true } }) : []);
     const parentNumbers = new Set(parentRows.map(row => row.replicateNo));
     const newNumbers = numbers.filter(number => !parentNumbers.has(number));
     if (!newNumbers.length) return;

@@ -3,9 +3,13 @@ const rules = require('./workflowStateRules');
 const { hasPermission } = require('../config/roles');
 const { isNonMeasurement } = require('./workItemKinds');
 const policy = require('./policyService');
-const { repeatRequest, repeatLimitOverrideRequest, SELF_REPEAT_REASONS } = require('./workRepeatContract');
+const { repeatRequest, repeatLimitOverrideRequest, partialReplacementRequest, SELF_REPEAT_REASONS } = require('./workRepeatContract');
 const { appendAttemptEvent, transitionAttempt } = require('./workAttemptEventService');
 
+function partialBatchFrozen() {
+    return new rules.TransitionError('This batched partial repeat remains frozen in REPEAT_REQUIRED; its original run and Result evidence are retained.',
+        409, 'REPEAT_REPLACEMENT_BATCH_FROZEN');
+}
 async function assertRepeatCapacity(tx, item, sample, limitOverride = false) {
     const limit = await policy.get(sample.assignedLab || item.labId, 'repeats.maxAttemptsBeforeNcr',
         { analysisCode: item.analysis, methodologyId: item.methodologyId, db: tx });
@@ -24,6 +28,14 @@ async function preflightRepeat(tx, item, sample, actor, request, attemptId) {
         throw new rules.TransitionError('This work cannot request a measurement repeat.', 409, 'WORK_REPEAT_STATE_REFUSED');
     }
     const reviewer = hasPermission(actor, 'APPROVE_RESULTS');
+    if (request.partialReplacement && !reviewer) throw new rules.TransitionError('Replacing a partial execution requires review authority.', 403, 'PARTIAL_REPEAT_FORBIDDEN');
+    // #261 pin6253346589 keeps the exact #191 membership guard unchanged.
+    // Refuse this boundary before invalidating or reserving any attempt.
+    if (request.partialReplacement && item.status === 'REPEAT_REQUIRED' && item.batchId) throw partialBatchFrozen();
+    if (request.partialReplacement && (item.version !== request.partialReplacement.expectedVersion ||
+        !['IN_PROGRESS', 'COMPLETED'].includes(item.status))) {
+        throw new rules.TransitionError('Work changed. Reload the partial execution before replacing it.', 409, 'PARTIAL_REPEAT_CONTEXT_MISMATCH');
+    }
     if (request.limitOverride && !reviewer) throw new rules.TransitionError('A repeat-limit override requires review authority.', 403, 'NCR_MANAGEMENT_FORBIDDEN');
     if (!reviewer) {
         if (!hasPermission(actor, 'ENTER_RESULTS') || item.assignedTo !== rules.actorName(actor) ||
@@ -37,13 +49,15 @@ async function preflightRepeat(tx, item, sample, actor, request, attemptId) {
     const attempts = await tx.workAttempt.findMany({ where: { workItemId: item.id }, orderBy: { attemptNo: 'asc' } });
     if (attempts.some(row => row.status === 'OPEN')) throw new rules.TransitionError('An OPEN repeat already exists for this work.', 409, 'WORK_REPEAT_ALREADY_OPEN');
     // Selecting the parent never guesses between multiple execution owners.
-    const parentId = attemptId || await require('./reviewAttemptService').resolveReviewAttempt(tx, item, 'RETURN');
+    const parentId = request.partialReplacement?.attemptId || attemptId || await require('./reviewAttemptService').resolveReviewAttempt(tx, item, 'RETURN');
     const parent = attempts.find(row => row.id === parentId);
     if (!parent || !['RECORDED', 'SUBMITTED'].includes(parent.status) || parent.status === 'SUBMITTED' && !reviewer) {
         throw new rules.TransitionError('The recorded attempt is not eligible for this repeat.', 409, 'WORK_REPEAT_STATE_REFUSED');
     }
+    const oldResultIds = request.partialReplacement
+        ? await require('./workRepeatLineageService').partialReplacementSources(tx, { ...item, sample }, parent, actor) : null;
     await assertRepeatCapacity(tx, item, sample, Boolean(request.limitOverride));
-    return { parent, attemptNo: Math.max(0, ...attempts.map(row => row.attemptNo)) + 1 };
+    return { parent, attemptNo: Math.max(0, ...attempts.map(row => row.attemptNo)) + 1, oldResultIds };
 }
 async function reserveRepeat(tx, item, sample, actor, request, preflight) {
     rules.requireTransaction(tx);
@@ -64,7 +78,7 @@ async function reserveRepeat(tx, item, sample, actor, request, preflight) {
         nonconformityId = report.id;
     }
     await appendAttemptEvent(tx, { ...item, sample }, id, actor, { action: 'CREATED', from: null, to: 'OPEN', reason: request.reason,
-        note: request.note, ...(nonconformityId && { nonconformityId }) });
+        note: request.note, ...(plan.oldResultIds && { oldResultIds: plan.oldResultIds }), ...(nonconformityId && { nonconformityId }) });
     return attempt;
 }
 async function requestRepeat(db, workItemId, actor, input) {
@@ -73,6 +87,10 @@ async function requestRepeat(db, workItemId, actor, input) {
 async function requestRepeatLimitOverride(db, workItemId, actor, input) {
     if (!hasPermission(actor, 'APPROVE_RESULTS')) throw new rules.TransitionError('A repeat-limit override requires review authority.', 403, 'NCR_MANAGEMENT_FORBIDDEN');
     return executeRepeat(db, workItemId, actor, repeatLimitOverrideRequest(input));
+}
+async function replacePartialRepeat(db, workItemId, actor, input, override = false) {
+    if (!hasPermission(actor, 'APPROVE_RESULTS')) throw new rules.TransitionError('Replacing a partial execution requires review authority.', 403, 'PARTIAL_REPEAT_FORBIDDEN');
+    return executeRepeat(db, workItemId, actor, partialReplacementRequest(input, override));
 }
 async function executeRepeat(db, workItemId, actor, request) {
     return rules.inTransaction(db, async tx => {
@@ -95,6 +113,9 @@ async function executeRepeat(db, workItemId, actor, request) {
                 { expectedStatus: sample.status, action: 'REVIEW_RETURNED', details: JSON.stringify({ attemptId: attempt.id, reasonCode: request.reason }) });
         }
         return { workItem: updated, attempt };
-    }).catch(error=>{throw require('./workRepeatBatchService').mapRepeatRunError(error);});
+    }).catch(error=>{
+        if (request.partialReplacement && `${error.message || ''} ${JSON.stringify(error.meta || {})}`.includes('BATCH_MEMBERSHIP_FROZEN')) throw partialBatchFrozen();
+        throw require('./workRepeatBatchService').mapRepeatRunError(error);
+    });
 }
-module.exports = { assertRepeatCapacity, preflightRepeat, reserveRepeat, requestRepeat, requestRepeatLimitOverride };
+module.exports = { assertRepeatCapacity, preflightRepeat, reserveRepeat, requestRepeat, requestRepeatLimitOverride, replacePartialRepeat };

@@ -50,4 +50,17 @@ function repeatLimitOverrideRequest(input = {}) {
     return { ...request, limitOverride: repeatLimitAssessment(input) };
 }
 
-module.exports = { SELF_REPEAT_REASONS, RETURN_REASON_STATUS, repeatRequest, repeatLimitOverrideRequest, repeatLimitAssessment };
+function partialReplacementRequest(input = {}, override = false) {
+    const allowed = ['attemptId', 'expectedVersion', 'reason', 'note', 'aliquotId', ...(override ? ['description', 'impactAssessment'] : [])];
+    if (!input || typeof input !== 'object' || Array.isArray(input) || Object.keys(input).some(key => !allowed.includes(key)) ||
+        typeof input.attemptId !== 'string' || !input.attemptId.trim() || !Number.isInteger(input.expectedVersion) || input.expectedVersion < 0) {
+        throw new TransitionError('Choose the recorded partial attempt and the current work version.', 400, 'PARTIAL_REPEAT_FIELDS_INVALID');
+    }
+    if (input.reason !== 'INSTRUMENT_FAULT') throw new TransitionError('Partial replacement requires INSTRUMENT_FAULT.', 409, 'PARTIAL_REPEAT_REASON_REQUIRED');
+    const request = repeatRequest({ reason: input.reason, note: input.note, aliquotId: input.aliquotId });
+    if (!request.note) throw new TransitionError('Describe the instrument failure before replacing a partial execution.', 400, 'REPEAT_NOTE_REQUIRED');
+    return { ...request, partialReplacement: { attemptId: input.attemptId, expectedVersion: input.expectedVersion },
+        ...(override && { limitOverride: repeatLimitAssessment(input) }) };
+}
+
+module.exports = { SELF_REPEAT_REASONS, RETURN_REASON_STATUS, repeatRequest, repeatLimitOverrideRequest, repeatLimitAssessment, partialReplacementRequest };
