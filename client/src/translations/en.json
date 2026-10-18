@@ -4040,5 +4040,22 @@
       "LOD_LOQ_METHOD_VERSION_UNKNOWN": "Current methodology version is unknown.",
       "LOD_LOQ_FAILED": "Blank-history request failed."
     }
+  },
+  "benchErgonomics": {
+    "density": "Workbench density",
+    "standard": "Standard",
+    "bench": "Bench",
+    "codeMissing": "Sample code unavailable",
+    "position": "Position",
+    "unknown": "Unknown",
+    "unitUnknown": "Unit unavailable",
+    "flags": "Flags and warnings",
+    "incomplete": "Prerequisites or validation incomplete",
+    "confirm": "I verified the lab sample codes, positions, values, units, flags, basis and replicate numbers against the raw bench data.",
+    "pdfDownload": "Download worksheet PDF",
+    "pdfDownloading": "Preparing worksheet…",
+    "pdfFailed": "The worksheet download failed.",
+    "pdfUnexpected": "The server did not return a worksheet PDF.",
+    "checksCount": "{checked}/{total} checks"
   }
 }

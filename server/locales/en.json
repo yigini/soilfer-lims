@@ -2203,5 +2203,51 @@
       "LOD_LOQ_METHOD_VERSION_UNKNOWN": "Current methodology version is unknown.",
       "LOD_LOQ_FAILED": "Blank-history request failed."
     }
+  },
+  "workbenchWorksheet": {
+    "title": "Run worksheet",
+    "run": "Run",
+    "lab": "Laboratory",
+    "analyte": "Analyte",
+    "method": "Method",
+    "instrument": "Instrument",
+    "analyst": "Analyst",
+    "started": "Started (UTC)",
+    "templateAtPrint": "Template at printing",
+    "noTemplate": "No active calculation template",
+    "unknown": "Unknown",
+    "notStarted": "Not started",
+    "blankNotice": "Blank bench worksheet. Record raw observations in the empty cells. This is not a result or an analytical report.",
+    "position": "Pos.",
+    "identity": "Sample code / QC position",
+    "rawObservation": "Raw observation",
+    "lot": "Lot",
+    "codeNeedsReview": "Code needs review",
+    "analystSignature": "Analyst signature / date",
+    "reviewerSignature": "Reviewer signature / date",
+    "page": "Page",
+    "duplicateOf": "from position",
+    "kinds": {
+      "BLANK": "Blank",
+      "DUPLICATE": "Duplicate",
+      "LRM": "LRM",
+      "CRM": "CRM",
+      "ICV": "ICV",
+      "CCV": "CCV",
+      "CCB": "CCB",
+      "CAL_STD": "Calibration standard"
+    },
+    "errors": {
+      "WORKSHEET_PERMISSION_DENIED": "Worksheet permission is required.",
+      "WORKSHEET_ANALYTE_REQUIRED": "Select one analyte for this mixed run.",
+      "WORKSHEET_ANALYTE_NOT_IN_RUN": "The selected analyte is not in this run.",
+      "WORKSHEET_CONTEXT_INVALID": "The retained run context needs review.",
+      "WORKSHEET_MEMBERSHIP_INVALID": "The run membership needs review.",
+      "WORKSHEET_POSITIONS_REQUIRED": "This analyte has no printable positions.",
+      "WORKSHEET_FAILED": "The worksheet could not be generated.",
+      "BATCH_NOT_FOUND": "Run not found.",
+      "QC_BATCH_SCOPE_DENIED": "The run is outside your laboratory scope.",
+      "WORKSHEET_LAYOUT_TOO_LARGE": "A header or row is too long for this worksheet."
+    }
   }
 }

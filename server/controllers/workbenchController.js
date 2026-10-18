@@ -1609,7 +1609,14 @@ exports.previewCompletion = async (req, res) => {
                 }
             }
 
-            const sampleDisplayId = item.sample?.labId || item.labId || item.sampleId;
+            // Display metadata only. The issued-code read never allocates or
+            // repairs a code, and is reached only after both scope checks.
+            const sampleDisplayId = item.sample ? await require('../services/workbenchWorksheetService').displayCode(item.sample, prisma) : null;
+            const displayAnalysis = await prisma.analysis.findUnique({ where: { code: item.analysis }, select: { units: true, unitCode: true } });
+            const reportingUnit = entry.unit && [displayAnalysis?.units, displayAnalysis?.unitCode].includes(entry.unit)
+                ? entry.unit : displayAnalysis?.units || displayAnalysis?.unitCode || null;
+            const displayMetadata = { labSampleCode: sampleDisplayId, rackPosition: item.rackPosition ?? null,
+                displayUnit: isTextureAnalysis ? '%' : calculationPreview?.calculationEvidence?.outputUnit ?? reportingUnit };
             const originalId = item.sample?.originalId || null;
 
             if (blockers.length > 0) {
@@ -1617,10 +1624,13 @@ exports.previewCompletion = async (req, res) => {
                     workItemId: item.id,
                     sampleId: item.sampleId,
                     sampleDisplayId,
+                    ...displayMetadata,
                     labId: item.sample?.labId || item.labId,
                     originalId,
                     analysis: item.analysis,
                     value: entry.value,
+                    values: entry.values,
+                    checks: entry.checks,
                     blockers,
                     reasons,
                     warnings: readiness.warnings
@@ -1630,6 +1640,7 @@ exports.previewCompletion = async (req, res) => {
                     workItemId: item.id,
                     sampleId: item.sampleId,
                     sampleDisplayId,
+                    ...displayMetadata,
                     labId: item.sample?.labId || item.labId,
                     originalId,
                     analysis: item.analysis,

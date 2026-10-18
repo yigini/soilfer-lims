@@ -382,6 +382,13 @@ export default function WorksheetArea({
                                             key={position?.id || item.workItemId}
                                             {...(position ? nativeControls.positionProps(position) : {})}
                                             onClick={() => setSelectedItemId(item.workItemId)}
+                                            tabIndex={0}
+                                            aria-selected={isSelected}
+                                            onKeyDown={event => {
+                                                if (event.target === event.currentTarget && ['Enter', ' '].includes(event.key)) {
+                                                    event.preventDefault(); setSelectedItemId(item.workItemId);
+                                                }
+                                            }}
                                             className={`cursor-pointer transition-colors ${
                                                 ['FAIL', 'REVIEW_REQUIRED'].includes(item.sampleReplicates?.status)
                                                     ? 'bg-amber-500/10 border-l-4 border-amber-500'

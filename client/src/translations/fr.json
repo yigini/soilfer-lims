@@ -4040,5 +4040,22 @@
       "LOD_LOQ_METHOD_VERSION_UNKNOWN": "La révision actuelle de méthode est inconnue.",
       "LOD_LOQ_FAILED": "Échec de la demande d’historique des blancs."
     }
+  },
+  "benchErgonomics": {
+    "density": "Densité du poste de travail",
+    "standard": "Standard",
+    "bench": "Paillasse",
+    "codeMissing": "Code échantillon indisponible",
+    "position": "Position",
+    "unknown": "Inconnu",
+    "unitUnknown": "Unité indisponible",
+    "flags": "Indicateurs et avertissements",
+    "incomplete": "Prérequis ou validation incomplets",
+    "confirm": "J’ai vérifié les codes échantillon du laboratoire, les positions, les valeurs, les unités, les indicateurs, la base et les numéros de répétition par rapport aux données brutes de la paillasse.",
+    "pdfDownload": "Télécharger la feuille PDF",
+    "pdfDownloading": "Préparation de la feuille…",
+    "pdfFailed": "Le téléchargement de la feuille a échoué.",
+    "pdfUnexpected": "Le serveur n’a pas renvoyé de feuille PDF.",
+    "checksCount": "{checked}/{total} vérifications"
   }
 }

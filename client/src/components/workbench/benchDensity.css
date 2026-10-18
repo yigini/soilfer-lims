@@ -1,0 +1,36 @@
+/* #203: scoped to the workbench; independent of the shared-terminal PIN mode. */
+.workbench-density-bench {
+    font-size: 14px;
+}
+.workbench-density-bench :is(button, select, textarea, input, a[href], [role="button"]) {
+    min-height: 44px !important;
+    min-width: 44px !important;
+}
+.workbench-density-bench :is(input:not([type="checkbox"]):not([type="radio"]), select, textarea) {
+    font-size: 18px !important;
+    line-height: 1.5;
+}
+.workbench-density-bench input:is([type="checkbox"], [type="radio"]) {
+    width: 44px !important;
+    height: 44px !important;
+    flex-shrink: 0;
+}
+.workbench-density-bench :is(p, span, label, th, td, dt, dd, button, a, legend) {
+    font-size: max(14px, 1em) !important;
+}
+.workbench-density-bench :is(input, select, textarea, button, a, [tabindex]):focus-visible {
+    outline: 3px solid var(--sf-primary);
+    outline-offset: 3px;
+}
+.workbench-density-bench [data-bench-verdict="pass"] {
+    color: #065f46 !important;
+    background: #ecfdf5 !important;
+}
+.workbench-density-bench [data-bench-verdict="warning"] {
+    color: #78350f !important;
+    background: #fffbeb !important;
+}
+.workbench-density-bench [data-bench-verdict="fail"] {
+    color: #991b1b !important;
+    background: #fef2f2 !important;
+}

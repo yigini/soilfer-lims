@@ -135,10 +135,17 @@ export default function NativeRunPanel({ batch, referenceMaterials, onChanged, l
         const candidate = preview?.positions?.find(position => position.positionId === row.id);
         const evidence = candidate || storedPositionEvidence(analyte, row.id) || analyte.entryEvidence?.find(position => position.positionId === row.id);
         const snapshot = referenceSnapshot(row);
+        const state = ['PASS', 'NOT_REQUIRED'].includes(evidence?.status) ? 'pass' : evidence?.status === 'FAIL' ? 'fail' : 'warning';
         return <div data-testid={`native-evidence-${row.id}`} className="text-xs space-y-1">
             <p>{t('qcWorksheet.expected')}: <output>{(evidence ? evidence.expected : snapshot?.expected) ?? t('qcWorksheet.notStored')}</output></p>
             <p>{t('qcWorksheet.limits')}: <output>{Object.keys(evidence?.limits || {}).length ? JSON.stringify(evidence.limits) : t('qcWorksheet.notStored')}</output></p>
-            <p className={verdictColour(evidence?.status)}>{t(candidate ? 'qcWorksheet.preview' : 'qcWorksheet.verdict')}: <output>{evidence?.status ?? t('qcWorksheet.notStored')}</output>
+            <p data-bench-verdict={state} className={verdictColour(evidence?.status)}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true" className="inline mr-1">
+                    {state === 'warning' ? <path d="M12 3 2 21h20L12 3zm0 5v6m0 3v1" /> : <>
+                        <circle cx="12" cy="12" r="10" />
+                        <path d={state === 'pass' ? 'm7 12 3 3 7-7' : 'm8 8 8 8m0-8-8 8'} />
+                    </>}
+                </svg>{t(candidate ? 'qcWorksheet.preview' : 'qcWorksheet.verdict')}: <output>{evidence?.status ?? t('qcWorksheet.notStored')}</output>
                 {evidence?.criterion && ` · ${evidence.criterion}`}</p>
         </div>;
     };

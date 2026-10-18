@@ -2203,5 +2203,51 @@
       "LOD_LOQ_METHOD_VERSION_UNKNOWN": "La révision actuelle de méthode est inconnue.",
       "LOD_LOQ_FAILED": "Échec de la demande d’historique des blancs."
     }
+  },
+  "workbenchWorksheet": {
+    "title": "Feuille de travail de la série",
+    "run": "Série",
+    "lab": "Laboratoire",
+    "analyte": "Analyte",
+    "method": "Méthode",
+    "instrument": "Instrument",
+    "analyst": "Analyste",
+    "started": "Début (UTC)",
+    "templateAtPrint": "Modèle au moment de l’impression",
+    "noTemplate": "Aucun modèle de calcul actif",
+    "unknown": "Inconnu",
+    "notStarted": "Non démarré",
+    "blankNotice": "Feuille de paillasse vierge. Inscrivez les observations brutes dans les cases vides. Ceci n’est ni un résultat ni un rapport analytique.",
+    "position": "Pos.",
+    "identity": "Code échantillon / position CQ",
+    "rawObservation": "Observation brute",
+    "lot": "Lot",
+    "codeNeedsReview": "Code à vérifier",
+    "analystSignature": "Signature de l’analyste / date",
+    "reviewerSignature": "Signature du réviseur / date",
+    "page": "Page",
+    "duplicateOf": "de la position",
+    "kinds": {
+      "BLANK": "Blanc",
+      "DUPLICATE": "Duplicata",
+      "LRM": "MRL",
+      "CRM": "MRC",
+      "ICV": "ICV",
+      "CCV": "CCV",
+      "CCB": "CCB",
+      "CAL_STD": "Étalon de calibration"
+    },
+    "errors": {
+      "WORKSHEET_PERMISSION_DENIED": "Une autorisation est requise pour la feuille de travail.",
+      "WORKSHEET_ANALYTE_REQUIRED": "Sélectionnez un analyte pour cette série mixte.",
+      "WORKSHEET_ANALYTE_NOT_IN_RUN": "L’analyte sélectionné ne fait pas partie de cette série.",
+      "WORKSHEET_CONTEXT_INVALID": "Le contexte conservé de la série doit être vérifié.",
+      "WORKSHEET_MEMBERSHIP_INVALID": "Les membres de la série doivent être vérifiés.",
+      "WORKSHEET_POSITIONS_REQUIRED": "Cet analyte ne comporte aucune position imprimable.",
+      "WORKSHEET_FAILED": "La feuille de travail n’a pas pu être générée.",
+      "BATCH_NOT_FOUND": "Série introuvable.",
+      "QC_BATCH_SCOPE_DENIED": "La série est hors du périmètre de votre laboratoire.",
+      "WORKSHEET_LAYOUT_TOO_LARGE": "Un en-tête ou une ligne est trop long pour cette feuille de travail."
+    }
   }
 }

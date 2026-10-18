@@ -1,11 +1,20 @@
 import { useAnalysisNames } from '../../context/AnalysisCatalogueContext';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import CalculationEvidence from '../sample/CalculationEvidence';
 import { useLanguage } from '../../context/LanguageContext';
 import {
     ArrowLeft, CheckCircle2, AlertTriangle, ShieldCheck,
     Check, ArrowRight
 } from 'lucide-react';
+
+export function benchOrdered(items) {
+    return [...items].sort((a, b) => {
+        const position = row => Number.isFinite(row.rackPosition) ? row.rackPosition : Number.MAX_SAFE_INTEGER;
+        return position(a) - position(b) || String(a.labSampleCode || '').localeCompare(String(b.labSampleCode || ''));
+    });
+}
+const messages = item => [...(item.validation?.flags || []), ...(item.warnings || []), ...(item.reasons || [])]
+    .map(value => typeof value === 'string' ? value : value?.message || value?.code).filter(Boolean);
 
 /**
  * ReviewCompletionView
@@ -23,8 +32,18 @@ export default function ReviewCompletionView({
     const { t } = useLanguage();
     const [confirmed, setConfirmed] = useState(false);
 
-    const included = previewData?.included || [];
-    const excluded = previewData?.excluded || [];
+    const included = benchOrdered(previewData?.included || []);
+    const excluded = benchOrdered(previewData?.excluded || []);
+    useEffect(() => { setConfirmed(false); }, [previewData]);
+
+    const valueText = item => {
+        if (item.value !== null && item.value !== undefined && item.value !== '') return item.value;
+        if (Array.isArray(item.values)) return item.values.join('/');
+        if (item.values && ['sand', 'silt', 'clay'].some(key => Object.hasOwn(item.values, key)))
+            return ['sand', 'silt', 'clay'].map(key => item.values[key] ?? '').join('/');
+        if (Array.isArray(item.checks)) return t('benchErgonomics.checksCount', { checked: item.checks.filter(check => check === true).length, total: item.checks.length });
+        return t('benchErgonomics.unknown');
+    };
 
     const handleRecord = () => {
         if (!confirmed || !included.length) return;
@@ -34,7 +53,7 @@ export default function ReviewCompletionView({
     return (
         <div className="flex flex-col gap-5 max-w-4xl mx-auto py-2">
             {/* Header */}
-            <div className="flex items-center justify-between pb-3 border-b border-sf-divider">
+            <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between pb-3 border-b border-sf-divider">
                 <div>
                     <h3 className="text-lg font-bold text-sf-text">
                         Review Determinations Before Recording
@@ -46,7 +65,7 @@ export default function ReviewCompletionView({
                 <button
                     type="button"
                     onClick={onBack}
-                    className="px-3 py-1.5 rounded-lg text-xs font-medium border border-sf-divider hover:bg-sf-hover transition-colors flex items-center gap-1.5 text-sf-text"
+                    className="shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium border border-sf-divider hover:bg-sf-hover transition-colors flex items-center gap-1.5 text-sf-text"
                 >
                     <ArrowLeft size={13} /> Back to Worksheet
                 </button>
@@ -83,33 +102,30 @@ export default function ReviewCompletionView({
             <div className="rounded-xl border border-sf-divider overflow-hidden bg-sf-surface">
                 <div className="px-4 py-2.5 bg-sf-canvas/80 font-semibold text-sf-text text-xs flex items-center justify-between border-b border-sf-divider">
                     <span>Included Determinations ({included.length})</span>
-                    <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold">Ready to Record</span>
+                    <span data-bench-verdict="pass" className="text-[11px] text-emerald-700 dark:text-emerald-300 font-bold rounded px-1"><CheckCircle2 size={16} aria-hidden="true" className="inline mr-1" />Ready to Record</span>
                 </div>
                 <div className="divide-y divide-sf-divider max-h-64 overflow-y-auto bg-sf-surface">
                     {included.map((item, idx) => (
-                        <div key={idx} className="p-3 flex items-center justify-between text-xs">
+                        <div key={item.workItemId || idx} data-testid="bench-completion-row" className="p-3 flex items-center justify-between text-xs">
                             <div>
                                 <span className="font-bold text-sf-text font-mono">
-                                    {item.sampleId}
+                                    {item.labSampleCode || t('benchErgonomics.codeMissing')}
                                 </span>
                                 <span className="text-sf-muted mx-2">·</span>
                                 <span className="text-sf-text font-medium">
                                     {getAnalysisDisplayName(item.analysis, item.analysisName)}
                                 </span>
                                 <span className="text-sf-muted text-[11px] ml-2">
-                                    (Basis: {item.basis || 'Air-dry'}, Rep: {item.replicateNo || 1})
+                                    {t('benchErgonomics.position')}: {item.rackPosition ?? t('benchErgonomics.unknown')} | Basis: {item.basis || 'Air-dry'}, Rep: {item.replicateNo || 1}
                                 </span>
                                 <CalculationEvidence evidence={item.calculationEvidence} t={t} />
+                                {messages(item).length > 0 && <ul aria-label={t('benchErgonomics.flags')} data-bench-verdict="warning" className="mt-1 rounded p-1">
+                                    {messages(item).map((message, index) => <li key={index}><AlertTriangle size={16} aria-hidden="true" className="inline mr-1" />{message}</li>)}
+                                </ul>}
                             </div>
                             <div className="flex items-center gap-3">
                                 <span className="text-sm font-mono font-bold text-emerald-700 dark:text-emerald-400">
-                                    {item.value ?? (
-                                        item.values ? (
-                                            Array.isArray(item.values)
-                                                ? item.values.join('/')
-                                                : `${item.values.sand ?? ''}/${item.values.silt ?? ''}/${item.values.clay ?? ''}`
-                                        ) : '3/3 checks'
-                                    )}
+                                    {valueText(item)}{!item.checks && <span className="ml-1">{item.displayUnit || t('benchErgonomics.unitUnknown')}</span>}
                                 </span>
                                 <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/15 text-emerald-800 dark:text-emerald-300">
                                     ✓ Included
@@ -130,19 +146,20 @@ export default function ReviewCompletionView({
                 <div className="rounded-xl border border-amber-500/30 overflow-hidden bg-sf-surface">
                     <div className="px-4 py-2.5 bg-amber-500/10 font-semibold text-amber-800 dark:text-amber-300 text-xs flex items-center justify-between border-b border-amber-500/20">
                         <span>Excluded Items ({excluded.length})</span>
-                        <span className="text-[11px] text-amber-600 dark:text-amber-400 font-bold">Remains Draft</span>
+                        <span data-bench-verdict="warning" className="text-[11px] text-amber-800 dark:text-amber-300 font-bold rounded px-1"><AlertTriangle size={16} aria-hidden="true" className="inline mr-1" />Remains Draft</span>
                     </div>
                     <div className="divide-y divide-sf-divider max-h-48 overflow-y-auto bg-sf-surface">
                         {excluded.map((item, idx) => (
-                            <div key={idx} className="p-3 flex items-center justify-between text-xs">
+                            <div key={item.workItemId || idx} data-testid="bench-completion-row" className="p-3 flex items-center justify-between text-xs">
                                 <div>
                                     <span className="font-bold text-sf-text font-mono">
-                                        {item.sampleId}
+                                        {item.labSampleCode || t('benchErgonomics.codeMissing')}
                                     </span>
                                     <span className="text-sf-muted mx-2">·</span>
                                     <span className="text-sf-muted">{getAnalysisDisplayName(item.analysis, item.analysisName)}</span>
+                                    <div>{t('benchErgonomics.position')}: {item.rackPosition ?? t('benchErgonomics.unknown')} | {valueText(item)} {!item.checks && (item.displayUnit || t('benchErgonomics.unitUnknown'))}</div>
                                     <div className="text-[11px] text-red-600 dark:text-red-400 mt-0.5">
-                                        • {item.reasons?.[0] || 'Prerequisites or validation incomplete'}
+                                        • {messages(item).join('; ') || t('benchErgonomics.incomplete')}
                                     </div>
                                 </div>
                                 <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-500/15 text-amber-800 dark:text-amber-300">
@@ -164,7 +181,7 @@ export default function ReviewCompletionView({
                         className="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500"
                     />
                     <span>
-                        I verified the sample IDs, determinations, basis, and replicate numbers shown above against raw bench data.
+                        {t('benchErgonomics.confirm')}
                     </span>
                 </label>
 
@@ -176,7 +193,7 @@ export default function ReviewCompletionView({
                         type="button"
                         onClick={handleRecord}
                         disabled={!confirmed || !included.length || isSubmitting}
-                        className="px-5 py-2 rounded-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 transition-colors flex items-center gap-1.5"
+                        className="px-5 py-2 rounded-lg text-xs font-semibold bg-emerald-700 text-white hover:bg-emerald-800 disabled:opacity-50 transition-colors flex items-center gap-1.5"
                     >
                         {isSubmitting ? 'Recording...' : `Record ${included.length} Determination${included.length === 1 ? '' : 's'}`}
                         <ArrowRight size={13} />

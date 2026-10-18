@@ -4040,5 +4040,22 @@
       "LOD_LOQ_METHOD_VERSION_UNKNOWN": "Se desconoce la revisión actual del método.",
       "LOD_LOQ_FAILED": "Falló la solicitud del historial de blancos."
     }
+  },
+  "benchErgonomics": {
+    "density": "Densidad de la mesa de trabajo",
+    "standard": "Estándar",
+    "bench": "Banco",
+    "codeMissing": "Código de muestra no disponible",
+    "position": "Posición",
+    "unknown": "Desconocido",
+    "unitUnknown": "Unidad no disponible",
+    "flags": "Indicadores y advertencias",
+    "incomplete": "Requisitos o validación incompletos",
+    "confirm": "He verificado los códigos de muestra del laboratorio, las posiciones, los valores, las unidades, los indicadores, la base y los números de réplica con los datos originales del banco.",
+    "pdfDownload": "Descargar hoja de trabajo PDF",
+    "pdfDownloading": "Preparando hoja…",
+    "pdfFailed": "No se pudo descargar la hoja de trabajo.",
+    "pdfUnexpected": "El servidor no devolvió una hoja de trabajo PDF.",
+    "checksCount": "{checked}/{total} verificaciones"
   }
 }
