@@ -14,6 +14,27 @@ const intakeProfile = require('../services/intakeProfileService');
 const { massRequirement, massDeficit } = require('../services/intakeMassService');
 const batchObservations = require('../services/batchIntakeObservationsService');
 
+// Keep shared intake semantics for expected client errors; redact server failures here
+// without changing the shared responder used by other controllers.
+const isClientError = err => err.statusCode >= 400 && err.statusCode < 500;
+function respondIntakeError(res, err) {
+    if (isClientError(err) || (!err.statusCode && err.name === 'ProfileReferenceConflictError')) {
+        return require('../services/intakeErrors').respond(res, err);
+    }
+    console.error('[intakeService]', err);
+    const message = 'Internal server error';
+    if (err.payload) {
+        return res.status(err.statusCode).json({
+            ...(Object.hasOwn(err.payload, 'success') && { success: err.payload.success }),
+            code: err.payload.code ?? err.code,
+            ...(Object.hasOwn(err.payload, 'error') && { error: message }),
+            ...(Object.hasOwn(err.payload, 'message') && { message })
+        });
+    }
+    if (err.statusCode) return res.status(err.statusCode).json({ success: false, code: err.code, error: message, message });
+    return res.status(500).json({ success: false, message });
+}
+
 // In-memory cache for reverse geocoding (24hr TTL)
 const geocodeCache = new Map();
 
@@ -27,7 +48,7 @@ exports.processIntake = async (req, res) => {
         const result = await prisma.$transaction(tx => intake.intake(tx, { body: req.body, user: req.user, expectedSnapshot }), { timeout: 30000 });
         return res.json(result.response);
     } catch (error) {
-        return require('../services/intakeErrors').respond(res, error);
+        return respondIntakeError(res, error);
     }
 };
 
@@ -206,14 +227,15 @@ exports.discardDraft = async (req, res) => {
             return res.json({ success: true, message: `Sample ${sample.originalId} deleted.` });
         }
     } catch (error) {
+        if (error.statusCode >= 500) console.error('[discardDraft] ERROR:', error);
         if (error.name === 'TransitionError' || error.code === 'ILLEGAL_STATUS_TRANSITION' || error.statusCode) {
             return res.status(error.statusCode || 409).json({
                 error: error.code || 'ILLEGAL_STATUS_TRANSITION',
-                message: error.message
+                message: (error.statusCode || 409) < 500 ? error.message : 'Internal server error'
             });
         }
         console.error('[discardDraft] ERROR:', error);
-        res.status(500).json({ error: 'Failed to discard: ' + error.message });
+        res.status(500).json({ error: 'Failed to discard' });
     }
 };
 
@@ -267,7 +289,7 @@ exports.checkDuplicate = async (req, res) => {
         });
     } catch (err) {
         console.error('[checkDuplicate] ERROR:', err);
-        return res.status(500).json({ error: 'Failed to check duplicate: ' + err.message });
+        return res.status(500).json({ error: 'Failed to check duplicate' });
     }
 };
 
@@ -302,7 +324,7 @@ exports.calculateMassRequirement = async (req, res) => {
         });
     } catch (err) {
         console.error('[calculateMassRequirement] ERROR:', err);
-        return res.status(500).json({ error: 'Failed to calculate mass requirement: ' + err.message });
+        return res.status(500).json({ error: 'Failed to calculate mass requirement' });
     }
 };
 
@@ -325,7 +347,7 @@ exports.uploadIntakePhoto = (req, res) => {
         });
     } catch (err) {
         console.error('[uploadIntakePhoto] ERROR:', err);
-        return res.status(500).json({ error: 'Photo upload failed: ' + err.message });
+        return res.status(500).json({ error: 'Photo upload failed' });
     }
 };
 
@@ -344,7 +366,7 @@ exports.getAdminUnits = (req, res) => {
         return res.json({ success: true, countries: adminBoundaries });
     } catch (err) {
         console.error('[getAdminUnits] ERROR:', err);
-        return res.status(500).json({ error: 'Failed to fetch admin units: ' + err.message });
+        return res.status(500).json({ error: 'Failed to fetch admin units' });
     }
 };
 
@@ -365,7 +387,7 @@ exports.parseCoordinatesEndpoint = (req, res) => {
         return res.json({ success: true, ...parsed });
     } catch (err) {
         console.error('[parseCoordinatesEndpoint] ERROR:', err);
-        return res.status(500).json({ error: 'Failed to parse coordinates: ' + err.message });
+        return res.status(500).json({ error: 'Failed to parse coordinates' });
     }
 };
 
@@ -483,7 +505,7 @@ exports.reverseGeocode = async (req, res) => {
         });
     } catch (err) {
         console.error('[reverseGeocode] ERROR:', err);
-        return res.status(500).json({ error: 'Reverse geocode failed: ' + err.message });
+        return res.status(500).json({ error: 'Reverse geocode failed' });
     }
 };
 
@@ -550,7 +572,7 @@ exports.batchGeometryCheck = async (req, res) => {
         });
     } catch (err) {
         console.error('[batchGeometryCheck] ERROR:', err);
-        return res.status(500).json({ error: 'Batch geometry check failed: ' + err.message });
+        return res.status(500).json({ error: 'Batch geometry check failed' });
     }
 };
 
@@ -565,7 +587,7 @@ exports.processBatchConsignmentIntake = async (req, res) => {
         const expectedSnapshots = Array.isArray(req.body.samples) ? await Promise.all(req.body.samples.map(body => require('../services/intakeService').snapshot(prisma, body))) : [];
         const result = await prisma.$transaction(tx => require('../services/consignmentIntakeService').receiveConsignment(tx, { body: req.body, user: req.user, expectedSnapshots }), { timeout: 60000 });
         return res.status(201).json(result);
-    } catch (error) { return require('../services/intakeErrors').respond(res, error); }
+    } catch (error) { return respondIntakeError(res, error); }
 };
 
 /**
@@ -618,7 +640,7 @@ exports.getConsignments = async (req, res) => {
         });
     } catch (err) {
         console.error('[getConsignments] ERROR:', err);
-        return res.status(500).json({ error: 'Failed to fetch consignments: ' + err.message });
+        return res.status(500).json({ error: 'Failed to fetch consignments' });
     }
 };
 
@@ -668,7 +690,7 @@ exports.getConsignmentDetail = async (req, res) => {
         return res.json({ success: true, consignment: require('../services/consignmentResponseService').consignmentResponse(await require('../services/custodyService').receiptView(prisma, consignment, 'consignment')) });
     } catch (err) {
         console.error('[getConsignmentDetail] ERROR:', err);
-        return res.status(err.statusCode || 500).json({ code: err.code || 'CONSIGNMENT_FETCH_ERROR', error: 'Failed to fetch consignment detail: ' + err.message });
+        return res.status(err.statusCode || 500).json({ code: err.code || 'CONSIGNMENT_FETCH_ERROR', error: isClientError(err) ? 'Failed to fetch consignment detail: ' + err.message : 'Failed to fetch consignment detail' });
     }
 };
 
@@ -767,9 +789,9 @@ exports.parseManifestEndpoint = async (req, res) => {
         });
     } catch (err) {
         console.error('[parseManifestEndpoint] ERROR:', err);
-        if (err.statusCode) return res.status(err.statusCode).json({ error: err.message, code: err.code });
+        if (err.statusCode) return res.status(err.statusCode).json({ error: isClientError(err) ? err.message : 'Failed to parse manifest', code: err.code });
         if (err instanceof profileIdentity.ProfileReferenceConflictError) return res.status(409).json({error: err.code, code: err.code, message: err.message});
-        return res.status(500).json({ error: 'Failed to parse manifest: ' + err.message });
+        return res.status(500).json({ error: 'Failed to parse manifest' });
     }
 };
 
@@ -873,7 +895,7 @@ exports.getSampleIntakeContext = async (req, res) => {
         });
     } catch (err) {
         console.error('[getSampleIntakeContext] Error:', err);
-        return res.status(500).json({ success: false, error: 'SERVER_ERROR', message: err.message });
+        return res.status(500).json({ success: false, error: 'SERVER_ERROR', message: 'Internal server error' });
     }
 };
 

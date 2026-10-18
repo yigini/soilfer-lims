@@ -99,15 +99,15 @@ Group common laboratory determinations into 1-click packages for intake officers
 
 ## 5. Quality Assurance & Batch Control Aligned with ISO/IEC 17025
 
-Quality assurance is embedded into every analytical batch to support an ISO/IEC 17025 aligned management system:
+Quality settings belong to each laboratory and its validated methods. The application supplies defaults; it does not establish a laboratory's approved acceptance limits.
 
-1. **Batch QC Samples**:
-   * **Method Blanks:** Checked against default background limit ($\le 0.05$).
-   * **Analytical Duplicates:** Verified using Relative Percent Difference (default $\text{RPD} \le 10.0\%$).
-   * **Certified Reference Materials (CRMs):** Verified against recovery windows (default $90.0\% \le \text{Recovery} \le 110.0\%$).
-   * *Note: Thresholds are configurable defaults. Laboratories must validate and approve method-specific acceptance limits.*
-2. **Automated Evaluation:** Batches are classified as `QC_PASS` or `QC_FAIL` by the calculation engine based on configured limits.
-3. **Manager Disposition Overrides:** When natural soil heterogeneity causes duplicate failure, only an authorized `LAB_MANAGER` can sign a `PROCEED_WITH_WARNING` disposition with a mandatory written justification recorded in the audit trail.
+1. **Choose and review the policy.** `ISO17025_STRICT`, `BASIC` and `ADVISORY` are shipped presets. Laboratory overrides and supported analysis/method overrides are resolved by `policyService`. Changes are versioned and audited with a reason. Use the resolved policy and its source, rather than assuming that an example blank, duplicate or recovery threshold applies to every lab.
+2. **Configure versioned QC criteria.** `QcRule` is scoped to a laboratory and analysis, with optional methodology-specific criteria and effective dates. Resolution combines the applicable rule, method/analysis overrides, shipped analysis defaults where applicable, and laboratory policy. Blank criteria, duplicate criteria, CRM/LRM criteria and QC actions must be reviewed for the actual method. Unsupported modes are rejected rather than silently applied.
+3. **Maintain the reference catalogue.** `ReferenceMaterial` identifies a CRM or in-house/check-soil lot, its status and analyte values. Register the correct lot and values and select an eligible reference for the run. Preserve earlier value records when correcting a reference value.
+4. **Approve control-chart limits deliberately.** Control-chart series are scoped by lab, analysis, methodology and reference lot. Proposals use selected eligible observations and the configured minimum point count; authorized approval creates the limit version. Evaluation uses approved limits and the configured Westgard rules, with a policy-controlled fixed basis where applicable. Adding a reading does not automatically approve or replace the limits.
+5. **Evaluate, then disposition.** Run QC positions are evaluated using resolved criteria and a recorded policy/rule snapshot. Blocking, warning and advisory behavior follows the lab policy. An authorized manager can disposition a failed batch where permitted, with a mandatory reason; earlier QC readings and evaluations remain available for audit.
+
+For the actual resolution order and supported fields, see [`policyService`](../server/services/policyService.js), [`qcRuleService`](../server/services/qcRuleService.js), [`qcPolicyService`](../server/services/qcPolicyService.js), [`referenceMaterialService`](../server/services/referenceMaterialService.js) and [`controlChartService`](../server/services/controlChartService.js).
 
 ---
 

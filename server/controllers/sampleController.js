@@ -16,6 +16,27 @@ const profileIdentity = require('../services/profileIdentityService');
 const sampleHolds = require('../services/sampleHoldService');
 const policyService = require('../services/policyService');
 
+// Keep shared intake semantics for expected client errors; redact server failures here
+// without changing the shared responder used by other controllers.
+const isClientError = err => err.statusCode >= 400 && err.statusCode < 500;
+function respondIntakeError(res, err) {
+    if (isClientError(err) || (!err.statusCode && err.name === 'ProfileReferenceConflictError')) {
+        return require('../services/intakeErrors').respond(res, err);
+    }
+    console.error('[intakeService]', err);
+    const message = 'Internal server error';
+    if (err.payload) {
+        return res.status(err.statusCode).json({
+            ...(Object.hasOwn(err.payload, 'success') && { success: err.payload.success }),
+            code: err.payload.code ?? err.code,
+            ...(Object.hasOwn(err.payload, 'error') && { error: message }),
+            ...(Object.hasOwn(err.payload, 'message') && { message })
+        });
+    }
+    if (err.statusCode) return res.status(err.statusCode).json({ success: false, code: err.code, error: message, message });
+    return res.status(500).json({ success: false, message });
+}
+
 exports.getSampleHolds = async (req, res) => {
     try {
         const sample = await prisma.sample.findUnique({ where: { id: String(req.params.id) } });
@@ -26,7 +47,8 @@ exports.getSampleHolds = async (req, res) => {
             metadataRepairNeeded: sampleHolds.legacyHoldState(sample).metadataRepairNeeded, canResolve: hasPermission(req.user, 'APPROVE_RESULTS') });
     } catch (err) {
         const mapped = require('../services/workflowStateRules').mapStateError(err);
-        return res.status(mapped.statusCode || 500).json({ code: mapped.code || 'HOLD_FETCH_ERROR', error: mapped.message });
+        if (!isClientError(mapped)) console.error('[getSampleHolds] Error:', err);
+        return res.status(mapped.statusCode || 500).json({ code: mapped.code || 'HOLD_FETCH_ERROR', error: isClientError(mapped) ? mapped.message : 'Internal server error' });
     }
 };
 
@@ -38,7 +60,8 @@ exports.resolveSampleHold = async (req, res) => {
         return res.json({ hold: sampleHolds.presentHold(hold) });
     } catch (err) {
         const mapped = require('../services/workflowStateRules').mapStateError(err);
-        return res.status(mapped.statusCode || 500).json({ code: mapped.code || 'HOLD_RESOLVE_ERROR', error: mapped.message });
+        if (!isClientError(mapped)) console.error('[resolveSampleHold] Error:', err);
+        return res.status(mapped.statusCode || 500).json({ code: mapped.code || 'HOLD_RESOLVE_ERROR', error: isClientError(mapped) ? mapped.message : 'Internal server error' });
     }
 };
 
@@ -182,7 +205,7 @@ exports.searchExpectedSamples = async (req, res) => {
         res.json(results);
     } catch (err) {
         console.error('[DEBUG] searchExpectedSamples CRASH:', err);
-        return error(res, 500, 'SAMPLE_SEARCH_ERROR', null, err.message || 'Internal Server Error');
+        return error(res, 500, 'SAMPLE_SEARCH_ERROR', 'Internal Server Error');
     }
 };
 
@@ -508,7 +531,7 @@ exports.getSamples = async (req, res) => {
         });
     } catch (err) {
         console.error("[getSamples] ERROR:", err);
-        return error(res, 500, 'SAMPLE_FETCH_ERROR', null, "Internal Server Error", { message: err.message });
+        return error(res, 500, 'SAMPLE_FETCH_ERROR', 'Internal Server Error');
     }
 };
 
@@ -556,7 +579,10 @@ exports.updateStatus = async (req, res) => {
         return res.json(updated);
     } catch (err) {
         const mapped = require('../services/workflowStateRules').mapStateError(err);
-        if (mapped.statusCode) return res.status(mapped.statusCode).json({ code: mapped.code, error: mapped.message, ...(mapped.details && { details: mapped.details }) });
+        if (mapped.statusCode) {
+            if (!isClientError(mapped)) console.error('[updateStatus] Error:', err);
+            return res.status(mapped.statusCode).json({ code: mapped.code, error: isClientError(mapped) ? mapped.message : 'Failed to update status', ...(isClientError(mapped) && mapped.details && { details: mapped.details }) });
+        }
         console.error('[updateStatus] Error:', err);
         return error(res, 500, 'SAMPLE_UPDATE_ERROR', null, 'Failed to update status');
     }
@@ -596,7 +622,11 @@ exports.updatePhaseStatus = async (req, res) => {
         });
         return res.json(outcome.sample);
     } catch (err) {
-        if (err.statusCode || err.status) return res.status(err.statusCode || err.status).json({ code: err.code, error: err.message, details: err.details });
+        if (err.statusCode || err.status) {
+            const status = err.statusCode || err.status;
+            if (status >= 500) console.error('[updatePhaseStatus] Error:', err);
+            return res.status(status).json({ code: err.code, error: status < 500 ? err.message : 'Failed to update phase status', ...(status < 500 && { details: err.details }) });
+        }
         console.error('[updatePhaseStatus] Error:', err);
         return error(res, 500, 'PHASE_UPDATE_ERROR', null, 'Failed to update phase status');
     }
@@ -651,7 +681,7 @@ exports.receiveSample = async (req, res) => {
     try {
         const sample = await prisma.$transaction(tx => require('../services/intakeService').receiveSample(tx, { sampleId: req.params.id, body: req.body, user: req.user }));
         return res.json(sample);
-    } catch (error) { return require('../services/intakeErrors').respond(res, error); }
+    } catch (error) { return respondIntakeError(res, error); }
 };
 
 /**
@@ -681,7 +711,7 @@ exports.createWalkInSample = async (req, res) => {
             }
         }), { timeout: 30000 });
         return res.status(201).json({ sample: { ...sample, ...sampleMeta } });
-    } catch (error) { return require('../services/intakeErrors').respond(res, error); }
+    } catch (error) { return respondIntakeError(res, error); }
 };
 
 /**
@@ -728,9 +758,9 @@ exports.undoIntake = async (req, res) => {
 
     } catch (error) {
         const mapped = require('../services/workflowStateRules').mapStateError(error);
-        if (!mapped.statusCode) console.error('[undoIntake] Error:', error);
-        res.status(mapped.statusCode || 500).json({ error: mapped.statusCode ? mapped.message : 'Failed to undo intake',
-            ...(mapped.code && { code: mapped.code }), ...(mapped.details && { details: mapped.details }) });
+        if (!isClientError(mapped)) console.error('[undoIntake] Error:', error);
+        res.status(mapped.statusCode || 500).json({ error: isClientError(mapped) ? mapped.message : 'Failed to undo intake',
+            ...(mapped.code && { code: mapped.code }), ...(isClientError(mapped) && mapped.details && { details: mapped.details }) });
     }
 };
 
@@ -1052,7 +1082,7 @@ exports.acceptSample = async (req, res) => {
         }, { timeout: 30000 });
         if (!result) return res.status(404).json({ error: 'Sample not found' });
         return res.json(result);
-    } catch (error) { return require('../services/intakeErrors').respond(res, error); }
+    } catch (error) { return respondIntakeError(res, error); }
 };
 exports.deleteSample = async (req, res) => {
     const { id } = req.params;
@@ -1229,10 +1259,11 @@ exports.deleteSample = async (req, res) => {
 
         res.json({ message: 'Sample deleted successfully' });
     } catch (error) {
+        if (error.statusCode >= 500) console.error('[deleteSample] Error:', error);
         if (error.name === 'TransitionError' || error.code === 'ILLEGAL_STATUS_TRANSITION' || error.statusCode) {
             return res.status(error.statusCode || 409).json({
                 error: error.code || 'ILLEGAL_STATUS_TRANSITION',
-                message: error.message
+                message: (error.statusCode || 409) < 500 ? error.message : 'Internal server error'
             });
         }
         console.error('[deleteSample] Error:', error);
@@ -1433,14 +1464,15 @@ exports.batchDeleteSamples = async (req, res) => {
 
         res.json({ message: msg, reverted: toRevert.length, deleted: toDelete.length });
     } catch (error) {
+        if (error.statusCode >= 500) console.error('[batchDeleteSamples] Error:', error);
         if (error.name === 'TransitionError' || error.code === 'ILLEGAL_STATUS_TRANSITION' || error.statusCode) {
             return res.status(error.statusCode || 409).json({
                 error: error.code || 'ILLEGAL_STATUS_TRANSITION',
-                message: error.message
+                message: (error.statusCode || 409) < 500 ? error.message : 'Internal server error'
             });
         }
         console.error('[batchDeleteSamples] Error:', error);
-        res.status(500).json({ error: 'Failed to batch delete samples: ' + error.message });
+        res.status(500).json({ error: 'Failed to batch delete samples' });
     }
 };
 
@@ -1629,9 +1661,9 @@ exports.updateSampleAnalyses = async (req, res) => {
             { idempotencyKey: req.body.idempotencyKey || req.headers['x-idempotency-key'] });
         return res.json(outcome);
     } catch (err) {
-        if (!err.statusCode) console.error('[updateSampleAnalyses] Error:', err);
-        return res.status(err.statusCode || 500).json({ error: err.statusCode ? err.message : 'Failed to update analyses',
-            code: err.code, ...(err.details || {}) });
+        if (!isClientError(err)) console.error('[updateSampleAnalyses] Error:', err);
+        return res.status(err.statusCode || 500).json({ error: isClientError(err) ? err.message : 'Failed to update analyses',
+            code: err.code, ...(isClientError(err) ? err.details || {} : {}) });
     }
 };
 
@@ -1707,9 +1739,9 @@ exports.approveSample = async (req, res) => {
         res.json({ ...updated, success: true, status: 'APPROVED' });
     } catch (error) {
         const mapped = require('../services/workflowStateRules').mapStateError(error);
-        if (!mapped.statusCode) console.error('[approveSample] Error:', error);
-        res.status(mapped.statusCode || 500).json({ error: mapped.statusCode ? mapped.message : 'Failed to approve sample',
-            ...(mapped.code && { code: mapped.code }), ...(mapped.details && { details: mapped.details }) });
+        if (!isClientError(mapped)) console.error('[approveSample] Error:', error);
+        res.status(mapped.statusCode || 500).json({ error: isClientError(mapped) ? mapped.message : 'Failed to approve sample',
+            ...(mapped.code && { code: mapped.code }), ...(isClientError(mapped) && mapped.details && { details: mapped.details }) });
     }
 };
 
@@ -1727,7 +1759,10 @@ exports.clearPreparationEvidence = async (req, res) => {
         );
         return res.json(outcome);
     } catch (err) {
-        if (err.statusCode) return res.status(err.statusCode).json({ code: err.code, error: err.message, details: err.details });
+        if (err.statusCode) {
+            if (!isClientError(err)) console.error('[clearPreparationEvidence] Error:', err);
+            return res.status(err.statusCode).json({ code: err.code, error: isClientError(err) ? err.message : 'Failed to clear preparation evidence.', ...(isClientError(err) && { details: err.details }) });
+        }
         console.error('[clearPreparationEvidence] Error:', err);
         return res.status(500).json({ code: 'PREPARATION_CLEARANCE_FAILED', error: 'Failed to clear preparation evidence.' });
     }
@@ -1739,9 +1774,9 @@ exports.archiveSample = async (req, res) => {
         return res.json({ success: true, message: 'Archiving task created. Please assign a technician in the work items table.', ...result });
     } catch (error) {
         const mapped = require('../services/workflowStateRules').mapStateError(error);
-        if (!mapped.statusCode) console.error('[archiveSample] Error:', error);
-        return res.status(mapped.statusCode || 500).json({ error: mapped.statusCode ? mapped.message : 'Failed to archive sample',
-            ...(mapped.code && { code: mapped.code }), ...(mapped.details || {}) });
+        if (!isClientError(mapped)) console.error('[archiveSample] Error:', error);
+        return res.status(mapped.statusCode || 500).json({ error: isClientError(mapped) ? mapped.message : 'Failed to archive sample',
+            ...(mapped.code && { code: mapped.code }), ...(isClientError(mapped) ? mapped.details || {} : {}) });
     }
 };
 
@@ -1751,9 +1786,9 @@ exports.disposeSample = async (req, res) => {
         return res.json({ success: true, message: 'Disposal task created. Please assign a technician in the work items table.', ...result });
     } catch (error) {
         const mapped = require('../services/workflowStateRules').mapStateError(error);
-        if (!mapped.statusCode) console.error('[disposeSample] Error:', error);
-        return res.status(mapped.statusCode || 500).json({ error: mapped.statusCode ? mapped.message : 'Failed to dispose sample',
-            ...(mapped.code && { code: mapped.code }), ...(mapped.details || {}) });
+        if (!isClientError(mapped)) console.error('[disposeSample] Error:', error);
+        return res.status(mapped.statusCode || 500).json({ error: isClientError(mapped) ? mapped.message : 'Failed to dispose sample',
+            ...(mapped.code && { code: mapped.code }), ...(isClientError(mapped) ? mapped.details || {} : {}) });
     }
 };
 // ─── GET /api/samples/locations ─── (Globe GPS data)
@@ -1827,7 +1862,8 @@ exports.getSampleWorkspace = async (req, res) => {
         res.json(workspace);
     } catch (err) {
         if (err.statusCode) {
-            return res.status(err.statusCode).json({ error: err.message, code: err.code });
+            if (!isClientError(err)) console.error('[getSampleWorkspace] Error:', err);
+            return res.status(err.statusCode).json({ error: isClientError(err) ? err.message : 'Failed to fetch sample workspace', code: err.code });
         }
         console.error('[getSampleWorkspace] Error:', err);
         res.status(500).json({ error: 'Failed to fetch sample workspace' });
@@ -1932,9 +1968,9 @@ exports.applyOrderRevision = async (req, res) => {
             { mode: 'order', idempotencyKey: idempotencyKey || req.headers['x-idempotency-key'] });
         return res.json(outcome);
     } catch (err) {
-        if (!err.statusCode) console.error('[applyOrderRevision] Error:', err);
-        return res.status(err.statusCode || 500).json({ error: err.statusCode ? err.message : 'Failed to apply order revision',
-            code: err.code, ...(err.details || {}) });
+        if (!isClientError(err)) console.error('[applyOrderRevision] Error:', err);
+        return res.status(err.statusCode || 500).json({ error: isClientError(err) ? err.message : 'Failed to apply order revision',
+            code: err.code, ...(isClientError(err) ? err.details || {} : {}) });
     }
 };
 
@@ -1978,7 +2014,7 @@ exports.repairWorkItems = async (req, res) => {
         });
     } catch (err) {
         console.error('[repairWorkItems] Error:', err);
-        res.status(err.statusCode || 500).json({ error: err.statusCode ? err.message : 'Failed to repair work items', ...(err.code && { code: err.code }) });
+        res.status(err.statusCode || 500).json({ error: isClientError(err) ? err.message : 'Failed to repair work items', ...(err.code && { code: err.code }) });
     }
 };
 
