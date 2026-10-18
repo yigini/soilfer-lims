@@ -131,6 +131,9 @@ async function calcTemplate(reference, { analysisCode, methodologyId = null } = 
 }
 
 function validatePairs(values, status = 400, code = 'POLICY_VALUE_INVALID') {
+    if (values['qc.blankHistoryMinPoints'] > values['qc.blankHistoryWindow'] || values['qc.blankLodMultiplier'] > values['qc.blankLoqMultiplier']) {
+        throw error(status, code, 'The blank-history minimum cannot exceed its window, and the LOD multiplier cannot exceed the LOQ multiplier.');
+    }
     if (!require('../../shared/numberParse').validateNumberFormat({ decimal: values['numbers.decimalSeparator'], thousands: values['numbers.thousandsSeparator'] })) {
         throw error(status, code, 'Decimal and thousands separators must differ.');
     }
