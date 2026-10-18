@@ -56,7 +56,7 @@ Whether you run a single provincial soil laboratory or coordinate a national net
 1. **Field Intake & Provenance**: Expected arrivals from KoboToolbox mobile surveys, physical inspection of bags, barcode/QR label printing, and non-conformance tracking.
 2. **Operational Prerequisite Gates**: Server-side enforced preparation gates (configurable drying and sieving steps, default 40 °C forced-air drying and 2 mm sieving) requiring verified operational checklist receipts before testing can begin.
 3. **Bench Execution & Worksheets**: Single-entry bench worksheets for routine soil chemistry, AAS, ICP, photometry, titration, and mid-infrared (MIR) diffuse reflectance spectroscopy.
-4. **Quality Assurance Workflows**: Automated calculation and evaluation of method blanks, analytical duplicate RPD, and Certified Reference Material (CRM) recovery against laboratory-approved acceptance limits (with configurable default thresholds).
+4. **Quality Assurance Workflows**: Evaluate method blanks, analytical duplicates, reference materials and control charts against laboratory-approved, versioned per-lab and per-method policy and QC rules.
 5. **Analytical Reports**: PDF reports generated via PDFKit featuring laboratory branding, USDA 12-class soil texture classification, 5-tier agronomic ratings, and authorized electronic approval records.
 6. **National Soil Information System (SIS) Interoperability**: Data exchange and export tools formatted according to GloSIS ontologies and RFC 7946 GeoJSON guidelines.
 
@@ -87,13 +87,13 @@ To switch modes, simply adjust `DEPLOYMENT_MODE=local` or `DEPLOYMENT_MODE=globa
 
 ### 🛡️ 2. Quality Assurance & Batch Control Aligned with ISO/IEC 17025
 SoilFER-LIMS is designed to support workflows and records that contribute to an ISO/IEC 17025 quality system. Formal accreditation belongs to the testing laboratory and its validated procedures.
-* **Typed Quality Control Samples**:
-  * **Method Blanks**: Automatic evaluation against background limits (default $\le 0.05$).
-  * **Analytical Duplicates**: Relative Percent Difference monitoring (default $\text{RPD} \le 10.0\%$).
-  * **Certified Reference Materials (CRMs)**: Recovery monitoring (default $90.0\% \le \text{Recovery} \le 110.0\%$).
-* **Automated Batch Disposition**: Batches transition to `QC_PASS` or `QC_FAIL` based on entered readings and configured acceptance criteria.
-* **Managerial Disposition Overrides**: Authorize `PROCEED_WITH_WARNING` or order batch re-runs with mandatory audit trail justification.
-* **Method-Specific Thresholds**: Laboratories must review, validate, and approve method-specific limits appropriate to their testing scope.
+* **Laboratory-owned policy**: `ISO17025_STRICT`, `BASIC` and `ADVISORY` presets provide shipped defaults. Labs can override supported settings, with analysis/method overrides where available; no acceptance number is a universal rule. Review and validate limits for the method and laboratory before operational use.
+* **Versioned QC rules**: `QcRule` supplies lab/analysis criteria and optional method-specific criteria. The evaluator resolves these with `policyService` and applicable shipped analysis defaults, and records the resolved rule and policy snapshot with the evaluation.
+* **Reference materials**: `ReferenceMaterial` records identify CRM/check-soil lots and their analyte values. Choose an eligible material and lot for the laboratory and run; do not substitute a generic recovery window for the configured criterion.
+* **Control charts**: Lab/analysis/method/reference-lot series use approved limits and the configured control-chart/Westgard rules. Proposals and approvals are deliberate actions; the limits are not continuously re-estimated after every measurement.
+* **Batch evaluation and disposition**: QC results and the applicable policy determine blocking, warning or advisory behavior. Authorized dispositions require a recorded reason and preserve previous evaluations and readings.
+
+The current resolution paths are documented in [`policyService`](server/services/policyService.js), [`qcRuleService`](server/services/qcRuleService.js), [`qcPolicyService`](server/services/qcPolicyService.js) and [`controlChartService`](server/services/controlChartService.js).
 
 ### 🌿 3. USDA Soil Texture & Agronomic Interpretation Engine
 * **USDA 12-Class Textural Triangle**: Automatic soil texture derivation (`Sandy Loam`, `Clay`, `Silty Clay Loam`, etc.) with strict composite mass-balance closure validation ($\text{Sand} + \text{Silt} + \text{Clay} = 100\% \pm 2.0\%$).
