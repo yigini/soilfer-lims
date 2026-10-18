@@ -2203,5 +2203,51 @@
       "LOD_LOQ_METHOD_VERSION_UNKNOWN": "Se desconoce la revisión actual del método.",
       "LOD_LOQ_FAILED": "Falló la solicitud del historial de blancos."
     }
+  },
+  "workbenchWorksheet": {
+    "title": "Hoja de trabajo de la serie",
+    "run": "Serie",
+    "lab": "Laboratorio",
+    "analyte": "Analito",
+    "method": "Método",
+    "instrument": "Instrumento",
+    "analyst": "Analista",
+    "started": "Inicio (UTC)",
+    "templateAtPrint": "Plantilla al imprimir",
+    "noTemplate": "Sin plantilla de cálculo activa",
+    "unknown": "Desconocido",
+    "notStarted": "Sin iniciar",
+    "blankNotice": "Hoja de banco en blanco. Registre las observaciones originales en las celdas vacías. No es un resultado ni un informe analítico.",
+    "position": "Pos.",
+    "identity": "Código de muestra / posición de CC",
+    "rawObservation": "Observación original",
+    "lot": "Lote",
+    "codeNeedsReview": "El código requiere revisión",
+    "analystSignature": "Firma del analista / fecha",
+    "reviewerSignature": "Firma del revisor / fecha",
+    "page": "Página",
+    "duplicateOf": "de la posición",
+    "kinds": {
+      "BLANK": "Blanco",
+      "DUPLICATE": "Duplicado",
+      "LRM": "MRL",
+      "CRM": "MRC",
+      "ICV": "ICV",
+      "CCV": "CCV",
+      "CCB": "CCB",
+      "CAL_STD": "Patrón de calibración"
+    },
+    "errors": {
+      "WORKSHEET_PERMISSION_DENIED": "Se requiere permiso para la hoja de trabajo.",
+      "WORKSHEET_ANALYTE_REQUIRED": "Seleccione un analito para esta serie mixta.",
+      "WORKSHEET_ANALYTE_NOT_IN_RUN": "El analito seleccionado no pertenece a esta serie.",
+      "WORKSHEET_CONTEXT_INVALID": "El contexto conservado de la serie requiere revisión.",
+      "WORKSHEET_MEMBERSHIP_INVALID": "Los miembros de la serie requieren revisión.",
+      "WORKSHEET_POSITIONS_REQUIRED": "Este analito no tiene posiciones imprimibles.",
+      "WORKSHEET_FAILED": "No se pudo generar la hoja de trabajo.",
+      "BATCH_NOT_FOUND": "Serie no encontrada.",
+      "QC_BATCH_SCOPE_DENIED": "La serie está fuera del ámbito de su laboratorio.",
+      "WORKSHEET_LAYOUT_TOO_LARGE": "Un encabezado o una fila es demasiado largo para esta hoja de trabajo."
+    }
   }
 }

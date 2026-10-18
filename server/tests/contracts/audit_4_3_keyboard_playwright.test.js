@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 const { chromium } = require('playwright');
 const { qcGateFixture } = require('../helpers/qcGateFixture');
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
+const confirmationLabel = require('../../../client/src/translations/en.json').benchErgonomics.confirm;
 
 test('real Chromium types and records 40 values through the production app with keyboard input only', async () => {
     const f = await qcGateFixture({ criteria: { blankPerBatch: 0, lrmPerBatch: 0, duplicateEvery: 0, crmEveryNBatches: 0 } });
@@ -96,10 +97,14 @@ test('real Chromium types and records 40 values through the production app with 
             await page.keyboard.press('Enter');
             const preview = await (await previewResponse).json();
             expect(preview.included).toHaveLength(40); expect(preview.excluded).toHaveLength(0);
-            await page.getByText('I verified the sample IDs, determinations, basis, and replicate numbers shown above against raw bench data.').waitFor();
+            const confirmation = page.getByRole('checkbox', { name: confirmationLabel, exact: true });
+            await confirmation.waitFor();
+            expect(await confirmation.isChecked()).toBe(false);
             await tabTo(() => document.activeElement?.type === 'checkbox' &&
                 document.activeElement.closest('label')?.textContent.includes('I verified'));
-            await page.keyboard.press('Space'); await page.keyboard.press('Tab');
+            await page.keyboard.press('Space');
+            expect(await confirmation.isChecked()).toBe(true);
+            await page.keyboard.press('Tab');
             expect(await page.locator(':focus').textContent()).toContain('Record 40 Determinations');
             const committedResponse = page.waitForResponse(response => response.url().endsWith('/api/workbench/v2/completion/commit'));
             await page.keyboard.press('Enter');

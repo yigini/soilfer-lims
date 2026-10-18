@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const workbenchController = require('../controllers/workbenchController');
+const worksheetController = require('../controllers/workbenchWorksheetController');
 const calculationController = require('../controllers/calculationTemplateController');
 const importController = require('../controllers/instrumentImportController');
 const { verifyToken, checkPermission } = require('../middleware/authMiddleware');
@@ -9,6 +10,7 @@ router.use(verifyToken);
 
 // Technician workbench queue (analysis-grouped)
 router.get('/queue', checkPermission('ENTER_RESULTS'), workbenchController.getQueue);
+router.get('/runs/:batchId/worksheet.pdf', checkPermission('ENTER_RESULTS'), worksheetController.getWorksheet);
 
 // Batch save results (draft or complete)
 router.post('/batch-save', checkPermission('ENTER_RESULTS'), workbenchController.batchSave);

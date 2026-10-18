@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useLanguage } from '../../context/LanguageContext';
+import RunWorksheetDownload from './RunWorksheetDownload';
 
 export default function RunHeader({ batch, analysisCode, canEdit = false, onChanged }) {
     const { t } = useLanguage();
@@ -27,7 +28,10 @@ export default function RunHeader({ batch, analysisCode, canEdit = false, onChan
         finally { setBusy(false); }
     };
     return <section data-testid="run-header" className="rounded-xl border border-sf-divider bg-sf-surface p-4 mb-3 space-y-3">
-        <h3 className="text-sm font-semibold">{t('runFirst.header')}</h3>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+            <h3 className="text-sm font-semibold">{t('runFirst.header')}</h3>
+            <RunWorksheetDownload batch={batch} analysisCode={analysisCode} />
+        </div>
         <dl className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
             <div><dt className="text-sf-muted">{t('runFirst.instrument')}</dt><dd>{batch.instrument || t('runFirst.manual')}</dd></div>
             <div><dt className="text-sf-muted">{t('runFirst.method')}</dt><dd data-testid="run-method-revision">{revision ?

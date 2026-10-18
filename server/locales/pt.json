@@ -2203,5 +2203,51 @@
       "LOD_LOQ_METHOD_VERSION_UNKNOWN": "A revisão atual do método é desconhecida.",
       "LOD_LOQ_FAILED": "Falha ao solicitar o histórico de brancos."
     }
+  },
+  "workbenchWorksheet": {
+    "title": "Folha de trabalho da corrida",
+    "run": "Corrida",
+    "lab": "Laboratório",
+    "analyte": "Analito",
+    "method": "Método",
+    "instrument": "Instrumento",
+    "analyst": "Analista",
+    "started": "Início (UTC)",
+    "templateAtPrint": "Modelo na impressão",
+    "noTemplate": "Sem modelo de cálculo ativo",
+    "unknown": "Desconhecido",
+    "notStarted": "Não iniciada",
+    "blankNotice": "Folha de bancada em branco. Registre as observações brutas nas células vazias. Não é um resultado nem um relatório analítico.",
+    "position": "Pos.",
+    "identity": "Código de amostra / posição de CQ",
+    "rawObservation": "Observação bruta",
+    "lot": "Lote",
+    "codeNeedsReview": "Código precisa de revisão",
+    "analystSignature": "Assinatura do analista / data",
+    "reviewerSignature": "Assinatura do revisor / data",
+    "page": "Página",
+    "duplicateOf": "da posição",
+    "kinds": {
+      "BLANK": "Branco",
+      "DUPLICATE": "Duplicata",
+      "LRM": "MRL",
+      "CRM": "MRC",
+      "ICV": "ICV",
+      "CCV": "CCV",
+      "CCB": "CCB",
+      "CAL_STD": "Padrão de calibração"
+    },
+    "errors": {
+      "WORKSHEET_PERMISSION_DENIED": "É necessária permissão para a folha de trabalho.",
+      "WORKSHEET_ANALYTE_REQUIRED": "Selecione um analito para esta corrida mista.",
+      "WORKSHEET_ANALYTE_NOT_IN_RUN": "O analito selecionado não pertence a esta corrida.",
+      "WORKSHEET_CONTEXT_INVALID": "O contexto preservado da corrida precisa de revisão.",
+      "WORKSHEET_MEMBERSHIP_INVALID": "Os membros da corrida precisam de revisão.",
+      "WORKSHEET_POSITIONS_REQUIRED": "Este analito não tem posições imprimíveis.",
+      "WORKSHEET_FAILED": "Não foi possível gerar a folha de trabalho.",
+      "BATCH_NOT_FOUND": "Corrida não encontrada.",
+      "QC_BATCH_SCOPE_DENIED": "A corrida está fora do escopo do seu laboratório.",
+      "WORKSHEET_LAYOUT_TOO_LARGE": "Um cabeçalho ou uma linha é longo demais para esta folha de trabalho."
+    }
   }
 }

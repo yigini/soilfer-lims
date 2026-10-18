@@ -23,6 +23,8 @@ import SpectralIntakeModal from './SpectralIntakeModal';
 import { mergeLocalDraft, getLocalDraft, deleteLocalDraft, removePendingDraftOperations, getPendingOutboxOperations, purgeUserOfflineState } from '../../services/offline/offlineDb';
 import { recordSyncOperation, triggerSync } from '../../services/offline/syncEngine';
 import BenchMode from './BenchMode';
+import BenchDensity, { readBenchDensity } from './BenchDensity';
+import './benchDensity.css';
 
 /**
  * WorkbenchShell
@@ -43,6 +45,7 @@ export default function WorkbenchShell({
     const { t } = useLanguage();
     const { clearBlockers } = useHelp();
     const [toast, setToast] = useState(null);
+    const [density, setDensity] = useState(readBenchDensity);
 
     // Clean up blockers when navigating away from Workbench
     useEffect(() => {
@@ -740,7 +743,7 @@ export default function WorkbenchShell({
     } : groups[0] || null);
 
     return (
-        <div className="flex flex-col gap-4 max-w-7xl mx-auto px-4 py-6 font-sans">
+        <div data-testid="workbench-shell" data-density={density} className={`flex flex-col gap-4 max-w-7xl mx-auto px-4 py-6 font-sans ${density === 'bench' ? 'workbench-density-bench' : ''}`}>
             {/* Top Ribbon */}
             <div className="flex items-center justify-between text-[11px] text-sf-muted border-b border-sf-divider pb-2">
                 <span className="sf-kicker">SoilFER LIMS / Technician Workspace</span>
@@ -760,6 +763,7 @@ export default function WorkbenchShell({
 
                 {/* Save / Sync Status Pill */}
                 <div className="flex items-center gap-2">
+                    <BenchDensity value={density} onChange={setDensity} />
                     <BenchMode user={user} t={t} canManage={hasPermission?.('MANAGE_LAB_POLICIES')}
                         onSwitchAnalyst={handleSwitchAnalyst} registerRecordGuard={registerRecordGuard} />
                     {syncStatus === 'saving' ? (
