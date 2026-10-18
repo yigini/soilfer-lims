@@ -35,6 +35,10 @@ key('qc.calibrationFailAction', 'calibrationFailAction', { ICV: 'FAIL_BATCH', CC
     help: 'policies.help.qc_calibrationFailAction' });
 key('qc.lrmLimitMode', 'enum', 'CONTROL_CHART', 'FIXED_WINDOW', 'FIXED_WINDOW', { allowedValues: ['CONTROL_CHART', 'FIXED_WINDOW'] });
 key('qc.controlChartMinPoints', 'integer', 20, 20, 20, { min: 2, unit: 'observations' });
+key('qc.blankHistoryWindow', 'integer', 20, 20, 20, { min: 10, unit: 'blank observations' });
+key('qc.blankHistoryMinPoints', 'integer', 10, 10, 10, { min: 10, unit: 'blank observations' });
+key('qc.blankLodMultiplier', 'number', 3, 3, 3, { min: Number.MIN_VALUE, unit: 'sample SD' });
+key('qc.blankLoqMultiplier', 'number', 10, 10, 10, { min: Number.MIN_VALUE, unit: 'sample SD' });
 key('qc.westgardRules', 'westgard', { reject: ['1-3s', '2-2s', 'R-4s'], warn: ['1-2s'], review: ['4-1s', '10x'] }, { reject: ['1-3s'], warn: [], review: [] }, { reject: [], warn: [], review: [] },
     { allowedValues: ['1-2s', '1-3s', '2-2s', 'R-4s', '4-1s', '10x'] });
 key('qc.runProfiles', 'runProfiles', DEFAULT_RUN_PROFILES, DEFAULT_RUN_PROFILES, DEFAULT_RUN_PROFILES, { scope: 'LAB' });

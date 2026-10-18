@@ -4,9 +4,13 @@ const qcController = require('../controllers/qcController');
 const qcRuleController = require('../controllers/qcRuleController');
 const calculationController = require('../controllers/calculationTemplateController');
 const controlChartController = require('../controllers/controlChartController');
+const blankHistoryController = require('../controllers/blankHistoryController');
 const { verifyToken, checkPermission } = require('../middleware/authMiddleware');
 
 router.use(verifyToken);
+router.get('/blank-history/series', checkPermission('VIEW_ANALYTICAL_RESULTS'), blankHistoryController.series);
+router.get('/blank-history', checkPermission('VIEW_ANALYTICAL_RESULTS'), blankHistoryController.history);
+router.post('/lod-loq-proposals', checkPermission('MANAGE_ANALYSES'), blankHistoryController.propose);
 router.get('/control-charts/series', checkPermission('VIEW_ANALYTICAL_RESULTS'), controlChartController.series);
 router.get('/control-charts', checkPermission('VIEW_ANALYTICAL_RESULTS'), controlChartController.chart);
 router.post('/control-limit-proposals', checkPermission('CHANGE_STATUS'), controlChartController.propose);

@@ -226,10 +226,13 @@ async function startNativeRun(db, batchId, actor, input = {}) {
         for (const row of batch.analytes) {
             const criteria = validated.forecasts.find(forecast => forecast.analysisCode === row.analysisCode);
             const controlCharts = await require('./controlChartService').freezeRunCharts(tx, batch, row, criteria, validated.positions);
+            // #216: first start alone freezes the blank-history unit. Resuming
+            // an older run above must retain its criteriaSnapshot byte for byte.
+            const analysis = await tx.analysis.findUnique({ where: { code: row.analysisCode }, select: { unitCode: true } });
             await tx.batchAnalyte.update({ where: { id: row.id }, data: { status: 'IN_RUN', crmOrdinal: criteria.crmOrdinal,
                 policyVersion: criteria.policyVersion, qcRuleId: criteria.qcRule.id, qcRuleVersion: criteria.qcRule.version,
                 criteriaSnapshot: JSON.stringify({ ...criteria, instrumentId: instrument?.id || null, instrumentText: batch.instrument,
-                    controlCharts,
+                    controlCharts, analysisUnit: analysis?.unitCode || null,
                     methodRevision: methodRevisions.find(revision => revision.analysisCode === row.analysisCode).methodRevision }) } });
         }
         await tx.batchEvent.create({ data: { id: randomUUID(), batchId: batch.id, type: 'RUN_STARTED', by: performedBy, at: now,

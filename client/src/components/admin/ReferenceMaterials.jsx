@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
 import ControlCharts from '../qc/ControlCharts';
+import BlankHistory from '../qc/BlankHistory';
 
 const kinds = ['CRM', 'LRM', 'CHECK_STANDARD', 'CALIBRATION_STANDARD', 'BLANK_MATRIX'];
 const statuses = ['ACTIVE', 'QUARANTINED', 'EXPIRED', 'RETIRED'];
@@ -119,5 +120,6 @@ export default function ReferenceMaterials() {
             </form>}
         </div>}
         <ControlCharts labId={activeLabId} />
+        <BlankHistory labId={activeLabId} />
     </section>;
 }
