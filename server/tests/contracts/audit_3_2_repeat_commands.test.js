@@ -571,7 +571,8 @@ test.each([{expectedVersion:999},{attemptId:'missing'},{nonconformityId:'old-ncr
 test('partial replacement respects scope, the explicit repeat-limit NCR path and reservation conflicts',async()=>{
     const f=await partialFixture();
     const foreign=await f.db.lab.create({data:{id:randomUUID(),code:randomUUID(),name:'Foreign partial-repeat lab',country:'TEST'}});
-    const actor={...f.actor,labId:foreign.id};let before=await f.all();
+    // Authentication reloads the persisted principal, so use a distinct foreign-lab user.
+    const actor=await reviewer({...f,labId:foreign.id});let before=await f.all();
     expect((await f.replace({},actor)).status).toBe(403);expect(await f.all()).toEqual(before);
     await f.setPolicy([{key:'repeats.maxAttemptsBeforeNcr',value:2}]);before=await f.all();
     const reports=await f.db.nonconformityReport.findMany();
