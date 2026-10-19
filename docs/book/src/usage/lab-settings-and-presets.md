@@ -85,7 +85,7 @@ Next to each setting you see:
 | `qc.ccvEvery` | Insert 1 Continuing Calibration Verification (`CCV`) per $N$ samples (`0` = disabled) | `0`–`100` *(overridable per analysis)* |
 | `qc.calibrationVerification` | Require calibration curve ($r$, slope, intercept) and `ICV` / `CCV` / `CCB` verification in each run | `true` / `false` *(overridable per analysis)* |
 | `qc.calibrationFailAction` | Action when an `ICV`, `CCV`, or `CCB` fails | Per check (`ICV`, `CCV`, `CCB`): `FAIL_BATCH`, `REPEAT_BRACKET`, or `WARN` *(overridable per analysis)* |
-| `qc.failAction` | Action when a batch `BLANK`, `DUPLICATE`, `LRM`, or `CRM` fails | Per type: `FAIL_BATCH`, `FAIL_AFFECTED_SAMPLES`, `WARN`, `ADVISORY` *(overridable per analysis)* |
+| `qc.failAction` | Action when a batch `BLANK`, `DUPLICATE`, `LRM`, or `CRM` fails | Per type: `FAIL_BATCH` or `WARN` *(overridable per method)* |
 | `qc.lrmLimitMode` | How LRM control limits are evaluated | `CONTROL_CHART` ($\bar{x} \pm 2s/3s$ after `controlChartMinPoints`), `FIXED_WINDOW` (recovery % or min/max) *(overridable per analysis)* |
 | `qc.controlChartMinPoints` | Minimum historical QC points before switching from fixed limits to Shewhart $\bar{x}/s$ limits | `5`–`200` (default `20`) *(overridable per analysis)* |
 | `qc.westgardRules` | Which Westgard rules (`1-3s`, `2-2s`, `R-4s`, `1-2s`, `4-1s`, `10x`) trigger `reject`, `warn`, or `review` | Configurable arrays for `reject`, `warn`, and `review` |
@@ -141,7 +141,7 @@ Next to each setting you see:
 | `sample.codeFormat` / `sample.sequenceReset` | Automatic Sample Code format and sequence reset schedule | Default `'{LAB}-{YY}-{SEQ:6}{CHK}'`, reset `YEARLY` or `NEVER` |
 | `container.codeFormat` / `container.sequenceReset` | Sub-sample container barcode format | Default `'C-{LAB}-{YY}-{SEQ:6}{CHK}'`, reset `YEARLY` or `NEVER` |
 | `consignment.numberFormat` / `consignment.sequenceReset` | Intake consignment number format | Default `'CSG-{LAB}-{YYYY}-{SEQ:5}'`, reset `YEARLY` or `NEVER` |
-| `report.numberFormat` / `report.sequenceReset` | Official Certificate of Analysis report number format | Default `'RPT-{LAB}-{YYYY}-{SEQ:5}'`, reset `YEARLY` or `NEVER` |
+| `report.numberFormat` | Official Certificate of Analysis report number format | Default `'RPT-{LAB}-{YYYY}-{SEQ:5}'` (`LAB` scope) |
 | `sample.retentionDaysAfterReport` | Default days to retain archived soil after reporting before disposal eligibility | `0`–`3650` days |
 | `intake.defaultAnalysisMassG` / `intake.retentionMassG` | Default mass (g) required per test (`10` g) plus archive retention (`100` g) at intake | Numeric (grams) |
 | `bench.idleLockMinutes` | Minutes of inactivity before a shared bench terminal locks (`0` = disabled) | `0`–`480` minutes |

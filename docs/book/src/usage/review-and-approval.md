@@ -14,7 +14,7 @@ flowchart TD
     G1 -->|QC_PASS| CC["2. Inspect Cross-Parameter<br/>Plausibility Checks"]
     ACK --> CC
     CC --> ATT["3. Compare All Work Attempts<br/>Side by Side"]
-    ATT -->|Result Valid| SEL["4. Select Reported Value<br/>• Single Attempt (ATTEMPT)<br/>• Mean within r (MEAN_OF)<br/>• Waive (NOT_REPORTABLE)"]
+    ATT -->|Result Valid| SEL["4. Select Reported Value<br/>• Single Attempt (ATTEMPT)<br/>• Mean within r (MEAN)<br/>• Derived Value (DERIVED)<br/>• Waive (NOT_REPORTABLE)"]
     ATT -->|Needs Re-Run or Fix| RET["Return to Technician (REPEAT_REQUIRED)<br/>with Canonical Repeat Reason Code"]
     SEL --> APP["Work Item APPROVED<br/>(Sample → APPROVED when all items done)"]
 ```
@@ -73,14 +73,16 @@ When a test has been measured more than once (multiple **Work Attempts**) or has
 - A side-by-side comparison table showing every attempt (`Attempt #1`, `Attempt #2`, ...), its replicate readings, analytical batch, QC status, instrument, analyst, date, and repeat reason.
 - Your laboratory's default guidance rule (`results.reportedValueRule` in **Settings → Laboratory Policy**: `MEAN_IF_WITHIN_R` in `Strict`/`Basic`, `LATEST_VALID` in `Advisory`, or `REVIEWER_PICKS`).
 
-### Your Three Selection Choices
-1. **Select a Specific Attempt (`ATTEMPT:<id>` / `AUTO_SINGLE`)**:
-   - Choose one specific valid attempt (for example, `Attempt #2` after `Attempt #1` was invalidated by a batch failure or dilution).
+### Your Selection Modes
+1. **Select a Specific Attempt (`ATTEMPT`)**:
+   - Choose one specific valid attempt (for example, selecting `Attempt #2` after `Attempt #1` was invalidated by a batch failure or dilution).
    - If you explicitly select an attempt that was previously marked `QUESTIONED` (for example, after a `REVIEW_OUTLIER` check proved the original reading was actually right), you must enter a **mandatory reason** explaining your choice.
-2. **Report the Mean of Agreeing Attempts (`MEAN_OF:<ids>`)**:
-   - When two or more valid attempts (or duplicate replicates) agree within the method's configured **Repeatability Limit ($r$, `qc.repeatabilityLimit`)**, you can select **Report Mean**.
+2. **Report the Mean of Agreeing Attempts (`MEAN`)**:
+   - When two or more valid attempts (or duplicate replicates) agree within the method's configured **Repeatability Limit ($r$, `qc.repeatabilityLimit`)**, you can select **Report Mean** (`mode: 'MEAN'` with the chosen attempt IDs).
    - SoilFER-LIMS verifies that all chosen attempts share the exact same controlled unit and method, are uncensored (not `< LOQ`), and have a spread $\le r$. The system saves the full-precision arithmetic mean and rounds it to the method's configured `decimalPlaces` when rendering the PDF report.
-3. **Mark Not Reportable / Waive (`NOT_REPORTABLE`)**:
+3. **Derived Value (`DERIVED`)**:
+   - Used for parameters calculated from other approved selections on the sample (such as USDA Soil Texture derived from Sand, Silt, and Clay).
+4. **Mark Not Reportable / Waive (`NOT_REPORTABLE`)**:
    - If a test cannot produce a valid reportable result (for example, sample matrix interference or insufficient remaining soil for a repeat), select **Not Reportable (`NOT_REPORTABLE`)** and enter a **mandatory reason**.
    - The work item moves to `WAIVED`, and the PDF report prints your localized explanation instead of a number.
 
