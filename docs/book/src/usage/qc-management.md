@@ -174,7 +174,7 @@ Each NCR follows a strict three-step forward lifecycle managed by a **Lab Manage
 Open the **QA Dashboard** (under **Quality Control / QA Overview**) to monitor your laboratory's quality health over a **30-day** or **90-day** window:
 - **Batches Awaiting Disposition**: Immediate action list of `QC_FAIL` runs needing manager decision.
 - **QC Failure Rates**: Breakdown of pass/warn/fail rates across analytes and methods.
-- **Open Nonconformity Reports (NCRs)**: Filterable by status (`OPEN`, `ACTION`, `CLOSED`) and source (`QC_REJECT`, `CRM_FAIL`, `PT_UNSATISFACTORY`, `REPEAT_LIMIT`).
+- **Open Nonconformity Reports (NCRs)**: Filterable by status (`OPEN`, `ACTION`, `CLOSED`) and source (`QC` for quality control failures, `PT` for proficiency testing, `REPEAT_LIMIT` for exceeding repeat thresholds, `CUSTOMER` for client complaints/retests, `INTAKE` for sample reception issues, and `OTHER`).
 - **Expiring Reference Materials**: Active LRM and CRM lots approaching expiration within your lab's configured `referenceMaterials.expiryWarningDays` window.
 - **Instrument Calibration Deadlines**: Equipment due or overdue for calibration/verification.
 - **Proficiency Testing Trends**: Recent PT rounds and $z$-score performance.
