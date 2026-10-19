@@ -1148,6 +1148,7 @@
       "qc_blankHistoryMinPoints": "Minimum de blancs sélectionnés pour LD/LQ",
       "qc_blankLodMultiplier": "Multiplicateur d’écart-type pour LD",
       "qc_blankLoqMultiplier": "Multiplicateur d’écart-type pour LQ",
+      "reception_intakeRules": "Règles de réception et contexte du prélèvement",
       "qc_controlChartMinPoints": "Nombre minimal de points pour les cartes de contrôle"
     },
     "title": "Politiques",

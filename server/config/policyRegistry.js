@@ -37,7 +37,7 @@ const intakeDefaults = Object.fromEntries(['project', 'walkIn'].map(profile => [
 }]));
 for (const [name, field] of Object.entries(intakeFields.criteria)) field.failHint = `intakeRules.failureNotes.${name}`;
 key('reception.intakeRules', 'intakeRules', intakeDefaults, undefined, undefined,
-    { scope: 'LAB', intakeFields, description: 'intakeRules.title', help: 'intakeRules.help' });
+    { scope: 'LAB', intakeFields, help: 'intakeRules.help' });
 key('qc.mode', 'enum', 'REQUIRED_BLOCKING', 'REQUIRED_WARN', 'ADVISORY', { allowedValues: ['REQUIRED_BLOCKING', 'REQUIRED_WARN', 'ADVISORY', 'OFF'] });
 key('qc.requireBatchQc', 'enum', 'AUTO', undefined, undefined, { allowedValues: ['AUTO', 'REQUIRED', 'NOT_REQUIRED'],
     help: 'policies.help.qc_requireBatchQc' });

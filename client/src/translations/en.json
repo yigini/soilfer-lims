@@ -2773,6 +2773,7 @@
       "qc_blankHistoryMinPoints": "Minimum selected blanks for LOD/LOQ",
       "qc_blankLodMultiplier": "LOD sample-SD multiplier",
       "qc_blankLoqMultiplier": "LOQ sample-SD multiplier",
+      "reception_intakeRules": "Reception and sample context rules",
       "qc_controlChartMinPoints": "Minimum control-chart baseline points"
     },
     "title": "Policies",

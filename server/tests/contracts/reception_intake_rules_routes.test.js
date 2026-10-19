@@ -50,7 +50,8 @@ describe('#156 server-resolved reception rules across intake paths', () => {
         const work = await prisma.workItem.findMany({ where: { sampleId: { in: ids } }, select: { id: true } });
         await cleanupWorkflowFixtures(prisma, 'workItem', work.map(item => item.id), { single: false });
         await cleanupWorkflowFixtures(prisma, 'sample', ids, { single: false });
-        await prisma.consignment.deleteMany({ where: { labId } });
+        // Custody evidence retains samples and their consignments until the
+        // disposable suite database is removed; do not delete those parents.
         await prisma.labPolicyOverride.deleteMany({ where: { labId } });
         await prisma.labPolicy.deleteMany({ where: { labId } });
         await prisma.commandReceipt.deleteMany({ where: { idempotencyKey: { startsWith: prefix } } });

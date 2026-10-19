@@ -1148,6 +1148,7 @@
       "qc_blankHistoryMinPoints": "Mínimo de brancos selecionados para LOD/LOQ",
       "qc_blankLodMultiplier": "Multiplicador de DP amostral para LOD",
       "qc_blankLoqMultiplier": "Multiplicador de DP amostral para LOQ",
+      "reception_intakeRules": "Regras de receção e contexto da amostra",
       "qc_controlChartMinPoints": "Mínimo de pontos de base para cartas de controlo"
     },
     "title": "Políticas",
