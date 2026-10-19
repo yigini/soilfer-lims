@@ -50,6 +50,8 @@
 - [First Login & Setup](./usage/first-login.md)
 - [Roles & Permissions](./usage/roles.md)
 - [The Sample Workflow](./usage/sample-workflow.md)
+- [Sample Reception & Intake](./usage/reception-and-intake.md)
+- [Sample Preparation, Sub-Sampling & Custody](./usage/preparation-and-custody.md)
 - [Quality Control & Batch Management](./usage/qc-management.md)
 - [Controlled Units & Agronomic Interpretation](./usage/agronomic-interpretation.md)
 - [Certificate of Analysis & PDF Reports](./usage/reporting-pdf.md)

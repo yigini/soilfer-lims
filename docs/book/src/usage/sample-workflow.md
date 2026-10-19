@@ -66,7 +66,7 @@ Technicians perform tests inside an **Analytical Batch (Run)** in the **Technici
   5. Click **Record / Submit for Review** (entering your bench PIN if shared bench terminal lock is enabled in your lab's policy).
 - **What happens next**: SoilFER-LIMS creates a numbered **Work Attempt** (`attemptNo = 1, 2, ...`) for each test, evaluates the batch's QC rules per analyte (`QC_PASS`, warning, or `QC_FAIL`), and sends submitted results to the Manager Review Queue.
 
-👉 *Full step-by-step guides:* [Technician Workbench & Analytical Runs](./technician-workbench.md), [Shared Bench Terminals, Work Items & Attempts](./bench-terminals-and-attempts.md), and [Quality Control & Batch Management](./qc-management.md).
+👉 *Full step-by-step guide:* [Quality Control & Batch Management](./qc-management.md).
 
 ---
 
@@ -78,13 +78,12 @@ Technicians can enter and submit results, but **only a Lab Manager (or authorize
 - **What you do**:
   1. Check that the analytical batch passed QC (or apply a documented manager batch disposition if permitted by your laboratory's policy).
   2. If a test has multiple attempts or replicates, explicitly choose the **Reported Value Selection**:
-     - Pick a specific valid attempt (`ATTEMPT:<id>`),
-     - Report the **Mean** of agreeing attempts (`MEAN_OF:<ids>`, allowed when their spread is within the method's repeatability limit $r$), or
-     - Mark the test **Not Reportable / Waive** with a mandatory reason.
+     - Pick a specific valid attempt (`ATTEMPT`),
+     - Report the **Mean** of agreeing attempts (`MEAN`, allowed when their spread is within the method's repeatability limit $r$),
+     - Use a **Derived** calculated value (`DERIVED`), or
+     - Mark the test **Not Reportable / Waive** (`NOT_REPORTABLE`) with a mandatory reason.
   3. Approve (`APPROVE`) valid results, or **Return / Request Repeat** with a structured **Repeat Reason Code** (`QC_BATCH_FAIL`, `REVIEW_OUTLIER`, `DUPLICATE_DISAGREEMENT`, `ABOVE_RANGE_DILUTION`, `INSTRUMENT_FAULT`, `PREP_ERROR`, `TRANSCRIPTION_ERROR`, `CONFIRMATION`).
 - **What happens next**: When every required work item on a sample is approved (or waived with a reason), the sample moves to `APPROVED`.
-
-👉 *Full step-by-step guide:* [Review, Approval, Repeats & Reported Value Selection](./review-and-approval.md).
 
 ---
 
@@ -93,11 +92,11 @@ Technicians can enter and submit results, but **only a Lab Manager (or authorize
 Once a sample is `APPROVED`, its results are ready for official reporting and external data exchange.
 
 - **Certificates of Analysis (PDF)**: Generate an official PDF report aligned with ISO/IEC 17025 §7.8 showing sample provenance, structured drying/preparation records, moisture basis (`AIR_DRY` or converted `OVEN_DRY`), the selected reported values, truthful QC statements, agronomic ratings, and a public QR verification link.
-- **Post-Report Amendments (`Rev 1`, `Rev 2`, ...)**: Once a sample is approved or reported, results are locked. If a client retest (`CLIENT_RETEST`) or correction is ever needed after approval, a manager opens a formal **Sample Amendment** (which requires a second authoriser when your lab policy enables `amendment.requiresSecondPerson`). Issuing the amended report creates a new revision (`Rev 1`, `Rev 2`) and automatically revokes public share links to the superseded version (`HTTP 410 Gone`).
+- **Post-Report Amendments (`Rev 1`, `Rev 2`, ...)**: Once a sample is approved or reported, results are locked. If a client retest (`CLIENT_RETEST`) or correction is ever needed after approval, a manager opens a formal **Sample Amendment** (which requires a second authoriser when your lab policy enables `report.amendmentRequiresSecondPerson`). Issuing the amended report creates a new revision (`Rev 1`, `Rev 2`) and automatically revokes public share links to the superseded version (`HTTP 410 Gone`).
 - **Exports & National SIS Exchange**: Excel/CSV exports and the Data Exchange API v2 publish **only** the explicitly selected reported value for `APPROVED` samples.
 - **Retention & Disposal**: Publishing the report starts the sample's retention countdown (`sample.retentionDaysAfterReport`). After `retainUntil`, samples with no open holds or amendments appear in the **Disposal Queue** for archival (`ARCHIVED`) or safe disposal (`DISPOSED`).
 
-👉 *Full step-by-step guides:* [Certificate of Analysis & PDF Reports](./reporting-pdf.md) and [National SIS & Data Exchange API v2](./data-exchange.md).
+👉 *Full step-by-step guide:* [Certificate of Analysis & PDF Reports](./reporting-pdf.md).
 
 ---
 
