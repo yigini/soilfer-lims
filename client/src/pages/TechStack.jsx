@@ -83,6 +83,15 @@ const techStack = [
 
 const changelog = [
     {
+        version: 'v1.10.2',
+        date: 'October 19, 2026',
+        tag: 'Mobile Queue and Sample Layouts',
+        badgeColor: 'bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300 border-blue-300 dark:border-blue-800',
+        changes: [
+            'Manager Queue tabs scroll without overlapping; Samples quick filters wrap and lifecycle stages scroll within their card on narrow screens.',
+        ],
+    },
+    {
         version: 'v1.10.1',
         date: 'October 19, 2026',
         tag: 'Temporary Schema Review Copy Cleanup',

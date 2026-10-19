@@ -375,7 +375,7 @@ const ManagerQueue = () => {
         return (
             <button
                 onClick={() => handleTabChange(id)}
-                className={`flex items-center gap-2 px-4 sm:px-6 py-3 sm:py-4 border-b-2 font-medium transition-colors relative whitespace-nowrap touch-target ${activeTab === id
+                className={`flex shrink-0 items-center gap-2 px-4 sm:px-6 py-3 sm:py-4 border-b-2 font-medium transition-colors relative whitespace-nowrap touch-target ${activeTab === id
                     ? 'border-sf-emerald text-sf-emerald bg-emerald-50/50 dark:bg-emerald-950/20 font-bold'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-sf-raised/30'
                     }`}

@@ -134,9 +134,9 @@ const SamplesFilterBar = ({
                     </button>
                 </div>
 
-                <div className="flex flex-1 items-center gap-3 w-full lg:w-auto">
+                <div className="flex min-w-0 flex-1 flex-col sm:flex-row sm:items-center gap-3 w-full lg:w-auto">
                     {/* Search */}
-                    <div className="relative flex-1 max-w-md">
+                    <div className="relative min-w-0 w-full sm:flex-1 max-w-md">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-sf-muted" size={16} />
                         <input
                             type="text"
@@ -159,8 +159,8 @@ const SamplesFilterBar = ({
                     </div>
 
                     {/* Quick Filters */}
-                    <div className="flex gap-1.5 items-center">
-                        <div className="flex gap-1 items-center p-1 bg-sf-canvas rounded-xl border border-sf-divider">
+                    <div className="flex min-w-0 max-w-full gap-1.5 items-center">
+                        <div className="flex flex-wrap min-w-0 max-w-full gap-1 items-center p-1 bg-sf-canvas rounded-xl border border-sf-divider">
                             {QUICK_FILTERS.map(qf => {
                                 const active = isFilterActive(qf);
                                 const Icon = qf.icon;
@@ -168,7 +168,7 @@ const SamplesFilterBar = ({
                                 const isAnimating = animatingId === qf.id;
 
                                 return (
-                                    <div key={qf.id} className="group relative">
+                                    <div key={qf.id} className="group relative shrink-0">
                                         <button
                                             data-testid={`qf-${qf.id}`}
                                             onClick={() => handleFilterClick(qf)}

@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.10.2] - 2026-10-19
+
+### Fixed
+- Prevent overlapping Manager Queue tabs and keep Samples quick filters and lifecycle stages within the mobile viewport (#102).
+
 ## [1.10.1] - 2026-10-19
 
 ### Fixed
