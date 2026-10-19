@@ -85,22 +85,32 @@ function fileHashes(target) {
         return [suffix, hash.digest('hex')];
     }));
 }
-function reviewReadonlySnapshot(target, source, startupContext) {
+function reviewReadonlySnapshot(target, source, startupContext, inspect = result => result) {
     startupContext?.beforeSnapshot();
     // A normal SQLite read-only open can create WAL/SHM files. Read target files
-    // only, and let SQLite open an isolated, retained copy instead. Bind all
+    // only, and let SQLite open an isolated, temporary copy instead. Bind all
     // three originals before/after copying and classification; never retry a race.
     const before = fileHashes(target), directory = fs.mkdtempSync(path.join(os.tmpdir(), 'lims-policy-schema-readonly-'));
     const copy = path.join(directory, 'snapshot.db');
-    for (const suffix of ['', '-wal', '-shm']) if (before[suffix] !== null) fs.copyFileSync(target + suffix, copy + suffix, fs.constants.COPYFILE_EXCL);
-    if (JSON.stringify(fileHashes(copy)) !== JSON.stringify(before) || JSON.stringify(fileHashes(target)) !== JSON.stringify(before))
-        throw fail('LAB_POLICY_SNAPSHOT_CHANGED', 'Database files changed while retaining the read-only snapshot.');
-    startupContext?.useSnapshot(copy, before);
-    const reader = openReadonlyDatabase(Database, copy, { readonly: true, fileMustExist: true }, startupContext); let reviewed;
-    try { reviewed = reader.transaction(() => classify(reader, source))(); } finally { reader.close(); }
-    if (JSON.stringify(fileHashes(target)) !== JSON.stringify(before))
-        throw fail('LAB_POLICY_SNAPSHOT_CHANGED', 'Database files changed during read-only classification.');
-    return { ...reviewed, readonlySnapshot: { path: copy, originalDbWalShmSha256: before, originalFilesPreserved: true } };
+    let retainedByStartup = false;
+    try {
+        for (const suffix of ['', '-wal', '-shm']) if (before[suffix] !== null) fs.copyFileSync(target + suffix, copy + suffix, fs.constants.COPYFILE_EXCL);
+        if (JSON.stringify(fileHashes(copy)) !== JSON.stringify(before) || JSON.stringify(fileHashes(target)) !== JSON.stringify(before))
+            throw fail('LAB_POLICY_SNAPSHOT_CHANGED', 'Database files changed while retaining the read-only snapshot.');
+        startupContext?.useSnapshot(copy, before);
+        const reader = openReadonlyDatabase(Database, copy, { readonly: true, fileMustExist: true }, startupContext); let reviewed;
+        try { reviewed = reader.transaction(() => classify(reader, source))(); } finally { reader.close(); }
+        if (JSON.stringify(fileHashes(target)) !== JSON.stringify(before))
+            throw fail('LAB_POLICY_SNAPSHOT_CHANGED', 'Database files changed during read-only classification.');
+        const result = inspect({ ...reviewed, readonlySnapshot: { originalDbWalShmSha256: before, originalFilesPreserved: true } }, copy);
+        retainedByStartup = Boolean(startupContext);
+        return result;
+    } finally {
+        if (!retainedByStartup) {
+            try { startupContext?.beforeSnapshot(); }
+            finally { fs.rmSync(directory, { recursive: true, force: true }); }
+        }
+    }
 }
 function snapshot(db, previous) {
     const result = {};
@@ -115,13 +125,14 @@ function snapshot(db, previous) {
     }
     return result;
 }
-function installLabPolicySchema({ dbPath, apply = false, startupContext} = {}) {
+function installLabPolicySchema({ dbPath, apply = false, startupContext} = {}, inspectReadonlySnapshot) {
     if (typeof dbPath !== 'string' || !dbPath.trim()) throw fail('LAB_POLICY_DATABASE_REQUIRED', 'Provide an explicit existing database path.');
     const target = path.resolve(dbPath), source = loadLabPolicyMigrationSource();
     if (!fs.existsSync(target)) throw fail('LAB_POLICY_DATABASE_REQUIRED', 'The explicit database file does not exist.');
     const reviewed = !apply && startupContext
-        ? startupContext.reviewPolicy(target, source, fileHashes(target), () => reviewReadonlySnapshot(target, source, startupContext), fileHashes)
-        : reviewReadonlySnapshot(target, source);
+        ? startupContext.reviewPolicy(target, source, fileHashes(target), () => reviewReadonlySnapshot(target, source, startupContext), fileHashes, inspectReadonlySnapshot)
+        : reviewReadonlySnapshot(target, source, undefined, inspectReadonlySnapshot);
+    if (inspectReadonlySnapshot) return reviewed;
     if (reviewed.classification === 'PRESENT') return { ...reviewed, mode: 'NO_OP', totalChanges: 0, dataWrites: 0 };
     if (!apply) return { ...reviewed, mode: 'DRY_RUN', totalChanges: 0, dataWrites: 0 };
     // Revalidate the digest before opening a writer, then reclassify under its lock.
@@ -140,10 +151,11 @@ function installLabPolicySchema({ dbPath, apply = false, startupContext} = {}) {
         }).immediate();
     } finally { db.close(); }
 }
-function assertLabPolicyStartupReady(dbPath, startupContext) {
-    const result = installLabPolicySchema({ dbPath, startupContext });
-    if (result.classification !== 'PRESENT') throw fail('LAB_POLICY_STARTUP_REQUIRED', 'Install the reviewed policy prerequisite before starting the lab.');
-    return result;
+function assertLabPolicyStartupReady(dbPath, startupContext, inspect = result => result) {
+    return installLabPolicySchema({ dbPath, startupContext }, (reviewed, copy) => {
+        if (reviewed.classification !== 'PRESENT') throw fail('LAB_POLICY_STARTUP_REQUIRED', 'Install the reviewed policy prerequisite before starting the lab.');
+        return inspect({ ...reviewed, mode: 'NO_OP', totalChanges: 0, dataWrites: 0 }, copy);
+    });
 }
 function parseArguments(args) {
     const options = { apply: false }, seen = new Set();

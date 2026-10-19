@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.10.1] - 2026-10-19
+
+### Fixed
+- Remove temporary read-only schema review copies after their final reader finishes, preserving original database, WAL and SHM hash evidence.
+
 ## [1.10.0] - 2026-10-19
 
 ### Added

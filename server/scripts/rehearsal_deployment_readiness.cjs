@@ -1472,15 +1472,18 @@ async function runSuite() {
          const dbPath='/owned-policy/dev.db',hash=()=>Object.fromEntries(['','-wal','-shm'].map(suffix=>[suffix,
            fs.existsSync(dbPath+suffix)?crypto.createHash('sha256').update(fs.readFileSync(dbPath+suffix)).digest('hex'):null]));
          const before=hash(),installer=require('./scripts/install_lab_policy_schema');
-         const ready=installer.assertLabPolicyStartupReady(dbPath),again=installer.installLabPolicySchema({dbPath,apply:true});
-         const inspected=ready.readonlySnapshot.path;
-         const charts=require('./scripts/install_control_charts').assertControlChartStartupReady(inspected);
-         const db=new Database(inspected,{readonly:true,fileMustExist:true});
-         const counts=Object.fromEntries(['LabPolicy','LabPolicyOverride'].map(name=>[name,db.prepare('SELECT count(*) n FROM "'+name+'"').get().n]));db.close();
+         let ready,again,charts,counts,inspected;
+         installer.assertLabPolicyStartupReady(dbPath,undefined,(result,copy)=>{
+           ready=result;inspected=copy;again=installer.installLabPolicySchema({dbPath,apply:true});
+           charts=require('./scripts/install_control_charts').assertControlChartStartupReady(inspected);
+           const db=new Database(inspected,{readonly:true,fileMustExist:true});
+           try{counts=Object.fromEntries(['LabPolicy','LabPolicyOverride'].map(name=>[name,db.prepare('SELECT count(*) n FROM "'+name+'"').get().n]));}
+           finally{db.close();}
+         });
          if(ready.classification!=='PRESENT'||again.mode!=='NO_OP'||again.totalChanges!==0||charts.classification!=='COMPLETE_214'||charts.totalChanges!==0||
            Object.values(counts).some(Boolean)||JSON.stringify(ready.readonlySnapshot.originalDbWalShmSha256)!==JSON.stringify(before)||
-           JSON.stringify(hash())!==JSON.stringify(before))throw Error('Policy/214 startup or repeat preservation differs');
-         console.log(JSON.stringify({ready,again,charts,counts,dbWalShmPreserved:true,secondaryInspectionsOnRetainedSnapshot:true}));`
+           JSON.stringify(hash())!==JSON.stringify(before)||fs.existsSync(inspected))throw Error('Policy/214 startup or repeat preservation differs');
+         console.log(JSON.stringify({ready,again,charts,counts,dbWalShmPreserved:true,secondaryInspectionsOnRetainedSnapshot:true,temporarySnapshotRemoved:true}));`
     ],{encoding:'utf8'}).trim();
     const policyAfter=JSON.parse(policyAfterOutput);
     console.log(JSON.stringify({policyChartEntrypointProof:{scenario:'PRE_199-default-entrypoint-COMPLETE_214',before:policyBefore,after:policyAfter}}));
