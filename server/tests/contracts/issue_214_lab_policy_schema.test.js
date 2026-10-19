@@ -145,7 +145,8 @@ test('the actual shipped Docker post-start policy/chart probe preserves an origi
         { cwd: path.join(root, 'server'), encoding: 'utf8' }).trim());
     expect(actual).toMatchObject({ ready: { classification: 'PRESENT', totalChanges: 0 },
         again: { mode: 'NO_OP', totalChanges: 0 }, charts: { classification: 'COMPLETE_214', totalChanges: 0 },
-        counts: { LabPolicy: 0, LabPolicyOverride: 0 }, dbWalShmPreserved: true, secondaryInspectionsOnRetainedSnapshot: true });
+        counts: { LabPolicy: 0, LabPolicyOverride: 0 }, dbWalShmPreserved: true, secondaryInspectionsOnRetainedSnapshot: true,
+        temporarySnapshotRemoved: true });
     expect(actual.ready.readonlySnapshot.originalDbWalShmSha256).toEqual(before);
     expect(bytes(target)).toEqual(before);
 });

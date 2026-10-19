@@ -64,14 +64,12 @@ function startup(file, { shared = false, selected = stages, corruptIntegrity = f
                 const owner = require('../../scripts/install_lab_policy_schema');
                 const original = owner.assertLabPolicyStartupReady;
                 const spy = jest.spyOn(owner, 'assertLabPolicyStartupReady').mockImplementation((...args) => {
-                    const result = original(...args);
-                    if (activeStage === 'install_order_revisions' && args[0] === file) {
-                        const captured = result.readonlySnapshot.path;
-                        Object.defineProperty(result.readonlySnapshot, 'path', { enumerable: true, get() {
-                            afterOrderPolicy(); return captured;
-                        } });
-                    }
-                    return result;
+                    const inspect = args[2];
+                    args[2] = (result, copy) => {
+                        if (activeStage === 'install_order_revisions' && args[0] === file) afterOrderPolicy();
+                        return inspect ? inspect(result, copy) : result;
+                    };
+                    return original(...args);
                 });
                 restore.push(() => spy.mockRestore());
             }
@@ -316,7 +314,8 @@ test('changed retained-copy bytes cannot reuse cached policy or integrity result
                     expect(capturedCopy).toBeDefined();
                     // Only this run's newly retained copy is changed. The
                     // original owned fixture and SQL data remain unchanged.
-                    fs.appendFileSync(capturedCopy, '\nowned-copy-byte-canary\n');
+                    if (shared) fs.appendFileSync(capturedCopy, '\nowned-copy-byte-canary\n');
+                    else expect(fs.existsSync(capturedCopy)).toBe(false);
                 }
             } });
         expect(triples(file)).toEqual(before);

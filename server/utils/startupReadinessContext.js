@@ -29,7 +29,7 @@ function optionalDataHashes(target) {
 function createStartupReadinessContext() {
     let original, connection, facade, activePath, closed = false;
     let checks = new Map(), checkedVersion = null, firstReadVersion = null;
-    let policy, chart, policyCopyHashes;
+    let policy, chart, policyCopy, policyCopyHashes;
     const retainedSnapshots = new Set();
 
     function releaseReader() {
@@ -91,29 +91,36 @@ function createStartupReadinessContext() {
             releaseReader();
         },
         useSnapshot(copy, originalHashes) {
+            // Only the policy owner's new mkdtemp directory belongs to this
+            // context. Keep it through all nested readers, then close removes it.
+            const directory = path.dirname(path.resolve(copy));
+            if (path.dirname(directory) !== path.resolve(require('node:os').tmpdir()) ||
+                !path.basename(directory).startsWith('lims-policy-schema-readonly-') || path.basename(copy) !== 'snapshot.db')
+                throw new TypeError('The startup snapshot must be its owned temporary policy copy.');
+            retainedSnapshots.add(copy);
             const version = ['', '-wal'].map(suffix => originalHashes[suffix]);
             if (!checkedVersion || !same(checkedVersion, version)) checks = new Map();
             activePath = copy;
             firstReadVersion = version;
             checkedVersion = checks.size ? version : null;
         },
-        reviewPolicy(target, source, hashes, review, snapshotHashes) {
+        reviewPolicy(target, source, hashes, review, snapshotHashes, inspect = result => result) {
             const resolved = path.resolve(target);
             if (!original) original = resolved;
             let copyUnchanged = false;
             if (policy && policy.sourceSha256 === source.sha256) {
-                copyUnchanged = same(policyCopyHashes, resolved === policy.readonlySnapshot.path
-                    ? hashes : snapshotHashes(policy.readonlySnapshot.path));
-                if (resolved === policy.readonlySnapshot.path && copyUnchanged) {
+                copyUnchanged = same(policyCopyHashes, resolved === policyCopy
+                    ? hashes : snapshotHashes(policyCopy));
+                if (resolved === policyCopy && copyUnchanged) {
                     // A nested owner is reviewing the already pinned copy.
                     // Validate that copy and the source, without refreshing
                     // from the original midway through the outer order check.
                     const pinned = structuredClone(policy);
                     pinned.readonlySnapshot.originalDbWalShmSha256 = structuredClone(hashes);
-                    return pinned;
+                    return inspect(pinned, policyCopy);
                 }
                 if (resolved === original && copyUnchanged && same(policy.readonlySnapshot.originalDbWalShmSha256, hashes))
-                    return structuredClone(policy);
+                    return inspect(structuredClone(policy), policyCopy);
             }
             // Changed source/copy bytes use the unchanged full owner review.
             // Its copy and race guards still decide the existing refusal.
@@ -122,11 +129,11 @@ function createStartupReadinessContext() {
                 checks.clear(); checkedVersion = firstReadVersion = null;
             }
             policy = chart = null;
-            policyCopyHashes = null;
+            policyCopy = policyCopyHashes = null;
             policy = review();
-            retainedSnapshots.add(policy.readonlySnapshot.path);
-            policyCopyHashes = snapshotHashes(policy.readonlySnapshot.path);
-            return structuredClone(policy);
+            policyCopy = activePath;
+            policyCopyHashes = snapshotHashes(policyCopy);
+            return inspect(structuredClone(policy), policyCopy);
         },
         reviewChart(source, review) {
             const key = [activePath, source.sha256];
@@ -135,7 +142,13 @@ function createStartupReadinessContext() {
         },
         close() {
             try { releaseReader(); }
-            finally { closed = true; checks.clear(); retainedSnapshots.clear(); policy = chart = policyCopyHashes = null; }
+            finally {
+                try {
+                    for (const copy of retainedSnapshots) fs.rmSync(path.dirname(copy), { recursive: true, force: true });
+                } finally {
+                    closed = true; checks.clear(); retainedSnapshots.clear(); policy = chart = policyCopy = policyCopyHashes = null;
+                }
+            }
         }
     };
     contexts.add(context);

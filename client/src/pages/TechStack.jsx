@@ -83,6 +83,15 @@ const techStack = [
 
 const changelog = [
     {
+        version: 'v1.10.1',
+        date: 'October 19, 2026',
+        tag: 'Temporary Schema Review Copy Cleanup',
+        badgeColor: 'bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300 border-blue-300 dark:border-blue-800',
+        changes: [
+            'Temporary database copies used by read-only schema reviews are removed after the final reader finishes; original file hash evidence stays in the review result.',
+        ],
+    },
+    {
         version: 'v1.10.0',
         date: 'October 19, 2026',
         tag: 'Laboratory Intake Rules and Audit Catch-up',

@@ -194,15 +194,17 @@ function installOrderRevisions({ dbPath, apply = false, startupContext} = {}) {
     if (typeof dbPath !== 'string' || !dbPath.trim() || !fs.existsSync(dbPath)) throw fail('ORDER_REVISION_DATABASE_REQUIRED', 'Provide an existing explicit database path.');
     const target = path.resolve(dbPath), source = loadOrderRevisionMigrationSource();
     // This prerequisite's retained-copy classification never opens the original target.
-    const policy = require('./install_lab_policy_schema').assertLabPolicyStartupReady(target, apply ? undefined : startupContext);
-    const copy = policy.readonlySnapshot.path;
-    require('./install_control_charts').assertControlChartStartupReady(copy, apply ? undefined : startupContext);
-    const reader = openReadonlyDatabase(Database, copy, { readonly: true, fileMustExist: true }, apply ? undefined : startupContext); let reviewed, counts;
-    try { reader.transaction(() => { reviewed = classify(reader, source); counts = impact(reader); })(); }
-    finally { reader.close(); }
-    if (JSON.stringify(fileHashes(target)) !== JSON.stringify(policy.readonlySnapshot.originalDbWalShmSha256)) {
-        throw fail('ORDER_REVISION_SNAPSHOT_CHANGED', 'Database files changed during order classification.');
-    }
+    let reviewed, counts;
+    const policy = require('./install_lab_policy_schema').assertLabPolicyStartupReady(target, apply ? undefined : startupContext, (policy, copy) => {
+        require('./install_control_charts').assertControlChartStartupReady(copy, apply ? undefined : startupContext);
+        const reader = openReadonlyDatabase(Database, copy, { readonly: true, fileMustExist: true }, apply ? undefined : startupContext);
+        try { reader.transaction(() => { reviewed = classify(reader, source); counts = impact(reader); })(); }
+        finally { reader.close(); }
+        if (JSON.stringify(fileHashes(target)) !== JSON.stringify(policy.readonlySnapshot.originalDbWalShmSha256)) {
+            throw fail('ORDER_REVISION_SNAPSHOT_CHANGED', 'Database files changed during order classification.');
+        }
+        return policy;
+    });
     if (!apply || reviewed.classification === 'COMPLETE_209') return { ...reviewed, mode: apply ? 'NO_OP' : 'DRY_RUN', totalChanges: 0,
         backfilledCount: 0, impact: counts, readonlySnapshot: policy.readonlySnapshot };
     const release = loadOrderRevisionMigrationSource(), db = new Database(target, { fileMustExist: true, timeout: 5000 });
