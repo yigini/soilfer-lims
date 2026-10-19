@@ -48,14 +48,21 @@ async function receiveSample(tx, { sampleId, body = {}, user, createDataFactory 
     if (!sample) {
         if (!createDataFactory) throw new IntakeError(422, { code: 'INTAKE_IDENTIFIER_REQUIRED', message: 'A specimen identifier is required.' });
         const data = await createDataFactory(tx, lab);
-        sample = await createSample({ ...data, status: 'EXPECTED', assignedLab: labId, labId: null, labSampleCode: null,
+        sample = await createSample({ ...data, ...(resolved ? { projectId: resolved.id, projectCode: resolved.code } : {}),
+            status: 'EXPECTED', assignedLab: labId, labId: null, labSampleCode: null,
             requiredAnalyses: JSON.stringify(codes) }, user, { tx });
     }
     const reception = profile.parseFieldMetadata(sample.receptionData);
+    const rules = await require('./intakeRulesService').resolve(tx, { sample, labId, projectReference: reference, isWalkIn: !reference });
     if (body.checklist !== undefined) {
         reception.checklist = body.checklist;
-        reception.checklistDraft = !evaluateChecklistCompliance(body.checklist, { isWalkIn: !resolved }).isPassed;
     }
+    if (body.samplingDetails !== undefined) reception.samplingDetails = body.samplingDetails;
+    if (body.notes !== undefined) reception.notes = body.notes;
+    if (body.capturedAtLocal !== undefined) reception.capturedAtLocal = body.capturedAtLocal;
+    // Arrival is evidence, never acceptance. Incomplete observations remain a draft.
+    reception.checklistDraft = !evaluateChecklistCompliance(reception.checklist, { rules }).isPassed ||
+        !require('./intakeRulesService').evaluateContext(body, sample, rules).isComplete;
     const metadata = profile.parseFieldMetadata(sample.metadata);
     const events = typeof sample.history === 'string' ? JSON.parse(sample.history) : sample.history || [];
     if (!Array.isArray(events)) throw new IntakeError(409, { code: 'INTAKE_HISTORY_INVALID', message: 'The stored custody history needs review.' });

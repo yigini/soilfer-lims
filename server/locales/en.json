@@ -2249,5 +2249,55 @@
       "QC_BATCH_SCOPE_DENIED": "The run is outside your laboratory scope.",
       "WORKSHEET_LAYOUT_TOO_LARGE": "A header or row is too long for this worksheet."
     }
+  },
+  "intakeRules": {
+    "loading": "Loading reception rules…",
+    "failureNotes": {
+      "container": "e.g. Bag torn, lid loose, visible leakage...",
+      "label": "Describe the illegible or mismatched label",
+      "quantity": "Describe the observed shortage for the requested analyses",
+      "condition": "Describe the observed sample condition",
+      "coc": "Describe the missing custody documentation"
+    },
+    "title": "Reception and sample context rules",
+    "help": "Configure the existing reception observations for project samples and walk-ins. Required answers are checked at final acceptance; missing answers never prevent recording arrival. Changes apply to later receptions and do not rewrite existing records.",
+    "profiles": {
+      "project": "Project samples",
+      "walkIn": "Walk-in / private customers"
+    },
+    "groups": {
+      "criteria": "Reception criteria",
+      "context": "Sample context"
+    },
+    "flags": {
+      "enabled": "Enabled",
+      "required": "Required",
+      "naAllowed": "N/A allowed"
+    },
+    "fields": {
+      "landUse": "Land use",
+      "samplingDate": "Sampling date",
+      "samplingDepth": "Sampling depth",
+      "composite": "Composite sample"
+    },
+    "fieldHelp": {
+      "landUse": "Observed land use at the sampling site.",
+      "samplingDate": "Date the specimen was collected in the field.",
+      "samplingDepth": "Observed depth range in centimetres. Leave blank if not recorded.",
+      "composite": "Choose whether the specimen combines material from multiple sampling points."
+    },
+    "required": "Required",
+    "unanswered": "Not answered",
+    "unavailable": "Reception rules could not be loaded. Reconnect before final acceptance.",
+    "failureNote": "Describe the observed problem",
+    "naDisabled": "N/A is disabled by this laboratory’s reception rules.",
+    "naAllowed": "Not applicable",
+    "depthFrom": "Depth from (cm)",
+    "depthTo": "Depth to (cm)",
+    "subsamples": "Sub-samples count",
+    "radius": "Composite radius (m)",
+    "enabledItems": "enabled observations",
+    "batchObservations": "Shared batch observations",
+    "batchHelp": "Enter observations explicitly for the specimens in this batch. No quality answers or depths are assumed. Review individual rows when their origin or observations differ."
   }
 }

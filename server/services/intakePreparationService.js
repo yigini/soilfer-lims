@@ -73,6 +73,7 @@ async function prepareIntake(prisma, { body: rawBody, user, newSampleId, initial
         let isNewlyCreatedDeskSample = false;
 
         if (sample) {
+            require('../utils/scopeGuard').ensureScope(user, sample, { altLabField: 'assignedLab' });
             // Check for active provenance hold (Finding 4: Ambiguous specimen identity must remain visibly unresolved)
             if (!body.isDraft && !['REJECT', 'REJECTED'].includes(body.decision) &&
                 await require('./sampleHoldService').isHeld(prisma, sample)) {
@@ -176,7 +177,15 @@ async function prepareIntake(prisma, { body: rawBody, user, newSampleId, initial
         let complianceExceptionRecord = null;
 
         if (isFinalAcceptance) {
-            compliance = evaluateChecklistCompliance(checklist, { isWalkIn: Boolean(isWalkIn) });
+            const rules = await require('./intakeRulesService').resolve(prisma, {
+                sample, labId: user.labId, projectReference: projectId, isWalkIn: Boolean(isWalkIn)
+            });
+            const context = require('./intakeRulesService').evaluateContext(body, sample, rules);
+            if (!context.isComplete) throw new IntakeError(400, {
+                code: 'INCOMPLETE_INTAKE_CONTEXT', message: `Required sample context is missing: ${context.unansweredItems.join(', ')}.`,
+                unansweredItems: context.unansweredItems
+            });
+            compliance = evaluateChecklistCompliance(checklist, { rules });
 
             if (compliance.invalidNAItems.length > 0) {
                 throw new IntakeError(400, {
@@ -193,7 +202,7 @@ async function prepareIntake(prisma, { body: rawBody, user, newSampleId, initial
                     success: false,
                     error: 'INCOMPLETE_COMPLIANCE_CHECKLIST',
                     code: 'INCOMPLETE_COMPLIANCE_CHECKLIST',
-                    message: `Unanswered compliance checklist items: ${compliance.unansweredItems.join(', ')}. All items must be assessed before final acceptance.`,
+                    message: `Unanswered required compliance checklist items: ${compliance.unansweredItems.join(', ')}. Required items must be assessed before final acceptance.`,
                     unansweredItems: compliance.unansweredItems
                 });
             }

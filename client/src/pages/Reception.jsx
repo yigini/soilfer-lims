@@ -9,6 +9,8 @@ import { AlertTriangle, CheckCircle, XCircle, Droplet, Droplets, Scale, Layers, 
 import QRCode from 'qrcode';
 import WalkInForm from '../components/reception/WalkInForm';
 import ComplianceChecklist from '../components/reception/ComplianceChecklist';
+import useIntakeRules from '../components/reception/useIntakeRules';
+import IntakeContextFields, { missingIntakeContext } from '../components/reception/IntakeContextFields';
 import SampleMap from '../components/reception/SampleMap';
 import FieldProvenanceCard from '../components/reception/FieldProvenanceCard';
 import ProfileReferenceFields from '../components/reception/ProfileReferenceFields';
@@ -110,18 +112,16 @@ const Reception = () => {
     // Compliance & Notes
     const [checklistData, setChecklistData] = useState({ items: {}, nonConformance: false, reason: '' });
 
-    // Enforce N/A policy cleanup when switching intake mode (#113)
+    const { rules: intakeRules, error: intakeRulesFailed } = useIntakeRules({
+        sampleId: sampleData && !sampleData.isNew ? sampleData.id : undefined,
+        projectId: mode === 'WALK_IN' ? undefined : sessionProject,
+        isWalkIn: mode === 'WALK_IN', labId: user?.labId
+    });
     useEffect(() => {
-        if (mode !== 'WALK_IN' && checklistData?.items?.coc?.status === 'NA') {
-            setChecklistData(prev => ({
-                ...prev,
-                items: {
-                    ...prev?.items,
-                    coc: { ...prev?.items?.coc, status: undefined }
-                }
-            }));
-        }
-    }, [mode, checklistData?.items?.coc?.status]);
+        if (!intakeRules) return;
+        setChecklistData(previous => ({ ...previous, items: Object.fromEntries(Object.entries(previous.items || {}).map(([key, item]) =>
+            [key, item?.status === 'NA' && intakeRules.criteria[key]?.enabled && !intakeRules.criteria[key].naAllowed ? { ...item, status: undefined } : item])) }));
+    }, [intakeRules]);
     const [intakeNotes, setIntakeNotes] = useState('');
     const [branding, setBranding] = useState(null);
 
@@ -178,7 +178,7 @@ const Reception = () => {
         landmark: '',
         locationUncertaintyReason: '',
         purpose: '',
-        isComposite: false,
+        isComposite: undefined,
         subsamples: '',
         urgency: 'Normal'
     });
@@ -493,7 +493,7 @@ const Reception = () => {
                 previousCrop: '',
                 management: '',
                 purpose: '',
-                isComposite: false,
+                isComposite: undefined,
                 subsamples: '',
                 urgency: 'Normal'
             });
@@ -711,7 +711,7 @@ const Reception = () => {
             previousCrop: '',
             management: '',
             purpose: '',
-            isComposite: false,
+            isComposite: undefined,
             subsamples: '',
             urgency: 'Normal'
         });
@@ -817,7 +817,12 @@ const Reception = () => {
         const field = targetSample.fieldMetadata ? (typeof targetSample.fieldMetadata === 'string' ? JSON.parse(targetSample.fieldMetadata) : targetSample.fieldMetadata) : {};
         const sourceValue = value => value && typeof value === 'object' && Object.hasOwn(value, 'value') ? value.value : value;
         const savedDate = sourceValue(field.collectionDate ?? field.collection_date ?? field.samplingDate ?? recData?.samplingDetails?.date);
-        setSampling(prev => ({...prev, date: savedDate ? String(savedDate).slice(0, 10) : '', depthTopCm: targetSample.depthTopCm ?? null, depthBottomCm: targetSample.depthBottomCm ?? null}));
+        setSampling(prev => ({ ...prev, ...recData?.samplingDetails,
+            landUse: sourceValue(field.landUse) ?? recData?.samplingDetails?.landUse ?? '',
+            isComposite: sourceValue(field.isComposite) ?? recData?.samplingDetails?.isComposite,
+            date: savedDate ? String(savedDate).slice(0, 10) : '',
+            depthTopCm: targetSample.depthTopCm ?? recData?.samplingDetails?.depthTopCm ?? null,
+            depthBottomCm: targetSample.depthBottomCm ?? recData?.samplingDetails?.depthBottomCm ?? null }));
         const savedChecklist = recData?.checklist || meta?.nonConformance?.checklist;
                             if (savedChecklist) setChecklistData(savedChecklist);
                             if (recData?.notes || found.notes) setIntakeNotes(recData?.notes || found.notes || '');
@@ -1206,7 +1211,6 @@ const Reception = () => {
         });
     };
 
-    const CHECKLIST_KEYS = ['container', 'label', 'quantity', 'condition', 'coc'];
 
     const validateForm = () => {
         const errors = [];
@@ -1229,7 +1233,6 @@ const Reception = () => {
             if (sampling.locationConfidence === 'LOW' && !sampling.locationUncertaintyReason?.trim()) {
                 errors.push({ key: 'uncertaintyReason', label: 'Reason for low location confidence' });
             }
-            if (!sampling.depthType) errors.push({ key: 'depth', label: 'Sampling depth' });
             if (!sampling.purpose) errors.push({ key: 'purpose', label: 'Purpose of testing' });
         }
 
@@ -1244,7 +1247,9 @@ const Reception = () => {
             errors.push({ key: 'massDeficit', label: `Mass deficit (${massDeficit}g) must be acknowledged` });
         }
 
-        const unanswered = CHECKLIST_KEYS.filter(k => !checklistData.items?.[k]?.status);
+        if (!intakeRules) errors.push({ key: 'compliance', label: t('intakeRules.unavailable') });
+        missingIntakeContext(sampling, intakeRules).forEach(([key, rule]) => errors.push({ key, label: t(rule.label) }));
+        const unanswered = Object.entries(intakeRules?.criteria || {}).filter(([key, rule]) => rule.enabled && rule.required && !checklistData.items?.[key]?.status);
         if (unanswered.length > 0) errors.push({ key: 'compliance', label: `Compliance checklist (${unanswered.length} unanswered)` });
 
         if (removals.length > 0 && !justification?.trim()) errors.push({ key: 'justification', label: 'Justification for removed analyses' });
@@ -1256,7 +1261,7 @@ const Reception = () => {
     const handleSubmit = async (decision, isDraft = false) => {
         // Skip validation for drafts
         if (!isDraft) {
-            const hasFailedChecks = Object.values(checklistData?.items || {}).some(it => it?.status === 'FAIL') || Boolean(checklistData?.nonConformance);
+            const hasFailedChecks = Object.entries(intakeRules?.criteria || {}).some(([key, rule]) => rule.enabled && checklistData?.items?.[key]?.status === 'FAIL') || Boolean(checklistData?.nonConformance);
             const isManager = ['SUPER_ADMIN', 'ADMIN', 'LAB_MANAGER'].includes(user?.role);
 
             if (decision === 'ACCEPTED' && hasFailedChecks && !isManager) {
@@ -1324,7 +1329,7 @@ const Reception = () => {
             isWalkIn: mode === 'WALK_IN',
             projectId: mode === 'WALK_IN' ? null : (sessionProject || null),
             submitterDetails: (mode === 'WALK_IN' || sampleData?.isNew) ? submitter : null,
-            samplingDetails: (mode === 'WALK_IN' || sampleData?.isNew) ? sampling : null,
+            samplingDetails: sampling,
             isDraft,
 
             // Stage A: Desk-Only Facts
@@ -1911,6 +1916,7 @@ const Reception = () => {
                                 <ProfileReferenceFields value={profileInput} onChange={setProfileInput} current={currentProfile} disabled={loading}/>
                                 {(mode === 'WALK_IN' || sampleData?.isNew) ? (
                                     <WalkInForm
+                                        rules={intakeRules}
                                         submitter={submitter} setSubmitter={setSubmitter}
                                         sampling={sampling} setSampling={setSampling}
                                         groups={groups}
@@ -1920,10 +1926,8 @@ const Reception = () => {
                                         countryCode={user?.lab?.country || user?.country}
                                     />
                                 ) : (
-                                    <FieldProvenanceCard
-                                        sampleData={sampleData}
-                                        coordinates={resolvedCoordinates}
-                                    />
+                                    <><FieldProvenanceCard sampleData={sampleData} coordinates={resolvedCoordinates} />
+                                        <IntakeContextFields sampling={sampling} setSampling={setSampling} rules={intakeRules} /></>
                                 )}
 
                                 {/* Mobile Next Action */}
@@ -2264,11 +2268,12 @@ const Reception = () => {
                         </div>
 
                         <div className="bg-sf-surface p-6 rounded-xl border border-sf-divider shadow-sm">
+                            {intakeRulesFailed && <p role="alert">{t('intakeRules.unavailable')}</p>}
                             <ComplianceChecklist
                                 value={checklistData}
                                 onChange={setChecklistData}
                                 onNonConformance={(checked) => setChecklistData(prev => ({ ...prev, nonConformance: checked }))}
-                                isWalkIn={mode === 'WALK_IN'}
+                                rules={intakeRules}
                                 showIncomplete={validationErrors.some(e => e.key === 'compliance')}
                                 photos={intakePhotos}
                                 onUploadPhoto={handlePhotoUpload}

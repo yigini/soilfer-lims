@@ -1,10 +1,11 @@
 import React from 'react';
 import { User, MapPin, Clipboard, Sprout, HelpCircle, FlaskConical, Search, Shield, Bug } from 'lucide-react';
 import LocationPicker from './LocationPicker';
+import IntakeContextFields from './IntakeContextFields';
 import InfoTooltip from '../common/InfoTooltip';
 import { useLanguage } from '../../context/LanguageContext';
 
-const WalkInForm = ({ submitter, setSubmitter, sampling, setSampling, groups = [], onPurposeSelect, errors = [], labCoordinates = null, countryCode = null }) => {
+const WalkInForm = ({ submitter, setSubmitter, sampling, setSampling, groups = [], onPurposeSelect, errors = [], labCoordinates = null, countryCode = null, rules }) => {
     const { t } = useLanguage();
 
     const STATIC_PURPOSES = [
@@ -119,22 +120,6 @@ const WalkInForm = ({ submitter, setSubmitter, sampling, setSampling, groups = [
                     </div>
 
                     <div>
-                        <label className="block text-xs font-semibold text-sf-muted mb-1 flex items-center gap-1">
-                            {t('reception.landUse', 'Land Use & Management')} 
-                            <InfoTooltip text={t('reception.landUseTooltip', 'Current land use affects nutrient availability and fertilizer recommendations.')} />
-                        </label>
-                        <select
-                            className="w-full p-2 border rounded-lg mb-2 bg-sf-surface border-sf-divider text-sf-text"
-                            value={sampling.landUse}
-                            onChange={e => handleChange('sampling', 'landUse', e.target.value)}
-                        >
-                            <option value="">{t('reception.selectLandUse', '-- Select Land Use --')}</option>
-                            <option value="Cropland">{t('reception.cropland', 'Cropland')}</option>
-                            <option value="Pasture">{t('reception.pasture', 'Pasture')}</option>
-                            <option value="Forest">{t('reception.forest', 'Forest')}</option>
-                            <option value="Garden">{t('reception.garden', 'Home Garden')}</option>
-                            <option value="Greenhouse">{t('reception.greenhouse', 'Greenhouse')}</option>
-                        </select>
                         <input
                             placeholder={t('reception.fertilizerUsed', 'Fertilizer / Manure Used?')}
                             className="w-full p-2 border rounded-lg text-sm bg-sf-canvas border-sf-divider text-sf-text"
@@ -143,126 +128,19 @@ const WalkInForm = ({ submitter, setSubmitter, sampling, setSampling, groups = [
                         />
                     </div>
 
-                    <div>
-                        <label className="block text-xs font-semibold text-sf-muted mb-1">
-                            {t('reception.collectionDate', 'Collection Date')}
-                            <InfoTooltip text={t('reception.collectionDateTooltip', 'Date of physical collection in the field.')} />
-                        </label>
-                        <input
-                            type="date"
-                            className="w-full p-2 border rounded-lg bg-sf-surface border-sf-divider text-sf-text"
-                            value={sampling.date}
-                            onChange={e => handleChange('sampling', 'date', e.target.value)}
-                        />
-                    </div>
+
                 </div>
 
-                {/* Row 2: Sampling Depth — full width */}
-                <div data-field-key="depth" className={`p-4 bg-sf-canvas rounded-xl border ${hasErr('depth') ? 'border-red-400 ring-1 ring-red-200' : 'border-sf-divider'}`}>
-                    <label className="block text-xs font-semibold text-sf-muted mb-2 flex items-center gap-1">
-                        Sampling Depth
-                        <InfoTooltip text="Select the standard soil horizon or enter a custom depth range." />
-                    </label>
-                    <div className="flex flex-wrap gap-2">
-                        {[
-                            { label: '0–20 cm', val: '0-20' },
-                            { label: '20–40 cm', val: '20-40' },
-                            { label: '0–30 cm', val: '0-30' },
-                            { label: '30–60 cm', val: '30-60' },
-                        ].map(opt => (
-                            <button
-                                key={opt.val}
-                                type="button"
-                                onClick={() => setSampling(prev => ({ ...prev, depthType: opt.val, depth: opt.label }))}
-                                className={`px-4 py-2 rounded-lg text-sm font-bold transition-all border cursor-pointer ${sampling.depthType === opt.val
-                                    ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
-                                    : 'bg-sf-surface text-sf-muted border-sf-divider hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-sf-raised hover:text-sf-text'
-                                    }`}
-                            >
-                                {opt.label}
-                            </button>
-                        ))}
-                        <button
-                            type="button"
-                            onClick={() => setSampling(prev => ({ ...prev, depthType: 'Custom', depth: '' }))}
-                            className={`px-4 py-2 rounded-lg text-sm font-bold transition-all border cursor-pointer ${sampling.depthType === 'Custom'
-                                ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
-                                : 'bg-sf-surface text-sf-muted border-sf-divider hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-sf-raised hover:text-sf-text'
-                                    }`}
-                        >
-                            Custom…
-                        </button>
-                    </div>
-                    {sampling.depthType === 'Custom' && (
-                        <div className="flex gap-2 items-center mt-3 p-3 bg-sf-surface rounded-lg border border-sf-divider">
-                            <input
-                                type="number"
-                                placeholder="From"
-                                min="0"
-                                className="w-24 p-2 border rounded-lg text-sm text-center bg-sf-surface border-sf-divider text-sf-text"
-                                value={sampling.depthMin || ''}
-                                onChange={e => handleChange('sampling', 'depthMin', e.target.value)}
-                            />
-                            <span className="text-sf-muted font-bold">–</span>
-                            <input
-                                type="number"
-                                placeholder="To"
-                                min="0"
-                                className="w-24 p-2 border rounded-lg text-sm text-center bg-sf-surface border-sf-divider text-sf-text"
-                                value={sampling.depthMax || ''}
-                                onChange={e => handleChange('sampling', 'depthMax', e.target.value)}
-                            />
-                            <span className="text-sm text-sf-muted font-semibold">cm</span>
-                        </div>
-                    )}
-                </div>
+                <IntakeContextFields sampling={sampling} setSampling={setSampling} rules={rules} />
 
                 <div className="mt-4 pt-4 border-t border-sf-divider grid md:grid-cols-2 gap-6">
-                    <div>
-                        <label className="flex items-center gap-2 mb-2 text-sf-text">
-                            <input
-                                type="checkbox"
-                                checked={sampling.isComposite || false}
-                                onChange={e => handleChange('sampling', 'isComposite', e.target.checked)}
-                                className="text-blue-600 focus:ring-blue-500 rounded"
-                            />
-                            <span className="font-semibold text-sm flex items-center gap-1">
-                                Composite Sample?
-                                <InfoTooltip text="Was this sample mixed from multiple spots in the field? (Recommended)" />
-                            </span>
-                        </label>
-                        {sampling.isComposite && (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
-                                <input
-                                    type="number"
-                                    min="1"
-                                    placeholder="Sub-samples count"
-                                    className="w-full p-2 border rounded-lg bg-sf-surface border-sf-divider text-sf-text text-sm"
-                                    value={sampling.subsamples || ''}
-                                    onChange={e => handleChange('sampling', 'subsamples', e.target.value)}
-                                />
-                                <div className="relative">
-                                    <input
-                                        type="number"
-                                        min="1"
-                                        step="1"
-                                        placeholder="Composite Radius"
-                                        className="w-full p-2 pr-8 border rounded-lg bg-sf-surface border-sf-divider text-sf-text text-sm"
-                                        value={sampling.compositeRadiusM || ''}
-                                        onChange={e => {
-                                            const r = parseFloat(e.target.value);
-                                            const rad = isNaN(r) ? '' : r;
-                                            handleChange('sampling', 'compositeRadiusM', rad);
-                                            if (rad && (!sampling.positionalUncertaintyM || sampling.positionalUncertaintyM < rad)) {
-                                                handleChange('sampling', 'positionalUncertaintyM', rad);
-                                            }
-                                        }}
-                                    />
-                                    <span className="absolute right-3 top-2.5 text-xs text-gray-400 font-bold">&plusmn;m</span>
-                                </div>
-                            </div>
-                        )}
-                    </div>
+                    {rules?.context.composite.enabled && sampling.isComposite && <div className="grid grid-cols-2 gap-2">
+                        <input type="number" min="1" placeholder={t('intakeRules.subsamples')} className="p-2 border rounded bg-sf-surface" value={sampling.subsamples || ''} onChange={e => handleChange('sampling', 'subsamples', e.target.value)} />
+                        <input type="number" min="1" placeholder={t('intakeRules.radius')} className="p-2 border rounded bg-sf-surface" value={sampling.compositeRadiusM || ''} onChange={e => {
+                            const radius = e.target.value === '' ? '' : Number(e.target.value);
+                            setSampling(previous => ({ ...previous, compositeRadiusM: radius, ...(radius && (!previous.positionalUncertaintyM || previous.positionalUncertaintyM < radius) ? { positionalUncertaintyM: radius } : {}) }));
+                        }} />
+                    </div>}
                     <div className="md:col-span-2">
                         <label className="block text-xs font-semibold text-sf-muted mb-2 flex items-center gap-1">
                             Purpose of Testing
