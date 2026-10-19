@@ -21,6 +21,8 @@ const vm = require('vm');
 const esbuild = require(path.resolve(__dirname, '../../../client/node_modules/esbuild'));
 const React = require(path.resolve(__dirname, '../../../client/node_modules/react'));
 const ReactDOMServer = require(path.resolve(__dirname, '../../../client/node_modules/react-dom/server'));
+const intakeRulesFixture = require('../helpers/intakeRulesFixture');
+const english = require('../../../client/src/translations/en.json');
 
 function loadComplianceChecklistComponent() {
     const componentPath = path.resolve(__dirname, '../../../client/src/components/reception/ComplianceChecklist.jsx');
@@ -31,6 +33,8 @@ function loadComplianceChecklistComponent() {
     const mockLanguage = {
         useLanguage: () => ({
             t: (k, fallbackOrOptions, maybeDefault) => {
+                const translated = k.split('.').reduce((value, key) => value?.[key], english);
+                if (typeof translated === 'string' && typeof fallbackOrOptions !== 'object') return translated;
                 if (typeof fallbackOrOptions === 'string') return fallbackOrOptions;
                 if (typeof maybeDefault === 'string') return maybeDefault;
                 return k;
@@ -54,7 +58,8 @@ function loadComplianceChecklistComponent() {
     };
 
     vm.runInNewContext(transformed.code, runContext);
-    return runContext.module.exports.default;
+    const Component = runContext.module.exports.default;
+    return props => Component({ ...props, rules: props.rules || intakeRulesFixture(props.isWalkIn) });
 }
 
 const ComplianceChecklist = loadComplianceChecklistComponent();
@@ -86,6 +91,18 @@ function findCheckboxByTestId(vnode, testId) {
 }
 
 describe('Reception ComplianceChecklist Component & Parent State Contract (#113, #117)', () => {
+    test('#156 renders enabled criteria and uses the server N/A rule', () => {
+        const rules = intakeRulesFixture(false);
+        rules.criteria.container.enabled = false;
+        rules.criteria.quantity.naAllowed = true;
+        let value = { items: {} };
+        const tree = ComplianceChecklist({ rules, value, onChange: next => { value = next; } });
+        expect(findButtonByAriaLabel(tree, 'Container Intact / Sealed: OK')).toBeNull();
+        const na = findButtonByAriaLabel(tree, 'Sample Quantity Sufficient: N/A');
+        expect(na.props.disabled).toBe(false);
+        na.props.onClick();
+        expect(value.items.quantity.status).toBe('NA');
+    });
     test('1. PASS selection atomically updates items without parent closure wipe', () => {
         // Model the exact Reception.jsx parent state holder and callbacks:
         let checklistData = { items: {}, nonConformance: false, reason: '' };
@@ -718,13 +735,13 @@ describe('Reception Parent Page Component & Intake Mode Contracts (#113, #114, #
         }).not.toThrow();
     });
 
-    test('5. Reception intake mode switch enforces N/A policy cleanup (WALK_IN to PROJECT reset)', () => {
+    test('5. Reception resolved-policy cleanup remains after checklist state initialization', () => {
         // Source Reception.jsx source code directly to ensure the effect is placed AFTER useState
         const componentPath = path.resolve(__dirname, '../../../client/src/pages/Reception.jsx');
         const source = fs.readFileSync(componentPath, 'utf8');
 
         const stateDeclIndex = source.indexOf('const [checklistData, setChecklistData] = useState');
-        const effectIndex = source.indexOf("if (mode !== 'WALK_IN' && checklistData?.items?.coc?.status === 'NA')");
+        const effectIndex = source.indexOf('if (!intakeRules) return;');
 
         expect(stateDeclIndex).toBeGreaterThan(0);
         expect(effectIndex).toBeGreaterThan(0);

@@ -52,6 +52,25 @@ exports.processIntake = async (req, res) => {
     }
 };
 
+// Reception actors read only the applicable rules; editing remains in lab policies.
+exports.getIntakeRules = async (req, res) => {
+    try {
+        const rules = await prisma.$transaction(async tx => {
+            const identifier = req.query.sampleId || req.query.originalId;
+            const sample = identifier ? await tx.sample.findFirst({ where: { OR: [{ id: String(identifier) }, { originalId: String(identifier) }] } }) : null;
+            if (req.query.sampleId && !sample) throw new (require('../services/intakeErrors').IntakeError)(404, { code: 'SAMPLE_NOT_FOUND', message: 'Sample not found.' });
+            const scope = require('../utils/scopeGuard');
+            if (sample) scope.ensureScope(req.user, sample, { altLabField: 'assignedLab' });
+            const labId = sample?.assignedLab || req.user.labId || (scope.hasGlobalAccess(req.user) ? req.query.assignedLab : null);
+            const lab = await require('../services/policyService').resolveLab(labId, tx);
+            if (!lab?.isActive) throw new (require('../services/intakeErrors').IntakeError)(403, { code: 'MISSING_LAB_SCOPE', message: 'Select an active receiving laboratory.' });
+            return require('../services/intakeRulesService').resolve(tx, { sample, labId: lab.id,
+                projectReference: req.query.projectId || req.query.projectCode, isWalkIn: req.query.isWalkIn === 'true' });
+        });
+        return res.json({ rules });
+    } catch (error) { return respondIntakeError(res, error); }
+};
+
 /**
  * POST /api/reception/discard
  * Discard a DRAFT or RECEIVED sample from the reception console.

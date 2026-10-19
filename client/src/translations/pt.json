@@ -2773,6 +2773,7 @@
       "qc_blankHistoryMinPoints": "Mínimo de brancos selecionados para LOD/LOQ",
       "qc_blankLodMultiplier": "Multiplicador de DP amostral para LOD",
       "qc_blankLoqMultiplier": "Multiplicador de DP amostral para LOQ",
+      "reception_intakeRules": "Regras de receção e contexto da amostra",
       "qc_controlChartMinPoints": "Mínimo de pontos de base para cartas de controlo"
     },
     "title": "Políticas",
@@ -4057,5 +4058,55 @@
     "pdfFailed": "Falha ao baixar a folha de trabalho.",
     "pdfUnexpected": "O servidor não retornou uma folha de trabalho PDF.",
     "checksCount": "{checked}/{total} verificações"
+  },
+  "intakeRules": {
+    "loading": "A carregar regras de receção…",
+    "failureNotes": {
+      "container": "Ex.: saco rasgado, tampa solta, fuga visível…",
+      "label": "Descreva a etiqueta ilegível ou incorreta",
+      "quantity": "Descreva a quantidade em falta para as análises pedidas",
+      "condition": "Descreva o estado observado da amostra",
+      "coc": "Descreva a documentação de custódia em falta"
+    },
+    "title": "Regras de receção e contexto da amostra",
+    "help": "Configure as observações existentes para projetos e particulares. As respostas obrigatórias são verificadas na aceitação final; a sua ausência nunca impede o registo da chegada. As alterações aplicam-se a receções posteriores sem reescrever registos existentes.",
+    "profiles": {
+      "project": "Amostras de projeto",
+      "walkIn": "Entrega direta / particulares"
+    },
+    "groups": {
+      "criteria": "Critérios de receção",
+      "context": "Contexto da amostra"
+    },
+    "flags": {
+      "enabled": "Ativado",
+      "required": "Obrigatório",
+      "naAllowed": "Permitir N/A"
+    },
+    "fields": {
+      "landUse": "Uso do solo",
+      "samplingDate": "Data de amostragem",
+      "samplingDepth": "Profundidade de amostragem",
+      "composite": "Amostra composta"
+    },
+    "fieldHelp": {
+      "landUse": "Uso do solo observado no local de amostragem.",
+      "samplingDate": "Data de recolha da amostra no campo.",
+      "samplingDepth": "Intervalo de profundidade observado em centímetros. Deixe vazio se não foi registado.",
+      "composite": "Indique se a amostra combina material de vários pontos de amostragem."
+    },
+    "required": "Obrigatório",
+    "unanswered": "Sem resposta",
+    "unavailable": "Não foi possível carregar as regras de receção. Volte a ligar antes da aceitação final.",
+    "failureNote": "Descreva o problema observado",
+    "naDisabled": "As regras de receção deste laboratório não permitem N/A.",
+    "naAllowed": "Não aplicável",
+    "depthFrom": "Profundidade de (cm)",
+    "depthTo": "Profundidade até (cm)",
+    "subsamples": "Número de subamostras",
+    "radius": "Raio da amostra composta (m)",
+    "enabledItems": "observações ativadas",
+    "batchObservations": "Observações partilhadas do lote",
+    "batchHelp": "Introduza explicitamente as observações das amostras do lote. Não são presumidas respostas de qualidade nem profundidades. Reveja cada linha quando a origem ou as observações forem diferentes."
   }
 }

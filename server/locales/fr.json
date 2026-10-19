@@ -1148,6 +1148,7 @@
       "qc_blankHistoryMinPoints": "Minimum de blancs sélectionnés pour LD/LQ",
       "qc_blankLodMultiplier": "Multiplicateur d’écart-type pour LD",
       "qc_blankLoqMultiplier": "Multiplicateur d’écart-type pour LQ",
+      "reception_intakeRules": "Règles de réception et contexte du prélèvement",
       "qc_controlChartMinPoints": "Nombre minimal de points pour les cartes de contrôle"
     },
     "title": "Politiques",
@@ -2249,5 +2250,55 @@
       "QC_BATCH_SCOPE_DENIED": "La série est hors du périmètre de votre laboratoire.",
       "WORKSHEET_LAYOUT_TOO_LARGE": "Un en-tête ou une ligne est trop long pour cette feuille de travail."
     }
+  },
+  "intakeRules": {
+    "loading": "Chargement des règles de réception…",
+    "failureNotes": {
+      "container": "Ex. : sac déchiré, couvercle desserré, fuite visible…",
+      "label": "Décrire l’étiquette illisible ou incorrecte",
+      "quantity": "Décrire le manque de matière pour les analyses demandées",
+      "condition": "Décrire l’état observé de l’échantillon",
+      "coc": "Décrire les documents de traçabilité manquants"
+    },
+    "title": "Règles de réception et contexte du prélèvement",
+    "help": "Configurez les observations existantes pour les projets et les particuliers. Les réponses obligatoires sont vérifiées à l’acceptation finale ; leur absence n’empêche jamais d’enregistrer l’arrivée. Les modifications concernent les réceptions suivantes sans réécrire les dossiers existants.",
+    "profiles": {
+      "project": "Échantillons de projet",
+      "walkIn": "Dépôt direct / particuliers"
+    },
+    "groups": {
+      "criteria": "Critères de réception",
+      "context": "Contexte du prélèvement"
+    },
+    "flags": {
+      "enabled": "Activé",
+      "required": "Obligatoire",
+      "naAllowed": "N/A autorisé"
+    },
+    "fields": {
+      "landUse": "Utilisation du sol",
+      "samplingDate": "Date du prélèvement",
+      "samplingDepth": "Profondeur du prélèvement",
+      "composite": "Échantillon composite"
+    },
+    "fieldHelp": {
+      "landUse": "Utilisation du sol observée sur le site de prélèvement.",
+      "samplingDate": "Date de collecte de l’échantillon sur le terrain.",
+      "samplingDepth": "Intervalle de profondeur observé en centimètres. Laisser vide si non enregistré.",
+      "composite": "Indiquer si l’échantillon réunit des matériaux de plusieurs points de prélèvement."
+    },
+    "required": "Obligatoire",
+    "unanswered": "Sans réponse",
+    "unavailable": "Impossible de charger les règles de réception. Reconnectez-vous avant l’acceptation finale.",
+    "failureNote": "Décrivez le problème observé",
+    "naDisabled": "Les règles de réception de ce laboratoire interdisent N/A.",
+    "naAllowed": "Sans objet",
+    "depthFrom": "Profondeur de (cm)",
+    "depthTo": "Profondeur à (cm)",
+    "subsamples": "Nombre de sous-échantillons",
+    "radius": "Rayon du composite (m)",
+    "enabledItems": "observations activées",
+    "batchObservations": "Observations communes du lot",
+    "batchHelp": "Saisissez explicitement les observations des échantillons du lot. Aucune réponse qualité ni profondeur n’est présumée. Vérifiez chaque ligne lorsque la provenance ou les observations diffèrent."
   }
 }
