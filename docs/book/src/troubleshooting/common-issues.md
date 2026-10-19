@@ -51,11 +51,11 @@ This troubleshooting guide is divided into two sections:
    - Check for a transcription typo before submission
    - Re-analyze the affected bracket (`REPEAT_BRACKET`) if a mid-run `CCV`/`CCB` drifted
    - Trigger a **Batch Repeat (`REANALYZE_BATCH`)** so new `R2` attempts are created for the unknown samples
-   - Or, if a Lab Manager determines the results are scientifically fit for purpose with a documented caveat, record a **Managerial QC Disposition (`ACCEPT_WITH_CAVEAT`)** with a written justification.
+   - Or, if a Lab Manager determines the results are scientifically fit for purpose with a documented caveat, record a **Managerial QC Disposition (`ACCEPT_WITH_DEVIATION`)** with a written justification.
 
 ---
 
-### "We already issued a PDF Certificate of Analysis (`REPORTED`), and now we noticed a misspelled client name or need to re-run a test. Why are the fields locked?"
+### "We already issued a PDF Certificate of Analysis (`APPROVED` / `RELEASED`), and now we noticed a misspelled client name or need to re-run a test. Why are the fields locked?"
 
 **Cause**: Once a Certificate of Analysis is issued, the sample is locked to preserve ISO/IEC 17025 report integrity.
 

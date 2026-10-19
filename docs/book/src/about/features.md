@@ -8,7 +8,7 @@ SoilFER LIMS includes everything a soil testing laboratory needs to operate digi
 
 Track every physical soil bag and sub-sample container from the field to archive disposal:
 - **Three Intake Paths**: Register multi-sample **Consignments** (`CSG-...`), quick **Walk-In Samples**, or expected arrivals synced from **KoboToolbox** mobile surveys.
-- **Physical Arrival Inspection**: Record arrival condition, gross weight ($g$), moisture state, and any reception deviations (`INSUFFICIENT_MASS`, `DAMAGED_PACKAGE`, `Wet/Unsealed`) with reject or caveat-override workflows.
+- **Physical Arrival Inspection**: Complete the five-point intake inspection checklist (container integrity, label legibility, sufficient quantity/mass, physical condition, and chain of custody) and accept, accept with a documented deviation note, or reject with a written reason.
 - **Blind Lab Coding & Container Barcodes**: Automatically generate sequential Laboratory Sample Codes (`{LAB}-{YY}-{SEQ:6}{CHK}`) and Sub-Sample Container barcodes (`C-{LAB}-{YY}-{SEQ:6}{CHK}`) for $2\text{ mm}$ archive jars and $< 100\ \mu\text{m}$ spectroscopy vials.
 - **Pre-Analytical Preparation Gates**: Enforce air-drying ($< 40^\circ\text{C}$, `DRYING`) and crushing/sieving (`PREPARATION`) before analytical bench work items unlock.
 - **Storage, Custody & Retention**: Track rack/shelf locations, custody transfers, and post-report retention countdowns (`sample.retentionDaysAfterReport`).
@@ -33,7 +33,7 @@ Because SoilFER LIMS is used by many independent laboratories, **all QC frequenc
   - **Method Blanks (`BLANK`)**: Evaluated against absolute limits, `< LOQ`, or `< 0.5 × LOQ`, plus rolling blank history for empirical LOD ($3s$) and LOQ ($10s$) estimation.
   - **Analytical Duplicates (`DUPLICATE`)**: Evaluated by Relative Percent Difference (`RPD %`) above $5 \times \text{LOQ}$ and absolute difference near the LOQ.
   - **In-House Controls (`LRM`) & Certified Reference Materials (`CRM`)**: Evaluated by recovery % or certified uncertainty windows against registered reference material lots.
-  - **Calibration Verification (`ICV`, `ICB`, `CCV`, `CCB`)**: Checks linear regression correlation ($r$), minimum calibration standards, and mid-run drift with configurable `FAIL_BATCH` or **`REPEAT_BRACKET`** actions.
+  - **Calibration Verification (`ICV`, `CCV`, `CCB`)**: Checks linear regression correlation ($r$), minimum calibration standards, and mid-run drift with configurable `FAIL_BATCH` or **`REPEAT_BRACKET`** actions.
 - **Shewhart Control Charts & Westgard Rules**: Plot historical LRM/CRM measurements against approved $\bar{x} \pm 2s / 3s$ limits with configurable Westgard rules (`1-3s`, `2-2s`, `R-4s`, `1-2s`, `4-1s`, `10x`).
 - **Equipment Readiness & Proficiency Testing (PT)**: Block or warn when a `CRITICAL` or `IMPORTANT` instrument has an overdue calibration or open fault, and track external PT rounds (such as GLOSOLAN PT) with automatic $|z|$-score evaluation and CAPA tracking.
 
