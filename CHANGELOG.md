@@ -53,6 +53,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Redacted controller errors and updated QC documentation (#217).
   - Partial repeat replacement preserving result and attempt lineage (#261).
 
+### Fixed
+- Header Light and Dark choices now update the session appearance override (#317).
+
 ## [1.9.0] - 2026-10-05
 
 ### Added
