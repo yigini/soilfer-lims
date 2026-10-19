@@ -1,200 +1,70 @@
 # Features Overview
 
-SoilFER-LIMS includes everything a soil laboratory needs to operate digitally. Here is a detailed look at each major feature.
+SoilFER LIMS includes everything a soil testing laboratory needs to operate digitally—from sample arrival at the reception desk to ISO/IEC 17025 quality control, PDF Certificates of Analysis, and national database exchange.
 
 ---
 
-## 📋 Sample Lifecycle Management
+## 1. Sample Intake, Barcoding & Chain of Custody
 
-The central feature of any LIMS. Track every soil sample from the moment it's collected in the field until the final report is delivered to the client.
-
-**What you can do:**
-- Register new samples (manually or automatically from KoboToolbox)
-- Assign unique laboratory IDs
-- Track the sample's status at every stage (received → in analysis → pending review → approved → reported)
-- View the complete history of a sample — who handled it, what tests were performed, when results were entered
-- Search and filter samples by project, date, status, location, or any other property
-
-**Why it matters:** Paper-based systems make it nearly impossible to answer the question "Where exactly is this sample in the process?" With SoilFER-LIMS, the answer is always just a search away.
+Track every physical soil bag and sub-sample container from the field to archive disposal:
+- **Three Intake Paths**: Register multi-sample **Consignments** (`CSG-...`), quick **Walk-In Samples**, or expected arrivals synced from **KoboToolbox** mobile surveys.
+- **Physical Arrival Inspection**: Record arrival condition, gross weight ($g$), moisture state, and any reception deviations (`INSUFFICIENT_MASS`, `DAMAGED_PACKAGE`, `Wet/Unsealed`) with reject or caveat-override workflows.
+- **Blind Lab Coding & Container Barcodes**: Automatically generate sequential Laboratory Sample Codes (`{LAB}-{YY}-{SEQ:6}{CHK}`) and Sub-Sample Container barcodes (`C-{LAB}-{YY}-{SEQ:6}{CHK}`) for $2\text{ mm}$ archive jars and $< 100\ \mu\text{m}$ spectroscopy vials.
+- **Pre-Analytical Preparation Gates**: Enforce air-drying ($< 40^\circ\text{C}$, `DRYING`) and crushing/sieving (`PREPARATION`) before analytical bench work items unlock.
+- **Storage, Custody & Retention**: Track rack/shelf locations, custody transfers, and post-report retention countdowns (`sample.retentionDaysAfterReport`).
 
 ---
 
-## 📱 KoboToolbox Field Data Sync
+## 2. Technician Workbench, Shared Bench Terminals & Analytical Runs
 
-**[KoboToolbox](https://www.kobotoolbox.org/)** is a free, open-source tool for mobile data collection, widely used by the UN, NGOs, and government agencies. SoilFER-LIMS integrates directly with it.
-
-**How it works:**
-1. A field worker opens the KoboToolbox app on their phone
-2. They fill in sample details (GPS location, soil depth, field observations, photos)
-3. They submit the form (works even offline — data syncs when back online)
-4. SoilFER-LIMS automatically pulls the submission at the next sync interval
-5. The sample appears in the Reception queue, pre-filled with all field data
-
-**What you can do:**
-- Connect multiple KoboToolbox forms to different projects
-- Set automatic sync intervals (every 15 minutes, hourly, or manual)
-- Review synced data and match it to physical samples arriving at the lab
-- View field photos and GPS coordinates on the 3D map
-
-**External help:**
-- [KoboToolbox documentation](https://support.kobotoolbox.org/)
-- [KoboToolbox sign-up](https://www.kobotoolbox.org/) (free for humanitarian and research use)
+Purpose-built for wet-chemistry analysts and instrument operators:
+- **Structured Analytical Runs (`RunBatch`)**: Organize work items into batches with visual rack/microplate layouts (`MICROPLATE_96`, `CENTRIFUGE_24`, `RACK_40`), linked reagent lots, and verified instruments.
+- **Formula-Backed Worksheets**: Enter raw weights, extraction volumes, dilution factors, and instrument readings (pH, EC, Walkley–Black titration, Kjeldahl N, Olsen/Bray/Mehlich P, AAS/ICP cations, Hydrometer/Pipette texture, gravimetric moisture) while the LIMS computes final concentrations automatically.
+- **Shared Bench Terminals**: Support shared tablets and balance PCs in the wet lab with configurable idle auto-lock (`bench.idleLockMinutes`) and per-action **4–6 digit operator PIN** attribution (`bench.pinAtRecord`).
+- **Append-Only Analytical Attempts (`R1`, `R2`, ...)**: Every repeat creates a numbered attempt without overwriting earlier measurements, with automatic Non-Conformance Report (`NCR`) prompts when attempts exceed `repeats.maxAttemptsBeforeNcr`.
 
 ---
 
-## 🔬 Spectral Data Management
+## 3. Configurable Quality Control, Control Charts & Proficiency Testing
 
-For laboratories that perform **infrared spectroscopy** (MIR — Mid-Infrared, or NIR — Near-Infrared), SoilFER-LIMS includes a full spectral data management module.
-
-Soil spectroscopy is a fast, cost-effective method for estimating soil properties. Instead of wet chemistry (which uses reagents and takes hours), a spectrometer can scan a soil sample in seconds and predict its properties using mathematical models.
-
-**What you can do:**
-- Upload spectral files (CSV or OPUS format)
-- Automatic validation (wavelength range checks, duplicate detection, quality flags)
-- Link spectra to existing samples by lab ID
-- Visualize spectral curves
-- Review and approve spectra through the same workflow as wet chemistry results
-
-**External help:**
-- [GLOSOLAN spectroscopy resources](https://www.fao.org/global-soil-partnership/glosolan/soil-analysis/soil-spectroscopy)
-- [What is soil spectroscopy? (ICRAF)](https://www.worldagroforestry.org/sd/landhealth/soil-plant-spectral-diagnostics-laboratory)
+Because SoilFER LIMS is used by many independent laboratories, **all QC frequencies, limits, and enforcement modes are configurable per laboratory and per method**:
+- **Three Built-In Lab Presets**: Start with **`ISO17025_STRICT`**, **`BASIC`**, or **`ADVISORY`** and customize any individual rule in **Settings → Laboratory Policy** or per-method **`QcRule`** overrides.
+- **Complete Batch & Instrument QC**:
+  - **Method Blanks (`BLANK`)**: Evaluated against absolute limits, `< LOQ`, or `< 0.5 × LOQ`, plus rolling blank history for empirical LOD ($3s$) and LOQ ($10s$) estimation.
+  - **Analytical Duplicates (`DUPLICATE`)**: Evaluated by Relative Percent Difference (`RPD %`) above $5 \times \text{LOQ}$ and absolute difference near the LOQ.
+  - **In-House Controls (`LRM`) & Certified Reference Materials (`CRM`)**: Evaluated by recovery % or certified uncertainty windows against registered reference material lots.
+  - **Calibration Verification (`ICV`, `ICB`, `CCV`, `CCB`)**: Checks linear regression correlation ($r$), minimum calibration standards, and mid-run drift with configurable `FAIL_BATCH` or **`REPEAT_BRACKET`** actions.
+- **Shewhart Control Charts & Westgard Rules**: Plot historical LRM/CRM measurements against approved $\bar{x} \pm 2s / 3s$ limits with configurable Westgard rules (`1-3s`, `2-2s`, `R-4s`, `1-2s`, `4-1s`, `10x`).
+- **Equipment Readiness & Proficiency Testing (PT)**: Block or warn when a `CRITICAL` or `IMPORTANT` instrument has an overdue calibration or open fault, and track external PT rounds (such as GLOSOLAN PT) with automatic $|z|$-score evaluation and CAPA tracking.
 
 ---
 
-## 🌍 3D Field Maps
+## 4. Two-Stage Technical Review & Soil Plausibility Checks
 
-Visualize your sampling sites on an interactive globe using **CesiumJS** — the same technology used by NASA and USGS for geospatial visualization.
-
-**What you can do:**
-- View all sampling locations on a 3D globe with satellite imagery
-- Click on markers to see sample details, field photos, and analysis status
-- Filter map pins by project, analysis status, or date range
-- Full 360° field audit photo gallery for each sampling site
-
----
-
-## 👥 Multi-Laboratory Support (Global Mode)
-
-For organizations managing multiple soil laboratories, Global mode provides complete data isolation and centralized management.
-
-**What you can do:**
-- Create and manage multiple laboratories from a single system
-- Assign a Lab Manager to each lab who independently manages their own staff, projects, and analyses
-- View system-wide statistics while respecting data isolation
-- Transfer samples between laboratories if needed
+- **Stage 1 (Batch/Method Review)**: Verify calibration curves, QC pass/warn/fail badges, and replicate agreement ($r$) across an analytical run.
+- **Stage 2 (Whole-Sample Approval)**: Inspect all parameters on a sample side by side with automated soil chemistry cross-checks:
+  - Sum of Exchangeable Bases vs. CEC ($\sum \text{Bases} \le 1.1 \times \text{CEC}$) and Base Saturation ($\le 100\%$)
+  - Particle-Size Texture Closure ($\text{Sand} + \text{Silt} + \text{Clay} = 100\% \pm 2\%$)
+  - Organic Carbon to Total Nitrogen ($\text{C:N}$) ratio ($8\text{--}25$)
+  - Carbonate presence vs. low pH, $\text{EC}_{1:2.5}$ vs. $\text{EC}_e$, and Available P vs. Total P
+- **Saved Reported Value Selection**: Locks the official reported value (`MEAN_IF_WITHIN_R`, `LATEST_VALID`, or `REVIEWER_PICKS`) and enforces independent second-person review (`review.secondPersonRequired`).
 
 ---
 
-## 🔐 Role-Based Access Control (RBAC)
+## 5. Certificates of Analysis (PDF), Revisions & Amendments
 
-Not everyone in a lab should have access to everything. RBAC ensures people only see what they need.
-
-| Role | What They Can Do |
-|------|-----------------|
-| **Super Admin** | Full system access: create labs, manage all users, see everything. Only in Global mode. |
-| **Lab Manager** | Run their laboratory: create users, assign work, review and approve results, configure settings |
-| **Lab Technician** | Perform assigned analyses, enter results, submit for review |
-| **Sample Reception** | Receive physical samples, assign lab IDs, manage the intake queue |
-| **Project Manager** | View project data and export reports (read-only access) |
+- **Server-Side Vector PDF Reports**: Generates official Certificates of Analysis showing actual recorded drying/preparation conditions, explicit **`AIR_DRY` vs. `OVEN_DRY`** moisture basis, saved Reported Values, optional expanded measurement uncertainty ($U$), truthful QC/caveat disclosures, and a scannable **QR Verification Code**.
+- **ISO/IEC 17025 §7.8.8 Amendments & Revisions**:
+  - Supports post-report **Clerical** and **Scientific** amendments (with second-person authorization when `report.amendmentRequiresSecondPerson = true`).
+  - Opening a scientific amendment immediately marks the existing report **`WITHDRAWN`** and replaces the public QR download with a plain-text withdrawal notice.
+  - Issuing the corrected **Report Revision (`Rev 2+`)** prints the official replacement banner and marks changed (`†`), added (`‡`), and removed results.
 
 ---
 
-## 📜 Publication-Grade Certificates & PDF Reports
+## 6. Spectral Library (MIR & Vis-NIR) & National Data Exchange (API v2)
 
-Generate structured **Certificates of Analysis (COA)** aligned with laboratory SOPs and soil testing guidelines.
-
-**What you can do:**
-- **Server-Side PDF Rendering**: Built on PDFKit for fast, container-friendly rendering without headless browsers.
-- **Complete Provenance & Quality Gates**: 2-column metadata grid showing sampling coordinates, depths (D1/D2), reception date, and preparation gate checks (Drying $<40^\circ\text{C}$, 2mm sieving).
-- **Categorized Results with FAO Ratings**: Displays analytical parameters with standardized units, method references, and FAO 5-tier agronomic classification badges.
-- **Derived Diagnostics & Approvals**: Derives USDA texture triangle class, C:N stoichiometry, and includes Lab Manager electronic approval record.
-- **Secure Public Verification Tokens**: Share certificates via secure token links (`/api/reports/public/:token/pdf`) without requiring login.
-
----
-
-## 🌿 FAO Agronomic Interpretation Engine & Soil Metrology
-
-Transform raw analytical numbers into actionable agronomic insights.
-
-**What you can do:**
-- **Controlled Unit Standardization**: Automatic conversion of `%`, `ppm`, `meq/100g`, `g/kg`, `mg/kg`, `cmol(+)/kg`, `dS/m`, and `µS/cm`.
-- **FAO 5-Tier Ratings**: Classifies parameters into `VERY_LOW`, `LOW`, `OPTIMAL`, `HIGH`, and `VERY_HIGH` with tailored agronomic advisory text.
-- **USDA 12-Class Texture Derivation**: Computes textural triangle classes with 100% closure error validation ($\pm 2.0\%$).
-- **Stoichiometry & Cation Balance**: Evaluates C:N organic matter equilibrium, Base Saturation %, Ca:Mg ($<2.0$) and Mg:K ($<1.0$) balance alerts, and SAR/ESP sodicity hazards.
-
----
-
-## 🛡️ ISO/IEC 17025 Typed Quality Control & Batch Disposition
-
-Enforce rigorous analytical quality assurance across every testing run.
-
-**What you can do:**
-- **Typed QC Control Types**:
-  - **Method Blanks**: Automatic evaluation against baseline contamination limits ($\le 0.05$).
-  - **Analytical Duplicates**: Relative Percent Difference precision checks ($\text{RPD} \le 10.0\%$).
-  - **Certified Reference Materials (CRMs)**: Standard recovery window evaluation ($90.0\% \le \text{Recovery} \le 110.0\%$).
-- **Automated Batch Evaluation**: Transitions batch to `QC_PASS` or `QC_FAIL` automatically.
-- **Managerial Quality Gate Overrides**: Blocks unapproved acceptance of failed batch items; supports `PROCEED_WITH_WARNING` with audit trail justification.
-
----
-
-## 🔧 Equipment & Inventory Modules
-
-Track all laboratory instruments, calibrations, and consumables in one place.
-
-**What you can do:**
-- Register instruments with model, serial number, manufacturer, and location.
-- Set calibration schedules and receive alerts when calibration is due.
-- Record maintenance activities with dates, costs, and notes.
-- Manage reagents, minimum stock thresholds, lot numbers, and supplier catalogs.
-
----
-
-## 📝 Audit Trail
-
-Every action in the system is logged — who did what, when, and to which record.
-
-This is critical for:
-- **Accreditation** — auditors can verify that processes were followed correctly
-- **Accountability** — if a result is questioned, you can trace exactly who entered, reviewed, and approved it
-- **Debugging** — if something goes wrong, you can see exactly what happened
-
----
-
-## 📦 Historical Analysis Data Ingestion
-
-For soil laboratories with historical soil datasets analyzed prior to SoilFER LIMS rollout:
-
-**What you can do:**
-- **Legacy CSV Ingestion**: Ingest historical sample datasets through the Admin Panel CSV ingestion engine (`/admin/legacy-import`).
-- **Controlled Mapping & Validation**: Map legacy columns to canonical catalogue analyses, validated laboratory methods, and controlled measurement units with pre-import validation.
-- **Audit Trail Traceability**: Ingested determinations are stored with sample provenance and recorded in the audit trail for reporting and statistics.
-
----
-
-## 🌐 National SIS Interoperability & Machine-to-Machine APIs
-
-Connect laboratory data directly with national Soil Information Systems (SIS) and international FAO repositories.
-
-**What you can do:**
-- **RFC 7946 GeoJSON & GloSIS Schemas**: Standardized geospatial exchange format containing field metadata, depth horizons, and categorized analytical findings.
-- **Secure API Key Token Authorization**: Issue scoped, revocable machine-to-machine API keys with expiration management.
-- **RESTful Neutral Endpoints**: Access analytics and statistics through standard, automated endpoints.
-
----
-
-## 🌙 Dark Mode
-
-Full dark/light theme support. Because lab technicians entering data at the end of a long day deserve gentle lighting.
-
----
-
-## 🌐 Multi-Language Support
-
-The interface is available in:
-- 🇬🇧 English
-- 🇫🇷 Français (French)
-- 🇪🇸 Español (Spanish & Latin American Spanish)
-- 🇵🇹 Português (Portuguese)
-
-Users can switch languages from any page or their profile settings. The system remembers their preference.
+- **Infrared Spectroscopy**: Upload CSV or native Bruker OPUS scans for **MIR** ($4000\text{--}400\text{ cm}^{-1}$) and **Vis-NIR** ($350\text{--}2500\text{ nm}$), validate signal quality, overlay replicates, and pair spectra with wet-chemistry reference measurements.
+- **NSIS / OpenNSIS Data Exchange Gateway**:
+  - **API v1 & CSV/Excel Exports**: Export the official saved Reported Value per sample and parameter.
+  - **API v2 (`/api/v2/data-exchange`)**: Lossless observation export preserving all replicates, decimal depths, Soil Profile References (`{namespace}:{code}`), RFC 7946 GeoJSON, resumable 24-hour **Snapshots**, monotonic **Change Feeds**, and **Delivery Receipts**.
+- **Multilingual & Accessible**: Full interface and PDF reporting support in **English (`en`)**, **French (`fr`)**, **Spanish (`es` & `es-419`)**, and **Portuguese (`pt`)**, with light and dark themes.

@@ -1,35 +1,41 @@
 # Environment Variables
 
-SoilFER-LIMS reads its configuration from a `.env` file in the project root directory. Here is a reference of all supported variables.
+SoilFER LIMS reads its server configuration from the `.env` file in the project root directory (`/opt/soilfer-lims/.env`).
 
 ---
 
+## Supported Environment Variables
+
 | Variable | Default | Required | Description |
-|----------|---------|----------|-------------|
-| `PORT` | `3000` | No | The internal port the application listens on. Usually keep as 3000. |
-| `JWT_SECRET` | *(auto-generated)* | No | Secret key for encrypting login tokens. If left blank, a secure random key is generated on first boot. Set this explicitly if you want tokens to survive container restarts. |
-| `NODE_ENV` | `production` | No | Application environment. Always use `production` for deployed instances. |
-| `DEPLOYMENT_MODE` | `local` | No | `local` for a single laboratory, `global` for multi-laboratory network. |
+| :--- | :--- | :---: | :--- |
+| `PORT` | `3000` | No | Internal HTTP port on which the Node.js server listens (or host bind such as `127.0.0.1:3000`). |
+| `NODE_ENV` | `production` | No | Runtime environment (`production`, `development`, or `test`). Always use `production` on deployed servers. |
+| `DEPLOYMENT_MODE` | `local` | No | `local` for a single laboratory (initial `admin` is `LAB_MANAGER`) or `global` for a multi-laboratory network (initial `admin` is `SUPER_ADMIN`). |
+| `JWT_SECRET` | *(auto-generated & persisted in `prisma/.jwt_secret`)* | No | Secret key used to sign login JWT tokens and HMAC cursors. If left blank, a cryptographic secret is generated and persisted on first boot. Setting an explicit 64+ character random string is recommended for production. |
+| `ADMIN_INITIAL_PASSWORD` | *(randomly generated on first boot)* | No | Optional initial password for the `admin` account when seeding a brand-new database. If omitted, a random password is generated and printed once in the startup logs. |
+| `DATABASE_URL` | `file:./dev.db` | No | SQLite database file path used by Prisma ORM inside `/app/server/prisma`. |
+| `DISABLE_BACKGROUND_JOBS` | `false` | No | When set to `true` during pre-exposure upgrade verification (see `docs/UPGRADING.md`), suppresses background schedulers so zero background writes occur before cutover commitment. |
 
 ---
 
 ## Example `.env` File
 
 ```bash
-# SoilFER-LIMS Configuration
+# SoilFER LIMS Production Configuration
 PORT=3000
-JWT_SECRET=
 NODE_ENV=production
 DEPLOYMENT_MODE=local
+JWT_SECRET=
+ADMIN_INITIAL_PASSWORD=
 ```
 
 ---
 
-## Notes
+## Operational Notes
 
-- The `.env` file should **never** be committed to Git (it's listed in `.gitignore`)
-- If you change a value, restart the application for it to take effect:
+- **Never commit `.env` to Git**: Your `.env` file is ignored by `.gitignore` so secrets stay on your server.
+- **Applying changes**: After editing `/opt/soilfer-lims/.env`, recreate/restart the container for changes to take effect:
   ```bash
-  cd /opt/soilfer-lims && docker compose restart
+  cd /opt/soilfer-lims
+  docker compose up -d
   ```
-- The JWT_SECRET auto-generation is convenient but means that all user sessions expire if the container restarts. For production use, set an explicit JWT_SECRET so sessions persist.

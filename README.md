@@ -22,14 +22,25 @@
 
 ## 📖 In-Repository & Local Documentation
 
-Complete, operator-focused documentation is available directly in the repository and viewable locally as an interactive book:
+Complete, plain-language documentation for laboratory managers, bench technicians, reception staff, and IT administrators is available directly in the repository and viewable locally as an interactive book (`mdbook serve docs/book`):
 
+### User Manual Chapters (`docs/book/src/usage/`)
+* 📥 **[Sample Reception & Intake](docs/book/src/usage/reception-and-intake.md)** — Consignments (`CSG-...`), walk-in intake, [KoboToolbox mobile sync](docs/book/src/usage/kobotoolbox.md), arrival inspection, blind lab coding, and sub-sample container barcodes (`C-...`).
+* 🌡️ **[Drying, Preparation, Storage & Custody](docs/book/src/usage/preparation-and-custody.md)** — Air-drying (`< 40 °C`), `2 mm` sieving and `< 100 µm` grinding gates, storage locations, chain of custody, and post-report retention countdowns.
+* 🧪 **[Technician Workbench & Analytical Runs](docs/book/src/usage/technician-workbench.md)** & **[Shared Bench Terminals, Attempts & Repeats](docs/book/src/usage/bench-terminals-and-attempts.md)** — Rack/microplate batch builder, formula-backed wet-chemistry worksheets, shared bench PIN attribution, and append-only attempts (`R1`, `R2`, ...).
+* 🛡️ **[Quality Control, Control Charts & Failed QC](docs/book/src/usage/qc-management.md)** & **[Equipment Readiness, Reference Materials & PT](docs/book/src/usage/equipment-inventory.md)** — Blanks, duplicates, LRMs, CRMs, `ICV`/`CCV`/`CCB` drift checks, Shewhart control charts, Westgard rules, failed-QC remedies, instrument readiness gates, and Proficiency Testing ($z$-scores).
+* ✅ **[Review, Approval & Plausibility Checks](docs/book/src/usage/review-and-approval.md)** — Stage 1 batch review, Stage 2 whole-sample approval, saved Reported Value Selection, soil chemistry cross-checks, and second-person review rules.
+* 📄 **[Certificates of Analysis, PDF Reports & Amendments](docs/book/src/usage/reporting-pdf.md)** — ISO/IEC 17025 §7.8 PDF certificates, `AIR_DRY` vs. `OVEN_DRY` moisture basis, QR verification, and post-report clerical/scientific amendments & revisions (`Rev 2+`).
+* ⚙️ **[Per-Lab Settings, Presets & Method Overrides](docs/book/src/usage/lab-settings-and-presets.md)** & **[Roles & Permissions](docs/book/src/usage/roles.md)** — `ISO17025_STRICT`, `BASIC`, and `ADVISORY` presets, lab policy overrides, and per-method `QcRule` settings.
+* 🌐 **[Data Exchange, NSIS / OpenNSIS & API v2](docs/book/src/usage/data-exchange.md)**, **[Spectral Data Management](docs/book/src/usage/spectral.md)**, **[Agronomic Interpretation](docs/book/src/usage/agronomic-interpretation.md)** & **[Glossary](docs/book/src/reference/glossary.md)**.
+
+### Administrator & Technical Reference Guides (`docs/`)
 * 📊 **[Deployment Readiness Status & Operator Guide](docs/DEPLOYMENT_READINESS.md)** — Tracked readiness status, single-lab and multi-lab guides, and technical audit ledger.
 * 📖 **[Administration Guide](docs/ADMIN_GUIDE.md)** — Laboratory configuration, user RBAC, GloSIS procedures, quality rules, and SIS API keys.
 * 🚀 **[Deployment & Production Guide](docs/DEPLOYMENT_GUIDE.md)** — Comprehensive VPS setup, Docker Compose, Nginx/Apache reverse proxy, SSL/Certbot, and zero-downtime updates.
 * 🛠️ **[Installation Quickstart](docs/INSTALL.md)** — Step-by-step local machine and server installation for beginners.
 * 🔄 **[Upgrading & Maintenance Guide](docs/UPGRADING.md)** — Backup procedures, container updates, and database migration routines.
-* 📚 **Interactive mdBook Site (Local)** — Run `mdbook serve docs/book` from the repository root to launch the local interactive documentation site at `http://localhost:3000`.
+* 📡 **[NSIS Data Exchange API v2 Specification](docs/data-exchange-api-v2.md)** & **[Operator Runbook](docs/nsis-operator-runbook.md)** — Lossless observations, snapshots, change feeds, delivery receipts, and [Soil Profile References](docs/profile-reference-guide.md).
 
 ---
 
@@ -49,16 +60,16 @@ Whether you run a single provincial soil laboratory or coordinate a national net
                                                          |
 +-----------------+     +-----------------+     +--------v--------+
 | 6. SIS Exchange | <-- | 5. Certificates | <-- | 4. QA Review    |
-| RFC 7946 GeoJSON|     | PDF Report      |     | Blanks/Dups/QC  |
+| V2 & GeoJSON    |     | PDF & Revisions |     | Blanks/Dups/QC  |
 +-----------------+     +-----------------+     +-----------------+
 ```
 
-1. **Field Intake & Provenance**: Expected arrivals from KoboToolbox mobile surveys, physical inspection of bags, barcode/QR label printing, and non-conformance tracking.
-2. **Operational Prerequisite Gates**: Server-side enforced preparation gates (configurable drying and sieving steps, default 40 °C forced-air drying and 2 mm sieving) requiring verified operational checklist receipts before testing can begin.
-3. **Bench Execution & Worksheets**: Single-entry bench worksheets for routine soil chemistry, AAS, ICP, photometry, titration, and mid-infrared (MIR) diffuse reflectance spectroscopy.
-4. **Quality Assurance Workflows**: Evaluate method blanks, analytical duplicates, reference materials and control charts against laboratory-approved, versioned per-lab and per-method policy and QC rules.
-5. **Analytical Reports**: PDF reports generated via PDFKit featuring laboratory branding, USDA 12-class soil texture classification, 5-tier agronomic ratings, and authorized electronic approval records.
-6. **National Soil Information System (SIS) Interoperability**: Data exchange and export tools formatted according to GloSIS ontologies and RFC 7946 GeoJSON guidelines.
+1. **Field Intake & Provenance**: Expected arrivals from KoboToolbox mobile surveys, consignment (`CSG-...`) and walk-in registration, physical inspection of bags, barcode/QR label printing, and sub-sample container tracking (`C-...`).
+2. **Operational Prerequisite Gates**: Server-side enforced preparation gates (configurable drying and sieving steps, default $< 40\ ^\circ\text{C}$ forced-air drying and $2\text{ mm}$ sieving) requiring verified operational records before bench testing unlocks.
+3. **Bench Execution, Terminals & Runs**: Structured analytical batches (`RunBatch`) with rack/microplate layouts, formula-backed wet-chemistry worksheets, shared bench terminal PIN attribution, append-only repeat attempts (`R1`, `R2`), and MIR/Vis-NIR spectroscopy.
+4. **Configurable Quality Assurance & Two-Stage Review**: Evaluate method blanks, analytical duplicates, LRMs, CRMs, calibration drift (`ICV`/`CCV`/`CCB`), Shewhart control charts, and cross-parameter soil chemistry checks against configurable per-lab (`ISO17025_STRICT`, `BASIC`, `ADVISORY`) and per-method (`QcRule`) policies.
+5. **Certificates of Analysis & Amendments**: Server-side PDF reports (`RPT-...`) featuring actual drying/prep records, `AIR_DRY` vs. `OVEN_DRY` moisture basis, saved Reported Values, truthful QC/caveat disclosures, QR verification, and ISO/IEC 17025 §7.8.8 post-report amendments & revisions (`Rev 2+`).
+6. **National Soil Information System (NSIS / OpenNSIS) Interoperability**: Read-only Data Exchange Gateway (`v1` and `v2`) providing lossless replicate observations, Soil Profile References, RFC 7946 GeoJSON, resumable 24-hour snapshots, continuous change feeds, and delivery receipts.
 
 ---
 
@@ -69,7 +80,7 @@ SoilFER-LIMS can be deployed in two operating modes depending on institutional r
 | Feature | **Local Lab Mode (`DEPLOYMENT_MODE=local`)** | **Global Network Mode (`DEPLOYMENT_MODE=global`)** |
 | :--- | :--- | :--- |
 | **Primary Target** | Single independent soil testing laboratory | National soil program, ministry network, multi-lab initiative |
-| **User Roles** | Lab Manager, Receptionists, Bench Technicians | Super Admin, National Lab Managers, Technicians, Intake Officers |
+| **User Roles** | Lab Manager, Reviewers, Receptionists, Bench Technicians | Super Admin, National Lab Managers, Reviewers, Technicians, Intake Officers |
 | **Data Scoping** | Single unified laboratory pool | Strict multi-tenant RBAC isolation per laboratory code (`GTM-LAB1`, `MOZ-LAB1`) |
 | **Default Admin** | `admin` (Role: `LAB_MANAGER`) | `admin` (Role: `SUPER_ADMIN`) |
 | **Best Used For** | University laboratories, provincial testing centers | National ministries, international soil research consortia |
@@ -82,33 +93,33 @@ To switch modes, simply adjust `DEPLOYMENT_MODE=local` or `DEPLOYMENT_MODE=globa
 
 ### 🔬 1. FAO GLOSOLAN Harmonized Method Catalogue
 * **Standard Operating Procedures (SOPs)**: Standardized analytical procedure catalogue aligned with FAO GLOSOLAN guidelines.
-* **Controlled Unit Vocabulary**: Built-in unit normalization converting `%`, `ppm`, `meq/100g`, `g/kg`, `mg/kg`, `cmol(+)/kg`, `dS/m`, and `µS/cm` with exact scientific conversion factors.
+* **One Canonical Unit per Analysis**: Built-in unit normalization converting legacy `%`, `ppm`, `meq/100g` inputs into each analysis's canonical unit (`g/kg`, `mg/kg`, `cmol(+)/kg`, `dS/m`, `µS/cm`, `%`) with exact conversion factors.
 * **Canonical Soil Measurands**: Standardized parameters for `pH`, `carbonOrganic`, `nitrogenTotal`, `electricalConductivity`, `exchangeableBases`, `particleSizeAnalysis`, and `cationExchangeCapacitySoil`.
 
 ### 🛡️ 2. Quality Assurance & Batch Control Aligned with ISO/IEC 17025
 SoilFER-LIMS is designed to support workflows and records that contribute to an ISO/IEC 17025 quality system. Formal accreditation belongs to the testing laboratory and its validated procedures.
 * **Laboratory-owned policy**: `ISO17025_STRICT`, `BASIC` and `ADVISORY` presets provide shipped defaults. Labs can override supported settings, with analysis/method overrides where available; no acceptance number is a universal rule. Review and validate limits for the method and laboratory before operational use.
 * **Versioned QC rules**: `QcRule` supplies lab/analysis criteria and optional method-specific criteria. The evaluator resolves these with `policyService` and applicable shipped analysis defaults, and records the resolved rule and policy snapshot with the evaluation.
-* **Reference materials**: `ReferenceMaterial` records identify CRM/check-soil lots and their analyte values. Choose an eligible material and lot for the laboratory and run; do not substitute a generic recovery window for the configured criterion.
+* **Reference materials & Proficiency Testing**: `ReferenceMaterial` records identify CRM/LRM lots, expiry dates, and target analyte values, while the Proficiency Testing (`PT`) module tracks inter-laboratory rounds and evaluates $|z|$-scores ($\le 2$ satisfactory, $2\text{--}3$ questionable, $\ge 3$ unsatisfactory).
 * **Control charts**: Lab/analysis/method/reference-lot series use approved limits and the configured control-chart/Westgard rules. Proposals and approvals are deliberate actions; the limits are not continuously re-estimated after every measurement.
-* **Batch evaluation and disposition**: QC results and the applicable policy determine blocking, warning or advisory behavior. Authorized dispositions require a recorded reason and preserve previous evaluations and readings.
+* **Batch evaluation, two-stage review, and disposition**: QC results and the applicable policy determine blocking, warning or advisory behavior. Stage 1 reviews the analytical batch, while Stage 2 reviews the whole sample across parameters and locks the saved `ReportedValueSelection`.
 
 The current resolution paths are documented in [`policyService`](server/services/policyService.js), [`qcRuleService`](server/services/qcRuleService.js), [`qcPolicyService`](server/services/qcPolicyService.js) and [`controlChartService`](server/services/controlChartService.js).
 
 ### 🌿 3. USDA Soil Texture & Agronomic Interpretation Engine
-* **USDA 12-Class Textural Triangle**: Automatic soil texture derivation (`Sandy Loam`, `Clay`, `Silty Clay Loam`, etc.) with strict composite mass-balance closure validation ($\text{Sand} + \text{Silt} + \text{Clay} = 100\% \pm 2.0\%$).
-* **FAO 5-Tier Fertility Ratings**: Evaluates values into `VERY_LOW`, `LOW`, `OPTIMAL`, `HIGH`, `VERY_HIGH` with practical soil health guidance.
-* **Stoichiometric Balances**: Calculates C:N organic matter equilibrium, Base Saturation %, $\text{Ca:Mg}$ and $\text{Mg:K}$ ratios, and SAR/ESP sodicity hazards.
+* **USDA 12-Class Textural Triangle**: Automatic soil texture derivation (`Sandy Loam`, `Clay`, `Silty Clay Loam`, etc.) with configurable mass-balance closure validation ($\text{Sand} + \text{Silt} + \text{Clay} = 100\% \pm \text{crossCheck.textureClosureTolerancePct}$).
+* **FAO 5-Tier Fertility Ratings**: Classifies results into `VERY_LOW`, `LOW`, `OPTIMAL`, `HIGH`, `VERY_HIGH`.
+* **Stoichiometric & Chemical Cross-Checks**: Evaluates C:N organic matter equilibrium, Sum of Bases vs. CEC, Base Saturation %, $\text{Ca:Mg}$ and $\text{Mg:K}$ ratios, and SAR/ESP sodicity hazards.
 
-### ⚡ 4. Technician Workbench & Spectral Library
-* **Single-Entry Recording**: Eliminates duplicate entry forms and maintains clean separation between draft autosaves and submitted results.
-* **Diffuse Reflectance Spectroscopy**: Upload, display, and manage Full-Range Mid-Infrared (MIR $400\text{--}4000\text{ cm}^{-1}$) and VIS-NIR spectral files linked directly to sample custody IDs.
-* **Instrument Readiness**: Tracks analytical balances, pH meters, and spectrophotometers with calibration reminders.
+### ⚡ 4. Technician Workbench, Shared Bench Terminals & Spectral Library
+* **Append-Only Attempts & Shared Bench Terminals**: Supports shared wet-lab tablets with idle auto-lock (`bench.idleLockMinutes`), per-action operator PIN verification (`bench.pinAtRecord`), and non-destructive repeat attempts (`R1`, `R2`, ...).
+* **Diffuse Reflectance Spectroscopy**: Upload, validate, and review Mid-Infrared (`MIR`, $4000\text{--}400\text{ cm}^{-1}$) and `Vis-NIR` ($350\text{--}2500\text{ nm}$) CSV and Bruker OPUS files linked directly to sample custody IDs.
+* **Instrument Readiness Gates**: Tracks analytical balances, pH/EC meters, and spectrophotometers by criticality (`CRITICAL`, `IMPORTANT`, `NON_CRITICAL`) and blocks or warns when calibration is overdue or a fault is open.
 
-### 📄 5. Certificate & Report Generation
+### 📄 5. Certificate of Analysis, Revisions & Amendments
 * **Server-Side PDF Engine**: High-performance pure JavaScript PDF generator powered by PDFKit without a headless browser.
-* **Official Layout**: Laboratory and program headers, sample GPS coordinates, depth layers, complete analytical results grid, and authorized electronic approval records.
-* **Public QR Verification**: Instant validation of printed certificates via secure public URL tokens (`/api/reports/public/:token/pdf`).
+* **Truthful ISO/IEC 17025 §7.8 Layout**: Displays actual drying/prep records, `AIR_DRY` vs. `OVEN_DRY` moisture basis, saved Reported Values, optional measurement uncertainty ($U$), and truthful QC/caveat disclosures.
+* **Post-Report Amendments & Public QR Protection**: Supports clerical and scientific amendments (`#210`), immediately marks superseded reports `WITHDRAWN` on public QR links, and issues numbered revisions (`Rev 2+`, `#211`) with `†`/`‡` change markers.
 
 ### 📦 6. Historical Sample Analysis Backfill
 * **Legacy Batch Ingestion**: Built-in CSV ingestion engine in the Admin Panel (`/admin/legacy-import`, accessible by authorized intake and manager roles) with CSV header preview, required column-to-method mappings, unit validation, duplicate handling, and audit logging.

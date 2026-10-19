@@ -47,15 +47,22 @@
 
 # Using SoilFER-LIMS
 
-- [First Login & Setup](./usage/first-login.md)
-- [Roles & Permissions](./usage/roles.md)
-- [The Sample Workflow](./usage/sample-workflow.md)
-- [Quality Control & Batch Management](./usage/qc-management.md)
+- [First Login & Lab Setup](./usage/first-login.md)
+- [Roles, Permissions & Separation of Duties](./usage/roles.md)
+- [Per-Lab Settings, Presets & Method Overrides](./usage/lab-settings-and-presets.md)
+- [The Sample Workflow (End-to-End)](./usage/sample-workflow.md)
+- [Sample Reception & Intake](./usage/reception-and-intake.md)
+- [KoboToolbox Field Integration](./usage/kobotoolbox.md)
+- [Drying, Preparation, Storage & Custody](./usage/preparation-and-custody.md)
+- [Technician Workbench & Analytical Runs](./usage/technician-workbench.md)
+- [Shared Bench Terminals, Attempts & Repeats](./usage/bench-terminals-and-attempts.md)
+- [Quality Control, Control Charts & Failed QC](./usage/qc-management.md)
+- [Equipment Readiness, Reference Materials & PT](./usage/equipment-inventory.md)
+- [Review, Approval & Plausibility Checks](./usage/review-and-approval.md)
+- [Certificates of Analysis, PDF Reports & Amendments](./usage/reporting-pdf.md)
 - [Controlled Units & Agronomic Interpretation](./usage/agronomic-interpretation.md)
-- [Certificate of Analysis & PDF Reports](./usage/reporting-pdf.md)
-- [KoboToolbox Integration](./usage/kobotoolbox.md)
-- [Spectral Data Management](./usage/spectral.md)
-- [Equipment & Inventory](./usage/equipment-inventory.md)
+- [Spectral Data Management (MIR & Vis-NIR)](./usage/spectral.md)
+- [Data Exchange, NSIS / OpenNSIS & API v2](./usage/data-exchange.md)
 
 ---
 
