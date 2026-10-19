@@ -23,7 +23,7 @@ A plain-language reference for laboratory, quality control (QC), soil chemistry,
 | **Profile Reference** | An optional code (`{namespace}:{code}`, e.g., `SOILFER-GTM:PIT-01`) linking multiple soil bags taken from different depth layers of the same soil pit or sampling location. |
 | **Reported Value Selection** | The explicit, saved record (`ReportedValueSelection`) of which analytical value is officially reported for a work item (for example, the mean of replicates within repeatability $r$, the latest valid attempt, or a reviewer-selected attempt). |
 | **Superseded / Withdrawn Report** | When a report is being scientifically amended, the previous PDF is immediately marked **`WITHDRAWN`**. Once the corrected Revision (`Rev 2`) is issued, Revision 1 becomes **`SUPERSEDED`**. Public QR links never serve withdrawn or superseded PDFs. |
-| **Work Item (`AnalysisResult`)** | A single requested test on a single sample (for example, *Olsen P on Sample `NRL-26-000142C`*). |
+| **Work Item (`WorkItem`)** | A single requested test on a single sample (for example, *Olsen P on Sample `NRL-26-000142C`*). |
 
 ---
 
@@ -34,7 +34,7 @@ A plain-language reference for laboratory, quality control (QC), soil chemistry,
 | **Analytical Batch (`RunBatch`)** | A group of unknown customer samples prepared and analyzed together under the same reagent lot, instrument calibration, and set of QC samples (Blanks, Duplicates, LRMs, CRMs). |
 | **Blank (`BLANK` / Method Blank)** | A vessel containing all extraction and digestion reagents—but **no soil**—carried through the entire analytical procedure to check for reagent or glassware contamination. |
 | **Bracketed Repeat (`REPEAT_BRACKET`)** | When a mid-run calibration check (`CCV` or `CCB`) fails, re-analyzing only the unknown samples that were measured between the last passing check and the failed check. |
-| **Calibration Blank (`ICB` / `CCB`)** | An instrument blank run immediately after calibration (**Initial Calibration Blank, `ICB`**) or periodically during the sequence (**Continuing Calibration Blank, `CCB`**) to verify zero baseline drift or carryover. |
+| **Continuing Calibration Blank (`CCB`)** | An instrument blank run periodically during an analytical sequence to verify zero baseline drift or carryover between samples. |
 | **Calibration Verification (`ICV` / `CCV`)** | A standard solution of known concentration analyzed immediately after calibration (**Initial Calibration Verification, `ICV`**, typically from a second source) or every $N$ samples (**Continuing Calibration Verification, `CCV`**) to verify that the instrument calibration remains accurate. |
 | **Certified Reference Material (`CRM`)** | A soil standard purchased from an accredited metrological body (such as NIST, WEPAL, or GLOSOLAN) with a certified value and uncertainty, used to verify method **trueness** (absence of systematic bias). |
 | **Control Chart (Shewhart / Levey–Jennings)** | A graph plotting LRM or CRM measurements over time against the historical mean ($\bar{x}$), warning limits ($\pm 2s$), and action limits ($\pm 3s$) to spot drift or shifts before a method goes out of control. |

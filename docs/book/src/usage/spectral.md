@@ -42,7 +42,7 @@ In **Spectral Library → Upload Spectra** (or from the **Spectra** tab on a sam
   - **Spectrometer Instrument** (linked to Equipment Inventory, e.g., *Bruker ALPHA II*)
   - **Modality & Axis Unit**: `MIR` (`WAVENUMBER_CM1`, descending $4000 \to 400\text{ cm}^{-1}$) or `NIR` (`WAVELENGTH_NM`, ascending $350 \to 2500\text{ nm}$)
   - **Signal Quantity**: `ABSORBANCE` ($\text{AU}$), `REFLECTANCE` ($R \in [0, 1]$), `TRANSMITTANCE` ($T \in [0, 1]$), or `REMANENCE` (Kubelka–Munk)
-  - **Accessory & Window Material** (e.g., `DRIFT`, `ATR`, `KBR`, `ZNSE`, `QUARTZ`)
+  - **Accessory & Window Material** (e.g., `DRIFT`, `ATR`, `KBR`, `ZN_SE`, `QUARTZ`)
   - **Resolution & Co-Added Scans** (e.g., $4\text{ cm}^{-1}$, 32 or 64 scans)
   - **Background Reference** (e.g., `GOLD`, `SPECTRALON`, `KBR`) and background timestamp
   - **Sample Preparation & Moisture State** (`AGATE_100UM`, `AIR_DRY_2MM`; `AIR_DRY`, `OVEN_DRY`)

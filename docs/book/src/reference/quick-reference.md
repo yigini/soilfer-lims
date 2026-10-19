@@ -8,15 +8,14 @@ A single-page cheat sheet for laboratory staff and system administrators.
 
 | Status Badge | Where You See It | What It Means | Who Acts Next |
 | :--- | :--- | :--- | :--- |
-| **`EXPECTED`** | Reception / Kobo | Synced from field survey; physical bag has not yet arrived at the lab | **Reception** (confirm arrival) |
-| **`REGISTERED` / `IN_PREP`** | Reception / Prep | Arrived at lab; waiting for Air-Drying (`DRYING`) and Sieving (`PREPARATION`) | **Prep Technician** |
-| **`READY_FOR_ANALYSIS`** | Workbench | Pre-analytical gates passed; test work items are unlocked | **Lab Technician** |
-| **`IN_PROGRESS`** | Workbench | Assigned to an analytical batch/run; measurements being recorded | **Lab Technician** |
-| **`SUBMITTED`** | Review Queue | Technician submitted batch/results for Stage 1 technical review | **Reviewer / Lab Manager** |
-| **`REVIEWED`** | Sample Review | Method batch passed Stage 1 review; awaiting whole-sample Stage 2 approval | **Reviewer / Lab Manager** |
-| **`NEEDS_REPEAT`** | Workbench | Returned by reviewer (or QC failure) for re-analysis (`R2`, `R3`) | **Lab Technician** |
-| **`APPROVED`** | Sample / Reports | Whole sample approved; Reported Values locked; ready for PDF certificate | **Lab Manager / Reviewer** |
-| **`REPORTED`** | Reports / Archive | Official PDF Certificate of Analysis issued (`Rev 1+`) | **Client / Archive** |
+| **`EXPECTED`** | Reception / Kobo | Synced from field survey; physical bag has not yet arrived at the lab | **Sample Reception** (confirm arrival) |
+| **`RECEIVED` / `ACCEPTED`** | Reception / Prep | Physical arrival logged and accepted at intake; ready for `DRYING` and `PREPARATION` gates | **Sample Reception / Technician** |
+| **`NOT_ASSIGNED` / `ASSIGNED`** | Workbench (`WorkItem`) | Work item created and assigned to an analyst or queue | **Lab Technician** |
+| **`IN_PROGRESS` / `PROCESSING`** | Workbench / Sample | Pre-analytical gates passed; measurements actively being recorded in a batch | **Lab Technician** |
+| **`SUBMITTED` (`SUBMITTED_PARTIAL` / `SUBMITTED_FULL`)** | Review Queue | Technician submitted work item(s) for technical review | **Reviewer / Lab Manager** |
+| **`REPEAT_REQUIRED`** | Workbench (`WorkItem`) | Returned by reviewer (or QC failure) for re-analysis (`Attempt #2`, `Attempt #3`) | **Lab Technician** |
+| **`APPROVED` / `ACCEPTED`** | Sample / Work Item | Approved by reviewer/manager; Reported Values locked; ready for PDF certificate | **Lab Manager / Reviewer** |
+| **`RELEASED`** | Reports / Archive | Official PDF Certificate of Analysis issued (`Rev 1+`) and released | **Client / Archive** |
 
 ---
 
@@ -71,7 +70,7 @@ A single-page cheat sheet for laboratory staff and system administrators.
 | `/opt/soilfer-lims/` | Application root directory on the host server |
 | `/opt/soilfer-lims/.env` | Environment variables and secrets |
 | `/opt/soilfer-lims/deploy/nginx.conf` | NGINX reverse-proxy and TLS configuration |
-| Docker volume `lims-data` | Persistent SQLite database (`prod.db`) |
+| Docker volume `lims-data` | Persistent SQLite database (`dev.db` at `/app/server/prisma/dev.db`) |
 | Docker volume `lims-assets` | Uploaded spectra, attachments, and logos |
 | Docker volume `lims-backups` | Compressed database backup archives (`.db.gz`) |
 | **Ports `80` / `443` / `22` / `3000`** | HTTP (`80`), HTTPS (`443`), SSH (`22`), internal app port (`3000`) |

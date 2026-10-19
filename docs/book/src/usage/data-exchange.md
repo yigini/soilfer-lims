@@ -38,8 +38,8 @@ On the Sample Intake form, KoboToolbox mapping screen, and Sample Detail page, t
 - **Resolved Key** (`{namespace}:{code}`, such as `SOILFER-GTM:PIT-DEMO-01`)
 - **Relation / Meaning**:
   - `CONFIRMED_PROFILE` (explicitly confirmed multi-layer soil pit/profile)
-  - `SAMPLING_POINT` (single point or auger boring)
-  - `COMPOSITE_AREA` (bulked composite across a plot)
+  - `SITE_POINT` (single point or auger boring)
+  - `COMPOSITE` (bulked composite across a plot)
   - `UNSPECIFIED` (or explicitly recorded as unknown)
 
 ### What You Do
