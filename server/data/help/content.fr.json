@@ -338,7 +338,7 @@
             },
             {
               "action": "Vérifiez les éléments correspondant à l’objectif : Follow assigned work from preparation to reviewer handoff using five demo samples.",
-              "expected": "Chaque échantillon ou tâche affiche clairement son état (EXPECTED, IN_PREP, READY_FOR_ANALYSIS, SUBMITTED, APPROVED, REPORTED) et le prochain rôle responsable."
+              "expected": "Chaque échantillon ou tâche affiche clairement son état (EXPECTED, RECEIVED, ACCEPTED, IN_PROGRESS, SUBMITTED, APPROVED, RELEASED) et le prochain rôle responsable."
             },
             {
               "action": "Consultez le reçu de confirmation ou l’historique d’audit avant de poursuivre ou de transmettre le dossier.",
@@ -381,7 +381,7 @@
       ],
       "steps": [
         "Ouvrez /workbench et examinez les compteurs de file d’attente, les badges d’état et le périmètre du laboratoire. (Expected: Seuls les enregistrements autorisés pour votre laboratoire et vos projets s’affichent.)",
-        "Vérifiez les éléments correspondant à l’objectif : Follow assigned work from preparation to reviewer handoff using five demo samples. (Expected: Chaque échantillon ou tâche affiche clairement son état (EXPECTED, IN_PREP, READY_FOR_ANALYSIS, SUBMITTED, APPROVED, REPORTED) et le prochain rôle responsable.)",
+        "Vérifiez les éléments correspondant à l’objectif : Follow assigned work from preparation to reviewer handoff using five demo samples. (Expected: Chaque échantillon ou tâche affiche clairement son état (EXPECTED, RECEIVED, ACCEPTED, IN_PROGRESS, SUBMITTED, APPROVED, RELEASED) et le prochain rôle responsable.)",
         "Consultez le reçu de confirmation ou l’historique d’audit avant de poursuivre ou de transmettre le dossier. (Expected: La traçabilité reste complète sans modification accidentelle des données validées.)"
       ],
       "caution": "Attention: A completed worksheet is mistaken for submitted work. — Réinitialisez les filtres dans /workbench, vérifiez l’état des prérequis de l’échantillon et confirmez vos autorisations auprès du responsable de laboratoire.",
@@ -517,7 +517,7 @@
             },
             {
               "action": "Vérifiez les éléments correspondant à l’objectif : Distinguish intake review, assignment, result review and final release.",
-              "expected": "Chaque échantillon ou tâche affiche clairement son état (EXPECTED, IN_PREP, READY_FOR_ANALYSIS, SUBMITTED, APPROVED, REPORTED) et le prochain rôle responsable."
+              "expected": "Chaque échantillon ou tâche affiche clairement son état (EXPECTED, RECEIVED, ACCEPTED, IN_PROGRESS, SUBMITTED, APPROVED, RELEASED) et le prochain rôle responsable."
             },
             {
               "action": "Consultez le reçu de confirmation ou l’historique d’audit avant de poursuivre ou de transmettre le dossier.",
@@ -560,7 +560,7 @@
       ],
       "steps": [
         "Ouvrez /manager-queue et examinez les compteurs de file d’attente, les badges d’état et le périmètre du laboratoire. (Expected: Seuls les enregistrements autorisés pour votre laboratoire et vos projets s’affichent.)",
-        "Vérifiez les éléments correspondant à l’objectif : Distinguish intake review, assignment, result review and final release. (Expected: Chaque échantillon ou tâche affiche clairement son état (EXPECTED, IN_PREP, READY_FOR_ANALYSIS, SUBMITTED, APPROVED, REPORTED) et le prochain rôle responsable.)",
+        "Vérifiez les éléments correspondant à l’objectif : Distinguish intake review, assignment, result review and final release. (Expected: Chaque échantillon ou tâche affiche clairement son état (EXPECTED, RECEIVED, ACCEPTED, IN_PROGRESS, SUBMITTED, APPROVED, RELEASED) et le prochain rôle responsable.)",
         "Consultez le reçu de confirmation ou l’historique d’audit avant de poursuivre ou de transmettre le dossier. (Expected: La traçabilité reste complète sans modification accidentelle des données validées.)"
       ],
       "caution": "Attention: The manager opens the wrong queue and sees no work. — Réinitialisez les filtres dans /manager-queue, vérifiez l’état des prérequis de l’échantillon et confirmez vos autorisations auprès du responsable de laboratoire.",
@@ -602,7 +602,7 @@
             },
             {
               "action": "Vérifiez les éléments correspondant à l’objectif : Read project progress and identify who owns the next action.",
-              "expected": "Chaque échantillon ou tâche affiche clairement son état (EXPECTED, IN_PREP, READY_FOR_ANALYSIS, SUBMITTED, APPROVED, REPORTED) et le prochain rôle responsable."
+              "expected": "Chaque échantillon ou tâche affiche clairement son état (EXPECTED, RECEIVED, ACCEPTED, IN_PROGRESS, SUBMITTED, APPROVED, RELEASED) et le prochain rôle responsable."
             },
             {
               "action": "Consultez le reçu de confirmation ou l’historique d’audit avant de poursuivre ou de transmettre le dossier.",
@@ -645,7 +645,7 @@
       ],
       "steps": [
         "Ouvrez /projects et examinez les compteurs de file d’attente, les badges d’état et le périmètre du laboratoire. (Expected: Seuls les enregistrements autorisés pour votre laboratoire et vos projets s’affichent.)",
-        "Vérifiez les éléments correspondant à l’objectif : Read project progress and identify who owns the next action. (Expected: Chaque échantillon ou tâche affiche clairement son état (EXPECTED, IN_PREP, READY_FOR_ANALYSIS, SUBMITTED, APPROVED, REPORTED) et le prochain rôle responsable.)",
+        "Vérifiez les éléments correspondant à l’objectif : Read project progress and identify who owns the next action. (Expected: Chaque échantillon ou tâche affiche clairement son état (EXPECTED, RECEIVED, ACCEPTED, IN_PROGRESS, SUBMITTED, APPROVED, RELEASED) et le prochain rôle responsable.)",
         "Consultez le reçu de confirmation ou l’historique d’audit avant de poursuivre ou de transmettre le dossier. (Expected: La traçabilité reste complète sans modification accidentelle des données validées.)"
       ],
       "caution": "Attention: KoBo import is mistaken for completed analysis. — Réinitialisez les filtres dans /projects, vérifiez l’état des prérequis de l’échantillon et confirmez vos autorisations auprès du responsable de laboratoire.",
@@ -687,7 +687,7 @@
             },
             {
               "action": "Vérifiez les éléments correspondant à l’objectif : Follow the evidence and report history within audit scope.",
-              "expected": "Chaque échantillon ou tâche affiche clairement son état (EXPECTED, IN_PREP, READY_FOR_ANALYSIS, SUBMITTED, APPROVED, REPORTED) et le prochain rôle responsable."
+              "expected": "Chaque échantillon ou tâche affiche clairement son état (EXPECTED, RECEIVED, ACCEPTED, IN_PROGRESS, SUBMITTED, APPROVED, RELEASED) et le prochain rôle responsable."
             },
             {
               "action": "Consultez le reçu de confirmation ou l’historique d’audit avant de poursuivre ou de transmettre le dossier.",
@@ -730,7 +730,7 @@
       ],
       "steps": [
         "Ouvrez /qa et examinez les compteurs de file d’attente, les badges d’état et le périmètre du laboratoire. (Expected: Seuls les enregistrements autorisés pour votre laboratoire et vos projets s’affichent.)",
-        "Vérifiez les éléments correspondant à l’objectif : Follow the evidence and report history within audit scope. (Expected: Chaque échantillon ou tâche affiche clairement son état (EXPECTED, IN_PREP, READY_FOR_ANALYSIS, SUBMITTED, APPROVED, REPORTED) et le prochain rôle responsable.)",
+        "Vérifiez les éléments correspondant à l’objectif : Follow the evidence and report history within audit scope. (Expected: Chaque échantillon ou tâche affiche clairement son état (EXPECTED, RECEIVED, ACCEPTED, IN_PROGRESS, SUBMITTED, APPROVED, RELEASED) et le prochain rôle responsable.)",
         "Consultez le reçu de confirmation ou l’historique d’audit avant de poursuivre ou de transmettre le dossier. (Expected: La traçabilité reste complète sans modification accidentelle des données validées.)"
       ],
       "caution": "Attention: An audit viewer expects edit controls. — Réinitialisez les filtres dans /qa, vérifiez l’état des prérequis de l’échantillon et confirmez vos autorisations auprès du responsable de laboratoire.",
@@ -772,7 +772,7 @@
             },
             {
               "action": "Vérifiez les éléments correspondant à l’objectif : Navigate permitted records and distinguish current from superseded reports.",
-              "expected": "Chaque échantillon ou tâche affiche clairement son état (EXPECTED, IN_PREP, READY_FOR_ANALYSIS, SUBMITTED, APPROVED, REPORTED) et le prochain rôle responsable."
+              "expected": "Chaque échantillon ou tâche affiche clairement son état (EXPECTED, RECEIVED, ACCEPTED, IN_PROGRESS, SUBMITTED, APPROVED, RELEASED) et le prochain rôle responsable."
             },
             {
               "action": "Consultez le reçu de confirmation ou l’historique d’audit avant de poursuivre ou de transmettre le dossier.",
@@ -815,7 +815,7 @@
       ],
       "steps": [
         "Ouvrez /samples et examinez les compteurs de file d’attente, les badges d’état et le périmètre du laboratoire. (Expected: Seuls les enregistrements autorisés pour votre laboratoire et vos projets s’affichent.)",
-        "Vérifiez les éléments correspondant à l’objectif : Navigate permitted records and distinguish current from superseded reports. (Expected: Chaque échantillon ou tâche affiche clairement son état (EXPECTED, IN_PREP, READY_FOR_ANALYSIS, SUBMITTED, APPROVED, REPORTED) et le prochain rôle responsable.)",
+        "Vérifiez les éléments correspondant à l’objectif : Navigate permitted records and distinguish current from superseded reports. (Expected: Chaque échantillon ou tâche affiche clairement son état (EXPECTED, RECEIVED, ACCEPTED, IN_PROGRESS, SUBMITTED, APPROVED, RELEASED) et le prochain rôle responsable.)",
         "Consultez le reçu de confirmation ou l’historique d’audit avant de poursuivre ou de transmettre le dossier. (Expected: La traçabilité reste complète sans modification accidentelle des données validées.)"
       ],
       "caution": "Attention: A viewer cannot see another project's data. — Réinitialisez les filtres dans /samples, vérifiez l’état des prérequis de l’échantillon et confirmez vos autorisations auprès du responsable de laboratoire.",
@@ -856,7 +856,7 @@
             },
             {
               "action": "Vérifiez les éléments correspondant à l’objectif : Apply session or profile settings without changing laboratory data.",
-              "expected": "Chaque échantillon ou tâche affiche clairement son état (EXPECTED, IN_PREP, READY_FOR_ANALYSIS, SUBMITTED, APPROVED, REPORTED) et le prochain rôle responsable."
+              "expected": "Chaque échantillon ou tâche affiche clairement son état (EXPECTED, RECEIVED, ACCEPTED, IN_PROGRESS, SUBMITTED, APPROVED, RELEASED) et le prochain rôle responsable."
             },
             {
               "action": "Consultez le reçu de confirmation ou l’historique d’audit avant de poursuivre ou de transmettre le dossier.",
@@ -899,7 +899,7 @@
       ],
       "steps": [
         "Ouvrez /profile et examinez les compteurs de file d’attente, les badges d’état et le périmètre du laboratoire. (Expected: Seuls les enregistrements autorisés pour votre laboratoire et vos projets s’affichent.)",
-        "Vérifiez les éléments correspondant à l’objectif : Apply session or profile settings without changing laboratory data. (Expected: Chaque échantillon ou tâche affiche clairement son état (EXPECTED, IN_PREP, READY_FOR_ANALYSIS, SUBMITTED, APPROVED, REPORTED) et le prochain rôle responsable.)",
+        "Vérifiez les éléments correspondant à l’objectif : Apply session or profile settings without changing laboratory data. (Expected: Chaque échantillon ou tâche affiche clairement son état (EXPECTED, RECEIVED, ACCEPTED, IN_PROGRESS, SUBMITTED, APPROVED, RELEASED) et le prochain rôle responsable.)",
         "Consultez le reçu de confirmation ou l’historique d’audit avant de poursuivre ou de transmettre le dossier. (Expected: La traçabilité reste complète sans modification accidentelle des données validées.)"
       ],
       "caution": "Attention: A language switch appears to change a displayed number. — Réinitialisez les filtres dans /profile, vérifiez l’état des prérequis de l’échantillon et confirmez vos autorisations auprès du responsable de laboratoire.",
@@ -1063,7 +1063,7 @@
             },
             {
               "action": "Sélectionnez le forfait d’analyses ou les méthodes requises, imprimez les étiquettes Échantillon et Contenant, puis cliquez sur Confirmer la réception.",
-              "expected": "Un reçu de réception durable est créé, le statut passe à REGISTERED et les étapes pré-analytiques DRYING / PREPARATION sont ouvertes."
+              "expected": "Un reçu de réception durable est créé, le statut passe à ACCEPTED et les étapes pré-analytiques DRYING / PREPARATION sont ouvertes."
             }
           ]
         }
@@ -1102,7 +1102,7 @@
       "steps": [
         "Ouvrez Réception (/reception) et choisissez le mode d’entrée (Envoi groupé / Consignment, Dépôt direct ou Arrivées attendues KoBo). (Expected: Le formulaire de réception ou la file d’attente de votre laboratoire actif s’affiche.)",
         "Vérifiez l’identifiant du sac, contrôlez les métadonnées/coordonnées et saisissez la masse reçue (g) ainsi que l’état à l’arrivée (Review each matched sample and isolate exceptions during batch intake.). (Expected: Tout écart (masse insuffisante ou sac endommagé) est signalé pour permettre un rejet motivé ou une acceptation avec réserve (Override with Caveat).)",
-        "Sélectionnez le forfait d’analyses ou les méthodes requises, imprimez les étiquettes Échantillon et Contenant, puis cliquez sur Confirmer la réception. (Expected: Un reçu de réception durable est créé, le statut passe à REGISTERED et les étapes pré-analytiques DRYING / PREPARATION sont ouvertes.)"
+        "Sélectionnez le forfait d’analyses ou les méthodes requises, imprimez les étiquettes Échantillon et Contenant, puis cliquez sur Confirmer la réception. (Expected: Un reçu de réception durable est créé, le statut passe à ACCEPTED et les étapes pré-analytiques DRYING / PREPARATION sont ouvertes.)"
       ],
       "caution": "Attention: One damaged or missing sample blocks a whole delivery. — Comparez l’étiquette physique avec les dossiers existants dans /reception, traitez toute anomalie (rejet ou réserve motivée) et cliquez sur Confirmer la réception.",
       "related": [
@@ -1147,7 +1147,7 @@
             },
             {
               "action": "Sélectionnez le forfait d’analyses ou les méthodes requises, imprimez les étiquettes Échantillon et Contenant, puis cliquez sur Confirmer la réception.",
-              "expected": "Un reçu de réception durable est créé, le statut passe à REGISTERED et les étapes pré-analytiques DRYING / PREPARATION sont ouvertes."
+              "expected": "Un reçu de réception durable est créé, le statut passe à ACCEPTED et les étapes pré-analytiques DRYING / PREPARATION sont ouvertes."
             }
           ]
         }
@@ -1186,7 +1186,7 @@
       "steps": [
         "Ouvrez Réception (/reception) et choisissez le mode d’entrée (Envoi groupé / Consignment, Dépôt direct ou Arrivées attendues KoBo). (Expected: Le formulaire de réception ou la file d’attente de votre laboratoire actif s’affiche.)",
         "Vérifiez l’identifiant du sac, contrôlez les métadonnées/coordonnées et saisissez la masse reçue (g) ainsi que l’état à l’arrivée (Identify draft owner, restore state and verify that saving did not receive material.). (Expected: Tout écart (masse insuffisante ou sac endommagé) est signalé pour permettre un rejet motivé ou une acceptation avec réserve (Override with Caveat).)",
-        "Sélectionnez le forfait d’analyses ou les méthodes requises, imprimez les étiquettes Échantillon et Contenant, puis cliquez sur Confirmer la réception. (Expected: Un reçu de réception durable est créé, le statut passe à REGISTERED et les étapes pré-analytiques DRYING / PREPARATION sont ouvertes.)"
+        "Sélectionnez le forfait d’analyses ou les méthodes requises, imprimez les étiquettes Échantillon et Contenant, puis cliquez sur Confirmer la réception. (Expected: Un reçu de réception durable est créé, le statut passe à ACCEPTED et les étapes pré-analytiques DRYING / PREPARATION sont ouvertes.)"
       ],
       "caution": "Attention: A reopened draft loses its source location. — Comparez l’étiquette physique avec les dossiers existants dans /reception, traitez toute anomalie (rejet ou réserve motivée) et cliquez sur Confirmer la réception.",
       "related": [
@@ -1232,7 +1232,7 @@
             },
             {
               "action": "Sélectionnez le forfait d’analyses ou les méthodes requises, imprimez les étiquettes Échantillon et Contenant, puis cliquez sur Confirmer la réception.",
-              "expected": "Un reçu de réception durable est créé, le statut passe à REGISTERED et les étapes pré-analytiques DRYING / PREPARATION sont ouvertes."
+              "expected": "Un reçu de réception durable est créé, le statut passe à ACCEPTED et les étapes pré-analytiques DRYING / PREPARATION sont ouvertes."
             }
           ]
         }
@@ -1271,7 +1271,7 @@
       "steps": [
         "Ouvrez Réception (/reception) et choisissez le mode d’entrée (Envoi groupé / Consignment, Dépôt direct ou Arrivées attendues KoBo). (Expected: Le formulaire de réception ou la file d’attente de votre laboratoire actif s’affiche.)",
         "Vérifiez l’identifiant du sac, contrôlez les métadonnées/coordonnées et saisissez la masse reçue (g) ainsi que l’état à l’arrivée (Trace coordinates and locality to the linked source without guessing.). (Expected: Tout écart (masse insuffisante ou sac endommagé) est signalé pour permettre un rejet motivé ou une acceptation avec réserve (Override with Caveat).)",
-        "Sélectionnez le forfait d’analyses ou les méthodes requises, imprimez les étiquettes Échantillon et Contenant, puis cliquez sur Confirmer la réception. (Expected: Un reçu de réception durable est créé, le statut passe à REGISTERED et les étapes pré-analytiques DRYING / PREPARATION sont ouvertes.)"
+        "Sélectionnez le forfait d’analyses ou les méthodes requises, imprimez les étiquettes Échantillon et Contenant, puis cliquez sur Confirmer la réception. (Expected: Un reçu de réception durable est créé, le statut passe à ACCEPTED et les étapes pré-analytiques DRYING / PREPARATION sont ouvertes.)"
       ],
       "caution": "Attention: Source coordinates exist but the form says no location. — Comparez l’étiquette physique avec les dossiers existants dans /reception, traitez toute anomalie (rejet ou réserve motivée) et cliquez sur Confirmer la réception.",
       "related": [
@@ -1316,7 +1316,7 @@
             },
             {
               "action": "Sélectionnez le forfait d’analyses ou les méthodes requises, imprimez les étiquettes Échantillon et Contenant, puis cliquez sur Confirmer la réception.",
-              "expected": "Un reçu de réception durable est créé, le statut passe à REGISTERED et les étapes pré-analytiques DRYING / PREPARATION sont ouvertes."
+              "expected": "Un reçu de réception durable est créé, le statut passe à ACCEPTED et les étapes pré-analytiques DRYING / PREPARATION sont ouvertes."
             }
           ]
         }
@@ -1355,7 +1355,7 @@
       "steps": [
         "Ouvrez Réception (/reception) et choisissez le mode d’entrée (Envoi groupé / Consignment, Dépôt direct ou Arrivées attendues KoBo). (Expected: Le formulaire de réception ou la file d’attente de votre laboratoire actif s’affiche.)",
         "Vérifiez l’identifiant du sac, contrôlez les métadonnées/coordonnées et saisissez la masse reçue (g) ainsi que l’état à l’arrivée (Explain the condition fields, evidence and permitted exception handling.). (Expected: Tout écart (masse insuffisante ou sac endommagé) est signalé pour permettre un rejet motivé ou une acceptation avec réserve (Override with Caveat).)",
-        "Sélectionnez le forfait d’analyses ou les méthodes requises, imprimez les étiquettes Échantillon et Contenant, puis cliquez sur Confirmer la réception. (Expected: Un reçu de réception durable est créé, le statut passe à REGISTERED et les étapes pré-analytiques DRYING / PREPARATION sont ouvertes.)"
+        "Sélectionnez le forfait d’analyses ou les méthodes requises, imprimez les étiquettes Échantillon et Contenant, puis cliquez sur Confirmer la réception. (Expected: Un reçu de réception durable est créé, le statut passe à ACCEPTED et les étapes pré-analytiques DRYING / PREPARATION sont ouvertes.)"
       ],
       "caution": "Attention: A mass deficit is present or the container is damaged. — Comparez l’étiquette physique avec les dossiers existants dans /reception, traitez toute anomalie (rejet ou réserve motivée) et cliquez sur Confirmer la réception.",
       "related": [
@@ -1400,7 +1400,7 @@
             },
             {
               "action": "Sélectionnez le forfait d’analyses ou les méthodes requises, imprimez les étiquettes Échantillon et Contenant, puis cliquez sur Confirmer la réception.",
-              "expected": "Un reçu de réception durable est créé, le statut passe à REGISTERED et les étapes pré-analytiques DRYING / PREPARATION sont ouvertes."
+              "expected": "Un reçu de réception durable est créé, le statut passe à ACCEPTED et les étapes pré-analytiques DRYING / PREPARATION sont ouvertes."
             }
           ]
         }
@@ -1439,7 +1439,7 @@
       "steps": [
         "Ouvrez Réception (/reception) et choisissez le mode d’entrée (Envoi groupé / Consignment, Dépôt direct ou Arrivées attendues KoBo). (Expected: Le formulaire de réception ou la file d’attente de votre laboratoire actif s’affiche.)",
         "Vérifiez l’identifiant du sac, contrôlez les métadonnées/coordonnées et saisissez la masse reçue (g) ainsi que l’état à l’arrivée (Use parameter names, method variants and grouped panels before handover.). (Expected: Tout écart (masse insuffisante ou sac endommagé) est signalé pour permettre un rejet motivé ou une acceptation avec réserve (Override with Caveat).)",
-        "Sélectionnez le forfait d’analyses ou les méthodes requises, imprimez les étiquettes Échantillon et Contenant, puis cliquez sur Confirmer la réception. (Expected: Un reçu de réception durable est créé, le statut passe à REGISTERED et les étapes pré-analytiques DRYING / PREPARATION sont ouvertes.)"
+        "Sélectionnez le forfait d’analyses ou les méthodes requises, imprimez les étiquettes Échantillon et Contenant, puis cliquez sur Confirmer la réception. (Expected: Un reçu de réception durable est créé, le statut passe à ACCEPTED et les étapes pré-analytiques DRYING / PREPARATION sont ouvertes.)"
       ],
       "caution": "Attention: Texture fractions appear as three separate choices. — Comparez l’étiquette physique avec les dossiers existants dans /reception, traitez toute anomalie (rejet ou réserve motivée) et cliquez sur Confirmer la réception.",
       "related": [
@@ -1485,7 +1485,7 @@
             },
             {
               "action": "Sélectionnez le forfait d’analyses ou les méthodes requises, imprimez les étiquettes Échantillon et Contenant, puis cliquez sur Confirmer la réception.",
-              "expected": "Un reçu de réception durable est créé, le statut passe à REGISTERED et les étapes pré-analytiques DRYING / PREPARATION sont ouvertes."
+              "expected": "Un reçu de réception durable est créé, le statut passe à ACCEPTED et les étapes pré-analytiques DRYING / PREPARATION sont ouvertes."
             }
           ]
         }
@@ -1524,7 +1524,7 @@
       "steps": [
         "Ouvrez Réception (/reception) et choisissez le mode d’entrée (Envoi groupé / Consignment, Dépôt direct ou Arrivées attendues KoBo). (Expected: Le formulaire de réception ou la file d’attente de votre laboratoire actif s’affiche.)",
         "Vérifiez l’identifiant du sac, contrôlez les métadonnées/coordonnées et saisissez la masse reçue (g) ainsi que l’état à l’arrivée (Compare label, source and existing records without creating a second intake.). (Expected: Tout écart (masse insuffisante ou sac endommagé) est signalé pour permettre un rejet motivé ou une acceptation avec réserve (Override with Caveat).)",
-        "Sélectionnez le forfait d’analyses ou les méthodes requises, imprimez les étiquettes Échantillon et Contenant, puis cliquez sur Confirmer la réception. (Expected: Un reçu de réception durable est créé, le statut passe à REGISTERED et les étapes pré-analytiques DRYING / PREPARATION sont ouvertes.)"
+        "Sélectionnez le forfait d’analyses ou les méthodes requises, imprimez les étiquettes Échantillon et Contenant, puis cliquez sur Confirmer la réception. (Expected: Un reçu de réception durable est créé, le statut passe à ACCEPTED et les étapes pré-analytiques DRYING / PREPARATION sont ouvertes.)"
       ],
       "caution": "Attention: A scan returns two candidates or none. — Comparez l’étiquette physique avec les dossiers existants dans /reception, traitez toute anomalie (rejet ou réserve motivée) et cliquez sur Confirmer la réception.",
       "related": [
@@ -1569,7 +1569,7 @@
             },
             {
               "action": "Sélectionnez le forfait d’analyses ou les méthodes requises, imprimez les étiquettes Échantillon et Contenant, puis cliquez sur Confirmer la réception.",
-              "expected": "Un reçu de réception durable est créé, le statut passe à REGISTERED et les étapes pré-analytiques DRYING / PREPARATION sont ouvertes."
+              "expected": "Un reçu de réception durable est créé, le statut passe à ACCEPTED et les étapes pré-analytiques DRYING / PREPARATION sont ouvertes."
             }
           ]
         }
@@ -1608,7 +1608,7 @@
       "steps": [
         "Ouvrez Réception (/reception) et choisissez le mode d’entrée (Envoi groupé / Consignment, Dépôt direct ou Arrivées attendues KoBo). (Expected: Le formulaire de réception ou la file d’attente de votre laboratoire actif s’affiche.)",
         "Vérifiez l’identifiant du sac, contrôlez les métadonnées/coordonnées et saisissez la masse reçue (g) ainsi que l’état à l’arrivée (Identify final receipt action, receipt evidence and the next responsible role.). (Expected: Tout écart (masse insuffisante ou sac endommagé) est signalé pour permettre un rejet motivé ou une acceptation avec réserve (Override with Caveat).)",
-        "Sélectionnez le forfait d’analyses ou les méthodes requises, imprimez les étiquettes Échantillon et Contenant, puis cliquez sur Confirmer la réception. (Expected: Un reçu de réception durable est créé, le statut passe à REGISTERED et les étapes pré-analytiques DRYING / PREPARATION sont ouvertes.)"
+        "Sélectionnez le forfait d’analyses ou les méthodes requises, imprimez les étiquettes Échantillon et Contenant, puis cliquez sur Confirmer la réception. (Expected: Un reçu de réception durable est créé, le statut passe à ACCEPTED et les étapes pré-analytiques DRYING / PREPARATION sont ouvertes.)"
       ],
       "caution": "Attention: A draft is saved but the receiving queue has not changed. — Comparez l’étiquette physique avec les dossiers existants dans /reception, traitez toute anomalie (rejet ou réserve motivée) et cliquez sur Confirmer la réception.",
       "related": [
@@ -2259,7 +2259,7 @@
       "minutes": 3,
       "quick": "Check the applicable preparation steps and record completion for the correct material. Dans /workbench, vérifiez l’échantillon physique, notez la température réelle de séchage (< 40 °C), la durée et la maille de tamisage (2 mm ou < 100 µm pour MIR), puis cliquez sur Confirmer la fin (Confirm Complete) pour débloquer les analyses.",
       "before": [
-        "Assurez-vous que l’échantillon est bien reçu (REGISTERED) et que son étiquette correspond au plateau de séchage.",
+        "Assurez-vous que l’échantillon est bien reçu (ACCEPTED) et que son étiquette correspond au plateau de séchage.",
         "Vérifiez si votre politique exige une double vérification (gate.verificationRequired)."
       ],
       "sections": [
@@ -2276,7 +2276,7 @@
             },
             {
               "action": "Cliquez sur Confirm Complete (et obtenez la validation d’un second opérateur si gate.verificationRequired est actif) puis vérifiez le reçu.",
-              "expected": "Un enregistrement PreparationRecord durable est créé et les tâches analytiques passent à READY_FOR_ANALYSIS."
+              "expected": "Un enregistrement PreparationRecord durable est créé et les tâches analytiques sont débloquées pour l’analyse (ASSIGNED / IN_PROGRESS)."
             }
           ]
         }
@@ -2316,7 +2316,7 @@
       "steps": [
         "Ouvrez /workbench et sélectionnez l’échantillon ou le lot dans la file DRYING ou PREPARATION. (Expected: La liste de contrôle affiche les paramètres requis de séchage (< 40 °C) et de broyage/tamisage.)",
         "Effectuez les contrôles physiques et saisissez la température, la durée, la maille du tamis et la masse préparée (Check the applicable preparation steps and record completion for the correct material.). (Expected: Les paramètres sont validés ; décochez tout échantillon qui n’a pas été physiquement préparé avant une validation groupée.)",
-        "Cliquez sur Confirm Complete (et obtenez la validation d’un second opérateur si gate.verificationRequired est actif) puis vérifiez le reçu. (Expected: Un enregistrement PreparationRecord durable est créé et les tâches analytiques passent à READY_FOR_ANALYSIS.)"
+        "Cliquez sur Confirm Complete (et obtenez la validation d’un second opérateur si gate.verificationRequired est actif) puis vérifiez le reçu. (Expected: Un enregistrement PreparationRecord durable est créé et les tâches analytiques sont débloquées pour l’analyse (ASSIGNED / IN_PROGRESS).)"
       ],
       "caution": "Attention: An analysis requires a different preparation pathway. — Consultez l’onglet Préparation et le reçu de l’échantillon, complétez l’étape manquante ou créez une nouvelle tentative de préparation auditée.",
       "related": [
@@ -2448,7 +2448,7 @@
       "minutes": 3,
       "quick": "Compare selected items and each sample's evidence before a permitted bulk action. Dans /workbench, vérifiez l’échantillon physique, notez la température réelle de séchage (< 40 °C), la durée et la maille de tamisage (2 mm ou < 100 µm pour MIR), puis cliquez sur Confirmer la fin (Confirm Complete) pour débloquer les analyses.",
       "before": [
-        "Assurez-vous que l’échantillon est bien reçu (REGISTERED) et que son étiquette correspond au plateau de séchage.",
+        "Assurez-vous que l’échantillon est bien reçu (ACCEPTED) et que son étiquette correspond au plateau de séchage.",
         "Vérifiez si votre politique exige une double vérification (gate.verificationRequired)."
       ],
       "sections": [
@@ -2465,7 +2465,7 @@
             },
             {
               "action": "Cliquez sur Confirm Complete (et obtenez la validation d’un second opérateur si gate.verificationRequired est actif) puis vérifiez le reçu.",
-              "expected": "Un enregistrement PreparationRecord durable est créé et les tâches analytiques passent à READY_FOR_ANALYSIS."
+              "expected": "Un enregistrement PreparationRecord durable est créé et les tâches analytiques sont débloquées pour l’analyse (ASSIGNED / IN_PROGRESS)."
             }
           ]
         }
@@ -2505,7 +2505,7 @@
       "steps": [
         "Ouvrez /workbench et sélectionnez l’échantillon ou le lot dans la file DRYING ou PREPARATION. (Expected: La liste de contrôle affiche les paramètres requis de séchage (< 40 °C) et de broyage/tamisage.)",
         "Effectuez les contrôles physiques et saisissez la température, la durée, la maille du tamis et la masse préparée (Compare selected items and each sample's evidence before a permitted bulk action.). (Expected: Les paramètres sont validés ; décochez tout échantillon qui n’a pas été physiquement préparé avant une validation groupée.)",
-        "Cliquez sur Confirm Complete (et obtenez la validation d’un second opérateur si gate.verificationRequired est actif) puis vérifiez le reçu. (Expected: Un enregistrement PreparationRecord durable est créé et les tâches analytiques passent à READY_FOR_ANALYSIS.)"
+        "Cliquez sur Confirm Complete (et obtenez la validation d’un second opérateur si gate.verificationRequired est actif) puis vérifiez le reçu. (Expected: Un enregistrement PreparationRecord durable est créé et les tâches analytiques sont débloquées pour l’analyse (ASSIGNED / IN_PROGRESS).)"
       ],
       "caution": "Attention: One selected sample was not physically prepared. — Consultez l’onglet Préparation et le reçu de l’échantillon, complétez l’étape manquante ou créez une nouvelle tentative de préparation auditée.",
       "related": [
@@ -2534,7 +2534,7 @@
       "minutes": 3,
       "quick": "Explain the evidence-gap state and who may document verification or a new attempt. Dans /workbench, vérifiez l’échantillon physique, notez la température réelle de séchage (< 40 °C), la durée et la maille de tamisage (2 mm ou < 100 µm pour MIR), puis cliquez sur Confirmer la fin (Confirm Complete) pour débloquer les analyses.",
       "before": [
-        "Assurez-vous que l’échantillon est bien reçu (REGISTERED) et que son étiquette correspond au plateau de séchage.",
+        "Assurez-vous que l’échantillon est bien reçu (ACCEPTED) et que son étiquette correspond au plateau de séchage.",
         "Vérifiez si votre politique exige une double vérification (gate.verificationRequired)."
       ],
       "sections": [
@@ -2551,7 +2551,7 @@
             },
             {
               "action": "Cliquez sur Confirm Complete (et obtenez la validation d’un second opérateur si gate.verificationRequired est actif) puis vérifiez le reçu.",
-              "expected": "Un enregistrement PreparationRecord durable est créé et les tâches analytiques passent à READY_FOR_ANALYSIS."
+              "expected": "Un enregistrement PreparationRecord durable est créé et les tâches analytiques sont débloquées pour l’analyse (ASSIGNED / IN_PROGRESS)."
             }
           ]
         }
@@ -2591,7 +2591,7 @@
       "steps": [
         "Ouvrez /workbench et sélectionnez l’échantillon ou le lot dans la file DRYING ou PREPARATION. (Expected: La liste de contrôle affiche les paramètres requis de séchage (< 40 °C) et de broyage/tamisage.)",
         "Effectuez les contrôles physiques et saisissez la température, la durée, la maille du tamis et la masse préparée (Explain the evidence-gap state and who may document verification or a new attempt.). (Expected: Les paramètres sont validés ; décochez tout échantillon qui n’a pas été physiquement préparé avant une validation groupée.)",
-        "Cliquez sur Confirm Complete (et obtenez la validation d’un second opérateur si gate.verificationRequired est actif) puis vérifiez le reçu. (Expected: Un enregistrement PreparationRecord durable est créé et les tâches analytiques passent à READY_FOR_ANALYSIS.)"
+        "Cliquez sur Confirm Complete (et obtenez la validation d’un second opérateur si gate.verificationRequired est actif) puis vérifiez le reçu. (Expected: Un enregistrement PreparationRecord durable est créé et les tâches analytiques sont débloquées pour l’analyse (ASSIGNED / IN_PROGRESS).)"
       ],
       "caution": "Attention: A legacy Done flag exists without a checklist receipt. — Consultez l’onglet Préparation et le reçu de l’échantillon, complétez l’étape manquante ou créez une nouvelle tentative de préparation auditée.",
       "related": [
@@ -2620,7 +2620,7 @@
       "minutes": 3,
       "quick": "Preserve original evidence and route a permitted new preparation attempt. Dans /workbench, vérifiez l’échantillon physique, notez la température réelle de séchage (< 40 °C), la durée et la maille de tamisage (2 mm ou < 100 µm pour MIR), puis cliquez sur Confirmer la fin (Confirm Complete) pour débloquer les analyses.",
       "before": [
-        "Assurez-vous que l’échantillon est bien reçu (REGISTERED) et que son étiquette correspond au plateau de séchage.",
+        "Assurez-vous que l’échantillon est bien reçu (ACCEPTED) et que son étiquette correspond au plateau de séchage.",
         "Vérifiez si votre politique exige une double vérification (gate.verificationRequired)."
       ],
       "sections": [
@@ -2637,7 +2637,7 @@
             },
             {
               "action": "Cliquez sur Confirm Complete (et obtenez la validation d’un second opérateur si gate.verificationRequired est actif) puis vérifiez le reçu.",
-              "expected": "Un enregistrement PreparationRecord durable est créé et les tâches analytiques passent à READY_FOR_ANALYSIS."
+              "expected": "Un enregistrement PreparationRecord durable est créé et les tâches analytiques sont débloquées pour l’analyse (ASSIGNED / IN_PROGRESS)."
             }
           ]
         }
@@ -2677,7 +2677,7 @@
       "steps": [
         "Ouvrez /workbench et sélectionnez l’échantillon ou le lot dans la file DRYING ou PREPARATION. (Expected: La liste de contrôle affiche les paramètres requis de séchage (< 40 °C) et de broyage/tamisage.)",
         "Effectuez les contrôles physiques et saisissez la température, la durée, la maille du tamis et la masse préparée (Preserve original evidence and route a permitted new preparation attempt.). (Expected: Les paramètres sont validés ; décochez tout échantillon qui n’a pas été physiquement préparé avant une validation groupée.)",
-        "Cliquez sur Confirm Complete (et obtenez la validation d’un second opérateur si gate.verificationRequired est actif) puis vérifiez le reçu. (Expected: Un enregistrement PreparationRecord durable est créé et les tâches analytiques passent à READY_FOR_ANALYSIS.)"
+        "Cliquez sur Confirm Complete (et obtenez la validation d’un second opérateur si gate.verificationRequired est actif) puis vérifiez le reçu. (Expected: Un enregistrement PreparationRecord durable est créé et les tâches analytiques sont débloquées pour l’analyse (ASSIGNED / IN_PROGRESS).)"
       ],
       "caution": "Attention: Staff attempt to overwrite the old confirmation. — Consultez l’onglet Préparation et le reçu de l’échantillon, complétez l’étape manquante ou créez une nouvelle tentative de préparation auditée.",
       "related": [
@@ -4499,7 +4499,7 @@
       "problems": [
         {
           "symptom": "A newly expected sample is mistaken for completed lab work.",
-          "why": "La règle du second regard (review.secondPersonRequired) bloque l’auto-approbation, un prérequis ou un CQ est non résolu, ou l’échantillon est déjà REPORTED et nécessite un Amendement.",
+          "why": "La règle du second regard (review.secondPersonRequired) bloque l’auto-approbation, un prérequis ou un CQ est non résolu, ou l’échantillon est déjà APPROVED / RELEASED et nécessite un Amendement.",
           "action": "Consultez le motif de blocage sur le bouton d’approbation, demandez à un second Réviseur/Responsable d’approuver vos propres mesures, ou utilisez Amender l’échantillon pour les rapports déjà émis."
         }
       ],
@@ -4585,7 +4585,7 @@
       "problems": [
         {
           "symptom": "Assignment exists but preparation has not been confirmed.",
-          "why": "La règle du second regard (review.secondPersonRequired) bloque l’auto-approbation, un prérequis ou un CQ est non résolu, ou l’échantillon est déjà REPORTED et nécessite un Amendement.",
+          "why": "La règle du second regard (review.secondPersonRequired) bloque l’auto-approbation, un prérequis ou un CQ est non résolu, ou l’échantillon est déjà APPROVED / RELEASED et nécessite un Amendement.",
           "action": "Consultez le motif de blocage sur le bouton d’approbation, demandez à un second Réviseur/Responsable d’approuver vos propres mesures, ou utilisez Amender l’échantillon pour les rapports déjà émis."
         }
       ],
@@ -4790,7 +4790,7 @@
       "problems": [
         {
           "symptom": "An ambiguous return note leads to another incorrect submission.",
-          "why": "La règle du second regard (review.secondPersonRequired) bloque l’auto-approbation, un prérequis ou un CQ est non résolu, ou l’échantillon est déjà REPORTED et nécessite un Amendement.",
+          "why": "La règle du second regard (review.secondPersonRequired) bloque l’auto-approbation, un prérequis ou un CQ est non résolu, ou l’échantillon est déjà APPROVED / RELEASED et nécessite un Amendement.",
           "action": "Consultez le motif de blocage sur le bouton d’approbation, demandez à un second Réviseur/Responsable d’approuver vos propres mesures, ou utilisez Amender l’échantillon pour les rapports déjà émis."
         }
       ],
@@ -4877,7 +4877,7 @@
       "problems": [
         {
           "symptom": "The approval button is disabled by an unresolved prerequisite.",
-          "why": "La règle du second regard (review.secondPersonRequired) bloque l’auto-approbation, un prérequis ou un CQ est non résolu, ou l’échantillon est déjà REPORTED et nécessite un Amendement.",
+          "why": "La règle du second regard (review.secondPersonRequired) bloque l’auto-approbation, un prérequis ou un CQ est non résolu, ou l’échantillon est déjà APPROVED / RELEASED et nécessite un Amendement.",
           "action": "Consultez le motif de blocage sur le bouton d’approbation, demandez à un second Réviseur/Responsable d’approuver vos propres mesures, ou utilisez Amender l’échantillon pour les rapports déjà émis."
         }
       ],
@@ -4963,7 +4963,7 @@
       "problems": [
         {
           "symptom": "The report omits a derived texture class or uses an old result.",
-          "why": "La règle du second regard (review.secondPersonRequired) bloque l’auto-approbation, un prérequis ou un CQ est non résolu, ou l’échantillon est déjà REPORTED et nécessite un Amendement.",
+          "why": "La règle du second regard (review.secondPersonRequired) bloque l’auto-approbation, un prérequis ou un CQ est non résolu, ou l’échantillon est déjà APPROVED / RELEASED et nécessite un Amendement.",
           "action": "Consultez le motif de blocage sur le bouton d’approbation, demandez à un second Réviseur/Responsable d’approuver vos propres mesures, ou utilisez Amender l’échantillon pour les rapports déjà émis."
         }
       ],
@@ -5050,7 +5050,7 @@
       "problems": [
         {
           "symptom": "Staff attempt to edit a released result in place.",
-          "why": "La règle du second regard (review.secondPersonRequired) bloque l’auto-approbation, un prérequis ou un CQ est non résolu, ou l’échantillon est déjà REPORTED et nécessite un Amendement.",
+          "why": "La règle du second regard (review.secondPersonRequired) bloque l’auto-approbation, un prérequis ou un CQ est non résolu, ou l’échantillon est déjà APPROVED / RELEASED et nécessite un Amendement.",
           "action": "Consultez le motif de blocage sur le bouton d’approbation, demandez à un second Réviseur/Responsable d’approuver vos propres mesures, ou utilisez Amender l’échantillon pour les rapports déjà émis."
         }
       ],
@@ -5137,7 +5137,7 @@
       "problems": [
         {
           "symptom": "An expired or superseded public report link is forwarded.",
-          "why": "La règle du second regard (review.secondPersonRequired) bloque l’auto-approbation, un prérequis ou un CQ est non résolu, ou l’échantillon est déjà REPORTED et nécessite un Amendement.",
+          "why": "La règle du second regard (review.secondPersonRequired) bloque l’auto-approbation, un prérequis ou un CQ est non résolu, ou l’échantillon est déjà APPROVED / RELEASED et nécessite un Amendement.",
           "action": "Consultez le motif de blocage sur le bouton d’approbation, demandez à un second Réviseur/Responsable d’approuver vos propres mesures, ou utilisez Amender l’échantillon pour les rapports déjà émis."
         }
       ],
@@ -5224,7 +5224,7 @@
       "problems": [
         {
           "symptom": "A partial review is taken as final approval of the entire sample.",
-          "why": "La règle du second regard (review.secondPersonRequired) bloque l’auto-approbation, un prérequis ou un CQ est non résolu, ou l’échantillon est déjà REPORTED et nécessite un Amendement.",
+          "why": "La règle du second regard (review.secondPersonRequired) bloque l’auto-approbation, un prérequis ou un CQ est non résolu, ou l’échantillon est déjà APPROVED / RELEASED et nécessite un Amendement.",
           "action": "Consultez le motif de blocage sur le bouton d’approbation, demandez à un second Réviseur/Responsable d’approuver vos propres mesures, ou utilisez Amender l’échantillon pour les rapports déjà émis."
         }
       ],
@@ -6578,7 +6578,7 @@
       "quick": "Explain project identity, country/lab scope and enabled data flows. Utilisez /projects pour configurer le périmètre du projet, synchroniser les formulaires KoBoToolbox (qui arrivent à l’état EXPECTED jusqu’à réception physique), suivre l’avancement et exporter les résultats approuvés ou vérifier les accusés de réception NSIS / OpenNSIS.",
       "before": [
         "Vérifiez votre périmètre de projet, de pays et de laboratoire dans la barre supérieure.",
-        "Rappelez-vous que seuls les échantillons à l’état APPROVED ou REPORTED (RELEASED) sont exposés aux exports externes et à l’API Data Exchange."
+        "Rappelez-vous que seuls les échantillons à l’état APPROVED ou RELEASED sont exposés aux exports externes et à l’API Data Exchange."
       ],
       "sections": [
         {
@@ -6601,9 +6601,9 @@
       ],
       "fields": [
         [
-          "EXPECTED vs REGISTERED vs APPROVED",
+          "EXPECTED vs. ACCEPTED vs. APPROVED",
           "Compteurs de cycle de vie du projet",
-          "Une soumission KoBo arrive comme EXPECTED et ne devient REGISTERED qu’après réception physique du sac."
+          "Une soumission KoBo arrive comme EXPECTED et ne devient ACCEPTED qu’après réception physique du sac."
         ],
         [
           "Référence de profil (Profile Reference)",
@@ -6768,7 +6768,7 @@
       "quick": "Explain where source corrections belong and how reconciliation works. Utilisez /projects pour configurer le périmètre du projet, synchroniser les formulaires KoBoToolbox (qui arrivent à l’état EXPECTED jusqu’à réception physique), suivre l’avancement et exporter les résultats approuvés ou vérifier les accusés de réception NSIS / OpenNSIS.",
       "before": [
         "Vérifiez votre périmètre de projet, de pays et de laboratoire dans la barre supérieure.",
-        "Rappelez-vous que seuls les échantillons à l’état APPROVED ou REPORTED (RELEASED) sont exposés aux exports externes et à l’API Data Exchange."
+        "Rappelez-vous que seuls les échantillons à l’état APPROVED ou RELEASED sont exposés aux exports externes et à l’API Data Exchange."
       ],
       "sections": [
         {
@@ -6791,9 +6791,9 @@
       ],
       "fields": [
         [
-          "EXPECTED vs REGISTERED vs APPROVED",
+          "EXPECTED vs. ACCEPTED vs. APPROVED",
           "Compteurs de cycle de vie du projet",
-          "Une soumission KoBo arrive comme EXPECTED et ne devient REGISTERED qu’après réception physique du sac."
+          "Une soumission KoBo arrive comme EXPECTED et ne devient ACCEPTED qu’après réception physique du sac."
         ],
         [
           "Référence de profil (Profile Reference)",
@@ -6858,7 +6858,7 @@
       "quick": "Validate identifiers and source completeness before the lab receives material. Utilisez /projects pour configurer le périmètre du projet, synchroniser les formulaires KoBoToolbox (qui arrivent à l’état EXPECTED jusqu’à réception physique), suivre l’avancement et exporter les résultats approuvés ou vérifier les accusés de réception NSIS / OpenNSIS.",
       "before": [
         "Vérifiez votre périmètre de projet, de pays et de laboratoire dans la barre supérieure.",
-        "Rappelez-vous que seuls les échantillons à l’état APPROVED ou REPORTED (RELEASED) sont exposés aux exports externes et à l’API Data Exchange."
+        "Rappelez-vous que seuls les échantillons à l’état APPROVED ou RELEASED sont exposés aux exports externes et à l’API Data Exchange."
       ],
       "sections": [
         {
@@ -6881,9 +6881,9 @@
       ],
       "fields": [
         [
-          "EXPECTED vs REGISTERED vs APPROVED",
+          "EXPECTED vs. ACCEPTED vs. APPROVED",
           "Compteurs de cycle de vie du projet",
-          "Une soumission KoBo arrive comme EXPECTED et ne devient REGISTERED qu’après réception physique du sac."
+          "Une soumission KoBo arrive comme EXPECTED et ne devient ACCEPTED qu’après réception physique du sac."
         ],
         [
           "Référence de profil (Profile Reference)",
@@ -6949,7 +6949,7 @@
       "quick": "Distinguish expected, received, active, submitted, approved and reported counts. Utilisez /projects pour configurer le périmètre du projet, synchroniser les formulaires KoBoToolbox (qui arrivent à l’état EXPECTED jusqu’à réception physique), suivre l’avancement et exporter les résultats approuvés ou vérifier les accusés de réception NSIS / OpenNSIS.",
       "before": [
         "Vérifiez votre périmètre de projet, de pays et de laboratoire dans la barre supérieure.",
-        "Rappelez-vous que seuls les échantillons à l’état APPROVED ou REPORTED (RELEASED) sont exposés aux exports externes et à l’API Data Exchange."
+        "Rappelez-vous que seuls les échantillons à l’état APPROVED ou RELEASED sont exposés aux exports externes et à l’API Data Exchange."
       ],
       "sections": [
         {
@@ -6972,9 +6972,9 @@
       ],
       "fields": [
         [
-          "EXPECTED vs REGISTERED vs APPROVED",
+          "EXPECTED vs. ACCEPTED vs. APPROVED",
           "Compteurs de cycle de vie du projet",
-          "Une soumission KoBo arrive comme EXPECTED et ne devient REGISTERED qu’après réception physique du sac."
+          "Une soumission KoBo arrive comme EXPECTED et ne devient ACCEPTED qu’après réception physique du sac."
         ],
         [
           "Référence de profil (Profile Reference)",
@@ -7039,7 +7039,7 @@
       "quick": "Explain exported revision, units, scope and raw versus interpreted data. Utilisez /data-results pour configurer le périmètre du projet, synchroniser les formulaires KoBoToolbox (qui arrivent à l’état EXPECTED jusqu’à réception physique), suivre l’avancement et exporter les résultats approuvés ou vérifier les accusés de réception NSIS / OpenNSIS.",
       "before": [
         "Vérifiez votre périmètre de projet, de pays et de laboratoire dans la barre supérieure.",
-        "Rappelez-vous que seuls les échantillons à l’état APPROVED ou REPORTED (RELEASED) sont exposés aux exports externes et à l’API Data Exchange."
+        "Rappelez-vous que seuls les échantillons à l’état APPROVED ou RELEASED sont exposés aux exports externes et à l’API Data Exchange."
       ],
       "sections": [
         {
@@ -7062,9 +7062,9 @@
       ],
       "fields": [
         [
-          "EXPECTED vs REGISTERED vs APPROVED",
+          "EXPECTED vs. ACCEPTED vs. APPROVED",
           "Compteurs de cycle de vie du projet",
-          "Une soumission KoBo arrive comme EXPECTED et ne devient REGISTERED qu’après réception physique du sac."
+          "Une soumission KoBo arrive comme EXPECTED et ne devient ACCEPTED qu’après réception physique du sac."
         ],
         [
           "Référence de profil (Profile Reference)",
@@ -7129,7 +7129,7 @@
       "quick": "Distinguish a generated file from confirmed external delivery and a rejected transfer. Utilisez /data-results pour configurer le périmètre du projet, synchroniser les formulaires KoBoToolbox (qui arrivent à l’état EXPECTED jusqu’à réception physique), suivre l’avancement et exporter les résultats approuvés ou vérifier les accusés de réception NSIS / OpenNSIS.",
       "before": [
         "Vérifiez votre périmètre de projet, de pays et de laboratoire dans la barre supérieure.",
-        "Rappelez-vous que seuls les échantillons à l’état APPROVED ou REPORTED (RELEASED) sont exposés aux exports externes et à l’API Data Exchange."
+        "Rappelez-vous que seuls les échantillons à l’état APPROVED ou RELEASED sont exposés aux exports externes et à l’API Data Exchange."
       ],
       "sections": [
         {
@@ -7152,9 +7152,9 @@
       ],
       "fields": [
         [
-          "EXPECTED vs REGISTERED vs APPROVED",
+          "EXPECTED vs. ACCEPTED vs. APPROVED",
           "Compteurs de cycle de vie du projet",
-          "Une soumission KoBo arrive comme EXPECTED et ne devient REGISTERED qu’après réception physique du sac."
+          "Une soumission KoBo arrive comme EXPECTED et ne devient ACCEPTED qu’après réception physique du sac."
         ],
         [
           "Référence de profil (Profile Reference)",
@@ -7219,7 +7219,7 @@
       "quick": "Explain coordinates, location confidence and display limitations. Utilisez /maps pour configurer le périmètre du projet, synchroniser les formulaires KoBoToolbox (qui arrivent à l’état EXPECTED jusqu’à réception physique), suivre l’avancement et exporter les résultats approuvés ou vérifier les accusés de réception NSIS / OpenNSIS.",
       "before": [
         "Vérifiez votre périmètre de projet, de pays et de laboratoire dans la barre supérieure.",
-        "Rappelez-vous que seuls les échantillons à l’état APPROVED ou REPORTED (RELEASED) sont exposés aux exports externes et à l’API Data Exchange."
+        "Rappelez-vous que seuls les échantillons à l’état APPROVED ou RELEASED sont exposés aux exports externes et à l’API Data Exchange."
       ],
       "sections": [
         {
@@ -7242,9 +7242,9 @@
       ],
       "fields": [
         [
-          "EXPECTED vs REGISTERED vs APPROVED",
+          "EXPECTED vs. ACCEPTED vs. APPROVED",
           "Compteurs de cycle de vie du projet",
-          "Une soumission KoBo arrive comme EXPECTED et ne devient REGISTERED qu’après réception physique du sac."
+          "Une soumission KoBo arrive comme EXPECTED et ne devient ACCEPTED qu’après réception physique du sac."
         ],
         [
           "Référence de profil (Profile Reference)",
@@ -8835,7 +8835,7 @@
             },
             {
               "action": "Vérifiez les éléments correspondant à l’objectif : Follow assigned work from preparation to reviewer handoff using five demo samples. [Canonical successor: start-technician]",
-              "expected": "Chaque échantillon ou tâche affiche clairement son état (EXPECTED, IN_PREP, READY_FOR_ANALYSIS, SUBMITTED, APPROVED, REPORTED) et le prochain rôle responsable."
+              "expected": "Chaque échantillon ou tâche affiche clairement son état (EXPECTED, RECEIVED, ACCEPTED, IN_PROGRESS, SUBMITTED, APPROVED, RELEASED) et le prochain rôle responsable."
             },
             {
               "action": "Consultez le reçu de confirmation ou l’historique d’audit avant de poursuivre ou de transmettre le dossier.",
@@ -8878,7 +8878,7 @@
       ],
       "steps": [
         "Ouvrez /workbench et examinez les compteurs de file d’attente, les badges d’état et le périmètre du laboratoire. (Expected: Seuls les enregistrements autorisés pour votre laboratoire et vos projets s’affichent.)",
-        "Vérifiez les éléments correspondant à l’objectif : Follow assigned work from preparation to reviewer handoff using five demo samples. [Canonical successor: start-technician] (Expected: Chaque échantillon ou tâche affiche clairement son état (EXPECTED, IN_PREP, READY_FOR_ANALYSIS, SUBMITTED, APPROVED, REPORTED) et le prochain rôle responsable.)",
+        "Vérifiez les éléments correspondant à l’objectif : Follow assigned work from preparation to reviewer handoff using five demo samples. [Canonical successor: start-technician] (Expected: Chaque échantillon ou tâche affiche clairement son état (EXPECTED, RECEIVED, ACCEPTED, IN_PROGRESS, SUBMITTED, APPROVED, RELEASED) et le prochain rôle responsable.)",
         "Consultez le reçu de confirmation ou l’historique d’audit avant de poursuivre ou de transmettre le dossier. (Expected: La traçabilité reste complète sans modification accidentelle des données validées.)"
       ],
       "caution": "Attention: A completed worksheet is mistaken for submitted work. — Réinitialisez les filtres dans /workbench, vérifiez l’état des prérequis de l’échantillon et confirmez vos autorisations auprès du responsable de laboratoire.",
@@ -10223,7 +10223,7 @@
             },
             {
               "action": "Vérifiez les éléments correspondant à l’objectif : Apply session or profile settings without changing laboratory data. [Canonical successor: start-settings]",
-              "expected": "Chaque échantillon ou tâche affiche clairement son état (EXPECTED, IN_PREP, READY_FOR_ANALYSIS, SUBMITTED, APPROVED, REPORTED) et le prochain rôle responsable."
+              "expected": "Chaque échantillon ou tâche affiche clairement son état (EXPECTED, RECEIVED, ACCEPTED, IN_PROGRESS, SUBMITTED, APPROVED, RELEASED) et le prochain rôle responsable."
             },
             {
               "action": "Consultez le reçu de confirmation ou l’historique d’audit avant de poursuivre ou de transmettre le dossier.",
@@ -10266,7 +10266,7 @@
       ],
       "steps": [
         "Ouvrez /profile et examinez les compteurs de file d’attente, les badges d’état et le périmètre du laboratoire. (Expected: Seuls les enregistrements autorisés pour votre laboratoire et vos projets s’affichent.)",
-        "Vérifiez les éléments correspondant à l’objectif : Apply session or profile settings without changing laboratory data. [Canonical successor: start-settings] (Expected: Chaque échantillon ou tâche affiche clairement son état (EXPECTED, IN_PREP, READY_FOR_ANALYSIS, SUBMITTED, APPROVED, REPORTED) et le prochain rôle responsable.)",
+        "Vérifiez les éléments correspondant à l’objectif : Apply session or profile settings without changing laboratory data. [Canonical successor: start-settings] (Expected: Chaque échantillon ou tâche affiche clairement son état (EXPECTED, RECEIVED, ACCEPTED, IN_PROGRESS, SUBMITTED, APPROVED, RELEASED) et le prochain rôle responsable.)",
         "Consultez le reçu de confirmation ou l’historique d’audit avant de poursuivre ou de transmettre le dossier. (Expected: La traçabilité reste complète sans modification accidentelle des données validées.)"
       ],
       "caution": "Attention: A language switch appears to change a displayed number. — Réinitialisez les filtres dans /profile, vérifiez l’état des prérequis de l’échantillon et confirmez vos autorisations auprès du responsable de laboratoire.",

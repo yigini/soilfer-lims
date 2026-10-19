@@ -338,7 +338,7 @@
             },
             {
               "action": "Verifica el flujo correspondiente: Follow assigned work from preparation to reviewer handoff using five demo samples.",
-              "expected": "Cada muestra o tarea muestra su estado real (EXPECTED, IN_PREP, READY_FOR_ANALYSIS, SUBMITTED, APPROVED, REPORTED) y el rol responsable."
+              "expected": "Cada muestra o tarea muestra su estado real (EXPECTED, RECEIVED, ACCEPTED, IN_PROGRESS, SUBMITTED, APPROVED, RELEASED) y el rol responsable."
             },
             {
               "action": "Consulta el comprobante o historial de auditoría antes de ejecutar o transferir la siguiente acción.",
@@ -381,7 +381,7 @@
       ],
       "steps": [
         "Abre /workbench y revisa los contadores de cola, insignias de estado y alcance del laboratorio. (Expected: La pantalla muestra únicamente los registros autorizados para tu laboratorio y proyectos.)",
-        "Verifica el flujo correspondiente: Follow assigned work from preparation to reviewer handoff using five demo samples. (Expected: Cada muestra o tarea muestra su estado real (EXPECTED, IN_PREP, READY_FOR_ANALYSIS, SUBMITTED, APPROVED, REPORTED) y el rol responsable.)",
+        "Verifica el flujo correspondiente: Follow assigned work from preparation to reviewer handoff using five demo samples. (Expected: Cada muestra o tarea muestra su estado real (EXPECTED, RECEIVED, ACCEPTED, IN_PROGRESS, SUBMITTED, APPROVED, RELEASED) y el rol responsable.)",
         "Consulta el comprobante o historial de auditoría antes de ejecutar o transferir la siguiente acción. (Expected: La trazabilidad se conserva íntegra sin modificar registros cerrados.)"
       ],
       "caution": "Precaución: A completed worksheet is mistaken for submitted work. — Restablece los filtros en /workbench, revisa los prerrequisitos de la muestra y confirma tus permisos con el Responsable de Laboratorio.",
@@ -517,7 +517,7 @@
             },
             {
               "action": "Verifica el flujo correspondiente: Distinguish intake review, assignment, result review and final release.",
-              "expected": "Cada muestra o tarea muestra su estado real (EXPECTED, IN_PREP, READY_FOR_ANALYSIS, SUBMITTED, APPROVED, REPORTED) y el rol responsable."
+              "expected": "Cada muestra o tarea muestra su estado real (EXPECTED, RECEIVED, ACCEPTED, IN_PROGRESS, SUBMITTED, APPROVED, RELEASED) y el rol responsable."
             },
             {
               "action": "Consulta el comprobante o historial de auditoría antes de ejecutar o transferir la siguiente acción.",
@@ -560,7 +560,7 @@
       ],
       "steps": [
         "Abre /manager-queue y revisa los contadores de cola, insignias de estado y alcance del laboratorio. (Expected: La pantalla muestra únicamente los registros autorizados para tu laboratorio y proyectos.)",
-        "Verifica el flujo correspondiente: Distinguish intake review, assignment, result review and final release. (Expected: Cada muestra o tarea muestra su estado real (EXPECTED, IN_PREP, READY_FOR_ANALYSIS, SUBMITTED, APPROVED, REPORTED) y el rol responsable.)",
+        "Verifica el flujo correspondiente: Distinguish intake review, assignment, result review and final release. (Expected: Cada muestra o tarea muestra su estado real (EXPECTED, RECEIVED, ACCEPTED, IN_PROGRESS, SUBMITTED, APPROVED, RELEASED) y el rol responsable.)",
         "Consulta el comprobante o historial de auditoría antes de ejecutar o transferir la siguiente acción. (Expected: La trazabilidad se conserva íntegra sin modificar registros cerrados.)"
       ],
       "caution": "Precaución: The manager opens the wrong queue and sees no work. — Restablece los filtros en /manager-queue, revisa los prerrequisitos de la muestra y confirma tus permisos con el Responsable de Laboratorio.",
@@ -602,7 +602,7 @@
             },
             {
               "action": "Verifica el flujo correspondiente: Read project progress and identify who owns the next action.",
-              "expected": "Cada muestra o tarea muestra su estado real (EXPECTED, IN_PREP, READY_FOR_ANALYSIS, SUBMITTED, APPROVED, REPORTED) y el rol responsable."
+              "expected": "Cada muestra o tarea muestra su estado real (EXPECTED, RECEIVED, ACCEPTED, IN_PROGRESS, SUBMITTED, APPROVED, RELEASED) y el rol responsable."
             },
             {
               "action": "Consulta el comprobante o historial de auditoría antes de ejecutar o transferir la siguiente acción.",
@@ -645,7 +645,7 @@
       ],
       "steps": [
         "Abre /projects y revisa los contadores de cola, insignias de estado y alcance del laboratorio. (Expected: La pantalla muestra únicamente los registros autorizados para tu laboratorio y proyectos.)",
-        "Verifica el flujo correspondiente: Read project progress and identify who owns the next action. (Expected: Cada muestra o tarea muestra su estado real (EXPECTED, IN_PREP, READY_FOR_ANALYSIS, SUBMITTED, APPROVED, REPORTED) y el rol responsable.)",
+        "Verifica el flujo correspondiente: Read project progress and identify who owns the next action. (Expected: Cada muestra o tarea muestra su estado real (EXPECTED, RECEIVED, ACCEPTED, IN_PROGRESS, SUBMITTED, APPROVED, RELEASED) y el rol responsable.)",
         "Consulta el comprobante o historial de auditoría antes de ejecutar o transferir la siguiente acción. (Expected: La trazabilidad se conserva íntegra sin modificar registros cerrados.)"
       ],
       "caution": "Precaución: KoBo import is mistaken for completed analysis. — Restablece los filtros en /projects, revisa los prerrequisitos de la muestra y confirma tus permisos con el Responsable de Laboratorio.",
@@ -687,7 +687,7 @@
             },
             {
               "action": "Verifica el flujo correspondiente: Follow the evidence and report history within audit scope.",
-              "expected": "Cada muestra o tarea muestra su estado real (EXPECTED, IN_PREP, READY_FOR_ANALYSIS, SUBMITTED, APPROVED, REPORTED) y el rol responsable."
+              "expected": "Cada muestra o tarea muestra su estado real (EXPECTED, RECEIVED, ACCEPTED, IN_PROGRESS, SUBMITTED, APPROVED, RELEASED) y el rol responsable."
             },
             {
               "action": "Consulta el comprobante o historial de auditoría antes de ejecutar o transferir la siguiente acción.",
@@ -730,7 +730,7 @@
       ],
       "steps": [
         "Abre /qa y revisa los contadores de cola, insignias de estado y alcance del laboratorio. (Expected: La pantalla muestra únicamente los registros autorizados para tu laboratorio y proyectos.)",
-        "Verifica el flujo correspondiente: Follow the evidence and report history within audit scope. (Expected: Cada muestra o tarea muestra su estado real (EXPECTED, IN_PREP, READY_FOR_ANALYSIS, SUBMITTED, APPROVED, REPORTED) y el rol responsable.)",
+        "Verifica el flujo correspondiente: Follow the evidence and report history within audit scope. (Expected: Cada muestra o tarea muestra su estado real (EXPECTED, RECEIVED, ACCEPTED, IN_PROGRESS, SUBMITTED, APPROVED, RELEASED) y el rol responsable.)",
         "Consulta el comprobante o historial de auditoría antes de ejecutar o transferir la siguiente acción. (Expected: La trazabilidad se conserva íntegra sin modificar registros cerrados.)"
       ],
       "caution": "Precaución: An audit viewer expects edit controls. — Restablece los filtros en /qa, revisa los prerrequisitos de la muestra y confirma tus permisos con el Responsable de Laboratorio.",
@@ -772,7 +772,7 @@
             },
             {
               "action": "Verifica el flujo correspondiente: Navigate permitted records and distinguish current from superseded reports.",
-              "expected": "Cada muestra o tarea muestra su estado real (EXPECTED, IN_PREP, READY_FOR_ANALYSIS, SUBMITTED, APPROVED, REPORTED) y el rol responsable."
+              "expected": "Cada muestra o tarea muestra su estado real (EXPECTED, RECEIVED, ACCEPTED, IN_PROGRESS, SUBMITTED, APPROVED, RELEASED) y el rol responsable."
             },
             {
               "action": "Consulta el comprobante o historial de auditoría antes de ejecutar o transferir la siguiente acción.",
@@ -815,7 +815,7 @@
       ],
       "steps": [
         "Abre /samples y revisa los contadores de cola, insignias de estado y alcance del laboratorio. (Expected: La pantalla muestra únicamente los registros autorizados para tu laboratorio y proyectos.)",
-        "Verifica el flujo correspondiente: Navigate permitted records and distinguish current from superseded reports. (Expected: Cada muestra o tarea muestra su estado real (EXPECTED, IN_PREP, READY_FOR_ANALYSIS, SUBMITTED, APPROVED, REPORTED) y el rol responsable.)",
+        "Verifica el flujo correspondiente: Navigate permitted records and distinguish current from superseded reports. (Expected: Cada muestra o tarea muestra su estado real (EXPECTED, RECEIVED, ACCEPTED, IN_PROGRESS, SUBMITTED, APPROVED, RELEASED) y el rol responsable.)",
         "Consulta el comprobante o historial de auditoría antes de ejecutar o transferir la siguiente acción. (Expected: La trazabilidad se conserva íntegra sin modificar registros cerrados.)"
       ],
       "caution": "Precaución: A viewer cannot see another project's data. — Restablece los filtros en /samples, revisa los prerrequisitos de la muestra y confirma tus permisos con el Responsable de Laboratorio.",
@@ -856,7 +856,7 @@
             },
             {
               "action": "Verifica el flujo correspondiente: Apply session or profile settings without changing laboratory data.",
-              "expected": "Cada muestra o tarea muestra su estado real (EXPECTED, IN_PREP, READY_FOR_ANALYSIS, SUBMITTED, APPROVED, REPORTED) y el rol responsable."
+              "expected": "Cada muestra o tarea muestra su estado real (EXPECTED, RECEIVED, ACCEPTED, IN_PROGRESS, SUBMITTED, APPROVED, RELEASED) y el rol responsable."
             },
             {
               "action": "Consulta el comprobante o historial de auditoría antes de ejecutar o transferir la siguiente acción.",
@@ -899,7 +899,7 @@
       ],
       "steps": [
         "Abre /profile y revisa los contadores de cola, insignias de estado y alcance del laboratorio. (Expected: La pantalla muestra únicamente los registros autorizados para tu laboratorio y proyectos.)",
-        "Verifica el flujo correspondiente: Apply session or profile settings without changing laboratory data. (Expected: Cada muestra o tarea muestra su estado real (EXPECTED, IN_PREP, READY_FOR_ANALYSIS, SUBMITTED, APPROVED, REPORTED) y el rol responsable.)",
+        "Verifica el flujo correspondiente: Apply session or profile settings without changing laboratory data. (Expected: Cada muestra o tarea muestra su estado real (EXPECTED, RECEIVED, ACCEPTED, IN_PROGRESS, SUBMITTED, APPROVED, RELEASED) y el rol responsable.)",
         "Consulta el comprobante o historial de auditoría antes de ejecutar o transferir la siguiente acción. (Expected: La trazabilidad se conserva íntegra sin modificar registros cerrados.)"
       ],
       "caution": "Precaución: A language switch appears to change a displayed number. — Restablece los filtros en /profile, revisa los prerrequisitos de la muestra y confirma tus permisos con el Responsable de Laboratorio.",
@@ -1063,7 +1063,7 @@
             },
             {
               "action": "Selecciona el paquete de análisis o los métodos requeridos, imprime las etiquetas de Muestra y Contenedor y pulsa Confirmar recepción.",
-              "expected": "Se guarda el comprobante de recepción, el estado pasa a REGISTERED y se habilitan las compuertas previas de DRYING y PREPARATION."
+              "expected": "Se guarda el comprobante de recepción, el estado pasa a ACCEPTED y se habilitan las compuertas previas de DRYING y PREPARATION."
             }
           ]
         }
@@ -1102,7 +1102,7 @@
       "steps": [
         "Abre Recepción (/reception) y elige la modalidad de ingreso (Remesa/Consignment, Ingreso directo o Llegadas esperadas de KoBo). (Expected: Se carga el formulario de ingreso o la cola de llegadas esperadas de tu laboratorio activo.)",
         "Comprueba el identificador de la bolsa, revisa los metadatos/coordenadas y anota la masa recibida (g) y el estado de llegada (Review each matched sample and isolate exceptions during batch intake.). (Expected: Cualquier desviación (masa insuficiente o envase dañado) se marca al instante para rechazar la muestra o aceptarla con salvedad documentada.)",
-        "Selecciona el paquete de análisis o los métodos requeridos, imprime las etiquetas de Muestra y Contenedor y pulsa Confirmar recepción. (Expected: Se guarda el comprobante de recepción, el estado pasa a REGISTERED y se habilitan las compuertas previas de DRYING y PREPARATION.)"
+        "Selecciona el paquete de análisis o los métodos requeridos, imprime las etiquetas de Muestra y Contenedor y pulsa Confirmar recepción. (Expected: Se guarda el comprobante de recepción, el estado pasa a ACCEPTED y se habilitan las compuertas previas de DRYING y PREPARATION.)"
       ],
       "caution": "Precaución: One damaged or missing sample blocks a whole delivery. — Compara la etiqueta física con los registros en /reception, resuelve cualquier duplicado o salvedad de condición y pulsa Confirmar recepción.",
       "related": [
@@ -1147,7 +1147,7 @@
             },
             {
               "action": "Selecciona el paquete de análisis o los métodos requeridos, imprime las etiquetas de Muestra y Contenedor y pulsa Confirmar recepción.",
-              "expected": "Se guarda el comprobante de recepción, el estado pasa a REGISTERED y se habilitan las compuertas previas de DRYING y PREPARATION."
+              "expected": "Se guarda el comprobante de recepción, el estado pasa a ACCEPTED y se habilitan las compuertas previas de DRYING y PREPARATION."
             }
           ]
         }
@@ -1186,7 +1186,7 @@
       "steps": [
         "Abre Recepción (/reception) y elige la modalidad de ingreso (Remesa/Consignment, Ingreso directo o Llegadas esperadas de KoBo). (Expected: Se carga el formulario de ingreso o la cola de llegadas esperadas de tu laboratorio activo.)",
         "Comprueba el identificador de la bolsa, revisa los metadatos/coordenadas y anota la masa recibida (g) y el estado de llegada (Identify draft owner, restore state and verify that saving did not receive material.). (Expected: Cualquier desviación (masa insuficiente o envase dañado) se marca al instante para rechazar la muestra o aceptarla con salvedad documentada.)",
-        "Selecciona el paquete de análisis o los métodos requeridos, imprime las etiquetas de Muestra y Contenedor y pulsa Confirmar recepción. (Expected: Se guarda el comprobante de recepción, el estado pasa a REGISTERED y se habilitan las compuertas previas de DRYING y PREPARATION.)"
+        "Selecciona el paquete de análisis o los métodos requeridos, imprime las etiquetas de Muestra y Contenedor y pulsa Confirmar recepción. (Expected: Se guarda el comprobante de recepción, el estado pasa a ACCEPTED y se habilitan las compuertas previas de DRYING y PREPARATION.)"
       ],
       "caution": "Precaución: A reopened draft loses its source location. — Compara la etiqueta física con los registros en /reception, resuelve cualquier duplicado o salvedad de condición y pulsa Confirmar recepción.",
       "related": [
@@ -1232,7 +1232,7 @@
             },
             {
               "action": "Selecciona el paquete de análisis o los métodos requeridos, imprime las etiquetas de Muestra y Contenedor y pulsa Confirmar recepción.",
-              "expected": "Se guarda el comprobante de recepción, el estado pasa a REGISTERED y se habilitan las compuertas previas de DRYING y PREPARATION."
+              "expected": "Se guarda el comprobante de recepción, el estado pasa a ACCEPTED y se habilitan las compuertas previas de DRYING y PREPARATION."
             }
           ]
         }
@@ -1271,7 +1271,7 @@
       "steps": [
         "Abre Recepción (/reception) y elige la modalidad de ingreso (Remesa/Consignment, Ingreso directo o Llegadas esperadas de KoBo). (Expected: Se carga el formulario de ingreso o la cola de llegadas esperadas de tu laboratorio activo.)",
         "Comprueba el identificador de la bolsa, revisa los metadatos/coordenadas y anota la masa recibida (g) y el estado de llegada (Trace coordinates and locality to the linked source without guessing.). (Expected: Cualquier desviación (masa insuficiente o envase dañado) se marca al instante para rechazar la muestra o aceptarla con salvedad documentada.)",
-        "Selecciona el paquete de análisis o los métodos requeridos, imprime las etiquetas de Muestra y Contenedor y pulsa Confirmar recepción. (Expected: Se guarda el comprobante de recepción, el estado pasa a REGISTERED y se habilitan las compuertas previas de DRYING y PREPARATION.)"
+        "Selecciona el paquete de análisis o los métodos requeridos, imprime las etiquetas de Muestra y Contenedor y pulsa Confirmar recepción. (Expected: Se guarda el comprobante de recepción, el estado pasa a ACCEPTED y se habilitan las compuertas previas de DRYING y PREPARATION.)"
       ],
       "caution": "Precaución: Source coordinates exist but the form says no location. — Compara la etiqueta física con los registros en /reception, resuelve cualquier duplicado o salvedad de condición y pulsa Confirmar recepción.",
       "related": [
@@ -1316,7 +1316,7 @@
             },
             {
               "action": "Selecciona el paquete de análisis o los métodos requeridos, imprime las etiquetas de Muestra y Contenedor y pulsa Confirmar recepción.",
-              "expected": "Se guarda el comprobante de recepción, el estado pasa a REGISTERED y se habilitan las compuertas previas de DRYING y PREPARATION."
+              "expected": "Se guarda el comprobante de recepción, el estado pasa a ACCEPTED y se habilitan las compuertas previas de DRYING y PREPARATION."
             }
           ]
         }
@@ -1355,7 +1355,7 @@
       "steps": [
         "Abre Recepción (/reception) y elige la modalidad de ingreso (Remesa/Consignment, Ingreso directo o Llegadas esperadas de KoBo). (Expected: Se carga el formulario de ingreso o la cola de llegadas esperadas de tu laboratorio activo.)",
         "Comprueba el identificador de la bolsa, revisa los metadatos/coordenadas y anota la masa recibida (g) y el estado de llegada (Explain the condition fields, evidence and permitted exception handling.). (Expected: Cualquier desviación (masa insuficiente o envase dañado) se marca al instante para rechazar la muestra o aceptarla con salvedad documentada.)",
-        "Selecciona el paquete de análisis o los métodos requeridos, imprime las etiquetas de Muestra y Contenedor y pulsa Confirmar recepción. (Expected: Se guarda el comprobante de recepción, el estado pasa a REGISTERED y se habilitan las compuertas previas de DRYING y PREPARATION.)"
+        "Selecciona el paquete de análisis o los métodos requeridos, imprime las etiquetas de Muestra y Contenedor y pulsa Confirmar recepción. (Expected: Se guarda el comprobante de recepción, el estado pasa a ACCEPTED y se habilitan las compuertas previas de DRYING y PREPARATION.)"
       ],
       "caution": "Precaución: A mass deficit is present or the container is damaged. — Compara la etiqueta física con los registros en /reception, resuelve cualquier duplicado o salvedad de condición y pulsa Confirmar recepción.",
       "related": [
@@ -1400,7 +1400,7 @@
             },
             {
               "action": "Selecciona el paquete de análisis o los métodos requeridos, imprime las etiquetas de Muestra y Contenedor y pulsa Confirmar recepción.",
-              "expected": "Se guarda el comprobante de recepción, el estado pasa a REGISTERED y se habilitan las compuertas previas de DRYING y PREPARATION."
+              "expected": "Se guarda el comprobante de recepción, el estado pasa a ACCEPTED y se habilitan las compuertas previas de DRYING y PREPARATION."
             }
           ]
         }
@@ -1439,7 +1439,7 @@
       "steps": [
         "Abre Recepción (/reception) y elige la modalidad de ingreso (Remesa/Consignment, Ingreso directo o Llegadas esperadas de KoBo). (Expected: Se carga el formulario de ingreso o la cola de llegadas esperadas de tu laboratorio activo.)",
         "Comprueba el identificador de la bolsa, revisa los metadatos/coordenadas y anota la masa recibida (g) y el estado de llegada (Use parameter names, method variants and grouped panels before handover.). (Expected: Cualquier desviación (masa insuficiente o envase dañado) se marca al instante para rechazar la muestra o aceptarla con salvedad documentada.)",
-        "Selecciona el paquete de análisis o los métodos requeridos, imprime las etiquetas de Muestra y Contenedor y pulsa Confirmar recepción. (Expected: Se guarda el comprobante de recepción, el estado pasa a REGISTERED y se habilitan las compuertas previas de DRYING y PREPARATION.)"
+        "Selecciona el paquete de análisis o los métodos requeridos, imprime las etiquetas de Muestra y Contenedor y pulsa Confirmar recepción. (Expected: Se guarda el comprobante de recepción, el estado pasa a ACCEPTED y se habilitan las compuertas previas de DRYING y PREPARATION.)"
       ],
       "caution": "Precaución: Texture fractions appear as three separate choices. — Compara la etiqueta física con los registros en /reception, resuelve cualquier duplicado o salvedad de condición y pulsa Confirmar recepción.",
       "related": [
@@ -1485,7 +1485,7 @@
             },
             {
               "action": "Selecciona el paquete de análisis o los métodos requeridos, imprime las etiquetas de Muestra y Contenedor y pulsa Confirmar recepción.",
-              "expected": "Se guarda el comprobante de recepción, el estado pasa a REGISTERED y se habilitan las compuertas previas de DRYING y PREPARATION."
+              "expected": "Se guarda el comprobante de recepción, el estado pasa a ACCEPTED y se habilitan las compuertas previas de DRYING y PREPARATION."
             }
           ]
         }
@@ -1524,7 +1524,7 @@
       "steps": [
         "Abre Recepción (/reception) y elige la modalidad de ingreso (Remesa/Consignment, Ingreso directo o Llegadas esperadas de KoBo). (Expected: Se carga el formulario de ingreso o la cola de llegadas esperadas de tu laboratorio activo.)",
         "Comprueba el identificador de la bolsa, revisa los metadatos/coordenadas y anota la masa recibida (g) y el estado de llegada (Compare label, source and existing records without creating a second intake.). (Expected: Cualquier desviación (masa insuficiente o envase dañado) se marca al instante para rechazar la muestra o aceptarla con salvedad documentada.)",
-        "Selecciona el paquete de análisis o los métodos requeridos, imprime las etiquetas de Muestra y Contenedor y pulsa Confirmar recepción. (Expected: Se guarda el comprobante de recepción, el estado pasa a REGISTERED y se habilitan las compuertas previas de DRYING y PREPARATION.)"
+        "Selecciona el paquete de análisis o los métodos requeridos, imprime las etiquetas de Muestra y Contenedor y pulsa Confirmar recepción. (Expected: Se guarda el comprobante de recepción, el estado pasa a ACCEPTED y se habilitan las compuertas previas de DRYING y PREPARATION.)"
       ],
       "caution": "Precaución: A scan returns two candidates or none. — Compara la etiqueta física con los registros en /reception, resuelve cualquier duplicado o salvedad de condición y pulsa Confirmar recepción.",
       "related": [
@@ -1569,7 +1569,7 @@
             },
             {
               "action": "Selecciona el paquete de análisis o los métodos requeridos, imprime las etiquetas de Muestra y Contenedor y pulsa Confirmar recepción.",
-              "expected": "Se guarda el comprobante de recepción, el estado pasa a REGISTERED y se habilitan las compuertas previas de DRYING y PREPARATION."
+              "expected": "Se guarda el comprobante de recepción, el estado pasa a ACCEPTED y se habilitan las compuertas previas de DRYING y PREPARATION."
             }
           ]
         }
@@ -1608,7 +1608,7 @@
       "steps": [
         "Abre Recepción (/reception) y elige la modalidad de ingreso (Remesa/Consignment, Ingreso directo o Llegadas esperadas de KoBo). (Expected: Se carga el formulario de ingreso o la cola de llegadas esperadas de tu laboratorio activo.)",
         "Comprueba el identificador de la bolsa, revisa los metadatos/coordenadas y anota la masa recibida (g) y el estado de llegada (Identify final receipt action, receipt evidence and the next responsible role.). (Expected: Cualquier desviación (masa insuficiente o envase dañado) se marca al instante para rechazar la muestra o aceptarla con salvedad documentada.)",
-        "Selecciona el paquete de análisis o los métodos requeridos, imprime las etiquetas de Muestra y Contenedor y pulsa Confirmar recepción. (Expected: Se guarda el comprobante de recepción, el estado pasa a REGISTERED y se habilitan las compuertas previas de DRYING y PREPARATION.)"
+        "Selecciona el paquete de análisis o los métodos requeridos, imprime las etiquetas de Muestra y Contenedor y pulsa Confirmar recepción. (Expected: Se guarda el comprobante de recepción, el estado pasa a ACCEPTED y se habilitan las compuertas previas de DRYING y PREPARATION.)"
       ],
       "caution": "Precaución: A draft is saved but the receiving queue has not changed. — Compara la etiqueta física con los registros en /reception, resuelve cualquier duplicado o salvedad de condición y pulsa Confirmar recepción.",
       "related": [
@@ -2259,7 +2259,7 @@
       "minutes": 3,
       "quick": "Check the applicable preparation steps and record completion for the correct material. En /workbench, verifica la muestra física, registra la temperatura real de secado (< 40 °C), la duración y el tamiz empleado (2 mm o < 100 µm para MIR) y pulsa Confirm Complete para desbloquear los análisis en mesada.",
       "before": [
-        "Confirma que la muestra tenga recepción confirmada (REGISTERED) y coincida con la etiqueta de la bandeja.",
+        "Confirma que la muestra tenga recepción confirmada (ACCEPTED) y coincida con la etiqueta de la bandeja.",
         "Verifica si tu laboratorio exige verificación de segunda persona (gate.verificationRequired)."
       ],
       "sections": [
@@ -2276,7 +2276,7 @@
             },
             {
               "action": "Pulsa Confirm Complete (con firma de segundo usuario si gate.verificationRequired está activo) y revisa el comprobante generado.",
-              "expected": "Se guarda un PreparationRecord auditable y las tareas analíticas dependientes pasan a READY_FOR_ANALYSIS."
+              "expected": "Se guarda un PreparationRecord auditable y las tareas analíticas dependientes quedan desbloqueadas para el análisis (ASSIGNED / IN_PROGRESS)."
             }
           ]
         }
@@ -2316,7 +2316,7 @@
       "steps": [
         "Abre /workbench y selecciona la muestra o lote en la cola de DRYING o PREPARATION. (Expected: La lista de verificación muestra los requisitos de secado (< 40 °C) y tamizado/molienda.)",
         "Completa las comprobaciones físicas y anota la temperatura, duración, malla de tamiz y masa preparada (Check the applicable preparation steps and record completion for the correct material.). (Expected: Cada muestra seleccionada valida sus parámetros; desmarca cualquier muestra que no haya sido preparada físicamente antes de confirmar en lote.)",
-        "Pulsa Confirm Complete (con firma de segundo usuario si gate.verificationRequired está activo) y revisa el comprobante generado. (Expected: Se guarda un PreparationRecord auditable y las tareas analíticas dependientes pasan a READY_FOR_ANALYSIS.)"
+        "Pulsa Confirm Complete (con firma de segundo usuario si gate.verificationRequired está activo) y revisa el comprobante generado. (Expected: Se guarda un PreparationRecord auditable y las tareas analíticas dependientes quedan desbloqueadas para el análisis (ASSIGNED / IN_PROGRESS).)"
       ],
       "caution": "Precaución: An analysis requires a different preparation pathway. — Revisa el recibo de preparación de la muestra, completa o verifica la compuerta pendiente o abre un nuevo intento de preparación auditado.",
       "related": [
@@ -2448,7 +2448,7 @@
       "minutes": 3,
       "quick": "Compare selected items and each sample's evidence before a permitted bulk action. En /workbench, verifica la muestra física, registra la temperatura real de secado (< 40 °C), la duración y el tamiz empleado (2 mm o < 100 µm para MIR) y pulsa Confirm Complete para desbloquear los análisis en mesada.",
       "before": [
-        "Confirma que la muestra tenga recepción confirmada (REGISTERED) y coincida con la etiqueta de la bandeja.",
+        "Confirma que la muestra tenga recepción confirmada (ACCEPTED) y coincida con la etiqueta de la bandeja.",
         "Verifica si tu laboratorio exige verificación de segunda persona (gate.verificationRequired)."
       ],
       "sections": [
@@ -2465,7 +2465,7 @@
             },
             {
               "action": "Pulsa Confirm Complete (con firma de segundo usuario si gate.verificationRequired está activo) y revisa el comprobante generado.",
-              "expected": "Se guarda un PreparationRecord auditable y las tareas analíticas dependientes pasan a READY_FOR_ANALYSIS."
+              "expected": "Se guarda un PreparationRecord auditable y las tareas analíticas dependientes quedan desbloqueadas para el análisis (ASSIGNED / IN_PROGRESS)."
             }
           ]
         }
@@ -2505,7 +2505,7 @@
       "steps": [
         "Abre /workbench y selecciona la muestra o lote en la cola de DRYING o PREPARATION. (Expected: La lista de verificación muestra los requisitos de secado (< 40 °C) y tamizado/molienda.)",
         "Completa las comprobaciones físicas y anota la temperatura, duración, malla de tamiz y masa preparada (Compare selected items and each sample's evidence before a permitted bulk action.). (Expected: Cada muestra seleccionada valida sus parámetros; desmarca cualquier muestra que no haya sido preparada físicamente antes de confirmar en lote.)",
-        "Pulsa Confirm Complete (con firma de segundo usuario si gate.verificationRequired está activo) y revisa el comprobante generado. (Expected: Se guarda un PreparationRecord auditable y las tareas analíticas dependientes pasan a READY_FOR_ANALYSIS.)"
+        "Pulsa Confirm Complete (con firma de segundo usuario si gate.verificationRequired está activo) y revisa el comprobante generado. (Expected: Se guarda un PreparationRecord auditable y las tareas analíticas dependientes quedan desbloqueadas para el análisis (ASSIGNED / IN_PROGRESS).)"
       ],
       "caution": "Precaución: One selected sample was not physically prepared. — Revisa el recibo de preparación de la muestra, completa o verifica la compuerta pendiente o abre un nuevo intento de preparación auditado.",
       "related": [
@@ -2534,7 +2534,7 @@
       "minutes": 3,
       "quick": "Explain the evidence-gap state and who may document verification or a new attempt. En /workbench, verifica la muestra física, registra la temperatura real de secado (< 40 °C), la duración y el tamiz empleado (2 mm o < 100 µm para MIR) y pulsa Confirm Complete para desbloquear los análisis en mesada.",
       "before": [
-        "Confirma que la muestra tenga recepción confirmada (REGISTERED) y coincida con la etiqueta de la bandeja.",
+        "Confirma que la muestra tenga recepción confirmada (ACCEPTED) y coincida con la etiqueta de la bandeja.",
         "Verifica si tu laboratorio exige verificación de segunda persona (gate.verificationRequired)."
       ],
       "sections": [
@@ -2551,7 +2551,7 @@
             },
             {
               "action": "Pulsa Confirm Complete (con firma de segundo usuario si gate.verificationRequired está activo) y revisa el comprobante generado.",
-              "expected": "Se guarda un PreparationRecord auditable y las tareas analíticas dependientes pasan a READY_FOR_ANALYSIS."
+              "expected": "Se guarda un PreparationRecord auditable y las tareas analíticas dependientes quedan desbloqueadas para el análisis (ASSIGNED / IN_PROGRESS)."
             }
           ]
         }
@@ -2591,7 +2591,7 @@
       "steps": [
         "Abre /workbench y selecciona la muestra o lote en la cola de DRYING o PREPARATION. (Expected: La lista de verificación muestra los requisitos de secado (< 40 °C) y tamizado/molienda.)",
         "Completa las comprobaciones físicas y anota la temperatura, duración, malla de tamiz y masa preparada (Explain the evidence-gap state and who may document verification or a new attempt.). (Expected: Cada muestra seleccionada valida sus parámetros; desmarca cualquier muestra que no haya sido preparada físicamente antes de confirmar en lote.)",
-        "Pulsa Confirm Complete (con firma de segundo usuario si gate.verificationRequired está activo) y revisa el comprobante generado. (Expected: Se guarda un PreparationRecord auditable y las tareas analíticas dependientes pasan a READY_FOR_ANALYSIS.)"
+        "Pulsa Confirm Complete (con firma de segundo usuario si gate.verificationRequired está activo) y revisa el comprobante generado. (Expected: Se guarda un PreparationRecord auditable y las tareas analíticas dependientes quedan desbloqueadas para el análisis (ASSIGNED / IN_PROGRESS).)"
       ],
       "caution": "Precaución: A legacy Done flag exists without a checklist receipt. — Revisa el recibo de preparación de la muestra, completa o verifica la compuerta pendiente o abre un nuevo intento de preparación auditado.",
       "related": [
@@ -2620,7 +2620,7 @@
       "minutes": 3,
       "quick": "Preserve original evidence and route a permitted new preparation attempt. En /workbench, verifica la muestra física, registra la temperatura real de secado (< 40 °C), la duración y el tamiz empleado (2 mm o < 100 µm para MIR) y pulsa Confirm Complete para desbloquear los análisis en mesada.",
       "before": [
-        "Confirma que la muestra tenga recepción confirmada (REGISTERED) y coincida con la etiqueta de la bandeja.",
+        "Confirma que la muestra tenga recepción confirmada (ACCEPTED) y coincida con la etiqueta de la bandeja.",
         "Verifica si tu laboratorio exige verificación de segunda persona (gate.verificationRequired)."
       ],
       "sections": [
@@ -2637,7 +2637,7 @@
             },
             {
               "action": "Pulsa Confirm Complete (con firma de segundo usuario si gate.verificationRequired está activo) y revisa el comprobante generado.",
-              "expected": "Se guarda un PreparationRecord auditable y las tareas analíticas dependientes pasan a READY_FOR_ANALYSIS."
+              "expected": "Se guarda un PreparationRecord auditable y las tareas analíticas dependientes quedan desbloqueadas para el análisis (ASSIGNED / IN_PROGRESS)."
             }
           ]
         }
@@ -2677,7 +2677,7 @@
       "steps": [
         "Abre /workbench y selecciona la muestra o lote en la cola de DRYING o PREPARATION. (Expected: La lista de verificación muestra los requisitos de secado (< 40 °C) y tamizado/molienda.)",
         "Completa las comprobaciones físicas y anota la temperatura, duración, malla de tamiz y masa preparada (Preserve original evidence and route a permitted new preparation attempt.). (Expected: Cada muestra seleccionada valida sus parámetros; desmarca cualquier muestra que no haya sido preparada físicamente antes de confirmar en lote.)",
-        "Pulsa Confirm Complete (con firma de segundo usuario si gate.verificationRequired está activo) y revisa el comprobante generado. (Expected: Se guarda un PreparationRecord auditable y las tareas analíticas dependientes pasan a READY_FOR_ANALYSIS.)"
+        "Pulsa Confirm Complete (con firma de segundo usuario si gate.verificationRequired está activo) y revisa el comprobante generado. (Expected: Se guarda un PreparationRecord auditable y las tareas analíticas dependientes quedan desbloqueadas para el análisis (ASSIGNED / IN_PROGRESS).)"
       ],
       "caution": "Precaución: Staff attempt to overwrite the old confirmation. — Revisa el recibo de preparación de la muestra, completa o verifica la compuerta pendiente o abre un nuevo intento de preparación auditado.",
       "related": [
@@ -4499,7 +4499,7 @@
       "problems": [
         {
           "symptom": "A newly expected sample is mistaken for completed lab work.",
-          "why": "La política de segunda persona (review.secondPersonRequired) impide autoaprobar tu propio trabajo, queda un prerrequisito/CC pendiente o la muestra ya está REPORTED y requiere Enmienda.",
+          "why": "La política de segunda persona (review.secondPersonRequired) impide autoaprobar tu propio trabajo, queda un prerrequisito/CC pendiente o la muestra ya está APPROVED / RELEASED y requiere Enmienda.",
           "action": "Revisa el motivo en el botón de aprobación, solicita a otro Revisor/Responsable aprobar mediciones registradas por ti o inicia una Enmienda en muestras ya informadas."
         }
       ],
@@ -4585,7 +4585,7 @@
       "problems": [
         {
           "symptom": "Assignment exists but preparation has not been confirmed.",
-          "why": "La política de segunda persona (review.secondPersonRequired) impide autoaprobar tu propio trabajo, queda un prerrequisito/CC pendiente o la muestra ya está REPORTED y requiere Enmienda.",
+          "why": "La política de segunda persona (review.secondPersonRequired) impide autoaprobar tu propio trabajo, queda un prerrequisito/CC pendiente o la muestra ya está APPROVED / RELEASED y requiere Enmienda.",
           "action": "Revisa el motivo en el botón de aprobación, solicita a otro Revisor/Responsable aprobar mediciones registradas por ti o inicia una Enmienda en muestras ya informadas."
         }
       ],
@@ -4790,7 +4790,7 @@
       "problems": [
         {
           "symptom": "An ambiguous return note leads to another incorrect submission.",
-          "why": "La política de segunda persona (review.secondPersonRequired) impide autoaprobar tu propio trabajo, queda un prerrequisito/CC pendiente o la muestra ya está REPORTED y requiere Enmienda.",
+          "why": "La política de segunda persona (review.secondPersonRequired) impide autoaprobar tu propio trabajo, queda un prerrequisito/CC pendiente o la muestra ya está APPROVED / RELEASED y requiere Enmienda.",
           "action": "Revisa el motivo en el botón de aprobación, solicita a otro Revisor/Responsable aprobar mediciones registradas por ti o inicia una Enmienda en muestras ya informadas."
         }
       ],
@@ -4877,7 +4877,7 @@
       "problems": [
         {
           "symptom": "The approval button is disabled by an unresolved prerequisite.",
-          "why": "La política de segunda persona (review.secondPersonRequired) impide autoaprobar tu propio trabajo, queda un prerrequisito/CC pendiente o la muestra ya está REPORTED y requiere Enmienda.",
+          "why": "La política de segunda persona (review.secondPersonRequired) impide autoaprobar tu propio trabajo, queda un prerrequisito/CC pendiente o la muestra ya está APPROVED / RELEASED y requiere Enmienda.",
           "action": "Revisa el motivo en el botón de aprobación, solicita a otro Revisor/Responsable aprobar mediciones registradas por ti o inicia una Enmienda en muestras ya informadas."
         }
       ],
@@ -4963,7 +4963,7 @@
       "problems": [
         {
           "symptom": "The report omits a derived texture class or uses an old result.",
-          "why": "La política de segunda persona (review.secondPersonRequired) impide autoaprobar tu propio trabajo, queda un prerrequisito/CC pendiente o la muestra ya está REPORTED y requiere Enmienda.",
+          "why": "La política de segunda persona (review.secondPersonRequired) impide autoaprobar tu propio trabajo, queda un prerrequisito/CC pendiente o la muestra ya está APPROVED / RELEASED y requiere Enmienda.",
           "action": "Revisa el motivo en el botón de aprobación, solicita a otro Revisor/Responsable aprobar mediciones registradas por ti o inicia una Enmienda en muestras ya informadas."
         }
       ],
@@ -5050,7 +5050,7 @@
       "problems": [
         {
           "symptom": "Staff attempt to edit a released result in place.",
-          "why": "La política de segunda persona (review.secondPersonRequired) impide autoaprobar tu propio trabajo, queda un prerrequisito/CC pendiente o la muestra ya está REPORTED y requiere Enmienda.",
+          "why": "La política de segunda persona (review.secondPersonRequired) impide autoaprobar tu propio trabajo, queda un prerrequisito/CC pendiente o la muestra ya está APPROVED / RELEASED y requiere Enmienda.",
           "action": "Revisa el motivo en el botón de aprobación, solicita a otro Revisor/Responsable aprobar mediciones registradas por ti o inicia una Enmienda en muestras ya informadas."
         }
       ],
@@ -5137,7 +5137,7 @@
       "problems": [
         {
           "symptom": "An expired or superseded public report link is forwarded.",
-          "why": "La política de segunda persona (review.secondPersonRequired) impide autoaprobar tu propio trabajo, queda un prerrequisito/CC pendiente o la muestra ya está REPORTED y requiere Enmienda.",
+          "why": "La política de segunda persona (review.secondPersonRequired) impide autoaprobar tu propio trabajo, queda un prerrequisito/CC pendiente o la muestra ya está APPROVED / RELEASED y requiere Enmienda.",
           "action": "Revisa el motivo en el botón de aprobación, solicita a otro Revisor/Responsable aprobar mediciones registradas por ti o inicia una Enmienda en muestras ya informadas."
         }
       ],
@@ -5224,7 +5224,7 @@
       "problems": [
         {
           "symptom": "A partial review is taken as final approval of the entire sample.",
-          "why": "La política de segunda persona (review.secondPersonRequired) impide autoaprobar tu propio trabajo, queda un prerrequisito/CC pendiente o la muestra ya está REPORTED y requiere Enmienda.",
+          "why": "La política de segunda persona (review.secondPersonRequired) impide autoaprobar tu propio trabajo, queda un prerrequisito/CC pendiente o la muestra ya está APPROVED / RELEASED y requiere Enmienda.",
           "action": "Revisa el motivo en el botón de aprobación, solicita a otro Revisor/Responsable aprobar mediciones registradas por ti o inicia una Enmienda en muestras ya informadas."
         }
       ],
@@ -6578,7 +6578,7 @@
       "quick": "Explain project identity, country/lab scope and enabled data flows. Usa /projects para gestionar el alcance del proyecto, sincronizar formularios de campo KoboToolbox (que ingresan como EXPECTED hasta su recepción física), consultar el avance y exportar resultados aprobados o verificar recibos de entrega NSIS / OpenNSIS.",
       "before": [
         "Verifica tu alcance autorizado de proyecto, país y laboratorio en la barra superior.",
-        "Recuerda que las exportaciones externas y la API Data Exchange solo exponen muestras con estado APPROVED o REPORTED (RELEASED)."
+        "Recuerda que las exportaciones externas y la API Data Exchange solo exponen muestras con estado APPROVED o RELEASED."
       ],
       "sections": [
         {
@@ -6601,9 +6601,9 @@
       ],
       "fields": [
         [
-          "EXPECTED vs. REGISTERED vs. APPROVED",
+          "EXPECTED vs. ACCEPTED vs. APPROVED",
           "Contadores de avance del proyecto",
-          "Los envíos de KoBo entran como EXPECTED; solo pasan a REGISTERED cuando la bolsa física se recibe en Recepción."
+          "Los envíos de KoBo entran como EXPECTED; solo pasan a ACCEPTED cuando la bolsa física se recibe en Recepción."
         ],
         [
           "Referencia de Perfil",
@@ -6768,7 +6768,7 @@
       "quick": "Explain where source corrections belong and how reconciliation works. Usa /projects para gestionar el alcance del proyecto, sincronizar formularios de campo KoboToolbox (que ingresan como EXPECTED hasta su recepción física), consultar el avance y exportar resultados aprobados o verificar recibos de entrega NSIS / OpenNSIS.",
       "before": [
         "Verifica tu alcance autorizado de proyecto, país y laboratorio en la barra superior.",
-        "Recuerda que las exportaciones externas y la API Data Exchange solo exponen muestras con estado APPROVED o REPORTED (RELEASED)."
+        "Recuerda que las exportaciones externas y la API Data Exchange solo exponen muestras con estado APPROVED o RELEASED."
       ],
       "sections": [
         {
@@ -6791,9 +6791,9 @@
       ],
       "fields": [
         [
-          "EXPECTED vs. REGISTERED vs. APPROVED",
+          "EXPECTED vs. ACCEPTED vs. APPROVED",
           "Contadores de avance del proyecto",
-          "Los envíos de KoBo entran como EXPECTED; solo pasan a REGISTERED cuando la bolsa física se recibe en Recepción."
+          "Los envíos de KoBo entran como EXPECTED; solo pasan a ACCEPTED cuando la bolsa física se recibe en Recepción."
         ],
         [
           "Referencia de Perfil",
@@ -6858,7 +6858,7 @@
       "quick": "Validate identifiers and source completeness before the lab receives material. Usa /projects para gestionar el alcance del proyecto, sincronizar formularios de campo KoboToolbox (que ingresan como EXPECTED hasta su recepción física), consultar el avance y exportar resultados aprobados o verificar recibos de entrega NSIS / OpenNSIS.",
       "before": [
         "Verifica tu alcance autorizado de proyecto, país y laboratorio en la barra superior.",
-        "Recuerda que las exportaciones externas y la API Data Exchange solo exponen muestras con estado APPROVED o REPORTED (RELEASED)."
+        "Recuerda que las exportaciones externas y la API Data Exchange solo exponen muestras con estado APPROVED o RELEASED."
       ],
       "sections": [
         {
@@ -6881,9 +6881,9 @@
       ],
       "fields": [
         [
-          "EXPECTED vs. REGISTERED vs. APPROVED",
+          "EXPECTED vs. ACCEPTED vs. APPROVED",
           "Contadores de avance del proyecto",
-          "Los envíos de KoBo entran como EXPECTED; solo pasan a REGISTERED cuando la bolsa física se recibe en Recepción."
+          "Los envíos de KoBo entran como EXPECTED; solo pasan a ACCEPTED cuando la bolsa física se recibe en Recepción."
         ],
         [
           "Referencia de Perfil",
@@ -6949,7 +6949,7 @@
       "quick": "Distinguish expected, received, active, submitted, approved and reported counts. Usa /projects para gestionar el alcance del proyecto, sincronizar formularios de campo KoboToolbox (que ingresan como EXPECTED hasta su recepción física), consultar el avance y exportar resultados aprobados o verificar recibos de entrega NSIS / OpenNSIS.",
       "before": [
         "Verifica tu alcance autorizado de proyecto, país y laboratorio en la barra superior.",
-        "Recuerda que las exportaciones externas y la API Data Exchange solo exponen muestras con estado APPROVED o REPORTED (RELEASED)."
+        "Recuerda que las exportaciones externas y la API Data Exchange solo exponen muestras con estado APPROVED o RELEASED."
       ],
       "sections": [
         {
@@ -6972,9 +6972,9 @@
       ],
       "fields": [
         [
-          "EXPECTED vs. REGISTERED vs. APPROVED",
+          "EXPECTED vs. ACCEPTED vs. APPROVED",
           "Contadores de avance del proyecto",
-          "Los envíos de KoBo entran como EXPECTED; solo pasan a REGISTERED cuando la bolsa física se recibe en Recepción."
+          "Los envíos de KoBo entran como EXPECTED; solo pasan a ACCEPTED cuando la bolsa física se recibe en Recepción."
         ],
         [
           "Referencia de Perfil",
@@ -7039,7 +7039,7 @@
       "quick": "Explain exported revision, units, scope and raw versus interpreted data. Usa /data-results para gestionar el alcance del proyecto, sincronizar formularios de campo KoboToolbox (que ingresan como EXPECTED hasta su recepción física), consultar el avance y exportar resultados aprobados o verificar recibos de entrega NSIS / OpenNSIS.",
       "before": [
         "Verifica tu alcance autorizado de proyecto, país y laboratorio en la barra superior.",
-        "Recuerda que las exportaciones externas y la API Data Exchange solo exponen muestras con estado APPROVED o REPORTED (RELEASED)."
+        "Recuerda que las exportaciones externas y la API Data Exchange solo exponen muestras con estado APPROVED o RELEASED."
       ],
       "sections": [
         {
@@ -7062,9 +7062,9 @@
       ],
       "fields": [
         [
-          "EXPECTED vs. REGISTERED vs. APPROVED",
+          "EXPECTED vs. ACCEPTED vs. APPROVED",
           "Contadores de avance del proyecto",
-          "Los envíos de KoBo entran como EXPECTED; solo pasan a REGISTERED cuando la bolsa física se recibe en Recepción."
+          "Los envíos de KoBo entran como EXPECTED; solo pasan a ACCEPTED cuando la bolsa física se recibe en Recepción."
         ],
         [
           "Referencia de Perfil",
@@ -7129,7 +7129,7 @@
       "quick": "Distinguish a generated file from confirmed external delivery and a rejected transfer. Usa /data-results para gestionar el alcance del proyecto, sincronizar formularios de campo KoboToolbox (que ingresan como EXPECTED hasta su recepción física), consultar el avance y exportar resultados aprobados o verificar recibos de entrega NSIS / OpenNSIS.",
       "before": [
         "Verifica tu alcance autorizado de proyecto, país y laboratorio en la barra superior.",
-        "Recuerda que las exportaciones externas y la API Data Exchange solo exponen muestras con estado APPROVED o REPORTED (RELEASED)."
+        "Recuerda que las exportaciones externas y la API Data Exchange solo exponen muestras con estado APPROVED o RELEASED."
       ],
       "sections": [
         {
@@ -7152,9 +7152,9 @@
       ],
       "fields": [
         [
-          "EXPECTED vs. REGISTERED vs. APPROVED",
+          "EXPECTED vs. ACCEPTED vs. APPROVED",
           "Contadores de avance del proyecto",
-          "Los envíos de KoBo entran como EXPECTED; solo pasan a REGISTERED cuando la bolsa física se recibe en Recepción."
+          "Los envíos de KoBo entran como EXPECTED; solo pasan a ACCEPTED cuando la bolsa física se recibe en Recepción."
         ],
         [
           "Referencia de Perfil",
@@ -7219,7 +7219,7 @@
       "quick": "Explain coordinates, location confidence and display limitations. Usa /maps para gestionar el alcance del proyecto, sincronizar formularios de campo KoboToolbox (que ingresan como EXPECTED hasta su recepción física), consultar el avance y exportar resultados aprobados o verificar recibos de entrega NSIS / OpenNSIS.",
       "before": [
         "Verifica tu alcance autorizado de proyecto, país y laboratorio en la barra superior.",
-        "Recuerda que las exportaciones externas y la API Data Exchange solo exponen muestras con estado APPROVED o REPORTED (RELEASED)."
+        "Recuerda que las exportaciones externas y la API Data Exchange solo exponen muestras con estado APPROVED o RELEASED."
       ],
       "sections": [
         {
@@ -7242,9 +7242,9 @@
       ],
       "fields": [
         [
-          "EXPECTED vs. REGISTERED vs. APPROVED",
+          "EXPECTED vs. ACCEPTED vs. APPROVED",
           "Contadores de avance del proyecto",
-          "Los envíos de KoBo entran como EXPECTED; solo pasan a REGISTERED cuando la bolsa física se recibe en Recepción."
+          "Los envíos de KoBo entran como EXPECTED; solo pasan a ACCEPTED cuando la bolsa física se recibe en Recepción."
         ],
         [
           "Referencia de Perfil",
@@ -8835,7 +8835,7 @@
             },
             {
               "action": "Verifica el flujo correspondiente: Follow assigned work from preparation to reviewer handoff using five demo samples. [Canonical successor: start-technician]",
-              "expected": "Cada muestra o tarea muestra su estado real (EXPECTED, IN_PREP, READY_FOR_ANALYSIS, SUBMITTED, APPROVED, REPORTED) y el rol responsable."
+              "expected": "Cada muestra o tarea muestra su estado real (EXPECTED, RECEIVED, ACCEPTED, IN_PROGRESS, SUBMITTED, APPROVED, RELEASED) y el rol responsable."
             },
             {
               "action": "Consulta el comprobante o historial de auditoría antes de ejecutar o transferir la siguiente acción.",
@@ -8878,7 +8878,7 @@
       ],
       "steps": [
         "Abre /workbench y revisa los contadores de cola, insignias de estado y alcance del laboratorio. (Expected: La pantalla muestra únicamente los registros autorizados para tu laboratorio y proyectos.)",
-        "Verifica el flujo correspondiente: Follow assigned work from preparation to reviewer handoff using five demo samples. [Canonical successor: start-technician] (Expected: Cada muestra o tarea muestra su estado real (EXPECTED, IN_PREP, READY_FOR_ANALYSIS, SUBMITTED, APPROVED, REPORTED) y el rol responsable.)",
+        "Verifica el flujo correspondiente: Follow assigned work from preparation to reviewer handoff using five demo samples. [Canonical successor: start-technician] (Expected: Cada muestra o tarea muestra su estado real (EXPECTED, RECEIVED, ACCEPTED, IN_PROGRESS, SUBMITTED, APPROVED, RELEASED) y el rol responsable.)",
         "Consulta el comprobante o historial de auditoría antes de ejecutar o transferir la siguiente acción. (Expected: La trazabilidad se conserva íntegra sin modificar registros cerrados.)"
       ],
       "caution": "Precaución: A completed worksheet is mistaken for submitted work. — Restablece los filtros en /workbench, revisa los prerrequisitos de la muestra y confirma tus permisos con el Responsable de Laboratorio.",
@@ -10223,7 +10223,7 @@
             },
             {
               "action": "Verifica el flujo correspondiente: Apply session or profile settings without changing laboratory data. [Canonical successor: start-settings]",
-              "expected": "Cada muestra o tarea muestra su estado real (EXPECTED, IN_PREP, READY_FOR_ANALYSIS, SUBMITTED, APPROVED, REPORTED) y el rol responsable."
+              "expected": "Cada muestra o tarea muestra su estado real (EXPECTED, RECEIVED, ACCEPTED, IN_PROGRESS, SUBMITTED, APPROVED, RELEASED) y el rol responsable."
             },
             {
               "action": "Consulta el comprobante o historial de auditoría antes de ejecutar o transferir la siguiente acción.",
@@ -10266,7 +10266,7 @@
       ],
       "steps": [
         "Abre /profile y revisa los contadores de cola, insignias de estado y alcance del laboratorio. (Expected: La pantalla muestra únicamente los registros autorizados para tu laboratorio y proyectos.)",
-        "Verifica el flujo correspondiente: Apply session or profile settings without changing laboratory data. [Canonical successor: start-settings] (Expected: Cada muestra o tarea muestra su estado real (EXPECTED, IN_PREP, READY_FOR_ANALYSIS, SUBMITTED, APPROVED, REPORTED) y el rol responsable.)",
+        "Verifica el flujo correspondiente: Apply session or profile settings without changing laboratory data. [Canonical successor: start-settings] (Expected: Cada muestra o tarea muestra su estado real (EXPECTED, RECEIVED, ACCEPTED, IN_PROGRESS, SUBMITTED, APPROVED, RELEASED) y el rol responsable.)",
         "Consulta el comprobante o historial de auditoría antes de ejecutar o transferir la siguiente acción. (Expected: La trazabilidad se conserva íntegra sin modificar registros cerrados.)"
       ],
       "caution": "Precaución: A language switch appears to change a displayed number. — Restablece los filtros en /profile, revisa los prerrequisitos de la muestra y confirma tus permisos con el Responsable de Laboratorio.",

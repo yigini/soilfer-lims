@@ -338,7 +338,7 @@
             },
             {
               "action": "Perform the workflow check: Follow assigned work from preparation to reviewer handoff using five demo samples.",
-              "expected": "Each item clearly shows its current lifecycle status (EXPECTED, REGISTERED, IN_PREP, READY_FOR_ANALYSIS, SUBMITTED, REVIEWED, APPROVED, or REPORTED) and next owner."
+              "expected": "Each item clearly shows its current lifecycle status (EXPECTED, RECEIVED, ACCEPTED, PROCESSING, SUBMITTED_PARTIAL, SUBMITTED_FULL, APPROVED, or RELEASED) and next owner."
             },
             {
               "action": "Open an individual record or receipt to verify who recorded the previous step before taking or handing off the next action.",
@@ -370,7 +370,7 @@
       "problems": [
         {
           "symptom": "A completed worksheet is mistaken for submitted work.",
-          "why": "A queue filter is hiding records, the item is still in an earlier prerequisite stage (such as EXPECTED or IN_PREP), or your role is read-only for this step.",
+          "why": "A queue filter is hiding records, the item is still in an earlier prerequisite stage (such as EXPECTED or RECEIVED), or your role is read-only for this step.",
           "action": "Reset queue filters in /workbench, inspect the sample's workflow stage and prerequisite receipts, and confirm role permissions with your Lab Manager."
         }
       ],
@@ -381,7 +381,7 @@
       ],
       "steps": [
         "Open /workbench and inspect the queue counters, status badges, and active laboratory filter. (Expected: You see only records scoped to your authorized laboratory and projects.)",
-        "Perform the workflow check: Follow assigned work from preparation to reviewer handoff using five demo samples. (Expected: Each item clearly shows its current lifecycle status (EXPECTED, REGISTERED, IN_PREP, READY_FOR_ANALYSIS, SUBMITTED, REVIEWED, APPROVED, or REPORTED) and next owner.)",
+        "Perform the workflow check: Follow assigned work from preparation to reviewer handoff using five demo samples. (Expected: Each item clearly shows its current lifecycle status (EXPECTED, RECEIVED, ACCEPTED, PROCESSING, SUBMITTED_PARTIAL, SUBMITTED_FULL, APPROVED, or RELEASED) and next owner.)",
         "Open an individual record or receipt to verify who recorded the previous step before taking or handing off the next action. (Expected: Audit history and prerequisite receipts remain intact without accidental edits.)"
       ],
       "caution": "Caution: A completed worksheet is mistaken for submitted work. — Reset queue filters in /workbench, inspect the sample's workflow stage and prerequisite receipts, and confirm role permissions with your Lab Manager.",
@@ -517,7 +517,7 @@
             },
             {
               "action": "Perform the workflow check: Distinguish intake review, assignment, result review and final release.",
-              "expected": "Each item clearly shows its current lifecycle status (EXPECTED, REGISTERED, IN_PREP, READY_FOR_ANALYSIS, SUBMITTED, REVIEWED, APPROVED, or REPORTED) and next owner."
+              "expected": "Each item clearly shows its current lifecycle status (EXPECTED, RECEIVED, ACCEPTED, PROCESSING, SUBMITTED_PARTIAL, SUBMITTED_FULL, APPROVED, or RELEASED) and next owner."
             },
             {
               "action": "Open an individual record or receipt to verify who recorded the previous step before taking or handing off the next action.",
@@ -549,7 +549,7 @@
       "problems": [
         {
           "symptom": "The manager opens the wrong queue and sees no work.",
-          "why": "A queue filter is hiding records, the item is still in an earlier prerequisite stage (such as EXPECTED or IN_PREP), or your role is read-only for this step.",
+          "why": "A queue filter is hiding records, the item is still in an earlier prerequisite stage (such as EXPECTED or RECEIVED), or your role is read-only for this step.",
           "action": "Reset queue filters in /manager-queue, inspect the sample's workflow stage and prerequisite receipts, and confirm role permissions with your Lab Manager."
         }
       ],
@@ -560,7 +560,7 @@
       ],
       "steps": [
         "Open /manager-queue and inspect the queue counters, status badges, and active laboratory filter. (Expected: You see only records scoped to your authorized laboratory and projects.)",
-        "Perform the workflow check: Distinguish intake review, assignment, result review and final release. (Expected: Each item clearly shows its current lifecycle status (EXPECTED, REGISTERED, IN_PREP, READY_FOR_ANALYSIS, SUBMITTED, REVIEWED, APPROVED, or REPORTED) and next owner.)",
+        "Perform the workflow check: Distinguish intake review, assignment, result review and final release. (Expected: Each item clearly shows its current lifecycle status (EXPECTED, RECEIVED, ACCEPTED, PROCESSING, SUBMITTED_PARTIAL, SUBMITTED_FULL, APPROVED, or RELEASED) and next owner.)",
         "Open an individual record or receipt to verify who recorded the previous step before taking or handing off the next action. (Expected: Audit history and prerequisite receipts remain intact without accidental edits.)"
       ],
       "caution": "Caution: The manager opens the wrong queue and sees no work. — Reset queue filters in /manager-queue, inspect the sample's workflow stage and prerequisite receipts, and confirm role permissions with your Lab Manager.",
@@ -602,7 +602,7 @@
             },
             {
               "action": "Perform the workflow check: Read project progress and identify who owns the next action.",
-              "expected": "Each item clearly shows its current lifecycle status (EXPECTED, REGISTERED, IN_PREP, READY_FOR_ANALYSIS, SUBMITTED, REVIEWED, APPROVED, or REPORTED) and next owner."
+              "expected": "Each item clearly shows its current lifecycle status (EXPECTED, RECEIVED, ACCEPTED, PROCESSING, SUBMITTED_PARTIAL, SUBMITTED_FULL, APPROVED, or RELEASED) and next owner."
             },
             {
               "action": "Open an individual record or receipt to verify who recorded the previous step before taking or handing off the next action.",
@@ -634,7 +634,7 @@
       "problems": [
         {
           "symptom": "KoBo import is mistaken for completed analysis.",
-          "why": "A queue filter is hiding records, the item is still in an earlier prerequisite stage (such as EXPECTED or IN_PREP), or your role is read-only for this step.",
+          "why": "A queue filter is hiding records, the item is still in an earlier prerequisite stage (such as EXPECTED or RECEIVED), or your role is read-only for this step.",
           "action": "Reset queue filters in /projects, inspect the sample's workflow stage and prerequisite receipts, and confirm role permissions with your Lab Manager."
         }
       ],
@@ -645,7 +645,7 @@
       ],
       "steps": [
         "Open /projects and inspect the queue counters, status badges, and active laboratory filter. (Expected: You see only records scoped to your authorized laboratory and projects.)",
-        "Perform the workflow check: Read project progress and identify who owns the next action. (Expected: Each item clearly shows its current lifecycle status (EXPECTED, REGISTERED, IN_PREP, READY_FOR_ANALYSIS, SUBMITTED, REVIEWED, APPROVED, or REPORTED) and next owner.)",
+        "Perform the workflow check: Read project progress and identify who owns the next action. (Expected: Each item clearly shows its current lifecycle status (EXPECTED, RECEIVED, ACCEPTED, PROCESSING, SUBMITTED_PARTIAL, SUBMITTED_FULL, APPROVED, or RELEASED) and next owner.)",
         "Open an individual record or receipt to verify who recorded the previous step before taking or handing off the next action. (Expected: Audit history and prerequisite receipts remain intact without accidental edits.)"
       ],
       "caution": "Caution: KoBo import is mistaken for completed analysis. — Reset queue filters in /projects, inspect the sample's workflow stage and prerequisite receipts, and confirm role permissions with your Lab Manager.",
@@ -687,7 +687,7 @@
             },
             {
               "action": "Perform the workflow check: Follow the evidence and report history within audit scope.",
-              "expected": "Each item clearly shows its current lifecycle status (EXPECTED, REGISTERED, IN_PREP, READY_FOR_ANALYSIS, SUBMITTED, REVIEWED, APPROVED, or REPORTED) and next owner."
+              "expected": "Each item clearly shows its current lifecycle status (EXPECTED, RECEIVED, ACCEPTED, PROCESSING, SUBMITTED_PARTIAL, SUBMITTED_FULL, APPROVED, or RELEASED) and next owner."
             },
             {
               "action": "Open an individual record or receipt to verify who recorded the previous step before taking or handing off the next action.",
@@ -719,7 +719,7 @@
       "problems": [
         {
           "symptom": "An audit viewer expects edit controls.",
-          "why": "A queue filter is hiding records, the item is still in an earlier prerequisite stage (such as EXPECTED or IN_PREP), or your role is read-only for this step.",
+          "why": "A queue filter is hiding records, the item is still in an earlier prerequisite stage (such as EXPECTED or RECEIVED), or your role is read-only for this step.",
           "action": "Reset queue filters in /qa, inspect the sample's workflow stage and prerequisite receipts, and confirm role permissions with your Lab Manager."
         }
       ],
@@ -730,7 +730,7 @@
       ],
       "steps": [
         "Open /qa and inspect the queue counters, status badges, and active laboratory filter. (Expected: You see only records scoped to your authorized laboratory and projects.)",
-        "Perform the workflow check: Follow the evidence and report history within audit scope. (Expected: Each item clearly shows its current lifecycle status (EXPECTED, REGISTERED, IN_PREP, READY_FOR_ANALYSIS, SUBMITTED, REVIEWED, APPROVED, or REPORTED) and next owner.)",
+        "Perform the workflow check: Follow the evidence and report history within audit scope. (Expected: Each item clearly shows its current lifecycle status (EXPECTED, RECEIVED, ACCEPTED, PROCESSING, SUBMITTED_PARTIAL, SUBMITTED_FULL, APPROVED, or RELEASED) and next owner.)",
         "Open an individual record or receipt to verify who recorded the previous step before taking or handing off the next action. (Expected: Audit history and prerequisite receipts remain intact without accidental edits.)"
       ],
       "caution": "Caution: An audit viewer expects edit controls. — Reset queue filters in /qa, inspect the sample's workflow stage and prerequisite receipts, and confirm role permissions with your Lab Manager.",
@@ -772,7 +772,7 @@
             },
             {
               "action": "Perform the workflow check: Navigate permitted records and distinguish current from superseded reports.",
-              "expected": "Each item clearly shows its current lifecycle status (EXPECTED, REGISTERED, IN_PREP, READY_FOR_ANALYSIS, SUBMITTED, REVIEWED, APPROVED, or REPORTED) and next owner."
+              "expected": "Each item clearly shows its current lifecycle status (EXPECTED, RECEIVED, ACCEPTED, PROCESSING, SUBMITTED_PARTIAL, SUBMITTED_FULL, APPROVED, or RELEASED) and next owner."
             },
             {
               "action": "Open an individual record or receipt to verify who recorded the previous step before taking or handing off the next action.",
@@ -804,7 +804,7 @@
       "problems": [
         {
           "symptom": "A viewer cannot see another project's data.",
-          "why": "A queue filter is hiding records, the item is still in an earlier prerequisite stage (such as EXPECTED or IN_PREP), or your role is read-only for this step.",
+          "why": "A queue filter is hiding records, the item is still in an earlier prerequisite stage (such as EXPECTED or RECEIVED), or your role is read-only for this step.",
           "action": "Reset queue filters in /samples, inspect the sample's workflow stage and prerequisite receipts, and confirm role permissions with your Lab Manager."
         }
       ],
@@ -815,7 +815,7 @@
       ],
       "steps": [
         "Open /samples and inspect the queue counters, status badges, and active laboratory filter. (Expected: You see only records scoped to your authorized laboratory and projects.)",
-        "Perform the workflow check: Navigate permitted records and distinguish current from superseded reports. (Expected: Each item clearly shows its current lifecycle status (EXPECTED, REGISTERED, IN_PREP, READY_FOR_ANALYSIS, SUBMITTED, REVIEWED, APPROVED, or REPORTED) and next owner.)",
+        "Perform the workflow check: Navigate permitted records and distinguish current from superseded reports. (Expected: Each item clearly shows its current lifecycle status (EXPECTED, RECEIVED, ACCEPTED, PROCESSING, SUBMITTED_PARTIAL, SUBMITTED_FULL, APPROVED, or RELEASED) and next owner.)",
         "Open an individual record or receipt to verify who recorded the previous step before taking or handing off the next action. (Expected: Audit history and prerequisite receipts remain intact without accidental edits.)"
       ],
       "caution": "Caution: A viewer cannot see another project's data. — Reset queue filters in /samples, inspect the sample's workflow stage and prerequisite receipts, and confirm role permissions with your Lab Manager.",
@@ -856,7 +856,7 @@
             },
             {
               "action": "Perform the workflow check: Apply session or profile settings without changing laboratory data.",
-              "expected": "Each item clearly shows its current lifecycle status (EXPECTED, REGISTERED, IN_PREP, READY_FOR_ANALYSIS, SUBMITTED, REVIEWED, APPROVED, or REPORTED) and next owner."
+              "expected": "Each item clearly shows its current lifecycle status (EXPECTED, RECEIVED, ACCEPTED, PROCESSING, SUBMITTED_PARTIAL, SUBMITTED_FULL, APPROVED, or RELEASED) and next owner."
             },
             {
               "action": "Open an individual record or receipt to verify who recorded the previous step before taking or handing off the next action.",
@@ -888,7 +888,7 @@
       "problems": [
         {
           "symptom": "A language switch appears to change a displayed number.",
-          "why": "A queue filter is hiding records, the item is still in an earlier prerequisite stage (such as EXPECTED or IN_PREP), or your role is read-only for this step.",
+          "why": "A queue filter is hiding records, the item is still in an earlier prerequisite stage (such as EXPECTED or RECEIVED), or your role is read-only for this step.",
           "action": "Reset queue filters in /profile, inspect the sample's workflow stage and prerequisite receipts, and confirm role permissions with your Lab Manager."
         }
       ],
@@ -899,7 +899,7 @@
       ],
       "steps": [
         "Open /profile and inspect the queue counters, status badges, and active laboratory filter. (Expected: You see only records scoped to your authorized laboratory and projects.)",
-        "Perform the workflow check: Apply session or profile settings without changing laboratory data. (Expected: Each item clearly shows its current lifecycle status (EXPECTED, REGISTERED, IN_PREP, READY_FOR_ANALYSIS, SUBMITTED, REVIEWED, APPROVED, or REPORTED) and next owner.)",
+        "Perform the workflow check: Apply session or profile settings without changing laboratory data. (Expected: Each item clearly shows its current lifecycle status (EXPECTED, RECEIVED, ACCEPTED, PROCESSING, SUBMITTED_PARTIAL, SUBMITTED_FULL, APPROVED, or RELEASED) and next owner.)",
         "Open an individual record or receipt to verify who recorded the previous step before taking or handing off the next action. (Expected: Audit history and prerequisite receipts remain intact without accidental edits.)"
       ],
       "caution": "Caution: A language switch appears to change a displayed number. — Reset queue filters in /profile, inspect the sample's workflow stage and prerequisite receipts, and confirm role permissions with your Lab Manager.",
@@ -1063,7 +1063,7 @@
             },
             {
               "action": "Select the requested analysis package or individual methods, print the Laboratory Sample Code and Container labels, and click Confirm Receipt.",
-              "expected": "A durable reception receipt is recorded, the sample status changes from EXPECTED/DRAFT to REGISTERED, and pre-analytical DRYING/PREPARATION gates are created."
+              "expected": "A durable reception receipt is recorded, the sample status changes from EXPECTED to RECEIVED / ACCEPTED, and pre-analytical DRYING/PREPARATION gates are created."
             }
           ]
         }
@@ -1102,7 +1102,7 @@
       "steps": [
         "Open Reception (/reception) and select the appropriate intake mode (Consignment, Walk-In, or Expected Kobo Arrivals). (Expected: The intake form or expected arrival queue loads for your active laboratory.)",
         "Match the physical bag identifier, verify source metadata/coordinates, and record actual received mass (g) and arrival condition (Review each matched sample and isolate exceptions during batch intake.). (Expected: Any deviation (such as mass below intake.defaultAnalysisMassG + intake.retentionMassG or damaged packaging) is flagged immediately so you can Reject Sample or Override with Caveat.)",
-        "Select the requested analysis package or individual methods, print the Laboratory Sample Code and Container labels, and click Confirm Receipt. (Expected: A durable reception receipt is recorded, the sample status changes from EXPECTED/DRAFT to REGISTERED, and pre-analytical DRYING/PREPARATION gates are created.)"
+        "Select the requested analysis package or individual methods, print the Laboratory Sample Code and Container labels, and click Confirm Receipt. (Expected: A durable reception receipt is recorded, the sample status changes from EXPECTED to RECEIVED / ACCEPTED, and pre-analytical DRYING/PREPARATION gates are created.)"
       ],
       "caution": "Caution: One damaged or missing sample blocks a whole delivery. — Compare the physical bag label against existing samples in /reception, resolve any duplicate or missing-mass exception (Reject or Override with Caveat), and click Confirm Receipt.",
       "related": [
@@ -1147,7 +1147,7 @@
             },
             {
               "action": "Select the requested analysis package or individual methods, print the Laboratory Sample Code and Container labels, and click Confirm Receipt.",
-              "expected": "A durable reception receipt is recorded, the sample status changes from EXPECTED/DRAFT to REGISTERED, and pre-analytical DRYING/PREPARATION gates are created."
+              "expected": "A durable reception receipt is recorded, the sample status changes from EXPECTED to RECEIVED / ACCEPTED, and pre-analytical DRYING/PREPARATION gates are created."
             }
           ]
         }
@@ -1186,7 +1186,7 @@
       "steps": [
         "Open Reception (/reception) and select the appropriate intake mode (Consignment, Walk-In, or Expected Kobo Arrivals). (Expected: The intake form or expected arrival queue loads for your active laboratory.)",
         "Match the physical bag identifier, verify source metadata/coordinates, and record actual received mass (g) and arrival condition (Identify draft owner, restore state and verify that saving did not receive material.). (Expected: Any deviation (such as mass below intake.defaultAnalysisMassG + intake.retentionMassG or damaged packaging) is flagged immediately so you can Reject Sample or Override with Caveat.)",
-        "Select the requested analysis package or individual methods, print the Laboratory Sample Code and Container labels, and click Confirm Receipt. (Expected: A durable reception receipt is recorded, the sample status changes from EXPECTED/DRAFT to REGISTERED, and pre-analytical DRYING/PREPARATION gates are created.)"
+        "Select the requested analysis package or individual methods, print the Laboratory Sample Code and Container labels, and click Confirm Receipt. (Expected: A durable reception receipt is recorded, the sample status changes from EXPECTED to RECEIVED / ACCEPTED, and pre-analytical DRYING/PREPARATION gates are created.)"
       ],
       "caution": "Caution: A reopened draft loses its source location. — Compare the physical bag label against existing samples in /reception, resolve any duplicate or missing-mass exception (Reject or Override with Caveat), and click Confirm Receipt.",
       "related": [
@@ -1232,7 +1232,7 @@
             },
             {
               "action": "Select the requested analysis package or individual methods, print the Laboratory Sample Code and Container labels, and click Confirm Receipt.",
-              "expected": "A durable reception receipt is recorded, the sample status changes from EXPECTED/DRAFT to REGISTERED, and pre-analytical DRYING/PREPARATION gates are created."
+              "expected": "A durable reception receipt is recorded, the sample status changes from EXPECTED to RECEIVED / ACCEPTED, and pre-analytical DRYING/PREPARATION gates are created."
             }
           ]
         }
@@ -1271,7 +1271,7 @@
       "steps": [
         "Open Reception (/reception) and select the appropriate intake mode (Consignment, Walk-In, or Expected Kobo Arrivals). (Expected: The intake form or expected arrival queue loads for your active laboratory.)",
         "Match the physical bag identifier, verify source metadata/coordinates, and record actual received mass (g) and arrival condition (Trace coordinates and locality to the linked source without guessing.). (Expected: Any deviation (such as mass below intake.defaultAnalysisMassG + intake.retentionMassG or damaged packaging) is flagged immediately so you can Reject Sample or Override with Caveat.)",
-        "Select the requested analysis package or individual methods, print the Laboratory Sample Code and Container labels, and click Confirm Receipt. (Expected: A durable reception receipt is recorded, the sample status changes from EXPECTED/DRAFT to REGISTERED, and pre-analytical DRYING/PREPARATION gates are created.)"
+        "Select the requested analysis package or individual methods, print the Laboratory Sample Code and Container labels, and click Confirm Receipt. (Expected: A durable reception receipt is recorded, the sample status changes from EXPECTED to RECEIVED / ACCEPTED, and pre-analytical DRYING/PREPARATION gates are created.)"
       ],
       "caution": "Caution: Source coordinates exist but the form says no location. — Compare the physical bag label against existing samples in /reception, resolve any duplicate or missing-mass exception (Reject or Override with Caveat), and click Confirm Receipt.",
       "related": [
@@ -1316,7 +1316,7 @@
             },
             {
               "action": "Select the requested analysis package or individual methods, print the Laboratory Sample Code and Container labels, and click Confirm Receipt.",
-              "expected": "A durable reception receipt is recorded, the sample status changes from EXPECTED/DRAFT to REGISTERED, and pre-analytical DRYING/PREPARATION gates are created."
+              "expected": "A durable reception receipt is recorded, the sample status changes from EXPECTED to RECEIVED / ACCEPTED, and pre-analytical DRYING/PREPARATION gates are created."
             }
           ]
         }
@@ -1355,7 +1355,7 @@
       "steps": [
         "Open Reception (/reception) and select the appropriate intake mode (Consignment, Walk-In, or Expected Kobo Arrivals). (Expected: The intake form or expected arrival queue loads for your active laboratory.)",
         "Match the physical bag identifier, verify source metadata/coordinates, and record actual received mass (g) and arrival condition (Explain the condition fields, evidence and permitted exception handling.). (Expected: Any deviation (such as mass below intake.defaultAnalysisMassG + intake.retentionMassG or damaged packaging) is flagged immediately so you can Reject Sample or Override with Caveat.)",
-        "Select the requested analysis package or individual methods, print the Laboratory Sample Code and Container labels, and click Confirm Receipt. (Expected: A durable reception receipt is recorded, the sample status changes from EXPECTED/DRAFT to REGISTERED, and pre-analytical DRYING/PREPARATION gates are created.)"
+        "Select the requested analysis package or individual methods, print the Laboratory Sample Code and Container labels, and click Confirm Receipt. (Expected: A durable reception receipt is recorded, the sample status changes from EXPECTED to RECEIVED / ACCEPTED, and pre-analytical DRYING/PREPARATION gates are created.)"
       ],
       "caution": "Caution: A mass deficit is present or the container is damaged. — Compare the physical bag label against existing samples in /reception, resolve any duplicate or missing-mass exception (Reject or Override with Caveat), and click Confirm Receipt.",
       "related": [
@@ -1400,7 +1400,7 @@
             },
             {
               "action": "Select the requested analysis package or individual methods, print the Laboratory Sample Code and Container labels, and click Confirm Receipt.",
-              "expected": "A durable reception receipt is recorded, the sample status changes from EXPECTED/DRAFT to REGISTERED, and pre-analytical DRYING/PREPARATION gates are created."
+              "expected": "A durable reception receipt is recorded, the sample status changes from EXPECTED to RECEIVED / ACCEPTED, and pre-analytical DRYING/PREPARATION gates are created."
             }
           ]
         }
@@ -1439,7 +1439,7 @@
       "steps": [
         "Open Reception (/reception) and select the appropriate intake mode (Consignment, Walk-In, or Expected Kobo Arrivals). (Expected: The intake form or expected arrival queue loads for your active laboratory.)",
         "Match the physical bag identifier, verify source metadata/coordinates, and record actual received mass (g) and arrival condition (Use parameter names, method variants and grouped panels before handover.). (Expected: Any deviation (such as mass below intake.defaultAnalysisMassG + intake.retentionMassG or damaged packaging) is flagged immediately so you can Reject Sample or Override with Caveat.)",
-        "Select the requested analysis package or individual methods, print the Laboratory Sample Code and Container labels, and click Confirm Receipt. (Expected: A durable reception receipt is recorded, the sample status changes from EXPECTED/DRAFT to REGISTERED, and pre-analytical DRYING/PREPARATION gates are created.)"
+        "Select the requested analysis package or individual methods, print the Laboratory Sample Code and Container labels, and click Confirm Receipt. (Expected: A durable reception receipt is recorded, the sample status changes from EXPECTED to RECEIVED / ACCEPTED, and pre-analytical DRYING/PREPARATION gates are created.)"
       ],
       "caution": "Caution: Texture fractions appear as three separate choices. — Compare the physical bag label against existing samples in /reception, resolve any duplicate or missing-mass exception (Reject or Override with Caveat), and click Confirm Receipt.",
       "related": [
@@ -1485,7 +1485,7 @@
             },
             {
               "action": "Select the requested analysis package or individual methods, print the Laboratory Sample Code and Container labels, and click Confirm Receipt.",
-              "expected": "A durable reception receipt is recorded, the sample status changes from EXPECTED/DRAFT to REGISTERED, and pre-analytical DRYING/PREPARATION gates are created."
+              "expected": "A durable reception receipt is recorded, the sample status changes from EXPECTED to RECEIVED / ACCEPTED, and pre-analytical DRYING/PREPARATION gates are created."
             }
           ]
         }
@@ -1524,7 +1524,7 @@
       "steps": [
         "Open Reception (/reception) and select the appropriate intake mode (Consignment, Walk-In, or Expected Kobo Arrivals). (Expected: The intake form or expected arrival queue loads for your active laboratory.)",
         "Match the physical bag identifier, verify source metadata/coordinates, and record actual received mass (g) and arrival condition (Compare label, source and existing records without creating a second intake.). (Expected: Any deviation (such as mass below intake.defaultAnalysisMassG + intake.retentionMassG or damaged packaging) is flagged immediately so you can Reject Sample or Override with Caveat.)",
-        "Select the requested analysis package or individual methods, print the Laboratory Sample Code and Container labels, and click Confirm Receipt. (Expected: A durable reception receipt is recorded, the sample status changes from EXPECTED/DRAFT to REGISTERED, and pre-analytical DRYING/PREPARATION gates are created.)"
+        "Select the requested analysis package or individual methods, print the Laboratory Sample Code and Container labels, and click Confirm Receipt. (Expected: A durable reception receipt is recorded, the sample status changes from EXPECTED to RECEIVED / ACCEPTED, and pre-analytical DRYING/PREPARATION gates are created.)"
       ],
       "caution": "Caution: A scan returns two candidates or none. — Compare the physical bag label against existing samples in /reception, resolve any duplicate or missing-mass exception (Reject or Override with Caveat), and click Confirm Receipt.",
       "related": [
@@ -1569,7 +1569,7 @@
             },
             {
               "action": "Select the requested analysis package or individual methods, print the Laboratory Sample Code and Container labels, and click Confirm Receipt.",
-              "expected": "A durable reception receipt is recorded, the sample status changes from EXPECTED/DRAFT to REGISTERED, and pre-analytical DRYING/PREPARATION gates are created."
+              "expected": "A durable reception receipt is recorded, the sample status changes from EXPECTED to RECEIVED / ACCEPTED, and pre-analytical DRYING/PREPARATION gates are created."
             }
           ]
         }
@@ -1608,7 +1608,7 @@
       "steps": [
         "Open Reception (/reception) and select the appropriate intake mode (Consignment, Walk-In, or Expected Kobo Arrivals). (Expected: The intake form or expected arrival queue loads for your active laboratory.)",
         "Match the physical bag identifier, verify source metadata/coordinates, and record actual received mass (g) and arrival condition (Identify final receipt action, receipt evidence and the next responsible role.). (Expected: Any deviation (such as mass below intake.defaultAnalysisMassG + intake.retentionMassG or damaged packaging) is flagged immediately so you can Reject Sample or Override with Caveat.)",
-        "Select the requested analysis package or individual methods, print the Laboratory Sample Code and Container labels, and click Confirm Receipt. (Expected: A durable reception receipt is recorded, the sample status changes from EXPECTED/DRAFT to REGISTERED, and pre-analytical DRYING/PREPARATION gates are created.)"
+        "Select the requested analysis package or individual methods, print the Laboratory Sample Code and Container labels, and click Confirm Receipt. (Expected: A durable reception receipt is recorded, the sample status changes from EXPECTED to RECEIVED / ACCEPTED, and pre-analytical DRYING/PREPARATION gates are created.)"
       ],
       "caution": "Caution: A draft is saved but the receiving queue has not changed. — Compare the physical bag label against existing samples in /reception, resolve any duplicate or missing-mass exception (Reject or Override with Caveat), and click Confirm Receipt.",
       "related": [
@@ -2259,7 +2259,7 @@
       "minutes": 3,
       "quick": "Check the applicable preparation steps and record completion for the correct material. In /workbench, verify the physical soil material, record actual air-drying temperature (< 40 °C), duration, and sieve mesh size (e.g., 2 mm or < 100 µm for MIR), and click Confirm Complete to unlock downstream bench analyses.",
       "before": [
-        "Confirm the sample has completed Reception (REGISTERED) and physically matches the barcode on the drying tray or sieve.",
+        "Confirm the sample has completed Reception (ACCEPTED) and physically matches the barcode on the drying tray or sieve.",
         "Check whether your laboratory policy requires second-person gate verification (gate.verificationRequired)."
       ],
       "sections": [
@@ -2276,7 +2276,7 @@
             },
             {
               "action": "Click Confirm Complete (and obtain supervisor verification if gate.verificationRequired is enabled) and inspect the confirmation receipt.",
-              "expected": "A permanent PreparationRecord receipt is saved, and dependent wet-chemistry and spectroscopy work items transition from blocked to READY_FOR_ANALYSIS."
+              "expected": "A permanent PreparationRecord receipt is saved, and dependent wet-chemistry and spectroscopy work items transition from blocked to unlocked for analysis (ASSIGNED / IN_PROGRESS)."
             }
           ]
         }
@@ -2316,7 +2316,7 @@
       "steps": [
         "Open /workbench and select the sample or batch of samples in the DRYING or PREPARATION queue. (Expected: The pre-analytical checklist displays the required drying (< 40 °C) and sieving/grinding parameters.)",
         "Complete the physical checks, record actual oven/room temperature, duration, sieve size, and final prepared mass (Check the applicable preparation steps and record completion for the correct material.). (Expected: Each selected sample shows validated preparation parameters; any sample not physically prepared must be deselected before bulk confirmation.)",
-        "Click Confirm Complete (and obtain supervisor verification if gate.verificationRequired is enabled) and inspect the confirmation receipt. (Expected: A permanent PreparationRecord receipt is saved, and dependent wet-chemistry and spectroscopy work items transition from blocked to READY_FOR_ANALYSIS.)"
+        "Click Confirm Complete (and obtain supervisor verification if gate.verificationRequired is enabled) and inspect the confirmation receipt. (Expected: A permanent PreparationRecord receipt is saved, and dependent wet-chemistry and spectroscopy work items transition from blocked to unlocked for analysis (ASSIGNED / IN_PROGRESS).)"
       ],
       "caution": "Caution: An analysis requires a different preparation pathway. — Inspect the Preparation tab and receipt on the sample, complete or verify the missing gate, or create an audited repeat preparation attempt if the material was re-processed.",
       "related": [
@@ -2448,7 +2448,7 @@
       "minutes": 3,
       "quick": "Compare selected items and each sample's evidence before a permitted bulk action. In /workbench, verify the physical soil material, record actual air-drying temperature (< 40 °C), duration, and sieve mesh size (e.g., 2 mm or < 100 µm for MIR), and click Confirm Complete to unlock downstream bench analyses.",
       "before": [
-        "Confirm the sample has completed Reception (REGISTERED) and physically matches the barcode on the drying tray or sieve.",
+        "Confirm the sample has completed Reception (ACCEPTED) and physically matches the barcode on the drying tray or sieve.",
         "Check whether your laboratory policy requires second-person gate verification (gate.verificationRequired)."
       ],
       "sections": [
@@ -2465,7 +2465,7 @@
             },
             {
               "action": "Click Confirm Complete (and obtain supervisor verification if gate.verificationRequired is enabled) and inspect the confirmation receipt.",
-              "expected": "A permanent PreparationRecord receipt is saved, and dependent wet-chemistry and spectroscopy work items transition from blocked to READY_FOR_ANALYSIS."
+              "expected": "A permanent PreparationRecord receipt is saved, and dependent wet-chemistry and spectroscopy work items transition from blocked to unlocked for analysis (ASSIGNED / IN_PROGRESS)."
             }
           ]
         }
@@ -2505,7 +2505,7 @@
       "steps": [
         "Open /workbench and select the sample or batch of samples in the DRYING or PREPARATION queue. (Expected: The pre-analytical checklist displays the required drying (< 40 °C) and sieving/grinding parameters.)",
         "Complete the physical checks, record actual oven/room temperature, duration, sieve size, and final prepared mass (Compare selected items and each sample's evidence before a permitted bulk action.). (Expected: Each selected sample shows validated preparation parameters; any sample not physically prepared must be deselected before bulk confirmation.)",
-        "Click Confirm Complete (and obtain supervisor verification if gate.verificationRequired is enabled) and inspect the confirmation receipt. (Expected: A permanent PreparationRecord receipt is saved, and dependent wet-chemistry and spectroscopy work items transition from blocked to READY_FOR_ANALYSIS.)"
+        "Click Confirm Complete (and obtain supervisor verification if gate.verificationRequired is enabled) and inspect the confirmation receipt. (Expected: A permanent PreparationRecord receipt is saved, and dependent wet-chemistry and spectroscopy work items transition from blocked to unlocked for analysis (ASSIGNED / IN_PROGRESS).)"
       ],
       "caution": "Caution: One selected sample was not physically prepared. — Inspect the Preparation tab and receipt on the sample, complete or verify the missing gate, or create an audited repeat preparation attempt if the material was re-processed.",
       "related": [
@@ -2534,7 +2534,7 @@
       "minutes": 3,
       "quick": "Explain the evidence-gap state and who may document verification or a new attempt. In /workbench, verify the physical soil material, record actual air-drying temperature (< 40 °C), duration, and sieve mesh size (e.g., 2 mm or < 100 µm for MIR), and click Confirm Complete to unlock downstream bench analyses.",
       "before": [
-        "Confirm the sample has completed Reception (REGISTERED) and physically matches the barcode on the drying tray or sieve.",
+        "Confirm the sample has completed Reception (ACCEPTED) and physically matches the barcode on the drying tray or sieve.",
         "Check whether your laboratory policy requires second-person gate verification (gate.verificationRequired)."
       ],
       "sections": [
@@ -2551,7 +2551,7 @@
             },
             {
               "action": "Click Confirm Complete (and obtain supervisor verification if gate.verificationRequired is enabled) and inspect the confirmation receipt.",
-              "expected": "A permanent PreparationRecord receipt is saved, and dependent wet-chemistry and spectroscopy work items transition from blocked to READY_FOR_ANALYSIS."
+              "expected": "A permanent PreparationRecord receipt is saved, and dependent wet-chemistry and spectroscopy work items transition from blocked to unlocked for analysis (ASSIGNED / IN_PROGRESS)."
             }
           ]
         }
@@ -2591,7 +2591,7 @@
       "steps": [
         "Open /workbench and select the sample or batch of samples in the DRYING or PREPARATION queue. (Expected: The pre-analytical checklist displays the required drying (< 40 °C) and sieving/grinding parameters.)",
         "Complete the physical checks, record actual oven/room temperature, duration, sieve size, and final prepared mass (Explain the evidence-gap state and who may document verification or a new attempt.). (Expected: Each selected sample shows validated preparation parameters; any sample not physically prepared must be deselected before bulk confirmation.)",
-        "Click Confirm Complete (and obtain supervisor verification if gate.verificationRequired is enabled) and inspect the confirmation receipt. (Expected: A permanent PreparationRecord receipt is saved, and dependent wet-chemistry and spectroscopy work items transition from blocked to READY_FOR_ANALYSIS.)"
+        "Click Confirm Complete (and obtain supervisor verification if gate.verificationRequired is enabled) and inspect the confirmation receipt. (Expected: A permanent PreparationRecord receipt is saved, and dependent wet-chemistry and spectroscopy work items transition from blocked to unlocked for analysis (ASSIGNED / IN_PROGRESS).)"
       ],
       "caution": "Caution: A legacy Done flag exists without a checklist receipt. — Inspect the Preparation tab and receipt on the sample, complete or verify the missing gate, or create an audited repeat preparation attempt if the material was re-processed.",
       "related": [
@@ -2620,7 +2620,7 @@
       "minutes": 3,
       "quick": "Preserve original evidence and route a permitted new preparation attempt. In /workbench, verify the physical soil material, record actual air-drying temperature (< 40 °C), duration, and sieve mesh size (e.g., 2 mm or < 100 µm for MIR), and click Confirm Complete to unlock downstream bench analyses.",
       "before": [
-        "Confirm the sample has completed Reception (REGISTERED) and physically matches the barcode on the drying tray or sieve.",
+        "Confirm the sample has completed Reception (ACCEPTED) and physically matches the barcode on the drying tray or sieve.",
         "Check whether your laboratory policy requires second-person gate verification (gate.verificationRequired)."
       ],
       "sections": [
@@ -2637,7 +2637,7 @@
             },
             {
               "action": "Click Confirm Complete (and obtain supervisor verification if gate.verificationRequired is enabled) and inspect the confirmation receipt.",
-              "expected": "A permanent PreparationRecord receipt is saved, and dependent wet-chemistry and spectroscopy work items transition from blocked to READY_FOR_ANALYSIS."
+              "expected": "A permanent PreparationRecord receipt is saved, and dependent wet-chemistry and spectroscopy work items transition from blocked to unlocked for analysis (ASSIGNED / IN_PROGRESS)."
             }
           ]
         }
@@ -2677,7 +2677,7 @@
       "steps": [
         "Open /workbench and select the sample or batch of samples in the DRYING or PREPARATION queue. (Expected: The pre-analytical checklist displays the required drying (< 40 °C) and sieving/grinding parameters.)",
         "Complete the physical checks, record actual oven/room temperature, duration, sieve size, and final prepared mass (Preserve original evidence and route a permitted new preparation attempt.). (Expected: Each selected sample shows validated preparation parameters; any sample not physically prepared must be deselected before bulk confirmation.)",
-        "Click Confirm Complete (and obtain supervisor verification if gate.verificationRequired is enabled) and inspect the confirmation receipt. (Expected: A permanent PreparationRecord receipt is saved, and dependent wet-chemistry and spectroscopy work items transition from blocked to READY_FOR_ANALYSIS.)"
+        "Click Confirm Complete (and obtain supervisor verification if gate.verificationRequired is enabled) and inspect the confirmation receipt. (Expected: A permanent PreparationRecord receipt is saved, and dependent wet-chemistry and spectroscopy work items transition from blocked to unlocked for analysis (ASSIGNED / IN_PROGRESS).)"
       ],
       "caution": "Caution: Staff attempt to overwrite the old confirmation. — Inspect the Preparation tab and receipt on the sample, complete or verify the missing gate, or create an audited repeat preparation attempt if the material was re-processed.",
       "related": [
@@ -4499,7 +4499,7 @@
       "problems": [
         {
           "symptom": "A newly expected sample is mistaken for completed lab work.",
-          "why": "Second-person review policy (review.secondPersonRequired) prevents self-approval, an unapproved prerequisite or QC failure is still open, or the sample is already REPORTED and requires a formal Amendment.",
+          "why": "Second-person review policy (review.secondPersonRequired) prevents self-approval, an unapproved prerequisite or QC failure is still open, or the sample is already APPROVED / RELEASED and requires a formal Amendment.",
           "action": "Check the blocker reason on the review button, ask a second Reviewer/Manager to approve if you recorded the bench data, or use Amend Sample / Correct Report on already-reported samples."
         }
       ],
@@ -4585,7 +4585,7 @@
       "problems": [
         {
           "symptom": "Assignment exists but preparation has not been confirmed.",
-          "why": "Second-person review policy (review.secondPersonRequired) prevents self-approval, an unapproved prerequisite or QC failure is still open, or the sample is already REPORTED and requires a formal Amendment.",
+          "why": "Second-person review policy (review.secondPersonRequired) prevents self-approval, an unapproved prerequisite or QC failure is still open, or the sample is already APPROVED / RELEASED and requires a formal Amendment.",
           "action": "Check the blocker reason on the review button, ask a second Reviewer/Manager to approve if you recorded the bench data, or use Amend Sample / Correct Report on already-reported samples."
         }
       ],
@@ -4790,7 +4790,7 @@
       "problems": [
         {
           "symptom": "An ambiguous return note leads to another incorrect submission.",
-          "why": "Second-person review policy (review.secondPersonRequired) prevents self-approval, an unapproved prerequisite or QC failure is still open, or the sample is already REPORTED and requires a formal Amendment.",
+          "why": "Second-person review policy (review.secondPersonRequired) prevents self-approval, an unapproved prerequisite or QC failure is still open, or the sample is already APPROVED / RELEASED and requires a formal Amendment.",
           "action": "Check the blocker reason on the review button, ask a second Reviewer/Manager to approve if you recorded the bench data, or use Amend Sample / Correct Report on already-reported samples."
         }
       ],
@@ -4877,7 +4877,7 @@
       "problems": [
         {
           "symptom": "The approval button is disabled by an unresolved prerequisite.",
-          "why": "Second-person review policy (review.secondPersonRequired) prevents self-approval, an unapproved prerequisite or QC failure is still open, or the sample is already REPORTED and requires a formal Amendment.",
+          "why": "Second-person review policy (review.secondPersonRequired) prevents self-approval, an unapproved prerequisite or QC failure is still open, or the sample is already APPROVED / RELEASED and requires a formal Amendment.",
           "action": "Check the blocker reason on the review button, ask a second Reviewer/Manager to approve if you recorded the bench data, or use Amend Sample / Correct Report on already-reported samples."
         }
       ],
@@ -4963,7 +4963,7 @@
       "problems": [
         {
           "symptom": "The report omits a derived texture class or uses an old result.",
-          "why": "Second-person review policy (review.secondPersonRequired) prevents self-approval, an unapproved prerequisite or QC failure is still open, or the sample is already REPORTED and requires a formal Amendment.",
+          "why": "Second-person review policy (review.secondPersonRequired) prevents self-approval, an unapproved prerequisite or QC failure is still open, or the sample is already APPROVED / RELEASED and requires a formal Amendment.",
           "action": "Check the blocker reason on the review button, ask a second Reviewer/Manager to approve if you recorded the bench data, or use Amend Sample / Correct Report on already-reported samples."
         }
       ],
@@ -5050,7 +5050,7 @@
       "problems": [
         {
           "symptom": "Staff attempt to edit a released result in place.",
-          "why": "Second-person review policy (review.secondPersonRequired) prevents self-approval, an unapproved prerequisite or QC failure is still open, or the sample is already REPORTED and requires a formal Amendment.",
+          "why": "Second-person review policy (review.secondPersonRequired) prevents self-approval, an unapproved prerequisite or QC failure is still open, or the sample is already APPROVED / RELEASED and requires a formal Amendment.",
           "action": "Check the blocker reason on the review button, ask a second Reviewer/Manager to approve if you recorded the bench data, or use Amend Sample / Correct Report on already-reported samples."
         }
       ],
@@ -5137,7 +5137,7 @@
       "problems": [
         {
           "symptom": "An expired or superseded public report link is forwarded.",
-          "why": "Second-person review policy (review.secondPersonRequired) prevents self-approval, an unapproved prerequisite or QC failure is still open, or the sample is already REPORTED and requires a formal Amendment.",
+          "why": "Second-person review policy (review.secondPersonRequired) prevents self-approval, an unapproved prerequisite or QC failure is still open, or the sample is already APPROVED / RELEASED and requires a formal Amendment.",
           "action": "Check the blocker reason on the review button, ask a second Reviewer/Manager to approve if you recorded the bench data, or use Amend Sample / Correct Report on already-reported samples."
         }
       ],
@@ -5224,7 +5224,7 @@
       "problems": [
         {
           "symptom": "A partial review is taken as final approval of the entire sample.",
-          "why": "Second-person review policy (review.secondPersonRequired) prevents self-approval, an unapproved prerequisite or QC failure is still open, or the sample is already REPORTED and requires a formal Amendment.",
+          "why": "Second-person review policy (review.secondPersonRequired) prevents self-approval, an unapproved prerequisite or QC failure is still open, or the sample is already APPROVED / RELEASED and requires a formal Amendment.",
           "action": "Check the blocker reason on the review button, ask a second Reviewer/Manager to approve if you recorded the bench data, or use Amend Sample / Correct Report on already-reported samples."
         }
       ],
@@ -6578,7 +6578,7 @@
       "quick": "Explain project identity, country/lab scope and enabled data flows. Use /projects to manage project scope, synchronize KoboToolbox field surveys (which arrive as EXPECTED until physical reception), track sample lifecycle counts, and export approved results or verify NSIS / OpenNSIS Data Exchange deliveries.",
       "before": [
         "Verify your authorized project, country, and laboratory scope in the top navigation bar.",
-        "Remember that external exports and the Data Exchange API only expose samples whose status is APPROVED or REPORTED (RELEASED)."
+        "Remember that external exports and the Data Exchange API only expose samples whose status is APPROVED or RELEASED."
       ],
       "sections": [
         {
@@ -6601,9 +6601,9 @@
       ],
       "fields": [
         [
-          "EXPECTED vs. REGISTERED vs. APPROVED",
+          "EXPECTED vs. ACCEPTED vs. APPROVED",
           "Lifecycle progress counters",
-          "KoboToolbox imports start as EXPECTED; they only become REGISTERED after physical arrival at Reception."
+          "KoboToolbox imports start as EXPECTED; they only become ACCEPTED after physical arrival at Reception."
         ],
         [
           "Soil Profile Reference",
@@ -6768,7 +6768,7 @@
       "quick": "Explain where source corrections belong and how reconciliation works. Use /projects to manage project scope, synchronize KoboToolbox field surveys (which arrive as EXPECTED until physical reception), track sample lifecycle counts, and export approved results or verify NSIS / OpenNSIS Data Exchange deliveries.",
       "before": [
         "Verify your authorized project, country, and laboratory scope in the top navigation bar.",
-        "Remember that external exports and the Data Exchange API only expose samples whose status is APPROVED or REPORTED (RELEASED)."
+        "Remember that external exports and the Data Exchange API only expose samples whose status is APPROVED or RELEASED."
       ],
       "sections": [
         {
@@ -6791,9 +6791,9 @@
       ],
       "fields": [
         [
-          "EXPECTED vs. REGISTERED vs. APPROVED",
+          "EXPECTED vs. ACCEPTED vs. APPROVED",
           "Lifecycle progress counters",
-          "KoboToolbox imports start as EXPECTED; they only become REGISTERED after physical arrival at Reception."
+          "KoboToolbox imports start as EXPECTED; they only become ACCEPTED after physical arrival at Reception."
         ],
         [
           "Soil Profile Reference",
@@ -6858,7 +6858,7 @@
       "quick": "Validate identifiers and source completeness before the lab receives material. Use /projects to manage project scope, synchronize KoboToolbox field surveys (which arrive as EXPECTED until physical reception), track sample lifecycle counts, and export approved results or verify NSIS / OpenNSIS Data Exchange deliveries.",
       "before": [
         "Verify your authorized project, country, and laboratory scope in the top navigation bar.",
-        "Remember that external exports and the Data Exchange API only expose samples whose status is APPROVED or REPORTED (RELEASED)."
+        "Remember that external exports and the Data Exchange API only expose samples whose status is APPROVED or RELEASED."
       ],
       "sections": [
         {
@@ -6881,9 +6881,9 @@
       ],
       "fields": [
         [
-          "EXPECTED vs. REGISTERED vs. APPROVED",
+          "EXPECTED vs. ACCEPTED vs. APPROVED",
           "Lifecycle progress counters",
-          "KoboToolbox imports start as EXPECTED; they only become REGISTERED after physical arrival at Reception."
+          "KoboToolbox imports start as EXPECTED; they only become ACCEPTED after physical arrival at Reception."
         ],
         [
           "Soil Profile Reference",
@@ -6949,7 +6949,7 @@
       "quick": "Distinguish expected, received, active, submitted, approved and reported counts. Use /projects to manage project scope, synchronize KoboToolbox field surveys (which arrive as EXPECTED until physical reception), track sample lifecycle counts, and export approved results or verify NSIS / OpenNSIS Data Exchange deliveries.",
       "before": [
         "Verify your authorized project, country, and laboratory scope in the top navigation bar.",
-        "Remember that external exports and the Data Exchange API only expose samples whose status is APPROVED or REPORTED (RELEASED)."
+        "Remember that external exports and the Data Exchange API only expose samples whose status is APPROVED or RELEASED."
       ],
       "sections": [
         {
@@ -6972,9 +6972,9 @@
       ],
       "fields": [
         [
-          "EXPECTED vs. REGISTERED vs. APPROVED",
+          "EXPECTED vs. ACCEPTED vs. APPROVED",
           "Lifecycle progress counters",
-          "KoboToolbox imports start as EXPECTED; they only become REGISTERED after physical arrival at Reception."
+          "KoboToolbox imports start as EXPECTED; they only become ACCEPTED after physical arrival at Reception."
         ],
         [
           "Soil Profile Reference",
@@ -7039,7 +7039,7 @@
       "quick": "Explain exported revision, units, scope and raw versus interpreted data. Use /data-results to manage project scope, synchronize KoboToolbox field surveys (which arrive as EXPECTED until physical reception), track sample lifecycle counts, and export approved results or verify NSIS / OpenNSIS Data Exchange deliveries.",
       "before": [
         "Verify your authorized project, country, and laboratory scope in the top navigation bar.",
-        "Remember that external exports and the Data Exchange API only expose samples whose status is APPROVED or REPORTED (RELEASED)."
+        "Remember that external exports and the Data Exchange API only expose samples whose status is APPROVED or RELEASED."
       ],
       "sections": [
         {
@@ -7062,9 +7062,9 @@
       ],
       "fields": [
         [
-          "EXPECTED vs. REGISTERED vs. APPROVED",
+          "EXPECTED vs. ACCEPTED vs. APPROVED",
           "Lifecycle progress counters",
-          "KoboToolbox imports start as EXPECTED; they only become REGISTERED after physical arrival at Reception."
+          "KoboToolbox imports start as EXPECTED; they only become ACCEPTED after physical arrival at Reception."
         ],
         [
           "Soil Profile Reference",
@@ -7129,7 +7129,7 @@
       "quick": "Distinguish a generated file from confirmed external delivery and a rejected transfer. Use /data-results to manage project scope, synchronize KoboToolbox field surveys (which arrive as EXPECTED until physical reception), track sample lifecycle counts, and export approved results or verify NSIS / OpenNSIS Data Exchange deliveries.",
       "before": [
         "Verify your authorized project, country, and laboratory scope in the top navigation bar.",
-        "Remember that external exports and the Data Exchange API only expose samples whose status is APPROVED or REPORTED (RELEASED)."
+        "Remember that external exports and the Data Exchange API only expose samples whose status is APPROVED or RELEASED."
       ],
       "sections": [
         {
@@ -7152,9 +7152,9 @@
       ],
       "fields": [
         [
-          "EXPECTED vs. REGISTERED vs. APPROVED",
+          "EXPECTED vs. ACCEPTED vs. APPROVED",
           "Lifecycle progress counters",
-          "KoboToolbox imports start as EXPECTED; they only become REGISTERED after physical arrival at Reception."
+          "KoboToolbox imports start as EXPECTED; they only become ACCEPTED after physical arrival at Reception."
         ],
         [
           "Soil Profile Reference",
@@ -7219,7 +7219,7 @@
       "quick": "Explain coordinates, location confidence and display limitations. Use /maps to manage project scope, synchronize KoboToolbox field surveys (which arrive as EXPECTED until physical reception), track sample lifecycle counts, and export approved results or verify NSIS / OpenNSIS Data Exchange deliveries.",
       "before": [
         "Verify your authorized project, country, and laboratory scope in the top navigation bar.",
-        "Remember that external exports and the Data Exchange API only expose samples whose status is APPROVED or REPORTED (RELEASED)."
+        "Remember that external exports and the Data Exchange API only expose samples whose status is APPROVED or RELEASED."
       ],
       "sections": [
         {
@@ -7242,9 +7242,9 @@
       ],
       "fields": [
         [
-          "EXPECTED vs. REGISTERED vs. APPROVED",
+          "EXPECTED vs. ACCEPTED vs. APPROVED",
           "Lifecycle progress counters",
-          "KoboToolbox imports start as EXPECTED; they only become REGISTERED after physical arrival at Reception."
+          "KoboToolbox imports start as EXPECTED; they only become ACCEPTED after physical arrival at Reception."
         ],
         [
           "Soil Profile Reference",
@@ -8835,7 +8835,7 @@
             },
             {
               "action": "Perform the workflow check: Follow assigned work from preparation to reviewer handoff using five demo samples. [Canonical successor: start-technician]",
-              "expected": "Each item clearly shows its current lifecycle status (EXPECTED, REGISTERED, IN_PREP, READY_FOR_ANALYSIS, SUBMITTED, REVIEWED, APPROVED, or REPORTED) and next owner."
+              "expected": "Each item clearly shows its current lifecycle status (EXPECTED, RECEIVED, ACCEPTED, PROCESSING, SUBMITTED_PARTIAL, SUBMITTED_FULL, APPROVED, or RELEASED) and next owner."
             },
             {
               "action": "Open an individual record or receipt to verify who recorded the previous step before taking or handing off the next action.",
@@ -8867,7 +8867,7 @@
       "problems": [
         {
           "symptom": "A completed worksheet is mistaken for submitted work.",
-          "why": "A queue filter is hiding records, the item is still in an earlier prerequisite stage (such as EXPECTED or IN_PREP), or your role is read-only for this step.",
+          "why": "A queue filter is hiding records, the item is still in an earlier prerequisite stage (such as EXPECTED or RECEIVED), or your role is read-only for this step.",
           "action": "Reset queue filters in /workbench, inspect the sample's workflow stage and prerequisite receipts, and confirm role permissions with your Lab Manager."
         }
       ],
@@ -8878,7 +8878,7 @@
       ],
       "steps": [
         "Open /workbench and inspect the queue counters, status badges, and active laboratory filter. (Expected: You see only records scoped to your authorized laboratory and projects.)",
-        "Perform the workflow check: Follow assigned work from preparation to reviewer handoff using five demo samples. [Canonical successor: start-technician] (Expected: Each item clearly shows its current lifecycle status (EXPECTED, REGISTERED, IN_PREP, READY_FOR_ANALYSIS, SUBMITTED, REVIEWED, APPROVED, or REPORTED) and next owner.)",
+        "Perform the workflow check: Follow assigned work from preparation to reviewer handoff using five demo samples. [Canonical successor: start-technician] (Expected: Each item clearly shows its current lifecycle status (EXPECTED, RECEIVED, ACCEPTED, PROCESSING, SUBMITTED_PARTIAL, SUBMITTED_FULL, APPROVED, or RELEASED) and next owner.)",
         "Open an individual record or receipt to verify who recorded the previous step before taking or handing off the next action. (Expected: Audit history and prerequisite receipts remain intact without accidental edits.)"
       ],
       "caution": "Caution: A completed worksheet is mistaken for submitted work. — Reset queue filters in /workbench, inspect the sample's workflow stage and prerequisite receipts, and confirm role permissions with your Lab Manager.",
@@ -10223,7 +10223,7 @@
             },
             {
               "action": "Perform the workflow check: Apply session or profile settings without changing laboratory data. [Canonical successor: start-settings]",
-              "expected": "Each item clearly shows its current lifecycle status (EXPECTED, REGISTERED, IN_PREP, READY_FOR_ANALYSIS, SUBMITTED, REVIEWED, APPROVED, or REPORTED) and next owner."
+              "expected": "Each item clearly shows its current lifecycle status (EXPECTED, RECEIVED, ACCEPTED, PROCESSING, SUBMITTED_PARTIAL, SUBMITTED_FULL, APPROVED, or RELEASED) and next owner."
             },
             {
               "action": "Open an individual record or receipt to verify who recorded the previous step before taking or handing off the next action.",
@@ -10255,7 +10255,7 @@
       "problems": [
         {
           "symptom": "A language switch appears to change a displayed number.",
-          "why": "A queue filter is hiding records, the item is still in an earlier prerequisite stage (such as EXPECTED or IN_PREP), or your role is read-only for this step.",
+          "why": "A queue filter is hiding records, the item is still in an earlier prerequisite stage (such as EXPECTED or RECEIVED), or your role is read-only for this step.",
           "action": "Reset queue filters in /profile, inspect the sample's workflow stage and prerequisite receipts, and confirm role permissions with your Lab Manager."
         }
       ],
@@ -10266,7 +10266,7 @@
       ],
       "steps": [
         "Open /profile and inspect the queue counters, status badges, and active laboratory filter. (Expected: You see only records scoped to your authorized laboratory and projects.)",
-        "Perform the workflow check: Apply session or profile settings without changing laboratory data. [Canonical successor: start-settings] (Expected: Each item clearly shows its current lifecycle status (EXPECTED, REGISTERED, IN_PREP, READY_FOR_ANALYSIS, SUBMITTED, REVIEWED, APPROVED, or REPORTED) and next owner.)",
+        "Perform the workflow check: Apply session or profile settings without changing laboratory data. [Canonical successor: start-settings] (Expected: Each item clearly shows its current lifecycle status (EXPECTED, RECEIVED, ACCEPTED, PROCESSING, SUBMITTED_PARTIAL, SUBMITTED_FULL, APPROVED, or RELEASED) and next owner.)",
         "Open an individual record or receipt to verify who recorded the previous step before taking or handing off the next action. (Expected: Audit history and prerequisite receipts remain intact without accidental edits.)"
       ],
       "caution": "Caution: A language switch appears to change a displayed number. — Reset queue filters in /profile, inspect the sample's workflow stage and prerequisite receipts, and confirm role permissions with your Lab Manager.",

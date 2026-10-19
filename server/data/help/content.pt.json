@@ -338,7 +338,7 @@
             },
             {
               "action": "Realize a verificação operacional: Follow assigned work from preparation to reviewer handoff using five demo samples.",
-              "expected": "Cada amostra ou tarefa indica claramente o seu estado (EXPECTED, IN_PREP, READY_FOR_ANALYSIS, SUBMITTED, APPROVED, REPORTED) e o próximo responsável."
+              "expected": "Cada amostra ou tarefa indica claramente o seu estado (EXPECTED, RECEIVED, ACCEPTED, IN_PROGRESS, SUBMITTED, APPROVED, RELEASED) e o próximo responsável."
             },
             {
               "action": "Abra o comprovativo ou histórico de auditoria para confirmar os passos anteriores antes de prosseguir.",
@@ -381,7 +381,7 @@
       ],
       "steps": [
         "Abra /workbench e consulte os contadores da fila, os estados e o âmbito do laboratório. (Expected: Apenas os registos pertencentes ao seu laboratório e projetos autorizados são apresentados.)",
-        "Realize a verificação operacional: Follow assigned work from preparation to reviewer handoff using five demo samples. (Expected: Cada amostra ou tarefa indica claramente o seu estado (EXPECTED, IN_PREP, READY_FOR_ANALYSIS, SUBMITTED, APPROVED, REPORTED) e o próximo responsável.)",
+        "Realize a verificação operacional: Follow assigned work from preparation to reviewer handoff using five demo samples. (Expected: Cada amostra ou tarefa indica claramente o seu estado (EXPECTED, RECEIVED, ACCEPTED, IN_PROGRESS, SUBMITTED, APPROVED, RELEASED) e o próximo responsável.)",
         "Abra o comprovativo ou histórico de auditoria para confirmar os passos anteriores antes de prosseguir. (Expected: A rastreabilidade mantém-se íntegra sem alterar registos bloqueados.)"
       ],
       "caution": "Atenção: A completed worksheet is mistaken for submitted work. — Limpe os filtros em /workbench, verifique os pré-requisitos da amostra e confirme as permissões com o Gestor de Laboratório.",
@@ -517,7 +517,7 @@
             },
             {
               "action": "Realize a verificação operacional: Distinguish intake review, assignment, result review and final release.",
-              "expected": "Cada amostra ou tarefa indica claramente o seu estado (EXPECTED, IN_PREP, READY_FOR_ANALYSIS, SUBMITTED, APPROVED, REPORTED) e o próximo responsável."
+              "expected": "Cada amostra ou tarefa indica claramente o seu estado (EXPECTED, RECEIVED, ACCEPTED, IN_PROGRESS, SUBMITTED, APPROVED, RELEASED) e o próximo responsável."
             },
             {
               "action": "Abra o comprovativo ou histórico de auditoria para confirmar os passos anteriores antes de prosseguir.",
@@ -560,7 +560,7 @@
       ],
       "steps": [
         "Abra /manager-queue e consulte os contadores da fila, os estados e o âmbito do laboratório. (Expected: Apenas os registos pertencentes ao seu laboratório e projetos autorizados são apresentados.)",
-        "Realize a verificação operacional: Distinguish intake review, assignment, result review and final release. (Expected: Cada amostra ou tarefa indica claramente o seu estado (EXPECTED, IN_PREP, READY_FOR_ANALYSIS, SUBMITTED, APPROVED, REPORTED) e o próximo responsável.)",
+        "Realize a verificação operacional: Distinguish intake review, assignment, result review and final release. (Expected: Cada amostra ou tarefa indica claramente o seu estado (EXPECTED, RECEIVED, ACCEPTED, IN_PROGRESS, SUBMITTED, APPROVED, RELEASED) e o próximo responsável.)",
         "Abra o comprovativo ou histórico de auditoria para confirmar os passos anteriores antes de prosseguir. (Expected: A rastreabilidade mantém-se íntegra sem alterar registos bloqueados.)"
       ],
       "caution": "Atenção: The manager opens the wrong queue and sees no work. — Limpe os filtros em /manager-queue, verifique os pré-requisitos da amostra e confirme as permissões com o Gestor de Laboratório.",
@@ -602,7 +602,7 @@
             },
             {
               "action": "Realize a verificação operacional: Read project progress and identify who owns the next action.",
-              "expected": "Cada amostra ou tarefa indica claramente o seu estado (EXPECTED, IN_PREP, READY_FOR_ANALYSIS, SUBMITTED, APPROVED, REPORTED) e o próximo responsável."
+              "expected": "Cada amostra ou tarefa indica claramente o seu estado (EXPECTED, RECEIVED, ACCEPTED, IN_PROGRESS, SUBMITTED, APPROVED, RELEASED) e o próximo responsável."
             },
             {
               "action": "Abra o comprovativo ou histórico de auditoria para confirmar os passos anteriores antes de prosseguir.",
@@ -645,7 +645,7 @@
       ],
       "steps": [
         "Abra /projects e consulte os contadores da fila, os estados e o âmbito do laboratório. (Expected: Apenas os registos pertencentes ao seu laboratório e projetos autorizados são apresentados.)",
-        "Realize a verificação operacional: Read project progress and identify who owns the next action. (Expected: Cada amostra ou tarefa indica claramente o seu estado (EXPECTED, IN_PREP, READY_FOR_ANALYSIS, SUBMITTED, APPROVED, REPORTED) e o próximo responsável.)",
+        "Realize a verificação operacional: Read project progress and identify who owns the next action. (Expected: Cada amostra ou tarefa indica claramente o seu estado (EXPECTED, RECEIVED, ACCEPTED, IN_PROGRESS, SUBMITTED, APPROVED, RELEASED) e o próximo responsável.)",
         "Abra o comprovativo ou histórico de auditoria para confirmar os passos anteriores antes de prosseguir. (Expected: A rastreabilidade mantém-se íntegra sem alterar registos bloqueados.)"
       ],
       "caution": "Atenção: KoBo import is mistaken for completed analysis. — Limpe os filtros em /projects, verifique os pré-requisitos da amostra e confirme as permissões com o Gestor de Laboratório.",
@@ -687,7 +687,7 @@
             },
             {
               "action": "Realize a verificação operacional: Follow the evidence and report history within audit scope.",
-              "expected": "Cada amostra ou tarefa indica claramente o seu estado (EXPECTED, IN_PREP, READY_FOR_ANALYSIS, SUBMITTED, APPROVED, REPORTED) e o próximo responsável."
+              "expected": "Cada amostra ou tarefa indica claramente o seu estado (EXPECTED, RECEIVED, ACCEPTED, IN_PROGRESS, SUBMITTED, APPROVED, RELEASED) e o próximo responsável."
             },
             {
               "action": "Abra o comprovativo ou histórico de auditoria para confirmar os passos anteriores antes de prosseguir.",
@@ -730,7 +730,7 @@
       ],
       "steps": [
         "Abra /qa e consulte os contadores da fila, os estados e o âmbito do laboratório. (Expected: Apenas os registos pertencentes ao seu laboratório e projetos autorizados são apresentados.)",
-        "Realize a verificação operacional: Follow the evidence and report history within audit scope. (Expected: Cada amostra ou tarefa indica claramente o seu estado (EXPECTED, IN_PREP, READY_FOR_ANALYSIS, SUBMITTED, APPROVED, REPORTED) e o próximo responsável.)",
+        "Realize a verificação operacional: Follow the evidence and report history within audit scope. (Expected: Cada amostra ou tarefa indica claramente o seu estado (EXPECTED, RECEIVED, ACCEPTED, IN_PROGRESS, SUBMITTED, APPROVED, RELEASED) e o próximo responsável.)",
         "Abra o comprovativo ou histórico de auditoria para confirmar os passos anteriores antes de prosseguir. (Expected: A rastreabilidade mantém-se íntegra sem alterar registos bloqueados.)"
       ],
       "caution": "Atenção: An audit viewer expects edit controls. — Limpe os filtros em /qa, verifique os pré-requisitos da amostra e confirme as permissões com o Gestor de Laboratório.",
@@ -772,7 +772,7 @@
             },
             {
               "action": "Realize a verificação operacional: Navigate permitted records and distinguish current from superseded reports.",
-              "expected": "Cada amostra ou tarefa indica claramente o seu estado (EXPECTED, IN_PREP, READY_FOR_ANALYSIS, SUBMITTED, APPROVED, REPORTED) e o próximo responsável."
+              "expected": "Cada amostra ou tarefa indica claramente o seu estado (EXPECTED, RECEIVED, ACCEPTED, IN_PROGRESS, SUBMITTED, APPROVED, RELEASED) e o próximo responsável."
             },
             {
               "action": "Abra o comprovativo ou histórico de auditoria para confirmar os passos anteriores antes de prosseguir.",
@@ -815,7 +815,7 @@
       ],
       "steps": [
         "Abra /samples e consulte os contadores da fila, os estados e o âmbito do laboratório. (Expected: Apenas os registos pertencentes ao seu laboratório e projetos autorizados são apresentados.)",
-        "Realize a verificação operacional: Navigate permitted records and distinguish current from superseded reports. (Expected: Cada amostra ou tarefa indica claramente o seu estado (EXPECTED, IN_PREP, READY_FOR_ANALYSIS, SUBMITTED, APPROVED, REPORTED) e o próximo responsável.)",
+        "Realize a verificação operacional: Navigate permitted records and distinguish current from superseded reports. (Expected: Cada amostra ou tarefa indica claramente o seu estado (EXPECTED, RECEIVED, ACCEPTED, IN_PROGRESS, SUBMITTED, APPROVED, RELEASED) e o próximo responsável.)",
         "Abra o comprovativo ou histórico de auditoria para confirmar os passos anteriores antes de prosseguir. (Expected: A rastreabilidade mantém-se íntegra sem alterar registos bloqueados.)"
       ],
       "caution": "Atenção: A viewer cannot see another project's data. — Limpe os filtros em /samples, verifique os pré-requisitos da amostra e confirme as permissões com o Gestor de Laboratório.",
@@ -856,7 +856,7 @@
             },
             {
               "action": "Realize a verificação operacional: Apply session or profile settings without changing laboratory data.",
-              "expected": "Cada amostra ou tarefa indica claramente o seu estado (EXPECTED, IN_PREP, READY_FOR_ANALYSIS, SUBMITTED, APPROVED, REPORTED) e o próximo responsável."
+              "expected": "Cada amostra ou tarefa indica claramente o seu estado (EXPECTED, RECEIVED, ACCEPTED, IN_PROGRESS, SUBMITTED, APPROVED, RELEASED) e o próximo responsável."
             },
             {
               "action": "Abra o comprovativo ou histórico de auditoria para confirmar os passos anteriores antes de prosseguir.",
@@ -899,7 +899,7 @@
       ],
       "steps": [
         "Abra /profile e consulte os contadores da fila, os estados e o âmbito do laboratório. (Expected: Apenas os registos pertencentes ao seu laboratório e projetos autorizados são apresentados.)",
-        "Realize a verificação operacional: Apply session or profile settings without changing laboratory data. (Expected: Cada amostra ou tarefa indica claramente o seu estado (EXPECTED, IN_PREP, READY_FOR_ANALYSIS, SUBMITTED, APPROVED, REPORTED) e o próximo responsável.)",
+        "Realize a verificação operacional: Apply session or profile settings without changing laboratory data. (Expected: Cada amostra ou tarefa indica claramente o seu estado (EXPECTED, RECEIVED, ACCEPTED, IN_PROGRESS, SUBMITTED, APPROVED, RELEASED) e o próximo responsável.)",
         "Abra o comprovativo ou histórico de auditoria para confirmar os passos anteriores antes de prosseguir. (Expected: A rastreabilidade mantém-se íntegra sem alterar registos bloqueados.)"
       ],
       "caution": "Atenção: A language switch appears to change a displayed number. — Limpe os filtros em /profile, verifique os pré-requisitos da amostra e confirme as permissões com o Gestor de Laboratório.",
@@ -1063,7 +1063,7 @@
             },
             {
               "action": "Selecione o pacote de análises ou métodos pretendidos, imprima as etiquetas de Amostra e Contentor e clique em Confirmar Receção.",
-              "expected": "É gerado um comprovativo de receção auditável, o estado passa para REGISTERED e abrem-se os portões de DRYING e PREPARATION."
+              "expected": "É gerado um comprovativo de receção auditável, o estado passa para ACCEPTED e abrem-se os portões de DRYING e PREPARATION."
             }
           ]
         }
@@ -1102,7 +1102,7 @@
       "steps": [
         "Abra a Receção (/reception) e selecione o modo de entrada (Remessa/Consignment, Entrada direta ou Chegadas esperadas KoBo). (Expected: O formulário de receção ou a fila de chegadas esperadas do seu laboratório é carregado.)",
         "Compare o código do saco, valide os metadados/coordenadas e registe a massa recebida (g) e o estado de chegada (Review each matched sample and isolate exceptions during batch intake.). (Expected: Qualquer desvio (massa insuficiente ou saco danificado) é sinalizado para permitir rejeição ou aceitação com ressalva documentada.)",
-        "Selecione o pacote de análises ou métodos pretendidos, imprima as etiquetas de Amostra e Contentor e clique em Confirmar Receção. (Expected: É gerado um comprovativo de receção auditável, o estado passa para REGISTERED e abrem-se os portões de DRYING e PREPARATION.)"
+        "Selecione o pacote de análises ou métodos pretendidos, imprima as etiquetas de Amostra e Contentor e clique em Confirmar Receção. (Expected: É gerado um comprovativo de receção auditável, o estado passa para ACCEPTED e abrem-se os portões de DRYING e PREPARATION.)"
       ],
       "caution": "Atenção: One damaged or missing sample blocks a whole delivery. — Compare a etiqueta física com os registos em /reception, resolva a exceção (rejeitar ou aceitar com ressalva) e clique em Confirmar Receção.",
       "related": [
@@ -1147,7 +1147,7 @@
             },
             {
               "action": "Selecione o pacote de análises ou métodos pretendidos, imprima as etiquetas de Amostra e Contentor e clique em Confirmar Receção.",
-              "expected": "É gerado um comprovativo de receção auditável, o estado passa para REGISTERED e abrem-se os portões de DRYING e PREPARATION."
+              "expected": "É gerado um comprovativo de receção auditável, o estado passa para ACCEPTED e abrem-se os portões de DRYING e PREPARATION."
             }
           ]
         }
@@ -1186,7 +1186,7 @@
       "steps": [
         "Abra a Receção (/reception) e selecione o modo de entrada (Remessa/Consignment, Entrada direta ou Chegadas esperadas KoBo). (Expected: O formulário de receção ou a fila de chegadas esperadas do seu laboratório é carregado.)",
         "Compare o código do saco, valide os metadados/coordenadas e registe a massa recebida (g) e o estado de chegada (Identify draft owner, restore state and verify that saving did not receive material.). (Expected: Qualquer desvio (massa insuficiente ou saco danificado) é sinalizado para permitir rejeição ou aceitação com ressalva documentada.)",
-        "Selecione o pacote de análises ou métodos pretendidos, imprima as etiquetas de Amostra e Contentor e clique em Confirmar Receção. (Expected: É gerado um comprovativo de receção auditável, o estado passa para REGISTERED e abrem-se os portões de DRYING e PREPARATION.)"
+        "Selecione o pacote de análises ou métodos pretendidos, imprima as etiquetas de Amostra e Contentor e clique em Confirmar Receção. (Expected: É gerado um comprovativo de receção auditável, o estado passa para ACCEPTED e abrem-se os portões de DRYING e PREPARATION.)"
       ],
       "caution": "Atenção: A reopened draft loses its source location. — Compare a etiqueta física com os registos em /reception, resolva a exceção (rejeitar ou aceitar com ressalva) e clique em Confirmar Receção.",
       "related": [
@@ -1232,7 +1232,7 @@
             },
             {
               "action": "Selecione o pacote de análises ou métodos pretendidos, imprima as etiquetas de Amostra e Contentor e clique em Confirmar Receção.",
-              "expected": "É gerado um comprovativo de receção auditável, o estado passa para REGISTERED e abrem-se os portões de DRYING e PREPARATION."
+              "expected": "É gerado um comprovativo de receção auditável, o estado passa para ACCEPTED e abrem-se os portões de DRYING e PREPARATION."
             }
           ]
         }
@@ -1271,7 +1271,7 @@
       "steps": [
         "Abra a Receção (/reception) e selecione o modo de entrada (Remessa/Consignment, Entrada direta ou Chegadas esperadas KoBo). (Expected: O formulário de receção ou a fila de chegadas esperadas do seu laboratório é carregado.)",
         "Compare o código do saco, valide os metadados/coordenadas e registe a massa recebida (g) e o estado de chegada (Trace coordinates and locality to the linked source without guessing.). (Expected: Qualquer desvio (massa insuficiente ou saco danificado) é sinalizado para permitir rejeição ou aceitação com ressalva documentada.)",
-        "Selecione o pacote de análises ou métodos pretendidos, imprima as etiquetas de Amostra e Contentor e clique em Confirmar Receção. (Expected: É gerado um comprovativo de receção auditável, o estado passa para REGISTERED e abrem-se os portões de DRYING e PREPARATION.)"
+        "Selecione o pacote de análises ou métodos pretendidos, imprima as etiquetas de Amostra e Contentor e clique em Confirmar Receção. (Expected: É gerado um comprovativo de receção auditável, o estado passa para ACCEPTED e abrem-se os portões de DRYING e PREPARATION.)"
       ],
       "caution": "Atenção: Source coordinates exist but the form says no location. — Compare a etiqueta física com os registos em /reception, resolva a exceção (rejeitar ou aceitar com ressalva) e clique em Confirmar Receção.",
       "related": [
@@ -1316,7 +1316,7 @@
             },
             {
               "action": "Selecione o pacote de análises ou métodos pretendidos, imprima as etiquetas de Amostra e Contentor e clique em Confirmar Receção.",
-              "expected": "É gerado um comprovativo de receção auditável, o estado passa para REGISTERED e abrem-se os portões de DRYING e PREPARATION."
+              "expected": "É gerado um comprovativo de receção auditável, o estado passa para ACCEPTED e abrem-se os portões de DRYING e PREPARATION."
             }
           ]
         }
@@ -1355,7 +1355,7 @@
       "steps": [
         "Abra a Receção (/reception) e selecione o modo de entrada (Remessa/Consignment, Entrada direta ou Chegadas esperadas KoBo). (Expected: O formulário de receção ou a fila de chegadas esperadas do seu laboratório é carregado.)",
         "Compare o código do saco, valide os metadados/coordenadas e registe a massa recebida (g) e o estado de chegada (Explain the condition fields, evidence and permitted exception handling.). (Expected: Qualquer desvio (massa insuficiente ou saco danificado) é sinalizado para permitir rejeição ou aceitação com ressalva documentada.)",
-        "Selecione o pacote de análises ou métodos pretendidos, imprima as etiquetas de Amostra e Contentor e clique em Confirmar Receção. (Expected: É gerado um comprovativo de receção auditável, o estado passa para REGISTERED e abrem-se os portões de DRYING e PREPARATION.)"
+        "Selecione o pacote de análises ou métodos pretendidos, imprima as etiquetas de Amostra e Contentor e clique em Confirmar Receção. (Expected: É gerado um comprovativo de receção auditável, o estado passa para ACCEPTED e abrem-se os portões de DRYING e PREPARATION.)"
       ],
       "caution": "Atenção: A mass deficit is present or the container is damaged. — Compare a etiqueta física com os registos em /reception, resolva a exceção (rejeitar ou aceitar com ressalva) e clique em Confirmar Receção.",
       "related": [
@@ -1400,7 +1400,7 @@
             },
             {
               "action": "Selecione o pacote de análises ou métodos pretendidos, imprima as etiquetas de Amostra e Contentor e clique em Confirmar Receção.",
-              "expected": "É gerado um comprovativo de receção auditável, o estado passa para REGISTERED e abrem-se os portões de DRYING e PREPARATION."
+              "expected": "É gerado um comprovativo de receção auditável, o estado passa para ACCEPTED e abrem-se os portões de DRYING e PREPARATION."
             }
           ]
         }
@@ -1439,7 +1439,7 @@
       "steps": [
         "Abra a Receção (/reception) e selecione o modo de entrada (Remessa/Consignment, Entrada direta ou Chegadas esperadas KoBo). (Expected: O formulário de receção ou a fila de chegadas esperadas do seu laboratório é carregado.)",
         "Compare o código do saco, valide os metadados/coordenadas e registe a massa recebida (g) e o estado de chegada (Use parameter names, method variants and grouped panels before handover.). (Expected: Qualquer desvio (massa insuficiente ou saco danificado) é sinalizado para permitir rejeição ou aceitação com ressalva documentada.)",
-        "Selecione o pacote de análises ou métodos pretendidos, imprima as etiquetas de Amostra e Contentor e clique em Confirmar Receção. (Expected: É gerado um comprovativo de receção auditável, o estado passa para REGISTERED e abrem-se os portões de DRYING e PREPARATION.)"
+        "Selecione o pacote de análises ou métodos pretendidos, imprima as etiquetas de Amostra e Contentor e clique em Confirmar Receção. (Expected: É gerado um comprovativo de receção auditável, o estado passa para ACCEPTED e abrem-se os portões de DRYING e PREPARATION.)"
       ],
       "caution": "Atenção: Texture fractions appear as three separate choices. — Compare a etiqueta física com os registos em /reception, resolva a exceção (rejeitar ou aceitar com ressalva) e clique em Confirmar Receção.",
       "related": [
@@ -1485,7 +1485,7 @@
             },
             {
               "action": "Selecione o pacote de análises ou métodos pretendidos, imprima as etiquetas de Amostra e Contentor e clique em Confirmar Receção.",
-              "expected": "É gerado um comprovativo de receção auditável, o estado passa para REGISTERED e abrem-se os portões de DRYING e PREPARATION."
+              "expected": "É gerado um comprovativo de receção auditável, o estado passa para ACCEPTED e abrem-se os portões de DRYING e PREPARATION."
             }
           ]
         }
@@ -1524,7 +1524,7 @@
       "steps": [
         "Abra a Receção (/reception) e selecione o modo de entrada (Remessa/Consignment, Entrada direta ou Chegadas esperadas KoBo). (Expected: O formulário de receção ou a fila de chegadas esperadas do seu laboratório é carregado.)",
         "Compare o código do saco, valide os metadados/coordenadas e registe a massa recebida (g) e o estado de chegada (Compare label, source and existing records without creating a second intake.). (Expected: Qualquer desvio (massa insuficiente ou saco danificado) é sinalizado para permitir rejeição ou aceitação com ressalva documentada.)",
-        "Selecione o pacote de análises ou métodos pretendidos, imprima as etiquetas de Amostra e Contentor e clique em Confirmar Receção. (Expected: É gerado um comprovativo de receção auditável, o estado passa para REGISTERED e abrem-se os portões de DRYING e PREPARATION.)"
+        "Selecione o pacote de análises ou métodos pretendidos, imprima as etiquetas de Amostra e Contentor e clique em Confirmar Receção. (Expected: É gerado um comprovativo de receção auditável, o estado passa para ACCEPTED e abrem-se os portões de DRYING e PREPARATION.)"
       ],
       "caution": "Atenção: A scan returns two candidates or none. — Compare a etiqueta física com os registos em /reception, resolva a exceção (rejeitar ou aceitar com ressalva) e clique em Confirmar Receção.",
       "related": [
@@ -1569,7 +1569,7 @@
             },
             {
               "action": "Selecione o pacote de análises ou métodos pretendidos, imprima as etiquetas de Amostra e Contentor e clique em Confirmar Receção.",
-              "expected": "É gerado um comprovativo de receção auditável, o estado passa para REGISTERED e abrem-se os portões de DRYING e PREPARATION."
+              "expected": "É gerado um comprovativo de receção auditável, o estado passa para ACCEPTED e abrem-se os portões de DRYING e PREPARATION."
             }
           ]
         }
@@ -1608,7 +1608,7 @@
       "steps": [
         "Abra a Receção (/reception) e selecione o modo de entrada (Remessa/Consignment, Entrada direta ou Chegadas esperadas KoBo). (Expected: O formulário de receção ou a fila de chegadas esperadas do seu laboratório é carregado.)",
         "Compare o código do saco, valide os metadados/coordenadas e registe a massa recebida (g) e o estado de chegada (Identify final receipt action, receipt evidence and the next responsible role.). (Expected: Qualquer desvio (massa insuficiente ou saco danificado) é sinalizado para permitir rejeição ou aceitação com ressalva documentada.)",
-        "Selecione o pacote de análises ou métodos pretendidos, imprima as etiquetas de Amostra e Contentor e clique em Confirmar Receção. (Expected: É gerado um comprovativo de receção auditável, o estado passa para REGISTERED e abrem-se os portões de DRYING e PREPARATION.)"
+        "Selecione o pacote de análises ou métodos pretendidos, imprima as etiquetas de Amostra e Contentor e clique em Confirmar Receção. (Expected: É gerado um comprovativo de receção auditável, o estado passa para ACCEPTED e abrem-se os portões de DRYING e PREPARATION.)"
       ],
       "caution": "Atenção: A draft is saved but the receiving queue has not changed. — Compare a etiqueta física com os registos em /reception, resolva a exceção (rejeitar ou aceitar com ressalva) e clique em Confirmar Receção.",
       "related": [
@@ -2259,7 +2259,7 @@
       "minutes": 3,
       "quick": "Check the applicable preparation steps and record completion for the correct material. Em /workbench, confirme a amostra física, registe a temperatura real de secagem (< 40 °C), a duração e o crivo utilizado (2 mm ou < 100 µm para MIR) e clique em Confirm Complete para desbloquear as análises de bancada.",
       "before": [
-        "Confirme que a amostra foi recebida (REGISTERED) e que o código de barras coincide com o tabuleiro de secagem.",
+        "Confirme que a amostra foi recebida (ACCEPTED) e que o código de barras coincide com o tabuleiro de secagem.",
         "Verifique se o laboratório exige verificação por segunda pessoa (gate.verificationRequired)."
       ],
       "sections": [
@@ -2276,7 +2276,7 @@
             },
             {
               "action": "Clique em Confirm Complete (e obtenha verificação de supervisor se gate.verificationRequired estiver ativo) e consulte o comprovativo.",
-              "expected": "É gravado um registo PreparationRecord permanente e as tarefas analíticas passam para READY_FOR_ANALYSIS."
+              "expected": "É gravado um registo PreparationRecord permanente e as tarefas analíticas ficam desbloqueadas para análise (ASSIGNED / IN_PROGRESS)."
             }
           ]
         }
@@ -2316,7 +2316,7 @@
       "steps": [
         "Abra /workbench e selecione a amostra ou grupo de amostras na fila de DRYING ou PREPARATION. (Expected: A lista de verificação apresenta os parâmetros de secagem (< 40 °C) e crivagem/moagem aplicáveis.)",
         "Realize as verificações físicas e registe a temperatura, duração, malha do crivo e massa preparada (Check the applicable preparation steps and record completion for the correct material.). (Expected: Cada amostra apresenta os dados validados; desmarque qualquer amostra que ainda não tenha sido fisicamente preparada antes de confirmar em lote.)",
-        "Clique em Confirm Complete (e obtenha verificação de supervisor se gate.verificationRequired estiver ativo) e consulte o comprovativo. (Expected: É gravado um registo PreparationRecord permanente e as tarefas analíticas passam para READY_FOR_ANALYSIS.)"
+        "Clique em Confirm Complete (e obtenha verificação de supervisor se gate.verificationRequired estiver ativo) e consulte o comprovativo. (Expected: É gravado um registo PreparationRecord permanente e as tarefas analíticas ficam desbloqueadas para análise (ASSIGNED / IN_PROGRESS).)"
       ],
       "caution": "Atenção: An analysis requires a different preparation pathway. — Consulte o separador Preparação e o comprovativo da amostra, conclua o portão em falta ou abra uma nova tentativa de preparação auditada.",
       "related": [
@@ -2448,7 +2448,7 @@
       "minutes": 3,
       "quick": "Compare selected items and each sample's evidence before a permitted bulk action. Em /workbench, confirme a amostra física, registe a temperatura real de secagem (< 40 °C), a duração e o crivo utilizado (2 mm ou < 100 µm para MIR) e clique em Confirm Complete para desbloquear as análises de bancada.",
       "before": [
-        "Confirme que a amostra foi recebida (REGISTERED) e que o código de barras coincide com o tabuleiro de secagem.",
+        "Confirme que a amostra foi recebida (ACCEPTED) e que o código de barras coincide com o tabuleiro de secagem.",
         "Verifique se o laboratório exige verificação por segunda pessoa (gate.verificationRequired)."
       ],
       "sections": [
@@ -2465,7 +2465,7 @@
             },
             {
               "action": "Clique em Confirm Complete (e obtenha verificação de supervisor se gate.verificationRequired estiver ativo) e consulte o comprovativo.",
-              "expected": "É gravado um registo PreparationRecord permanente e as tarefas analíticas passam para READY_FOR_ANALYSIS."
+              "expected": "É gravado um registo PreparationRecord permanente e as tarefas analíticas ficam desbloqueadas para análise (ASSIGNED / IN_PROGRESS)."
             }
           ]
         }
@@ -2505,7 +2505,7 @@
       "steps": [
         "Abra /workbench e selecione a amostra ou grupo de amostras na fila de DRYING ou PREPARATION. (Expected: A lista de verificação apresenta os parâmetros de secagem (< 40 °C) e crivagem/moagem aplicáveis.)",
         "Realize as verificações físicas e registe a temperatura, duração, malha do crivo e massa preparada (Compare selected items and each sample's evidence before a permitted bulk action.). (Expected: Cada amostra apresenta os dados validados; desmarque qualquer amostra que ainda não tenha sido fisicamente preparada antes de confirmar em lote.)",
-        "Clique em Confirm Complete (e obtenha verificação de supervisor se gate.verificationRequired estiver ativo) e consulte o comprovativo. (Expected: É gravado um registo PreparationRecord permanente e as tarefas analíticas passam para READY_FOR_ANALYSIS.)"
+        "Clique em Confirm Complete (e obtenha verificação de supervisor se gate.verificationRequired estiver ativo) e consulte o comprovativo. (Expected: É gravado um registo PreparationRecord permanente e as tarefas analíticas ficam desbloqueadas para análise (ASSIGNED / IN_PROGRESS).)"
       ],
       "caution": "Atenção: One selected sample was not physically prepared. — Consulte o separador Preparação e o comprovativo da amostra, conclua o portão em falta ou abra uma nova tentativa de preparação auditada.",
       "related": [
@@ -2534,7 +2534,7 @@
       "minutes": 3,
       "quick": "Explain the evidence-gap state and who may document verification or a new attempt. Em /workbench, confirme a amostra física, registe a temperatura real de secagem (< 40 °C), a duração e o crivo utilizado (2 mm ou < 100 µm para MIR) e clique em Confirm Complete para desbloquear as análises de bancada.",
       "before": [
-        "Confirme que a amostra foi recebida (REGISTERED) e que o código de barras coincide com o tabuleiro de secagem.",
+        "Confirme que a amostra foi recebida (ACCEPTED) e que o código de barras coincide com o tabuleiro de secagem.",
         "Verifique se o laboratório exige verificação por segunda pessoa (gate.verificationRequired)."
       ],
       "sections": [
@@ -2551,7 +2551,7 @@
             },
             {
               "action": "Clique em Confirm Complete (e obtenha verificação de supervisor se gate.verificationRequired estiver ativo) e consulte o comprovativo.",
-              "expected": "É gravado um registo PreparationRecord permanente e as tarefas analíticas passam para READY_FOR_ANALYSIS."
+              "expected": "É gravado um registo PreparationRecord permanente e as tarefas analíticas ficam desbloqueadas para análise (ASSIGNED / IN_PROGRESS)."
             }
           ]
         }
@@ -2591,7 +2591,7 @@
       "steps": [
         "Abra /workbench e selecione a amostra ou grupo de amostras na fila de DRYING ou PREPARATION. (Expected: A lista de verificação apresenta os parâmetros de secagem (< 40 °C) e crivagem/moagem aplicáveis.)",
         "Realize as verificações físicas e registe a temperatura, duração, malha do crivo e massa preparada (Explain the evidence-gap state and who may document verification or a new attempt.). (Expected: Cada amostra apresenta os dados validados; desmarque qualquer amostra que ainda não tenha sido fisicamente preparada antes de confirmar em lote.)",
-        "Clique em Confirm Complete (e obtenha verificação de supervisor se gate.verificationRequired estiver ativo) e consulte o comprovativo. (Expected: É gravado um registo PreparationRecord permanente e as tarefas analíticas passam para READY_FOR_ANALYSIS.)"
+        "Clique em Confirm Complete (e obtenha verificação de supervisor se gate.verificationRequired estiver ativo) e consulte o comprovativo. (Expected: É gravado um registo PreparationRecord permanente e as tarefas analíticas ficam desbloqueadas para análise (ASSIGNED / IN_PROGRESS).)"
       ],
       "caution": "Atenção: A legacy Done flag exists without a checklist receipt. — Consulte o separador Preparação e o comprovativo da amostra, conclua o portão em falta ou abra uma nova tentativa de preparação auditada.",
       "related": [
@@ -2620,7 +2620,7 @@
       "minutes": 3,
       "quick": "Preserve original evidence and route a permitted new preparation attempt. Em /workbench, confirme a amostra física, registe a temperatura real de secagem (< 40 °C), a duração e o crivo utilizado (2 mm ou < 100 µm para MIR) e clique em Confirm Complete para desbloquear as análises de bancada.",
       "before": [
-        "Confirme que a amostra foi recebida (REGISTERED) e que o código de barras coincide com o tabuleiro de secagem.",
+        "Confirme que a amostra foi recebida (ACCEPTED) e que o código de barras coincide com o tabuleiro de secagem.",
         "Verifique se o laboratório exige verificação por segunda pessoa (gate.verificationRequired)."
       ],
       "sections": [
@@ -2637,7 +2637,7 @@
             },
             {
               "action": "Clique em Confirm Complete (e obtenha verificação de supervisor se gate.verificationRequired estiver ativo) e consulte o comprovativo.",
-              "expected": "É gravado um registo PreparationRecord permanente e as tarefas analíticas passam para READY_FOR_ANALYSIS."
+              "expected": "É gravado um registo PreparationRecord permanente e as tarefas analíticas ficam desbloqueadas para análise (ASSIGNED / IN_PROGRESS)."
             }
           ]
         }
@@ -2677,7 +2677,7 @@
       "steps": [
         "Abra /workbench e selecione a amostra ou grupo de amostras na fila de DRYING ou PREPARATION. (Expected: A lista de verificação apresenta os parâmetros de secagem (< 40 °C) e crivagem/moagem aplicáveis.)",
         "Realize as verificações físicas e registe a temperatura, duração, malha do crivo e massa preparada (Preserve original evidence and route a permitted new preparation attempt.). (Expected: Cada amostra apresenta os dados validados; desmarque qualquer amostra que ainda não tenha sido fisicamente preparada antes de confirmar em lote.)",
-        "Clique em Confirm Complete (e obtenha verificação de supervisor se gate.verificationRequired estiver ativo) e consulte o comprovativo. (Expected: É gravado um registo PreparationRecord permanente e as tarefas analíticas passam para READY_FOR_ANALYSIS.)"
+        "Clique em Confirm Complete (e obtenha verificação de supervisor se gate.verificationRequired estiver ativo) e consulte o comprovativo. (Expected: É gravado um registo PreparationRecord permanente e as tarefas analíticas ficam desbloqueadas para análise (ASSIGNED / IN_PROGRESS).)"
       ],
       "caution": "Atenção: Staff attempt to overwrite the old confirmation. — Consulte o separador Preparação e o comprovativo da amostra, conclua o portão em falta ou abra uma nova tentativa de preparação auditada.",
       "related": [
@@ -4499,7 +4499,7 @@
       "problems": [
         {
           "symptom": "A newly expected sample is mistaken for completed lab work.",
-          "why": "A política de revisão por segunda pessoa (review.secondPersonRequired) impede a autoaprovação, existe um pré-requisito/CQ pendente ou a amostra já está REPORTED e requer Emenda formal.",
+          "why": "A política de revisão por segunda pessoa (review.secondPersonRequired) impede a autoaprovação, existe um pré-requisito/CQ pendente ou a amostra já está APPROVED / RELEASED e requer Emenda formal.",
           "action": "Verifique o motivo de bloqueio no botão, peça a outro Revisor/Gestor para aprovar trabalho medido por si, ou utilize Emendar Amostra para relatórios já emitidos."
         }
       ],
@@ -4585,7 +4585,7 @@
       "problems": [
         {
           "symptom": "Assignment exists but preparation has not been confirmed.",
-          "why": "A política de revisão por segunda pessoa (review.secondPersonRequired) impede a autoaprovação, existe um pré-requisito/CQ pendente ou a amostra já está REPORTED e requer Emenda formal.",
+          "why": "A política de revisão por segunda pessoa (review.secondPersonRequired) impede a autoaprovação, existe um pré-requisito/CQ pendente ou a amostra já está APPROVED / RELEASED e requer Emenda formal.",
           "action": "Verifique o motivo de bloqueio no botão, peça a outro Revisor/Gestor para aprovar trabalho medido por si, ou utilize Emendar Amostra para relatórios já emitidos."
         }
       ],
@@ -4790,7 +4790,7 @@
       "problems": [
         {
           "symptom": "An ambiguous return note leads to another incorrect submission.",
-          "why": "A política de revisão por segunda pessoa (review.secondPersonRequired) impede a autoaprovação, existe um pré-requisito/CQ pendente ou a amostra já está REPORTED e requer Emenda formal.",
+          "why": "A política de revisão por segunda pessoa (review.secondPersonRequired) impede a autoaprovação, existe um pré-requisito/CQ pendente ou a amostra já está APPROVED / RELEASED e requer Emenda formal.",
           "action": "Verifique o motivo de bloqueio no botão, peça a outro Revisor/Gestor para aprovar trabalho medido por si, ou utilize Emendar Amostra para relatórios já emitidos."
         }
       ],
@@ -4877,7 +4877,7 @@
       "problems": [
         {
           "symptom": "The approval button is disabled by an unresolved prerequisite.",
-          "why": "A política de revisão por segunda pessoa (review.secondPersonRequired) impede a autoaprovação, existe um pré-requisito/CQ pendente ou a amostra já está REPORTED e requer Emenda formal.",
+          "why": "A política de revisão por segunda pessoa (review.secondPersonRequired) impede a autoaprovação, existe um pré-requisito/CQ pendente ou a amostra já está APPROVED / RELEASED e requer Emenda formal.",
           "action": "Verifique o motivo de bloqueio no botão, peça a outro Revisor/Gestor para aprovar trabalho medido por si, ou utilize Emendar Amostra para relatórios já emitidos."
         }
       ],
@@ -4963,7 +4963,7 @@
       "problems": [
         {
           "symptom": "The report omits a derived texture class or uses an old result.",
-          "why": "A política de revisão por segunda pessoa (review.secondPersonRequired) impede a autoaprovação, existe um pré-requisito/CQ pendente ou a amostra já está REPORTED e requer Emenda formal.",
+          "why": "A política de revisão por segunda pessoa (review.secondPersonRequired) impede a autoaprovação, existe um pré-requisito/CQ pendente ou a amostra já está APPROVED / RELEASED e requer Emenda formal.",
           "action": "Verifique o motivo de bloqueio no botão, peça a outro Revisor/Gestor para aprovar trabalho medido por si, ou utilize Emendar Amostra para relatórios já emitidos."
         }
       ],
@@ -5050,7 +5050,7 @@
       "problems": [
         {
           "symptom": "Staff attempt to edit a released result in place.",
-          "why": "A política de revisão por segunda pessoa (review.secondPersonRequired) impede a autoaprovação, existe um pré-requisito/CQ pendente ou a amostra já está REPORTED e requer Emenda formal.",
+          "why": "A política de revisão por segunda pessoa (review.secondPersonRequired) impede a autoaprovação, existe um pré-requisito/CQ pendente ou a amostra já está APPROVED / RELEASED e requer Emenda formal.",
           "action": "Verifique o motivo de bloqueio no botão, peça a outro Revisor/Gestor para aprovar trabalho medido por si, ou utilize Emendar Amostra para relatórios já emitidos."
         }
       ],
@@ -5137,7 +5137,7 @@
       "problems": [
         {
           "symptom": "An expired or superseded public report link is forwarded.",
-          "why": "A política de revisão por segunda pessoa (review.secondPersonRequired) impede a autoaprovação, existe um pré-requisito/CQ pendente ou a amostra já está REPORTED e requer Emenda formal.",
+          "why": "A política de revisão por segunda pessoa (review.secondPersonRequired) impede a autoaprovação, existe um pré-requisito/CQ pendente ou a amostra já está APPROVED / RELEASED e requer Emenda formal.",
           "action": "Verifique o motivo de bloqueio no botão, peça a outro Revisor/Gestor para aprovar trabalho medido por si, ou utilize Emendar Amostra para relatórios já emitidos."
         }
       ],
@@ -5224,7 +5224,7 @@
       "problems": [
         {
           "symptom": "A partial review is taken as final approval of the entire sample.",
-          "why": "A política de revisão por segunda pessoa (review.secondPersonRequired) impede a autoaprovação, existe um pré-requisito/CQ pendente ou a amostra já está REPORTED e requer Emenda formal.",
+          "why": "A política de revisão por segunda pessoa (review.secondPersonRequired) impede a autoaprovação, existe um pré-requisito/CQ pendente ou a amostra já está APPROVED / RELEASED e requer Emenda formal.",
           "action": "Verifique o motivo de bloqueio no botão, peça a outro Revisor/Gestor para aprovar trabalho medido por si, ou utilize Emendar Amostra para relatórios já emitidos."
         }
       ],
@@ -6578,7 +6578,7 @@
       "quick": "Explain project identity, country/lab scope and enabled data flows. Utilize /projects para configurar o âmbito do projeto, sincronizar registos de campo KoBoToolbox (que entram como EXPECTED até à receção física), acompanhar o progresso e exportar resultados aprovados ou confirmar recibos de entrega NSIS / OpenNSIS.",
       "before": [
         "Confirme o âmbito de projeto, país e laboratório autorizado no topo do ecrã.",
-        "Lembre-se de que apenas amostras nos estados APPROVED ou REPORTED (RELEASED) são incluídas em exportações externas e na API Data Exchange."
+        "Lembre-se de que apenas amostras nos estados APPROVED ou RELEASED são incluídas em exportações externas e na API Data Exchange."
       ],
       "sections": [
         {
@@ -6601,9 +6601,9 @@
       ],
       "fields": [
         [
-          "EXPECTED vs. REGISTERED vs. APPROVED",
+          "EXPECTED vs. ACCEPTED vs. APPROVED",
           "Contadores do ciclo de vida",
-          "Submissões KoBo entram como EXPECTED; só passam a REGISTERED após receção física do saco no laboratório."
+          "Submissões KoBo entram como EXPECTED; só passam a ACCEPTED após receção física do saco no laboratório."
         ],
         [
           "Referência de Perfil",
@@ -6768,7 +6768,7 @@
       "quick": "Explain where source corrections belong and how reconciliation works. Utilize /projects para configurar o âmbito do projeto, sincronizar registos de campo KoBoToolbox (que entram como EXPECTED até à receção física), acompanhar o progresso e exportar resultados aprovados ou confirmar recibos de entrega NSIS / OpenNSIS.",
       "before": [
         "Confirme o âmbito de projeto, país e laboratório autorizado no topo do ecrã.",
-        "Lembre-se de que apenas amostras nos estados APPROVED ou REPORTED (RELEASED) são incluídas em exportações externas e na API Data Exchange."
+        "Lembre-se de que apenas amostras nos estados APPROVED ou RELEASED são incluídas em exportações externas e na API Data Exchange."
       ],
       "sections": [
         {
@@ -6791,9 +6791,9 @@
       ],
       "fields": [
         [
-          "EXPECTED vs. REGISTERED vs. APPROVED",
+          "EXPECTED vs. ACCEPTED vs. APPROVED",
           "Contadores do ciclo de vida",
-          "Submissões KoBo entram como EXPECTED; só passam a REGISTERED após receção física do saco no laboratório."
+          "Submissões KoBo entram como EXPECTED; só passam a ACCEPTED após receção física do saco no laboratório."
         ],
         [
           "Referência de Perfil",
@@ -6858,7 +6858,7 @@
       "quick": "Validate identifiers and source completeness before the lab receives material. Utilize /projects para configurar o âmbito do projeto, sincronizar registos de campo KoBoToolbox (que entram como EXPECTED até à receção física), acompanhar o progresso e exportar resultados aprovados ou confirmar recibos de entrega NSIS / OpenNSIS.",
       "before": [
         "Confirme o âmbito de projeto, país e laboratório autorizado no topo do ecrã.",
-        "Lembre-se de que apenas amostras nos estados APPROVED ou REPORTED (RELEASED) são incluídas em exportações externas e na API Data Exchange."
+        "Lembre-se de que apenas amostras nos estados APPROVED ou RELEASED são incluídas em exportações externas e na API Data Exchange."
       ],
       "sections": [
         {
@@ -6881,9 +6881,9 @@
       ],
       "fields": [
         [
-          "EXPECTED vs. REGISTERED vs. APPROVED",
+          "EXPECTED vs. ACCEPTED vs. APPROVED",
           "Contadores do ciclo de vida",
-          "Submissões KoBo entram como EXPECTED; só passam a REGISTERED após receção física do saco no laboratório."
+          "Submissões KoBo entram como EXPECTED; só passam a ACCEPTED após receção física do saco no laboratório."
         ],
         [
           "Referência de Perfil",
@@ -6949,7 +6949,7 @@
       "quick": "Distinguish expected, received, active, submitted, approved and reported counts. Utilize /projects para configurar o âmbito do projeto, sincronizar registos de campo KoBoToolbox (que entram como EXPECTED até à receção física), acompanhar o progresso e exportar resultados aprovados ou confirmar recibos de entrega NSIS / OpenNSIS.",
       "before": [
         "Confirme o âmbito de projeto, país e laboratório autorizado no topo do ecrã.",
-        "Lembre-se de que apenas amostras nos estados APPROVED ou REPORTED (RELEASED) são incluídas em exportações externas e na API Data Exchange."
+        "Lembre-se de que apenas amostras nos estados APPROVED ou RELEASED são incluídas em exportações externas e na API Data Exchange."
       ],
       "sections": [
         {
@@ -6972,9 +6972,9 @@
       ],
       "fields": [
         [
-          "EXPECTED vs. REGISTERED vs. APPROVED",
+          "EXPECTED vs. ACCEPTED vs. APPROVED",
           "Contadores do ciclo de vida",
-          "Submissões KoBo entram como EXPECTED; só passam a REGISTERED após receção física do saco no laboratório."
+          "Submissões KoBo entram como EXPECTED; só passam a ACCEPTED após receção física do saco no laboratório."
         ],
         [
           "Referência de Perfil",
@@ -7039,7 +7039,7 @@
       "quick": "Explain exported revision, units, scope and raw versus interpreted data. Utilize /data-results para configurar o âmbito do projeto, sincronizar registos de campo KoBoToolbox (que entram como EXPECTED até à receção física), acompanhar o progresso e exportar resultados aprovados ou confirmar recibos de entrega NSIS / OpenNSIS.",
       "before": [
         "Confirme o âmbito de projeto, país e laboratório autorizado no topo do ecrã.",
-        "Lembre-se de que apenas amostras nos estados APPROVED ou REPORTED (RELEASED) são incluídas em exportações externas e na API Data Exchange."
+        "Lembre-se de que apenas amostras nos estados APPROVED ou RELEASED são incluídas em exportações externas e na API Data Exchange."
       ],
       "sections": [
         {
@@ -7062,9 +7062,9 @@
       ],
       "fields": [
         [
-          "EXPECTED vs. REGISTERED vs. APPROVED",
+          "EXPECTED vs. ACCEPTED vs. APPROVED",
           "Contadores do ciclo de vida",
-          "Submissões KoBo entram como EXPECTED; só passam a REGISTERED após receção física do saco no laboratório."
+          "Submissões KoBo entram como EXPECTED; só passam a ACCEPTED após receção física do saco no laboratório."
         ],
         [
           "Referência de Perfil",
@@ -7129,7 +7129,7 @@
       "quick": "Distinguish a generated file from confirmed external delivery and a rejected transfer. Utilize /data-results para configurar o âmbito do projeto, sincronizar registos de campo KoBoToolbox (que entram como EXPECTED até à receção física), acompanhar o progresso e exportar resultados aprovados ou confirmar recibos de entrega NSIS / OpenNSIS.",
       "before": [
         "Confirme o âmbito de projeto, país e laboratório autorizado no topo do ecrã.",
-        "Lembre-se de que apenas amostras nos estados APPROVED ou REPORTED (RELEASED) são incluídas em exportações externas e na API Data Exchange."
+        "Lembre-se de que apenas amostras nos estados APPROVED ou RELEASED são incluídas em exportações externas e na API Data Exchange."
       ],
       "sections": [
         {
@@ -7152,9 +7152,9 @@
       ],
       "fields": [
         [
-          "EXPECTED vs. REGISTERED vs. APPROVED",
+          "EXPECTED vs. ACCEPTED vs. APPROVED",
           "Contadores do ciclo de vida",
-          "Submissões KoBo entram como EXPECTED; só passam a REGISTERED após receção física do saco no laboratório."
+          "Submissões KoBo entram como EXPECTED; só passam a ACCEPTED após receção física do saco no laboratório."
         ],
         [
           "Referência de Perfil",
@@ -7219,7 +7219,7 @@
       "quick": "Explain coordinates, location confidence and display limitations. Utilize /maps para configurar o âmbito do projeto, sincronizar registos de campo KoBoToolbox (que entram como EXPECTED até à receção física), acompanhar o progresso e exportar resultados aprovados ou confirmar recibos de entrega NSIS / OpenNSIS.",
       "before": [
         "Confirme o âmbito de projeto, país e laboratório autorizado no topo do ecrã.",
-        "Lembre-se de que apenas amostras nos estados APPROVED ou REPORTED (RELEASED) são incluídas em exportações externas e na API Data Exchange."
+        "Lembre-se de que apenas amostras nos estados APPROVED ou RELEASED são incluídas em exportações externas e na API Data Exchange."
       ],
       "sections": [
         {
@@ -7242,9 +7242,9 @@
       ],
       "fields": [
         [
-          "EXPECTED vs. REGISTERED vs. APPROVED",
+          "EXPECTED vs. ACCEPTED vs. APPROVED",
           "Contadores do ciclo de vida",
-          "Submissões KoBo entram como EXPECTED; só passam a REGISTERED após receção física do saco no laboratório."
+          "Submissões KoBo entram como EXPECTED; só passam a ACCEPTED após receção física do saco no laboratório."
         ],
         [
           "Referência de Perfil",
@@ -8835,7 +8835,7 @@
             },
             {
               "action": "Realize a verificação operacional: Follow assigned work from preparation to reviewer handoff using five demo samples. [Canonical successor: start-technician]",
-              "expected": "Cada amostra ou tarefa indica claramente o seu estado (EXPECTED, IN_PREP, READY_FOR_ANALYSIS, SUBMITTED, APPROVED, REPORTED) e o próximo responsável."
+              "expected": "Cada amostra ou tarefa indica claramente o seu estado (EXPECTED, RECEIVED, ACCEPTED, IN_PROGRESS, SUBMITTED, APPROVED, RELEASED) e o próximo responsável."
             },
             {
               "action": "Abra o comprovativo ou histórico de auditoria para confirmar os passos anteriores antes de prosseguir.",
@@ -8878,7 +8878,7 @@
       ],
       "steps": [
         "Abra /workbench e consulte os contadores da fila, os estados e o âmbito do laboratório. (Expected: Apenas os registos pertencentes ao seu laboratório e projetos autorizados são apresentados.)",
-        "Realize a verificação operacional: Follow assigned work from preparation to reviewer handoff using five demo samples. [Canonical successor: start-technician] (Expected: Cada amostra ou tarefa indica claramente o seu estado (EXPECTED, IN_PREP, READY_FOR_ANALYSIS, SUBMITTED, APPROVED, REPORTED) e o próximo responsável.)",
+        "Realize a verificação operacional: Follow assigned work from preparation to reviewer handoff using five demo samples. [Canonical successor: start-technician] (Expected: Cada amostra ou tarefa indica claramente o seu estado (EXPECTED, RECEIVED, ACCEPTED, IN_PROGRESS, SUBMITTED, APPROVED, RELEASED) e o próximo responsável.)",
         "Abra o comprovativo ou histórico de auditoria para confirmar os passos anteriores antes de prosseguir. (Expected: A rastreabilidade mantém-se íntegra sem alterar registos bloqueados.)"
       ],
       "caution": "Atenção: A completed worksheet is mistaken for submitted work. — Limpe os filtros em /workbench, verifique os pré-requisitos da amostra e confirme as permissões com o Gestor de Laboratório.",
@@ -10223,7 +10223,7 @@
             },
             {
               "action": "Realize a verificação operacional: Apply session or profile settings without changing laboratory data. [Canonical successor: start-settings]",
-              "expected": "Cada amostra ou tarefa indica claramente o seu estado (EXPECTED, IN_PREP, READY_FOR_ANALYSIS, SUBMITTED, APPROVED, REPORTED) e o próximo responsável."
+              "expected": "Cada amostra ou tarefa indica claramente o seu estado (EXPECTED, RECEIVED, ACCEPTED, IN_PROGRESS, SUBMITTED, APPROVED, RELEASED) e o próximo responsável."
             },
             {
               "action": "Abra o comprovativo ou histórico de auditoria para confirmar os passos anteriores antes de prosseguir.",
@@ -10266,7 +10266,7 @@
       ],
       "steps": [
         "Abra /profile e consulte os contadores da fila, os estados e o âmbito do laboratório. (Expected: Apenas os registos pertencentes ao seu laboratório e projetos autorizados são apresentados.)",
-        "Realize a verificação operacional: Apply session or profile settings without changing laboratory data. [Canonical successor: start-settings] (Expected: Cada amostra ou tarefa indica claramente o seu estado (EXPECTED, IN_PREP, READY_FOR_ANALYSIS, SUBMITTED, APPROVED, REPORTED) e o próximo responsável.)",
+        "Realize a verificação operacional: Apply session or profile settings without changing laboratory data. [Canonical successor: start-settings] (Expected: Cada amostra ou tarefa indica claramente o seu estado (EXPECTED, RECEIVED, ACCEPTED, IN_PROGRESS, SUBMITTED, APPROVED, RELEASED) e o próximo responsável.)",
         "Abra o comprovativo ou histórico de auditoria para confirmar os passos anteriores antes de prosseguir. (Expected: A rastreabilidade mantém-se íntegra sem alterar registos bloqueados.)"
       ],
       "caution": "Atenção: A language switch appears to change a displayed number. — Limpe os filtros em /profile, verifique os pré-requisitos da amostra e confirme as permissões com o Gestor de Laboratório.",
