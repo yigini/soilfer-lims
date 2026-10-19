@@ -13,45 +13,15 @@ const ComplianceChecklist = ({
     onUploadPhoto,
     onRemovePhoto,
     uploadingPhoto = false,
-    isWalkIn = false
+    rules
 }) => {
     const { t } = useLanguage();
+    if (!rules) return <p role="status">{t('intakeRules.loading')}</p>;
 
-    const CHECKLIST_ITEMS = [
-        {
-            key: 'container',
-            label: t('reception.containerIntact', 'Container Intact / Sealed'),
-            tooltip: t('reception.containerTooltip', 'Verify the sample bag or container is not torn, open, or leaking. Compromised containers may lead to contamination.'),
-            failHint: 'e.g. Bag torn, lid loose, visible leakage...'
-        },
-        {
-            key: 'label',
-            label: t('reception.labelLegible', 'Label Legible & Matches ID'),
-            tooltip: t('reception.labelTooltip', 'Confirm the label on the container matches the scanned/entered Sample ID. Illegible labels risk misidentification.'),
-            failHint: 'e.g. Smudged ink, wrong ID on label...'
-        },
-        {
-            key: 'quantity',
-            label: t('reception.quantitySufficient', 'Sample Quantity Sufficient'),
-            tooltip: t('reception.quantityTooltip', 'Ensure there is enough material (~500g minimum) to perform all requested analyses.'),
-            failHint: 'e.g. Less than 200g, half-empty bag...'
-        },
-        {
-            key: 'condition',
-            label: t('reception.conditionDry', 'Sample Condition (Dry, No Contam.)'),
-            tooltip: t('reception.conditionTooltip', 'Check that the sample is air-dry and free of visible contaminants (rocks, roots, mold, excessive moisture).'),
-            failHint: 'e.g. Wet/muddy, contains large roots, mold...'
-        },
-        {
-            key: 'coc',
-            label: t('reception.cocPresent', 'Chain of Custody Present'),
-            tooltip: t('reception.cocTooltip', 'A Chain of Custody document should accompany the sample, recording who collected and delivered it.'),
-            failHint: 'e.g. No CoC form, missing signatures...'
-        }
-    ];
-
-    // Helper: N/A is strictly prohibited for standard criteria, and permitted for CoC only when isWalkIn is true
-    const isNAAllowed = (key) => key === 'coc' && Boolean(isWalkIn);
+    const CHECKLIST_ITEMS = Object.entries(rules?.criteria || {}).filter(([, rule]) => rule.enabled).map(([key, rule]) => ({
+        key, ...rule, label: t(rule.label), tooltip: t(rule.help), failHint: t(rule.failHint)
+    }));
+    const isNAAllowed = key => Boolean(rules?.criteria[key]?.naAllowed);
 
     // value = { items: { container: { status: 'PASS'|'FAIL'|'NA'|undefined, note: '' } }, nonConformance: false, reason: '' }
 
@@ -66,8 +36,8 @@ const ComplianceChecklist = ({
             ...currentItems,
             [key]: { ...currentItems[key], status }
         };
-        const anyFail = Object.values(newItems).some(it => it?.status === 'FAIL');
-        const wasAnyFail = Object.values(currentItems).some(it => it?.status === 'FAIL');
+        const anyFail = CHECKLIST_ITEMS.some(item => newItems[item.key]?.status === 'FAIL');
+        const wasAnyFail = CHECKLIST_ITEMS.some(item => currentItems[item.key]?.status === 'FAIL');
 
         // Check if an independent other-problem was recorded or active
         // Legacy draft: otherProblem is undefined, but nonConformance is true and no items failed.
@@ -118,13 +88,13 @@ const ComplianceChecklist = ({
     ).length;
     const pendingCount = totalItems - checkedCount;
     const anyFail = failCount > 0;
-    const hasUnanswered = pendingCount > 0;
+    const hasUnanswered = CHECKLIST_ITEMS.some(item => item.required && !value?.items?.[item.key]?.status);
 
     // Derived routine compliant outcome:
     // All items checked, none failed, and every item is either PASS or permitted NA (#113)
     const allCompliant = !hasUnanswered && !anyFail && CHECKLIST_ITEMS.every(item => {
         const s = value?.items?.[item.key]?.status;
-        return s === 'PASS' || (s === 'NA' && isNAAllowed(item.key));
+        return (!s && !item.required) || s === 'PASS' || (s === 'NA' && isNAAllowed(item.key));
     });
 
     // Explicit other-problem route (uncovered by checklist):
@@ -214,7 +184,7 @@ const ComplianceChecklist = ({
                                     )}
                                     <span className={`font-medium text-sm truncate ${isFail ? 'text-red-800 dark:text-red-400' : isNA ? 'text-sf-muted' : isPending ? 'text-amber-900 dark:text-amber-400' : 'text-sf-text'
                                         }`}>
-                                        {item.label}
+                                        {item.label} {item.required && <span aria-label={t('intakeRules.required')}>*</span>}
                                     </span>
                                     {isFail && (
                                         <span className="text-[10px] font-black uppercase text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/40 px-1.5 py-0.5 rounded flex items-center gap-0.5">
@@ -273,11 +243,7 @@ const ComplianceChecklist = ({
                                                     ? 'bg-gray-500 text-white shadow-sm ring-2 ring-gray-400 active:scale-95'
                                                     : 'bg-sf-surface border border-sf-divider text-sf-muted hover:border-sf-divider hover:text-sf-text active:scale-95'
                                         }`}
-                                        title={!isNAAllowed(item.key)
-                                            ? (item.key === 'coc'
-                                                ? t('reception.cocNAShipmentDisabled', 'Chain of Custody N/A is permitted only for informal walk-in drop-offs')
-                                                : t('reception.naNotPermitted', 'N/A is not permitted for mandatory reception criteria'))
-                                            : 'Not Applicable'}
+                                        title={!isNAAllowed(item.key) ? t('intakeRules.naDisabled') : t('intakeRules.naAllowed')}
                                     >
                                         N/A
                                     </button>
@@ -304,7 +270,7 @@ const ComplianceChecklist = ({
             <div className="flex gap-2">
                 <button
                     onClick={() => {
-                        const newItems = {};
+                        const newItems = { ...value?.items };
                         CHECKLIST_ITEMS.forEach(item => {
                             newItems[item.key] = { ...value?.items?.[item.key], status: 'PASS' };
                         });
@@ -324,7 +290,7 @@ const ComplianceChecklist = ({
                 </button>
                 <button
                     onClick={() => {
-                        const newItems = {};
+                        const newItems = { ...value?.items };
                         CHECKLIST_ITEMS.forEach(item => {
                             newItems[item.key] = { status: undefined, note: '' };
                         });

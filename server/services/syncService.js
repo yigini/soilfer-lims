@@ -768,8 +768,9 @@ class SyncService {
                     const originalId = op.payload?.originalId || op.payload?.sampleId;
                     if (!originalId) throw new Error('Sample identifier is required');
 
-                    const sampleLab = user.labId || op.payload?.labId;
-                    if (!sampleLab && user.role !== 'SUPER_ADMIN') {
+                    const sampleLab = user.labId || (require('../utils/scopeGuard').hasGlobalAccess(user)
+                        ? op.payload?.assignedLab || op.payload?.labId : null);
+                    if (!sampleLab) {
                         receipts.push({
                             operationId: opId,
                             status: 'REJECTED',
@@ -797,23 +798,18 @@ class SyncService {
                     let savedReceipt = null;
                     const sampleId = 'SMP-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6);
                     await prisma.$transaction(async (tx) => {
-                        const receptionData = JSON.stringify({
-                            notes: op.payload?.notes || null,
-                            capturedAtLocal: op.capturedAtLocal || null
-                        });
-
-                        await createSample({
-                                id: sampleId,
-                                originalId,
-                                labId: sampleLab,
-                                assignedLab: sampleLab,
-                                status: 'EXPECTED'
-                            }, user, { tx });
-                        await transitionSample(sampleId, 'RECEIVED', user, 'Offline specimen received', {
-                                receptionDate: new Date(op.capturedAtLocal || Date.now()),
-                                receivedBy: user.username,
-                                receptionData
-                            }, tx, { action: 'SAMPLE_RECEIVED' });
+                        const intake = require('./intakeService');
+                        const body = { ...op.payload, originalId, capturedAtLocal: op.capturedAtLocal || null };
+                        const actor = { ...user, labId: sampleLab };
+                        // A queued final decision has the same acceptance authority as
+                        // online intake. A receipt-only command remains arrival pending.
+                        const finalDecision = ['ACCEPTED', 'REJECTED', 'REJECT'].includes(body.decision) || body.isDraft === true;
+                        const result = finalDecision ? (await intake.intake(tx, { body, user: actor })).sample
+                            : await intake.receiveSample(tx, { body, user: actor,
+                                createDataFactory: async () => ({ id: sampleId, originalId,
+                                    projectId: body.projectId || null, projectCode: body.projectCode || null,
+                                    metadata: JSON.stringify(!body.projectId && !body.projectCode && body.isWalkIn === true ? { origin: 'DESK_WALKIN' } : {}) }) });
+                        const receivedId = result.id;
 
                         savedReceipt = await CommandReceiptService.recordReceipt(tx, {
                             idempotencyKey: opId,
@@ -821,10 +817,10 @@ class SyncService {
                             targetResource: targetResource,
                             actor: user.username,
                             status: 'SUCCESS',
-                            outcome: { sampleId, originalId, status: 'RECEIVED' }
+                            outcome: { sampleId: receivedId, originalId, status: result.status }
                         });
 
-                        outcome = { sampleId, originalId, status: 'RECEIVED' };
+                        outcome = { sampleId: receivedId, originalId, status: result.status };
                     });
                     savedReceiptId = savedReceipt?.id;
                 } else {

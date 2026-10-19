@@ -4,6 +4,20 @@ import { useLanguage } from '../../context/LanguageContext';
 import QcRules from './QcRules';
 
 export function PolicyValueEditor({ definition, value, onChange, t }) {
+    if (definition.type === 'intakeRules') return <div className="space-y-4">{Object.entries(value).map(([profile, groups]) =>
+        <fieldset key={profile} className="border rounded p-3"><legend>{t(`intakeRules.profiles.${profile}`)}</legend>
+            {Object.entries(groups).map(([group, fields]) => <div key={group} className="space-y-2">
+                <h4 className="font-semibold">{t(`intakeRules.groups.${group}`)}</h4>
+                {Object.entries(fields).map(([name, flags]) => <div key={name} className="flex flex-wrap gap-3">
+                    <span>{t(definition.intakeFields[group][name].label)}</span>
+                    {Object.entries(flags).map(([flag, checked]) => <label key={flag}>
+                        <input type="checkbox" aria-label={`${t(`intakeRules.profiles.${profile}`)}: ${t(definition.intakeFields[group][name].label)}: ${t(`intakeRules.flags.${flag}`)}`}
+                            checked={checked} onChange={event => onChange({ ...value, [profile]: { ...groups, [group]: { ...fields, [name]: { ...flags, [flag]: event.target.checked } } } })} />
+                        {t(`intakeRules.flags.${flag}`)}
+                    </label>)}
+                </div>)}
+            </div>)}
+        </fieldset>)}</div>;
     if (definition.type === 'reportAmendmentTemplate') return <div className="space-y-2">
         <select aria-label={t('policies.keys.report_amendedStatement')} value={value === null ? 'default' : 'custom'}
             onChange={event => onChange(event.target.value === 'default' ? null : JSON.parse(JSON.stringify(definition.localizedDefaults)))}>
@@ -91,6 +105,8 @@ export default function LabPolicies({ labId }) {
         finally { setSaving(false); }
     };
     const display = (definition, value) => {
+        if (definition.type === 'intakeRules') return Object.entries(value).map(([profile, groups]) =>
+            `${t(`intakeRules.profiles.${profile}`)}: ${Object.values(groups).flatMap(fields => Object.values(fields)).filter(rule => rule.enabled).length} ${t('intakeRules.enabledItems')}`).join('; ');
         if (value === null) return t(definition.type === 'integer' ? 'policies.noLimit' : 'policies.none');
         if (typeof value === 'boolean') return t(value ? 'policies.yes' : 'policies.no');
         if (definition.type === 'westgard') return ['reject','warn','review'].map(kind => `${t(`policies.${kind}`)}: ${(value[kind] || []).join(', ') || '—'}`).join('; ');

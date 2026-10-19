@@ -6,6 +6,9 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 import BatchExceptionModal from './BatchExceptionModal';
+import ComplianceChecklist from './ComplianceChecklist';
+import IntakeContextFields from './IntakeContextFields';
+import useIntakeRules from './useIntakeRules';
 import ManifestImportModal from './ManifestImportModal';
 import LabelPrintDialog from '../common/LabelPrintDialog';
 import { playSuccessChime, playErrorBuzz } from '../../utils/audioCues';
@@ -41,16 +44,12 @@ const BatchIntake = ({
         analysisBundle: analysisGroups[0]?.id || '',
         requiredAnalyses: analysisGroups[0]?.analyses || ['PH_H2O'],
         compositeRadiusM: '',
-        depthTopCm: 0,
-        depthBottomCm: 20,
-        checklist: {
-            container: { status: 'PASS' },
-            label: { status: 'PASS' },
-            quantity: { status: 'PASS' },
-            condition: { status: 'PASS' },
-            coc: { status: 'PASS' }
-        }
+        samplingDetails: {},
+        checklist: { items: {}, nonConformance: false, reason: '' }
     });
+
+    const { rules: intakeRules, error: intakeRulesFailed } = useIntakeRules({ projectId: consignment.projectCode,
+        isWalkIn: !consignment.projectCode, labId: user?.labId });
 
     // --- SAMPLES LIST IN BATCH ---
     const [samples, setSamples] = useState([]);
@@ -150,8 +149,7 @@ const BatchIntake = ({
                 latitude: foundExpected?.coordinates?.lat ?? null,
                 longitude: foundExpected?.coordinates?.lng ?? null,
                 positionalUncertaintyM: foundExpected?.coordinates?.accuracy ?? null,
-                depthTopCm: defaults.depthTopCm,
-                depthBottomCm: defaults.depthBottomCm,
+                sampleId: foundExpected?.id,
                 siteName: foundExpected?.location || null,
                 village: null,
                 admin1: foundExpected?.country || null,
@@ -223,8 +221,7 @@ const BatchIntake = ({
                 defaults: {
                     foreignMaterial: defaults.foreignMaterial,
                     requiredAnalyses: defaults.requiredAnalyses,
-                    depthTopCm: defaults.depthTopCm,
-                    depthBottomCm: defaults.depthBottomCm,
+                    samplingDetails: defaults.samplingDetails,
                     compositeRadiusM: defaults.compositeRadiusM ? parseFloat(defaults.compositeRadiusM) : null,
                     checklist: defaults.checklist
                 },
@@ -531,23 +528,7 @@ const BatchIntake = ({
                         </select>
                     </div>
 
-                    <div className="flex items-center gap-1.5">
-                        <span className="text-sf-muted">Depths:</span>
-                        <input
-                            type="number"
-                            value={defaults.depthTopCm}
-                            onChange={(e) => setDefaults(prev => ({ ...prev, depthTopCm: e.target.value }))}
-                            className="w-14 p-1.5 rounded-lg border border-sf-divider bg-sf-surface text-sf-text text-xs text-center"
-                        />
-                        <span>-</span>
-                        <input
-                            type="number"
-                            value={defaults.depthBottomCm}
-                            onChange={(e) => setDefaults(prev => ({ ...prev, depthBottomCm: e.target.value }))}
-                            className="w-14 p-1.5 rounded-lg border border-sf-divider bg-sf-surface text-sf-text text-xs text-center"
-                        />
-                        <span>cm</span>
-                    </div>
+
                 </div>
             </div>
 
@@ -557,6 +538,15 @@ const BatchIntake = ({
                 {t('batchIntake.applyToAll')}
             </button>
             {massCheckFailed && <p className="text-amber-700 text-sm" role="alert">{t('batchIntake.massCheckFailed')}</p>}
+
+            <section className="bg-sf-surface p-4 border rounded-xl space-y-4">
+                <h3 className="font-semibold">{t('intakeRules.batchObservations')}</h3>
+                <p>{t('intakeRules.batchHelp')}</p>
+                {intakeRulesFailed && <p role="alert">{t('intakeRules.unavailable')}</p>}
+                <ComplianceChecklist rules={intakeRules} value={defaults.checklist} onChange={checklist => setDefaults(previous => ({ ...previous, checklist }))} />
+                <IntakeContextFields rules={intakeRules} sampling={defaults.samplingDetails} setSampling={update => setDefaults(previous => ({ ...previous,
+                    samplingDetails: typeof update === 'function' ? update(previous.samplingDetails) : update }))} />
+            </section>
 
             {/* Fast Rapid-Scan Intake Bar & Running Counter */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -762,6 +752,9 @@ const BatchIntake = ({
                     isOpen={true}
                     sample={samples[editingSampleIdx]}
                     index={editingSampleIdx}
+                    defaults={defaults}
+                    projectId={consignment.projectCode}
+                    labId={user?.labId}
                     onClose={() => setEditingSampleIdx(null)}
                     onSave={handleUpdateSample}
                 />

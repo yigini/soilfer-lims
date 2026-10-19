@@ -38,6 +38,7 @@ function harness(name) {
             if (dependency === 'axios') return axios;
             if (dependency === 'lucide-react') return new Proxy({}, { get: () => () => null });
             if (dependency.includes('LanguageContext')) return { useLanguage: () => ({ t: key => key }) };
+            if (dependency.includes('useIntakeRules')) return () => ({ rules: require('../helpers/intakeRulesFixture')() });
             if (dependency.includes('audioCues')) return { playSuccessChime() {}, playErrorBuzz() {} };
             if (dependency.includes('coordParser')) return { parseCoordinates: () => ({ lat: 14.5, lng: -89.4, uncertaintyM: 10 }) };
             if (dependency.includes('spreadsheetImport')) return { MAX_FILE_SIZE: 5242880 };
@@ -70,6 +71,10 @@ describe('Audit 0.12: batch observation entry and explicit actions', () => {
         let payload = await submit();
         expect(payload.samples[0]).toMatchObject({ receivedMass: null, moistureOnArrival: null, massWarningAcknowledged: false, positionalUncertaintyM: null });
         expect(payload.bulkApplications).toEqual([]);
+        expect(payload.defaults.checklist.items).toEqual({});
+        expect(payload.defaults.samplingDetails).toEqual({});
+        expect(payload.samples[0]).not.toHaveProperty('depthTopCm');
+        expect(payload.samples[0]).not.toHaveProperty('depthBottomCm');
         button(h.render(props), 'batchIntake.applyToAll').props.onClick();
         tree = h.render(props);
         field(tree, 'batchIntake.massToApply').props.onChange({ target: { value: '650' } });
