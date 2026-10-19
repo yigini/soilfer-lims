@@ -1,120 +1,54 @@
-# Roles & Permissions
+# Roles, Permissions & Separation of Duties
 
-SoilFER-LIMS uses **role-based access control (RBAC)**, meaning each user is assigned a role that determines what they can see and do. This ensures that lab technicians can't accidentally modify system settings, and reception staff can't approve results.
-
----
-
-## Role Overview
-
-| Role | Summary | Available In |
-|------|---------|-------------|
-| **Super Admin** | Full system control — creates labs, manages all users | Global mode only |
-| **Lab Manager** | Runs one laboratory — manages staff, reviews results, configures settings | Both modes |
-| **Lab Technician** | Performs analyses and enters results | Both modes |
-| **Sample Reception** | Receives samples and manages the intake queue | Both modes |
-| **Project Manager** | Views project data and exports reports (read-only) | Both modes |
+SoilFER LIMS uses **Role-Based Access Control (RBAC)** together with configurable **Separation-of-Duties** rules so that every person in the laboratory sees the screens they need while preventing accidental or unauthorized changes to analytical records.
 
 ---
 
-## Detailed Permissions
+## 1. Overview of Laboratory Roles
 
-### Super Admin (Global Mode Only)
-
-The Super Admin is the highest-level administrator. This role only exists in Global mode, because in Local mode there's only one lab and the Lab Manager handles everything.
-
-**Can do:**
-- Create, edit, and delete laboratories
-- Create and manage users across all laboratories
-- Manage institutional partner branding and logos (`MANAGE_BRANDING`)
-- Issue and revoke Machine-to-Machine SIS API Keys
-- View system-wide statistics and dashboards
-- Change system-level settings
-- Access all data across all laboratories
-
-**Typical user:** National programme coordinator, IT administrator
+| Role | Who Typically Holds It | Main Responsibilities |
+| :--- | :--- | :--- |
+| **Super Admin (`SUPER_ADMIN`)** | National programme coordinator or IT administrator *(Global multi-lab mode)* | Creates and manages laboratories, manages users across labs, configures branding, and issues/rotates Data Exchange API keys. |
+| **Lab Manager / Admin (`LAB_MANAGER` / `ADMIN`)** | Head of laboratory, quality manager, or lab director | Configures laboratory policies and presets, manages lab staff and methods, approves batches and samples, issues and amends Certificates of Analysis, and manages equipment/proficiency testing. |
+| **Technical Reviewer (`REVIEWER`)** | Senior chemist or section supervisor | Performs Stage 1 (batch/method) and Stage 2 (whole-sample) technical reviews, selects reported values, returns work items for repeat testing, and co-signs scientific amendments. |
+| **Lab Technician (`TECHNICIAN`)** | Bench analyst, wet-chemistry technician, or spectroscopy operator | Performs drying and preparation gates, builds and runs analytical QC batches, records measurements on the workbench or shared bench terminals, performs self-repeats (`R2`), and uploads spectral files. |
+| **Sample Reception (`SAMPLE_RECEPTION` / `RECEPTIONIST`)** | Sample intake clerk or reception officer | Registers incoming consignments and walk-in samples, synchronizes KoboToolbox field submissions, records arrival condition and archive storage locations, and prints container barcodes. |
+| **Project Manager / Client (`PROJECT_MANAGER` / `CLIENT`)** | Project coordinator, agronomist, or institutional submitter | Tracks sample progress, views approved results and sampling maps, and downloads PDF Certificates of Analysis or CSV/Excel exports (read-only). |
 
 ---
 
-### Lab Manager
+## 2. Permission Matrix by Workflow Area
 
-The Lab Manager is responsible for day-to-day operations of a single laboratory. In Local mode, this is the highest role available.
+| Action / Screen | Reception | Technician | Reviewer | Lab Manager | Super Admin | Project Manager |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| Register consignments, walk-ins & Kobo intake | ✅ | ❌ | ❌ | ✅ | ✅ | ❌ |
+| Print sample & sub-sample container labels | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
+| Record Drying (`DRYING`) & Prep (`PREPARATION`) gates | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
+| Build analytical batches & record bench results | ❌ | ✅ | ✅ | ✅ | ✅ | ❌ |
+| Trigger self-repeat (`R2`) before batch submission | ❌ | ✅* | ✅ | ✅ | ✅ | ❌ |
+| Stage 1 Batch Review & QC Caveat acceptance | ❌ | ❌ | ✅* | ✅* | ✅* | ❌ |
+| Stage 2 Sample Approval & Reported Value Selection | ❌ | ❌ | ✅* | ✅* | ✅* | ❌ |
+| Issue PDF Certificates of Analysis | ❌ | ❌ | ✅ | ✅ | ✅ | ❌ |
+| Authorize Post-Report Sample Amendment | ❌ | ❌ | ✅* | ✅* | ✅* | ❌ |
+| Manage Equipment, Reference Materials & PT rounds | ❌ | View / Log | ✅ | ✅ | ✅ | ❌ |
+| Change Laboratory Policy Settings & Presets | ❌ | ❌ | ❌ | ✅ | ✅ | ❌ |
+| Manage Labs & External NSIS Data Exchange Keys | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ |
+| View Dashboards, Maps & Export Approved Data | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ |
 
-**Can do:**
-- Create and manage users within their laboratory
-- Assign samples and work items to technicians
-- Review submissions and approve/reject/waive analytical results
-- Authorize QC Batch disposition overrides (`PROCEED_WITH_WARNING`, `REANALYZE_BATCH`)
-- Configure which analyses and procedures the lab offers
-- Create and manage projects
-- Generate and digitally sign PDF Certificates of Analysis
-- View equipment calibration and inventory records
-- Manage KoboToolbox integration settings
-
-**Cannot do:**
-- Access data from other laboratories (in Global mode)
-- Create new laboratories (in Global mode)
-- Modify global institutional branding without Super Admin role
-
-**Typical user:** Head of laboratory, senior chemist, lab director
+*\*Subject to your laboratory's configured Separation-of-Duties policy settings (see Section 3 below).*
 
 ---
 
-### Lab Technician
+## 3. Configurable Separation-of-Duties Rules
 
-Lab Technicians are the users who physically perform soil analyses and enter results into the system.
+In accredited laboratories (ISO/IEC 17025), the person who performs a measurement must not be the same person who approves it. Because staffing varies across laboratories, these rules are configurable in **Settings → Laboratory Policy**:
 
-**Can do:**
-- View samples and work items assigned to them
-- Create and run analytical QC batches (Blanks, Duplicates, CRMs)
-- Trigger automated batch pass/fail evaluations
-- Enter analysis results with optimistic draft saving
-- Submit results for manager review
-- View their personal bench queue and work history
-- Upload spectral data (MIR / VIS-NIR)
-
-**Cannot do:**
-- Approve results or issue Certificates of Analysis
-- Override failed QC batches
-- Create or manage users
-- Change laboratory settings
-- Delete samples
-
-**Typical user:** Soil chemist, lab analyst, junior scientist
-
----
-
-### Sample Reception
-
-Reception staff handle the initial intake of physical soil samples when they arrive at the laboratory.
-
-**Can do:**
-- Register new samples (assign lab IDs, record observations)
-- View and manage the reception queue
-- Match incoming samples with KoboToolbox field submissions
-- Mark samples as received, rejected, or requiring additional information
-
-**Cannot do:**
-- Enter analysis results
-- Approve results
-- Manage users or settings
-
-**Typical user:** Lab receptionist, sample intake clerk
-
----
-
-### Project Manager
-
-Project Managers have read-only access to project data and reports. They can monitor progress but cannot modify data.
-
-**Can do:**
-- View project dashboards and statistics
-- View sample statuses and results
-- Export data to Excel, CSV, or PDF
-- View maps of sampling locations
-
-**Cannot do:**
-- Create or modify samples
-- Enter or approve results
-- Change any settings
-
-**Typical user:** Project coordinator, client representative, external reviewer
+1. **Independent Second-Person Review (`review.secondPersonRequired`)**:
+   - **When `true`** *(default in `ISO17025_STRICT` and `BASIC` presets)*: Even if a user holds a Reviewer or Lab Manager role, the LIMS blocks them from reviewing or approving any batch or work item where they recorded the analytical results themselves. A second qualified Reviewer or Lab Manager must approve that work.
+   - **When `false`** *(default in `ADVISORY` preset)*: A single Lab Manager in a small 1–2 person lab can both record and approve results.
+2. **Second-Person Authorization for Amendments (`report.amendmentRequiresSecondPerson`)**:
+   - **When `true`** *(default in `ISO17025_STRICT` and `BASIC` presets)*: Opening a post-report **Scientific Amendment** (`SCIENTIFIC`) on an already-reported sample requires a second Reviewer or Lab Manager to co-sign the amendment request.
+3. **Second-Person Verification on Prep Gates (`gate.verificationRequired`)**:
+   - Can be enabled independently for **`DRYING`** and **`PREPARATION`** so a supervisor must verify drying temperatures and sieving records before analytical work items unlock.
+4. **Shared Bench Terminal PIN Attribution (`bench.pinAtRecord` & `bench.idleLockMinutes`)**:
+   - When multiple technicians share a rugged tablet or balance terminal in the wet lab, `bench.pinAtRecord = true` prompts the operator for their personal **4–6 digit PIN** whenever they record a weight, moisture reading, or analytical measurement—ensuring the audit trail always attributes the measurement to the exact individual at the bench.
