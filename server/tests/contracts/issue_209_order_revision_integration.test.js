@@ -1,4 +1,5 @@
 const fs = require('node:fs');
+const path = require('node:path');
 const { randomUUID, createHash } = require('node:crypto');
 const Database = require('better-sqlite3');
 const { qcGateFixture } = require('../helpers/qcGateFixture');
@@ -255,7 +256,7 @@ test('order revisions enforce permission and laboratory scope before changing re
     expect(await rows(f)).toEqual(before);
 });
 
-test('the read-only kit collector preserves an active WAL triple and accounts for every nested retained snapshot', async () => {
+test('the read-only kit collector preserves an active WAL triple and its evidence without leaking nested schema snapshots', async () => {
     const f = await fixture({ revisions: 3, historicalOpen: true });
     const writer = new Database(f.file, { fileMustExist: true });
     try {
@@ -266,7 +267,11 @@ test('the read-only kit collector preserves an active WAL triple and accounts fo
         expect(before['-wal']).not.toBeNull(); expect(triples(f.file)).toEqual(before);
         expect(result).toMatchObject({ classification: 'PRE_209', access: 'RETAINED_SNAPSHOT_ONLY', totalChanges: 0,
             originalFilesPreserved: true, productionMutations: 0, impact: { multipleActiveSampleCount: 1, continuingReservedOpenCount: 1 } });
-        expect(result.retainedAllocation.files.filter(row => row.path.endsWith('snapshot.db')).length).toBeGreaterThanOrEqual(2);
+        expect(result.retainedAllocation.files.filter(row => row.path.endsWith('snapshot.db'))).toEqual([]);
+        const evidenceFiles = ['exit-original.json', 'stderr-original.log', 'stdout-original.json'];
+        expect(result.retainedAllocation.files.map(row => path.basename(row.path)).sort()).toEqual(evidenceFiles);
+        expect(fs.readdirSync(result.retainedAllocation.root).sort()).toEqual(evidenceFiles);
+        expect(result.readonlySnapshot).not.toHaveProperty('path');
         expect(result.retainedAllocation.conservativeAllocationBytes).toBeGreaterThanOrEqual(result.retainedAllocation.logicalBytes);
         for (const retained of result.retainedAllocation.files) {
             expect(fs.existsSync(retained.path)).toBe(true);
