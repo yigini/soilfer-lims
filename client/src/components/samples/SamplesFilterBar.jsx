@@ -74,7 +74,7 @@ const SamplesFilterBar = ({
             <div className="flex flex-col lg:flex-row lg:flex-wrap gap-3 items-stretch lg:items-center justify-between">
 
                 {/* Operational Views Navigation (#120) */}
-                <div className="flex bg-sf-canvas p-1 rounded-xl border border-sf-divider gap-1 shrink-0 overflow-x-auto">
+                <div className="flex min-w-0 max-w-full lg:max-w-[calc(100%_-_11rem)] bg-sf-canvas p-1 rounded-xl border border-sf-divider gap-1 shrink-0 overflow-x-auto">
                     <button
                         type="button"
                         onClick={() => handleViewClick('daily')}
@@ -159,7 +159,7 @@ const SamplesFilterBar = ({
                     </div>
 
                     {/* Quick Filters */}
-                    <div className="flex min-w-0 max-w-full lg:flex-1 lg:basis-52 gap-1.5 items-center">
+                    <div className="flex min-w-0 max-w-full lg:flex-1 lg:basis-44 gap-1.5 items-center">
                         <div className="flex flex-nowrap overflow-x-auto min-w-0 max-w-full gap-1 items-center p-1 bg-sf-canvas rounded-xl border border-sf-divider">
                             {QUICK_FILTERS.map(qf => {
                                 const active = isFilterActive(qf);

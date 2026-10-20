@@ -55,17 +55,18 @@ async function checkMobileLayout({ chromium, artifactDir }) {
         import ManagerQueue from './src/pages/ManagerQueue.jsx';
         import SamplesHeader from './src/components/samples/SamplesHeader.jsx';
         import SamplesFilterBar from './src/components/samples/SamplesFilterBar.jsx';
-        const facets={lifecycle:{EXPECTED:40223,RECEIVED:12,ACCEPTED:5,ONGOING:1,COMPLETED:3,HISTORY:10,REJECTED:4}};
+        const facets={views:{daily:40223,expected:123,registry:40237},lifecycle:{EXPECTED:40223,RECEIVED:12,ACCEPTED:5,ONGOING:1,COMPLETED:3,HISTORY:10,REJECTED:4}};
         const noop=()=>{};
         function SamplesFixture(){
             const [activeFilters,setFilters]=useState({});
             const toggle=(key,value)=>{window.__mobileLayoutClicks.push({key,value});setFilters({[key]:value});};
             return <div className=${JSON.stringify(samplesPageClass[1])}>
                 <section id="samples-header"><SamplesHeader facets={facets} onSync={noop} onExport={noop} onToggleQuickFilter={toggle}/></section>
-                <section id="samples-filter"><SamplesFilterBar search="" onSearchChange={noop} activeFilters={activeFilters} onToggleQuickFilter={toggle} onOpenAdvanced={noop} onReset={noop} totalResults={40223} facets={facets} page={1} pages={10} onPageChange={noop}/></section>
+                <section id="samples-filter"><SamplesFilterBar search="" onSearchChange={noop} activeFilters={activeFilters} onToggleQuickFilter={toggle} onOpenAdvanced={noop} onReset={noop} totalResults={40223} facets={facets} page={1} pages={10} onPageChange={noop} onViewChange={view=>window.__mobileLayoutViews.push(view)}/></section>
             </div>;
         }
         window.__mobileLayoutClicks=[];
+        window.__mobileLayoutViews=[];
         const manager=new URLSearchParams(location.search).get('screen')==='manager';
         createRoot(document.getElementById('root')).render(<MemoryRouter initialEntries={[manager?'/manager-queue':'/samples']}><AppShell>{manager?<ManagerQueue/>:<SamplesFixture/>}</AppShell></MemoryRouter>);
     `;
@@ -141,6 +142,16 @@ async function checkMobileLayout({ chromium, artifactDir }) {
                 assert.equal(await stages.count(), 6);
                 for (const stage of await stages.all()) await stage.click();
                 assert.deepEqual(await page.evaluate(() => window.__mobileLayoutClicks.at(-1)), { key: 'status', value: 'ARCHIVED,DISPOSED' });
+                const viewLabels = clientRequire('./src/translations/' + lang + '.json').samplesSection.views;
+                for (const view of ['daily', 'expected', 'registry']) {
+                    const button = page.getByRole('button', { name: viewLabels[view] });
+                    await button.click();
+                    assert.equal(await page.evaluate(() => window.__mobileLayoutViews.at(-1)), view);
+                    assert.ok(await button.evaluate(el => {
+                        const button = el.getBoundingClientRect(), strip = el.parentElement.getBoundingClientRect();
+                        return button.left >= strip.left - 1 && button.right <= strip.right + 1;
+                    }));
+                }
             } finally { await context.close(); }
         }
     } finally {
