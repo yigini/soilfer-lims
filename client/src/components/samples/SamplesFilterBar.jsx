@@ -71,10 +71,10 @@ const SamplesFilterBar = ({
 
     return (
         <div className="sticky top-0 z-20 bg-sf-surface/95 backdrop-blur-md border-b border-sf-divider py-3 mb-4 shadow-sm px-4">
-            <div className="flex flex-col lg:flex-row gap-3 items-stretch lg:items-center justify-between">
+            <div className="flex flex-col lg:flex-row lg:flex-wrap gap-3 items-stretch lg:items-center justify-between">
 
                 {/* Operational Views Navigation (#120) */}
-                <div className="flex bg-sf-canvas p-1 rounded-xl border border-sf-divider gap-1 shrink-0 overflow-x-auto">
+                <div className="flex min-w-0 max-w-full lg:max-w-[calc(100%_-_11rem)] bg-sf-canvas p-1 rounded-xl border border-sf-divider gap-1 shrink-0 overflow-x-auto">
                     <button
                         type="button"
                         onClick={() => handleViewClick('daily')}
@@ -134,9 +134,9 @@ const SamplesFilterBar = ({
                     </button>
                 </div>
 
-                <div className="flex min-w-0 flex-1 flex-col sm:flex-row sm:items-center gap-3 w-full lg:w-auto">
+                <div className="flex min-w-0 flex-1 flex-col sm:flex-row sm:items-center gap-3 w-full lg:contents">
                     {/* Search */}
-                    <div className="relative min-w-0 w-full sm:flex-1 max-w-md">
+                    <div className="relative min-w-[10rem] w-full sm:flex-1 max-w-md">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-sf-muted" size={16} />
                         <input
                             type="text"
@@ -159,8 +159,8 @@ const SamplesFilterBar = ({
                     </div>
 
                     {/* Quick Filters */}
-                    <div className="flex min-w-0 max-w-full gap-1.5 items-center">
-                        <div className="flex flex-wrap min-w-0 max-w-full gap-1 items-center p-1 bg-sf-canvas rounded-xl border border-sf-divider">
+                    <div className="flex min-w-0 max-w-full lg:flex-1 lg:basis-44 gap-1.5 items-center">
+                        <div className="flex flex-nowrap overflow-x-auto min-w-0 max-w-full gap-1 items-center p-1 bg-sf-canvas rounded-xl border border-sf-divider">
                             {QUICK_FILTERS.map(qf => {
                                 const active = isFilterActive(qf);
                                 const Icon = qf.icon;
@@ -214,7 +214,7 @@ const SamplesFilterBar = ({
                                         setLocalSearch('');
                                         onReset();
                                     }}
-                                    className="ml-0.5 p-1.5 text-sf-muted hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all duration-200"
+                                    className="shrink-0 ml-0.5 p-1.5 text-sf-muted hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all duration-200"
                                     title={t('samplesSection.filterBar.clearAll', 'Clear all filters')}
                                 >
                                     <X size={14} />
