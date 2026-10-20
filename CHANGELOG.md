@@ -7,6 +7,70 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.10.3] - 2026-10-20
+
+### Fixed
+- Keep Samples quick filters in one scrolling row and preserve search width when desktop view tabs and pagination wrap, including Spanish with the sidebar open (#321).
+
+## [1.10.2] - 2026-10-19
+
+### Fixed
+- Prevent overlapping Manager Queue tabs and keep Samples quick filters and lifecycle stages within the mobile viewport (#102).
+
+## [1.10.1] - 2026-10-19
+
+### Fixed
+- Remove temporary read-only schema review copies after their final reader finishes, preserving original database, WAL and SHM hash evidence.
+
+## [1.10.0] - 2026-10-19
+
+### Added
+- Configurable laboratory reception criteria and sample context for project and walk-in intake; physical arrival stays pending until final acceptance requirements are answered (#156).
+
+### Changed
+- Sample context is enabled and optional by default in both reception profiles; walk-in sampling depth no longer has a separate client-only requirement (#156).
+- Catch-up release metadata for the following changes shipped since 1.9.0:
+  - One transactional result write service across entry paths (#182).
+  - Sample holds and safe intake rejection/undo (#183).
+  - Reference material catalogue for CRM, in-house soil and check standards (#184).
+  - Laboratory and method QC policy rules (#185).
+  - Real QC run positions and append-only evaluations (#186).
+  - QC batch verdict gates for review and publication (#187).
+  - QC position entry in the worksheet grid (#188).
+  - QC audit history, proficiency scoring and equipment readiness (#189).
+  - One retained execution attempt per measurement (#190).
+  - Reasoned repeat and transcription correction commands (#191).
+  - Explicit reported-value selection across attempts (#192).
+  - Linked nonconformity records and repeat-limit assessment (#193).
+  - Run-first workbench with recorded run provenance (#194).
+  - Scoped barcode-driven workbench entry (#195).
+  - Keyboard grid navigation with retained decimal input (#196).
+  - Live value validation and reasoned override requests (#197).
+  - Replicate and duplicate measurement entry (#198).
+  - Raw calculation evidence, templates and calibration revisions (#199).
+  - Reviewed instrument-file import with retained source evidence (#200).
+  - Cross-parameter plausibility review (#201).
+  - Shared bench sessions with idle lock and analyst switching (#202).
+  - Bench density controls and printable run worksheets (#203).
+  - Reused workbench queue reads within a request (#204).
+  - Structured preparation records and moisture-factor evidence (#205).
+  - Physical sample containers and immutable aliquot links (#206).
+  - Controlled storage, custody events and retention policy (#207).
+  - Issued-code labels and audited print/reprint requests (#208).
+  - Reasoned order revisions bound to execution evidence (#209).
+  - Scientific amendments with a separate authoriser (#210).
+  - Report revisions issued through approved amendments (#211).
+  - Report content tied to recorded results and approval evidence (#212).
+  - Reported-value exports with retained selection provenance (#213).
+  - Frozen control-chart limits and QC review evidence (#214).
+  - Scoped, reconciled laboratory QA dashboard (#215).
+  - Reviewed LOD/LOQ proposals from blank history (#216).
+  - Redacted controller errors and updated QC documentation (#217).
+  - Partial repeat replacement preserving result and attempt lineage (#261).
+
+### Fixed
+- Header Light and Dark choices now update the session appearance override (#317).
+
 ## [1.9.0] - 2026-10-05
 
 ### Added

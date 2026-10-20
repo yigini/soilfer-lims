@@ -3,6 +3,7 @@ const path = require('path');
 const vm = require('vm');
 const esbuild = require('../../../client/node_modules/esbuild');
 const React = require('../../../client/node_modules/react');
+const intakeRulesFixture = require('../helpers/intakeRulesFixture');
 
 function elements(tree, predicate) {
     if (Array.isArray(tree)) return tree.flatMap(node => elements(node, predicate));
@@ -33,6 +34,7 @@ function harness(page, { offline, axios = {}, search = '' } = {}) {
             if (name.includes('DialogContext')) return { useDialog: () => ({ showDialog }) };
             if (name.includes('AnalysisCatalogueContext')) return { useAnalysisNames: () => code => code };
             if (name.includes('offlineDb')) return { getOfflineSample: offline };
+            if (name.includes('useIntakeRules')) return () => ({ rules: intakeRulesFixture(false), loading: false, error: '' });
             if (name.includes('coordinateResolver')) return { resolveCoordinates: () => ({ isRecorded: false }) };
             if (name.includes('mapConfig')) return { parseCoordinates: () => null };
             if (name.includes('audioCues')) return new Proxy({}, { get: () => () => {} });

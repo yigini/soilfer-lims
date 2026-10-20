@@ -81,17 +81,19 @@ function review(target, source, startupContext) {
         const reader = require('../utils/startupReadinessContext').openReadonlyDatabase(Database, target, { readonly: true, fileMustExist: true }, startupContext);
         try { return reader.transaction(() => classify(reader, source))(); } finally { reader.close(); }
     }
-    // SQLite read-only opens can create WAL/SHM files. Review a retained copy instead.
+    // SQLite read-only opens can create WAL/SHM files. Review a temporary copy instead.
     const before = fileHashes(target), directory = fs.mkdtempSync(path.join(os.tmpdir(), 'lims-sample-code-schema-readonly-'));
     const copy = path.join(directory, 'snapshot.db');
-    for (const suffix of ['', '-wal', '-shm']) if (before[suffix] !== null) fs.copyFileSync(target + suffix, copy + suffix, fs.constants.COPYFILE_EXCL);
-    if (JSON.stringify(fileHashes(copy)) !== JSON.stringify(before) || JSON.stringify(fileHashes(target)) !== JSON.stringify(before))
-        throw fail('SAMPLE_CODE_SCHEMA_SNAPSHOT_CHANGED', 'Database files changed while retaining the read-only snapshot.');
-    const reader = new Database(copy, { readonly: true, fileMustExist: true }); let result;
-    try { result = reader.transaction(() => classify(reader, source))(); } finally { reader.close(); }
-    if (JSON.stringify(fileHashes(target)) !== JSON.stringify(before))
-        throw fail('SAMPLE_CODE_SCHEMA_SNAPSHOT_CHANGED', 'Database files changed during read-only review.');
-    return { ...result, readonlySnapshot: { path: copy, originalDbWalShmSha256: before, originalFilesPreserved: true } };
+    try {
+        for (const suffix of ['', '-wal', '-shm']) if (before[suffix] !== null) fs.copyFileSync(target + suffix, copy + suffix, fs.constants.COPYFILE_EXCL);
+        if (JSON.stringify(fileHashes(copy)) !== JSON.stringify(before) || JSON.stringify(fileHashes(target)) !== JSON.stringify(before))
+            throw fail('SAMPLE_CODE_SCHEMA_SNAPSHOT_CHANGED', 'Database files changed while retaining the read-only snapshot.');
+        const reader = new Database(copy, { readonly: true, fileMustExist: true }); let result;
+        try { result = reader.transaction(() => classify(reader, source))(); } finally { reader.close(); }
+        if (JSON.stringify(fileHashes(target)) !== JSON.stringify(before))
+            throw fail('SAMPLE_CODE_SCHEMA_SNAPSHOT_CHANGED', 'Database files changed during read-only review.');
+        return { ...result, readonlySnapshot: { originalDbWalShmSha256: before, originalFilesPreserved: true } };
+    } finally { fs.rmSync(directory, { recursive: true, force: true }); }
 }
 function installSampleCodeSchema({ dbPath, apply = false, startupContext } = {}) {
     if (typeof dbPath !== 'string' || !dbPath.trim() || !fs.existsSync(dbPath))

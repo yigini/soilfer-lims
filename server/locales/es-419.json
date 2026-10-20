@@ -1148,6 +1148,7 @@
       "qc_blankHistoryMinPoints": "Mínimo de blancos seleccionados para LOD/LOQ",
       "qc_blankLodMultiplier": "Multiplicador de DE muestral para LOD",
       "qc_blankLoqMultiplier": "Multiplicador de DE muestral para LOQ",
+      "reception_intakeRules": "Reglas de recepción y contexto de la muestra",
       "qc_controlChartMinPoints": "Mínimo de puntos de referencia para gráficos de control"
     },
     "title": "Políticas",
@@ -2249,5 +2250,55 @@
       "QC_BATCH_SCOPE_DENIED": "La corrida está fuera del ámbito de su laboratorio.",
       "WORKSHEET_LAYOUT_TOO_LARGE": "Un encabezado o una fila es demasiado largo para esta hoja de trabajo."
     }
+  },
+  "intakeRules": {
+    "loading": "Cargando reglas de recepción…",
+    "failureNotes": {
+      "container": "Por ejemplo: bolsa rota, tapa suelta, fuga visible…",
+      "label": "Describa la etiqueta ilegible o discordante",
+      "quantity": "Describa la cantidad que falta para los análisis solicitados",
+      "condition": "Describa el estado observado de la muestra",
+      "coc": "Describa la documentación de custodia que falta"
+    },
+    "title": "Reglas de recepción y contexto de la muestra",
+    "help": "Configure las observaciones existentes para muestras de proyecto y particulares. Las respuestas obligatorias se comprueban en la aceptación final; su ausencia nunca impide registrar la llegada. Los cambios se aplican a recepciones posteriores sin reescribir registros existentes.",
+    "profiles": {
+      "project": "Muestras de proyecto",
+      "walkIn": "Particulares / recepción directa"
+    },
+    "groups": {
+      "criteria": "Criterios de recepción",
+      "context": "Contexto de la muestra"
+    },
+    "flags": {
+      "enabled": "Habilitado",
+      "required": "Obligatorio",
+      "naAllowed": "Permitir N/A"
+    },
+    "fields": {
+      "landUse": "Uso del suelo",
+      "samplingDate": "Fecha de muestreo",
+      "samplingDepth": "Profundidad de muestreo",
+      "composite": "Muestra compuesta"
+    },
+    "fieldHelp": {
+      "landUse": "Uso observado del suelo en el lugar de muestreo.",
+      "samplingDate": "Fecha de recogida de la muestra en campo.",
+      "samplingDepth": "Intervalo de profundidad observado en centímetros. Déjelo vacío si no se registró.",
+      "composite": "Indique si la muestra combina material de varios puntos de muestreo."
+    },
+    "required": "Obligatorio",
+    "unanswered": "Sin responder",
+    "unavailable": "No se pudieron cargar las reglas de recepción. Reconecte antes de la aceptación final.",
+    "failureNote": "Describa el problema observado",
+    "naDisabled": "Las reglas de recepción de este laboratorio no permiten N/A.",
+    "naAllowed": "No aplica",
+    "depthFrom": "Profundidad desde (cm)",
+    "depthTo": "Profundidad hasta (cm)",
+    "subsamples": "Número de submuestras",
+    "radius": "Radio de la muestra compuesta (m)",
+    "enabledItems": "observaciones habilitadas",
+    "batchObservations": "Observaciones compartidas del lote",
+    "batchHelp": "Introduzca explícitamente las observaciones de las muestras del lote. No se presuponen respuestas de calidad ni profundidades. Revise cada fila cuando cambien el origen o las observaciones."
   }
 }

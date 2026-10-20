@@ -94,48 +94,14 @@ exports.resolveAnalysisGroup = resolveAnalysisGroup;
  * - coc: Chain of Custody Present (allowed N/A for walk-in / ad-hoc dropoff)
  */
 function evaluateChecklistCompliance(checklist, options = {}) {
-    const isWalkIn = Boolean(options.isWalkIn);
-    const standardKeys = ['container', 'label', 'quantity', 'condition', 'coc'];
-
-    if (!checklist || typeof checklist !== 'object') {
-        return {
-            isProvided: false,
-            isComplete: false,
-            isPassed: false,
-            failedItems: [],
-            unansweredItems: [...standardKeys],
-            invalidNAItems: [],
-            unknownItems: []
-        };
-    }
-
-    const items = checklist.items !== undefined ? checklist.items : checklist;
-    if (!items || typeof items !== 'object') {
-        return {
-            isProvided: false,
-            isComplete: false,
-            isPassed: false,
-            failedItems: [],
-            unansweredItems: [...standardKeys],
-            invalidNAItems: [],
-            unknownItems: []
-        };
-    }
-
+    // rules is internal, server-resolved input. HTTP bodies never supply it.
+    const rules = options.rules || require('../config/policyRegistry').strict('reception.intakeRules')[options.isWalkIn ? 'walkIn' : 'project'];
+    const standardKeys = Object.keys(rules.criteria).filter(key => rules.criteria[key].enabled);
+    const source = checklist && typeof checklist === 'object' ? checklist : {};
+    const rawItems = source.items !== undefined ? source.items : source;
+    const items = rawItems && typeof rawItems === 'object' ? rawItems : {};
     const itemKeys = Object.keys(items);
-    const isExplicitNC = Boolean(checklist.nonConformance);
-
-    if (itemKeys.length === 0 && !isExplicitNC) {
-        return {
-            isProvided: false,
-            isComplete: false,
-            isPassed: false,
-            failedItems: [],
-            unansweredItems: [...standardKeys],
-            invalidNAItems: [],
-            unknownItems: []
-        };
-    }
+    const isExplicitNC = Boolean(source.nonConformance);
 
     // Recognized aliases per criterion
     const ALIAS_MAP = {
@@ -186,7 +152,7 @@ function evaluateChecklistCompliance(checklist, options = {}) {
         }
 
         if (evaluatedStatuses.length === 0) {
-            unansweredItems.push(key);
+            if (rules.criteria[key].required) unansweredItems.push(key);
             resolvedItems[key] = { status: undefined };
         } else {
             // If any alias failed, fail closed!
@@ -206,15 +172,7 @@ function evaluateChecklistCompliance(checklist, options = {}) {
             if (finalStatus === 'FAIL') {
                 failedItems.push({ key, note });
             } else if (finalStatus === 'NA') {
-                // N/A policy:
-                // coc is permitted N/A ONLY if isWalkIn === true
-                if (key === 'coc') {
-                    if (!isWalkIn) {
-                        invalidNAItems.push('coc');
-                    }
-                } else {
-                    invalidNAItems.push(key);
-                }
+                if (!rules.criteria[key].naAllowed) invalidNAItems.push(key);
             }
         }
     }
@@ -227,7 +185,7 @@ function evaluateChecklistCompliance(checklist, options = {}) {
     const isPassed = isComplete && failedItems.length === 0 && invalidNAItems.length === 0;
 
     return {
-        isProvided: true,
+        isProvided: itemKeys.length > 0 || isExplicitNC,
         isComplete,
         isPassed,
         failedItems,

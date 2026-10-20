@@ -53,7 +53,7 @@ const SamplesHeader = ({ facets = {}, onSync, onExport, onLegacyBackfill, loadin
     const lifecycleCounts = facets.lifecycle || {};
 
     return (
-        <div className="flex flex-col gap-4 mb-4">
+        <div className="flex min-w-0 max-w-full flex-col gap-4 mb-4">
             {/* Top Row: Title and Global Actions */}
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
@@ -105,7 +105,7 @@ const SamplesHeader = ({ facets = {}, onSync, onExport, onLegacyBackfill, loadin
             </div>
 
             {/* Connected Lifecycle Stepper */}
-            <div className="flex items-center w-full bg-sf-surface p-2 rounded-2xl border border-sf-divider shadow-sm overflow-visible">
+            <div className="flex min-w-0 items-center w-full bg-sf-surface p-2 rounded-2xl border border-sf-divider shadow-sm overflow-x-auto">
                 {STATUS_CONFIG.map((status, index) => {
                     const count = lifecycleCounts[status.key] || 0;
                     const isLast = index === STATUS_CONFIG.length - 1;
@@ -113,7 +113,7 @@ const SamplesHeader = ({ facets = {}, onSync, onExport, onLegacyBackfill, loadin
                     return (
                         <React.Fragment key={status.key}>
                             <div
-                                className="relative group flex-1 cursor-pointer"
+                                className="relative group flex-1 min-w-max cursor-pointer"
                                 onClick={() => onToggleQuickFilter && onToggleQuickFilter('status', status.statuses)}
                             >
                                 <div className={`flex items-center justify-center gap-2 px-2 py-1.5 rounded-full hover:bg-sf-canvas transition-colors duration-200 cursor-default ${index === 0 ? 'pl-2' : ''} ${isLast ? 'pr-2' : ''}`}>

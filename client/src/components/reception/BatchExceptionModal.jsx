@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { X, AlertTriangle, CheckCircle, Camera, Upload, Trash2 } from 'lucide-react';
 import axios from 'axios';
+import ComplianceChecklist from './ComplianceChecklist';
+import IntakeContextFields from './IntakeContextFields';
+import useIntakeRules from './useIntakeRules';
 import { useLanguage } from '../../context/LanguageContext';
 
 const PRESET_REASONS = [
@@ -12,7 +15,7 @@ const PRESET_REASONS = [
     'Sample severely waterlogged / compromised'
 ];
 
-const BatchExceptionModal = ({ isOpen, sample, index, onClose, onSave }) => {
+const BatchExceptionModal = ({ isOpen, sample, index, onClose, onSave, defaults = {}, projectId, labId }) => {
     const { t } = useLanguage();
     const [status, setStatus] = useState(sample?.status || 'ACCEPTED');
     const [rejectionReason, setRejectionReason] = useState(sample?.rejectionReason || '');
@@ -21,6 +24,9 @@ const BatchExceptionModal = ({ isOpen, sample, index, onClose, onSave }) => {
     const [notes, setNotes] = useState(sample?.notes || '');
     const [photos, setPhotos] = useState(sample?.intakePhotos || []);
     const [uploading, setUploading] = useState(false);
+    const [checklist, setChecklist] = useState(sample?.checklist || defaults.checklist || { items: {} });
+    const [sampling, setSampling] = useState({ ...defaults.samplingDetails, ...sample?.samplingDetails });
+    const { rules, error: rulesFailed } = useIntakeRules({ sampleId: sample?.sampleId, originalId: sample?.originalId, projectId, isWalkIn: !projectId, labId });
 
     React.useEffect(() => {
         if (!isOpen) return;
@@ -72,6 +78,7 @@ const BatchExceptionModal = ({ isOpen, sample, index, onClose, onSave }) => {
 
         onSave({
             ...sample,
+            checklist, samplingDetails: sampling,
             status,
             rejectionReason: status === 'REJECTED' ? rejectionReason.trim() : null,
             receivedMass: receivedMass !== '' ? parseFloat(receivedMass) : null,
@@ -128,6 +135,9 @@ const BatchExceptionModal = ({ isOpen, sample, index, onClose, onSave }) => {
                         </div>
                     </div>
 
+                    {rulesFailed && <p role="alert">{t('intakeRules.unavailable')}</p>}
+                    <ComplianceChecklist rules={rules} value={checklist} onChange={setChecklist} />
+                    <IntakeContextFields rules={rules} sampling={sampling} setSampling={setSampling} />
                     {/* Rejection Details */}
                     {status === 'REJECTED' && (
                         <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl space-y-3">

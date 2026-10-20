@@ -18,6 +18,26 @@ function key(name, type, strict, basic = strict, advisory = strict, options = {}
         presets: { ISO17025_STRICT: strict, BASIC: basic, ADVISORY: advisory } };
 }
 const integer = { min: 0 };
+// #156: a bounded laboratory setting for the existing reception observations.
+const intakeFields = {
+    criteria: {
+        container: { label: 'reception.containerIntact', help: 'reception.containerTooltip' },
+        label: { label: 'reception.labelLegible', help: 'reception.labelTooltip' },
+        quantity: { label: 'reception.quantitySufficient', help: 'reception.quantityTooltip' },
+        condition: { label: 'reception.conditionDry', help: 'reception.conditionTooltip' },
+        coc: { label: 'reception.cocPresent', help: 'reception.cocTooltip' }
+    },
+    context: Object.fromEntries(['landUse', 'samplingDate', 'samplingDepth', 'composite'].map(name =>
+        [name, { label: `intakeRules.fields.${name}`, help: `intakeRules.fieldHelp.${name}` }]))
+};
+const intakeDefaults = Object.fromEntries(['project', 'walkIn'].map(profile => [profile, {
+    criteria: Object.fromEntries(Object.keys(intakeFields.criteria).map(name =>
+        [name, { enabled: true, required: true, naAllowed: name === 'coc' && profile === 'walkIn' }])),
+    context: Object.fromEntries(Object.keys(intakeFields.context).map(name => [name, { enabled: true, required: false }]))
+}]));
+for (const [name, field] of Object.entries(intakeFields.criteria)) field.failHint = `intakeRules.failureNotes.${name}`;
+key('reception.intakeRules', 'intakeRules', intakeDefaults, undefined, undefined,
+    { scope: 'LAB', intakeFields, help: 'intakeRules.help' });
 key('qc.mode', 'enum', 'REQUIRED_BLOCKING', 'REQUIRED_WARN', 'ADVISORY', { allowedValues: ['REQUIRED_BLOCKING', 'REQUIRED_WARN', 'ADVISORY', 'OFF'] });
 key('qc.requireBatchQc', 'enum', 'AUTO', undefined, undefined, { allowedValues: ['AUTO', 'REQUIRED', 'NOT_REQUIRED'],
     help: 'policies.help.qc_requireBatchQc' });
@@ -129,6 +149,16 @@ function valid(name, value) {
     const d = definition(name);
     if (value === null) return d.nullable === true;
     switch (d.type) {
+    case 'intakeRules': {
+        const exact = (object, keys) => object && typeof object === 'object' && !Array.isArray(object) &&
+            Object.keys(object).length === keys.length && keys.every(k => Object.hasOwn(object, k));
+        return exact(value, ['project', 'walkIn']) && Object.values(value).every(profile =>
+            exact(profile, ['criteria', 'context']) && Object.entries(d.intakeFields).every(([group, fields]) =>
+                exact(profile[group], Object.keys(fields)) && Object.values(profile[group]).every(rule => {
+                    const flags = group === 'criteria' ? ['enabled', 'required', 'naAllowed'] : ['enabled', 'required'];
+                    return exact(rule, flags) && flags.every(flag => typeof rule[flag] === 'boolean');
+                })));
+    }
     case 'reportAmendmentTemplate':
         return !!value && typeof value === 'object' && !Array.isArray(value) &&
             Object.keys(value).length === d.allowedLocales.length && d.allowedLocales.every(locale => {

@@ -60,7 +60,7 @@ export const ThemeToggle = () => {
     }, [isOpen, closePopover]);
 
     const handleSelectTheme = (mode) => {
-        setSessionAppearance(mode);
+        setSessionAppearance({ mode });
         setIsOpen(false);
     };
 

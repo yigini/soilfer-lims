@@ -83,6 +83,44 @@ const techStack = [
 
 const changelog = [
     {
+        version: 'v1.10.3',
+        date: 'October 20, 2026',
+        tag: 'Desktop Samples Filter Layout',
+        badgeColor: 'bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300 border-blue-300 dark:border-blue-800',
+        changes: [
+            'Samples quick filters stay in one scrolling row, search keeps a usable width, and desktop controls wrap before they get squeezed, including Spanish with the sidebar open.',
+        ],
+    },
+    {
+        version: 'v1.10.2',
+        date: 'October 19, 2026',
+        tag: 'Mobile Queue and Sample Layouts',
+        badgeColor: 'bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300 border-blue-300 dark:border-blue-800',
+        changes: [
+            'Manager Queue tabs scroll without overlapping; Samples quick filters wrap and lifecycle stages scroll within their card on narrow screens.',
+        ],
+    },
+    {
+        version: 'v1.10.1',
+        date: 'October 19, 2026',
+        tag: 'Temporary Schema Review Copy Cleanup',
+        badgeColor: 'bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300 border-blue-300 dark:border-blue-800',
+        changes: [
+            'Temporary database copies used by read-only schema reviews are removed after the final reader finishes; original file hash evidence stays in the review result.',
+        ],
+    },
+    {
+        version: 'v1.10.0',
+        date: 'October 19, 2026',
+        tag: 'Laboratory Intake Rules and Audit Catch-up',
+        badgeColor: 'bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300 border-blue-300 dark:border-blue-800',
+        changes: [
+            'Laboratories configure reception observations and sample context; arrival stays pending until final acceptance requirements are answered.',
+            'Walk-in sampling depth is optional by default, matching the server rules used for project intake.',
+            'Catch-up release notes cover the shipped result, QC, workbench, preparation, custody, reporting and QA changes since 1.9.0 (#182–#217, #261).',
+        ],
+    },
+    {
         version: 'v1.9.0',
         date: 'October 5, 2026',
         tag: 'Workflow State Integrity',
