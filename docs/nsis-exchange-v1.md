@@ -118,7 +118,7 @@ Streams an RFC 7946 compliant GeoJSON `FeatureCollection` optimized for direct G
 ---
 
 ### 3.3 Analytical Chemistry Matrix (`GET /results`)
-Provides the complete tabular metrology for soil chemical, physical, and biological determinations. Every result includes method reference, controlled unit, analytical basis, and provenance.
+Provides the complete tabular metrology for soil chemical, physical, and biological determinations. Each row outputs the official saved **Reported Value** (`ReportedValueSelection`) for that parameter and sample, including method reference, canonical controlled unit, analytical basis, censoring flags, and provenance. (For lossless individual replicate determinations and attempt lineage, use V2 `GET /api/v2/data-exchange/observations`).
 
 **Sample Response:**
 ```json

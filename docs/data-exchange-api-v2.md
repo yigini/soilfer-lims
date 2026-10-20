@@ -250,9 +250,15 @@ Returns tabular soil determinations. Each record represents a single analytical 
     "name": "Potentiometric pH (1:2.5 Water)",
     "isoStandard": "ISO 10390:2021"
   },
+  "attemptId": "att-9102-r1",
+  "batchId": "batch-2026-04-14-ph",
+  "reportedValueSelectionId": "rvs-550e8400-ph",
   "determinedAt": "2026-04-14T09:15:00.000Z"
 }
 ```
+
+> [!NOTE]
+> **Lossless Observations vs. Selected Reported Values (`#213`):** While CSV/XLSX exports and the V1 `/results` endpoint output a single saved Reported Value per parameter (from `ReportedValueSelection`), V2 `/observations` returns all valid analytical observations across replicates (`replicateNo: 1, 2, ...`) together with `attemptId`, `batchId`, and `reportedValueSelectionId` so downstream consumers can trace both individual replicate determinations and the official reported value.
 
 ---
 
