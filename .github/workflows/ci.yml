@@ -67,6 +67,14 @@ jobs:
           JWT_SECRET: ci-test-secret-key-12345
           NODE_OPTIONS: --max-old-space-size=8192
 
+      - name: Upload Samples layout screenshots and measurements
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: samples-layout-${{ github.run_id }}
+          path: output/playwright/issue102-mobile-layout/
+          if-no-files-found: error
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 

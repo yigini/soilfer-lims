@@ -83,6 +83,15 @@ const techStack = [
 
 const changelog = [
     {
+        version: 'v1.10.3',
+        date: 'October 20, 2026',
+        tag: 'Desktop Samples Filter Layout',
+        badgeColor: 'bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300 border-blue-300 dark:border-blue-800',
+        changes: [
+            'Samples quick filters stay in one scrolling row, search keeps a usable width, and desktop controls wrap before they get squeezed, including Spanish with the sidebar open.',
+        ],
+    },
+    {
         version: 'v1.10.2',
         date: 'October 19, 2026',
         tag: 'Mobile Queue and Sample Layouts',

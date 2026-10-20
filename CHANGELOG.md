@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.10.3] - 2026-10-20
+
+### Fixed
+- Keep Samples quick filters in one scrolling row and preserve search width when desktop view tabs and pagination wrap, including Spanish with the sidebar open (#321).
+
 ## [1.10.2] - 2026-10-19
 
 ### Fixed
