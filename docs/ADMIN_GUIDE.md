@@ -52,13 +52,14 @@ SoilFER-LIMS enforces strict, type-safe Role-Based Access Control with automatic
 
 | Role Persona | System Code | Scope of Access | Primary Operational Responsibilities |
 | :--- | :--- | :--- | :--- |
-| **Global Administrator** | `SUPER_ADMIN` | Global (All Laboratories) | Laboratory creation, user provisioning, institutional branding locks, SIS API tokens, system backups. |
-| **Laboratory Manager** | `LAB_MANAGER` | Single Laboratory (e.g. `GTM-LAB1`) | Work item assignment, batch approvals, QC disposition overrides, equipment calibration, inventory lots. |
-| **Bench Analyst** | `LAB_TECHNICIAN` | Assigned Work Queue | Sample drying and milling checklist receipts, worksheet results recording, instrument linkage, MIR scan uploads. |
-| **Intake Officer** | `SAMPLE_RECEPTION` | Reception Desk | Physical sample inspection, container condition checks, barcode/QR label printing, Kobo manifest matching. |
-| **Project Sponsor** | `PROJECT_MANAGER` | Assigned Projects | Project progress dashboards, spatial GIS coordinates, and batch CSV/Excel report exports. |
+| **Global Administrator** | `SUPER_ADMIN` | Global (All Laboratories) | Laboratory creation, user provisioning, institutional branding locks, NSIS API tokens, system backups. |
+| **Laboratory Manager** | `LAB_MANAGER` | Single Laboratory (e.g. `GTM-LAB1`) | Laboratory policy presets & overrides, work assignment, Stage 1/2 approvals, QC disposition overrides, COA issuance & amendments, equipment & PT oversight. |
+| **Technical Reviewer** | `REVIEWER` | Single Laboratory | Stage 1 batch technical review, Stage 2 whole-sample review & Reported Value Selection, returning work items for repeat, co-signing scientific amendments. |
+| **Bench Analyst** | `LAB_TECHNICIAN` | Assigned Work Queue | Sample drying and sieving gates, batch building, bench/terminal results recording, self-repeats (`R2`), instrument linkage, MIR/Vis-NIR scan uploads. |
+| **Intake Officer** | `SAMPLE_RECEPTION` | Reception Desk | Consignment & walk-in intake, container condition/mass checks, barcode/QR label printing, sub-sample containers, Kobo manifest matching. |
+| **Project Sponsor** | `PROJECT_MANAGER` | Assigned Projects | Project progress dashboards, spatial GIS coordinates, and batch CSV/Excel/PDF report downloads. |
 
-> 🔒 **Security Guarantee:** Technicians and Intake Officers are physically scoped to their assigned laboratory. Cross-laboratory queries fail closed with an HTTP 403 Forbidden error.
+> 🔒 **Security & Separation of Duties:** Technicians and Intake Officers are strictly scoped to their assigned laboratory. In addition, when `review.secondPersonRequired = true` (default in `ISO17025_STRICT` and `BASIC` presets), a Reviewer or Lab Manager cannot approve a batch or sample for which they recorded the measurements themselves.
 
 ---
 
@@ -86,8 +87,8 @@ Navigate to **Admin Panel → Lab Configuration → Analyses & Methods** (`/admi
 
 ### A. Core Soil Properties (Measurands)
 * **Canonical Codes:** `pH`, `carbonOrganic`, `nitrogenTotal`, `electricalConductivity`, `exchangeableBases` (`Ca`, `Mg`, `K`, `Na`), `pSA` (Sand, Silt, Clay).
-* **Controlled Units:** Automatically converts and standardizes units (`g/kg`, `mg/kg`, `cmol(+)/kg`, `dS/m`, `µS/cm`, `%`).
-* **Plausibility Bounds:** Enforces strict physical minimum and maximum bounds to catch data entry errors before submission.
+* **One Canonical Unit per Analysis:** Each analysis stores one canonical reporting unit (`g/kg`, `mg/kg`, `cmol(+)/kg`, `dS/m`, `µS/cm`, `%`) and normalizes legacy synonyms automatically.
+* **Plausibility & Cross-Parameter Bounds:** Enforces physical bounds (e.g. `results.phMin`/`phMax`), regional typical ranges (`results.typicalMin`/`typicalMax`), and cross-parameter checks (Sum of Bases vs. CEC, Texture Closure $100\% \pm \text{tolerance}$, C:N ratio).
 
 ### B. Standard Analysis Suites (Packages)
 Group common laboratory determinations into 1-click packages for intake officers:
@@ -97,34 +98,40 @@ Group common laboratory determinations into 1-click packages for intake officers
 
 ---
 
-## 5. Quality Assurance & Batch Control Aligned with ISO/IEC 17025
+## 5. Quality Assurance, Two-Stage Review & Report Amendments (ISO/IEC 17025)
 
-Quality settings belong to each laboratory and its validated methods. The application supplies defaults; it does not establish a laboratory's approved acceptance limits.
+Quality settings belong to each laboratory and its validated methods. The application supplies configurable presets (`ISO17025_STRICT`, `BASIC`, `ADVISORY`); it does not hard-code a single laboratory's fixed policy.
 
-1. **Choose and review the policy.** `ISO17025_STRICT`, `BASIC` and `ADVISORY` are shipped presets. Laboratory overrides and supported analysis/method overrides are resolved by `policyService`. Changes are versioned and audited with a reason. Use the resolved policy and its source, rather than assuming that an example blank, duplicate or recovery threshold applies to every lab.
-2. **Configure versioned QC criteria.** `QcRule` is scoped to a laboratory and analysis, with optional methodology-specific criteria and effective dates. Resolution combines the applicable rule, method/analysis overrides, shipped analysis defaults where applicable, and laboratory policy. Blank criteria, duplicate criteria, CRM/LRM criteria and QC actions must be reviewed for the actual method. Unsupported modes are rejected rather than silently applied.
-3. **Maintain the reference catalogue.** `ReferenceMaterial` identifies a CRM or in-house/check-soil lot, its status and analyte values. Register the correct lot and values and select an eligible reference for the run. Preserve earlier value records when correcting a reference value.
-4. **Approve control-chart limits deliberately.** Control-chart series are scoped by lab, analysis, methodology and reference lot. Proposals use selected eligible observations and the configured minimum point count; authorized approval creates the limit version. Evaluation uses approved limits and the configured Westgard rules, with a policy-controlled fixed basis where applicable. Adding a reading does not automatically approve or replace the limits.
-5. **Evaluate, then disposition.** Run QC positions are evaluated using resolved criteria and a recorded policy/rule snapshot. Blocking, warning and advisory behavior follows the lab policy. An authorized manager can disposition a failed batch where permitted, with a mandatory reason; earlier QC readings and evaluations remain available for audit.
+1. **Choose and customize the laboratory policy (`Settings → Laboratory Policy`).** `ISO17025_STRICT`, `BASIC` and `ADVISORY` are shipped presets. Laboratory overrides and supported analysis/method overrides are resolved by `policyService` (Preset $\to$ Lab Override $\to$ Analysis Override $\to$ Method `QcRule`). Changes are versioned and audited with a mandatory reason. See [Per-Lab Settings, Presets & Method Overrides](book/src/usage/lab-settings-and-presets.md) for the complete policy table.
+2. **Configure versioned QC criteria (`QcRule`).** `QcRule` is scoped to a laboratory and analysis, with optional methodology-specific criteria and effective dates. Blank criteria, duplicate RPD/absolute-difference criteria, CRM/LRM recovery windows, calibration curve checks (`ICV`, `CCV`, `CCB`), and failure actions (`FAIL_BATCH`, `REPEAT_BRACKET`, `WARN`) are configured per method.
+3. **Maintain reference materials, equipment readiness & Proficiency Testing.** Register `ReferenceMaterial` lots with expiry dates and target analyte values, track instrument calibration readiness by criticality (`CRITICAL`, `IMPORTANT`, `NON_CRITICAL`), and record external Proficiency Testing (`PT`) rounds with automatic $|z|$-score evaluation.
+4. **Approve control-chart limits deliberately.** Control-chart series are scoped by lab, analysis, methodology and reference lot. Proposals use selected eligible observations and `qc.controlChartMinPoints` (default 20); authorized approval creates the limit version evaluated with Westgard rules.
+5. **Two-stage review, Reported Value Selection & post-report amendments.** Stage 1 reviews the analytical batch, while Stage 2 evaluates the whole sample and saves the official `ReportedValueSelection`. Once a Certificate of Analysis is issued (`REPORTED`), any post-report correction follows the audited **Sample Amendment** (`CLERICAL` or `SCIENTIFIC`) and **Report Revision (`Rev 2+`)** workflow (immediately marking superseded reports `WITHDRAWN` on public links).
 
 For the actual resolution order and supported fields, see [`policyService`](../server/services/policyService.js), [`qcRuleService`](../server/services/qcRuleService.js), [`qcPolicyService`](../server/services/qcPolicyService.js), [`referenceMaterialService`](../server/services/referenceMaterialService.js) and [`controlChartService`](../server/services/controlChartService.js).
 
 ---
 
-## 6. Machine-to-Machine SIS API & GloSIS Exchange
+## 6. Machine-to-Machine NSIS API (V1 & V2) & OpenNSIS Exchange
 
-National Soil Information Systems (SIS) and research repositories can ingest laboratory data programmatically:
+National Soil Information Systems (NSIS), FAO OpenNSIS, and research repositories can ingest approved laboratory data programmatically:
 
-1. Navigate to **Admin Panel → API Keys** (`/admin?tab=api-keys`).
-2. Click **Generate New API Key**.
-3. Specify a client description (e.g. `National-SIS-Data-Exchange`), select the authorized laboratory scope, and set an expiration date.
-4. Clients pass the token in the `X-API-Key` header:
+1. Navigate to **Admin Panel → Data Exchange Keys** (`/admin/api-keys`).
+2. Click **Generate API Key**, specify a descriptive label, choose the access role (`NSIS_CONSUMER`, `EXTERNAL_GIS`, `GLOBAL_HARVESTER`), and check the **Authorized Laboratories** (fail-closed if empty) and **Countries**.
+3. Use grace-period key rotation (**Rotate API Key** $\to$ **Confirm / Abort Rotation**) to rotate secrets without downtime.
+4. Clients authenticate using `X-API-Key: slims_live_...` or `Authorization: Bearer slims_live_...`:
 
 ```bash
-# Query authorized sample data in standardized RFC 7946 GeoJSON format:
-curl -H "X-API-Key: sis_live_a8f9c2d1..." \
-     https://lims.your-institution.org/api/v1/data-exchange/samples?limit=50
+# V2 Lossless Specimen & Observation Exchange (Recommended for OpenNSIS):
+curl -H "X-API-Key: slims_live_a8f9c2d1..." \
+     "https://lims.your-institution.org/api/v2/data-exchange/samples?profile=opennsis&limit=50"
+
+# V1 Legacy Selected Reported Values Exchange:
+curl -H "X-API-Key: slims_live_a8f9c2d1..." \
+     "https://lims.your-institution.org/api/v1/data-exchange/samples?limit=50"
 ```
+
+See [NSIS Data Exchange Specification V2](data-exchange-api-v2.md) and the [NSIS Operator Runbook](nsis-operator-runbook.md) for snapshots, change feeds, and delivery receipts.
 
 ---
 

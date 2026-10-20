@@ -1,102 +1,77 @@
-# First Login & Setup
+# First Login & Lab Setup
 
-After your SoilFER-LIMS instance is running, here's how to log in for the first time and set up your laboratory.
-
----
-
-## Step 1: Open SoilFER-LIMS
-
-Open your web browser and go to your LIMS URL:
-- `https://soillab.org` (if you set up a domain with SSL)
-- `http://soillab.org` (if no SSL yet)
-- `http://YOUR_SERVER_IP` (if no domain yet)
-
-You should see the login page.
+After your SoilFER LIMS server is running, follow these seven steps to sign in for the first time and configure your laboratory for daily operations.
 
 ---
 
-## Step 2: Log In
+## Step 1: Open SoilFER LIMS in Your Browser
+
+Navigate to your LIMS address:
+- `https://soillab.org` (production domain with HTTPS)
+- `http://YOUR_SERVER_IP:3000` (direct server IP before DNS/SSL setup)
+
+---
+
+## Step 2: Sign In with the Initial Admin Account
 
 | Field | Value |
-|-------|-------|
+| :--- | :--- |
 | **Username** | `admin` |
-| **Password** | `<generated-initial-password>` (or set via `ADMIN_INITIAL_PASSWORD`) |
+| **Password** | `<generated-initial-password>` (or the value set in `ADMIN_INITIAL_PASSWORD`) |
 
-Check your container startup logs (`docker logs soilfer-lims | grep "INITIAL ADMIN CREDENTIALS" -A 4`) to retrieve your generated initial password.
+To view the auto-generated initial password on your server, run:
+```bash
+docker logs soilfer-lims | grep "INITIAL ADMIN CREDENTIALS" -A 4
+```
 
-Click **"Sign In"**.
+Click **Sign In**.
 
 ---
 
 ## Step 3: Change Your Password
 
-You will be immediately prompted to change the initial password. This is mandatory — you cannot skip it.
-
-Choose a strong password:
-- At least **12 characters** long
-- Include **letters**, **numbers**, and **symbols**
-- Don't use dictionary words, personal information, or anything guessable
-
-Write down the password and store it somewhere safe (a password manager is ideal).
+On first login, the LIMS requires you to set a new personal password before accessing any screens:
+- Use at least **12 characters** mixing uppercase, lowercase, numbers, and symbols.
+- Store the password safely in your institution's password manager.
 
 ---
 
-## Step 4: Configure Your Laboratory (Local Mode)
+## Step 4: Configure Laboratory Identity & Choose a Policy Preset
 
-After logging in, set up your laboratory's basic information:
-
-1. Go to **Settings → Laboratory**
-2. Enter your laboratory name, address, country, and contact details
-3. Upload your laboratory's logo (optional, but it appears on reports)
-4. Save
-
----
-
-## Step 5: Create User Accounts
-
-Create accounts for your team members so they can log in with their own credentials.
-
-1. Go to **Settings → Users**
-2. Click **"Create User"**
-3. Fill in:
-   - **Full name** — their real name
-   - **Username** — what they'll type to log in
-   - **Email** — for notifications (optional)
-   - **Role** — what they can do (see [Roles & Permissions](./roles.md))
-4. Click **Create**
-5. Share the temporary password with the user — they'll be prompted to change it on first login
-
-> 💡 **Tip:** Create at least one account for each role you need. A typical small lab might have: 1 Lab Manager (you), 1 Sample Reception person, and 2-3 Lab Technicians.
+1. Go to **Settings → Laboratory** to enter your laboratory's official name, code (e.g., `NRL`), physical address, country, timezone, and logo (which appears on PDF Certificates of Analysis).
+2. Go to **Settings → Laboratory Policy** and choose the baseline preset that matches your laboratory's quality system:
+   - **`ISO17025_STRICT`**: Blocking batch QC, mandatory second-person review, Shewhart control charts, and 5-minute bench idle lock.
+   - **`BASIC`**: Routine batch blanks and duplicates with warning enforcement and second-person review.
+   - **`ADVISORY`**: Lightweight advisory workflow without mandatory QC blocking.
+3. Fine-tune any individual setting (such as sample numbering format `sample.codeFormat`, retention period `sample.retentionDaysAfterReport`, or decimal separator `numbers.decimalSeparator`) and click **Save Policy Changes**.
+   *(See [Per-Lab Settings, Presets & Method Overrides](./lab-settings-and-presets.md) for every available option.)*
 
 ---
 
-## Step 6: Configure Your Analyses
+## Step 5: Enable Your Analytical Methods & QC Rules
 
-Tell the system which soil tests your laboratory performs:
+1. Go to **Settings → Analyses & Methods**.
+2. Enable the soil parameters and SOPs your laboratory performs (for example, *pH 1:2.5 Water*, *Walkley–Black Organic Carbon*, *Olsen P*, *Ammonium Acetate Cations*, *Hydrometer Particle Size*).
+3. Review or customize the method-level **QC Rules (`QcRule`)** (blank limits, duplicate RPD thresholds, LRM/CRM recovery windows, and repeatability limits $r$) to match your validated laboratory SOPs.
 
-1. Go to **Settings → Analyses**
-2. You'll see a list of common soil analyses (pH, organic carbon, nitrogen, phosphorus, texture, etc.)
-3. **Enable** the ones your lab performs
-4. You can customize method references, units, and acceptable ranges
+---
+
+## Step 6: Register Instruments, Reference Materials & Staff Accounts
+
+1. **Staff Accounts (`Settings → Users`)**:
+   - Create accounts for your **Sample Reception** staff, **Lab Technicians**, **Reviewers**, and **Lab Managers** (see [Roles, Permissions & Separation of Duties](./roles.md)).
+   - If your laboratory uses shared tablets or PCs in the wet lab (`bench.pinAtRecord = true`), have each technician set their **4–6 digit Bench PIN** in their user profile.
+2. **Instruments (`Equipment → Instruments`)**:
+   - Register your analytical balances, pH/EC meters, spectrophotometers, AAS/ICP instruments, and drying ovens along with their calibration due dates and criticality level (`CRITICAL`, `IMPORTANT`, `NON_CRITICAL`).
+3. **Reference Materials (`QC → Reference Materials`)**:
+   - Register your active **CRM** and **In-House Control (`LRM`)** soil lots and their target analyte concentrations so technicians can select them when building analytical batches.
 
 ---
 
 ## Step 7: Create Your First Project
 
-Before receiving samples, create a project to organize them:
+1. Go to **Projects → New Project**.
+2. Enter the **Project Name**, **Project Code**, optional **Client / Sponsor**, and—if field teams use mobile data collection—configure the **KoboToolbox** form connection.
+3. Click **Create**.
 
-1. Go to **Projects → New Project**
-2. Enter:
-   - **Project name** — e.g., "National Soil Survey 2025"
-   - **Project code** — a short identifier like "NSS-2025"
-   - **Client** — who commissioned the work (optional)
-   - **Expected sample count** — helps with planning
-3. Click **Create**
-
----
-
-## You're Ready!
-
-Your LIMS is set up. Staff can now log in with their accounts and you can start receiving samples through the **Reception** page.
-
-For a detailed walkthrough of the sample workflow, see [The Sample Workflow](./sample-workflow.md).
+Your laboratory is now ready to receive samples! Continue to [The Sample Workflow (End-to-End)](./sample-workflow.md) and [Sample Reception & Intake](./reception-and-intake.md).
