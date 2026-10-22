@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.11.0] - 2026-10-22
+
+### Changed
+- Refine field and intake image access with scoped viewing links while preserving recorded photo paths (#326, #327).
+- Refresh production libraries for navigation, spreadsheet import/export and database access (#328).
+
 ## [1.10.3] - 2026-10-20
 
 ### Fixed
