@@ -3,6 +3,7 @@ import React from 'react';
 import { AlertCircle, Check, X, HelpCircle, ShieldCheck, Minus, Camera, Loader2 } from 'lucide-react';
 import InfoTooltip from '../common/InfoTooltip';
 import { useLanguage } from '../../context/LanguageContext';
+import useUploadMediaUrls from '../../hooks/useUploadMediaUrls';
 
 const ComplianceChecklist = ({
     value,
@@ -16,6 +17,7 @@ const ComplianceChecklist = ({
     rules
 }) => {
     const { t } = useLanguage();
+    const photoUrl = useUploadMediaUrls(photos);
     if (!rules) return <p role="status">{t('intakeRules.loading')}</p>;
 
     const CHECKLIST_ITEMS = Object.entries(rules?.criteria || {}).filter(([, rule]) => rule.enabled).map(([key, rule]) => ({
@@ -451,7 +453,7 @@ const ComplianceChecklist = ({
                                     <span>{uploadingPhoto ? 'Uploading...' : 'Attach Photo'}</span>
                                     <input
                                         type="file"
-                                        accept="image/*"
+                                        accept="image/jpeg,image/png,image/webp"
                                         multiple
                                         className="hidden"
                                         disabled={uploadingPhoto}
@@ -465,7 +467,7 @@ const ComplianceChecklist = ({
                             <div className="grid grid-cols-4 gap-2 pt-1">
                                 {photos.map((url, idx) => (
                                     <div key={idx} className="relative group rounded-lg overflow-hidden border border-red-200 dark:border-red-800 aspect-video bg-sf-canvas shadow-sm">
-                                        <img src={url} alt={`Evidence ${idx + 1}`} className="w-full h-full object-cover" />
+                                        <img src={photoUrl(url)} alt={`Evidence ${idx + 1}`} className="w-full h-full object-cover" />
                                         {onRemovePhoto && (
                                             <button
                                                 type="button"

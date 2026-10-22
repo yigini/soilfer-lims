@@ -2,6 +2,7 @@ import { useAnalysisNames } from '../context/AnalysisCatalogueContext';
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import useUploadMediaUrls from '../hooks/useUploadMediaUrls';
 import { useDialog } from '../context/DialogContext';
 import { useLanguage } from '../context/LanguageContext';
 import axios from 'axios';
@@ -102,6 +103,7 @@ const Reception = () => {
     const [moistureOnArrival, setMoistureOnArrival] = useState('MOIST');
     const [foreignMaterial, setForeignMaterial] = useState([]);
     const [intakePhotos, setIntakePhotos] = useState([]);
+    const intakePhotoUrl = useUploadMediaUrls(intakePhotos);
     const [uploadingPhoto, setUploadingPhoto] = useState(false);
     const [isResubmission, setIsResubmission] = useState(false);
     const [duplicateWarning, setDuplicateWarning] = useState(null);
@@ -2236,7 +2238,7 @@ const Reception = () => {
                                         <span>{uploadingPhoto ? 'Uploading...' : 'Add Photo'}</span>
                                         <input
                                             type="file"
-                                            accept="image/*"
+                                            accept="image/jpeg,image/png,image/webp"
                                             multiple
                                             className="hidden"
                                             disabled={uploadingPhoto}
@@ -2249,7 +2251,7 @@ const Reception = () => {
                                     <div className="grid grid-cols-4 gap-2 pt-1">
                                         {intakePhotos.map((url, idx) => (
                                             <div key={idx} className="relative group rounded-lg overflow-hidden border border-sf-divider aspect-video bg-sf-canvas shadow-sm">
-                                                <img src={url} alt={`Intake ${idx + 1}`} className="w-full h-full object-cover" />
+                                                <img src={intakePhotoUrl(url)} alt={`Intake ${idx + 1}`} className="w-full h-full object-cover" />
                                                 <button
                                                     type="button"
                                                     onClick={() => handleRemovePhoto(idx)}
