@@ -24,7 +24,7 @@ for (const [address, prefix] of [['0.0.0.0', 8], ['10.0.0.0', 8], ['100.64.0.0',
 }
 // BlockList applies the IPv4 rules to mapped IPv6 addresses too. Blocking the
 // entire mapped range here would also deny ordinary public IPv4 connections.
-for (const [address, prefix] of [['::', 128], ['::1', 128],
+for (const [address, prefix] of [['::', 128], ['::1', 128], ['64:ff9b::', 96], ['2002::', 16],
     ['fc00::', 7], ['fe80::', 10], ['ff00::', 8]]) blocked.addSubnet(address, prefix, 'ipv6');
 
 function fail(statusCode, code, message) {

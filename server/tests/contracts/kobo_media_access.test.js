@@ -184,7 +184,8 @@ describe('Recorded field media access', () => {
         get.mockRejectedValue(Object.assign(new Error('maxContentLength size exceeded'), { code: 'ERR_BAD_RESPONSE' }));
         expect((await request(app).get(url)).status).toBe(413);
     });
-    test.each(['127.0.0.1', '10.0.0.1', '169.254.169.254', '::1', '::ffff:127.0.0.1', 'fc00::1'])(
+    test.each(['127.0.0.1', '10.0.0.1', '169.254.169.254', '::1', '::ffff:127.0.0.1', 'fc00::1',
+        '64:ff9b::a00:1', '2002:0a00:0001::1'])(
         'private resolved address %s is rejected before credentials can leave', async address => {
             lookup.mockResolvedValue([{ address, family: address.includes(':') ? 6 : 4 }]);
             expect((await request(app).get(await signedUrl())).status).toBe(404);
