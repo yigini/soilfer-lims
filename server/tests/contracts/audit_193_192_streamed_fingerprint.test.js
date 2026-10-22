@@ -51,7 +51,8 @@ afterAll(() => {
 });
 
 test('both historical installer fingerprints are byte-identical on the real published test template', () => {
-    const file = path.resolve(__dirname, '../../prisma/dev.db');
+    const file = process.env.LIMS_OWNED_TEST_TEMPLATE
+        ? path.resolve(process.env.LIMS_OWNED_TEST_TEMPLATE) : path.resolve(__dirname, '../../prisma/dev.db');
     const before = createHash('sha256').update(fs.readFileSync(file)).digest('hex');
     const db = new Database(file, { readonly: true, fileMustExist: true });
     try {

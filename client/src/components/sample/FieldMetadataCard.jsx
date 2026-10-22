@@ -3,8 +3,7 @@ import React, { useState } from 'react';
 import { ChevronDown, ChevronRight, Edit2, MapPin, User, Calendar, Layers, Camera, Globe, Cloud, Leaf, FileText, X, ChevronLeft, ChevronRight as ChevronRightIcon, ExternalLink, Compass, RotateCw, RotateCcw } from 'lucide-react';
 import MetadataEditorModal from './MetadataEditorModal';
 
-// Proxy Kobo attachment URLs through our server (adds auth token)
-const proxyUrl = (url) => url ? `/api/kobo/media?url=${encodeURIComponent(url)}` : null;
+import useKoboMediaUrls from '../../hooks/useKoboMediaUrls';
 
 // ─── Shared Components ───────────────────────────────────────────
 
@@ -57,7 +56,7 @@ const SectionHeader = ({ icon: Icon, title, badge, children, defaultOpen = true 
 
 // ─── PHOTO LIGHTBOX MODAL ─────────────────────────────────────────
 
-const PhotoLightbox = ({ photos, initialIndex = 0, onClose }) => {
+const PhotoLightbox = ({ photos, initialIndex = 0, onClose, proxyUrl }) => {
     const [currentIndex, setCurrentIndex] = useState(initialIndex);
     const [rotation, setRotation] = useState(0);
     const [zoom, setZoom] = useState(1);
@@ -257,7 +256,7 @@ const PhotoLightbox = ({ photos, initialIndex = 0, onClose }) => {
 
                 {/* Main image */}
                 <img
-                    src={proxyUrl(photo.download_large || photo.download_url)}
+                    src={proxyUrl(photo.download_large, photo.download_url)}
                     alt={photo.categoryLabel || photo.filename}
                     onClick={e => e.stopPropagation()}
                     onMouseDown={handleMouseDown}
@@ -297,7 +296,7 @@ const PhotoLightbox = ({ photos, initialIndex = 0, onClose }) => {
                             onMouseLeave={e => { if (i !== currentIndex) e.currentTarget.style.opacity = '0.45'; }}
                         >
                             <img
-                                src={proxyUrl(p.download_small || p.download_medium || p.download_url)}
+                                src={proxyUrl(p.download_small, p.download_medium, p.download_url)}
                                 alt=""
                                 className="w-full h-full object-cover"
                                 draggable={false}
@@ -322,7 +321,8 @@ const CATEGORY_ICONS = {
 // Categories to exclude from photo gallery
 const HIDDEN_CATEGORIES = ['participant_signature', 'surveyor_signature', 'signature'];
 
-const PhotoGallery = ({ attachments }) => {
+const PhotoGallery = ({ attachments, sample }) => {
+    const proxyUrl = useKoboMediaUrls(sample);
     const [lightboxOpen, setLightboxOpen] = useState(false);
     const [lightboxIndex, setLightboxIndex] = useState(0);
 
@@ -387,7 +387,7 @@ const PhotoGallery = ({ attachments }) => {
                                     onClick={() => { setLightboxIndex(globalIdx); setLightboxOpen(true); }}
                                     className="relative aspect-square rounded-lg overflow-hidden border border-gray-200 hover:border-blue-400 hover:shadow-md transition-all group cursor-pointer"
                                 >
-                                    <img src={proxyUrl(photo.download_small || photo.download_medium || photo.download_url)}
+                                    <img src={proxyUrl(photo.download_small, photo.download_medium, photo.download_url)}
                                         alt={`${d} view`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/20" />
                                     <CompassBadge />
@@ -414,7 +414,7 @@ const PhotoGallery = ({ attachments }) => {
                                     className="relative aspect-square rounded overflow-hidden border border-gray-200 hover:border-blue-400 hover:shadow transition-all group cursor-pointer"
                                 >
                                     <img
-                                        src={proxyUrl(photo.download_small || photo.download_medium || photo.download_url)}
+                                        src={proxyUrl(photo.download_small, photo.download_medium, photo.download_url)}
                                         alt={photo.categoryLabel}
                                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                     />
@@ -445,7 +445,7 @@ const PhotoGallery = ({ attachments }) => {
 
             {/* Lightbox */}
             {lightboxOpen && (
-                <PhotoLightbox
+                <PhotoLightbox proxyUrl={proxyUrl}
                     photos={sortedPhotos}
                     initialIndex={lightboxIndex}
                     onClose={() => setLightboxOpen(false)}
@@ -509,7 +509,7 @@ const KoboFieldDataView = ({ sample, meta, rawMeta }) => {
                 </SectionHeader>
 
                 <SectionHeader icon={Camera} title={`Photos & Attachments (${attachments.length})`} defaultOpen={true}>
-                    <PhotoGallery attachments={attachments} />
+                    <PhotoGallery attachments={attachments} sample={sample} />
                 </SectionHeader>
             </div>
 
