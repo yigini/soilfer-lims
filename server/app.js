@@ -1018,13 +1018,10 @@ app.get('/api/dashboard/stats', verifyToken, async (req, res) => {
     }
 });
 
-// ─── Uploads Static Directory (Persistent user/sample assets) ───
-const uploadsDir = path.join(__dirname, 'uploads');
-const intakeUploadsDir = path.join(uploadsDir, 'intake');
-if (!fs.existsSync(intakeUploadsDir)) {
-    fs.mkdirSync(intakeUploadsDir, { recursive: true });
-}
-app.use('/uploads', express.static(uploadsDir));
+// Persistent intake assets retain their paths, with current scope and short-lived access.
+const uploadMediaRoutes = require('./routes/uploadMediaRoutes');
+app.use('/api/uploads', uploadMediaRoutes.api);
+app.use('/uploads', uploadMediaRoutes.files);
 
 // ─── Production / Standalone: Serve React client ───
 if (process.env.NODE_ENV === 'production' || process.env.SERVE_CLIENT === 'true') {

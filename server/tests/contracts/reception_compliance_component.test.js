@@ -52,6 +52,9 @@ function loadComplianceChecklistComponent() {
             if (mod === 'lucide-react') return mockLucide;
             if (mod.includes('InfoTooltip')) return mockTooltip;
             if (mod.includes('LanguageContext')) return mockLanguage;
+            // This criteria-tree harness invokes the component outside React.
+            // Media/session effects stay isolated; no raw image URL is returned.
+            if (mod.includes('useUploadMediaUrls')) return () => () => undefined;
             return {};
         },
         console

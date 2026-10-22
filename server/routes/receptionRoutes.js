@@ -1,36 +1,24 @@
 const express = require('express');
 const router = express.Router();
-const path = require('path');
-const fs = require('fs');
 const multer = require('multer');
 const receptionController = require('../controllers/receptionController');
+const uploadMediaController = require('../controllers/uploadMediaController');
+const { MAX_IMAGE_BYTES } = require('../utils/uploadFiles');
 const { verifyToken, checkPermission } = require('../middleware/authMiddleware');
 
-// Storage configuration for intake & non-conformance photos
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        const dest = path.join(__dirname, '..', 'uploads', 'intake');
-        if (!fs.existsSync(dest)) fs.mkdirSync(dest, { recursive: true });
-        cb(null, dest);
-    },
-    filename: (req, file, cb) => {
-        const ext = path.extname(file.originalname) || '.jpg';
-        const uniqueName = `intake_${Date.now()}_${Math.random().toString(36).substring(2, 9)}${ext}`;
-        cb(null, uniqueName);
-    }
-});
-
-const upload = multer({
-    storage,
-    limits: { fileSize: 10 * 1024 * 1024 }, // 10MB per photo
-    fileFilter: (req, file, cb) => {
-        if (file.mimetype.startsWith('image/')) {
-            cb(null, true);
-        } else {
-            cb(new Error('Only image files are allowed.'));
-        }
-    }
-});
+// Bounded memory intake: no client-provided filename/type reaches disk.
+// The controller validates every file's bytes before saving the batch.
+const upload = multer({ storage: multer.memoryStorage(),
+    limits: { fileSize: MAX_IMAGE_BYTES, files: 5, fields: 1, fieldSize: 200, parts: 7 } }).array('photos', 5);
+function receivePhotos(req, res, next) {
+    upload(req, res, error => {
+        if (!error) return next();
+        return uploadMediaController.sendError(res, Object.assign(new Error(
+            error.code === 'LIMIT_FILE_SIZE' ? 'The image exceeds the upload size limit.' : 'Select up to five image files.'), {
+            statusCode: error.code === 'LIMIT_FILE_SIZE' ? 413 : 400,
+            code: error.code === 'LIMIT_FILE_SIZE' ? 'UPLOAD_TOO_LARGE' : 'UPLOAD_REQUEST_INVALID', uploadMediaError: true }));
+    });
+}
 
 router.use(verifyToken);
 
@@ -53,7 +41,7 @@ router.post('/mass-check', checkPermission('RECEIVE_SAMPLE'), receptionControlle
 
 // POST /api/reception/upload-photo
 // Upload sample condition or non-conformance photographic evidence (RC-03)
-router.post('/upload-photo', checkPermission('RECEIVE_SAMPLE'), upload.array('photos', 5), receptionController.uploadIntakePhoto);
+router.post('/upload-photo', checkPermission('RECEIVE_SAMPLE'), receivePhotos, receptionController.uploadIntakePhoto);
 
 // GET /api/reception/admin-units
 // Administrative unit hierarchy picker (RC-05, RC-08)
