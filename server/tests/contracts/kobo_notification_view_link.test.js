@@ -26,7 +26,8 @@ const request = require('supertest');
 const jwt = require('jsonwebtoken');
 
 // 1. Temporary isolated SQLite fixture database (zero mutation of dev.db or production)
-const sourcePath = path.join(__dirname, '../../prisma/dev.db');
+const sourcePath = process.env.LIMS_OWNED_TEST_TEMPLATE
+    ? path.resolve(process.env.LIMS_OWNED_TEST_TEMPLATE) : path.join(__dirname, '../../prisma/dev.db');
 const devDbHashBefore = createHash('sha256').update(fs.readFileSync(sourcePath)).digest('hex');
 
 const { file: fixtureDbPath } = beforeGuards({ actor: 'system:fixture' });
