@@ -13,7 +13,7 @@ const techStack = [
         color: 'from-blue-500 to-cyan-500',
         items: [
             { name: 'React', version: '18.3', url: 'https://react.dev', icon: '⚛️', desc: 'Core UI library for building interactive user interfaces' },
-            { name: 'React Router', version: '6.x', url: 'https://reactrouter.com', icon: '🧭', desc: 'Client-side routing and navigation' },
+            { name: 'React Router', version: '7.18.4', url: 'https://reactrouter.com', icon: '🧭', desc: 'Client-side routing and navigation' },
             { name: 'Vite', version: '5.x', url: 'https://vitejs.dev', icon: '⚡', desc: 'Next-generation build tool and dev server' },
             { name: 'Tailwind CSS', version: '3.4', url: 'https://tailwindcss.com', icon: '🎨', desc: 'Utility-first CSS framework for rapid styling' },
             { name: 'Lucide React', version: '0.344', url: 'https://lucide.dev', icon: '✨', desc: 'Beautiful, consistent icon library' },
@@ -50,7 +50,7 @@ const techStack = [
         color: 'from-amber-500 to-orange-500',
         items: [
             { name: 'PostgreSQL', url: 'https://www.postgresql.org', icon: '🐘', desc: 'Advanced open-source relational database' },
-            { name: 'Prisma', version: '5.22', url: 'https://www.prisma.io', icon: '💎', desc: 'Next-generation ORM for type-safe database access' },
+            { name: 'Prisma', version: '7.4.0', url: 'https://www.prisma.io', icon: '💎', desc: 'Next-generation ORM for type-safe database access' },
         ]
     },
     {
@@ -60,7 +60,7 @@ const techStack = [
         items: [
             { name: 'KoboToolbox', url: 'https://www.kobotoolbox.org', icon: '📋', desc: 'Open-source field data collection platform used for sample intake' },
             { name: 'PapaParse', version: '5.5', url: 'https://www.papaparse.com', icon: '📄', desc: 'Fast CSV parser for data import/export' },
-            { name: 'SheetJS (xlsx)', version: '0.18', url: 'https://sheetjs.com', icon: '📊', desc: 'Excel/spreadsheet generation and parsing' },
+            { name: 'SheetJS (xlsx)', version: '0.20.3', url: 'https://sheetjs.com', icon: '📊', desc: 'Excel/spreadsheet generation and parsing' },
             { name: 'jsPDF', version: '4.0', url: 'https://github.com/parallax/jsPDF', icon: '📑', desc: 'PDF generation for reports and documents' },
         ]
     },
