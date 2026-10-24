@@ -10,6 +10,9 @@ add('GET /api/spectral/control-drifts', '/api/spectral/control-drifts', null, { 
 add('POST /api/spectral/check-matches', '/api/spectral/check-matches', { labIds: ['{sampleA}'] });
 add('POST /api/spectral/preview', '/api/spectral/preview', { scans: [source], contextSampleId: '{sampleA}', modality: 'MIR' });
 add('POST /api/spectral/batch/commit', '/api/spectral/batch/commit', { manifestId: '{spectralManifestA}', equipmentId: '{equipmentA}', idempotencyKey: 'synthetic-foreign-commit' });
+for (const equipment of ['{equipmentA}', '{equipmentB}']) cases.push({ key: 'POST /api/spectral/batch/commit', path: '/api/spectral/batch/commit',
+    variant: 'legacy foreign manifest with ' + equipment, mustDeny: true,
+    body: { manifestId: '{legacySpectralManifestA}', equipmentId: equipment } });
 for (const action of ['batch', 'upload-raw']) add(`POST /api/spectral/${action}`, `/api/spectral/${action}`, { scans: [source], contextSampleId: '{sampleA}' });
 add('POST /api/spectral/link-task', '/api/spectral/link-task', { scanId: '{scanA}', workItemId: '{workItemA}' });
 add('POST /api/spectral/batch-review', '/api/spectral/batch-review', { ids: ['{scanA}'], action: 'APPROVE' });

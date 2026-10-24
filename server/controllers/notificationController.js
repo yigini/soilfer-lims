@@ -1,6 +1,7 @@
 const prisma = require('../prisma');
 const { randomUUID: uuidv4 } = require('crypto');
 const { broadcastToUser } = require('../wsServer');
+const { recipientScopeWhere } = require('../services/messageRecipientScope');
 
 exports.getMyNotifications = async (req, res) => {
     const userId = String(req.user.id);
@@ -87,7 +88,7 @@ exports.sendInternalMessage = async (req, res) => {
     }
 
     try {
-        const targetUser = await prisma.user.findUnique({ where: { id: toUserId } });
+        const targetUser = await prisma.user.findFirst({ where: { AND: [{ id: toUserId }, await recipientScopeWhere(sender)] } });
         if (!targetUser) {
             return res.status(404).json({ error: 'Recipient not found' });
         }

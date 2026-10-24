@@ -25,12 +25,18 @@ add('GET /api/messages/conversations', '/api/messages/conversations');
 add('GET /api/messages/thread/:userId', '/api/messages/thread/{managerIdA}');
 add('POST /api/messages/draft', '/api/messages/draft', { id: '{messageA}', toUserId: '{managerIdB}', subject: 'Synthetic changed subject', body: 'Synthetic changed private draft' });
 add('POST /api/messages/send', '/api/messages/send', { draftId: '{messageDraftA}', toUserId: '{managerIdB}', subject: 'Synthetic message', body: 'Synthetic private-draft redemption' });
+cases.push({ key: 'POST /api/messages/send', path: '/api/messages/send', variant: 'foreign direct recipient', mustDeny: true,
+    body: { toUserId: '{managerIdA}', subject: 'Synthetic foreign direct message', body: 'Synthetic foreign delivery' } });
+cases.push({ key: 'POST /api/messages/send', path: '/api/messages/send', variant: 'foreign chat recipient', mustDeny: true,
+    body: { toUserId: '{managerIdA}', isChat: true, body: 'Synthetic foreign chat delivery' } });
+cases.push({ key: 'POST /api/messages/send', path: '/api/messages/send', variant: 'broadcast laboratory boundary',
+    body: { toUserId: 'BROADCAST', subject: 'Synthetic broadcast', body: 'Synthetic broadcast delivery' } });
 add('POST /api/messages/read', '/api/messages/read', { id: '{receivedMessageA}' });
 add('POST /api/messages/move', '/api/messages/move', { id: '{receivedMessageA}', targetFolder: 'TRASH', scope: 'recipient' });
 add('GET /api/notifications', '/api/notifications', null, { userId: '{managerIdA}' });
 add('POST /api/notifications/mark-read', '/api/notifications/mark-read', { id: '{notificationA}' });
 add('POST /api/notifications/mark-all-read', '/api/notifications/mark-all-read', {});
 add('POST /api/notifications/clear-all', '/api/notifications/clear-all', {});
-cases.push({ key: 'POST /api/notifications/send', path: '/api/notifications/send', body: { toUserId: '{managerIdB}', message: 'Synthetic personal message' },
-    globalReason: 'User-to-user communication is a personal workflow, not a lab-owned domain operation. This synthetic request targets labB; existing private labA notifications remain unchanged.' });
+cases.push({ key: 'POST /api/notifications/send', path: '/api/notifications/send', mustDeny: true,
+    body: { toUserId: '{managerIdA}', message: 'Synthetic foreign personal notification' } });
 module.exports = cases;

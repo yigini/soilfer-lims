@@ -246,6 +246,98 @@ describe('R2 real lab-A requests as lab B', () => {
         expect(await prisma.message.findUnique({ where: { id: created.body.id } })).toBeNull();
     });
 
+    test('a refused foreign recipient cannot consume the sender draft', async () => {
+        const headers = { Authorization: `Bearer ${fixtures.tokens.managerB}` };
+        const created = await request(app).post('/api/messages/draft').set(headers)
+            .send({ toUserId: fixtures.ids.managerIdB, subject: 'Retained own draft', body: 'Retained own text' });
+        expect(created.status).toBe(200);
+        const draftBefore = await prisma.message.findUnique({ where: { id: created.body.id } });
+        const before = await snapshotLabA(prisma, fixtures.ids);
+        const response = await request(app).post('/api/messages/send').set(headers)
+            .send({ draftId: created.body.id, toUserId: fixtures.ids.managerIdA, body: 'Refused foreign delivery' });
+        expect(response.status).toBe(404);
+        expect(response.body).toEqual({ error: 'Recipient not found' });
+        expect(await prisma.message.findUnique({ where: { id: created.body.id } })).toEqual(draftBefore);
+        expect(await snapshotLabA(prisma, fixtures.ids)).toEqual(before);
+    });
+
+    test('own-lab personal notifications remain usable', async () => {
+        const response = await request(app).post('/api/notifications/send').set('Authorization', `Bearer ${fixtures.tokens.technicianB}`)
+            .send({ toUserId: fixtures.ids.managerIdB, message: 'Permitted own-lab notification' });
+        expect(response.status).toBe(200);
+        expect(response.body.userId).toBe(fixtures.ids.managerIdB);
+        expect(await prisma.notification.findUnique({ where: { id: response.body.id } })).toMatchObject({ userId: fixtures.ids.managerIdB });
+    });
+
+    test('manager broadcast stays within its own lab even with a country grant and leaves all A inbox rows unchanged', async () => {
+        const before = await snapshotLabA(prisma, fixtures.ids);
+        const senderId = fixtures.ids.countryManagerIdB;
+        const sender = await prisma.user.findUnique({ where: { id: senderId } });
+        expect(JSON.parse(sender.countries)).toEqual(['GTM']);
+        const recipients = await prisma.user.findMany({ where: { labId: fixtures.ids.labB, id: { not: senderId } } });
+        expect(recipients.length).toBeGreaterThan(0);
+        const body = 'Permitted own-lab broadcast with actual delivery assertions';
+        const response = await request(app).post('/api/messages/send').set('Authorization', `Bearer ${fixtures.tokens.countryManagerB}`)
+            .send({ toUserId: 'BROADCAST', subject: 'Own-lab broadcast', body });
+        expect(response.status).toBe(200);
+        expect(response.body.count).toBe(recipients.length);
+        for (const recipient of recipients) {
+            expect(await prisma.message.findFirst({ where: { senderId, recipientId: recipient.id, body } })).not.toBeNull();
+            expect(await prisma.notification.findFirst({ where: { userId: recipient.id, senderId, message: 'Own-lab broadcast' } })).not.toBeNull();
+        }
+        expect(await snapshotLabA(prisma, fixtures.ids)).toEqual(before);
+    });
+
+    test('MASTER_USER country access does not grant broadcast permission', async () => {
+        const before = await snapshotLabA(prisma, fixtures.ids);
+        const response = await request(app).post('/api/messages/send').set('Authorization', `Bearer ${fixtures.tokens.nationalUser}`)
+            .send({ toUserId: 'BROADCAST', subject: 'Refused national broadcast', body: 'Refused national broadcast' });
+        expect(response.status).toBe(403);
+        expect(response.body).toEqual({ error: 'Only Managers can broadcast.' });
+        expect(await snapshotLabA(prisma, fixtures.ids)).toEqual(before);
+    });
+
+    for (const role of ['globalAdmin', 'nationalUser']) {
+        for (const route of ['messages', 'notifications']) {
+            test(`${role} retains authorized cross-lab ${route} delivery`, async () => {
+                const response = await request(app).post(`/api/${route}/send`).set('Authorization', `Bearer ${fixtures.tokens[role]}`)
+                    .send({ toUserId: fixtures.ids.managerIdA, subject: 'Authorized delivery', body: 'Authorized message', message: 'Authorized notification' });
+                expect(response.status).toBe(200);
+                if (route === 'messages') {
+                    expect(response.body.recipientId).toBe(fixtures.ids.managerIdA);
+                    expect(await prisma.message.findUnique({ where: { id: response.body.id } })).toMatchObject({ recipientId: fixtures.ids.managerIdA });
+                } else {
+                    expect(response.body.userId).toBe(fixtures.ids.managerIdA);
+                    expect(await prisma.notification.findUnique({ where: { id: response.body.id } })).toMatchObject({ userId: fixtures.ids.managerIdA });
+                }
+            });
+        }
+    }
+
+    for (const route of ['messages', 'notifications']) {
+        test(`MASTER_USER cannot deliver ${route} outside its authorized countries`, async () => {
+            const messages = await prisma.message.findMany({ where: { recipientId: fixtures.ids.managerIdC } });
+            const notifications = await prisma.notification.findMany({ where: { userId: fixtures.ids.managerIdC } });
+            const response = await request(app).post(`/api/${route}/send`).set('Authorization', `Bearer ${fixtures.tokens.nationalUser}`)
+                .send({ toUserId: fixtures.ids.managerIdC, body: 'Refused out-of-country message', message: 'Refused out-of-country notification' });
+            expect(response.status).toBe(404);
+            expect(response.body).toEqual({ error: 'Recipient not found' });
+            expect(await prisma.message.findMany({ where: { recipientId: fixtures.ids.managerIdC } })).toEqual(messages);
+            expect(await prisma.notification.findMany({ where: { userId: fixtures.ids.managerIdC } })).toEqual(notifications);
+        });
+    }
+
+    test('SUPER_ADMIN retains global broadcast delivery', async () => {
+        const body = 'Permitted global broadcast with actual A and C delivery';
+        const response = await request(app).post('/api/messages/send').set('Authorization', `Bearer ${fixtures.tokens.globalAdmin}`)
+            .send({ toUserId: 'BROADCAST', subject: 'Global broadcast', body });
+        expect(response.status).toBe(200);
+        for (const id of [fixtures.ids.managerIdA, fixtures.ids.managerIdC]) {
+            expect(await prisma.message.findFirst({ where: { recipientId: id, body } })).not.toBeNull();
+            expect(await prisma.notification.findFirst({ where: { userId: id, message: 'Global broadcast' } })).not.toBeNull();
+        }
+    });
+
     test('global exchange and calculation readers retain nonempty A evidence', async () => {
         const headers = { Authorization: `Bearer ${fixtures.tokens.globalAdmin}` };
         for (const alias of ['data-exchange', 'sis']) {

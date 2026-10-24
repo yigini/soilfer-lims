@@ -1,6 +1,7 @@
 const prisma = require('../prisma');
 const { randomUUID: uuidv4 } = require('crypto');
 const { broadcastToUser } = require('../wsServer');
+const { recipientScopeWhere } = require('../services/messageRecipientScope');
 
 const getDisplayName = (user) => {
     if (!user) return 'Unknown';
@@ -323,6 +324,18 @@ exports.sendMessage = async (req, res) => {
     }
 
     try {
+        const recipientScope = await recipientScopeWhere(sender);
+        let recipient;
+        if (toUserId === 'BROADCAST') {
+            if (sender.role !== 'LAB_MANAGER' && sender.role !== 'SUPER_ADMIN') {
+                return res.status(403).json({ error: 'Only Managers can broadcast.' });
+            }
+        } else {
+            recipient = await prisma.user.findFirst({ where: { AND: [{ id: toUserId }, recipientScope] },
+                select: { id: true, username: true, name: true } });
+            if (!recipient) return res.status(404).json({ error: 'Recipient not found' });
+        }
+
         // Handle Draft Deletion if converting draft -> sent
         if (draftId) {
             const draft = await prisma.message.findFirst({ where: { id: draftId, senderId: sender.id, status: 'DRAFT' } });
@@ -334,12 +347,8 @@ exports.sendMessage = async (req, res) => {
 
         // BROADCAST (always formal)
         if (toUserId === 'BROADCAST') {
-            if (sender.role !== 'LAB_MANAGER' && sender.role !== 'SUPER_ADMIN') {
-                return res.status(403).json({ error: 'Only Managers can broadcast.' });
-            }
-
             const allUsers = await prisma.user.findMany({
-                where: { id: { not: sender.id } }
+                where: { AND: [{ id: { not: sender.id } }, recipientScope] }
             });
 
             const operations = allUsers.map(async u => {
@@ -394,11 +403,6 @@ exports.sendMessage = async (req, res) => {
                 isRead: false,
                 isChat: isChatMsg
             }
-        });
-
-        const recipient = await prisma.user.findUnique({
-            where: { id: toUserId },
-            select: { id: true, username: true, name: true }
         });
 
         // Only create notification for formal messages (chats have their own real-time delivery)

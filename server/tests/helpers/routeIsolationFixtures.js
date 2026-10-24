@@ -71,6 +71,11 @@ async function createRouteIsolationFixtures(db) {
     ids.technicianBUsername = jwt.decode(tokens.technicianB).username;
     ids.managerIdA = actor.id;
     ids.managerIdB = jwt.decode(tokens.managerB).id;
+    const countryManager = await db.user.create({ data: { id: 'R2-COUNTRY-MANAGER-B', username: 'r2_country_manager_b',
+        email: 'r2_country_manager_b@example.test', password: await require('bcryptjs').hash('password', 4),
+        role: 'LAB_MANAGER', labId: ids.labB, isActive: true, countries: '["GTM"]', projects: '[]' } });
+    tokens.countryManagerB = require('../setup').generateToken({ ...countryManager, countries: ['GTM'], projects: [] });
+    ids.countryManagerIdB = countryManager.id;
     const helpArticle = await db.helpArticle.findFirst({ where: { archivedAt: null, visibility: 'AUTHENTICATED' },
         include: { revisions: { orderBy: { revisionNumber: 'desc' }, take: 1 } } });
     if (!helpArticle?.revisions.length) throw Error('Route matrix requires the canonical published help fixtures.');
@@ -247,6 +252,8 @@ async function createRouteIsolationFixtures(db) {
         labId: ids.labA, action: 'REVIEW_ACCEPT', performedBy: actor.username, details: 'Synthetic retained review history' } });
     ids.labC = 'R2-LAB-C'; ids.batchC = 'R2-BATCH-C';
     await db.lab.create({ data: { id: ids.labC, code: ids.labC, name: 'Synthetic out-of-country laboratory', country: 'HND' } });
+    const recipientCToken = await createAuthTokenFixture(db, 'LAB_MANAGER', ids.labC, [], []);
+    ids.managerIdC = jwt.decode(recipientCToken).id;
     await db.batch.create({ data: { id: ids.batchC, labId: ids.labC, analysis: 'PH_H2O', status: 'OPEN', createdBy: 'system:fixture' } });
     ids.ncrC = 'R2-NCR-C';
     await db.nonconformityReport.create({ data: { id: ids.ncrC, labId: ids.labC, source: 'OTHER', refType: 'LAB',
@@ -323,6 +330,14 @@ async function createRouteIsolationFixtures(db) {
             wavelengths: [4000,3000,2000,1000,500], values: [0.2,0.25,0.3,0.22,0.2] }] });
     if (preview.status !== 200 || !preview.body.manifestId) throw Error(`Synthetic spectral preview refused: ${preview.status}/${preview.body.code || preview.body.error}`);
     ids.spectralManifestA = preview.body.manifestId;
+    ids.legacySpectralManifestA = 'r2-legacy-manifest-' + require('node:crypto').randomUUID();
+    const stagingRoot = path.join(require('../../utils/uploadFiles').uploadsRoot(), 'staging');
+    const legacyManifest = JSON.parse(fs.readFileSync(path.join(stagingRoot, ids.spectralManifestA, 'manifest.json'), 'utf8'));
+    delete legacyManifest.labId;
+    legacyManifest.manifestId = ids.legacySpectralManifestA;
+    legacyManifest.expiresAt = '2020-01-01T00:00:00Z';
+    fs.mkdirSync(path.join(stagingRoot, ids.legacySpectralManifestA));
+    fs.writeFileSync(path.join(stagingRoot, ids.legacySpectralManifestA, 'manifest.json'), JSON.stringify(legacyManifest), { flag: 'wx' });
     const foreignMarkers = [...Object.entries(ids).filter(([key]) => key.endsWith('A') && !['referenceUnitA', 'importPreviewA'].includes(key)).map(([, value]) => value),
         'R2-SAMPLE-CODE-A', 'R2-CONTAINER-CODE-A', 'R2-STORAGE-A', 'R2-ORIGINAL-sample-A', 'R2-ORIGINAL-draft-A', 'R2-ORIGINAL-expected-A'];
     return { ids, tokens, foreignMarkers, actor };
@@ -334,6 +349,7 @@ async function createRouteIsolationFixtures(db) {
 async function snapshotLabA(db, ids) {
     const samples = [ids.sampleA, ids.draftA, ids.expectedA, ids.importSampleA, ids.completedSampleA, ids.exportSampleA].filter(Boolean);
     const batches = [ids.batchA, ids.importBatchA].filter(Boolean);
+    const userIds = (await db.user.findMany({ where: { labId: ids.labA }, select: { id: true } })).map(row => row.id);
     const filters = {
         lab: { id: ids.labA }, user: { labId: ids.labA }, project: { OR: [{ id: ids.projectA }, { labId: ids.labA }, { assignedLabIds: { contains: ids.labA } }] },
         projectLab: { OR: [{ projectCode: ids.projectA }, { labId: ids.labA }] },
@@ -349,7 +365,9 @@ async function snapshotLabA(db, ids) {
         consignment: { labId: ids.labA }, submission: { assignedLab: ids.labA }, resultOverrideRequest: { labId: ids.labA },
         spectralData: { labId: ids.labA }, proficiencyRound: { labId: ids.labA },
         staffInvitation: { labId: ids.labA }, passwordRecoveryGrant: { userId: ids.managerIdA },
-        message: { id: { in: [ids.messageA, ids.messageDraftA, ids.receivedMessageA].filter(Boolean) } }, notification: { id: ids.notificationA },
+        message: { OR: [{ senderId: { in: userIds } }, { recipientId: { in: userIds } },
+            { id: { in: [ids.messageA, ids.messageDraftA, ids.receivedMessageA].filter(Boolean) } }] },
+        notification: { OR: [{ userId: { in: userIds } }, { senderId: { in: userIds } }, { id: ids.notificationA }] },
         sampleContainer: { sampleId: { in: samples } }, inventoryLocation: { labId: ids.labA },
         custodyEvent: { labId: ids.labA }, labelPrintEvent: { sampleId: { in: samples } }, labPolicy: { labId: ids.labA },
         labPolicyOverride: { labId: ids.labA },
@@ -379,6 +397,10 @@ async function snapshotLabA(db, ids) {
     snapshot.exchangeReceipts = exchangeDb.prepare('SELECT * FROM _exchange_receipts WHERE snapshot_id = ? OR connection_id = ? ORDER BY id').all(ids.snapshotA, ids.connectionA);
     const file = path.join(require('../../utils/uploadFiles').uploadsRoot(), 'intake', path.basename(ids.uploadA));
     snapshot.ownedUpload = fs.existsSync(file) ? createHash('sha256').update(fs.readFileSync(file)).digest('hex') : null;
+    snapshot.stagedManifests = [ids.spectralManifestA, ids.legacySpectralManifestA].map(id => {
+        const staged = path.join(require('../../utils/uploadFiles').uploadsRoot(), 'staging', id, 'manifest.json');
+        return fs.existsSync(staged) ? createHash('sha256').update(fs.readFileSync(staged)).digest('hex') : null;
+    });
     return snapshot;
 }
 

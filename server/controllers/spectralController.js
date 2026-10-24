@@ -47,6 +47,37 @@ async function assertScanBatchScope(user, ids) {
     }
 }
 
+async function canReadLegacyManifest(user, manifest, decisions) {
+    if (scopeGuard.hasGlobalAccess(user)) return true;
+    let hasOwner = false;
+    if (manifest.equipmentId) {
+        const equipment = await prisma.equipmentAsset.findUnique({ where: { id: manifest.equipmentId } });
+        if (!equipment || !await canReadScan(user, { labId: equipment.labId })) return false;
+        hasOwner = true;
+    }
+    const samples = new Set();
+    for (const item of [...manifest.items, ...Object.values(manifest.committedEntries || {})]) {
+        const decision = decisions[item.id] || decisions[item.filename] || {};
+        for (const id of [item.sampleId, item.matchedSample?.id, decision.sampleId]) if (id) samples.add(id);
+        for (const id of [item.targetWorkItemId, item.matchedWorkItem?.id, decision.targetWorkItemId].filter(Boolean)) {
+            const work = await prisma.workItem.findUnique({ where: { id } });
+            if (!work) return false;
+            samples.add(work.sampleId);
+        }
+        if (item.duplicateScanId) {
+            const scan = await prisma.spectralData.findUnique({ where: { id: item.duplicateScanId } });
+            if (!scan || !await canReadScan(user, scan)) return false;
+            hasOwner = true;
+        }
+    }
+    for (const id of samples) {
+        const sample = await prisma.sample.findUnique({ where: { id } });
+        if (!sample || !scopeGuard.canAccessEntity(user, sample, { altLabField: 'assignedLab' })) return false;
+        hasOwner = true;
+    }
+    return hasOwner;
+}
+
 exports.getLibrary = async (req, res) => {
     try {
         const { status, modality, qcStatus, search, sampleId, page, limit, includeSuperseded } = req.query;
@@ -705,7 +736,15 @@ exports.commitBatch = async (req, res) => {
         }
 
         const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
-        if (!await canReadScan(user, { labId: manifest.labId })) {
+        if (manifest.labId && !await canReadScan(user, { labId: manifest.labId })) {
+            return res.status(403).json({ error: 'Staged manifest is outside your laboratory scope.' });
+        }
+        const effectiveEquipmentId = bodyEquipmentId || manifest.equipmentId;
+        // Older manifests lack previewBatch's lab envelope. Resolve their stored
+        // owners before expiry/equipment diagnostics or any staged-file writes.
+        // An empty unbound request can only reach the required-equipment refusal.
+        if (!manifest.labId && (effectiveEquipmentId || manifest.items.length) &&
+            !await canReadLegacyManifest(user, manifest, decisions)) {
             return res.status(403).json({ error: 'Staged manifest is outside your laboratory scope.' });
         }
         if (new Date() > new Date(manifest.expiresAt)) {
@@ -713,7 +752,6 @@ exports.commitBatch = async (req, res) => {
         }
 
         // Equipment qualification (Amendment 8: No silent guessing)
-        const effectiveEquipmentId = bodyEquipmentId || manifest.equipmentId;
         if (!effectiveEquipmentId) {
             return res.status(400).json({
                 error: 'EQUIPMENT_SELECTION_REQUIRED',
