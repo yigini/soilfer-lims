@@ -5,6 +5,7 @@
 const prisma = require('../prisma');
 const { reviewWorkItem } = require('./workItemController');
 const { WORK_ITEM_STATES } = require('../workflowContract');
+const scopeGuard = require('../utils/scopeGuard');
 
 /**
  * Create review decision for a work item
@@ -41,21 +42,14 @@ exports.getReviews = async (req, res) => {
         const where = {
             action: { in: ['REVIEW_ACCEPT', 'REVIEW_REJECT', 'REVIEW_WAIVE'] }
         };
-
-        if (workItemId) {
-            where.entityId = workItemId;
-        }
-
-        // Note: sampleId filtering on AuditLog needs optimization, typically AuditLog.entityId is workItemId here.
-        // We'd need to join or assume context. For now, if sampleId provided, we first find workItems.
-        if (sampleId) {
-            const items = await prisma.workItem.findMany({
-                where: { sampleId },
-                select: { id: true }
-            });
-            const itemIds = items.map(i => i.id);
-            where.entityId = { in: itemIds };
-        }
+        // AuditLog is a denormalized read model. Resolve permitted owners from
+        // the authoritative sample scope even for an unfiltered history read.
+        const items = await prisma.workItem.findMany({
+            where: { ...(workItemId && { id: workItemId }), ...(sampleId && { sampleId }),
+                sample: { is: scopeGuard.buildScopedWhere(req.user) } },
+            select: { id: true }
+        });
+        where.entityId = { in: items.map(item => item.id) };
 
         const logs = await prisma.auditLog.findMany({
             where,

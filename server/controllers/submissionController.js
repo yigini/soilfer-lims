@@ -38,6 +38,9 @@ exports.createSubmission = async (req, res) => {
 
         const sample = await prisma.sample.findUnique({ where: { id: String(sampleId) } });
         if (!sample) return res.status(404).json({ error: 'Sample not found' });
+        if (!scopeGuard.canAccessEntity(user, sample, { altLabField: 'assignedLab' })) {
+            return res.status(403).json({ error: 'Submission outside your lab' });
+        }
 
         const validItems = [];
         const errors = [];
@@ -149,6 +152,10 @@ exports.getSubmission = async (req, res) => {
         if (!submission) {
             return res.status(404).json({ error: 'Submission not found' });
         }
+        const sample = await prisma.sample.findUnique({ where: { id: String(submission.sampleId) } });
+        if (!scopeGuard.canAccessEntity(user, sample || submission, { labField: 'assignedLab', altLabField: 'labId' })) {
+            return res.status(403).json({ error: 'Submission outside your lab' });
+        }
 
         // RBAC
         if (user.role === 'LAB_TECHNICIAN' && submission.submittedBy !== user.username) {
@@ -162,8 +169,6 @@ exports.getSubmission = async (req, res) => {
         const workItems = await prisma.workItem.findMany({
             where: { id: { in: workItemIds } }
         });
-        const sample = await prisma.sample.findUnique({ where: { id: String(submission.sampleId) } });
-
         res.json({ submission, workItems, sample });
     } catch (error) {
         console.error('[getSubmission] Error:', error);

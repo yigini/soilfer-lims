@@ -119,14 +119,20 @@ async function softDelete(actor, id, reason, { db = require('../prisma') } = {})
     });
 }
 
-function visibleWhere(actor, input = {}) {
+async function visibleWhere(actor, input = {}, db = require('../prisma')) {
     if (input.includeDeleted != null && !['true', 'false', true, false].includes(input.includeDeleted)) {
         throw fail(400, 'PT_INPUT_INVALID', 'includeDeleted must be true or false.');
     }
     const includeDeleted = input.includeDeleted === true || input.includeDeleted === 'true';
     if (includeDeleted && !hasPermission(actor, 'APPROVE_RESULTS')) throw fail(403, 'PERMISSION_DENIED', 'Manager authority is required to include deleted PT rounds.');
-    return scopeGuard.buildScopedWhere(actor, { ...(!includeDeleted && { deletedAt: null }),
-        ...(input.labId && { labId: input.labId }) }, { entityType: 'ProficiencyRound', labField: 'labId', altLabField: null });
+    const where = { ...(!includeDeleted && { deletedAt: null }), ...(input.labId && { labId: input.labId }) };
+    if (scopeGuard.hasGlobalAccess(actor)) return where;
+    const actorLab = actor.labId ? await policyService.resolveLab(actor.labId, db) : null;
+    const scopedActor = { ...actor, labId: actorLab?.id || actor.labId };
+    const labs = await db.lab.findMany({ select: { id: true, code: true, country: true } });
+    const allowed = labs.filter(lab => scopeGuard.canAccessEntity(scopedActor, { labId: lab.id, country: lab.country },
+        { labField: 'labId', altLabField: null })).flatMap(lab => [lab.id, lab.code]);
+    return { ...where, AND: [{ labId: { in: allowed } }] };
 }
 
 module.exports = { record, update, softDelete, visibleWhere };

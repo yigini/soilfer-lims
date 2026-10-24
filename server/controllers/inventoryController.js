@@ -282,6 +282,10 @@ exports.createItem = async (req, res) => {
             return res.status(400).json({ error: 'name, itemType, and unitOfMeasure are required' });
         }
 
+        if (req.body.defaultLocationId) {
+            const location = await prisma.inventoryLocation.findUnique({ where: { id: req.body.defaultLocationId } });
+            if (!location || location.labId !== labId) return res.status(403).json({ error: 'Access denied' });
+        }
         const item = await prisma.inventoryItem.create({
             data: {
                 id: uuid(),
@@ -326,6 +330,10 @@ exports.updateItem = async (req, res) => {
         }
 
         const { id, labId, createdAt, updatedAt, lots, methodRequirements, ...updateData } = req.body;
+        if (updateData.defaultLocationId) {
+            const location = await prisma.inventoryLocation.findUnique({ where: { id: updateData.defaultLocationId } });
+            if (!location || location.labId !== existing.labId) return res.status(403).json({ error: 'Access denied' });
+        }
         if (updateData.storageConditions && typeof updateData.storageConditions === 'object') {
             updateData.storageConditions = JSON.stringify(updateData.storageConditions);
         }
@@ -789,6 +797,7 @@ exports.createLocation = async (req, res) => {
             return res.status(400).json({ code: 'CUSTODY_LOCATION_INVALID', error: 'Choose a name and valid location purpose.' });
         if (req.body.parentLocationId) {
             const parent = await prisma.inventoryLocation.findUnique({ where: { id: req.body.parentLocationId } });
+            if (parent && parent.labId !== labId) return res.status(403).json({ error: 'Access denied' });
             if (!parent || parent.labId !== labId || parent.purpose !== purpose || !parent.isActive)
                 return res.status(400).json({ code: 'CUSTODY_LOCATION_INVALID', error: 'Choose an active parent location with the same laboratory and purpose.' });
         }
@@ -1125,8 +1134,10 @@ exports.getMethodRequirements = async (req, res) => {
         const { analysisCode } = req.query;
         const where = {};
         if (analysisCode) where.analysisCode = analysisCode;
-        if (req.user.role !== 'SUPER_ADMIN' && req.user.labId) {
+        if (req.user.role !== 'SUPER_ADMIN') {
             where.OR = [{ labId: req.user.labId }, { labId: null }];
+            // Legacy null-lab requirements are still owned by their item.
+            where.item = { is: { labId: req.user.labId || '__NO_AUTHORIZED_LAB__' } };
         }
 
         const reqs = await prisma.methodRequirement.findMany({
@@ -1148,6 +1159,14 @@ exports.createMethodRequirement = async (req, res) => {
             return res.status(400).json({ error: 'analysisCode and inventoryItemId are required' });
         }
 
+        const item = await prisma.inventoryItem.findUnique({ where: { id: inventoryItemId } });
+        if (!item || req.user.role !== 'SUPER_ADMIN' && item.labId !== req.user.labId) {
+            return res.status(403).json({ error: 'Access denied' });
+        }
+        if (methodId) {
+            const method = await prisma.methodology.findUnique({ where: { id: methodId } });
+            if (!method || method.labId && method.labId !== item.labId) return res.status(403).json({ error: 'Access denied' });
+        }
         const req_ = await prisma.methodRequirement.create({
             data: {
                 id: uuid(),
@@ -1157,7 +1176,7 @@ exports.createMethodRequirement = async (req, res) => {
                 defaultConsumption: defaultConsumption || null,
                 unit: unit || null,
                 isRequired: isRequired !== false,
-                labId: req.user.labId || null
+                labId: item.labId
             }
         });
 
@@ -1170,6 +1189,12 @@ exports.createMethodRequirement = async (req, res) => {
 /** DELETE /api/inventory/method-requirements/:id */
 exports.deleteMethodRequirement = async (req, res) => {
     try {
+        const requirement = await prisma.methodRequirement.findUnique({ where: { id: req.params.id }, include: { item: true } });
+        if (!requirement) return res.status(404).json({ error: 'Not found' });
+        if (req.user.role !== 'SUPER_ADMIN' && (!req.user.labId || requirement.item.labId !== req.user.labId ||
+            requirement.labId && requirement.labId !== req.user.labId)) {
+            return res.status(403).json({ error: 'Access denied' });
+        }
         await prisma.methodRequirement.delete({ where: { id: req.params.id } });
         res.json({ success: true });
     } catch (e) {

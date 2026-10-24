@@ -17,7 +17,7 @@ async function laboratory(db, actor, reference, edit = false) {
     if (!lab) throw fail(404, 'CALC_TEMPLATE_LAB_NOT_FOUND', 'Select a registered laboratory.');
     const actorLab = actor?.labId ? await policyService.resolveLab(actor.labId, db) : null;
     const normalized = { ...actor, labId: actorLab?.id || actor?.labId };
-    if (!scopeGuard.canAccessEntity(normalized, { labId: lab.id }, { labField: 'labId', altLabField: null }) ||
+    if (!scopeGuard.canAccessEntity(normalized, { labId: lab.id, country: lab.country }, { labField: 'labId', altLabField: null }) ||
         edit && !scopeGuard.canManageLab(normalized, lab.id)) {
         throw fail(403, 'CALC_TEMPLATE_SCOPE_DENIED', 'This laboratory is outside your scope.');
     }

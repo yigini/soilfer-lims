@@ -903,32 +903,10 @@ app.get('/api/dashboard/stats', verifyToken, async (req, res) => {
     const { country, projectId } = req.query; // Optional filters
 
     try {
-        // 1. Build Query
-        const where = {};
-
-        // RBAC Scoping
-        if (user.role !== 'SUPER_ADMIN') {
-            const userCountries = user.countries || [];
-            const userProjects = user.projects || [];
-            if (userCountries.length > 0) {
-                // If filtering by country, it's safer to query projects or raw field? 
-                // Schema has projectCode, countryName. 
-                // Let's assume projectCode map to country for now or countryName.
-                where.OR = [
-                    { projectCode: { in: userCountries } },
-                    { countryName: { in: userCountries } }
-                ];
-            }
-            if (userProjects.length > 0) {
-                // Combine with existing OR or add? 
-                // Complex RBAC logic from sampleController... simplified here:
-                if (where.OR) {
-                    where.OR.push({ projectId: { in: userProjects } });
-                } else {
-                    where.OR = [{ projectId: { in: userProjects } }];
-                }
-            }
-        }
+        // Apply the same sample scope as the other dashboard routes. Optional
+        // filters can narrow that scope but cannot grant another lab's totals.
+        const { buildScopedWhere } = require('./utils/scopeGuard');
+        const where = buildScopedWhere(user);
 
         // Explicit Filters
         if (country) {

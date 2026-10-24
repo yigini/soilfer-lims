@@ -455,7 +455,7 @@ exports.getPendingInvitations = async (req, res) => {
         const result = await staffLifecycleService.getPendingInvitations(req.user, labId, options);
         res.json(result);
     } catch (err) {
-        res.status(err.statusCode || 500).json({ error: err.message, code: err.code });
+        res.status(err.statusCode || 500).json({ error: err.statusCode === 403 ? 'Invitation access is outside your authorized scope.' : err.message, code: err.code });
     }
 };
 

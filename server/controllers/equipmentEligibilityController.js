@@ -29,6 +29,19 @@ exports.updateEligibility = async (req, res) => {
             return res.status(403).json({ error: 'Manager permissions required' });
         }
 
+        if (!labId || !analysisCode || eligibleEquipmentIds != null &&
+            (!Array.isArray(eligibleEquipmentIds) || eligibleEquipmentIds.some(id => typeof id !== 'string'))) {
+            return res.status(400).json({ error: 'A laboratory, analysis and equipment ID array are required' });
+        }
+        if (methodId) {
+            const method = await prisma.methodology.findUnique({ where: { id: methodId } });
+            if (!method || method.labId && method.labId !== labId) return res.status(403).json({ error: 'Access denied' });
+        }
+        const equipmentIds = [...new Set(eligibleEquipmentIds || [])];
+        if (equipmentIds.length) {
+            const ownedCount = await prisma.equipmentAsset.count({ where: { id: { in: equipmentIds }, labId } });
+            if (ownedCount !== equipmentIds.length) return res.status(403).json({ error: 'Access denied' });
+        }
         // Upsert logic
         const existing = await prisma.equipmentMethodEligibility.findFirst({
             where: { labId, analysisCode }

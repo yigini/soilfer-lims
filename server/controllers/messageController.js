@@ -325,8 +325,10 @@ exports.sendMessage = async (req, res) => {
     try {
         // Handle Draft Deletion if converting draft -> sent
         if (draftId) {
+            const draft = await prisma.message.findFirst({ where: { id: draftId, senderId: sender.id, status: 'DRAFT' } });
+            if (!draft) return res.status(404).json({ error: 'Draft not found' });
             try {
-                await prisma.message.delete({ where: { id: draftId } });
+                await prisma.message.delete({ where: { id: draftId, senderId: sender.id, status: 'DRAFT' } });
             } catch (e) { /* ignore if not found */ }
         }
 
@@ -462,8 +464,10 @@ exports.saveDraft = async (req, res) => {
     try {
         let draft;
         if (id) {
+            const existing = await prisma.message.findFirst({ where: { id, senderId: sender.id, status: 'DRAFT' } });
+            if (!existing) return res.status(404).json({ error: 'Draft not found' });
             draft = await prisma.message.update({
-                where: { id },
+                where: { id, senderId: sender.id, status: 'DRAFT' },
                 data: { recipientId: toUserId || null, subject, body }
             });
         } else {

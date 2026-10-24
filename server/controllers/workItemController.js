@@ -164,6 +164,13 @@ exports.assignWork = async (req, res) => {
             const sample = sampleMap[item.sampleId];
             const owningLab = sample ? (sample.assignedLab || sample.labId) : (item.assignedLab || item.labId);
 
+            // Authorize the owner before assignee diagnostics can disclose its
+            // laboratory. Cross-laboratory assignment checks still run below.
+            stateRules.assertScope(user, sample || item);
+            if (user.role === 'LAB_MANAGER' && user.labId !== owningLab) {
+                return res.status(403).json({ error: 'Work item is outside your laboratory scope.', code: 'ACCESS_DENIED_LAB' });
+            }
+
             const validation = await assignmentEligibilityService.validateAssignmentTarget({
                 actor: user,
                 assigneeUsername: assignee,
@@ -182,11 +189,6 @@ exports.assignWork = async (req, res) => {
 
             validatedTechUser = validation.assignee;
 
-            if (user.role === 'LAB_MANAGER' && user.labId !== owningLab) {
-                return res.status(403).json({
-                    error: `Work item belongs to different lab scope (Req: ${user.labId}, Has: ${owningLab})`
-                });
-            }
         }
 
         const techUser = validatedTechUser;
@@ -377,6 +379,11 @@ exports.reassignWork = async (req, res) => {
 
         const sample = item.sampleId ? await prisma.sample.findUnique({ where: { id: item.sampleId } }) : null;
         const owningLab = sample ? (sample.assignedLab || sample.labId) : (item.assignedLab || item.labId);
+
+        stateRules.assertScope(user, sample || item);
+        if (user.role === 'LAB_MANAGER' && user.labId !== owningLab) {
+            return res.status(403).json({ error: 'Work item is outside your laboratory scope.', code: 'ACCESS_DENIED_LAB' });
+        }
 
         const assignmentEligibilityService = require('../services/assignmentEligibilityService');
         const validation = await assignmentEligibilityService.validateAssignmentTarget({
@@ -1107,8 +1114,7 @@ exports.reviewWorkItemsBulk = async (req, res) => {
             if (outOfScopeItems.length > 0) {
                 return res.status(403).json({
                     error: `Access denied: ${outOfScopeItems.length} work item(s) outside your lab scope.`,
-                    code: 'ACCESS_DENIED_LAB',
-                    outOfScopeIds: outOfScopeItems.map(i => i.id)
+                    code: 'ACCESS_DENIED_LAB'
                 });
             }
         }

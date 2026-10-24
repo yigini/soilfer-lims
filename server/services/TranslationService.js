@@ -19,8 +19,7 @@ function getTranslationsDir() {
 const CLIENT_TRANSLATIONS_DIR = getTranslationsDir();
 
 // In-memory cache for dynamic keys
-let dynamicKeyCache = null;
-let lastCacheUpdate = 0;
+const dynamicKeyCache = new Map();
 const CACHE_TTL = 60 * 1000; // 1 minute
 
 const safeReadJSON = (filePath) => {
@@ -52,17 +51,18 @@ class TranslationService {
      * Generates all dynamic keys from the database and canonical reference models.
      * Uses English/System values as default.
      */
-    async getDynamicKeys() {
+    async getDynamicKeys(labId = null) {
         const now = Date.now();
-        if (dynamicKeyCache && (now - lastCacheUpdate < CACHE_TTL)) {
-            return dynamicKeyCache;
-        }
+        const scope = labId || '';
+        const cached = dynamicKeyCache.get(scope);
+        if (cached && now - cached.updatedAt < CACHE_TTL) return cached.keys;
+        const catalogueScope = labId ? { OR: [{ labId: null }, { labId }] } : { labId: null };
 
         const keys = {};
 
         try {
             // 1. Analyses
-            const analyses = await prisma.analysis.findMany({ select: { code: true, name: true, description: true } });
+            const analyses = await prisma.analysis.findMany({ where: catalogueScope, select: { code: true, name: true, description: true } });
             analyses.forEach(a => {
                 keys[`dynamic.analysis.${a.code}.name`] = a.name;
                 if (a.description) keys[`dynamic.analysis.${a.code}.description`] = a.description;
@@ -75,14 +75,14 @@ class TranslationService {
             });
 
             // 3. Analysis Categories
-            const categories = await prisma.analysisCategory.findMany({ select: { id: true, name: true } });
+            const categories = await prisma.analysisCategory.findMany({ where: catalogueScope, select: { id: true, name: true } });
             categories.forEach(c => {
                 keys[`dynamic.category.${c.id}.name`] = c.name;
             });
 
             // 4. Methodologies
             try {
-                const methodologies = await prisma.methodology.findMany({ select: { id: true, name: true, description: true } });
+                const methodologies = await prisma.methodology.findMany({ where: catalogueScope, select: { id: true, name: true, description: true } });
                 methodologies.forEach(m => {
                     keys[`dynamic.methodology.${m.id}.name`] = m.name;
                     if (m.description) keys[`dynamic.methodology.${m.id}.description`] = m.description;
@@ -93,6 +93,7 @@ class TranslationService {
 
             // 5. Equipment Types
             const equipmentTypes = await prisma.equipmentAsset.findMany({
+                where: { labId: labId || { in: [] } },
                 distinct: ['assetType'],
                 select: { assetType: true }
             });
@@ -125,19 +126,18 @@ class TranslationService {
                 keys[`dynamic.status.${s}.label`] = s;
             });
 
-            dynamicKeyCache = keys;
-            lastCacheUpdate = now;
+            dynamicKeyCache.set(scope, { keys, updatedAt: now });
         } catch (error) {
             console.error('[TranslationService] Failed to generate dynamic keys', error);
         }
-        return dynamicKeyCache || {};
+        return dynamicKeyCache.get(scope)?.keys || {};
     }
 
     /**
      * Returns full merged translation dictionary for runtime locale usage.
      */
     async getMergedTranslations(code, labId = null) {
-        const dynamicDefaults = await this.getDynamicKeys();
+        const dynamicDefaults = await this.getDynamicKeys(labId);
 
         const staticFilePath = path.join(CLIENT_TRANSLATIONS_DIR, `${code}.json`);
         const staticTranslations = safeReadJSON(staticFilePath);
@@ -180,7 +180,7 @@ class TranslationService {
      * Returns the structured "Catalog" with primaryGroup, tags, reviewStatus for Admin/Manager UI.
      */
     async getCatalog(targetCode, labId = null) {
-        const dynamicKeys = await this.getDynamicKeys();
+        const dynamicKeys = await this.getDynamicKeys(labId);
 
         // English baseline (reference)
         const enStatic = flattenParams(safeReadJSON(path.join(CLIENT_TRANSLATIONS_DIR, 'en.json')));
@@ -258,7 +258,7 @@ class TranslationService {
     }
 
     invalidateCache() {
-        dynamicKeyCache = null;
+        dynamicKeyCache.clear();
     }
 }
 

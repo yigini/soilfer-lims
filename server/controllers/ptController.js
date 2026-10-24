@@ -39,7 +39,7 @@ exports.getRounds = async (req, res) => {
     const { analysisCode, outcome, provider, year } = req.query;
 
     try {
-        const where = rounds.visibleWhere(req.user, req.query);
+        const where = await rounds.visibleWhere(req.user, req.query);
 
         if (analysisCode) where.analysisCode = String(analysisCode).trim();
         if (outcome) where.outcome = String(outcome).toUpperCase();
@@ -70,7 +70,7 @@ exports.getSummary = async (req, res) => {
     const { year } = req.query;
 
     try {
-        const where = rounds.visibleWhere(req.user, req.query);
+        const where = await rounds.visibleWhere(req.user, req.query);
 
         if (year) {
             const start = new Date(`${year}-01-01T00:00:00.000Z`);
