@@ -132,6 +132,20 @@ function prepareAcquisition(mode, fixtures) {
 async function acquire(mode, fixtures, body = {}) {
     return prepareAcquisition(mode, fixtures).send(body);
 }
+
+test('a legacy staged manifest checks the authoritative sample owner without changing rows or staged bytes', async () => {
+    const f = await fixture(), batch = prepareAcquisition('commit', [f]);
+    const foreignLabId = 'LAB-SPECTRAL-STATE-FOREIGN-336';
+    await ensureTestLab(foreignLabId, 'TEST');
+    await f.db.sample.update({ where: { id: f.sample.id }, data: { assignedLab: foreignLabId } });
+    const before = allTables(), stagedBefore = fs.readFileSync(batch.manifestPath);
+    const response = await batch.send({ reopenReason: 'Acquisition correction' });
+    expect(response.status).toBe(403);
+    expect(response.body).toEqual({ error: 'Staged manifest is outside your laboratory scope.' });
+    expect(allTables()).toEqual(before);
+    expect(fs.readFileSync(batch.manifestPath)).toEqual(stagedBefore);
+});
+
 function allTables() {
     const db = new Database(process.env.DATABASE_PATH, { readonly: true, fileMustExist: true });
     try {

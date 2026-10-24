@@ -17,6 +17,9 @@ exports.getAssignableRoles = async (req, res) => {
     try {
         const actor = req.user;
         const targetLabId = req.query.labId || actor.labId || null;
+        if (actor.role === 'LAB_MANAGER' && targetLabId !== actor.labId) {
+            return res.status(403).json({ error: 'Role assignment is outside your laboratory scope.' });
+        }
 
         const catalogue = actionPolicyService.getAssignableRolesCatalogue(actor, targetLabId);
 
@@ -60,7 +63,7 @@ exports.getCapabilities = async (req, res) => {
  */
 exports.getProjectMembershipReport = async (req, res) => {
     try {
-        const report = await projectMembershipService.getDiscrepancyReport();
+        const report = await projectMembershipService.getDiscrepancyReport(undefined, { actor: req.user });
         res.json(report);
     } catch (err) {
         console.error('[AccessController] getProjectMembershipReport error:', err);

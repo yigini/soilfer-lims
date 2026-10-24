@@ -61,9 +61,14 @@ exports.previewCsv = async (req, res) => {
             return res.status(400).json({ error: 'No valid CSV headers found.' });
         }
 
-        const analyses = await prisma.analysis.findMany({ select: { code: true, name: true, unitCode: true } });
+        const lab = req.user?.labId ? await prisma.lab.findFirst({
+            where: { OR: [{ id: req.user.labId }, { code: req.user.labId }] }, select: { id: true }
+        }) : null;
+        const catalogueScope = req.user?.role === 'SUPER_ADMIN' ? {} :
+            lab ? { OR: [{ labId: null }, { labId: lab.id }] } : { labId: null };
+        const analyses = await prisma.analysis.findMany({ where: catalogueScope, select: { code: true, name: true, unitCode: true } });
         const units = await prisma.unit.findMany({ select: { code: true, display: true } });
-        const methodologies = await prisma.methodology.findMany({ select: { id: true, name: true, analysisCode: true, isDefault: true } });
+        const methodologies = await prisma.methodology.findMany({ where: catalogueScope, select: { id: true, name: true, analysisCode: true, isDefault: true } });
 
         // Auto-suggest mappings
         const suggestedMappings = [];

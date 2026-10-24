@@ -14,8 +14,10 @@ exports.getPolicies = async (req, res) => {
             const [overrides, history, analyses, methodologies] = await Promise.all([
                 tx.labPolicyOverride.findMany({ where: { labId: lab.id }, orderBy: { setAt: 'desc' } }),
                 tx.auditLog.findMany({ where: { labId: lab.id, entity: 'LAB', details: { contains: 'LAB_POLICY_CHANGE' } }, orderBy: { timestamp: 'desc' } }),
-                tx.analysis.findMany({ select: { code: true, name: true }, orderBy: { code: 'asc' } }),
-                tx.methodology.findMany({ select: { id: true, name: true, analysisCode: true }, orderBy: { name: 'asc' } })
+                tx.analysis.findMany({ where: { OR: [{ labId: null }, { labId: lab.id }] },
+                    select: { code: true, name: true }, orderBy: { code: 'asc' } }),
+                tx.methodology.findMany({ where: { OR: [{ labId: null }, { labId: lab.id }] },
+                    select: { id: true, name: true, analysisCode: true }, orderBy: { name: 'asc' } })
             ]);
             return { ...effective, lab: { id: lab.id, name: lab.name, code: lab.code }, registry, presets: PRESETS,
                 overrides: overrides.map(row => ({ ...row, value: JSON.parse(row.value) })), history, analyses, methodologies,

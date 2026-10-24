@@ -11,18 +11,23 @@ const { hasPermission } = require('../config/roles');
 exports.getExportHistory = async (req, res) => {
     const user = req.user;
     try {
-        const where = {};
+        const where = { entity: 'EXPORT' };
         if (user.role !== 'SUPER_ADMIN') {
-            where.user = user.username;
+            where.performedBy = user.username;
         }
 
-        const logs = await prisma.exportLog.findMany({
+        const logs = await prisma.auditLog.findMany({
             where,
             orderBy: { timestamp: 'desc' },
             take: 50 // Limit history
         });
 
-        res.json(logs);
+        res.json(logs.map(log => {
+            let details = {};
+            try { details = JSON.parse(log.details || '{}'); } catch (_) { /* Retain historical rows without structured details. */ }
+            return { id: log.id, timestamp: log.timestamp, user: log.performedBy, type: log.action,
+                filters: details.filters || {}, recordCount: details.count || 0, signOff: details.signOff || {} };
+        }));
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch export history' });
     }
@@ -54,6 +59,28 @@ exports.getExportData = async (req, res) => {
 
         // 1. Build Query (Scope + Filters)
         const scopeGuard = require('../utils/scopeGuard');
+        // Resolve explicit private selectors before audit output can reflect
+        // foreign identifiers. The sample query below still intersects scope.
+        const policies = require('../services/policyService');
+        const actorLab = user.labId ? await policies.resolveLab(user.labId, prisma) : null;
+        const scopedActor = { ...user, labId: actorLab?.id || user.labId };
+        const targetLab = lab ? await policies.resolveLab(lab, prisma) : null;
+        if (targetLab && !scopeGuard.canAccessEntity(scopedActor, { assignedLab: targetLab.id, country: targetLab.country })) {
+            return res.status(403).json({ error: 'Export laboratory is outside your scope.' });
+        }
+        const projectPolicy = require('../services/projectPolicyService');
+        const projects = [...new Set([project, ...Object.keys(viewFilters?.projects || {})].filter(Boolean))];
+        for (const reference of projects) {
+            const target = await projectPolicy.resolveProject(reference, prisma);
+            if (!target) continue;
+            const members = await prisma.projectLab.findMany({ where: { projectCode: target.code }, select: { labId: true } });
+            const labs = await prisma.lab.findMany({ where: { id: { in: [target.labId, ...members.map(row => row.labId)].filter(Boolean) } },
+                select: { id: true, country: true } });
+            if (!projectPolicy.canReadProject(scopedActor, target, { memberLabIds: members.map(row => row.labId),
+                labCountries: Object.fromEntries(labs.map(row => [row.id, row.country])) })) {
+                return res.status(403).json({ error: 'Export project is outside your scope.' });
+            }
+        }
         // 1. Build Scope (Secure Base)
 
         const scopeWhere = scopeGuard.buildScopedWhere(user, {}, {

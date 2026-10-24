@@ -86,7 +86,7 @@ async function resolveProjectLabs(project, tx = prisma) {
  * @param {object} [tx=prisma]
  * @returns {Promise<{ scannedProjects: number, discrepancyCount: number, discrepancies: Array }>}
  */
-async function getDiscrepancyReport(tx = prisma) {
+async function getDiscrepancyReport(tx = prisma, { actor = null } = {}) {
     const projects = await tx.project.findMany({
         select: {
             id: true,
@@ -99,6 +99,9 @@ async function getDiscrepancyReport(tx = prisma) {
     });
 
     const discrepancies = [];
+    const labCountries = actor ? Object.fromEntries((await tx.lab.findMany({ select: { id: true, country: true } }))
+        .map(lab => [lab.id, lab.country])) : {};
+    let scannedProjects = 0;
 
     for (const p of projects) {
         const issues = [];
@@ -108,6 +111,9 @@ async function getDiscrepancyReport(tx = prisma) {
             select: { labId: true, role: true }
         });
         const junctionLabIds = junctions.map(j => j.labId);
+        if (actor && !require('./projectPolicyService').canReadProject(actor, p,
+            { memberLabIds: junctionLabIds, labCountries })) continue;
+        scannedProjects++;
 
         let assignedLabs = [];
         if (p.assignedLabIds) {
@@ -153,7 +159,7 @@ async function getDiscrepancyReport(tx = prisma) {
     }
 
     return {
-        scannedProjects: projects.length,
+        scannedProjects,
         discrepancyCount: discrepancies.length,
         discrepancies
     };

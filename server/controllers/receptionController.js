@@ -286,6 +286,7 @@ exports.checkDuplicate = async (req, res) => {
                 receivedBy: true,
                 assignedLab: true,
                 projectCode: true,
+                country: true,
                 receivedMass: true,
                 moistureOnArrival: true
             }
@@ -293,6 +294,9 @@ exports.checkDuplicate = async (req, res) => {
 
         if (!sample) {
             return res.json({ exists: false });
+        }
+        if (!require('../utils/scopeGuard').canAccessEntity(req.user, sample, { altLabField: 'assignedLab' })) {
+            return res.status(403).json({ error: 'Access denied: Sample not in your Lab scope' });
         }
 
         const priorReceiptStatuses = [
@@ -543,6 +547,7 @@ exports.batchGeometryCheck = async (req, res) => {
 
         const projectSamples = await prisma.sample.findMany({
             where: {
+                AND: [require('../utils/scopeGuard').buildScopedWhere(req.user)],
                 OR: [
                     { projectId },
                     { projectCode: projectId }

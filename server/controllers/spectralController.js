@@ -10,12 +10,12 @@ const scopeGuard = require('../utils/scopeGuard');
 const spectralState = require('../services/spectralWorkItemStateService');
 const stateRules = require('../services/workflowStateRules');
 
-const UPLOADS_SPECTRA_DIR = path.join(__dirname, '..', 'uploads', 'spectra');
+const UPLOADS_SPECTRA_DIR = path.join(require('../utils/uploadFiles').uploadsRoot(), 'spectra');
 if (!fs.existsSync(UPLOADS_SPECTRA_DIR)) {
     try { fs.mkdirSync(UPLOADS_SPECTRA_DIR, { recursive: true }); } catch (e) {}
 }
 
-const UPLOADS_STAGING_DIR = path.join(__dirname, '..', 'uploads', 'staging');
+const UPLOADS_STAGING_DIR = path.join(require('../utils/uploadFiles').uploadsRoot(), 'staging');
 if (!fs.existsSync(UPLOADS_STAGING_DIR)) {
     try { fs.mkdirSync(UPLOADS_STAGING_DIR, { recursive: true }); } catch (e) {}
 }
@@ -31,6 +31,52 @@ const parseJson = (str) => {
 const calculateChecksum = (dataString) => {
     return crypto.createHash('sha256').update(dataString).digest('hex');
 };
+
+async function canReadScan(user, scan) {
+    if (scopeGuard.hasGlobalAccess(user)) return true;
+    const sample = scan.sampleId ? await prisma.sample.findUnique({ where: { id: scan.sampleId } }) : null;
+    const owner = scan.labId || sample?.assignedLab || sample?.labId;
+    const lab = await require('../services/policyService').resolveLab(owner, prisma);
+    return scopeGuard.canAccessEntity(user, { labId: lab?.id || owner, country: lab?.country }, { labField: 'labId', altLabField: null }) &&
+        (!sample || scopeGuard.canAccessEntity(user, sample, { altLabField: 'assignedLab' }));
+}
+async function assertScanBatchScope(user, ids) {
+    const scans = await prisma.spectralData.findMany({ where: { id: { in: ids } } });
+    for (const scan of scans) if (!await canReadScan(user, scan)) {
+        throw new stateRules.TransitionError('Spectrum is outside your laboratory scope.', 403, 'SPECTRAL_SCOPE_DENIED');
+    }
+}
+
+async function canReadLegacyManifest(user, manifest, decisions) {
+    if (scopeGuard.hasGlobalAccess(user)) return true;
+    let hasOwner = false;
+    if (manifest.equipmentId) {
+        const equipment = await prisma.equipmentAsset.findUnique({ where: { id: manifest.equipmentId } });
+        if (!equipment || !await canReadScan(user, { labId: equipment.labId })) return false;
+        hasOwner = true;
+    }
+    const samples = new Set();
+    for (const item of [...manifest.items, ...Object.values(manifest.committedEntries || {})]) {
+        const decision = decisions[item.id] || decisions[item.filename] || {};
+        for (const id of [item.sampleId, item.matchedSample?.id, decision.sampleId]) if (id) samples.add(id);
+        for (const id of [item.targetWorkItemId, item.matchedWorkItem?.id, decision.targetWorkItemId].filter(Boolean)) {
+            const work = await prisma.workItem.findUnique({ where: { id } });
+            if (!work) return false;
+            samples.add(work.sampleId);
+        }
+        if (item.duplicateScanId) {
+            const scan = await prisma.spectralData.findUnique({ where: { id: item.duplicateScanId } });
+            if (!scan || !await canReadScan(user, scan)) return false;
+            hasOwner = true;
+        }
+    }
+    for (const id of samples) {
+        const sample = await prisma.sample.findUnique({ where: { id } });
+        if (!sample || !scopeGuard.canAccessEntity(user, sample, { altLabField: 'assignedLab' })) return false;
+        hasOwner = true;
+    }
+    return hasOwner;
+}
 
 exports.getLibrary = async (req, res) => {
     try {
@@ -250,7 +296,7 @@ exports.getScan = async (req, res) => {
         if (!scan) return res.status(404).json({ error: 'Scan not found' });
 
         // Lab Isolation Check (Phase 1 - Scope Guard)
-        if (!scopeGuard.canAccessEntity(user, scan, { labField: 'labId' })) {
+        if (!await canReadScan(user, scan)) {
             return res.status(403).json({ error: 'Security Violation: Access denied to spectral data outside of your lab context.' });
         }
 
@@ -326,6 +372,11 @@ exports.checkMatches = async (req, res) => {
         };
 
         // Apply Scope
+        const candidates = await prisma.sample.findMany({ where,
+            select: { id: true, labId: true, assignedLab: true, country: true } });
+        if (candidates.some(sample => !scopeGuard.canAccessEntity(user, sample, { altLabField: 'assignedLab' }))) {
+            return res.status(403).json({ error: 'Sample matching is outside your laboratory scope.' });
+        }
         where = scopeGuard.buildScopedWhere(user, where, { labField: 'labId', altLabField: 'assignedLab' });
 
         // Bulk fetch all matching samples
@@ -412,7 +463,6 @@ exports.previewBatch = async (req, res) => {
 
         const manifestId = `manif-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`;
         const manifestDir = path.join(UPLOADS_STAGING_DIR, manifestId);
-        fs.mkdirSync(manifestDir, { recursive: true });
 
         // Pre-fetch context sample and work item if provided
         let contextSample = null;
@@ -433,6 +483,11 @@ exports.previewBatch = async (req, res) => {
                 contextSample = contextWorkItem.sample;
             }
         }
+        if (contextSample && !scopeGuard.canAccessEntity(user, contextSample, { altLabField: 'assignedLab' }) ||
+            contextWorkItem && !scopeGuard.canAccessEntity(user, contextWorkItem.sample || contextWorkItem, { altLabField: 'assignedLab' })) {
+            return res.status(403).json({ error: 'Spectrum context is outside your laboratory scope.' });
+        }
+        fs.mkdirSync(manifestDir, { recursive: true });
 
         // Pre-fetch equipment limits if equipmentId given
         let equipmentLimits = null;
@@ -681,12 +736,22 @@ exports.commitBatch = async (req, res) => {
         }
 
         const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+        if (manifest.labId && !await canReadScan(user, { labId: manifest.labId })) {
+            return res.status(403).json({ error: 'Staged manifest is outside your laboratory scope.' });
+        }
+        const effectiveEquipmentId = bodyEquipmentId || manifest.equipmentId;
+        // Older manifests lack previewBatch's lab envelope. Resolve their stored
+        // owners before expiry/equipment diagnostics or any staged-file writes.
+        // An empty unbound request can only reach the required-equipment refusal.
+        if (!manifest.labId && (effectiveEquipmentId || manifest.items.length) &&
+            !await canReadLegacyManifest(user, manifest, decisions)) {
+            return res.status(403).json({ error: 'Staged manifest is outside your laboratory scope.' });
+        }
         if (new Date() > new Date(manifest.expiresAt)) {
             return res.status(410).json({ error: 'MANIFEST_EXPIRED', message: 'Staged manifest has expired. Please re-upload.' });
         }
 
         // Equipment qualification (Amendment 8: No silent guessing)
-        const effectiveEquipmentId = bodyEquipmentId || manifest.equipmentId;
         if (!effectiveEquipmentId) {
             return res.status(400).json({
                 error: 'EQUIPMENT_SELECTION_REQUIRED',
@@ -1121,6 +1186,12 @@ exports.uploadBatch = async (req, res) => {
         let { batchId, scans, contextSampleId, autoApprove } = req.body || {};
         const user = req.user; // From auth middleware
         const canAutoApprove = autoApprove && user && ['SUPER_ADMIN', 'LAB_MANAGER'].includes(user.role);
+        if (contextSampleId) {
+            const sample = await prisma.sample.findUnique({ where: { id: contextSampleId } });
+            if (sample && !scopeGuard.canAccessEntity(user, sample, { altLabField: 'assignedLab' })) {
+                return res.status(403).json({ error: 'Spectrum context is outside your laboratory scope.' });
+            }
+        }
 
         // Parse stringified scans if sent via FormData
         if (typeof scans === 'string') {
@@ -1710,6 +1781,7 @@ exports.batchReview = async (req, res) => {
         if (!['SUPER_ADMIN', 'LAB_MANAGER'].includes(user.role)) return res.status(403).json({ error: 'Only managers can batch review spectra.' });
         if (!Array.isArray(ids) || !ids.length) return res.status(400).json({ error: 'No spectrum IDs provided.' });
         if (!['APPROVE', 'REJECT'].includes(action)) return res.status(400).json({ error: 'Action must be APPROVE or REJECT.' });
+        await assertScanBatchScope(user, ids);
         await spectralState.preflightBatch(ids.map(id => ({ id, check: async () => {
             const scan = await prisma.spectralData.findUnique({ where: { id } });
             if (scan) await spectralState.prepareReview(prisma, scan, user,
@@ -1746,6 +1818,7 @@ exports.batchDelete = async (req, res) => {
         if (!['SUPER_ADMIN', 'LAB_MANAGER'].includes(user.role)) return res.status(403).json({ error: 'Only managers can batch delete spectra.' });
         if (!Array.isArray(ids) || !ids.length) return res.status(400).json({ error: 'No spectrum IDs provided.' });
         if (typeof reason !== 'string' || !reason.trim()) return res.status(422).json({ error: 'A reason is required to move spectral evidence to trash.', code: 'SPECTRAL_TRASH_REASON_REQUIRED' });
+        await assertScanBatchScope(user, ids);
         const results = { succeeded: 0, failed: 0, errors: [] };
         for (const id of ids) {
             try {
@@ -1797,6 +1870,7 @@ exports.restoreScan = async (req, res) => {
 
         const scan = await prisma.spectralData.findUnique({ where: { id } });
         if (!scan) return res.status(404).json({ error: 'Scan not found' });
+        if (!await canReadScan(user, scan)) return res.status(403).json({ error: 'Spectrum is outside your laboratory scope.' });
         if (scan.status !== 'DELETED') return res.status(400).json({ error: 'Scan is not in trash.' });
 
         const meta = parseJson(scan.metadata) || {};
@@ -1839,6 +1913,7 @@ exports.permanentlyDeleteScan = async (req, res) => {
 
         const scan = await prisma.spectralData.findUnique({ where: { id } });
         if (!scan) return res.status(404).json({ error: 'Scan not found' });
+        if (!await canReadScan(user, scan)) return res.status(403).json({ error: 'Spectrum is outside your laboratory scope.' });
         if (scan.status !== 'DELETED') return res.status(400).json({ error: 'Only trashed spectra can be permanently deleted. Move to trash first.' });
 
         await prisma.spectralData.delete({ where: { id } });
@@ -1891,7 +1966,7 @@ exports.downloadRawScan = async (req, res) => {
         const scan = await prisma.spectralData.findUnique({ where: { id } });
         if (!scan) return res.status(404).json({ error: 'Spectrum not found' });
 
-        if (!scopeGuard.canAccessEntity(user, scan, { labField: 'labId' })) {
+        if (!await canReadScan(user, scan)) {
             return res.status(403).json({ error: 'Access denied: spectrum outside your laboratory scope.' });
         }
 

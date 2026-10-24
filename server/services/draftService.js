@@ -303,7 +303,7 @@ async function discardDraft(user, workItemId, db = null) {
 
     // Verify ownership
     if (draft.userId !== user.username && draft.workItem?.assignedTo !== user.username && !['LAB_MANAGER', 'SUPER_ADMIN'].includes(user.role)) {
-        throw new Error('Access denied: You cannot discard another user’s draft');
+        throw new rules.TransitionError('Access denied: You cannot discard another user’s draft', 403, 'DRAFT_SCOPE_DENIED');
     }
 
     if (!canAccessDraft(user, draft)) {
