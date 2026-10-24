@@ -43,7 +43,13 @@ app.use(helmet({
         directives: {
             ...helmet.contentSecurityPolicy.getDefaultDirectives(),
             "default-src": ["'self'", "https://*.cesium.com", "https://cesium.com"],
-            "script-src": ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://cesium.com", "https://*.cesium.com", "https://cdnjs.cloudflare.com", "https://*.virtualearth.net"],
+            // Cesium decoders compile WebAssembly; JavaScript eval stays blocked.
+            "script-src": ["'self'", "'wasm-unsafe-eval'", "https://cesium.com", "https://*.cesium.com", "https://cdnjs.cloudflare.com", "https://*.virtualearth.net"],
+            "script-src-attr": ["'none'"],
+            "object-src": ["'none'"],
+            "base-uri": ["'self'"],
+            "frame-ancestors": ["'none'"],
+            "form-action": ["'self'"],
             "style-src": ["'self'", "'unsafe-inline'", "https://cesium.com", "https://*.cesium.com", "https://fonts.googleapis.com"],
             "font-src": ["'self'", "https://fonts.gstatic.com"],
             "img-src": ["'self'", "data:", "blob:", "https://api.qrserver.com", "https://cesium.com", "https://*.cesium.com", "https://*.openstreetmap.org", "https://*.cartocdn.com", "https://*.basemaps.cartocdn.com", "https://*.virtualearth.net", "https://*.arcgisonline.com", "https://server.arcgisonline.com", "https://mt1.google.com", "https://*.google.com", "https://cdnjs.cloudflare.com", "https://images.unsplash.com"],

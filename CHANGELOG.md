@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.12.0] - 2026-10-24
+
+### Changed
+- Set repository line-ending defaults without rewriting historical fixtures (#335).
+- Extend laboratory isolation coverage and enforce scoped access across operational routes (#336).
+- Use safer installation, proxy, browser-origin and initial-password defaults (#337).
+- Add durable account sign-in backoff, configurable password rules and forced-change enforcement (#338).
+- Tighten browser script policy and send WebSocket credentials through the upgrade header (#339).
+
 ## [1.11.0] - 2026-10-22
 
 ### Changed

@@ -83,6 +83,17 @@ const techStack = [
 
 const changelog = [
     {
+        version: 'v1.12.0',
+        date: 'October 24, 2026',
+        tag: 'Installation and Access Updates',
+        badgeColor: 'bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300 border-blue-300 dark:border-blue-800',
+        changes: [
+            'Laboratory access checks cover operational routes, with safer installation and initial-password defaults.',
+            'Account sign-in uses durable backoff and configurable password rules.',
+            'Browser scripts use a tighter policy, and WebSocket credentials travel in the upgrade header.',
+        ],
+    },
+    {
         version: 'v1.11.0',
         date: 'October 22, 2026',
         tag: 'Image Access and Library Updates',
