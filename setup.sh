@@ -9,6 +9,7 @@
 # ─────────────────────────────────────────────────────
 
 set -e
+umask 077
 
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
@@ -101,6 +102,9 @@ PORT=3000
 JWT_SECRET=${JWT_SECRET}
 NODE_ENV=production
 DEPLOYMENT_MODE=${MODE}
+ALLOWED_ORIGINS=
+TRUST_PROXY=loopback
+HEALTH_SHOW_VERSION=false
 EOF
     echo -e "${GREEN}✓ Created .env with auto-generated JWT secret${NC}"
 else
@@ -115,6 +119,11 @@ else
         echo -e "${GREEN}✓ Populated missing JWT_SECRET in existing .env${NC}"
     fi
 fi
+
+# Preserve existing configuration; missing HTTP settings use the safe defaults.
+echo "  Browser origins: same-origin by default; extra origins must use HTTPS."
+echo "  Proxy trust: loopback by default; configure TRUST_PROXY for your actual proxy."
+echo "  Public health metadata: hidden unless HEALTH_SHOW_VERSION=true."
 
 # ── 7. Seed Database ──
 echo -e "\n${BLUE}[7/7]${NC} Seeding database (${MODE_UPPER} mode)..."
@@ -131,6 +140,6 @@ echo ""
 echo -e "  Start:   ${BLUE}npm start${NC}  (or: ${BLUE}cd server && npm start${NC})"
 echo -e "  Open:    ${BLUE}http://localhost:3000${NC}"
 echo -e "  Login:   ${BLUE}admin${NC} (Role: $([ "$MODE" = "global" ] && echo "SUPER_ADMIN" || echo "LAB_MANAGER"))"
-echo -e "  Password: (See initial one-time password generated in step 7 above)"
+echo -e "  Password: use ADMIN_INITIAL_PASSWORD, or the owner-only handoff file reported in step 7."
 echo -e "  ${YELLOW}⚠ A password change will be required on your first login.${NC}"
 echo ""

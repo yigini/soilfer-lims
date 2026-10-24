@@ -8,9 +8,13 @@ fs.mkdirSync(uploadRoot, { recursive: true });
 process.env.LIMS_OWNED_UPLOAD_ROOT = uploadRoot;
 // No network is used by this real mounted-route matrix. Standalone Kobo test
 // input is public synthetic data; authentication/controllers/ORM stay real.
+jest.spyOn(require('node:dns').promises, 'lookup').mockImplementation(async hostname => {
+    if (hostname !== 'example.invalid') throw Error('Unexpected DNS request in route matrix.');
+    return [{ address: '93.184.216.34', family: 4 }];
+});
 jest.spyOn(require('axios'), 'get').mockImplementation(async url => {
     if (typeof url !== 'string' || !url.startsWith('https://example.invalid/')) throw Error('Unexpected outbound request in route matrix.');
-    return { data: { name: 'Synthetic standalone form', url: 'https://example.invalid/synthetic' } };
+    return { status: 200, data: { name: 'Synthetic standalone form', url: 'https://example.invalid/synthetic' } };
 });
 const prisma = require('../../prisma');
 const { loadRegisteredRouteInventory } = require('../helpers/registeredRouteInventory');

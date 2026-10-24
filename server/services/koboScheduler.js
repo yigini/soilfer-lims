@@ -37,12 +37,12 @@ async function checkAndSyncKobo() {
                     const result = await koboController._syncLabSubmissions(config, 'KOBO_SCHEDULER');
                     console.log(`[KOBO_SCHEDULER] Completed sync for ${config.labId}:`, result);
                 } catch (err) {
-                    console.error(`[KOBO_SCHEDULER] Error syncing lab ${config.labId}:`, err.message);
+                    console.error(`[KOBO_SCHEDULER] Error syncing lab ${config.labId}:`);
                 }
             }
         }
     } catch (err) {
-        console.error('[KOBO_SCHEDULER] General scheduler error:', err.message);
+        console.error('[KOBO_SCHEDULER] General scheduler error:');
     } finally {
         isSyncing = false;
     }
@@ -58,7 +58,7 @@ function startScheduler(tickIntervalMs = 60000) {
     console.log(`[KOBO_SCHEDULER] Starting Kobo background sync scheduler (Tick: ${tickIntervalMs / 1000}s)`);
     // Run an initial check after 10s startup delay
     startupTimeout = setTimeout(() => {
-        checkAndSyncKobo().catch(err => console.error('[KOBO_SCHEDULER] Initial sync error:', err.message));
+        checkAndSyncKobo().catch(err => console.error('[KOBO_SCHEDULER] Initial sync error:'));
     }, 10000);
 
     schedulerInterval = setInterval(checkAndSyncKobo, tickIntervalMs);

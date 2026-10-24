@@ -9,6 +9,7 @@ build/
 .env
 .env.local
 .env.*.local
+**/.initial-admin-credentials/
 
 # ─── Database ───
 server/prisma/*.db

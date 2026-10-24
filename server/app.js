@@ -15,6 +15,10 @@ if (fs.existsSync(serverEnv)) {
     dotenv.config({ path: serverEnv });
 }
 
+const { readHttpSecurityConfig, corsOptions, healthResponse } = require('./config/httpSecurity');
+// Validate public HTTP settings before loading routes or a writable adapter.
+const httpSecurity = readHttpSecurityConfig();
+
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -29,7 +33,7 @@ const { success, error } = require('./i18n/response');
 const app = express();
 // Enable if behind a reverse proxy (Heroku, Bluemix, AWS ELB, Nginx, etc)
 // see https://expressjs.com/en/guide/behind-proxies.html
-app.set('trust proxy', 1);
+app.set('trust proxy', httpSecurity.trustProxy);
 
 const PORT = process.env.PORT || 3000;
 
@@ -50,12 +54,11 @@ app.use(helmet({
         }
     }
 }));
-app.use(cors({
-    origin: process.env.NODE_ENV === 'production'
-        ? ['http://localhost:5173', 'https://lims.yigini.net', 'http://lims.yigini.net']
-        : '*',
-    credentials: true
-}));
+app.use((req, res, next) => {
+    if (httpSecurity.production) res.vary('Origin');
+    next();
+});
+app.use(cors((req, callback) => callback(null, corsOptions(req, httpSecurity))));
 
 // Rate Limiting
 if (process.env.NODE_ENV !== 'test') {
@@ -119,17 +122,12 @@ const pkg = require('./package.json');
 
 // Health Check (used by Docker healthcheck)
 app.get('/api/health', (req, res) => {
-    res.json({ status: 'ok', version: pkg.version, uptime: process.uptime() });
+    healthResponse(req, res, httpSecurity, pkg.version);
 });
 
 // Canonical Version Info Endpoint
 app.get('/api/version', (req, res) => {
-    res.json({
-        name: 'soilfer-lims',
-        version: pkg.version,
-        status: 'ok',
-        uptime: process.uptime()
-    });
+    healthResponse(req, res, httpSecurity, pkg.version, true);
 });
 
 // Background Schedulers Lifecycle Management
@@ -1019,7 +1017,9 @@ if (process.env.NODE_ENV === 'production' || process.env.SERVE_CLIENT === 'true'
 // ─── Global Error Handler ───
 // Catches unhandled controller errors, prevents stack trace leaks, and ensures standard JSON responses
 app.use((err, req, res, next) => {
-    console.error(`[UNHANDLED_ERROR] ${req.method} ${req.originalUrl}:`, err);
+    // Error objects may carry upstream Authorization headers or request bodies.
+    // Query strings can contain sealed media references. Keep both out of logs.
+    console.error('[UNHANDLED_ERROR]', req.method, req.route?.path || 'unmatched');
     if (res.headersSent) {
         return next(err);
     }
