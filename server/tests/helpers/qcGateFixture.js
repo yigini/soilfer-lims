@@ -40,6 +40,7 @@ async function qcGateFixture({ managedStartup = false, count = 1, criteria = {},
     require('../../scripts/install_sample_amendment_authorisation').installSampleAmendmentAuthorisation({dbPath:file,apply:true});
     require('../../scripts/install_report_revisions').installReportRevisions({dbPath:file,apply:true});
     require('../../scripts/install_bench_credentials').installBenchCredentials({dbPath:file,apply:true});
+    require('../../scripts/install_signin_protection').installSignInProtection({dbPath:file,apply:true});
     require('../../scripts/install_preparation_records').installPreparationRecords({dbPath:file,apply:true});
     if (installInstrumentImports) require('../../scripts/install_instrument_imports').installInstrumentImports({ dbPath: file, apply: true });
     if (installInstrumentImports && installSampleContainers) require('../../scripts/install_sample_containers').installSampleContainers({ dbPath: file, apply: true });

@@ -459,7 +459,16 @@ test('a complete guarded database passes the read-only gate, listens and answers
     expect(fingerprint(fixture.file)).toBe(beforeCustody);
     expect(require('../../scripts/install_sample_custody').installSampleCustody({dbPath:fixture.file,apply:true}))
         .toMatchObject({classification:'COMPLETE_207',mode:'APPLIED'});
+    const beforeSignIn=fingerprint(fixture.file), missingSignIn=await realStartup(fixture.file,false);
+    expect(missingSignIn.code).toBe(1); expect(JSON.parse(missingSignIn.stderr).error).toBe('SIGNIN_STARTUP_REQUIRED');
+    expect(missingSignIn.stdout).not.toMatch(/Enterprise Server running on|\[PRISMA\]|SCHEDULER/);
+    expect(fingerprint(fixture.file)).toBe(beforeSignIn);
+    expect(require('../../scripts/install_signin_protection').installSignInProtection({dbPath:fixture.file,apply:true}))
+        .toMatchObject({classification:'COMPLETE_338',mode:'APPLIED'});
     const child = await realStartup(fixture.file, true);
+    const signInReady=JSON.parse(child.stdout.split('\n').find(line=>line.startsWith('{"event":"SIGNIN_STARTUP_READY"')));
+    expect(signInReady).toMatchObject({classification:'COMPLETE_338',totalChanges:0});
+    expect(child.stdout.indexOf('SIGNIN_STARTUP_READY')).toBeLessThan(child.stdout.indexOf('Enterprise Server running on'));
     expect(child.accepted).toBe(true);
     const labelsReady=JSON.parse(child.stdout.split('\n').find(line=>line.startsWith('{"event":"LABEL_PRINT_STARTUP_READY"')));
     expect(labelsReady).toMatchObject({classification:'COMPLETE_208',totalChanges:0});

@@ -1070,6 +1070,10 @@
   "policies": {
     "sampleCodeNoCheck": "Sem um caractere de verificação, os erros de leitura são mais difíceis de detectar.",
     "keys": {
+      "auth_loginFailureThreshold": "Falhas de acesso antes de limitar a conta",
+      "auth_loginWindowMinutes": "Janela de falhas de acesso (minutos)",
+      "auth_loginMaxDelayMinutes": "Espera máxima para entrar (minutos)",
+      "auth_passwordMinLength": "Comprimento mínimo de novas senhas",
       "qc_mode": "Modo de bloqueio do controle",
       "qc_maxBatchSize": "Tamanho máximo do lote analítico",
       "qc_blankPerBatch": "Brancos por lote",

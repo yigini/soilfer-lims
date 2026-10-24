@@ -144,7 +144,7 @@ cp .env.example .env
 
 *(Optional)* Open `.env` in any text editor to set your custom `JWT_SECRET` or customize your domain name.
 
-Production browser origins default to same-origin. Configure `ALLOWED_ORIGINS` (HTTPS origins only), `TRUST_PROXY` (default `loopback`) and `HEALTH_SHOW_VERSION` (default `false`) for your deployment. The API binds to host loopback. See [HTTP deployment settings](docs/http-deployment-settings.md) for the shipped NGINX proxy and host-side health command.
+Production browser origins default to same-origin. Configure `ALLOWED_ORIGINS` (HTTPS origins only), `TRUST_PROXY` (default `loopback`) and `HEALTH_SHOW_VERSION` (default `false`) for your deployment. The API binds to host loopback. See [HTTP deployment settings](docs/http-deployment-settings.md) for the shipped NGINX proxy and host-side health command. Account backoff and the configurable new-password minimum are described in [sign-in protection](docs/sign-in-protection.md).
 
 ### 3. Launch with Docker Compose
 ```bash

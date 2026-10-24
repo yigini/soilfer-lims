@@ -373,6 +373,8 @@ bash "${entryScript.replace(/\\/g, '/')}"
         require('../../scripts/install_order_revisions').installOrderRevisions({ dbPath: targetDb, apply: true });
         require('../../scripts/install_label_print_events').installLabelPrintEvents({ dbPath: targetDb, apply: true });
         require('../../scripts/install_sample_custody').installSampleCustody({ dbPath: targetDb, apply: true });
+        expect(require('../../scripts/install_signin_protection').installSignInProtection({ dbPath: targetDb, apply: true }))
+            .toMatchObject({classification:'COMPLETE_338',backfilledCount:0});
         const hashDb = () => createHash('sha256').update(fs.readFileSync(targetDb)).digest('hex');
         const beforeSha = hashDb();
         fs.writeFileSync(path.join(testDir, 'prisma', '.seed_complete'), 'done');
@@ -440,6 +442,8 @@ bash "${entryScript.replace(/\\/g, '/')}"
                 `node "${path.join(serverDir, 'scripts/install_label_print_events.js').replace(/\\/g, '/')}"`)
             .replaceAll('node scripts/install_sample_custody.js',
                 `node "${path.join(serverDir, 'scripts/install_sample_custody.js').replace(/\\/g, '/')}"`)
+            .replaceAll('node scripts/install_signin_protection.js',
+                `node "${path.join(serverDir, 'scripts/install_signin_protection.js').replace(/\\/g, '/')}"`)
             .replaceAll('node scripts/install_lab_policy_schema.js',
                 `node "${path.join(serverDir, 'scripts/install_lab_policy_schema.js').replace(/\\/g, '/')}"`)
             .replaceAll('node scripts/install_result_raw_input.js',

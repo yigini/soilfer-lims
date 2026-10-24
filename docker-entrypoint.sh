@@ -200,6 +200,7 @@ node scripts/install_control_charts.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
 node scripts/install_order_revisions.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
 node scripts/install_label_print_events.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
 node scripts/install_sample_custody.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
+node scripts/install_signin_protection.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
 
 # Start the server
 echo "🚀 Starting SoilFER-LIMS..."

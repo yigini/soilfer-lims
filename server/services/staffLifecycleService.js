@@ -1090,12 +1090,7 @@ async function consumeInvitation(rawToken, { username, password }, outerTx = nul
             err.code = 'INVALID_USERNAME';
             throw err;
         }
-        if (!password || password.length < 8) {
-            const err = new Error('Password must be at least 8 characters long');
-            err.statusCode = 400;
-            err.code = 'INVALID_PASSWORD';
-            throw err;
-        }
+        require('./signInPolicy').assertNewPassword(password);
 
         const normalizedUsername = username.trim().toLowerCase();
         const existingUser = await tx.user.findFirst({
@@ -1283,18 +1278,14 @@ async function consumeRecoveryGrant(rawToken, { newPassword }, outerTx = null) {
         await ensureTables(tx);
         const { user } = await verifyRecoveryToken(rawToken, tx);
 
-        if (!newPassword || newPassword.length < 8) {
-            const err = new Error('Password must be at least 8 characters long');
-            err.statusCode = 400;
-            err.code = 'INVALID_PASSWORD';
-            throw err;
-        }
+        require('./signInPolicy').assertNewPassword(newPassword);
 
         const hashedPassword = await bcrypt.hash(newPassword, 10);
         await tx.user.update({
             where: { id: user.id },
             data: {
                 password: hashedPassword,
+                mustChangePassword: false,
                 tokenVersion: { increment: 1 }
             }
         });

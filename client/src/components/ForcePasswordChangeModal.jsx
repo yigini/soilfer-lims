@@ -1,12 +1,14 @@
 
 import React, { useState } from 'react';
 import axios from 'axios';
+import { minimumPasswordLength } from '../lib/passwordPolicy';
 import { useAuth } from '../context/AuthContext';
 import { Lock, CheckCircle, AlertCircle } from 'lucide-react';
 import { useDialog } from '../context/DialogContext';
 
 const ForcePasswordChangeModal = () => {
     const { user, logout } = useAuth();
+    const minPasswordLength = minimumPasswordLength(user);
     const { showDialog } = useDialog();
 
     // Safety check - if no user or no flag, don't render (though parent should handle strict conditional)
@@ -22,8 +24,8 @@ const ForcePasswordChangeModal = () => {
         e.preventDefault();
         setError('');
 
-        if (newPassword.length < 8) {
-            setError('New password must be at least 8 characters long');
+        if ([...newPassword].length < minPasswordLength) {
+            setError('New password must be at least ' + minPasswordLength + ' characters long');
             return;
         }
 
@@ -50,8 +52,7 @@ const ForcePasswordChangeModal = () => {
             });
 
         } catch (err) {
-            console.error(err);
-            setError(err.response?.data?.error || 'Failed to change password');
+            setError(err.response?.data?.message || err.response?.data?.error || 'Failed to change password');
             setLoading(false);
         }
     };
@@ -100,7 +101,7 @@ const ForcePasswordChangeModal = () => {
                                 value={newPassword}
                                 onChange={e => setNewPassword(e.target.value)}
                                 className="w-full p-4 bg-sf-canvas border-2 border-sf-divider focus:border-sf-primary focus:ring-4 focus:ring-sf-primary/10 rounded-2xl outline-none transition-all font-semibold text-sf-text placeholder:text-sf-muted"
-                                placeholder="Min. 8 characters"
+                                placeholder={'Min. ' + minPasswordLength + ' characters'}
                                 required
                             />
                         </div>

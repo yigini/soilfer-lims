@@ -143,8 +143,8 @@ export default function LabPolicies({ labId }) {
         <div className="overflow-x-auto"><table className="w-full text-sm"><thead><tr>{['setting', 'value', 'source', 'difference'].map(key => <th key={key} className="text-left p-2">{t(`policies.${key}`)}</th>)}<th /></tr></thead>
             <tbody>{Object.entries(data.registry).map(([key, definition]) => {
                 const row = data.resolved[key], presetValue = definition.presets[data.presetCode || data.inheritedPreset];
-                const canChangeScope = definition.scope === 'LAB+METHOD' || !analysisCode ||
-                    (!methodologyId && (definition.analysisOverridesAll || definition.analysisOverrides?.includes(analysisCode)));
+                const canChangeScope = definition.scope !== 'INSTALL' && (definition.scope === 'LAB+METHOD' || !analysisCode ||
+                    (!methodologyId && (definition.analysisOverridesAll || definition.analysisOverrides?.includes(analysisCode))));
                 return <tr key={key} className="border-t"><td className="p-2">{t(definition.description)}{definition.unit && <span> ({t(`policies.units.${definition.unit}`, definition.unit)})</span>}{definition.help && <p className="text-xs">{t(definition.help)}</p>}</td>
                     <td className="p-2">{display(definition, row.value)}
                         {row.invalid && <p role="alert" data-testid="policy-stored-invalid">{t('policies.storedInvalid')}</p>}

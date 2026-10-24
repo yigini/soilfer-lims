@@ -49,6 +49,13 @@ async function state(reference, context = {}) {
 }
 function resolvedFromState(current, key, context = {}) {
     const d = definition(key), version = current.policy?.version || 0;
+    if (d.scope === 'INSTALL') {
+        if (Object.hasOwn(current.profile.overrides, key)) return { value: clone(current.profile.overrides[key]),
+            source: 'PROFILE_OVERRIDE', profile: current.profile.name, scope: null, version: 0 };
+        return { value: clone(d.presets[current.profile.preset || 'ISO17025_STRICT']),
+            source: current.profile.preset ? 'PROFILE_PRESET' : 'REGISTRY_DEFAULT',
+            presetCode: current.profile.preset || 'ISO17025_STRICT', scope: null, version: 0 };
+    }
     const analysisCode = context.analysisCode || null, methodologyId = context.methodologyId || null;
     const candidates = d.scope === 'LAB+METHOD' ? [
         ...(analysisCode && methodologyId ? [[analysisCode, methodologyId, 'METHOD_OVERRIDE']] : []),
@@ -156,6 +163,7 @@ async function assertScope(actor, lab, edit = false, db = require('../prisma')) 
 async function validateChange(change, db) {
     if (!change || typeof change !== 'object') throw error(400, 'POLICY_VALUE_INVALID', 'Invalid policy change.');
     const d = definition(change.key);
+    if (d.scope === 'INSTALL') throw error(422, 'POLICY_SCOPE_INVALID', 'This setting belongs to the installation deployment profile.');
     const analysisCode = change.analysisCode ?? null, methodologyId = change.methodologyId ?? null;
     if ((analysisCode !== null && (typeof analysisCode !== 'string' || !analysisCode.trim())) ||
         (methodologyId !== null && (typeof methodologyId !== 'string' || !methodologyId.trim())) ||

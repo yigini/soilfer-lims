@@ -178,6 +178,8 @@ exports.createUser = async (req, res) => {
             }
         }
 
+        try { require('../services/signInPolicy').assertNewPassword(password); }
+        catch (err) { return res.status(400).json({ error: err.code, message: err.message }); }
         const hashedPassword = await bcrypt.hash(password, 10);
         const newUser = await prisma.user.create({
             data: {
@@ -277,6 +279,8 @@ exports.updateUser = async (req, res) => {
         if (updates.language !== undefined) data.language = updates.language;
 
         if (updates.password) {
+            try { require('../services/signInPolicy').assertNewPassword(updates.password); }
+            catch (err) { return res.status(400).json({ error: err.code, message: err.message }); }
             data.password = await bcrypt.hash(updates.password, 10);
             data.mustChangePassword = true;
         }
