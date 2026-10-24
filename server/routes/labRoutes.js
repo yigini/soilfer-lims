@@ -445,7 +445,7 @@ router.patch('/:id/staff/:userId/reset-password', checkPermission('MANAGE_USERS'
 
         res.json({ success: true, username: user.username, tempPassword, temporaryPassword: tempPassword, message: 'Password reset. User must change on next login.' });
     } catch (e) {
-        console.error('[PATCH reset-password]', e);
+        console.error('[PATCH reset-password]');
         res.status(500).json({ error: 'Reset failed' });
     }
 });

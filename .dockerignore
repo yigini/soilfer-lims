@@ -6,6 +6,7 @@ client/node_modules
 .gitignore
 .env
 .env.*
+**/.initial-admin-credentials
 .gemini
 
 # Build artifacts (rebuilt in Docker)

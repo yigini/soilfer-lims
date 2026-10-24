@@ -25,7 +25,7 @@ if (fs.existsSync(serverEnv)) dotenv.config({ path: serverEnv });
 
 const prisma = require('../prisma');
 const bcrypt = require('bcryptjs');
-const crypto = require('crypto');
+const { prepareInitialAdminPassword, reportInitialAdminPassword } = require('../utils/initialAdminPassword');
 
 async function provisionSuperAdmin() {
     const args = process.argv.slice(2);
@@ -90,7 +90,7 @@ async function provisionSuperAdmin() {
         process.exit(1);
     }
 
-    const generatedPassword = password || crypto.randomBytes(8).toString('base64url');
+    const { password: generatedPassword, handoffFile } = prepareInitialAdminPassword(password);
     const hashedPassword = await bcrypt.hash(generatedPassword, 10);
     const now = new Date();
 
@@ -132,12 +132,7 @@ async function provisionSuperAdmin() {
 
         console.log(`[PROVISION] Elevated user '${updated.username}' to SUPER_ADMIN (tokenVersion: ${updated.tokenVersion}, Active: ${updated.isActive}).`);
 
-        console.log('\n┌────────────────────────────────────────────────────────┐');
-        console.log('│ 🔑 ELEVATED SUPER_ADMIN CREDENTIALS:                   │');
-        console.log(`│    Username: ${updated.username.padEnd(42)}│`);
-        console.log(`│    Password: ${generatedPassword.padEnd(42)}│`);
-        console.log('└────────────────────────────────────────────────────────┘');
-        console.log('⚠ Password must be changed upon next login.\n');
+        reportInitialAdminPassword(handoffFile);
     } else {
         // --- CREATION PATH ---
         const newUser = await prisma.user.create({
@@ -160,12 +155,7 @@ async function provisionSuperAdmin() {
         });
         console.log(`[PROVISION] Created new SUPER_ADMIN user: ${newUser.username} (${candidateEmail})`);
 
-        console.log('\n┌────────────────────────────────────────────────────────┐');
-        console.log('│ 🔑 PROVISIONED SUPER_ADMIN CREDENTIALS:                │');
-        console.log(`│    Username: ${newUser.username.padEnd(42)}│`);
-        console.log(`│    Password: ${generatedPassword.padEnd(42)}│`);
-        console.log('└────────────────────────────────────────────────────────┘');
-        console.log('⚠ Password must be changed upon first login.\n');
+        reportInitialAdminPassword(handoffFile);
     }
 }
 

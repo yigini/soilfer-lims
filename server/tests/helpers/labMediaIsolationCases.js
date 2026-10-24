@@ -32,7 +32,7 @@ cases.push({ key: 'GET /api/kobo/media', path: '/api/kobo/media', query: { token
     globalReason: 'Public sealed-media capability route; a private sample ID cannot substitute for its signed access capability.' });
 cases.push({ key: 'POST /api/kobo/test', path: '/api/kobo/test', body: {
     koboServerUrl: 'https://example.invalid', formId: 'synthetic-standalone-form', apiToken: 'synthetic-test-only' },
-    globalReason: 'Tests caller-supplied connection details; reads no stored laboratory configuration. Only outbound HTTP transport is stubbed.' });
+    globalReason: 'Tests caller-supplied connection details; reads no stored laboratory configuration. Public-target validation is real; outbound DNS/HTTP transport is stubbed.' });
 
 add('GET /api/nonconformities', '/api/nonconformities', null, { source: 'OTHER', status: 'OPEN' });
 add('POST /api/nonconformities/:id/transitions', '/api/nonconformities/{ncrA}/transitions', { status: 'ACTION', impactAssessment: 'Synthetic impact assessment' });

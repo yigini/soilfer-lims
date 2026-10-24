@@ -43,8 +43,8 @@ async function seed() {
         return;
     }
 
-    const crypto = require('crypto');
-    const initialPassword = process.env.ADMIN_INITIAL_PASSWORD || crypto.randomBytes(6).toString('base64url');
+    const { prepareInitialAdminPassword, reportInitialAdminPassword } = require('./utils/initialAdminPassword');
+    const { password: initialPassword, handoffFile } = prepareInitialAdminPassword(process.env.ADMIN_INITIAL_PASSWORD);
     const defaultPassword = await bcrypt.hash(initialPassword, 10);
     const now = new Date();
 
@@ -71,12 +71,7 @@ async function seed() {
         });
 
         console.log('  ✓ Created user: admin (SUPER_ADMIN)');
-        console.log('  ┌────────────────────────────────────────────────────────┐');
-        console.log('  │ 🔑 INITIAL ADMIN CREDENTIALS (Generated — Print Once): │');
-        console.log(`  │    Username: admin                                     │`);
-        console.log(`  │    Password: ${initialPassword.padEnd(42)}│`);
-        console.log('  └────────────────────────────────────────────────────────┘');
-        console.log('    ⚠ You will be prompted to set a new password on first login.\n');
+        reportInitialAdminPassword(handoffFile);
         console.log('  Next steps:');
         console.log('    1. Log in as admin');
         console.log('    2. Create laboratories via Admin → Laboratories');
@@ -131,12 +126,7 @@ async function seed() {
             }
         });
         console.log('  ✓ Created user: admin (LAB_MANAGER)');
-        console.log('  ┌────────────────────────────────────────────────────────┐');
-        console.log('  │ 🔑 INITIAL ADMIN CREDENTIALS (Generated — Print Once): │');
-        console.log(`  │    Username: admin                                     │`);
-        console.log(`  │    Password: ${initialPassword.padEnd(42)}│`);
-        console.log('  └────────────────────────────────────────────────────────┘');
-        console.log('    ⚠ You will be prompted to set a new password on first login.\n');
+        reportInitialAdminPassword(handoffFile);
         console.log('  Next steps:');
         console.log('    1. Log in as admin');
         console.log('    2. Update laboratory details via Settings');

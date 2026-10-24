@@ -64,7 +64,7 @@ exports.getAllConfigs = async (req, res) => {
 
         res.json(maskedConfigs);
     } catch (error) {
-        console.error('[KOBO] Error fetching configs:', error);
+        console.error('[KOBO] Error fetching configs:');
         res.status(500).json({ error: 'Failed to fetch Kobo configurations' });
     }
 };
@@ -95,7 +95,7 @@ exports.getConfig = async (req, res) => {
             configured: true
         });
     } catch (error) {
-        console.error('[KOBO] Error fetching config:', error);
+        console.error('[KOBO] Error fetching config:');
         res.status(500).json({ error: 'Failed to fetch configuration' });
     }
 };
@@ -156,7 +156,7 @@ exports.upsertConfig = async (req, res) => {
             config: { ...config, apiToken: '••••••••' + config.apiToken.slice(-4) }
         });
     } catch (error) {
-        console.error('[KOBO] Error saving config:', error);
+        console.error('[KOBO] Error saving config:');
         const status = error instanceof profileIdentity.ProfileReferenceConflictError || error.code === 'P2025' ? 409 : (error.status || 500);
         res.status(status).json({ error: error.code === 'P2025' ? 'STALE_REVISION' : error.code || 'KOBO_CONFIG_FAILED', message: status < 500 ? error.message : 'Failed to save configuration' });
     }
@@ -182,7 +182,7 @@ exports.testConnection = async (req, res) => {
 
         res.json(result);
     } catch (error) {
-        console.error('[KOBO] Test connection error:', error);
+        console.error('[KOBO] Test connection error:');
         res.status(500).json({ success: false, error: error.message });
     }
 };
@@ -215,7 +215,7 @@ exports.getFormFields = async (req, res) => {
 
         res.json({ fields });
     } catch (error) {
-        console.error('[KOBO] Error getting form fields:', error);
+        console.error('[KOBO] Error getting form fields:');
         res.status(500).json({ error: error.message });
     }
 };
@@ -273,7 +273,7 @@ exports.syncLab = async (req, res) => {
         }
         res.json(result);
     } catch (error) {
-        console.error('[KOBO] Sync error:', error);
+        console.error('[KOBO] Sync error:');
         if (error instanceof profileIdentity.ProfileReferenceConflictError) return res.status(409).json({code: error.code, message: error.message, reason: error.reason});
         if (error.message?.includes('LAB_INACTIVE') || error.message?.includes('CONFIG_INACTIVE') || error.message?.includes('CONFIG_REVOKED')) {
             return res.status(400).json({ error: 'PRECONDITION_FAILED', message: error.message });
@@ -310,7 +310,7 @@ exports.syncAll = async (req, res) => {
 
         res.json({ synced: results.length, results });
     } catch (error) {
-        console.error('[KOBO] Sync all error:', error);
+        console.error('[KOBO] Sync all error:');
         res.status(500).json({ error: error.message });
     }
 };
@@ -1640,7 +1640,7 @@ exports.syncSample = async (req, res) => {
         console.log(`[KOBO] ✅ Force synced ${sample.originalId} (matched ${matchedSampleData.original_id}): ${attachments.length} attachments`);
         res.json({ success: true, message: `Successfully synced ${sample.originalId} from Kobo` });
     } catch (error) {
-        console.error('[KOBO] Force sync sample error:', error);
+        console.error('[KOBO] Force sync sample error:');
         res.status(error instanceof profileIdentity.ProfileReferenceConflictError ? 409 : 500).json({ error: error.code || 'KOBO_SYNC_FAILED', message: error instanceof profileIdentity.ProfileReferenceConflictError ? error.message : 'Could not refresh the field record.' });
     }
 };

@@ -21,7 +21,7 @@ class KoboService {
                     throw err;
                 }
                 const backoffMs = Math.min(1000 * Math.pow(2, attempt - 1), 8000);
-                console.warn(`[KOBO] Transient error on attempt ${attempt}/${maxRetries}. Retrying in ${backoffMs}ms: ${err.message}`);
+                console.warn(`[KOBO] Transient error on attempt ${attempt}/${maxRetries}. Retrying in ${backoffMs}ms.`);
                 await new Promise(resolve => setTimeout(resolve, backoffMs));
             }
         }
@@ -71,7 +71,7 @@ class KoboService {
             console.log(`[KOBO] Total ${allSubmissions.length} submissions fetched from form ${formId}`);
             return allSubmissions;
         } catch (error) {
-            console.error('[KOBO] Error fetching submissions:', error.response?.data || error.message);
+            console.error('[KOBO] Error fetching submissions.');
             throw new Error(`Failed to fetch Kobo submissions: ${error.response?.data?.detail || error.message}`);
         }
     }
@@ -84,28 +84,7 @@ class KoboService {
      * @returns {Promise<{success: boolean, formName?: string, submissionCount?: number, error?: string}>}
      */
     async testConnection(serverUrl, formId, apiToken) {
-        try {
-            const url = `${serverUrl}/api/v2/assets/${formId}/`;
-
-            const response = await this._requestWithRetry(url, {
-                headers: {
-                    'Authorization': `Token ${apiToken}`
-                },
-                timeout: 15000
-            });
-
-            return {
-                success: true,
-                formName: response.data.name,
-                submissionCount: response.data.deployment__submission_count || 0,
-                formUrl: response.data.url
-            };
-        } catch (error) {
-            return {
-                success: false,
-                error: error.response?.data?.detail || error.message
-            };
-        }
+        return require('./koboConnectionTest').testKoboConnection(serverUrl, formId, apiToken);
     }
 
     /**
@@ -138,7 +117,7 @@ class KoboService {
 
             return fields;
         } catch (error) {
-            console.error('[KOBO] Error getting form fields:', error.message);
+            console.error('[KOBO] Error getting form fields.');
             throw new Error(`Failed to get form fields: ${error.message}`);
         }
     }

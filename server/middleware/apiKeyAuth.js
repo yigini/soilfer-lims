@@ -186,7 +186,7 @@ const apiKeyAuth = async (req, res, next) => {
                                 }
                             }
                         } catch (e) {
-                            console.error('[API_KEY_AUTH_ROTATION_ERR]', e);
+                            console.error('[API_KEY_AUTH_ROTATION_ERR]');
                         }
                     } else if (keyLink.key_status === 'ROTATING') {
                         // Bounded overlap grace window (nominal 24 hours)
@@ -359,7 +359,7 @@ const apiKeyAuth = async (req, res, next) => {
         }
     } catch (err) {
         endAuth();
-        console.error('[SIS_AUTH_ERROR]', err);
+        console.error('[SIS_AUTH_ERROR]');
         return res.status(500).json({ error: 'Internal Server Error during authentication.' });
     }
 };

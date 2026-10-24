@@ -82,6 +82,12 @@ This is the most important choice:
 
 ---
 
+## Browser Origins, Proxy and Health Metadata
+
+`ALLOWED_ORIGINS` is empty by default, permitting same-origin browser use. Extra production origins must be HTTPS origins separated by commas; an HTTP entry refuses startup. `TRUST_PROXY` defaults to `loopback`; Docker NGINX needs its actual proxy address or dedicated subnet configured. `HEALTH_SHOW_VERSION=false` keeps version and uptime private while container-loopback health checks retain them.
+
+Follow the [HTTP deployment settings](../../../http-deployment-settings.md) for the exact proxy and host-side health commands. Compose binds the API to host loopback.
+
 ## Save and Exit
 
 Press **Ctrl+O** (that's the letter O, not zero), then **Enter** to save, then **Ctrl+X** to exit the editor.

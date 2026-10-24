@@ -86,7 +86,7 @@ exports.login = async (req, res) => {
             data: { token, user: safeUser }
         });
     } catch (err) {
-        console.error('[AUTH] Login Error:', err);
+        console.error('[AUTH] Login Error:');
         return error(res, 500, 'AUTH.INTERNAL', 'Internal server error');
     }
 };
@@ -152,7 +152,7 @@ exports.changePassword = async (req, res) => {
 
         res.json({ message: 'Password updated successfully', token: newToken });
     } catch (error) {
-        console.error('[AUTH] Change Password Error:', error);
+        console.error('[AUTH] Change Password Error');
         res.status(500).json({ error: 'Internal server error' });
     }
 };
@@ -212,7 +212,7 @@ exports.impersonate = async (req, res) => {
             data: { token, user: safeUser }
         });
     } catch (err) {
-        console.error('[AUTH] Impersonate Error:', err);
+        console.error('[AUTH] Impersonate Error:');
         return error(res, 500, 'AUTH.INTERNAL', 'Failed to impersonate user');
     }
 };
@@ -393,7 +393,7 @@ exports.updatePreferences = async (req, res) => {
                 currentRevision: err.currentRevision
             });
         }
-        console.error('[AUTH] Update Preferences Error:', err);
+        console.error('[AUTH] Update Preferences Error:');
         return error(res, 500, 'AUTH.INTERNAL', 'Failed to update preferences');
     }
 };
@@ -508,7 +508,7 @@ exports.updateProfile = async (req, res) => {
                 currentRevision: err.currentRevision
             });
         }
-        console.error('[AUTH] updateProfile error:', err);
+        console.error('[AUTH] updateProfile error:');
         res.status(500).json({ error: 'Internal server error' });
     }
 };
@@ -528,7 +528,7 @@ const benchRoute = action => async (req, res) => {
         return res.json(await action(req));
     } catch (err) {
         if (err.statusCode) return res.status(err.statusCode).json({ error: err.message, code: err.code, ...(err.lockedUntil && { lockedUntil: err.lockedUntil }) });
-        console.error('[AUTH] Bench credential error:', err);
+        console.error('[AUTH] Bench credential error:');
         return res.status(500).json({ error: 'Internal server error' });
     }
 };
