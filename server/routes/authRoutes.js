@@ -21,7 +21,7 @@ const staffLifecycleService = require('../services/staffLifecycleService');
 router.get('/invitation/:token', async (req, res) => {
     try {
         const info = await staffLifecycleService.verifyInvitationToken(req.params.token);
-        res.json(info);
+        res.json({ ...info, passwordPolicy: { minLength: require('../services/signInPolicy').readSignInPolicy().minPasswordLength } });
     } catch (err) {
         res.status(err.statusCode || 500).json({ error: err.code || 'INVITATION_ERROR', code: err.code || 'INVITATION_ERROR', message: err.message });
     }
@@ -40,7 +40,7 @@ router.post('/activate', async (req, res) => {
 router.get('/recovery/:token', async (req, res) => {
     try {
         const info = await staffLifecycleService.verifyRecoveryToken(req.params.token);
-        res.json(info);
+        res.json({ ...info, passwordPolicy: { minLength: require('../services/signInPolicy').readSignInPolicy().minPasswordLength } });
     } catch (err) {
         res.status(err.statusCode || 500).json({ error: err.code || 'RECOVERY_ERROR', code: err.code || 'RECOVERY_ERROR', message: err.message });
     }

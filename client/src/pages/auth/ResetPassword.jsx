@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
+import { minimumPasswordLength } from '../../lib/passwordPolicy';
 import { KeyRound, CheckCircle2, AlertCircle, Loader2, ArrowRight } from 'lucide-react';
 
 export default function ResetPassword() {
@@ -17,6 +18,7 @@ export default function ResetPassword() {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [formError, setFormError] = useState('');
+    const minPasswordLength = minimumPasswordLength(grantInfo);
 
     useEffect(() => {
         if (!token) {
@@ -43,8 +45,8 @@ export default function ResetPassword() {
         e.preventDefault();
         setFormError('');
 
-        if (!password || password.length < 8) {
-            setFormError('Password must be at least 8 characters long.');
+        if (!password || [...password].length < minPasswordLength) {
+            setFormError('Password must be at least ' + minPasswordLength + ' characters long.');
             return;
         }
 
@@ -166,8 +168,8 @@ export default function ResetPassword() {
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required
-                            minLength={8}
-                            placeholder="At least 8 characters"
+                            minLength={minPasswordLength}
+                            placeholder={'At least ' + minPasswordLength + ' characters'}
                             className="w-full px-3.5 py-2.5 bg-sf-canvas border border-sf-divider rounded-xl text-xs text-sf-text focus:ring-2 focus:ring-sf-primary outline-none transition"
                         />
                     </div>
@@ -181,7 +183,7 @@ export default function ResetPassword() {
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}
                             required
-                            minLength={8}
+                            minLength={minPasswordLength}
                             placeholder="Confirm new password"
                             className="w-full px-3.5 py-2.5 bg-sf-canvas border border-sf-divider rounded-xl text-xs text-sf-text focus:ring-2 focus:ring-sf-primary outline-none transition"
                         />

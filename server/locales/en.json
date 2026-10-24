@@ -1070,6 +1070,10 @@
   "policies": {
     "sampleCodeNoCheck": "Without a check character, scanning errors are harder to detect.",
     "keys": {
+      "auth_loginFailureThreshold": "Sign-in failures before account backoff",
+      "auth_loginWindowMinutes": "Sign-in failure window (minutes)",
+      "auth_loginMaxDelayMinutes": "Maximum account sign-in delay (minutes)",
+      "auth_passwordMinLength": "Minimum new password length",
       "qc_mode": "QC blocking mode",
       "qc_maxBatchSize": "Maximum analytical batch size",
       "qc_blankPerBatch": "Blanks per batch",

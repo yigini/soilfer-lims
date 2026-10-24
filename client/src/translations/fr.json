@@ -2695,6 +2695,10 @@
   "policies": {
     "sampleCodeNoCheck": "Sans caractère de contrôle, les erreurs de lecture sont plus difficiles à détecter.",
     "keys": {
+      "auth_loginFailureThreshold": "Échecs de connexion avant temporisation",
+      "auth_loginWindowMinutes": "Fenêtre des échecs de connexion (minutes)",
+      "auth_loginMaxDelayMinutes": "Délai maximal de connexion (minutes)",
+      "auth_passwordMinLength": "Longueur minimale des nouveaux mots de passe",
       "qc_mode": "Mode de blocage du contrôle",
       "qc_maxBatchSize": "Taille maximale du lot analytique",
       "qc_blankPerBatch": "Blancs par lot",

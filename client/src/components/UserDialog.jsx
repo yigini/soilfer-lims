@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { minimumPasswordLength } from '../lib/passwordPolicy';
+import { useAuth } from '../context/AuthContext';
 import { X } from 'lucide-react';
 import { useDialog } from '../context/DialogContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -8,6 +10,7 @@ const UserDialog = ({ userToEdit, onClose, onSave, currentUserRole, currentUserL
     const isEdit = !!userToEdit;
     const { showDialog } = useDialog();
     const { t } = useLanguage();
+    const minPasswordLength = minimumPasswordLength(useAuth()?.user);
 
     // Form State
     const [formData, setFormData] = useState({
@@ -58,8 +61,8 @@ const UserDialog = ({ userToEdit, onClose, onSave, currentUserRole, currentUserL
         e.preventDefault();
 
         // Password Complexity Check for New Users
-        if (!isEdit && formData.password.length < 8) {
-            showDialog({ title: t('common.error', 'Error'), message: t('forms.minLength', { min: 8 }, 'Password must be at least 8 characters long'), type: 'error' });
+        if (!isEdit && [...formData.password].length < minPasswordLength) {
+            showDialog({ title: t('common.error', 'Error'), message: t('forms.minLength', { min: minPasswordLength }, 'Password is shorter than the required minimum'), type: 'error' });
             return;
         }
 
@@ -71,7 +74,7 @@ const UserDialog = ({ userToEdit, onClose, onSave, currentUserRole, currentUserL
             }
             onSave();
         } catch (err) {
-            showDialog({ title: t('common.error', 'Error'), message: err.response?.data?.error || err.message, type: 'error' });
+            showDialog({ title: t('common.error', 'Error'), message: err.response?.data?.message || err.response?.data?.error || err.message, type: 'error' });
         }
     };
 
@@ -178,7 +181,7 @@ const UserDialog = ({ userToEdit, onClose, onSave, currentUserRole, currentUserL
                                 value={formData.password}
                                 onChange={handleChange}
                                 className="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none"
-                                placeholder={t('users.tempPassword', 'Min. 8 characters')}
+                                placeholder={t('forms.minLength', { min: minPasswordLength })}
                                 required
                             />
                             <p className="text-xs text-sf-muted mt-1">{t('users.tempPasswordHint', 'Temporary password. User will be asked to change on first login.')}</p>
