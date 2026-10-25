@@ -1,0 +1,1826 @@
+[
+  {
+    "key": "DELETE /api/admin/languages/:code",
+    "registration": 1
+  },
+  {
+    "key": "DELETE /api/config/analyses/:code",
+    "registration": 1
+  },
+  {
+    "key": "DELETE /api/config/categories/:id",
+    "registration": 1
+  },
+  {
+    "key": "DELETE /api/config/groups/:id",
+    "registration": 1
+  },
+  {
+    "key": "DELETE /api/config/methodologies/:id",
+    "registration": 1
+  },
+  {
+    "key": "DELETE /api/inventory/method-requirements/:id",
+    "registration": 1
+  },
+  {
+    "key": "DELETE /api/projects/:id",
+    "registration": 1
+  },
+  {
+    "key": "DELETE /api/pt/rounds/:id",
+    "registration": 1
+  },
+  {
+    "key": "DELETE /api/qc/batches/:id/items",
+    "registration": 1
+  },
+  {
+    "key": "DELETE /api/samples/:id",
+    "registration": 1
+  },
+  {
+    "key": "DELETE /api/spectral/:id",
+    "registration": 1
+  },
+  {
+    "key": "DELETE /api/spectral/:id/permanent",
+    "registration": 1
+  },
+  {
+    "key": "DELETE /api/staff/invitations/:id",
+    "registration": 1
+  },
+  {
+    "key": "DELETE /api/users/:id",
+    "registration": 1
+  },
+  {
+    "key": "DELETE /api/users/invitations/:id",
+    "registration": 1
+  },
+  {
+    "key": "DELETE /api/v1/data-exchange/keys/:id",
+    "registration": 1
+  },
+  {
+    "key": "DELETE /api/v1/sis/keys/:id",
+    "registration": 1
+  },
+  {
+    "key": "DELETE /api/workbench/drafts/:analysis",
+    "registration": 1
+  },
+  {
+    "key": "DELETE /api/workbench/drafts/item/:workItemId",
+    "registration": 1
+  },
+  {
+    "key": "GET /",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/access/assignable-roles",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/access/capabilities",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/access/project-membership-report",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/admin/appearance",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/admin/languages",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/admin/languages/:code/catalog",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/admin/ping",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/admin/settings",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/admin/system-logs",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/appearance/catalog",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/appearance/context",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/appearance/public",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/audit-final",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/auth/bench",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/auth/invitation/:token",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/auth/me",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/auth/recovery/:token",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/calculation-templates",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/calculation-templates/activation",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/config/analyses",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/config/analyses/:code/usage",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/config/categories",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/config/gates",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/config/groups",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/config/lab-defaults/:labId",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/config/methodologies",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/config/references",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/config/units",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/dashboard/home",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/dashboard/live",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/dashboard/qa",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/dashboard/queues/:queueKey",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/dashboard/stats",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/data-results",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/equipment",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/equipment/:equipmentId/events",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/equipment/:id",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/equipment/audit/mismatches",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/equipment/eligibility",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/equipment/eligibility/:analysisCode",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/exports/history",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/health",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/help/admin/articles",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/help/admin/articles/:articleId/revisions/:revisionNumber",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/help/admin/release-preview",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/help/articles",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/help/articles/:articleId",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/help/context",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/help/faqs",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/help/pack",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/help/search",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/help/support-config",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/help/topics",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/inventory/alerts",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/inventory/export/:type",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/inventory/fefo/:itemId",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/inventory/items",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/inventory/items/:id",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/inventory/locations",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/inventory/lots",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/inventory/method-requirements",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/inventory/transactions",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/kobo/config/:labId",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/kobo/configs",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/kobo/form-fields/:labId",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/kobo/media",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/kobo/media",
+    "registration": 2
+  },
+  {
+    "key": "GET /api/kobo/media/samples/:sampleId",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/labs",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/labs/:id",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/labs/:id/policies",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/labs/:id/staff",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/labs/:id/workspace",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/labs/:labId/appearance",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/labs/directory",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/messages",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/messages/conversations",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/messages/thread/:userId",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/nonconformities",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/notifications",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/offline/packs/:id",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/projects",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/projects/:id",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/projects/:id/activity",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/projects/:id/kobo-config",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/projects/:id/kobo-connections",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/projects/:id/kobo/config",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/projects/:id/kobo/connections",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/projects/:id/lab-access",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/projects/:id/operations/:key",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/projects/:id/samples",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/projects/:id/stats",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/pt/rounds",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/pt/summary",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/public/branding",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/public/i18n/bootstrap",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/qc/batches",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/qc/batches/:id",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/qc/batches/:id/calibration-curves",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/qc/batches/:id/reagent-lot-options",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/qc/blank-history",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/qc/blank-history/series",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/qc/control-charts",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/qc/control-charts/series",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/qc/control-reviews",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/qc/rules",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/qc/run-options",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/reception/admin-units",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/reception/batch-geometry-check",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/reception/check-duplicate",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/reception/consignments",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/reception/consignments/:id",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/reception/intake-rules",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/reception/reverse-geocode",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/reception/sample-context",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/reception/sample-context/:id",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/reference-materials",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/reports/:reportId",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/reports/:reportId/links",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/reports/:reportId/pdf",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/reports/public/:token",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/reports/public/:token/pdf",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/reports/sample/:sampleId",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/reports/sample/:sampleId/pdf",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/reports/search",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/result-overrides",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/results/:sampleId",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/results/:sampleId/cross-checks",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/results/:sampleId/history",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/results/:sampleId/history/:param",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/reviews",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/samples",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/samples/:id/amendments",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/samples/:id/containers",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/samples/:id/custody",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/samples/:id/detail",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/samples/:id/holds",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/samples/:id/map-state",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/samples/:id/orders/preview",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/samples/:id/storage-locations",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/samples/:id/workspace",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/samples/disposal-queue",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/samples/expected",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/samples/locations",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/samples/lookup",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/spectral",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/spectral/:id",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/spectral/:id/raw",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/spectral/control-drifts",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/spectral/stats",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/staff/invitations",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/submissions",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/submissions/:id",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/submissions/reanalysis",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/sync/status",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/users",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/users/directory",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/users/invitations",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/v1/data-exchange/connections",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/v1/data-exchange/geojson",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/v1/data-exchange/keys",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/v1/data-exchange/results",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/v1/data-exchange/samples",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/v1/data-exchange/samples/:id",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/v1/data-exchange/spectra",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/v1/data-exchange/spectra/export",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/v1/data-exchange/stats",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/v1/data-exchange/sync",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/v1/sis/connections",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/v1/sis/geojson",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/v1/sis/keys",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/v1/sis/results",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/v1/sis/samples",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/v1/sis/samples/:id",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/v1/sis/spectra",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/v1/sis/spectra/export",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/v1/sis/stats",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/v1/sis/sync",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/v2/data-exchange/capabilities",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/v2/data-exchange/changes",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/v2/data-exchange/geojson",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/v2/data-exchange/observations",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/v2/data-exchange/samples",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/v2/data-exchange/samples/:specimenId",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/v2/data-exchange/snapshots/:snapshotId/pages",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/v2/data-exchange/spectra",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/v2/data-exchange/stats",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/v2/sis/capabilities",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/v2/sis/changes",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/v2/sis/geojson",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/v2/sis/observations",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/v2/sis/samples",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/v2/sis/samples/:specimenId",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/v2/sis/snapshots/:snapshotId/pages",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/v2/sis/spectra",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/v2/sis/stats",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/version",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/work",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/work/:id/reported-value",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/work/eligible-assignees",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/workbench/drafts",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/workbench/instruments/:instrumentId/import-templates",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/workbench/queue",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/workbench/runs/:batchId/imports/context",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/workbench/runs/:batchId/worksheet.pdf",
+    "registration": 1
+  },
+  {
+    "key": "GET /api/workbench/v2/receipts",
+    "registration": 1
+  },
+  {
+    "key": "GET /uploads/intake/:filename",
+    "registration": 1
+  },
+  {
+    "key": "PATCH /api/admin/appearance",
+    "registration": 1
+  },
+  {
+    "key": "PATCH /api/auth/preferences",
+    "registration": 1
+  },
+  {
+    "key": "PATCH /api/auth/profile",
+    "registration": 1
+  },
+  {
+    "key": "PATCH /api/equipment/:id/status",
+    "registration": 1
+  },
+  {
+    "key": "PATCH /api/equipment/events/:eventId/disposition",
+    "registration": 1
+  },
+  {
+    "key": "PATCH /api/labs/:id/policies",
+    "registration": 1
+  },
+  {
+    "key": "PATCH /api/labs/:id/profile",
+    "registration": 1
+  },
+  {
+    "key": "PATCH /api/labs/:id/staff/:userId/reset-password",
+    "registration": 1
+  },
+  {
+    "key": "PATCH /api/labs/:id/staff/:userId/toggle",
+    "registration": 1
+  },
+  {
+    "key": "PATCH /api/labs/:id/toggle-active",
+    "registration": 1
+  },
+  {
+    "key": "PATCH /api/labs/:labId/appearance",
+    "registration": 1
+  },
+  {
+    "key": "PATCH /api/projects/:id/lab-access",
+    "registration": 1
+  },
+  {
+    "key": "PATCH /api/pt/rounds/:id",
+    "registration": 1
+  },
+  {
+    "key": "PATCH /api/reference-materials/:id/status",
+    "registration": 1
+  },
+  {
+    "key": "PATCH /api/users/:id/access",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/admin/languages",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/attempts/:id/corrections",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/auth/activate",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/auth/bench/pin/verify",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/auth/change-password",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/auth/impersonate",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/auth/login",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/auth/refresh",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/auth/reset-password-grant",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/calculation-templates/:id/activation",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/calculation-templates/:id/clone",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/calculation-templates/:id/versions",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/config/analyses",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/config/categories",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/config/groups",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/config/methodologies",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/equipment",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/equipment/eligibility",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/equipment/events",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/exports/data",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/help/admin/articles/:articleId/approve",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/help/admin/articles/:articleId/publish",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/help/admin/articles/:articleId/request-review",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/help/admin/articles/:articleId/revisions",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/help/admin/batch-publish",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/help/feedback",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/import/execute",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/import/preview",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/inventory/items",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/inventory/locations",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/inventory/lots",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/inventory/lots/:id/adjust",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/inventory/lots/:id/consume",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/inventory/lots/:id/dispose",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/inventory/lots/:id/quarantine",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/inventory/lots/:id/release",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/inventory/lots/:id/transfer",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/inventory/method-requirements",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/kobo/sync-all",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/kobo/sync-sample/:sampleId",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/kobo/sync/:labId",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/kobo/test",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/labs",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/labs/:id/lifecycle",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/labs/:id/lifecycle-preview",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/messages/draft",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/messages/move",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/messages/read",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/messages/send",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/nonconformities/:id/transitions",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/notifications/clear-all",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/notifications/mark-all-read",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/notifications/mark-read",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/notifications/send",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/offline/devices/enroll",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/offline/packs/prepare",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/projects",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/projects/:id/archive",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/projects/:id/imports/preview",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/projects/:id/kobo-connections",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/projects/:id/kobo-connections/:configId/sync",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/projects/:id/kobo-connections/:configId/toggle",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/projects/:id/manifest",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/projects/:id/restore",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/pt/rounds",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/qc/batches",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/qc/batches/:id/calibration-curves",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/qc/batches/:id/corrections",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/qc/batches/:id/disposition",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/qc/batches/:id/evaluate",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/qc/batches/:id/items",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/qc/batches/:id/preview",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/qc/batches/:id/reagent-lots",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/qc/batches/:id/reagent-lots/:lotId/withdraw",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/qc/batches/:id/rebuild",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/qc/batches/:id/reorder",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/qc/batches/:id/start",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/qc/control-limit-proposals",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/qc/control-limit-proposals/:id/approve",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/qc/control-reviews/:id/resolve",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/qc/lod-loq-proposals",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/qc/rules",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/qc/runs/start",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/reception/consignments",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/reception/discard",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/reception/intake",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/reception/mass-check",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/reception/parse-coordinates",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/reception/parse-manifest",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/reception/upload-photo",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/reference-materials",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/reference-materials/:id/values",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/reference-materials/:id/values/:valueId/correct",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/reports/:reportId/share",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/reports/generate/:sampleId",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/reports/links/:linkId/revoke",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/result-overrides/:id/cancel",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/result-overrides/:id/decision",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/result-overrides/work-items/:workItemId",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/results/:sampleId",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/results/:sampleId/submit",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/reviews/:workItemId",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/samples/:id/accept",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/samples/:id/amendments",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/samples/:id/amendments/:amendmentId/authorise",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/samples/:id/approve",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/samples/:id/archive",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/samples/:id/containers",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/samples/:id/custody",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/samples/:id/custody/move",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/samples/:id/dispose",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/samples/:id/holds/:holdId/resolve",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/samples/:id/orders",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/samples/:id/orders/preview",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/samples/:id/preparation-evidence/:resultId/clear",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/samples/:id/receive",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/samples/:id/repair-work-items",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/samples/:id/undo-approve",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/samples/:id/undo-intake",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/samples/batch-delete",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/samples/labels/preview",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/samples/labels/print",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/samples/walkin",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/spectral/:id/restore",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/spectral/:id/review",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/spectral/batch",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/spectral/batch-delete",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/spectral/batch-review",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/spectral/batch/commit",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/spectral/check-matches",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/spectral/link-task",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/spectral/preview",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/spectral/upload-raw",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/staff/invitations",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/staff/invitations/:id/reissue",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/staff/invitations/:id/revoke",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/submissions",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/submissions/:id/review",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/sync/operations",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/uploads/access",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/users",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/users/:id/access-preview",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/users/:id/reactivate",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/users/:id/recovery",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/users/:id/suspend",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/users/invitations",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/users/invitations/:id/reissue",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/users/invitations/:id/revoke",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/v1/data-exchange/connections",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/v1/data-exchange/keys",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/v1/data-exchange/keys/:id/abort-rotation",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/v1/data-exchange/keys/:id/confirm-rotation",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/v1/data-exchange/keys/:id/rotate",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/v1/sis/connections",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/v1/sis/keys",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/v1/sis/keys/:id/abort-rotation",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/v1/sis/keys/:id/confirm-rotation",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/v1/sis/keys/:id/rotate",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/v2/data-exchange/receipts",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/v2/data-exchange/snapshots",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/v2/sis/receipts",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/v2/sis/snapshots",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/work-items/:id/repeats",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/work-items/:id/repeats/limit-override",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/work-items/:id/repeats/replace-partial",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/work-items/:id/repeats/replace-partial/limit-override",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/work/:id/assign",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/work/:id/reassign",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/work/:id/repeats",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/work/:id/reported-value",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/work/:id/reported-value/preview",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/work/:id/review",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/work/:id/start",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/work/assign",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/work/review/bulk",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/workbench/batch-save",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/workbench/calculation-preview",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/workbench/drafts/item/:workItemId/resolve-conflict",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/workbench/instruments/:instrumentId/import-templates",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/workbench/operations/confirm",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/workbench/operations/verify",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/workbench/runs/:batchId/imports/commit",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/workbench/runs/:batchId/imports/preview",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/workbench/v2/completion/commit",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/workbench/v2/completion/preview",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/workbench/v2/submissions/commit",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/workbench/v2/submissions/preview",
+    "registration": 1
+  },
+  {
+    "key": "PUT /api/admin/languages/:code",
+    "registration": 1
+  },
+  {
+    "key": "PUT /api/admin/languages/:code/default",
+    "registration": 1
+  },
+  {
+    "key": "PUT /api/admin/settings/branding",
+    "registration": 1
+  },
+  {
+    "key": "PUT /api/auth/bench/pin",
+    "registration": 1
+  },
+  {
+    "key": "PUT /api/config/analyses/:code",
+    "registration": 1
+  },
+  {
+    "key": "PUT /api/config/categories/:id",
+    "registration": 1
+  },
+  {
+    "key": "PUT /api/config/groups/:id",
+    "registration": 1
+  },
+  {
+    "key": "PUT /api/config/lab-defaults/:labId",
+    "registration": 1
+  },
+  {
+    "key": "PUT /api/config/methodologies/:id",
+    "registration": 1
+  },
+  {
+    "key": "PUT /api/equipment/:id",
+    "registration": 1
+  },
+  {
+    "key": "PUT /api/help/admin/articles/:articleId/lab-note",
+    "registration": 1
+  },
+  {
+    "key": "PUT /api/help/admin/articles/:articleId/revisions/:revisionNumber/locales/:locale",
+    "registration": 1
+  },
+  {
+    "key": "PUT /api/inventory/items/:id",
+    "registration": 1
+  },
+  {
+    "key": "PUT /api/kobo/config/:labId",
+    "registration": 1
+  },
+  {
+    "key": "PUT /api/labs/:id",
+    "registration": 1
+  },
+  {
+    "key": "PUT /api/projects/:id",
+    "registration": 1
+  },
+  {
+    "key": "PUT /api/projects/:id/kobo-connections/:configId",
+    "registration": 1
+  },
+  {
+    "key": "PUT /api/qc/batches/:id",
+    "registration": 1
+  },
+  {
+    "key": "PUT /api/samples/:id/analyses",
+    "registration": 1
+  },
+  {
+    "key": "PUT /api/samples/:id/metadata",
+    "registration": 1
+  },
+  {
+    "key": "PUT /api/samples/:id/phase",
+    "registration": 1
+  },
+  {
+    "key": "PUT /api/samples/:id/project",
+    "registration": 1
+  },
+  {
+    "key": "PUT /api/samples/:id/status",
+    "registration": 1
+  },
+  {
+    "key": "PUT /api/users/:id",
+    "registration": 1
+  },
+  {
+    "key": "PUT /api/v1/data-exchange/connections/:id",
+    "registration": 1
+  },
+  {
+    "key": "PUT /api/v1/sis/connections/:id",
+    "registration": 1
+  },
+  {
+    "key": "PUT /api/work/:id/status",
+    "registration": 1
+  }
+]

@@ -1,6 +1,5 @@
 const { WebSocketServer } = require('ws');
 const jwt = require('jsonwebtoken');
-const url = require('url');
 const { JWT_SECRET } = require('./config/auth');
 const prisma = require('./prisma');
 
@@ -123,14 +122,17 @@ function init(server) {
     };
 
     instanceWss.on('connection', (ws, req) => {
-        // Authenticate via Sec-WebSocket-Protocol or query param
+        // Credentials belong in the upgrade header, never in request URLs/logs.
+        const requestUrl = req.url || '';
+        const queryStart = requestUrl.indexOf('?');
+        const params = new URLSearchParams(queryStart < 0 ? '' : requestUrl.slice(queryStart + 1));
+        if (params.has('token')) {
+            ws.close(4001, 'URL credentials are not accepted');
+            return;
+        }
         let token = null;
         if (req.headers['sec-websocket-protocol']) {
             token = req.headers['sec-websocket-protocol'].split(',')[0].trim();
-        }
-        if (!token) {
-            const params = new URLSearchParams(url.parse(req.url).query);
-            token = params.get('token');
         }
 
         if (!token) {

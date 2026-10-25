@@ -27,7 +27,8 @@ const sanitizeUser = (user) => {
         },
         countries: typeof user.countries === 'string' ? JSON.parse(user.countries) : (user.countries || []),
         projects: typeof user.projects === 'string' ? JSON.parse(user.projects) : (user.projects || []),
-        permissions: getPermissionsForRole(user.role)
+        permissions: getPermissionsForRole(user.role),
+        passwordPolicy: { minLength: require('../services/signInPolicy').readSignInPolicy().minPasswordLength }
     };
 };
 
@@ -35,24 +36,12 @@ exports.login = async (req, res) => {
     const { username, password } = req.body;
 
     try {
-        const user = await prisma.user.findUnique({
-            where: { username }
-        });
-
-        if (!user) {
-            return error(res, 401, 'AUTH.INVALID_CREDENTIALS', 'Invalid credentials');
+        const decision = await require('../services/signInService').authenticate(prisma, username, password, req.ip);
+        if (!decision.accepted) {
+            if (decision.retryAfter) res.set('Retry-After', String(decision.retryAfter));
+            return error(res, decision.status, 'AUTH.INVALID_CREDENTIALS', 'Invalid credentials');
         }
-
-        // Verify Password
-        const isValid = await bcrypt.compare(password, user.password);
-        if (!isValid) {
-            return error(res, 401, 'AUTH.INVALID_CREDENTIALS', 'Invalid credentials');
-        }
-
-        // Check if account is active
-        if (user.isActive === false) {
-            return error(res, 401, 'AUTH.ACCOUNT_DEACTIVATED', 'This account has been deactivated. Please contact your administrator.');
-        }
+        const user = decision.user;
 
         // Resolve laboratory profile if assigned
         if (user.labId) {
@@ -86,14 +75,14 @@ exports.login = async (req, res) => {
             data: { token, user: safeUser }
         });
     } catch (err) {
-        console.error('[AUTH] Login Error:', err);
+        console.error('[AUTH] Login Error:');
         return error(res, 500, 'AUTH.INTERNAL', 'Internal server error');
     }
 };
 
 exports.me = (req, res) => {
     // req.user is sanitized and contains permissions from verifyToken middleware
-    res.json(req.user);
+    res.json({ ...req.user, passwordPolicy: { minLength: require('../services/signInPolicy').readSignInPolicy().minPasswordLength } });
 };
 
 exports.changePassword = async (req, res) => {
@@ -110,14 +99,13 @@ exports.changePassword = async (req, res) => {
         }
 
         // Verify current
-        const isValid = await bcrypt.compare(currentPassword, user.password);
+        const isValid = typeof currentPassword === 'string' && await bcrypt.compare(currentPassword, user.password);
         if (!isValid) {
             return res.status(400).json({ error: 'Current password incorrect' });
         }
 
-        if (newPassword.length < 8) {
-            return res.status(400).json({ error: 'Password must be at least 8 characters long' });
-        }
+        try { require('../services/signInPolicy').assertNewPassword(newPassword); }
+        catch (err) { return res.status(400).json({ error: err.code, message: err.message }); }
 
         const isSame = await bcrypt.compare(newPassword, user.password);
         if (isSame) {
@@ -152,7 +140,7 @@ exports.changePassword = async (req, res) => {
 
         res.json({ message: 'Password updated successfully', token: newToken });
     } catch (error) {
-        console.error('[AUTH] Change Password Error:', error);
+        console.error('[AUTH] Change Password Error');
         res.status(500).json({ error: 'Internal server error' });
     }
 };
@@ -212,7 +200,7 @@ exports.impersonate = async (req, res) => {
             data: { token, user: safeUser }
         });
     } catch (err) {
-        console.error('[AUTH] Impersonate Error:', err);
+        console.error('[AUTH] Impersonate Error:');
         return error(res, 500, 'AUTH.INTERNAL', 'Failed to impersonate user');
     }
 };
@@ -393,7 +381,7 @@ exports.updatePreferences = async (req, res) => {
                 currentRevision: err.currentRevision
             });
         }
-        console.error('[AUTH] Update Preferences Error:', err);
+        console.error('[AUTH] Update Preferences Error:');
         return error(res, 500, 'AUTH.INTERNAL', 'Failed to update preferences');
     }
 };
@@ -508,7 +496,7 @@ exports.updateProfile = async (req, res) => {
                 currentRevision: err.currentRevision
             });
         }
-        console.error('[AUTH] updateProfile error:', err);
+        console.error('[AUTH] updateProfile error:');
         res.status(500).json({ error: 'Internal server error' });
     }
 };
@@ -528,7 +516,7 @@ const benchRoute = action => async (req, res) => {
         return res.json(await action(req));
     } catch (err) {
         if (err.statusCode) return res.status(err.statusCode).json({ error: err.message, code: err.code, ...(err.lockedUntil && { lockedUntil: err.lockedUntil }) });
-        console.error('[AUTH] Bench credential error:', err);
+        console.error('[AUTH] Bench credential error:');
         return res.status(500).json({ error: 'Internal server error' });
     }
 };

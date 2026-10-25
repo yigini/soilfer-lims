@@ -415,7 +415,7 @@ router.patch('/:id/staff/:userId/reset-password', checkPermission('MANAGE_USERS'
 
         // Generate cryptographically secure random temporary password (LG-03)
         const crypto = require('crypto');
-        const tempPassword = 'SL-' + crypto.randomBytes(6).toString('hex') + '!' + (Math.floor(Math.random() * 90) + 10);
+        const tempPassword = 'SL-' + crypto.randomBytes(48).toString('base64url');
         const hashed = await bcrypt.hash(tempPassword, 10);
         const newVersion = (user.tokenVersion || 0) + 1;
 
@@ -445,7 +445,7 @@ router.patch('/:id/staff/:userId/reset-password', checkPermission('MANAGE_USERS'
 
         res.json({ success: true, username: user.username, tempPassword, temporaryPassword: tempPassword, message: 'Password reset. User must change on next login.' });
     } catch (e) {
-        console.error('[PATCH reset-password]', e);
+        console.error('[PATCH reset-password]');
         res.status(500).json({ error: 'Reset failed' });
     }
 });

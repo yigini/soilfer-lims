@@ -122,7 +122,7 @@ You should see the SoilFER-LIMS login page! 🎉
 | **Username** | `admin` |
 | **Password** | `<generated-initial-password>` (or set via `ADMIN_INITIAL_PASSWORD`) |
 
-Check your container startup logs (`docker logs soilfer-lims | grep "INITIAL ADMIN CREDENTIALS" -A 4`) for your randomly generated password. You will be **immediately prompted to change your password**. Choose a strong password (at least 12 characters, with a mix of letters, numbers, and symbols) and remember it or store it securely.
+Use your supplied `ADMIN_INITIAL_PASSWORD`, or privately read the owner-only bootstrap handoff file reported by path in the startup log. Password values are never printed. See [administrator handoff](../../../http-deployment-settings.md#initial-administrator-password). You will be **immediately prompted to change your password**. Choose a strong password (at least 12 characters, with a mix of letters, numbers, and symbols) and remember it or store it securely.
 
 ---
 

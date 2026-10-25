@@ -156,7 +156,10 @@ async function readQcRun(db, batchId, actor, options = {}) {
     const batch = await db.batch.findUnique({ where: { id: batchId }, include: QC_RUN_INCLUDE });
     if (!batch) throw Object.assign(new Error('Batch not found.'), { statusCode: 404, code: 'BATCH_NOT_FOUND' });
     const [actorLab, targetLab] = db.lab ? await Promise.all([policyService.resolveLab(actor.labId, db), policyService.resolveLab(batch.labId, db)]) : [];
-    try { scopeGuard.ensureScope({ ...actor, labId: actorLab?.id || actor.labId }, { ...batch, labId: targetLab?.id || batch.labId }, { labField: 'labId', altLabField: null }); }
+    // National oversight uses the registered laboratory's country. Batch rows
+    // have no country column; omitting it accidentally denied authorized reads.
+    try { scopeGuard.ensureScope({ ...actor, labId: actorLab?.id || actor.labId },
+        { ...batch, labId: targetLab?.id || batch.labId, country: targetLab?.country }, { labField: 'labId', altLabField: null }); }
     catch (error) { error.code = error.code || 'QC_BATCH_SCOPE_DENIED'; if (error.statusCode === 403) error.message = 'Access denied: Batch outside your laboratory scope'; throw error; }
     return batchApiView(batch, options);
 }

@@ -285,6 +285,11 @@ DEPLOYMENT_MODE=local
 - **JWT_SECRET**: Leave blank — it will be auto-generated securely on first boot
 - **NODE_ENV**: Leave as `production`
 - **DEPLOYMENT_MODE**: Set to `local` for a single lab, or `global` for multiple labs
+- **ALLOWED_ORIGINS**: Empty for same-origin; extra browser origins must use HTTPS.
+- **TRUST_PROXY**: Defaults to `loopback`; configure the actual Docker NGINX or host proxy peer.
+- **HEALTH_SHOW_VERSION**: Defaults to `false`; public health responses hide version and uptime.
+
+The API binds to host loopback. Follow [HTTP deployment settings](http-deployment-settings.md) for proxy addresses, private administrator handoff and the host-side container-loopback health command.
 
 Save the file: press **Ctrl+O**, then **Enter**, then **Ctrl+X** to exit.
 
@@ -418,7 +423,7 @@ You should see the SoilFER-LIMS login page.
 | Username | `admin` |
 | Password | `<generated-initial-password>` (or value of `ADMIN_INITIAL_PASSWORD`) |
 
-Check the container startup logs (`docker logs soilfer-lims | grep "INITIAL ADMIN CREDENTIALS" -A 4`) for your randomly generated password. You will be **immediately prompted to change your password** on first login. Choose a strong institutional password and remember it.
+Privately read the owner-only bootstrap handoff file whose path appears in the startup log, or use the supplied `ADMIN_INITIAL_PASSWORD`. See [administrator handoff](http-deployment-settings.md#initial-administrator-password). You will be **immediately prompted to change your password** on first login. Choose a strong institutional password and remember it.
 
 ---
 
@@ -916,14 +921,14 @@ cd /app/server
 node -e "
 const {PrismaClient}=require('./prisma_client');
 const bcrypt=require('bcryptjs');
-const crypto=require('crypto');
+const {prepareInitialAdminPassword,reportInitialAdminPassword}=require('./utils/initialAdminPassword');
 const p=new PrismaClient();
 (async()=>{
-  const tempPass = crypto.randomBytes(6).toString('base64url');
+  const {password: tempPass, handoffFile} = prepareInitialAdminPassword(null);
   const hash=await bcrypt.hash(tempPass,10);
   await p.user.updateMany({where:{username:'admin'},data:{password:hash,mustChangePassword:true}});
   console.log('Password reset successfully.');
-  console.log('Temporary password:', tempPass);
+  reportInitialAdminPassword(handoffFile);
   process.exit(0);
 })()
 "
@@ -1055,8 +1060,8 @@ docker compose -f docker-compose.yml -f docker-compose.nginx.yml up -d --build
 
 | Mode | Username | Initial Password | Role |
 |------|----------|------------------|------|
-| Local | `admin` | `<generated-initial-password>` (printed on startup) | Lab Manager |
-| Global | `admin` | `<generated-initial-password>` (printed on startup) | Super Admin |
+| Local | `admin` | `<generated-initial-password>` (owner-only bootstrap handoff file) | Lab Manager |
+| Global | `admin` | `<generated-initial-password>` (owner-only bootstrap handoff file) | Super Admin |
 
 *Note: Initial password is generated randomly on first seed unless `ADMIN_INITIAL_PASSWORD` is supplied in `.env`. Password change is enforced on first login.*
 

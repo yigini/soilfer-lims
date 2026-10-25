@@ -49,7 +49,7 @@ const loadCesium = () => {
 };
 
 // ─── Photo helpers ───
-const proxyUrl = (url) => url ? `/api/kobo/media?url=${encodeURIComponent(url)}` : null;
+import useKoboMediaUrls from '../../hooks/useKoboMediaUrls';
 const HIDDEN = ['participant_signature', 'surveyor_signature', 'signature'];
 const DIR_LABELS = { north: 'N', south: 'S', east: 'E', west: 'W' };
 
@@ -65,7 +65,7 @@ function getPhotos(sample) {
 
 
 // ─── Photo Lightbox ───
-const PhotoLightbox = ({ photos, index, onClose, onNav }) => {
+const PhotoLightbox = ({ photos, index, onClose, onNav, proxyUrl }) => {
     const photo = photos[index];
     if (!photo) return null;
     useEffect(() => {
@@ -81,7 +81,7 @@ const PhotoLightbox = ({ photos, index, onClose, onNav }) => {
         <div className="fixed inset-0 z-[10000] bg-black/90 flex items-center justify-center" onClick={onClose}>
             <div className="relative max-w-[90vw] max-h-[90vh]" onClick={e => e.stopPropagation()}>
                 <img
-                    src={proxyUrl(photo.download_large || photo.download_url)}
+                    src={proxyUrl(photo.download_large, photo.download_url)}
                     alt={photo.category || photo.filename}
                     className="max-w-full max-h-[85vh] object-contain rounded-lg"
                 />
@@ -108,7 +108,7 @@ const PhotoLightbox = ({ photos, index, onClose, onNav }) => {
 
 
 // ─── Photo Popup Panel (shown when pin is clicked) ───
-const PhotoPopupPanel = ({ sample, photos, onClose, onPhotoClick }) => {
+const PhotoPopupPanel = ({ sample, photos, onClose, onPhotoClick, proxyUrl }) => {
     const { directional, soil, other } = photos;
     const allPhotos = photos.all;
     if (allPhotos.length === 0) return null;
@@ -145,7 +145,7 @@ const PhotoPopupPanel = ({ sample, photos, onClose, onPhotoClick }) => {
                                 return (
                                     <button key={dir} onClick={() => onPhotoClick(globalIdx)}
                                         className="relative aspect-square rounded-lg overflow-hidden border border-white/10 hover:border-blue-400 transition group cursor-pointer">
-                                        <img src={proxyUrl(photo.download_small || photo.download_medium || photo.download_url)}
+                                        <img src={proxyUrl(photo.download_small, photo.download_medium, photo.download_url)}
                                             alt={dir} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" loading="lazy" />
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
                                         <div className="absolute top-1.5 left-1.5 px-1.5 py-0.5 bg-black/60 backdrop-blur rounded text-[9px] text-white font-bold">
@@ -168,7 +168,7 @@ const PhotoPopupPanel = ({ sample, photos, onClose, onPhotoClick }) => {
                                 return (
                                     <button key={i} onClick={() => onPhotoClick(globalIdx)}
                                         className="relative aspect-square rounded-lg overflow-hidden border border-white/10 hover:border-blue-400 transition group cursor-pointer">
-                                        <img src={proxyUrl(photo.download_small || photo.download_medium || photo.download_url)}
+                                        <img src={proxyUrl(photo.download_small, photo.download_medium, photo.download_url)}
                                             alt={photo.category} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" loading="lazy" />
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
                                         <div className="absolute bottom-1 left-1 px-1.5 py-0.5 bg-black/60 backdrop-blur rounded text-[8px] text-white font-bold capitalize">
@@ -191,7 +191,7 @@ const PhotoPopupPanel = ({ sample, photos, onClose, onPhotoClick }) => {
                                 return (
                                     <button key={i} onClick={() => onPhotoClick(globalIdx)}
                                         className="relative aspect-square rounded-lg overflow-hidden border border-white/10 hover:border-blue-400 transition group cursor-pointer">
-                                        <img src={proxyUrl(photo.download_small || photo.download_medium || photo.download_url)}
+                                        <img src={proxyUrl(photo.download_small, photo.download_medium, photo.download_url)}
                                             alt={photo.category || 'photo'} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" loading="lazy" />
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
                                         <div className="absolute bottom-1 left-1 px-1.5 py-0.5 bg-black/60 backdrop-blur rounded text-[8px] text-white font-bold capitalize">
@@ -466,6 +466,7 @@ const LeafletView = ({ lat, lng, sample, onPinClick }) => {
 
 // ─── Main FieldMap Component ───
 const FieldMap = ({ sample }) => {
+    const proxyUrl = useKoboMediaUrls(sample);
     const [viewMode, setViewMode] = useState('3d');
     const [expanded, setExpanded] = useState(false);
     const [fullscreen, setFullscreen] = useState(false);
@@ -601,7 +602,7 @@ const FieldMap = ({ sample }) => {
                 <Controls isFullscreen={false} />
                 <InfoBar isFullscreen={false} />
                 {showPhotoPopup && (
-                    <PhotoPopupPanel
+                    <PhotoPopupPanel proxyUrl={proxyUrl}
                         sample={sample}
                         photos={photos}
                         onClose={() => setShowPhotoPopup(false)}
@@ -618,7 +619,7 @@ const FieldMap = ({ sample }) => {
                         <Controls isFullscreen={true} />
                         <InfoBar isFullscreen={true} />
                         {showPhotoPopup && (
-                            <PhotoPopupPanel
+                            <PhotoPopupPanel proxyUrl={proxyUrl}
                                 sample={sample}
                                 photos={photos}
                                 onClose={() => setShowPhotoPopup(false)}
@@ -631,7 +632,7 @@ const FieldMap = ({ sample }) => {
 
             {/* Photo lightbox */}
             {lightboxIndex !== null && (
-                <PhotoLightbox
+                <PhotoLightbox proxyUrl={proxyUrl}
                     photos={photos.all}
                     index={lightboxIndex}
                     onClose={() => setLightboxIndex(null)}

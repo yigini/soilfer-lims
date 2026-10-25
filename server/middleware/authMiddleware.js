@@ -40,8 +40,6 @@ const verifyToken = async (req, res, next) => {
     }
 
     try {
-        console.log(`[AUTH] Verifying token for ID: ${decoded.id} (Type: ${typeof decoded.id})`);
-
         const { validateUserPrincipal } = require('../services/sessionValidationService');
         const currentPath = (req.baseUrl || '') + (req.path || '');
         const decision = await validateUserPrincipal(decoded, { currentPath });
@@ -122,7 +120,7 @@ const verifyToken = async (req, res, next) => {
 
         next();
     } catch (dbErr) {
-        console.error(`[AUTH] Internal error verifying token from ${req.ip}:`, dbErr);
+        console.error(`[AUTH] Internal error verifying session from ${req.ip}`);
         return res.status(500).json({
             error: 'Internal authentication service error',
             code: 'AUTH_INTERNAL_ERROR',

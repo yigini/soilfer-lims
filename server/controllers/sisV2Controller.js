@@ -270,7 +270,7 @@ exports.getSampleById = async (req, res, next) => {
         if (!sample || (isRestrictedConsumer(req.sisAuth) && !exchangeStateService.isSpecimenEligible(sample))) {
             return res.status(404).json({
                 error: 'NOT_FOUND',
-                message: `Specimen '${specimenId}' not found or not authorized for publication.`
+                message: 'Specimen not found or not authorized for publication.'
             });
         }
 

@@ -7,7 +7,8 @@ const { createHash } = require('crypto');
 const { beforeGuards } = require('../helpers/legacyWorkflowDatabase');
 
 // 1. Ensure 100% database isolation with temporary fixture DB
-const sourcePath = path.join(__dirname, '../../prisma/dev.db');
+const sourcePath = process.env.LIMS_OWNED_TEST_TEMPLATE
+    ? path.resolve(process.env.LIMS_OWNED_TEST_TEMPLATE) : path.join(__dirname, '../../prisma/dev.db');
 const devDbHashBefore = createHash('sha256').update(fs.readFileSync(sourcePath)).digest('hex');
 
 const SUFFIX = 'DUP-' + Date.now();

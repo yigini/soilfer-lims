@@ -30,6 +30,16 @@ async function receiveConsignment(tx, { body, user, expectedSnapshots }) {
     const now = new Date();
     const lab = user.labId && await tx.lab.findUnique({ where: { id: user.labId } });
     if (!lab?.isActive) throw new IntakeError(403, { code: 'MISSING_LAB_SCOPE', message: 'Select an active receiving laboratory.' });
+    // Authorize existing specimen owners before per-row diagnostics can echo
+    // their identities or wrap a scope denial as an intake validation error.
+    for (const sample of samples) {
+        const identifier = sample?.sampleId || sample?.id || sample?.originalId;
+        if (typeof identifier !== 'string' || !identifier.trim()) continue;
+        const existing = await tx.sample.findFirst({ where: { OR: [{ id: identifier }, { originalId: identifier }] } });
+        if (existing && !require('../utils/scopeGuard').canAccessEntity(user, existing, { altLabField: 'assignedLab' })) {
+            throw new IntakeError(403, { code: 'SAMPLE_SCOPE_DENIED', message: 'The specimen is outside your laboratory scope.' });
+        }
+    }
     for (const value of [header.deliveredAt, header.custodyHandoverAt]) if (value != null && value !== '' && !Number.isFinite(new Date(value).getTime())) throw new IntakeError(422, { code: 'INTAKE_CUSTODY_INVALID', message: 'The custody date must be valid.' });
     const project = header.projectId || header.projectCode ? await projects.resolveProject(header.projectId || header.projectCode, tx) : null;
     const applications = observations.normalizeApplications(bulkApplications, samples);

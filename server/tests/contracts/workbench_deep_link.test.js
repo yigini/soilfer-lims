@@ -631,14 +631,10 @@ describe('Issue #128: Workbench Deep Link Contract', () => {
                 }]
             });
 
-        expect(res.status).toBe(422);
-        expect(res.body.success).toBe(false);
-        expect(res.body.saved).toBe(0);
-        expect(res.body.errors).toBeDefined();
-        expect(res.body.errors.length).toBe(1);
-        expect(res.body.errors[0].workItemId).toBe(wiForeignSample.id);
-        expect(res.body.errors[0].code).toBe('OUT_OF_SCOPE');
-        expect(res.body.errors[0].error).toContain('Access denied: Sample is in another laboratory');
+        expect(res.status).toBe(403);
+        expect(res.body).toEqual({ code: 'WORKITEM_SCOPE_DENIED', error: 'Work item is outside your laboratory scope.' });
+        expect(JSON.stringify(res.body)).not.toContain(wiForeignSample.id);
+        expect(JSON.stringify(res.body)).not.toContain(sampleForSample.id);
 
         // Zero mutation verification
         const draftInDb = await prisma.workItemDraft.findFirst({
@@ -652,6 +648,8 @@ describe('Issue #128: Workbench Deep Link Contract', () => {
         expect(wiInDb.status).toBe('ASSIGNED');
         expect(wiInDb.version).toBe(1);
         expect(wiInDb.result).toBeNull();
+        expect(wiInDb).toEqual(wiForeignSample);
+        expect(await prisma.sample.findUnique({ where: { id: sampleForSample.id } })).toEqual(sampleForSample);
     });
 
     test('19. Direct draftService enforcement rejects foreign-item and foreign-sample draft save and access', async () => {

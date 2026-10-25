@@ -18,6 +18,10 @@ function key(name, type, strict, basic = strict, advisory = strict, options = {}
         presets: { ISO17025_STRICT: strict, BASIC: basic, ADVISORY: advisory } };
 }
 const integer = { min: 0 };
+key('auth.loginFailureThreshold', 'integer', 5, 5, 5, { scope: 'INSTALL', min: 1, max: 100 });
+key('auth.loginWindowMinutes', 'integer', 15, 15, 15, { scope: 'INSTALL', min: 1, max: 1440, unit: 'minutes' });
+key('auth.loginMaxDelayMinutes', 'integer', 15, 15, 15, { scope: 'INSTALL', min: 1, max: 1440, unit: 'minutes' });
+key('auth.passwordMinLength', 'integer', 12, 12, 12, { scope: 'INSTALL', min: 12, max: 64 });
 // #156: a bounded laboratory setting for the existing reception observations.
 const intakeFields = {
     criteria: {

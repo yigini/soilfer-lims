@@ -124,7 +124,9 @@ async function validateUserPrincipal(decoded, options = {}) {
     if (user.mustChangePassword) {
         const allowedPaths = ['/api/auth/me', '/api/auth/change-password', '/api/auth/logout'];
         const currentPath = options.currentPath || '';
-        const isPathAllowed = allowedPaths.some(p => currentPath.includes(p));
+        // Exempt only exact recovery endpoints, never matching substrings.
+        const normalizedPath = currentPath.split('?')[0].replace(/\/+$/, '') || '/';
+        const isPathAllowed = allowedPaths.includes(normalizedPath);
 
         if (!isPathAllowed) {
             return {

@@ -15,6 +15,10 @@ if (fs.existsSync(serverEnv)) {
     dotenv.config({ path: serverEnv });
 }
 
+const { readHttpSecurityConfig, corsOptions, healthResponse } = require('./config/httpSecurity');
+// Validate public HTTP settings before loading routes or a writable adapter.
+const httpSecurity = readHttpSecurityConfig();
+
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -29,7 +33,7 @@ const { success, error } = require('./i18n/response');
 const app = express();
 // Enable if behind a reverse proxy (Heroku, Bluemix, AWS ELB, Nginx, etc)
 // see https://expressjs.com/en/guide/behind-proxies.html
-app.set('trust proxy', 1);
+app.set('trust proxy', httpSecurity.trustProxy);
 
 const PORT = process.env.PORT || 3000;
 
@@ -39,7 +43,13 @@ app.use(helmet({
         directives: {
             ...helmet.contentSecurityPolicy.getDefaultDirectives(),
             "default-src": ["'self'", "https://*.cesium.com", "https://cesium.com"],
-            "script-src": ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://cesium.com", "https://*.cesium.com", "https://cdnjs.cloudflare.com", "https://*.virtualearth.net"],
+            // Cesium decoders compile WebAssembly; JavaScript eval stays blocked.
+            "script-src": ["'self'", "'wasm-unsafe-eval'", "https://cesium.com", "https://*.cesium.com", "https://cdnjs.cloudflare.com", "https://*.virtualearth.net"],
+            "script-src-attr": ["'none'"],
+            "object-src": ["'none'"],
+            "base-uri": ["'self'"],
+            "frame-ancestors": ["'none'"],
+            "form-action": ["'self'"],
             "style-src": ["'self'", "'unsafe-inline'", "https://cesium.com", "https://*.cesium.com", "https://fonts.googleapis.com"],
             "font-src": ["'self'", "https://fonts.gstatic.com"],
             "img-src": ["'self'", "data:", "blob:", "https://api.qrserver.com", "https://cesium.com", "https://*.cesium.com", "https://*.openstreetmap.org", "https://*.cartocdn.com", "https://*.basemaps.cartocdn.com", "https://*.virtualearth.net", "https://*.arcgisonline.com", "https://server.arcgisonline.com", "https://mt1.google.com", "https://*.google.com", "https://cdnjs.cloudflare.com", "https://images.unsplash.com"],
@@ -50,12 +60,11 @@ app.use(helmet({
         }
     }
 }));
-app.use(cors({
-    origin: process.env.NODE_ENV === 'production'
-        ? ['http://localhost:5173', 'https://lims.yigini.net', 'http://lims.yigini.net']
-        : '*',
-    credentials: true
-}));
+app.use((req, res, next) => {
+    if (httpSecurity.production) res.vary('Origin');
+    next();
+});
+app.use(cors((req, callback) => callback(null, corsOptions(req, httpSecurity))));
 
 // Rate Limiting
 if (process.env.NODE_ENV !== 'test') {
@@ -119,17 +128,12 @@ const pkg = require('./package.json');
 
 // Health Check (used by Docker healthcheck)
 app.get('/api/health', (req, res) => {
-    res.json({ status: 'ok', version: pkg.version, uptime: process.uptime() });
+    healthResponse(req, res, httpSecurity, pkg.version);
 });
 
 // Canonical Version Info Endpoint
 app.get('/api/version', (req, res) => {
-    res.json({
-        name: 'soilfer-lims',
-        version: pkg.version,
-        status: 'ok',
-        uptime: process.uptime()
-    });
+    healthResponse(req, res, httpSecurity, pkg.version, true);
 });
 
 // Background Schedulers Lifecycle Management
@@ -335,8 +339,8 @@ app.use('/api/v1/data-exchange', require('./routes/sisRoutes')); // Neutral Nati
 app.use('/api/v1/sis', require('./routes/sisRoutes')); // Legacy backward-compatible alias
 app.use('/api/v2/data-exchange', require('./routes/sisV2Routes')); // Neutral National Data Exchange API (v2)
 app.use('/api/v2/sis', require('./routes/sisV2Routes')); // V2 SIS alias
-// Kobo media proxy — no JWT auth because <img> tags can't send headers.
-// Security: (1) only proxies to known Kobo hosts from active configs, (2) HTTPS only, (3) URL scheme validation.
+// Browser image requests carry a short-lived sealed sample/attachment reference.
+// The handler revalidates principal, tenant scope and the exact stored source.
 const koboController = require('./controllers/koboController');
 app.get('/api/kobo/media', koboController.proxyMedia);
 
@@ -903,32 +907,10 @@ app.get('/api/dashboard/stats', verifyToken, async (req, res) => {
     const { country, projectId } = req.query; // Optional filters
 
     try {
-        // 1. Build Query
-        const where = {};
-
-        // RBAC Scoping
-        if (user.role !== 'SUPER_ADMIN') {
-            const userCountries = user.countries || [];
-            const userProjects = user.projects || [];
-            if (userCountries.length > 0) {
-                // If filtering by country, it's safer to query projects or raw field? 
-                // Schema has projectCode, countryName. 
-                // Let's assume projectCode map to country for now or countryName.
-                where.OR = [
-                    { projectCode: { in: userCountries } },
-                    { countryName: { in: userCountries } }
-                ];
-            }
-            if (userProjects.length > 0) {
-                // Combine with existing OR or add? 
-                // Complex RBAC logic from sampleController... simplified here:
-                if (where.OR) {
-                    where.OR.push({ projectId: { in: userProjects } });
-                } else {
-                    where.OR = [{ projectId: { in: userProjects } }];
-                }
-            }
-        }
+        // Apply the same sample scope as the other dashboard routes. Optional
+        // filters can narrow that scope but cannot grant another lab's totals.
+        const { buildScopedWhere } = require('./utils/scopeGuard');
+        const where = buildScopedWhere(user);
 
         // Explicit Filters
         if (country) {
@@ -1018,13 +1000,10 @@ app.get('/api/dashboard/stats', verifyToken, async (req, res) => {
     }
 });
 
-// ─── Uploads Static Directory (Persistent user/sample assets) ───
-const uploadsDir = path.join(__dirname, 'uploads');
-const intakeUploadsDir = path.join(uploadsDir, 'intake');
-if (!fs.existsSync(intakeUploadsDir)) {
-    fs.mkdirSync(intakeUploadsDir, { recursive: true });
-}
-app.use('/uploads', express.static(uploadsDir));
+// Persistent intake assets retain their paths, with current scope and short-lived access.
+const uploadMediaRoutes = require('./routes/uploadMediaRoutes');
+app.use('/api/uploads', uploadMediaRoutes.api);
+app.use('/uploads', uploadMediaRoutes.files);
 
 // ─── Production / Standalone: Serve React client ───
 if (process.env.NODE_ENV === 'production' || process.env.SERVE_CLIENT === 'true') {
@@ -1044,7 +1023,9 @@ if (process.env.NODE_ENV === 'production' || process.env.SERVE_CLIENT === 'true'
 // ─── Global Error Handler ───
 // Catches unhandled controller errors, prevents stack trace leaks, and ensures standard JSON responses
 app.use((err, req, res, next) => {
-    console.error(`[UNHANDLED_ERROR] ${req.method} ${req.originalUrl}:`, err);
+    // Error objects may carry upstream Authorization headers or request bodies.
+    // Query strings can contain sealed media references. Keep both out of logs.
+    console.error('[UNHANDLED_ERROR]', req.method, req.route?.path || 'unmatched');
     if (res.headersSent) {
         return next(err);
     }

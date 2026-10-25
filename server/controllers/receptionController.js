@@ -286,6 +286,7 @@ exports.checkDuplicate = async (req, res) => {
                 receivedBy: true,
                 assignedLab: true,
                 projectCode: true,
+                country: true,
                 receivedMass: true,
                 moistureOnArrival: true
             }
@@ -293,6 +294,9 @@ exports.checkDuplicate = async (req, res) => {
 
         if (!sample) {
             return res.json({ exists: false });
+        }
+        if (!require('../utils/scopeGuard').canAccessEntity(req.user, sample, { altLabField: 'assignedLab' })) {
+            return res.status(403).json({ error: 'Access denied: Sample not in your Lab scope' });
         }
 
         const priorReceiptStatuses = [
@@ -351,23 +355,18 @@ exports.calculateMassRequirement = async (req, res) => {
  * POST /api/reception/upload-photo
  * RC-03: Upload Intake or Non-Conformance Photographs
  */
-exports.uploadIntakePhoto = (req, res) => {
+exports.uploadIntakePhoto = async (req, res) => {
+    const mediaController = require('./uploadMediaController');
     try {
-        const files = req.files || (req.file ? [req.file] : []);
-        if (files.length === 0) {
-            return res.status(400).json({ success: false, error: 'No image file uploaded' });
+        if (Object.keys(req.query).length || Object.keys(req.body || {}).some(key => key !== 'labId')) {
+            throw Object.assign(new Error('Unsupported image request.'), {
+                statusCode: 400, code: 'UPLOAD_REQUEST_INVALID', uploadMediaError: true });
         }
-
-        const urls = files.map(f => `/uploads/intake/${f.filename}`);
-        return res.json({
-            success: true,
-            urls,
-            url: urls[0]
-        });
-    } catch (err) {
-        console.error('[uploadIntakePhoto] ERROR:', err);
-        return res.status(500).json({ error: 'Photo upload failed' });
-    }
+        const urls = await require('../services/uploadMediaService').storePhotos({
+            user: req.user, actor: req.actor, uploads: req.files, requestedLab: req.body?.labId });
+        mediaController.headers(res);
+        return res.json({ success: true, urls, url: urls[0], photos: urls.map(url => ({ url })) });
+    } catch (error) { return mediaController.sendError(res, error); }
 };
 
 /**
@@ -548,6 +547,7 @@ exports.batchGeometryCheck = async (req, res) => {
 
         const projectSamples = await prisma.sample.findMany({
             where: {
+                AND: [require('../utils/scopeGuard').buildScopedWhere(req.user)],
                 OR: [
                     { projectId },
                     { projectCode: projectId }

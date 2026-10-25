@@ -387,8 +387,21 @@ exports.updateLanguage = async (req, res) => {
 
 exports.getLanguageCatalog = async (req, res) => {
     const { code } = req.params;
-    const labId = req.query.labId || req.user?.labId;
     try {
+        const target = req.query.labId || req.user?.labId;
+        let labId = null;
+        if (target) {
+            const lab = await prisma.lab.findFirst({ where: { OR: [{ id: target }, { code: target }] } });
+            if (!lab) return res.status(404).json({ error: 'Laboratory not found.' });
+            const actorLab = req.user?.labId ? await prisma.lab.findFirst({
+                where: { OR: [{ id: req.user.labId }, { code: req.user.labId }] }, select: { id: true }
+            }) : null;
+            if (!require('../utils/scopeGuard').canAccessEntity({ ...req.user, labId: actorLab?.id || req.user?.labId },
+                { assignedLab: lab.id, country: lab.country })) {
+                return res.status(403).json({ error: 'Forbidden' });
+            }
+            labId = lab.id;
+        }
         const catalog = await translationService.getCatalog(code, labId);
         res.success('CATALOG_FETCHED', 'Catalog fetched', null, 200, catalog);
     } catch (error) {

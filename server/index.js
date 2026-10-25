@@ -108,6 +108,9 @@ try {
     const custodyReadyBegan = beginReadinessStage();
     const custodyReady = require('./scripts/install_sample_custody').assertSampleCustodyStartupReady(dbPath, startupContext);
     console.log(JSON.stringify({event:'SAMPLE_CUSTODY_STARTUP_READY',...custodyReady, ...readinessTelemetry(custodyReadyBegan)}));
+    const signInReadyBegan = beginReadinessStage();
+    const signInReady = require('./scripts/install_signin_protection').assertSignInStartupReady(dbPath, startupContext);
+    console.log(JSON.stringify({event:'SIGNIN_STARTUP_READY',...signInReady, ...readinessTelemetry(signInReadyBegan)}));
 } catch (error) {
     console.error(JSON.stringify({ error: error.code || 'WORKFLOW_STARTUP_REFUSED', message: error.message,
         nextStep: error.code?.startsWith('QC_GATE_SCOPE_') ? 'Keep the lab stopped and follow docs/audit/2.4-qc-gate.md.'

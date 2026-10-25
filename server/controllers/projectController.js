@@ -3,6 +3,7 @@ const prisma = require('../prisma');
 const { success, error } = require('../i18n/response');
 const projectPolicyService = require('../services/projectPolicyService');
 const projectMembershipService = require('../services/projectMembershipService');
+const scopeGuard = require('../utils/scopeGuard');
 const commandReceiptService = require('../services/commandReceiptService');
 const { createSample } = require('../services/sampleStateService');
 const defaultAuditCreate = prisma.auditLog?.create;
@@ -353,8 +354,14 @@ exports.createProject = async (req, res) => {
                         { originalId: { in: uniqueSampleIds } }
                     ]
                 },
-                select: { id: true, projectId: true, projectCode: true }
+                select: { id: true, projectId: true, projectCode: true, labId: true, assignedLab: true, country: true }
             });
+            // Duplicate-ID diagnostics must not reveal another laboratory's
+            // sample or owning project, including matches by originalId.
+            if (existingSamples.some(sample => !scopeGuard.canAccessEntity(req.user, sample,
+                { entityType: 'Sample', labField: 'labId', altLabField: 'assignedLab' }))) {
+                return error(res, 403, 'SAMPLE_SCOPE_DENIED', 'Manifest contains samples outside your authorized scope.');
+            }
             if (existingSamples.length > 0) {
                 const conflictDetails = existingSamples.map(e => `${e.id} (Project: ${e.projectCode || e.projectId})`).join(', ');
                 return error(res, 400, 'SAMPLE_ID_CONFLICT', `Sample IDs already exist: ${conflictDetails}`, { conflicts: existingSamples.map(e => e.id) });

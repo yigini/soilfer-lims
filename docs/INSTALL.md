@@ -221,7 +221,7 @@ curl http://localhost/api/health
 Go to **http://soillab.org** — you should see the LIMS login page!
 
 - **Username:** `admin`
-- **Password:** `<generated-initial-password>` (check startup logs with `docker logs soilfer-lims | grep "INITIAL ADMIN CREDENTIALS" -A 4`)
+- **Password:** Use `ADMIN_INITIAL_PASSWORD`, or privately read the owner-only handoff file reported by bootstrap; see [administrator handoff](http-deployment-settings.md#initial-administrator-password).
 - You will be prompted to change your password immediately on first login.
 
 ### A5. Add SSL (HTTPS) — Recommended
@@ -398,7 +398,7 @@ sudo systemctl reload nginx
 Open **http://lims.mainsite.org** in your browser. You should see the LIMS login page.
 
 - **Username:** `admin`
-- **Password:** `<generated-initial-password>` (from container logs, or set via `ADMIN_INITIAL_PASSWORD`)
+- **Password:** Use `ADMIN_INITIAL_PASSWORD` or the owner-only bootstrap handoff file; no password value appears in container logs.
 
 ### B5. Add SSL for the Subdomain
 
@@ -603,14 +603,14 @@ cd /app/server
 node -e "
 const {PrismaClient}=require('./prisma_client');
 const bcrypt=require('bcryptjs');
-const crypto=require('crypto');
+const {prepareInitialAdminPassword,reportInitialAdminPassword}=require('./utils/initialAdminPassword');
 const p=new PrismaClient();
 (async()=>{
-  const tempPass = crypto.randomBytes(6).toString('base64url');
+  const {password: tempPass, handoffFile} = prepareInitialAdminPassword(null);
   const hash=await bcrypt.hash(tempPass,10);
   await p.user.updateMany({where:{username:'admin'},data:{password:hash,mustChangePassword:true}});
   console.log('Password reset successfully.');
-  console.log('Temporary password:', tempPass);
+  reportInitialAdminPassword(handoffFile);
   process.exit(0);
 })()
 "
@@ -641,3 +641,8 @@ exit
 | `JWT_SECRET` | *(auto-generated)* | Secret for login tokens. Auto-generated if left blank |
 | `NODE_ENV` | `production` | Leave as `production` |
 | `DEPLOYMENT_MODE` | `local` | `local` (single lab) or `global` (multi-lab network) |
+| `ALLOWED_ORIGINS` | empty | Extra HTTPS browser origins, separated by commas; empty is same-origin |
+| `TRUST_PROXY` | `loopback` | Actual reverse proxy addresses/subnets; configure for Docker NGINX |
+| `HEALTH_SHOW_VERSION` | `false` | Public version/uptime disclosure; loopback checks retain metadata |
+
+See [HTTP deployment settings](http-deployment-settings.md) for proxy setup and the exact host-side version health check. Compose publishes the API only on host loopback.

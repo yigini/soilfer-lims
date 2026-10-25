@@ -8,6 +8,9 @@ const { verifyToken, checkPermission } = require('../middleware/authMiddleware')
 
 router.use(verifyToken);
 
+// Issue only references already recorded on an authorized sample.
+router.get('/media/samples/:sampleId', koboController.getMediaUrls);
+
 // Configuration endpoints (managers only for write)
 router.get('/configs', checkPermission('MANAGE_ANALYSES'), koboController.getAllConfigs);
 router.get('/config/:labId', koboController.getConfig);
@@ -22,7 +25,7 @@ router.post('/sync-sample/:sampleId', checkPermission('MANAGE_ANALYSES'), koboCo
 router.post('/sync/:labId', checkPermission('MANAGE_ANALYSES'), koboController.syncLab);
 router.post('/sync-all', checkPermission('MANAGE_ANALYSES'), koboController.syncAll);
 
-// Media proxy (any authenticated user can view kobo images)
+// Image reads still require a valid sealed reference.
 router.get('/media', koboController.proxyMedia);
 
 module.exports = router;

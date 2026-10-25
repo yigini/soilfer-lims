@@ -5,6 +5,7 @@ import ComplianceChecklist from './ComplianceChecklist';
 import IntakeContextFields from './IntakeContextFields';
 import useIntakeRules from './useIntakeRules';
 import { useLanguage } from '../../context/LanguageContext';
+import useUploadMediaUrls from '../../hooks/useUploadMediaUrls';
 
 const PRESET_REASONS = [
     'Bag torn / sample leaked in transit',
@@ -23,6 +24,7 @@ const BatchExceptionModal = ({ isOpen, sample, index, onClose, onSave, defaults 
     const [moistureOnArrival, setMoistureOnArrival] = useState(sample?.moistureOnArrival || '');
     const [notes, setNotes] = useState(sample?.notes || '');
     const [photos, setPhotos] = useState(sample?.intakePhotos || []);
+    const photoUrl = useUploadMediaUrls(photos);
     const [uploading, setUploading] = useState(false);
     const [checklist, setChecklist] = useState(sample?.checklist || defaults.checklist || { items: {} });
     const [sampling, setSampling] = useState({ ...defaults.samplingDetails, ...sample?.samplingDetails });
@@ -46,6 +48,7 @@ const BatchExceptionModal = ({ isOpen, sample, index, onClose, onSave, defaults 
         setUploading(true);
         const formData = new FormData();
         files.forEach(f => formData.append('photos', f));
+        if (labId) formData.append('labId', labId);
 
         try {
             const token = localStorage.getItem('token');
@@ -214,7 +217,7 @@ const BatchExceptionModal = ({ isOpen, sample, index, onClose, onSave, defaults 
                         <div className="flex flex-wrap gap-2 items-center">
                             {photos.map((p, idx) => (
                                 <div key={idx} className="relative w-16 h-16 rounded-lg overflow-hidden border border-sf-divider group">
-                                    <img src={p} alt="evidence" className="w-full h-full object-cover" />
+                                    <img src={photoUrl(p)} alt="evidence" className="w-full h-full object-cover" />
                                     <button
                                         type="button"
                                         onClick={() => handleRemovePhoto(idx)}
@@ -230,7 +233,7 @@ const BatchExceptionModal = ({ isOpen, sample, index, onClose, onSave, defaults 
                                 <span className="text-[9px] font-bold mt-1">Upload</span>
                                 <input
                                     type="file"
-                                    accept="image/*"
+                                    accept="image/jpeg,image/png,image/webp"
                                     multiple
                                     onChange={handlePhotoUpload}
                                     disabled={uploading}

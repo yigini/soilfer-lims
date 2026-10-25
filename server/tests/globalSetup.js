@@ -95,6 +95,7 @@ module.exports = async function globalSetup() {
         require('../scripts/install_order_revisions').installOrderRevisions({dbPath:testDbPath,apply:true});
         require('../scripts/install_label_print_events').installLabelPrintEvents({dbPath:testDbPath,apply:true});
         require('../scripts/install_sample_custody').installSampleCustody({dbPath:testDbPath,apply:true});
+        require('../scripts/install_signin_protection').installSignInProtection({dbPath:testDbPath,apply:true});
     }
 
     process.env.DATABASE_PATH = testDbPath;

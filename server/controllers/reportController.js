@@ -899,6 +899,11 @@ async function getReportPdf(req, res) {
 async function getSampleReportPdf(req, res) {
     try {
         const { sampleId } = req.params;
+        const sample = await prisma.sample.findUnique({ where: { id: sampleId } });
+        if (!sample) return res.status(404).json({ error: 'Sample not found' });
+        if (!isReportAuthorized(req.user, null, sample)) {
+            return res.status(403).json({ error: 'Access denied: Sample not in your Lab scope' });
+        }
         let report = await prisma.report.findFirst({
             where: { sampleId, status: 'PUBLISHED' },
             orderBy: { version: 'desc' }

@@ -273,6 +273,9 @@ function beforeGuards(options) {
             if (sampleGap) sampleGap.fields.push('retainUntil');
             else expected.push({table:'Sample',fields:['retainUntil']});
             expected.push({table:'InventoryLocation',fields:['purpose']},{table:'CustodyEvent',missingTable:true});
+            // #338 adds only this durable sign-in counter table. Keep the
+            // captured SQL and every other exact historical gap unchanged.
+            if (modelNames.includes('AuthLoginState')) expected.push({table:'AuthLoginState',missingTable:true});
             const order = Prisma.dmmf.datamodel.models.map(model => model.dbName || model.name);
             expected.sort((left, right) => order.indexOf(left.table) - order.indexOf(right.table));
         }

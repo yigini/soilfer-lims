@@ -64,7 +64,7 @@ exports.getAllConfigs = async (req, res) => {
 
         res.json(maskedConfigs);
     } catch (error) {
-        console.error('[KOBO] Error fetching configs:', error);
+        console.error('[KOBO] Error fetching configs:');
         res.status(500).json({ error: 'Failed to fetch Kobo configurations' });
     }
 };
@@ -95,7 +95,7 @@ exports.getConfig = async (req, res) => {
             configured: true
         });
     } catch (error) {
-        console.error('[KOBO] Error fetching config:', error);
+        console.error('[KOBO] Error fetching config:');
         res.status(500).json({ error: 'Failed to fetch configuration' });
     }
 };
@@ -156,7 +156,7 @@ exports.upsertConfig = async (req, res) => {
             config: { ...config, apiToken: '••••••••' + config.apiToken.slice(-4) }
         });
     } catch (error) {
-        console.error('[KOBO] Error saving config:', error);
+        console.error('[KOBO] Error saving config:');
         const status = error instanceof profileIdentity.ProfileReferenceConflictError || error.code === 'P2025' ? 409 : (error.status || 500);
         res.status(status).json({ error: error.code === 'P2025' ? 'STALE_REVISION' : error.code || 'KOBO_CONFIG_FAILED', message: status < 500 ? error.message : 'Failed to save configuration' });
     }
@@ -182,7 +182,7 @@ exports.testConnection = async (req, res) => {
 
         res.json(result);
     } catch (error) {
-        console.error('[KOBO] Test connection error:', error);
+        console.error('[KOBO] Test connection error:');
         res.status(500).json({ success: false, error: error.message });
     }
 };
@@ -215,7 +215,7 @@ exports.getFormFields = async (req, res) => {
 
         res.json({ fields });
     } catch (error) {
-        console.error('[KOBO] Error getting form fields:', error);
+        console.error('[KOBO] Error getting form fields:');
         res.status(500).json({ error: error.message });
     }
 };
@@ -273,7 +273,7 @@ exports.syncLab = async (req, res) => {
         }
         res.json(result);
     } catch (error) {
-        console.error('[KOBO] Sync error:', error);
+        console.error('[KOBO] Sync error:');
         if (error instanceof profileIdentity.ProfileReferenceConflictError) return res.status(409).json({code: error.code, message: error.message, reason: error.reason});
         if (error.message?.includes('LAB_INACTIVE') || error.message?.includes('CONFIG_INACTIVE') || error.message?.includes('CONFIG_REVOKED')) {
             return res.status(400).json({ error: 'PRECONDITION_FAILED', message: error.message });
@@ -310,7 +310,7 @@ exports.syncAll = async (req, res) => {
 
         res.json({ synced: results.length, results });
     } catch (error) {
-        console.error('[KOBO] Sync all error:', error);
+        console.error('[KOBO] Sync all error:');
         res.status(500).json({ error: error.message });
     }
 };
@@ -1640,62 +1640,54 @@ exports.syncSample = async (req, res) => {
         console.log(`[KOBO] ✅ Force synced ${sample.originalId} (matched ${matchedSampleData.original_id}): ${attachments.length} attachments`);
         res.json({ success: true, message: `Successfully synced ${sample.originalId} from Kobo` });
     } catch (error) {
-        console.error('[KOBO] Force sync sample error:', error);
+        console.error('[KOBO] Force sync sample error:');
         res.status(error instanceof profileIdentity.ProfileReferenceConflictError ? 409 : 500).json({ error: error.code || 'KOBO_SYNC_FAILED', message: error instanceof profileIdentity.ProfileReferenceConflictError ? error.message : 'Could not refresh the field record.' });
     }
 };
 
 /**
- * GET /api/kobo/media?url=<encodedKoboUrl>
- * Proxy Kobo attachment images through our server (adds auth token)
+ * Authenticated issuance for the owning sample; image requests use a short-lived
+ * sealed reference and recheck the current principal and sample scope.
  */
+function setKoboMediaHeaders(res) {
+    res.set('Cache-Control', 'private, no-store');
+    res.set('X-Content-Type-Options', 'nosniff');
+    res.set('Referrer-Policy', 'no-referrer');
+}
+function sendKoboMediaError(res, error) {
+    setKoboMediaHeaders(res);
+    const known = Number.isInteger(error.statusCode) && error.statusCode >= 400 && error.statusCode < 600;
+    if (!known) console.error('[KOBO] Media request failed.');
+    return res.status(known ? error.statusCode : 500).json({
+        code: known ? error.code : 'MEDIA_REQUEST_FAILED',
+        error: known ? error.message : 'The image request could not be completed.'
+    });
+}
+exports.getMediaUrls = async (req, res) => {
+    try {
+        if (Object.keys(req.query).length) throw Object.assign(new Error('Unsupported media request.'),
+            { statusCode: 400, code: 'MEDIA_REQUEST_INVALID' });
+        const encoded = req.headers.authorization?.split(' ')[1];
+        const session = encoded ? require('jsonwebtoken').decode(encoded) : null;
+        const result = await require('../services/koboMediaService').issueUrls({ user: req.user,
+            actor: req.actor, sampleId: req.params.sampleId, sessionExpiresAt: session?.exp });
+        setKoboMediaHeaders(res);
+        return res.json(result);
+    } catch (error) { return sendKoboMediaError(res, error); }
+};
 exports.proxyMedia = async (req, res) => {
     try {
-        const { url } = req.query;
-        if (!url) return res.status(400).json({ error: 'Missing url parameter' });
-
-        // SSRF protection: only allow HTTPS URLs to external hosts
-        const parsedUrl = new URL(url);
-        if (parsedUrl.protocol !== 'https:') {
-            return res.status(400).json({ error: 'Only HTTPS URLs are allowed' });
+        if (typeof req.query.token !== 'string') throw Object.assign(new Error('Media access is missing or expired.'),
+            { statusCode: 401, code: 'MEDIA_ACCESS_INVALID' });
+        if (Object.keys(req.query).some(key => key !== 'token')) {
+            throw Object.assign(new Error('Unsupported media request.'), { statusCode: 400, code: 'MEDIA_REQUEST_INVALID' });
         }
-        const hostname = parsedUrl.hostname;
-        if (['localhost', '127.0.0.1', '[::1]', '0.0.0.0'].includes(hostname) ||
-            hostname.startsWith('10.') || hostname.startsWith('172.') || hostname.startsWith('192.168.')) {
-            return res.status(403).json({ error: 'Internal addresses are not allowed' });
-        }
-
-        // Find a KoboConfig with a matching server URL
-        const configs = await prisma.koboConfig.findMany({
-            where: { isActive: true },
-            select: { koboServerUrl: true, apiToken: true }
-        });
-
-        const config = configs.find(c => {
-            const configHost = new URL(c.koboServerUrl).host;
-            return configHost === parsedUrl.host;
-        });
-
-        if (!config) {
-            return res.status(404).json({ error: 'No Kobo config found for this server' });
-        }
-
-        // Fetch the image from Kobo with authentication
-        const axios = require('axios');
-        const response = await axios.get(url, {
-            headers: { 'Authorization': `Token ${config.apiToken}` },
-            responseType: 'stream',
-            timeout: 15000
-        });
-
-        // Forward content type and cache for 1 hour
-        res.set('Content-Type', response.headers['content-type'] || 'image/jpeg');
-        res.set('Cache-Control', 'public, max-age=3600');
-        response.data.pipe(res);
-    } catch (error) {
-        console.error('[KOBO] Media proxy error:', error.message);
-        res.status(500).json({ error: 'Failed to fetch media' });
-    }
+        const image = await require('../services/koboMediaService').readImage(req.query.token);
+        setKoboMediaHeaders(res);
+        res.set('Content-Security-Policy', "default-src 'none'; img-src 'self'; sandbox");
+        res.set('Content-Disposition', 'inline');
+        return res.type(image.contentType).send(image.bytes);
+    } catch (error) { return sendKoboMediaError(res, error); }
 };
 
 // Expose internal functions for cross-controller use (auto-sync on project creation)

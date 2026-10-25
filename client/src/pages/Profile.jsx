@@ -6,11 +6,13 @@ import { useLanguage } from '../context/LanguageContext';
 import { useDialog } from '../context/DialogContext';
 import { User, Lock, Bell, Mail, Shield, MapPin, Building2, Calendar, Sun } from 'lucide-react';
 import axios from 'axios';
+import { minimumPasswordLength } from '../lib/passwordPolicy';
 import MessagingCenter from '../components/messaging/MessagingCenter';
 import { ThemeGallery } from '../components/appearance/ThemeGallery';
 
 const Profile = () => {
     const { user, logout, updateUserPreferences } = useAuth();
+    const minPasswordLength = minimumPasswordLength(user);
     const { savedAppearance, setSavedAppearance } = useTheme();
     const { locale, changeLanguage, availableLanguages, t } = useLanguage();
     const { showDialog } = useDialog();
@@ -118,8 +120,8 @@ const Profile = () => {
 
     const handlePasswordChange = async (e) => {
         e.preventDefault();
-        if (passData.new.length < 8) {
-            showDialog({ title: 'Error', message: 'New password must be at least 8 characters long.', type: 'error' });
+        if ([...passData.new].length < minPasswordLength) {
+            showDialog({ title: 'Error', message: 'New password must be at least ' + minPasswordLength + ' characters long.', type: 'error' });
             return;
         }
         if (passData.new !== passData.confirm) {
@@ -143,7 +145,7 @@ const Profile = () => {
         } catch (err) {
             showDialog({
                 title: 'Error',
-                message: err.response?.data?.error || 'Failed to update password',
+                message: err.response?.data?.message || err.response?.data?.error || 'Failed to update password',
                 type: 'error'
             });
         } finally {
@@ -306,7 +308,7 @@ const Profile = () => {
                                         value={passData.new}
                                         onChange={e => setPassData({ ...passData, new: e.target.value })}
                                         className="input-base w-full p-3 rounded-lg border dark:border-gray-600 focus:ring-2 focus:ring-blue-500"
-                                        placeholder="Min. 8 characters"
+                                        placeholder={'Min. ' + minPasswordLength + ' characters'}
                                         required
                                     />
                                 </div>

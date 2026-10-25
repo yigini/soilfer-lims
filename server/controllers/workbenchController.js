@@ -698,6 +698,13 @@ exports.getQueue = async (req, res) => {
 //   Fix 4 – Out-of-range values block completion unless manager + overrideReason
 //   Fix 2b – Equipment eligibility prefetched before the loop
 // ─────────────────────────────────────────────────────────────────────────────
+async function assertWorkbenchItemsScope(user, items) {
+    const scope = require('../utils/scopeGuard');
+    if (items.some(item => !scope.canAccessEntity(user, item.sample || item, { altLabField: 'assignedLab' }))) {
+        throw new stateRules.TransitionError('Work item is outside your laboratory scope.', 403, 'WORKITEM_SCOPE_DENIED');
+    }
+}
+
 exports.batchSave = async (req, res) => {
     const { entries, draft = true } = req.body;
     const user = req.user;
@@ -718,12 +725,13 @@ exports.batchSave = async (req, res) => {
                 sample: {
                     select: {
                         id: true, status: true, labId: true, assignedLab: true,
-                        dryingStatus: true, preparationStatus: true
+                        dryingStatus: true, preparationStatus: true, country: true
                     }
                 }
             }
         });
 
+        await assertWorkbenchItemsScope(user, workItems);
         const itemMap = {};
         workItems.forEach(wi => itemMap[wi.id] = wi);
 
@@ -1491,6 +1499,7 @@ exports.previewCompletion = async (req, res) => {
             where: { id: { in: workItemIds } },
             include: { sample: true }
         });
+        await assertWorkbenchItemsScope(user, workItems);
         const itemMap = {};
         workItems.forEach(wi => itemMap[wi.id] = wi);
 
@@ -1720,6 +1729,7 @@ exports.previewSubmissions = async (req, res) => {
 
     try {
         const whereClause = {
+            sample: { is: require('../utils/scopeGuard').buildScopedWhere(user) },
             status: 'COMPLETED',
             submissionId: null,
             analysis: { notIn: ['DRYING', 'PREPARATION', 'ARCHIVING', 'ARCH', 'Archive', 'DISPOSAL', 'DISP', 'Dispose'] }
@@ -1857,7 +1867,7 @@ exports.commitSubmissions = async (req, res) => {
             const sample = await prisma.sample.findUnique({ where: { id: sampleId } });
             if (!sample) continue;
             if (!scopeGuard.canAccessEntity(user, sample, { labField: 'labId', altLabField: 'assignedLab' })) {
-                return res.status(403).json({ error: `Access denied: Sample ${sampleId} is outside your lab scope.` });
+                return res.status(403).json({ error: 'Access denied: Sample is outside your lab scope.' });
             }
         }
 
@@ -2045,7 +2055,7 @@ exports.confirmOperation = async (req, res) => {
         res.json(outcome);
     } catch (err) {
         console.error('[workbench.confirmOperation] Error:', err);
-        res.status(err.status || 500).json({
+        res.status(err.status || err.statusCode || 500).json({
             error: err.message || 'Failed to confirm operational procedure',
             code: err.code || 'OPERATION_CONFIRM_FAILED',
             ...(err.details && Object.keys(err.details).length && { details: err.details })
@@ -2074,7 +2084,7 @@ exports.verifyOperation = async (req, res) => {
         res.json(outcome);
     } catch (err) {
         console.error('[workbench.verifyOperation] Error:', err);
-        res.status(err.status || 500).json({
+        res.status(err.status || err.statusCode || 500).json({
             error: err.message || 'Failed to verify operational procedure',
             code: err.code || 'OPERATION_VERIFY_FAILED'
         });

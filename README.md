@@ -144,6 +144,8 @@ cp .env.example .env
 
 *(Optional)* Open `.env` in any text editor to set your custom `JWT_SECRET` or customize your domain name.
 
+Production browser origins default to same-origin. Configure `ALLOWED_ORIGINS` (HTTPS origins only), `TRUST_PROXY` (default `loopback`) and `HEALTH_SHOW_VERSION` (default `false`) for your deployment. The API binds to host loopback. See [HTTP deployment settings](docs/http-deployment-settings.md) for the shipped NGINX proxy and host-side health command. Account backoff and the configurable new-password minimum are described in [sign-in protection](docs/sign-in-protection.md).
+
 ### 3. Launch with Docker Compose
 ```bash
 # Option A: Single Laboratory with NGINX (Ports 80/443 — Recommended):
@@ -170,14 +172,7 @@ When a fresh database is initialized, SoilFER-LIMS provisions a single administr
 - **Role Assignment:**
   - In **Local Mode** (`DEPLOYMENT_MODE=local`): `LAB_MANAGER` scoped to the initial default laboratory.
   - In **Global Mode** (`DEPLOYMENT_MODE=global`): `SUPER_ADMIN` with system-wide management authority.
-- **Initial Password:** Randomly generated during first initialization (or set via `ADMIN_INITIAL_PASSWORD` in your `.env` file). The password is printed once to the container/server logs:
-  ```text
-  ┌────────────────────────────────────────────────────────┐
-  │ 🔑 INITIAL ADMIN CREDENTIALS (Generated — Print Once): │
-  │    Username: admin                                     │
-  │    Password: <generated-initial-password>              │
-  └────────────────────────────────────────────────────────┘
-  ```
+- **Initial Password:** Use your supplied `ADMIN_INITIAL_PASSWORD`, or privately read the owner-only handoff file whose path appears in the startup log. Password values are never printed. See [administrator handoff](docs/http-deployment-settings.md#initial-administrator-password).
 - **Mandatory Password Change:** You will be prompted to set an institutional-strength password upon first login.
 - **Staff Provisioning:** Operational roles (`SAMPLE_RECEPTION`, `LAB_TECHNICIAN`, `LAB_MANAGER`, `PROJECT_MANAGER`) are created by administrators via **Admin Panel → User Management** (`/admin?tab=users`) rather than persistent default accounts.
 

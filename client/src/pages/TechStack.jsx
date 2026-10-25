@@ -14,7 +14,7 @@ const techStack = [
         color: 'from-blue-500 to-cyan-500',
         items: [
             { name: 'React', version: '18.3', url: 'https://react.dev', icon: '⚛️', desc: 'Core reactive component library for modern user interfaces' },
-            { name: 'React Router', version: '6.x', url: 'https://reactrouter.com', icon: '🧭', desc: 'Declarative client-side routing and protected view guards' },
+            { name: 'React Router', version: '7.18.4', url: 'https://reactrouter.com', icon: '🧭', desc: 'Declarative client-side routing and protected view guards' },
             { name: 'Vite', version: '5.x', url: 'https://vitejs.dev', icon: '⚡', desc: 'Next-generation ES module bundler and ultra-fast dev server' },
             { name: 'Tailwind CSS', version: '3.4', url: 'https://tailwindcss.com', icon: '🎨', desc: 'Utility-first styling with custom dark-mode & glassmorphism' },
             { name: 'Lucide React', version: '0.344', url: 'https://lucide.dev', icon: '✨', desc: 'Comprehensive, accessible SVG iconography' },
@@ -52,7 +52,7 @@ const techStack = [
         color: 'from-amber-500 to-orange-500',
         items: [
             { name: 'PostgreSQL', url: 'https://www.postgresql.org', icon: '🐘', desc: 'Enterprise ACID-compliant relational SQL database' },
-            { name: 'Prisma ORM', version: '5.22', url: 'https://www.prisma.io', icon: '💎', desc: 'Type-safe database client, schema migrations & connection pooling' },
+            { name: 'Prisma ORM', version: '7.4.0', url: 'https://www.prisma.io', icon: '💎', desc: 'Type-safe database client, schema migrations & connection pooling' },
             { name: 'SQLite / Better-SQLite3', url: 'https://github.com/WiseLibs/better-sqlite3', icon: '📦', desc: 'High-speed embedded database engine for offline/local field deployments' },
         ]
     },
@@ -63,7 +63,7 @@ const techStack = [
         items: [
             { name: 'KoboToolbox API', url: 'https://www.kobotoolbox.org', icon: '📋', desc: 'Open-source field survey sync connector for sample collection intake' },
             { name: 'PapaParse', version: '5.5', url: 'https://www.papaparse.com', icon: '📄', desc: 'High-speed CSV batch parser for soil analytical datasets' },
-            { name: 'SheetJS (xlsx)', version: '0.18', url: 'https://sheetjs.com', icon: '📊', desc: 'Excel spreadsheet generation, batch export, and matrix parsing' },
+            { name: 'SheetJS (xlsx)', version: '0.20.3', url: 'https://sheetjs.com', icon: '📊', desc: 'Excel spreadsheet generation, batch export, and matrix parsing' },
             { name: 'jsPDF & AutoTable', version: '4.0', url: 'https://github.com/parallax/jsPDF', icon: '📑', desc: 'Automated ISO-compliant Certificate of Analysis PDF generation' },
             { name: 'html5-qrcode', url: 'https://github.com/mebjas/html5-qrcode', icon: '📷', desc: 'Camera barcode and QR code scanner for sample tube intake' },
         ]
@@ -82,6 +82,27 @@ const techStack = [
 ];
 
 const changelog = [
+    {
+        version: 'v1.12.0',
+        date: 'October 24, 2026',
+        tag: 'Installation and Access Updates',
+        badgeColor: 'bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300 border-blue-300 dark:border-blue-800',
+        changes: [
+            'Laboratory access checks cover operational routes, with safer installation and initial-password defaults.',
+            'Account sign-in uses durable backoff and configurable password rules.',
+            'Browser scripts use a tighter policy, and WebSocket credentials travel in the upgrade header.',
+        ],
+    },
+    {
+        version: 'v1.11.0',
+        date: 'October 22, 2026',
+        tag: 'Image Access and Library Updates',
+        badgeColor: 'bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300 border-blue-300 dark:border-blue-800',
+        changes: [
+            'Field and intake photographs use scoped viewing links while preserving recorded photo paths.',
+            'Production libraries are refreshed for navigation, spreadsheet import/export and database access.',
+        ],
+    },
     {
         version: 'v1.10.3',
         date: 'October 20, 2026',

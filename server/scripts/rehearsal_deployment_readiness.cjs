@@ -1409,6 +1409,9 @@ async function runSuite() {
          const db=new Database(dbPath,{readonly:true,fileMustExist:true});
          try { const tables=['Sample','Result','WorkAttempt','AuditLog','QcMeasurement','QcEvaluation','BatchDisposition'];
            const names=[...tables,'_schema_migrations'],quote=name=>'"'+name.replaceAll('"','""')+'"';
+           if(db.prepare("SELECT count(*) n FROM sqlite_master WHERE name='AuthLoginState'").get().n||
+             db.prepare("SELECT count(*) n FROM _schema_migrations WHERE id='338_signin_protection'").get().n)
+             throw Error('338 rehearsal requires the unchanged pre-sign-in predecessor');
            console.log(JSON.stringify({dry,
              locationColumns:db.prepare('PRAGMA table_info("InventoryLocation")').all(),locationRows:db.prepare('SELECT * FROM InventoryLocation ORDER BY rowid').all(),
              columns:Object.fromEntries(names.map(name=>[name,db.prepare('PRAGMA table_xinfo('+quote(name)+')').all()])),
@@ -1518,17 +1521,24 @@ async function runSuite() {
          const custodyReady=custodyOwner.assertSampleCustodyStartupReady(dbPath),custodyAgain=custodyOwner.installSampleCustody({dbPath,apply:true});
          if(custodyReady.classification!=='COMPLETE_207'||custodyReady.totalChanges!==0||custodyAgain.mode!=='NO_OP'||custodyAgain.totalChanges!==0||hashFiles()!==custodyBefore)
            throw Error('207 startup or direct-module repeat changed bytes');
+         const signInBefore=hashFiles(),signInOwner=require('./scripts/install_signin_protection');
+         const signInReady=signInOwner.assertSignInStartupReady(dbPath),signInAgain=signInOwner.installSignInProtection({dbPath,apply:true});
+         if(signInReady.classification!=='COMPLETE_338'||signInReady.totalChanges!==0||signInAgain.mode!=='NO_OP'||
+           signInAgain.totalChanges!==0||!signInReady.receipt.originalRowsPreserved||signInReady.receipt.backfilledCount!==0||
+           signInReady.sources.migrationSha256!==require('./services/signinMigrationSource').loadSignInMigrationSource().sha256||hashFiles()!==signInBefore)
+           throw Error('338 startup or direct-module repeat changed bytes or provenance');
          const db=new Database(dbPath,{readonly:true,fileMustExist:true});
          try { const tables=['Sample','Result','WorkAttempt','AuditLog','QcMeasurement','QcEvaluation','BatchDisposition'];
+           if(db.prepare('SELECT count(*) n FROM AuthLoginState').get().n!==0)throw Error('338 startup created sign-in attempts');
            if(db.pragma('integrity_check',{simple:true})!=='ok'||db.pragma('foreign_key_check').length)throw Error('199 integrity differs');
            for(const table of ['CalcTemplateActivation','CalibrationCurve','CalibrationPoint','ResultCalculation'])
              if(db.prepare('SELECT count(*) n FROM "'+table+'"').get().n!==0)throw Error('199 startup activated or backfilled calculations');
            const quote=name=>'"'+name.replaceAll('"','""')+'"',originalRows={};
-           for(const {name}of db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name <> 'CustodyEvent' ORDER BY name").all()){
+           for(const {name}of db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name NOT IN ('CustodyEvent','AuthLoginState') ORDER BY name").all()){
              const columns=db.prepare('PRAGMA table_info('+quote(name)+')').all().map(row=>row.name)
                .filter(column=>!(name==='Sample'&&column==='retainUntil'||name==='InventoryLocation'&&column==='purpose'));
              const selected=columns.map(quote).join(','),digest=crypto.createHash('sha256');
-             for(const row of db.prepare('SELECT '+selected+' FROM '+quote(name)+(name==='_schema_migrations'?' WHERE id <> ?':'')+' ORDER BY '+selected).iterate(...(name==='_schema_migrations'?['207_sample_custody']:[])))digest.update(JSON.stringify(row)+'\\n');
+             for(const row of db.prepare('SELECT '+selected+' FROM '+quote(name)+(name==='_schema_migrations'?' WHERE id NOT IN (?,?)':'')+' ORDER BY '+selected).iterate(...(name==='_schema_migrations'?['207_sample_custody','338_signin_protection']:[])))digest.update(JSON.stringify(row)+'\\n');
              originalRows[name]=digest.digest('hex');
            }
            const names=[...tables,'_schema_migrations'];
@@ -1536,6 +1546,7 @@ async function runSuite() {
              columns:Object.fromEntries(names.map(name=>[name,db.prepare('PRAGMA table_xinfo('+quote(name)+')').all()])),
              schemas:Object.fromEntries(names.map(name=>[name,db.prepare('SELECT sql FROM sqlite_master WHERE name=?').get(name).sql])),
              locationColumns:db.prepare('PRAGMA table_info("InventoryLocation")').all(),locationRows:db.prepare('SELECT * FROM InventoryLocation ORDER BY rowid').all(),
+             signIn:{ready:signInReady,again:signInAgain,emptyState:true,dbWalShmPreserved:true},
              custody:{ready:custodyReady,again:custodyAgain,dbWalShmPreserved:true,sourceSha256:require('./services/custodyMigrationSource').loadCustodyMigrationSource().sha256,
                ledgerCount:db.prepare('SELECT count(*) n FROM CustodyEvent').get().n,originalRowsSha256:crypto.createHash('sha256').update(JSON.stringify(originalRows)).digest('hex')},
              rows:Object.fromEntries(tables.map(name=>[name,db.prepare('SELECT * FROM "'+name+'" ORDER BY rowid').all()])),
@@ -1546,7 +1557,7 @@ async function runSuite() {
     assertCalculationPredecessorPreserved(calculationBefore, calculationAfter);
     console.log('  ✓ calculation-default-entrypoint-pre199: PRE_199 → shipped default docker-entrypoint.sh → COMPLETE; inactive references 11, activations/backfill 0; retained evidence preserved; direct installer-module repeat NO_OP writes 0');
     console.log(JSON.stringify({calculationEntrypointProof:{scenario:'calculation-default-entrypoint-pre199',repeatInvocation:'direct installer module (not a second entrypoint run)',dry:calculationBefore.dry,ready:calculationAfter.ready,
-        again:calculationAfter.again,retainedRowsAndReceiptBytesPreserved:true,noOpBytesPreserved:calculationAfter.noOpBytesPreserved,custody:calculationAfter.custody}}));
+        again:calculationAfter.again,retainedRowsAndReceiptBytesPreserved:true,noOpBytesPreserved:calculationAfter.noOpBytesPreserved,custody:calculationAfter.custody,signIn:calculationAfter.signIn}}));
     if(!calculationStartupLog.includes('Installing immutable amendment requests, attempt links and report withdrawals')||
         !calculationStartupLog.includes('"previousClassification": "PRE_210"')||!calculationStartupLog.includes('AMENDMENT_STARTUP_READY'))
         throw Error('210 default-entrypoint installation proof missing');
