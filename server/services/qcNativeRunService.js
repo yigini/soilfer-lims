@@ -1,3 +1,4 @@
+const { isRootClient } = require('../utils/prismaClientIdentity');
 const { randomUUID } = require('node:crypto');
 const { withQcAudit, auditRunCommand } = require('./qcRunAuditService');
 const { hasPermission } = require('../config/roles');
@@ -39,7 +40,7 @@ async function nextOrdinal(db, labId, analysisCode, methodologyId) {
     return prior + 1;
 }
 async function transaction(db, execute) {
-    try { return typeof db.$transaction === 'function' ? await db.$transaction(execute) : await execute(db); }
+    try { return isRootClient(db) ? await db.$transaction(execute) : await execute(db); }
     catch (cause) {
         if (['P2002', 'P2034', 'P1008', 'SQLITE_BUSY', 'SQLITE_LOCKED'].includes(cause.code) || /database is (?:locked|busy)/i.test(cause.message)) {
             throw error(409, 'QC_SEQUENCE_STALE', 'The run or ordinal changed. Reload before retrying.');

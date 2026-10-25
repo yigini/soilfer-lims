@@ -1,3 +1,4 @@
+const { isRootClient } = require('../utils/prismaClientIdentity');
 const policyService = require('./policyService');
 const { valid } = require('../config/policyRegistry');
 const { publicationYear } = require('./reportNumberService');
@@ -42,7 +43,7 @@ async function codePolicy(labReference, projectCode, db) {
     return { lab, format, reset };
 }
 async function allocateSampleCode(tx, { labReference, projectCode, issuedAt = new Date() }) {
-    if (!tx || typeof tx.$transaction === 'function') throw conflict('SAMPLE_CODE_TRANSACTION_REQUIRED', 'Sample numbers must be allocated inside the intake transaction.');
+    if (!tx || isRootClient(tx)) throw conflict('SAMPLE_CODE_TRANSACTION_REQUIRED', 'Sample numbers must be allocated inside the intake transaction.');
     const { lab, format, reset } = await codePolicy(labReference, projectCode, tx);
     const year = publicationYear(issuedAt, lab.timezone), sequenceYear = reset === 'NEVER' ? 0 : year;
     await tx.$executeRaw`INSERT INTO "LabSequence" ("labId", "scope", "year", "next") VALUES (${lab.id}, 'SAMPLE', ${sequenceYear}, 1) ON CONFLICT ("labId", "scope", "year") DO NOTHING`;
@@ -59,7 +60,7 @@ async function allocateSampleCode(tx, { labReference, projectCode, issuedAt = ne
 }
 // Uses its own additive counter and LAB policy; sample numbering is unaffected.
 async function allocateContainerCode(tx, { labReference, projectCode, issuedAt = new Date() }) {
-    if (!tx || typeof tx.$transaction === 'function') throw conflict('SAMPLE_CODE_TRANSACTION_REQUIRED', 'Container numbers require a transaction.');
+    if (!tx || isRootClient(tx)) throw conflict('SAMPLE_CODE_TRANSACTION_REQUIRED', 'Container numbers require a transaction.');
     const lab = await policyService.resolveLab(labReference, tx);
     if (!lab?.isActive) throw conflict('SAMPLE_CODE_LAB_REQUIRED', 'An active registered laboratory is required.');
     const snapshot = await policyService.snapshot(lab.id, { db: tx });

@@ -1,3 +1,4 @@
+const { isRootClient } = require('../utils/prismaClientIdentity');
 const crypto = require('crypto');
 const { prepareIntake } = require('./intakePreparationService');
 const { LOCKED_INTAKE_STATUSES } = require('./intakeValidationService');
@@ -9,7 +10,7 @@ const profileIdentity = require('./profileIdentityService');
 const scopeGuard = require('../utils/scopeGuard');
 
 function requireTransaction(tx) {
-    if (!tx || typeof tx.$transaction === 'function') throw new IntakeError(409, { code: 'INTAKE_TRANSACTION_REQUIRED', message: 'Intake requires the caller transaction.' });
+    if (!tx || isRootClient(tx)) throw new IntakeError(409, { code: 'INTAKE_TRANSACTION_REQUIRED', message: 'Intake requires the caller transaction.' });
 }
 async function commitPrepared(tx, plan, { consumeApproval = true } = {}) {
     requireTransaction(tx);

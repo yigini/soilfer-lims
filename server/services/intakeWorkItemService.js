@@ -1,3 +1,4 @@
+const { isRootClient } = require('../utils/prismaClientIdentity');
 const crypto = require('crypto');
 const { normalizeAnalysisCodes } = require('./analysisCodesService');
 const { resolveDefaultSelections } = require('./methodResolution');
@@ -23,7 +24,7 @@ async function planForSample(db, sample) {
     return { codes, methods, existingCodes, metadata };
 }
 async function generate(tx, sample, plan, actor = 'system:intake-work-generation') {
-    if (!tx || typeof tx.$transaction === 'function') throw new IntakeError(409, { code: 'INTAKE_TRANSACTION_REQUIRED', message: 'Work generation requires an intake transaction.' });
+    if (!tx || isRootClient(tx)) throw new IntakeError(409, { code: 'INTAKE_TRANSACTION_REQUIRED', message: 'Work generation requires an intake transaction.' });
     sample = await tx.sample.findUnique({ where: { id: String(sample.id) } });
     if (!sample) throw new rules.TransitionError('Sample not found.', 404, 'SAMPLE_NOT_FOUND');
     rules.assertScope(actor, sample);

@@ -210,9 +210,9 @@ function verifyRemediation(name, condition, detail) {
     verifyRemediation('Request-time initialization preserves populated prior journal (non-destructive)', retainedCount === 1, { retainedCount });
 
     // Extra: Real Prisma Client Validation with translated where clause
-    const { PrismaClient } = req('./prisma_client');
+    const { createRootClient } = req('./utils/prismaClientIdentity');
     const { PrismaBetterSqlite3 } = req('@prisma/adapter-better-sqlite3');
-    const realPrisma = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: 'file::memory:' }) });
+    const realPrisma = createRootClient({ adapter: new PrismaBetterSqlite3({ url: 'file::memory:' }) });
     try {
         const spectralWhere = policy.toPrismaSpectralWhere({
             ...policy.buildSpectralWhere(authA, {}),

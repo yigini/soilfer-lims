@@ -1,7 +1,7 @@
 const fs = require('node:fs'), path = require('node:path');
 const { randomUUID, createHash } = require('node:crypto');
 const Database = require('better-sqlite3');
-const { PrismaClient } = require('../../prisma_client');
+const { createRootClient } = require('../../utils/prismaClientIdentity');
 const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
 const { beforeGuards } = require('../helpers/legacyWorkflowDatabase');
 const { assertOwnedTestDatabase } = require('../helpers/testOwnedDatabase');
@@ -18,7 +18,7 @@ async function fixture({ omittedAnalysis = null, conflict = null } = {}) {
     const file = assertOwnedTestDatabase(path.join(directory, `audit_legacy_calc_refs_${randomUUID()}.db`), 'system:fixture'); files.push(file);
     beforeGuards({ actor: 'system:fixture', file, qcBootstrap: 'CREATE_PRISMA' });
     require('../../scripts/install_workflow_state_guards').installWorkflowStateGuards({ dbPath: file, apply: true });
-    const client = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${file}` }) });
+    const client = createRootClient({ adapter: new PrismaBetterSqlite3({ url: `file:${file}` }) });
     try {
         // All fixture rows are inserted on a newly owned real Prisma schema.
         // Existing catalogue rows are never updated to prepare a test condition.

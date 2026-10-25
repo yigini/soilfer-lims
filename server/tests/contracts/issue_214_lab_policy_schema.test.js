@@ -108,8 +108,8 @@ test('empty installed tables resolve shipped Strict/chart/minimum20 through the 
     expect(db.prepare('SELECT count(*) n FROM LabPolicyOverride').get().n).toBe(0);
     db.exec('DROP TABLE LabPolicyOverride; DROP TABLE LabPolicy'); db.close();
     installLabPolicySchema({ dbPath: target, apply: true });
-    const { PrismaClient } = require('../../prisma_client'), { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
-    const prisma = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: 'file:' + target }) });
+    const { createRootClient } = require('../../utils/prismaClientIdentity'), { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
+    const prisma = createRootClient({ adapter: new PrismaBetterSqlite3({ url: 'file:' + target }) });
     try {
         const lab = await prisma.lab.create({ data: { id: randomUUID(), name: 'No policy row', country: 'TEST', code: randomUUID() } });
         const policy = require('../../services/policyService'), context = { db: prisma, profile: {} };

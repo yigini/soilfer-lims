@@ -1,6 +1,6 @@
 const fs=require('node:fs'),path=require('node:path'),{randomUUID,createHash}=require('node:crypto');
 const Database=require('better-sqlite3');
-const {PrismaClient}=require('../../prisma_client');
+const { createRootClient } = require('../../utils/prismaClientIdentity');
 const {PrismaBetterSqlite3}=require('@prisma/adapter-better-sqlite3');
 const {beforeGuards}=require('../helpers/legacyWorkflowDatabase');
 const {assertOwnedTestDatabase}=require('../helpers/testOwnedDatabase');
@@ -16,7 +16,7 @@ async function fixture(){
  const directory=path.resolve(__dirname,'../.tmp');fs.mkdirSync(directory,{recursive:true});
  const file=assertOwnedTestDatabase(path.join(directory,'audit_legacy_amendment_'+randomUUID()+'.db'),'system:fixture');files.push(file);
  beforeGuards({actor:'system:fixture',file,qcBootstrap:'CREATE_PRISMA'});
- const client=new PrismaClient({adapter:new PrismaBetterSqlite3({url:'file:'+file})});
+ const client=createRootClient({adapter:new PrismaBetterSqlite3({url:'file:'+file})});
  try{
   const sample=await createSampleFixture(client,{data:{id:randomUUID(),originalId:randomUUID(),status:'APPROVED'}});
   await client.sampleAmendment.create({data:{id:'legacy-'+randomUUID(),sampleId:sample.id,type:'CLERICAL',status:'APPROVED',

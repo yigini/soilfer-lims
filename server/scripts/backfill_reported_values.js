@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 const path = require('node:path');
 const { createHash } = require('node:crypto');
-const { PrismaClient } = require('../prisma_client');
+const { createRootClient } = require('../utils/prismaClientIdentity');
 const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
 const rules = require('../services/workflowStateRules');
 const { hasPermission } = require('../config/roles');
@@ -87,7 +87,7 @@ function connection(dbPath,readonly) {
     class BackfillAdapter extends PrismaBetterSqlite3 {
         async connect() { const adapter = await super.connect(); adapter.client.pragma('foreign_keys=ON'); return adapter; }
     }
-    return new PrismaClient({ adapter:new BackfillAdapter({ url:'file:'+dbPath, readonly, fileMustExist:true, timeout:5000 }) });
+    return createRootClient({ adapter:new BackfillAdapter({ url:'file:'+dbPath, readonly, fileMustExist:true, timeout:5000 }) });
 }
 async function backfillReportedValues({ dbPath, by, apply = false, planSha256 = null } = {}) {
     if (typeof dbPath !== 'string' || !dbPath.trim()) throw fail('REPORTED_VALUE_DATABASE_REQUIRED','An explicit database path is required.');

@@ -1,6 +1,6 @@
 const fs=require('node:fs'),path=require('node:path'),Database=require('better-sqlite3');
 const {randomUUID,createHash}=require('node:crypto');
-const {PrismaClient}=require('../../prisma_client');
+const { createRootClient } = require('../../utils/prismaClientIdentity');
 const {PrismaBetterSqlite3}=require('@prisma/adapter-better-sqlite3');
 const {createPre190AttemptFixture}=require('../helpers/workAttemptHistoricalFixtures');
 const {rejectedGuardWrite}=require('../helpers/rejectedGuardWrite');
@@ -36,7 +36,7 @@ async function guarded({items=[itemRow('item'),itemRow('other','Q'),itemRow('ano
         const shape=new Database(file);shape.exec(modelColumns.schemaSql);shape.close();
     }
     require('../helpers/custodyFixtureSchema').extendHistoricalCustodyFixture(file);
-    db=new Database(file);db.pragma('foreign_keys=ON');client=new PrismaClient({adapter:new PrismaBetterSqlite3({url:'file:'+file})});
+    db=new Database(file);db.pragma('foreign_keys=ON');client=createRootClient({adapter:new PrismaBetterSqlite3({url:'file:'+file})});
 }
 afterEach(async()=>{
     jest.restoreAllMocks();

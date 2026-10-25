@@ -1,3 +1,4 @@
+const { isRootClient } = require('../utils/prismaClientIdentity');
 const { randomUUID } = require('node:crypto');
 const workflow = require('../workflowContract');
 const { hasPermission } = require('../config/roles');
@@ -54,7 +55,7 @@ async function appendEvent(tx, result, gate, eventType, reason, actor) {
 
 /** Called inside the gate-revert transaction before the DONE flag changes. */
 async function recordPreparationRevert(tx, sample, gate, reason, actor) {
-    if (!tx || typeof tx.$transaction === 'function') {
+    if (!tx || isRootClient(tx)) {
         throw new TransitionError('Preparation evidence requires the gate-revert transaction.', 409, 'EVIDENCE_TRANSACTION_REQUIRED');
     }
     assertGate(gate);

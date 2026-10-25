@@ -4,7 +4,7 @@ const app = require('../../app');
 const prisma = require('../../prisma');
 const getAuthToken = (...args) => createAuthTokenFixture(prisma, ...args);
 const { resolveCoordinates } = require('../../utils/coordinateResolver');
-const { PrismaClient } = require('../../prisma_client');
+const { createRootClient } = require('../../utils/prismaClientIdentity');
 const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
 const { beforeGuards, useLegacyRouteDatabase } = require('../helpers/legacyWorkflowDatabase');
 
@@ -27,7 +27,7 @@ describe('Reception Post-Release Corrections: Lifecycle Safety, Context & Dashbo
                 receptionDate: new Date(), createdAt: timestamp, updatedAt: timestamp };
         });
         rehearsal = beforeGuards({ actor: 'system:fixture', samples });
-        client = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${rehearsal.file}` }) });
+        client = createRootClient({ adapter: new PrismaBetterSqlite3({ url: `file:${rehearsal.file}` }) });
         useLegacyRouteDatabase(prisma, client, { allModels: true });
         // Ensure test labs exist
         await prisma.lab.upsert({

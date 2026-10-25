@@ -3,7 +3,7 @@ const { createResultFixture } = require('../../services/resultWriteService');
 const fs = require('node:fs');
 const path = require('node:path');
 const { randomUUID } = require('node:crypto');
-const { PrismaClient } = require('../../prisma_client');
+const { createRootClient } = require('../../utils/prismaClientIdentity');
 const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
 const samples = require('../../services/sampleStateService');
 const work = require('../../services/workItemStateService');
@@ -92,7 +92,7 @@ beforeAll(async () => {
             history, updatedAt: now, createdAt: now })),
         workItems: [{ id: 'legacy-pending', sampleId: 'legacy-collected', analysis: 'PH_H2O', status: 'PENDING', updatedAt: now, createdAt: now }]
     }).file;
-    client = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${databasePath}` }) });
+    client = createRootClient({ adapter: new PrismaBetterSqlite3({ url: `file:${databasePath}` }) });
     await client.lab.create({ data: { id: manager.labId, code: manager.labId, name: 'Isolated workflow laboratory', country: 'TEST' } });
     for (const user of [manager, technician]) await client.user.create({ data: { id: user.username, username: user.username,
         email: `${user.username}@example.test`, password: 'isolated-fixture', role: user.role, labId: user.labId } });

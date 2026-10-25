@@ -1,7 +1,7 @@
 const fs = require('node:fs'), path = require('node:path'), { randomUUID, createHash } = require('node:crypto');
 const Database = require('better-sqlite3');
 const { spawnSync } = require('node:child_process');
-const { PrismaClient } = require('../../prisma_client');
+const { createRootClient } = require('../../utils/prismaClientIdentity');
 const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
 const { createPre201CrossCheckFixture } = require('../helpers/crossCheckHistoricalFixture');
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
@@ -21,7 +21,7 @@ async function fixture() {
     const orderShape = new Database(file);
     try { orderShape.exec(orderSource.schemaSql); } finally { orderShape.close(); }
     require('../helpers/custodyFixtureSchema').extendHistoricalCustodyFixture(file);
-    const db = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: 'file:' + file }) });
+    const db = createRootClient({ adapter: new PrismaBetterSqlite3({ url: 'file:' + file }) });
     const labId = 'cross-lab-' + randomUUID();
     let sample;
     try {

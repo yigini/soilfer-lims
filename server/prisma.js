@@ -1,4 +1,4 @@
-const { PrismaClient } = require('./prisma_client');
+const { createRootClient } = require('./utils/prismaClientIdentity');
 const path = require('path');
 const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
 const Database = require('better-sqlite3');
@@ -58,6 +58,6 @@ class ExchangePrismaBetterSqlite3 extends PrismaBetterSqlite3 {
 }
 
 const adapter = new ExchangePrismaBetterSqlite3({ url: `file:${dbPath}`, timeout: 5000 });
-const prisma = new PrismaClient({ adapter });
+const prisma = createRootClient({ adapter });
 
 module.exports = prisma;

@@ -1,3 +1,4 @@
+const { isRootClient } = require('../utils/prismaClientIdentity');
 const { randomUUID } = require('node:crypto');
 const workflow = require('../workflowContract');
 const { hasPermission } = require('../config/roles');
@@ -83,7 +84,7 @@ async function changeGate({ sampleId, gate, status, reason, actor, resumeSampleS
 
 /** A manager RETURN already performed the review CAS in this transaction. */
 async function resetReviewedGate(item, actor, reason, tx) {
-    if (!tx || typeof tx.$transaction === 'function') throw new TransitionError('Gate review requires its review transaction.', 409, 'EVIDENCE_TRANSACTION_REQUIRED');
+    if (!tx || isRootClient(tx)) throw new TransitionError('Gate review requires its review transaction.', 409, 'EVIDENCE_TRANSACTION_REQUIRED');
     if (!hasPermission(actor, 'APPROVE_RESULTS')) throw new TransitionError('Manager review permission required.', 403, 'OPERATIONAL_PERMISSION_DENIED');
     const field = evidence.GATE_FIELDS[item.analysis];
     if (!field) throw new TransitionError('Unknown operational gate.', 400, 'INVALID_PREPARATION_GATE');

@@ -2,7 +2,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { randomUUID, createHash } = require('node:crypto');
 const Database = require('better-sqlite3');
-const { PrismaClient } = require('../../prisma_client');
+const { createRootClient } = require('../../utils/prismaClientIdentity');
 const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
 const { beforeGuards } = require('../helpers/legacyWorkflowDatabase');
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
@@ -33,7 +33,7 @@ async function fixture(criteria = {}, { mode = 'ADVISORY', start = true } = {}) 
         require(`../../scripts/install_${script}`)[installer]({ dbPath: file, apply: true });
     }
     require('../helpers/custodyFixtureSchema').extendHistoricalCustodyFixture(file);
-    const db = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${file}` }) }); resource.db = db;
+    const db = createRootClient({ adapter: new PrismaBetterSqlite3({ url: `file:${file}` }) }); resource.db = db;
     const actor = { username, role: 'SUPER_ADMIN', labId };
     await db.unit.create({ data: { code: 'preview-unit', display: 'Preview unit', quantityKind: 'MASS_FRACTION', factorToBase: 1 } });
     await db.analysis.create({ data: { code: analysisCode, name: 'Preview analysis', unitCode: 'preview-unit' } });

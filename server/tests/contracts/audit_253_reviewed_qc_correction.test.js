@@ -222,7 +222,7 @@ test('compatibility replay retains required counts when the current run profile 
 
 test('real legacy-imported NULL authors and historical snapshots stay locked without inventing authors or criteria', async () => {
     const fs = require('node:fs'), path = require('node:path'), Database = require('better-sqlite3');
-    const { PrismaClient } = require('../../prisma_client'), { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
+    const { createRootClient } = require('../../utils/prismaClientIdentity'), { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
     const labId = randomUUID(), batchId = randomUUID(), analysis = `LEGACY-${randomUUID()}`, username = `legacy-reviewer-${randomUUID()}`, userId = randomUUID();
     const failed = value => ({ blanks: [{ value, status: 'FAIL', maxAllowed: 0.05 }], controls: [], duplicates: [], overallStatus: 'QC_FAIL', summary: {} });
     const historical = require('../helpers/legacyWorkflowDatabase').beforeGuards({ actor: 'system:fixture', schemaVariant: 'PRE_1_3_SAMPLE_CODES',
@@ -243,7 +243,7 @@ test('real legacy-imported NULL authors and historical snapshots stay locked wit
         const install = require(`../../scripts/${script}`)[installer], dry = install({ dbPath: historical.file });
         install({ dbPath: historical.file, apply: true, ...(script === 'install_qc_runs' && { planSha256: dry.backfillFingerprint }) });
     }
-    const db = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${historical.file}` }) });
+    const db = createRootClient({ adapter: new PrismaBetterSqlite3({ url: `file:${historical.file}` }) });
     owned.push({ close: async () => {
         await db.$disconnect();
         if (path.dirname(historical.file) !== path.resolve(__dirname, '../.tmp') || !path.basename(historical.file).startsWith('audit_legacy_')) throw Error('Only the owned retained fixture may be removed.');

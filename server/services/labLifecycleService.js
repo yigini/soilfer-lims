@@ -1,4 +1,5 @@
 'use strict';
+const { isRootClient } = require('../utils/prismaClientIdentity');
 
 const crypto = require('crypto');
 const prisma = require('../prisma');
@@ -79,9 +80,9 @@ async function getLabOperationalState(labId, tx = prisma) {
 async function getLabWorkspace(actor, labId, options = {}, tx = prisma) {
     let query = {};
     let transaction = prisma;
-    if (options && (typeof options.$transaction === 'function' || typeof options.$queryRawUnsafe === 'function')) {
+    if (options && (isRootClient(options) || typeof options.$queryRawUnsafe === 'function')) {
         transaction = options;
-    } else if (tx && (typeof tx.$transaction === 'function' || typeof tx.$queryRawUnsafe === 'function')) {
+    } else if (tx && (isRootClient(tx) || typeof tx.$queryRawUnsafe === 'function')) {
         query = options || {};
         transaction = tx;
     } else {

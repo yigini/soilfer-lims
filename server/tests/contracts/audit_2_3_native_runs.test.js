@@ -1,7 +1,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { randomUUID } = require('node:crypto');
-const { PrismaClient } = require('../../prisma_client');
+const { createRootClient } = require('../../utils/prismaClientIdentity');
 const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
 const Database = require('better-sqlite3');
 const { beforeGuards } = require('../helpers/legacyWorkflowDatabase');
@@ -79,7 +79,7 @@ async function fixture(count = 1, criteria = { crmEveryNBatches: 0 }, recordedAn
     require('../../scripts/install_result_equipment_evidence').installResultEquipmentEvidence({ dbPath: file, apply: true });
     installCalculationReleasePrerequisites(file);
     require('../helpers/custodyFixtureSchema').extendHistoricalCustodyFixture(file);
-    const db = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${file}` }) });
+    const db = createRootClient({ adapter: new PrismaBetterSqlite3({ url: `file:${file}` }) });
     ownedFile.db = db;
     await db.unit.create({ data: { code: 'fixture-unit', display: 'Fixture unit', quantityKind: 'MASS_FRACTION', factorToBase: 1 } });
     await db.analysis.create({ data: { code: analysisCode, name: 'Native fixture analyte', unitCode: 'fixture-unit' } });

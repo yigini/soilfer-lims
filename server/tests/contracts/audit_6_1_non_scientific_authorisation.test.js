@@ -1,6 +1,6 @@
 const fs=require('node:fs'),path=require('node:path'),{randomUUID}=require('node:crypto');
 const Database=require('better-sqlite3');
-const {PrismaClient}=require('../../prisma_client');
+const { createRootClient } = require('../../utils/prismaClientIdentity');
 const {PrismaBetterSqlite3}=require('@prisma/adapter-better-sqlite3');
 const {beforeGuards}=require('../helpers/legacyWorkflowDatabase');
 const {assertOwnedTestDatabase}=require('../helpers/testOwnedDatabase');
@@ -16,7 +16,7 @@ async function fixture(status='APPROVED',itemStatus='ACCEPTED'){
  const directory=path.resolve(__dirname,'../.tmp');fs.mkdirSync(directory,{recursive:true});
  const file=assertOwnedTestDatabase(path.join(directory,'audit_legacy_amendment_auth_'+randomUUID()+'.db'),'system:fixture'),f={file};owned.push(f);
  beforeGuards({actor:'system:fixture',file,qcBootstrap:'CREATE_PRISMA'});
- f.db=new PrismaClient({adapter:new PrismaBetterSqlite3({url:'file:'+file})});
+ f.db=createRootClient({adapter:new PrismaBetterSqlite3({url:'file:'+file})});
  f.labId='owned-lab-'+randomUUID();await f.db.lab.create({data:{id:f.labId,code:f.labId,name:'Owned amendment laboratory',country:'GTM'}});
  f.actor={username:'requester',name:'Request manager',role:'LAB_MANAGER',labId:f.labId};
  f.other={...f.actor,username:'authoriser',name:'Authorisation manager'};

@@ -1,4 +1,5 @@
 'use strict';
+const { isRootClient } = require('../utils/prismaClientIdentity');
 const { randomUUID } = require('node:crypto');
 const workflow = require('../workflowContract');
 const checklists = require('../data/operationalChecklists.json');
@@ -121,7 +122,7 @@ class OperationalConfirmationService {
                 targetResource: item.id, actor: actor.username, status: 'SUCCESS', outcome: { receipt, workItem: updatedItem, sample: updatedSample } });
             return { success: true, receipt, workItem: updatedItem, sample: updatedSample };
         });
-        if (typeof db.$transaction === 'function') broadcast(outcome.sample, actor, outcome.receipt.analysis, outcome.workItem.status, 'OPERATION_CONFIRMED');
+        if (isRootClient(db)) broadcast(outcome.sample, actor, outcome.receipt.analysis, outcome.workItem.status, 'OPERATION_CONFIRMED');
         return outcome;
     }
 
@@ -149,7 +150,7 @@ class OperationalConfirmationService {
             const updatedSample = await setGate(tx, sample, analysis, decision === 'ACCEPT' ? 'DONE' : 'PENDING', actor, note || 'Operational gate verified');
             return { success: true, decision, workItemId: item.id, sampleId: sample.id, analysis, status, sample: updatedSample };
         });
-        if (typeof db.$transaction === 'function') broadcast(outcome.sample, actor, outcome.analysis, outcome.status, 'OPERATION_VERIFIED');
+        if (isRootClient(db)) broadcast(outcome.sample, actor, outcome.analysis, outcome.status, 'OPERATION_VERIFIED');
         return outcome;
     }
 }

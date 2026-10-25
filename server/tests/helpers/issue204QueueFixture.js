@@ -1,7 +1,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { randomUUID } = require('node:crypto');
-const { PrismaClient } = require('../../prisma_client');
+const { createRootClient } = require('../../utils/prismaClientIdentity');
 const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
 const { createSampleFixture, createWorkItemFixture } = require('./workflowFixtures');
 const { beforeGuards } = require('./legacyWorkflowDatabase');
@@ -20,7 +20,7 @@ async function issue204QueueFixture(count, onDatabase) {
     try {
         beforeGuards({ actor: 'system:fixture', file, qcBootstrap: 'CREATE_PRISMA' });
         let queries = 0;
-        db = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${file}` }),
+        db = createRootClient({ adapter: new PrismaBetterSqlite3({ url: `file:${file}` }),
             log: [{ emit: 'event', level: 'query' }] });
         db.$on('query', () => { queries++; });
         onDatabase(db);

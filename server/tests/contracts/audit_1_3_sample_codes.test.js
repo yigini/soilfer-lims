@@ -217,10 +217,10 @@ describe('Audit 1.3: additive migration and idempotent back-fill', () => {
         } else {
             // This collision uses a post-#180 code, so central creation runs
             // against the fully guarded owned file, never raw SQL.
-            const { PrismaClient } = require('../../prisma_client');
+            const { createRootClient } = require('../../utils/prismaClientIdentity');
             const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
             require('../helpers/custodyFixtureSchema').extendHistoricalCustodyFixture(rehearsal.file);
-            const client = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${rehearsal.file}` }) });
+            const client = createRootClient({ adapter: new PrismaBetterSqlite3({ url: `file:${rehearsal.file}` }) });
             const previousPath = process.env.DATABASE_PATH, previousUrl = process.env.DATABASE_URL;
             process.env.DATABASE_PATH = rehearsal.file; process.env.DATABASE_URL = `file:${rehearsal.file}`;
             try { await createSampleFixture(client, { data: { id: 'duplicate', originalId: 'duplicate', labId: null,

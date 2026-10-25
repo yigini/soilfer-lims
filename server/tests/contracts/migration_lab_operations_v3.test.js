@@ -14,7 +14,7 @@ const path = require('path');
 const Database = require('better-sqlite3');
 const { spawnSync } = require('child_process');
 const { createHash } = require('node:crypto');
-const { PrismaClient } = require('../../prisma_client');
+const { createRootClient } = require('../../utils/prismaClientIdentity');
 const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
 const { beforeGuards } = require('../helpers/legacyWorkflowDatabase');
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
@@ -29,7 +29,7 @@ describe('Lab Operations v3 Database Migration & Reconciliation', () => {
             { id: 'SMP-WRONG-TEX-01', originalId: 'ORIG-SMP-WRONG-TEX-01', status: 'COMPLETED', labId: 'LAB-GTM', createdAt: now, updatedAt: now }
         ] });
         rehearsalDbPath = rehearsal.file;
-        client = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: 'file:' + rehearsalDbPath }) });
+        client = createRootClient({ adapter: new PrismaBetterSqlite3({ url: 'file:' + rehearsalDbPath }) });
         await createSampleFixture(client, { data: { id: 'MIG-SMP-001', originalId: 'ORIG-MIG-001', status: 'ACCEPTED', preparationStatus: 'DONE', dryingStatus: 'DONE' } });
         await client.user.create({ data: { id: 'usr-mig-mgr', username: 'mig_mgr', password: 'hash', email: 'mgr@example.test', role: 'LAB_MANAGER', name: 'Migration Manager' } });
         const db = new Database(rehearsalDbPath); db.pragma('foreign_keys = ON');

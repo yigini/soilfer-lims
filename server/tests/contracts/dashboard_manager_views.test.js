@@ -2,7 +2,7 @@ const { createSampleFixture, createWorkItemFixture, createSamplesFixture, create
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
-const { PrismaClient } = require('../../prisma_client');
+const { createRootClient } = require('../../utils/prismaClientIdentity');
 const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
 const { beforeGuards, useLegacyRouteDatabase } = require('../helpers/legacyWorkflowDatabase');
 
@@ -29,7 +29,7 @@ describe('Dashboard, Manager Task List & Field Registry Separation (#120)', () =
                 createdAt: timestamp, updatedAt: timestamp }
         ];
         rehearsal = beforeGuards({ actor: 'system:fixture', samples: historicalRows });
-        client = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${rehearsal.file}` }) });
+        client = createRootClient({ adapter: new PrismaBetterSqlite3({ url: `file:${rehearsal.file}` }) });
         useLegacyRouteDatabase(prisma, client, { allModels: true });
         sampleRejectedA = await prisma.sample.findUnique({ where: { id: historicalRows[0].id } });
         sampleCollectedA = await prisma.sample.findUnique({ where: { id: historicalRows[1].id } });
