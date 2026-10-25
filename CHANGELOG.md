@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.12.1] - 2026-10-25
+
+### Fixed
+- Keep transaction-client checks independent of Prisma capabilities while preserving transaction reuse and QC audit collection (#332).
+
 ## [1.12.0] - 2026-10-24
 
 ### Changed
