@@ -12,7 +12,7 @@ describe('Help System Full Acceptance & Release Verification', () => {
     );
 
     test('1. Every article is present with revision 1 and validated locale entries', async () => {
-        expect(rawContent.articles.length).toBe(113);
+        expect(rawContent.articles.length).toBe(114);
         for (const art of rawContent.articles) {
             const dbArt = await prisma.helpArticle.findUnique({
                 where: { id: art.id },
@@ -119,7 +119,7 @@ describe('Help System Full Acceptance & Release Verification', () => {
             expect(fs.existsSync(filePath)).toBe(true);
             const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
             expect(data.articles).toBeDefined();
-            expect(data.articles.length).toBe(113);
+            expect(data.articles.length).toBe(114);
             for (const a of data.articles) {
                 expect(a.id).toBeDefined();
                 expect(a.title).toBeDefined();
