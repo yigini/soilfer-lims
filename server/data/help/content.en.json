@@ -340,7 +340,7 @@
               "expected": "The Security Update Required dialog opens immediately and asks you to establish a private password before accessing any laboratory screens."
             },
             {
-              "action": "Enter your Current Temporary Password, type a New Private Password of at least 12 characters, confirm the new password, and click Update Password & Continue.",
+              "action": "Enter your Current Temporary Password, type a New Private Password of at least 12 characters, confirm the new password, and click Update & Access System.",
               "expected": "A Password Changed confirmation appears; click Log In Again and sign in with your new personal password."
             }
           ]
@@ -394,7 +394,7 @@
       ],
       "steps": [
         "Open the sign-in screen (/login), enter your Username or ID and your temporary password, and click Secure Sign In. (Expected: The Security Update Required dialog opens immediately and asks you to establish a private password before accessing any laboratory screens.)",
-        "Enter your Current Temporary Password, type a New Private Password of at least 12 characters, confirm the new password, and click Update Password & Continue. (Expected: A Password Changed confirmation appears; click Log In Again and sign in with your new personal password.)",
+        "Enter your Current Temporary Password, type a New Private Password of at least 12 characters, confirm the new password, and click Update & Access System. (Expected: A Password Changed confirmation appears; click Log In Again and sign in with your new personal password.)",
         "If sign-in fails after several wrong attempts or you forget your password, wait a short time before trying again, or ask your Laboratory Manager to reset it in User Management (/users). (Expected: After a brief pause you can sign in again, or use the new temporary password from your administrator to set a new 12+ character password.)"
       ],
       "caution": "Caution: After several wrong attempts the account is paused for a short time. — Wait a short time before trying again, or ask your Laboratory Manager to reset your forgotten password in User Management (/users).",

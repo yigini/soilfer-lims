@@ -340,7 +340,7 @@
               "expected": "Se abre de inmediato la ventana de actualización obligatoria de seguridad para que definas una contraseña privada antes de acceder al sistema."
             },
             {
-              "action": "Introduce tu contraseña temporal actual, escribe una nueva contraseña privada de al menos 12 caracteres, confírmala y pulsa Actualizar contraseña y continuar.",
+              "action": "Introduce tu contraseña temporal actual, escribe una nueva contraseña privada de al menos 12 caracteres, confírmala y pulsa Actualizar y acceder al sistema.",
               "expected": "Aparece la confirmación de contraseña actualizada; vuelve a iniciar sesión con tu nueva contraseña personal."
             }
           ]
@@ -394,7 +394,7 @@
       ],
       "steps": [
         "Abre la pantalla de acceso (/login), introduce tu nombre de usuario y tu contraseña temporal, y pulsa Iniciar sesión. (Expected: Se abre de inmediato la ventana de actualización obligatoria de seguridad para que definas una contraseña privada antes de acceder al sistema.)",
-        "Introduce tu contraseña temporal actual, escribe una nueva contraseña privada de al menos 12 caracteres, confírmala y pulsa Actualizar contraseña y continuar. (Expected: Aparece la confirmación de contraseña actualizada; vuelve a iniciar sesión con tu nueva contraseña personal.)",
+        "Introduce tu contraseña temporal actual, escribe una nueva contraseña privada de al menos 12 caracteres, confírmala y pulsa Actualizar y acceder al sistema. (Expected: Aparece la confirmación de contraseña actualizada; vuelve a iniciar sesión con tu nueva contraseña personal.)",
         "Si el acceso falla tras varios intentos incorrectos o has olvidado tu contraseña, espera un breve tiempo antes de volver a intentarlo o pide a tu Responsable de Laboratorio que la restablezca en /users. (Expected: Tras una breve pausa puedes volver a iniciar sesión, o usar la nueva contraseña temporal del administrador para definir una contraseña de 12 o más caracteres.)"
       ],
       "caution": "Precaución: Tras varios intentos incorrectos la cuenta se pausa durante un breve tiempo. — Espera unos minutos antes de volver a intentarlo o solicita a tu Responsable de Laboratorio que restablezca la contraseña en /users.",

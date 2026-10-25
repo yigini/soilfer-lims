@@ -340,7 +340,7 @@
               "expected": "A janela de atualização obrigatória de segurança abre-se de imediato e pede para definir uma palavra-passe privada antes de aceder ao laboratório."
             },
             {
-              "action": "Introduza a palavra-passe temporária atual, escreva uma nova palavra-passe privada com pelo menos 12 caracteres, confirme-a e clique em Atualizar palavra-passe e continuar.",
+              "action": "Introduza a palavra-passe temporária atual, escreva uma nova palavra-passe privada com pelo menos 12 caracteres, confirme-a e clique em Atualizar e aceder ao sistema.",
               "expected": "Surge a confirmação de palavra-passe alterada; volte a iniciar sessão com a sua nova palavra-passe pessoal."
             }
           ]
@@ -394,7 +394,7 @@
       ],
       "steps": [
         "Abra o ecrã de início de sessão (/login), introduza o seu utilizador e a palavra-passe temporária, e clique em Entrar. (Expected: A janela de atualização obrigatória de segurança abre-se de imediato e pede para definir uma palavra-passe privada antes de aceder ao laboratório.)",
-        "Introduza a palavra-passe temporária atual, escreva uma nova palavra-passe privada com pelo menos 12 caracteres, confirme-a e clique em Atualizar palavra-passe e continuar. (Expected: Surge a confirmação de palavra-passe alterada; volte a iniciar sessão com a sua nova palavra-passe pessoal.)",
+        "Introduza a palavra-passe temporária atual, escreva uma nova palavra-passe privada com pelo menos 12 caracteres, confirme-a e clique em Atualizar e aceder ao sistema. (Expected: Surge a confirmação de palavra-passe alterada; volte a iniciar sessão com a sua nova palavra-passe pessoal.)",
         "Se o início de sessão falhar após várias tentativas incorretas ou se se esquecer da palavra-passe, aguarde um curto período antes de tentar novamente ou peça ao Gestor de Laboratório para a repor em /users. (Expected: Após uma breve pausa pode voltar a iniciar sessão, ou usar a nova palavra-passe temporária fornecida pelo administrador.)"
       ],
       "caution": "Atenção: Após várias tentativas incorretas a conta é pausada por um curto período. — Aguarde alguns instantes antes de tentar novamente ou peça ao Gestor de Laboratório para repor a palavra-passe em /users.",
