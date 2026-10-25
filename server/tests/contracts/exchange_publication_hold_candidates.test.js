@@ -1,5 +1,5 @@
 const Database = require('better-sqlite3');
-const { PrismaClient } = require('../../prisma_client');
+const { createRootClient } = require('../../utils/prismaClientIdentity');
 const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
 const { beforeGuards } = require('../helpers/legacyWorkflowDatabase');
 const { createSampleFixture } = require('../helpers/workflowFixtures');
@@ -11,7 +11,7 @@ describe('Narrow publication hold candidates preserve conservative exclusions', 
         const historical = rows.filter(row => row.status === 'RELEASED');
         rehearsal = beforeGuards({ actor: 'system:fixture', samples: historical.map(row => ({ ...row,
             originalId: row.id, createdAt: Date.UTC(2026, 9, 3), updatedAt: Date.UTC(2026, 9, 3) })) });
-        client = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${rehearsal.file}` }) });
+        client = createRootClient({ adapter: new PrismaBetterSqlite3({ url: `file:${rehearsal.file}` }) });
         for (const row of rows.filter(row => row.status !== 'RELEASED')) {
             await createSampleFixture(client, { data: { ...row, originalId: row.id,
                 approvedAt: row.approvedAt ? new Date(row.approvedAt) : null } });

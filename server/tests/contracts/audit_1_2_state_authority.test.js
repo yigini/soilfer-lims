@@ -3,7 +3,7 @@ const { createResultFixture } = require('../../services/resultWriteService');
 const fs = require('node:fs');
 const path = require('node:path');
 const { randomUUID } = require('node:crypto');
-const { PrismaClient } = require('../../prisma_client');
+const { createRootClient, registerRootClient } = require('../../utils/prismaClientIdentity');
 const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
 const samples = require('../../services/sampleStateService');
 const work = require('../../services/workItemStateService');
@@ -92,7 +92,7 @@ beforeAll(async () => {
             history, updatedAt: now, createdAt: now })),
         workItems: [{ id: 'legacy-pending', sampleId: 'legacy-collected', analysis: 'PH_H2O', status: 'PENDING', updatedAt: now, createdAt: now }]
     }).file;
-    client = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${databasePath}` }) });
+    client = createRootClient({ adapter: new PrismaBetterSqlite3({ url: `file:${databasePath}` }) });
     await client.lab.create({ data: { id: manager.labId, code: manager.labId, name: 'Isolated workflow laboratory', country: 'TEST' } });
     for (const user of [manager, technician]) await client.user.create({ data: { id: user.username, username: user.username,
         email: `${user.username}@example.test`, password: 'isolated-fixture', role: user.role, labId: user.labId } });
@@ -341,8 +341,8 @@ test('a failed gate-review evidence append rolls back the review CAS, review ide
     const { sample, item } = await fixture('PROCESSING', 'DRYING', 'SUBMITTED');
     await createResultFixture(client, { data: { id: id(), sampleId: sample.id, param: 'PH_H2O', value: '6.24', unit: 'pH' } });
     const before = await snapshot(sample.id), reason = 'Drying protocol requires repetition';
-    await expect(client.$transaction(tx => commitReview({ $transaction: callback => callback({ ...tx,
-        resultEvidenceEvent: { ...tx.resultEvidenceEvent, create: async () => { throw new Error('Injected evidence failure'); } } }) },
+    await expect(client.$transaction(tx => commitReview(registerRootClient({ $transaction: callback => callback({ ...tx,
+        resultEvidenceEvent: { ...tx.resultEvidenceEvent, create: async () => { throw new Error('Injected evidence failure'); } } }) }),
         item, 'REPEAT_REQUIRED', manager, { status: 'REPEAT_REQUIRED', history: JSON.stringify([{ status: 'REPEAT_REQUIRED', reason }]) },
         inner => gates.resetReviewedGate(item, manager, reason, inner), null, { reason }))).rejects.toThrow('Injected evidence failure');
     expect(await snapshot(sample.id)).toEqual(before);

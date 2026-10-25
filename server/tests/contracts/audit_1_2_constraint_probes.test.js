@@ -1,7 +1,7 @@
 const fs = require('node:fs');
 const { randomUUID } = require('node:crypto');
 const Database = require('better-sqlite3');
-const { PrismaClient } = require('../../prisma_client');
+const { createRootClient } = require('../../utils/prismaClientIdentity');
 const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
 const { beforeGuards } = require('../helpers/legacyWorkflowDatabase');
 const { rejectedGuardWrite } = require('../helpers/rejectedGuardWrite');
@@ -11,7 +11,7 @@ describe('Audit 1.2: exact SQLite constraint refusals preserve workflow evidence
     let file, client, sample, item, duplicate;
     beforeEach(async () => {
         ({ file } = beforeGuards({ actor: 'system:fixture' }));
-        client = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${file}` }) });
+        client = createRootClient({ adapter: new PrismaBetterSqlite3({ url: `file:${file}` }) });
         const id = randomUUID();
         sample = await createSampleFixture(client, { data: { id, originalId: id, status: 'PROCESSING' } });
         item = await createWorkItemFixture(client, { data: {

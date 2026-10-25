@@ -162,10 +162,10 @@ describe('Browser Journey Database Isolation & Refusal Contract', () => {
         const { runnerDir, dbPath } = createDisposableDatabase();
         const names = ['NODE_ENV', 'DATABASE_PATH', 'DATABASE_URL', 'PRODUCTION_DATABASE_PATH', 'ALLOW_WORKFLOW_FIXTURES'];
         const previous = Object.fromEntries(names.map(name => [name, process.env[name]]));
-        const { PrismaClient } = require('../../prisma_client');
+        const { createRootClient } = require('../../utils/prismaClientIdentity');
         const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
         const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
-        const fixtureDb = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${dbPath}` }) });
+        const fixtureDb = createRootClient({ adapter: new PrismaBetterSqlite3({ url: `file:${dbPath}` }) });
         try {
             process.env.NODE_ENV = 'production';
             process.env.DATABASE_PATH = dbPath; process.env.DATABASE_URL = `file:${dbPath}`;

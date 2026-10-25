@@ -1,7 +1,7 @@
 const fs = require('node:fs'), path = require('node:path');
 const { randomUUID, createHash } = require('node:crypto');
 const Database = require('better-sqlite3');
-const { PrismaClient } = require('../../prisma_client');
+const { createRootClient } = require('../../utils/prismaClientIdentity');
 const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
 const { beforeGuards } = require('../helpers/legacyWorkflowDatabase');
 const { assertOwnedTestDatabase } = require('../helpers/testOwnedDatabase');
@@ -37,7 +37,7 @@ async function freshFixture({ omittedUnit = null, emptyCatalogue = false, confli
     const file = assertOwnedTestDatabase(path.join(directory, `audit_legacy_calc_install_${randomUUID()}.db`), 'system:fixture'); files.push(file);
     // The existing owned CREATE_PRISMA authority executes the real current schema.
     beforeGuards({ actor: 'system:fixture', file, qcBootstrap: 'CREATE_PRISMA' });
-    const db = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${file}` }) });
+    const db = createRootClient({ adapter: new PrismaBetterSqlite3({ url: `file:${file}` }) });
     try {
         for (const row of UNITS.filter(unit => !emptyCatalogue && unit.code !== omittedUnit)) await db.unit.create({ data: { ...row,
             ...(row.code === conflictingUnit ? { factorToBase: row.factorToBase + 1 } : {}),
@@ -52,7 +52,7 @@ async function freshFixture({ omittedUnit = null, emptyCatalogue = false, confli
     return file;
 }
 async function curveContext(file) {
-    const db = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${file}` }) });
+    const db = createRootClient({ adapter: new PrismaBetterSqlite3({ url: `file:${file}` }) });
     try {
         const lab = await db.lab.create({ data: { id: randomUUID(), code: randomUUID(), name: 'Owned curve lab', country: 'ZZ' } });
         const user = await db.user.create({ data: { id: randomUUID(), username: randomUUID(), email: `${randomUUID()}@example.invalid`,
@@ -90,7 +90,7 @@ function insertCalculation(db, row) {
 async function correctionSqlFixture({ resultField, calculationField, noWitness = false, revisedCurve = false } = {}) {
     const file = await freshFixture(); installCalculationTemplates({ dbPath: file, apply: true });
     const curve = await curveContext(file);
-    const db = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${file}` }) });
+    const db = createRootClient({ adapter: new PrismaBetterSqlite3({ url: `file:${file}` }) });
     try {
         const manager = await db.user.findUnique({ where: { username: curve.recordedBy } });
         const source = referenceRows().find(row => row.analysisCode === 'P_OLSEN');
@@ -317,7 +317,7 @@ test('empty fresh catalogue installs schema with eleven deferred references, the
     expect(assertCalculationStartupReady(file)).toMatchObject({ ready: true, references: { deferredReferenceCount: 11 } });
     expect(installCalculationTemplates({ dbPath: file, apply: true })).toMatchObject({ mode: 'NO_OP', totalChanges: 0 });
     expect(snapshot(file)).toEqual(after); expect(hash(file)).toBe(installed);
-    const db = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${file}` }) });
+    const db = createRootClient({ adapter: new PrismaBetterSqlite3({ url: `file:${file}` }) });
     try {
         expect(await db.analysis.count()).toBe(0); expect(await db.unit.count()).toBe(0);
         await expect(activations.change(db, { username: 'owned-missing-reference-manager', role: 'LAB_MANAGER' },

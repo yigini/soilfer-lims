@@ -31,7 +31,7 @@ const crypto = require('crypto');
 const Database = require('better-sqlite3');
 const { createDisposableDatabase, cleanupDisposableDatabase } = require('./journey_db_isolation.cjs');
 const { createSampleFixture } = require('../tests/helpers/workflowFixtures');
-const { PrismaClient } = require('../prisma_client');
+const { createRootClient } = require('../utils/prismaClientIdentity');
 const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
 
 const serverDir = path.resolve(__dirname, '..');
@@ -98,7 +98,7 @@ async function setupEnvironmentFixture(testDir, options = {}) {
     process.env.DATABASE_PATH=source.dbPath;
     process.env.DATABASE_URL='file:' + source.dbPath;
     process.env.NODE_ENV='test';
-    const client = new PrismaClient({adapter:new PrismaBetterSqlite3({url:'file:' + source.dbPath})});
+    const client = createRootClient({adapter:new PrismaBetterSqlite3({url:'file:' + source.dbPath})});
     try {
         await createSampleFixture(client, {data:{id:'smp-base-1',originalId:'GTM-EXISTING-01',
             projectCode:'SOILFER-GTM',assignedLab:'GTM-LAB1',status:'EXPECTED',metadata:'{"kept":"original"}'}});

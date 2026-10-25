@@ -10,7 +10,7 @@ const Database = require('better-sqlite3');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
-const { PrismaClient } = require('../../prisma_client');
+const { createRootClient } = require('../../utils/prismaClientIdentity');
 const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
 
 describe('Candidate Release Review Remediation (R1 - R5)', () => {
@@ -1178,7 +1178,7 @@ describe('Candidate Release Review Remediation (R1 - R5)', () => {
             // Query via Prisma Client using Better-Sqlite3 adapter — guarantees NO P2022 column missing errors
             require('../helpers/custodyFixtureSchema').extendHistoricalCustodyFixture(rehearsalDbPath);
             const adapter = new PrismaBetterSqlite3({ url: 'file:' + rehearsalDbPath, timeout: 5000 });
-            const rehearsalPrisma = new PrismaClient({ adapter });
+            const rehearsalPrisma = createRootClient({ adapter });
 
             try {
                 const projects = await rehearsalPrisma.project.findMany();

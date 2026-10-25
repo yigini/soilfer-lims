@@ -1,5 +1,5 @@
 const Database = require('better-sqlite3');
-const { PrismaClient } = require('../../prisma_client');
+const { createRootClient } = require('../../utils/prismaClientIdentity');
 const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
 const { beforeGuards } = require('../helpers/legacyWorkflowDatabase');
 const { createSampleFixture } = require('../helpers/workflowFixtures');
@@ -15,7 +15,7 @@ describe.each([['Prisma-generated', 'CONSIGNMENT_PRE_1_1_A'], ['deployed legacy 
         ] } });
         db = new Database(rehearsal.file); db.pragma('foreign_keys = ON');
         require('../helpers/custodyFixtureSchema').extendHistoricalCustodyFixture(rehearsal.file);
-        client = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${rehearsal.file}` }) });
+        client = createRootClient({ adapter: new PrismaBetterSqlite3({ url: `file:${rehearsal.file}` }) });
         await createSampleFixture(client, { data: { id: 'child', originalId: 'child', consignmentId: 'old-zero', status: 'RECEIVED' } });
         child = db.prepare('SELECT * FROM Sample').all();
     });

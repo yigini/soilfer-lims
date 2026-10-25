@@ -40,9 +40,9 @@ async function main(args = process.argv.slice(2)) {
     const plan = document.plan || document;
     if (plan.direction !== options.direction) throw new Error('The reviewed plan direction does not match --revert.');
     // Import the writable runtime only after all read-only argument/schema checks.
-    const { PrismaClient } = require('../prisma_client');
+    const { createRootClient } = require('../utils/prismaClientIdentity');
     const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
-    const client = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${path.resolve(options.databasePath)}`, timeout: 5000 }) });
+    const client = createRootClient({ adapter: new PrismaBetterSqlite3({ url: `file:${path.resolve(options.databasePath)}`, timeout: 5000 }) });
     try {
         const outcome = await migrations.applyReviewedPlan(client, plan, options.fingerprint, { timeoutMs: options.timeoutMs });
         process.stdout.write(`${JSON.stringify({ mode: 'APPLIED', ...outcome }, null, 2)}\n`);

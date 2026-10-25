@@ -107,9 +107,9 @@ describe('R4 durable sign-in protection', () => {
         const Database = require('better-sqlite3');
         const reader = new Database(process.env.DATABASE_PATH, { readonly: true, fileMustExist: true });
         try { await reader.backup(file); } finally { reader.close(); }
-        const { PrismaClient } = require('../../prisma_client');
+        const { createRootClient } = require('../../utils/prismaClientIdentity');
         const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
-        const shared = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: 'file:' + file, timeout: 5000 }) });
+        const shared = createRootClient({ adapter: new PrismaBetterSqlite3({ url: 'file:' + file, timeout: 5000 }) });
         function child() {
             return new Promise((resolve, reject) => {
                 const p = spawn(process.execPath, [path.resolve(__dirname, '../helpers/signinAttemptChild.js'), file, known.username],

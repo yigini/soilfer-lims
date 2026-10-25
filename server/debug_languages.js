@@ -1,10 +1,10 @@
-const { PrismaClient } = require('./prisma_client');
+const { createRootClient } = require('./utils/prismaClientIdentity');
 const path = require('path');
 const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
 
 const dbPath = path.resolve(__dirname, 'prisma', 'dev.db');
 const adapter = new PrismaBetterSqlite3({ url: `file:${dbPath}` });
-const prisma = new PrismaClient({ adapter });
+const prisma = createRootClient({ adapter });
 
 async function main() {
     try {

@@ -1,7 +1,7 @@
 const fs=require('node:fs'),path=require('node:path');
 const {randomUUID}=require('node:crypto');
 const Database=require('better-sqlite3');
-const {PrismaClient}=require('../../prisma_client');
+const { createRootClient } = require('../../utils/prismaClientIdentity');
 const {PrismaBetterSqlite3}=require('@prisma/adapter-better-sqlite3');
 const {beforeGuards}=require('../helpers/legacyWorkflowDatabase');
 const {createSampleFixture,createWorkItemFixture}=require('../helpers/workflowFixtures');
@@ -24,7 +24,7 @@ beforeAll(async()=>{
     if(added.length===0)shape.exec(modelColumns.schemaSql);
     else if(added.length!==2 || added.some(row=>row.type!=='TEXT' || row.notnull || row.dflt_value!==null))throw Error('Unexpected nullable repeat model columns.');
     shape.close();
-    client=new PrismaClient({adapter:new PrismaBetterSqlite3({url:'file:'+file})});
+    client=createRootClient({adapter:new PrismaBetterSqlite3({url:'file:'+file})});
 },60000);
 afterAll(async()=>{
     if(client)await client.$disconnect();

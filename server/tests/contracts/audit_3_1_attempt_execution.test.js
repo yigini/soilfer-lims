@@ -1,7 +1,7 @@
 const fs=require('node:fs'),path=require('node:path');
 const {randomUUID}=require('node:crypto');
 const Database=require('better-sqlite3');
-const {PrismaClient}=require('../../prisma_client');
+const { createRootClient } = require('../../utils/prismaClientIdentity');
 const {PrismaBetterSqlite3}=require('@prisma/adapter-better-sqlite3');
 const {beforeGuards}=require('../helpers/legacyWorkflowDatabase');
 const {createSampleFixture,createWorkItemFixture}=require('../helpers/workflowFixtures');
@@ -19,7 +19,7 @@ beforeAll(async()=>{
     installWorkAttemptContract({dbPath:file,apply:true});
     require('../helpers/repeatQcPredecessors').installRepeatQcPredecessors(file);
     require('../../scripts/install_work_repeat_contract').installWorkRepeatContract({dbPath:file,apply:true});
-    client=new PrismaClient({adapter:new PrismaBetterSqlite3({url:'file:'+file})});
+    client=createRootClient({adapter:new PrismaBetterSqlite3({url:'file:'+file})});
     await client.lab.create({data:{id:labId,code:labId,name:'Attempt execution laboratory',country:'TEST'}});
     expect(await client.unit.findUnique({where:{code:'%'}}))
         .toMatchObject(require('../../seeds/units').UNITS.find(row=>row.code==='%'));

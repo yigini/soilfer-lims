@@ -25,7 +25,7 @@ const { restoreBackup } = require('../../scripts/restore_db');
 const { rotateEpoch, getCurrentEpoch, initTables, ensureTriggers } = require('../../services/exchangeStateService');
 const { createDisposableDatabase, cleanupDisposableDatabase } = require('../../scripts/journey_db_isolation.cjs');
 const { createSampleFixture } = require('../helpers/workflowFixtures');
-const { PrismaClient } = require('../../prisma_client');
+const { createRootClient } = require('../../utils/prismaClientIdentity');
 const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
 
 describe('Deployment Readiness Acceptance Contract', () => {
@@ -397,7 +397,7 @@ describe('Deployment Readiness Acceptance Contract', () => {
         async function createRestoreSource(userId, username, sampleId, labAlias) {
             const { runnerDir, dbPath } = createDisposableDatabase();
             ownedRunnerDirectories.push(runnerDir);
-            const fixtureDb = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${dbPath}` }) });
+            const fixtureDb = createRootClient({ adapter: new PrismaBetterSqlite3({ url: `file:${dbPath}` }) });
             try {
                 await fixtureDb.user.create({ data: { id: userId, username, email: `${userId}@restore.example.test`,
                     password: 'fixture-hash', role: 'SUPER_ADMIN' } });

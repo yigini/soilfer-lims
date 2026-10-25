@@ -1,3 +1,4 @@
+const { isRootClient } = require('../utils/prismaClientIdentity');
 const policyService = require('./policyService');
 const { valid } = require('../config/policyRegistry');
 const { publicationYear } = require('./reportNumberService');
@@ -10,7 +11,7 @@ function formatNumber(template, { labCode, year, sequence, projectCode }) {
         .replaceAll('{PROJECT}', projectCode || '').replace(/\{SEQ(?::(\d+))?\}/g, (_, width) => String(sequence).padStart(Number(width || 0), '0'));
 }
 async function allocateConsignmentNumber(tx, { labReference, projectCode, issuedAt = new Date() }) {
-    if (!tx || typeof tx.$transaction === 'function') throw conflict('CONSIGNMENT_TRANSACTION_REQUIRED', 'Consignment numbers must be allocated inside the intake transaction.');
+    if (!tx || isRootClient(tx)) throw conflict('CONSIGNMENT_TRANSACTION_REQUIRED', 'Consignment numbers must be allocated inside the intake transaction.');
     const lab = await policyService.resolveLab(labReference, tx);
     if (!lab?.isActive) throw conflict('CONSIGNMENT_LAB_REQUIRED', 'An active registered receiving laboratory is required.');
     const snapshot = await policyService.snapshot(lab.id, { db: tx });

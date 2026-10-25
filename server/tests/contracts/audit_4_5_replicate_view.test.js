@@ -1,3 +1,4 @@
+const { extendRootClient } = require('../../utils/prismaClientIdentity');
 const { sampleReplicatePairView } = require('../../services/sampleReplicateView');
 const registry = require('../../config/policyRegistry');
 const { resolveSampleReplicateRules } = require('../../services/sampleReplicatePolicyService');
@@ -16,7 +17,7 @@ async function started(f) {
     const built = await buildNativeRun(f.db, f.actor, f.input);
     return startNativeRun(f.db, built.id, f.actor);
 }
-const projectStoredSnapshot = (db, edit) => db.$extends({ query: { batchAnalyte: { async findFirst({ args, query }) {
+const projectStoredSnapshot = (db, edit) => extendRootClient(db, { query: { batchAnalyte: { async findFirst({ args, query }) {
     const record = await query(args);
     return record ? { ...record, criteriaSnapshot: edit(record.criteriaSnapshot) } : record;
 } } } });

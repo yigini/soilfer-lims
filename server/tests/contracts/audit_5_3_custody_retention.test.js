@@ -248,9 +248,9 @@ async function legacyCustodyCopy(data = {}, extraSamples = []) {
     const file = path.resolve(__dirname, '../.tmp/custody-install-' + randomUUID() + '.db');
     const reader = new Database(legacyTemplate, { readonly: true, fileMustExist: true });
     await reader.backup(file); reader.close();
-    const { PrismaClient } = require('../../prisma_client');
+    const { createRootClient } = require('../../utils/prismaClientIdentity');
     const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
-    const fixtureDb = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: 'file:' + file }) });
+    const fixtureDb = createRootClient({ adapter: new PrismaBetterSqlite3({ url: 'file:' + file }) });
     const id = randomUUID(), at = '2026-09-01T08:00:00.000Z';
     try { await createSampleFixture(fixtureDb, { data: { id, originalId: id, assignedLab: labId, status: 'RECEIVED',
         receptionDate: new Date(at), receivedBy: 'legacy-officer', custodyCarrierName: 'Courier',

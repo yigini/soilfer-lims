@@ -7,7 +7,7 @@ const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
 const getAuthToken = (...args) => createAuthTokenFixture(prisma, ...args);
-const { PrismaClient } = require('../../prisma_client');
+const { createRootClient } = require('../../utils/prismaClientIdentity');
 const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
 const { beforeGuards, useLegacyRouteDatabase } = require('../helpers/legacyWorkflowDatabase');
 
@@ -26,7 +26,7 @@ describe('PM-14 Reception Admissions & Provenance-Based Draft Discard Contracts'
             id: prefix + SUFFIX, originalId: prefix + SUFFIX, status: 'RELEASED', assignedLab: testLab,
             approvedAt: new Date(timestamp), approvedBy: 'admin', createdAt: timestamp, updatedAt: timestamp
         })) });
-        client = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${rehearsal.file}` }) });
+        client = createRootClient({ adapter: new PrismaBetterSqlite3({ url: `file:${rehearsal.file}` }) });
         useLegacyRouteDatabase(prisma, client, { allModels: true });
         // Setup lab
         await prisma.lab.create({

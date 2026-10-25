@@ -1,6 +1,6 @@
 const fs = require('node:fs'), path = require('node:path');
 const { randomUUID } = require('node:crypto');
-const { PrismaClient } = require('../../prisma_client');
+const { createRootClient } = require('../../utils/prismaClientIdentity');
 const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
 const { beforeGuards } = require('../helpers/legacyWorkflowDatabase');
 const { assertOwnedTestDatabase } = require('../helpers/testOwnedDatabase');
@@ -23,7 +23,7 @@ async function fixture({ additionalItem = false } = {}) {
     const directory = path.resolve(__dirname, '../.tmp'); fs.mkdirSync(directory, { recursive: true });
     const file = assertOwnedTestDatabase(path.join(directory, `audit_legacy_calibration_${randomUUID()}.db`), 'system:fixture'); files.push(file);
     beforeGuards({ actor: 'system:fixture', file, qcBootstrap: 'CREATE_PRISMA' });
-    const db = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${file}` }) });
+    const db = createRootClient({ adapter: new PrismaBetterSqlite3({ url: `file:${file}` }) });
     clients.push(db);
     for (const row of UNITS) await db.unit.create({ data: row });
     const codes = new Set(referenceRows().map(row => row.analysisCode));

@@ -1,7 +1,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { randomUUID } = require('node:crypto');
-const { PrismaClient } = require('../../prisma_client');
+const { createRootClient } = require('../../utils/prismaClientIdentity');
 const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
 const Database = require('better-sqlite3');
 const { beforeGuards } = require('../helpers/legacyWorkflowDatabase');
@@ -69,7 +69,7 @@ async function fixture({ migrated = false, sampleMember = false, finalClear = fa
         require('../../scripts/install_control_charts').installControlCharts({ dbPath: record.file, apply: true });
     }
     require('../helpers/custodyFixtureSchema').extendHistoricalCustodyFixture(record.file);
-    const db = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${record.file}` }) }); record.db = db;
+    const db = createRootClient({ adapter: new PrismaBetterSqlite3({ url: `file:${record.file}` }) }); record.db = db;
     const actor = { id: username, username, role: 'LAB_MANAGER', labId }, f = { db, file: record.file, actor, labId, analysisCode };
     await db.analysis.create({ data: { code: analysisCode, name: 'Compatibility fixture analysis' } });
     if (multiAnalyte) await db.analysis.create({ data: { code: secondCode, name: 'Second compatibility fixture analysis' } });

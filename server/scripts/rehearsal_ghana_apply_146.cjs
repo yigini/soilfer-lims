@@ -16,7 +16,7 @@ const crypto = require('crypto');
 const Database = require('better-sqlite3');
 const { createDisposableDatabase, cleanupDisposableDatabase } = require('./journey_db_isolation.cjs');
 const { createSampleFixture } = require('../tests/helpers/workflowFixtures');
-const { PrismaClient } = require('../prisma_client');
+const { createRootClient } = require('../utils/prismaClientIdentity');
 const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
 
 const serverDir = path.resolve(__dirname, '..');
@@ -64,7 +64,7 @@ async function initBaselineFixture(dbFile) {
     process.env.DATABASE_PATH=source.dbPath;
     process.env.DATABASE_URL='file:' + source.dbPath;
     process.env.NODE_ENV='test';
-    const client = new PrismaClient({adapter:new PrismaBetterSqlite3({url:'file:' + source.dbPath})});
+    const client = createRootClient({adapter:new PrismaBetterSqlite3({url:'file:' + source.dbPath})});
     try {
         await createSampleFixture(client, {data:{id:'smp-base-1',originalId:'GTM-EXISTING-01',
             projectCode:'SOILFER-GTM',assignedLab:'GTM-LAB1',status:'EXPECTED',metadata:'{"kept":"original"}'}});
@@ -222,7 +222,7 @@ async function runRehearsal() {
         process.env.DATABASE_PATH=partialDb;
         process.env.DATABASE_URL='file:' + partialDb;
         process.env.NODE_ENV='test';
-        const dirtyClient=new PrismaClient({adapter:new PrismaBetterSqlite3({url:'file:' + partialDb})});
+        const dirtyClient=createRootClient({adapter:new PrismaBetterSqlite3({url:'file:' + partialDb})});
         try {
             for(const [id, originalId] of [['smp-part-1','GHA-PART-01'],['smp-part-2','GHA-PART-02']]) {
                 await createSampleFixture(dirtyClient,{data:{id,originalId,projectCode:EXPECTED_PROJECT,

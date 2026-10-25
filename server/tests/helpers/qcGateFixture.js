@@ -2,7 +2,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { randomUUID } = require('node:crypto');
 const Database = require('better-sqlite3');
-const { PrismaClient } = require('../../prisma_client');
+const { createRootClient } = require('../../utils/prismaClientIdentity');
 const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
 const { beforeGuards } = require('./legacyWorkflowDatabase');
 const { createSampleFixture, createWorkItemFixture } = require('./workflowFixtures');
@@ -52,7 +52,7 @@ async function qcGateFixture({ managedStartup = false, count = 1, criteria = {},
         require('./custodyFixtureSchema').extendHistoricalCustodyFixture(file);
     }
     if (installInstrumentImports && installSampleContainers && installControlCharts) require('../../scripts/install_control_charts').installControlCharts({ dbPath: file, apply: true });
-    const db = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${file}` }) });
+    const db = createRootClient({ adapter: new PrismaBetterSqlite3({ url: `file:${file}` }) });
     const actor = { username, role: 'SUPER_ADMIN', labId };
     await db.unit.create({ data: { code: 'fixture-unit', display: 'Fixture unit', quantityKind: 'MASS_FRACTION', factorToBase: 1 } });
     const instrument = await db.equipmentAsset.create({ data: { id: randomUUID(), labId, name: 'Fixture instrument', assetType: 'OTHER',

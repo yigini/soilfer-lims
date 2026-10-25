@@ -1,3 +1,4 @@
+const { registerRootClient } = require('../../utils/prismaClientIdentity');
 const { randomUUID } = require('node:crypto');
 const request = require('supertest');
 const { qcGateFixture } = require('../helpers/qcGateFixture');
@@ -120,13 +121,13 @@ test.each(['identical', 'different-role', 'withdrawn'])('an actual unique-index 
     await linkReagentLot(f.db, f.run.id, f.actor, { inventoryLotId: f.lot.id, role: 'extractant' });
     if (scenario === 'withdrawn') await withdrawReagentLot(f.db, f.run.id, f.actor, { inventoryLotId: f.lot.id, reason: 'Retain withdrawal' });
     const before = await snapshot(f); let staleRead = true, conflicts = 0;
-    const concurrent = { $transaction: execute => f.db.$transaction(tx => execute(new Proxy(tx, { get(target, key) {
+    const concurrent = registerRootClient({ $transaction: execute => f.db.$transaction(tx => execute(new Proxy(tx, { get(target, key) {
         if (key !== 'batchReagentLot') return Reflect.get(target, key);
         return { ...tx.batchReagentLot,
             findUnique: args => staleRead ? (staleRead = false, Promise.resolve(null)) : tx.batchReagentLot.findUnique(args),
             create: async args => { try { return await tx.batchReagentLot.create(args); } catch (error) { if (error.code === 'P2002') conflicts++; throw error; } }
         };
-    } }))) };
+    } }))) });
     const result = linkReagentLot(concurrent, f.run.id, f.actor, { inventoryLotId: f.lot.id, role: scenario === 'different-role' ? 'changed' : 'extractant' });
     if (scenario === 'identical') await expect(result).resolves.toMatchObject({ created: false });
     else await expect(result).rejects.toMatchObject({ statusCode: 409, code: scenario === 'withdrawn' ? 'REAGENT_LOT_WITHDRAWN' : 'REAGENT_LOT_LINK_CONFLICT' });
@@ -134,13 +135,13 @@ test.each(['identical', 'different-role', 'withdrawn'])('an actual unique-index 
 });
 test('a late event fault rolls back the newly inserted link and its audit', async () => {
     const f = await fixture(), before = await snapshot(f);
-    const faulty = { $transaction: execute => f.db.$transaction(tx => execute(new Proxy(tx, { get(target, key) {
+    const faulty = registerRootClient({ $transaction: execute => f.db.$transaction(tx => execute(new Proxy(tx, { get(target, key) {
         if (key !== 'batchEvent') return Reflect.get(target, key);
         return { ...tx.batchEvent, create: args => {
             if (args.data.type === 'REAGENT_LOT_LINKED') throw new Error('OWNED_LATE_EVENT_FAULT');
             return tx.batchEvent.create(args);
         } };
-    } }))) };
+    } }))) });
     await expect(linkReagentLot(faulty, f.run.id, f.actor, { inventoryLotId: f.lot.id })).rejects.toThrow('OWNED_LATE_EVENT_FAULT');
     expect(await snapshot(f)).toEqual(before);
 });

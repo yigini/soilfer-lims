@@ -1,3 +1,4 @@
+const { extendRootClient } = require('../../utils/prismaClientIdentity');
 const { randomUUID } = require('node:crypto');
 const request = require('supertest');
 const { qcGateFixture } = require('../helpers/qcGateFixture');
@@ -247,7 +248,7 @@ test('the route permission admits a scoped MASTER_USER reviewer and refuses read
 
 test('a failed attempt event rolls back the parent transition, OPEN request and WorkItem together',async()=>{
     const f=await fixture(),before=await f.all();
-    const fault=f.db.$extends({query:{auditLog:{create({args,query}){
+    const fault=extendRootClient(f.db, {query:{auditLog:{create({args,query}){
         if(args.data.entity==='WORK_ATTEMPT' && args.data.action==='CREATED')throw Error('Owned attempt-event storage failure');
         return query(args);
     }}}});
@@ -259,7 +260,7 @@ test('a failed attempt event rolls back the parent transition, OPEN request and 
 test('a failed first Result rolls back its first fill and immutable event, allowing the same OPEN request to be retried',async()=>{
     const f=await fixture();expect((await f.command({reason:'PREP_ERROR'})).status).toBe(201);
     const before=await f.all();
-    const fault=f.db.$extends({query:{result:{create(){throw Error('Owned Result storage failure');}}}});
+    const fault=extendRootClient(f.db, {query:{result:{create(){throw Error('Owned Result storage failure');}}}});
     await expect(inTransaction(fault,tx=>writeResultsExecution(tx,{sampleId:f.items[0].sampleId,workItemId:f.items[0].id,actor:f.actor,
         measurements:[{param:f.analysisCode,value:'7.3',equipmentId:f.instrument.id,replicateNo:1}]}))).rejects.toThrow('Owned Result storage failure');
     expect(await f.all()).toEqual(before);
@@ -268,7 +269,7 @@ test('a failed first Result rolls back its first fill and immutable event, allow
 
 test('a failed correction event rolls back the new Result, old supersession and review metadata without deleting audit rows',async()=>{
     const f=await fixture(),before=await f.all();
-    const fault=f.db.$extends({query:{auditLog:{create({args,query}){
+    const fault=extendRootClient(f.db, {query:{auditLog:{create({args,query}){
         if(args.data.entity==='WORK_ATTEMPT' && args.data.action==='CORRECTED')throw Error('Owned correction-event storage failure');
         return query(args);
     }}}});
@@ -366,7 +367,7 @@ test.each(['instrument','method'])('an incremental replicate refuses a changed f
 
 test('failure to append the replicate event rolls back its Result, cache and every audit row',async()=>{
     const f=await fixture(),before=await f.all();
-    const fault=f.db.$extends({query:{auditLog:{create({args,query}){
+    const fault=extendRootClient(f.db, {query:{auditLog:{create({args,query}){
         if(args.data.entity==='WORK_ATTEMPT' && args.data.action==='REPLICATE_ADDED')throw Error('Owned replicate-event storage failure');
         return query(args);
     }}}});
@@ -590,7 +591,7 @@ test('partial replacement respects scope, the explicit repeat-limit NCR path and
 
 test('failure to store partial replacement CREATED rolls back invalidation, the reservation and work state atomically',async()=>{
     const f=await partialFixture(),item=await f.db.workItem.findUnique({where:{id:f.items[0].id}}),before=await f.all();
-    const fault=f.db.$extends({query:{auditLog:{create({args,query}){
+    const fault=extendRootClient(f.db, {query:{auditLog:{create({args,query}){
         if(args.data.entity==='WORK_ATTEMPT'&&args.data.action==='CREATED')throw Error('Owned partial replacement event failure');
         return query(args);
     }}}});
@@ -668,7 +669,7 @@ test('a submitted execution cannot use partial replacement to reopen sealed work
 
 test('a mismatched run seen by the transaction refuses partial replacement with zero retained changes',async()=>{
     const f=await partialFixture(),item=await f.db.workItem.findUnique({where:{id:f.items[0].id}}),before=await f.all();
-    const changedRead=f.db.$extends({query:{workItem:{async findUnique({args,query}){
+    const changedRead=extendRootClient(f.db, {query:{workItem:{async findUnique({args,query}){
         const row=await query(args);return row?.id===item.id?{...row,batchId:'unavailable-run'}:row;
     }}}});
     await expect(require('../../services/workRepeatService').replacePartialRepeat(changedRead,item.id,f.actor,
@@ -679,7 +680,7 @@ test('a mismatched run seen by the transaction refuses partial replacement with 
 
 test('a membership guard refusal during reservation rolls back all changes and exposes the stable partial-replacement code',async()=>{
     const f=await partialFixture(),item=await f.db.workItem.findUnique({where:{id:f.items[0].id}}),before=await f.all();
-    const fault=f.db.$extends({query:{workItem:{updateMany(){throw Error('BATCH_MEMBERSHIP_FROZEN');}}}});
+    const fault=extendRootClient(f.db, {query:{workItem:{updateMany(){throw Error('BATCH_MEMBERSHIP_FROZEN');}}}});
     await expect(require('../../services/workRepeatService').replacePartialRepeat(fault,item.id,f.actor,
         {attemptId:f.partial.id,expectedVersion:item.version,reason:'INSTRUMENT_FAULT',note:'Instrument fault with a membership conflict'}))
         .rejects.toMatchObject({statusCode:409,code:'REPEAT_REPLACEMENT_BATCH_FROZEN'});

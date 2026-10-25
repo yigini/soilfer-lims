@@ -18,7 +18,7 @@ const prisma = require('../../prisma');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { canFinalApprove } = require('../../services/workEligibility');
-const { PrismaClient } = require('../../prisma_client');
+const { createRootClient } = require('../../utils/prismaClientIdentity');
 const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
 const { beforeGuards, useLegacyRouteDatabase } = require('../helpers/legacyWorkflowDatabase');
 
@@ -42,7 +42,7 @@ describe('Manager Dashboard Progress & Bottleneck Overview (Refs #120)', () => {
         rehearsal = beforeGuards({ actor: 'system:fixture', samples: [{ id: `SMP-A-${unique}-2`,
             originalId: `FLD-A-${unique}-2`, labId: `LA-${unique}-002`, assignedLab: `LAB-MGR-A-${unique}`,
             status: 'COMPLETED', receptionDate: new Date('2026-09-19T10:00:00Z'), createdAt: Date.now(), updatedAt: Date.now() }] });
-        client = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${rehearsal.file}` }) });
+        client = createRootClient({ adapter: new PrismaBetterSqlite3({ url: `file:${rehearsal.file}` }) });
         useLegacyRouteDatabase(prisma, client, { allModels: true });
         const pwHash = await bcrypt.hash('password123', 10);
 
@@ -304,7 +304,7 @@ describe('Bounded Correctness & Stage Precedence (Review Comment 5796060402)', (
         rehearsal = beforeGuards({ actor: 'system:fixture', samples: [{ id: `SMP-STG-COMP-${unique}`,
             originalId: `FLD-STG-COMP-${unique}`, labId: `L-STG-COMP-${unique}`, assignedLab: `LAB-STAGE-${unique}`,
             status: 'COMPLETED', receptionDate: new Date('2026-09-05T08:00:00Z'), createdAt: Date.now(), updatedAt: Date.now() }] });
-        client = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${rehearsal.file}` }) });
+        client = createRootClient({ adapter: new PrismaBetterSqlite3({ url: `file:${rehearsal.file}` }) });
         useLegacyRouteDatabase(prisma, client, { allModels: true });
         const pwHash = await bcrypt.hash('password123', 10);
 

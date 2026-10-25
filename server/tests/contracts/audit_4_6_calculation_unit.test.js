@@ -1,7 +1,7 @@
 const fs = require('node:fs'), path = require('node:path');
 const { randomUUID, createHash } = require('node:crypto');
 const Database = require('better-sqlite3');
-const { PrismaClient } = require('../../prisma_client');
+const { createRootClient } = require('../../utils/prismaClientIdentity');
 const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
 const { assertOwnedTestDatabase } = require('../helpers/testOwnedDatabase');
 const { MASS_FRACTION_PERCENT, classifyCalculationUnit, installCalculationUnit } = require('../../services/calculationReferenceUnit');
@@ -65,7 +65,7 @@ test('an outer schema-installation failure preserves the absent unit and every c
 
 test('the actual fresh Prisma-backed seed adds pct_mass and leaves existing percent free-text resolution distinct', async () => {
     const file = fixture({ historical: false });
-    const client = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${file}` }) });
+    const client = createRootClient({ adapter: new PrismaBetterSqlite3({ url: `file:${file}` }) });
     try {
         expect(await seedUnits(client)).toBe(UNITS.length);
         expect(await client.unit.findUnique({ where: { code: 'pct_mass' } })).toMatchObject(MASS_FRACTION_PERCENT);

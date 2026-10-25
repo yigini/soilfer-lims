@@ -1,3 +1,4 @@
+const { isRootClient } = require('../utils/prismaClientIdentity');
 const fs = require('node:fs');
 const path = require('node:path');
 const workflow = require('../workflowContract');
@@ -187,12 +188,12 @@ function assertFixtureContext(env = process.env) {
 async function inTransaction(tx, execute) {
     try {
         const client = tx || require('../prisma');
-        return typeof client.$transaction === 'function' ? await client.$transaction(execute) : await execute(client);
+        return isRootClient(client) ? await client.$transaction(execute) : await execute(client);
     } catch (error) { throw mapStateError(error); }
 }
 
 function requireTransaction(tx) {
-    if (!tx || typeof tx.$transaction === 'function' || !tx.sample || !tx.workItem) {
+    if (!tx || isRootClient(tx) || !tx.sample || !tx.workItem) {
         throw new TransitionError('Removal requires the caller workflow transaction.', 400, 'WORKFLOW_TRANSACTION_REQUIRED');
     }
 }

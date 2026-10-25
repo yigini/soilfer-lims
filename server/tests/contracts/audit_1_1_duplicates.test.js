@@ -2,7 +2,7 @@ const Database = require('better-sqlite3');
 const fs = require('fs');
 const path = require('path');
 const { execFileSync, spawnSync } = require('child_process');
-const { PrismaClient } = require('../../prisma_client');
+const { createRootClient } = require('../../utils/prismaClientIdentity');
 const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
 const { beforeGuards } = require('../helpers/legacyWorkflowDatabase');
 const { rejectedGuardWrite } = require('../helpers/rejectedGuardWrite');
@@ -138,7 +138,7 @@ describe('Audit 1.1: additive, audited duplicate resolution', () => {
                 changed.exec('CREATE TABLE IF NOT EXISTS "_schema_migrations" ("id" TEXT PRIMARY KEY NOT NULL, "appliedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, "details" TEXT)');
                 require('../../scripts/install_sample_holds').installSampleHolds({ dbPath: file, apply: true });
                 require('../helpers/custodyFixtureSchema').extendHistoricalCustodyFixture(file);
-                const client = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${file}` }) });
+                const client = createRootClient({ adapter: new PrismaBetterSqlite3({ url: `file:${file}` }) });
                 try { await createWorkItemFixture(client, { data: { id: 'third', sampleId: 'sample', analysis: 'PH', status: 'NOT_ASSIGNED' } }); }
                 finally { await client.$disconnect(); }
             }

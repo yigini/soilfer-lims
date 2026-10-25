@@ -3,7 +3,8 @@ const path = require('node:path');
 const { randomUUID, createHash } = require('node:crypto');
 const Database = require('better-sqlite3');
 const assert = require('node:assert/strict');
-const { PrismaClient, Prisma } = require('../../prisma_client');
+const { Prisma } = require('../../prisma_client');
+const { createRootClient } = require('../../utils/prismaClientIdentity');
 const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
 const { assertOwnedTestDatabase } = require('./testOwnedDatabase');
 
@@ -589,7 +590,7 @@ async function createLegacyClosureDatabase({ analysis, labId, samples = [], work
         { id: workItemId, sampleId, analysis, status: 'PENDING', assignedLab: labId, result: '6.2', history: '[]',
             createdAt: now, updatedAt: now }, ...workItems.map(row => ({ ...row, sampleId: row.sampleId || sampleId }))] });
     const { file } = database;
-    const client = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${file}` }) });
+    const client = createRootClient({ adapter: new PrismaBetterSqlite3({ url: `file:${file}` }) });
     await client.lab.create({ data: { id: labId, code: labId, name: 'Isolated legacy test laboratory', country: 'TEST' } });
     return { client, file, sampleId, workItemId, preMigrationSnapshot: database.preMigrationSnapshot, async close() {
         await client.$disconnect();

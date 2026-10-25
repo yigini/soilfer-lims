@@ -1,3 +1,4 @@
+const { registerRootClient } = require('../../utils/prismaClientIdentity');
 const {randomUUID}=require('node:crypto');
 const request=require('supertest');
 const {qcGateFixture}=require('../helpers/qcGateFixture');
@@ -130,11 +131,11 @@ test('v2 membership of fraction sources prefers their owning test over a shared 
     // Exercise both retained work-item orders through the real transaction and
     // validation authorities. Only query order changes, never stored evidence.
     for(const ordered of [history,[...history].reverse()]) {
-        const db={$transaction:callback=>f.db.$transaction(tx=>callback(new Proxy(tx,{get(target,key){
+        const db=registerRootClient({$transaction:callback=>f.db.$transaction(tx=>callback(new Proxy(tx,{get(target,key){
             if(key!=='reportedValueSelection')return target[key];
             return new Proxy(target[key],{get(model,method){return method==='findMany'?
                 async args=>args.orderBy?.workItemId ? ordered : model.findMany(args):model[method];}});
-        }})))};
+        }})))});
         const ids=await read(db,f.fractions);
         for(const source of f.fractions)expect(ids[source.id]).toBe(history.find(row=>row.analysisCode===source.param).id);
     }
