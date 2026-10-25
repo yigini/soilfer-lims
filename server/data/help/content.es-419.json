@@ -309,6 +309,103 @@
       "reviewOwner": "Lab operations lead"
     },
     {
+      "id": "start-passwords",
+      "category": "start",
+      "kind": "guide",
+      "title": "Inicio de sesión y contraseñas",
+      "summary": "Inicie sesión con una contraseña temporal, defina una contraseña personal de al menos 12 caracteres, gestione las pausas por intentos fallidos y solicite el restablecimiento al administrador.",
+      "roles": [
+        "ALL"
+      ],
+      "keywords": [
+        "start-passwords",
+        "start",
+        "login",
+        "password",
+        "profile",
+        "users"
+      ],
+      "minutes": 3,
+      "quick": "Una contraseña nueva necesita al menos 12 caracteres. En su primer inicio de sesión con una contraseña temporal, el sistema le pide definir la suya propia antes de continuar. Tras varios intentos fallidos la cuenta se pausa por un tiempo breve: espere e inténtelo de nuevo, o pida al administrador de su laboratorio que restablezca la contraseña olvidada.",
+      "before": [
+        "Confirme su nombre de usuario y, si la cuenta es nueva o fue restablecida, la contraseña temporal entregada por el Gerente de Laboratorio o administrador.",
+        "Prepare una contraseña personal de al menos 12 caracteres que sea distinta de la temporal o de la anterior."
+      ],
+      "sections": [
+        {
+          "title": "1. Primer inicio de sesión con contraseña temporal",
+          "steps": [
+            {
+              "action": "Abra la pantalla de inicio de sesión (/login), ingrese su usuario y su contraseña temporal, y seleccione Iniciar Sesión.",
+              "expected": "Se abre de inmediato la ventana de actualización obligatoria de seguridad para que establezca una contraseña privada antes de acceder al sistema."
+            },
+            {
+              "action": "Ingrese su contraseña temporal actual, escriba una nueva contraseña privada de al menos 12 caracteres, confírmela y seleccione Actualizar contraseña y continuar.",
+              "expected": "Se muestra la confirmación de contraseña actualizada; vuelva a iniciar sesión con su nueva contraseña personal."
+            }
+          ]
+        },
+        {
+          "title": "2. Cambio de contraseña o recuperación de acceso",
+          "steps": [
+            {
+              "action": "Para cambiar su contraseña más adelante, abra su Perfil (/profile), ingrese su contraseña actual y una nueva de al menos 12 caracteres, y guarde los cambios.",
+              "expected": "Su contraseña queda actualizada y debe ser diferente de la contraseña anterior."
+            },
+            {
+              "action": "Si el inicio de sesión falla tras varios intentos incorrectos o si olvidó su contraseña, espere un tiempo breve antes de volver a intentarlo o consulte ¿Olvidó su contraseña? en /login y contacte a su Gerente de Laboratorio.",
+              "expected": "Tras una pausa breve puede volver a intentar el ingreso, o el administrador puede generar una nueva contraseña temporal desde Gestión de Usuarios (/users)."
+            }
+          ]
+        }
+      ],
+      "fields": [
+        [
+          "Nueva contraseña privada",
+          "Mínimo 12 caracteres (distinta de la contraseña anterior)",
+          "Obligatoria en el primer ingreso con contraseña temporal, tras un restablecimiento y al cambiarla en /profile."
+        ],
+        [
+          "Actualización de seguridad obligatoria",
+          "Ventana emergente en el primer ingreso o tras un restablecimiento",
+          "Restringe el acceso al área de trabajo hasta que reemplace la contraseña temporal y vuelva a iniciar sesión."
+        ],
+        [
+          "¿Olvidó su contraseña? / Restablecer contraseña",
+          "Restablecimiento administrado en Gestión de Usuarios (/users)",
+          "El personal solicita el restablecimiento a su Gerente de Laboratorio; los gerentes y administradores pueden contactar a GLOSOLAN@fao.org."
+        ]
+      ],
+      "example": "Inicie sesión como m.garcia con la contraseña temporal, complete la actualización obligatoria con una contraseña nueva de 12 o más caracteres y vuelva a iniciar sesión.",
+      "success": "Inicia sesión con su contraseña personal de 12 o más caracteres y sabe cómo proceder ante una pausa temporal o cómo solicitar un restablecimiento al administrador.",
+      "nextActor": "Usuario de laboratorio, Gerente de Laboratorio o Administrador",
+      "problems": [
+        {
+          "symptom": "El inicio de sesión muestra Credenciales inválidas tras varios intentos fallidos.",
+          "why": "Tras varios intentos incorrectos seguidos, la cuenta se pausa por un tiempo breve para proteger el acceso, o la contraseña ingresada no coincide.",
+          "action": "Deje de reintentar de inmediato, espere unos minutos y vuelva a probar con cuidado, o pida a su Gerente de Laboratorio que restablezca su contraseña en /users."
+        }
+      ],
+      "sources": [
+        "client/src/pages/Login.jsx",
+        "client/src/components/ForcePasswordChangeModal.jsx",
+        "client/src/pages/Profile.jsx",
+        "client/src/components/UserDialog.jsx"
+      ],
+      "steps": [
+        "Abra la pantalla de inicio de sesión (/login), ingrese su usuario y su contraseña temporal, y seleccione Iniciar Sesión. (Expected: Se abre de inmediato la ventana de actualización obligatoria de seguridad para que establezca una contraseña privada antes de acceder al sistema.)",
+        "Ingrese su contraseña temporal actual, escriba una nueva contraseña privada de al menos 12 caracteres, confírmela y seleccione Actualizar contraseña y continuar. (Expected: Se muestra la confirmación de contraseña actualizada; vuelva a iniciar sesión con su nueva contraseña personal.)",
+        "Si el inicio de sesión falla tras varios intentos incorrectos o si olvidó su contraseña, espere un tiempo breve antes de volver a intentarlo o pida a su Gerente de Laboratorio que la restablezca en /users. (Expected: Tras una pausa breve puede volver a iniciar sesión, o usar la nueva contraseña temporal del administrador para definir una contraseña de 12 o más caracteres.)"
+      ],
+      "caution": "Precaución: Tras varios intentos incorrectos la cuenta se pausa por un tiempo breve. — Espere unos minutos antes de volver a intentarlo o solicite a su Gerente de Laboratorio que restablezca la contraseña en /users.",
+      "related": [
+        "start-first-login",
+        "start-settings"
+      ],
+      "feature": "core",
+      "reviewOwner": "Lab operations lead"
+    },
+    {
       "id": "start-technician",
       "category": "start",
       "kind": "guide",

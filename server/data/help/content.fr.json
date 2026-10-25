@@ -309,6 +309,103 @@
       "reviewOwner": "Lab operations lead"
     },
     {
+      "id": "start-passwords",
+      "category": "start",
+      "kind": "guide",
+      "title": "Connexion et mots de passe",
+      "summary": "Connectez-vous avec un mot de passe temporaire, définissez un mot de passe personnel d’au moins 12 caractères, gérez la pause après plusieurs échecs et demandez une réinitialisation à l’administrateur.",
+      "roles": [
+        "ALL"
+      ],
+      "keywords": [
+        "start-passwords",
+        "start",
+        "login",
+        "password",
+        "profile",
+        "users"
+      ],
+      "minutes": 3,
+      "quick": "Un nouveau mot de passe doit comporter au moins 12 caractères. Lors de la première connexion avec un mot de passe temporaire, le système vous invite à définir votre propre mot de passe avant de continuer. Après plusieurs tentatives erronées, le compte est suspendu pendant une courte durée : patientez avant de réessayer, ou demandez une réinitialisation à l’administrateur de votre laboratoire.",
+      "before": [
+        "Vérifiez votre nom d’utilisateur et, pour un compte nouveau ou réinitialisé, le mot de passe temporaire remis par le responsable ou l’administrateur du laboratoire.",
+        "Préparez un mot de passe personnel d’au moins 12 caractères, différent du mot de passe temporaire ou précédent."
+      ],
+      "sections": [
+        {
+          "title": "1. Première connexion avec un mot de passe temporaire",
+          "steps": [
+            {
+              "action": "Ouvrez l’écran de connexion (/login), saisissez votre nom d’utilisateur et votre mot de passe temporaire, puis cliquez sur Se connecter.",
+              "expected": "La fenêtre de mise à jour de sécurité obligatoire s’ouvre immédiatement et vous demande de définir un mot de passe privé avant d’accéder au laboratoire."
+            },
+            {
+              "action": "Saisissez votre mot de passe temporaire actuel, entrez un nouveau mot de passe privé d’au moins 12 caractères, confirmez-le et cliquez sur Mettre à jour et continuer.",
+              "expected": "Une confirmation de changement de mot de passe s’affiche ; reconnectez-vous avec votre nouveau mot de passe personnel."
+            }
+          ]
+        },
+        {
+          "title": "2. Modifier son mot de passe ou récupérer l’accès",
+          "steps": [
+            {
+              "action": "Pour modifier votre mot de passe ultérieurement, ouvrez votre Profil (/profile), saisissez votre mot de passe actuel ainsi qu’un nouveau mot de passe d’au moins 12 caractères, puis enregistrez.",
+              "expected": "Votre mot de passe est mis à jour et doit être différent de l’ancien."
+            },
+            {
+              "action": "Si la connexion échoue après plusieurs tentatives erronées ou en cas d’oubli du mot de passe, patientez quelques instants avant de réessayer ou consultez Mot de passe oublié ? sur /login et contactez votre responsable de laboratoire.",
+              "expected": "Après une courte pause, vous pouvez vous reconnecter, ou l’administrateur peut générer un nouveau mot de passe temporaire depuis la gestion des utilisateurs (/users)."
+            }
+          ]
+        }
+      ],
+      "fields": [
+        [
+          "Nouveau mot de passe privé",
+          "12 caractères minimum (différent de l’ancien mot de passe)",
+          "Requis lors de la première connexion avec un mot de passe temporaire, après une réinitialisation et lors d’un changement dans /profile."
+        ],
+        [
+          "Mise à jour de sécurité requise",
+          "Fenêtre obligatoire à la première connexion ou après réinitialisation",
+          "Bloque l’accès aux écrans du laboratoire tant que le mot de passe temporaire n’a pas été remplacé."
+        ],
+        [
+          "Mot de passe oublié ? / Réinitialiser le mot de passe",
+          "Réinitialisation par l’administrateur dans /users",
+          "Les techniciens et le personnel s’adressent au responsable de laboratoire ; les responsables et administrateurs peuvent contacter GLOSOLAN@fao.org."
+        ]
+      ],
+      "example": "Connectez-vous en tant que m.garcia avec le mot de passe temporaire, définissez un nouveau mot de passe de 12 caractères ou plus dans la fenêtre obligatoire, puis reconnectez-vous.",
+      "success": "Vous vous connectez avec votre mot de passe personnel d’au moins 12 caractères et savez comment agir en cas de pause temporaire ou d’oubli du mot de passe.",
+      "nextActor": "Utilisateur du laboratoire, Responsable de laboratoire ou Administrateur",
+      "problems": [
+        {
+          "symptom": "La connexion affiche Identifiants invalides après plusieurs tentatives erronées.",
+          "why": "Après plusieurs tentatives infructueuses consécutives, le compte est suspendu pendant une courte durée pour protéger l’accès, ou le mot de passe saisi est incorrect.",
+          "action": "Cessez immédiatement les essais répétés, patientez quelques instants avant de réessayer, ou demandez au responsable de laboratoire de réinitialiser votre mot de passe dans /users."
+        }
+      ],
+      "sources": [
+        "client/src/pages/Login.jsx",
+        "client/src/components/ForcePasswordChangeModal.jsx",
+        "client/src/pages/Profile.jsx",
+        "client/src/components/UserDialog.jsx"
+      ],
+      "steps": [
+        "Ouvrez l’écran de connexion (/login), saisissez votre nom d’utilisateur et votre mot de passe temporaire, puis cliquez sur Se connecter. (Expected: La fenêtre de mise à jour de sécurité obligatoire s’ouvre immédiatement et vous demande de définir un mot de passe privé avant d’accéder au laboratoire.)",
+        "Saisissez votre mot de passe temporaire actuel, entrez un nouveau mot de passe privé d’au moins 12 caractères, confirmez-le et cliquez sur Mettre à jour et continuer. (Expected: Une confirmation de changement de mot de passe s’affiche ; reconnectez-vous avec votre nouveau mot de passe personnel.)",
+        "Si la connexion échoue après plusieurs tentatives erronées ou en cas d’oubli du mot de passe, patientez quelques instants avant de réessayer ou demandez au responsable de laboratoire de le réinitialiser dans /users. (Expected: Après une courte pause, vous pouvez vous reconnecter ou utiliser le nouveau mot de passe temporaire fourni par l’administrateur.)"
+      ],
+      "caution": "Attention: Après plusieurs tentatives erronées, le compte est suspendu pendant une courte durée. — Patientez quelques instants avant de réessayer ou demandez au responsable de laboratoire de réinitialiser votre mot de passe dans /users.",
+      "related": [
+        "start-first-login",
+        "start-settings"
+      ],
+      "feature": "core",
+      "reviewOwner": "Lab operations lead"
+    },
+    {
       "id": "start-technician",
       "category": "start",
       "kind": "guide",
