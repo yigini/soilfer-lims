@@ -83,6 +83,15 @@ const techStack = [
 
 const changelog = [
     {
+        version: 'v1.12.1',
+        date: 'October 25, 2026',
+        tag: 'Transaction Handling',
+        badgeColor: 'bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300 border-blue-300 dark:border-blue-800',
+        changes: [
+            'Transaction checks preserve the caller transaction and QC audit identity across supported Prisma client capabilities.',
+        ],
+    },
+    {
         version: 'v1.12.0',
         date: 'October 24, 2026',
         tag: 'Installation and Access Updates',
