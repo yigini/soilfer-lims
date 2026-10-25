@@ -309,6 +309,103 @@
       "reviewOwner": "Lab operations lead"
     },
     {
+      "id": "start-passwords",
+      "category": "start",
+      "kind": "guide",
+      "title": "Início de sessão e palavras-passe",
+      "summary": "Inicie sessão com uma palavra-passe temporária, defina uma palavra-passe pessoal com pelo menos 12 caracteres, lide com pausas temporárias e peça a reposição ao administrador.",
+      "roles": [
+        "ALL"
+      ],
+      "keywords": [
+        "start-passwords",
+        "start",
+        "login",
+        "password",
+        "profile",
+        "users"
+      ],
+      "minutes": 3,
+      "quick": "Uma nova palavra-passe precisa de pelo menos 12 caracteres. No primeiro início de sessão com uma palavra-passe temporária, o sistema pede-lhe para definir a sua própria palavra-passe antes de continuar. Após várias tentativas incorretas a conta é pausada por um curto período: aguarde e tente novamente, ou peça ao administrador do laboratório para repor uma palavra-passe esquecida.",
+      "before": [
+        "Confirme o seu nome de utilizador e, para uma conta nova ou reposta, a palavra-passe temporária fornecida pelo Gestor de Laboratório ou administrador.",
+        "Prepare uma palavra-passe pessoal com pelo menos 12 caracteres, diferente da palavra-passe temporária ou anterior."
+      ],
+      "sections": [
+        {
+          "title": "1. Primeiro início de sessão com palavra-passe temporária",
+          "steps": [
+            {
+              "action": "Abra o ecrã de início de sessão (/login), introduza o seu utilizador e a palavra-passe temporária, e clique em Entrar.",
+              "expected": "A janela de atualização obrigatória de segurança abre-se de imediato e pede para definir uma palavra-passe privada antes de aceder ao laboratório."
+            },
+            {
+              "action": "Introduza a palavra-passe temporária atual, escreva uma nova palavra-passe privada com pelo menos 12 caracteres, confirme-a e clique em Atualizar e aceder ao sistema.",
+              "expected": "Surge a confirmação de palavra-passe alterada; volte a iniciar sessão com a sua nova palavra-passe pessoal."
+            }
+          ]
+        },
+        {
+          "title": "2. Alterar a palavra-passe ou recuperar o acesso",
+          "steps": [
+            {
+              "action": "Para alterar a sua palavra-passe mais tarde, abra o Perfil (/profile), introduza a palavra-passe atual e uma nova com pelo menos 12 caracteres, e guarde.",
+              "expected": "A sua palavra-passe é atualizada e tem de ser diferente da anterior."
+            },
+            {
+              "action": "Se o início de sessão falhar após várias tentativas incorretas ou se se esquecer da palavra-passe, aguarde um curto período antes de tentar novamente ou consulte Esqueceu-se da palavra-passe? em /login e contacte o seu Gestor de Laboratório.",
+              "expected": "Após uma breve pausa pode voltar a iniciar sessão, ou o administrador pode gerar uma nova palavra-passe temporária na Gestão de Utilizadores (/users)."
+            }
+          ]
+        }
+      ],
+      "fields": [
+        [
+          "Nova palavra-passe privada",
+          "Mínimo de 12 caracteres (diferente da palavra-passe anterior)",
+          "Obrigatória no primeiro acesso com palavra-passe temporária, após reposição pelo administrador e ao alterar em /profile."
+        ],
+        [
+          "Atualização de segurança obrigatória",
+          "Janela obrigatória no primeiro acesso ou após reposição",
+          "Restringe o acesso aos ecrãs do laboratório até substituir a palavra-passe temporária e voltar a iniciar sessão."
+        ],
+        [
+          "Esqueceu-se da palavra-passe? / Repor palavra-passe",
+          "Reposição efetuada pelo administrador em /users",
+          "Os técnicos e equipa pedem a reposição ao Gestor de Laboratório; gestores e administradores podem contactar GLOSOLAN@fao.org."
+        ]
+      ],
+      "example": "Inicie sessão como m.garcia com a palavra-passe temporária, conclua a atualização obrigatória com uma nova palavra-passe de 12 ou mais caracteres e volte a iniciar sessão.",
+      "success": "Inicia sessão com a sua palavra-passe pessoal de 12 ou mais caracteres e sabe como aguardar após uma pausa temporária ou solicitar uma reposição ao administrador.",
+      "nextActor": "Utilizador do laboratório, Gestor de Laboratório ou Administrador",
+      "problems": [
+        {
+          "symptom": "O início de sessão continua a apresentar Credenciais inválidas após várias tentativas incorretas.",
+          "why": "Após várias tentativas incorretas seguidas, a conta é pausada por um curto período para proteger o acesso, ou a palavra-passe introduzida não coincide.",
+          "action": "Pare de tentar repetidamente, aguarde alguns instantes e tente de novo com cuidado, ou peça ao Gestor de Laboratório para repor a palavra-passe em /users."
+        }
+      ],
+      "sources": [
+        "client/src/pages/Login.jsx",
+        "client/src/components/ForcePasswordChangeModal.jsx",
+        "client/src/pages/Profile.jsx",
+        "client/src/components/UserDialog.jsx"
+      ],
+      "steps": [
+        "Abra o ecrã de início de sessão (/login), introduza o seu utilizador e a palavra-passe temporária, e clique em Entrar. (Expected: A janela de atualização obrigatória de segurança abre-se de imediato e pede para definir uma palavra-passe privada antes de aceder ao laboratório.)",
+        "Introduza a palavra-passe temporária atual, escreva uma nova palavra-passe privada com pelo menos 12 caracteres, confirme-a e clique em Atualizar e aceder ao sistema. (Expected: Surge a confirmação de palavra-passe alterada; volte a iniciar sessão com a sua nova palavra-passe pessoal.)",
+        "Se o início de sessão falhar após várias tentativas incorretas ou se se esquecer da palavra-passe, aguarde um curto período antes de tentar novamente ou peça ao Gestor de Laboratório para a repor em /users. (Expected: Após uma breve pausa pode voltar a iniciar sessão, ou usar a nova palavra-passe temporária fornecida pelo administrador.)"
+      ],
+      "caution": "Atenção: Após várias tentativas incorretas a conta é pausada por um curto período. — Aguarde alguns instantes antes de tentar novamente ou peça ao Gestor de Laboratório para repor a palavra-passe em /users.",
+      "related": [
+        "start-first-login",
+        "start-settings"
+      ],
+      "feature": "core",
+      "reviewOwner": "Lab operations lead"
+    },
+    {
       "id": "start-technician",
       "category": "start",
       "kind": "guide",

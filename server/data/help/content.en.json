@@ -309,6 +309,103 @@
       "reviewOwner": "Lab operations lead"
     },
     {
+      "id": "start-passwords",
+      "category": "start",
+      "kind": "guide",
+      "title": "Signing in and passwords",
+      "summary": "Sign in with a temporary password, set a 12-character personal password, handle paused sign-in attempts, and request an administrator password reset.",
+      "roles": [
+        "ALL"
+      ],
+      "keywords": [
+        "start-passwords",
+        "start",
+        "login",
+        "password",
+        "profile",
+        "users"
+      ],
+      "minutes": 3,
+      "quick": "New passwords need at least 12 characters. On your first sign-in with a temporary password, the LIMS asks you to set your own password before continuing. After several wrong sign-in attempts the account is paused for a short time—wait and try again, or ask your laboratory administrator to reset a forgotten password.",
+      "before": [
+        "Confirm your assigned username and, for a new or reset account, the temporary password provided by your Laboratory Manager or administrator.",
+        "Prepare a personal password that is at least 12 characters long and different from your temporary or previous password."
+      ],
+      "sections": [
+        {
+          "title": "1. First sign-in with a temporary password",
+          "steps": [
+            {
+              "action": "Open the sign-in screen (/login), enter your Username or ID and your temporary password, and click Secure Sign In.",
+              "expected": "The Security Update Required dialog opens immediately and asks you to establish a private password before accessing any laboratory screens."
+            },
+            {
+              "action": "Enter your Current Temporary Password, type a New Private Password of at least 12 characters, confirm the new password, and click Update & Access System.",
+              "expected": "A Password Changed confirmation appears; click Log In Again and sign in with your new personal password."
+            }
+          ]
+        },
+        {
+          "title": "2. Changing your password or recovering access",
+          "steps": [
+            {
+              "action": "To change your own password later, open Profile (/profile), enter your current password and a new password of at least 12 characters, and save.",
+              "expected": "Your password is updated and must be different from your previous password."
+            },
+            {
+              "action": "If sign-in fails after several wrong attempts or you forget your password, wait a short time before trying again, or click Forgot password? on /login and contact your Laboratory Manager.",
+              "expected": "After a brief pause you can sign in again with the right password, or an administrator can issue a new temporary password from User Management (/users)."
+            }
+          ]
+        }
+      ],
+      "fields": [
+        [
+          "New Private Password",
+          "Minimum 12 characters (must differ from old password)",
+          "Required on first sign-in with a temporary password, after an admin reset, and when changing your password in /profile."
+        ],
+        [
+          "Security Update Required",
+          "Mandatory password update modal on first sign-in or after reset",
+          "Restricts workspace access until you replace the temporary password and sign in again."
+        ],
+        [
+          "Forgot password? / Reset Password",
+          "Administrator-managed password reset in User Management (/users)",
+          "Technicians and staff ask their Laboratory Manager for a reset; managers and administrators can contact GLOSOLAN@fao.org for system-level overrides."
+        ]
+      ],
+      "example": "Sign in as technician m.garcia with a temporary password, complete the Security Update Required dialog with a new 12+ character password, click Log In Again, and sign in to your laboratory workspace.",
+      "success": "You can sign in with your personal 12+ character password and know how to wait out a temporary sign-in pause or request an administrator reset.",
+      "nextActor": "Staff User, Laboratory Manager, or Administrator",
+      "problems": [
+        {
+          "symptom": "Sign-in keeps showing Invalid credentials. Please try again. after several wrong attempts.",
+          "why": "After several wrong attempts in a row, the account is paused for a short time to protect access, or the password entered does not match.",
+          "action": "Stop retrying immediately, wait a short time, and try again carefully—or ask your Laboratory Manager to reset your password in User Management (/users)."
+        }
+      ],
+      "sources": [
+        "client/src/pages/Login.jsx",
+        "client/src/components/ForcePasswordChangeModal.jsx",
+        "client/src/pages/Profile.jsx",
+        "client/src/components/UserDialog.jsx"
+      ],
+      "steps": [
+        "Open the sign-in screen (/login), enter your Username or ID and your temporary password, and click Secure Sign In. (Expected: The Security Update Required dialog opens immediately and asks you to establish a private password before accessing any laboratory screens.)",
+        "Enter your Current Temporary Password, type a New Private Password of at least 12 characters, confirm the new password, and click Update & Access System. (Expected: A Password Changed confirmation appears; click Log In Again and sign in with your new personal password.)",
+        "If sign-in fails after several wrong attempts or you forget your password, wait a short time before trying again, or ask your Laboratory Manager to reset it in User Management (/users). (Expected: After a brief pause you can sign in again, or use the new temporary password from your administrator to set a new 12+ character password.)"
+      ],
+      "caution": "Caution: After several wrong attempts the account is paused for a short time. — Wait a short time before trying again, or ask your Laboratory Manager to reset your forgotten password in User Management (/users).",
+      "related": [
+        "start-first-login",
+        "start-settings"
+      ],
+      "feature": "core",
+      "reviewOwner": "Lab operations lead"
+    },
+    {
       "id": "start-technician",
       "category": "start",
       "kind": "guide",

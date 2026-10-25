@@ -154,7 +154,7 @@ async function publishHelpRelease(options = {}) {
     }
 
     const manifest = {
-        releaseVersion: 'v1.1.0',
+        releaseVersion: 'v1.2.0',
         publishedAt: publishedTimestamp.toISOString(),
         provenance: 'system-app-review',
         reviewScope: 'Application navigation, UI controls, error recovery, and operational workflows verified against SoilFER LIMS v3.4 controls',
