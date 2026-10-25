@@ -68,6 +68,7 @@
 
 # Maintenance
 
+- [Release Notes (1.11 & 1.12)](./maintenance/release-notes.md)
 - [Backing Up Your Data](./maintenance/backups.md)
 - [Updating SoilFER-LIMS](./maintenance/updates.md)
 - [Checking Logs & Restarting](./maintenance/logs.md)
