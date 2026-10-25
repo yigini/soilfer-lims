@@ -5,13 +5,25 @@ if (!Object.hasOwn(globalThis, registryKey)) {
 }
 const rootClients = globalThis[registryKey];
 
+// Explicit construction hook for roots and root adapters. Return the exact
+// object: transaction and QC collector identities must never be unwrapped.
+function registerRootClient(client) {
+    rootClients.add(client);
+    return client;
+}
+
 // Record identity at construction, including standalone tools and isolated test
 // databases. No client capabilities or private Prisma fields determine its role.
 function createRootClient(options) {
     const { PrismaClient } = require('../prisma_client');
-    const client = new PrismaClient(options);
-    rootClients.add(client);
-    return client;
+    return registerRootClient(new PrismaClient(options));
+}
+
+// Prisma's public extension API creates another root identity. Register it at
+// construction instead of inspecting either client's capabilities or internals.
+function extendRootClient(client, extension) {
+    if (!isRootClient(client)) throw new TypeError('A registered root client is required for an extension.');
+    return registerRootClient(client.$extends(extension));
 }
 
 // Transaction clients may also expose $transaction. Keep the exact caller object
@@ -20,4 +32,4 @@ function isRootClient(client) {
     return rootClients.has(client);
 }
 
-module.exports = { createRootClient, isRootClient };
+module.exports = { createRootClient, extendRootClient, registerRootClient, isRootClient };

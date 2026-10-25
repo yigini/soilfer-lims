@@ -16,7 +16,7 @@ jest.mock('../../services/qcRunViewService', () => ({
 }));
 
 const root = require('../../prisma');
-const { createRootClient, isRootClient } = require('../../utils/prismaClientIdentity');
+const { createRootClient, extendRootClient, registerRootClient, isRootClient } = require('../../utils/prismaClientIdentity');
 const rules = require('../../services/workflowStateRules');
 const intake = require('../../services/intakeService');
 const workGeneration = require('../../services/intakeWorkItemService');
@@ -83,6 +83,40 @@ test('module isolation does not change the identity of an existing root client',
         expect(reloaded.isRootClient(root)).toBe(true);
         expect(reloaded.isRootClient(nestedClient())).toBe(false);
     });
+});
+
+test('an explicitly constructed root adapter keeps its identity and opens one transaction', async () => {
+    const tx = nestedClient();
+    const adapter = { ...nestedClient(), $transaction: jest.fn(execute => execute(tx)) };
+    expect(registerRootClient(adapter)).toBe(adapter);
+    expect(isRootClient(adapter)).toBe(true);
+    expect(() => rules.requireTransaction(adapter)).toThrow('Removal requires');
+    await rules.inTransaction(adapter, inner => expect(inner).toBe(tx));
+    expect(adapter.$transaction).toHaveBeenCalledTimes(1);
+    expect(tx.$transaction).not.toHaveBeenCalled();
+});
+
+test('public root extensions are registered without wrapping either caller or transaction', async () => {
+    const independent = createRootClient({});
+    const tx = nestedClient();
+    const extended = { ...nestedClient(), $transaction: jest.fn(execute => execute(tx)) };
+    const extension = { query: {} };
+    independent.$extends = jest.fn(() => extended);
+    expect(extendRootClient(independent, extension)).toBe(extended);
+    expect(independent.$extends).toHaveBeenCalledWith(extension);
+    expect(isRootClient(extended)).toBe(true);
+    expect(() => rules.requireTransaction(extended)).toThrow('Removal requires');
+    await rules.inTransaction(extended, inner => expect(inner).toBe(tx));
+    expect(extended.$transaction).toHaveBeenCalledTimes(1);
+    expect(tx.$transaction).not.toHaveBeenCalled();
+});
+
+test('a nested-capable transaction is never registered by the root extension factory', () => {
+    const tx = nestedClient();
+    tx.$extends = jest.fn();
+    expect(() => extendRootClient(tx, {})).toThrow('A registered root client is required');
+    expect(tx.$extends).not.toHaveBeenCalled();
+    expect(isRootClient(tx)).toBe(false);
 });
 
 const requiredPaths = [

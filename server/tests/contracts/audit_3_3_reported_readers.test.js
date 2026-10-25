@@ -1,3 +1,4 @@
+const { registerRootClient } = require('../../utils/prismaClientIdentity');
 const {qcGateFixture}=require('../helpers/qcGateFixture');
 const rules=require('../../services/workflowStateRules');
 const {appendReportedSelection}=require('../../services/reportedValueSelectionService');
@@ -147,11 +148,11 @@ test.each([
 test.each(['P2021','REPORTED_VALUE_STORAGE_FAILURE'])('partial reader still throws an unexpected storage error (%s) with zero writes',async code=>{
     const f=await fixture();await f.choose();const before=await f.snapshot(),sample=await f.db.sample.findUnique({where:{id:f.items[0].sampleId}});
     const failure=Object.assign(new Error('Owned database fault'),{code,statusCode:500});
-    const db={$transaction:execute=>f.db.$transaction(tx=>execute(new Proxy(tx,{get(target,key){
+    const db=registerRootClient({$transaction:execute=>f.db.$transaction(tx=>execute(new Proxy(tx,{get(target,key){
         if(key==='reportedValueSelection')return new Proxy(target[key],{get(delegate,operation){
             if(operation==='findMany')return async()=>{throw failure;};return delegate[operation];
         }});return target[key];
-    }})))};
+    }})))});
     await expect(readSampleReportedValues(db,sample,{partial:true})).rejects.toBe(failure);
     expect(await f.snapshot()).toEqual(before);
 });
