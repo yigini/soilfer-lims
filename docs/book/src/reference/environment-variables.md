@@ -17,6 +17,7 @@ SoilFER LIMS reads its server configuration from the `.env` file in the project 
 | `DISABLE_BACKGROUND_JOBS` | `false` | No | When set to `true` during pre-exposure upgrade verification (see `docs/UPGRADING.md`), suppresses background schedulers so zero background writes occur before cutover commitment. |
 | `API_RATE_LIMIT_USER_MAX` | `3000` | No | Positive integer: `/api` requests per user id in a valid JWT per 15 minutes. Sessions for the same user share this budget. |
 | `API_RATE_LIMIT_ANON_MAX` | `300` | No | Positive integer: `/api` requests per client IP per 15 minutes without a valid JWT. Login/register and account sign-in protections also apply. See [HTTP settings](../../../http-deployment-settings.md). |
+| `API_RATE_LIMIT_EXCHANGE_MAX` | `1000` | No | Positive integer: separate per-IP budget per 15 minutes for API-key headers on `/api/v2/data-exchange` and `/api/v2/sis`; valid JWTs retain the user budget and connection authentication/limits still apply. |
 
 ---
 

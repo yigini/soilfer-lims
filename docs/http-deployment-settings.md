@@ -10,9 +10,10 @@ changing them; an existing install's settings are not rewritten by `setup.sh`.
 | `TRUST_PROXY` | `loopback` | Express trusts forwarding headers only from loopback proxies. Use a comma-separated list of the actual proxy IP addresses or dedicated proxy subnets. `false` disables proxy trust. |
 | `HEALTH_SHOW_VERSION` | `false` | `/api/health` and `/api/version` return only `{"status":"ok"}` to non-loopback callers. Exactly `true` makes version and uptime public. |
 | `API_RATE_LIMIT_USER_MAX` | `3000` | Maximum `/api` requests per 15 minutes for each user id in a signature-verified, unexpired JWT. Different users behind the same IP have separate budgets; a user's sessions share one budget. |
-| `API_RATE_LIMIT_ANON_MAX` | `300` | Maximum `/api` requests per 15 minutes for each client IP without a valid JWT, including missing, forged and expired tokens. IPv6 addresses use the limiter's default /56 grouping. |
+| `API_RATE_LIMIT_ANON_MAX` | `300` | Maximum `/api` requests per 15 minutes for each client IP without a valid JWT, including missing, forged and expired tokens, except the exchange API-key budget below. IPv6 addresses use the limiter's default /56 grouping. |
+| `API_RATE_LIMIT_EXCHANGE_MAX` | `1000` | Separate per-IP budget per 15 minutes under `/api/v2/data-exchange` and `/api/v2/sis` with `X-API-KEY` or a Bearer value without a valid user JWT. Valid JWTs keep the user budget. Header presence selects this budget without a database lookup; `apiKeyAuth` still authenticates and applies its per-connection limit. IPv6 uses /56 grouping. |
 
-Both API budgets must be positive integers; invalid values refuse startup. They
+All three API budgets must be positive integers; invalid values refuse startup. They
 apply before route authentication and do not grant access or replace active-session,
 permission or laboratory checks. The separate login/register limiter and per-account
 sign-in backoff still apply unchanged. Configure proxy trust from the observed

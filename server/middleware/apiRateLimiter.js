@@ -14,6 +14,7 @@ function readApiRateLimitConfig(env = process.env) {
     return {
         userMax: positiveInteger('API_RATE_LIMIT_USER_MAX', 3000),
         anonymousMax: positiveInteger('API_RATE_LIMIT_ANON_MAX', 300),
+        exchangeMax: positiveInteger('API_RATE_LIMIT_EXCHANGE_MAX', 1000),
         windowMs: 15 * 60 * 1000
     };
 }
@@ -35,7 +36,18 @@ function createApiRateLimiter({ env = process.env, jwtSecret = env.JWT_SECRET, s
                 if (typeof principal.id === 'string' && principal.id.trim() && principal.id.length <= 200) {
                     return (req[selectedBudget] = { key: `user:${principal.id}`, limit: config.userMax });
                 }
-            } catch { /* Invalid/expired JWTs share the anonymous IP budget. */ }
+            } catch { /* Exchange API keys can also use the Bearer transport. */ }
+        }
+        const path = `${req.baseUrl || ''}${req.path}`;
+        const exchangePath = /^\/api\/v2\/(?:data-exchange|sis)(?:\/|$)/i.test(path);
+        const apiKey = req.headers['x-api-key'];
+        if (exchangePath && (bearer || (typeof apiKey === 'string' && apiKey.trim()))) {
+            // Header presence only selects a budget; apiKeyAuth still authenticates
+            // the connection and enforces its existing per-connection rate limit.
+            return (req[selectedBudget] = {
+                key: `exchange:${ipKeyGenerator(req.ip)}`,
+                limit: config.exchangeMax
+            });
         }
         return (req[selectedBudget] = {
             key: `ip:${ipKeyGenerator(req.ip)}`,
