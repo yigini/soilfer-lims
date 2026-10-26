@@ -692,7 +692,7 @@ components:
           example: "2.0.0"
         schemaVersion:
           type: string
-          example: 2026-09-issue140-v2
+          example: 2026-10-issue333-v2
         sourceSystemId:
           type: string
           example: soilfer-lims-core
@@ -747,7 +747,7 @@ components:
       properties:
         schemaVersion:
           type: string
-          example: "2026-09-issue140-v2"
+          example: "2026-10-issue333-v2"
         sourceSystemId:
           type: string
           example: "soilfer-lims-core"
@@ -958,6 +958,20 @@ components:
         censoring:
           type: string
           example: "NONE"
+        censored:
+          type: string
+          enum: ['<LOD', '<LOQ', '>RANGE']
+          description: >-
+            Present on /observations when stored censoring is BELOW_LOD,
+            BELOW_LOQ or ABOVE_RANGE, respectively. Both asMeasured.value and
+            normalized.value are null; rawEntry retains the original typed entry.
+            Existing censoring, lod and loq fields retain their existing meaning.
+        censoringLimit:
+          type: [number, "null"]
+          description: >-
+            Present with censored. The explicit canonical typed threshold, or
+            the same procedure's LOD/LOQ when available. Null if unknown.
+            A substituted numericValue is never used to infer a threshold.
         replicateNo:
           type: integer
           example: 1
@@ -979,6 +993,35 @@ components:
               type: [string, "null"]
             citation:
               type: [string, "null"]
+            limitOfDetection:
+              $ref: '#/components/schemas/ProcedureLimit'
+            limitOfQuantification:
+              $ref: '#/components/schemas/ProcedureLimit'
+            uncertainty:
+              type: object
+              description: >-
+                Optional on /observations. The result's own permitted procedure
+                supplies the amount; its laboratory's method-scoped uncertainty
+                policy determines absolute or relative reporting. Never sourced
+                from analysis defaults. Omitted when not reported or unknown.
+              required: [value, unit, type]
+              properties:
+                value:
+                  type: number
+                unit:
+                  type: string
+                  description: controlledUnit for absolute uncertainty, '%' for relative uncertainty.
+                relative:
+                  type: boolean
+                  const: true
+                  description: Present only for EXPANDED_RELATIVE_PCT.
+                type:
+                  type: string
+                  enum: [expanded]
+                coverageFactor:
+                  type: number
+                  minimum: 1
+                  description: Omitted when the laboratory policy leaves it null. No default factor is assumed.
         glosis:
           type: [object, "null"]
         analysedAt:
@@ -988,6 +1031,19 @@ components:
           type: [string, "null"]
           format: date-time
 
+    ProcedureLimit:
+      type: object
+      description: >-
+        Optional on /observations, from the result's own permitted methodology
+        only. Omitted if the stored amount or reporting unit is unknown.
+      required: [value, unit]
+      properties:
+        value:
+          type: number
+        unit:
+          type: string
+          description: The observation's controlledUnit.
+
     SpecimenListResponse:
       type: object
       properties:
@@ -996,7 +1052,7 @@ components:
           example: success
         schemaVersion:
           type: string
-          example: 2026-09-issue140-v2
+          example: 2026-10-issue333-v2
         sourceSystemId:
           type: string
           example: soilfer-lims-core
@@ -1024,7 +1080,7 @@ components:
           example: success
         schemaVersion:
           type: string
-          example: 2026-09-issue140-v2
+          example: 2026-10-issue333-v2
         sourceSystemId:
           type: string
           example: soilfer-lims-core
@@ -1039,7 +1095,7 @@ components:
           example: success
         schemaVersion:
           type: string
-          example: 2026-09-issue140-v2
+          example: 2026-10-issue333-v2
         sourceSystemId:
           type: string
           example: soilfer-lims-core
@@ -1070,7 +1126,7 @@ components:
           enum: [FeatureCollection]
         schemaVersion:
           type: string
-          example: 2026-09-issue140-v2
+          example: 2026-10-issue333-v2
         sourceSystemId:
           type: string
           example: soilfer-lims-core
@@ -1152,7 +1208,7 @@ components:
           example: success
         schemaVersion:
           type: string
-          example: 2026-09-issue140-v2
+          example: 2026-10-issue333-v2
         sourceSystemId:
           type: string
           example: soilfer-lims-core
@@ -1208,7 +1264,7 @@ components:
           example: success
         schemaVersion:
           type: string
-          example: 2026-09-issue140-v2
+          example: 2026-10-issue333-v2
         sourceSystemId:
           type: string
           example: soilfer-lims-core
@@ -1291,7 +1347,7 @@ components:
           example: success
         schemaVersion:
           type: string
-          example: 2026-09-issue140-v2
+          example: 2026-10-issue333-v2
         sourceSystemId:
           type: string
           example: soilfer-lims-core

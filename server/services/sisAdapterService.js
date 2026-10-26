@@ -1,3 +1,4 @@
+const { SCHEMA_VERSION } = require('./exchangeObservationQuality');
 /**
  * Soil Information System (SIS) / National SIS (NSIS) Data Exchange Adapter
  * Pure adapter service for harmonized SOSA/SSN & GloSIS data transformation.
@@ -722,7 +723,7 @@ function formatSampleV2(sample, maps = {}, options = {}) {
     }
 
     return {
-        schemaVersion: '2026-09-issue140-v2',
+        schemaVersion: SCHEMA_VERSION,
         sourceSystemId: sample.sourceSystemId || options.sourceSystemId || resolveSourceSystemId(options.db),
 
         // Core Specimen Identifiers (R4, R5: laboratoryId strictly assignedLab, no labId fallback)
