@@ -2,32 +2,38 @@
 
 ## Supported Versions
 
-Security fixes are actively released for the following versions of SoilFER-LIMS:
+Security updates are provided for the current release line. Older versions are unsupported—please upgrade to `1.12.x`.
 
 | Version | Supported |
-|---|---|
-| 1.0.x (Current / Main) | :white_check_mark: |
-| < 1.0.0 | :x: |
+| :--- | :--- |
+| `1.12.x` (Current) | :white_check_mark: |
+| `< 1.12.0` | :x: |
 
----
+## Reporting a Security Issue
 
-## Reporting a Vulnerability
+We take the protection of laboratory records, chain-of-custody data, and national soil information systems seriously.
 
-The SoilFER-LIMS team takes security seriously. If you discover a security vulnerability, please report it responsibly:
+**Please do not report security issues through public GitHub issues, pull requests, or discussions.**
 
-- **Do NOT open a public issue on GitHub.**
-- Send details of the vulnerability by email to: **`security@soilfer.org`** or directly to the repository maintainer (**`yusuf.yigini@fao.org`**).
-- Please include:
-  - Detailed description of the vulnerability and affected components
-  - Step-by-step reproduction steps or Proof of Concept (PoC)
-  - Potential impact assessment
-  - Any suggested remediation
+Instead, send a private report by email to the project maintainers:
+- **Email:** `security@soilfer.org` (or directly to `yusuf.yigini@fao.org`)
 
----
+When reporting, please include:
+1. A short description of the issue and the affected component or file path.
+2. Clear steps to reproduce the behavior.
+3. The deployment version and configuration context (without sharing passwords, tokens, or private keys).
 
-## Response & Disclosure Process
+## What Happens After a Report
 
-1. **Acknowledgment**: Within 48 hours, the security team will acknowledge receipt of your report.
-2. **Assessment**: The team will verify and triage the reported vulnerability.
-3. **Patch Development**: A fix will be developed, tested against the test suite, and verified in an isolated staging environment.
-4. **Release & Advisory**: A security patch will be released with a GitHub Security Advisory detailing the issue and acknowledging the reporter (unless anonymity is requested).
+1. **Acknowledgment:** We confirm receipt of your report within 48 hours.
+2. **Review & Verification:** Maintainers reproduce and assess the report within 5 business days and keep you updated on progress.
+3. **Fix & Release:** Validated fixes are prepared, tested, and published in a `1.12.x` or subsequent release on `main`, followed by release notes for laboratory administrators.
+
+## Safe Installation & Configuration Settings
+
+Laboratory administrators and system operators should review the installation and configuration guides when deploying or updating SoilFER LIMS:
+
+- [Installation Guide](docs/INSTALL.md) — production Docker deployment, TLS/reverse-proxy setup, and initial administrator setup.
+- [Environment Configuration](docs/book/src/installation/configuration.md) — required secrets, environment variables, and per-laboratory policy presets.
+- [HTTP Deployment Settings](docs/http-deployment-settings.md) — reverse-proxy trust, browser origin allowlists, and request body settings.
+- [Sign-in & Password Protection](docs/sign-in-protection.md) — password length and sign-in throttle settings.
