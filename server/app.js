@@ -68,14 +68,8 @@ app.use(cors((req, callback) => callback(null, corsOptions(req, httpSecurity))))
 
 // Rate Limiting
 if (process.env.NODE_ENV !== 'test') {
-    // Global Rate Limiter for API routes (DoS protection)
-    const apiLimiter = rateLimit({
-        windowMs: 15 * 60 * 1000, // 15 minutes
-        max: 1000, // 1000 requests per 15 min per IP
-        standardHeaders: true,
-        legacyHeaders: false,
-        message: { error: 'Too many requests from this IP, please try again later.' }
-    });
+    const { createApiRateLimiter } = require('./middleware/apiRateLimiter');
+    const apiLimiter = createApiRateLimiter();
     app.use('/api', apiLimiter);
 
     // Strict Rate Limiter for Login / Credential Endpoints (brute force protection)

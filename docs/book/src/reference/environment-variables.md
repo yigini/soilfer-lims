@@ -15,6 +15,8 @@ SoilFER LIMS reads its server configuration from the `.env` file in the project 
 | `ADMIN_INITIAL_PASSWORD` | *(randomly generated on first boot)* | No | Optional initial password for the `admin` account when seeding a brand-new database. If omitted, a random password is generated and printed once in the startup logs. |
 | `DATABASE_URL` | `file:./dev.db` | No | SQLite database file path used by Prisma ORM inside `/app/server/prisma`. |
 | `DISABLE_BACKGROUND_JOBS` | `false` | No | When set to `true` during pre-exposure upgrade verification (see `docs/UPGRADING.md`), suppresses background schedulers so zero background writes occur before cutover commitment. |
+| `API_RATE_LIMIT_USER_MAX` | `3000` | No | Positive integer: `/api` requests per user id in a valid JWT per 15 minutes. Sessions for the same user share this budget. |
+| `API_RATE_LIMIT_ANON_MAX` | `300` | No | Positive integer: `/api` requests per client IP per 15 minutes without a valid JWT. Login/register and account sign-in protections also apply. See [HTTP settings](../../../http-deployment-settings.md). |
 
 ---
 

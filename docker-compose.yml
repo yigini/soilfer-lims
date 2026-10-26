@@ -16,6 +16,8 @@ services:
       - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-}
       - TRUST_PROXY=${TRUST_PROXY:-loopback}
       - HEALTH_SHOW_VERSION=${HEALTH_SHOW_VERSION:-false}
+      - API_RATE_LIMIT_USER_MAX=${API_RATE_LIMIT_USER_MAX:-3000}
+      - API_RATE_LIMIT_ANON_MAX=${API_RATE_LIMIT_ANON_MAX:-300}
     deploy:
       resources:
         limits:
