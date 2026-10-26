@@ -7,8 +7,8 @@ import { playNoticeChime } from '../utils/audioCues';
 export const NotificationContext = createContext();
 
 export const NotificationProvider = ({ children }) => {
-    const { user } = useAuth();
-    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    const { user, token } = useAuth();
+    const userId = user?.id;
 
     const [notifications, setNotifications] = useState([]);
     const [unreadCount, setUnreadCount] = useState(0);
@@ -29,6 +29,15 @@ export const NotificationProvider = ({ children }) => {
     const wsRef = useRef(null);
     const reconnectTimer = useRef(null);
     const wsConnected = useRef(false);
+    const reconnectAttempts = useRef(0);
+    const refreshState = useRef({ inFlight: new Set(), nextAt: 0 });
+
+    useEffect(() => {
+        // Identity/token changes start a new refresh generation. Late responses
+        // from the previous session must not populate the next user's drawer.
+        refreshState.current = { inFlight: new Set(), nextAt: 0 };
+        return () => { refreshState.current = { inFlight: new Set(), nextAt: 0 }; };
+    }, [userId, token]);
 
     // Generic event subscribers (for WORKITEM_CHANGED, WORKITEM_UPDATE, etc.)
     const eventSubscribersRef = useRef(new Map());
@@ -43,17 +52,31 @@ export const NotificationProvider = ({ children }) => {
     useEffect(() => { activeThreadPartnerRef.current = activeThreadPartner; }, [activeThreadPartner]);
 
     // ── Notifications ─────────────────────────────────────────────
-    const fetchNotifications = useCallback(async () => {
-        if (!user) return;
+    const fetchList = useCallback(async (url, apply) => {
+        const state = refreshState.current;
+        if (!userId || state.inFlight.has(url) || Date.now() < state.nextAt) return;
+        state.inFlight.add(url);
         try {
-            const res = await axios.get('/api/notifications');
-            const list = Array.isArray(res.data) ? res.data : [];
-            setNotifications(list);
-            setUnreadCount(list.filter(n => !n.read && !n.isRead).length);
+            const res = await axios.get(url);
+            if (refreshState.current === state) apply(Array.isArray(res.data) ? res.data : []);
         } catch (err) {
-            console.error('Failed to fetch notifications', err);
+            const status = err.response?.status;
+            if (status === 401 || status === 403) state.nextAt = Infinity;
+            if (status === 429) {
+                const seconds = Number(err.response.headers?.['retry-after']);
+                const delay = Number.isFinite(seconds) && seconds > 0 ? seconds * 1000 : 60000;
+                state.nextAt = Math.max(state.nextAt, Date.now() + delay);
+            }
+            console.error('Background notification refresh failed', status || 'network');
+        } finally {
+            state.inFlight.delete(url);
         }
-    }, [user]);
+    }, [userId, token]);
+
+    const fetchNotifications = useCallback(() => fetchList('/api/notifications', list => {
+        setNotifications(list);
+        setUnreadCount(list.filter(n => !n.read && !n.isRead).length);
+    }), [fetchList]);
 
     // Keep ref in sync
     useEffect(() => { fetchNotificationsRef.current = fetchNotifications; }, [fetchNotifications]);
@@ -137,13 +160,8 @@ export const NotificationProvider = ({ children }) => {
         } catch (err) { console.error('Failed to send chat message', err); return false; }
     };
 
-    const fetchConversations = useCallback(async () => {
-        if (!user) return;
-        try {
-            const res = await axios.get('/api/messages/conversations');
-            setConversations(Array.isArray(res.data) ? res.data : []);
-        } catch (err) { console.error('Failed to fetch conversations', err); }
-    }, [user]);
+    const fetchConversations = useCallback(() =>
+        fetchList('/api/messages/conversations', setConversations), [fetchList]);
 
     useEffect(() => { fetchConversationsRef.current = fetchConversations; }, [fetchConversations]);
 
@@ -185,6 +203,7 @@ export const NotificationProvider = ({ children }) => {
 
         switch (data.type) {
             case 'CONNECTED':
+                reconnectAttempts.current = 0;
                 console.log('[WS] Authenticated as', data.userId);
                 if (data.onlineUsers) {
                     setOnlineUsers(new Set(data.onlineUsers.map(String)));
@@ -296,16 +315,20 @@ export const NotificationProvider = ({ children }) => {
     }, []); // No dependencies — uses refs for everything
 
     const connectWebSocket = useCallback(() => {
-        const currentToken = localStorage.getItem('token');
-        if (!currentToken || !user) return;
+        if (!token || !userId) return;
         if (wsRef.current && (wsRef.current.readyState === WebSocket.OPEN || wsRef.current.readyState === WebSocket.CONNECTING)) return;
+
+        const scheduleReconnect = () => {
+            const delay = Math.min(60000, 3000 * (2 ** Math.min(reconnectAttempts.current++, 5)));
+            reconnectTimer.current = setTimeout(connectWebSocket, delay);
+        };
 
         const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
         const host = import.meta.env.DEV ? 'localhost:3000' : window.location.host;
         const wsUrl = `${protocol}://${host}/ws`;
 
         try {
-            const ws = new WebSocket(wsUrl, [currentToken]);
+            const ws = new WebSocket(wsUrl, [token]);
             wsRef.current = ws;
 
             ws.onopen = () => {
@@ -324,11 +347,13 @@ export const NotificationProvider = ({ children }) => {
                 } catch (e) { console.error('[WS] Parse error:', e); }
             };
 
-            ws.onclose = () => {
+            ws.onclose = (event) => {
                 console.log('[WS] Disconnected');
                 wsConnected.current = false;
                 wsRef.current = null;
-                reconnectTimer.current = setTimeout(connectWebSocket, 3000);
+                // Authentication refusals need a new session, not repeated upgrades.
+                if (event.code >= 4001 && event.code <= 4005) return;
+                scheduleReconnect();
             };
 
             ws.onerror = (err) => {
@@ -339,14 +364,16 @@ export const NotificationProvider = ({ children }) => {
             };
         } catch (e) {
             console.error('[WS] Connection failed:', e);
-            reconnectTimer.current = setTimeout(connectWebSocket, 5000);
+            scheduleReconnect();
         }
-    }, [user, handleWebSocketEvent]);
+    }, [userId, token, handleWebSocketEvent]);
 
     // Connect WebSocket on mount
     useEffect(() => {
-        if (user) connectWebSocket();
+        reconnectAttempts.current = 0;
+        if (userId) connectWebSocket();
         return () => {
+            wsConnected.current = false;
             if (wsRef.current) {
                 const ws = wsRef.current;
                 wsRef.current = null;
@@ -370,21 +397,27 @@ export const NotificationProvider = ({ children }) => {
                 reconnectTimer.current = null;
             }
         };
-    }, [user, connectWebSocket]);
+    }, [userId, connectWebSocket]);
 
     // Fallback polling
     useEffect(() => {
-        if (!user) return;
-        fetchNotifications();
-        fetchConversations();
-        const interval = setInterval(() => {
-            if (!wsConnected.current) {
+        if (!userId) return;
+        const refresh = () => {
+            if (document.visibilityState !== 'hidden' && navigator.onLine !== false && !wsConnected.current) {
                 fetchNotifications();
                 fetchConversations();
             }
-        }, 8000);
-        return () => clearInterval(interval);
-    }, [user, fetchNotifications, fetchConversations]);
+        };
+        refresh();
+        const interval = setInterval(refresh, 30000);
+        document.addEventListener('visibilitychange', refresh);
+        window.addEventListener('online', refresh);
+        return () => {
+            clearInterval(interval);
+            document.removeEventListener('visibilitychange', refresh);
+            window.removeEventListener('online', refresh);
+        };
+    }, [userId, fetchNotifications, fetchConversations]);
 
     // ── Event Subscription API (for WORKITEM_CHANGED, WORKITEM_UPDATE, etc.) ─────────────────
     const subscribeToEvent = useCallback((eventType, callback) => {
