@@ -74,7 +74,7 @@ curl -s -X GET "https://<lims-domain>/api/v2/data-exchange/capabilities" | jq .
 
 Verify that the response returns:
 - `contractVersion: "2.0.0"`
-- `schemaVersion: "2026-09-issue140-v2"`
+- `schemaVersion: "2026-10-issue333-v2"`
 - `supportedProfiles: ["core-lossless-v2", "opennsis", "glosis", "default"]`
 
 ### 3.2 Running the Standalone Reference Client Verification

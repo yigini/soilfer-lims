@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.12.2] - 2026-10-26
+
+### Added
+- Include optional procedure LOD, LOQ and measurement uncertainty in exchange observations, with explicit censored-result markers (#333).
+
+### Fixed
+- Give signed-in users independent API request budgets and reduce unnecessary background refresh (#352).
+
+### Changed
+- Include Help v1.2.0 with the five-language signing-in and passwords article (#350).
+
 ## [1.12.1] - 2026-10-25
 
 ### Fixed

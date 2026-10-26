@@ -83,7 +83,7 @@ const techStack = [
 
 const changelog = [
     {
-        version: 'v1.12.1',
+        version: 'v1.12.2',
         date: 'October 25, 2026',
         tag: 'Transaction Handling',
         badgeColor: 'bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300 border-blue-300 dark:border-blue-800',

@@ -1,7 +1,7 @@
 # National Soil Information System (NSIS) Data Exchange Specification (V2)
 
 **Specification Version:** 2.0.0  
-**Schema Identifier:** `2026-09-issue140-v2`  
+**Schema Identifier:** `2026-10-issue333-v2`\
 **Status:** Approved / Active Contract  
 **Protocol:** RESTful JSON / RFC 7946 GeoJSON over TLS (HTTPS)  
 **Target Consumers:** National Soil Information Systems (NSIS), FAO OpenNSIS (`sis-database/owl2sql`), Global Soil Data Portals (GLOSIS / GSP)  
@@ -74,7 +74,7 @@ Public machine-discovery endpoint declaring server contract version, supported p
 {
   "status": "success",
   "contractVersion": "2.0.0",
-  "schemaVersion": "2026-09-issue140-v2",
+  "schemaVersion": "2026-10-issue333-v2",
   "sourceSystemId": "soilfer-lims-core",
   "supportedProfiles": ["core-lossless-v2", "opennsis", "glosis", "default"],
   "supportedMatrices": ["SOIL", "PLANT", "WATER", "FERTILIZER"],
@@ -119,7 +119,7 @@ Returns aggregated specimen, observation, and laboratory metrics scoped strictly
 ```json
 {
   "status": "success",
-  "schemaVersion": "2026-09-issue140-v2",
+  "schemaVersion": "2026-10-issue333-v2",
   "sourceSystemId": "soilfer-lims-core",
   "data": {
     "totalSamplesPublished": 1420,
@@ -292,7 +292,7 @@ RFC 7946 compliant GeoJSON stream for GIS systems (QGIS, ArcGIS, GeoNode).
 ```json
 {
   "type": "FeatureCollection",
-  "schemaVersion": "2026-09-issue140-v2",
+  "schemaVersion": "2026-10-issue333-v2",
   "sourceSystemId": "soilfer-lims-core",
   "total": 1200,
   "count": 1,
@@ -353,7 +353,7 @@ Allows consumers to freeze a point-in-time manifest across the dataset and harve
     ```json
     {
       "status": "success",
-      "schemaVersion": "2026-09-issue140-v2",
+      "schemaVersion": "2026-10-issue333-v2",
       "sourceSystemId": "soilfer-lims-core",
       "profile": "core-lossless-v2",
       "snapshotId": "snap_1790461148749_eb88d95e",
@@ -396,7 +396,7 @@ Monotonically ordered feed of publication, amendment, and withdrawal events from
 ```json
 {
   "status": "success",
-  "schemaVersion": "2026-09-issue140-v2",
+  "schemaVersion": "2026-10-issue333-v2",
   "sourceSystemId": "soilfer-lims-core",
   "batchId": "batch_1790461149000_c4d2",
   "boundaryTimestamp": "2026-09-27T00:15:00.000Z",
@@ -466,7 +466,7 @@ Enables external consumers (e.g. OpenNSIS ingestion pipeline) to acknowledge suc
 ```json
 {
   "status": "success",
-  "schemaVersion": "2026-09-issue140-v2",
+  "schemaVersion": "2026-10-issue333-v2",
   "sourceSystemId": "soilfer-lims-core",
   "receipt": {
     "receiptId": "rec_1790461148894_cb7fa653",
@@ -517,3 +517,34 @@ All error responses return structured JSON:
   "message": "Missing API authentication. Provide an X-API-KEY header or Bearer token."
 }
 ```
+
+
+### Procedure quality and censored observations
+
+Schema `2026-10-issue333-v2` adds optional fields to the dedicated
+`/api/v2/data-exchange/observations` endpoint and its `/api/v2/sis` alias,
+including `profile=opennsis`. The result's own `methodologyId` supplies
+`method.limitOfDetection` and `method.limitOfQuantification`, each as
+`{ value, unit }` in the observation's `controlledUnit`. Missing procedure
+amounts or unknown reporting units omit those keys. Analysis defaults never
+supply these quality values; another laboratory's procedure cannot supply them.
+
+When the owning laboratory's method-scoped `report.uncertaintyMode` is
+`EXPANDED_ABSOLUTE`, `method.uncertainty` contains the procedure amount, reporting
+unit and `type: "expanded"`. `EXPANDED_RELATIVE_PCT` uses `unit: "%"` and
+`relative: true`. `NOT_REPORTED` or a missing amount omits uncertainty. A null
+`report.uncertaintyCoverageFactor` omits `coverageFactor`; no factor is guessed.
+Absolute uncertainty also requires a known reporting unit.
+
+Stored `BELOW_LOD`, `BELOW_LOQ` and `ABOVE_RANGE` map to `censored: "<LOD"`,
+`"<LOQ"` and `">RANGE"`, respectively. These observations have null
+`asMeasured.value` and `normalized.value` while `asMeasured.rawEntry` keeps the
+typed entry (for example `<0,5`). `censoringLimit` is the canonical typed threshold,
+or the same procedure's LOD/LOQ if available, and null when unknown. A substituted
+numeric value never establishes a threshold. Unrecognized stored censoring codes
+refuse the response with `EXCHANGE_CENSORING_UNSUPPORTED` rather than exporting an
+unqualified number. Uncensored observations and the existing observation-level
+`censoring`, `lod` and `loq` fields retain their existing behavior.
+
+This changes exchange output only. It does not rewrite stored measurements,
+backfill historical rows, or change report-PDF evidence and publication rules.

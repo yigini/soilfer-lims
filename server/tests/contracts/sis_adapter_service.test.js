@@ -290,7 +290,7 @@ describe('Issue #140 Work Package P1: SIS Data Exchange Adapter Contracts', () =
             };
 
             const v2 = formatSampleV2(sample, {}, { auth: { capabilities: ['SPATIAL'] } });
-            expect(v2.schemaVersion).toBe('2026-09-issue140-v2');
+            expect(v2.schemaVersion).toBe('2026-10-issue333-v2');
             expect(v2.specimenId).toBe('uuid-5678');
             expect(v2.fieldSampleId).toBe('FIELD-BAG-88');
             expect(v2.labSampleId).toBe('LAB-ACCESS-100');

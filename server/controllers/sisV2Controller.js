@@ -15,6 +15,7 @@
 
 const crypto = require('crypto');
 const prisma = require('../prisma');
+const { SCHEMA_VERSION, readMethodContexts, methodQuality, censoringFields } = require('../services/exchangeObservationQuality');
 const {
     SOURCE_SYSTEM_ID,
     formatSampleV2,
@@ -83,7 +84,7 @@ exports.getCapabilities = (req, res) => {
     res.json({
         status: 'success',
         contractVersion: '2.0.0',
-        schemaVersion: '2026-09-issue140-v2',
+        schemaVersion: SCHEMA_VERSION,
         sourceSystemId: getSourceSystemId(),
         supportedProfiles: ['core-lossless-v2', 'opennsis', 'glosis', 'default'],
         supportedMatrices: ['SOIL', 'PLANT', 'WATER', 'FERTILIZER'],
@@ -229,7 +230,7 @@ exports.getSamples = async (req, res, next) => {
 
         res.json({
             status: 'success',
-            schemaVersion: '2026-09-issue140-v2',
+            schemaVersion: SCHEMA_VERSION,
             sourceSystemId: getSourceSystemId(),
             boundaryTimestamp: new Date().toISOString(),
             count: data.length,
@@ -298,7 +299,7 @@ exports.getSampleById = async (req, res, next) => {
 
         res.json({
             status: 'success',
-            schemaVersion: '2026-09-issue140-v2',
+            schemaVersion: SCHEMA_VERSION,
             sourceSystemId: getSourceSystemId(),
             data: formatted
         });
@@ -424,10 +425,15 @@ exports.getObservations = async (req, res, next) => {
 
         if (typeof req.startPhase === 'function') req.startPhase('mapping');
         const reportedSelectionIds=await require('../services/reportedValueReadService').rawSelectionIds(prisma,pageItems);
+        const methodContexts = await prisma.$transaction(tx => readMethodContexts(tx, pageItems));
         const observations = pageItems.map(r => {
             const s = r.sample;
             const aMeta = maps.analysisMap[r.param] || {};
-            const methodObj = (r.methodologyId && maps.methodMap[r.methodologyId]) ? maps.methodMap[r.methodologyId] : aMeta.defaultMethod;
+            const methodContext = methodContexts.get(r.id);
+            const defaultMethod = aMeta.defaultMethod;
+            const methodObj = methodContext.method ||
+                (require('../services/methodResolution').isAvailable(defaultMethod, r.param, methodContext.labId) ? defaultMethod : null);
+            const censoring = censoringFields(r, methodContext.method);
 
             const procedureUri = methodObj?.glosisUri || aMeta.glosisUri || null;
             const propertyUri = aMeta.glosisPropertyUri || (aMeta.glosisProperty ? `http://glosis.org/ont/property/${aMeta.glosisProperty}` : null);
@@ -467,12 +473,12 @@ exports.getObservations = async (req, res, next) => {
                 parameterCode: aMeta.code || r.param,
                 parameterName: aMeta.name || r.param,
                 asMeasured: {
-                    value: numVal,
-                    rawEntry: r.value,
+                    value: censoring.censored ? null : numVal,
+                    rawEntry: censoring.censored ? r.rawInput ?? r.value : r.value,
                     unit: rawUnit
                 },
                 normalized: {
-                    value: normVal,
+                    value: censoring.censored ? null : normVal,
                     unit: controlledUnit
                 },
                 controlledUnit,
@@ -483,6 +489,7 @@ exports.getObservations = async (req, res, next) => {
                 provenance: r.provenance || 'MEASURED',
                 basis: r.basis || 'AIR_DRY',
                 censoring: r.censoring || 'NONE',
+                ...censoring,
                 replicateNo: r.replicateNo || 1,
                 attemptId: r.attemptId || null,
                 batchId: r.batchId || null,
@@ -493,7 +500,8 @@ exports.getObservations = async (req, res, next) => {
                     name: methodObj?.name || r.method || aMeta.methodLabel || null,
                     standard: methodObj?.standard || null,
                     procedureUri,
-                    citation: methodObj?.glosisCitation || aMeta.methodCitation || null
+                    citation: methodObj?.glosisCitation || aMeta.methodCitation || null,
+                    ...methodQuality(methodContext, controlledUnit)
                 },
                 glosis: (propertyUri || procedureUri || aMeta.glosisAttribute) ? {
                     propertyCode: aMeta.glosisProperty || null,
@@ -512,7 +520,7 @@ exports.getObservations = async (req, res, next) => {
 
         res.json({
             status: 'success',
-            schemaVersion: '2026-09-issue140-v2',
+            schemaVersion: SCHEMA_VERSION,
             sourceSystemId: getSourceSystemId(),
             boundaryTimestamp: new Date().toISOString(),
             count: observations.length,
@@ -738,7 +746,7 @@ exports.getGeoJson = async (req, res, next) => {
         if (!hasSpatialCapability(req.sisAuth)) {
             return res.json({
                 type: 'FeatureCollection',
-                schemaVersion: '2026-09-issue140-v2',
+                schemaVersion: SCHEMA_VERSION,
                 sourceSystemId: getSourceSystemId(),
                 total: 0,
                 count: 0,
@@ -999,7 +1007,7 @@ exports.getGeoJson = async (req, res, next) => {
         // RFC 7946 strictly omits the obsolete crs object
         res.json({
             type: 'FeatureCollection',
-            schemaVersion: '2026-09-issue140-v2',
+            schemaVersion: SCHEMA_VERSION,
             sourceSystemId: getSourceSystemId(),
             total,
             count: features.length,
@@ -1062,7 +1070,7 @@ exports.getStats = async (req, res, next) => {
 
         res.json({
             status: 'success',
-            schemaVersion: '2026-09-issue140-v2',
+            schemaVersion: SCHEMA_VERSION,
             sourceSystemId: getSourceSystemId(),
             metrics: {
                 totalEligibleSamples,
@@ -1224,7 +1232,7 @@ exports.getSpectra = async (req, res, next) => {
 
         res.json({
             status: 'success',
-            schemaVersion: '2026-09-issue140-v2',
+            schemaVersion: SCHEMA_VERSION,
             sourceSystemId: getSourceSystemId(),
             count: data.length,
             total,
@@ -1273,7 +1281,7 @@ exports.createSnapshot = async (req, res, next) => {
 
         res.status(201).json({
             status: 'success',
-            schemaVersion: '2026-09-issue140-v2',
+            schemaVersion: SCHEMA_VERSION,
             sourceSystemId: getSourceSystemId(),
             profile,
             ...snapshot
@@ -1301,7 +1309,7 @@ exports.getSnapshotPages = async (req, res, next) => {
 
         res.json({
             status: 'success',
-            schemaVersion: '2026-09-issue140-v2',
+            schemaVersion: SCHEMA_VERSION,
             sourceSystemId: getSourceSystemId(),
             ...result
         });
@@ -1334,7 +1342,7 @@ exports.getChanges = async (req, res, next) => {
 
         res.json({
             status: 'success',
-            schemaVersion: '2026-09-issue140-v2',
+            schemaVersion: SCHEMA_VERSION,
             sourceSystemId: getSourceSystemId(),
             ...result
         });
@@ -1357,7 +1365,7 @@ exports.submitReceipt = async (req, res, next) => {
         }
         res.status(200).json({
             status: 'success',
-            schemaVersion: '2026-09-issue140-v2',
+            schemaVersion: SCHEMA_VERSION,
             sourceSystemId: getSourceSystemId(),
             receipt
         });

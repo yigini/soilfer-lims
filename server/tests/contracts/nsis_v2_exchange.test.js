@@ -150,7 +150,7 @@ describe('Issue #140 Work Packages P3 & P4: V2 Data Exchange API Contracts', () 
 
         expect(res.status).toBe(200);
         expect(res.body.contractVersion).toBe('2.0.0');
-        expect(res.body.schemaVersion).toBe('2026-09-issue140-v2');
+        expect(res.body.schemaVersion).toBe('2026-10-issue333-v2');
         expect(res.body.supportedProfiles).toContain('opennsis');
         expect(res.body.features.losslessObservations).toBe(true);
         expect(res.body.features.resumableSnapshots).toBe(true);
@@ -169,7 +169,7 @@ describe('Issue #140 Work Packages P3 & P4: V2 Data Exchange API Contracts', () 
             .set('X-API-Key', testKey.rawKey);
 
         expect(res.status).toBe(200);
-        expect(res.body.schemaVersion).toBe('2026-09-issue140-v2');
+        expect(res.body.schemaVersion).toBe('2026-10-issue333-v2');
         expect(res.body.count).toBeGreaterThanOrEqual(2);
 
         const found = res.body.data.find(s => s.specimenId === sample1.id);
@@ -206,7 +206,7 @@ describe('Issue #140 Work Packages P3 & P4: V2 Data Exchange API Contracts', () 
             .set('X-API-Key', testKey.rawKey);
 
         expect(res.status).toBe(200);
-        expect(res.body.schemaVersion).toBe('2026-09-issue140-v2');
+        expect(res.body.schemaVersion).toBe('2026-10-issue333-v2');
 
         const sample1Obs = res.body.data.filter(o => o.specimenId === sample1.id);
         expect(sample1Obs).toHaveLength(2); // Both replicates present!
