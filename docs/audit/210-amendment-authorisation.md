@@ -1,6 +1,6 @@
 # Sample amendment authorisation (#210, WIP)
 
-Scope: author pins [6091161203](https://github.com/yigini/soilfer-lims/issues/210#issuecomment-6091161203), [6091749343](https://github.com/yigini/soilfer-lims/issues/210#issuecomment-6091749343), and [6094004400](https://github.com/yigini/soilfer-lims/issues/210#issuecomment-6094004400).
+Scope: author pins 6091161203 (historical issue #210), 6091749343 (historical issue #210), and 6094004400 (historical issue #210).
 
 Requests persist PENDING evidence. Non-scientific authorisation re-reads the laboratory's second-person policy, applies retained clerical corrections with profile revision CAS, and records ORDER/REPORT proposals without making those changes. Scientific authorisation validates every selected current accepted measurement line and its unambiguous current accepted attempt, the assigned registered laboratory, holds, released batch evidence and the existing attempt-limit policy before writing. The same transaction approves the request, retains the prior approval pair, mints a private transaction-bound capability, reopens only the selected lines, and creates OPEN children linked through SampleAmendmentAttempt. Accepted parent attempts and prior analytical, QC, calculation and reported-selection rows remain unchanged. Ordinary transition and repeat paths do not acquire the new authority.
 

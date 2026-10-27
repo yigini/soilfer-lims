@@ -58,7 +58,7 @@ const bcrypt = require('bcryptjs');
 
 const CHROME_PATH = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
 const ARTIFACT_DIR = path.resolve(__dirname, '..', '..', 'artifacts', 'evidence-journeys');
-const BRAIN_ARTIFACT_DIR = path.resolve('C:\\Users\\yigin\\.gemini\\antigravity\\brain\\80c11c12-5cb7-4455-a433-01544d488498');
+const BRAIN_ARTIFACT_DIR = path.resolve('C:\\workspace\\.gemini\\antigravity\\brain\\80c11c12-5cb7-4455-a433-01544d488498');
 
 if (!fs.existsSync(ARTIFACT_DIR)) {
     fs.mkdirSync(ARTIFACT_DIR, { recursive: true });

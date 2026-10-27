@@ -29,12 +29,12 @@ PRIVATE_MANIFEST=${PRIVATE_MANIFEST:-"${LIMS_OPT_DIR}/private_kobo/ghana_kobo_ma
 
 EXPECTED_SNAPSHOT_SHA=${EXPECTED_SNAPSHOT_SHA:-"33db90cdcab60ccf4801a7754d8444893c0b6ee25f269a65366d6fed5046292f"}
 EXPECTED_MANIFEST_SHA=${EXPECTED_MANIFEST_SHA:-"e43d490366eda0e325b1f1639c743b57105a6256e0f406df6f7e1d87514adaed"}
-RUNNER_SCRIPT=${RUNNER_SCRIPT:-"/app/server/scripts/execute_ghana_apply_146.cjs"}
+RUNNER_SCRIPT=${RUNNER_SCRIPT:-"/app/server/scripts/apply_reviewed_snapshot.cjs"}
 EXPECTED_APPLY_COUNT=${EXPECTED_APPLY_COUNT:-864}
 
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-BACKUP_CONSISTENT="${LIMS_OPT_DIR}/backups/dev_pre_issue146_${TIMESTAMP}.db"
-LOG_FILE="${LIMS_OPT_DIR}/logs/apply_issue146_${TIMESTAMP}.log"
+BACKUP_CONSISTENT="${LIMS_OPT_DIR}/backups/dev_pre_snapshot_${TIMESTAMP}.db"
+LOG_FILE="${LIMS_OPT_DIR}/logs/snapshot_apply_${TIMESTAMP}.log"
 
 RUNNER_DRYRUN_NAME="soilfer-lims-dryrun-${TIMESTAMP}"
 RUNNER_APPLY_NAME="soilfer-lims-apply-${TIMESTAMP}"
@@ -42,9 +42,9 @@ RUNNER_APPLY_NAME="soilfer-lims-apply-${TIMESTAMP}"
 mkdir -p "${LIMS_OPT_DIR}/backups" "${LIMS_OPT_DIR}/logs"
 
 # --- Step 0: Exclusive Host Lock ---
-LOCK_FILE="${LIMS_OPT_DIR}/apply_issue146.lock"
-LOCK_DIR="${LIMS_OPT_DIR}/apply_issue146.lock.d"
-PID_FILE="${LIMS_OPT_DIR}/apply_issue146.pid"
+LOCK_FILE="${LIMS_OPT_DIR}/snapshot_apply.lock"
+LOCK_DIR="${LIMS_OPT_DIR}/snapshot_apply.lock.d"
+PID_FILE="${LIMS_OPT_DIR}/snapshot_apply.pid"
 
 if command -v flock >/dev/null 2>&1; then
     exec 200>"${LOCK_FILE}"

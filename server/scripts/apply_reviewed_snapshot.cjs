@@ -5,8 +5,8 @@
  * Ghana Kobo Enablement & Bounded Ingestion Runner (Issue #146, PR #147)
  * 
  * Usage:
- *   node server/scripts/execute_ghana_apply_146.cjs --dry-run [--snapshot <path>] [--manifest <path>]
- *   node server/scripts/execute_ghana_apply_146.cjs --apply   [--snapshot <path>] [--manifest <path>]
+ *   node server/scripts/apply_reviewed_snapshot.cjs --dry-run [--snapshot <path>] [--manifest <path>]
+ *   node server/scripts/apply_reviewed_snapshot.cjs --apply   [--snapshot <path>] [--manifest <path>]
  */
 
 const fs = require('fs');
@@ -37,7 +37,7 @@ const isApply = process.argv.includes('--apply');
 
 if (!isDryRun && !isApply) {
     console.error('ERROR: Must specify either --dry-run or --apply');
-    console.error('Usage: node execute_ghana_apply_146.cjs [--dry-run | --apply] [--snapshot <path>] [--manifest <path>]');
+    console.error('Usage: node apply_reviewed_snapshot.cjs [--dry-run | --apply] [--snapshot <path>] [--manifest <path>]');
     process.exit(1);
 }
 

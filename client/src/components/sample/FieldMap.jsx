@@ -5,6 +5,7 @@ import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { OSM_TILE_CONFIG } from '../../utils/mapConfig';
 import { useLanguage } from '../../context/LanguageContext';
+import { useTheme } from '../../context/ThemeContext';
 
 // Custom Leaflet marker icon (no external images needed)
 const sampleIcon = new L.DivIcon({
@@ -25,7 +26,6 @@ const sampleIcon = new L.DivIcon({
 // ─── Cesium CDN Loader ───
 const CESIUM_VERSION = '1.124';
 const CESIUM_BASE = `https://cesium.com/downloads/cesiumjs/releases/${CESIUM_VERSION}/Build/Cesium`;
-const CESIUM_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJhZjA2OTI4NC0yYjg4LTRhZjUtOWQ2OS04YmU5MWIyYmYyOTciLCJpZCI6NjU0MzUsImlhdCI6MTc3MDYyOTY3OX0.5vA6I0n9SS-f1SCt8xQQmw1JhrKsEsfqZgzhJ_4Tgh8';
 
 let cesiumLoadPromise = null;
 const loadCesium = () => {
@@ -210,7 +210,7 @@ const PhotoPopupPanel = ({ sample, photos, onClose, onPhotoClick, proxyUrl }) =>
 
 
 // ─── Cesium 3D View ───
-const CesiumView = ({ lat, lng, sample, onPinClick }) => {
+const CesiumView = ({ lat, lng, sample, onPinClick, accessToken }) => {
     const containerRef = useRef(null);
     const viewerRef = useRef(null);
     const [loading, setLoading] = useState(true);
@@ -218,7 +218,7 @@ const CesiumView = ({ lat, lng, sample, onPinClick }) => {
     const [ionAvailable, setIonAvailable] = useState(false);
 
     useEffect(() => {
-        if (!containerRef.current) return;
+        if (!containerRef.current || !accessToken) return;
         let viewer = null;
         let destroyed = false;
 
@@ -226,7 +226,7 @@ const CesiumView = ({ lat, lng, sample, onPinClick }) => {
             try {
                 const Cesium = await loadCesium();
                 if (destroyed) return;
-                Cesium.Ion.defaultAccessToken = CESIUM_TOKEN;
+                Cesium.Ion.defaultAccessToken = accessToken;
                 if (containerRef.current) containerRef.current.innerHTML = '';
 
                 let terrainProvider, usingIon = false;
@@ -345,7 +345,7 @@ const CesiumView = ({ lat, lng, sample, onPinClick }) => {
             if (viewer && !viewer.isDestroyed()) viewer.destroy();
             viewerRef.current = null;
         };
-    }, [lat, lng]);
+    }, [lat, lng, accessToken]);
 
     useEffect(() => { setLoading(true); setError(null); }, []);
 
@@ -466,8 +466,11 @@ const LeafletView = ({ lat, lng, sample, onPinClick }) => {
 
 // ─── Main FieldMap Component ───
 const FieldMap = ({ sample }) => {
+    const { theme } = useTheme();
+    const cesiumToken = typeof theme?.cesiumToken === 'string' ? theme.cesiumToken.trim() : '';
     const proxyUrl = useKoboMediaUrls(sample);
-    const [viewMode, setViewMode] = useState('3d');
+    const [requestedViewMode, setViewMode] = useState('3d');
+    const viewMode = cesiumToken ? requestedViewMode : '2d';
     const [expanded, setExpanded] = useState(false);
     const [fullscreen, setFullscreen] = useState(false);
     const [showPhotoPopup, setShowPhotoPopup] = useState(false);
@@ -539,8 +542,9 @@ const FieldMap = ({ sample }) => {
     const Controls = ({ isFullscreen }) => (
         <div className={`absolute top-3 right-3 z-[1000] flex gap-1.5 ${isFullscreen ? 'top-5 right-5' : ''}`}>
             <div className="flex rounded-lg overflow-hidden border border-white/15 shadow-lg">
-                <button onClick={() => setViewMode('3d')}
-                    className={`px-3 py-2 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider transition-all backdrop-blur-xl ${viewMode === '3d' ? 'bg-blue-600/90 text-white' : 'bg-slate-900/80 text-gray-400 hover:text-white'}`}>
+                <button onClick={() => setViewMode('3d')} disabled={!cesiumToken}
+                    title={cesiumToken ? '3D view' : '3D view is unavailable for this installation'}
+                    className={`px-3 py-2 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider transition-all backdrop-blur-xl ${viewMode === '3d' ? 'bg-blue-600/90 text-white' : 'bg-slate-900/80 text-gray-400 hover:text-white'} disabled:opacity-40 disabled:cursor-not-allowed`}>
                     <Box size={12} /> 3D
                 </button>
                 <button onClick={() => setViewMode('2d')}
@@ -590,7 +594,7 @@ const FieldMap = ({ sample }) => {
     // Map content
     const MapContent = () => (
         viewMode === '3d'
-            ? <CesiumView lat={lat} lng={lng} sample={sample} onPinClick={handlePinClick} />
+            ? <CesiumView lat={lat} lng={lng} sample={sample} onPinClick={handlePinClick} accessToken={cesiumToken} />
             : <LeafletView lat={lat} lng={lng} sample={sample} onPinClick={handlePinClick} />
     );
 

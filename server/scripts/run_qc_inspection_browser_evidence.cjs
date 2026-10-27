@@ -610,7 +610,7 @@ async function runQCInspectionEvidence() {
         console.log(`[Evidence] Saved card screenshot to: ${cardScreenshotPath}`);
 
         // Also copy to antigravity brain artifacts directory for direct user inspection
-        const brainArtifactsDir = 'C:\\Users\\yigin\\.gemini\\antigravity\\brain\\80c11c12-5cb7-4455-a433-01544d488498';
+        const brainArtifactsDir = 'C:\\workspace\\.gemini\\antigravity\\brain\\80c11c12-5cb7-4455-a433-01544d488498';
         if (fs.existsSync(brainArtifactsDir)) {
             const brainPath1 = path.join(brainArtifactsDir, 'qc_inspection_legacy_reject_modal.png');
             fs.copyFileSync(screenshotPath, brainPath1);

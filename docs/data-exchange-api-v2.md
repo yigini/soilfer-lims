@@ -5,7 +5,7 @@
 **Status:** Approved / Active Contract  
 **Protocol:** RESTful JSON / RFC 7946 GeoJSON over TLS (HTTPS)  
 **Target Consumers:** National Soil Information Systems (NSIS), FAO OpenNSIS (`sis-database/owl2sql`), Global Soil Data Portals (GLOSIS / GSP)  
-**Governing Issue:** GitHub Issue [#140](https://github.com/yigini/soilfer-lims/issues/140)  
+**Governing Issue:** Historical issue 140<br>
 
 ---
 

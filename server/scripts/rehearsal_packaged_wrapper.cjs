@@ -320,7 +320,7 @@ if (cmd === 'run') {
         process.exit(1);
     }
     // Runner execution
-    const runnerIdx = args.findIndex(a => a.includes('execute_ghana_apply_146.cjs'));
+    const runnerIdx = args.findIndex(a => a.includes('apply_reviewed_snapshot.cjs'));
     if (runnerIdx !== -1) {
         const runnerArgs = args.slice(runnerIdx + 1);
         const nameIdx = args.indexOf('--name');
@@ -350,7 +350,7 @@ if (cmd === 'run') {
 
         try {
             const out = cp.execFileSync(process.execPath, [
-                '${serverDir.replace(/\\/g, '/')}/scripts/execute_ghana_apply_146.cjs',
+                '${serverDir.replace(/\\/g, '/')}/scripts/apply_reviewed_snapshot.cjs',
                 ...runnerArgs
             ], {
                 env: {
@@ -518,7 +518,7 @@ async function runAllPackagedRehearsals() {
         });
 
         // Poll for PID file
-        const pidFile = path.join(dir3, 'opt_lims', 'apply_issue146.pid');
+        const pidFile = path.join(dir3, 'opt_lims', 'snapshot_apply.pid');
         let msysPid = null;
         for (let i = 0; i < 50; i++) {
             if (fs.existsSync(pidFile)) {

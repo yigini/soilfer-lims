@@ -5,7 +5,7 @@ Dependencies186 and190 are merged. Cited dropdown/single-editor defects
 remain. The existing Result writer supports an absent replicate in the same
 recorded execution; native QC positions remain one observation each.
 
-[Pin6080225630](https://github.com/yigini/soilfer-lims/issues/198#issuecomment-6080225630)
+Pin6080225630 (historical issue #198)
 specifies `results.replicatesRequired` (integer1..2, default1 in all presets),
 Result replicates1/2 within one WorkAttempt for SAMPLE rows, and server read
 projection using existing duplicate math. Frozen native criteria take precedence;
@@ -22,7 +22,7 @@ labels, pure read projection and frozen/current resolver. Owned validation:
 two suites,50 tests PASS,zero skips,21.651s, including real DB policy/freeze,
 historical missing-count, foreign-scope and malformed-evidence zero-write cases.
 
-[Parent-set pin6080751135](https://github.com/yigini/soilfer-lims/issues/198#issuecomment-6080751135)
+Parent-set pin6080751135 (historical issue #198)
 keeps all retained parent replica numbers under #191 completeness/replacement
 rules, regardless of the current count or pair verdict. A genuinely new number
 above the count requires a recorded FAIL pair and number3; a new fourth refuses.

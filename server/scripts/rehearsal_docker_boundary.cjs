@@ -9,7 +9,7 @@
  * container runtime boundaries in an isolated real Docker environment (CI):
  * 
  *   [Smoke Test]
- *     - Packaged runner loading (/app/server/scripts/execute_ghana_apply_146.cjs) inside
+ *     - Packaged runner loading (/app/server/scripts/apply_reviewed_snapshot.cjs) inside
  *       candidate Alpine container, confirming musl native module (better-sqlite3) linkage.
  *     - Packaged shared intake guards (AMBIGUOUS_PROVENANCE_HOLD) and controller wiring verification.
  * 
@@ -341,7 +341,7 @@ async function runRealDockerBoundarySuite() {
     try {
         console.log('[Smoke Test] Packaged Runner Loading & Intake Guard Verification in Real Container...');
         
-        // 1. Verify packaged execute_ghana_apply_146.cjs loads correctly in Alpine musl runtime
+        // 1. Verify packaged apply_reviewed_snapshot.cjs loads correctly in Alpine musl runtime
         let smokeStatus = 0;
         let smokeOutput = '';
         try {
@@ -350,7 +350,7 @@ async function runRealDockerBoundarySuite() {
                 '--entrypoint', 'node',
                 '-w', '/app/server',
                 REVIEWED_IMAGE_ID,
-                '/app/server/scripts/execute_ghana_apply_146.cjs'
+                '/app/server/scripts/apply_reviewed_snapshot.cjs'
             ], { encoding: 'utf8' });
         } catch (err) {
             smokeStatus = err.status;
@@ -373,7 +373,7 @@ async function runRealDockerBoundarySuite() {
         if (!guardsCheck.includes('GUARDS_VERIFIED')) {
             throw new Error('Intake guards verification failed in packaged image: ' + guardsCheck);
         }
-        console.log('  ✓ Smoke Test PASSED: Packaged runner (/app/server/scripts/execute_ghana_apply_146.cjs) loaded cleanly with Alpine musl native modules; shared intake guards and controller wiring verified, held acceptance refused without writes.\n');
+        console.log('  ✓ Smoke Test PASSED: Packaged runner (/app/server/scripts/apply_reviewed_snapshot.cjs) loaded cleanly with Alpine musl native modules; shared intake guards and controller wiring verified, held acceptance refused without writes.\n');
 
         // ====================================================================
         // SCENARIO 1: Real Wrapper Success Path Through Disposable Docker

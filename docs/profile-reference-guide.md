@@ -63,7 +63,7 @@ The mounted `profile_fixture_workflow.test.js` takes all five through reception,
 
 For Eloi's actual receiver demonstration, use an isolated deployed staging instance and a designated connection scoped only to the fixture lab/project. Process the specimens through the same valid workflow, verify the key's scope, and retain snapshot/checkpoint/receipt evidence. The ordinary loader does not create an unrestricted key, expose test credentials or write real results. No national production ingestion is authorized by this fixture.
 
-Receiver acceptance remains separately tracked on [issue #140](https://github.com/yigini/soilfer-lims/issues/140): two layers, namespace separation, decimal depths, replay, reasoned amendment, withdrawal and checkpoint-expiry rebaseline. A successful LIMS fetch does not establish those external outcomes. Retain existing data/checkpoints on retryable exchange 503 responses; see [the operator runbook](nsis-operator-runbook.md#7-exchange-publication-eligibility--retry-semantics-http-503).
+Receiver acceptance remains separately tracked on historical issue #140: two layers, namespace separation, decimal depths, replay, reasoned amendment, withdrawal and checkpoint-expiry rebaseline. A successful LIMS fetch does not establish those external outcomes. Retain existing data/checkpoints on retryable exchange 503 responses; see [the operator runbook](nsis-operator-runbook.md#7-exchange-publication-eligibility--retry-semantics-http-503).
 
 ## Data preservation and release
 

@@ -6,7 +6,7 @@
  * Partial-Apply Recovery, and Process Interruption Recovery (Issue #146, PR #147)
  * 
  * Usage:
- *   node server/scripts/rehearsal_ghana_apply_146.cjs
+ *   node server/scripts/rehearsal_snapshot_apply.cjs
  */
 
 const fs = require('fs');
@@ -34,7 +34,7 @@ const EXPECTED_LAB = 'GHA-LAB1';
 const EXPECTED_PROJECT = 'SOILFER-US';
 const EXPECTED_FORM = 'aQtvKZHiZmtqVCkQsGw2X4';
 const EXPECTED_SERVER = 'https://kf.soilfer-data.fao.org';
-const runnerScript = path.join(__dirname, 'execute_ghana_apply_146.cjs');
+const runnerScript = path.join(__dirname, 'apply_reviewed_snapshot.cjs');
 
 // Resolve private snapshot/manifest location
 const privateSnapPath = 'C:/workspace/Documents/Codex/2026-09-21/se/work/private_kobo/ghana_kobo_snapshot_40747.json';

@@ -10,11 +10,11 @@ validation is rerunning after #192 merged. The PR still requires green CI and
 Claude's audit of its current head before merge.
 
 Authoritative pins:
-- [6071242717](https://github.com/yigini/soilfer-lims/issues/193#issuecomment-6071242717): source identity and explicit one-use manager override.
-- [6034830001](https://github.com/yigini/soilfer-lims/issues/193#issuecomment-6034830001): retained PT evidence, nullable nonconformityId and idempotent PENDING backfill.
-- [6075820954](https://github.com/yigini/soilfer-lims/issues/193#issuecomment-6075820954): exact additive PT successor, no WorkAttempt column, lifecycle commands, retained links and recorded compatibility mode.
-- [6076135661](https://github.com/yigini/soilfer-lims/issues/193#issuecomment-6076135661): first UNSATISFACTORY record/correction writes RAISED directly with its NCR in the same transaction. PENDING is historical-only; no NULL-round backfill.
-- [6076453701](https://github.com/yigini/soilfer-lims/issues/193#issuecomment-6076453701): exact fresh Prisma bootstrap, both unchanged #189 and new #193 guards/receipts in one transaction; predecessor verifier alone refuses the unguarded successor state. Inconsistent pushed rows refuse with ids and zero writes.
+- 6071242717 (historical issue #193): source identity and explicit one-use manager override.
+- 6034830001 (historical issue #193): retained PT evidence, nullable nonconformityId and idempotent PENDING backfill.
+- 6075820954 (historical issue #193): exact additive PT successor, no WorkAttempt column, lifecycle commands, retained links and recorded compatibility mode.
+- 6076135661 (historical issue #193): first UNSATISFACTORY record/correction writes RAISED directly with its NCR in the same transaction. PENDING is historical-only; no NULL-round backfill.
+- 6076453701 (historical issue #193): exact fresh Prisma bootstrap, both unchanged #189 and new #193 guards/receipts in one transaction; predecessor verifier alone refuses the unguarded successor state. Inconsistent pushed rows refuse with ids and zero writes.
 
 Implementation boundaries:
 - SQL unique(source,refType,refId); retries retain the original NCR.

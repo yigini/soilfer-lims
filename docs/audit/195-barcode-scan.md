@@ -1,6 +1,6 @@
 # Audit 4.2 — run barcode scanning (#195)
 
-Scope follows Claude's [6061884497 pin](https://github.com/yigini/soilfer-lims/issues/195#issuecomment-6061884497).
+Scope follows Claude's 6061884497 pin (historical issue #195).
 The cited worksheet search remained a substring filter with no scan/Enter workflow on main0b54284.
 
 The worksheet keeps a Scan field alongside the run controls. F2 focuses it;

@@ -775,7 +775,7 @@ async function runBrowserJourney() {
             },
             databaseIsolation: {
                 priorRunAudit: {
-                    priorRunDbResolved: 'C:\\Users\\yigin\\Documents\\soilfer-lims\\server\\prisma\\dev.db',
+                    priorRunDbResolved: 'C:\\workspace\\Documents\\soilfer-lims\\server\\prisma\\dev.db',
                     priorRunRiskIdentified: 'Unsafe default fallback to working dev.db when DATABASE_PATH was unset',
                     remediation: 'Enforced isolated disposable database copy in runner-owned directory with validateDisposableDbPath refusal guard before importing Prisma/app'
                 },

@@ -7,9 +7,10 @@ const patterns = [
     ['46', '19', '33', '37'].join('\\.'),
     ['yigini', 'net'].join('\\.'),
     ['soillab', 'server'].join('-'),
-    ['C:', 'Users', 'yigin'].join('[/\\\\]'),
+    ['C:', 'Users', 'yigin'].join('[/\\\\]+'),
     ['soilfer', 'secret', 'key'].join('-'),
-    ['super', 'secret', 'production', 'key'].join('-')
+    ['super', 'secret', 'production', 'key'].join('-'),
+    'eyJ[[:alnum:]_-]{10,}[.][[:alnum:]_-]{10,}[.][[:alnum:]_-]{10,}'
 ];
 const result = spawnSync('git', ['grep', '-Il', '-E', patterns.join('|'), '--', '.'], {
     cwd: path.resolve(__dirname, '../..'), encoding: 'utf8'
