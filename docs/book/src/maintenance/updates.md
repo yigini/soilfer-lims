@@ -2,6 +2,8 @@
 
 When a new version is released, updating is simple. Your data is safe — it lives in a Docker volume that persists across updates.
 
+Before updating, review the [Release Notes (1.11 & 1.12)](./release-notes.md) to see what changes for laboratory staff and administrators.
+
 ---
 
 ## Step-by-Step Update
