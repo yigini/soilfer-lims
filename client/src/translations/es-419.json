@@ -2308,7 +2308,7 @@
       "copied": "¡Copiado!",
       "expiresNotice": "El enlace caduca en 24 horas. El destinatario crea su propia contraseña al activarlo.",
       "namePlaceholder": "ej. María González",
-      "emailPlaceholder": "ej. mgonzalez@soilfer.org",
+      "emailPlaceholder": "name@example.org",
       "labScope": "Alcance de Laboratorio",
       "globalScope": "Sin laboratorio específico (Global)",
       "successTitle": "Invitación Creada",

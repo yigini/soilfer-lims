@@ -2308,7 +2308,7 @@
       "copied": "Copié !",
       "expiresNotice": "Le lien expire dans 24 heures. Le destinataire crée son propre mot de passe lors de l activation.",
       "namePlaceholder": "ex. Marie Dupont",
-      "emailPlaceholder": "ex. mdupont@soilfer.org",
+      "emailPlaceholder": "name@example.org",
       "labScope": "Périmètre du Laboratoire",
       "globalScope": "Aucun laboratoire spécifique (Global)",
       "successTitle": "Invitation Créée",

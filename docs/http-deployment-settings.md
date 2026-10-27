@@ -29,10 +29,13 @@ a browser boundary; authentication and laboratory scope still apply to API calls
 The main Compose file publishes the API on `127.0.0.1:${PORT:-3000}`, rather than all
 host interfaces. Serve remote users through the reverse proxy and HTTPS.
 
+For a new installation, follow [INSTALL.md](INSTALL.md) before starting the shipped
+proxy. It requires an existing TLS certificate and redirects HTTP to HTTPS.
+
 ## Configure the shipped proxy
 
-The shipped NGINX configuration sets Host and X-Forwarded-Proto and appends the
-actual peer to X-Forwarded-For. Its Docker address is not loopback. Before allowing
+The shipped NGINX configuration sets Host and X-Forwarded-Proto and overwrites
+X-Forwarded-For with the actual client address. Its Docker address is not loopback. Before allowing
 public traffic, obtain that address on the application network:
 
 ```sh
