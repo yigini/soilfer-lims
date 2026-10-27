@@ -58,7 +58,7 @@ const snapshotCandidates = [
     getArgValue('--snapshot'),
     process.env.GHANA_SNAPSHOT_PATH,
     '/private/ghana_kobo_snapshot_40747.json',
-    'C:/Users/yigin/Documents/Codex/2026-09-21/se/work/private_kobo/ghana_kobo_snapshot_40747.json',
+    'C:/workspace/Documents/Codex/2026-09-21/se/work/private_kobo/ghana_kobo_snapshot_40747.json',
     path.join(dataDir, 'ghana_kobo_snapshot_40747.json')
 ].filter(Boolean);
 
@@ -66,7 +66,7 @@ const manifestCandidates = [
     getArgValue('--manifest'),
     process.env.GHANA_MANIFEST_PATH,
     '/private/ghana_kobo_manifest_40747.json',
-    'C:/Users/yigin/Documents/Codex/2026-09-21/se/work/private_kobo/ghana_kobo_manifest_40747.json',
+    'C:/workspace/Documents/Codex/2026-09-21/se/work/private_kobo/ghana_kobo_manifest_40747.json',
     path.join(dataDir, 'ghana_kobo_manifest_40747.json')
 ].filter(Boolean);
 

@@ -5,7 +5,7 @@
  * Shell Wrapper Mock Integration Suite (Simulated Docker Environment)
  * File: server/scripts/rehearsal_packaged_wrapper.cjs
  * 
- * Tests the execute_release_pr147.sh wrapper orchestration logic in disposable isolation
+ * Tests the tools/deploy/release-rehearsal.sh wrapper orchestration logic in disposable isolation
  * with simulated Docker, Systemctl, and SQLite environments:
  *   1. Full packaged execution with --entrypoint node, private mounts, and verified writer exclusion
  *   2. Partial-apply mid-flight failure recovery (asserts all writers stopped, bit-for-bit DB restoration, ingress stays 503)
@@ -36,7 +36,7 @@ const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
 
 const serverDir = path.resolve(__dirname, '..');
 const repoRoot = path.resolve(serverDir, '..');
-const releaseScript = path.join(repoRoot, 'execute_release_pr147.sh');
+const releaseScript = path.join(repoRoot, 'tools/deploy/release-rehearsal.sh');
 
 const bashPath = 'C:\\Program Files\\Git\\bin\\bash.exe';
 if (!fs.existsSync(bashPath)) {
@@ -49,7 +49,7 @@ fs.mkdirSync(tmpDir, { recursive: true });
 
 console.log('================================================================');
 console.log('  SHELL WRAPPER MOCK INTEGRATION SUITE (SIMULATED DOCKER)       ');
-console.log('  Testing execute_release_pr147.sh Orchestration & Rollback     ');
+console.log('  Testing tools/deploy/release-rehearsal.sh Orchestration & Rollback     ');
 console.log('================================================================');
 console.log(`Fixture Dir: ${tmpDir}`);
 
@@ -61,8 +61,8 @@ const EXPECTED_SERVER = 'https://kf.soilfer-data.fao.org';
 const REVIEWED_IMAGE = 'soilfer-lims:pr147-reviewed';
 const REVIEWED_IMAGE_ID = 'sha256:7777777777777777777777777777777777777777777777777777777777777777';
 
-const privateSnapPath = 'C:/Users/yigin/Documents/Codex/2026-09-21/se/work/private_kobo/ghana_kobo_snapshot_40747.json';
-const privateManPath = 'C:/Users/yigin/Documents/Codex/2026-09-21/se/work/private_kobo/ghana_kobo_manifest_40747.json';
+const privateSnapPath = 'C:/workspace/Documents/Codex/2026-09-21/se/work/private_kobo/ghana_kobo_snapshot_40747.json';
+const privateManPath = 'C:/workspace/Documents/Codex/2026-09-21/se/work/private_kobo/ghana_kobo_manifest_40747.json';
 
 async function setupEnvironmentFixture(testDir, options = {}) {
     fs.mkdirSync(testDir, { recursive: true });

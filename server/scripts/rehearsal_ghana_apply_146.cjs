@@ -37,8 +37,8 @@ const EXPECTED_SERVER = 'https://kf.soilfer-data.fao.org';
 const runnerScript = path.join(__dirname, 'execute_ghana_apply_146.cjs');
 
 // Resolve private snapshot/manifest location
-const privateSnapPath = 'C:/Users/yigin/Documents/Codex/2026-09-21/se/work/private_kobo/ghana_kobo_snapshot_40747.json';
-const privateManPath = 'C:/Users/yigin/Documents/Codex/2026-09-21/se/work/private_kobo/ghana_kobo_manifest_40747.json';
+const privateSnapPath = 'C:/workspace/Documents/Codex/2026-09-21/se/work/private_kobo/ghana_kobo_snapshot_40747.json';
+const privateManPath = 'C:/workspace/Documents/Codex/2026-09-21/se/work/private_kobo/ghana_kobo_manifest_40747.json';
 
 const baseEnv = {
     ...process.env,

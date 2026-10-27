@@ -5,7 +5,7 @@
  * Real Disposable Docker Boundary Rehearsal (PR #147, Issue #146)
  * File: server/scripts/rehearsal_docker_boundary.cjs
  * 
- * Verifies the actual Bash release wrapper (execute_release_pr147.sh) and packaged
+ * Verifies the actual Bash release wrapper (tools/deploy/release-rehearsal.sh) and packaged
  * container runtime boundaries in an isolated real Docker environment (CI):
  * 
  *   [Smoke Test]
@@ -27,7 +27,7 @@
  * Note:
  *   - Strictly uses synthetic public fixtures (zero real datasets or PII).
  *   - Operates exclusively on disposable Docker volumes and isolated mock ingress.
- *   - Real code under test is execute_release_pr147.sh invoking real Docker daemon.
+ *   - Real code under test is tools/deploy/release-rehearsal.sh invoking real Docker daemon.
  *   - Faults are injected via clearly labeled synthetic test adapters.
  */
 
@@ -39,7 +39,7 @@ const os = require('os');
 
 console.log('================================================================');
 console.log('  REAL DISPOSABLE DOCKER BOUNDARY REHEARSAL                     ');
-console.log('  Testing execute_release_pr147.sh Against Real Docker Runtime  ');
+console.log('  Testing tools/deploy/release-rehearsal.sh Against Real Docker Runtime  ');
 console.log('================================================================');
 
 // 1. Docker Daemon Availability Check
@@ -72,10 +72,10 @@ try {
 
 const serverDir = path.resolve(__dirname, '..');
 const repoRoot = path.resolve(serverDir, '..');
-const releaseScript = path.join(repoRoot, 'execute_release_pr147.sh');
+const releaseScript = path.join(repoRoot, 'tools/deploy/release-rehearsal.sh');
 
 if (!fs.existsSync(releaseScript)) {
-    console.error('FATAL: execute_release_pr147.sh not found at', releaseScript);
+    console.error('FATAL: tools/deploy/release-rehearsal.sh not found at', releaseScript);
     process.exit(1);
 }
 
