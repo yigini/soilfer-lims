@@ -66,7 +66,7 @@ describe('Audit 0.13: scan and reception callers', () => {
         const offline = jest.fn().mockResolvedValue(null);
         const axios = { get: jest.fn().mockResolvedValue({ data: { id: 'database-013', labId: 'LABEL-013' } }) };
         const h = harness('ScanPage', { offline, axios });
-        const tree = await scan(h, 'https://lims.yigini.net/samples/LABEL-013?print=1');
+        const tree = await scan(h, 'https://lims.example.org/samples/LABEL-013?print=1');
         expect(offline).toHaveBeenCalledWith('LABEL-013');
         expect(axios.get).toHaveBeenCalledWith('/api/samples/lookup', { params: { code: 'LABEL-013' }, headers: { Authorization: 'Bearer auth-013' } });
         expect(offline.mock.invocationCallOrder[0]).toBeLessThan(axios.get.mock.invocationCallOrder[0]);

@@ -33,7 +33,7 @@ In cloud computing terms, this is called a **VPS** (Virtual Private Server) — 
 
 ## What Is a Domain Name?
 
-A **domain name** is a human-readable address for your server. Instead of asking people to visit `http://46.19.33.37`, you can tell them to go to `https://soillab.org` — much easier to remember and type!
+A **domain name** is a human-readable address for your server. Instead of asking people to visit `http://203.0.113.10`, you can tell them to go to `https://soillab.org` — much easier to remember and type!
 
 You can either:
 - **Buy a new domain** (costs about $10–15/year from registrars like Namecheap or Cloudflare)

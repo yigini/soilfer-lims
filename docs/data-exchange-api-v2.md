@@ -46,7 +46,7 @@ All requests must be transmitted over encrypted TLS (`HTTPS`). Authentication us
 
 ```http
 GET /api/v2/data-exchange/samples?limit=10 HTTP/1.1
-Host: lims.yigini.net
+Host: lims.example.org
 X-API-Key: slims_live_a1b2c3d4e5f6...
 Accept: application/json
 ```

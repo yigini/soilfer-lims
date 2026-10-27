@@ -151,9 +151,9 @@ You need a **Linux server** — a computer that stays running 24/7 and is access
 4. Select **Ubuntu 22.04** as the operating system
 5. Select the **CX22** plan (2 CPU, 4 GB RAM — about €4/month)
 6. Under **SSH keys**, click "Add SSH Key" (or use password authentication)
-7. Give your server a name (e.g., `soillab-server`)
+7. Give your server a name (e.g., `lims-server`)
 8. Click **"Create & Buy now"**
-9. Note down the **IP address** shown (e.g., `46.19.33.37`)
+9. Note down the **IP address** shown (e.g., `203.0.113.10`)
 
 > The process is similar on other providers. They all give you an IP address and a way to log in.
 
@@ -200,12 +200,12 @@ ssh root@YOUR_SERVER_IP
 Replace `YOUR_SERVER_IP` with the IP address from your server provider. For example:
 
 ```bash
-ssh root@46.19.33.37
+ssh root@203.0.113.10
 ```
 
 You'll be asked for your password. Type it (nothing will appear on screen — this is normal) and press Enter.
 
-> 🎉 If you see a command prompt (something like `root@soillab-server:~#`), you're connected!
+> 🎉 If you see a command prompt (something like `root@lims-server:~#`), you're connected!
 
 ---
 

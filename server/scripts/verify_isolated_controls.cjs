@@ -747,7 +747,7 @@ async function runCompleteVerification() {
                     runnerDir: runnerDir,
                     dbPath: dbPath,
                     refusalGuardVerified: true,
-                    productionHostBlocked: '46.19.33.37'
+                    productionHostBlocked: '203.0.113.10'
                 }
             },
             environment: {

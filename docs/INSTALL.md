@@ -57,7 +57,7 @@ Open your terminal (or PuTTY) and connect:
 
 ```bash
 ssh root@YOUR_SERVER_IP
-# Example: ssh root@46.19.33.37
+# Example: ssh root@203.0.113.10
 # Enter your password when prompted
 ```
 
@@ -166,7 +166,7 @@ Go to your domain provider (GoDaddy, Namecheap, Cloudflare, etc.) and add a **DN
 |---------|-------|
 | **Type** | A |
 | **Name** | `@` (or leave blank — means the root domain) |
-| **Value** | Your server's IP address (e.g. `46.19.33.37`) |
+| **Value** | Your server's IP address (e.g. `203.0.113.10`) |
 | **TTL** | Auto or 3600 |
 
 > ⏳ DNS changes take **5 minutes to 1 hour** to propagate. You can check at [whatsmydns.net](https://www.whatsmydns.net/).

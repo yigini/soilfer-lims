@@ -1566,7 +1566,7 @@ async function main() {
                     runnerDir,
                     dbPath: process.env.DATABASE_PATH,
                     refusalGuardVerified: true,
-                    productionHostBlocked: '46.19.33.37'
+                    productionHostBlocked: '203.0.113.10'
                 }
             },
             attributionNotes: {

@@ -18,6 +18,7 @@ const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
 const jwt = require('jsonwebtoken');
+const { JWT_SECRET } = require('../../config/auth');
 
 describe('Project Governance Retry Recovery & Preview Contracts (C01, C02)', () => {
     const SUFFIX = 'GOV-' + Date.now();
@@ -35,7 +36,7 @@ describe('Project Governance Retry Recovery & Preview Contracts (C01, C02)', () 
                 labId: user.labId,
                 tokenVersion: user.tokenVersion || 1
             },
-            process.env.JWT_SECRET || 'soilfer-secret-key',
+            JWT_SECRET,
             { expiresIn: '1h' }
         );
     };
@@ -331,6 +332,27 @@ describe('Project Governance Retry Recovery & Preview Contracts (C01, C02)', () 
             });
             expect(registered).toHaveLength(2);
         });
+
+        it.each([undefined, null, 123, '', 'a', 'g'.repeat(64), '0'.repeat(64), '0'.repeat(66)])(
+            'rejects a malformed or altered preview signature (%s) without registering samples', async (signature) => {
+                const candidate = ['SMP-SIG-' + SUFFIX + '-' + Math.random().toString(36).slice(2)];
+                const preview = await request(app)
+                    .post(`/api/projects/${testProject.id}/imports/preview`)
+                    .set('Authorization', `Bearer ${tokenOwner}`)
+                    .send({ sampleIds: candidate });
+                expect(preview.status).toBe(200);
+                const payload = JSON.parse(Buffer.from(preview.body.previewToken, 'base64').toString('utf8'));
+                payload.signature = signature;
+                const commit = await request(app)
+                    .post(`/api/projects/${testProject.id}/manifest`)
+                    .set('Authorization', `Bearer ${tokenOwner}`)
+                    .send({ sampleIds: candidate, targetLabId: labA.id,
+                        previewToken: Buffer.from(JSON.stringify(payload)).toString('base64') });
+                expect(commit.status).toBe(409);
+                expect(commit.body.code || commit.body.error).toBe('PREVIEW_TOKEN_TAMPERED');
+                expect(await prisma.sample.findUnique({ where: { id: candidate[0] } })).toBeNull();
+            }
+        );
 
         it('stale preview token is rejected with 409 PREVIEW_STALE_REVISION even when fresh If-Match header is passed', async () => {
             const candidate = ['SMP-STALE-PREV-' + SUFFIX];

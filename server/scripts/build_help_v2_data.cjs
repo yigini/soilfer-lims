@@ -1,15 +1,14 @@
 const fs = require('fs');
 const path = require('path');
 
-const ROOT = path.resolve(__dirname, '../..');
-const WP_DIR = path.join(ROOT, 'WP/help-knowledge-base-v2');
+const SOURCE_DIR = path.join(__dirname, 'help-source');
 const SERVER_DATA_DIR = path.resolve(__dirname, '../data/help');
 
-const inventoryGroups = require(path.join(WP_DIR, 'inventory-source.cjs'));
-const examplesData = require(path.join(WP_DIR, 'guide-examples.json'));
-const traceability = require(path.join(WP_DIR, 'traceability.json'));
-const migrationMap = require(path.join(WP_DIR, 'migration-map.json'));
-const terminology = require(path.join(WP_DIR, 'terminology.json'));
+const inventoryGroups = require(path.join(SOURCE_DIR, 'inventory-source.cjs'));
+const examplesData = require(path.join(SOURCE_DIR, 'guide-examples.json'));
+const traceability = require(path.join(SOURCE_DIR, 'traceability.json'));
+const migrationMap = require(path.join(SOURCE_DIR, 'migration-map.json'));
+const terminology = require(path.join(SOURCE_DIR, 'terminology.json'));
 
 const LOCALES = ['en', 'es', 'es-419', 'fr', 'pt'];
 
