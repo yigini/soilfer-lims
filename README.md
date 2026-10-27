@@ -126,41 +126,12 @@ The current resolution paths are documented in [`policyService`](server/services
 
 ---
 
-## ⚡ 5-Minute Quick Start (Docker Deployment)
+## Installation
 
-The fastest and most reliable way to run SoilFER-LIMS is with **Docker** and **Docker Compose**. Everything (Node.js API, React frontend, database engine) runs in a single optimized container.
-
-### 1. Clone the Repository
-```bash
-git clone https://github.com/yigini/soilfer-lims.git
-cd soilfer-lims
-```
-
-### 2. Configure Environment
-```bash
-# Copy template environment file
-cp .env.example .env
-```
-
-*(Optional)* Open `.env` in any text editor to set your custom `JWT_SECRET` or customize your domain name.
-
-Production browser origins default to same-origin. Configure `ALLOWED_ORIGINS` (HTTPS origins only), `TRUST_PROXY` (default `loopback`) and `HEALTH_SHOW_VERSION` (default `false`) for your deployment. The API binds to host loopback. See [HTTP deployment settings](docs/http-deployment-settings.md) for the shipped NGINX proxy and host-side health command. Account backoff and the configurable new-password minimum are described in [sign-in protection](docs/sign-in-protection.md).
-
-### 3. Launch with Docker Compose
-```bash
-# Option A: Single Laboratory with NGINX (Ports 80/443 — Recommended):
-docker compose -f docker-compose.yml -f docker-compose.nginx.yml up -d --build
-
-# Option B: Single Laboratory Direct Port 3000 (No NGINX):
-docker compose up -d --build
-
-# Option C: Multi-Lab National Network (Global mode) with NGINX:
-docker compose -f docker-compose.yml -f docker-compose.global.yml -f docker-compose.nginx.yml up -d --build
-```
-
-### 4. Access the Application
-Open your web browser and navigate to:
-👉 **`http://localhost`** (or `http://localhost:3000` if not using NGINX)
+Follow the [HTTPS-first installation walkthrough](docs/INSTALL.md). It covers
+server sizing, certificates, the shipped proxy, environment configuration,
+first sign-in and off-host backups. For an existing instance, use the
+[upgrade guide](docs/UPGRADING.md).
 
 ---
 

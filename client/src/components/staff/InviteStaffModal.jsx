@@ -207,7 +207,7 @@ export default function InviteStaffModal({ isOpen, onClose, onSuccess, defaultLa
                                         type="email"
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
-                                        placeholder={t('staffManagement.invite.emailPlaceholder', 'e.g. mgonzalez@soilfer.org')}
+                                        placeholder={t('staffManagement.invite.emailPlaceholder', 'name@example.org')}
                                         required
                                         className="w-full pl-10 pr-3 py-2.5 bg-sf-canvas border border-sf-divider rounded-xl text-sm text-sf-text focus:ring-2 focus:ring-sf-primary outline-none transition"
                                     />

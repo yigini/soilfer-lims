@@ -28,11 +28,11 @@ SoilFER-LIMS is lightweight. It doesn't need a powerful server.
 | Specification | Minimum | Recommended | Explanation |
 |--------------|---------|-------------|-------------|
 | **CPU** | 1 core | 2 cores | How many tasks the server can handle simultaneously |
-| **RAM** | 1 GB | 2 GB | Short-term memory for running the application |
-| **Disk** | 10 GB | 20 GB+ | Storage for the application, database, and uploaded files |
+| **RAM** | 2 GB | 4 GB for builds | Short-term memory for running the application |
+| **Disk** | 20 GB | 40 GB+ as data grows | Storage for the application, database, and uploaded files |
 | **Operating System** | Ubuntu 22.04 LTS | Ubuntu 24.04 LTS | The server's base software. Choose "LTS" (Long Term Support) for stability. |
 
-> **How much data does LIMS store?** A database with 10,000 samples and their results uses roughly 50-100 MB. Spectral data files are larger — if you upload thousands of spectra, plan for 5-10 GB of storage. For most laboratories, the minimum 10 GB disk is more than sufficient for the first few years.
+> Allow space for database growth, uploaded files, retained images and backups. Keep more than 10 GB free before upgrades. Build on a separate machine if the runtime host has only 2 GB RAM.
 
 ---
 
@@ -97,7 +97,7 @@ Click **"Create → Droplets"** (DigitalOcean calls their servers "Droplets").
 
 - **Region:** Choose the closest to your users
 - **Image:** Ubuntu 22.04 LTS
-- **Size:** Regular, $6/month (1 CPU, 1 GB RAM)
+- **Size:** At least 2 GB RAM and 20 GB disk; check the current provider price.
 - **Authentication:** Password or SSH key
 - **Hostname:** `soilfer-lims`
 

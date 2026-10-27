@@ -2308,7 +2308,7 @@
       "copied": "Copiado!",
       "expiresNotice": "O link expira em 24 horas. O destinatário define sua própria senha na ativação.",
       "namePlaceholder": "ex. Maria Silva",
-      "emailPlaceholder": "ex. msilva@soilfer.org",
+      "emailPlaceholder": "name@example.org",
       "labScope": "Escopo do Laboratório",
       "globalScope": "Nenhum laboratório específico (Global)",
       "successTitle": "Convite Criado",
