@@ -8,7 +8,7 @@ Before you begin setting up SoilFER-LIMS, let's make sure you have everything pr
 
 Use this checklist to make sure you have everything ready:
 
-- [ ] **A Linux server** — a computer in a data center that stays on 24/7 and is accessible over the internet
+- [ ] **A Linux server** — at least 2 GB RAM and 20 GB disk, with extra space for laboratory data and backups. Use 4 GB RAM or a separate machine for builds.
 - [ ] **A domain name** — either a new domain (like `soillab.org`) or a subdomain (like `lims.your-institute.org`)
 - [ ] **SSH access** — your server's IP address plus a username/password or SSH key to connect
 - [ ] **An SSH client** — a program on your computer to connect to your server

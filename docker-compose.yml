@@ -13,6 +13,7 @@ services:
       - DEPLOYMENT_MODE=${DEPLOYMENT_MODE:-local}
       - ADMIN_INITIAL_PASSWORD=${ADMIN_INITIAL_PASSWORD:-}
       - DISABLE_BACKGROUND_JOBS=${DISABLE_BACKGROUND_JOBS:-}
+      - BASE_URL=${BASE_URL:-}
       - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-}
       - TRUST_PROXY=${TRUST_PROXY:-loopback}
       - HEALTH_SHOW_VERSION=${HEALTH_SHOW_VERSION:-false}
@@ -41,7 +42,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 30s
+      start_period: 10m
 
 volumes:
   lims-data:

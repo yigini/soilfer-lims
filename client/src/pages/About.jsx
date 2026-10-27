@@ -1,4 +1,5 @@
 import React from 'react';
+import useBrandingContact from '../hooks/useBrandingContact';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import {
@@ -8,6 +9,7 @@ import {
 } from 'lucide-react';
 
 const About = () => {
+    const contactEmail = useBrandingContact();
     const { t } = useLanguage();
     return (
         <div className="max-w-6xl mx-auto pb-16 space-y-12 animate-in fade-in duration-500 font-sans">
@@ -403,9 +405,9 @@ const About = () => {
                 <p>
                     SoilFER LIMS is an open digital laboratory platform developed for the Global Soil Partnership.
                 </p>
-                <p>
-                    For technical support or institutional inquiries: <a href="mailto:GLOSOLAN@fao.org" className="text-emerald-600 dark:text-emerald-400 font-semibold hover:underline">GLOSOLAN@fao.org</a>
-                </p>
+                {contactEmail && <p>
+                    For technical support or institutional inquiries: <a href={`mailto:${contactEmail}`} className="text-emerald-600 dark:text-emerald-400 font-semibold hover:underline">{contactEmail}</a>
+                </p>}
             </div>
         </div>
     );

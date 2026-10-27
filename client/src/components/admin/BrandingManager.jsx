@@ -19,7 +19,7 @@ const BrandingManager = () => {
         logoUrl: '/assets/img/logo-light.png', // Default
         tagline: 'Global & Local Laboratory Information Management System',
         organization: 'FAO Global Soil Partnership / SoilFER Programme',
-        contactEmail: 'GLOSOLAN@fao.org',
+        contactEmail: '',
         defaultLanguage: 'en',
         dateFormat: 'YYYY-MM-DD',
         footerText: 'SoilFER-LIMS · Aligned with FAO Global Soil Partnership & GLOSOLAN',

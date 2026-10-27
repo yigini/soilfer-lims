@@ -4,8 +4,10 @@ import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { User, Lock, Eye, EyeOff, ArrowRight, ExternalLink } from 'lucide-react';
 import clsx from 'clsx';
+import useBrandingContact from '../hooks/useBrandingContact';
 
 const Login = () => {
+    const contactEmail = useBrandingContact();
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
@@ -300,11 +302,11 @@ const Login = () => {
                             <span className="text-sf-text font-bold">LIMS</span>
                             {' · '}v{__APP_VERSION__}{' · '}build {__BUILD_DATE__}
                         </p>
-                        <div className="mt-3">
-                            <a href="mailto:GLOSOLAN@fao.org" className="text-[11px] font-bold text-amber-600 dark:text-amber-400 hover:underline transition-colors">
-                                Support: GLOSOLAN@fao.org
+                        {contactEmail && <div className="mt-3">
+                            <a href={`mailto:${contactEmail}`} className="text-[11px] font-bold text-amber-600 dark:text-amber-400 hover:underline transition-colors">
+                                Support: {contactEmail}
                             </a>
-                        </div>
+                        </div>}
                     </div>
                 </div>
             </div>
@@ -331,8 +333,8 @@ const Login = () => {
                             <div className="p-5 bg-sf-raised/50 rounded-2xl border border-sf-divider shadow-sm relative overflow-hidden">
                                 <div className="absolute top-0 left-0 w-1.5 h-full bg-amber-500"></div>
                                 <h4 className="font-bold text-sf-text mb-2 underline decoration-amber-500/30">Managers & Admins</h4>
-                                <p className="leading-relaxed text-sf-muted">Please email the global GLOSOLAN support desk for system-level overrides:</p>
-                                <a href="mailto:GLOSOLAN@fao.org" className="text-sf-primary font-black mt-2 inline-block hover:underline">GLOSOLAN@fao.org</a>
+                                <p className="leading-relaxed text-sf-muted">Contact your system administrator through your organization's usual support channel.</p>
+                                {contactEmail && <a href={`mailto:${contactEmail}`} className="text-sf-primary font-black mt-2 inline-block hover:underline">{contactEmail}</a>}
                             </div>
                         </div>
 
