@@ -30,6 +30,14 @@ jobs:
         run: npm install
         working-directory: client
 
+      - name: Check server runtime dependencies
+        run: npm audit --omit=dev --audit-level=high
+        working-directory: server
+
+      - name: Check client runtime dependencies
+        run: npm audit --omit=dev --audit-level=high
+        working-directory: client
+
       - name: Verify theme catalog and tokens drift
         run: npm run check:theme-catalog
         working-directory: server
