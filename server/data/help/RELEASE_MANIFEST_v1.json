@@ -1,6 +1,6 @@
 {
   "releaseVersion": "v1.2.0",
-  "publishedAt": "2026-10-25T19:44:42.516Z",
+  "publishedAt": "2026-10-28T14:12:59.088Z",
   "provenance": "system-app-review",
   "reviewScope": "Application navigation, UI controls, error recovery, and operational workflows verified against SoilFER LIMS v3.4 controls",
   "scientificBoundary": "Operational workflow guidance only; chemical method protocols and lab-specific policies are managed separately via laboratory-local notes (HelpLabNote) requiring lab manager authorization",
@@ -54,11 +54,11 @@
         "pt"
       ],
       "localeHashes": {
-        "en": "84997fdbe078049f6364699618a2e84ab9f1321efb64f1da7131d1ddd3cfb09b",
-        "es": "ede171ea109a068c238fb0e5452c8442138d1fffca91a68a7b7218a7fe453f2f",
-        "es-419": "f0bcb68ff69d4b1be4917d68d862991fc2e22918a29cdf00cedde851a6753699",
-        "fr": "a77a8f8ae8d89a16e0d49dc97a6d9ea72c09e4dbcfc492169c40432f8e7ef888",
-        "pt": "41e4fb631423012f6f917a3ded2bfa9796f13ba9a89b4127c00cc3ab1e4573b5"
+        "en": "0dd99b71fd821b7a3d6f3afb8891c30c6806d8b0fba602e9ab68299190baa349",
+        "es": "ab5e9e6c134735ba62b809ffa507dca989b5a8732ecbc04a1932954fd70e4005",
+        "es-419": "0c3ee137745c4831ee015db3cdca2a63ed4af8308af2a7926bb05cf164d19fe7",
+        "fr": "1e9ce74b83de80a5c9686095ef9774b612154f0ccf8a977cf4746e52f693fb41",
+        "pt": "2fbc8931cfb48d718ab732e6039c72e465b531a06973d0a5c7fc48188aad0db3"
       },
       "mappedRoutes": []
     },

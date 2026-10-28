@@ -353,7 +353,7 @@
               "expected": "Tu contraseña queda actualizada y debe ser diferente de la contraseña anterior."
             },
             {
-              "action": "Si el acceso falla tras varios intentos incorrectos o has olvidado tu contraseña, espera un breve tiempo antes de volver a intentarlo o consulta ¿Olvidaste tu contraseña? en /login y contacta con tu Responsable de Laboratorio.",
+              "action": "Si el acceso falla tras varios intentos incorrectos o has olvidado tu contraseña, espera un breve tiempo antes de volver a intentarlo o consulta ¿Olvidaste tu contraseña? en /login y contacta con tu Responsable de Laboratorio. Si eres responsable o administrador, contacta con el administrador de tu sistema por el canal de soporte habitual de tu organización.",
               "expected": "Tras una breve pausa puedes volver a intentar el acceso, o el administrador puede generar una nueva contraseña temporal desde Gestión de Usuarios (/users)."
             }
           ]
@@ -373,7 +373,7 @@
         [
           "¿Olvidaste tu contraseña? / Restablecer contraseña",
           "Restablecimiento gestionado por el administrador en /users",
-          "El personal solicita el restablecimiento a su Responsable de Laboratorio; los responsables y administradores pueden contactar con GLOSOLAN@fao.org."
+          "El personal solicita el restablecimiento a su Responsable de Laboratorio; los responsables y administradores deben dirigirse al administrador de su sistema por el canal de soporte habitual de su organización."
         ]
       ],
       "example": "Inicia sesión como m.garcia con la contraseña temporal, completa la actualización obligatoria con una contraseña nueva de 12 o más caracteres y vuelve a iniciar sesión.",
@@ -395,7 +395,7 @@
       "steps": [
         "Abre la pantalla de acceso (/login), introduce tu nombre de usuario y tu contraseña temporal, y pulsa Iniciar sesión. (Expected: Se abre de inmediato la ventana de actualización obligatoria de seguridad para que definas una contraseña privada antes de acceder al sistema.)",
         "Introduce tu contraseña temporal actual, escribe una nueva contraseña privada de al menos 12 caracteres, confírmala y pulsa Actualizar y acceder al sistema. (Expected: Aparece la confirmación de contraseña actualizada; vuelve a iniciar sesión con tu nueva contraseña personal.)",
-        "Si el acceso falla tras varios intentos incorrectos o has olvidado tu contraseña, espera un breve tiempo antes de volver a intentarlo o pide a tu Responsable de Laboratorio que la restablezca en /users. (Expected: Tras una breve pausa puedes volver a iniciar sesión, o usar la nueva contraseña temporal del administrador para definir una contraseña de 12 o más caracteres.)"
+        "Si el acceso falla tras varios intentos incorrectos o has olvidado tu contraseña, espera un breve tiempo antes de volver a intentarlo o pide a tu Responsable de Laboratorio que la restablezca en /users. Si eres responsable o administrador, contacta con el administrador de tu sistema por el canal de soporte habitual de tu organización. (Expected: Tras una breve pausa puedes volver a iniciar sesión, o usar la nueva contraseña temporal del administrador para definir una contraseña de 12 o más caracteres.)"
       ],
       "caution": "Precaución: Tras varios intentos incorrectos la cuenta se pausa durante un breve tiempo. — Espera unos minutos antes de volver a intentarlo o solicita a tu Responsable de Laboratorio que restablezca la contraseña en /users.",
       "related": [

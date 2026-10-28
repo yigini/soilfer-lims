@@ -10,7 +10,8 @@ const patterns = [
     ['C:', 'Users', 'yigin'].join('[/\\\\]+'),
     ['soilfer', 'secret', 'key'].join('-'),
     ['super', 'secret', 'production', 'key'].join('-'),
-    'eyJ[[:alnum:]_-]{10,}[.][[:alnum:]_-]{10,}[.][[:alnum:]_-]{10,}'
+    'eyJ[[:alnum:]_-]{10,}[.][[:alnum:]_-]{10,}[.][[:alnum:]_-]{10,}',
+    ['github[.]com', 'yigini', 'soilfer-lims', '(issues|pull)', ''].join('/')
 ];
 const result = spawnSync('git', ['grep', '-Il', '-E', patterns.join('|'), '--', '.'], {
     cwd: path.resolve(__dirname, '../..'), encoding: 'utf8'

@@ -49,7 +49,9 @@ const cases = [
     ['mixed separators', ['C:', 'Users', 'yi' + 'gin', 'example'].join('\\/')],
     ['first example key', ['soilfer', 'secret', 'key'].join('-')],
     ['second example key', ['super', 'secret', 'production', 'key'].join('-')],
-    ['encoded access-value shape', ['eyJ' + 'a'.repeat(16), 'b'.repeat(16), 'c'.repeat(16)].join('.')]
+    ['encoded access-value shape', ['eyJ' + 'a'.repeat(16), 'b'.repeat(16), 'c'.repeat(16)].join('.')],
+    ['historical issue link', ['https:', '', 'github.com', 'yigini', 'soilfer-lims', 'issues', '123'].join('/')],
+    ['historical PR-comment link', ['https:', '', 'github.com', 'yigini', 'soilfer-lims', 'pull', '123#issuecomment-456'].join('/')]
 ];
 
 test.each(cases)('rejects %s without echoing the matched value', (_name, value) => {

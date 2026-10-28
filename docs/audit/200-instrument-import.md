@@ -111,8 +111,8 @@ Advisory Database queries found no matching advisory for either package. Existin
 repository dependency findings are neither fixed nor concealed by this issue.
 YY explicitly approved this concrete dependency on October 10: "approve saxes,
 clear the hold", recorded on PR284 in comments
-[6099365745](https://github.com/yigini/soilfer-lims/pull/284#issuecomment-6099365745)
-and [6099368373](https://github.com/yigini/soilfer-lims/pull/284#issuecomment-6099368373).
+6099365745 (historical PR 284, comment 6099365745)
+and 6099368373 (historical PR 284, comment 6099368373).
 
 Sources: [saxes](https://github.com/lddubeau/saxes),
 [Node zlib](https://nodejs.org/download/release/v22.22.0/docs/api/zlib.html),

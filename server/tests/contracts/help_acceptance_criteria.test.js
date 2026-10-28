@@ -161,6 +161,32 @@ describe('Help System Full Acceptance & Release Verification', () => {
         }
     });
 
+    test('published password guidance uses the installation administrator in every locale', async () => {
+        const oldContact = ['GLOSOLAN', 'fao.org'].join('@');
+        const phrases = { en: 'system administrator', es: 'administrador de tu sistema',
+            'es-419': 'administrador de tu sistema', fr: 'administrateur système',
+            pt: 'administrador do seu sistema' };
+        const publication = await prisma.helpPublication.findFirst({
+            where: { articleId: 'start-passwords', isCurrent: true }
+        });
+        expect(publication).toBeDefined();
+        for (const [locale, phrase] of Object.entries(phrases)) {
+            const registry = JSON.parse(fs.readFileSync(path.resolve(__dirname,
+                `../../data/help/content.${locale}.json`), 'utf8'));
+            const article = registry.articles.find(item => item.id === 'start-passwords');
+            expect(JSON.stringify(article)).not.toContain(oldContact);
+            const published = await prisma.helpLocaleRevision.findUnique({
+                where: { revisionId_locale: { revisionId: publication.revisionId, locale } }
+            });
+            expect(published.reviewStatus).toBe('APPROVED');
+            expect(published.steps).toContain(phrase);
+            const served = await helpContentService.getArticleById('start-passwords',
+                { role: 'SUPER_ADMIN' }, locale, false);
+            expect(JSON.stringify(served)).not.toContain(oldContact);
+            expect(JSON.stringify(served)).toContain(phrase);
+        }
+    });
+
     test('9. Runtime data decoupling: help service reads exclusively from server/data/help/', () => {
         const dataDir = path.resolve(__dirname, '../../data/help');
         expect(fs.existsSync(path.join(dataDir, 'route-help-map.json'))).toBe(true);
