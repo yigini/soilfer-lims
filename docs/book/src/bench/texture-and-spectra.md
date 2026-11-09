@@ -4,7 +4,7 @@
 
 Record multi-part soil measurements that use specialized bench editors in **Workbench**. These include particle size fractions (**Sand**, **Silt**, and **Clay** percentages with automatic closure and USDA texture class calculation) and soil spectroscopy scans (**Upload spectra →** / **Open Spectral Capture** for MIR and Vis-NIR).
 
-> *Screenshot placeholder — docs/book/src/img/screenshots/bench-texture-and-spectra.png (pending local training seed on [#370](https://github.com/yigini/soilfer-lims/issues/370)): The **Workbench** showing the **Fractions (Sand / Silt / Clay %)** editor with closure badge and the **Spectra Acquisition Status** column with **Upload spectra →**.*
+> *Screenshot placeholder — docs/book/src/img/screenshots/bench-texture-and-spectra.png (screenshot coming once the training data is ready): The **Workbench** showing the **Fractions (Sand / Silt / Clay %)** editor with closure badge and the **Spectra Acquisition Status** column with **Upload spectra →**.*
 
 ---
 

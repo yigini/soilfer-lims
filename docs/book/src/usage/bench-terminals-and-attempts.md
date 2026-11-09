@@ -10,7 +10,7 @@ Work safely on a shared computer at the laboratory bench without mixing up two t
 | Request an out-of-range override or a dilution repeat at the bench | [Enter Results, Replicates, and Raw Calculations](../bench/enter-results-and-replicates.md) |
 | Review failed quality control runs or order repeats as a manager | [Quality Control, Control Charts & Failed QC](qc-management.md) |
 
-> *Screenshot placeholder — docs/book/src/img/screenshots/bench-mode-and-attempts.png (pending local training seed on [#370](https://github.com/yigini/soilfer-lims/issues/370)): The **Technician Workbench** top bar showing **Turn on bench mode**, **Switch analyst**, **Workbench density** (**Standard** / **Bench**), and the **Enter your PIN to unlock** overlay.*
+> *Screenshot placeholder — docs/book/src/img/screenshots/bench-mode-and-attempts.png (screenshot coming once the training data is ready): The **Technician Workbench** top bar showing **Turn on bench mode**, **Switch analyst**, **Workbench density** (**Standard** / **Bench**), and the **Enter your PIN to unlock** overlay.*
 
 ---
 

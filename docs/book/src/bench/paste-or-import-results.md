@@ -4,7 +4,7 @@
 
 Bring measurements into your **Workbench** worksheet without re-typing every number by hand, either by pasting two columns from a spreadsheet (**Paste Values**) or by uploading a CSV, TXT, or XLSX export file from an instrument (**Instrument file import**).
 
-> *Screenshot placeholder — docs/book/src/img/screenshots/bench-paste-and-import.png (pending local training seed on [#370](https://github.com/yigini/soilfer-lims/issues/370)): The **Instrument file import** panel and **Paste preview** modal showing **Saved instrument mapping**, **Preview file**, **Samples matched**, **QC rows**, **Unmatched rows**, and **Import drafts and pending QC**.*
+> *Screenshot placeholder — docs/book/src/img/screenshots/bench-paste-and-import.png (screenshot coming once the training data is ready): The **Instrument file import** panel and **Paste preview** modal showing **Saved instrument mapping**, **Preview file**, **Samples matched**, **QC rows**, **Unmatched rows**, and **Import drafts and pending QC**.*
 
 ---
 

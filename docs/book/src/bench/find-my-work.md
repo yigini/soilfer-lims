@@ -4,7 +4,7 @@
 
 Check which soil samples and analytical methods are waiting for you today. You can quickly see which items are **Ready** versus **Blocked** and open the right worksheet in **Workbench**.
 
-> *Screenshot placeholder — docs/book/src/img/screenshots/bench-find-my-work.png (pending local training seed on [#370](https://github.com/yigini/soilfer-lims/issues/370)): The **My Work** and **Workbench** screens showing **My runs**, **My Work**, **Ready to Record**, and **Open run worksheet**.*
+> *Screenshot placeholder — docs/book/src/img/screenshots/bench-find-my-work.png (screenshot coming once the training data is ready): The **My Work** and **Workbench** screens showing **My runs**, **My Work**, **Ready to Record**, and **Open run worksheet**.*
 
 ---
 

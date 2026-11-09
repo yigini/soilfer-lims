@@ -4,7 +4,7 @@
 
 Resolve the three most common identity problems at reception: a barcode not found in the manifest, a sample ID that was already received, or a field sample with missing location details.
 
-> *Screenshot placeholder — docs/book/src/img/screenshots/reception-id-lookup.png (pending local training seed on [#370](https://github.com/yigini/soilfer-lims/issues/370)): The **1. ID & Field** step in **Sample Reception** showing barcode lookup, duplicate warning, and the **Soil profile / sampling point** section.*
+> *Screenshot placeholder — docs/book/src/img/screenshots/reception-id-lookup.png (screenshot coming once the training data is ready): The **1. ID & Field** step in **Sample Reception** showing barcode lookup, duplicate warning, and the **Soil profile / sampling point** section.*
 
 ---
 

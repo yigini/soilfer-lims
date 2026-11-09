@@ -4,7 +4,7 @@
 
 Record the crushing, sieving (typically to under 2 mm fine earth), fine grinding (such as under 0.5 mm or 0.15 mm), and riffle splitting of a dried soil sample so it is ready for bench analysis.
 
-> *Screenshot placeholder — docs/book/src/img/screenshots/preparation-record-grinding-sieving.png (pending local training seed on [#370](https://github.com/yigini/soilfer-lims/issues/370)): The **Workbench** showing **Sample Preparation** selected in **Work type:**, the three **Operational Checklist** items, and the **Sieving**, **Grinding**, and **Splitting** fieldsets.*
+> *Screenshot placeholder — docs/book/src/img/screenshots/preparation-record-grinding-sieving.png (screenshot coming once the training data is ready): The **Workbench** showing **Sample Preparation** selected in **Work type:**, the three **Operational Checklist** items, and the **Sieving**, **Grinding**, and **Splitting** fieldsets.*
 
 ---
 

@@ -4,7 +4,7 @@
 
 Check in a single soil sample bag at the reception desk, either from a pre-registered field survey (**Project Sample**) or from a customer arriving at the counter (**Walk-in / External**).
 
-> *Screenshot placeholder — docs/book/src/img/screenshots/reception-single-sample.png (pending local training seed on [#370](https://github.com/yigini/soilfer-lims/issues/370)): The **Reception Console** showing **1. ID & Field**, **2. Condition**, **3. Analyses**, and **4. Handover** for a single soil sample.*
+> *Screenshot placeholder — docs/book/src/img/screenshots/reception-single-sample.png (screenshot coming once the training data is ready): The **Reception Console** showing **1. ID & Field**, **2. Condition**, **3. Analyses**, and **4. Handover** for a single soil sample.*
 
 ---
 

@@ -4,7 +4,7 @@
 
 Pause a sample check-in safely when you are interrupted at the reception desk, waiting for a phone number from a walk-in customer, or waiting for your manager to clarify which tests to run, and resume it later without re-typing your work.
 
-> *Screenshot placeholder — docs/book/src/img/screenshots/reception-incomplete-drafts.png (pending local training seed on [#370](https://github.com/yigini/soilfer-lims/issues/370)): The **Incomplete Intakes (Drafts)** list showing saved draft check-ins with **Resume** and **Discard** buttons.*
+> *Screenshot placeholder — docs/book/src/img/screenshots/reception-incomplete-drafts.png (screenshot coming once the training data is ready): The **Incomplete Intakes (Drafts)** list showing saved draft check-ins with **Resume** and **Discard** buttons.*
 
 ---
 

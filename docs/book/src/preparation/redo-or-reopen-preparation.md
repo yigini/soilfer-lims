@@ -4,7 +4,7 @@
 
 Handle situations where a drying or preparation step needs a second look. You can verify a step in **Awaiting verification**, resolve a **Legacy Completion — Evidence Gap**, or return work for **Preparation error**.
 
-> *Screenshot placeholder — docs/book/src/img/screenshots/preparation-reopen-and-verify.png (pending local training seed on [#370](https://github.com/yigini/soilfer-lims/issues/370)): The **Work & results** tab on a sample page showing **Preparation Prerequisites**, **Evidence needs verification**, and the manager verification controls on **Operational Gates**.*
+> *Screenshot placeholder — docs/book/src/img/screenshots/preparation-reopen-and-verify.png (screenshot coming once the training data is ready): The **Work & results** tab on a sample page showing **Preparation Prerequisites**, **Evidence needs verification**, and the manager verification controls on **Operational Gates**.*
 
 ---
 

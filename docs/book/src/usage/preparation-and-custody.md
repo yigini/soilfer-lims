@@ -11,7 +11,7 @@ Prepare accepted soil samples for laboratory testing by recording drying, sievin
 | Confirm preparation for a whole tray of samples or label sub-containers | [Prepare Several Samples at Once & Create Containers](../preparation/batch-preparation-and-containers.md) |
 | Verify, return, or redo a preparation step when an error is found | [Redo or Reopen a Completed Preparation Step](../preparation/redo-or-reopen-preparation.md) |
 
-> *Screenshot placeholder — docs/book/src/img/screenshots/preparation-gates-overview.png (pending local training seed on [#370](https://github.com/yigini/soilfer-lims/issues/370)): The **Preparation Prerequisites** card on a sample page showing **Air Drying** (**Constant weight**) and **Sample Preparation** (**Homogenized fraction**), plus the **Containers and aliquots** card.*
+> *Screenshot placeholder — docs/book/src/img/screenshots/preparation-gates-overview.png (screenshot coming once the training data is ready): The **Preparation Prerequisites** card on a sample page showing **Air Drying** (**Constant weight**) and **Sample Preparation** (**Homogenized fraction**), plus the **Containers and aliquots** card.*
 
 ---
 

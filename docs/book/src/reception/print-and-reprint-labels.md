@@ -4,7 +4,7 @@
 
 Print barcode stickers when you accept a sample at **Sample Reception**, print a replacement sticker if a label gets smudged or torn, or print a container sticker when you split a sample into sub-containers.
 
-> *Screenshot placeholder — docs/book/src/img/screenshots/label-print-dialog.png (pending local training seed on [#370](https://github.com/yigini/soilfer-lims/issues/370)): The **Print labels** dialog showing **Format** (**Standard (101 × 54 mm)** and **Compact (50 × 25 mm)**), **Copies per label**, **Reason for reprint**, and the barcode preview.*
+> *Screenshot placeholder — docs/book/src/img/screenshots/label-print-dialog.png (screenshot coming once the training data is ready): The **Print labels** dialog showing **Format** (**Standard (101 × 54 mm)** and **Compact (50 × 25 mm)**), **Copies per label**, **Reason for reprint**, and the barcode preview.*
 
 ---
 

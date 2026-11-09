@@ -4,7 +4,7 @@
 
 Enter sample readings in the **Workbench** worksheet grid using your keyboard or barcode scanner. You can also record side-by-side sample replicates (**Rep 1**, **Rep 2**, **Rep 3**), enter raw bench weights or titration volumes for automatic calculation, and handle out-of-range values.
 
-> *Screenshot placeholder — docs/book/src/img/screenshots/bench-enter-results-grid.png (pending local training seed on [#370](https://github.com/yigini/soilfer-lims/issues/370)): The **Worksheet** grid showing sample rows, **Scan a sample barcode (F2)**, **Rep 1** and **Rep 2** cells, **Raw measurements**, and **Draft saved** badges.*
+> *Screenshot placeholder — docs/book/src/img/screenshots/bench-enter-results-grid.png (screenshot coming once the training data is ready): The **Worksheet** grid showing sample rows, **Scan a sample barcode (F2)**, **Rep 1** and **Rep 2** cells, **Raw measurements**, and **Draft saved** badges.*
 
 ---
 

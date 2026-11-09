@@ -4,7 +4,7 @@
 
 Finish your bench work using SoilFER LIMS's two-step handoff: first confirm and record your ready worksheet rows (**Review Determinations Before Recording**), and then bundle completed samples and send them to your reviewer (**Review & Submit Samples for Review**).
 
-> *Screenshot placeholder — docs/book/src/img/screenshots/bench-record-and-submit.png (pending local training seed on [#370](https://github.com/yigini/soilfer-lims/issues/370)): The **Review Determinations Before Recording** screen showing **Eligible to Record**, **Excluded / Incomplete**, and the verification checkbox, followed by **Review & Submit Samples for Review**.*
+> *Screenshot placeholder — docs/book/src/img/screenshots/bench-record-and-submit.png (screenshot coming once the training data is ready): The **Review Determinations Before Recording** screen showing **Eligible to Record**, **Excluded / Incomplete**, and the verification checkbox, followed by **Review & Submit Samples for Review**.*
 
 ---
 

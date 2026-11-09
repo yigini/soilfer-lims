@@ -4,7 +4,7 @@
 
 Group a set of prepared soil samples into a numbered analytical run that shares one method, one calibrated instrument, and one set of quality control positions, and print a paper A4 worksheet with barcodes for the bench.
 
-> *Screenshot placeholder — docs/book/src/img/screenshots/bench-start-run.png (pending local training seed on [#370](https://github.com/yigini/soilfer-lims/issues/370)): The **Start run** form on the **My runs** tab showing **Analysis**, **Method revision**, **Instrument**, **LRM lot for this run**, **Select all eligible**, and **Confirm and start**.*
+> *Screenshot placeholder — docs/book/src/img/screenshots/bench-start-run.png (screenshot coming once the training data is ready): The **Start run** form on the **My runs** tab showing **Analysis**, **Method revision**, **Instrument**, **LRM lot for this run**, **Select all eligible**, and **Confirm and start**.*
 
 ---
 

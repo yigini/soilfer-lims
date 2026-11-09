@@ -15,7 +15,7 @@ Use **Workbench** to organize your daily analytical runs, print paper bench work
 | Confirming your ready rows and sending finished samples to the reviewer | [Review, Record, and Submit Completed Samples](../bench/record-and-submit-for-review.md) |
 | Locking a shared bench PC with a PIN, switching analysts, or repeating a returned test | [Use Shared Bench Mode and Fix Returned or Repeated Work](../bench/shared-bench-and-returned-work.md) |
 
-> *Screenshot placeholder — docs/book/src/img/screenshots/workbench-overview.png (pending local training seed on [#370](https://github.com/yigini/soilfer-lims/issues/370)): The **Technician Workbench** showing the **My runs**, **My Work**, **Worksheet**, **Ready to Submit**, **Sent & Completed**, and **Activity Receipts** tabs, plus the **Workbench density** toggle.*
+> *Screenshot placeholder — docs/book/src/img/screenshots/workbench-overview.png (screenshot coming once the training data is ready): The **Technician Workbench** showing the **My runs**, **My Work**, **Worksheet**, **Ready to Submit**, **Sent & Completed**, and **Activity Receipts** tabs, plus the **Workbench density** toggle.*
 
 ---
 

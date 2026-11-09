@@ -4,7 +4,7 @@
 
 Share a bench computer safely between several technicians using **Turn on bench mode** and **Switch analyst**. This page also shows how to handle tests that need to be repeated when a reviewer returns an item (**Repeat requested** / **Returned**).
 
-> *Screenshot placeholder — docs/book/src/img/screenshots/bench-shared-terminal-and-repeats.png (pending local training seed on [#370](https://github.com/yigini/soilfer-lims/issues/370)): The **Technician Workbench** showing **Turn on bench mode**, **Switch analyst**, the **Enter your PIN to unlock** prompt, and a returned item with **Previous** result hint.*
+> *Screenshot placeholder — docs/book/src/img/screenshots/bench-shared-terminal-and-repeats.png (screenshot coming once the training data is ready): The **Technician Workbench** showing **Turn on bench mode**, **Switch analyst**, the **Enter your PIN to unlock** prompt, and a returned item with **Previous** result hint.*
 
 ---
 

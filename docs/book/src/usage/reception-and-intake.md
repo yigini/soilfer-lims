@@ -14,7 +14,7 @@ Use the **Sample Reception** pages to check in soil bags arriving at the laborat
 | New sample stickers or a replacement for a torn barcode label | [Print and Reprint Barcode Labels](../reception/print-and-reprint-labels.md) |
 | A tray of accepted, labelled bags ready for drying and preparation | [Hand Over Accepted Samples to the Lab](../reception/handover-to-lab.md) |
 
-> *Screenshot placeholder — docs/book/src/img/screenshots/reception-console-modes.png (pending local training seed on [#370](https://github.com/yigini/soilfer-lims/issues/370)): The **Sample Reception & Intake** screen showing the **Project Sample**, **Walk-in / External**, **Consignment Batch**, and **Incomplete Intakes (Drafts)** cards.*
+> *Screenshot placeholder — docs/book/src/img/screenshots/reception-console-modes.png (screenshot coming once the training data is ready): The **Sample Reception & Intake** screen showing the **Project Sample**, **Walk-in / External**, **Consignment Batch**, and **Incomplete Intakes (Drafts)** cards.*
 
 ---
 

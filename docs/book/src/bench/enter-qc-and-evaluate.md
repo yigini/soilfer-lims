@@ -4,7 +4,7 @@
 
 Enter the measurements for the quality control positions in your analytical run (*blanks*, *duplicates*, and *reference soils*; see [Glossary](../reference/glossary.md)), save the observations, and run the automatic quality control check (**Evaluate QC**).
 
-> *Screenshot placeholder — docs/book/src/img/screenshots/bench-qc-positions-and-evaluate.png (pending local training seed on [#370](https://github.com/yigini/soilfer-lims/issues/370)): The native run panel in **Workbench** showing quality control positions, **Bound reference lot**, **Duplicate parent position**, **Save observations**, and **Evaluate QC**.*
+> *Screenshot placeholder — docs/book/src/img/screenshots/bench-qc-positions-and-evaluate.png (screenshot coming once the training data is ready): The native run panel in **Workbench** showing quality control positions, **Bound reference lot**, **Duplicate parent position**, **Save observations**, and **Evaluate QC**.*
 
 ---
 
