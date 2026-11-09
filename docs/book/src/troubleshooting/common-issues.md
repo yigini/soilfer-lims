@@ -1,85 +1,83 @@
 # Common Problems & Solutions
 
 This troubleshooting guide is divided into two sections:
-1. **Everyday Laboratory Workflow Questions** (for Lab Managers, Reviewers, Technicians, and Receptionists)
-2. **Server, Docker, Network & Database Troubleshooting** (for IT Administrators)
+1. *Everyday Laboratory Workflow Questions* (for **Laboratory Manager**, **Quality & Audit Officer**, **Laboratory Technician**, and **Sample Reception Officer** staff)
+2. *Server, Docker, Network & Database Troubleshooting* (for IT Administrators)
 
 ---
 
 ## Part 1: Laboratory Workflow Troubleshooting
 
-### "Why is a sample's test work item locked on the Technician Workbench?"
+### 1. Why is a sample's test row locked in Workbench?
 
-**Cause**: Pre-analytical preparation gates (`DRYING` at $< 40^\circ\text{C}$ and `PREPARATION` $2\text{ mm}$ sieving) have not been completed yet, or are waiting for second-person verification (`gate.verificationRequired`).
+*Cause:* Required drying and preparation steps have not been completed yet. They may also be waiting for manager verification when **Require manager verification of preparation gates** is enabled in **Policies**.
 
-**Solution**:
-1. Open the **Preparation & Drying** page (or the **Preparation** tab on the sample).
-2. Complete the **Air-Drying (`DRYING`)** and **Crushing & Sieving (`PREPARATION`)** steps (and have a second user verify them if your lab policy requires `gate.verificationRequired = true`).
-3. As soon as both gates are marked `COMPLETED`, the bench work items unlock automatically.
-
----
-
-### "Why does the Batch Builder say an instrument is `BLOCKED` and won't let me start the run?"
-
-**Cause**: The selected instrument is marked `CRITICAL` (or `equipment.requireEquipment` is enforced) and either:
-- Its **Calibration Due Date** has passed
-- Its **Daily Verification Check** has not been logged today
-- It has an open **Fault / Out-of-Service** ticket
-
-**Solution**:
-1. Go to **Equipment → Instruments** and select the instrument.
-2. Log the current **Calibration Record** or **Daily Verification Check** (or select a backup calibrated instrument for the batch).
-3. Once the instrument readiness badge returns to green (`READY`), return to the Batch Builder and start the run.
+*Solution:*
+1. Open the sample in **My Work** or **Workbench**.
+2. Complete the drying record (**Confirm Complete**) and the sieving or grinding preparation record. Have a manager verify them if required by your laboratory's **Policies**.
+3. As soon as preparation is confirmed, the sample status moves from **Accepted** to **Processing**. Bench test rows unlock automatically.
 
 ---
 
-### "Why is the 'Approve Batch' or 'Approve Sample' button disabled for me even though I am a Lab Manager or Reviewer?"
+### 2. Why does Workbench say an instrument is blocked and won't let me submit the run?
 
-**Cause**: Your laboratory has **Second-Person Review (`review.secondPersonRequired = true`)** enabled (standard in `ISO17025_STRICT` and `BASIC` presets), and you are the person who recorded one or more measurements in that batch or sample.
+*Cause:* Your laboratory enforces **Required equipment** in **Policies**. The selected instrument either:
+- Has a **Service Status** other than **In Service**, or
+- Shows **Calibration Overdue / Blocked** under **ISO Readiness** because its **Next Due Date** has passed.
 
-**Solution**:
-- Ask another qualified **Reviewer** or **Lab Manager** to review and approve that batch/sample, or (if your laboratory operates as a single-person facility) adjust `review.secondPersonRequired` in **Settings → Laboratory Policy**.
-
----
-
-### "A batch QC Blank or CRM failed (`QC_FAIL`), and the Submit/Approve button is blocked. What should I do?"
-
-**Cause**: Your laboratory's `qc.mode` is set to `REQUIRED_BLOCKING`, which prevents unverified results from advancing when a quality control check fails.
-
-**Solution**:
-1. Follow the troubleshooting steps in [Quality Control, Control Charts & Failed QC](../usage/qc-management.md):
-   - Check for a transcription typo before submission
-   - Re-analyze the affected bracket (`REPEAT_BRACKET`) if a mid-run `CCV`/`CCB` drifted
-   - Trigger a **Batch Repeat (`REANALYZE_BATCH`)** so new `R2` attempts are created for the unknown samples
-   - Or, if a Lab Manager determines the results are scientifically fit for purpose with a documented caveat, record a **Managerial QC Disposition (`ACCEPT_WITH_DEVIATION`)** with a written justification.
+*Solution:*
+1. Open **Equipment** (**Equipment & Instruments**) and find the instrument.
+2. Click **Log Event / Calibration** to record a current **Calibration** or **Verification** event with a new **Next Due Date**. You can also select a backup calibrated instrument that shows **Ready / Calibrated**.
+3. Return to **Workbench** and continue the run.
 
 ---
 
-### "We already issued a PDF Certificate of Analysis (`APPROVED` / `RELEASED`), and now we noticed a misspelled client name or need to re-run a test. Why are the fields locked?"
+### 3. Why is the Approve button disabled for me even though I am a Laboratory Manager?
 
-**Cause**: Once a Certificate of Analysis is issued, the sample is locked to preserve ISO/IEC 17025 report integrity.
+*Cause:* Your laboratory has **Require a second reviewer** enabled in **Policies** (switched on by default in **ISO 17025 strict** and **Basic**). You are the person who recorded or submitted one or more measurements in that batch.
 
-**Solution**:
-1. Open the sample and click **Amend Sample / Correct Report** (see [Certificates of Analysis, PDF Reports & Amendments](../usage/reporting-pdf.md)).
-2. Choose **`CLERICAL`** (for metadata/name corrections) or **`SCIENTIFIC`** (to re-open analytical results; requires a second Reviewer/Manager signature when `report.amendmentRequiresSecondPerson = true`).
-3. Make the correction, re-approve the sample, and click **Issue Amended Report** to publish **`Revision 2`** (`Rev 2`).
+*Solution:*
+- Ask a second **Laboratory Manager** or **Quality & Audit Officer** to review and click **Approve** in **Manager Task List**. If your facility operates with only one senior reviewer, adjust **Require a second reviewer** in **Policies** with a written **Reason for change**.
 
 ---
 
-### "An external NSIS harvester received `HTTP 410 Gone (CURSOR_EXPIRED)` from `/api/v2/data-exchange/changes`."
+### 4. A batch Blank, Duplicate, or Reference Soil failed QC, and approval is blocked. What should we do?
 
-**Cause**: Either more than **72 hours** elapsed since the harvester last polled the change feed, the API key's laboratory permissions were modified, or a database backup restore rotated the synchronization epoch.
+*Cause:* Your laboratory's **QC blocking mode** is set to **Required, blocking**. This prevents unverified results in a failed batch from being approved or reported.
 
-**Solution**:
-- Do not retry the expired cursor. Run a fresh baseline snapshot via `POST /api/v2/data-exchange/snapshots` (or run `data_exchange_reference_client.cjs --rebaseline-on-410`) to obtain a new starting cursor.
+*Solution:*
+1. Follow the step-by-step decision guide in [Quality Control, Control Charts & Failed QC](../usage/qc-management.md):
+   - Check for a typing mistake. Apply a reviewed transcription correction if **Allow reviewed transcription correction of undispositioned failed QC** is enabled in **Policies**.
+   - Select **Repeat calibration bracket** if a mid-run calibration check drifted after earlier passing checks.
+   - Reject the batch (**Fail batch**) and return the affected samples (**Returned**). Technicians can then record a fresh Attempt 2 in **Workbench**.
 
 ---
 
-## Part 2: Server, Docker, Network & Database Troubleshooting
+### 5. We already issued a Certificate of Analysis PDF, and now we need to fix a sample detail or re-run a test. Why are the fields locked?
+
+*Cause:* Once a sample is **Approved** and its **Certificate of Analysis** is issued in **Reports**, all results are locked.
+
+*Solution:*
+1. Open the sample or report in **Reports** (**Result Reports**) and start a formal report amendment (see [Lab Manager & QA: Certificates of Analysis, PDF Reports & Amendments](../usage/reporting-pdf.md)).
+2. Record the amendment reason. Obtain a second person's co-signature when **Require a second person for amendments** is enabled in **Policies**.
+3. Issue the amended report to publish the new revision (**Current**). This automatically marks the previous PDF **Superseded** and retires its old public link.
+
+---
+
+### 6. An external NSIS harvester received HTTP 410 Gone from the Data Exchange change feed
+
+*Cause:* More than 72 hours elapsed since the external harvester last polled the change feed. This also happens if the integration key's **Authorized Scopes** were modified or a database restore rotated the sync epoch.
+
+*Solution:*
+- Do not retry the expired cursor. Take a fresh baseline snapshot from the **Data Exchange** snapshots service to obtain a new starting cursor.
+
+---
+
+## Part 2: Server, Docker, Network & Database Troubleshooting (For IT)
 
 ### The Website Doesn't Load ("Connection refused")
 
-1. **Check if containers are running**:
+1. *Check if containers are running:*
    ```bash
    docker ps
    ```
@@ -91,13 +89,13 @@ This troubleshooting guide is divided into two sections:
    # Or direct port 3000:
    docker compose up -d
    ```
-2. **Check firewall ports (`80` and `443`)**:
+2. *Check firewall ports (80 and 443):*
    ```bash
    sudo ufw allow 80
    sudo ufw allow 443
    sudo ufw reload
    ```
-3. **DNS not propagated yet**: Test with `http://YOUR_SERVER_IP:3000` or check [whatsmydns.net](https://www.whatsmydns.net/).
+3. *DNS not propagated yet:* Test with `http://<server-ip>:3000` or check [whatsmydns.net](https://www.whatsmydns.net/).
 
 ---
 
@@ -119,29 +117,10 @@ The NGINX reverse proxy is running, but the `soilfer-lims` application container
 
 ### Port Conflicts ("Port 80 or 3000 already in use")
 
-- **Port 80 in use**: Another web server (Apache or host NGINX) is already listening on port 80 (`sudo lsof -i :80`). Use **Scenario B** (`docker compose up -d` without `docker-compose.nginx.yml`) and proxy to `http://127.0.0.1:3000` from your existing web server.
-- **Port 3000 in use**: Change `PORT=3001` in `/opt/soilfer-lims/.env` and restart (`docker compose up -d`).
+Another web server (such as host Apache or NGINX) is already listening on port 80 or 3000.
 
----
-
-### SSL Certificate Renewal Issues
-
-If your Let's Encrypt HTTPS certificate expired:
 ```bash
-sudo certbot renew --force-renewal
-cd /opt/soilfer-lims
-docker compose -f docker-compose.yml -f docker-compose.nginx.yml restart nginx
+sudo ss -tlnp | grep -E ':(80|443|3000)\s'
 ```
 
----
-
-### Database Locked or Disk Full
-
-- **"Database is locked"**: Restart the container cleanly so SQLite WAL checkpoints complete:
-  ```bash
-  cd /opt/soilfer-lims && docker compose restart
-  ```
-- **Disk space full**: Check free disk space with `df -h` and prune unused Docker build cache/images:
-  ```bash
-  docker system prune -f
-  ```
+Either stop the conflicting host service or follow [Scenario B: Existing Server & Subdomain](../deployment/scenario-b.md).

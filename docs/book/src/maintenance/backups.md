@@ -3,7 +3,17 @@
 SoilFER-LIMS stores all database records in SQLite with Write-Ahead Logging (WAL) enabled.
 
 > [!WARNING]
-> **Do not directly copy a live `dev.db` file while the system is running.** Direct file copying while SQLite has active WAL transactions can produce an incomplete or corrupted backup file. Always use the built-in online backup script.
+> *Do not directly copy a live database file while the system is running.* Direct file copying while SQLite has active WAL transactions can produce an incomplete or corrupted backup file. Always use the built-in online backup script below.
+
+---
+
+## Pre-Pilot Backup Readiness Checklist (For IT)
+
+Before your laboratory receives its first live pilot samples, verify these four items:
+- [ ] Run one manual online backup (`backup_db.js`) and confirm the `.db.gz` archive is created cleanly.
+- [ ] Run `verify_backup.js` on the archive to confirm it passes integrity verification.
+- [ ] Schedule the daily automated cron job (2:00 AM UTC or local night-time) and schedule a weekly copy of `/app/server/uploads` for spectral files, logos, and field photos.
+- [ ] Copy at least one verified backup archive to an off-site location and test a restore on a staging or local test container before pilot day one.
 
 ---
 
@@ -84,10 +94,10 @@ docker cp soilfer-lims:/app/server/uploads /opt/backups/uploads-$(date +%Y%m%d)
 
 ## Off-Site Backups (Recommended)
 
-Keeping backups only on the same server is risky — if the server's disk fails, you lose both the database and the backups. Consider copying backups to another location:
+Keeping backups only on the same server is risky — if the server's disk fails, you lose both the database and the backups. Copy backups to a second location:
 
-- **Download to your computer:** `scp root@YOUR_SERVER_IP:/opt/backups/lims-20260211.db ./`
-- **Copy to cloud storage:** Use tools like `rclone` to sync backups to Google Drive, Dropbox, or S3
-- **Copy to another server:** Use `rsync` or `scp`
+- *Download to your computer:* `scp root@<server-ip>:/opt/backups/soilfer_lims_backup_<timestamp>.db.gz ./`
+- *Copy to cloud storage:* Use tools like `rclone` to sync backups to Google Drive, Dropbox, or S3
+- *Copy to another server:* Use `rsync` or `scp`
 
 > 📖 [How to use SCP to transfer files (DigitalOcean)](https://www.digitalocean.com/community/tutorials/how-to-use-scp-command-to-securely-transfer-files)
