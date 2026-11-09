@@ -82,7 +82,18 @@
 # Launching in Your Lab
 
 - [Pilot Launch Kit](./launch/index.md)
+  - [Three-Session Lab Training Plan](./launch/training-plan.md)
+  - [Hands-On Practice Exercises & Answer Key](./launch/practice-exercises.md)
+  - [Day-One & Week-One Parallel-Run Guide](./launch/day-one-guide.md)
+  - [Known Limitations for the Pilot](./launch/known-limitations.md)
+  - [One-Page Pilot Feedback Form](./launch/pilot-feedback-form.md)
 - [Printable Bench Cards & Posters](./print/index.md)
+  - [Reception Card: Receiving a Box in 8 Steps](./print/reception-card.md)
+  - [Technician Bench Card: Running a Batch & QC](./print/technician-bench-card.md)
+  - [Manager Card: Reviewing, Failed QC & Reports](./print/manager-review-card.md)
+  - [Wall Poster: The Sample Journey](./print/sample-journey-poster.md)
+  - [Wall Poster: QC Failed — What Now?](./print/qc-failed-flowchart.md)
+  - [Bench Card: Status Colours & Badges](./print/status-colours-card.md)
 
 ---
 
