@@ -103,7 +103,7 @@ export function buildNavItems(user, t = (k, d) => d, icons = {}) {
     }
 
     if (['SUPER_ADMIN', 'LAB_MANAGER'].includes(user?.role)) {
-        navItems.push({ icon: Settings, label: t('nav.admin', 'Admin Panel'), path: '/admin' });
+        navItems.push({ icon: Settings, label: t('nav.admin', 'Admin Panel'), path: '/admin', exact: true });
     }
 
     // General Information
@@ -111,4 +111,10 @@ export function buildNavItems(user, t = (k, d) => d, icons = {}) {
     navItems.push({ icon: Info, label: t('nav.about', 'About SoilFER'), path: '/about' });
 
     return navItems;
+}
+
+export function isNavItemActive(item, pathname) {
+    const path = item.path.split('?')[0];
+    const current = pathname.replace(/\/+$/, '') || '/';
+    return current === path || (!item.exact && path !== '/' && current.startsWith(path + '/'));
 }

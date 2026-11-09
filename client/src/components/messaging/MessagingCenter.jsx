@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { Inbox, Send, FileText, Archive, Trash2, Edit3, User, RefreshCw, Check, Clock, Mail, MessageCircle, ArrowLeft, CheckCheck, Smile } from 'lucide-react';
 import clsx from 'clsx';
 import { useDialog } from '../../context/DialogContext';
+import { useLanguage } from '../../context/LanguageContext';
 
 const MessagingCenter = ({ initialMessageId }) => {
     const {
@@ -14,6 +15,7 @@ const MessagingCenter = ({ initialMessageId }) => {
     } = useNotifications();
     const { user } = useAuth();
     const { showDialog } = useDialog();
+    const { t, locale } = useLanguage();
 
     // State
     const [activeFolder, setActiveFolder] = useState('INBOX');
@@ -130,9 +132,9 @@ const MessagingCenter = ({ initialMessageId }) => {
             } else {
                 switchFolder('SENT');
             }
-            showDialog({ title: 'Success', message: 'Message sent successfully.', type: 'success' });
+            showDialog({ title: t('common.success'), message: t('profileMessages.sentSuccess'), type: 'success' });
         } else {
-            showDialog({ title: 'Error', message: 'Failed to send message.', type: 'error' });
+            showDialog({ title: t('common.error'), message: t('profileMessages.sendFailed'), type: 'error' });
         }
     };
 
@@ -143,7 +145,7 @@ const MessagingCenter = ({ initialMessageId }) => {
         if (success) {
             setIsComposing(false);
             switchFolder('DRAFT');
-            showDialog({ title: 'Saved', message: 'Message saved to drafts.', type: 'info' });
+            showDialog({ title: t('profileMessages.saved'), message: t('profileMessages.draftSaved'), type: 'info' });
         }
     };
 
@@ -183,20 +185,20 @@ const MessagingCenter = ({ initialMessageId }) => {
         const d = new Date(date);
         const now = new Date();
         const diff = now - d;
-        if (diff < 60000) return 'now';
+        if (diff < 60000) return t('profileMessages.now');
         if (diff < 3600000) return `${Math.floor(diff / 60000)}m`;
-        if (diff < 86400000) return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        if (diff < 604800000) return d.toLocaleDateString([], { weekday: 'short' });
-        return d.toLocaleDateString([], { month: 'short', day: 'numeric' });
+        if (diff < 86400000) return d.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
+        if (diff < 604800000) return d.toLocaleDateString(locale, { weekday: 'short' });
+        return d.toLocaleDateString(locale, { month: 'short', day: 'numeric' });
     };
 
-    const formatChatTime = (date) => new Date(date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const formatChatTime = (date) => new Date(date).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
 
     const groupMessagesByDate = (msgs) => {
         const groups = [];
         let currentDate = '';
         for (const msg of msgs) {
-            const dateStr = new Date(msg.createdAt).toLocaleDateString([], { year: 'numeric', month: 'long', day: 'numeric' });
+            const dateStr = new Date(msg.createdAt).toLocaleDateString(locale, { year: 'numeric', month: 'long', day: 'numeric' });
             if (dateStr !== currentDate) {
                 groups.push({ type: 'date', label: dateStr });
                 currentDate = dateStr;
@@ -213,15 +215,15 @@ const MessagingCenter = ({ initialMessageId }) => {
             const msg = activeThread[0];
             return msg.isMe ? msg.recipientName : msg.senderName;
         }
-        return 'Chat';
+        return t('profileMessages.chat');
     };
 
     // ── Render Message List Item ──────────────────────────────────
     const renderMessageItem = (msg) => {
         const isSelected = selectedMessage?.id === msg.id;
         const otherUser = (activeFolder === 'SENT' || activeFolder === 'DRAFT')
-            ? (msg.recipientName || msg.recipient?.name || msg.recipient?.username || 'Unknown')
-            : (msg.senderName || msg.sender?.name || msg.sender?.username || 'Unknown');
+            ? (msg.recipientName || msg.recipient?.name || msg.recipient?.username || t('profileMessages.unknown'))
+            : (msg.senderName || msg.sender?.name || msg.sender?.username || t('profileMessages.unknown'));
 
         return (
             <div
@@ -239,10 +241,10 @@ const MessagingCenter = ({ initialMessageId }) => {
             >
                 <div className="flex justify-between items-start mb-1">
                     <span className="truncate text-sm text-sf-text font-medium w-40 block">
-                        {(activeFolder === 'DRAFT' && !otherUser) ? '(No Recipient)' : otherUser}
+                        {(activeFolder === 'DRAFT' && !otherUser) ? t('profileMessages.noRecipient') : otherUser}
                     </span>
                     <span className="text-xs text-gray-500 whitespace-nowrap ml-2">
-                        {new Date(msg.createdAt).toLocaleDateString()}
+                        {new Date(msg.createdAt).toLocaleDateString(locale)}
                     </span>
                 </div>
                 <div className="text-sm text-sf-text mb-1 truncate">{msg.subject}</div>
@@ -257,8 +259,8 @@ const MessagingCenter = ({ initialMessageId }) => {
             {conversations.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-center text-gray-400 p-8">
                     <MessageCircle size={48} className="mb-4 opacity-20" />
-                    <p className="text-sm">No conversations yet</p>
-                    <p className="text-xs mt-2 text-gray-400">Start a new chat from the notification drawer</p>
+                    <p className="text-sm">{t('profileMessages.noConversations')}</p>
+                    <p className="text-xs mt-2 text-gray-400">{t('profileMessages.startChat')}</p>
                 </div>
             ) : (
                 conversations.map(conv => (
@@ -330,10 +332,10 @@ const MessagingCenter = ({ initialMessageId }) => {
                         <p className="font-semibold text-sm text-sf-text">{getPartnerName()}</p>
                         {isOnline(activeThreadPartner) ? (
                             <p className="text-xs text-green-500 flex items-center gap-1">
-                                <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" /> online
+                                <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" /> {t('profileMessages.online')}
                             </p>
                         ) : (
-                            <p className="text-xs text-gray-400">offline</p>
+                            <p className="text-xs text-gray-400">{t('profileMessages.offline')}</p>
                         )}
                     </div>
                 </div>
@@ -345,8 +347,8 @@ const MessagingCenter = ({ initialMessageId }) => {
                     {activeThread.length === 0 ? (
                         <div className="flex flex-col items-center justify-center h-full text-gray-400">
                             <MessageCircle size={40} className="mb-3 opacity-30" />
-                            <p className="text-sm">No messages yet</p>
-                            <p className="text-xs mt-1">Say hello! 👋</p>
+                            <p className="text-sm">{t('profileMessages.noMessagesYet')}</p>
+                            <p className="text-xs mt-1">{t('profileMessages.sayHello')}</p>
                         </div>
                     ) : (
                         grouped.map((item, idx) => {
@@ -426,7 +428,7 @@ const MessagingCenter = ({ initialMessageId }) => {
                                 value={chatInput}
                                 onChange={e => setChatInput(e.target.value)}
                                 onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleChatSend(e); } }}
-                                placeholder="Type a message..."
+                                placeholder={t('profileMessages.chatPlaceholder')}
                                 rows={1}
                                 style={{ minHeight: '40px' }}
                             />
@@ -459,7 +461,7 @@ const MessagingCenter = ({ initialMessageId }) => {
                         onClick={() => handleCompose()}
                         className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg flex items-center justify-center gap-2 font-medium transition-colors shadow-sm"
                     >
-                        <Edit3 size={18} /> Compose
+                        <Edit3 size={18} /> {t('profileMessages.compose')}
                     </button>
                 </div>
 
@@ -469,7 +471,7 @@ const MessagingCenter = ({ initialMessageId }) => {
                         onClick={() => switchFolder('CHATS')}
                         className={clsx("w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-colors", activeFolder === 'CHATS' ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-sm" : "text-sf-muted hover:bg-sf-raised")}
                     >
-                        <div className="flex items-center gap-3"><MessageCircle size={18} /> Chats</div>
+                        <div className="flex items-center gap-3"><MessageCircle size={18} /> {t('profileMessages.CHATS')}</div>
                         {conversations.filter(c => c.unreadCount > 0).length > 0 && (
                             <span className={clsx("text-xs rounded-full px-1.5 py-0.5 font-bold", activeFolder === 'CHATS' ? "bg-white/20 text-white" : "bg-green-500 text-white")}>
                                 {conversations.reduce((acc, c) => acc + c.unreadCount, 0)}
@@ -483,32 +485,32 @@ const MessagingCenter = ({ initialMessageId }) => {
                         onClick={() => switchFolder('INBOX')}
                         className={clsx("w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-colors", activeFolder === 'INBOX' ? "bg-sf-surface text-blue-600 shadow-sm" : "text-sf-muted hover:bg-sf-raised")}
                     >
-                        <div className="flex items-center gap-3"><Inbox size={18} /> Inbox</div>
+                        <div className="flex items-center gap-3"><Inbox size={18} /> {t('profileMessages.INBOX')}</div>
                     </button>
                     <button
                         onClick={() => switchFolder('SENT')}
                         className={clsx("w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors", activeFolder === 'SENT' ? "bg-sf-surface text-blue-600 shadow-sm" : "text-sf-muted hover:bg-sf-raised")}
                     >
-                        <Send size={18} /> Sent
+                        <Send size={18} /> {t('profileMessages.SENT')}
                     </button>
                     <button
                         onClick={() => switchFolder('DRAFT')}
                         className={clsx("w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors", activeFolder === 'DRAFT' ? "bg-sf-surface text-blue-600 shadow-sm" : "text-sf-muted hover:bg-sf-raised")}
                     >
-                        <FileText size={18} /> Drafts
+                        <FileText size={18} /> {t('profileMessages.DRAFT')}
                     </button>
                     <button
                         onClick={() => switchFolder('ARCHIVE')}
                         className={clsx("w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors", activeFolder === 'ARCHIVE' ? "bg-sf-surface text-blue-600 shadow-sm" : "text-sf-muted hover:bg-sf-raised")}
                     >
-                        <Archive size={18} /> Archive
+                        <Archive size={18} /> {t('profileMessages.ARCHIVE')}
                     </button>
                     <div className="pt-4 mt-4 border-t dark:border-gray-700">
                         <button
                             onClick={() => switchFolder('TRASH')}
                             className={clsx("w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors", activeFolder === 'TRASH' ? "bg-sf-surface text-red-600 shadow-sm" : "text-sf-muted hover:bg-red-50 dark:hover:bg-red-900/10 hover:text-red-600")}
                         >
-                            <Trash2 size={18} /> Trash
+                            <Trash2 size={18} /> {t('profileMessages.TRASH')}
                         </button>
                     </div>
                 </nav>
@@ -524,7 +526,7 @@ const MessagingCenter = ({ initialMessageId }) => {
                     )}>
                         <div className="p-4 border-b dark:border-gray-700 flex justify-between items-center">
                             <h3 className="font-semibold text-sf-text flex items-center gap-2">
-                                <MessageCircle size={18} className="text-blue-500" /> Chats
+                                <MessageCircle size={18} className="text-blue-500" /> {t('profileMessages.CHATS')}
                             </h3>
                             <button onClick={fetchConversations} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
                                 <RefreshCw size={16} />
@@ -543,8 +545,8 @@ const MessagingCenter = ({ initialMessageId }) => {
                         ) : (
                             <div className="flex-1 flex flex-col items-center justify-center text-gray-400">
                                 <MessageCircle size={48} className="mb-4 opacity-20" />
-                                <p className="text-sm">Select a conversation</p>
-                                <p className="text-xs mt-1 text-gray-400">or start one from the notification drawer</p>
+                                <p className="text-sm">{t('profileMessages.selectConversation')}</p>
+                                <p className="text-xs mt-1 text-gray-400">{t('profileMessages.startFromDrawer')}</p>
                             </div>
                         )}
                     </div>
@@ -555,12 +557,12 @@ const MessagingCenter = ({ initialMessageId }) => {
                     {/* Message List */}
                     <div className="w-64 md:w-80 border-r dark:border-gray-700 flex flex-col bg-sf-surface">
                         <div className="p-4 border-b dark:border-gray-700 flex justify-between items-center">
-                            <h3 className="font-semibold text-sf-text capitalize">{activeFolder.toLowerCase()}</h3>
+                            <h3 className="font-semibold text-sf-text capitalize">{t('profileMessages.' + activeFolder, activeFolder)}</h3>
                             <button onClick={() => fetchMessages(activeFolder)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"><RefreshCw size={16} /></button>
                         </div>
                         <div className="flex-1 overflow-y-auto">
                             {messages.length === 0 ? (
-                                <div className="p-8 text-center text-gray-400 text-sm">No messages</div>
+                                <div className="p-8 text-center text-gray-400 text-sm">{t('profileMessages.noMessages')}</div>
                             ) : (
                                 messages.map(renderMessageItem)
                             )}
@@ -572,24 +574,24 @@ const MessagingCenter = ({ initialMessageId }) => {
                         {isComposing ? (
                             <div className="flex-1 flex flex-col p-6 overflow-y-auto animate-in fade-in duration-200">
                                 <h3 className="text-lg font-bold text-sf-text mb-4">
-                                    {composeData.id ? 'Edit Draft' : 'New Message'}
+                                    {composeData.id ? t('profileMessages.editDraft') : t('profileMessages.newMessage')}
                                 </h3>
                                 <form onSubmit={onSend} className="space-y-4 flex-1 flex flex-col">
                                     <div>
-                                        <label className="block text-sm font-medium text-sf-muted mb-1">To</label>
+                                        <label className="block text-sm font-medium text-sf-muted mb-1">{t('profileMessages.to')}</label>
                                         <select
                                             className="w-full rounded-lg border-sf-divider dark:bg-gray-700 dark:text-white p-2.5"
                                             value={composeData.toUserId}
                                             onChange={e => setComposeData({ ...composeData, toUserId: e.target.value })}
                                             required={!composeData.id}
                                         >
-                                            <option value="">Select Recipient...</option>
+                                            <option value="">{t('profileMessages.selectRecipient')}</option>
                                             {(user?.role === 'LAB_MANAGER' || user?.role === 'SUPER_ADMIN' || (user?.role && user.role.includes('MANAGER'))) && (
-                                                <option value="BROADCAST">📢 Broadcast to All Staff</option>
+                                                <option value="BROADCAST">{t('profileMessages.broadcast')}</option>
                                             )}
                                             {directory.map(u => (
                                                 <option key={u.id} value={u.id}>
-                                                    {u.id === user?.id ? '📝 Note to Self' : (u.name || u.username)} ({u.role})
+                                                    {u.id === user?.id ? t('profileMessages.selfNote') : (u.name || u.username)} ({u.role})
                                                 </option>
                                             ))}
                                         </select>
@@ -597,36 +599,36 @@ const MessagingCenter = ({ initialMessageId }) => {
 
                                     {activeFolder !== 'CHATS' && (
                                         <div>
-                                            <label className="block text-sm font-medium text-sf-muted mb-1">Subject</label>
+                                            <label className="block text-sm font-medium text-sf-muted mb-1">{t('profileMessages.subject')}</label>
                                             <input
                                                 type="text"
                                                 className="w-full rounded-lg border-sf-divider dark:bg-gray-700 dark:text-white p-2.5"
                                                 value={composeData.subject}
                                                 onChange={e => setComposeData({ ...composeData, subject: e.target.value })}
-                                                placeholder="Subject..."
+                                                placeholder={t('profileMessages.subjectPlaceholder')}
                                                 required
                                             />
                                         </div>
                                     )}
 
                                     <div className="flex-1 flex flex-col">
-                                        <label className="block text-sm font-medium text-sf-muted mb-1">Message</label>
+                                        <label className="block text-sm font-medium text-sf-muted mb-1">{t('profileMessages.message')}</label>
                                         <textarea
                                             className="flex-1 w-full rounded-lg border-sf-divider dark:bg-gray-700 dark:text-white p-3 resize-none focus:ring-2 focus:ring-blue-500"
                                             value={composeData.body}
                                             onChange={e => setComposeData({ ...composeData, body: e.target.value })}
                                             required
-                                            placeholder="Type your message here..."
+                                            placeholder={t('profileMessages.messagePlaceholder')}
                                         />
                                     </div>
                                     <div className="flex justify-end gap-3 pt-2">
                                         {activeFolder !== 'CHATS' && (
                                             <button type="button" onClick={onSaveDraft} className="px-4 py-2 text-sf-muted hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg flex items-center gap-2">
-                                                <FileText size={18} /> Save Draft
+                                                <FileText size={18} /> {t('profileMessages.saveDraft')}
                                             </button>
                                         )}
                                         <button type="submit" disabled={loading} className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center gap-2 shadow-sm">
-                                            <Send size={18} /> {loading ? 'Sending...' : 'Send'}
+                                            <Send size={18} /> {loading ? t('profileMessages.sending') : t('profileMessages.send')}
                                         </button>
                                     </div>
                                 </form>
@@ -640,8 +642,8 @@ const MessagingCenter = ({ initialMessageId }) => {
                                             <div className="font-medium text-gray-900 dark:text-gray-200 flex items-center gap-2">
                                                 <User size={16} className="text-gray-500" />
                                                 {activeFolder === 'SENT'
-                                                    ? `To: ${selectedMessage.recipientName || selectedMessage.recipient?.name || selectedMessage.recipient?.username || 'Unknown'}`
-                                                    : `From: ${selectedMessage.senderName || selectedMessage.sender?.name || selectedMessage.sender?.username || 'Unknown'}`}
+                                                    ? t('profileMessages.toPerson', { name: selectedMessage.recipientName || selectedMessage.recipient?.name || selectedMessage.recipient?.username || t('profileMessages.unknown') })
+                                                    : t('profileMessages.fromPerson', { name: selectedMessage.senderName || selectedMessage.sender?.name || selectedMessage.sender?.username || t('profileMessages.unknown') })}
                                             </div>
                                             <div className="text-gray-500 flex items-center gap-2">
                                                 <Clock size={14} />
@@ -650,21 +652,21 @@ const MessagingCenter = ({ initialMessageId }) => {
                                         </div>
                                         <div className="flex gap-2">
                                             <button onClick={() => handleReply(selectedMessage)} className="px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg dark:bg-blue-900/20 dark:text-blue-400 dark:hover:bg-blue-900/30 text-sm font-medium flex items-center gap-1">
-                                                <Send size={14} className="scale-x-[-1]" /> Reply
+                                                <Send size={14} className="scale-x-[-1]" /> {t('profileMessages.reply')}
                                             </button>
                                             {activeFolder === 'DRAFT' ? (
-                                                <button onClick={() => handleCompose(selectedMessage)} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg dark:hover:bg-blue-900/30" title="Edit Draft">
+                                                <button onClick={() => handleCompose(selectedMessage)} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg dark:hover:bg-blue-900/30" title={t('profileMessages.editDraft')}>
                                                     <Edit3 size={18} />
                                                 </button>
                                             ) : (
                                                 <>
                                                     {activeFolder !== 'ARCHIVE' && activeFolder !== 'TRASH' && (
-                                                        <button onClick={() => onArchive(selectedMessage.id)} className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg dark:hover:bg-gray-700" title="Archive">
+                                                        <button onClick={() => onArchive(selectedMessage.id)} className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg dark:hover:bg-gray-700" title={t('profileMessages.archiveMessage')}>
                                                             <Archive size={18} />
                                                         </button>
                                                     )}
                                                     {activeFolder !== 'TRASH' && (
-                                                        <button onClick={() => onDelete(selectedMessage.id)} className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg dark:hover:bg-red-900/20" title="Delete">
+                                                        <button onClick={() => onDelete(selectedMessage.id)} className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg dark:hover:bg-red-900/20" title={t('common.delete')}>
                                                             <Trash2 size={18} />
                                                         </button>
                                                     )}
@@ -680,7 +682,7 @@ const MessagingCenter = ({ initialMessageId }) => {
                         ) : (
                             <div className="flex-1 flex flex-col items-center justify-center text-gray-400">
                                 <Mail size={48} className="mb-4 opacity-20" />
-                                <p>Select a message to view</p>
+                                <p>{t('profileMessages.selectMessage')}</p>
                             </div>
                         )}
                     </div>

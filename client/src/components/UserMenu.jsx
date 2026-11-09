@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { LogOut, User, Clock } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import { useNavigate } from 'react-router-dom';
 import { getTimezoneInfo } from '../utils/timezone';
 
 export const UserMenu = () => {
     const { user, logout } = useAuth();
+    const { t } = useLanguage();
     const navigate = useNavigate();
     const [isOpen, setIsOpen] = useState(false);
     const tzInfo = getTimezoneInfo();
@@ -15,17 +17,17 @@ export const UserMenu = () => {
             <button
                 onClick={() => setIsOpen(!isOpen)}
                 className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-sf-hover text-sf-text transition-colors"
-                title="User Menu"
+                title={t('accountProfile.menu')}
             >
                 <div className="w-8 h-8 rounded-full bg-[var(--sf-earth-bg)] text-[var(--sf-earth)] flex items-center justify-center font-bold text-sm shadow-sm border border-sf-divider">
                     {user?.name?.charAt(0) || 'U'}
                 </div>
                 <div className="hidden md:block text-left">
                     <div className="text-sm font-semibold text-sf-text">
-                        {user?.name || 'User'}
+                        {user?.name || t('accountProfile.user')}
                     </div>
                     <div className="text-[11px] text-sf-muted font-medium tracking-wide">
-                        {user?.role?.replace(/_/g, ' ')}
+                        {user?.role && t('roles.' + user.role, user.role)}
                     </div>
                 </div>
                 <svg
@@ -56,13 +58,13 @@ export const UserMenu = () => {
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <div className="font-semibold text-sf-text truncate">
-                                        {user?.name || 'User'}
+                                        {user?.name || t('accountProfile.user')}
                                     </div>
                                     <div className="text-xs text-sf-muted truncate">
                                         {user?.email || user?.username}
                                     </div>
                                     <div className="text-xs text-sf-muted mt-1">
-                                        {user?.role?.replace(/_/g, ' ')}
+                                        {user?.role && t('roles.' + user.role, user.role)}
                                     </div>
                                 </div>
                             </div>
@@ -91,7 +93,7 @@ export const UserMenu = () => {
                                 className="w-full flex items-center gap-3 px-4 py-2 text-sm text-sf-text hover:bg-sf-hover transition-colors"
                             >
                                 <User size={16} className="text-sf-muted" />
-                                <span>Profile Settings</span>
+                                <span>{t('accountProfile.settings')}</span>
                             </button>
 
                             {/* Logout */}
@@ -103,7 +105,7 @@ export const UserMenu = () => {
                                 className="w-full flex items-center gap-3 px-4 py-2 text-sm text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 transition-colors"
                             >
                                 <LogOut size={16} />
-                                <span className="font-medium">Sign Out</span>
+                                <span className="font-medium">{t('nav.logout')}</span>
                             </button>
                         </div>
                     </div>

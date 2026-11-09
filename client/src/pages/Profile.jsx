@@ -121,11 +121,11 @@ const Profile = () => {
     const handlePasswordChange = async (e) => {
         e.preventDefault();
         if ([...passData.new].length < minPasswordLength) {
-            showDialog({ title: 'Error', message: 'New password must be at least ' + minPasswordLength + ' characters long.', type: 'error' });
+            showDialog({ title: t('common.error'), message: t('accountProfile.passwordTooShort', { count: minPasswordLength }), type: 'error' });
             return;
         }
         if (passData.new !== passData.confirm) {
-            showDialog({ title: 'Error', message: 'New passwords do not match.', type: 'error' });
+            showDialog({ title: t('common.error'), message: t('accountProfile.passwordMismatch'), type: 'error' });
             return;
         }
 
@@ -136,16 +136,16 @@ const Profile = () => {
                 newPassword: passData.new
             });
             showDialog({
-                title: 'Success',
-                message: 'Password updated successfully. Please log in again.',
+                title: t('common.success'),
+                message: t('accountProfile.passwordChanged'),
                 type: 'success',
-                confirmText: 'Log In',
+                confirmText: t('login.signin'),
                 onConfirm: logout
             });
         } catch (err) {
             showDialog({
-                title: 'Error',
-                message: err.response?.data?.message || err.response?.data?.error || 'Failed to update password',
+                title: t('common.error'),
+                message: err.response?.data?.message || err.response?.data?.error || t('accountProfile.passwordFailed'),
                 type: 'error'
             });
         } finally {
@@ -163,10 +163,11 @@ const Profile = () => {
                     {user.name?.charAt(0) || 'U'}
                 </div>
                 <div className="flex-1 text-center md:text-left space-y-2">
+                    <p className="text-sm font-medium text-sf-muted">{t('header.profile')}</p>
                     <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">{user.name}</h1>
                     <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 text-sm text-gray-500 dark:text-gray-400">
                         <span className="flex items-center gap-1 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 px-3 py-1 rounded-full font-medium">
-                            <Shield size={14} /> {user.role?.replace(/_/g, ' ')}
+                            <Shield size={14} /> {user.role && t('roles.' + user.role, user.role)}
                         </span>
                         {user.labId && (
                             <span className="flex items-center gap-1">
@@ -189,7 +190,7 @@ const Profile = () => {
                         : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
                         }`}
                 >
-                    <User size={18} /> Overview
+                    <User size={18} /> {t('accountProfile.overview')}
                 </button>
                 <button
                     onClick={() => setActiveTab('security')}
@@ -198,7 +199,7 @@ const Profile = () => {
                         : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
                         }`}
                 >
-                    <Lock size={18} /> Security
+                    <Lock size={18} /> {t('accountProfile.security')}
                 </button>
                 <button
                     onClick={() => setActiveTab('messaging')}
@@ -207,7 +208,7 @@ const Profile = () => {
                         : 'border-transparent text-sf-muted hover:text-sf-text'
                         }`}
                 >
-                    <Mail size={18} /> Messaging Center
+                    <Mail size={18} /> {t('accountProfile.messaging')}
                 </button>
                 <button
                     onClick={() => setActiveTab('appearance')}
@@ -233,41 +234,41 @@ const Profile = () => {
                         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 <div className="space-y-4">
-                                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white border-b pb-2">Account Details</h3>
+                                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white border-b pb-2">{t('accountProfile.accountDetails')}</h3>
                                     <div className="space-y-3">
                                         <div className="flex justify-between">
-                                            <span className="text-gray-500">Username</span>
+                                            <span className="text-gray-500">{t('accountProfile.username')}</span>
                                             <span className="font-medium text-gray-900 dark:text-gray-200">{user.username}</span>
                                         </div>
                                         <div className="flex justify-between">
-                                            <span className="text-gray-500">Full Name</span>
+                                            <span className="text-gray-500">{t('accountProfile.fullName')}</span>
                                             <span className="font-medium text-gray-900 dark:text-gray-200">{user.name}</span>
                                         </div>
                                         <div className="flex justify-between">
-                                            <span className="text-gray-500">Email Address</span>
+                                            <span className="text-gray-500">{t('accountProfile.email')}</span>
                                             <span className="font-medium text-gray-900 dark:text-gray-200">{user.email}</span>
                                         </div>
                                         <div className="flex justify-between">
-                                            <span className="text-gray-500">Member Since</span>
+                                            <span className="text-gray-500">{t('accountProfile.memberSince')}</span>
                                             <span className="font-medium text-gray-900 dark:text-gray-200 flex items-center gap-1">
-                                                <Calendar size={14} /> {new Date(user.createdAt || Date.now()).toLocaleDateString()}
+                                                <Calendar size={14} /> {new Date(user.createdAt || Date.now()).toLocaleDateString(locale)}
                                             </span>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div className="space-y-4">
-                                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white border-b pb-2">Access Scope</h3>
+                                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white border-b pb-2">{t('accountProfile.accessScope')}</h3>
                                     <div className="space-y-3">
                                         <div>
-                                            <span className="text-gray-500 block mb-1">Assigned Laboratory</span>
+                                            <span className="text-gray-500 block mb-1">{t('accountProfile.assignedLab')}</span>
                                             <div className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700">
                                                 <Building2 className="text-gray-400" size={18} />
-                                                <span className="font-medium">{user.labId || 'Global Access'}</span>
+                                                <span className="font-medium">{user.labId || t('accountProfile.globalAccess')}</span>
                                             </div>
                                         </div>
                                         <div>
-                                            <span className="text-gray-500 block mb-1">Country Access</span>
+                                            <span className="text-gray-500 block mb-1">{t('accountProfile.countryAccess')}</span>
                                             <div className="flex flex-wrap gap-2">
                                                 {user.countries && user.countries.length > 0 ? (
                                                     user.countries.map(c => (
@@ -276,7 +277,7 @@ const Profile = () => {
                                                         </span>
                                                     ))
                                                 ) : (
-                                                    <span className="text-gray-400 italic">No specific country restrictions</span>
+                                                    <span className="text-gray-400 italic">{t('accountProfile.noCountryRestrictions')}</span>
                                                 )}
                                             </div>
                                         </div>
@@ -289,10 +290,10 @@ const Profile = () => {
                     {/* SECURITY TAB */}
                     {activeTab === 'security' && (
                         <div className="max-w-md animate-in fade-in slide-in-from-bottom-2 duration-300">
-                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">Change Password</h3>
+                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">{t('accountProfile.changePassword')}</h3>
                             <form onSubmit={handlePasswordChange} className="space-y-5">
                                 <div className="space-y-2">
-                                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Current Password</label>
+                                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('accountProfile.currentPassword')}</label>
                                     <input
                                         type="password"
                                         value={passData.current}
@@ -302,18 +303,18 @@ const Profile = () => {
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">New Password</label>
+                                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('accountProfile.newPassword')}</label>
                                     <input
                                         type="password"
                                         value={passData.new}
                                         onChange={e => setPassData({ ...passData, new: e.target.value })}
                                         className="input-base w-full p-3 rounded-lg border dark:border-gray-600 focus:ring-2 focus:ring-blue-500"
-                                        placeholder={'Min. ' + minPasswordLength + ' characters'}
+                                        placeholder={t('accountProfile.minPassword', { count: minPasswordLength })}
                                         required
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Confirm New Password</label>
+                                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('accountProfile.confirmPassword')}</label>
                                     <input
                                         type="password"
                                         value={passData.confirm}
@@ -330,7 +331,7 @@ const Profile = () => {
                                             ${loading ? 'opacity-70 cursor-not-allowed' : ''}
                                         `}
                                     >
-                                        {loading ? 'Updating...' : 'Update Password'}
+                                        {loading ? t('accountProfile.updating') : t('accountProfile.updatePassword')}
                                     </button>
                                 </div>
                             </form>
@@ -428,7 +429,7 @@ const Profile = () => {
                                     </button>
                                     {selectedLang !== (user?.language || locale) && (
                                         <span className="text-xs text-sf-muted">
-                                            Unsaved language change
+                                            {t('accountProfile.unsavedLanguage')}
                                         </span>
                                     )}
                                 </div>
