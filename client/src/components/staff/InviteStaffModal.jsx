@@ -69,6 +69,11 @@ export default function InviteStaffModal({ isOpen, onClose, onSuccess, defaultLa
             return;
         }
 
+        if (!labId) {
+            setError(t('staffManagement.invite.selectLab'));
+            return;
+        }
+
         setSubmitting(true);
         setError(null);
 
@@ -77,15 +82,13 @@ export default function InviteStaffModal({ isOpen, onClose, onSuccess, defaultLa
                 name: name.trim(),
                 email: email.trim().toLowerCase(),
                 role,
-                labId: labId || null
+                labId
             });
 
             setInvitationResult(res.data?.invitation || res.data);
             if (onSuccess) onSuccess();
         } catch (err) {
-            console.error('Failed to create invitation:', err);
-            const msg = err.response?.data?.message || err.response?.data?.error || err.message;
-            setError(msg || 'Failed to prepare invitation');
+            setError(err.response?.data?.message || err.response?.data?.error || t('staffManagement.invite.prepareFailed'));
         } finally {
             setSubmitting(false);
         }
@@ -214,17 +217,19 @@ export default function InviteStaffModal({ isOpen, onClose, onSuccess, defaultLa
                                 </div>
                             </div>
 
-                            {availableLabs.length > 1 && (
+                            {(!defaultLabId || availableLabs.length > 1) && (
                                 <div>
-                                    <label className="block text-[11px] font-bold text-sf-muted mb-1 uppercase tracking-wider">
+                                    <label htmlFor="invite-lab" className="block text-[11px] font-bold text-sf-muted mb-1 uppercase tracking-wider">
                                         {t('staffManagement.invite.labScope', 'Laboratory Scope')}
                                     </label>
                                     <select
+                                        id="invite-lab"
+                                        required
                                         value={labId}
                                         onChange={(e) => handleLabChange(e.target.value)}
                                         className="w-full px-3 py-2.5 bg-sf-canvas border border-sf-divider rounded-xl text-sm text-sf-text focus:ring-2 focus:ring-sf-primary outline-none transition"
                                     >
-                                        <option value="">{t('staffManagement.invite.globalScope', 'No specific laboratory (Global)')}</option>
+                                        <option value="" disabled>{t('staffManagement.invite.selectLab')}</option>
                                         {availableLabs.map(l => (
                                             <option key={l.id} value={l.id}>{l.name} ({l.code})</option>
                                         ))}
@@ -275,7 +280,7 @@ export default function InviteStaffModal({ isOpen, onClose, onSuccess, defaultLa
                             </button>
                             <button
                                 type="submit"
-                                disabled={submitting || !name.trim() || !email.trim()}
+                                disabled={submitting || !name.trim() || !email.trim() || !labId}
                                 className="px-6 py-2.5 bg-sf-primary text-white rounded-xl text-xs font-bold hover:bg-sf-primary/90 transition shadow-md shadow-sf-primary/20 disabled:opacity-50"
                             >
                                 {submitting ? t('common.generating', 'Generating...') : t('staffManagement.invite.prepareButton', 'Prepare Invitation')}
