@@ -1,103 +1,61 @@
 # Data Exchange, NSIS / OpenNSIS & API v2
 
-SoilFER LIMS includes a built-in **Data Exchange Gateway** that allows national soil programmes, GIS portals, and external systems such as **FAO OpenNSIS** and **GLOSIS** to harvest approved soil data securely without disrupting everyday work inside the laboratory.
+> *Time:* 10 minutes.
+> *Who can do this:* Super Administrators, National Leads, Laboratory Managers, and NSIS coordinators.
+
+SoilFER LIMS includes a built-in data exchange gateway (**National SIS & Data Exchange**). National soil portals, GIS teams, and FAO OpenNSIS can harvest approved soil data securely. Daily work in the laboratory continues at full speed.
 
 ---
 
-## 1. How Data Exchange Protects the Laboratory
+## 1. Four Guarantees That Protect Your Laboratory
 
-The Data Exchange Gateway is designed around four non-negotiable guarantees for laboratory staff:
-
-1. **Only Approved Data Leaves the Lab**: External systems can only see samples whose status is **`APPROVED`** or **`REPORTED` (`RELEASED`)**. Samples that are still in reception, preparation, bench testing, or waiting for review are never exposed.
-2. **Strict Laboratory Scoping (Fail-Closed)**: Every external API key is locked to specific laboratories and countries. If an API key does not explicitly list your laboratory, it receives zero records from your lab.
-3. **Zero Disruption to Reception & Bench Work**: External synchronization happens in the background on a read-only publication layer. Even if a national database is offline, laboratory intake, testing, and PDF reporting continue normally.
-4. **Truthful Provenance**: Missing GPS coordinates or missing soil depths remain `null` (never replaced with fake `0, 0` coordinates or default `0–20 cm` depths), decimal depths (such as `0.0–15.5 cm`) are preserved without rounding, and field collection dates are kept strictly separate from laboratory reception timestamps.
+1. *Only approved data leaves the laboratory:* External systems can only access samples whose status is **Approved** (**Released**). Samples still in **Sample Reception**, preparation, **Workbench** runs, or **Awaiting Review** are never exposed.
+2. *Strict laboratory and country scoping:* Every external integration key is restricted to specific **Authorized Scopes** (**Countries:** and **Labs:**). If a key does not list your laboratory, it receives zero records from your facility (**None (Deny All)** by default).
+3. *Zero disruption to bench work:* External harvesting reads from an isolated publication layer. Even if a national database is offline, sample reception, bench entry, and PDF reporting continue normally.
+4. *Truthful field and analytical provenance:* Missing GPS coordinates or sampling depths stay blank. Decimal depths are kept without rounding. Field collection dates stay separate from laboratory reception dates.
 
 ---
 
-## 2. Reported Values (v1 / CSV / Excel) vs. Lossless Observations (API v2)
-
-SoilFER LIMS supports two complementary ways of exchanging analytical results depending on what the receiving system needs:
+## 2. Two Complementary Export Formats
 
 | Export Channel | What It Contains | Best For |
 | :--- | :--- | :--- |
-| **CSV / Excel Export & API v1 (`/api/v1/data-exchange`)** | Outputs the single **Saved Reported Value** per parameter on each approved sample (from `ReportedValueSelection`), along with its standardized unit, method reference, and censoring flag (`< LOD`, `< LOQ`, `J`). | Agronomists, project managers, spreadsheet analysis, and legacy v1 dashboards. |
-| **Data Exchange API v2 (`/api/v2/data-exchange`)** | Outputs **Lossless Observations**—preserving every valid replicate measurement (`replicateNo: 1, 2, ...`), raw and normalized values, attempt/batch lineage, and the reference to which value was selected as the official Reported Value. | National Soil Information Systems (**NSIS / OpenNSIS**), pedometricians, and digital soil mapping pipelines. |
+| *Spreadsheet Exports (CSV / Excel) & V1 Legacy* | The single official reported value per test parameter on each approved sample. Includes its controlled unit, method name, and detection-limit flag. | Agronomists, project coordinators, spreadsheet review, and summary dashboards. |
+| *Lossless Exchange (**Default (core-lossless-v2)** & **OpenNSIS (National Accession)**)* | Every valid replicate measurement, raw and normalized values, moisture basis, and batch lineage. Also includes a pointer to the official reported value. | National Soil Information Systems, digital soil mapping teams, and spectral calibration libraries. |
 
 ---
 
-## 3. Recording Soil Profile References (Site / Pit / Layer Linking)
+## 3. Recording Soil Profile References (Pit & Depth Layer Linking)
 
-When field teams collect soil samples from multiple depth layers of the same soil pit or sampling point (for example, `0–20 cm` and `20–50 cm`), they can record a **Profile Reference** so the receiving National Soil Information System knows both bags came from the same location.
-
-### What You See
-
-On the Sample Intake form, KoboToolbox mapping screen, and Sample Detail page, the **Profile Reference** section shows:
-- **Profile Code** (for example, `PIT-DEMO-01` or `PLOT-ALPHA`)
-- **Source Namespace** (inherited from the project or survey context, such as `SOILFER-GTM`)
-- **Resolved Key** (`{namespace}:{code}`, such as `SOILFER-GTM:PIT-DEMO-01`)
-- **Relation / Meaning**:
-  - `CONFIRMED_PROFILE` (explicitly confirmed multi-layer soil pit/profile)
-  - `SITE_POINT` (single point or auger boring)
-  - `COMPOSITE` (bulked composite across a plot)
-  - `UNSPECIFIED` (or explicitly recorded as unknown)
-
-### What You Do
-
-- **At Reception or via KoboToolbox**: Enter the field profile code if recorded on the bag or manifest, or map the exact KoboToolbox field path in the project settings. If a sample has no profile reference, simply leave it blank or select **Record as Unknown**—an unknown profile never blocks laboratory work.
-- **Correcting a Profile Reference**:
-  - *Before the sample is released*: Reception staff or a Lab Manager can update the profile reference directly on the Sample Detail page.
-  - *After the sample is released/approved*: Changing a profile reference requires an authorized **Clerical Amendment** with a written reason so downstream NSIS harvesters receive an audited update event on the change feed.
+Field surveyors often collect soil bags from multiple depth layers of the same soil pit (for example, 0–20 cm and 20–50 cm). Recording a soil profile code lets the receiving National Soil Information System link those layers to the same pit:
+- At **Sample Reception** (or via **KoboToolbox Integration**), enter the profile code if written on the bag or manifest. If a bag has no profile code, leave it blank. An unknown profile code never blocks laboratory testing.
+- Before a sample is approved, reception staff or a **Laboratory Manager** can update the profile reference on the sample detail page. After a report is released, any provenance correction requires an audited report amendment with a written reason.
 
 ---
 
-## 4. Managing Data Exchange API Keys
+## 4. Manage Integration Keys in Admin Panel
 
-### What You See
+### Steps for Super Administrators
 
-In **Admin Panel → Data Exchange Keys** (`/admin/api-keys`), Super Admins can view all external integration keys, their assigned role (`NSIS_CONSUMER`, `EXTERNAL_GIS`, or `GLOBAL_HARVESTER`), their authorized countries and laboratories, and their current status (`ACTIVE`, `ROTATING`, `RETIRED`, or `REVOKED`).
-
-### What You Do
-
-1. **Create a Key**: Click **Generate API Key**, enter a descriptive consumer label, select the access role, check the exact **Authorized Laboratories** and **Countries**, and click **Generate Secret Key**. Copy the one-time `slims_live_...` secret and share it securely with the NSIS administrator.
-2. **Rotate a Key Without Downtime**: Click the **Rotate API Key** icon on an active key.
-   - The old key enters a **24-hour `ROTATING` grace window** so the external system does not break while its administrator updates the secret.
-   - As soon as the external system makes its first request with the new key (or when you click **Confirm Rotation**), the old key is automatically retired.
-   - If needed before confirmation, click **Abort Rotation** to roll back to the original key.
-3. **Revoke a Key Immediately**: Click **Revoke** to permanently block access (`HTTP 401 Unauthorized`).
+1. Click **Admin Panel** in the left sidebar and select the **National SIS & Data Exchange** tab.
+2. Under **Active API Keys**, click **Generate API Key**.
+3. Enter a descriptive consumer name (for example, **Guatemala NSIS Node**).
+4. Choose the authorized countries (**All Permitted Countries** or specific countries) and laboratories. Then generate the key.
+5. Copy the one-time secret key immediately. Share it securely with the national database administrator.
+6. Under **Connections & Telemetry**, monitor **Status & Control** (**ACTIVE (Operational)** or **DISABLED (Halt All Keys)**). You can also check **Receiver-Reported Telemetry** (**Receiver Ingested:** and **Receiver Quarantined:** counts).
+7. Use the **Step-by-Step Guide** and **Live API Sandbox** tabs (**Test Live with Built-in Sandbox**) to preview responses. Supported endpoints include **Exchange Capabilities & Profiles**, **Scoped Dataset Statistics**, **Lossless Specimen Registry & Provenance**, **Lossless Tabular Observations Matrix**, **RFC 7946 Spatial GeoJSON FeatureCollection**, **Lossless Spectroscopy Dataset (MIR/NIR)**, and **Monotonic Change Feed & Continuous Sync**.
 
 ---
 
-## 5. How External Systems Harvest Data (API v2 Workflow)
+## Related Tasks
 
-External NSIS and OpenNSIS connectors interact with `/api/v2/data-exchange` using three main patterns:
-
-```mermaid
-flowchart LR
-    CAP["1. GET /capabilities<br/>Check schema & limits"] --> SNAP["2. POST /snapshots<br/>Freeze point-in-time dataset"]
-    SNAP --> PAGES["3. GET /snapshots/:id/pages<br/>Download pages & nextCursor"]
-    PAGES --> REC["4. POST /receipts<br/>Send delivery receipt"]
-    REC --> CHG["5. GET /changes?cursor=...<br/>Stream incremental updates"]
-```
-
-1. **Point-in-Time Snapshots (`POST /snapshots` & `GET /snapshots/:id/pages`)**:
-   - Freezes a consistent dataset for 24 hours so the harvester can download pages one by one using `cursor` pagination without drift if the lab approves new samples mid-download.
-2. **Continuous Change Feed (`GET /changes`)**:
-   - Returns a chronological stream of `PUBLICATION`, `AMENDMENT`, and `WITHDRAWAL` events since the harvester's last cursor.
-   - If a cursor expires (after 72 hours) or the database epoch changes, the endpoint returns `HTTP 410 Gone (CURSOR_EXPIRED)`, telling the harvester to take a fresh baseline snapshot.
-3. **Delivery Receipts (`POST /receipts`)**:
-   - After importing a snapshot or change batch, the receiving NSIS posts back a receipt recording `importedCount`, `quarantinedCount`, and `checkpoint` (`seq_<N>` or `item_<N>`). Administrators can review these receipts in the LIMS to verify that national synchronization succeeded.
-4. **Live Endpoints (`/samples`, `/observations`, `/geojson`, `/spectra`)**:
-   - Direct paginated endpoints for querying specimens, lossless analytical observations, RFC 7946 GeoJSON map layers (for QGIS / ArcGIS / GeoNode), and MIR/Vis-NIR spectra.
+- [KoboToolbox Field Integration](./kobotoolbox.md)
+- [Spectral Data Management (MIR & Vis-NIR)](./spectral.md)
+- [Lab Manager & QA: Certificates of Analysis, PDF Reports & Amendments](./reporting-pdf.md)
 
 ---
 
-## 6. Technical Specification References
+### For the QA Person
 
-For software engineers and national database administrators implementing connectors, see the detailed technical specifications in the `docs/` directory:
-- [NSIS Data Exchange Specification v2 (`docs/data-exchange-api-v2.md`)](../../../data-exchange-api-v2.md)
-- [OpenNSIS Connector Mapping & Handoff (`docs/opennsis-connector-handoff-v1.md`)](../../../opennsis-connector-handoff-v1.md)
-- [NSIS Operator Runbook (`docs/nsis-operator-runbook.md`)](../../../nsis-operator-runbook.md)
-- [Soil Profile Reference Guide (`docs/profile-reference-guide.md`)](../../../profile-reference-guide.md)
-- [Spectral Data Exchange Specification v1 (`docs/spectral-exchange-v1.md`)](../../../spectral-exchange-v1.md)
-- [Legacy NSIS Exchange Specification v1 (`docs/nsis-exchange-v1.md`)](../../../nsis-exchange-v1.md)
+- *Key rotation without downtime:* Integration keys can be rotated with a grace window or revoked immediately from **National SIS & Data Exchange**. Every key creation, rotation, and revocation is logged in **Audit & Security**.
+- *Snapshot and change-feed consistency:* External harvesters can freeze a point-in-time dataset snapshot for paginated downloading. They can then stream chronological publication, amendment, and withdrawal events without missing post-release report amendments.

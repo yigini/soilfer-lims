@@ -1,86 +1,67 @@
 # Spectral Data Management (MIR & Vis-NIR)
 
-For laboratories that perform infrared soil spectroscopy—**Mid-Infrared (`MIR`, $4000\text{--}400\text{ cm}^{-1}$)** or **Visible–Near-Infrared (`NIR` / `Vis-NIR`, $350\text{--}2500\text{ nm}$)**—SoilFER LIMS provides a dedicated **Spectral Library & Workbench** module for uploading, validating, reviewing, and exchanging calibrated spectral signatures alongside wet-chemistry reference results.
+> *Time:* 10 minutes
+> *Who can do this:* Spectroscopy Technicians, Laboratory Managers, and Quality & Audit Officers
+
+For laboratories that run infrared soil spectroscopy—Mid-Infrared (**MIR**, 4000 to 400 inverse centimetres) or Visible–Near-Infrared (**NIR**, 350 to 2500 nanometres)—SoilFER LIMS provides **Spectral Library** (**Spectral Library & Proximal Sensing**). You can upload, validate, review, and export spectral curves alongside wet-chemistry reference measurements.
 
 > [!TIP]
-> **GLOSOLAN Spectroscopy Resources**: See the [FAO GLOSOLAN Soil Spectroscopy Portal](https://www.fao.org/global-soil-partnership/glosolan/soil-analysis/soil-spectroscopy) for standard operating procedures on fine grinding, background reference checks, and chemometric calibration.
+> *GLOSOLAN Spectroscopy Resources:* Visit the [FAO GLOSOLAN Soil Spectroscopy Portal](https://www.fao.org/global-soil-partnership/glosolan/soil-analysis/soil-spectroscopy) for standard operating procedures on fine ball-milling, background reference checks, and spectral calibration.
 
 ---
 
-## 1. What Soil Spectroscopy Does in the LIMS
+## 1. How Spectroscopy Fits into Your Laboratory Workflow
 
-Instead of replacing reference wet chemistry, soil spectroscopy in SoilFER LIMS works hand-in-hand with your analytical benches:
-
-1. **Spectral Library Building**: Pair high-quality MIR or Vis-NIR scans with approved wet-chemistry reference measurements (`MEASURED`) on the same physical soil sample (`SOC`, `TN`, `pH`, `Clay`, `CEC`, etc.).
-2. **Rapid Screening & Replicate Checks**: Record multiple sub-sample scans (`replicateNo: 1, 2, ...`) and automatically check spectral quality before approval.
-3. **Standardized Exchange**: Export approved spectra and paired reference chemistry through the **Spectral Exchange API** (`/api/v1/data-exchange/spectra` and `/api/v2/data-exchange/spectra`) for national and global spectral calibration models.
+1. *Pair spectra with wet chemistry:* Link **MIR** or **NIR** scans to the same physical soil sample that has approved wet-chemistry results (such as organic carbon, total nitrogen, pH, clay, or cation exchange capacity).
+2. *Check replicate scans:* Upload single or replicate sub-sample scans. The system verifies wavenumber range, signal bounds, and duplicate file fingerprints before review.
+3. *Share calibrated matrices:* Export approved curves using **Export Spectral Matrix** or through **National SIS & Data Exchange** (**Lossless Spectroscopy Dataset (MIR/NIR)**).
 
 ---
 
-## 2. Preparing Samples for Spectroscopy
+## 2. Sample Preparation for Spectroscopy
 
-Before scanning a soil sample, its physical preparation must be recorded accurately because particle size and moisture strongly affect infrared absorption:
+Because particle size and residual moisture strongly affect infrared absorption, always record how the soil was prepared before scanning:
 
-| Preparation Code | Description | Typical Modality |
+| Preparation Type | Physical Preparation | Typical Modality |
 | :--- | :--- | :--- |
-| **`AIR_DRY_2MM`** | Air-dried ($< 40^\circ\text{C}$) and sieved to $< 2\text{ mm}$ | Standard **Vis-NIR** ($350\text{--}2500\text{ nm}$) |
-| **`AGATE_100UM`** | Sub-sampled from the $2\text{ mm}$ archive and finely ball-milled / ground in agate to $< 100\ \mu\text{m}$ | Standard **MIR** ($4000\text{--}400\text{ cm}^{-1}$) |
-| **`KBR_PELLET`** | Finely ground soil diluted in potassium bromide ($\text{KBr}$) pressed pellet | Transmission **MIR** |
-| **`INTACT_CORE`** | Unprocessed aggregate or intact core | Specialized field/core **Vis-NIR** |
+| *Air-dried 2 mm fine earth* | Air-dried below 40 °C and sieved to pass 2 mm | Routine **NIR** (350–2500 nm) |
+| *Finely ground (agate / ball mill)* | Sub-sampled from 2 mm fine earth and finely ground to pass 100 micrometres | Routine **MIR** diffuse reflectance (4000–400 inverse cm) |
+| *Pressed KBr pellet* | Finely ground soil diluted in potassium bromide pellet | Transmission **MIR** |
+| *Intact core or aggregate* | Unprocessed soil aggregate or core | Specialized **NIR** scanning |
 
 ---
 
-## 3. Uploading & Recording Spectra
+## 3. Upload and Validate Spectral Files
 
-### What You See
+### Steps
 
-In **Spectral Library → Upload Spectra** (or from the **Spectra** tab on a sample or bench work item), you see:
-- **File Upload Dropzone** accepting:
-  - **CSV matrices** (wavelengths or wavenumbers in columns, sample scans in rows)
-  - **Bruker OPUS files** (`.0`, `.1`, etc. native binary spectrometer output)
-- **Acquisition & Instrument Metadata** fields:
-  - **Spectrometer Instrument** (linked to Equipment Inventory, e.g., *Bruker ALPHA II*)
-  - **Modality & Axis Unit**: `MIR` (`WAVENUMBER_CM1`, descending $4000 \to 400\text{ cm}^{-1}$) or `NIR` (`WAVELENGTH_NM`, ascending $350 \to 2500\text{ nm}$)
-  - **Signal Quantity**: `ABSORBANCE` ($\text{AU}$), `REFLECTANCE` ($R \in [0, 1]$), `TRANSMITTANCE` ($T \in [0, 1]$), or `REMANENCE` (Kubelka–Munk)
-  - **Accessory & Window Material** (e.g., `DRIFT`, `ATR`, `KBR`, `ZN_SE`, `QUARTZ`)
-  - **Resolution & Co-Added Scans** (e.g., $4\text{ cm}^{-1}$, 32 or 64 scans)
-  - **Background Reference** (e.g., `GOLD`, `SPECTRALON`, `KBR`) and background timestamp
-  - **Sample Preparation & Moisture State** (`AGATE_100UM`, `AIR_DRY_2MM`; `AIR_DRY`, `OVEN_DRY`)
-
-### What You Do
-
-1. Select the **Spectrometer Instrument** and verify that its readiness badge is green (`READY`).
-2. Confirm the **Preparation**, **Modality**, and **Background Reference** settings.
-3. Drag and drop your **CSV** or **OPUS** file(s) into the upload box.
-4. Match each parsed scan to its **Laboratory Sample Code** (or sub-sample container barcode) and confirm the replicate number (`replicateNo: 1, 2, ...`).
-5. Click **Upload & Validate Spectra**.
-
-### What Happens Next
-
-For every uploaded spectrum, the LIMS automatically computes a cryptographic **`sha256` fingerprint** (preventing duplicate uploads of the exact same scan file) and runs automated spectral QC checks:
-- **Axis & Range Check**: Confirms that wavenumbers/wavelengths cover the expected spectral region without missing channels or NaN values.
-- **Signal Bounds Check**: Flags negative reflectance, saturated absorbance ($> 3.5\text{ AU}$), or reflectance $> 1.2$.
-- **Atmospheric / Baseline Flags**: Highlights abnormal water vapor or $\text{CO}_2$ band interference or severe baseline drift.
-- Validated scans enter the review queue with a **`PASS`**, **`WARN`**, or **`FAIL`** QC status badge.
+1. Click **Spectral Library** in the left sidebar (or open a spectroscopy batch in **Workbench**).
+2. Click **Upload Spectra** (or **Batch Upload OPUS/CSV**).
+3. Select the spectrometer under **Calibrated Spectrometers** (**Instrument**). Confirm that its status in **Equipment** is **In Service** and **Ready / Calibrated**.
+4. Drag and drop your spectrometer files into **Drag and drop raw spectrometer files (.0, .csv, .dpt) or click to browse**.
+5. Match each scan to its sample code and replicate number, then upload.
+6. For step-by-step bench instructions, see [Technician: Workbench & Analytical Runs](./technician-workbench.md).
 
 ---
 
-## 4. Reviewing & Approving Spectral Scans
+## 4. Review and Approve Spectral Curves
 
-```mermaid
-flowchart LR
-    U["Upload CSV / OPUS"] --> V["Automated Spectral QC<br/>(Range, Saturation, SHA-256)"]
-    V --> R["Reviewer / Manager Inspection<br/>(Overlay Plot & Replicate Check)"]
-    R -->|Approve| A["APPROVED<br/>Available in Library & Exchange API"]
-    R -->|Reject| X["REJECTED<br/>Re-grind or Re-scan"]
-```
+1. In **Spectral Library**, use **Library Explorer** to filter by modality (**All Modalities**, **MIR**, or **NIR**) and workflow status (**All Workflow Status**, **Pending QC**, **Awaiting Review**, **Approved**, or **Rejected**).
+2. Open a scan to inspect **Wavenumber (cm⁻¹) / Wavelength (nm)** against **Absorbance / Reflectance**. Toggle **Baseline Correction** or **Continuum Removal** for visual inspection, and check that replicate curves overlay cleanly without baseline shift.
+3. Verify the quality badge (**✓ All quality checks passed**) alongside **Instrument**, **Scan Date**, and **Operator**.
+4. Approve valid spectra so they become **Approved** in **Total Spectra Curves**. If a scan is noisy, reject it so the technician can re-pack the cup and re-scan.
 
-### What You See
+---
 
-In **Spectral Library → Review Queue**, Reviewers and Lab Managers can plot single or multiple replicate scans on an interactive spectral curve viewer, inspect the acquisition metadata and QC flags, and view any paired wet-chemistry results on the same sample.
+## Related Tasks
 
-### What You Do
+- [Technician: Workbench & Analytical Runs](./technician-workbench.md)
+- [Register Instruments, Log Calibrations, and Track Reagent Stock](../admin/register-equipment-and-inventory.md)
+- [Data Exchange, NSIS / OpenNSIS & API v2](./data-exchange.md)
 
-1. Inspect the absorbance or reflectance curve (especially the quartz/silicate bands, carbonate peak near $2515 / 1430\text{ cm}^{-1}$, and organic matter C–H / C=O regions).
-2. If replicate scans (`replicateNo: 1, 2`) were recorded, verify that the curves overlay closely without baseline shifts caused by poor cup packing.
-3. Click **Approve Spectrum** to publish the scan into the laboratory's approved Spectral Library, or **Reject Spectrum** with a note instructing the technician to re-pack or re-grind the sample.
+---
+
+### For the QA Person
+
+- *Automated spectral quality checks:* Every uploaded file is checked for duplicate file fingerprints, wavenumber or wavelength coverage, signal saturation or negative reflectance, and baseline anomalies before entering **Awaiting Review**.
+- *Traceable metadata:* Approved spectra retain their linked **Instrument**, **Operator**, **Scan Date**, **Reviewed By**, preparation state, and paired wet-chemistry sample lineage.
