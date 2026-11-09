@@ -4068,6 +4068,7 @@
     "checksCount": "{checked}/{total} vérifications"
   },
   "intakeRules": {
+    "loadFailed": "Impossible de charger les règles de réception.",
     "loading": "Chargement des règles de réception…",
     "failureNotes": {
       "container": "Ex. : sac déchiré, couvercle desserré, fuite visible…",

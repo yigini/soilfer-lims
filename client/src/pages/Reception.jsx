@@ -10,7 +10,7 @@ import { AlertTriangle, CheckCircle, XCircle, Droplet, Droplets, Scale, Layers, 
 import QRCode from 'qrcode';
 import WalkInForm from '../components/reception/WalkInForm';
 import ComplianceChecklist from '../components/reception/ComplianceChecklist';
-import useIntakeRules from '../components/reception/useIntakeRules';
+import useIntakeRules, { intakeRulesErrorText } from '../components/reception/useIntakeRules';
 import IntakeContextFields, { missingIntakeContext } from '../components/reception/IntakeContextFields';
 import SampleMap from '../components/reception/SampleMap';
 import FieldProvenanceCard from '../components/reception/FieldProvenanceCard';
@@ -114,11 +114,35 @@ const Reception = () => {
     // Compliance & Notes
     const [checklistData, setChecklistData] = useState({ items: {}, nonConformance: false, reason: '' });
 
-    const { rules: intakeRules, error: intakeRulesFailed } = useIntakeRules({
+    const [selectedReceivingLab, setSelectedReceivingLab] = useState('');
+    const [receivingLabs, setReceivingLabs] = useState([]);
+    const [receivingLabsFailed, setReceivingLabsFailed] = useState(false);
+    const needsReceivingLab = mode === 'WALK_IN' && user?.role === 'SUPER_ADMIN' && !user.labId
+        && !sampleData?.assignedLab && user.isActive !== false && user.status !== 'INACTIVE';
+    const labRequired = needsReceivingLab && !selectedReceivingLab;
+
+    useEffect(() => {
+        if (!needsReceivingLab) {
+            setSelectedReceivingLab('');
+            return;
+        }
+        let current = true;
+        setReceivingLabs([]);
+        setReceivingLabsFailed(false);
+        axios.get('/api/labs/directory')
+            .then(({ data }) => { if (current) setReceivingLabs(data.filter(lab => lab.isActive === true)); })
+            .catch(() => { if (current) setReceivingLabsFailed(true); });
+        return () => { current = false; };
+    }, [needsReceivingLab]);
+
+    const { rules: intakeRules, error: intakeRulesError } = useIntakeRules({
         sampleId: sampleData && !sampleData.isNew ? sampleData.id : undefined,
         projectId: mode === 'WALK_IN' ? undefined : sessionProject,
-        isWalkIn: mode === 'WALK_IN', labId: user?.labId
+        isWalkIn: mode === 'WALK_IN',
+        labId: needsReceivingLab ? selectedReceivingLab : user?.labId,
+        enabled: mode !== 'CONSIGNMENT' && !labRequired
     });
+    const intakeRulesFailure = intakeRulesError ? intakeRulesErrorText(intakeRulesError, t) : null;
     useEffect(() => {
         if (!intakeRules) return;
         setChecklistData(previous => ({ ...previous, items: Object.fromEntries(Object.entries(previous.items || {}).map(([key, item]) =>
@@ -1249,7 +1273,7 @@ const Reception = () => {
             errors.push({ key: 'massDeficit', label: `Mass deficit (${massDeficit}g) must be acknowledged` });
         }
 
-        if (!intakeRules) errors.push({ key: 'compliance', label: t('intakeRules.unavailable') });
+        if (!intakeRules) errors.push({ key: 'compliance', label: intakeRulesFailure || t('intakeRules.loading') });
         missingIntakeContext(sampling, intakeRules).forEach(([key, rule]) => errors.push({ key, label: t(rule.label) }));
         const unanswered = Object.entries(intakeRules?.criteria || {}).filter(([key, rule]) => rule.enabled && rule.required && !checklistData.items?.[key]?.status);
         if (unanswered.length > 0) errors.push({ key: 'compliance', label: `Compliance checklist (${unanswered.length} unanswered)` });
@@ -1261,6 +1285,10 @@ const Reception = () => {
     };
 
     const handleSubmit = async (decision, isDraft = false) => {
+        if (labRequired) {
+            showDialog({ type: 'error', title: t('batchIntake.receivingLab'), message: t('batchIntake.selectReceivingLab') });
+            return;
+        }
         // Skip validation for drafts
         if (!isDraft) {
             const hasFailedChecks = Object.entries(intakeRules?.criteria || {}).some(([key, rule]) => rule.enabled && checklistData?.items?.[key]?.status === 'FAIL') || Boolean(checklistData?.nonConformance);
@@ -1308,6 +1336,7 @@ const Reception = () => {
 
             receivedBy: user.username,
             labId: user.labId,
+            ...(needsReceivingLab && { assignedLab: selectedReceivingLab }),
 
             // Stage E: Chain of Custody (RC-19)
             custodyHandoverAt: custodyHandoverAt ? new Date(custodyHandoverAt).toISOString() : new Date().toISOString(),
@@ -1848,6 +1877,22 @@ const Reception = () => {
             {sampleData?.id && !result && <SampleHoldsPanel sampleId={sampleData.id} refreshKey={sampleData.updatedAt} />}
             {sampleData && !result && (
                 <>
+                    {needsReceivingLab && (
+                        <div className="mb-4 p-4 rounded-xl border border-sf-divider bg-sf-surface space-y-1 text-xs">
+                            <label htmlFor="walk-in-receiving-lab" className="block font-bold text-sf-muted">{t('batchIntake.receivingLab')}</label>
+                            <select id="walk-in-receiving-lab" required value={selectedReceivingLab} disabled={loading}
+                                onChange={event => {
+                                    setSelectedReceivingLab(event.target.value);
+                                    setChecklistData({ items: {}, nonConformance: false, reason: '' });
+                                    setMassWarningAcknowledged(false);
+                                }}
+                                className="w-full max-w-sm p-2 rounded-lg border border-sf-divider bg-sf-surface text-sf-text">
+                                <option value="">{t('batchIntake.selectReceivingLab')}</option>
+                                {receivingLabs.map(lab => <option key={lab.id} value={lab.id}>{lab.name} ({lab.code})</option>)}
+                            </select>
+                            {receivingLabsFailed && <p role="alert" className="text-amber-700">{t('batchIntake.receivingLabsFailed')}</p>}
+                        </div>
+                    )}
                     {/* MOBILE STEP NAVIGATION (Phone viewports < md) */}
                     <div className="md:hidden flex items-center justify-between gap-1 p-1 bg-sf-raised rounded-xl border border-sf-divider mb-4 sticky top-14 z-20 shadow-sm">
                         {[
@@ -2270,7 +2315,7 @@ const Reception = () => {
                         </div>
 
                         <div className="bg-sf-surface p-6 rounded-xl border border-sf-divider shadow-sm">
-                            {intakeRulesFailed && <p role="alert">{t('intakeRules.unavailable')}</p>}
+                            {intakeRulesFailure && <p role="alert">{intakeRulesFailure}</p>}
                             <ComplianceChecklist
                                 value={checklistData}
                                 onChange={setChecklistData}
@@ -2445,7 +2490,7 @@ const Reception = () => {
 
                                     <button
                                         onClick={() => handleSubmit('ACCEPTED', true)}
-                                        disabled={loading}
+                                        disabled={loading || labRequired}
                                         className="flex-1 sm:flex-none py-3 px-4 bg-sf-raised text-sf-text font-bold rounded-xl border border-sf-divider hover:bg-sf-canvas transition-all flex items-center justify-center gap-1.5 active:scale-95 touch-target text-xs"
                                     >
                                         <FileText size={16} /> {t('reception.saveDraft', 'Save Draft')}
@@ -2456,7 +2501,7 @@ const Reception = () => {
                                     <button
                                         type="button"
                                         onClick={() => handleSubmit('REJECTED')}
-                                        disabled={loading || !checklistData.reason}
+                                        disabled={loading || labRequired || !checklistData.reason}
                                         className="w-full sm:w-auto py-3 px-4 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl shadow-lg shadow-red-600/20 transition-all flex items-center justify-center gap-2 active:scale-95 touch-target text-xs"
                                         title="Reject sample due to non-conformance"
                                     >
@@ -2467,7 +2512,7 @@ const Reception = () => {
 
                                 <button
                                     onClick={() => handleSubmit('ACCEPTED')}
-                                    disabled={loading || (checklistData.nonConformance && !checklistData.reason) || (removals.length > 0 && !justification)}
+                                    disabled={loading || labRequired || (checklistData.nonConformance && !checklistData.reason) || (removals.length > 0 && !justification)}
                                     className="w-full sm:flex-1 py-3 bg-emerald-600 text-white font-black rounded-xl shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed flex flex-col items-center justify-center leading-tight transition-all active:scale-[0.98] touch-target"
                                 >
                                     <div className="flex items-center gap-2">

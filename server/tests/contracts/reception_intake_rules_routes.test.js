@@ -148,6 +148,41 @@ describe('#156 server-resolved reception rules across intake paths', () => {
         expect(response.status).toBe(400); expect(response.body.code).toBe('INCOMPLETE_COMPLIANCE_CHECKLIST');
         expect((await prisma.sample.findUnique({ where: { id: sample.id } })).status).toBe('EXPECTED');
     });
+    test('a new lab uses shipped intake rules immediately after normal lifecycle activation', async () => {
+        const freshLabId = next();
+        const admin = 'Bearer ' + await getAuthToken('SUPER_ADMIN', null);
+        await prisma.user.updateMany({ where: { username: 'test_super_admin_global' }, data: { mustChangePassword: false } });
+        const created = await post('/api/labs', {
+            id: freshLabId, code: 'R381' + freshLabId.slice(-9), name: 'New rules laboratory',
+            country: 'ESP', timezone: 'Europe/Madrid'
+        }, admin);
+        expect(created.status).toBe(200);
+        expect(created.body.lab.isActive).toBe(false);
+        const freshManager = 'Bearer ' + await getAuthToken('LAB_MANAGER', freshLabId, ['ESP']);
+        await prisma.user.updateMany({ where: { labId: freshLabId }, data: { mustChangePassword: false } });
+        const rules = () => request(app).get('/api/reception/intake-rules?isWalkIn=true').set('Authorization', freshManager);
+        const setup = await rules();
+        expect(setup.status).toBe(403);
+        expect(setup.body).toEqual({ code: 'MISSING_LAB_SCOPE', message: 'Select an active receiving laboratory.' });
+
+        const preview = await post('/api/labs/' + freshLabId + '/lifecycle-preview', { targetState: 'ACTIVE' }, admin);
+        expect(preview.status).toBe(200);
+        const activated = await post('/api/labs/' + freshLabId + '/lifecycle',
+            { targetState: 'ACTIVE', reason: 'Enable new laboratory reception', reviewToken: preview.body.reviewToken }, admin);
+        expect(activated.status).toBe(200);
+        expect(await prisma.labPolicy.findUnique({ where: { labId: freshLabId } })).toBeNull();
+        const ready = await rules();
+        expect(ready.status).toBe(200);
+        expect(ready.body.rules).toMatchObject({ profile: 'walkIn', version: 0, context: {
+            landUse: expect.any(Object), samplingDate: expect.any(Object),
+            samplingDepth: expect.any(Object), composite: expect.any(Object)
+        } });
+        const selected = await request(app).get('/api/reception/intake-rules')
+            .query({ isWalkIn: true, assignedLab: freshLabId }).set('Authorization', admin);
+        expect(selected.status).toBe(200);
+        expect(selected.body.rules).toEqual(ready.body.rules);
+    });
+
     test('reception can read applicable rules but cannot change the laboratory policy', async () => {
         const response = await request(app).get('/api/reception/intake-rules?isWalkIn=true').set('Authorization', reception);
         expect(response.status).toBe(200);

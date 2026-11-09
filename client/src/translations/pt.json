@@ -4068,6 +4068,7 @@
     "checksCount": "{checked}/{total} verificações"
   },
   "intakeRules": {
+    "loadFailed": "Não foi possível carregar as regras de receção.",
     "loading": "A carregar regras de receção…",
     "failureNotes": {
       "container": "Ex.: saco rasgado, tampa solta, fuga visível…",
