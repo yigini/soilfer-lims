@@ -32,6 +32,8 @@ Look up any sample, preparation, bench, or report status badge you see on screen
 
 ## 2. Bench, Work Queue & Result Statuses
 
+![Result statuses from Ready to record and Draft saved through Recorded, Submitted, Accepted, Approved, and Published](../img/diagrams/result-statuses.svg)
+
 | Status Shown on Screen | What It Means | Who Acts Next |
 | :--- | :--- | :--- |
 | **Unassigned** | The test has not been assigned to a technician yet. | **Laboratory Manager** assigns the work in **Manager Task List**. |
