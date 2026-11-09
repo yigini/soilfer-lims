@@ -1,7 +1,7 @@
 [book]
-title = "SoilFER-LIMS — Complete Deployment & User Guide"
+title = "SoilFER LIMS: Lab User Manual & Admin Guide"
 authors = ["SoilFER-LIMS Documentation Team"]
-description = "Step-by-step guide for deploying and using the SoilFER Laboratory Information Management System"
+description = "Role-based user manual, quality control guide, pilot launch kit, and administrator reference for SoilFER LIMS"
 language = "en"
 src = "src"
 
