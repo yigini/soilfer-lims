@@ -58,9 +58,9 @@ Your laboratory is ready for staff training and pilot launch! Open the [Lab Go-L
 
 ## If Something Goes Wrong
 
-- **If a staff member forgets their password or is paused after several wrong tries →** Open **Laboratory Staff**, find their row, click **Reset Password**, and give them the new **Temporary Password**. They will be prompted to choose a new 12-character password on their next sign-in.
-- **If an instrument shows Calibration Overdue / Blocked at the bench →** Open **Equipment**, select the instrument, and click **Log Event / Calibration** to record the latest calibration date.
-- **If a policy change warns of a conflict with a method rule →** Check the highlighted method rule in **Policies** or **Analysis Configuration** so the method has complete limits before enabling blocking quality control.
+- *If a staff member forgets their password or is paused after several wrong tries →* Open **Laboratory Staff**, find their row, click **Reset Password**, and give them the new **Temporary Password**. They will be prompted to choose a new 12-character password on their next sign-in.
+- *If an instrument shows* **Calibration Overdue / Blocked** *at the bench →* Open **Equipment**, select the instrument, and click **Log Event / Calibration** to record the latest calibration date.
+- *If a policy change warns of a conflict with a method rule →* Check the highlighted method rule in **Policies** or **Analysis Configuration** so the method has complete limits before enabling blocking quality control.
 
 ---
 

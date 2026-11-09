@@ -36,9 +36,9 @@ Walk through a complete technician shift using five practice soil samples. You w
    *Your laboratory decides the batch size and control positions (many laboratories use up to 20 samples per batch; see [Per-Lab Settings, Presets & Method Overrides](../usage/lab-settings-and-presets.md)).*
 2. Click **Select instrument** to pick the calibrated meter or instrument you are using today, verify the **Bound reference lot**, and click **Start run**.
    *You should see the run open with rows for your soil samples plus the required quality control positions:*
-   - A **blank** (a reagent-only check with no soil, used to check for contamination; see [Glossary](../reference/glossary.md)).
-   - A **duplicate** (a second weighing of one sample in the batch, used to check precision; see [Glossary](../reference/glossary.md)).
-   - A **reference soil** (a laboratory reference material or certified reference material with a known target value, used to check accuracy; see [Glossary](../reference/glossary.md)).
+   - A *blank* (a reagent-only check with no soil, used to check for contamination; see [Glossary](../reference/glossary.md)).
+   - A *duplicate* (a second weighing of one sample in the batch, used to check precision; see [Glossary](../reference/glossary.md)).
+   - A *reference soil* (a laboratory reference material or certified reference material with a known target value, used to check accuracy; see [Glossary](../reference/glossary.md)).
 
 ### Step 4: Enter or Paste Readings and Send for Review
 
@@ -64,9 +64,9 @@ Your **Submitted** batch appears in your manager's **Manager Task List** under *
 
 ## If Something Goes Wrong
 
-- **If you cannot type a result for a sample →** Check whether the sample status is still **Waiting for drying** or **Waiting for preparation**. Preparation must be confirmed before bench readings can be recorded.
-- **If you see Calibration verification requires a registered instrument. Ask a manager to select one before starting. →** Select an active, calibrated instrument in **Select instrument**, or ask your Laboratory Manager to update its calibration in **Equipment**.
-- **If you see Recording was not confirmed for this row. →** Click **Record this sample** (or **Retry failed** if the network flickered) before closing the screen so your reading moves from **Draft saved** to **Recorded**.
+- *If you cannot type a result for a sample →* Check whether the sample status is still **Waiting for drying** or **Waiting for preparation**. Preparation must be confirmed before bench readings can be recorded.
+- *If you see* **Calibration verification requires a registered instrument. Ask a manager to select one before starting.** *→* Select an active, calibrated instrument in **Select instrument**, or ask your Laboratory Manager to update its calibration in **Equipment**.
+- *If you see* **Recording was not confirmed for this row.** *→* Click **Record this sample** (or **Retry failed** if the network flickered) before closing the screen so your reading moves from **Draft saved** to **Recorded**.
 
 ---
 

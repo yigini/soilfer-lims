@@ -56,10 +56,10 @@ Every sample you accepted now appears in the technician's queue with status **Wa
 
 ## If Something Goes Wrong
 
-- **If you need to step away before finishing a sample check-in →** Click **Save Draft**. The record is saved in **Draft** status so you can finish it when you return.
-- **If a printed barcode label is smudged or torn →** Open the sample, click **Print labels**, enter a short note in **Reason for reprint**, and click **Print labels** again.
-- **If the barcode code is too long for a small sticker →** If you see **This code does not fit this label at a readable bar width. Choose the standard format or ask the laboratory manager to review the issued code.**, switch **Format** to **Standard (101 × 54 mm)**.
-- **If a field sample does not appear under Expected →** Click **Samples** in the left menu to check whether a colleague already received it, or ask your Laboratory Manager to synchronize the project form in [KoboToolbox Field Integration](../usage/kobotoolbox.md).
+- *If you need to step away before finishing a sample check-in →* Click **Save Draft**. The record is saved in **Draft** status so you can finish it when you return.
+- *If a printed barcode label is smudged or torn →* Open the sample, click **Print labels**, enter a short note in **Reason for reprint**, and click **Print labels** again.
+- *If the barcode code is too long for a small sticker →* If you see **This code does not fit this label at a readable bar width. Choose the standard format or ask the laboratory manager to review the issued code.**, switch **Format** to **Standard (101 × 54 mm)**.
+- *If a field sample does not appear under* **Expected** *→* Click **Samples** in the left menu to check whether a colleague already received it, or ask your Laboratory Manager to synchronize the project form in [KoboToolbox Field Integration](../usage/kobotoolbox.md).
 
 ---
 
