@@ -4,7 +4,7 @@
 
 Check in a shipping box, crate, or cooler containing many pre-registered soil bags from the same project in one session. You enter shared delivery and condition details once instead of typing them for each bag.
 
-> *Screenshot placeholder — docs/book/src/img/screenshots/reception-consignment-batch.png (pending local training seed on [#370](https://github.com/yigini/soilfer-lims/issues/370)): The **Consignment Batch** screen showing **Scan or Enter Sample ID to add...**, **Shared batch observations**, and the batch sample table.*
+> *Screenshot placeholder — docs/book/src/img/screenshots/reception-consignment-batch.png (screenshot coming once the training data is ready): The **Consignment Batch** screen showing **Scan or Enter Sample ID to add...**, **Shared batch observations**, and the batch sample table.*
 
 ---
 

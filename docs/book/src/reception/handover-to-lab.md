@@ -4,7 +4,7 @@
 
 Check your reception handoff queue at the end of a session, place accepted sample bags onto drying trays or storage shelves, and resolve any intake holds before preparation begins.
 
-> *Screenshot placeholder — docs/book/src/img/screenshots/reception-handoff-queue.png (pending local training seed on [#370](https://github.com/yigini/soilfer-lims/issues/370)): The **Laboratory Operational Handoff** and **Recent Receipts** views showing accepted samples ready to move to the drying room.*
+> *Screenshot placeholder — docs/book/src/img/screenshots/reception-handoff-queue.png (screenshot coming once the training data is ready): The **Laboratory Operational Handoff** and **Recent Receipts** views showing accepted samples ready to move to the drying room.*
 
 ---
 

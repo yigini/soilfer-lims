@@ -4,7 +4,7 @@
 
 Record the drying of accepted soil samples in the air-drying room or low-temperature drying oven (40 °C or lower). You record the drying method, temperature, weights, start and end times, and equipment so the sample can move to sieving.
 
-> *Screenshot placeholder — docs/book/src/img/screenshots/preparation-record-drying.png (pending local training seed on [#370](https://github.com/yigini/soilfer-lims/issues/370)): The **Workbench** showing **Air Drying** selected in **Work type:**, the three **Operational Checklist** items, the **Drying** fields (**Method**, **Temperature (°C)**, **Mass before (g)**, **Mass after (g)**, **Started**, **Ended**, **Equipment**), and the **Confirm Complete** button.*
+> *Screenshot placeholder — docs/book/src/img/screenshots/preparation-record-drying.png (screenshot coming once the training data is ready): The **Workbench** showing **Air Drying** selected in **Work type:**, the three **Operational Checklist** items, the **Drying** fields (**Method**, **Temperature (°C)**, **Mass before (g)**, **Mass after (g)**, **Started**, **Ended**, **Equipment**), and the **Confirm Complete** button.*
 
 ---
 

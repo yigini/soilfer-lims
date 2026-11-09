@@ -4,7 +4,7 @@
 
 Handle a soil bag that arrives torn, cross-contaminated, unlabelled, or without enough soil for all requested tests, either by rejecting it cleanly (**Rejected (Non-Conformance)**) or by accepting it with a documented **Mass deficit** warning.
 
-> *Screenshot placeholder — docs/book/src/img/screenshots/reception-condition-checks.png (pending local training seed on [#370](https://github.com/yigini/soilfer-lims/issues/370)): The **2. Condition** (**Reception Compliance**) step showing **Container Intact / Sealed**, **Sample Quantity Sufficient**, **Fail**, **Describe the observed problem**, and **Mass deficit**.*
+> *Screenshot placeholder — docs/book/src/img/screenshots/reception-condition-checks.png (screenshot coming once the training data is ready): The **2. Condition** (**Reception Compliance**) step showing **Container Intact / Sealed**, **Sample Quantity Sufficient**, **Fail**, **Describe the observed problem**, and **Mass deficit**.*
 
 ---
 

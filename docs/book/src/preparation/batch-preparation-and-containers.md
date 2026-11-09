@@ -4,7 +4,7 @@
 
 Confirm **Air Drying** or **Sample Preparation** for a whole tray of samples at once in **Workbench**. You can also register labelled child containers (**Fine earth**, **Ground**, **Aliquot**, or **Archive**) when splitting a sample into jars or packets.
 
-> *Screenshot placeholder — docs/book/src/img/screenshots/preparation-batch-and-containers.png (pending local training seed on [#370](https://github.com/yigini/soilfer-lims/issues/370)): The **Workbench** table footer showing **Confirm Sample Preparation Complete** for multiple selected rows, and the **Containers and aliquots** panel on a sample page.*
+> *Screenshot placeholder — docs/book/src/img/screenshots/preparation-batch-and-containers.png (screenshot coming once the training data is ready): The **Workbench** table footer showing **Confirm Sample Preparation Complete** for multiple selected rows, and the **Containers and aliquots** panel on a sample page.*
 
 ---
 
