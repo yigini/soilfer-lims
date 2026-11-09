@@ -166,10 +166,10 @@ const Login = () => {
             </div>
 
             {/* Right Side - Login Form */}
-            <div className="w-full lg:w-1/2 flex items-center justify-center p-8 relative bg-sf-canvas">
-                {/* Language Segmented Pill */}
-                <div className="absolute top-6 right-6 z-20">
-                    <div className="flex items-center bg-sf-surface rounded-full p-1 shadow-sm border border-sf-divider">
+            <div className="w-full lg:w-1/2 flex flex-col lg:flex-row items-center justify-center p-8 relative bg-sf-canvas">
+                {/* Language selector stays above mobile branding and top-right on desktop. */}
+                <div className="w-full flex justify-center mb-8 lg:mb-0 lg:w-auto lg:absolute lg:top-6 lg:right-6 z-20">
+                    <div className="flex flex-wrap items-center justify-center max-w-full bg-sf-surface rounded-full p-1 shadow-sm border border-sf-divider">
                         {languages.map(l => {
                             const isActive = locale === l.code;
                             return (
@@ -178,7 +178,7 @@ const Login = () => {
                                     onClick={() => changeLanguage(l.code)}
                                     title={l.name}
                                     className={clsx(
-                                        'px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider transition-all duration-200',
+                                        'px-2.5 sm:px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider whitespace-nowrap transition-all duration-200',
                                         isActive
                                             ? 'bg-sf-primary text-sf-on-primary shadow-sm'
                                             : 'text-sf-muted hover:text-sf-text'
