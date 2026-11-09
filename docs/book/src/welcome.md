@@ -1,61 +1,41 @@
-# Welcome to the SoilFER-LIMS Guide
+# Welcome to the SoilFER LIMS User Manual
 
 <div align="center">
 
-<img src="./img/soilfer-logo.png" alt="SoilFER LIMS Logo" width="300" />
+<img src="./img/soilfer-logo.png" alt="SoilFER LIMS Logo" width="260" />
 
-# 🧪 SoilFER-LIMS
+## SoilFER LIMS: Lab User Manual & Admin Guide
 
-### Laboratory Information Management System for Soil Analysis
-
-**Open-source software supporting the [FAO SoilFER Programme](https://www.fao.org/soils-portal/soilfer) and [GLOSOLAN](https://www.fao.org/global-soil-partnership/glosolan) guidelines**
-
----
-
-*An open-source system to help soil laboratories manage their work digitally — from field collection to final reporting.*
+**Step-by-step instructions for soil laboratories supporting the [FAO SoilFER Programme](https://www.fao.org/soils-portal/soilfer) and [GLOSOLAN](https://www.fao.org/global-soil-partnership/glosolan)**
 
 </div>
 
 ---
 
-## Who Is This Guide For?
+## Welcome to Your Laboratory Workspace
 
-This guide is written for **anyone** who needs to set up, manage, or operate SoilFER-LIMS, regardless of technical background:
+SoilFER LIMS helps your soil laboratory track every sample from the moment a box arrives at reception to the final Certificate of Analysis.
 
-- 🔬 **Laboratory Managers** digitizing soil testing workflows and managing quality systems aligned with ISO/IEC 17025.
-- 🏛️ **Government & Ministry Officials** establishing National Soil Information Systems (SIS).
-- 🎓 **University Researchers** managing sample custody and MIR/VIS-NIR spectral datasets.
-- 🌍 **International Programme Coordinators** deploying multi-lab networks across participating countries.
-- 💻 **IT Specialists & System Administrators** deploying containerized production infrastructure.
+You do not need an information technology background to use this manual. Every guide is written for laboratory staff and follows the same simple layout: what you need before you start, numbered steps with the exact button names you see on screen, and what to do if something goes wrong.
 
 ---
 
-## What Will You Learn?
+## Choose Your Starting Point
 
-| Part | What You'll Learn |
+Pick the line below that matches your work in the laboratory:
+
+| Your Role in the Lab | Start with These Pages |
 | :--- | :--- |
-| **About the Project** | How SoilFER-LIMS supports soil laboratory operations and its core capabilities |
-| **Getting Started** | Prerequisites, server hardware sizing, and domain name setup |
-| **Installation** | Step-by-step setup with Docker or Node.js |
-| **Deployment** | Production setups: fresh servers, shared reverse proxies, and automated SSL |
-| **Using LIMS** | Day-to-day operations: sample reception, bench worksheets, QC reviews, and certificates |
-| **Maintenance** | Container updates, automated daily backups, and disaster recovery |
-| **Reference** | Configuration tables, role permission matrices, and glossary of soil metrology terms |
+| **New to SoilFER LIMS** | Read [Which Part Is for Me?](./start/which-part.md), [First Login & Lab Setup](./usage/first-login.md), and [Finding Your Way Around the Screen](./start/screen-tour.md). |
+| **Reception Clerk** | Go to [Sample Reception & Intake](./usage/reception-and-intake.md) to check in arriving samples and print barcode labels. |
+| **Laboratory Technician** | Go to [Drying, Preparation, Storage & Custody](./usage/preparation-and-custody.md) and [Technician Workbench & Analytical Runs](./usage/technician-workbench.md). |
+| **Laboratory Manager or QA Officer** | Go to [Quality Control, Control Charts & Failed QC](./usage/qc-management.md), [Review, Approval & Plausibility Checks](./usage/review-and-approval.md), and [Certificates of Analysis, PDF Reports & Amendments](./usage/reporting-pdf.md). |
+| **Laboratory Administrator** | Go to [Go-Live Checklist](./admin/go-live-checklist.md), [Roles, Permissions & Separation of Duties](./usage/roles.md), and [Per-Lab Settings, Presets & Method Overrides](./usage/lab-settings-and-presets.md). |
+| **Client, Project Coordinator, or Viewer** | Go to [Reading Results & Reports](./usage/viewer-guide.md) to find your samples and download approved reports. |
+| **Server & IT Administrator** | Jump to the **For IT** chapters at the back of this book, starting with [What You Will Need](./getting-started/prerequisites.md) and [Updating SoilFER-LIMS](./maintenance/updates.md). |
 
 ---
 
-## Quick Start (For Experienced Users)
+## Need Help Right Now?
 
-If you're already familiar with Docker and Linux:
-
-```bash
-git clone https://github.com/yigini/soilfer-lims.git
-cd soilfer-lims
-# For Single-Lab with NGINX:
-docker compose -f docker-compose.yml -f docker-compose.nginx.yml up -d --build
-# (Or for Multi-Lab Global mode, add -f docker-compose.global.yml)
-```
-
-Open your browser to `http://localhost` and sign in with:
-* **Username:** `admin`
-* **Password:** `<generated-initial-password>` (printed once in container logs, or set via `ADMIN_INITIAL_PASSWORD`)
+If you are already signed in to SoilFER LIMS, click the **Help** button in the top bar of any screen. It opens a short guide for the exact page in front of you. See [Getting Help](./start/getting-help.md) for more ways to find answers.
