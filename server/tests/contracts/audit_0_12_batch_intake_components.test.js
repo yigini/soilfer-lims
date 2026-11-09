@@ -31,13 +31,14 @@ function harness(name) {
     const module = { exports: {} };
     const source = fs.readFileSync(path.resolve(__dirname, `../../../client/src/components/reception/${name}.jsx`), 'utf8');
     const code = esbuild.transformSync(source, { loader: 'jsx', format: 'cjs' }).code;
-    vm.runInNewContext(code, { module, exports: module.exports, console, alert: jest.fn(), confirm: () => true,
+    const alert = jest.fn();
+    vm.runInNewContext(code, { module, exports: module.exports, console, alert, confirm: () => true,
         localStorage: { getItem: () => null }, window: { addEventListener() {}, removeEventListener() {} },
         require: dependency => {
             if (dependency === 'react') return hooks;
             if (dependency === 'axios') return axios;
             if (dependency === 'lucide-react') return new Proxy({}, { get: () => () => null });
-            if (dependency.includes('LanguageContext')) return { useLanguage: () => ({ t: key => key }) };
+            if (dependency.includes('LanguageContext')) return { useLanguage: () => ({ t: (key, params) => params?.message ? `${key}: ${params.message}` : key }) };
             if (dependency.includes('useIntakeRules')) return () => ({ rules: require('../helpers/intakeRulesFixture')() });
             if (dependency.includes('audioCues')) return { playSuccessChime() {}, playErrorBuzz() {} };
             if (dependency.includes('coordParser')) return { parseCoordinates: () => ({ lat: 14.5, lng: -89.4, uncertaintyM: 10 }) };
@@ -47,13 +48,33 @@ function harness(name) {
             return children[child] || (children[child] = () => null);
         }
     });
-    return { states, children, axios, render(props = {}) { stateIndex = 0; effectIndex = 0; return module.exports.default(props); } };
+    return { states, children, axios, alert, render(props = {}) { stateIndex = 0; effectIndex = 0; return module.exports.default(props); } };
 }
 const button = (tree, label) => elements(tree, node => node.type === 'button').find(node => text(node).includes(label));
 const field = (tree, label) => elements(tree, node => node.props?.['aria-label'] === label)[0];
 const settle = () => new Promise(setImmediate);
 
 describe('Audit 0.12: batch observation entry and explicit actions', () => {
+    test('a lab-less global admin must pick an active lab and sees the server message', async () => {
+        const h = harness('BatchIntake'), props = { user: { role: 'SUPER_ADMIN', labId: null } };
+        h.axios.get.mockResolvedValue({ data: [{ id: 'active', name: 'Active Lab', code: 'A', isActive: true },
+            { id: 'inactive', name: 'Inactive Lab', code: 'I', isActive: false }] });
+        let tree = h.render(props);
+        elements(tree, node => node.type === h.children.ManifestImportModal)[0].props.onImport([{ originalId: 'bag', status: 'ACCEPTED' }]);
+        await settle(); tree = h.render(props);
+        const picker = elements(tree, node => node.props?.id === 'batch-receiving-lab')[0];
+        expect(elements(picker, node => node.type === 'option').map(node => node.props.value)).toEqual(['', 'active']);
+        expect(button(tree, 'Submit Consignment').props.disabled).toBe(true);
+        picker.props.onChange({ target: { value: 'active' } });
+        tree = h.render(props); await settle();
+        expect(h.axios.post).toHaveBeenCalledWith('/api/reception/mass-check', expect.objectContaining({ assignedLab: 'active' }));
+        h.axios.post.mockRejectedValueOnce({ response: { data: { message: 'Choose an active lab.', error: 'GENERIC' } }, message: '403' });
+        jest.spyOn(console, 'error').mockImplementation(() => {});
+        try { await button(tree, 'Submit Consignment').props.onClick(); } finally { jest.restoreAllMocks(); }
+        expect(h.axios.post).toHaveBeenCalledWith('/api/reception/consignments', expect.objectContaining({ assignedLab: 'active' }));
+        expect(h.alert).toHaveBeenCalledWith('batchIntake.submissionFailed: Choose an active lab.');
+    });
+
     test('bulk inputs do not apply to scanned rows until clicked; audit payload freezes the actual applied values', async () => {
         const h = harness('BatchIntake'), props = { analysisGroups: [{ id: 'group', analyses: ['PH_H2O'] }] };
         let tree = h.render(props);

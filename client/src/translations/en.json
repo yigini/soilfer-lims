@@ -2682,6 +2682,10 @@
     }
   },
   "batchIntake": {
+    "receivingLab": "Receiving laboratory",
+    "selectReceivingLab": "Select a receiving laboratory",
+    "receivingLabsFailed": "Could not load receiving laboratories.",
+    "submissionFailed": "Consignment submission failed: {message}",
     "massToApply": "Mass to apply (g)",
     "moistureToApply": "Moisture to apply",
     "notRecorded": "Not recorded",

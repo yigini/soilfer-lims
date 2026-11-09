@@ -2682,6 +2682,10 @@
     }
   },
   "batchIntake": {
+    "receivingLab": "Laboratorio receptor",
+    "selectReceivingLab": "Seleccione un laboratorio receptor",
+    "receivingLabsFailed": "No se pudieron cargar los laboratorios receptores.",
+    "submissionFailed": "No se pudo enviar el envío: {message}",
     "massToApply": "Masa a aplicar (g)",
     "moistureToApply": "Humedad a aplicar",
     "notRecorded": "No registrado",
