@@ -64,13 +64,13 @@ describe('Audit 0.12: batch observation entry and explicit actions', () => {
         await settle(); tree = h.render(props);
         const picker = elements(tree, node => node.props?.id === 'batch-receiving-lab')[0];
         expect(elements(picker, node => node.type === 'option').map(node => node.props.value)).toEqual(['', 'active']);
-        expect(button(tree, 'Submit Consignment').props.disabled).toBe(true);
+        expect(button(tree, 'batchReception.submit').props.disabled).toBe(true);
         picker.props.onChange({ target: { value: 'active' } });
         tree = h.render(props); await settle();
         expect(h.axios.post).toHaveBeenCalledWith('/api/reception/mass-check', expect.objectContaining({ assignedLab: 'active' }));
         h.axios.post.mockRejectedValueOnce({ response: { data: { message: 'Choose an active lab.', error: 'GENERIC' } }, message: '403' });
         jest.spyOn(console, 'error').mockImplementation(() => {});
-        try { await button(tree, 'Submit Consignment').props.onClick(); } finally { jest.restoreAllMocks(); }
+        try { await button(tree, 'batchReception.submit').props.onClick(); } finally { jest.restoreAllMocks(); }
         expect(h.axios.post).toHaveBeenCalledWith('/api/reception/consignments', expect.objectContaining({ assignedLab: 'active' }));
         expect(h.alert).toHaveBeenCalledWith('batchIntake.submissionFailed: Choose an active lab.');
     });
@@ -83,11 +83,11 @@ describe('Audit 0.12: batch observation entry and explicit actions', () => {
         field(tree, 'batchIntake.massToApply').props.onChange({ target: { value: '550' } });
         field(tree, 'batchIntake.moistureToApply').props.onChange({ target: { value: 'MOIST' } });
         tree = h.render(props);
-        const scan = elements(tree, node => node.type === 'input' && node.props.placeholder?.startsWith('Scan or type'))[0];
+        const scan = elements(tree, node => node.type === 'input' && node.props.placeholder === 'batchReception.scanPlaceholder')[0];
         scan.props.onChange({ target: { value: 'bag-1' } });
-        tree = h.render(props); await button(tree, 'Add Sample').props.onClick(); tree = h.render(props); await settle();
+        tree = h.render(props); await button(tree, 'samples.addSample').props.onClick(); tree = h.render(props); await settle();
         expect(text(tree)).toContain('batchIntake.massNotRecorded');
-        const submit = async () => { tree = h.render(props); await button(tree, 'Submit Consignment').props.onClick();
+        const submit = async () => { tree = h.render(props); await button(tree, 'batchReception.submit').props.onClick();
             return h.axios.post.mock.calls.filter(([url]) => url === '/api/reception/consignments').at(-1)[1]; };
         let payload = await submit();
         expect(payload.samples[0]).toMatchObject({ receivedMass: null, moistureOnArrival: null, massWarningAcknowledged: false, positionalUncertaintyM: null });
@@ -113,9 +113,9 @@ describe('Audit 0.12: batch observation entry and explicit actions', () => {
         let checkbox = elements(tree, node => node.type === 'input' && node.props.type === 'checkbox')[0];
         expect(checkbox.props.checked).toBe(false);
         checkbox.props.onChange({ target: { checked: true } });
-        tree = h.render(props); await button(tree, 'Submit Consignment').props.onClick();
+        tree = h.render(props); await button(tree, 'batchReception.submit').props.onClick();
         expect(h.axios.post.mock.calls.filter(([url]) => url === '/api/reception/consignments').at(-1)[1].samples[0].massWarningAcknowledged).toBe(true);
-        tree = h.render(props); elements(tree, node => node.props?.title === 'Edit / Record Exception')[0].props.onClick();
+        tree = h.render(props); elements(tree, node => node.props?.title === 'batchReception.editException')[0].props.onClick();
         tree = h.render(props); elements(tree, node => node.type === h.children.BatchExceptionModal)[0].props.onSave({ originalId: 'low', status: 'ACCEPTED', receivedMass: 70 });
         checkbox = elements(h.render(props), node => node.type === 'input' && node.props.type === 'checkbox')[0];
         expect(checkbox.props.checked).toBe(false);

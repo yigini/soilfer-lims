@@ -509,14 +509,14 @@ export default function LabManagement() {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
                         <div className="text-[10px] font-black uppercase tracking-widest text-sf-primary">
-                            Facility Network Governance
+                            {t('labDirectory.governance')}
                         </div>
                         <h1 className="text-2xl sm:text-3xl font-black text-sf-text tracking-tight flex items-center gap-3">
                             <Beaker className="text-sf-primary" size={28} />
-                            Laboratories
+                            {t('labManagement.laboratories', 'Laboratories')}
                         </h1>
                         <p className="text-xs sm:text-sm text-sf-muted mt-1">
-                            Operational status, workload metrics, and responsible managers across authorized facilities.
+                            {t('labDirectory.description')}
                         </p>
                     </div>
 
@@ -526,7 +526,7 @@ export default function LabManagement() {
                             className="px-5 py-2.5 bg-sf-primary text-white rounded-xl font-bold text-xs hover:bg-sf-primary/90 transition shadow-md shadow-sf-primary/20 flex items-center gap-2 self-start sm:self-auto"
                         >
                             <Plus size={16} />
-                            Onboard Laboratory
+                            {t('labDirectory.onboard')}
                         </button>
                     )}
                 </div>
@@ -535,19 +535,19 @@ export default function LabManagement() {
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
                     <div className="p-4 rounded-xl bg-sf-surface border border-sf-divider">
                         <div className="text-2xl font-black text-sf-text">{totalLabsCount}</div>
-                        <div className="text-[10px] font-bold uppercase tracking-wider text-sf-muted mt-0.5">Total Facilities</div>
+                        <div className="text-[10px] font-bold uppercase tracking-wider text-sf-muted mt-0.5">{t('labDirectory.totalFacilities')}</div>
                     </div>
                     <div className="p-4 rounded-xl bg-sf-surface border border-sf-divider">
                         <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400">{activeLabsCount}</div>
-                        <div className="text-[10px] font-bold uppercase tracking-wider text-sf-muted mt-0.5">Operational</div>
+                        <div className="text-[10px] font-bold uppercase tracking-wider text-sf-muted mt-0.5">{t('labDirectory.operational')}</div>
                     </div>
                     <div className="p-4 rounded-xl bg-sf-surface border border-sf-divider">
                         <div className="text-2xl font-black text-sf-text">{totalStaffCount}</div>
-                        <div className="text-[10px] font-bold uppercase tracking-wider text-sf-muted mt-0.5">Authorized Staff</div>
+                        <div className="text-[10px] font-bold uppercase tracking-wider text-sf-muted mt-0.5">{t('labDirectory.authorizedStaff')}</div>
                     </div>
                     <div className="p-4 rounded-xl bg-sf-surface border border-sf-divider">
                         <div className="text-2xl font-black text-sf-text">{totalSamplesCount}</div>
-                        <div className="text-[10px] font-bold uppercase tracking-wider text-sf-muted mt-0.5">Samples Assigned</div>
+                        <div className="text-[10px] font-bold uppercase tracking-wider text-sf-muted mt-0.5">{t('labDirectory.samplesAssigned')}</div>
                     </div>
                 </div>
 
@@ -559,7 +559,7 @@ export default function LabManagement() {
                             type="text"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            placeholder="Search by lab name, code, ID or country..."
+                            placeholder={t('labDirectory.search')}
                             className="w-full pl-10 pr-4 py-2.5 bg-sf-surface border border-sf-divider rounded-xl text-xs sm:text-sm text-sf-text focus:ring-2 focus:ring-sf-primary outline-none transition"
                         />
                     </div>
@@ -569,9 +569,9 @@ export default function LabManagement() {
                             onChange={(e) => setStatusFilter(e.target.value)}
                             className="px-3.5 py-2.5 bg-sf-surface border border-sf-divider rounded-xl text-xs font-semibold text-sf-text focus:ring-2 focus:ring-sf-primary outline-none transition"
                         >
-                            <option value="all">All Operational States</option>
-                            <option value="ACTIVE">Operational Only</option>
-                            <option value="PAUSED">Paused Only</option>
+                            <option value="all">{t('labDirectory.allStates')}</option>
+                            <option value="ACTIVE">{t('labDirectory.operationalOnly')}</option>
+                            <option value="PAUSED">{t('labDirectory.pausedOnly')}</option>
                         </select>
                     </div>
                 </div>
@@ -581,23 +581,23 @@ export default function LabManagement() {
                     {loadingLabs ? (
                         <div className="py-16 text-center text-sf-muted text-sm flex items-center justify-center gap-2">
                             <RefreshCw size={16} className="animate-spin" />
-                            Loading facility roster...
+                            {t('labDirectory.loading')}
                         </div>
                     ) : filteredLabs.length === 0 ? (
                         <div className="py-16 text-center text-sf-muted text-sm">
-                            No matching laboratories found.
+                            {t('labDirectory.empty')}
                         </div>
                     ) : (
                         <div className="overflow-x-auto">
                             <table className="w-full text-left border-collapse">
                                 <thead>
                                     <tr className="border-b border-sf-divider bg-sf-canvas/50 text-[10px] font-black uppercase tracking-wider text-sf-muted">
-                                        <th className="py-3.5 px-4 sm:px-6">Laboratory</th>
-                                        <th className="py-3.5 px-4">Location</th>
-                                        <th className="py-3.5 px-4">Operational Status</th>
-                                        <th className="py-3.5 px-4">Workload</th>
-                                        <th className="py-3.5 px-4">Staff</th>
-                                        <th className="py-3.5 px-4 sm:px-6 text-right">Action</th>
+                                        <th className="py-3.5 px-4 sm:px-6">{t('labDirectory.laboratory')}</th>
+                                        <th className="py-3.5 px-4">{t('labDirectory.location')}</th>
+                                        <th className="py-3.5 px-4">{t('labDirectory.status')}</th>
+                                        <th className="py-3.5 px-4">{t('labDirectory.workload')}</th>
+                                        <th className="py-3.5 px-4">{t('labDirectory.staff')}</th>
+                                        <th className="py-3.5 px-4 sm:px-6 text-right">{t('labDirectory.action')}</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-sf-divider text-xs sm:text-sm">
@@ -612,7 +612,7 @@ export default function LabManagement() {
                                                 <td className="py-4 px-4 text-sf-muted">
                                                     <div className="flex items-center gap-1 font-medium text-sf-text">
                                                         <MapPin size={13} className="text-sf-muted" />
-                                                        {lab.country || 'Not specified'}
+                                                        {lab.country || t('labDirectory.unspecified')}
                                                     </div>
                                                     {lab.city && <div className="text-xs text-sf-muted">{lab.city}</div>}
                                                 </td>
@@ -623,22 +623,22 @@ export default function LabManagement() {
                                                             : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300'
                                                     }`}>
                                                         <span className={`w-1.5 h-1.5 rounded-full ${isPaused ? 'bg-amber-500' : 'bg-emerald-500'}`} />
-                                                        {isPaused ? 'Paused' : 'Operational'}
+                                                        {isPaused ? t('labDirectory.paused') : t('labDirectory.operational')}
                                                     </span>
                                                 </td>
                                                 <td className="py-4 px-4">
-                                                    <div className="font-semibold text-sf-text">{lab.sampleCount || 0} samples</div>
-                                                    <div className="text-xs text-sf-muted">{lab.projects?.length || 0} projects</div>
+                                                    <div className="font-semibold text-sf-text">{t('labDirectory.sampleCount', { count: lab.sampleCount || 0 })}</div>
+                                                    <div className="text-xs text-sf-muted">{t('labDirectory.projectCount', { count: lab.projects?.length || 0 })}</div>
                                                 </td>
                                                 <td className="py-4 px-4">
-                                                    <div className="font-semibold text-sf-text">{lab.staffCount || 0} members</div>
+                                                    <div className="font-semibold text-sf-text">{t('labDirectory.memberCount', { count: lab.staffCount || 0 })}</div>
                                                 </td>
                                                 <td className="py-4 px-4 sm:px-6 text-right">
                                                     <button
                                                         onClick={() => selectLab(lab.id)}
                                                         className="px-3.5 py-1.5 bg-sf-canvas hover:bg-sf-raised border border-sf-divider rounded-xl text-xs font-bold text-sf-primary hover:text-sf-text transition inline-flex items-center gap-1"
                                                     >
-                                                        Open Workspace <ChevronRight size={14} />
+                                                        {t('labDirectory.workspace')} <ChevronRight size={14} />
                                                     </button>
                                                 </td>
                                             </tr>
@@ -664,7 +664,7 @@ export default function LabManagement() {
                                     <div className="text-[10px] font-black uppercase tracking-widest text-sf-primary">
                                         Facility Provisioning
                                     </div>
-                                    <h2 id="onboard-lab-title" className="text-lg sm:text-xl font-black text-sf-text">Onboard New Laboratory</h2>
+                                    <h2 id="onboard-lab-title" className="text-lg sm:text-xl font-black text-sf-text">{t('labDirectory.onboardTitle')}</h2>
                                 </div>
                                 <button onClick={() => setShowOnboardModal(false)} aria-label="Close" className="p-2 hover:bg-sf-raised rounded-xl transition text-sf-muted hover:text-sf-text">
                                     <X size={18} />
@@ -1023,7 +1023,7 @@ export default function LabManagement() {
                         <div className="p-6 rounded-2xl bg-sf-surface border border-sf-divider space-y-4">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <h2 className="text-base font-black text-sf-text">Keep the Lab Moving</h2>
+                                    <h2 className="text-base font-black text-sf-text">{t('labDirectory.keepMoving')}</h2>
                                     <p className="text-xs text-sf-muted mt-0.5">Decisions and attention items requiring management action.</p>
                                 </div>
                                 <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${
@@ -1057,7 +1057,7 @@ export default function LabManagement() {
                         {/* Work at this laboratory (Stage Breakdown) */}
                         <div className="p-6 rounded-2xl bg-sf-surface border border-sf-divider space-y-4">
                             <div>
-                                <h2 className="text-base font-black text-sf-text">Work at this Laboratory</h2>
+                                <h2 className="text-base font-black text-sf-text">{t('labDirectory.workAtLab')}</h2>
                                 <p className="text-xs text-sf-muted mt-0.5">Active assigned samples categorized by current workflow stage.</p>
                             </div>
 
@@ -1088,7 +1088,7 @@ export default function LabManagement() {
                                     to="/workbench"
                                     className="text-xs font-bold text-sf-primary hover:underline flex items-center gap-1"
                                 >
-                                    Open Work Queues <ChevronRight size={13} />
+                                    {t('labDirectory.workQueues')} <ChevronRight size={13} />
                                 </Link>
                             </div>
                         </div>
@@ -1568,7 +1568,7 @@ export default function LabManagement() {
             {activeTab === 'resources' && (
                 <div className="space-y-6 animate-in fade-in duration-150">
                     <div>
-                        <h2 className="text-lg font-black text-sf-text">Ready for the Next Batch</h2>
+                        <h2 className="text-lg font-black text-sf-text">{t('labDirectory.nextBatch')}</h2>
                         <p className="text-xs text-sf-muted mt-0.5">
                             Specialist modules operating within this laboratory's verified context.
                         </p>
@@ -1625,7 +1625,7 @@ export default function LabManagement() {
                                     <p className="text-xs text-sf-muted mt-1 leading-relaxed">{res.desc}</p>
                                 </div>
                                 <div className="text-xs font-bold text-sf-primary flex items-center gap-1 pt-1">
-                                    Open Workspace <ChevronRight size={13} />
+                                    {t('labDirectory.workspace')} <ChevronRight size={13} />
                                 </div>
                             </Link>
                         ))}
@@ -1639,7 +1639,7 @@ export default function LabManagement() {
             {activeTab === 'settings' && (
                 <div className="space-y-6 animate-in fade-in duration-150">
                     <div>
-                        <h2 className="text-lg font-black text-sf-text">Laboratory Configuration</h2>
+                        <h2 className="text-lg font-black text-sf-text">{t('labDirectory.configuration')}</h2>
                         <p className="text-xs text-sf-muted mt-0.5">
                             Facility identity, timezone normalization, and operational lifecycle state.
                         </p>
@@ -1873,7 +1873,7 @@ export default function LabManagement() {
             {activeTab === 'history' && (
                 <div className="space-y-6 animate-in fade-in duration-150">
                     <div>
-                        <h2 className="text-lg font-black text-sf-text">Changes with a Clear Trail</h2>
+                        <h2 className="text-lg font-black text-sf-text">{t('labDirectory.changeHistory')}</h2>
                         <p className="text-xs text-sf-muted mt-0.5">
                             Scoped, redacted audit trail: actor, affected resource, reason, and operational impact.
                         </p>

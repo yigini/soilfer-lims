@@ -127,10 +127,10 @@ const BrandingManager = () => {
                 <div>
                     <h2 className="text-2xl font-bold text-sf-text flex items-center gap-2">
                         <Palette className="text-blue-600" size={28} />
-                        Branding & Identity
+                        {t('adminLanguageSettings.branding')}
                     </h2>
                     <p className="text-sf-muted mt-1">
-                        Customize the look and feel of your laboratory information management system.
+                        {t('adminLanguageSettings.brandingDescription')}
                     </p>
                 </div>
                 <button
@@ -152,7 +152,7 @@ const BrandingManager = () => {
                         <div className="p-6 border-b border-sf-divider bg-sf-canvas">
                             <h3 className="text-lg font-semibold text-sf-text flex items-center gap-2">
                                 <Layout size={20} className="text-gray-500" />
-                                Visual Identity
+                                {t('adminLanguageSettings.visualIdentity')}
                             </h3>
                         </div>
                         <div className="p-6 space-y-6">

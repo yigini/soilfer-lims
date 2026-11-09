@@ -29,7 +29,7 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Samples from './pages/Samples';
 import SampleDetail from './pages/SampleDetail';
-import { buildNavItems } from './navigationConfig';
+import { buildNavItems, isNavItemActive } from './navigationConfig';
 
 // Lazy-loaded secondary pages
 const Projects = React.lazy(() => import('./pages/Projects'));
@@ -163,11 +163,12 @@ const Layout = ({ children }) => {
                 </div>
                 <nav className={`flex-1 ${sidebarCollapsed ? 'p-2' : 'p-3'} space-y-1 overflow-y-auto sidebar-scroll`}>
                     {navItems.map((item) => {
-                        const isActive = item.path === '/' ? location.pathname === '/' : location.pathname.startsWith(item.path);
+                        const isActive = isNavItemActive(item, location.pathname);
                         return (
                             <Link
                                 key={item.path}
                                 to={item.path}
+                                aria-current={isActive ? 'page' : undefined}
                                 data-tour={`nav-${item.path === '/' ? 'dashboard' : item.path.replace('/', '')}`}
                                 onClick={() => setIsSidebarOpen(false)}
                                 className={`flex items-center ${sidebarCollapsed ? 'justify-center px-2' : 'gap-3 px-3.5'} py-2.5 rounded-lg text-sm transition-all ${

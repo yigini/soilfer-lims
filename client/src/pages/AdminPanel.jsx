@@ -345,24 +345,24 @@ const AdminPanel = () => {
                         {isAddModalOpen && (
                             <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
                                 <div className="bg-white p-6 rounded-lg w-96 shadow-xl">
-                                    <h3 className="text-lg font-bold mb-4">Add New Language</h3>
+                                    <h3 className="text-lg font-bold mb-4">{t('adminLanguageSettings.addLanguage')}</h3>
                                     <div className="space-y-3">
                                         <input
-                                            placeholder="Name (e.g. German)"
+                                            placeholder={t('adminLanguageSettings.languageName')}
                                             className="w-full p-2 border rounded"
                                             value={newLang.name}
                                             onChange={e => setNewLang({ ...newLang, name: e.target.value })}
                                         />
                                         <input
-                                            placeholder="ISO Code (e.g. de)"
+                                            placeholder={t('adminLanguageSettings.languageCode')}
                                             className="w-full p-2 border rounded"
                                             value={newLang.code}
                                             onChange={e => setNewLang({ ...newLang, code: e.target.value })}
                                         />
                                     </div>
                                     <div className="flex justify-end gap-2 mt-4">
-                                        <button onClick={() => setIsAddModalOpen(false)} className="px-3 py-1 text-gray-500">Cancel</button>
-                                        <button onClick={handleAddLanguage} className="px-3 py-1 bg-blue-600 text-white rounded">Add</button>
+                                        <button onClick={() => setIsAddModalOpen(false)} className="px-3 py-1 text-gray-500">{t('common.cancel', 'Cancel')}</button>
+                                        <button onClick={handleAddLanguage} className="px-3 py-1 bg-blue-600 text-white rounded">{t('common.add', 'Add')}</button>
                                     </div>
                                 </div>
                             </div>
