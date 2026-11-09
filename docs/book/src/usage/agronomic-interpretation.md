@@ -1,68 +1,77 @@
 # Controlled Units & Agronomic Interpretation
 
-SoilFER LIMS combines a strict **One-Unit-Per-Analysis Controlled Vocabulary** with an **FAO 5-Tier Agronomic Classification Engine** and **Multi-Parameter Soil Chemistry Diagnostics**.
+## What This Is For
+
+Understand how SoilFER LIMS keeps measurement units consistent across every soil test. This page also explains what the five soil fertility rating badges mean on a Certificate of Analysis and how the system checks whether a sample's chemical results fit together.
+
+> *Screenshot placeholder — docs/book/src/img/screenshots/agronomic-units-and-crosschecks.png (screenshot coming once the training data is ready): A sample **Review** and report view showing standardized units, 5-tier fertility rating badges, and the **Cross-parameter plausibility** panel.*
 
 ---
 
-## 1. One Canonical Unit per Analysis
+## Before You Start
 
-Soil laboratories around the world historically used different unit notations for the same measurement (for example, `%` vs. `g/kg` for organic carbon, `ppm` vs. `mg/kg` for phosphorus, or `meq/100g` vs. `cmol(+)/kg` for exchangeable cations).
-
-To prevent unit confusion or 10-fold calculation errors:
-- **Every analysis in SoilFER LIMS has one canonical SI-aligned reporting unit** stored on the analysis definition (`Analysis.unit`).
-- When data is imported or entered, the LIMS normalizes legacy unit synonyms into the canonical unit and stores both the raw reading and the standardized value.
-
-| Soil Property Category | Canonical Unit | Common Legacy Synonyms | Numerical Equivalence |
-| :--- | :--- | :--- | :--- |
-| **Soil Reaction (pH)** | `pH units` | `pH`, `dimensionless` | $1 : 1$ |
-| **Electrical Conductivity (EC)** | `µS/cm` (or `dS/m` per analysis config) | `uS/cm`, `mS/cm`, `dS/m` | $1\text{ dS/m} = 1\text{ mS/cm} = 1000\text{ µS/cm}$ |
-| **Soil Organic Carbon (SOC) & Total N (TN)** | `g/kg` | `%`, `g kg-1` | $1.0\% = 10.0\text{ g/kg}$ |
-| **Extractable Macronutrients (P, S)** | `mg/kg` | `ppm`, `mg kg-1`, `mg/100g` | $1\text{ ppm} = 1\text{ mg/kg}$; $1\text{ mg/100g} = 10\text{ mg/kg}$ |
-| **Exchangeable Cations ($\text{Ca}, \text{Mg}, \text{K}, \text{Na}$) & CEC** | `cmol(+)/kg` | `meq/100g`, `cmol/kg` | $1\text{ meq/100g} = 1\text{ cmol(+)/kg}$ |
-| **Particle Size Fractions (Sand, Silt, Clay)** | `%` | `g/kg`, `percent` | $100\text{ g/kg} = 10.0\%$ |
-| **Extractable Micronutrients ($\text{Fe}, \text{Zn}, \text{Cu}, \text{Mn}, \text{B}$)** | `mg/kg` | `ppm`, `mg kg-1` | $1\text{ ppm} = 1\text{ mg/kg}$ |
+- Open any sample's **Review** or **Reports** tab in **Samples**, or open a released Certificate of Analysis in **Reports** (**Result Reports**).
 
 ---
 
-## 2. FAO 5-Tier Agronomic Classification
+## Steps
 
-When agronomic interpretation is enabled for an analysis method, each approved result is classified into one of five standardized tiers on the Sample Review screen and PDF Certificate of Analysis:
+### 1. Check the Measurement Unit on Every Result
 
-| Rating Badge | Meaning | Typical Agronomic Implication |
-| :--- | :--- | :--- |
-| **`VERY_LOW`** | Severe deficiency or extreme acidity | Severe constraint to crop growth; priority soil amendment or nutrient application required. |
-| **`LOW`** | Below optimal threshold | Likely crop response to nutrient replenishment. |
-| **`OPTIMAL`** | Balanced soil fertility range | Supports healthy crop development and microbial activity; maintenance management. |
-| **`HIGH`** | Above optimal range | Ample soil supply; additional nutrient input typically gives little yield return. |
-| **`VERY_HIGH`** | Excessive concentration / alkalinity / salinity | Potential risk of nutrient antagonism, phytotoxicity, or environmental loss. |
+SoilFER LIMS uses one standard reporting unit for each soil property. This ensures numbers from different runs or laboratories are never mixed up by a factor of 10:
 
-> [!NOTE]
-> **Focus on Analytical Truth**: SoilFER LIMS provides laboratory-grade **agronomic status classification** (`VERY_LOW` to `VERY_HIGH`) and **soil diagnostic indices** based on measured chemistry. Prescriptive field fertilizer rate calculators (which depend on local crop varieties, target yields, and fertilizer prices) are handled by downstream national decision-support tools via the Data Exchange API rather than hard-coded inside the laboratory LIMS.
+| Soil Property | Standard Unit in SoilFER LIMS | Everyday Comparison |
+|---|---|---|
+| **pH** (soil reaction) | pH units | Same scale everywhere (for example, 5.5 is acidic, 7.0 is neutral) |
+| Electrical conductivity | µS/cm or dS/m | 1 dS/m equals 1 mS/cm or 1000 µS/cm |
+| **Organic Carbon** & Total Nitrogen | g/kg | 10 g/kg equals 1.0 % |
+| Extractable phosphorus (**P Available**) & sulfur | mg/kg | 1 mg/kg equals 1 ppm |
+| Exchangeable cations (Ca, Mg, K, Na) & CEC | cmol(+)/kg | 1 cmol(+)/kg equals 1 meq/100g |
+| **Texture (Sand/Silt/Clay)** | % | **Sand**, **Silt**, and **Clay** percentages add up to 100 % |
+| Extractable micronutrients (Fe, Zn, Cu, Mn, B) | mg/kg | 1 mg/kg equals 1 ppm |
+
+### 2. Read the Five Agronomic Rating Badges
+
+When agronomic interpretation is turned on for a test method, the report prints a simple 5-level rating next to the number:
+
+| Rating Level | What It Means for the Soil |
+|---|---|
+| Very Low | Severe nutrient shortage or extreme acidity; priority soil correction needed |
+| Low | Below the target range; crops are likely to respond well to nutrient addition |
+| Optimal | Balanced fertility range for healthy crop growth |
+| High | Plenty of nutrient available in the soil; extra fertilizer gives little benefit |
+| Very High | Excessive concentration, alkalinity, or salinity; risk of nutrient imbalance |
+
+### 3. Check Cross-Parameter Plausibility Flags (**Cross-parameter plausibility**)
+
+1. On a sample's **Review** tab, look at the **Cross-parameter plausibility** card.
+2. Check the **Outcome** column for each soil chemistry relationship:
+   - **Pass**: the related soil tests agree with each other within your laboratory's limits.
+   - **Flagged**: two related measurements look unusual together (for example, **Carbonate is positive below the lab water-pH limit.**).
+   - **Not evaluated**: one of the required tests was not ordered or is not yet recorded (**An input is missing.**).
+3. If a row is **Flagged**, inspect the raw bench numbers. Decide whether to accept the result (for example, on a naturally calcareous or saline soil) or click **Return for correction** to ask for a **Confirmation** re-run.
 
 ---
 
-## 3. Multi-Parameter Soil Diagnostics & Cross-Checks
+## What Happens Next
 
-When all required parameters are present on a sample, SoilFER LIMS computes derived soil indices and checks internal chemical consistency using your laboratory's configurable thresholds (`Settings → Laboratory Policy`):
+Standardized units and approved agronomic ratings are saved inside the sample's Certificate of Analysis when the manager clicks **Authorize & release report**. They are also included when exporting from **Data Results** (**Analytical Results Master**).
 
-### 1. USDA 12-Class Soil Texture Derivation
-From measured **Sand (%)**, **Silt (%)**, and **Clay (%)**, the LIMS:
-- Verifies that $\text{Sand} + \text{Silt} + \text{Clay} = 100\% \pm \text{tolerance}$ (configured via **`crossCheck.textureClosureTolerancePct`**, default $\pm 2\%$, i.e. $98\%–102\%$).
-- Determines the **USDA Textural Class**: `Sand (S)`, `Loamy Sand (LS)`, `Sandy Loam (SL)`, `Loam (L)`, `Silt Loam (SiL)`, `Silt (Si)`, `Sandy Clay Loam (SCL)`, `Clay Loam (CL)`, `Silty Clay Loam (SiCL)`, `Sandy Clay (SC)`, `Silty Clay (SiC)`, or `Clay (C)`.
+---
 
-### 2. Carbon-to-Nitrogen ($\text{C:N}$) Stoichiometry
-$$\text{C:N Ratio} = \frac{\text{SOC (g/kg)}}{\text{TN (g/kg)}}$$
-- Checked against your lab's **`crossCheck.cnMin`** (default `8`) and **`crossCheck.cnMax`** (default `25`) bounds during Stage 2 sample review.
+## If Something Goes Wrong
 
-### 3. Exchangeable Bases, CEC & Base Saturation
-- **Sum of Exchangeable Bases**: $\sum \text{Bases} = \text{Ca}^{2+} + \text{Mg}^{2+} + \text{K}^{+} + \text{Na}^{+}\text{ (cmol(+)/kg)}$
-- **Base Saturation (%)**: $\text{BS\%} = \left(\frac{\sum \text{Bases}}{\text{CEC}}\right) \times 100\%$
-- Flags the sample for review if $\sum \text{Bases} > \text{crossCheck.basesCecFactor} \times \text{CEC}$ (default $1.10 \times \text{CEC}$) or if $\text{BS\%} > \text{crossCheck.baseSaturationMaxPct}$ (default $100\%$), which often indicates free $\text{CaCO}_3$ dissolution in neutral ammonium acetate.
-- Computes **$\text{Ca:Mg}$** and **$\text{Mg:K}$** cation balance ratios.
+- *If an instrument import fails with* **Use the exact configured measurement or input unit.** *→* Check the unit column in your instrument CSV or spreadsheet. Make sure it matches the method's configured unit before importing.
+- *If the* **Cross-parameter plausibility** *panel says* **Recorded bases are missing or differ.** *→* The two tests being compared were recorded on different moisture bases (one **Air-dry** and one **Oven-dry**). Check that both tests use the same moisture basis.
 
-### 4. Salinity & Sodicity Indices (SAR & ESP)
-- **Exchangeable Sodium Percentage ($\text{ESP}$)**:
-  $$\text{ESP (\%)} = \left(\frac{\text{Exchangeable Na}}{\text{CEC}}\right) \times 100\%$$
-- **Sodium Adsorption Ratio ($\text{SAR}$)**:
-  $$\text{SAR} = \frac{\text{Na}}{\sqrt{(\text{Ca} + \text{Mg}) / 2}}$$
-- Highlights sodicity hazards when $\text{ESP} \ge 15\%$ or $\text{SAR} \ge 13$.
+---
+
+## For the QA Person
+
+- *One canonical unit per analysis*: Each analysis definition stores one canonical unit. Where a method calculation template converts raw bench inputs (such as titration mL or extract mg/L) into the soil concentration, the conversion factor is recorded in **Recorded calculation evidence**.
+- *Configurable cross-check thresholds*: A **Laboratory Manager** or **System Administrator** can adjust the five cross-parameter rules in **Policies**:
+  - **Texture closure**: checks whether Sand + Silt + Clay equals 100 % within **Texture closure tolerance (%)** (default 2 %; flags **Texture closure is outside the lab tolerance.**).
+  - **Exchangeable bases / CEC**: checks whether Ca + Mg + K + Na exceeds **Maximum exchangeable bases / CEC factor** (default 1.1; flags **Exchangeable bases exceed the lab CEC factor.**).
+  - **Base saturation**: checks whether base saturation exceeds **Maximum base saturation (%)** (default 100 %; flags **Base saturation exceeds the lab limit.**).
+  - **C:N ratio**: checks whether organic carbon divided by total nitrogen is within **Minimum C:N ratio** and **Maximum C:N ratio** (default 8 to 25; flags **C:N is outside the lab limits.**).
+  - **Carbonate / water pH**, **KCl pH / water pH**, and **CaCl₂ pH / water pH**: flags **Carbonate is positive below the lab water-pH limit.** (default pH 7.0) or **Salt pH is not below water pH.**

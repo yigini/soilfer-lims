@@ -35,7 +35,12 @@
 - [Technician: Shared Bench Terminals, Attempts & Repeats](./usage/bench-terminals-and-attempts.md)
 - [Your First Day as a Laboratory Manager](./start/first-day-manager.md)
 - [Lab Manager & QA: Review, Approval & Plausibility Checks](./usage/review-and-approval.md)
+  - [Assign Pending Tests to Technicians](./review/assign-work-to-technicians.md)
+  - [Review Submitted Results and Choose the Reported Value](./review/review-and-select-reported-value.md)
+  - [Return a Test for Repeat or Give Final Sample Approval](./review/return-for-repeat-or-approve.md)
 - [Lab Manager & QA: Certificates of Analysis, PDF Reports & Amendments](./usage/reporting-pdf.md)
+  - [Issue, Print, and Share a Certificate of Analysis](./review/issue-and-share-reports.md)
+  - [Correct an Approved Sample or Issue an Amended Report](./review/amend-a-released-report.md)
 - [Clients & Viewers: Reading Results & Reports](./usage/viewer-guide.md)
 - [Controlled Units & Agronomic Interpretation](./usage/agronomic-interpretation.md)
 
@@ -44,6 +49,9 @@
 # Quality Control Made Simple
 
 - [Quality Control, Control Charts & Failed QC](./usage/qc-management.md)
+  - [What to Do When a QC Run Fails (Batch Disposition & Bracket Repeats)](./qc/handle-failed-qc-batch.md)
+  - [Review Control Charts, Reference Materials, and Blank Limits](./qc/control-charts-and-blank-limits.md)
+  - [Manage Nonconformities, Proficiency Testing, and Audit Logs](./qc/nonconformities-pt-and-audit-log.md)
 
 ---
 
