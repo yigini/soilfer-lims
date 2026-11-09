@@ -1,77 +1,74 @@
 # First Login & Lab Setup
 
-After your SoilFER LIMS server is running, follow these seven steps to sign in for the first time and configure your laboratory for daily operations.
+> *Time:* 5 minutes.
+> *Who can do this:* Every laboratory user signing in for the first time, and Laboratory Administrators.
+
+When you open your laboratory's SoilFER LIMS address in a web browser, you see the **Sign in to SoilFER LIMS** page. This guide shows you how to sign in, pick your language and theme, and set your personal password.
 
 ---
 
-## Step 1: Open SoilFER LIMS in Your Browser
+## Before You Start
 
-Navigate to your LIMS address:
-- `https://soillab.org` (production domain with HTTPS)
-- `http://YOUR_SERVER_IP:3000` (direct server IP before DNS/SSL setup)
+- Have your web address and either a one-time invitation link or your **Username** and **Temporary Password** ready.
+- Use a modern web browser on your computer or tablet.
 
 ---
 
-## Step 2: Sign In with the Initial Admin Account
+## Steps: Signing In and Choosing Your Preferences
 
-| Field | Value |
+### Step 1: Pick your language on the sign-in screen
+
+1. Look at the language pill bar in the top-right corner of the **Sign in to SoilFER LIMS** screen.
+2. Click your preferred language (**English**, **Español**, **Español (América Latina)**, **Français**, or **Português**).
+
+### Step 2: Sign in and set your personal password
+
+1. If you received a **One-Time Activation Link**, open that link in your browser. Choose a personal password that meets your laboratory's **Minimum new password length** policy (at least 12 characters by default).
+2. If you received a **Username** and a **Temporary Password**, enter both on the **Sign in to SoilFER LIMS** screen and click **Sign In**.
+3. When you sign in with a temporary password, the screen asks you to set a new personal password before entering the workspace.
+4. You can change your password later at any time. Click your name in the top bar, open the **Security** tab under **Change Password**, fill in **Current Password**, **New Password**, and **Confirm New Password**, and click **Update Password**.
+
+### Step 3: Save your personal language and appearance preferences
+
+1. Click your name in the top-right corner to open your profile page, then select the **Appearance** tab.
+2. Under **Account appearance preference**, choose a theme from the **Theme Library** and pick **Light** or **Dark · Graphite** under **Display Mode**, then click **Save for me**.
+3. Under **Preferred Language**, select your language and click **Save language preference**.
+
+*(Screenshot placeholder: laboratory setup and policy screen — screenshot coming once the training data is ready)*
+
+---
+
+## First-Time Setup Order for Laboratory Administrators
+
+If you are setting up a new laboratory for the first time, follow these five steps in order (or open the [Lab Go-Live Checklist](../admin/go-live-checklist.md)):
+
+1. *Set up your laboratory identity and branding:* Open **My Laboratory** (or **Lab Management**) and click the **Settings** tab to fill in your **Laboratory Name**, **City**, **IANA Timezone**, and **Contact Email**. Then open **Admin Panel** and **Branding & Identity** to upload your **Laboratory Logo**. See [Set Up Your Laboratory Profile, Report Branding, and Support Contact](../admin/lab-profile-and-branding.md).
+2. *Choose your quality preset and policies:* Open **Policies** to pick **ISO 17025 strict**, **Basic**, or **Advisory** and review your laboratory's rules. See [Choose a Quality Preset and Customize Laboratory Policies](../admin/configure-presets-and-policies.md).
+3. *Switch on your analytical methods and QC rules:* Open **Admin Panel** and **Analysis Configuration** (plus **Laboratory Methodology Defaults**) to confirm your active tests, units, and **Versioned QC rules**. See [Switch On Analytical Methods, Calculations, and QC Rules](../admin/enable-methods-and-qc-rules.md).
+4. *Register instruments, reference materials, and stock:* Open **Equipment**, **Inventory**, and **Reference materials** under **Quality** to register your balances, meters, and reference soils. See [Register Instruments, Log Calibrations, and Track Reagent Stock](../admin/register-equipment-and-inventory.md).
+5. *Invite your laboratory team:* Open **Laboratory Staff** to create accounts for your receptionists, technicians, and reviewers. See [Create Staff Accounts, Assign Roles, and Reset Passwords](../admin/manage-users-and-roles.md).
+
+---
+
+## What If Something Goes Wrong?
+
+| Problem | What to Do |
 | :--- | :--- |
-| **Username** | `admin` |
-| **Password** | `<generated-initial-password>` (or the value set in `ADMIN_INITIAL_PASSWORD`) |
-
-To view the auto-generated initial password on your server, run:
-```bash
-docker logs soilfer-lims | grep "INITIAL ADMIN CREDENTIALS" -A 4
-```
-
-Click **Sign In**.
+| *Screen shows* **Invalid credentials** | Check your **Username** and **Password**. If you forgot your password, click **Forgot password?** on the sign-in screen and ask your **Laboratory Manager** or administrator to issue a **Credential Recovery Link** or click **Reset Password** in **Laboratory Staff**. |
+| *Account is paused after several wrong sign-in attempts* | SoilFER LIMS pauses sign-in briefly after repeated failed attempts (controlled by **Sign-in failures before account backoff**). Wait a few minutes and try again, or ask your administrator for a password reset. |
+| *You cannot see* **Admin Panel** *or* **Policies** *in the left sidebar* | Only administrator and manager accounts can open setup screens. Ask your administrator to check your role in **Laboratory Staff**. |
 
 ---
 
-## Step 3: Change Your Password
+## Related Tasks
 
-On first login, the LIMS requires you to set a new personal password before accessing any screens:
-- Use at least **12 characters** mixing uppercase, lowercase, numbers, and symbols.
-- Store the password safely in your institution's password manager.
-
----
-
-## Step 4: Configure Laboratory Identity & Choose a Policy Preset
-
-1. Go to **Settings → Laboratory** to enter your laboratory's official name, code (e.g., `NRL`), physical address, country, timezone, and logo (which appears on PDF Certificates of Analysis).
-2. Go to **Settings → Laboratory Policy** and choose the baseline preset that matches your laboratory's quality system:
-   - **`ISO17025_STRICT`**: Blocking batch QC, mandatory second-person review, Shewhart control charts, and 5-minute bench idle lock.
-   - **`BASIC`**: Routine batch blanks and duplicates with warning enforcement and second-person review.
-   - **`ADVISORY`**: Lightweight advisory workflow without mandatory QC blocking.
-3. Fine-tune any individual setting (such as sample numbering format `sample.codeFormat`, retention period `sample.retentionDaysAfterReport`, or decimal separator `numbers.decimalSeparator`) and click **Save Policy Changes**.
-   *(See [Per-Lab Settings, Presets & Method Overrides](./lab-settings-and-presets.md) for every available option.)*
+- [Your First Day as a Laboratory Administrator](../start/first-day-admin.md)
+- [Lab Go-Live Checklist](../admin/go-live-checklist.md)
+- [Finding Your Way Around the Screen](../start/screen-tour.md)
 
 ---
 
-## Step 5: Enable Your Analytical Methods & QC Rules
+### For the QA Person
 
-1. Go to **Settings → Analyses & Methods**.
-2. Enable the soil parameters and SOPs your laboratory performs (for example, *pH 1:2.5 Water*, *Walkley–Black Organic Carbon*, *Olsen P*, *Ammonium Acetate Cations*, *Hydrometer Particle Size*).
-3. Review or customize the method-level **QC Rules (`QcRule`)** (blank limits, duplicate RPD thresholds, LRM/CRM recovery windows, and repeatability limits $r$) to match your validated laboratory SOPs.
-
----
-
-## Step 6: Register Instruments, Reference Materials & Staff Accounts
-
-1. **Staff Accounts (`Settings → Users`)**:
-   - Create accounts for your **Sample Reception** staff, **Lab Technicians**, **Reviewers**, and **Lab Managers** (see [Roles, Permissions & Separation of Duties](./roles.md)).
-   - If your laboratory uses shared tablets or PCs in the wet lab (`bench.pinAtRecord = true`), have each technician set their **4–6 digit Bench PIN** in their user profile.
-2. **Instruments (`Equipment → Instruments`)**:
-   - Register your analytical balances, pH/EC meters, spectrophotometers, AAS/ICP instruments, and drying ovens along with their calibration due dates and criticality level (`CRITICAL`, `IMPORTANT`, `NON_CRITICAL`).
-3. **Reference Materials (`QC → Reference Materials`)**:
-   - Register your active **CRM** and **In-House Control (`LRM`)** soil lots and their target analyte concentrations so technicians can select them when building analytical batches.
-
----
-
-## Step 7: Create Your First Project
-
-1. Go to **Projects → New Project**.
-2. Enter the **Project Name**, **Project Code**, optional **Client / Sponsor**, and—if field teams use mobile data collection—configure the **KoboToolbox** form connection.
-3. Click **Create**.
-
-Your laboratory is now ready to receive samples! Continue to [The Sample Workflow (End-to-End)](./sample-workflow.md) and [Sample Reception & Intake](./reception-and-intake.md).
+- *Personal accountability:* Every action recorded in SoilFER LIMS is stamped with the signed-in user's identity in **Audit & Security**. Staff must never share accounts or passwords.
+- *Configurable sign-in and bench security:* Administrators can adjust **Minimum new password length**, **Sign-in failures before account backoff**, **Sign-in failure window (minutes)**, **Maximum account sign-in delay (minutes)**, **Idle bench lock (0: off)**, and **Require PIN when recording** per laboratory in **Policies**.

@@ -52,8 +52,14 @@
 - [Your First Day as a Laboratory Administrator](./start/first-day-admin.md)
 - [Lab Go-Live Checklist](./admin/go-live-checklist.md)
 - [Users, Roles & Separation of Duties](./usage/roles.md)
+  - [Create Staff Accounts, Assign Roles, and Reset Passwords](./admin/manage-users-and-roles.md)
 - [Per-Lab Settings, Presets & Method Overrides](./usage/lab-settings-and-presets.md)
+  - [Choose a Quality Preset and Customize Laboratory Policies](./admin/configure-presets-and-policies.md)
+  - [Switch On Analytical Methods, Calculations, and QC Rules](./admin/enable-methods-and-qc-rules.md)
 - [Equipment, Calibration, Reference Materials & PT](./usage/equipment-inventory.md)
+  - [Register Instruments, Log Calibrations, and Track Reagent Stock](./admin/register-equipment-and-inventory.md)
+- [Set Up Your Laboratory Profile, Report Branding, and Support Contact](./admin/lab-profile-and-branding.md)
+- [Import Historical or Legacy Soil Data](./admin/import-legacy-data.md)
 
 ---
 

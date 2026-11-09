@@ -1,74 +1,68 @@
-# KoboToolbox Integration
+# KoboToolbox Field Integration
 
-[KoboToolbox](https://www.kobotoolbox.org/) is a free, open-source mobile survey platform widely used by field soil surveyors, national ministries, and FAO programmes. SoilFER-LIMS connects directly to KoboToolbox so field collection forms flow straight into your laboratory's **Expected Arrivals** queue without manual re-typing.
+> *Time:* 10 minutes
+> *Who can do this:* Project Managers, Laboratory Administrators, and Sample Reception Officers
 
----
-
-## 1. Connecting a Project to KoboToolbox
-
-KoboToolbox connections are configured per project and mapped to a specific destination laboratory.
-
-### What You See
-- Inside **Projects → [Select Project] → Data Connections**, you see the **KoboToolbox Data Connection** card and the **Field Mapping Editor**.
-
-### What You Do
-1. Open **Projects** (`/projects`) and click your project to open its **Project Workspace**.
-2. Select the **Data Connections** tab.
-3. Fill in the connection credentials:
-   - **Server URL**: e.g., `https://kf.kobotoolbox.org` (or your institution's self-hosted Kobo server).
-   - **Form / Asset ID**: The unique identifier of your Kobo field sampling survey.
-   - **API Token**: Your KoboToolbox account API token.
-   - **Destination Laboratory**: The laboratory that will physically receive the soil bags from this survey.
-4. Configure the **Field Mapping** (optional but recommended for soil profile surveys):
-   - Map exact form field paths (flat or nested) for **Field Sample / Bag ID**, **Soil Profile Code**, **Profile Namespace**, **Profile Meaning / Relation** (*Confirmed profile*, *Sampling point*, *Composite area*, or *Unspecified*), **Collection Date**, and **Top / Bottom Depth (cm)**.
-5. Click **Save Connection**.
-
-### What Happens Next
-- SoilFER-LIMS validates the connection and locks the mapping to the current connection revision so an in-flight synchronization cannot save against a half-changed mapping.
+[KoboToolbox](https://www.kobotoolbox.org/) is a free mobile survey tool widely used by field soil sampling teams. SoilFER LIMS connects to your project's KoboToolbox survey so field collection forms flow straight into your laboratory's **Expected Arrivals** queue without manual re-typing.
 
 ---
 
-## 2. Synchronizing Field Submissions
+## 1. Connect a Project to KoboToolbox
 
-### What You See
-- When a sync runs (automatically or when you click **Sync Now**), new field submissions appear in **Reception → Expected Arrivals** (`/reception`) with a **Synced** badge, status `EXPECTED`, and `receptionDate: null`.
+Each KoboToolbox link is set up inside a project and pointed to the destination laboratory that will receive the soil bags.
 
-### What Happens Behind the Scenes
-1. **Truthful Field Data Preservation**:
-   - **Collection Dates**: Only the actual field collection date is stored as `collectionDate`—LIMS never substitutes the tablet upload time or interview timestamp if the collection date was left blank.
-   - **Depths & Coordinates**: Numeric zero (`0 cm`) and decimal depths (such as `0` to `20.5 cm`) are preserved exactly. Missing GPS coordinates or depths stay blank (`null`) rather than defaulting to `0, 0` or `0–20 cm`.
-   - **Soil Profile References**: If two bags come from different depths (`0–20 cm` and `20–50 cm`) of the same confirmed soil pit, both bags receive their own unique specimen ID and laboratory sample code while sharing the same recorded soil profile reference (`namespace:code`).
-2. **Safe Handling of Malformed Submissions**:
-   - If a single Kobo submission has unreadable or malformed hold/metadata fields (`HOLD_MARKER_INVALID`), LIMS skips that broken row so healthy submissions can still synchronize, while keeping the sync cursor positioned before the gap so the repaired submission can be retried later.
+### Steps
 
----
-
-## 3. What Happens If Field Data Changes Later? (Replay & Provenance Holds)
-
-Sometimes a field coordinator edits a KoboToolbox submission *after* it has already been synchronized to the laboratory.
-
-- **If nothing changed**: Re-syncing or running a force refresh keeps all manual reception facts, laboratory sample codes, and results untouched.
-- **If source field data changed**:
-  - **What you see**: SoilFER-LIMS preserves the original record, saves the new revision evidence, and automatically places the sample **On Hold (`ON_HOLD`)** with a **Kobo Provenance Hold** badge.
-  - **What you do**: A **Lab Manager** opens the sample, inspects the provenance diff (comparing what changed in Kobo against the physical bag at the lab), clicks **Resolve Hold**, and records a mandatory **Resolution Reason**.
-  - **What happens next**: Once the hold is resolved, the sample returns to its prior workflow state and resumes normal laboratory processing.
+1. Click **Projects** in the left sidebar and open your project to view its workspace.
+2. Select the **Data connections** tab.
+3. In the **Kobo field collection** card (under **KoboToolbox Integration**), enter your survey connection details:
+   - Your KoboToolbox server address and authentication token.
+   - **Form / asset ID** (or **Kobo Form UID**) and **Auto-sync Interval (minutes)**.
+   - **Destination project** and **Destination lab** (the laboratory that will physically receive the bags).
+4. Map your survey's field names for the field bag ID, soil profile code, collection date, GPS coordinates, and top and bottom sampling depths in centimetres.
+5. Save the connection. Once linked, the card status badge shows **Configured**.
 
 ---
 
-## 4. Physical Receipt at the Laboratory Desk
+## 2. Synchronize Field Submissions into Expected Arrivals
+
+1. When automatic sync runs—or when you click **Sync All Projects** in **Projects**—new field survey submissions appear in **Sample Reception** under **Expected Arrivals** with status **Expected** (**Not received yet**).
+2. SoilFER LIMS preserves field facts truthfully:
+   - *Collection dates:* Only the actual field collection date is stored. If the field team left it blank, the system never substitutes the tablet upload timestamp.
+   - *Depths and GPS coordinates:* Zero depth (0 cm) and decimal depths (such as 0 to 20.5 cm) are kept without rounding. Missing coordinates stay blank rather than defaulting to zero.
+   - *Multi-depth soil pits:* When two bags come from different depth layers of the same soil pit, each bag gets its own unique laboratory sample code while sharing the same soil profile reference.
+
+---
+
+## 3. What Happens If Field Data Is Edited Later?
+
+Sometimes a field coordinator corrects a typo in KoboToolbox *after* the form has already synchronized to the laboratory:
+
+- *If nothing changed:* Re-syncing leaves all reception records, laboratory sample codes, and bench results untouched.
+- *If source field data changed:* SoilFER LIMS saves the updated field revision, keeps the original laboratory record safe, and places the sample **On Hold** so nothing is overwritten silently. A **Laboratory Manager** opens the sample, compares the field update against the physical bag, and resolves the hold with a written reason.
+
+---
+
+## 4. Physical Receipt at the Reception Desk
 
 > [!IMPORTANT]
-> **A KoboToolbox submission only means a sample was collected in the field—it does NOT mean the bag has arrived at the laboratory.**
+> *A KoboToolbox submission only means a sample was collected in the field—it does not mean the bag has arrived at the laboratory.*
 
-- All Kobo-synced samples stay in `EXPECTED` status (`receptionDate: null`) until reception staff physically inspect the bag at `/reception`.
-- `EXPECTED` samples **cannot** print permanent laboratory barcode labels, **cannot** enter drying/preparation gates, and **cannot** appear in technician workbenches.
-- For the step-by-step physical reception checklist, see [Sample Reception, Intake, Labels & Assignment](./reception-and-intake.md).
+- Every Kobo-synced sample stays in **Expected** (**Awaiting arrival**) until reception staff physically inspect the bag in **Sample Reception**.
+- Samples that have not physically arrived cannot print permanent laboratory barcode labels. They also cannot complete drying or preparation checklists or enter **Workbench** runs.
+- For the step-by-step reception checklist when the box arrives at your counter, see [Receive One Sample (Project or Walk-In)](../reception/receive-one-sample.md) and [Receive a Whole Box or Consignment](../reception/receive-consignment-box.md).
 
 ---
 
 ## External Resources
 
-- **KoboToolbox Sign-Up:** [kobotoolbox.org](https://www.kobotoolbox.org/)
-- **KoboToolbox Documentation:** [support.kobotoolbox.org](https://support.kobotoolbox.org/)
-- **Form Builder Guide:** [Creating Forms in KoboToolbox](https://support.kobotoolbox.org/creating_forms.html)
-- **Soil Profile Reference Technical Guide:** See `docs/profile-reference-guide.md` in the repository.
+- *KoboToolbox Sign-Up:* [kobotoolbox.org](https://www.kobotoolbox.org/)
+- *KoboToolbox Help Center:* [support.kobotoolbox.org](https://support.kobotoolbox.org/)
+- *Creating Forms Guide:* [Creating Forms in KoboToolbox](https://support.kobotoolbox.org/creating_forms.html)
+
+---
+
+### For the QA Person
+
+- *Server-side credential protection:* As noted on the **Kobo field collection** card (**API authentication credentials and secrets are protected by server-side access controls and strictly redacted from client responses.**), API tokens are never exposed in browser network responses after saving.
+- *Fault-isolated sync:* If a single survey submission contains unreadable metadata, SoilFER LIMS logs the skipped row and continues synchronizing healthy submissions. It holds the sync bookmark before the gap so the repaired submission can be retried cleanly.
