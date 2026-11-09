@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 520" role="img" aria-labelledby="qc-tree-title qc-tree-desc" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+  <title id="qc-tree-title">QC Failed, What Now? Decision Tree for Laboratory Managers</title>
+  <desc id="qc-tree-desc">Decision flowchart starting from a failed QC run: check if a number was mistyped, check if only a mid-run calibration check failed, or choose between Re-analyze Batch, Proceed with Warning, or Batch Rejected with a Nonconformity Report.</desc>
+
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="920" height="520" rx="16" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+
+  <!-- Header -->
+  <text x="460" y="34" text-anchor="middle" font-size="18" font-weight="700" fill="#0f172a">QC Failed, What Now? — Manager Decision Guide</text>
+  <text x="460" y="54" text-anchor="middle" font-size="12" fill="#475569">Follow the arrows from top to bottom when an analytical run shows a red QC failure in QA Dashboard</text>
+
+  <!-- Top Start Node -->
+  <rect x="310" y="72" width="300" height="48" rx="10" fill="#ffe4e6" stroke="#e11d48" stroke-width="2"/>
+  <text x="460" y="93" text-anchor="middle" font-size="13" font-weight="700" fill="#9f1239">Run Analyte Shows QC Failure</text>
+  <text x="460" y="110" text-anchor="middle" font-size="11" fill="#be123c">Open batch in QA Dashboard → QC Batch Inspection</text>
+
+  <!-- Arrow down to Question 1 -->
+  <line x1="460" y1="120" x2="460" y2="152" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Question 1 -->
+  <rect x="290" y="156" width="340" height="52" rx="10" fill="#e0f2fe" stroke="#0284c7" stroke-width="2"/>
+  <text x="460" y="178" text-anchor="middle" font-size="13" font-weight="700" fill="#0c4a6e">1. Was the QC number simply mistyped?</text>
+  <text x="460" y="196" text-anchor="middle" font-size="11" fill="#0369a1">Compare the screen against the paper bench notebook</text>
+
+  <!-- Branch Yes from Question 1 (Left) -->
+  <line x1="290" y1="182" x2="155" y2="182" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="225" y="174" text-anchor="middle" font-size="11" font-weight="700" fill="#0f766e">Yes (Typo)</text>
+
+  <rect x="24" y="144" width="128" height="84" rx="10" fill="#ecfdf5" stroke="#059669" stroke-width="1.8"/>
+  <text x="88" y="166" text-anchor="middle" font-size="11" font-weight="700" fill="#065f46">Review a</text>
+  <text x="88" y="180" text-anchor="middle" font-size="11" font-weight="700" fill="#065f46">Transcription</text>
+  <text x="88" y="194" text-anchor="middle" font-size="11" font-weight="700" fill="#065f46">Correction</text>
+  <text x="88" y="212" text-anchor="middle" font-size="10" fill="#047857">2nd reviewer + notebook ref</text>
+
+  <!-- Arrow down from Question 1 to Question 2 -->
+  <line x1="460" y1="208" x2="460" y2="246" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="498" y="232" text-anchor="start" font-size="11" font-weight="700" fill="#475569">No (Real QC failure)</text>
+
+  <!-- Question 2 -->
+  <rect x="290" y="250" width="340" height="52" rx="10" fill="#e0f2fe" stroke="#0284c7" stroke-width="2"/>
+  <text x="460" y="272" text-anchor="middle" font-size="13" font-weight="700" fill="#0c4a6e">2. Did only a mid-run calibration check fail?</text>
+  <text x="460" y="290" text-anchor="middle" font-size="11" fill="#0369a1">Earlier samples passed before the instrument drifted</text>
+
+  <!-- Branch Yes from Question 2 (Right) -->
+  <line x1="630" y1="276" x2="735" y2="276" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="682" y="268" text-anchor="middle" font-size="11" font-weight="700" fill="#0f766e">Yes (Mid-run check)</text>
+
+  <rect x="740" y="238" width="156" height="80" rx="10" fill="#fef3c7" stroke="#d97706" stroke-width="1.8"/>
+  <text x="818" y="260" text-anchor="middle" font-size="11" font-weight="700" fill="#92400e">Repeat Calibration</text>
+  <text x="818" y="275" text-anchor="middle" font-size="11" font-weight="700" fill="#92400e">Bracket</text>
+  <text x="818" y="293" text-anchor="middle" font-size="10" fill="#b45309">Repeat only samples after</text>
+  <text x="818" y="306" text-anchor="middle" font-size="10" fill="#b45309">the last passing check</text>
+
+  <!-- Arrow down from Question 2 to Manager Disposition -->
+  <line x1="460" y1="302" x2="460" y2="342" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="530" y="326" text-anchor="start" font-size="11" font-weight="700" fill="#475569">No (Blank, Duplicate, LRM, or CRM failed)</text>
+
+  <!-- Manager Decision Header Box -->
+  <rect x="300" y="346" width="320" height="36" rx="8" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.8"/>
+  <text x="460" y="369" text-anchor="middle" font-size="13" font-weight="700" fill="#5b21b6">3. Record Manager QC Disposition (With Reason)</text>
+
+  <!-- 3 Branch Arrows to Final Disposition Options -->
+  <path d="M 360 382 L 165 412" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <line x1="460" y1="382" x2="460" y2="412" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+  <path d="M 560 382 L 755 412" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+
+  <!-- Option A: Re-analyze Batch -->
+  <rect x="30" y="416" width="265" height="84" rx="10" fill="#ffe4e6" stroke="#e11d48" stroke-width="1.8"/>
+  <text x="162" y="438" text-anchor="middle" font-size="12" font-weight="700" fill="#9f1239">Option A: Re-analyze Batch</text>
+  <text x="162" y="456" text-anchor="middle" font-size="11" fill="#881337">Standard choice when results are unsafe.</text>
+  <text x="162" y="472" text-anchor="middle" font-size="11" fill="#881337">Invalidates attempts and queues</text>
+  <text x="162" y="488" text-anchor="middle" font-size="11" font-weight="600" fill="#9f1239">samples for a new analytical run.</text>
+
+  <!-- Option B: Proceed with Warning -->
+  <rect x="328" y="416" width="265" height="84" rx="10" fill="#fef3c7" stroke="#d97706" stroke-width="1.8"/>
+  <text x="460" y="438" text-anchor="middle" font-size="12" font-weight="700" fill="#92400e">Option B: Proceed with Warning</text>
+  <text x="460" y="456" text-anchor="middle" font-size="11" fill="#78350f">Only when SOP allows (e.g., high samples</text>
+  <text x="460" y="472" text-anchor="middle" font-size="11" fill="#78350f">unaffected by a tiny blank offset).</text>
+  <text x="460" y="488" text-anchor="middle" font-size="11" font-weight="600" fill="#92400e">Prints QC warning on final report.</text>
+
+  <!-- Option C: Severe Failure / NCR -->
+  <rect x="625" y="416" width="265" height="84" rx="10" fill="#f1f5f9" stroke="#475569" stroke-width="1.8"/>
+  <text x="757" y="438" text-anchor="middle" font-size="12" font-weight="700" fill="#1e293b">Option C: Reject &amp; Open NCR</text>
+  <text x="757" y="456" text-anchor="middle" font-size="11" fill="#334155">For severe reagent or instrument faults.</text>
+  <text x="757" y="472" text-anchor="middle" font-size="11" fill="#334155">Rejects the batch and opens a</text>
+  <text x="757" y="488" text-anchor="middle" font-size="11" font-weight="600" fill="#0f172a">Nonconformity Report for root cause.</text>
+</svg>
