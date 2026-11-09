@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const intake = require('./intakeService');
+const scope = require('../utils/scopeGuard');
 const { IntakeError } = require('./intakeErrors');
 const { allocateConsignmentNumber } = require('./consignmentNumberService');
 const projects = require('./projectPolicyService');
@@ -21,6 +22,13 @@ function failRows(errors, allFailed = false) {
         error: allFailed ? 'Every consignment row failed validation.' : errors.length && errors.every(error => error.error === errors[0].error) && errors[0].error || 'Consignment rows failed validation; no intake was committed.', errors,
         ...(warnings.length ? { warnings, massDeficitInfo: warnings[0].massDeficitInfo } : {}) });
 }
+async function resolveReceivingLab(db, user, requestedLabId) {
+    const labId = user.labId || (scope.hasGlobalAccess(user) ? requestedLabId : null);
+    const lab = typeof labId === 'string' && labId && await db.lab.findUnique({ where: { id: labId } });
+    if (!lab?.isActive) throw new IntakeError(403, { code: 'MISSING_LAB_SCOPE', message: 'Select an active receiving laboratory.' });
+    return lab;
+}
+
 async function receiveConsignment(tx, { body, user, expectedSnapshots }) {
     intake.requireTransaction(tx);
     const { consignment: header = {}, defaults = {}, samples = [], bulkApplications = [], allowPartial = false } = body;
@@ -28,15 +36,15 @@ async function receiveConsignment(tx, { body, user, expectedSnapshots }) {
     if (!Array.isArray(samples) || !samples.length) throw new IntakeError(400, { error: 'At least one sample is required for batch intake' });
     if (typeof allowPartial !== 'boolean') throw new IntakeError(422, { code: 'CONSIGNMENT_ALLOW_PARTIAL_INVALID', message: 'allowPartial must be a boolean.' });
     const now = new Date();
-    const lab = user.labId && await tx.lab.findUnique({ where: { id: user.labId } });
-    if (!lab?.isActive) throw new IntakeError(403, { code: 'MISSING_LAB_SCOPE', message: 'Select an active receiving laboratory.' });
+    const lab = await resolveReceivingLab(tx, user, body.assignedLab);
+    const receivingUser = user.labId ? user : { ...user, labId: lab.id };
     // Authorize existing specimen owners before per-row diagnostics can echo
     // their identities or wrap a scope denial as an intake validation error.
     for (const sample of samples) {
         const identifier = sample?.sampleId || sample?.id || sample?.originalId;
         if (typeof identifier !== 'string' || !identifier.trim()) continue;
         const existing = await tx.sample.findFirst({ where: { OR: [{ id: identifier }, { originalId: identifier }] } });
-        if (existing && !require('../utils/scopeGuard').canAccessEntity(user, existing, { altLabField: 'assignedLab' })) {
+        if (existing && !scope.canAccessEntity(user, existing, { altLabField: 'assignedLab' })) {
             throw new IntakeError(403, { code: 'SAMPLE_SCOPE_DENIED', message: 'The specimen is outside your laboratory scope.' });
         }
     }
@@ -72,7 +80,7 @@ async function receiveConsignment(tx, { body, user, expectedSnapshots }) {
                 receivingOfficerSignature: sample.receivingOfficerSignature || header.receivingOfficerSignature,
                 samplingDetails: Object.keys(samplingDetails).length ? samplingDetails : undefined
             };
-            const plan = await intake.prepareIntake(tx, { body: input, user, expectedSnapshot: expectedSnapshots?.[index], newSampleId: crypto.randomUUID(), initialFieldMetadata: sample.fieldMetadata || (sample.collectionDate ? { collectionDate: sample.collectionDate } : {}) });
+            const plan = await intake.prepareIntake(tx, { body: input, user: receivingUser, expectedSnapshot: expectedSnapshots?.[index], newSampleId: crypto.randomUUID(), initialFieldMetadata: sample.fieldMetadata || (sample.collectionDate ? { collectionDate: sample.collectionDate } : {}) });
             plans.push({ index, plan });
         } catch (error) { errors.push(rowError(error, index, sample)); }
     }
@@ -115,11 +123,11 @@ async function receiveConsignment(tx, { body, user, expectedSnapshots }) {
         status: rejectedCount === processed.length ? 'REJECTED' : rejectedCount ? 'PARTIAL' : 'RECEIVED' } });
     await tx.auditLog.create({ data: { id: crypto.randomUUID(), entity: 'CONSIGNMENT', entityId: final.id, action: 'CONSIGNMENT_BATCH_RECEIVED',
         details: JSON.stringify({ summary: `Consignment ${code} received with ${processed.length} samples (${acceptedCount} accepted, ${rejectedCount} rejected).`,
-            failedRowCount: errors.length, bulkApplications: applications, discrepancy: discrepancy(declared, processed.length),
+            receivingLabId: lab.id, failedRowCount: errors.length, bulkApplications: applications, discrepancy: discrepancy(declared, processed.length),
             massDeficitAcknowledgements: processed.filter(result => result.sample.massWarningAcknowledged).map(result => result.sample.originalId) }),
         performedBy: user.username, timestamp: now, labId: lab.id } });
     return { success: true, consignment: { ...consignmentResponse(await require('./custodyService').receiptView(tx, final, 'consignment')), discrepancy: discrepancy(declared, processed.length) },
         samples: processed.map(({ response, sample }) => ({ ...response, rejectionReason: sample.rejectionReason, receivedMass: sample.receivedMass })),
         errors: errors.sort((a, b) => a.row - b.row), failedRows: errors.length, message: `Batch received ${processed.length} samples under Consignment ${code}.` };
 }
-module.exports = { receiveConsignment, discrepancy };
+module.exports = { receiveConsignment, resolveReceivingLab, discrepancy };

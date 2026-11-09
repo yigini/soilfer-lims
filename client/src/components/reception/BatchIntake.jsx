@@ -48,8 +48,23 @@ const BatchIntake = ({
         checklist: { items: {}, nonConformance: false, reason: '' }
     });
 
+    const needsReceivingLab = user?.role === 'SUPER_ADMIN' && !user.labId && user.isActive !== false && user.status !== 'INACTIVE';
+    const [selectedLab, setSelectedLab] = useState('');
+    const [receivingLabs, setReceivingLabs] = useState([]);
+    const [labsFailed, setLabsFailed] = useState(false);
+    const receivingLabId = user?.labId || (needsReceivingLab ? selectedLab : undefined);
+    const labRequired = needsReceivingLab && !receivingLabId;
+    useEffect(() => {
+        if (!needsReceivingLab) return;
+        let current = true;
+        axios.get('/api/labs/directory')
+            .then(({ data }) => { if (current) setReceivingLabs(data.filter(lab => lab.isActive)); })
+            .catch(() => { if (current) setLabsFailed(true); });
+        return () => { current = false; };
+    }, [needsReceivingLab]);
+
     const { rules: intakeRules, error: intakeRulesFailed } = useIntakeRules({ projectId: consignment.projectCode,
-        isWalkIn: !consignment.projectCode, labId: user?.labId });
+        isWalkIn: !consignment.projectCode, labId: receivingLabId, enabled: !labRequired });
 
     // --- SAMPLES LIST IN BATCH ---
     const [samples, setSamples] = useState([]);
@@ -65,12 +80,15 @@ const BatchIntake = ({
 
     useEffect(() => {
         let cancelled = false;
+        if (labRequired) return;
         const keys = JSON.parse(massKeys);
-        Promise.all(keys.map(async key => [key, (await axios.post('/api/reception/mass-check', { analysisCodes: JSON.parse(key) })).data]))
+        Promise.all(keys.map(async key => [key, (await axios.post('/api/reception/mass-check', {
+            analysisCodes: JSON.parse(key), ...(needsReceivingLab && { assignedLab: receivingLabId })
+        })).data]))
             .then(entries => { if (!cancelled) { setMassRequirements(Object.fromEntries(entries)); setMassCheckFailed(false); } })
             .catch(() => { if (!cancelled) setMassCheckFailed(true); });
         return () => { cancelled = true; };
-    }, [massKeys]);
+    }, [massKeys, labRequired, needsReceivingLab, receivingLabId]);
 
     const hasMassDeficit = sample => sample.status !== 'REJECTED' && sample.receivedMass !== null && sample.receivedMass !== '' &&
         sample.receivedMass !== undefined && Number(sample.receivedMass) < massRequirements[requirementKey(sample.requiredAnalyses ?? defaults.requiredAnalyses)]?.totalRequiredMass;
@@ -194,6 +212,7 @@ const BatchIntake = ({
 
     // Atomic Consignment Submission (RC-12, RC-13, RC-14)
     const handleSubmitBatch = async () => {
+        if (labRequired) return;
         if (samples.length === 0) {
             alert('Please scan or import at least one sample.');
             return;
@@ -206,6 +225,7 @@ const BatchIntake = ({
         setSubmitting(true);
         try {
             const payload = {
+                ...(needsReceivingLab && { assignedLab: receivingLabId }),
                 consignment: {
                     deliveryNoteRef: consignment.deliveryNoteRef.trim() || null,
                     deliveredBy: consignment.deliveredBy.trim() || null,
@@ -240,7 +260,7 @@ const BatchIntake = ({
         } catch (err) {
             playErrorBuzz();
             console.error('Batch submission failed:', err);
-            alert('Consignment submission failed: ' + (err.response?.data?.error || err.message));
+            alert(t('batchIntake.submissionFailed', { message: err.response?.data?.message || err.response?.data?.error || err.message }));
         } finally {
             setSubmitting(false);
         }
@@ -366,6 +386,23 @@ const BatchIntake = ({
                     Delivery & Consignment Information
                 </div>
 
+                {needsReceivingLab && (
+                    <div className="space-y-1 text-xs">
+                        <label htmlFor="batch-receiving-lab" className="block font-bold text-sf-muted">{t('batchIntake.receivingLab')}</label>
+                        <select id="batch-receiving-lab" required value={selectedLab} disabled={submitting}
+                            onChange={event => {
+                                setSelectedLab(event.target.value);
+                                setMassRequirements({});
+                                setMassCheckFailed(false);
+                                setSamples(previous => previous.map(sample => ({ ...sample, massWarningAcknowledged: false })));
+                            }}
+                            className="w-full max-w-sm p-2 rounded-lg border border-sf-divider bg-sf-surface text-sf-text">
+                            <option value="">{t('batchIntake.selectReceivingLab')}</option>
+                            {receivingLabs.map(lab => <option key={lab.id} value={lab.id}>{lab.name} ({lab.code})</option>)}
+                        </select>
+                        {labsFailed && <p role="alert" className="text-amber-700">{t('batchIntake.receivingLabsFailed')}</p>}
+                    </div>
+                )}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-xs">
                     <div>
                         <label className="block font-bold text-sf-muted mb-1">
@@ -736,7 +773,7 @@ const BatchIntake = ({
                         <button
                             type="button"
                             onClick={handleSubmitBatch}
-                            disabled={submitting}
+                            disabled={submitting || labRequired}
                             className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-lg transition-all flex items-center gap-2 disabled:opacity-50"
                         >
                             {submitting ? <Loader2 size={16} className="animate-spin" /> : <PackageCheck size={16} />}
@@ -754,7 +791,7 @@ const BatchIntake = ({
                     index={editingSampleIdx}
                     defaults={defaults}
                     projectId={consignment.projectCode}
-                    labId={user?.labId}
+                    labId={receivingLabId}
                     onClose={() => setEditingSampleIdx(null)}
                     onSave={handleUpdateSample}
                 />

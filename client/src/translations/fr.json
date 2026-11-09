@@ -2682,6 +2682,10 @@
     }
   },
   "batchIntake": {
+    "receivingLab": "Laboratoire destinataire",
+    "selectReceivingLab": "Sélectionner un laboratoire destinataire",
+    "receivingLabsFailed": "Impossible de charger les laboratoires destinataires.",
+    "submissionFailed": "Échec de l’envoi du lot : {message}",
     "massToApply": "Masse à appliquer (g)",
     "moistureToApply": "Humidité à appliquer",
     "notRecorded": "Non renseigné",

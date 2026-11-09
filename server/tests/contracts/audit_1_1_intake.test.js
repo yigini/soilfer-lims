@@ -35,6 +35,48 @@ describe('Audit 1.1: one atomic intake service', () => {
         const audit = await prisma.auditLog.findMany({ where: { sampleId }, orderBy: [{ action: 'asc' }, { analysisCode: 'asc' }], select: { action: true, analysisCode: true, performedBy: true } });
         return { items, revisions: revisions.map(row => ({ version: row.version, status: row.status })), lines, audit };
     }
+    describe('receiving laboratory selection', () => {
+        let globalToken, inactiveLab, otherLab;
+        beforeAll(async () => {
+            globalToken = await getAuthToken('SUPER_ADMIN', null);
+            await prisma.user.update({ where: { username: jwt.decode(globalToken).username }, data: { mustChangePassword: false } });
+            const createLab = isActive => prisma.lab.create({ data: { id: uid(), code: `A11${uid().slice(0, 8)}`,
+                name: 'Batch reception fixture', country: 'GTM', timezone: 'Europe/Rome', isActive } });
+            [inactiveLab, otherLab] = [await createLab(false), await createLab(true)];
+        });
+        const receive = (auth, assignedLab) => request(app).post('/api/reception/consignments')
+            .set('Authorization', `Bearer ${auth}`).send({ assignedLab, samples: [input()] });
+
+        test('a global admin receives into the selected active lab and records it in the audit', async () => {
+            const response = await receive(globalToken, lab.id);
+            expect(response.status).toBe(201);
+            const sample = await prisma.sample.findUnique({ where: { id: response.body.samples[0].id } });
+            expect(sample.assignedLab).toBe(lab.id);
+            const consignment = await prisma.consignment.findUnique({ where: { id: response.body.consignment.id } });
+            expect(consignment.labId).toBe(lab.id);
+            const audit = await prisma.auditLog.findFirst({ where: { entityId: consignment.id, action: 'CONSIGNMENT_BATCH_RECEIVED' } });
+            expect(audit.labId).toBe(lab.id);
+            expect(JSON.parse(audit.details).receivingLabId).toBe(lab.id);
+        });
+
+        test('missing, inactive, unknown and invalid lab selections fail before writing', async () => {
+            const before = await counts();
+            for (const selection of [undefined, inactiveLab.id, uid(), { id: lab.id }]) {
+                const response = await receive(globalToken, selection);
+                expect(response.status).toBe(403);
+                expect(response.body).toMatchObject({ code: 'MISSING_LAB_SCOPE', message: 'Select an active receiving laboratory.' });
+            }
+            expect(await counts()).toEqual(before);
+        });
+
+        test('a lab-assigned account cannot redirect a batch to another lab', async () => {
+            const response = await receive(token, otherLab.id);
+            expect(response.status).toBe(201);
+            const sample = await prisma.sample.findUnique({ where: { id: response.body.samples[0].id } });
+            expect(sample.assignedLab).toBe(lab.id);
+        });
+    });
+
     test('single and batch acceptance produce identical normalised work, methods, order lines and per-sample audits', async () => {
         const one = await single(input()), many = await batch([input()]);
         expect(one.status).toBe(200); expect(many.status).toBe(201);
