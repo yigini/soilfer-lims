@@ -16,10 +16,13 @@
 # Daily Work, by Role
 
 - [The Sample Journey (End-to-End)](./usage/sample-workflow.md)
+- [Your First Day at Sample Reception](./start/first-day-reception.md)
 - [Reception: Receiving Samples & Labels](./usage/reception-and-intake.md)
 - [Preparation: Drying, Grinding, Storage & Custody](./usage/preparation-and-custody.md)
+- [Your First Day as a Laboratory Technician](./start/first-day-technician.md)
 - [Technician: Workbench & Analytical Runs](./usage/technician-workbench.md)
 - [Technician: Shared Bench Terminals, Attempts & Repeats](./usage/bench-terminals-and-attempts.md)
+- [Your First Day as a Laboratory Manager](./start/first-day-manager.md)
 - [Lab Manager & QA: Review, Approval & Plausibility Checks](./usage/review-and-approval.md)
 - [Lab Manager & QA: Certificates of Analysis, PDF Reports & Amendments](./usage/reporting-pdf.md)
 - [Clients & Viewers: Reading Results & Reports](./usage/viewer-guide.md)
@@ -35,6 +38,7 @@
 
 # Setting Up Your Lab (Lab Admin)
 
+- [Your First Day as a Laboratory Administrator](./start/first-day-admin.md)
 - [Lab Go-Live Checklist](./admin/go-live-checklist.md)
 - [Users, Roles & Separation of Duties](./usage/roles.md)
 - [Per-Lab Settings, Presets & Method Overrides](./usage/lab-settings-and-presets.md)
