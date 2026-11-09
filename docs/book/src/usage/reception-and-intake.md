@@ -49,7 +49,7 @@ Every sample you accept moves to **Accepted** (**Waiting for drying**) and appea
 
 ## If Something Goes Wrong
 
-- *If you scan a barcode and see* **Sample not found in manifest** *→* Check whether the bag belongs to a walk-in client (**Walk-in / External**) or ask your manager to synchronize the field survey. See [Unknown or Duplicate Sample ID & Missing Location](../reception/unknown-or-duplicate-id.md).
+- *If you scan a barcode and see* **Sample Not Found** *(or* **Not Found***) →* Check whether the bag belongs to a walk-in client (**Walk-in / External**) or ask your manager to synchronize the field survey. See [Unknown or Duplicate Sample ID & Missing Location](../reception/unknown-or-duplicate-id.md).
 - *If a sample bag is light but the client still wants partial testing →* Record the actual weight, tick **Acknowledge this sample’s mass warning**, and note which tests have priority. See [Sample Arrived Damaged, Leaking, or Too Small](../reception/damaged-or-small-sample.md).
 - *If you accepted a sample by mistake before preparation started →* Open the sample in **Samples**, click the actions menu, and click **Undo intake**. See [Hand Over Accepted Samples to the Lab](../reception/handover-to-lab.md).
 

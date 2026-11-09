@@ -57,5 +57,5 @@ Once the returned or unverified preparation step is confirmed and verified (**Ch
 
 ## For the QA Person
 
-- SoilFER LIMS never overwrites a completed preparation receipt or analytical attempt in place. Returning work for **Preparation error** marks the prior attempt **Invalidated** in **Attempt history** and links the new attempt to the new **Aliquot**.
+- SoilFER LIMS never overwrites a completed preparation receipt or analytical attempt in place. Returning work for **Preparation error** marks the prior attempt **Invalidated** under **Attempts** and links the new attempt to the new **Aliquot**.
 - Reopening an approved sample (**Reopen Sample**) creates a distinct pass in the timeline (**Reopened Analytical Record — Multiple Passes**). Auditors can see every pass, reason, and approval date.

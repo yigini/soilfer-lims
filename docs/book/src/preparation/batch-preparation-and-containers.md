@@ -51,12 +51,12 @@ When technicians later record wet-chemistry readings in **Workbench**, they can 
 
 ## If Something Goes Wrong
 
-- *If you see* **Choose the parent container this material came from.** *→* Every **Fine earth**, **Ground**, **Aliquot**, or **Archive** container must be linked to an **Active** parent under **Parent container**. Only a **Bulk** container can use **Root bulk container**.
+- *If you see* **Could not create the container.** *→* Make sure every **Fine earth**, **Ground**, **Aliquot**, or **Archive** container is linked to an **Active** parent under **Parent container**. Only a **Bulk** container can use **Root bulk container**.
 - *If one row in a batch confirmation fails while others succeed →* Check the message on that row. If your laboratory's **Policies** require structured weights or temperatures, fill in the missing numbers and click **Confirm Complete**.
 
 ---
 
 ## For the QA Person
 
-- The **Containers and aliquots** tree tracks parent-to-child lineage from the original **Bulk** bag through **Fine earth**, **Ground**, **Aliquot**, and **Archive** containers. It also displays which analytical attempt (**Linked to attempt**) used each aliquot.
+- The **Containers and aliquots** tree tracks parent-to-child lineage from the original **Bulk** bag through **Fine earth**, **Ground**, **Aliquot**, and **Archive** containers. It also displays which analytical attempt (**Linked attempt**) used each aliquot.
 - Even when you confirm several rows at once in **Table View**, the server validates and records an individual receipt for each sample.

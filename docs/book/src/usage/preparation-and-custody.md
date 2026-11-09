@@ -39,7 +39,7 @@ Prepare accepted soil samples for laboratory testing by recording drying, sievin
 ### Moving, Archiving, and Disposing Sample Material Later
 
 1. Open a sample in **Samples** and click the **Sample & request** tab to view **Physical Material & Custody**.
-2. Click **Record storage movement** whenever you move a container to a shelf, issue it to a bench, return it, or send it out (**Moved to storage**, **Issued to bench**, **Returned to storage**, or **Transferred to external lab**).
+2. Click **Record storage movement** whenever you move a container to a shelf, issue it to a bench, return it, or send it out (**Moved**, **Issued**, **Returned**, or **Sent out** under **Custody event**).
 3. After all tests on a sample are **Approved**, click the **More actions** menu at the top right:
    - Click **Archive sample** (**Request archival**) to move the sample to long-term storage and set its **Retain until** date.
    - Click **Dispose material** (**Dispose sample material**) when the retention period expires, or review expired samples in **Overdue disposal queue**.
@@ -56,12 +56,12 @@ Once both **Air Drying** and **Sample Preparation** are confirmed, every ordered
 
 - *If a test row in* **Workbench** *is locked and says* **Blocked** *→* Look at the **Readiness & State** column or the right-hand inspector (**Drying Gate:** and **Preparation Gate:**). Complete **Air Drying** first, then **Sample Preparation**, and the test row will unlock automatically.
 - *If you see* **Accept the sample before recording its preparation.** *→* The sample is still in **Received** or **Draft** status. Ask the reception clerk to complete intake so its status becomes **Accepted**.
-- *If you see* **This sample’s retention period has not expired.** *→* Keep the sample in archive storage until the **Retain until** date passes, or check retention rules under **Policies**.
+- *If you see* **Retention must expire before disposal.** *→* Keep the sample in archive storage until the **Retain until** date passes, or check retention rules under **Policies**.
 
 ---
 
 ## For the QA Person
 
 - Wet-chemistry and spectral tests are strictly gated behind **Air Drying** and **Sample Preparation**. No reading can be saved while either prerequisite gate is **Pending** or **Awaiting verification**.
-- When a method requires **Oven-dry** reporting (instead of **Air-dry** or **As received**), the system links the moisture test to the calculation template. Both the raw reading and the moisture-corrected result remain traceable.
+- When a method requires **Oven-dry** reporting (instead of **Air-dry**), the system links the moisture test to the calculation template. Both the raw reading and the moisture-corrected result remain traceable.
 - Your laboratory configures gate verification (**Awaiting verification**), required preparation fields (**Drying**, **Sieving**, **Grinding**, **Splitting**), and retention days under **Policies**. See [Per-Lab Settings, Presets & Method Overrides](lab-settings-and-presets.md).

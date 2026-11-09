@@ -57,7 +57,7 @@ The accepted sample moves to **Accepted** (**Waiting for drying**) and appears i
 ## If Something Goes Wrong
 
 - *If a walk-in customer does not know the exact field coordinates or crop history →* Leave unknown optional fields blank or choose **Record as unknown** under **Soil profile / sampling point**. Your laboratory sets which context fields are mandatory under **Policies**.
-- *If the client asks to add or remove a test after the sample was already accepted →* Open the sample in **Samples**, go to the **Sample & request** tab, click **Change requested analyses (Revision 1)**, select the complete target list of analyses, and type the explanation in **Reason for order revision**.
+- *If the client asks to add or remove a test after the sample was already accepted →* Open the sample in **Samples**, go to the **Sample & request** tab, click the **Change requested analyses** button, select the complete target list of analyses, and type the explanation in **Reason for order revision**.
 - *If you need to stop halfway through checking in a sample →* Click **Save Draft**. See [Save a Half-Finished Intake and Come Back](save-and-resume-draft.md).
 
 ---

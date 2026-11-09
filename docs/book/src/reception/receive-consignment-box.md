@@ -43,7 +43,7 @@ All accepted samples in the box move to **Accepted** (**Waiting for drying**) an
 
 ## If Something Goes Wrong
 
-- *If one bag in the box shows* **Sample not found in manifest** *→* Set that bag aside and complete intake for the matched bags first. Then follow [Unknown or Duplicate Sample ID & Missing Location](unknown-or-duplicate-id.md) for the unmatched bag.
+- *If one bag in the box is not registered in the project manifest →* Set that bag aside and complete intake for the matched bags first. Then follow [Unknown or Duplicate Sample ID & Missing Location](unknown-or-duplicate-id.md) for the unmatched bag.
 - *If the* **Complete Intake** *button stays disabled →* Check whether any row has an unacknowledged **Mass deficit** warning or a missing required field.
 - *If the box contains more or fewer bags than the paper manifest lists →* Record the bags physically present on your desk. Note the missing or extra bag codes in **Intake Notes / Visual Observations** so the project coordinator can follow up.
 

@@ -19,14 +19,14 @@ Resolve the three most common identity problems at reception: a barcode not foun
 
 ### Case 1: Barcode or Sample ID Is Not Found in the Manifest
 
-1. When you see **Sample not found in manifest** in **Project Sample**, double-check the characters on the bag. Check whether a zero was typed as the letter O.
+1. When you see **Sample Not Found** (or **Not Found**) in **Project Sample**, double-check the characters on the bag. Check whether a zero was typed as the letter O.
 2. Click **Samples** in the left menu and switch to **Field Registry**. Use **Search by Lab ID or Original ID...** to check whether the sample was registered under another project code.
 3. If the sample was collected with KoboToolbox today, ask your **Laboratory Manager** to synchronize the project form. See [KoboToolbox Field Integration](../usage/kobotoolbox.md), then click **Try Again** in **Sample Reception**.
 4. If the bag came from a client without a digital manifest, return to **Sample Reception**. Click **Walk-in / External** and register the sample there.
 
 ### Case 2: The Sample ID Shows as Already Received (Duplicate ID)
 
-1. If you scan a bag and see **Duplicate Detected: Sample already received.**, stop and check the details on screen.
+1. If you scan a bag and see **Prior Receipt Detected for** your sample ID (with the message **This sample ID was previously received on** a prior date), stop and check the details on screen.
 2. Check whether a colleague already checked in this exact bag earlier today. If so, click **Cancel / Clear ID** and reprint its label from **Samples** if needed.
 3. If the field team sent a *second* physical bag with the same field code, click **✓ Confirm as Re-submission**. Explain why in **Intake Notes / Visual Observations**.
    *You should see the new bag accepted under its own distinct **Permanent Lab ID**.*

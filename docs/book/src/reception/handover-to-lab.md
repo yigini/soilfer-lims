@@ -23,7 +23,7 @@ Check your reception handoff queue at the end of a session, place accepted sampl
 3. If you need to record which shelf or drying rack the tray is moving to right now:
    - Open the sample in **Samples** and click the **Sample & request** tab.
    - In the **Physical Material & Custody** card, click **Record storage movement**.
-   - Keep **Event type** as **Moved to storage** and choose the destination shelf under **Storage location** (**Choose a sample storage location**).
+   - Keep **Custody event** as **Moved** and choose the destination shelf under **Storage location** (**Choose a sample storage location**).
    - Enter a short note in **Reason** (such as moving accepted samples to the drying room) and click **Save**.
 4. Carry the tray to the drying and preparation area and hand it to the preparation technician.
 

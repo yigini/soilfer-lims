@@ -33,7 +33,7 @@ Handle a soil bag that arrives torn, cross-contaminated, unlabelled, or without 
    *If the weight is below the total needed for the ordered tests, you should see a **Mass deficit** warning showing the required grams versus the received grams.*
 2. Check with your **Laboratory Manager** which tests should take priority if there is not enough soil for every method.
 3. Type the priority order or customer agreement in **Intake Notes / Visual Observations**.
-4. Tick **Acknowledge this sample’s mass warning** (or **Acknowledge mass warning and continue**) and click **Accept & Print Label**.
+4. Tick **Acknowledge this sample’s mass warning** and click **Accept & Print Label**.
    *You should see **INTAKE CONFIRMED!** and the sample move to **Accepted** with the mass warning saved on its record.*
 
 ---
@@ -47,8 +47,8 @@ Handle a soil bag that arrives torn, cross-contaminated, unlabelled, or without 
 
 ## If Something Goes Wrong
 
-- *If you see* **Enter the observed problem for every failed reception check.** *→* Make sure you typed an explanation in **Describe the observed problem** for each check you marked **Fail**.
-- *If you see* **Received mass is below the required analytical mass. Acknowledge the warning or reduce the analysis selection.** *→* Either tick **Acknowledge this sample’s mass warning** after checking with your manager, or untick lower-priority tests in **3. Analyses**.
+- *If you see a validation message for* **Non-conformance reason** *→* Make sure you typed an explanation in **Describe the observed problem** for each check you marked **Fail**.
+- *If you see a validation message that the* **Mass deficit** *must be acknowledged →* Either tick **Acknowledge this sample’s mass warning** after checking with your manager, or untick lower-priority tests in **3. Analyses**.
 - *If a sample was accepted earlier and you only discover a problem when opening the bag at the drying bench →* Open the sample in **Samples** and place a hold on it (**Sample holds**), or ask a reception clerk to click **Undo intake** before preparation is recorded.
 
 ---
