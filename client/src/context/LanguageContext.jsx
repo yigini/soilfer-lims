@@ -55,6 +55,28 @@ const getInitialLocale = () => {
     });
 };
 
+function mergeLocales(entries) {
+    const incoming = Object.fromEntries(entries.map(([code, dictionary]) => [
+        resolveLocale({ rawInput: code }), flattenObject(dictionary)
+    ]));
+    const english = DEFAULT_TRANSLATIONS.en.flat;
+    const merged = { ...DEFAULT_TRANSLATIONS };
+    for (const [code, dictionary] of Object.entries(incoming)) {
+        const base = DEFAULT_TRANSLATIONS[code];
+        const overrides = Object.fromEntries(Object.entries(dictionary).filter(([key, value]) => {
+            const bundled = base.flat[key];
+            const hasBundledTranslation = code !== 'en' && typeof bundled === 'string' && bundled !== english[key];
+            if (!hasBundledTranslation) return true;
+            if (typeof value !== 'string' || !value.trim()) return false;
+            const storedEnglish = incoming.en?.[key];
+            const englishValues = [english[key], storedEnglish];
+            return !englishValues.some(text => typeof text === 'string' && text.trim() === value.trim());
+        }));
+        merged[code] = { ...base, flat: { ...base.flat, ...overrides } };
+    }
+    return merged;
+}
+
 // --- Provider -------------------------------------------------------------
 export const LanguageProvider = ({ children }) => {
     const [locale, setLocale] = useState(getInitialLocale);
@@ -77,16 +99,6 @@ export const LanguageProvider = ({ children }) => {
         fetchLanguages();
     }, []);
 
-    const mergeLocale = (code, incoming) => {
-        const canonical = resolveLocale({ rawInput: code });
-        const base = DEFAULT_TRANSLATIONS[canonical] || DEFAULT_TRANSLATIONS.en;
-        const incomingFlat = buildLocale(incoming || {}).flat;
-        return {
-            nested: base.nested,
-            flat: { ...base.flat, ...incomingFlat }
-        };
-    };
-
     const fetchLanguages = async () => {
         try {
             // Public bootstrap for pre-auth screens
@@ -103,26 +115,16 @@ export const LanguageProvider = ({ children }) => {
                 }
             }
 
-            const merged = { ...DEFAULT_TRANSLATIONS };
-            Object.entries(payload).forEach(([code, nestedObj]) => {
-                const canonical = resolveLocale({ rawInput: code });
-                merged[canonical] = mergeLocale(canonical, nestedObj);
-            });
-            setTranslations(merged);
+            setTranslations(mergeLocales(Object.entries(payload)));
         } catch (e) {
             // Fallback to admin endpoint when authenticated (post-login refresh)
             try {
                 const adminRes = await axios.get('/api/admin/languages');
-                const merged = { ...DEFAULT_TRANSLATIONS };
                 const langList = adminRes.data?.data || adminRes.data || [];
                 if (langList.length > 0) {
                     setAvailableLanguages(langList.map(l => ({ code: l.code, name: l.name, isDefault: l.isDefault })));
                 }
-                langList.forEach(l => {
-                    const canonical = resolveLocale({ rawInput: l.code });
-                    merged[canonical] = mergeLocale(canonical, l.translations || {});
-                });
-                setTranslations(merged);
+                setTranslations(mergeLocales(langList.map(l => [l.code, l.translations])));
             } catch (inner) {
                 if (inner.response?.status !== 401) {
                     console.warn('Could not load languages from backend, using defaults', inner.message);

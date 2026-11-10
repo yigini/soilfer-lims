@@ -3744,6 +3744,10 @@
     "pin": "PIN",
     "password": "Password",
     "setPinHelp": "Set a 4 to 8 digit bench PIN. Confirm with your password.",
+    "setPinTitle": "Set your bench PIN",
+    "newPinLabel": "New bench PIN (4–8 digits)",
+    "passwordLabel": "Your password",
+    "pinHint": "Use only the digits 0 to 9.",
     "unsentKept": "{count} change(s) are not sent yet, so they stay on this device. Reconnect and try again.",
     "errors": {
       "generic": "Could not check the PIN.",

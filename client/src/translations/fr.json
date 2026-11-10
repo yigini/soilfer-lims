@@ -3744,6 +3744,10 @@
     "pin": "PIN",
     "password": "Mot de passe",
     "setPinHelp": "Définissez un PIN de paillasse de 4 à 8 chiffres. Confirmez avec votre mot de passe.",
+    "setPinTitle": "Définissez votre code PIN de paillasse",
+    "newPinLabel": "Nouveau code PIN de paillasse (4 à 8 chiffres)",
+    "passwordLabel": "Votre mot de passe",
+    "pinHint": "Utilisez uniquement les chiffres de 0 à 9.",
     "unsentKept": "{count} modification(s) ne sont pas encore envoyées et restent sur cet appareil. Reconnectez-vous et réessayez.",
     "errors": {
       "generic": "Impossible de vérifier le PIN.",

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useId, useRef, useState } from 'react';
 import axios from 'axios';
 
 // #202 B12: bench mode is a per-device switch kept in this browser only. Lab
@@ -12,11 +12,19 @@ export function readBenchMode() {
 }
 
 function PinForm({ t, title, onVerified, onCancel, pinSet, onPinSet }) {
+    const fieldId = useId();
+    const pinId = fieldId + '-pin';
+    const passwordId = fieldId + '-password';
+    const hintId = fieldId + '-hint';
     const [pin, setPin] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const submit = async event => {
         event.preventDefault();
+        if (!/^\d{4,8}$/.test(pin)) {
+            setError(t('bench.errors.BENCH_PIN_FORMAT_INVALID'));
+            return;
+        }
         setError('');
         try {
             if (!pinSet) {
@@ -27,20 +35,28 @@ function PinForm({ t, title, onVerified, onCancel, pinSet, onPinSet }) {
             setPin('');
             onVerified();
         } catch (err) {
-            const code = err.response?.data?.code;
-            setError(t(`bench.errors.${code}`, err.response?.data?.error || t('bench.errors.generic')));
+            const { code, error: message } = err.response?.data || {};
+            setError(message || t(`bench.errors.${code}`, t('bench.errors.generic')));
         }
     };
     return (
         <form onSubmit={submit} data-testid="bench-pin-form" className="w-full max-w-xs space-y-3 rounded-lg bg-white p-6 shadow-xl dark:bg-slate-900">
-            <h2 className="text-lg font-semibold">{title}</h2>
-            {!pinSet && <>
-                <p className="text-sm">{t('bench.setPinHelp')}</p>
-                <input type="password" required aria-label={t('bench.password')} value={password}
-                    onChange={event => setPassword(event.target.value)} className="w-full rounded border px-3 py-2" />
-            </>}
-            <input type="password" inputMode="numeric" autoFocus required pattern="\d{4,8}" aria-label={t('bench.pin')} value={pin}
-                onChange={event => setPin(event.target.value)} className="w-full rounded border px-3 py-3 text-center text-2xl tracking-widest" />
+            <h2 className="text-lg font-semibold">{pinSet ? title : t('bench.setPinTitle')}</h2>
+            {!pinSet && <p className="text-sm">{t('bench.setPinHelp')}</p>}
+            <div>
+                <label htmlFor={pinId} className="block text-sm font-medium">{t(pinSet ? 'bench.pin' : 'bench.newPinLabel')}</label>
+                <input id={pinId} type="password" inputMode="numeric" autoFocus aria-required="true"
+                    aria-describedby={pinSet ? undefined : hintId} value={pin} onChange={event => setPin(event.target.value)}
+                    className="w-full rounded border px-3 py-3 text-center text-2xl tracking-widest" />
+                {!pinSet && <p id={hintId} className="mt-1 text-sm">{t('bench.pinHint')}</p>}
+            </div>
+            {!pinSet && (
+                <div>
+                    <label htmlFor={passwordId} className="block text-sm font-medium">{t('bench.passwordLabel')}</label>
+                    <input id={passwordId} type="password" required value={password}
+                        onChange={event => setPassword(event.target.value)} className="w-full rounded border px-3 py-2" />
+                </div>
+            )}
             {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
             <div className="flex justify-end gap-2">
                 {onCancel && <button type="button" onClick={onCancel} className="min-h-[44px] rounded border px-4">{t('common.cancel', 'Cancel')}</button>}

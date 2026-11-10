@@ -3744,6 +3744,10 @@
     "pin": "PIN",
     "password": "Senha",
     "setPinHelp": "Defina um PIN de bancada de 4 a 8 dígitos. Confirme com sua senha.",
+    "setPinTitle": "Defina o seu PIN de bancada",
+    "newPinLabel": "Novo PIN de bancada (4 a 8 dígitos)",
+    "passwordLabel": "A sua palavra-passe",
+    "pinHint": "Utilize apenas os dígitos de 0 a 9.",
     "unsentKept": "{count} alteração(ões) ainda não foram enviadas e ficam neste dispositivo. Reconecte e tente novamente.",
     "errors": {
       "generic": "Não foi possível verificar o PIN.",

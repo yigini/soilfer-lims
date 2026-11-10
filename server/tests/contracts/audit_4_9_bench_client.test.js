@@ -111,6 +111,115 @@ describe('idle lock (#202 B12)', () => {
     });
 });
 
+describe('first-time bench PIN (#393)', () => {
+    const spanish = require('../../../client/src/translations/es.json').bench;
+    const t = (key, fallback) => key.slice(6).split('.').reduce((node, part) => node?.[part], spanish) ?? fallback ?? key;
+    let root, axios, guard;
+
+    beforeEach(async () => {
+        localStorage.setItem('soilfer.benchMode', 'on');
+        axios = {
+            get: jest.fn(async () => ({ data: { idleLockMinutes: 0, pinAtRecord: true, pinSet: false } })),
+            put: jest.fn(),
+            post: jest.fn()
+        };
+        const BenchMode = load('components/workbench/BenchMode.jsx', { axios }).default;
+        root = createRoot(document.getElementById('root'));
+        await act(async () => root.render(React.createElement(BenchMode, {
+            user: { id: 'u1' }, t, registerRecordGuard: fn => { guard = fn; }
+        })));
+        await act(async () => { guard(); });
+    });
+
+    afterEach(async () => {
+        await act(async () => root.unmount());
+        localStorage.clear();
+    });
+
+    test('shows a first-time title and labeled PIN before the password', () => {
+        const form = byTestId('bench-pin-form');
+        expect(form.querySelector('h2').textContent).toBe(spanish.setPinTitle);
+        const [pin, password] = form.querySelectorAll('input');
+        expect(pin.labels[0].textContent).toBe(spanish.newPinLabel);
+        expect(password.labels[0].textContent).toBe(spanish.passwordLabel);
+        expect(document.getElementById(pin.getAttribute('aria-describedby')).textContent).toBe(spanish.pinHint);
+    });
+
+    test('rejects a wrong-format PIN inline and shows a server message after a valid format', async () => {
+        const form = byTestId('bench-pin-form');
+        const [pin, password] = form.querySelectorAll('input');
+        await type(pin, '123');
+        await type(password, 'example-password');
+        expect(pin.hasAttribute('pattern')).toBe(false);
+        await submit(form);
+        expect(form.querySelector('[role="alert"]').textContent).toBe(spanish.errors.BENCH_PIN_FORMAT_INVALID);
+        expect(axios.put).not.toHaveBeenCalled();
+        expect(axios.post).not.toHaveBeenCalled();
+
+        const error = rejection('BENCH_PIN_PASSWORD_INVALID');
+        error.response.data.error = 'Server password message';
+        axios.put.mockRejectedValueOnce(error);
+        await type(pin, '2468');
+        await submit(form);
+        expect(form.querySelector('[role="alert"]').textContent).toBe('Server password message');
+        expect(axios.post).not.toHaveBeenCalled();
+    });
+});
+
+describe('bench translations after loading stored languages (#393)', () => {
+    const locales = ['en', 'es', 'es-419', 'fr', 'pt'];
+    const catalogs = Object.fromEntries(locales.map(code => [code, require(path.join(src, 'translations', code + '.json'))]));
+    const stored = Object.fromEntries(locales.map(code => [code, { bench: {
+        confirmRecord: catalogs.en.bench.confirmRecord,
+        setPinHelp: catalogs.en.bench.setPinHelp
+    } }]));
+    const probeText = (t, key) => React.createElement('span', { 'data-testid': key }, t('bench.' + key));
+
+    test.each(locales)('%s keeps bundled bench labels on bootstrap and admin fallback', async locale => {
+        global.sessionStorage = dom.window.sessionStorage;
+        localStorage.setItem('locale', locale);
+        sessionStorage.clear();
+        try {
+            for (const useFallback of [false, true]) {
+                const axios = {
+                    defaults: { headers: { common: {} } },
+                    get: jest.fn(async url => {
+                        if (url === '/api/public/i18n/bootstrap') {
+                            if (useFallback) throw new Error('Use admin language endpoint');
+                            return { data: { translations: stored } };
+                        }
+                        expect(url).toBe('/api/admin/languages');
+                        return { data: locales.map(code => ({ code, translations: stored[code] })) };
+                    })
+                };
+                const { LanguageProvider, useLanguage } = load('context/LanguageContext.jsx', {
+                    axios,
+                    ...Object.fromEntries(locales.map(code => [code + '.json', catalogs[code]])),
+                    localeResolver: load('lib/localeResolver.js'),
+                    messageFormatter: { formatMessage: text => text }
+                });
+                const Probe = () => {
+                    const { t } = useLanguage();
+                    return React.createElement(React.Fragment, null, probeText(t, 'confirmRecord'), probeText(t, 'setPinHelp'));
+                };
+                const root = createRoot(document.getElementById('root'));
+                try {
+                    await act(async () => root.render(React.createElement(LanguageProvider, null, React.createElement(Probe))));
+                    expect(byTestId('confirmRecord').textContent).toBe(catalogs[locale].bench.confirmRecord);
+                    expect(byTestId('setPinHelp').textContent).toBe(catalogs[locale].bench.setPinHelp);
+                    expect(axios.get).toHaveBeenCalledTimes(useFallback ? 2 : 1);
+                } finally {
+                    await act(async () => root.unmount());
+                }
+            }
+        } finally {
+            localStorage.clear();
+            sessionStorage.clear();
+            delete global.sessionStorage;
+        }
+    });
+});
+
 describe('local drafts on a shared terminal (#202 B13/B15)', () => {
     let offline;
     beforeEach(() => {
