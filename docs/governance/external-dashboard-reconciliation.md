@@ -1,7 +1,7 @@
 # External Laboratory Dashboard Count Reconciliation Protocol (#104)
 
 **Work Package**: `WP/contributor-issues-2026-09`  
-**Issue**: [#104 Separate Laboratory Dashboard sample count discrepancy](https://github.com/yigini/soilfer-lims/issues/104)  
+**Issue**: #104 Separate Laboratory Dashboard sample count discrepancy (historical issue 104)<br>
 **Lead**: Antigravity (Evidence & Architectural Boundaries) / Codex (Reporter Coordination & Governance)  
 **Reporter**: Luis (Guatemala National Team)  
 **Scope Boundary**: Separate external reporting dashboard vs. SoilFER LIMS core analytical platform  

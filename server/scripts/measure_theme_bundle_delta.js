@@ -5,7 +5,7 @@ const crypto = require('crypto');
 const { execSync } = require('child_process');
 const os = require('os');
 
-const root = 'C:/Users/yigin/Documents/soilfer-lims';
+const root = 'C:/workspace/Documents/soilfer-lims';
 
 function getDistMetrics(distDir) {
     const assetsDir = path.join(distDir, 'assets');

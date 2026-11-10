@@ -1,7 +1,0 @@
-fix(workflow-map): restore all 7 room nodes and align room names
-
-- Backend ROOM_MAP: 'Archive' → 'Archive & Disposal' to match client
-- Backend currentRooms: same alignment for terminal/approved states
-- Client stageSummaries: merge mapState.activeStages with full
-  STAGE_ORDER so empty rooms (Reception, Chemical Analysis etc.)
-  still render nodes instead of being skipped

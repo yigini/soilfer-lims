@@ -19,7 +19,7 @@ const CHROME_PATH = 'C:/Program Files/Google/Chrome/Application/chrome.exe';
 
 let playwrightChromium;
 try {
-    const pw = require('C:/Users/yigin/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+    const pw = require('C:/workspace/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
     playwrightChromium = pw.chromium;
 } catch (e) {
     try {

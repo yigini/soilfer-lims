@@ -1,4 +1,5 @@
 const crypto = require('crypto');
+const { JWT_SECRET } = require('../config/auth');
 const prisma = require('../prisma');
 const { success, error } = require('../i18n/response');
 const projectPolicyService = require('../services/projectPolicyService');
@@ -809,10 +810,11 @@ exports.uploadManifest = async (req, res) => {
             } catch {
                 return res.status(409).json({ error: 'PREVIEW_TOKEN_INVALID', message: 'Invalid preview token format.' });
             }
-            const secret = process.env.JWT_SECRET || 'soilfer-secret-key';
+            const secret = JWT_SECRET;
             const { signature, ...payloadToSign } = tokenData;
             const expectedSig = crypto.createHmac('sha256', secret).update(JSON.stringify(payloadToSign)).digest('hex');
-            if (signature !== expectedSig) {
+            if (typeof signature !== 'string' || !/^[a-f0-9]{64}$/.test(signature) ||
+                !crypto.timingSafeEqual(Buffer.from(signature, 'hex'), Buffer.from(expectedSig, 'hex'))) {
                 return res.status(409).json({ error: 'PREVIEW_TOKEN_TAMPERED', message: 'Preview token signature mismatch.' });
             }
             if (Date.now() > tokenData.expiresAt) {
@@ -1173,7 +1175,7 @@ exports.previewImport = async (req, res) => {
             ? crypto.createHash('sha256').update(JSON.stringify(validSampleIds)).digest('hex')
             : null;
         const expiresAt = Date.now() + 15 * 60 * 1000;
-        const secret = process.env.JWT_SECRET || 'soilfer-secret-key';
+        const secret = JWT_SECRET;
         let previewToken = null;
         if (validSampleIds.length > 0) {
             const tokenPayload = {

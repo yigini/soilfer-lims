@@ -21,17 +21,17 @@ the populated predecessor test compares it with the original array hash.
 
 Issue comment pins take precedence:
 
-- [Templates/evidence/QC](https://github.com/yigini/soilfer-lims/issues/200#issuecomment-6091749530).
-- [Activated inputs](https://github.com/yigini/soilfer-lims/issues/200#issuecomment-6094747629).
-- [Existing QC owner, entry only](https://github.com/yigini/soilfer-lims/issues/200#issuecomment-6095469488).
-- [Shared typed reporting-unit reader](https://github.com/yigini/soilfer-lims/issues/200#issuecomment-6095652486).
-- [Atomic commit/existing drafts](https://github.com/yigini/soilfer-lims/issues/200#issuecomment-6096085980).
-- [Draft receipt-field refusal/input-only QC](https://github.com/yigini/soilfer-lims/issues/200#issuecomment-6096218065).
-- [XLSX boundary](https://github.com/yigini/soilfer-lims/issues/200#issuecomment-6095961328).
-- [Latest numeric storage/round-trip decision](https://github.com/yigini/soilfer-lims/issues/200#issuecomment-6096643904), superseding earlier raw numeric storage.
+- Templates/evidence/QC (historical issue #200).
+- Activated inputs (historical issue #200).
+- Existing QC owner, entry only (historical issue #200).
+- Shared typed reporting-unit reader (historical issue #200).
+- Atomic commit/existing drafts (historical issue #200).
+- Draft receipt-field refusal/input-only QC (historical issue #200).
+- XLSX boundary (historical issue #200).
+- Latest numeric storage/round-trip decision (historical issue #200), superseding earlier raw numeric storage.
 
 Closed schema-only fixtures, LF digests/callers, additive installers and independent
-Prisma oracles follow [the standing agreement](https://github.com/yigini/soilfer-lims/issues/162#issuecomment-6089928620).
+Prisma oracles follow the standing agreement (historical issue #162).
 Original89-model and independently emitted 92-model predecessors are
 retained. Their factories create schema only and grant no analytical-row authority.
 An additional closed schema-only fixture contains the unmodified Prisma emission
@@ -111,8 +111,8 @@ Advisory Database queries found no matching advisory for either package. Existin
 repository dependency findings are neither fixed nor concealed by this issue.
 YY explicitly approved this concrete dependency on October 10: "approve saxes,
 clear the hold", recorded on PR284 in comments
-[6099365745](https://github.com/yigini/soilfer-lims/pull/284#issuecomment-6099365745)
-and [6099368373](https://github.com/yigini/soilfer-lims/pull/284#issuecomment-6099368373).
+6099365745 (historical PR 284, comment 6099365745)
+and 6099368373 (historical PR 284, comment 6099368373).
 
 Sources: [saxes](https://github.com/lddubeau/saxes),
 [Node zlib](https://nodejs.org/download/release/v22.22.0/docs/api/zlib.html),

@@ -1,7 +1,7 @@
 # User Membership Reconciliation & Scoped Authorization Ledger (#103)
 
 **Work Package**: `WP/contributor-issues-2026-09`  
-**Issue**: [#103 User membership reconciliation & country access grants](https://github.com/yigini/soilfer-lims/issues/103)  
+**Issue**: #103 User membership reconciliation & country access grants (historical issue 103)<br>
 **Lead**: Antigravity (Evidence & Ledger) / Codex (Governance & Issue Communication)  
 **Baseline Policy**: `WP/project-management-country-kobo-v2` & `INDEPENDENT-REVIEW-2026-09-21.md`  
 **Gate Status**: **Production Migration Hold Active** (Read-Only Inspection; Zero unverified schema or data mutations).

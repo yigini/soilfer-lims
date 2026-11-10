@@ -162,7 +162,7 @@ const WORKFLOW_SOURCES = Object.freeze({
 // exception. A byte change restores failing embedded-write findings.
 const deferredSources = Object.freeze([Object.freeze({
     path: 'server/scripts/rehearsal_docker_boundary.cjs',
-    sha256: 'c215311a252b83fb95dcf410d4e9c9bc79c24864ca782123d19631472b226f32',
+    sha256: 'd0cace00ac6f69fcdfa010068228322a6f0493064cba1b0781a3e30e279a5a80',
     reason: '#146 synthetic Docker fault adapter; deferred, see #245'
 })]);
 
@@ -223,7 +223,7 @@ const ATTEMPT_FIXTURE = Object.freeze({
 // #199 pin6088661994: one digest-bound factory/export, one exact caller.
 const CALCULATION_FIXTURE = Object.freeze({
     file: 'tests/helpers/calculationHistoricalFixture.js', exportName: 'createPre199CalculationFixture',
-    sha256: 'c30a45823719903ffcb0a95326af62955374a5ef58a9ef7b846fc0545b6585ff',
+    sha256: '96afa18bd0875a2445737b85ae42ce822c8fc3b9c44cf278e5928bf74a40a47e',
     ddl: 'tests/helpers/fixtures/pre199_full_application_schema.sql',
     ddlSha256: '33f558c18a0b47c806989e6b83eca2ce15923df9c27caf5036cbe11c4420b114',
     caller: 'tests/contracts/audit_4_6_calculation_install.test.js'
@@ -231,7 +231,7 @@ const CALCULATION_FIXTURE = Object.freeze({
 // #162 closed-fixture precedent: schema-only, one digest-bound export and caller.
 const INSTRUMENT_IMPORT_FIXTURE = Object.freeze({
     file: 'tests/helpers/instrumentImportHistoricalFixture.js', exportName: 'createPre200ImportSchemaFixture',
-    sha256: 'efb2f9692ca26a95b410297ccd26eb16ac89b0c3804bcf7e52115b43a6744f0a',
+    sha256: 'f7b306d30274878371ed4dbfc6773f7d59aaeade2b7250ae0fb3e38fa37e02fc',
     ddl: 'tests/helpers/fixtures/pre200_full_application_schema.sql',
     ddlSha256: 'c49761af3bab4bc8b822bc94f4f2193c8f3f780b7da6c715fe5a8a424af70aee',
     caller: 'tests/contracts/audit_4_7_instrument_import_install.test.js'
@@ -279,7 +279,7 @@ const CROSS_CHECK_FIXTURE = Object.freeze({
 // #210 working agreement6089928620: same closed factory precedent6088661994.
 const AMENDMENT_FIXTURE = Object.freeze({
     file: 'tests/helpers/sampleAmendmentHistoricalFixture.js', exportName: 'createPre210AmendmentFixture',
-    sha256: 'cd04b289677dead115fa15d86801687a046607302c7ee0603a0f85e9e2ddb1d3',
+    sha256: 'd624bfec76b0de6b12d2c36bacce1d34a0666a81d03b52d90c0bf323150907b1',
     ddl: 'tests/helpers/fixtures/pre210_full_application_schema.sql',
     ddlSha256: '6ae0cc1d26dc3ba301d435d3f332d432a9765c3d30b7fd0725aa119db6f8f622',
     caller: 'tests/contracts/audit_6_1_amendment_install.test.js'

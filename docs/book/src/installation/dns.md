@@ -1,8 +1,8 @@
 # Connecting Your Domain (DNS)
 
-**DNS** (Domain Name System) is the internet's address book. It translates human-readable names like `soillab.org` into the IP addresses that computers use (like `46.19.33.37`).
+**DNS** (Domain Name System) is the internet's address book. It translates human-readable names like `soillab.org` into the IP addresses that computers use (like `203.0.113.10`).
 
-To make your domain point to your server, you need to add a **DNS record** — essentially telling the internet "when someone types `soillab.org`, send them to the server at `46.19.33.37`."
+To make your domain point to your server, you need to add a **DNS record** — essentially telling the internet "when someone types `soillab.org`, send them to the server at `203.0.113.10`."
 
 ---
 
@@ -57,7 +57,7 @@ ping soillab.org
 If it shows your server's IP address in the response, DNS is working:
 
 ```
-PING soillab.org (46.19.33.37): 56 data bytes
+PING soillab.org (203.0.113.10): 56 data bytes
 ```
 
 ---
