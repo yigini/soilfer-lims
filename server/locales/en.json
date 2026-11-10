@@ -2304,5 +2304,9 @@
     "enabledItems": "enabled observations",
     "batchObservations": "Shared batch observations",
     "batchHelp": "Enter observations explicitly for the specimens in this batch. No quality answers or depths are assumed. Review individual rows when their origin or observations differ."
+  },
+  "bulkAssignment": {
+    "notificationTitle": "New work assignment",
+    "notificationBody": "Work items assigned by {name}: {count}. Open My Work to see the tasks."
   }
 }

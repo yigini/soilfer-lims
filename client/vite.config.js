@@ -14,7 +14,7 @@ export default defineConfig({
         __BUILD_DATE__: JSON.stringify(buildDate),
     },
     build: {
-        commonjsOptions: { include: [/node_modules/, /shared[\\/](?:numberParse|reportedValueFormat|nonconformityContract|soilCalculation|resultValueValidation|delimitedText)\.js$/] },
+        commonjsOptions: { include: [/node_modules/, /src[\\/]utils[\\/]workflowContract\.js$/, /shared[\\/](?:numberParse|reportedValueFormat|nonconformityContract|soilCalculation|resultValueValidation|delimitedText)\.js$/] },
         rollupOptions: {
             output: {
                 manualChunks: {

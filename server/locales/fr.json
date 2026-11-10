@@ -2304,5 +2304,9 @@
     "enabledItems": "observations activées",
     "batchObservations": "Observations communes du lot",
     "batchHelp": "Saisissez explicitement les observations des échantillons du lot. Aucune réponse qualité ni profondeur n’est présumée. Vérifiez chaque ligne lorsque la provenance ou les observations diffèrent."
+  },
+  "bulkAssignment": {
+    "notificationTitle": "Nouveau travail attribué",
+    "notificationBody": "Tâches attribuées par {name} : {count}. Ouvrez Mon travail pour voir les tâches."
   }
 }

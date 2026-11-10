@@ -2304,5 +2304,9 @@
     "enabledItems": "observaciones habilitadas",
     "batchObservations": "Observaciones compartidas del lote",
     "batchHelp": "Introduzca explícitamente las observaciones de las muestras del lote. No se presuponen respuestas de calidad ni profundidades. Revise cada fila cuando cambien el origen o las observaciones."
+  },
+  "bulkAssignment": {
+    "notificationTitle": "Nueva asignación de trabajo",
+    "notificationBody": "Tareas asignadas por {name}: {count}. Abre Mi trabajo para ver las tareas."
   }
 }
