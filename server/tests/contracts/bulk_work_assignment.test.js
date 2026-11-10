@@ -5,17 +5,21 @@ const request = require('supertest');
 const jwt = require('jsonwebtoken');
 const app = require('../../app');
 const prisma = require('../../prisma');
-const workflow = require('../../workflowContract');
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const { ensureTestLab, getAuthToken } = require('../setup');
 
 function loadPreview() {
-    const source = fs.readFileSync(path.resolve(__dirname, '../../../client/src/components/sample/BulkAssignmentDialog.jsx'), 'utf8');
-    const compiled = transformSync(source, { loader: 'jsx', format: 'cjs' });
-    const component = { exports: {} };
-    new Function('module', 'exports', 'require', compiled.code)(component, component.exports, dependency =>
-        dependency.endsWith('/workflowContract') ? workflow : {});
-    return component.exports.previewBulkAssignment;
+    const loadClientModule = (name, imports = {}) => {
+        const source = fs.readFileSync(path.resolve(__dirname, '../../../client/src', name), 'utf8');
+        const { code } = transformSync(source, { loader: name.endsWith('.jsx') ? 'jsx' : 'js', format: 'cjs' });
+        const module = { exports: {} };
+        new Function('module', 'exports', 'require', code)(module, module.exports, dependency => imports[dependency] || {});
+        return module.exports;
+    };
+    const assignmentWorkflow = loadClientModule('utils/assignmentWorkflow.js');
+    return loadClientModule('components/sample/BulkAssignmentDialog.jsx', {
+        '../../utils/assignmentWorkflow': assignmentWorkflow
+    }).previewBulkAssignment;
 }
 
 test('preview keeps only selected, eligible work and lists held, finished and foreign items', () => {

@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { useAnalysisNames } from '../../context/AnalysisCatalogueContext';
-import workflow from '../../utils/workflowContract';
+import { ASSIGNABLE_WORK_ITEM_STATES, CLOSURE_TASK_ANALYSES } from '../../utils/assignmentWorkflow';
 
 const PREP = new Set(['DRYING', 'PREPARATION']);
 const CLOSURE_PAIR = { ARCHIVING: 'DISPOSAL', DISPOSAL: 'ARCHIVING' };
@@ -52,7 +52,7 @@ export function previewBulkAssignment(workspaces, { labId, mode, analyses }) {
         }
         const selected = workItems.filter(item => mode === 'all' ||
             (mode === 'prep' && PREP.has(item.analysis)) ||
-            (mode === 'analyses' && !PREP.has(item.analysis) && !workflow.CLOSURE_TASK_ANALYSES.includes(item.analysis)) ||
+            (mode === 'analyses' && !PREP.has(item.analysis) && !CLOSURE_TASK_ANALYSES.includes(item.analysis)) ||
             (mode === 'selected' && analyses.includes(item.analysis)));
         for (const item of selected) {
             const row = { id: item.id, sample, analysis: item.analysis, status: item.status };
@@ -61,10 +61,10 @@ export function previewBulkAssignment(workspaces, { labId, mode, analyses }) {
             if (identity.assignedLab !== labId) reason = 'outsideLab';
             else if (workspace.held || item.status === 'ON_HOLD') reason = 'held';
             else if (!workspace.capabilities?.canAssign?.allowed) reason = 'sampleNotReady';
-            else if (item.assignedTo || !(item.status === 'ASSIGNED' || workflow.isValidWorkItemTransition(item.status, 'ASSIGNED'))) reason = 'workState';
+            else if (item.assignedTo || !ASSIGNABLE_WORK_ITEM_STATES.includes(item.status)) reason = 'workState';
             else if (competing && workItems.some(other => other.analysis === competing && other.assignedTo)) reason = 'closureAlreadyAssigned';
             else if (competing && selected.some(other => other.analysis === competing && !other.assignedTo &&
-                (other.status === 'ASSIGNED' || workflow.isValidWorkItemTransition(other.status, 'ASSIGNED')) && other.status !== 'ON_HOLD')) reason = 'chooseClosure';
+                ASSIGNABLE_WORK_ITEM_STATES.includes(other.status) && other.status !== 'ON_HOLD')) reason = 'chooseClosure';
             if (reason) skipped.push({ ...row, reason });
             else eligible.push(row);
         }
@@ -122,7 +122,7 @@ export default function BulkAssignmentDialog({ selection, onClose, onAssigned, i
     const availableAnalyses = useMemo(() => [...new Set((workspaces || []).flatMap(row => row.workItems || []).map(item => item.analysis))].sort(), [workspaces]);
     const { eligible, skipped } = previewBulkAssignment(workspaces || [], { labId, mode, analyses });
     const prepCount = eligible.filter(row => PREP.has(row.analysis)).length;
-    const closureCount = eligible.filter(row => workflow.CLOSURE_TASK_ANALYSES.includes(row.analysis)).length;
+    const closureCount = eligible.filter(row => CLOSURE_TASK_ANALYSES.includes(row.analysis)).length;
 
     const submit = async event => {
         event.preventDefault();
