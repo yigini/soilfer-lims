@@ -14,7 +14,7 @@ describe('Help Release Rollout & Live Reader Journeys Contract Tests', () => {
 
     test('1. Release manifest matches published collection and 5-language coverage', () => {
         expect(manifest).toBeDefined();
-        expect(manifest.releaseVersion).toBe('v1.3.0');
+        expect(manifest.releaseVersion).toBe('v1.4.0');
         expect(manifest.provenance).toBe('system-app-review');
         expect(manifest.totalArticles).toBeGreaterThanOrEqual(27);
         expect(manifest.locales).toEqual(['en', 'es', 'es-419', 'fr', 'pt']);
