@@ -189,6 +189,22 @@ function inspectCalculationInstallation(volume, expectedInstalled, expectedDefer
     return JSON.parse(output);
 }
 
+function inspectFreshCatalogue(container) {
+    const result = cp.execFileSync('docker', ['exec', '-w', '/app/server', container, 'node', '-e',
+        `const Database=require('better-sqlite3'),crypto=require('node:crypto');
+         const db=new Database('/app/server/prisma/dev.db',{readonly:true,fileMustExist:true});
+         try {
+           const tables=[['Analysis','code'],['Methodology','id'],['Unit','code'],['MethodReference','id'],['AnalysisCategory','id']];
+           const proof=Object.fromEntries(tables.map(([table,key])=>{
+             const rows=db.prepare('SELECT * FROM "'+table+'" ORDER BY "'+key+'"').all();
+             return [table,{count:rows.length,sha256:crypto.createHash('sha256').update(JSON.stringify(rows)).digest('hex')}];
+           }));
+           if (proof.Analysis.count!==176||proof.Methodology.count!==467) throw Error('Fresh analysis catalogue counts differ');
+           console.log(JSON.stringify(proof));
+         } finally { db.close(); }`], { encoding: 'utf8', timeout: 120000 });
+    return JSON.parse(result);
+}
+
 function loadEmptyCalculationCatalogue(volume) {
     const absent = cp.execFileSync('docker', ['run', '--rm', '-v', `${volume}:/app/server/prisma`, IMAGE_TAG, 'node', '-e',
         `const Database=require('better-sqlite3');const db=new Database('/app/server/prisma/dev.db',{readonly:true,fileMustExist:true});try{
@@ -288,9 +304,9 @@ async function runSuite() {
 
     await waitForHealth(localPort, localContainer);
     console.log(`  ✓ Container healthy on port ${localPort}`);
-    const freshCalculations = inspectCalculationInstallation(localVol, 0, 11);
-    fs.writeFileSync(path.join(tmpDir, '199-fresh-deferred-proof.json'), JSON.stringify(freshCalculations));
-    console.log('  ✓ Fresh shipped entrypoint healthy: schema COMPLETE, 11 references deferred, catalogue inserts 0, reference receipts 0, repeat NO_OP/byte-preserved');
+    const freshCatalogue = inspectFreshCatalogue(localContainer);
+    const freshCalculations = inspectCalculationInstallation(localVol, 11, 0);
+    console.log('  ✓ Fresh install has 176 analyses and 467 methodologies; calculation installation repeats with no writes');
 
     // Initial Login
     const loginRes = await fetch(`http://127.0.0.1:${localPort}/api/auth/login`, {
@@ -384,12 +400,17 @@ async function runSuite() {
 
     await waitForHealth(restartPort, restartContainer);
     console.log(`  ✓ Restarted container healthy on port ${restartPort}`);
-    const restartedCalculations = inspectCalculationInstallation(localVol, 0, 11);
+    const restartedCatalogue = inspectFreshCatalogue(restartContainer);
+    if (JSON.stringify(restartedCatalogue) !== JSON.stringify(freshCatalogue))
+        throw Error('Catalogue counts or rows changed on restart');
+    fs.writeFileSync(path.join(tmpDir, '380-fresh-catalogue-restart-proof.json'), JSON.stringify({ freshCatalogue, restartedCatalogue }));
+    console.log('  ✓ Catalogue counts and row digests are unchanged on restart');
+    const restartedCalculations = inspectCalculationInstallation(localVol, 11, 0);
     if (JSON.stringify(restartedCalculations.referenceReceipts) !== JSON.stringify(freshCalculations.referenceReceipts) ||
         JSON.stringify(restartedCalculations.receipts.find(row => row.id === '199_calculation_templates')) !==
         JSON.stringify(freshCalculations.receipts.find(row => row.id === '199_calculation_templates')))
         throw Error('199 fresh restart changed its original schema/reference receipts');
-    fs.writeFileSync(path.join(tmpDir, '199-deferred-restart-proof.json'), JSON.stringify(restartedCalculations));
+    fs.writeFileSync(path.join(tmpDir, '199-fresh-catalogue-restart-proof.json'), JSON.stringify(restartedCalculations));
 
     // Cross-restart assertion: Pre-restart token MUST authenticate without re-login!
     const preRestartAuthRes = await fetch(`http://127.0.0.1:${restartPort}/api/labs`, {
@@ -440,13 +461,30 @@ async function runSuite() {
         { encoding: 'utf8', timeout: 60000 }).trim().split(/\r?\n/);
     if (stoppedSourceStates.length !== 2 || stoppedSourceStates.some(state => state !== 'false'))
         throw Error('199 owned conflict snapshot requires both source writers stopped');
-    console.log('  Source containers stopped; starting bounded WAL-aware owned snapshot/conflict proof');
+    // Model an existing installation that already has an administrator but
+    // has never loaded the catalogue. Keep #199's deferred/late-load path intact.
+    const legacyCatalogueVolume = registerVolume(`lims_vol_legacy_catalogue_${TS}`);
+    cp.execFileSync('docker', ['run', '--rm', '-v', `${legacyCatalogueVolume}:/app/server/prisma`,
+        '-e', 'DEPLOYMENT_MODE=local', '-e', 'ADMIN_INITIAL_PASSWORD=InitialSecretLocal123!',
+        '-e', 'DATABASE_PATH=/app/server/prisma/dev.db', IMAGE_TAG, 'sh', '-c', 'npx prisma db push && node seed.js'],
+        { stdio: 'pipe', timeout: 120000 });
+    const legacyCatalogueContainer = registerContainer(`lims_c_legacy_catalogue_${TS}`);
+    const legacyCataloguePort = await getFreePort();
+    cp.execFileSync('docker', ['run', '-d', '--name', legacyCatalogueContainer, '-p', `127.0.0.1:${legacyCataloguePort}:3000`,
+        '-v', `${legacyCatalogueVolume}:/app/server/prisma`, '-e', 'DEPLOYMENT_MODE=local', '-e', 'PORT=3000',
+        '-e', 'NODE_ENV=production', '-e', 'DISABLE_BACKGROUND_JOBS=true', IMAGE_TAG]);
+    await waitForHealth(legacyCataloguePort, legacyCatalogueContainer);
+    const legacyCalculations = inspectCalculationInstallation(legacyCatalogueVolume, 0, 11);
+    fs.writeFileSync(path.join(tmpDir, '199-existing-deferred-proof.json'), JSON.stringify(legacyCalculations));
+    cp.execFileSync('docker', ['stop', legacyCatalogueContainer], { timeout: 60000 });
+    if (cp.execFileSync('docker', ['inspect', '--format', '{{.State.Running}}', legacyCatalogueContainer],
+        { encoding: 'utf8', timeout: 60000 }).trim() !== 'false') throw Error('199 existing catalogue source writer remains active');
 
     // A conflicting controlled prerequisite is injected only into a new owned
-    // backup of this empty lab. Both modes must refuse before any installer
+    // backup of this existing lab without a catalogue. Both modes must refuse before any installer
     // write, and the source volume remains byte-identical.
     const conflictVolume = registerVolume(`lims_199_unit_conflict_${TS}`);
-    const conflictProofOutput = cp.execFileSync('docker', ['run', '--rm', '-v', `${localVol}:/source:ro`,
+    const conflictProofOutput = cp.execFileSync('docker', ['run', '--rm', '-v', `${legacyCatalogueVolume}:/source:ro`,
         '-v', `${conflictVolume}:/owned-conflict`, IMAGE_TAG, 'node', '-e',
         `(()=>{const fs=require('node:fs'),crypto=require('node:crypto'),Database=require('better-sqlite3');
           const hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
@@ -487,8 +525,8 @@ async function runSuite() {
 
     // Catalogue arrival makes the eleven deferred references installable. The
     // next shipped entrypoint must add only those references and their receipts.
-    loadEmptyCalculationCatalogue(localVol);
-    const loadedCatalogue = cp.execFileSync('docker', ['run', '--rm', '-v', `${localVol}:/app/server/prisma`, IMAGE_TAG, 'node', '-e',
+    loadEmptyCalculationCatalogue(legacyCatalogueVolume);
+    const loadedCatalogue = cp.execFileSync('docker', ['run', '--rm', '-v', `${legacyCatalogueVolume}:/app/server/prisma`, IMAGE_TAG, 'node', '-e',
         `const Database=require('better-sqlite3'),installer=require('./scripts/install_calculation_templates'),file='/app/server/prisma/dev.db';
          const plan=installer.installCalculationTemplates({dbPath:file});
          if(plan.ready||plan.classification!=='COMPLETE'||plan.plannedReferenceInsertCount!==11||plan.references.deferredReferenceCount!==0||plan.totalChanges!==0)
@@ -503,11 +541,11 @@ async function runSuite() {
     const beforeCatalogueRestart = JSON.parse(loadedCatalogue);
     const catalogueContainer = registerContainer(`lims_199_catalogue_${TS}`), cataloguePort = await getFreePort();
     cp.execFileSync('docker', ['run', '-d', '--name', catalogueContainer, '-p', `127.0.0.1:${cataloguePort}:3000`,
-        '-v', `${localVol}:/app/server/prisma`, '-e', 'DEPLOYMENT_MODE=local', '-e', 'PORT=3000', '-e', 'NODE_ENV=production',
+        '-v', `${legacyCatalogueVolume}:/app/server/prisma`, '-e', 'DEPLOYMENT_MODE=local', '-e', 'PORT=3000', '-e', 'NODE_ENV=production',
         '-e', 'ALLOW_PRISMA_DB_PUSH=false', '-e', 'ALLOW_AUTO_SEED=false', '-e', 'DISABLE_BACKGROUND_JOBS=true', IMAGE_TAG]);
     await waitForHealth(cataloguePort, catalogueContainer);
     cp.execFileSync('docker', ['stop', catalogueContainer]);
-    const afterCatalogueRestart = inspectCalculationInstallation(localVol, 11, 0);
+    const afterCatalogueRestart = inspectCalculationInstallation(legacyCatalogueVolume, 11, 0);
     if (JSON.stringify(afterCatalogueRestart.rows) !== JSON.stringify(beforeCatalogueRestart.rows) ||
         JSON.stringify(afterCatalogueRestart.schema) !== JSON.stringify(beforeCatalogueRestart.schema) ||
         beforeCatalogueRestart.receipts.some(row => !afterCatalogueRestart.receipts.some(after => JSON.stringify(row) === JSON.stringify(after))) ||
