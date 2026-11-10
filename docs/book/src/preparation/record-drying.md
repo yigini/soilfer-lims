@@ -4,7 +4,7 @@
 
 Record the drying of accepted soil samples in the air-drying room or low-temperature drying oven (40 °C or lower). You record the drying method, temperature, weights, start and end times, and equipment so the sample can move to sieving.
 
-> *Screenshot placeholder — docs/book/src/img/screenshots/preparation-record-drying.png (screenshot coming once the training data is ready): The **Workbench** showing **Air Drying** selected in **Work type:**, the three **Operational Checklist** items, the **Drying** fields (**Method**, **Temperature (°C)**, **Mass before (g)**, **Mass after (g)**, **Started**, **Ended**, **Equipment**), and the **Confirm Complete** button.*
+> *Screenshot placeholder — docs/book/src/img/screenshots/preparation-record-drying.png (screenshot coming once the training data is ready): The **Workbench** showing **Air Drying** selected in **Work type:**, the three **Operational Checklist** items, the **Drying** fields (**Method**, **Temperature (°C)**, **Mass before (g)**, **Mass after (g)**, **Started**, **Ended**, **Equipment**), and the **Confirm work is done** button.*
 
 ---
 
@@ -33,8 +33,8 @@ Record the drying of accepted soil samples in the air-drying room or low-tempera
    - **Mass before (g)** and **Mass after (g)**: enter the sample mass before and after drying.
    - **Started** and **Ended**: enter when the sample went into and came out of the drying room or oven.
    - **Equipment**: select the drying oven or facility asset if your laboratory registers drying equipment.
-6. Click **Confirm Complete** on that sample row.
-   *You should see a green **Checklist Verified** confirmation badge, and **Drying Gate:** (drying step that must finish first) in the detail panel change to **✓ Completed**.*
+6. Click **Confirm work is done** on that sample row.
+   *You should see a green **Checklist Verified** confirmation badge, and **Drying step:** in the detail panel change to **✓ Completed**.*
 
 ---
 
@@ -46,7 +46,7 @@ Once **Air Drying** is confirmed, the sample's drying step is **Completed** (or 
 
 ## If Something Goes Wrong
 
-- *If the* **Confirm Complete** *button does not appear →* Check the amber badge (**Checklist: 2/3 confirmed**). All three checkboxes in the **Operational Checklist** must be ticked before **Confirm Complete** appears.
+- *If the* **Confirm work is done** *button does not appear →* Check the amber badge (**Checklist: 2/3 confirmed**). All three checkboxes in the **Operational Checklist** must be ticked before **Confirm work is done** appears.
 - *If you see an error saying a drying field is missing or invalid →* Check that **Mass after (g)** is not greater than **Mass before (g)** and that **Ended** is after **Started**. Also check that every field required by your laboratory's **Policies** is filled in.
 - *If the row checkboxes are greyed out and the row says* **Blocked** *→* Check whether the sample has an active hold (**Sample held**) or has not been accepted at **Sample Reception** yet.
 

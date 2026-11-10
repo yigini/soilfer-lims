@@ -11,7 +11,7 @@ Accept reviewed test items (including confirming any quality control warnings). 
 ## Before You Start
 
 - Sign in with a **Laboratory Manager** account on the **Sign in to SoilFER LIMS** screen.
-- Before accepting a test, make sure you have saved its **Reported value** (the final number printed on the report) selection (see [Review Submitted Results and Choose the Reported Value](review-and-select-reported-value.md)).
+- Before accepting a test, make sure you have saved its **Final report value** selection (see [Review Submitted Results and Choose the Reported Value](review-and-select-reported-value.md)).
 
 ---
 
@@ -43,13 +43,13 @@ Accept reviewed test items (including confirming any quality control warnings). 
 ## What Happens Next
 
 - **Approved** samples are sealed against ordinary edits and are ready for report release on the **Reports** tab (see [Issue, Print, and Share a Certificate of Analysis](issue-and-share-reports.md)).
-- Returned items are re-measured by the technician as a new numbered try under **Attempts** (measurement tries) and resubmitted for your review.
+- Returned items are re-measured by the technician as a new numbered try under **Tries** and resubmitted for your review.
 
 ---
 
 ## If Something Goes Wrong
 
-- *If you click* **Confirm return** *and see* **This laboratory’s configured attempt limit has been reached.** (this test has reached the maximum number of repeat tries allowed by your lab) *→* The test has already been repeated the maximum number of times allowed by your laboratory policy. Use **Request a repeat-limit override** (ask a manager to allow an extra repeat try), enter the **Reason for exceeding the repeat limit** and **Impact assessment**, and submit. This automatically opens a linked record in **Nonconformities** (problem records).
+- *If you click* **Confirm return** *and see* **This laboratory’s configured attempt limit has been reached.** (this test has reached the maximum number of repeat tries allowed by your lab) *→* The test has already been repeated the maximum number of times allowed by your laboratory policy. Use **Ask manager for an extra repeat try**, enter the **Reason for exceeding the repeat limit** and **Impact assessment**, and submit. This automatically opens a linked record in **Problem records**.
 - *If you see* **Use a transcription correction for a typo.** *→* If the bench measurement itself was valid and only typed wrongly, use a transcription correction rather than ordering a new physical repeat.
 - *If you need to reopen an* **Approved** *sample before a report has been issued →* Click **Undo Approval**, enter the mandatory audit reason, and confirm to return the sample to **In Progress**.
 
@@ -58,4 +58,4 @@ Accept reviewed test items (including confirming any quality control warnings). 
 ## For the QA Person
 
 - Blanket approval without submitted evidence is blocked (**Only submitted evidence can be reviewed and accepted. Blanket approval without submitted evidence is prohibited.**).
-- When a manager authorizes **Request a repeat-limit override**, the system automatically creates a **Repeat limit** problem record in **Nonconformities** so recurring analytical issues are investigated.
+- When a manager authorizes **Ask manager for an extra repeat try**, the system automatically creates a **Repeat limit** problem record in **Problem records** so recurring analytical issues are investigated.

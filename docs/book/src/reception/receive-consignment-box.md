@@ -4,7 +4,7 @@
 
 Check in a shipping box, crate, or cooler containing many pre-registered soil bags from the same project in one session. You enter shared delivery and condition details once instead of typing them for each bag.
 
-> *Screenshot placeholder — docs/book/src/img/screenshots/reception-consignment-batch.png (screenshot coming once the training data is ready): The **Consignment Batch** screen showing **Scan or Enter Sample ID to add...**, **Shared batch observations**, and the batch sample table.*
+> *Screenshot placeholder — docs/book/src/img/screenshots/reception-consignment-batch.png (screenshot coming once the training data is ready): The **Sample delivery box** screen showing **Scan or Enter Sample ID to add...**, **Shared batch observations**, and the batch sample table.*
 
 ---
 
@@ -19,7 +19,7 @@ Check in a shipping box, crate, or cooler containing many pre-registered soil ba
 
 ## Steps
 
-1. On the **Sample Reception & Intake** screen, click **Consignment Batch** (a whole box or delivery of samples).
+1. On the **Sample Reception & Intake** screen, click **Sample delivery box**.
    *You should see the batch check-in workspace with a scan bar at the top.*
 2. Click **Scan or Enter Sample ID to add...** and scan (or type) the barcode on each soil bag.
    *You should see each matched **Expected** sample appear as a row in the batch table.*

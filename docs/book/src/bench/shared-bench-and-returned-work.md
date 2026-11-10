@@ -37,7 +37,7 @@ Share a bench computer safely between several technicians using **Turn on bench 
    - If the reason is **Preparation error**, prepare a fresh sub-container in **Containers and aliquots** first. Select that new container under **Physical aliquot (optional)**.
    - If the reason is **Above range: dilution required**, dilute the extract, select your calculation template or enter the **Recorded dilution factor**, and measure the diluted sample.
 4. Enter the new measurement, click **Record all ready** (or **Record this sample**), and then submit it again on the **Ready to Submit** tab.
-   *Your new reading is saved as the next numbered try under **Attempts** (measurement tries), while the original try remains preserved in the audit history.*
+   *Your new reading is saved as the next numbered try under **Tries**, while the original try remains preserved in the audit history.*
 
 ---
 
@@ -59,4 +59,4 @@ Once you record and submit the repeat try, the sample returns to the reviewer's 
 ## For the QA Person
 
 - When a work item is reassigned or handed over between technicians, any server draft saved by the first technician displays **by** that technician's name so authorship is always clear.
-- Every repeat try records its trigger reason (**Review outlier**, **Duplicate disagreement**, **Confirmation**, **QC batch failure**, **Above range: dilution required**, **Instrument fault**, **Preparation error**, or **Other**) and preserves all earlier tries under **Attempts**.
+- Every repeat try records its trigger reason (**Review outlier**, **Duplicate disagreement**, **Confirmation**, **QC batch failure**, **Above range: dilution required**, **Instrument fault**, **Preparation error**, or **Other**) and preserves all earlier tries under **Tries**.

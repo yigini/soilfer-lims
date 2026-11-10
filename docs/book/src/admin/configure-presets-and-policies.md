@@ -22,13 +22,13 @@ Every laboratory can choose its own starting rule set and customize individual r
 
 ### Step 2: Select a preset and record your reason
 
-1. In the **Preset** (ready-made set of quality rules) card, choose one of the options:
+1. In the **Starting rule set** card, choose one of the options:
    - **ISO 17025 strict** — **Required, blocking** QC, frequent quality checks, and two-person review.
    - **Basic** — **Required, warnings** QC with lighter check frequencies.
    - **Advisory** — optional QC verdicts for training or pilot runs.
    - **Inherit deployment defaults** — follow the server-wide starting rule set.
 2. Type a short explanation in **Reason for change** (for example, *Adopt Basic rule set for two-week regional pilot phase*).
-3. Click **Save preset** (save your chosen starting rule set).
+3. Click **Save starting rule set**.
 
 *(Screenshot placeholder: choosing a preset and editing laboratory policies — screenshot coming once the training data is ready)*
 
@@ -37,15 +37,15 @@ Every laboratory can choose its own starting rule set and customize individual r
 ## Task B: Customize a Whole-Laboratory Policy Setting
 
 1. Under **Scope** (which lab or tests a setting covers), select **Whole laboratory**.
-2. In the policy table, review each row's **Setting**, **Effective value**, **Source**, and **Compared with preset** (compared with the starting rule set) status (**Differs from preset** (customized from the starting rule set) highlights any custom setting).
+2. In the policy table, review each row's **Setting**, **Effective value**, **Source**, and **Compared with starting rules** status (**Customised from starting rules** highlights any custom setting).
 3. Click **Edit** on the setting you want to customize:
    - **Decimal separator** and **Thousands separator** (match your local spreadsheet conventions so bench paste works smoothly).
-   - **Sample code pattern**, **Consignment number format** (numbering pattern for incoming sample boxes), **Container code format**, and **Report number pattern**.
+   - **Sample code pattern**, **Delivery box number format**, **Container code format**, and **Report number pattern**.
    - **Sample retention after report** (how many **days** soil bags are kept in archive before appearing in the disposal queue).
    - **Require a second reviewer** and **Require a second person for amendments** (**Yes** or **No**).
    - **Idle bench lock (0: off)** and **Require PIN when recording** for shared bench computers.
 4. Enter the new value, type a **Reason for change**, and click **Save change**.
-5. To return an customized setting to its standard starting value later, click **Clear override** (return to the standard rule) on that row.
+5. To return an customized setting to its standard starting value later, click **Reset to lab default** on that row.
 
 ---
 
@@ -63,7 +63,7 @@ If your laboratory runs fixed rack or autosampler trays where blanks, duplicates
 
 | Problem | What to Do |
 | :--- | :--- |
-| *Screen shows* **Enter a reason for the policy change.** | Every policy change is audited. Type a brief explanation in **Reason for change** before clicking **Save preset** or **Save change**. |
+| *Screen shows* **Enter a reason for the policy change.** | Every policy change is audited. Type a brief explanation in **Reason for change** before clicking **Save starting rule set** or **Save change**. |
 | *Screen shows* **Policies changed while you were editing. Refresh and review the current values before saving.** | Another manager or administrator saved a change while your tab was open. Click **Refresh**, check the updated **Effective value**, and save your edit again. |
 | *Screen shows* **This policy would conflict with a current or scheduled QC rule. Adjust that rule before saving.** | Your method's **Versioned QC rules** have a stricter or conflicting requirement. Scroll to **Versioned QC rules** for that analysis or method, adjust the rule first, and then save the policy. |
 | *Screen shows* **You can read policies. A laboratory manager or administrator can change them.** | Your account has read-only access to **Policies**. Ask your **Laboratory Manager** or **Super Administrator** to save the change. |

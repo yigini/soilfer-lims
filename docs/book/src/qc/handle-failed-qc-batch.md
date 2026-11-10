@@ -2,11 +2,11 @@
 
 ## What This Is For
 
-Inspect a failed analytical run in **QC Batch Inspection**. Check whether the failure was a typing mistake or a mid-run calibration drift, and record your official manager decision (**Re-analyze Batch**, **Repeat calibration bracket** (re-test only the samples measured between the last good instrument check and the failed check), or **Proceed with Warning**).
+Inspect a failed analytical run in **QC Batch Inspection**. Check whether the failure was a typing mistake or a mid-run calibration drift, and record your official manager decision (**Re-analyze Batch**, **Repeat samples since last good instrument check**, or **Proceed with Warning**).
 
 ![QC Failed, What Now? Decision Tree](../img/diagrams/qc-failed-decision-tree.svg)
 
-> *Screenshot placeholder — docs/book/src/img/screenshots/qc-batch-inspection-disposition.png (screenshot coming once the training data is ready): The **QC Batch Inspection** modal showing **Stored QC evaluation — read only**, **Affected Work Items**, and **Record Manager QC Disposition** with **Repeat calibration bracket**, **Proceed with Warning**, **Re-analyze Batch**, and **Confirm Manager Disposition**.*
+> *Screenshot placeholder — docs/book/src/img/screenshots/qc-batch-inspection-disposition.png (screenshot coming once the training data is ready): The **QC Batch Inspection** modal showing **Stored QC evaluation — read only**, **Affected Work Items**, and **Save manager batch decision** with **Repeat samples since last good instrument check**, **Proceed with Warning**, **Re-analyze Batch**, and **Confirm manager decision**.*
 
 ---
 
@@ -22,7 +22,7 @@ Inspect a failed analytical run in **QC Batch Inspection**. Check whether the fa
 ### Step 1: Open the Failed Batch in **QC Batch Inspection**
 
 1. Click **QA Dashboard** in the left menu and open the **QC Batches** tab (or click **Manager Task List** and open the **QC Exceptions** tab).
-   *You should see any failed runs highlighted under **QC Exceptions** (**Batches require disposition**).*
+   *You should see any failed runs highlighted under **QC Exceptions** (**Batches need a manager decision**).*
 2. Click **Inspect** on the failed batch row.
    *You should see the **QC Batch Inspection** window open. It displays **QC FAILED — Quality Gate Active**, **Stored QC evaluation — read only**, and the list of **Affected Work Items**.*
 
@@ -35,26 +35,26 @@ Inspect a failed analytical run in **QC Batch Inspection**. Check whether the fa
    - Click **Approve correction and re-evaluate**.
    *Note: The reviewer submitting this correction must be a different person from the run analyst and original author.*
 
-### Step 3: Record Your Manager QC Disposition (**Record Manager QC Disposition**)
+### Step 3: Record Your Manager QC Disposition (**Save manager batch decision**)
 
-If the quality control failure is real (not a typing mistake), scroll down to **Record Manager QC Disposition** (save the manager's decision on a failed batch) and choose one **Manager Decision**:
+If the quality control failure is real (not a typing mistake), scroll down to **Save manager batch decision** and choose one **Manager Decision**:
 
-1. **Repeat calibration bracket** (shown when a mid-run calibration check failed):
-   - Select **Repeat calibration bracket** (**Repeat only the work covered by the failed continuing calibration checks.**).
+1. **Repeat samples since last good instrument check** (shown when a mid-run calibration check failed):
+   - Select **Repeat samples since last good instrument check** (**Repeat only the work covered by the failed continuing calibration checks.**).
    - Check the count of **Affected work items** measured after the last passing calibration check.
 2. **Re-analyze Batch** (standard choice when a blank, duplicate, or reference soil failed):
    - Select **Re-analyze Batch** to reject the batch results for that analyte. This flags all affected sample items for repeat analysis in a new run.
 3. **Proceed with Warning** (only when your laboratory SOP allows conditional acceptance):
    - Select **Proceed with Warning** when the samples are scientifically unaffected. For example, a tiny blank reading does not affect a batch where every soil sample has a very high concentration.
 4. In **Documented Technical Justification**, type your full scientific explanation or investigation summary.
-5. Click **Confirm Manager Disposition** (confirm the manager's batch decision).
-   *You should see the banner update to **Manager QC Disposition (Recorded — Read Only)**.*
+5. Click **Confirm manager decision**.
+   *You should see the banner update to **Manager batch decision (read only)**.*
 
 ---
 
 ## What Happens Next
 
-- If you chose **Re-analyze Batch** or **Repeat calibration bracket**, the affected sample tasks return to the technician's **Workbench** as **Repeat requested**. They can then be placed into a **new** analytical run.
+- If you chose **Re-analyze Batch** or **Repeat samples since last good instrument check**, the affected sample tasks return to the technician's **Workbench** as **Repeat requested**. They can then be placed into a **new** analytical run.
 - If you chose **Proceed with Warning**, sample review is unblocked on the sample's **Review** tab. The reviewer enters a **QC acknowledgement reason (required)** and the final report discloses the warning under **QC deviations:**.
 
 ---
@@ -68,5 +68,5 @@ If the quality control failure is real (not a typing mistake), scroll down to **
 
 ## For the QA Person
 
-- Recorded batch decisions (**Record Manager QC Disposition**) cannot be changed and are permanently stored in **Batch Lifecycle History** and **System Audit Logs**.
+- Recorded batch decisions (**Save manager batch decision**) cannot be changed and are permanently stored in **Batch Lifecycle History** and **System Audit Logs**.
 - When **Review a transcription correction** is used, SoilFER LIMS never overwrites the failed observation. Both **Original failed evaluation** and **Replacement evaluation** remain visible under **Reviewed QC transcription correction**.

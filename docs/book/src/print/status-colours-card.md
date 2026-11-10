@@ -18,7 +18,7 @@
 | **Returned** / **Redo** | Amber / Orange | Reviewer returned the test for a repeat run or check. | **Laboratory Technician** |
 | **On Hold** / **Blocked** | Amber / Red | Paused due to a paperwork hold, unfinished preparation step, or failed QC. | **Laboratory Manager** / **Laboratory Technician** |
 | **Approved** | Green | Reviewed and approved; ready for **Certificate of Analysis** PDF in **Reports**. | **Laboratory Manager** |
-| **Rejected (Non-Conformance)** (refused with a problem record) | Red | Rejected at intake (for example, damaged or leaking bag). | **Laboratory Manager** |
+| **Rejected (problem recorded)** | Red | Rejected at intake (for example, damaged or leaking bag). | **Laboratory Manager** |
 | **Archived** / **Disposed** | Slate / Grey | Stored in archive after reporting, or safely discarded after retention expired. | Complete |
 
 ---

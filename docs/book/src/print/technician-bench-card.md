@@ -7,7 +7,7 @@
 ## 1. Before You Start a Bench Run
 
 1. *Sign in as yourself:* Never type results under a colleague's name.
-2. *Complete drying and preparation first:* In **My Work** or **Workbench**, confirm that sample drying (**Confirm Complete**) and sieving or grinding are finished so the sample status is **Processing**.
+2. *Complete drying and preparation first:* In **My Work** or **Workbench**, confirm that sample drying (**Confirm work is done**) and sieving or grinding are finished so the sample status is **Processing**.
 3. *Check your instrument:* In **Equipment**, confirm your balance, meter, or spectrometer is **In Service** and **Ready / Calibrated** (not **Calibration Overdue / Blocked**).
 
 ---

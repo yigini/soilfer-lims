@@ -24,7 +24,7 @@ Use the **Sample amendments** workflow whenever you need to fix client metadata 
    *You should see the **Sample amendments** window open.*
 3. Under **Amendment type**, choose the type of change needed:
    - **Clerical correction**: fix sample or client text (such as a misspelled farmer name or field ID) without changing any test numbers.
-   - **Scientific retest**: reopen one or more accepted test lines for repeat measurement or a new **Reported value** (the final number printed on the report) selection.
+   - **Scientific retest**: reopen one or more accepted test lines for repeat measurement or a new **Final report value** selection.
    - **Order amendment**: add or remove analyses on the sample order.
    - **Report amendment**: reissue the certificate after an approved change.
 4. If you chose **Scientific retest**, select the **Retest reason** (**Client retest** or **Confirmation**) and tick the affected tests under **Selected order lines**.
@@ -42,9 +42,9 @@ Use the **Sample amendments** workflow whenever you need to fix client metadata 
 
 1. Complete the change:
    - For a **Clerical correction**, update the sample details on **Sample & request** (**Correct the field reference**).
-   - For a **Scientific retest**, have the technician record and submit the new try in **Workbench**, then select the new **Reported value**, accept the test on the **Review** tab, and click **Final approve sample**.
+   - For a **Scientific retest**, have the technician record and submit the new try in **Workbench**, then select the new **Final report value**, accept the test on the **Review** tab, and click **Final approve sample**.
 2. Open the sample's **Reports** tab and click **Authorize & release report** to issue the new report **Version** (for example, Version 2).
-   *The new Certificate of Analysis is published as **Published**, and the earlier version moves to **Superseded** (**SUPERSEDED** (replaced by a newer version)).*
+   *The new Certificate of Analysis is published as **Published**, and the earlier version moves to **Replaced by newer version**.*
 
 ---
 
@@ -64,4 +64,4 @@ The amended Certificate of Analysis prints an amendment banner showing which rep
 ## For the QA Person
 
 - Opening a **Scientific retest** immediately marks the currently released report **Withdrawn** so any public link or QR code scan displays **This report is under amendment and is temporarily unavailable.** instead of serving questionable numbers.
-- Once the new version is released, scanning the old version's link displays **This report has been superseded by an amended report. Ask the laboratory for the current report.**
+- Once the new version is released, scanning the old version's link displays **A newer version replaced this report. Ask the laboratory for the current report.**

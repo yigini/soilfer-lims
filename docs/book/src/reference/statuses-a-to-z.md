@@ -17,10 +17,10 @@ Look up any sample, preparation, bench, quality control, equipment, or stock sta
 | **Received** | The physical soil bag has arrived at the reception desk. | **Sample Reception Officer** finishes the condition check and accepts or rejects the sample. |
 | **Accepted** | The sample passed physical inspection at reception, received its laboratory code, and is accepted for testing. | **Laboratory Technician** begins drying and preparation. |
 | **Lab ID Assigned** | A unique laboratory sample code has been issued to the sample. | **Sample Reception Officer** clicks **Print labels** and hands the sample to preparation. |
-| **Rejected (Non-Conformance)** | The sample arrived damaged, leaking, or too small and was refused (with a problem record). | **Laboratory Manager** informs the project coordinator or client and records disposal when ready. |
+| **Rejected (problem recorded)** | The sample arrived damaged, leaking, or too small and was refused, with a problem record saved. | **Laboratory Manager** informs the project coordinator or client and records disposal when ready. |
 | **On Hold** | Work on the sample is paused while the laboratory resolves a paperwork question, Kobo field update, or manager hold. | **Laboratory Manager** reviews the hold reason and releases or cancels the item. |
 | **Waiting for drying** | The sample is accepted and waiting for air-drying or oven-drying. | **Laboratory Technician** places the sample in the drying area and records drying. |
-| **Drying** | The soil sample is currently drying before grinding and sieving. | **Laboratory Technician** clicks **Confirm Complete** when dry. |
+| **Drying** | The soil sample is currently drying before grinding and sieving. | **Laboratory Technician** clicks **Confirm work is done** when dry. |
 | **Waiting for preparation** | Drying is complete and the sample is waiting to be ground and sieved. | **Laboratory Technician** grinds, sieves, and records preparation. |
 | **Processing** | Preparation or bench testing is actively underway. | **Laboratory Technician** completes preparation or bench runs in **Workbench**. |
 | **Prepared** | Drying and sieving are complete and the sample is ready for analytical bench runs. | **Laboratory Technician** includes the sample in a run in **Workbench**. |
@@ -52,13 +52,13 @@ Look up any sample, preparation, bench, quality control, equipment, or stock sta
 | **Repeat requested** / **Redo** | A repeat analysis has been ordered for the sample or batch. | **Laboratory Technician** runs the repeat measurement try in **Workbench**. |
 | **Blocked** | The step cannot start until an earlier required step (such as drying, instrument calibration, or batch quality checks) is finished. | **Laboratory Technician** or **Laboratory Manager** clears the blocking item shown on screen. |
 | **QC failed** | A **Blank**, **Duplicate**, or **Control** fell outside your laboratory's acceptable limit in **Policies**. | **Laboratory Manager** decides the next action in **Manager Task List** or **QA Dashboard**. |
-| **Awaiting disposition** | A batch with a quality control failure is waiting for the manager's recorded decision. | **Laboratory Manager** orders a repeat run, selects **Repeat calibration bracket** (re-test only the samples after the last good check standard), or records the batch decision. |
+| **Waiting for manager decision** | A batch with a quality control failure is waiting for the manager's recorded decision. | **Laboratory Manager** orders a repeat run, selects **Repeat samples since last good instrument check**, or records the batch decision. |
 | **Waived** / **Not reportable** | A test was formally waived or marked **Not reportable** by the manager with a recorded **Reason**. | **Laboratory Manager** continues with the remaining approved results. |
 | **Invalidated** | An earlier measurement try was marked invalid and will not be used on the report. | **Laboratory Technician** records a fresh measurement try if required. |
 | **Cancelled** | The test order or measurement try was cancelled before reporting. | No further bench work is needed for that item. |
 | **Completed** / **Approved** | The reviewer or manager has approved the test result and its quality controls. | **Laboratory Manager** issues the **Certificate of Analysis** PDF in **Reports**. |
 | **Published** / **Released** | The **Certificate of Analysis** has been issued and is ready for reading and download. | Client, **Project Manager**, or **Laboratory Manager** downloads the PDF in **Reports**. |
-| **Superseded** | An earlier measurement try or report version was replaced by a newer approved version. | Everyone uses the **Current** version in **Reports**. |
+| **Replaced by newer version** | An earlier measurement try or report version was replaced by a newer approved version. | Everyone uses the **Current** version in **Reports**. |
 
 ---
 

@@ -30,17 +30,17 @@ Walk through a complete day managing laboratory work and quality control. You wi
 1. In **Manager Task List**, click the **Review Submissions** tab.
    *You should see runs sent by technicians with status **Submitted** / **Ready for review**.*
 2. Open the first submitted batch and inspect the sample readings alongside the *blank*, *duplicate*, and *reference soil* results (see [Glossary](../reference/glossary.md)).
-3. Confirm that **QC within limits for all reported values.** is shown and that the technician who recorded the run is not the same person reviewing it (when your laboratory's policy requires two-person review).
+3. Confirm that **All final report values passed their quality checks.** is shown and that the technician who recorded the run is not the same person reviewing it (when your laboratory's policy requires two-person review).
 4. Click **Review** / **Approve** to accept the submitted batch.
    *You should see the results advance to **Accepted** and **Approved**.*
 
 ### Afternoon: Handle a Batch Where Quality Control Failed
 
 1. In **Manager Task List**, click the **QC Exceptions** tab (or open **QA Dashboard** in the left menu).
-   *You should see any batch marked **QC failed** or **Awaiting disposition** (waiting for the manager's decision on a failed batch).*
+   *You should see any batch marked **QC failed** or **Waiting for manager decision**.*
 2. Open the failed batch worksheet to see which control failed (for example, a duplicate pair that disagreed beyond your laboratory's limit, or a reference soil outside its target recovery range).
 3. Choose the appropriate manager decision for your laboratory:
-   - *Order a full or partial repeat:* To send a sample or batch back for re-testing, click **Return for repeat testing**, select a **Repeat reason** (such as **QC batch failure**, **Duplicate disagreement**, or **Instrument fault**), write clear instructions in **Review note**, and click **Confirm return**. If only a group of samples between two instrument check standards failed, choose **Repeat calibration bracket** (re-test only the samples measured between the last good instrument check and the failed check).
+   - *Order a full or partial repeat:* To send a sample or batch back for re-testing, click **Return for repeat testing**, select a **Repeat reason** (such as **QC batch failure**, **Duplicate disagreement**, or **Instrument fault**), write clear instructions in **Review note**, and click **Confirm return**. If only a group of samples between two instrument check standards failed, choose **Repeat samples since last good instrument check**.
    - *Accept with a documented reason (when permitted by your laboratory's policy):* Enter the required explanation in **QC acknowledgement reason (required)** so your name and reason appear on the report record.
    *Your laboratory decides whether quality control failures block approval or allow a documented manager note (see [Per-Lab Settings, Presets & Method Overrides](../usage/lab-settings-and-presets.md)).*
 
@@ -61,8 +61,8 @@ Once a report is issued, its status is **Published** and clients or project coor
 
 ## If Something Goes Wrong
 
-- *If you see* **Failed batch QC requires a manager disposition.** (a manager must record a decision on the failed batch before results can be approved) *→* You cannot approve the results until you either order a repeat run or record a manager batch decision on the failed batch in **Manager Task List** or **QA Dashboard**.
-- *If an error is discovered on a report that was already published →* Never edit the database directly. Open the sample or report amendment workflow to issue a new revision; the old report is automatically marked **Superseded** (replaced by a newer version) and public QR links stop serving the replaced PDF.
+- *If you see* **The batch failed quality checks. The lab manager must record a decision.** *→* You cannot approve the results until you either order a repeat run or record a manager batch decision on the failed batch in **Manager Task List** or **QA Dashboard**.
+- *If an error is discovered on a report that was already published →* Never edit the database directly. Open the sample or report amendment workflow to issue a new revision; the old report is automatically marked **Replaced by newer version** and public QR links stop serving the replaced PDF.
 - *If repeated tries on the same item reach your laboratory's repeat limit →* If you see **This laboratory’s configured attempt limit has been reached.** (this test has reached the maximum number of repeat tries allowed by your lab), open **QA Dashboard** to record a problem review before ordering another try.
 
 ---

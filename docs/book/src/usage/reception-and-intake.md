@@ -14,7 +14,7 @@ Use the **Sample Reception** pages to check in soil bags arriving at the laborat
 | New sample stickers or a replacement for a torn barcode label | [Print and Reprint Barcode Labels](../reception/print-and-reprint-labels.md) |
 | A tray of accepted, labelled bags ready for drying and preparation | [Hand Over Accepted Samples to the Lab](../reception/handover-to-lab.md) |
 
-> *Screenshot placeholder — docs/book/src/img/screenshots/reception-console-modes.png (screenshot coming once the training data is ready): The **Sample Reception & Intake** screen showing the **Project Sample**, **Walk-in / External**, **Consignment Batch**, and **Incomplete Intakes (Drafts)** cards.*
+> *Screenshot placeholder — docs/book/src/img/screenshots/reception-console-modes.png (screenshot coming once the training data is ready): The **Sample Reception & Intake** screen showing the **Project Sample**, **Walk-in / External**, **Sample delivery box**, and **Incomplete Intakes (Drafts)** cards.*
 
 ---
 
@@ -33,17 +33,17 @@ Use the **Sample Reception** pages to check in soil bags arriving at the laborat
 2. Choose the intake mode that matches your arrival:
    - Click **Project Sample** for a pre-registered field survey sample that is currently in **Expected** status.
    - Click **Walk-in / External** for a sample brought directly to the counter by a farmer, advisor, or external client.
-   - Click **Consignment Batch** (a whole box or delivery of samples) when checking in a whole box of pre-registered samples together.
+   - Click **Sample delivery box** when checking in a whole box of pre-registered samples together.
    - Click **Incomplete Intakes (Drafts)** to resume a check-in you saved earlier with **Save Draft**.
 3. Follow the four steps across the top of the **Reception Console**: **1. ID & Field**, **2. Condition**, **3. Analyses**, and **4. Handover**.
-4. Click **Accept & Print Label** (or **Complete Intake**) to accept good samples, or click **Reject** (**Non-Conformance** (problem record)) if a bag cannot be tested.
+4. Click **Accept & Print Label** (or **Complete Intake**) to accept good samples, or click **Reject** (**Problem record**) if a bag cannot be tested.
    *You should see accepted samples receive a **Permanent Lab ID**, move to **Accepted** status, and open the **Print labels** dialog.*
 
 ---
 
 ## What Happens Next
 
-Every sample you accept moves to **Accepted** (**Waiting for drying**) and appears in the preparation technician's queue in **My Work** and **Workbench**. Samples you save with **Save Draft** stay in **Draft** status until you finish them. Samples you reject stay in **Rejected (Non-Conformance)** (refused with a problem record) and never enter analytical queues.
+Every sample you accept moves to **Accepted** (**Waiting for drying**) and appears in the preparation technician's queue in **My Work** and **Workbench**. Samples you save with **Save Draft** stay in **Draft** status until you finish them. Samples you reject stay in **Rejected (problem recorded)** and never enter analytical queues.
 
 ---
 

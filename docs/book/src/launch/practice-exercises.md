@@ -17,11 +17,11 @@ Use these ten short exercises during your hands-on training sessions. Each exerc
 ### Exercise 2: Handle a torn, leaking bag in a project box
 - *Scenario:* You are receiving a 5-bag shipping box of samples in **Sample Reception**. Bag 4 is torn and only 30 g of wet mud remains inside (not enough for testing).
 - *Your task:* Accept the four healthy bags, and record Bag 4 as damaged and insufficient.
-- *Answer key (what you should see):* The four healthy bags move to **Accepted**. Bag 4 is marked **Rejected (Non-Conformance)** (refused with a problem record) with your written note, and the system never creates bench work items for the rejected bag.
+- *Answer key (what you should see):* The four healthy bags move to **Accepted**. Bag 4 is marked **Rejected (problem recorded)** with your written note, and the system never creates bench work items for the rejected bag.
 
 ### Exercise 3: Complete drying and sieving for an accepted sample
 - *Scenario:* Sample 1 from Exercise 1 has finished air-drying below 40 °C and has been sieved through a 2 mm sieve (total dry mass 480 g, coarse stones retained on sieve 24 g).
-- *Your task:* Open the sample in **My Work** or **Workbench**, complete the drying record (**Confirm Complete**), and enter the sieving masses.
+- *Your task:* Open the sample in **My Work** or **Workbench**, complete the drying record (**Confirm work is done**), and enter the sieving masses.
 - *Answer key (what you should see):* The system calculates the coarse fraction percentage (5.0%), unlocks the analytical bench tests, and moves the sample status from **Accepted** to **Processing**.
 
 ---
@@ -49,7 +49,7 @@ Use these ten short exercises during your hands-on training sessions. Each exerc
 
 ### Exercise 7: Choose the official reported value when two attempts exist
 - *Scenario:* Open **Manager Task List** and inspect the sample from Exercise 6, which now has Try 1 (questioned) and Try 2 (valid).
-- *Your task:* Open the **Reported value** (the final number printed on the report) selector (**Choose the value to report**), select **Report attempt** (use this measurement try on the report) for Try 2, click **Save reported value** (lock in the final number for the report), and click **Approve**.
+- *Your task:* Open the **Final report value** selector (**Choose the value to report**), select **Use this try on report** for Try 2, click **Save final report value**, and click **Approve**.
 - *Answer key (what you should see):* Try 2 becomes the **Current selection**, while Try 1 remains in the audit history. Once all required tests on the sample are approved, the sample status becomes **Approved**.
 
 ### Exercise 8: Disposition a batch where the reference soil failed QC
@@ -65,7 +65,7 @@ Use these ten short exercises during your hands-on training sessions. Each exerc
 ### Exercise 10: Invite a new technician and check a method's QC rule
 - *Scenario:* A new analyst joins your laboratory.
 - *Your task:* Open **Laboratory Staff**, click **Invite Team Member**, select **Laboratory Technician**, and generate a **One-Time Activation Link**. Then open **Policies** and inspect the **Duplicate interval** for Soil pH in your laboratory.
-- *Answer key (what you should see):* You get a single-use 24-hour link (**Copy Activation Link**), and **Policies** shows the **Effective value** and **Source** (**Laboratory preset** or **Method override**) for your laboratory.
+- *Answer key (what you should see):* You get a single-use 24-hour link (**Copy Activation Link**), and **Policies** shows the **Effective value** and **Source** (**Lab starting rules** or **Custom method rule**) for your laboratory.
 
 ---
 
