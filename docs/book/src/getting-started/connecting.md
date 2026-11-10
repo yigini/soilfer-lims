@@ -23,13 +23,13 @@ ssh root@YOUR_SERVER_IP
 Replace `YOUR_SERVER_IP` with your actual IP address. For example:
 
 ```bash
-ssh root@46.19.33.37
+ssh root@203.0.113.10
 ```
 
 **The first time you connect**, you'll see a message like:
 
 ```
-The authenticity of host '46.19.33.37' can't be established.
+The authenticity of host '203.0.113.10' can't be established.
 ECDSA key fingerprint is SHA256:abc123...
 Are you sure you want to continue connecting (yes/no)?
 ```

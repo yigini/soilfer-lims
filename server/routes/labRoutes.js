@@ -451,11 +451,7 @@ router.patch('/:id/staff/:userId/reset-password', checkPermission('MANAGE_USERS'
 });
 
 // ─── POST /api/labs ─── Create a new lab
-router.post('/', checkPermission('MANAGE_BRANDING'), async (req, res) => {
-    if (req.user.role !== 'SUPER_ADMIN') {
-        return res.status(403).json({ error: 'Only Super Administrators can create laboratories' });
-    }
-
+router.post('/', checkPermission('CREATE_LAB'), async (req, res) => {
     const {
         projectId,
         id, code, name, country, location, address, city, phone, email, website, capacity, timezone, notes

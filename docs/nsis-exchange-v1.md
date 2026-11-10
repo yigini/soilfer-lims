@@ -32,7 +32,7 @@ All requests must be transmitted over encrypted TLS (`HTTPS`). Authentication us
 
 ```http
 GET /api/v1/data-exchange/results?labId=GTM-LAB1 HTTP/1.1
-Host: lims.yigini.net
+Host: lims.example.org
 X-API-Key: sis_live_a1b2c3d4e5f6...
 Accept: application/json
 ```

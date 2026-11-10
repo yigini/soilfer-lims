@@ -232,7 +232,7 @@ export default function WorkQueue({
                                         </td>
                                         <td className="py-3 px-3 whitespace-nowrap">
                                             {getStatusBadge(
-                                                row.statusKey ? t(row.statusKey, row.status) : (row.status ? t('dashboard.workQueue.status.' + row.status, row.status) : ''),
+                                                row.statusKey ? t(row.statusKey, row.status) : (row.status ? t('dashboard.workQueue.status.' + (row.status === 'Awaiting disposition' ? 'awaitingDisposition' : row.status), row.status) : ''),
                                                 row.status,
                                                 row.tone
                                             )}

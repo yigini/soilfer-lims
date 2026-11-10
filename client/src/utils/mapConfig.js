@@ -8,7 +8,7 @@
  * setting `referrerPolicy: 'strict-origin'` instructs Leaflet to attach
  * referrerpolicy="strict-origin" to every rendered <img> tile element.
  *
- * This allows the browser to transmit the application's origin (e.g. `https://lims.yigini.net/`)
+ * This allows the browser to transmit the application's origin (e.g. `https://lims.example.org/`)
  * to OpenStreetMap tile servers, preventing 403 Access Blocked rejections while:
  * 1. Maintaining the application's global `Referrer-Policy: no-referrer` header for all other traffic.
  * 2. Ensuring no sensitive paths, query parameters, sample IDs, or tokens are leaked to OSM.

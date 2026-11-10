@@ -134,7 +134,7 @@ export default function ScanPage() {
         setLookupError(null);
         let extractedId = clean;
 
-        // If URL was scanned (e.g. https://lims.yigini.net/samples/SMP-001)
+        // If URL was scanned (e.g. https://lims.example.org/samples/SMP-001)
         if (clean.includes('/samples/')) {
             extractedId = clean.split('/samples/')[1].split('?')[0];
         } else if (clean.includes('/workbench?sampleId=')) {

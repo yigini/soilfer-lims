@@ -99,7 +99,7 @@ describe('Stage E: Distinct RECEIVED_REJECTED State & Immutable Chain of Custody
             },
             notes: 'Refused intake as per Biosafety ISO 17025 protocol',
             ncReason: 'Bag compromised with petroleum hydrocarbon contamination',
-            intakePhotos: ['https://storage.lims.yigini.net/uploads/intake/torn_bag.jpg'],
+            intakePhotos: ['https://lims.example.org/uploads/intake/torn_bag.jpg'],
             custodyHandoverAt: handoverDate.toISOString(),
             custodyCarrierName: 'DHL Express Driver Gomez',
             custodyTrackingNumber: 'WB-GT-994827',

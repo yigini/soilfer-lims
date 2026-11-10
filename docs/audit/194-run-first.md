@@ -10,7 +10,7 @@ field. Batch has no reagent-lot link relation. Existing NativeRunPanel and
 WorksheetArea already supply the normalized run worksheet and scanner, so
 those authorities and deep links must be preserved.
 
-[Pin6072013517](https://github.com/yigini/soilfer-lims/issues/194#issuecomment-6072013517)
+Pin6072013517 (historical issue #194)
 requires an additive BatchReagentLot table (id/batch/lab/inventory lot/optional
 role/actor/time), immutable UPDATE/DELETE guards and unique(batch,lot). Only
 same-lab AVAILABLE, unexpired inventory lots link. OPEN withdrawal appends an
@@ -56,7 +56,7 @@ unchanged inventory quantity. The SQL/scanner group passes105/105 at4a9e790
 The only captured-schema expectation change is the exact absence of this
 new table. All literal old DDL and every other completeness check stay intact.
 
-[Pin6077632542](https://github.com/yigini/soilfer-lims/issues/194#issuecomment-6077632542)
+Pin6077632542 (historical issue #194)
 settles the command boundaries: before start only OPEN; after start no CLOSED
 batch, locked analyte or current disposition, and at least one IN_RUN or
 QC_PENDING analyte. State checks precede lot validation. Identical active
@@ -75,7 +75,7 @@ start/header, native-regression and scanner group passes4 suites184 tests
 0skips65.108s at499a1549. Client build8.75s and lint0errors14existing
 warnings pass on that candidate.
 
-[Pin6078331476](https://github.com/yigini/soilfer-lims/issues/194#issuecomment-6078331476)
+Pin6078331476 (historical issue #194)
 freezes the actual Methodology id/name/standard/version in the existing
 criteriaSnapshot and RUN_STARTED event at first start. Reopen retains it.
 Historical missing revisions display unknown; no backfill or live inference.
@@ -111,7 +111,7 @@ merges verify every main key and every runFirst key unchanged. Combined
 whole-suite/build/lint and CI verification remain required before a PR audit.
 Production remains under the #162 demo freeze.
 
-[Pin6079078551](https://github.com/yigini/soilfer-lims/issues/194#issuecomment-6079078551)
+Pin6079078551 (historical issue #194)
 resolves the header-to-Result handoff in the existing central Result context.
 A started native run supplies its frozen instrument for omitted/null input;
 different supplied instruments refuse RESULT_INSTRUMENT_MISMATCH. The same

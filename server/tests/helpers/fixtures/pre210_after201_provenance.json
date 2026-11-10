@@ -11,15 +11,15 @@
   ],
   "ddlCommand": [
     "C:\\Program Files\\nodejs\\node.exe",
-    "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-transcription\\soilfer-lims\\server\\node_modules\\prisma\\build\\index.js",
+    "C:\\workspace\\.codex\\worktrees\\audit-qc-transcription\\soilfer-lims\\server\\node_modules\\prisma\\build\\index.js",
     "migrate",
     "diff",
     "--from-empty",
     "--to-schema",
-    "C:\\Users\\yigin\\AppData\\Local\\Temp\\qc210-main-predecessor-ohGQqI\\schema.prisma",
+    "C:\\workspace\\AppData\\Local\\Temp\\qc210-main-predecessor-ohGQqI\\schema.prisma",
     "--script",
     "--config",
-    "C:\\Users\\yigin\\.codex\\worktrees\\audit-qc-transcription\\soilfer-lims\\server\\prisma.config.ts"
+    "C:\\workspace\\.codex\\worktrees\\audit-qc-transcription\\soilfer-lims\\server\\prisma.config.ts"
   ],
   "ddlBytes": 77186,
   "ddlSha256": "b7de680237c07ff2454ed27afcc95481ddb45cc24cd80ade943b88291d9ca397",

@@ -2,7 +2,7 @@
 
 Branch `audit/4.4-value-validation` begins at mainad2244c9 after194 merged.
 The cited missing `isInvalid` input and censor-limit/LOQ comparison remain.
-[Scope pin6080149352](https://github.com/yigini/soilfer-lims/issues/197#issuecomment-6080149352)
+Scope pin6080149352 (historical issue #197)
 defines the additive single-use approval table, immutable SQL state/context,
 shared browser/server classification, nullable lab/method limits and a dilution
 prompt only after an existing recorded source is eligible for191's command.
@@ -16,7 +16,7 @@ show translated ranges/LOQ/unit with the method LOQ quick key. The quick key
 waits for BarcodeSafeInput's accepted change rather than bypassing wedge refusal.
 Owned proof at1238f019: five suites/51 tests PASS, zero skips,10.546s.
 
-[Cancellation pin6081599894](https://github.com/yigini/soilfer-lims/issues/197#issuecomment-6081599894)
+Cancellation pin6081599894 (historical issue #197)
 adds explicit nullable cancelledBy/cancelledAt/cancelReason. Pending cancellation
 keeps decision fields NULL; approved cancellation/consumption preserve original
 approval byte for byte. The additive table, immutable SQL edges/context, active

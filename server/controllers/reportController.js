@@ -46,7 +46,7 @@ function publicLinkConflict(link) {
         return { error: 'This report is withdrawn pending amendment.', code: 'REPORT_WITHDRAWN' };
     }
     if (link.report.status === 'SUPERSEDED') {
-        return { error: 'This report has been superseded. Request a link to the current report.', code: 'REPORT_SUPERSEDED' };
+        return { error: 'A newer version replaced this report. Request a link to the current report.', code: 'REPORT_SUPERSEDED' };
     }
     if (link.isRevoked) return { error: 'This link has been revoked', code: 'LINK_REVOKED' };
     if (link.expiresAt && new Date() > new Date(link.expiresAt)) {

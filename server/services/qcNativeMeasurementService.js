@@ -25,7 +25,7 @@ async function writeNativeMeasurements(db, batchId, actor, input = {}, { correct
         if (!batch) throw failure(404, 'BATCH_NOT_FOUND', 'Batch not found.');
         const [actorLab, targetLab] = await Promise.all([policyService.resolveLab(actor.labId, tx), policyService.resolveLab(batch.labId, tx)]);
         scopeGuard.ensureScope({ ...actor, labId: actorLab?.id || actor.labId }, { ...batch, labId: targetLab?.id || batch.labId }, { labField: 'labId', altLabField: null });
-        if (!batch.analytes.length || batch.analytes.some(row => row.provenance !== 'NATIVE')) throw failure(409, 'QC_NATIVE_RUN_REQUIRED', 'This entry requires a native run.');
+        if (!batch.analytes.length || batch.analytes.some(row => row.provenance !== 'NATIVE')) throw failure(409, 'QC_NATIVE_RUN_REQUIRED', 'Enter this measurement in a standard batch run.');
         if (!batch.startedAt) throw failure(409, 'QC_RUN_NOT_STARTED', 'Start the run before entering or evaluating QC.');
         if (batch.status === 'CLOSED') throw failure(400, 'QC_BATCH_LOCKED', 'Closed QC evidence is locked.');
         if (entryOnly && (entryOnly !== true || correction !== false || explicit !== false ||

@@ -1,7 +1,7 @@
 # Real Mobile Device Testing Sheet (#102)
 
 **Work Package**: `WP/contributor-issues-2026-09`  
-**Issue**: [#102 Mobile usability, touch interaction, and layout issues](https://github.com/yigini/soilfer-lims/issues/102)  
+**Issue**: #102 Mobile usability, touch interaction, and layout issues (historical issue 102)<br>
 **Target Environments**: iOS Safari (iPhone 12/13/14/15/SE, iOS 16+) & Android Chrome (Pixel, Samsung Galaxy, Android 12+)  
 **Policy**: Emulation and browser devtools provide supplemental regression checks, but real physical hardware evidence is mandatory for closure. No invented passes.
 

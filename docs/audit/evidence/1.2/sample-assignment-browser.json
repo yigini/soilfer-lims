@@ -7,7 +7,7 @@
     "node": "v24.13.0",
     "database": "disposable_journey_sample_assignment.db",
     "isolationRefusalGuard": "ACTIVE",
-    "databaseUrl": "file:C:\\Users\\yigin\\Documents\\soilfer-lims-audit-validation-report-truth\\server\\.tmp_journey_runner_7yXSdw\\disposable_journey.db"
+    "databaseUrl": "file:C:\\workspace\\Documents\\soilfer-lims-audit-validation-report-truth\\server\\.tmp_journey_runner_7yXSdw\\disposable_journey.db"
   },
   "checks": {
     "methodFilterInQueue": {

@@ -273,7 +273,7 @@ const ResultReports = ({
                 <div className="flex items-center gap-1.5">
                     {[
                         { id: 'PUBLISHED', label: t('resultReports.filterPublished', 'Published') },
-                        { id: 'SUPERSEDED', label: t('resultReports.filterSuperseded', 'Superseded') },
+                        { id: 'SUPERSEDED', label: t('resultReports.superseded') },
                         { id: 'WITHDRAWN', label: t('resultReports.filterWithdrawn', 'Withdrawn') },
                         { id: 'ALL', label: t('resultReports.filterAll', 'All Versions') }
                     ].map(tab => (
@@ -342,7 +342,7 @@ const ResultReports = ({
                                                         ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300'
                                                         : 'bg-sf-raised text-sf-muted'
                                                 }`}>
-                                                    v{r.version} {r.status === 'SUPERSEDED' && '· Superseded'}
+                                                    v{r.version} {r.status === 'SUPERSEDED' && <>· {t('resultReports.superseded')}</>}
                                                 </span>
                                                 {r.status === 'WITHDRAWN' && <p className="mt-1 text-xs text-red-700">
                                                     {t('resultReports.withdrawnPendingAmendment', 'Withdrawn pending amendment {{amendmentId}}',
