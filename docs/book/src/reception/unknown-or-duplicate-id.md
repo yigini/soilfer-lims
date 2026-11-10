@@ -26,7 +26,7 @@ Resolve the three most common identity problems at reception: a barcode not foun
 
 ### Case 2: The Sample ID Shows as Already Received (Duplicate ID)
 
-1. If you scan a bag and see **Prior Receipt Detected for** your sample ID (with the message **This sample ID was previously received on** a prior date), stop and check the details on screen.
+1. If you scan a bag and see **Sample ID {id} was already checked in** (with the message **This sample ID was previously received on** a prior date), stop and check the details on screen.
 2. Check whether a colleague already checked in this exact bag earlier today. If so, click **Cancel / Clear ID** and reprint its label from **Samples** if needed.
 3. If the field team sent a *second* physical bag with the same field code, click **✓ Confirm as Re-submission**. Explain why in **Intake Notes / Visual Observations**.
    *You should see the new bag accepted under its own distinct **Permanent Lab ID**.*

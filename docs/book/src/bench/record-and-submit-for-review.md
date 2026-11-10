@@ -45,7 +45,7 @@ Finish your bench work using SoilFER LIMS's two-step handoff: first confirm and 
 
 ## What Happens Next
 
-Once a sample is **Submitted**, its recorded determinations become read-only at the bench and appear in your manager's **Manager Task List** under **Review Submissions**. You can view your saved confirmation records at any time on the **Activity Receipts** (saved confirmation records) tab.
+Once a sample is **Submitted**, its recorded determinations become read-only at the bench and appear in your manager's **Manager Task List** under **Review Submissions**. You can view your saved confirmation records at any time on the **Saved confirmation log ({count})** tab.
 
 ---
 

@@ -29,7 +29,7 @@ Release an official Certificate of Analysis for an **Approved** sample, print or
 
 1. Click **View Report v1** on the sample's **Reports** tab (or click **Reports** in the left menu to open **Result Reports** and click **View report** on the row).
    *You should see the full Certificate of Analysis open in the report preview window.*
-2. Check the sample details, **Preparation records**, results table, quality control summary (**QC within limits for all reported values.** or **QC deviations:**), and electronic approval block.
+2. Check the sample details, **Preparation records**, results table, quality control summary (**All final report values passed their quality checks.** or **QC deviations:**), and electronic approval block.
 3. Click **Print / Save as PDF** in the top right of the report window to print the certificate on paper or save it as a PDF file.
 
 ### Part 3: Create or Revoke a Public Share Link (**Manage Share Links**)
@@ -61,4 +61,4 @@ Release an official Certificate of Analysis for an **Approved** sample, print or
 ## For the QA Person
 
 - Every released report version is stored as a permanent, locked record in the database. Later changes to method catalogue defaults or laboratory settings never alter an already-released Certificate of Analysis.
-- Public share links are limited strictly to the single released report version and are automatically blocked if the report is **Withdrawn** or **Superseded** (replaced by a newer version).
+- Public share links are limited strictly to the single released report version and are automatically blocked if the report is **Withdrawn** or **Replaced by newer version**.

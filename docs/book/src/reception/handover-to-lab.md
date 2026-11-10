@@ -4,7 +4,7 @@
 
 Check your reception handoff queue at the end of a session, place accepted sample bags onto drying trays or storage shelves, and resolve any intake holds before preparation begins.
 
-> *Screenshot placeholder — docs/book/src/img/screenshots/reception-handoff-queue.png (screenshot coming once the training data is ready): The **Laboratory Operational Handoff** and **Recent Receipts** views showing accepted samples ready to move to the drying room.*
+> *Screenshot placeholder — docs/book/src/img/screenshots/reception-handoff-queue.png (screenshot coming once the training data is ready): The **Laboratory Operational Handoff** and **Recent check-ins** views showing accepted samples ready to move to the drying room.*
 
 ---
 
@@ -17,7 +17,7 @@ Check your reception handoff queue at the end of a session, place accepted sampl
 
 ## Steps
 
-1. Click **Sample Reception** in the left menu. Review the **Recent Receipts** (samples checked in recently) and **Laboratory Operational Handoff** sections on the reception dashboard.
+1. Click **Sample Reception** in the left menu. Review the **Recent check-ins** and **Laboratory Operational Handoff** sections on the reception dashboard.
    *You should see every sample you accepted today with its **Permanent Lab ID** and status **Accepted**.*
 2. Check each physical bag on your tray against the screen list. Make sure every bag has its printed barcode sticker attached.
 3. If you need to record which shelf or drying rack the tray is moving to right now:

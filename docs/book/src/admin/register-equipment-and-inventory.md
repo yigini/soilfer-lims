@@ -61,7 +61,7 @@ This guide shows you how to register laboratory instruments and log calibration 
 3. Select the **Value type** (**Certified**, **Indicative**, **Consensus**, or **Lab assigned**).
 4. Enter the **Assigned value** and **Unit** using your laboratory's number format. If the certificate includes uncertainty, enter both **Expanded uncertainty** and **Certificate coverage factor (k)**.
 5. Click **Save**.
-6. If you ever need to update an assigned value later, click **Correct by new revision**, enter a **Reason**, and click **Save**. Earlier revisions remain marked **Superseded** (replaced by a newer version) while the new one becomes **Current**.
+6. If you ever need to update an assigned value later, click **Correct by new revision**, enter a **Reason**, and click **Save**. Earlier revisions remain marked **Replaced by newer version** while the new one becomes **Current**.
 
 ---
 

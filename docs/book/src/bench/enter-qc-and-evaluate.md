@@ -4,7 +4,7 @@
 
 Enter the measurements for the quality control positions in your analytical run (*blanks*, *duplicates*, and *reference soils*; see [Glossary](../reference/glossary.md)), save the observations, and run the automatic quality control check (**Evaluate QC**).
 
-> *Screenshot placeholder — docs/book/src/img/screenshots/bench-qc-positions-and-evaluate.png (screenshot coming once the training data is ready): The native run panel in **Workbench** showing quality control positions, **Bound reference lot**, **Duplicate parent position**, **Save observations**, and **Evaluate QC**.*
+> *Screenshot placeholder — docs/book/src/img/screenshots/bench-qc-positions-and-evaluate.png (screenshot coming once the training data is ready): The native run panel in **Workbench** showing quality control positions, **Linked check soil bottle**, **Duplicate parent position**, **Save observations**, and **Evaluate QC**.*
 
 ---
 
@@ -19,7 +19,7 @@ Enter the measurements for the quality control positions in your analytical run 
 1. In **Workbench**, open your active run in the **Worksheet** tab.
    *You should see the run sequence containing both your soil sample positions and the reserved quality control positions.*
 2. Check that each quality control position has the right link before typing its value:
-   - For a *reference soil* position, verify the **Bound reference lot** (check soil bottle linked to this batch slot) and its **Expected value** (**Keep every required reference position bound to an eligible lot.**). If you changed reference lots on an unstarted run, click **Save reference bindings** (lock in the chosen check soil bottles for this run).
+   - For a *reference soil* position, verify the **Linked check soil bottle** and its **Expected value** (**Keep every required reference position bound to an eligible lot.**). If you changed reference lots on an unstarted run, click **Save check soil bottles for this run**.
    - For a *duplicate* position, verify the **Duplicate parent position** (**Select the original sample position** that was weighed a second time).
 3. Type the measured reading into each quality control row:
    - Enter the reading for each *blank* (reagent-only check with no soil).
@@ -34,7 +34,7 @@ Enter the measurements for the quality control positions in your analytical run 
 
 ## What Happens Next
 
-- If all quality control positions pass (**QC within limits for all reported values.**), proceed to record and submit your samples (see [Review, Record, and Submit Completed Samples](record-and-submit-for-review.md)).
+- If all quality control positions pass (**All final report values passed their quality checks.**), proceed to record and submit your samples (see [Review, Record, and Submit Completed Samples](record-and-submit-for-review.md)).
 - If a quality control check fails (**QC failed**), do not panic and do not erase your readings. Record the factual observations as measured; your **Laboratory Manager** will review the failed run and decide whether to repeat a group of samples between two instrument check standards, repeat the batch, or record a manager batch decision (see [Quality Control, Control Charts & Failed QC](../usage/qc-management.md)).
 
 ---

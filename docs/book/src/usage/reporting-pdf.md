@@ -10,7 +10,7 @@ Issue official PDF Certificates of Analysis for **Approved** samples, share veri
 | Fix a clerical typo or reopen an analytical test after a report was issued | [Correct an Approved Sample or Issue an Amended Report](../review/amend-a-released-report.md) |
 | Read or download reports as a client or project viewer | [Clients & Viewers: Reading Results & Reports](viewer-guide.md) |
 
-> *Screenshot placeholder — docs/book/src/img/screenshots/reports-and-amendments-overview.png (screenshot coming once the training data is ready): The **Result Reports** page showing **Published**, **Superseded**, and **Withdrawn** filters, **View report**, **Share report**, and **Manage Share Links**.*
+> *Screenshot placeholder — docs/book/src/img/screenshots/reports-and-amendments-overview.png (screenshot coming once the training data is ready): The **Result Reports** page showing **Published**, **Replaced by newer version**, and **Withdrawn** filters, **View report**, **Share report**, and **Manage Share Links**.*
 
 ---
 
@@ -46,13 +46,13 @@ Issue official PDF Certificates of Analysis for **Approved** samples, share veri
 
 - *If the* **Authorize & release report** *button is disabled →* Check that every ordered test on the sample has been reviewed and accepted (**Accepted**). Also make sure the sample has received **Final Approval** (**Final approve sample**).
 - *If you see* **An amended report needs an approved amendment. Request and authorise one first.** *→* Open **Sample amendments**, submit your **Request amendment**, and have an authorized reviewer click **Authorise request** before reissuing the report.
-- *If a client opens an old QR code link and sees* **This report is under amendment and is temporarily unavailable.** *(or* **This report has been superseded by an amended report. Ask the laboratory for the current report.***) →* The system automatically blocks outdated PDFs when a scientific amendment is opened or a newer version is released. Send the client the updated report.
+- *If a client opens an old QR code link and sees* **This report is under amendment and is temporarily unavailable.** *(or* **A newer version replaced this report. Ask the laboratory for the current report.***) →* The system automatically blocks outdated PDFs when a scientific amendment is opened or a newer version is released. Send the client the updated report.
 
 ---
 
 ## For the QA Person
 
-- *Locked report records*: Every released report saves a permanent copy of the sample's origin and history, recorded **Drying** and **Preparation** details, moisture basis, **Reported value** (the final number printed on the report) choices, units, methods, **QC deviations:** notes, and sign-off timestamps.
+- *Locked report records*: Every released report saves a permanent copy of the sample's origin and history, recorded **Drying** and **Preparation** details, moisture basis, **Final report value** choices, units, methods, **QC deviations:** notes, and sign-off timestamps.
 - *Immediate withdrawal during scientific retests*: When a **Scientific retest** amendment is authorized on a sample with a released report, the released version is immediately marked **Withdrawn**. External share links cannot serve unverified data while retesting is underway.
-- *Traceable revisions*: When the new report version is released, the previous version moves to **Superseded** (**SUPERSEDED** (replaced by a newer version)). The new certificate states which report version it **Replaces** and why.
-- *Master exports*: Exporting from **Data Results** (**Analytical Results Master**) via **CSV** or **Excel** outputs the official saved **Reported value** along with its **Reported value selection ID**, **Attempt IDs**, and **Batch IDs**.
+- *Traceable revisions*: When the new report version is released, the previous version moves to **Replaced by newer version**. The new certificate states which report version it **Replaces** and why.
+- *Master exports*: Exporting from **Data Results** (**Analytical Results Master**) via **CSV** or **Excel** outputs the official saved **Final report value** along with its **Reported value selection ID**, **Attempt IDs**, and **Batch IDs**.

@@ -43,8 +43,8 @@ Enter sample readings in the **Workbench** worksheet grid using your keyboard or
 
 1. If a reading is below the method's limit of quantification (**Below method LOQ** (below the limit of quantification — the lowest amount the method can measure reliably)), click **Fill method LOQ** (fill in the limit of quantification — the lowest amount the method can measure reliably) to apply the method's below-quantification-limit rule.
 2. If a reading exceeds the highest calibration standard (**Above calibration range**), record the initial reading first (**Record this reading first, then request a dilution repeat.**). Next, enter a **Reason** and click **Dilute and repeat?**.
-3. If a special soil sample falls **Outside typical range** (for example, a strongly saline or acid-sulfate soil), type your technical explanation in **Reason** and click **Request override** (ask a reviewer to accept an unusual reading).
-   *Once your **Laboratory Manager** approves the request under **Override requests** (requests to accept unusual readings), click **Use this approval** on the row.*
+3. If a special soil sample falls **Outside typical range** (for example, a strongly saline or acid-sulfate soil), type your technical explanation in **Reason** and click **Ask reviewer to approve unusual value**.
+   *Once your **Laboratory Manager** approves the request under **Unusual-value requests**, click **Use this approval** on the row.*
 
 ---
 
@@ -58,11 +58,11 @@ Your typed or calculated values are saved as drafts (**Draft saved**). Next, ent
 
 - *If you accidentally scan a barcode while your cursor is inside a number box →* You will see **Looks like a barcode; scan into the Scan field**. The system automatically protects your number from being overwritten.
 - *If you see* **Ambiguous decimal or thousands separator** *(or* **Clarify the decimal or thousands separator.***) →* Type a plain decimal number without thousands separators (for example, type 1250.5 instead of 1,250.5).
-- *If you see* **A complete passing calibration for this native run is required.** *→* Check the **Calibration curve** panel. Make sure your standards meet **Minimum distinct standard levels** and **Minimum correlation r**.
+- *If you see* **This standard batch run needs a complete calibration that passed its checks.** *→* Check the **Calibration curve** panel. Make sure your standards meet **Minimum distinct standard levels** and **Minimum correlation r**.
 
 ---
 
 ## For the QA Person
 
 - Raw calculation templates (**Method calculation templates**) compute the final concentration on the server. They freeze the **Recorded calculation evidence** (raw inputs, intermediate factors, template revision, and **Calibration curve**) with the try.
-- Out-of-range approvals (**Request override**) require independent approval from a user with review authority. The analyst who requested the special approval cannot approve their own request.
+- Out-of-range approvals (**Ask reviewer to approve unusual value**) require independent approval from a user with review authority. The analyst who requested the special approval cannot approve their own request.

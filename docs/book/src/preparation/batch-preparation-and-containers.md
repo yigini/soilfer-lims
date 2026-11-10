@@ -4,7 +4,7 @@
 
 Confirm **Air Drying** or **Sample Preparation** for a whole tray of samples at once in **Workbench**. You can also register labelled child containers (**Fine earth**, **Ground**, **Aliquot**, or **Archive**) when splitting a sample into jars or packets.
 
-> *Screenshot placeholder — docs/book/src/img/screenshots/preparation-batch-and-containers.png (screenshot coming once the training data is ready): The **Workbench** table footer showing **Confirm Sample Preparation Complete** for multiple selected rows, and the **Containers and aliquots** panel on a sample page.*
+> *Screenshot placeholder — docs/book/src/img/screenshots/preparation-batch-and-containers.png (screenshot coming once the training data is ready): The **Workbench** table footer showing **Confirm Sample Preparation is done** for multiple selected rows, and the **Containers and aliquots** panel on a sample page.*
 
 ---
 
@@ -25,7 +25,7 @@ Confirm **Air Drying** or **Sample Preparation** for a whole tray of samples at 
 3. For each sample on your tray, tick its three **Operational Checklist** boxes. Fill in any required **Drying**, **Sieving**, **Grinding**, or **Splitting** fields on its row.
 4. Tick the selection checkbox on the far left of each completed sample row. You can also tick the top-left header checkbox to select all visible rows.
    *You should see the footer at the bottom of the table show how many rows are selected.*
-5. Click **Confirm Air Drying Complete** or **Confirm Sample Preparation Complete** at the bottom right of the table.
+5. Click **Confirm Air Drying is done** or **Confirm Sample Preparation is done** at the bottom right of the table.
    *You should see every selected sample row update to **Checklist Verified** and **Recorded**.*
 
 ### Part 2: Register Sub-Containers and Aliquots for a Sample
@@ -52,11 +52,11 @@ When technicians later record wet-chemistry readings in **Workbench**, they can 
 ## If Something Goes Wrong
 
 - *If you see* **Could not create the container.** *→* Make sure every **Fine earth**, **Ground**, **Aliquot**, or **Archive** container is linked to an **Active** parent under **Parent container**. Only a **Bulk** container can use **Root bulk container**.
-- *If one row in a batch confirmation fails while others succeed →* Check the message on that row. If your laboratory's **Policies** require structured weights or temperatures, fill in the missing numbers and click **Confirm Complete**.
+- *If one row in a batch confirmation fails while others succeed →* Check the message on that row. If your laboratory's **Policies** require structured weights or temperatures, fill in the missing numbers and click **Confirm work is done**.
 
 ---
 
 ## For the QA Person
 
-- The **Containers and aliquots** tree tracks parent-to-child lineage from the original **Bulk** bag through **Fine earth**, **Ground**, **Aliquot**, and **Archive** containers. It also displays which measurement try (**Linked attempt** (the measurement try connected to this jar)) used each aliquot.
+- The **Containers and aliquots** tree tracks parent-to-child lineage from the original **Bulk** bag through **Fine earth**, **Ground**, **Aliquot**, and **Archive** containers. It also displays which measurement try (**Linked try**) used each aliquot.
 - Even when you confirm several rows at once in **Table View**, the server validates and records an individual saved confirmation for each sample.

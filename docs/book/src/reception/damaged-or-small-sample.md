@@ -2,7 +2,7 @@
 
 ## What This Is For
 
-Handle a soil bag that arrives torn, cross-contaminated, unlabelled, or without enough soil for all requested tests, either by rejecting it cleanly (**Rejected (Non-Conformance)** (refused with a problem record)) or by accepting it with a documented **Mass deficit** warning.
+Handle a soil bag that arrives torn, cross-contaminated, unlabelled, or without enough soil for all requested tests, either by rejecting it cleanly (**Rejected (problem recorded)**) or by accepting it with a documented **Mass deficit** warning.
 
 > *Screenshot placeholder — docs/book/src/img/screenshots/reception-condition-checks.png (screenshot coming once the training data is ready): The **2. Condition** (**Reception Compliance**) step showing **Container Intact / Sealed**, **Sample Quantity Sufficient**, **Fail**, **Describe the observed problem**, and **Mass deficit**.*
 
@@ -23,8 +23,8 @@ Handle a soil bag that arrives torn, cross-contaminated, unlabelled, or without 
 2. Click **Fail** on the check that failed (**Container Intact / Sealed**, **Label Legible & Matches ID**, **Sample Quantity Sufficient**, or **Sample Condition (Dry, No Contam.)**).
    *You should see the **Describe the observed problem** box appear.*
 3. Type a clear description of what you see on the bag in **Describe the observed problem** (for example, that the plastic bag burst in transit and mixed with another sample).
-4. Click **Reject** (**Non-Conformance** (problem record)).
-   *You should see the sample status change to **Rejected (Non-Conformance)**.*
+4. Click **Reject** (**Problem record**).
+   *You should see the sample status change to **Rejected (problem recorded)**.*
 5. Place the rejected bag in your quarantine tray so it is never carried to the drying room.
 
 ### Case B: The Bag Is Intact, But Has Less Soil Than Normal (Accept With Mass Warning)
@@ -40,14 +40,14 @@ Handle a soil bag that arrives torn, cross-contaminated, unlabelled, or without 
 
 ## What Happens Next
 
-- A sample marked **Rejected (Non-Conformance)** is permanently locked out of **Workbench** so no technician can accidentally record results for it, and the project coordinator can see the rejection reason in **Samples**.
+- A sample marked **Rejected (problem recorded)** is permanently locked out of **Workbench** so no technician can accidentally record results for it, and the project coordinator can see the rejection reason in **Samples**.
 - A sample accepted with a confirmed **Mass deficit** moves to **Accepted** (**Waiting for drying**) with your note visible to the technician and reviewer.
 
 ---
 
 ## If Something Goes Wrong
 
-- *If you see a validation message for* **Non-conformance reason** *→* Make sure you typed an explanation in **Describe the observed problem** for each check you marked **Fail**.
+- *If you see a validation message for* **Reason for problem record** *→* Make sure you typed an explanation in **Describe the observed problem** for each check you marked **Fail**.
 - *If you see a validation message that the* **Mass deficit** *must be confirmed →* Either tick **Acknowledge this sample’s mass warning** after checking with your manager, or untick lower-priority tests in **3. Analyses**.
 - *If a sample was accepted earlier and you only discover a problem when opening the bag at the drying bench →* Open the sample in **Samples** and place a hold on it (**Sample holds**), or ask a reception clerk to click **Undo intake** before preparation is recorded.
 
@@ -56,4 +56,4 @@ Handle a soil bag that arrives torn, cross-contaminated, unlabelled, or without 
 ## For the QA Person
 
 - Required sample mass is computed automatically by summing the sample mass required by each ordered analytical method and multiplying by your laboratory's reserve factor in **Policies** (see [Per-Lab Settings, Presets & Method Overrides](../usage/lab-settings-and-presets.md)).
-- Rejecting a sample at intake preserves the record in **Rejected (Non-Conformance)** rather than deleting it, providing full traceability for field teams and ISO/IEC 17025 problem records.
+- Rejecting a sample at intake preserves the record in **Rejected (problem recorded)** rather than deleting it, providing full traceability for field teams and ISO/IEC 17025 problem records.

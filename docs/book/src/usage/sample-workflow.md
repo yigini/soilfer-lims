@@ -18,7 +18,7 @@ Samples can enter your laboratory in three ways:
 
 At **Sample Reception**:
 - Inspect each bag. Make sure the label is readable, the container is intact, and there is enough soil.
-- Record physical arrival (status becomes **Received**) and click **Accept Sample** (status becomes **Accepted**). If paperwork needs checking, place the bag **On Hold**. If the bag is damaged or leaking, mark it **Rejected (Non-Conformance)** (refused with a problem record).
+- Record physical arrival (status becomes **Received**) and click **Accept Sample** (status becomes **Accepted**). If paperwork needs checking, place the bag **On Hold**. If the bag is damaged or leaking, mark it **Rejected (problem recorded)**.
 - Click **Print labels** to print **Standard (101 × 54 mm)** or **Compact (50 × 25 mm)** barcode labels carrying the permanent laboratory sample code.
 
 👉 *Step-by-step guides:* [Reception: Receiving Samples & Labels](./reception-and-intake.md) and [KoboToolbox Field Integration](./kobotoolbox.md).
@@ -28,7 +28,7 @@ At **Sample Reception**:
 ## Stage 2: Drying, Preparation & Sub-Sampling
 
 Before chemical or spectral measurements begin, the sample must pass your laboratory's drying and preparation steps:
-- In **My Work** or **Workbench**, complete the drying record (air-drying or oven temperature, start and end times, and optional oven asset) and click **Confirm Complete**.
+- In **My Work** or **Workbench**, complete the drying record (air-drying or oven temperature, start and end times, and optional oven asset) and click **Confirm work is done**.
 - Complete the preparation record for sieving (including mass before sieving and coarse stones mass in grams), grinding, or splitting. You can also create sub-sample containers and print container labels.
 - Once preparation is complete, the sample status moves from **Accepted** to **Processing**, unlocking its bench tests.
 
@@ -52,7 +52,7 @@ Technicians perform tests inside an analytical batch in **Workbench**:
 
 Technicians record and submit measurements. Only a **Laboratory Manager** (or authorized reviewer) can approve them:
 - Open **Manager Task List** to inspect the batch QC verdict, cross-parameter plausibility checks, and all numbered measurement tries.
-- If a test was run more than once or has replicates, choose the final report number (**Report attempt** (use this measurement try on the report), **Report mean**, **Report class from selected fractions**, or **Not reportable** with a reason).
+- If a test was run more than once or has replicates, choose the final report number (**Use this try on report**, **Report mean**, **Report class from selected fractions**, or **Not reportable** with a reason).
 - Click **Approve** on valid results, or return a questionable result for repeat testing with a clear reason note.
 - When every required test on the sample is approved (or waived with a reason), the sample status becomes **Approved**.
 
@@ -84,7 +84,7 @@ Once a sample is **Approved**, its results are locked against direct edits and r
 | **Partial** | Some (but not all) assigned tests have been submitted for review. | **Laboratory Technician** (remaining tests) and **Laboratory Manager** (review). |
 | **Submitted** | All assigned tests are submitted and waiting for review. | **Laboratory Manager**: Check QC, choose final report numbers, and approve. |
 | **Approved** | All required tests are approved (or marked **Not reportable** with a reason). Results are locked. | **Laboratory Manager**: Issue the **Certificate of Analysis** PDF in **Reports**. |
-| **Rejected (Non-Conformance)** | Sample was rejected at reception due to damage, leakage, or insufficient soil. | **Laboratory Manager** or **Sample Reception Officer**: Record disposal when ready. |
+| **Rejected (problem recorded)** | Sample was rejected at reception due to damage, leakage, or insufficient soil. | **Laboratory Manager** or **Sample Reception Officer**: Record disposal when ready. |
 | **Archived** | Sample is stored in long-term archive storage after reporting. | Kept in archive storage until retention expires. |
 | **Disposed** | Physical soil bag has been safely discarded after its retention period expired; all digital records remain. | Complete. |
 

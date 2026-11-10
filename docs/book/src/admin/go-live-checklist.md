@@ -42,10 +42,10 @@ Use this one-page checklist before you receive your first real box of soil sampl
 ## 4. Quality Preset Chosen & Policies Checked by QA
 
 - [ ] Open **Policies** for your laboratory.
-- [ ] Choose the **Preset** (ready-made set of quality rules) that matches your current phase (**ISO 17025 strict**, **Basic**, or **Advisory**). Enter a **Reason for change**, and click **Save preset** (save your chosen starting rule set).
+- [ ] Choose the **Starting rule set** that matches your current phase (**ISO 17025 strict**, **Basic**, or **Advisory**). Enter a **Reason for change**, and click **Save starting rule set**.
 - [ ] Review key whole-laboratory settings with your QA Officer:
   - *Number format:* Check **Decimal separator** and **Thousands separator** so pasted spreadsheet numbers parse cleanly.
-  - *Numbering & retention:* Check **Sample code pattern**, **Consignment number format** (numbering pattern for incoming sample boxes), **Report number pattern**, and **Sample retention after report**.
+  - *Numbering & retention:* Check **Sample code pattern**, **Delivery box number format**, **Report number pattern**, and **Sample retention after report**.
   - *Bench & review rules:* Check **Allow technician repeat before submission**, **Require a second reviewer**, **Require a second person for amendments**, **Idle bench lock (0: off)**, and **Require PIN when recording**.
 - 👉 *Step-by-step guide:* [Choose a Quality Preset and Customize Laboratory Policies](./configure-presets-and-policies.md)
 
@@ -57,7 +57,7 @@ Use this one-page checklist before you receive your first real box of soil sampl
 - [ ] Under **Test Methods**, confirm that every soil parameter your laboratory will run during the pilot is **Active**. Check its **Reporting Unit**, **Plausible Minimum**, **Plausible Maximum**, and **Display Decimals**.
 - [ ] Under **Analysis Packages**, click **Create Analysis Package** to create your lab's analysis packages. The standard GLOSOLAN analysis catalogue is loaded on install, and each laboratory creates its own packages for reception clerks to select in one click.
 - [ ] Open **Laboratory Methodology Defaults** and confirm the **Active Methodology** for each parameter in your laboratory, then click **Save Defaults**.
-- [ ] Open **Policies**, select each active analysis and method under **Analysis and method overrides** (custom rules for one test or method), and verify its **Versioned QC rules** with your QA Officer. Check **Blanks per batch**, **Duplicate interval**, **Laboratory reference materials per batch** (how many laboratory reference materials (your lab's own in-house check soils) to include per batch), **Certified reference material interval** (how often to include a certified reference material (official standard soil with a certified value)), and acceptance windows.
+- [ ] Open **Policies**, select each active analysis and method under **Custom rules per test or method**, and verify its **Versioned QC rules** with your QA Officer. Check **Blanks per batch**, **Duplicate interval**, **Laboratory reference materials per batch** (how many laboratory reference materials (your lab's own in-house check soils) to include per batch), **Certified reference material interval** (how often to include a certified reference material (official standard soil with a certified value)), and acceptance windows.
 - 👉 *Step-by-step guide:* [Switch On Analytical Methods, Calculations, and QC Rules](./enable-methods-and-qc-rules.md)
 
 ---

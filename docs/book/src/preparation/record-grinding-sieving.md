@@ -22,7 +22,7 @@ Record the crushing, sieving (typically to under 2 mm fine earth), fine grinding
 2. In the **Work type:** dropdown at the top left, select **Sample Preparation**.
    *You should see all dried samples that are ready for sieving, grinding, and splitting.*
 3. Find your sample row (or use **Find sample ID...**).
-   *In the right-hand detail panel, verify that **Drying Gate:** (drying step that must finish first) shows **✓ Completed** and that the row status badge says **Ready**.*
+   *In the right-hand detail panel, verify that **Drying step:** shows **✓ Completed** and that the row status badge says **Ready**.*
 4. Tick all three procedural checks in the **Operational Checklist** as you complete the physical work at the preparation bench:
    - **Sample identity and completed drying record verified**.
    - **Required preparation steps completed according to the applicable laboratory procedure**.
@@ -32,8 +32,8 @@ Record the crushing, sieving (typically to under 2 mm fine earth), fine grinding
    - Under **Sieving**: enter **Sieve (mm)** (such as 2.0), **Mass before (g)**, **Coarse fraction (g)** (stones retained on the sieve), **Mass after (g)** (fine earth), **Started**, **Ended**, and **Equipment**.
    - Under **Grinding** (when fine grinding is required): enter **Ground to (mm)** (such as 0.5 or 0.15), **Mass before (g)**, **Mass after (g)**, **Started**, **Ended**, and **Equipment**.
    - Under **Splitting** (when riffle splitting is required): enter **Mass before (g)**, **Mass after (g)**, **Started**, **Ended**, and **Equipment**.
-6. Click **Confirm Complete**.
-   *You should see **Checklist Verified** with a confirmation code, and **Preparation Gate:** (sieving and grinding step that must finish first) in the detail panel change to **✓ Completed**.*
+6. Click **Confirm work is done**.
+   *You should see **Checklist Verified** with a confirmation code, and **Sieving & grinding step:** in the detail panel change to **✓ Completed**.*
 
 ---
 
@@ -46,7 +46,7 @@ As soon as both **Air Drying** and **Sample Preparation** are confirmed, the sam
 ## If Something Goes Wrong
 
 - *If the sample row in* **Sample Preparation** *shows* **Blocked** *and* **Requires Drying Complete** *→* Switch **Work type:** to **Air Drying** and confirm drying for that sample first.
-- *If you see an error when clicking* **Confirm Complete** *→* Check that the sum of **Coarse fraction (g)** and **Mass after (g)** in **Sieving** does not exceed **Mass before (g)**. Also check that all required fields under **Sieving**, **Grinding**, or **Splitting** are filled in.
+- *If you see an error when clicking* **Confirm work is done** *→* Check that the sum of **Coarse fraction (g)** and **Mass after (g)** in **Sieving** does not exceed **Mass before (g)**. Also check that all required fields under **Sieving**, **Grinding**, or **Splitting** are filled in.
 
 ---
 

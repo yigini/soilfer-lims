@@ -7,34 +7,34 @@ Every entry below gives a one-line, plain-language definition for reception and 
 
 ---
 
-## 1. Plain Words for Common On-Screen & Manual Terms
+## 1. Plain Words for Common Lab & Screen Terms
 
-| Term You May See on Screen | One-Line Plain Definition |
+| Lab or QA Term (and Screen Label) | One-Line Plain Definition |
 | :--- | :--- |
 | *Acknowledgement* | Confirming on screen that you saw a warning (such as a low sample weight or a batch quality note) and wrote a reason before continuing. |
-| **Attempt** *(**Attempts** / **Attempt #1**)* | One measurement try (or round) of a test on a sample in **Workbench**; if a reviewer asks for a re-test (**Returned**), you record a second try while the first try stays saved in history. |
-| *Bound Reference Lot (**Save reference bindings**)* | The specific bottle or batch of check soil that you link to a quality control slot in your batch run before entering readings. |
-| **Repeat calibration bracket** | Re-testing only the group of samples measured between the last good instrument check and a failed mid-run check, instead of repeating the whole tray. |
+| *Attempt* (**Tries** / **Try #1**) | One measurement try (or round) of a test on a sample in **Workbench**; if a reviewer asks for a re-test (**Returned**), you record a second try while the first try stays saved in history. |
+| *Bound Reference Lot* (**Linked check soil bottle** / **Save check soil bottles for this run**) | The specific bottle or batch of check soil that you link to a quality control slot in your batch run before entering readings. |
+| *Calibration Bracket* (**Repeat samples since last good instrument check**) | Re-testing only the group of samples measured between the last good instrument check and a failed mid-run check, instead of repeating the whole tray. |
 | *Canonical Unit* | The single standard reporting unit (such as `mg/kg` or `cmol(+)/kg`) that the system uses for an analysis so numbers from different days or labs never mix up units. |
 | **Chain of Custody** | The step-by-step log showing who held, moved, stored, or tested a soil bag from arrival at reception to archive storage or disposal. |
-| **Consignment Batch** | A box, cooler, or delivery of several soil sample bags that arrive together at **Sample Reception** under one delivery number. |
-| **Disposition** *(**Awaiting disposition**)* | The manager's recorded decision on what to do when a batch fails a quality control check (for example, repeat the batch, repeat part of the run, or accept unaffected samples with a note). |
+| *Consignment* (**Sample delivery box**) | A box, cooler, or delivery of several soil sample bags that arrive together at **Sample Reception** under one delivery number. |
+| *Disposition* (**Waiting for manager decision** / **Save manager batch decision**) | The manager's recorded decision on what to do when a batch fails a quality control check (for example, repeat the batch, repeat part of the run, or accept unaffected samples with a note). |
 | *Eligible* | Ready, complete, and valid to be used (for example, a finished measurement try whose quality checks are clear so a reviewer can pick it for the report). |
 | *Endpoint / Payload / Idempotent* | Software terms for a data feed URL (*endpoint*), the package of data sent (*payload*), and a safe retry that never creates duplicates (*idempotent*). |
-| *Gate (**Operational Gates**)* | A preparation step—such as air-drying or 2 mm sieving—that must be finished and confirmed (**Confirm Complete**) before bench tests unlock. |
+| *Gate* (**Required prep steps** / **Drying step:** / **Sieving & grinding step:**) | A preparation step—such as air-drying or 2 mm sieving—that must be finished and confirmed (**Confirm work is done**) before bench tests unlock. |
 | *Immutable* | Locked so it cannot be changed or overwritten later; to make an update, you save a new numbered version with a written reason while old records stay intact. |
 | *Inspector* | The side or bottom detail panel that opens on screen when you click a sample, batch, or review row to see its full readings and history. |
 | *Lifecycle* | The stages a soil sample passes through from field collection and reception to drying, bench testing, review, reporting, and storage. |
-| **Native run** | A standard batch run created directly inside **Workbench**, with its sample order and quality control slots managed by the system. |
-| **Non-Conformance** *(**Nonconformities** / **Open NCRs**)* | A formal problem record in **QA Dashboard** describing what went wrong with a damaged sample or failed batch and what action your lab took to fix it. |
-| *Override (**Analysis and method overrides**)* | A custom rule set for one specific soil test or method when it needs different limits from your lab's general settings. |
-| **Preset** | A ready-made starting set of quality rules (**ISO 17025 strict**, **Basic**, or **Advisory**) that a lab administrator picks in **Policies** and then tailors to the lab. |
+| *Native Run* (**Standard batch run**) | A standard batch run created directly inside **Workbench**, with its sample order and quality control slots managed by the system. |
+| *Non-Conformance / NCR* (**Problem record** / **Problem records** / **Open problem records**) | A formal problem record in **QA Dashboard** describing what went wrong with a damaged sample or failed batch and what action your lab took to fix it. |
+| *Override* (**Custom rules per test or method**) | A custom rule set for one specific soil test or method when it needs different limits from your lab's general settings. |
+| *Preset* (**Starting rule set**) | A ready-made starting set of quality rules (**ISO 17025 strict**, **Basic**, or **Advisory**) that a lab administrator picks in **Policies** and then tailors to the lab. |
 | *Provenance* | The record of where a sample or result came from—who collected or measured it, when, on which instrument, and with which method. |
-| *Receipt (**Recent Receipts**)* | The saved confirmation banner or record showing that the server accepted a sample check-in, preparation step, or batch action. |
-| **Reported value** | The final result chosen by the reviewer in **Manager Task List** (**Report attempt**, **Report mean**, or **Report class from selected fractions**) to print on the client's report. |
+| *Receipt* (**Recent check-ins** / **Saved confirmation log ({count})**) | The saved confirmation banner or record showing that the server accepted a sample check-in, preparation step, or batch action. |
+| *Reported Value* (**Final report value**) | The final result chosen by the reviewer in **Manager Task List** (**Use this try on report**, **Report mean**, or **Report class from selected fractions**) to print on the client's report. |
 | **Scope** *(**Role & Scope**)* | Which laboratory, test, or method a user account or policy setting applies to. |
 | *Snapshot* | The saved copy of the quality rules and limits that were active at the exact moment a batch was run, kept so later rule edits never change past evaluations. |
-| **Superseded** | Replaced by a newer approved measurement try or a newer corrected PDF report version (**Revision** 2 or higher). |
+| *Superseded* (**Replaced by newer version**) | Replaced by a newer approved measurement try or a newer corrected PDF report version (**Revision** 2 or higher). |
 
 ---
 
@@ -71,7 +71,7 @@ Every entry below gives a one-line, plain-language definition for reception and 
 | *Electrical Conductivity (EC)* | A measurement of dissolved salts in a soil-water extract used to check for soil salinity. |
 | **Expanded uncertainty** | The plus-or-minus margin printed next to a test result showing the range where the true soil value lies (**Certificate coverage factor (k)**). |
 | **Laboratory reference material (LRM)** | Your laboratory's own large batch of air-dried, well-mixed local soil tested in every run as a daily check sample. |
-| *Limit of Detection (**< LOD**)* | The smallest trace of a nutrient your method can tell apart from a clean reagent **Blank**. |
+| *Limit of Detection* (`< LOD`) | The smallest trace of a nutrient your method can tell apart from a clean reagent **Blank**. |
 | *Limit of Quantification (**< LOQ**)* | The lowest amount of a nutrient your method can measure with reliable accuracy (**Values between detection and quantification limits** in **Policies**). |
 | **MIR** *(Mid-Infrared Spectroscopy)* | Mid-infrared light (4000 to 400 inverse centimetres) shone onto finely ground soil in **Spectral Library** to estimate soil properties rapidly. |
 | **NIR** *(Visible–Near-Infrared Spectroscopy)* | Visible and near-infrared light (350 to 2500 nanometres) shone onto 2 mm air-dried soil in **Spectral Library**. |

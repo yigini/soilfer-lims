@@ -10,11 +10,11 @@ This troubleshooting guide is divided into two sections:
 
 ### 1. Why is a sample's test row locked in Workbench?
 
-*Cause:* Required drying and preparation steps have not been completed yet. They may also be waiting for manager verification when **Require manager verification of preparation gates** is enabled in **Policies**.
+*Cause:* Required drying and preparation steps have not been completed yet. They may also be waiting for manager verification when **Require manager sign-off on preparation steps** is enabled in **Policies**.
 
 *Solution:*
 1. Open the sample in **My Work** or **Workbench**.
-2. Complete the drying record (**Confirm Complete**) and the sieving or grinding preparation record. Have a manager verify them if required by your laboratory's **Policies**.
+2. Complete the drying record (**Confirm work is done**) and the sieving or grinding preparation record. Have a manager verify them if required by your laboratory's **Policies**.
 3. As soon as preparation is confirmed, the sample status moves from **Accepted** to **Processing**. Bench test rows unlock automatically.
 
 ---
@@ -48,7 +48,7 @@ This troubleshooting guide is divided into two sections:
 *Solution:*
 1. Follow the step-by-step decision guide in [Quality Control, Control Charts & Failed QC](../usage/qc-management.md):
    - Check for a typing mistake. Apply a reviewed transcription correction if **Allow reviewed transcription correction of undispositioned failed QC** is enabled in **Policies**.
-   - Select **Repeat calibration bracket** if a mid-run calibration check drifted after earlier passing checks.
+   - Select **Repeat samples since last good instrument check** if a mid-run calibration check drifted after earlier passing checks.
    - Reject the batch (**Fail batch**) and return the affected samples (**Returned**). Technicians can then record a fresh Attempt 2 in **Workbench**.
 
 ---
@@ -60,7 +60,7 @@ This troubleshooting guide is divided into two sections:
 *Solution:*
 1. Open the sample or report in **Reports** (**Result Reports**) and start a formal report amendment (see [Lab Manager & QA: Certificates of Analysis, PDF Reports & Amendments](../usage/reporting-pdf.md)).
 2. Record the amendment reason. Obtain a second person's co-signature when **Require a second person for amendments** is enabled in **Policies**.
-3. Issue the amended report to publish the new revision (**Current**). This automatically marks the previous PDF **Superseded** and retires its old public link.
+3. Issue the amended report to publish the new revision (**Current**). This automatically marks the previous PDF **Replaced by newer version** and retires its old public link.
 
 ---
 

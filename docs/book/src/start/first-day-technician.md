@@ -34,7 +34,7 @@ Walk through a complete technician shift using five practice soil samples. You w
 
 1. In **Workbench**, select your analytical method (for example, soil pH in water) and open the **QC run** worksheet (**Open run worksheet**).
    *Your laboratory decides the batch size and control positions (many laboratories use up to 20 samples per batch; see [Per-Lab Settings, Presets & Method Overrides](../usage/lab-settings-and-presets.md)).*
-2. Click **Select instrument** to pick the calibrated meter or instrument you are using today, verify the **Bound reference lot** (check soil bottle linked to this batch slot), and click **Start run**.
+2. Click **Select instrument** to pick the calibrated meter or instrument you are using today, verify the **Linked check soil bottle**, and click **Start run**.
    *You should see the run open with rows for your soil samples plus the required quality control positions:*
    - A *blank* (a reagent-only check with no soil, used to check for contamination; see [Glossary](../reference/glossary.md)).
    - A *duplicate* (a second weighing of one sample in the batch, used to check precision; see [Glossary](../reference/glossary.md)).
