@@ -173,6 +173,7 @@ const PERMISSIONS = {
     ],
 
     // System & Analyses Configuration
+    'CREATE_LAB': ['SUPER_ADMIN'],
     'MANAGE_BRANDING': [
         'SUPER_ADMIN', 'LAB_MANAGER', 'MASTER_USER'
     ],

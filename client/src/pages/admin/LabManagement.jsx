@@ -37,7 +37,8 @@ const getIanaTimezones = () => {
 };
 
 export default function LabManagement() {
-    const { user } = useAuth();
+    const { user, hasPermission } = useAuth();
+    const canCreateLab = hasPermission('CREATE_LAB');
     const { t, language } = useLanguage();
     const { showDialog } = useDialog();
     const navigate = useNavigate();
@@ -520,7 +521,7 @@ export default function LabManagement() {
                         </p>
                     </div>
 
-                    {(user?.role === 'SUPER_ADMIN' || user?.role === 'MASTER_USER') && (
+                    {canCreateLab && (
                         <button
                             onClick={() => setShowOnboardModal(true)}
                             className="px-5 py-2.5 bg-sf-primary text-white rounded-xl font-bold text-xs hover:bg-sf-primary/90 transition shadow-md shadow-sf-primary/20 flex items-center gap-2 self-start sm:self-auto"
@@ -651,7 +652,7 @@ export default function LabManagement() {
                 </div>
 
                 {/* Onboard Laboratory Modal */}
-                {showOnboardModal && (
+                {showOnboardModal && canCreateLab && (
                     <div className="fixed inset-0 !m-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4 animate-in fade-in duration-200">
                         <div
                             role="dialog"
