@@ -1,6 +1,6 @@
 {
-  "releaseVersion": "v1.3.0",
-  "publishedAt": "2026-11-10T13:21:38.593Z",
+  "releaseVersion": "v1.4.0",
+  "publishedAt": "2026-11-10T21:36:22.804Z",
   "provenance": "system-app-review",
   "reviewScope": "Application navigation, UI controls, error recovery, and operational workflows verified against SoilFER LIMS v3.4 controls",
   "scientificBoundary": "Operational workflow guidance only; chemical method protocols and lab-specific policies are managed separately via laboratory-local notes (HelpLabNote) requiring lab manager authorization",
@@ -54,7 +54,7 @@
         "pt"
       ],
       "localeHashes": {
-        "en": "255f2b537f7838b589098a0283c1b7f874954aa1f3d221c234cd6af0a796c0df",
+        "en": "cd96a20f023906dc7f2770ac5ae9db6b2daa00e109975da2270a7752974b624c",
         "es": "89c15eda43a2a37a4f93e9468bb0213cdc2a0bf502051c5ce19e6866ef85ad53",
         "es-419": "af30d457a354688b495d715f385803bd58a04328016a1876429513d39e070ec1",
         "fr": "ad855018eff74cb6b233a1dacc5b7fdeb968148f1f1316782ed634fc7628083c",
@@ -77,11 +77,11 @@
         "pt"
       ],
       "localeHashes": {
-        "en": "baa3544cb5ef1cd73ea9685799bc09b72ac9988e3d666a06687bd195ee915a61",
-        "es": "b473f34a840198fd2735268cdcc8506424d7e5304be042bd936e99e48c2d94f9",
-        "es-419": "2a5c40eaf1b6575c1a69b2c0967bf0e43a993d6c569ff15bef628d1898659783",
-        "fr": "6f8c87c04e200f66a0815541a006dcb0a49535a905837786a55bbfa78328aae6",
-        "pt": "3b371f6b8469c87e8545a4ab9204a129e8c29282f86d8db2e45d39f8e2c4ab62"
+        "en": "94fd9b03aa15f476bebc71c7bfb5b71abc948728b787f3e3e394bd23eab00240",
+        "es": "f9e7122212c2e8daa23497420e49618e2d12c149397d5f27553fdbf3561ad681",
+        "es-419": "da541da88c1249f8e17375c5b70eb5a83e704e4b9bfd7417a409615c19968e48",
+        "fr": "0da9009ee7bbac062cda0433702561a029a4483f2a01bb035bb76c3d0987e205",
+        "pt": "17176a83eed6b511fec8b9b249c6ba76bd905ee1d409ddf792f962ddb1e24d59"
       },
       "mappedRoutes": [
         "/",
@@ -104,11 +104,11 @@
         "pt"
       ],
       "localeHashes": {
-        "en": "2c87447d4468448b1d45bf47b12794f0723592daf7c30d0ce04b07465c7bbab8",
-        "es": "4116cb96232a3590181b01b1cb0cba4efa68919652566a6ce637118c6b2f7a53",
-        "es-419": "1f10a27d732ceb3c9efe4c0229bc674ff52b2228d8cc5495515667f3fae597a0",
-        "fr": "d7fd72b7025d0a41c61bdcc41d4c55e3c91fc5103968f3cc54b7d6edbd41667b",
-        "pt": "f76c66970d48f33b5c1c997154596c95088580dc13e1ed919ba79f665367d3b3"
+        "en": "a957382631f1cb049b037ffc984c97bc55ba8684cd726884393788e8a8671918",
+        "es": "7a258edb975efc03356f3fc268a5c381db6f338ede673fcbe50849489b64d08e",
+        "es-419": "30491ada73166670842aaa6b8892c58d6b4fb963fddcc0e3790420e6387d782e",
+        "fr": "7c0aac535c89791a82aab1d4c9d15f047debb723bd31e9e1378fd11f64a795b8",
+        "pt": "2d9d804bd2148c9097e300e3d97f26514ba1ed2ef56d489e3488f03284e5ea51"
       },
       "mappedRoutes": [
         "/",
@@ -130,10 +130,10 @@
         "pt"
       ],
       "localeHashes": {
-        "en": "ce22dfc8c3f07ec2d33a55322f03e27459c66f0d74e06d2cae3cdeff90cfcebf",
+        "en": "b16fc2fee05c59c604a61a0c6844dd1b6ae2aa9cb8dfa9fd07aeb111533f3fee",
         "es": "b5c339e46327319e66bc73347e5ee9b017ecaecbb3212825fea8d4b193079c84",
         "es-419": "11a59915c698881761032bb6e98c4872b84599ab32c1007403854dd412bdbde5",
-        "fr": "92273edbed63b0b469aa285e9c54d948dcd1b6a16fa1e780e1dc3b0b752d31f8",
+        "fr": "ea6560b12694ca82a892870d7c7a363108ac99aef3c7bfff0dd0f4c4464730dc",
         "pt": "4c9ef747f73661f05eb044b6b5eb2bc5f7301bc6d563e8b611c31d1a4b8d15a8"
       },
       "mappedRoutes": [
@@ -183,11 +183,11 @@
         "pt"
       ],
       "localeHashes": {
-        "en": "2ce9d67d3c081d297962c8c52800768b4ddc0eebf8025f765551f8cc1190c06b",
-        "es": "411dfe7d5776fbae3bd5fcd6ef78c425d3e625803e4afdddfcb3e0e091c47cfb",
-        "es-419": "a77fdb87451f7191922b55df814dfafab8f1814fd9842946db992ee2ad6b631d",
-        "fr": "f5391b345c57bef5ec394038f02c236914ff6bc1436e9b0317a10aec1b0c6213",
-        "pt": "a6cf79b6d9ab1e102333d0a053513e8d15a8972223b4b2b80bd3e30c7120a215"
+        "en": "5e8d7313d2d8ee75006709d6acc4ea3c7e531bd2ea6d6522815d36dc89e0967f",
+        "es": "116261384673c084439f7a8c401a4ad2a485110dd5aad6bec87e58d97fc324ab",
+        "es-419": "7f35d531106fbdc302cf1582fe24a2646ff0d53bc63ba62ebb1856a216114afe",
+        "fr": "d0e2d9a2aefb48f54d37ab5962a1ecce885c4821571def9574ad6ac4b913c85b",
+        "pt": "66ab7bb2c6a5b8008af40d16ea38639261dc6413600aeefb1e6e678a4540d04b"
       },
       "mappedRoutes": [
         "/",
@@ -210,11 +210,11 @@
         "pt"
       ],
       "localeHashes": {
-        "en": "e6e67c3c2b5e2223909e61c498a03b85d326d5c21e13a3049903564456000144",
-        "es": "58ea2910793fcb190140751a54e99a6207dc57d8acb26af422d2af49a236ad6d",
-        "es-419": "11db2758ea6923d838b97590e92bc31c777b978076e1f46405ae761137dfa709",
-        "fr": "4cbf5c5901c7eb53f4446bff626d6d96b877edf1441ee177b1728dc8229b36c5",
-        "pt": "95e44874823a61edb845ef0237217b2a0d30ec7d57eb32b3627307d972984c5a"
+        "en": "68952a0d404f3eb52b7f126e87a14eee8d04c3ad2bf857f5fd6a9a58362e7391",
+        "es": "5ebba579771457bcb53dad64a7dee60806bf30a90d564b89487ab42fe416ebf7",
+        "es-419": "66541bb59a65f18f2ad86d3c7dd83e7a430ee0c0e8e15ba77867ed84aea94448",
+        "fr": "bf8e5e8fa7598e0e7df195ed10e89a7394ff4ec16849fdf4a5cc25dd888f9f31",
+        "pt": "e1d39d37917781e51e78ad61afc11dfd49f6eab4f99276e920ba865e7ea69550"
       },
       "mappedRoutes": [
         "/",
@@ -264,11 +264,11 @@
         "pt"
       ],
       "localeHashes": {
-        "en": "34f241aba7d04c2028ca73c424c4399733ed0c4362bda8a80faf1448e238d6ee",
-        "es": "6395a28b49396e334f73a834293eb0d5fc1c1a830f50793be759e33be700cc43",
-        "es-419": "babdbc9cfefbefe6cec086fe3fc88321a603cfa1cf953bbf3517c806f752d30b",
-        "fr": "f191a8967aad41b1f1dd8508c8e837c9ed093f008d3a886595a20106899cc3d0",
-        "pt": "b63cc5b5df35d712de431543ad6c4744a365a9ffe97b7666700e780e3ea9042a"
+        "en": "acf3212ec5cfee8170cfb4276dfbceb19b5c6ca2b66a654696ce44195fe2d940",
+        "es": "3aece2b26b48a71d2361e5454ac7dc8999a9a8011668ef4a54f7d65809dd91f6",
+        "es-419": "a1564137a75c839005ca1591a46e2d8ee70a4404936ab172788c03173a19bc66",
+        "fr": "f962ed03a5ca5b3cc02dfa1ac5524fd96498a97e343fc4a7c9fc27fd0872b5d1",
+        "pt": "5f34384b0bf20e36b50d3c49b3b14d699d47267745c5acd407e9b0942e11754c"
       },
       "mappedRoutes": [
         "/reception"
@@ -289,11 +289,11 @@
         "pt"
       ],
       "localeHashes": {
-        "en": "9552c53be2d9be4dbb2256d1c7c457169251525b326fbea8645e614bf20f08d7",
-        "es": "77ef293112ed844a62e1606246d9fe3e7c43e13cb802928f1b48ffa0c47165a5",
-        "es-419": "ad74dda735bbf217678cf323757dfa7078df7097f9c41370110662042d2ba49b",
-        "fr": "51cdcf192887b94712effb36f2f3b53c40108d736c2e810492d501bcb0a26d8f",
-        "pt": "b75b7a2c3128b81f7b66cc8c214e9e392f3f55d4e4ef108642995d98a2a71387"
+        "en": "2bb5a7fc6bf648ec97ac79de34da9c85a4c4e068113784cf42b3f9ce852e3839",
+        "es": "6add78176687be3a8002ef12fedafbefaf869bfe688dd3064d42d630f7fb60a2",
+        "es-419": "30a9adc206265b61d0751333a28e4b62d7c480e6b5dd8a0193007c0fc068742f",
+        "fr": "5d3f21f7f41a5b492f3671437339f0e9a8909caa8eb23da702986b7c5fc064e9",
+        "pt": "a8894d65037fc5dd8f9ed7e01ac44f41aae19b8de6d5ec505c79b78abc651fba"
       },
       "mappedRoutes": [
         "/reception"
@@ -365,11 +365,11 @@
         "pt"
       ],
       "localeHashes": {
-        "en": "bfda3b2eb7e2834d496ec19bda6a6d997f8e277343d0b60a067f67fea72b9f18",
-        "es": "ac8f6246a8c98c816e601310689d8777b90a856dad52b7a32265993d169f70b3",
-        "es-419": "cbfb751dd792361eeadd140d00ed3e852cc70aeb026501693ac618e1a4cf4275",
-        "fr": "c5a99f095a6c5face56328f4ab4664b07d99bc727140cc9ff793e133f5370e61",
-        "pt": "4cf8e35fe0abce503702983053e84619a3da0916a7d44cef7731a9e3a9166102"
+        "en": "be45bfe603740f341543e037a36c11cbc55a1b4deaf88fed2b3b32190346b4a7",
+        "es": "5a4093be71e20c8b4ec6db7e8a13d7efd599283118e8f0bff717e4b3d76b301e",
+        "es-419": "8d64138369ada0b9c4909b8ccc0151d00d266e1aaa9aabde932b55f73e27db41",
+        "fr": "d12a81ccc2ebb799b64ba44015fd4e0f40f57551b48eac2b7168a54d304b6961",
+        "pt": "a94596b238f3a09300eb8f94d3a6b839553a8aeb2ec44bfa51346d2501693ac3"
       },
       "mappedRoutes": [
         "/reception"
@@ -390,11 +390,11 @@
         "pt"
       ],
       "localeHashes": {
-        "en": "db42f08c0f9cb67cf1c629abbf2df61e1a374d1784d7fc611f391bd0f7832563",
-        "es": "c98409bf85ed331c60a7c4b920093f9edee22846d2757951c8daa591d3724cb5",
-        "es-419": "45776d53b0e8279a63da2a35cdd63545c85b2c0d5c027a675a65e6e255fae4b2",
-        "fr": "c44b96b617f19b6407c7d68fce1cee6c8f2dc0be4c01f7f0ad83c62d88e317cd",
-        "pt": "f5f9cbde4188ba83d50108ec1d11f15dc15c6d6d51c4d88acd68c397443146ae"
+        "en": "843488043ed8f8980e794c664b63fec6f08baf99dc1518c0c0132315fc7cc95f",
+        "es": "23b01e5679beddd97b24e899c9595bf1f71bdcc66746cdab4548662bfd7414f3",
+        "es-419": "5b95a1e4283cdeef4132d9e65e3bf77d7b3e26c02d0d9033e911ba69774e8fa3",
+        "fr": "5fe41e667d97d18b36d7d0fc72a795a03564d3dabdbd6d50df43f40c9d80beb0",
+        "pt": "e404cad171ddd9bbb4c8158476de88f8318e73e09c2a249369f91e18c1e25f26"
       },
       "mappedRoutes": [
         "/reception"
@@ -415,11 +415,11 @@
         "pt"
       ],
       "localeHashes": {
-        "en": "39438f9206c09698587512e56e04f2d867991a9a89e460fdc841182169e5bca1",
-        "es": "ea1ee534e423d700d4ad6fdc4d74ab9ce136c1b459c41e20ce0872803f660c1b",
-        "es-419": "f3e63f0351b89acac9e3d3413ac9ab255bcbd686bc35469c664cd7b86d8f171f",
-        "fr": "0a34aae709e44d44cc5c9f4cafd55fc7ad1d360587cde7811fcc78c87f580c7a",
-        "pt": "7028d07198262904a2a40cdf9fa622062847fb25101791eb7b11df9854514263"
+        "en": "cf2b576062e32a99f0a3a6e6d0f2738d46038fc076c828170dd28c142d04a177",
+        "es": "dc5666457c189b311fb204e27146df8c48113c68c7327f5ea66e8a570df404c5",
+        "es-419": "f41d81246cee385f4ffa75eaa5f72bdf75b8ca259418844a5d9337673209f036",
+        "fr": "c0f378287c5cdf9ccba3d3e13b58bcf04cac4520c679da2e1b0275400ccd19d7",
+        "pt": "239aaf7373c4f79958bf21a74ab9b0466cc246a7c3a03f380d566abdc2273d81"
       },
       "mappedRoutes": [
         "/scan",
@@ -441,11 +441,11 @@
         "pt"
       ],
       "localeHashes": {
-        "en": "8dc0ccc0fbed6cf90086896267533f8a990b4086d230266e7a8f2ff614364b4f",
-        "es": "042581f4191892f1e910b2cf0464d4ac26d36abd439b21d9252e7c2605501f31",
-        "es-419": "efb1c5ba1a87397575e415da7a9b783024d0e7035fa99ecfdb91aa941059d04a",
+        "en": "b059993c059c5f13e4383f06b3db90613e87c4ff6c382961e78b8643da72c631",
+        "es": "3c66b7bb261de82323e18ea640c4591cea255110fb2bea68217b3f11fcce3e0e",
+        "es-419": "69671d6a76500363e1f91354203b4c5e60eaf36effcdef96394d1dc69f13935e",
         "fr": "a5132590426427ae1cd29f5b982b7c3c4189097f509681f9183d9ab1aa17a809",
-        "pt": "cf07bb7d23b1ff6d74c625202d6c7cd4192a586721b512c4ad53eb22ef330e52"
+        "pt": "67668095880abf2e9c9748873d308063606d4ca81f05aeecc02c21bc3c2f6841"
       },
       "mappedRoutes": [
         "/reception"
@@ -493,11 +493,11 @@
         "pt"
       ],
       "localeHashes": {
-        "en": "adc690e72dde5c0726d50499218356fec2c2043beaaf74d931c8a24b58ed5dbb",
-        "es": "db7a643cd0e8800cd448a4138d7aa03136126c30c46d3a6a22ddb9b62df2c100",
-        "es-419": "2b033647a22ebab7311cc09e2148ebdd85772fda0b2d360d4299ee0f7aa1e6cb",
-        "fr": "ab3359e1619f77bf066c1d1c44a1f37150baea31ef46adc1a0054d2f746305a4",
-        "pt": "0e1edc9f030079ec9ace52f927ed40ffa31a427d352678ee0e9753218b5d89de"
+        "en": "c794a40676a8d76f16c00be985f29b58adf787d0d1aa19083565543a13ebc6d1",
+        "es": "d07cc72aa2b134572a784496dfb8df71c392f3719b4e83ae12e72fdc524baaeb",
+        "es-419": "49fb881d392649fea7a5f0a097cc5cfba354e173efe2668a4970e7a3efa650d8",
+        "fr": "a41c09b5a851e47f703000b815ac110fe10c62542d4fbcdf3225f14050998e4d",
+        "pt": "488d75300e81c6e66f5414dddd9c6e26fc386b7b768c50230298be958df2fa19"
       },
       "mappedRoutes": [
         "/samples"
@@ -518,10 +518,10 @@
         "pt"
       ],
       "localeHashes": {
-        "en": "1df254fab9b50ce4ebf0dfb023ac40fa65c9bf855d46f582bf0e09505fbb9ca0",
+        "en": "b3ce7a098e5e9450bed85708e9b86ee29afc9ec9ee72aa39197d6d43ae0e9632",
         "es": "3d47a1bce1b503d8f2020cc7bcd800d85dfa44d8559d07c2c8db5d9a63d7afda",
         "es-419": "7a0e4104d11394112f155fe5f9f9ce72527f6c645a22424c1a0403a1ce66504a",
-        "fr": "4720f797619e37367d2f2008e55015ad3551e8fec6eed98e54e81cf29c174294",
+        "fr": "6b05d34f64fd8dc91a7f9698d61a5b7f6773f6ba287c4e4633540c2537f815b2",
         "pt": "f45dd6ce491f862241a127a4302f63df7d49a0f42ba21a519b378bc81a3dce88"
       },
       "mappedRoutes": [
@@ -543,11 +543,11 @@
         "pt"
       ],
       "localeHashes": {
-        "en": "6c44f7cab261e92f0f67ceb8d43cfe2bcaf8ada93af1bb404e52da0ccb98b6c4",
-        "es": "ac8b8a8eb8e055c2a3b472c1538a0febafff1cbdb03fd8778d71e6fba813b836",
-        "es-419": "5d018077b3ecfbe9578c71d68953ff229df6ec16402a53a5d019b17210b39c8d",
-        "fr": "46d23a7f377c585576ce33a18cda940d72dfe404f21d234e092ba42f69b0361c",
-        "pt": "cfbe75fe6dd4e4fc25e2085cd5908e48f9a9065b3f77af1bca386777e9155704"
+        "en": "9e60ee94bd73b7e6d2713ce16eef93963820f39c054ef4b72d340ee7fe5d7302",
+        "es": "42b9c6cf373d5c95b1cf3b5fac45cec29387bf7eba35436e20a0515793df60e3",
+        "es-419": "361abeac7545d6e0adba3597530a659979e347051220c8e3e5c16ad6117215ce",
+        "fr": "b554146f8c1988853b0e104652de854270be7d9bbbe5e4f19ea1a0c08c4ccae8",
+        "pt": "96a15c7c5cf596ba737e238ad304d73086aeac8a87f01a9d5184e5a112413dc1"
       },
       "mappedRoutes": [
         "/samples/:id/map",
@@ -569,11 +569,11 @@
         "pt"
       ],
       "localeHashes": {
-        "en": "791490d3a8d449fd1fb94a69e77a3e0f54eb164e18f7bab07fd6592efb957550",
-        "es": "3227f7bf144a7392ec8f79308fe8d9263e3078e76c3eab44345366c4e0bb74d7",
-        "es-419": "1c9bc5edc2892449fc09dcbc9c97e9173d73717721ef657a4d43ebb7fd5079c3",
+        "en": "af735d387139a44a68f534519ebd67ec66f7ac11fb658947c143d7801572b95f",
+        "es": "3e18e90feb725e9f2edd03dcb03a0ee4e29ab400703d6790fe324b06e6a5ac1d",
+        "es-419": "5cfadce73634d3fb7022447f809f4ee91e0ad67928eb92d25034b4bff5e17b9e",
         "fr": "ef1caeb790ae6313db6f5ce17cb723b22eb4a574dc468172e97ea89035625300",
-        "pt": "0d0f98d88b30184888ae41d32afa44151808c5334d86cde6620ed980ffc4f9e4"
+        "pt": "9e3b85578fa5620db9c513f8fa417da6cd142316e9387d010335b7df1c455563"
       },
       "mappedRoutes": [
         "/samples/:id",
@@ -620,11 +620,11 @@
         "pt"
       ],
       "localeHashes": {
-        "en": "4699b0f194b0b6ee0dcb2cc0f05def859f80bbfde5e5a7035afbdd60cd166090",
-        "es": "158a478d9813bf6d1e8269d72e8891c42ee56c07fa27d9bf0ed444e4ac1f1072",
-        "es-419": "ef3dfb81ad3d9e0c55c9aa418f1e293eb9093715ee9e9b760a62ae81c80c0a69",
-        "fr": "b4675ed95509e2ff8d93723d5e32874b3dd251bdebed4cd6e670d7c6b4440655",
-        "pt": "638825faa75866591b1a59c11df22b7643ec6c9b6d49f059f7390dac352016f1"
+        "en": "74acddbf2fe777c0f49891f1e6d52621c4e5fd1c6c87771265123d7818a00749",
+        "es": "4089e5c7a3ba1a7a7e758b89b7cb6d8c69302e2ce35921b9a808b20d663c994a",
+        "es-419": "c23b593420427dbf7a62954fc8048b56418cff2a3a331867d7f8da1c6169f01e",
+        "fr": "8ee6358e0c2de71d02b09691965b708f49e97dd28d1d3b299cd0a14545d5e62e",
+        "pt": "0a4a244820766a2b28ec024b597d917b84da36ca8c6bd102ca36fcec07303c6b"
       },
       "mappedRoutes": [
         "/my-work",
@@ -646,11 +646,11 @@
         "pt"
       ],
       "localeHashes": {
-        "en": "0097c51cb8493ed4149d5849e8a2d46ddc99def12b27ab3fa0bf24af10878c65",
-        "es": "cc07a9c47398213e202c427023bb877002012b65790a8bd56b9d2f8b93087797",
-        "es-419": "cfe64f4ece83bc6c82be1c58b584c60e26e406bb7816a8f804d929a6b42b01dd",
-        "fr": "9e934083eab87ab002bc08c23b1d5e3d2835154e9eacf36ed5f1a659fee2b0fd",
-        "pt": "9440876dd65ec3cb7b878e7b101fd468af491c41d7c29c2f1f37806b5fb34ff6"
+        "en": "23dcb1f46173aeaeb99707f2ec77de3cfdb82716800b4f6cf71ed8fff8a0de1a",
+        "es": "d09374f3539daa112b2121091ebdaffe9c5e8829265c8b0413c99528e218e78a",
+        "es-419": "707f3c6728f9de02f13f3b80ba8f8910127673d5f7ef23755ccb9955b5bd8a96",
+        "fr": "8f16556d14674c27d6628884a6911c988aaec46e644bd9b5bc657091090d966d",
+        "pt": "0d1f9d415ee79b95a3e032a73c92e92a2e0bd43bfd2b10935601c2886b0265c5"
       },
       "mappedRoutes": [
         "/my-work",
@@ -672,11 +672,11 @@
         "pt"
       ],
       "localeHashes": {
-        "en": "ac283740ab81a170e5ce83565073077f4c454662457d5d27ac78cad4bc84eeb2",
-        "es": "b0e8e6848c100284f9d79c4c74574fb1b0dd37bfc44078bf3dd33627e2a6115f",
-        "es-419": "13617defc8690dc3b367b015cbf9bca25ed4ae7966783e658e4d5371f0954dc4",
-        "fr": "6116915a100f98e3e8ad528b9f43b3b0ee2bd8f6ba244dd31ef5670d572b6348",
-        "pt": "b3b133f95f577ff2a833eabad660ad6cfb824abaada4bd7fd7515e22c1c2aaf3"
+        "en": "57687e22f0dc5a6319c7c81f8c927fda6bf2b45a20ad870fa461a30bf3135aff",
+        "es": "cde2b8f53a14d002b392f950c55c98e8d6a6f4dce4e0788fc8ec942faa936a9a",
+        "es-419": "9ed2ec7573fbc2d6b05f1bd0aa01d07966534480e36d2f20bc53ce7c74b34d27",
+        "fr": "e564bdc2337949f71b2bbf97c7505a6c6931f8bbd260ea804936ab0ed38998fa",
+        "pt": "ef1d20dd5e33e434b4812684869fc77f7d45363eec3e4d6782196495e135b285"
       },
       "mappedRoutes": [
         "/samples/:id",
@@ -701,11 +701,11 @@
         "pt"
       ],
       "localeHashes": {
-        "en": "d8c1a045f8de4d7e84359e929db7a98f6a1afc64e4e1cb8811c9ad942c0c907c",
-        "es": "8c0a2abc09a7b32ecd072acbb2e613a29a084b039b26dfee1b29fa622e268b0d",
-        "es-419": "9d0dc9cd1621b2510f8e3d1182061ba35a52b112bc11651f294f89e114fb63e0",
-        "fr": "321b090aa37713d068aa0c189bb71206efe273add91fe528589c999150fca221",
-        "pt": "3561f464d3bad92753e6262e4262cba925d310c667a4dbad49be5ec6470e9649"
+        "en": "a132f0652898533ab5e307c20cf901c872c61ebb873ae32c5e4e285cd907036f",
+        "es": "10523722a049b0bc64db209da1a6d414e9f98f467ee28d7b054ac80031d27523",
+        "es-419": "248dd187bb0e563eb026304cd1f414eb3537f2cf7808606600c775e877efd240",
+        "fr": "419754593a0c69976ccc4b8e4cf5ca7e4854a8addd851affbd3e144e75ef912a",
+        "pt": "6cc050228aa5f9bdb43462539d5880c408ec04cccf422fd1f3ff18ef0fabde8c"
       },
       "mappedRoutes": [
         "/my-work",
@@ -727,11 +727,11 @@
         "pt"
       ],
       "localeHashes": {
-        "en": "8ce5cfd952bc185a3705bac7384869ca4509ac1e150c4351133b75bbdd4b2f78",
-        "es": "705a762d16d4d1062bd1581305d0cd0c9642d54c45e9ffbfe836095ca1d9edea",
-        "es-419": "9d0cf2980bb02d636aa3c3e30d8a4bf2c27026636b81ba2fe8362221baf7eccd",
-        "fr": "4a781a7632d61b989d9a15aef1955f65dfc8492a15acfe9f1d440616efe0cf61",
-        "pt": "945051d83e2c3f09b976f4d0b0a1918a833410e26b77b3e40b501a4487f10346"
+        "en": "ed0bf008427b2993cbd7a78a782c03d6db5b7eb400afa836cfde3757e4761aa2",
+        "es": "e4e8e0ab2b033477ce6d213d640d9d4df6ea3c5d8e6e358730867e2d99d35d89",
+        "es-419": "5f8c7d1abbb07360869f0818be47ac9fbb4dbd6183ee017bd9b40dc27dd49e16",
+        "fr": "22945c3e22e7946862b1f3117d74d2bd3a573d836b835aa522bd2ccd61216b34",
+        "pt": "a21b19977cece8e856904fa9fb589533568044fbc93748933c91423052a5b502"
       },
       "mappedRoutes": [
         "/my-work",
@@ -754,11 +754,11 @@
         "pt"
       ],
       "localeHashes": {
-        "en": "cf84f2af883d98cf381146d72791b51ed12414ea43afc5e1963c0d277388be05",
-        "es": "1629855202aa3e5e54de038866b3a811ff1603ca50529139828be60f00259e00",
-        "es-419": "b9f0c4f42f3073c445054c74f348cb5d30f2bb917a264d649d3dd98747f61568",
-        "fr": "887a9beef68422b4c26de77dc66eca6f2ed0a4892505433eda8a9d430bb21e25",
-        "pt": "fe388aa201cc9a79ba5b8f874dc578c2489fc83e0537787af43258f855575bd4"
+        "en": "ad028676f377ccddf8bcd8cc9f71aeaf0903171a2e08127d182553542e40b15c",
+        "es": "1873d4056ff9a952e781daa9ea37415df9894f3e04e75d9142585bdcf71e8ab3",
+        "es-419": "51bf43f1f14ac9a98b4eaaca16f62963ca9c2d487e3fb8d62cd2901f18f1658e",
+        "fr": "152ad68f5792abe82269dd4671b92657126db06acef56757dd1246bdb85db645",
+        "pt": "8f4eab43b1739cabefe7ce9c698369abdaaa501303a32460c7309f44dc98cf7b"
       },
       "mappedRoutes": [
         "/samples/:id",
@@ -940,11 +940,11 @@
         "pt"
       ],
       "localeHashes": {
-        "en": "c9d04b48797b0735e8424c555dbc8f6611c49b4a70cd49b519ccac2a0e1c7d68",
-        "es": "258e0220e464f3297d3b501dc9b9b113296daf0c15b8c99e8a174aabe5620475",
-        "es-419": "1caeb29a43490363407328984a578b4ba14d3ba422cffefee68f0defced99b20",
-        "fr": "81239ada64f3b352a4ecbb65091d9075db019b1e019088a7a1bad01937d35cdb",
-        "pt": "1f5209fc34236ab06ac61d7be3113536ece854c6dd6c145844ce32db11f4f995"
+        "en": "c8f11bf1dafa94e967cd2021e4a5fa90e98abaf953c0931895ea1ef51c7f4644",
+        "es": "5f1ce69dd91303c65dbd73be9d90997a3055bd4c936f92d7317d58e1ff34ad9c",
+        "es-419": "6738711def07ba7461301f12e78ed20afe72021bb756f49ae52359e42f0e60d0",
+        "fr": "0185294099a299b4b07175e92369772b8acffc702db307691affa5aa7158856f",
+        "pt": "cc7e2a7d7a222531054ba5fd3df0dbc8baea67e5b3554a49505f53735bd469ed"
       },
       "mappedRoutes": [
         "/my-work",
@@ -967,11 +967,11 @@
         "pt"
       ],
       "localeHashes": {
-        "en": "1ffb9383a5aca6a14506711cfeaf38a792fa705b6edfc879688b7c1b850650b1",
-        "es": "f8aa1eccb75f83838cd38eed80827b998894e5fe007e530f36ff19a0e3f5b659",
-        "es-419": "030fb16e15f5ba1583b080503cf3e2d74ace6037a14c0c450f0c1eae860be52c",
-        "fr": "96f1a1d439e04d5140ecca64fe4db6fe8675c631960527eb3c3e9d7a616366ac",
-        "pt": "3970b2568e82d8c937751628edcb7b9313bc47c850cdeafdac0a0649e5aa6bac"
+        "en": "43c80496a32d3e642a15c948353667411df00480b1d66870220fc2ef826b5164",
+        "es": "18fe1bdd89bac38a5ec4c72a481b1980be36b8420a982dfcca2eb81a860e871d",
+        "es-419": "09b45edee5fb0fa54fc8edc925ae4d1bb731eb0cc597837c629947306445c91d",
+        "fr": "c8faa258733e69cf871531d287ee83b5343700448b3128f48f897219949e8bd9",
+        "pt": "77ec2bc262321e24205d1a5161b2fc5d2ccb22d0b3dbb99eca5f1ab726b61866"
       },
       "mappedRoutes": [
         "/my-work",
@@ -1019,10 +1019,10 @@
         "pt"
       ],
       "localeHashes": {
-        "en": "6586fb851b6a15f54d210f617f32549aab5fb54643254f41b76357b79fc1eae6",
+        "en": "c47162ffb9eaa56c2893e3f138e1efe4f162733a71b746b5be9478e4f841a6b1",
         "es": "6eccd2c402c89e88059bd3fb74063fce1580aa13534826106a90000f50c71091",
         "es-419": "cd6db651cc533e8d04a135237a2401e103e3a4112a4795e0b99eab17bcc7ab38",
-        "fr": "e516e837d59f8de07180697fa30ed1cabeab4a61c5a449a1efabe938c4af2ce8",
+        "fr": "a44379afd0a0ba0fd8df5f4d5af7a7f3c03e6469791433aa72f706ac6dae697e",
         "pt": "e3b22d17da16d0f47497f77a4989364d5df9a5e233935b9d8829283d45f6df93"
       },
       "mappedRoutes": [
@@ -1126,10 +1126,10 @@
         "pt"
       ],
       "localeHashes": {
-        "en": "18e88562699acd07bbf34c4d2177a1731bee5a923e5976e965c0b3a5d9791528",
+        "en": "c7c64c76e20d11e846b3887104c4031ed8d7a044b1d4995feafb088e486b9485",
         "es": "073f47ec3886c477f9cf4b8f401a9e05aeceeaf6978406a87306cbe87d0dabfa",
         "es-419": "012d8031b19e5e0c805f367c6f8f8ae7bd7da67555f6a7c4a90adcad492da7e5",
-        "fr": "f7ee64edf68e29f82c3cd4564431e866515c3992c5dcdac1615ba4a43d29b8c7",
+        "fr": "2d568fc8745d7b99a7afe397ba304935ccd32544d72c80154ceaeeb9b658d47d",
         "pt": "3935bd6bd2361aceed6332dfbb9bd10bcdc81a840ddecf479f22fd9fd0ed73f4"
       },
       "mappedRoutes": [
@@ -1286,11 +1286,11 @@
         "pt"
       ],
       "localeHashes": {
-        "en": "edf28c3894f2b148299df23103cd9c22ab341a5b29005462c00e4db977277aca",
-        "es": "fc44ccf0cde34d38128f46bf1f7ff380fa73dc3b28692fc77fe63cdd82c0b51d",
-        "es-419": "a6289dd8c2f51e2d9705e0e6856d52f2293099cda5e7789c3be1eb48cebf5189",
-        "fr": "560df689826e2ea5e995137c1aa19a0f0f56a50878507d7963f71802221123cb",
-        "pt": "57d6a74557374d43c4a0f7c1b5f134cbd4b401af5aedad42263118894001f559"
+        "en": "0b9236a5de04547cc724d7c2755a99a8822a7d07759696dcfb0ef115e0e31a87",
+        "es": "88e643c9c98923ef32eb92499fc2b4572dc4365e0c099cd1cd7c316357548fc9",
+        "es-419": "8738d8a89c2ff55bcd1aef84be468a442d23944103c11920f973757a43b7c529",
+        "fr": "c9f48101f7d3b7dd57430f5bebfc5bab10debbfd2debbd6cbcf443e3d5dccbc0",
+        "pt": "1e224a63a75fbec48ca6fd56bbf33dc491c4294262c0a9b44df3c90b2a4df175"
       },
       "mappedRoutes": [
         "/manager-queue"
@@ -1336,11 +1336,11 @@
         "pt"
       ],
       "localeHashes": {
-        "en": "d83240c9fbaabace0c4ef0c2cf63729c2456c3c31d52bf07e77d58d3d8438fdb",
-        "es": "b0d49d0c57c2762df052ade6c8b88f9db4d8705373a3df1a7249530faf6a7db6",
-        "es-419": "ba5114ca22385c0d03365776522a3be2fdc646f6d527947de10fb5336b4f0877",
-        "fr": "b3184cbdcaf1fbcbc71f929c91441e443a082d8d8c777e11b5d3a2a28c5d555a",
-        "pt": "9dfe491e301961de7c6fefaf98c42f5242b9380432f577b834d7162abc58c00d"
+        "en": "82a0d2ed7df6345ff1736ddae56a037d64934055b7c2056a429b32dacfa7eb80",
+        "es": "4228bf48cac1c8ef866da401ac41f8c62c22c1d76174a63d6bcea83d753d1a90",
+        "es-419": "1ddcf6a307e7885e27a8831809fc0ad3273ee3dbff33f8ad8e82634f372d1d15",
+        "fr": "9e252bf109336860260235508c19c2f59f7628cffccf9a17e99696c4b5d32f24",
+        "pt": "0e04926b03ae9253355fd8394745d315ed5be9cfb8f3d5cc40c98f4bece11965"
       },
       "mappedRoutes": [
         "/manager-queue"
@@ -1361,11 +1361,11 @@
         "pt"
       ],
       "localeHashes": {
-        "en": "7d147e3228f2b66d926cd089a6d3dd271063b1aa9bc0064f2b3341637bcf41de",
-        "es": "80da89f49b5004e8cfc694eac7466e88b1f121b6648d20e338374a8814cf9f53",
-        "es-419": "359c72b99cc64228844374a33b36a3e9369107555ae987a2709b3b2c78bf4c95",
-        "fr": "0e0d7f63b684350bc958a69fbc2bb5e9e5f9e1c06501f425391e0fc3cb0f371f",
-        "pt": "e4b609076b48411c121dbe6704688de28463796c941511fc9a5318430d3cb79c"
+        "en": "5f12b57c717cd01f6f15ab3b10a25ddc0372a3461a63af3b3bf0a214a3bb4043",
+        "es": "b604494537bb9ea8b12c87ed360c2ff12704d2cc5fdb3e6d41655ef1187d0430",
+        "es-419": "727bd7028229b062c90b70409c62c54f06847812e6ebedc82533a909bb2bc98d",
+        "fr": "11c3e9082b89e9ac69a94fe9e04ecfb39d7acbfed19c864fdaf28210fe5fb017",
+        "pt": "17a451e5b954ad0f35cf30b410c19eeace67e61d19101466a27188bd43caeff8"
       },
       "mappedRoutes": [
         "/manager-queue"
@@ -1412,7 +1412,7 @@
         "pt"
       ],
       "localeHashes": {
-        "en": "faa0b9924064c366daa55ce3704a58dc98619a528c48f2aa085d0b80935c4712",
+        "en": "3bf93c2723d299ac65c4af5d1ddfdcfa79651f8f0b072958a2895ec6e5f39939",
         "es": "43c368e9546520c088fa0dba4be87ca1a13cfe2d7f01547662d5fcfcac92f31a",
         "es-419": "35d976ed2f82036ea14274d4c8d9e8fff13e66e97f6916f82ae34049965250fc",
         "fr": "b524315acef8b94e97e9f225c6d257e338f4d51aac8b51f273be38d6ad96626e",
@@ -1439,11 +1439,11 @@
         "pt"
       ],
       "localeHashes": {
-        "en": "8d66969c303e10e1a3e5ba5772942983fe2a1d813d2779cd91bd4f689d195e89",
-        "es": "d5fb9dd019160e538eb8fa101923fae8b68b49483681cf1a8ac5b17a58ee1b84",
-        "es-419": "0c99d2b9ea18c70c6a82fbbbb61e8f84e129f605825c741ee07b11523d40e413",
-        "fr": "2659ae0100f00fd9680c5ee40baae69a790c45ae310203c5d29bbcf5916b1791",
-        "pt": "df379d00cc8d109fe03913735468ec591598dbf95bba4cad469736866f168db3"
+        "en": "786994bc7aaa45b48ea02a12bf1889c2e4da5fe702dccc487c17aa052f69610e",
+        "es": "ec3cf55234271d08eecad94687e1c1e7c56df5b88be20f9b9a601b3da98326ae",
+        "es-419": "4426c03490729069a02e01142225640badda8bd85c041d31808494825a480221",
+        "fr": "7e0c7da7126a59e4d71514e4afcc4912716d53a35170e6cf7512a0a101cece42",
+        "pt": "93ef0119535a8c02dddf48bcea391cca569b07c7d4194830c8a83609651adb1a"
       },
       "mappedRoutes": [
         "/samples/:id",
@@ -1699,11 +1699,11 @@
         "pt"
       ],
       "localeHashes": {
-        "en": "a0b752f31591618464e38b1c7d1aa05b44e43eff4755a4c0c1df02c9f3b71d52",
-        "es": "916ab76760ad780522298d351178e7e69cbe3c62bb917888634999ab63564516",
-        "es-419": "454e34b40f40da58b7c9257eb833ca6f4761e1050470430a5a3cc62ba35eb555",
-        "fr": "c4a81e7baf28ee716150e47c5f6632ed20e2e454714f8a0991325d916a690855",
-        "pt": "06e769c5a87cd2c92788748a5130b419812f71104feb1d3341f472892ebf1d6b"
+        "en": "517b01f1d053be450af2aad8c6027fcd9a1a441b9a65c5f1412ed384110857ea",
+        "es": "7f11aff532250549348d6522c162f47c3ee6ab8382800f257f3ef141739f50ef",
+        "es-419": "a222ece7f91665cb6cc0931978de942ab000342a48ce8a0455961aa2efaa567b",
+        "fr": "c50f9fd027fdf6cff7dd580f316013643ac290242ed394a15e70e88bf26eaf35",
+        "pt": "a3c269c9a7ac7731950027adc60891a3e45850704dc15821f69121fd95e076fb"
       },
       "mappedRoutes": [
         "/inventory",
@@ -1807,7 +1807,7 @@
         "en": "9d7736e13c213695ef4175fe84b055f9b511583cd637f3fdab848d1d3002e9f7",
         "es": "88d0124f2d45f0eb8b56fd8756666d2c84300766b4720768509c6873f48e3358",
         "es-419": "ea3a38170364323b57cc71aa4bccae43710dc1b2e0e0bce074049646b8ca214f",
-        "fr": "be44cb5c77a1b8bccfb59bda558f725d474efd90421480227fa746503a779469",
+        "fr": "a176114ca887f58533b52fa0f616f8c393781f8f9a6bd6309648697b18b11101",
         "pt": "32f25dbf69202608ee76fe07920b0aceed21749bc534647eee40fc3f5f2bb44d"
       },
       "mappedRoutes": [
@@ -1830,10 +1830,10 @@
         "pt"
       ],
       "localeHashes": {
-        "en": "d28d2bd6ead52af12fbc82d9f67c110f564792ff7f031fa4a486b762bf03fbd3",
+        "en": "04f154d04bea4f97995c04dd41900e4977af68fcb7fb20689acf2538f9a83516",
         "es": "94f6bc4ab6aeecc65ba2b55e648fe3d6b7eb7d88164f593e60da74550d20bf79",
         "es-419": "cf16297e8cff99cbbcec6399bf26b4f1b1940939de3dbfffddc4b60830d27188",
-        "fr": "3f5976cba9d94a2d6cfae14c6f71be1ce8ab62d58a204b1d70abbfa6df552858",
+        "fr": "e7e8d85172757158cc67a5eb0f4347a514cee7e30508f676b614d4553f930bdd",
         "pt": "2dcdd34e04f07d9b0b495503b654d0607ce0829a022cff667c8f44a765cd8f5a"
       },
       "mappedRoutes": [
@@ -1908,11 +1908,11 @@
         "pt"
       ],
       "localeHashes": {
-        "en": "95963fcc28473647dea3c4a14e17b8b5d8802c0bb95642ae033aa26cf16d3bab",
-        "es": "49c53a6eeff977a13e51ab2134cc844a3caaf735e5e7d054d371be3291018234",
-        "es-419": "30616e07ad5deb255c7d2fa5866198fe50efccf4d38488c19c77cd4f1bbc58de",
+        "en": "cbf549390039859fc7db058160c05dd11cd5bc8595df739984fff8dda15bcac1",
+        "es": "6092bec9e6156ac81b3e5c12607379e870d5ab61ab95df4483a7c9e55ae909fa",
+        "es-419": "20c785440f019c40e7a1b285c6c088a61f3dcc406dc132dc3628cb5638d1b4fd",
         "fr": "7038a1ad5724248a164c8b428f82628a495525dd65fee220ec8cc4ca9c55ecfb",
-        "pt": "3647969f619cd06c73173926c553557f843e62a1f98d8f9e78738fe21ef25fe7"
+        "pt": "422d1c0f62038829c5187990da0ed424b2725dd287ad95c6ac5b15b06e4782da"
       },
       "mappedRoutes": [
         "/projects"
@@ -1959,11 +1959,11 @@
         "pt"
       ],
       "localeHashes": {
-        "en": "033c7ee560bcffefa843f1b805c10c8069b818c603356126af05ff5e33f2f3e0",
-        "es": "a508ddacea3e254489ef3610102e59b3b7e6796f17a1cbfb81c809d52f91d78f",
-        "es-419": "1e4e2a5104341a558c6845f7fd4e4d603f8dd576c6f76fd4ad5f1ba086982ea1",
-        "fr": "b577d8329ca691f9943a8d3a537c0fc018bcbc6671620b2f7c8bea98e4fff73a",
-        "pt": "4ec69d67452da6887fd3387989568cbf462d6fef5838f2ebad725026bff311b4"
+        "en": "9061276dd9c3a798ded1025ce142ae2f842097123620c3b1d5c3ca4bbcf4650a",
+        "es": "d64cecbc9a44d030476ee43e018a561c8a957f27f1d762f17d322e0f444f8c4a",
+        "es-419": "95c75a209fb4b1534b1ac8fbf076a0ce873f7aa8b7b18dc069d3ce9351e2553d",
+        "fr": "1b2134cb2a0c50101f87d9ac404134660277b45e5987586487952ba1ac76ed17",
+        "pt": "ed36edb33390d2f8f399d1ef65c49559b34b1ab4fcb156ea983537e1139de6dc"
       },
       "mappedRoutes": [
         "/samples/:id",
@@ -1986,11 +1986,11 @@
         "pt"
       ],
       "localeHashes": {
-        "en": "e8d4a0f2476e4691b42be273e7b3c2568e26e04559eece5130da551193683d03",
-        "es": "c8464995e0516b9dae02e1d6fbca7b1ef56392ac09dcd398668211c133538aa5",
-        "es-419": "25383695b0a65ed7b5e06b88437dbcfadd1ab13203fcff2437aaa32b38423b2b",
-        "fr": "d842beb95478bd2bd26900923af176786a8c6f1359e54434cd57f1ec40980c67",
-        "pt": "f488b5ec249fb31af66b1407793b7a889a3f022cdef0f1a08c5bab3008c2188a"
+        "en": "66df47704e0da6f76df785b931ddb0a85fb437dda268080e0529addf8e08e510",
+        "es": "2421d98e753186ed4090e6734f4052a8113eb28378367eaa526684b9f5e91aea",
+        "es-419": "0f6492aa758e6071db9404ea928af448c7d1ee301e2fb0a770ebea33fc419eac",
+        "fr": "5be705c7ffd422f724235a979fa48980baaf3c1a7ead51d276f14c1d60ea0578",
+        "pt": "50eae242525fbdb91e72c923f160052ac777f5ba1510a2bf2e6c57ad562cb275"
       },
       "mappedRoutes": [
         "/projects",
@@ -2039,7 +2039,7 @@
         "pt"
       ],
       "localeHashes": {
-        "en": "8d6be237e29b7bf1346275e1478c802fb064e8ce9faa738b8560cc861fee0e8f",
+        "en": "6671ce3f67aca9656db8ecba2b946b72d78f2e935482d1b5bbe102cf1a47acff",
         "es": "158c0ad253802407726681d66a70282ece630962ac091c7bd0120e1868ffd33a",
         "es-419": "4bcbbc59a8d16578c1048166ac0d987b283c1530a0700cca5a5f4b2293e3c24a",
         "fr": "666fa8d9ebe4d45d6bbc33b93de89adfd7239097cf2af1621654cbd60d4e5a33",
@@ -2065,7 +2065,7 @@
         "pt"
       ],
       "localeHashes": {
-        "en": "078030183cdfeb7257b683bf33e59fa7d2d571b8bf8651c89247e4e37d1323a1",
+        "en": "de4ad738e0faa63be8ff26737f3cc42a32744c23eacfc4583e94d0258487234c",
         "es": "b79a8aac3a54ff4b1ec934f09fd5d3b5ef4bdcd1c04c6b4e8c46f710242ffac1",
         "es-419": "94d90492bea51bf9ff245b2c934c72b3bbf3b2bfb12f0b6de2643c0118bfd597",
         "fr": "c84669ed202c2702a6f2eced43d8b6e7c2dc499e8dc12a9a89d06aeb7afe6e75",
@@ -2117,11 +2117,11 @@
         "pt"
       ],
       "localeHashes": {
-        "en": "550aa527e383dd48b4aaba137adc8f6269439a0826ec65b88d5206cdf7c6b953",
-        "es": "30e470ceb335b128902b50123019c6372e3150f399a42522b1b1d93500906dd2",
-        "es-419": "7295b9e4c61d7bd46fecfcef35bca811079ea9077c75ba2c2ab1b91417befe64",
-        "fr": "59fee3438663221aeb085b14b780798ee8a6fbd3764d9368412c8652a49f4a06",
-        "pt": "16dc55b86c990b42f80270110263b1a5d6d17bd0a7a59cde098372228c5e0c69"
+        "en": "dfba08531c6183b099757e29a2d3a6f55b26558cdb07d48ef07cc85b0fd5f0a1",
+        "es": "35d3cb76ca2a531259e1a446eb9f28a245d5a1fd7f6aad9c963cc759096e5714",
+        "es-419": "5df179448b00400a65d225fe87b19ba947c3b5e2f21b94ad22d35c4e306c13e0",
+        "fr": "c9cad1c3c9ddd448429253bd921f03b926b99eb0a9db86461d39b90d8fd8d4da",
+        "pt": "375f43d47fa61da4aac45c3d52bc80c240ab11aefb902cc1e7532683d99b5f87"
       },
       "mappedRoutes": [
         "/admin/labs"
@@ -2193,11 +2193,11 @@
         "pt"
       ],
       "localeHashes": {
-        "en": "1650c7124d633d695ee0703f06fba63f9f691b59efbcba44de34e40deb58dca7",
-        "es": "a89f660b2aa401c3470251657c6db4eeef23a057517e15d7958c40de3d6ad0ea",
-        "es-419": "da5c4255cec844caa8486cab718366860d60df48b101c7fa141f71bb008c75fc",
-        "fr": "81ef98c61a429a22a8840f69ca11744132bc2bf099f7cb61b252cdcfc3274c20",
-        "pt": "78b3ec82bb4d7f4574b4bcb9067ebebbaf8bee6bc4c291a0231a5129776dcdd8"
+        "en": "3dbd27a5bb7dceb857aecee5cc8e566d4aa224de7e62884b26f32e33bd42d45b",
+        "es": "712d69c1814604658b2e86c8587c8e9b93a242723bdd3f4517ecd52280f6020f",
+        "es-419": "c4ef039e63e87ec8ae13a8cecb1c7154955ecdaa8d4baeaf148b6cc597039d66",
+        "fr": "c81bfea20537dfffd78709d1b7a11c110a65bdcdda957c15c17e77c8ece20d7c",
+        "pt": "ade97a4c9ac9c60a7fc9c4520d5c8ebfe98e9fb7005ae585523851e2c6a7122b"
       },
       "mappedRoutes": [
         "/admin"
@@ -2218,11 +2218,11 @@
         "pt"
       ],
       "localeHashes": {
-        "en": "0c4b266a35c1b6ac24012db4da24d914fa41c7724c3fa03ebac8b5a540d1a4d7",
-        "es": "670d2c8667094a0e6d3df429ea9b52776b9f56bb7fc8b188635923b1142260a3",
-        "es-419": "adf1106248a9a2129f656e436cff9263b925a17aae537bd5b7f8e3659ce6c64c",
-        "fr": "8be82a6d538398e88ffb94267ca318e2d7afad16929e5a7f1766214f8de7e919",
-        "pt": "5e8cfc3ffa47abd64d92403167f5d3c13bf7b6847fdc249fbf5595cfa43e2ae1"
+        "en": "a4feb17b3c3ebbcfe96b5cc756f7bdc19ad048ead1e17ef3af767a574343521c",
+        "es": "c1bf027ae1a90bd74f5f835cbdd7fb619f28139e62e92a3f25b5c4f982907c6a",
+        "es-419": "f7c9f6a1b2b6bff9b16f878a3f763055b501fbc0177e153103f0bdbde422a2c0",
+        "fr": "2b1f4a1101a559f7159ab47fb6fa2ecf3347644a072eb1eb8d7a26f39551a519",
+        "pt": "f2862e50842036e9962cc08bdbf7d425747cd7cc3af3f52064ef1eb9449da82c"
       },
       "mappedRoutes": [
         "/admin/methods",
@@ -2421,11 +2421,11 @@
         "pt"
       ],
       "localeHashes": {
-        "en": "98d188a84fc041bd79868e49d6cb14c4859a4c5981baf03d442446934e52dfbf",
-        "es": "2c1471bd4e4dfcb5c66a7c22e6c922060c25322a83969d0fd1247af3202f02c3",
-        "es-419": "db64c4b8549da3102319aaed615476ecf6dc6c81bb8df31c54fc9b4f963f6ba5",
-        "fr": "a335ce12765f7a8db9b7f3fd331337c8af6a53f3665707a3be0069dc6ccca593",
-        "pt": "7825cedec8339896c27ec9a69026e3365815d298ac81fe5522e11b79e166e167"
+        "en": "fb953d1a7a5d24c3474d4c7775438fc1fc003cb016e015ac734678f847151177",
+        "es": "9955946077d59b8ad0ab7918042e0c2c161220e0efe55942902ef75ee85a7573",
+        "es-419": "dbd64901b7b4aa88926064bc6b235ed9ae4779303df8e01304ee199f8c2385ff",
+        "fr": "21020b3c593c6ef9174c084cd0f5d15a8545b387af84eb2c611ae4a2c0a10243",
+        "pt": "501ef7cf47573c37b707e7dee6dafd77bee62ceaaee8b287a16234545bc67417"
       },
       "mappedRoutes": [
         "/qa"
@@ -2446,11 +2446,11 @@
         "pt"
       ],
       "localeHashes": {
-        "en": "d99475834fa4978041e7279b4cabb77ae64968981a4132b1bd440a584ee3baf5",
-        "es": "83d2487886a3da4fed89ee085d19eac9da12f400e2bd5feaa7150e2302c0bdeb",
-        "es-419": "3c891fa7096ac30d63c349d144b3c82d3c30dca3598fca34ca31be1d2d92c3ff",
-        "fr": "4a51c8ad793dfc5bb5f00f93a9621368d0de9bf2bb24a78935a570d79f54e15e",
-        "pt": "1fe425dedb336ca39a175f3433165c59865777d5464e76233941bc8293f1aaa7"
+        "en": "96d370ed30417140a78107080c4d132fe311968051ed59189eba0f0e1732e1e7",
+        "es": "5a79e489535b1f247c40f1b28bd3d4dcac1f08662697b8850e2b30235c864857",
+        "es-419": "592f7627478f17e5bbc2dedc3cd49665f708b43c74463ff0c808c76d0d98c136",
+        "fr": "ca7b812f3673129f081346e3de0682282513f75aeb92212eac83d1d1280e73f3",
+        "pt": "3942449c4bcf4ed9ab704ef399526857e94ce384f3abde9a56283c77c9863771"
       },
       "mappedRoutes": [
         "/manager-queue",
@@ -2472,11 +2472,11 @@
         "pt"
       ],
       "localeHashes": {
-        "en": "8c49b5bb8368b379439b13c7b516826a48d0c97fc92ba8cb1c75fbc613462523",
-        "es": "8339d780be025138915b46b1581616f6c8390441b48109e52345dc5e8036830a",
-        "es-419": "b09d51128d76f6c26b8dfa6d64e1996326ee46b7a19c9169f91a62abdab5f1e2",
-        "fr": "67221bd2cd79197bf4ce3e09ce563ded6ca50fb05aadade35cb1973cb9337f40",
-        "pt": "80709415496da31a21bd1ec2a85e0eebd53fde737d53006a8ee52f6aa3d7488e"
+        "en": "918f7455168f52698c514f993763605b3ff63d627e0dafea71a6abf98fdb9f95",
+        "es": "856127cb6da53a81352054bfac778db0f7cc0d2fd1cf4838a4d96113373cec81",
+        "es-419": "11915ee040381ffffaa980896738ce5f5a5163c5bd5159bf1e6d14ee9720635d",
+        "fr": "cf4b44321508a8229f35ceb758a504f2dd35e071a4eba400c5d6561b7e71fdc5",
+        "pt": "a6035e16b3f3f0004a095841f893d68c065736d9d2c2612c52e6ba6dd8ef95d8"
       },
       "mappedRoutes": [
         "/samples/:id",
