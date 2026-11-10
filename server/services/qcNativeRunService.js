@@ -175,7 +175,7 @@ async function startNativeRun(db, batchId, actor, input = {}) {
         let batch = await tx.batch.findUnique({ where: { id: batchId }, include: QC_RUN_INCLUDE });
         if (!batch) throw error(404, 'BATCH_NOT_FOUND', 'Batch not found.');
         await scope(tx, actor, batch);
-        if (!batch.analytes.length || batch.analytes.some(row => row.provenance !== 'NATIVE')) throw error(409, 'QC_NATIVE_RUN_REQUIRED', 'This start flow requires a native run.');
+        if (!batch.analytes.length || batch.analytes.some(row => row.provenance !== 'NATIVE')) throw error(409, 'QC_NATIVE_RUN_REQUIRED', 'Use these steps to start a standard batch run.');
         if (batch.status !== 'OPEN') throw error(409, 'QC_BATCH_LOCKED', 'The run must be OPEN before it starts.');
         if (batch.startedAt) {
             if (input.instrumentId !== undefined && input.instrumentId !== batch.instrumentId) throw error(409, 'QC_INSTRUMENT_FROZEN', 'Started instrument identity is frozen.');

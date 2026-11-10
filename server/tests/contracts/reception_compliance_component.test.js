@@ -360,7 +360,7 @@ describe('Reception ComplianceChecklist Component & Parent State Contract (#113,
         // Static markup should render "Routine Compliant Outcome" badge
         const html = ReactDOMServer.renderToStaticMarkup(tree);
         expect(html).toContain('Routine Compliant Outcome');
-        expect(html).toContain('All quality checks are compliant. Routine non-conformance is unavailable.');
+        expect(html).toContain('All quality checks passed. A problem can only be recorded when a check fails.');
 
         // Attempting to invoke onChange on disabled routine NC must not toggle
         routineNcBox.props.onChange({ target: { checked: true } });
@@ -429,7 +429,7 @@ describe('Reception ComplianceChecklist Component & Parent State Contract (#113,
 
         const html = ReactDOMServer.renderToStaticMarkup(tree);
         expect(html).not.toContain('Routine Compliant Outcome');
-        expect(html).toContain('Non-Conformance Description');
+        expect(html).toContain('Describe the problem *');
     });
 
     test('11. Incomplete / unanswered checklist keeps routine NC choice unavailable (#113)', () => {

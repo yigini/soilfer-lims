@@ -321,11 +321,11 @@ const ComplianceChecklist = ({
                             ? 'border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/20 cursor-pointer'
                             : 'border-sf-divider hover:border-red-200 hover:bg-red-50/30 dark:hover:bg-red-900/10 cursor-pointer'
                     }`}
-                    title={allCompliant ? t('reception.ncDisabledAllCompliant', 'All quality checks are compliant. Routine non-conformance is unavailable.') : (!anyFail && hasUnanswered) ? t('reception.ncDisabledIncomplete', 'Complete checklist or mark failed criteria to enable routine non-conformance.') : undefined}
+                    title={allCompliant ? t('plainLabels.problemChecksPassed') : (!anyFail && hasUnanswered) ? t('plainLabels.problemCompleteChecklist') : undefined}
                 >
                     <input
                         type="checkbox"
-                        aria-label="Flag as Non-Conformance"
+                        aria-label={t('plainLabels.recordProblem')}
                         data-testid="routine-nc-checkbox"
                         checked={Boolean(value?.nonConformance && anyFail)}
                         disabled={allCompliant || !anyFail}
@@ -346,7 +346,7 @@ const ComplianceChecklist = ({
                     <div className="flex-1">
                         <div className="flex items-center gap-2">
                             <span className={`font-bold text-sm ${allCompliant ? 'text-sf-muted' : (value?.nonConformance && anyFail) ? 'text-red-700 dark:text-red-400' : 'text-sf-muted'}`}>
-                                {t('reception.flagNonConformance', 'Flag as Non-Conformance')}
+                                {t('plainLabels.recordProblem')}
                             </span>
                             {allCompliant && (
                                 <span className="text-[10px] font-bold uppercase text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/40 px-2 py-0.5 rounded">
@@ -356,7 +356,7 @@ const ComplianceChecklist = ({
                         </div>
                         <p className="text-xs text-sf-muted mt-0.5">
                             {allCompliant
-                                ? t('reception.ncDisabledHint', 'All quality checks are compliant. Routine non-conformance is unavailable.')
+                                ? t('plainLabels.problemChecksPassed')
                                 : anyFail
                                     ? t('reception.ncFailedHint', 'Flags this sample for manager review or rejection due to failed checklist criteria')
                                     : t('reception.ncRoutineHint', 'Flags this sample for manager review before processing can begin')}
@@ -427,7 +427,7 @@ const ComplianceChecklist = ({
                                 ? t('reception.combinedProblemDescription', 'Combined Problem Description (Checklist & Other) *')
                                 : hasOtherProblem 
                                     ? t('reception.otherProblemDescription', 'Problem Description (Outside Checklist Criteria) *')
-                                    : t('reception.nonConformanceDescription', 'Non-Conformance Description *')}
+                                    : t('plainLabels.problemDescription')}
                         </label>
                         <textarea
                             data-testid="unified-nc-description"
@@ -482,7 +482,7 @@ const ComplianceChecklist = ({
                                 ))}
                             </div>
                         ) : (
-                            <p className="text-[11px] text-sf-muted italic">No non-conformance photos attached yet.</p>
+                            <p className="text-[11px] text-sf-muted italic">{t('plainLabels.noProblemPhotos')}</p>
                         )}
                     </div>
                 )}

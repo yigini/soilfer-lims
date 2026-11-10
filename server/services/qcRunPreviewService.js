@@ -42,7 +42,7 @@ async function previewQcRun(db, batchId, actor, entries) {
     return db.$transaction(async tx => {
         const batch = await readQcRun(tx, batchId, actor);
         if (!batch.startedAt || !batch.analytes.length || batch.analytes.some(row => row.provenance !== 'NATIVE' || !row.criteriaSnapshot)) {
-            throw failure(409, 'QC_PREVIEW_UNAVAILABLE', 'Preview requires a started native run with frozen criteria.');
+            throw failure(409, 'QC_PREVIEW_UNAVAILABLE', 'Start a standard batch run and save its QC rules before previewing it.');
         }
         for (const analyte of batch.analytes) {
             try {

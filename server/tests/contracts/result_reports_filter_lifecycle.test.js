@@ -61,7 +61,7 @@ function loadResultReportsModule(customAxios = null, customReact = null, customR
     });
     const mockLanguage = {
         useLanguage: () => ({
-            t: (k, fb) => (typeof fb === 'string' ? fb : k),
+            t: (k, fb) => k === 'resultReports.superseded' ? require('../../../client/src/translations/en.json').resultReports.superseded : (typeof fb === 'string' ? fb : k),
             language: 'en'
         })
     };
@@ -252,7 +252,7 @@ describe('Result Reports Query/Filter Lifecycle & Stale-Response Regression (#12
             expect(markup).toContain('Result Reports');
             expect(markup).toContain('Search by name, phone, project, sample ID, or lab ID...');
             expect(markup).toContain('Published');
-            expect(markup).toContain('Superseded');
+            expect(markup).toContain('Replaced by newer version');
             expect(markup).toContain('All Versions');
             // By default with no query, clear button is not present
             expect(markup).not.toContain('aria-label="Clear search"');
@@ -543,7 +543,7 @@ describe('Result Reports Query/Filter Lifecycle & Stale-Response Regression (#12
 
             // 2. Click 'Superseded' status tab
             const buttons = findAllElements(tree, el => el.type === 'button');
-            const supersededBtn = buttons.find(b => b.props?.children === 'Superseded');
+            const supersededBtn = buttons.find(b => b.props?.children === 'Replaced by newer version');
             expect(supersededBtn).toBeDefined();
 
             supersededBtn.props.onClick();
@@ -737,7 +737,7 @@ describe('Result Reports Query/Filter Lifecycle & Stale-Response Regression (#12
             tree = render();
 
             const buttons = findAllElements(tree, el => el.type === 'button');
-            const supersededBtn = buttons.find(b => b.props?.children === 'Superseded');
+            const supersededBtn = buttons.find(b => b.props?.children === 'Replaced by newer version');
             const allBtn = buttons.find(b => b.props?.children === 'All Versions');
 
             // Dispatch Request 1: click Superseded

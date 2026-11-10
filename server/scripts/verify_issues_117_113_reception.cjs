@@ -1067,8 +1067,8 @@ async function runCompleteVerification() {
                 expression: `
                     (() => {
                         const text = document.body.innerText;
-                        const hasNonConf = text.toLowerCase().includes('non-conformance recorded');
-                        const hasStatus = text.includes('RECEIVED_REJECTED');
+                        const hasNonConf = text.toLowerCase().includes('problem recorded');
+                        const hasStatus = text.includes('Rejected (problem recorded)');
                         const errDialog = document.querySelector('[role="dialog"]');
                         return {
                             isModal: hasNonConf && hasStatus,
@@ -1083,7 +1083,7 @@ async function runCompleteVerification() {
             }, sessionId);
             console.log('    [Step 12 Evaluation]:', JSON.stringify(res.result?.value));
             return res.result?.value?.isModal;
-        }, 'Non-Conformance Recorded result modal displayed', 15000, 1000);
+        }, 'Problem recorded result modal displayed', 15000, 1000);
 
         const dbRejectedSample = await prisma.sample.findFirst({
             where: { originalId: TEST_EXP_SAMPLE_ID }

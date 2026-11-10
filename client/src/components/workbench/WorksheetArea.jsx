@@ -607,7 +607,7 @@ export default function WorksheetArea({
                                 className="px-4 py-2 rounded-lg text-xs font-semibold bg-sf-primary text-sf-on-primary hover:bg-sf-primary-hover disabled:opacity-50 transition-colors flex items-center gap-1.5"
                             >
                                 <CheckCircle2 size={13} />
-                                <span>Confirm {activeGroup?.analysisName || 'Preparation'} Complete ({selectedRows.size})</span>
+                                <span>{t('plainLabels.confirmAnalysisDone', { analysisName: activeGroup?.analysisName || t('resultReports.preparation') })} ({selectedRows.size})</span>
                             </button>
                         ) : (
                             <button
@@ -645,7 +645,7 @@ export default function WorksheetArea({
             <div className="flex items-center justify-between flex-wrap gap-3 pb-2">
                 <div className="flex items-center gap-3">
                     <label className="flex items-center gap-2 text-xs font-semibold text-sf-text">
-                        <span>Work type:</span>
+                        <span>{t('plainLabels.workType')}</span>
                         <select
                             value={activeGroup?.analysis || ''}
                             onChange={(e) => { if (!runBatch?.analytes?.some(row => row.analysisCode === e.target.value)) { selectedRunRef.current = ''; setSelectedRun(''); } onSelectGroup(e.target.value); }}

@@ -29,16 +29,16 @@ describe('Audit 1.0: real policy page controls', () => {
         const h = await fixture(false), tree = h.render();
         expect(find(tree, 'h2', 'Policies')).toBeDefined();
         expect(elements(tree).filter(node => node.type === 'tr')).toHaveLength(Object.keys(registry).length + 2);
-        for (const text of ['Edit', 'Clear override', 'Save preset', 'Save change']) expect(find(tree, 'button', text)).toBeUndefined();
+        for (const text of ['Edit', 'Reset to lab default', 'Save starting rule set', 'Save change']) expect(find(tree, 'button', text)).toBeUndefined();
         expect(elements(tree).filter(node => node.type === 'input')).toHaveLength(0);
         expect(h.axios.patch).not.toHaveBeenCalled();
     });
     test('manager changes preset with mandatory reason and current version', async () => {
         const h = await fixture(true, { version: 7 }); let tree = h.render();
-        expect(find(tree, 'button', 'Save preset').props.disabled).toBe(true);
+        expect(find(tree, 'button', 'Save starting rule set').props.disabled).toBe(true);
         elements(tree).find(node => node.type === 'select' && node.props.value === '').props.onChange({ target: { value: 'BASIC' } });
         elements(tree).find(node => node.type === 'input').props.onChange({ target: { value: 'Approved by laboratory' } }); tree = h.render();
-        expect(find(tree, 'button', 'Save preset').props.disabled).toBe(false);
+        expect(find(tree, 'button', 'Save starting rule set').props.disabled).toBe(false);
         elements(tree).find(node => node.type === 'form').props.onSubmit({ preventDefault() {} }); await new Promise(resolve => setImmediate(resolve));
         expect(h.axios.patch).toHaveBeenCalledWith('/api/labs/lab/policies', { presetCode: 'BASIC', reason: 'Approved by laboratory', expectedVersion: 7 });
     });
@@ -59,7 +59,7 @@ describe('Audit 1.0: real policy page controls', () => {
     });
     test('profile defaults cannot be cleared as laboratory overrides', async () => {
         const state = await snapshot(null, { profile: { overrides: { 'qc.mode': 'ADVISORY' } } });
-        const h = await fixture(true, state); expect(find(h.render(), 'button', 'Clear override')).toBeUndefined();
+        const h = await fixture(true, state); expect(find(h.render(), 'button', 'Reset to lab default')).toBeUndefined();
     });
     test('manager edits PT limits at analysis scope and submits the exact structured thresholds', async () => {
         const h = await fixture(); let tree = h.render();

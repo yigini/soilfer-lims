@@ -283,7 +283,7 @@ describe('Audit 0.3: reviewed results and policy-aware publication', () => {
             } else {
                 expect(content.qcWarnings).toEqual([expect.objectContaining({ resultId: f.result.id, batchId: f.batch.id,
                     analysisCode: 'PH_H2O', qcStatus: 'FAIL', dispositionDecision: null, dispositionReason: null })]);
-                expect(content.qcWarningStatement).toMatch(/QC warning/);
+                expect(content.qcWarningStatement).toBe('Quality warning: One or more final report values have failed or incomplete batch checks. See the recorded warnings.');
                 if (mode === 'REQUIRED_WARN') {
                     expect(content.qcWarnings[0].acknowledgement).toMatchObject({ actor: jwt.decode(token).username, reason: 'Retained QC warning checked' });
                     expect(content.qcStatement).toContain('Retained QC warning checked');
