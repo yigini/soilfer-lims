@@ -40,9 +40,12 @@ function loadBatchInspectionModalModule() {
     const transformed = esbuild.transformSync(source, { loader: 'jsx', format: 'cjs' });
 
     const mockLucide = new Proxy({}, { get: () => (props) => React.createElement('span', { 'data-lucide': 'icon', ...props }) });
+    const english = require('../../../client/src/translations/en.json');
     const mockLanguage = {
         useLanguage: () => ({
             t: (k, fallbackOrOptions, maybeDefault) => {
+                const label = k.startsWith('plainLabels.') && english.plainLabels[k.split('.')[1]];
+                if (label) return label;
                 if (typeof fallbackOrOptions === 'string') return fallbackOrOptions;
                 if (typeof maybeDefault === 'string') return maybeDefault;
                 return k;
@@ -286,7 +289,7 @@ describe('QC Batch Inspection Display & Legacy Limits Contract Tests (#118)', ()
             );
             expect(html).toContain('QC Batch Inspection');
             expect(html).toContain('BATCH-GTM-2026-P-01');
-            expect(html).toContain('Recorded QC batch evaluations and manager dispositions are preserved in audit history.');
+            expect(html).toContain('Batch checks and manager decisions are kept in audit history.');
         });
 
         test('BatchInspectionModal with initialBatch renders prominent banner, blank Not recorded, and read-only card while suppressing editable form', () => {
@@ -338,13 +341,13 @@ describe('QC Batch Inspection Display & Legacy Limits Contract Tests (#118)', ()
             expect(html).toContain('not stored in this evaluation');
 
             // 4. Form strictly suppressed (no decision selector or submit button)
-            expect(html).not.toContain('Record Manager QC Disposition');
-            expect(html).not.toContain('Confirm Manager Disposition');
+            expect(html).not.toContain('Save manager batch decision');
+            expect(html).not.toContain('Confirm manager decision');
 
             // 5. Read-only recorded disposition card
-            expect(html).toContain('Manager QC Disposition (Recorded — Read Only)');
+            expect(html).toContain('Manager batch decision (read only)');
             expect(html).toContain('Recorded Audit Entry');
-            expect(html).toContain('Recorded manager QC dispositions are preserved in audit history');
+            expect(html).toContain('Manager batch decisions are kept in audit history');
         });
     });
 });

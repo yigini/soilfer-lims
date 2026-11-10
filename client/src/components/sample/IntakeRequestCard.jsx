@@ -1,8 +1,10 @@
 import { useAnalysisNames } from '../../context/AnalysisCatalogueContext';
 import React from 'react';
+import { useLanguage } from '../../context/LanguageContext';
 import { ClipboardList, FlaskConical, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
 
 const IntakeRequestCard = ({ sample }) => {
+    const { t } = useLanguage();
     const getAnalysisDisplayName = useAnalysisNames();
     if (!sample || sample.status !== 'RECEIVED') return null;
 
@@ -113,7 +115,7 @@ const IntakeRequestCard = ({ sample }) => {
 
                         {ncReason && (
                             <div className="mt-2 p-2 bg-red-50 border border-red-100 rounded text-xs text-red-700">
-                                <span className="font-bold block mb-1">Non-Conformance:</span>
+                                <span className="font-bold block mb-1">{t('reception.nonConformance')}</span>
                                 {ncReason}
                             </div>
                         )}

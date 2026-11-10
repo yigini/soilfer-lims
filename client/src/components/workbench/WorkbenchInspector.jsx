@@ -7,6 +7,7 @@ import {
 import ConflictComparePanel from './ConflictComparePanel';
 import { canSelectInstrument } from './entryReadiness';
 import RunHeader from './RunHeader';
+import { useLanguage } from '../../context/LanguageContext';
 
 /**
  * WorkbenchInspector
@@ -27,6 +28,7 @@ export default function WorkbenchInspector({
     onResolveConflict,
     isDiscarding = false
 }) {
+    const { t } = useLanguage();
     const getAnalysisDisplayName = useAnalysisNames();
     if (!selectedItem) {
         return (
@@ -132,14 +134,14 @@ export default function WorkbenchInspector({
                         <span className="font-medium text-emerald-600 dark:text-emerald-400">✓ Accepted</span>
                     </div>
                     <div className="flex items-center justify-between text-[11px]">
-                        <span className="text-sf-muted">Drying Gate:</span>
+                        <span className="text-sf-muted">{t('plainLabels.dryingStep')}</span>
                         <span className={`font-medium ${dryingStatus === 'DONE' ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600'}`}>
                             {dryingStatus === 'DONE' ? '✓ Completed' : dryingStatus || 'Pending'}
                         </span>
                     </div>
                     {!isOperationalGate && (
                         <div className="flex items-center justify-between text-[11px]">
-                            <span className="text-sf-muted">Preparation Gate:</span>
+                            <span className="text-sf-muted">{t('plainLabels.preparationStep')}</span>
                             <span className={`font-medium ${preparationStatus === 'DONE' ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600'}`}>
                                 {preparationStatus === 'DONE' ? '✓ Completed' : preparationStatus || 'Pending'}
                             </span>

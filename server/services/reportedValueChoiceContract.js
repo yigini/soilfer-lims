@@ -17,7 +17,7 @@ function selectedOutputValues(item, candidates, limits, options = {}) {
         if (!candidate.results.length || candidate.results.some(row => !params.includes(row.param)) ||
             [...replicas].some(replica => params.some(param => candidate.results.filter(row => row.param === param &&
                 (row.replicateNo ?? 1) === replica).length !== 1))) {
-            throw failure('REPORTED_VALUE_SELECTION_INVALID', 'The chosen attempt does not have a complete output set.');
+            throw failure('REPORTED_VALUE_SELECTION_INVALID', 'The selected try is missing results. Choose a finished, valid try.');
         }
     }
     const averaging = params.some(param => all.filter(row => row.param === param).length > 1);
@@ -53,12 +53,12 @@ function selectedOutputValues(item, candidates, limits, options = {}) {
 
 function explicitReportedChoice(item, lineage, choice, limits, options = {}) {
     if (!choice || !MODES.has(choice.mode) || Object.keys(choice).some(key => !['mode', 'attemptIds', 'reason'].includes(key))) {
-        throw failure('REPORTED_VALUE_SELECTION_INVALID', 'Choose an attempt, a complete mean, or not reportable.');
+        throw failure('REPORTED_VALUE_SELECTION_INVALID', 'Choose a valid try, a complete average, or mark the result as not reportable.');
     }
     if (choice.reason != null && typeof choice.reason !== 'string') throw failure('REPORTED_VALUE_SELECTION_INVALID', 'The selection reason must be text.');
     if (choice.mode === 'NOT_REPORTABLE') {
         if (!choice.reason?.trim() || choice.attemptIds != null && (!Array.isArray(choice.attemptIds) || choice.attemptIds.length)) {
-            throw failure('REPORTED_VALUE_SELECTION_INVALID', 'Not reportable requires a reason and no selected attempts.');
+            throw failure('REPORTED_VALUE_SELECTION_INVALID', 'To mark the result as not reportable, give a reason and clear the selected tries.');
         }
         return { mode: choice.mode, attemptIds: [], rule: 'REVIEWER', reason: choice.reason.trim(),
             outputs: selectionOutputs(item).map(analysisCode => ({ analysisCode, value: null, valueText: '', unit: null,
@@ -66,11 +66,11 @@ function explicitReportedChoice(item, lineage, choice, limits, options = {}) {
     }
     const ids = choice.attemptIds;
     if (!Array.isArray(ids) || !ids.length || new Set(ids).size !== ids.length || ids.some(id => typeof id !== 'string') ||
-        choice.mode === 'ATTEMPT' && ids.length !== 1) throw failure('REPORTED_VALUE_SELECTION_INVALID', 'Choose complete eligible attempts.');
+        choice.mode === 'ATTEMPT' && ids.length !== 1) throw failure('REPORTED_VALUE_SELECTION_INVALID', 'Pick a finished, valid try or average.');
     const candidates = ids.map(id => lineage.eligible.find(row => row.attempt.id === id));
-    if (candidates.some(row => !row)) throw failure('REPORTED_VALUE_SELECTION_INVALID', 'An ineligible attempt cannot supply the reported value.');
+    if (candidates.some(row => !row)) throw failure('REPORTED_VALUE_SELECTION_INVALID', 'The selected try cannot be used as the final report value. Choose a finished, valid try.');
     const values = selectedOutputValues(item, candidates, limits, options);
-    if (choice.mode === 'MEAN' && !values.averaging) throw failure('REPORTED_VALUE_SELECTION_INVALID', 'A mean needs more than one final value per output.');
+    if (choice.mode === 'MEAN' && !values.averaging) throw failure('REPORTED_VALUE_SELECTION_INVALID', 'An average needs more than one final value for each result.');
     return { mode: choice.mode, attemptIds: [...ids].sort(), rule: 'REVIEWER', reason: choice.reason?.trim() || null,
         outputs: values.outputs };
 }

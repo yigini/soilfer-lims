@@ -18,7 +18,7 @@ async function reorderNativeRun(db, batchId, actor, input = {}) {
         }
         if (batch.status !== 'OPEN') throw failure(409, 'QC_BATCH_LOCKED', 'Only an OPEN run can be reordered.');
         if (!batch.analytes.length || batch.analytes.some(row => row.provenance !== 'NATIVE')) {
-            throw failure(409, 'QC_NATIVE_RUN_REQUIRED', 'Only a native run has a reorderable sequence.');
+            throw failure(409, 'QC_NATIVE_RUN_REQUIRED', 'You can change the sample order in a standard batch run.');
         }
         const ids = input.positionIds;
         if (!Array.isArray(ids) || ids.length !== batch.positions.length || new Set(ids).size !== ids.length ||
