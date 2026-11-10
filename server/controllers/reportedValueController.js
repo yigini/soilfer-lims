@@ -3,7 +3,7 @@ const selections = require('../services/reportedValueSelectionService');
 function refuse(res, original) {
     const error = require('../services/workflowStateRules').mapStateError(original);
     return res.status(error.statusCode || 500).json({ code: error.code || 'REPORTED_VALUE_SELECTION_FAILED',
-        error: error.statusCode ? error.message : 'Could not read or save the reported value.', ...(error.details || {}) });
+        error: error.statusCode ? error.message : 'Could not read or save the final report value.', ...(error.details || {}) });
 }
 exports.inspect = async (req,res) => {
     try { res.json(await selections.reviewReportedSelection(prisma, req.params.id, req.user)); }

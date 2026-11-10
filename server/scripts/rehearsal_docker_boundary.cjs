@@ -5,11 +5,11 @@
  * Real Disposable Docker Boundary Rehearsal (PR #147, Issue #146)
  * File: server/scripts/rehearsal_docker_boundary.cjs
  * 
- * Verifies the actual Bash release wrapper (execute_release_pr147.sh) and packaged
+ * Verifies the actual Bash release wrapper (tools/deploy/release-rehearsal.sh) and packaged
  * container runtime boundaries in an isolated real Docker environment (CI):
  * 
  *   [Smoke Test]
- *     - Packaged runner loading (/app/server/scripts/execute_ghana_apply_146.cjs) inside
+ *     - Packaged runner loading (/app/server/scripts/apply_reviewed_snapshot.cjs) inside
  *       candidate Alpine container, confirming musl native module (better-sqlite3) linkage.
  *     - Packaged shared intake guards (AMBIGUOUS_PROVENANCE_HOLD) and controller wiring verification.
  * 
@@ -27,7 +27,7 @@
  * Note:
  *   - Strictly uses synthetic public fixtures (zero real datasets or PII).
  *   - Operates exclusively on disposable Docker volumes and isolated mock ingress.
- *   - Real code under test is execute_release_pr147.sh invoking real Docker daemon.
+ *   - Real code under test is tools/deploy/release-rehearsal.sh invoking real Docker daemon.
  *   - Faults are injected via clearly labeled synthetic test adapters.
  */
 
@@ -39,7 +39,7 @@ const os = require('os');
 
 console.log('================================================================');
 console.log('  REAL DISPOSABLE DOCKER BOUNDARY REHEARSAL                     ');
-console.log('  Testing execute_release_pr147.sh Against Real Docker Runtime  ');
+console.log('  Testing tools/deploy/release-rehearsal.sh Against Real Docker Runtime  ');
 console.log('================================================================');
 
 // 1. Docker Daemon Availability Check
@@ -72,10 +72,10 @@ try {
 
 const serverDir = path.resolve(__dirname, '..');
 const repoRoot = path.resolve(serverDir, '..');
-const releaseScript = path.join(repoRoot, 'execute_release_pr147.sh');
+const releaseScript = path.join(repoRoot, 'tools/deploy/release-rehearsal.sh');
 
 if (!fs.existsSync(releaseScript)) {
-    console.error('FATAL: execute_release_pr147.sh not found at', releaseScript);
+    console.error('FATAL: tools/deploy/release-rehearsal.sh not found at', releaseScript);
     process.exit(1);
 }
 
@@ -341,7 +341,7 @@ async function runRealDockerBoundarySuite() {
     try {
         console.log('[Smoke Test] Packaged Runner Loading & Intake Guard Verification in Real Container...');
         
-        // 1. Verify packaged execute_ghana_apply_146.cjs loads correctly in Alpine musl runtime
+        // 1. Verify packaged apply_reviewed_snapshot.cjs loads correctly in Alpine musl runtime
         let smokeStatus = 0;
         let smokeOutput = '';
         try {
@@ -350,7 +350,7 @@ async function runRealDockerBoundarySuite() {
                 '--entrypoint', 'node',
                 '-w', '/app/server',
                 REVIEWED_IMAGE_ID,
-                '/app/server/scripts/execute_ghana_apply_146.cjs'
+                '/app/server/scripts/apply_reviewed_snapshot.cjs'
             ], { encoding: 'utf8' });
         } catch (err) {
             smokeStatus = err.status;
@@ -373,7 +373,7 @@ async function runRealDockerBoundarySuite() {
         if (!guardsCheck.includes('GUARDS_VERIFIED')) {
             throw new Error('Intake guards verification failed in packaged image: ' + guardsCheck);
         }
-        console.log('  ✓ Smoke Test PASSED: Packaged runner (/app/server/scripts/execute_ghana_apply_146.cjs) loaded cleanly with Alpine musl native modules; shared intake guards and controller wiring verified, held acceptance refused without writes.\n');
+        console.log('  ✓ Smoke Test PASSED: Packaged runner (/app/server/scripts/apply_reviewed_snapshot.cjs) loaded cleanly with Alpine musl native modules; shared intake guards and controller wiring verified, held acceptance refused without writes.\n');
 
         // ====================================================================
         // SCENARIO 1: Real Wrapper Success Path Through Disposable Docker

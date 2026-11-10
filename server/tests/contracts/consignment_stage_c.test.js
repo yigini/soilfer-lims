@@ -98,7 +98,7 @@ describe('Stage C: Consignment & High-Throughput Batch Intake Contract (RC-12 - 
                     name: 'Dr. Roberto Arbenz',
                     organization: 'ICTA Guatemala',
                     phone: '+502 2334-5678',
-                    email: 'roberto.arbenz@icta.gob.gt'
+                    email: 'intake.officer@example.org'
                 },
                 projectCode: testProjectId
             },

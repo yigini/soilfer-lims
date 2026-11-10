@@ -5,7 +5,7 @@
 **Status:** Approved / Active Contract  
 **Protocol:** RESTful JSON / RFC 7946 GeoJSON over TLS (HTTPS)  
 **Target Consumers:** National Soil Information Systems (NSIS), FAO OpenNSIS (`sis-database/owl2sql`), Global Soil Data Portals (GLOSIS / GSP)  
-**Governing Issue:** GitHub Issue [#140](https://github.com/yigini/soilfer-lims/issues/140)  
+**Governing Issue:** Historical issue 140<br>
 
 ---
 
@@ -46,7 +46,7 @@ All requests must be transmitted over encrypted TLS (`HTTPS`). Authentication us
 
 ```http
 GET /api/v2/data-exchange/samples?limit=10 HTTP/1.1
-Host: lims.yigini.net
+Host: lims.example.org
 X-API-Key: slims_live_a1b2c3d4e5f6...
 Accept: application/json
 ```

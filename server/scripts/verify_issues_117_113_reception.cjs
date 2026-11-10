@@ -58,7 +58,7 @@ const bcrypt = require('bcryptjs');
 
 const CHROME_PATH = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
 const EVIDENCE_DIR = path.resolve(__dirname, '..', '..', 'artifacts', 'evidence-journeys');
-const ARTIFACTS_DIR = 'C:\\Users\\yigin\\.gemini\\antigravity\\brain\\80c11c12-5cb7-4455-a433-01544d488498';
+const ARTIFACTS_DIR = 'C:\\workspace\\.gemini\\antigravity\\brain\\80c11c12-5cb7-4455-a433-01544d488498';
 
 if (!fs.existsSync(EVIDENCE_DIR)) {
     fs.mkdirSync(EVIDENCE_DIR, { recursive: true });
@@ -1067,8 +1067,8 @@ async function runCompleteVerification() {
                 expression: `
                     (() => {
                         const text = document.body.innerText;
-                        const hasNonConf = text.toLowerCase().includes('non-conformance recorded');
-                        const hasStatus = text.includes('RECEIVED_REJECTED');
+                        const hasNonConf = text.toLowerCase().includes('problem recorded');
+                        const hasStatus = text.includes('Rejected (problem recorded)');
                         const errDialog = document.querySelector('[role="dialog"]');
                         return {
                             isModal: hasNonConf && hasStatus,
@@ -1083,7 +1083,7 @@ async function runCompleteVerification() {
             }, sessionId);
             console.log('    [Step 12 Evaluation]:', JSON.stringify(res.result?.value));
             return res.result?.value?.isModal;
-        }, 'Non-Conformance Recorded result modal displayed', 15000, 1000);
+        }, 'Problem recorded result modal displayed', 15000, 1000);
 
         const dbRejectedSample = await prisma.sample.findFirst({
             where: { originalId: TEST_EXP_SAMPLE_ID }
@@ -1808,7 +1808,7 @@ async function runCompleteVerification() {
                     runnerDir: runnerDir,
                     dbPath: dbPath,
                     refusalGuardVerified: true,
-                    productionHostBlocked: '46.19.33.37'
+                    productionHostBlocked: '203.0.113.10'
                 }
             },
             environment: {

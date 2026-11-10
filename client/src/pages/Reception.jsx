@@ -1279,7 +1279,7 @@ const Reception = () => {
         if (unanswered.length > 0) errors.push({ key: 'compliance', label: `Compliance checklist (${unanswered.length} unanswered)` });
 
         if (removals.length > 0 && !justification?.trim()) errors.push({ key: 'justification', label: 'Justification for removed analyses' });
-        if (checklistData.nonConformance && !checklistData.reason?.trim()) errors.push({ key: 'ncReason', label: 'Non-conformance reason' });
+        if (checklistData.nonConformance && !checklistData.reason?.trim()) errors.push({ key: 'ncReason', label: t('plainLabels.problemReason') });
 
         return errors;
     };
@@ -2503,7 +2503,7 @@ const Reception = () => {
                                         onClick={() => handleSubmit('REJECTED')}
                                         disabled={loading || labRequired || !checklistData.reason}
                                         className="w-full sm:w-auto py-3 px-4 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl shadow-lg shadow-red-600/20 transition-all flex items-center justify-center gap-2 active:scale-95 touch-target text-xs"
-                                        title="Reject sample due to non-conformance"
+                                        title={t('plainLabels.rejectWithProblem')}
                                     >
                                         <AlertTriangle size={16} />
                                         <span>Reject Sample</span>
@@ -2540,9 +2540,9 @@ const Reception = () => {
                                         <AlertTriangle size={32} className="text-white" />
                                     </div>
                                 </div>
-                                <h2 className="text-2xl font-black text-sf-text mb-1 tracking-tight uppercase">Non-Conformance Recorded</h2>
+                                <h2 className="text-2xl font-black text-sf-text mb-1 tracking-tight uppercase">{t('plainLabels.problemRecorded')}</h2>
                                 <p className="text-rose-600 dark:text-rose-400 mb-6 font-semibold text-xs">
-                                    Sample rejected at reception desk and recorded as <span className="font-mono px-1.5 py-0.5 bg-rose-100 dark:bg-rose-900/50 rounded font-bold">RECEIVED_REJECTED</span>
+                                    Sample rejected at reception desk and recorded as <span className="font-mono px-1.5 py-0.5 bg-rose-100 dark:bg-rose-900/50 rounded font-bold">{t('status.RECEIVED_REJECTED')}</span>
                                 </p>
 
                                 <div className="space-y-3 bg-sf-canvas rounded-2xl p-4 border border-sf-divider mb-6 text-left text-xs shadow-inner">
@@ -2553,7 +2553,7 @@ const Reception = () => {
                                     <div className="pb-2 border-b border-sf-divider">
                                         <span className="text-sf-muted font-medium block mb-1">Rejection Reason:</span>
                                         <div className="p-2 bg-rose-50 dark:bg-rose-950/30 text-rose-800 dark:text-rose-300 rounded border border-rose-200 dark:border-rose-900 font-semibold text-xs">
-                                            {result.rejectionReason || 'Sample non-conformance recorded during physical intake.'}
+                                            {result.rejectionReason || t('plainLabels.problemRecordedAtIntake')}
                                         </div>
                                     </div>
                                     <div className="grid grid-cols-2 gap-2 text-[11px]">

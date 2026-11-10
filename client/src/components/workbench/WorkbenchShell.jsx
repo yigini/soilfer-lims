@@ -804,7 +804,7 @@ export default function WorkbenchShell({
                     { id: 'worksheet', label: `Worksheet (${currentGroup?.items?.length || 0})` },
                     { id: 'review', label: `Ready to Submit (${stats.readyToSubmitCount ?? 0})` },
                     { id: 'completed', label: `Sent & Completed (${(stats.submittedCount || 0) + (stats.completedCount || 0)})` },
-                    { id: 'activity', label: `Activity Receipts (${receipts.length})` },
+                    { id: 'activity', label: t('plainLabels.confirmationLog', { count: receipts.length }) },
                     ...(hasPermission?.('APPROVE_RESULTS') ? [{ id: 'overrides', label: t('overrideRequests.inbox') }] : [])
                 ].map(tab => (
                     <button

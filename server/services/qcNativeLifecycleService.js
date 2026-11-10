@@ -26,7 +26,7 @@ async function reopenNativeRun(db, batchId, actor, reason, analysisCode = null) 
         if (!accepted.length) throw failure(409, 'QC_BATCH_LOCKED', 'There is no accepted QC to reopen.');
         if (batch.status === 'CLOSED') throw failure(400, 'QC_BATCH_LOCKED', 'Batch is CLOSED and cannot be modified.');
         if (!batch.startedAt || !batch.analytes.length || batch.analytes.some(row => row.provenance !== 'NATIVE')) {
-            throw failure(409, 'QC_NATIVE_RUN_REQUIRED', 'Reopening requires a started native run.');
+            throw failure(409, 'QC_NATIVE_RUN_REQUIRED', 'Start the standard batch run before reopening it.');
         }
         if (!hasPermission(actor, 'APPROVE_RESULTS')) throw failure(403, 'QC_REOPEN_PERMISSION_REQUIRED', 'Reopening accepted QC requires APPROVE_RESULTS.');
         if (typeof reason !== 'string' || !reason.trim()) throw failure(400, 'REASON_REQUIRED', 'A reason is required to reopen accepted QC.');

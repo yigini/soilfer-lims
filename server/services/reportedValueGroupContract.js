@@ -1,7 +1,7 @@
 const { TransitionError } = require('./workflowStateRules');
 const { assertSelectionFresh } = require('./reportedValueSelectionLineage');
 function assertSelectionGroupStructure(rows, outputParams) {
-    if (!rows.length) throw new TransitionError('Choose a reported value before reporting this test.', 409, 'REPORTED_VALUE_SELECTION_REQUIRED');
+    if (!rows.length) throw new TransitionError('Choose a final report value before reporting this test.', 409, 'REPORTED_VALUE_SELECTION_REQUIRED');
     const stale = () => new TransitionError('The reported-value selection group is incomplete or stale.', 409, 'REPORTED_VALUE_STALE');
     const first = rows[0];
     const shared = ['workItemId', 'selectionGroupId', 'mode', 'attemptIds', 'rule', 'policyKey', 'policyVersion', 'policyRule',

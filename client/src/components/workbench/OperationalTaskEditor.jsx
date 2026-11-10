@@ -2,6 +2,7 @@ import checklists from '../../../../server/data/operationalChecklists.json';
 import React from 'react';
 import { CheckSquare, Square, CheckCircle2, AlertTriangle, ShieldCheck } from 'lucide-react';
 import PreparationRecordFields from './PreparationRecordFields';
+import { useLanguage } from '../../context/LanguageContext';
 
 /**
  * OperationalTaskEditor
@@ -23,6 +24,7 @@ export default function OperationalTaskEditor({
     onRecordsChange = null,
     equipment = []
 }) {
+    const { t } = useLanguage();
     const rawChecks = Array.isArray(checks) ? checks : [false, false, false];
 
     const fallbackSteps = analysis === 'DRYING' ? [
@@ -153,7 +155,7 @@ export default function OperationalTaskEditor({
                         onClick={onConfirm}
                         className="px-2.5 py-1 bg-sf-primary hover:bg-sf-primary-hover text-sf-on-primary rounded text-xs font-bold shadow-sm transition-colors"
                     >
-                        Confirm Complete
+                        {t('plainLabels.confirmWorkDone')}
                     </button>
                 )}
             </div>

@@ -32,18 +32,18 @@ test.each([['RETURNED','Returned (legacy)'],['REJECTED','Rejected (legacy)'],['O
 ('stored %s appears as a read-only badge, with its author and unlinked attempt number', (status,label)=>{
     const attempt={id:'historical',attemptNo:7,status,authorName:'Retained author',createdAt:'2026-10-01T12:00:00Z'};
     const before={...attempt},tree=render({attempts:[attempt]});
-    expect(text(tree)).toContain(label);expect(text(tree)).toContain('Attempt #7');expect(text(tree)).toContain('Retained author');
+    expect(text(tree)).toContain(label);expect(text(tree)).toContain('Try #7');expect(text(tree)).toContain('Retained author');
     expect(elements(tree,row=>['input','select','textarea'].includes(row.type))).toEqual([]);
     expect(elements(tree,row=>row.type==='button')).toHaveLength(2);
     expect(attempt).toEqual(before);
 });
-test('an imported result without an attempt never invents Attempt #1',()=>{
+test('an imported result without an attempt never invents Try #1',()=>{
     const tree=render({results:[{id:'imported',param:'P',value:'6.42',attempt:null,createdAt:'2026-10-01T12:00:00Z'}]});
-    expect(text(tree)).toContain('Imported, no attempt');expect(text(tree)).not.toContain('Attempt #1');
+    expect(text(tree)).toContain('Imported with no recorded try');expect(text(tree)).not.toContain('Try #1');
 });
 test('the result line uses its actual linked attempt number',()=>{
     expect(text(render({results:[{id:'linked',param:'P',value:'6.42',attempt:{id:'attempt',attemptNo:9,status:'RECORDED'},
-        createdAt:'2026-10-01T12:00:00Z'}]}))).toContain('Attempt #9');
+        createdAt:'2026-10-01T12:00:00Z'}]}))).toContain('Try #9');
 });
 test.each(['en','es','es-419','fr','pt'])('all attempt evidence labels are present in %s',locale=>{
     const labels=JSON.parse(fs.readFileSync(path.join(root,`translations/${locale}.json`),'utf8')).attemptEvidence;

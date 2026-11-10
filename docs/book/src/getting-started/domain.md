@@ -1,6 +1,6 @@
 # Getting a Domain Name
 
-A **domain name** is the address people type into their browser to access your LIMS. Instead of `http://46.19.33.37:3000`, your users go to `https://soillab.org` — much more professional and memorable.
+A **domain name** is the address people type into their browser to access your LIMS. Instead of `http://203.0.113.10:3000`, your users go to `https://soillab.org` — much more professional and memorable.
 
 ---
 
@@ -46,9 +46,9 @@ This is **free** — you just need to add a DNS record (we'll cover that in the 
 
 ## Do I Really Need a Domain?
 
-**Technically, no.** You can access SoilFER-LIMS using your server's IP address (like `http://46.19.33.37`). However, a domain name is **strongly recommended** because:
+**Technically, no.** You can access SoilFER-LIMS using your server's IP address (like `http://203.0.113.10`). However, a domain name is **strongly recommended** because:
 
-1. **Easier to remember** — `soillab.org` vs `46.19.33.37`
+1. **Easier to remember** — `soillab.org` vs `203.0.113.10`
 2. **Required for HTTPS** — SSL certificates (the green lock in browsers) are issued for domain names, not IP addresses
 3. **Professional appearance** — a proper domain looks more trustworthy to users and stakeholders
 4. **Won't change** — if you switch servers, you update the DNS record and the domain continues to work. With an IP address, you'd need to tell everyone the new address.

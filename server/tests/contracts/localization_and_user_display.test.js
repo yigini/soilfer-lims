@@ -232,7 +232,7 @@ describe('Localization & Multilingual Integrity Contract (#116)', () => {
         expect(translationData['es'].dashboard.workQueue.action.inspectQc).toBe('Inspeccionar CC');
 
         // Contexts
-        expect(translationData['es'].dashboard.workQueue.context.operationalGate).toBe('Puerta operativa');
+        expect(translationData['es'].dashboard.workQueue.context.operationalGate).toBe('Paso de preparación obligatorio');
         expect(translationData['es'].dashboard.workQueue.context.analyticalMethod).toBe('Método analítico');
         expect(translationData['es'].dashboard.workQueue.context.affectedWorkItems).toContain('elementos');
         expect(translationData['es'].dashboard.workQueue.context.allAnalysesAccepted).toContain('aceptados');

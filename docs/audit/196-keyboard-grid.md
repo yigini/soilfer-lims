@@ -9,7 +9,7 @@ advanceWorksheetCell. Remaining defects are confirmed: that helper handles
 only linear Enter/Tab movement, without same-column arrows or Escape;
 WorksheetArea still requires selectedRows before Review Completion.
 
-[Scope pin6078994041](https://github.com/yigini/soilfer-lims/issues/196#issuecomment-6078994041)
+Scope pin6078994041 (historical issue #196)
 limits navigation to existing editable Result/QC cells in display order.
 Enter/Down/NumpadEnter move down the same column; Shift+Enter/Up move up;
 Tab/Shift+Tab move through editable row cells and then adjacent rows.
@@ -40,7 +40,7 @@ Focused navigation/readiness/Escape/regression proof:6 suites84 tests PASS,
 zero skips3.794s. Initial real browser failed on an actual decimal integrity
 defect: slow45ms/key `6.01` became `601`, with no Results committed.
 
-[Pin6079796711](https://github.com/yigini/soilfer-lims/issues/196#issuecomment-6079796711)
+Pin6079796711 (historical issue #196)
 adds that fix here, confined to BarcodeSafeInput: the last emitted string is a
 parent acknowledgement and must leave newer text/pending/timer intact; an
 external supplied value still resets. Gap30ms, >6-character wedge refusal,

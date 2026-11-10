@@ -22,6 +22,9 @@ jobs:
         with:
           node-version: 24
 
+      - name: Check repository text
+        run: node server/scripts/check_tree.cjs
+
       - name: Check installation configuration
         run: |
           docker compose --env-file /dev/null -f docker-compose.yml -f docker-compose.nginx.yml config --quiet

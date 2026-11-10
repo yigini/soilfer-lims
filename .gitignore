@@ -75,3 +75,18 @@ output/playwright/
 
 # Explicit local metadata-only test templates; suite writes use .tmp copies.
 server/tests/.owned-templates/
+
+# Local work material and retired root helpers
+/WP/
+/artifacts/
+/.agent/
+/.claude/
+/docs/tasks/
+/.commitmsg
+/tmp_check.js
+/tmp_check_orphans.js
+/tmp_fix_drafts.js
+/check_db.js
+/execute_release_issue140.sh
+/execute_release_pr147.sh
+/execute_ghana_apply_146.cjs

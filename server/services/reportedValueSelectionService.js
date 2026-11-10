@@ -15,7 +15,7 @@ function choiceFor(item, context, explicit) {
         return choice;
     }
     const automatic = automaticReportedChoice(item, context.lineage, context.policy.value, context.limits, context);
-    if (!automatic.choice) throw new rules.TransitionError('Choose the reported value for this test before accepting it.', 409,
+    if (!automatic.choice) throw new rules.TransitionError('Choose the final report value for this test before accepting it.', 409,
         'REPORTED_VALUE_SELECTION_REQUIRED', { workItemId: item.id, reasons: automatic.reasons,
             eligibleAttempts: context.lineage.eligible.map(row => ({ attemptId: row.attempt.id, attemptNo: row.attempt.attemptNo,
                 status: row.attempt.status, finalResultIds: row.results.map(result => result.id), limit: context.limits[row.attempt.id] })) });
@@ -92,7 +92,7 @@ async function appendReportedSelection(tx, item, actor, explicit, options = {}) 
 }
 async function readReportedSelection(tx, item) {
     const rows = await currentRows(tx, item.id);
-    if(!rows.length) throw new rules.TransitionError('Choose a reported value before reporting this test.',409,
+    if(!rows.length) throw new rules.TransitionError('Choose a final report value before reporting this test.',409,
         'REPORTED_VALUE_SELECTION_REQUIRED',{workItemId:item.id});
     let context;
     try {context=await loadSelectionEvidence(tx,item);}

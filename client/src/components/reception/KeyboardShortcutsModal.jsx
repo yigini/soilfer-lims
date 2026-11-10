@@ -1,7 +1,9 @@
 import React, { useEffect } from 'react';
+import { useLanguage } from '../../context/LanguageContext';
 import { X, Keyboard, Zap, Printer, CheckCircle, ArrowRight, CornerDownLeft } from 'lucide-react';
 
 const KeyboardShortcutsModal = ({ isOpen, onClose }) => {
+    const { t } = useLanguage();
     useEffect(() => {
         if (!isOpen) return;
         const handleKeyDown = (e) => {
@@ -19,7 +21,7 @@ const KeyboardShortcutsModal = ({ isOpen, onClose }) => {
             items: [
                 { keys: ['Alt', '1'], label: 'Switch to Project Sample Intake' },
                 { keys: ['Alt', '2'], label: 'Switch to Walk-in Sample Intake' },
-                { keys: ['Alt', '3'], label: 'Switch to Consignment Batch Mode' },
+                { keys: ['Alt', '3'], label: t('plainLabels.switchToDeliveryBox') },
                 { keys: ['Escape'], label: 'Close Active Modal / Back to Desk' },
             ]
         },
@@ -34,7 +36,7 @@ const KeyboardShortcutsModal = ({ isOpen, onClose }) => {
         {
             category: 'Sample Intake & Labels',
             items: [
-                { keys: ['Ctrl', 'Enter'], label: 'Complete Intake / Submit Consignment' },
+                { keys: ['Ctrl', 'Enter'], label: t('plainLabels.submitDeliveryBox') },
                 { keys: ['Ctrl', 'P'], label: 'Open Label Print Dialog' },
                 { keys: ['?'], label: 'Show / Hide this Keyboard Shortcuts modal' },
             ]

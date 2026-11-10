@@ -248,7 +248,7 @@ export default function BatchInspectionModal({ batchId, isOpen, onClose, onDispo
     const handleDispositionSubmit = async (e) => {
         e.preventDefault();
         if (!reason.trim()) {
-            setDispositionError('A documented reason is required for QC disposition.');
+            setDispositionError(t('plainLabels.managerDecisionReasonRequired'));
             return;
         }
 
@@ -273,7 +273,7 @@ export default function BatchInspectionModal({ batchId, isOpen, onClose, onDispo
             }
         } catch (err) {
             console.error('[BatchInspectionModal] Disposition error:', err);
-            setDispositionError(err.response?.data?.error || 'Failed to submit disposition');
+            setDispositionError(err.response?.data?.error || t('plainLabels.managerDecisionFailed'));
         } finally {
             setSubmitting(false);
         }
@@ -354,7 +354,7 @@ export default function BatchInspectionModal({ batchId, isOpen, onClose, onDispo
                                         <span>QC FAILED — Quality Gate Active</span>
                                     </div>
                                     <p className="text-xs text-rose-800 dark:text-rose-300">
-                                        This batch failed analytical QC control limits. Downstream sample approvals and official report release are strictly blocked until an authorized Laboratory Manager records a formal disposition.
+                                        {t('plainLabels.waitingForManagerDecision')}
                                     </p>
                                 </div>
                             )}
@@ -365,7 +365,7 @@ export default function BatchInspectionModal({ batchId, isOpen, onClose, onDispo
                                         <div className={`flex items-center gap-2 font-bold text-sm ${dispInfo.titleColor}`}>
                                             <ShieldAlert className="w-5 h-5 shrink-0" />
                                             <span>
-                                                {isFailed ? 'QC FAILED — Manager Disposition Active: ' : 'Manager Disposition Active: '}
+                                                {t(isFailed ? 'plainLabels.failedManagerDecision' : 'plainLabels.activeManagerDecision')}{' '}
                                                 {dispInfo.title}
                                             </span>
                                         </div>
@@ -527,7 +527,7 @@ export default function BatchInspectionModal({ batchId, isOpen, onClose, onDispo
                                     <div className="flex items-center justify-between border-b border-sf-divider pb-2">
                                         <div className="flex items-center gap-2 font-bold text-sm text-sf-text">
                                             <ShieldAlert className="w-4 h-4 text-indigo-600" />
-                                            <span>Record Manager QC Disposition</span>
+                                            <span>{t('plainLabels.saveManagerDecision')}</span>
                                         </div>
                                         <span className="text-[10px] text-sf-muted uppercase font-bold">
                                             Authorized Role: {user.role}
@@ -610,7 +610,7 @@ export default function BatchInspectionModal({ batchId, isOpen, onClose, onDispo
                                             rows={3}
                                             value={reason}
                                             onChange={(e) => setReason(e.target.value)}
-                                            placeholder="Provide documented scientific rationale, instrument tolerance context, or investigation details justifying this disposition decision..."
+                                            placeholder={t('plainLabels.managerDecisionReason')}
                                             className="w-full p-2.5 text-xs bg-sf-surface border border-sf-divider rounded-xl text-sf-text placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                             required
                                         />
@@ -625,12 +625,12 @@ export default function BatchInspectionModal({ batchId, isOpen, onClose, onDispo
                                             {submitting ? (
                                                 <>
                                                     <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                                                    <span>Recording Disposition…</span>
+                                                    <span>{t('plainLabels.savingManagerDecision')}</span>
                                                 </>
                                             ) : (
                                                 <>
                                                     <Check className="w-3.5 h-3.5" />
-                                                    <span>Confirm Manager Disposition</span>
+                                                    <span>{t('plainLabels.confirmManagerDecision')}</span>
                                                 </>
                                             )}
                                         </button>
@@ -644,7 +644,7 @@ export default function BatchInspectionModal({ batchId, isOpen, onClose, onDispo
                                     <div className="flex items-center justify-between border-b border-sf-divider pb-2">
                                         <div className="flex items-center gap-2 font-bold text-sm text-sf-text">
                                             <ShieldCheck className="w-4 h-4 text-sf-muted" />
-                                            <span>Manager QC Disposition (Recorded — Read Only)</span>
+                                            <span>{t('plainLabels.managerDecisionRecorded')}</span>
                                         </div>
                                         <span className="text-[10px] text-sf-muted uppercase font-bold tracking-wider">
                                             Recorded Audit Entry
@@ -669,7 +669,7 @@ export default function BatchInspectionModal({ batchId, isOpen, onClose, onDispo
                                         </div>
                                     </div>
                                     <p className="text-[11px] text-sf-muted">
-                                        Recorded manager QC dispositions are preserved in audit history and cannot be overwritten through this interface.
+                                        {t('plainLabels.managerDecisionHistory')}
                                     </p>
                                 </div>
                             )}
@@ -680,7 +680,7 @@ export default function BatchInspectionModal({ batchId, isOpen, onClose, onDispo
                 {/* Modal Footer */}
                 <div className="px-6 py-3 border-t border-sf-divider bg-sf-canvas flex justify-between items-center">
                     <div className="text-[11px] text-sf-muted">
-                        Recorded QC batch evaluations and manager dispositions are preserved in audit history.
+                        {t('plainLabels.batchHistory')}
                     </div>
                     <button
                         type="button"

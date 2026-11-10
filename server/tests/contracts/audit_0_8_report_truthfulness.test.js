@@ -105,7 +105,7 @@ describe('Audit 0.8: issued identity and truthful report evidence', () => {
         expect(calls).toContain(`${prefix}-v1`);
         expect(calls).toContain('Issue Date: 2020-03-04');
         expect(calls).toContain('Status: SUPERSEDED');
-        expect(calls.some(value => value.includes(`SUPERSEDED`) && value.includes(`${prefix}-v2`))).toBe(true);
+        expect(calls).toContain(`Replaced by newer version – see ${prefix}-v2`);
     });
     test('a historical base shared by another sample fails closed without a substitute or new report', async () => {
         const a = await fixture(), b = await fixture(), number = id('COLLISION');
@@ -206,7 +206,9 @@ describe('Audit 0.8: issued identity and truthful report evidence', () => {
         const text = jest.spyOn(PDFDocument.prototype, 'text');
         const response = await request(app).get(`/api/reports/${first.id}/pdf`).set('Authorization', `Bearer ${token}`);
         expect(response.status).toBe(200);
-        expect(text.mock.calls.some(([value]) => String(value).includes(`SUPERSEDED`) && String(value).includes(`${second.reportNumberBase} rev 1`))).toBe(true);
+        const lines = text.mock.calls.map(([value]) => String(value));
+        expect(lines).toContain('Status: SUPERSEDED');
+        expect(lines).toContain(`Replaced by newer version – see ${second.reportNumberBase} rev 1`);
         text.mockClear();
         const publicPdf = await request(app).get(`/api/reports/public/${share.body.token}/pdf`);
         expect(publicPdf.status).toBe(410);

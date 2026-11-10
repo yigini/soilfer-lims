@@ -27,7 +27,7 @@ const jwt = require('jsonwebtoken');
 
 const root = path.resolve(__dirname, '../..');
 const canonicalCatalog = JSON.parse(fs.readFileSync(path.join(root, 'server/config/themeCatalogData.json'), 'utf8'));
-const { chromium } = require('C:/Users/yigin/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const { chromium } = require('C:/workspace/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
 const CHROME_PATH = 'C:/Program Files/Google/Chrome/Application/chrome.exe';
 
 const Database = require('better-sqlite3');
@@ -8084,7 +8084,7 @@ async function runBrowserEvidence() {
                                 './client/node_modules/html5-qrcode/third_party/zxing-js.umd.js',
                                 '../client/node_modules/html5-qrcode/third_party/zxing-js.umd.js',
                                 '../../client/node_modules/html5-qrcode/third_party/zxing-js.umd.js',
-                                'C:/Users/yigin/Documents/LIMSI/soilfer-lims/client/node_modules/html5-qrcode/third_party/zxing-js.umd.js'
+                                'C:/workspace/Documents/LIMSI/soilfer-lims/client/node_modules/html5-qrcode/third_party/zxing-js.umd.js'
                             ];
                             let zx = null;
                             for (const cand of zxingCandidates) {
