@@ -1,54 +1,46 @@
-# Roles, Permissions & Separation of Duties
+# Users, Roles & Separation of Duties
 
-SoilFER LIMS uses **Role-Based Access Control (RBAC)** together with configurable **Separation-of-Duties** rules so that every person in the laboratory sees the screens they need while preventing accidental or unauthorized changes to analytical records.
+> *Time:* 10 minutes.
+> *Who can do this:* Laboratory Administrators, Laboratory Managers, and Quality & Audit Officers.
+
+SoilFER LIMS uses role-based permissions and laboratory scoping. Every person sees only the screens they need for their job. When two-person review is enabled, no single person can both enter a bench measurement and approve their own result.
+
+![Who does what across the laboratory](../img/diagrams/who-does-what.svg)
 
 ---
 
-## 1. Overview of Laboratory Roles
+## Which Role Should Each Person Have?
 
-| Role | Who Typically Holds It | Main Responsibilities |
+| On-Screen Role Label | Typical Person in the Lab | What They Can Do |
 | :--- | :--- | :--- |
-| **Super Admin (`SUPER_ADMIN`)** | National programme coordinator or IT administrator *(Global multi-lab mode)* | Creates and manages laboratories, manages users across labs, configures branding, and issues/rotates Data Exchange API keys. |
-| **Lab Manager / Admin (`LAB_MANAGER` / `ADMIN`)** | Head of laboratory, quality manager, or lab director | Configures laboratory policies and presets, manages lab staff and methods, approves batches and samples, issues and amends Certificates of Analysis, and manages equipment/proficiency testing. |
-| **Technical Reviewer (`REVIEWER`)** | Senior chemist or section supervisor | Performs Stage 1 (batch/method) and Stage 2 (whole-sample) technical reviews, selects reported values, returns work items for repeat testing, and co-signs scientific amendments. |
-| **Lab Technician (`TECHNICIAN`)** | Bench analyst, wet-chemistry technician, or spectroscopy operator | Performs drying and preparation gates, builds and runs analytical QC batches, records measurements on the workbench or shared bench terminals, performs self-repeats (`R2`), and uploads spectral files. |
-| **Sample Reception (`SAMPLE_RECEPTION`)** | Sample intake clerk or reception officer | Registers incoming consignments and walk-in samples, synchronizes KoboToolbox field submissions, records arrival condition and archive storage locations, and prints container barcodes. |
-| **Project Manager / Client (`PROJECT_MANAGER` / `CLIENT`)** | Project coordinator, agronomist, or institutional submitter | Tracks sample progress, views approved results and sampling maps, and downloads PDF Certificates of Analysis or CSV/Excel exports (read-only). |
+| **Sample Reception Officer** | Front-desk reception clerk | Receive walk-in and project samples in **Sample Reception**, inspect bag condition, print barcode labels, and log sample handover. Cannot enter bench measurements or approve results. |
+| **Laboratory Technician** | Wet-chemistry, preparation, or spectroscopy analyst | Open **My Work** and **Workbench**, complete drying and preparation checklists, build analytical runs, enter sample and QC values, and submit runs for review. Cannot approve results or issue reports. |
+| **Laboratory Manager** | Head of laboratory or senior supervisor | Assign work, inspect and disposition QC batches, review and approve submitted results in **Manager Task List**, issue and amend **Certificate of Analysis** PDFs in **Reports**, and manage local staff and **Policies**. |
+| **Quality & Audit Officer** | QA Officer or internal auditor | Monitor **QA Dashboard**, control charts, proficiency testing, nonconformities, and **Audit & Security** logs. Can also review or co-sign results where authorized. |
+| **Project Manager** | Survey or project coordinator | Coordinate project intake, manifests, KoboToolbox links, and servicing laboratories in **Projects**. Track sample progress and released reports. |
+| **Read-Only Viewer** | Agronomist, client, or ministry partner | Browse released results in **Data Results** and **Country Data**. Download approved **Certificate of Analysis** PDFs in **Reports**. |
+| **National Lead / Master User** | National network coordinator | Coordinate multi-laboratory programmes, national methods, and authorized regional facilities. |
+| **Super Administrator** | Platform or IT administrator | Manage all laboratories, system languages, **Branding & Identity**, and **National SIS & Data Exchange** keys. |
 
 ---
 
-## 2. Permission Matrix by Workflow Area
+## How Separation of Duties Protects Your Lab
 
-| Action / Screen | Reception | Technician | Reviewer | Lab Manager | Super Admin | Project Manager |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| Register consignments, walk-ins & Kobo intake | ✅ | ❌ | ❌ | ✅ | ✅ | ❌ |
-| Print sample & sub-sample container labels | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
-| Record Drying (`DRYING`) & Prep (`PREPARATION`) gates | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
-| Build analytical batches & record bench results | ❌ | ✅ | ✅ | ✅ | ✅ | ❌ |
-| Trigger self-repeat (`R2`) before batch submission | ❌ | ✅* | ✅ | ✅ | ✅ | ❌ |
-| Stage 1 Batch Review & QC Caveat acceptance | ❌ | ❌ | ✅* | ✅* | ✅* | ❌ |
-| Stage 2 Sample Approval & Reported Value Selection | ❌ | ❌ | ✅* | ✅* | ✅* | ❌ |
-| Issue PDF Certificates of Analysis | ❌ | ❌ | ✅ | ✅ | ✅ | ❌ |
-| Authorize Post-Report Sample Amendment | ❌ | ❌ | ✅* | ✅* | ✅* | ❌ |
-| Manage Equipment, Reference Materials & PT rounds | ❌ | View / Log | ✅ | ✅ | ✅ | ❌ |
-| Change Laboratory Policy Settings & Presets | ❌ | ❌ | ❌ | ✅ | ✅ | ❌ |
-| Manage Labs & External NSIS Data Exchange Keys | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ |
-| View Dashboards, Maps & Export Approved Data | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ |
-
-*\*Subject to your laboratory's configured Separation-of-Duties policy settings (see Section 3 below).*
+1. *Reception is separate from testing:* A **Sample Reception Officer** registers physical arrival and prints barcode labels. Bench measurements happen only in **Workbench**.
+2. *Bench entry is separate from approval:* A **Laboratory Technician** records raw readings and submits the run. Only a **Laboratory Manager** (or authorized reviewer) can click **Approve** in **Manager Task List**.
+3. *Two-person review (optional per lab):* When **Require a second reviewer** is enabled in **Policies**, the person who recorded or submitted a bench result cannot approve that same result—even if they hold a **Laboratory Manager** account.
+4. *Two-person report amendment (optional per lab):* When **Require a second person for amendments** is enabled in **Policies**, a second authorized person must co-sign any amendment to a released report before the new PDF revision is issued.
+5. *Laboratory isolation:* Staff assigned to a facility under **Assigned Laboratory** see only their own laboratory's samples, work queue, equipment, and inventory.
 
 ---
 
-## 3. Configurable Separation-of-Duties Rules
+## Step-by-Step Admin Task Guide
 
-In accredited laboratories (ISO/IEC 17025), the person who performs a measurement must not be the same person who approves it. Because staffing varies across laboratories, these rules are configurable in **Settings → Laboratory Policy**:
+- [Create Staff Accounts, Assign Roles, and Reset Passwords](../admin/manage-users-and-roles.md) — invite new staff with a **One-Time Activation Link**, change someone's role or laboratory scope, issue a password recovery link, or suspend an account.
 
-1. **Independent Second-Person Review (`review.secondPersonRequired`)**:
-   - **When `true`** *(default in `ISO17025_STRICT` and `BASIC` presets)*: Even if a user holds a Reviewer or Lab Manager role, the LIMS blocks them from reviewing or approving any batch or work item where they recorded the analytical results themselves. A second qualified Reviewer or Lab Manager must approve that work.
-   - **When `false`** *(default in `ADVISORY` preset)*: A single Lab Manager in a small 1–2 person lab can both record and approve results.
-2. **Second-Person Authorization for Amendments (`report.amendmentRequiresSecondPerson`)**:
-   - **When `true`** *(default in `ISO17025_STRICT` and `BASIC` presets)*: Opening a post-report **Scientific Amendment** (`SCIENTIFIC`) on an already-reported sample requires a second Reviewer or Lab Manager to co-sign the amendment request.
-3. **Second-Person Verification on Prep Gates (`gate.verificationRequired`)**:
-   - Can be enabled independently for **`DRYING`** and **`PREPARATION`** so a supervisor must verify drying temperatures and sieving records before analytical work items unlock.
-4. **Shared Bench Terminal PIN Attribution (`bench.pinAtRecord` & `bench.idleLockMinutes`)**:
-   - When multiple technicians share a rugged tablet or balance terminal in the wet lab, `bench.pinAtRecord = true` prompts the operator for their personal **4–6 digit PIN** whenever they record a weight, moisture reading, or analytical measurement—ensuring the audit trail always attributes the measurement to the exact individual at the bench.
+---
+
+### For the QA Person
+
+- *Authorization records:* Every invitation, role assignment, scope change, suspension, and password recovery action is recorded with the administrator's username, timestamp, and reason in **Audit & Security**.
+- *Safe role transitions:* Clicking **Review Access** on an existing staff member opens **Pre-Change Access Review**. This screen shows **Unfinished Sample Determinations** and **Active Sessions Invalidation** before you apply the change.

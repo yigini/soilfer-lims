@@ -42,7 +42,7 @@ describe('Navigation Order & Laboratory Journey Contract (#115)', () => {
     test('1. navigationConfig.js and App.jsx reflect the canonical journey sequence order', () => {
         const appPath = path.resolve(__dirname, '../../../client/src/App.jsx');
         const appCode = fs.readFileSync(appPath, 'utf8');
-        expect(appCode).toContain("import { buildNavItems } from './navigationConfig';");
+        expect(appCode).toMatch(/import \{[^}]*\bbuildNavItems\b[^}]*\} from '\.\/navigationConfig';/);
         expect(appCode).toContain("buildNavItems(user, t");
 
         const configCode = fs.readFileSync(navConfigPath, 'utf8');

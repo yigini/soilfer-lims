@@ -4,6 +4,33 @@ import { Link } from 'react-router-dom';
 import { Search, ChevronLeft, ChevronRight, ArrowUpRight, Loader2, PanelRightClose } from 'lucide-react';
 import EmptyState from './EmptyState';
 
+function localizeConfigurationRow(row, t) {
+    const prefix = 'config-tz-';
+    if (typeof row.key !== 'string' || !row.key.startsWith(prefix) || row.key.length === prefix.length) {
+        return row;
+    }
+
+    const labId = row.key.slice(prefix.length);
+    const contextPrefix = labId + ' · ';
+    const contextSuffix = ' · Timezone missing';
+    const country = row.context?.startsWith(contextPrefix) && row.context.endsWith(contextSuffix)
+        ? row.context.slice(contextPrefix.length, -contextSuffix.length)
+        : null;
+
+    return {
+        ...row,
+        displayKey: t('configurationQueue.timezoneItem', { labId }),
+        contextKey: row.contextKey || (country ? 'configurationQueue.timezoneContext' : undefined),
+        contextParams: row.contextKey || !country ? row.contextParams : {
+            labId,
+            country: country === 'National Lab' ? t('configurationQueue.nationalLab') : country,
+        },
+        statusKey: row.statusKey || (row.status === 'Timezone not configured' ? 'configurationQueue.timezoneStatus' : undefined),
+        noteKey: row.noteKey || (row.note === 'Configure an IANA timezone before showing this laboratory’s daily metrics.' ? 'configurationQueue.timezoneNote' : undefined),
+        actionKey: row.actionKey || (row.action === 'Configure laboratory' ? 'configurationQueue.configureLab' : undefined),
+    };
+}
+
 /**
  * WorkQueue
  * Displays the active queue table, search filter, lane switcher, and direct continuation actions.
@@ -42,6 +69,10 @@ export default function WorkQueue({
             );
         })
         : rows;
+
+    const displayRows = queueKey === 'admin.configuration'
+        ? filteredRows.map(row => localizeConfigurationRow(row, t))
+        : filteredRows;
 
     const getStatusBadge = (displayStatus, rawStatus, tone) => {
         const s = String(rawStatus || displayStatus || '').toLowerCase();
@@ -172,7 +203,7 @@ export default function WorkQueue({
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-sf-divider">
-                                {filteredRows.map((row) => (
+                                {displayRows.map((row) => (
                                     <tr
                                         key={row.key || row.id}
                                         className="hover:bg-sf-hover transition-colors group"
@@ -184,7 +215,7 @@ export default function WorkQueue({
                                             <div className="text-xs text-sf-muted mt-0.5 flex items-center gap-2 flex-wrap">
                                                 {row.key && (
                                                     <span className="text-[11px] font-mono text-sf-muted bg-sf-raised px-1.5 py-0.5 rounded">
-                                                        {row.key}
+                                                        {row.displayKey || row.key}
                                                     </span>
                                                 )}
                                                 {row.context && (
@@ -250,7 +281,7 @@ export default function WorkQueue({
                             onClick={() => onPageChange && onPageChange(page - 1)}
                             disabled={page <= 1 || isLoading}
                             className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md border border-sf-divider bg-sf-surface text-sf-muted hover:bg-sf-raised disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                            aria-label="Previous page"
+                            aria-label={t('dashboard.workQueue.previous', 'Previous')}
                         >
                             <ChevronLeft className="w-3.5 h-3.5" />
                             <span>{t('dashboard.workQueue.previous', 'Previous')}</span>
@@ -263,7 +294,7 @@ export default function WorkQueue({
                             onClick={() => onPageChange && onPageChange(page + 1)}
                             disabled={!hasMore || isLoading}
                             className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md border border-sf-divider bg-sf-surface text-sf-muted hover:bg-sf-raised disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                            aria-label="Next page"
+                            aria-label={t('dashboard.workQueue.next', 'Next')}
                         >
                             <span>{t('dashboard.workQueue.next', 'Next')}</span>
                             <ChevronRight className="w-3.5 h-3.5" />

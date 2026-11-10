@@ -1957,7 +1957,7 @@ const Reception = () => {
                                 }`}
                         >
                             <h3 className="font-bold text-sf-text mb-4 flex items-center gap-2">
-                                <Droplet size={20} /> Requested Analysis
+                                <Droplet size={20} /> {t('receptionDesk.requestedAnalysis')}
                                 <InfoTooltip text="Choose a predefined package of tests (Bundle) or add individual tests as required by the client." />
                             </h3>
 
@@ -2052,12 +2052,12 @@ const Reception = () => {
                             <div className="flex items-center justify-between border-b border-sf-divider pb-3">
                                 <h3 className="font-bold text-sf-text flex items-center gap-2">
                                     <Scale size={20} className="text-indigo-600 dark:text-indigo-400" />
-                                    <span>Physical Arrival State & Desk Facts</span>
-                                    <InfoTooltip text="Desk-level observations recorded as the physical sample bag arrives at reception, prior to drying or grinding." />
+                                    <span>{t('receptionDesk.arrival')}</span>
+                                    <InfoTooltip text={t('receptionDesk.arrivalHelp')} />
                                 </h3>
                                 {isResubmission && (
                                     <span className="text-xs font-bold bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300 px-2 py-0.5 rounded-full border border-amber-300 dark:border-amber-700">
-                                        Re-submission
+                                        {t('receptionDesk.resubmission')}
                                     </span>
                                 )}
                             </div>
@@ -2066,11 +2066,11 @@ const Reception = () => {
                             <div>
                                 <div className="flex justify-between items-center mb-1.5">
                                     <label className="text-sm font-semibold text-sf-text flex items-center gap-1.5">
-                                        Received Sample Mass (g) *
-                                        <InfoTooltip text="Weigh physical bag on desk scale. System verifies sufficient material for ordered tests + 100g standard archive retention." />
+                                        {t('receptionDesk.mass')}
+                                        <InfoTooltip text={t('receptionDesk.massHelp')} />
                                     </label>
                                     <span className="text-xs font-mono text-sf-muted">
-                                        Req: {totalRequiredMass}g ({totalAnalyticalMass}g tests + {retentionBuffer}g archive)
+                                        {t('receptionDesk.massRequired', { total: totalRequiredMass, tests: totalAnalyticalMass, retention: retentionBuffer })}
                                     </span>
                                 </div>
                                 <div className="relative">
@@ -2322,10 +2322,10 @@ const Reception = () => {
                             <div className="flex items-center justify-between border-b border-sf-divider pb-3">
                                 <h3 className="font-bold text-sf-text flex items-center gap-2">
                                     <ShieldCheck size={20} className="text-indigo-600 dark:text-indigo-400" />
-                                    <span>Chain of Custody & Physical Handover</span>
+                                    <span>{t('receptionDesk.custody')}</span>
                                 </h3>
                                 <span className="text-[10px] font-mono uppercase bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 px-2 py-0.5 rounded border border-indigo-100 dark:border-indigo-800 font-semibold">
-                                    RC-19 Immutable Handover
+                                    {t('receptionDesk.immutableHandover')}
                                 </span>
                             </div>
 
@@ -2333,34 +2333,34 @@ const Reception = () => {
                                 <div>
                                     <label className="block text-xs font-bold text-sf-text mb-1 flex items-center gap-1">
                                         <Clock size={13} className="text-sf-muted" />
-                                        <span>Handover Timestamp</span>
+                                        <span>{t('receptionDesk.handoverTime')}</span>
                                     </label>
                                     <input
                                         type="datetime-local"
                                         value={custodyHandoverAt}
                                         onChange={e => setCustodyHandoverAt(e.target.value)}
                                         className="w-full p-2.5 text-sm bg-sf-canvas border border-sf-divider text-sf-text rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-                                        title="Physical date and time the sample was physically handed over at desk"
+                                        title={t('receptionDesk.handoverHelp')}
                                     />
-                                    <span className="text-[10px] text-sf-muted block mt-0.5">Physical custody handover (distinct from entry time)</span>
+                                    <span className="text-[10px] text-sf-muted block mt-0.5">{t('receptionDesk.handoverHelp')}</span>
                                 </div>
 
                                 <div>
                                     <label className="block text-xs font-bold text-sf-text mb-1">
-                                        Carrier / Delivered By
+                                        {t('receptionDesk.carrier')}
                                     </label>
                                     <input
                                         type="text"
                                         value={custodyCarrierName}
                                         onChange={e => setCustodyCarrierName(e.target.value)}
-                                        placeholder="Courier, driver, extension agent, or client"
+                                        placeholder={t('receptionDesk.carrierPlaceholder')}
                                         className="w-full p-2.5 text-sm bg-sf-canvas border border-sf-divider text-sf-text rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                                     />
                                 </div>
 
                                 <div>
                                     <label className="block text-xs font-bold text-sf-text mb-1">
-                                        Waybill / Tracking / Delivery Note #
+                                        {t('receptionDesk.tracking')}
                                     </label>
                                     <input
                                         type="text"

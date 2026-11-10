@@ -143,8 +143,8 @@ const WalkInForm = ({ submitter, setSubmitter, sampling, setSampling, groups = [
                     </div>}
                     <div className="md:col-span-2">
                         <label className="block text-xs font-semibold text-sf-muted mb-2 flex items-center gap-1">
-                            Purpose of Testing
-                            <InfoTooltip text="Select the testing purpose. Group-based options will auto-suggest the matching analysis bundle." />
+                            {t('receptionDesk.purpose')}
+                            <InfoTooltip text={t('receptionDesk.purposeHelp')} />
                         </label>
                         <div className={`flex flex-wrap gap-2 ${hasErr('purpose') ? 'p-2 rounded-xl border border-red-400 ring-1 ring-red-200' : ''}`}>
                             {/* Dynamic buttons from admin analysis groups */}
@@ -196,8 +196,8 @@ const WalkInForm = ({ submitter, setSubmitter, sampling, setSampling, groups = [
                     {/* Urgency Selector */}
                     <div className="md:col-span-2">
                         <label className="block text-xs font-semibold text-sf-muted mb-1 flex items-center gap-1">
-                            Processing Urgency
-                            <InfoTooltip text="Priority level for lab processing. Urgent samples are prioritized in the queue." />
+                            {t('receptionDesk.urgency')}
+                            <InfoTooltip text={t('receptionDesk.urgencyHelp')} />
                         </label>
                         <div className="flex gap-4">
                             {[
@@ -214,7 +214,7 @@ const WalkInForm = ({ submitter, setSubmitter, sampling, setSampling, groups = [
                                         onChange={e => handleChange('sampling', 'urgency', e.target.value)}
                                         className="text-blue-600 focus:ring-blue-500"
                                     />
-                                    <span className="font-bold text-sm">{opt.val}</span>
+                                    <span className="font-bold text-sm">{t('receptionDesk.' + opt.val, opt.val)}</span>
                                 </label>
                             ))}
                         </div>
@@ -225,7 +225,7 @@ const WalkInForm = ({ submitter, setSubmitter, sampling, setSampling, groups = [
             {/* LOCATION PICKER */}
             <div data-field-key="location" className={`bg-sf-surface p-6 rounded-xl border shadow-sm relative z-0 ${hasErr('location') ? 'border-red-400 ring-1 ring-red-200' : 'border-sf-divider'}`}>
                 <h3 className="font-bold text-sf-text mb-4 flex items-center gap-2">
-                    <MapPin size={20} /> 3. Sampling Location
+                    <MapPin size={20} /> {t('receptionDesk.samplingLocation')}
                 </h3>
                 <LocationPicker
                     value={{

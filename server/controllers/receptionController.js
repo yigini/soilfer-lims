@@ -324,6 +324,9 @@ exports.calculateMassRequirement = async (req, res) => {
     const { analysisCodes = [], analysisGroupIds = [], retentionMass } = req.body;
 
     try {
+        const labId = Object.hasOwn(req.body, 'assignedLab')
+            ? (await require('../services/consignmentIntakeService').resolveReceivingLab(prisma, req.user, req.body.assignedLab)).id
+            : req.user?.labId;
         const codes = new Set(Array.isArray(analysisCodes) ? analysisCodes : []);
 
         if (Array.isArray(analysisGroupIds) && analysisGroupIds.length > 0) {
@@ -343,9 +346,10 @@ exports.calculateMassRequirement = async (req, res) => {
 
         return res.json({
             success: true,
-            ...await massRequirement(req.user?.labId, analysisList, retentionMass)
+            ...await massRequirement(labId, analysisList, retentionMass)
         });
     } catch (err) {
+        if (isClientError(err)) return respondIntakeError(res, err);
         console.error('[calculateMassRequirement] ERROR:', err);
         return res.status(500).json({ error: 'Failed to calculate mass requirement' });
     }

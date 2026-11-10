@@ -48,8 +48,23 @@ const BatchIntake = ({
         checklist: { items: {}, nonConformance: false, reason: '' }
     });
 
+    const needsReceivingLab = user?.role === 'SUPER_ADMIN' && !user.labId && user.isActive !== false && user.status !== 'INACTIVE';
+    const [selectedLab, setSelectedLab] = useState('');
+    const [receivingLabs, setReceivingLabs] = useState([]);
+    const [labsFailed, setLabsFailed] = useState(false);
+    const receivingLabId = user?.labId || (needsReceivingLab ? selectedLab : undefined);
+    const labRequired = needsReceivingLab && !receivingLabId;
+    useEffect(() => {
+        if (!needsReceivingLab) return;
+        let current = true;
+        axios.get('/api/labs/directory')
+            .then(({ data }) => { if (current) setReceivingLabs(data.filter(lab => lab.isActive)); })
+            .catch(() => { if (current) setLabsFailed(true); });
+        return () => { current = false; };
+    }, [needsReceivingLab]);
+
     const { rules: intakeRules, error: intakeRulesFailed } = useIntakeRules({ projectId: consignment.projectCode,
-        isWalkIn: !consignment.projectCode, labId: user?.labId });
+        isWalkIn: !consignment.projectCode, labId: receivingLabId, enabled: !labRequired });
 
     // --- SAMPLES LIST IN BATCH ---
     const [samples, setSamples] = useState([]);
@@ -65,12 +80,15 @@ const BatchIntake = ({
 
     useEffect(() => {
         let cancelled = false;
+        if (labRequired) return;
         const keys = JSON.parse(massKeys);
-        Promise.all(keys.map(async key => [key, (await axios.post('/api/reception/mass-check', { analysisCodes: JSON.parse(key) })).data]))
+        Promise.all(keys.map(async key => [key, (await axios.post('/api/reception/mass-check', {
+            analysisCodes: JSON.parse(key), ...(needsReceivingLab && { assignedLab: receivingLabId })
+        })).data]))
             .then(entries => { if (!cancelled) { setMassRequirements(Object.fromEntries(entries)); setMassCheckFailed(false); } })
             .catch(() => { if (!cancelled) setMassCheckFailed(true); });
         return () => { cancelled = true; };
-    }, [massKeys]);
+    }, [massKeys, labRequired, needsReceivingLab, receivingLabId]);
 
     const hasMassDeficit = sample => sample.status !== 'REJECTED' && sample.receivedMass !== null && sample.receivedMass !== '' &&
         sample.receivedMass !== undefined && Number(sample.receivedMass) < massRequirements[requirementKey(sample.requiredAnalyses ?? defaults.requiredAnalyses)]?.totalRequiredMass;
@@ -116,7 +134,7 @@ const BatchIntake = ({
         // Duplicate check within batch
         if (samples.some(s => s.originalId.toLowerCase() === cleanId.toLowerCase())) {
             playErrorBuzz();
-            alert(`Sample "${cleanId}" is already scanned in this consignment batch.`);
+            alert(t('batchReception.alreadyScanned', { id: cleanId }));
             setScanInput('');
             return;
         }
@@ -194,8 +212,9 @@ const BatchIntake = ({
 
     // Atomic Consignment Submission (RC-12, RC-13, RC-14)
     const handleSubmitBatch = async () => {
+        if (labRequired) return;
         if (samples.length === 0) {
-            alert('Please scan or import at least one sample.');
+            alert(t('batchReception.noSamples'));
             return;
         }
 
@@ -206,6 +225,7 @@ const BatchIntake = ({
         setSubmitting(true);
         try {
             const payload = {
+                ...(needsReceivingLab && { assignedLab: receivingLabId }),
                 consignment: {
                     deliveryNoteRef: consignment.deliveryNoteRef.trim() || null,
                     deliveredBy: consignment.deliveredBy.trim() || null,
@@ -240,7 +260,7 @@ const BatchIntake = ({
         } catch (err) {
             playErrorBuzz();
             console.error('Batch submission failed:', err);
-            alert('Consignment submission failed: ' + (err.response?.data?.error || err.message));
+            alert(t('batchIntake.submissionFailed', { message: err.response?.data?.message || err.response?.data?.error || err.message }));
         } finally {
             setSubmitting(false);
         }
@@ -261,18 +281,18 @@ const BatchIntake = ({
                     </div>
                     
                     <h2 className="text-2xl font-bold text-sf-text mb-1">
-                        Consignment Received Successfully
+                        {t('batchReception.success')}
                     </h2>
                     <p className="text-sf-muted text-sm mb-6">
-                        All samples have been processed and registered into the laboratory database.
+                        {t('batchReception.successDetail')}
                     </p>
 
                     {/* Receipt Badge */}
                     <div className="bg-sf-canvas p-4 rounded-2xl border border-sf-divider inline-block mb-6 text-left">
-                        <div className="text-xs text-sf-muted font-bold uppercase tracking-wider">Consignment Identifier</div>
+                        <div className="text-xs text-sf-muted font-bold uppercase tracking-wider">{t('batchReception.identifier')}</div>
                         <div className="text-2xl font-mono font-bold text-blue-600 dark:text-blue-400">{csg.code}</div>
                         <div className="text-xs text-sf-muted mt-1">
-                            Waybill: {csg.deliveryNoteRef || 'N/A'} • Courier: {csg.deliveredBy || 'N/A'}
+                            {t('batchReception.receiptDelivery', { waybill: csg.deliveryNoteRef || t('batchReception.none'), courier: csg.deliveredBy || t('batchReception.none') })}
                         </div>
                     </div>
 
@@ -282,15 +302,15 @@ const BatchIntake = ({
                     <div className="grid grid-cols-3 gap-4 max-w-lg mx-auto mb-8">
                         <div className="bg-blue-50 dark:bg-blue-950/30 p-3 rounded-xl border border-blue-100 dark:border-blue-900">
                             <div className="text-2xl font-bold text-blue-700 dark:text-blue-300">{csg.sampleCount}</div>
-                            <div className="text-xs text-blue-600 dark:text-blue-400 font-medium">Total Received</div>
+                            <div className="text-xs text-blue-600 dark:text-blue-400 font-medium">{t('batchReception.totalReceived')}</div>
                         </div>
                         <div className="bg-emerald-50 dark:bg-emerald-950/30 p-3 rounded-xl border border-emerald-100 dark:border-emerald-900">
                             <div className="text-2xl font-bold text-emerald-700 dark:text-emerald-300">{csg.acceptedCount}</div>
-                            <div className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">Accepted</div>
+                            <div className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">{t('status.ACCEPTED')}</div>
                         </div>
                         <div className="bg-red-50 dark:bg-red-950/30 p-3 rounded-xl border border-red-100 dark:border-red-900">
                             <div className="text-2xl font-bold text-red-700 dark:text-red-300">{csg.rejectedCount}</div>
-                            <div className="text-xs text-red-600 dark:text-red-400 font-medium">Rejected</div>
+                            <div className="text-xs text-red-600 dark:text-red-400 font-medium">{t('status.REJECTED')}</div>
                         </div>
                     </div>
 
@@ -301,21 +321,21 @@ const BatchIntake = ({
                             onClick={() => window.print()}
                             className="px-5 py-2.5 rounded-xl border border-sf-divider text-xs font-bold text-sf-text hover:bg-sf-canvas flex items-center gap-2"
                         >
-                            <Printer size={16} /> Print Consignment Voucher
+                            <Printer size={16} /> {t('batchReception.printVoucher')}
                         </button>
                         <button
                             type="button"
                             onClick={() => setIsLabelModalOpen(true)}
                             className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-md flex items-center gap-2 transition-all active:scale-95"
                         >
-                            <Printer size={16} /> Print Sample Labels ({csg.acceptedCount || samples.filter(s => s.status !== 'REJECTED').length})
+                            <Printer size={16} /> {t('batchReception.printLabels', { count: csg.acceptedCount || samples.filter(s => s.status !== 'REJECTED').length })}
                         </button>
                         <button
                             type="button"
                             onClick={onBack}
                             className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-md transition-all"
                         >
-                            Complete & Return
+                            {t('batchReception.completeReturn')}
                         </button>
                     </div>
 
@@ -343,8 +363,8 @@ const BatchIntake = ({
                         <ArrowLeft size={18} />
                     </button>
                     <div>
-                        <div className="text-xs text-sf-muted font-bold uppercase tracking-wider">Archetype B / C Intake</div>
-                        <h2 className="text-lg font-bold">Consignment & High-Throughput Batch Reception</h2>
+                        <div className="text-xs text-sf-muted font-bold uppercase tracking-wider">{t('batchReception.intakeType')}</div>
+                        <h2 className="text-lg font-bold">{t('batchReception.title')}</h2>
                     </div>
                 </div>
 
@@ -354,7 +374,7 @@ const BatchIntake = ({
                         onClick={() => setIsManifestModalOpen(true)}
                         className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all"
                     >
-                        <Upload size={14} /> Import Client Manifest (CSV/XLSX)
+                        <Upload size={14} /> {t('batchReception.importManifest')}
                     </button>
                 </div>
             </div>
@@ -363,17 +383,34 @@ const BatchIntake = ({
             <div className="bg-sf-surface rounded-2xl p-5 shadow-sm border border-sf-divider space-y-4">
                 <div className="flex items-center gap-2 text-sm font-bold text-sf-text border-b border-sf-divider pb-2">
                     <Truck size={18} className="text-blue-600" />
-                    Delivery & Consignment Information
+                    {t('batchReception.delivery')}
                 </div>
 
+                {needsReceivingLab && (
+                    <div className="space-y-1 text-xs">
+                        <label htmlFor="batch-receiving-lab" className="block font-bold text-sf-muted">{t('batchIntake.receivingLab')}</label>
+                        <select id="batch-receiving-lab" required value={selectedLab} disabled={submitting}
+                            onChange={event => {
+                                setSelectedLab(event.target.value);
+                                setMassRequirements({});
+                                setMassCheckFailed(false);
+                                setSamples(previous => previous.map(sample => ({ ...sample, massWarningAcknowledged: false })));
+                            }}
+                            className="w-full max-w-sm p-2 rounded-lg border border-sf-divider bg-sf-surface text-sf-text">
+                            <option value="">{t('batchIntake.selectReceivingLab')}</option>
+                            {receivingLabs.map(lab => <option key={lab.id} value={lab.id}>{lab.name} ({lab.code})</option>)}
+                        </select>
+                        {labsFailed && <p role="alert" className="text-amber-700">{t('batchIntake.receivingLabsFailed')}</p>}
+                    </div>
+                )}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-xs">
                     <div>
                         <label className="block font-bold text-sf-muted mb-1">
-                            Delivery Note / Waybill Ref
+                            {t('batchReception.waybill')}
                         </label>
                         <input
                             type="text"
-                            placeholder="e.g. WAYBILL-9921"
+                            placeholder={t('batchReception.waybillExample')}
                             value={consignment.deliveryNoteRef}
                             onChange={(e) => setConsignment(prev => ({ ...prev, deliveryNoteRef: e.target.value }))}
                             className="w-full p-2 rounded-lg border border-sf-divider bg-sf-surface text-sf-text"
@@ -382,11 +419,11 @@ const BatchIntake = ({
 
                     <div>
                         <label className="block font-bold text-sf-muted mb-1">
-                            Delivered By (Courier / Driver)
+                            {t('batchReception.deliveredBy')}
                         </label>
                         <input
                             type="text"
-                            placeholder="e.g. DHL / Carlos Mendizabal"
+                            placeholder={t('batchReception.deliveredBy')}
                             value={consignment.deliveredBy}
                             onChange={(e) => setConsignment(prev => ({ ...prev, deliveredBy: e.target.value }))}
                             className="w-full p-2 rounded-lg border border-sf-divider bg-sf-surface text-sf-text"
@@ -395,7 +432,7 @@ const BatchIntake = ({
 
                     <div>
                         <label className="block font-bold text-sf-muted mb-1">
-                            Expected Bag Count (on Manifest)
+                            {t('batchReception.expectedBags')}
                         </label>
                         <input
                             type="number"
@@ -410,14 +447,14 @@ const BatchIntake = ({
 
                     <div>
                         <label className="block font-bold text-sf-muted mb-1">
-                            Project Affiliation
+                            {t('batchReception.project')}
                         </label>
                         <select
                             value={consignment.projectCode}
                             onChange={(e) => setConsignment(prev => ({ ...prev, projectCode: e.target.value }))}
                             className="w-full p-2 rounded-lg border border-sf-divider bg-sf-surface text-sf-text"
                         >
-                            <option value="">-- Generic / Walk-In Consignment --</option>
+                            <option value="">{t('batchReception.walkIn')}</option>
                             {availableProjects.map(p => (
                                 <option key={p.id} value={p.code}>{p.name || p.code}</option>
                             ))}
@@ -426,11 +463,11 @@ const BatchIntake = ({
 
                     <div>
                         <label className="block font-bold text-sf-muted mb-1">
-                            Submitter Contact Name
+                            {t('batchReception.submitterName')}
                         </label>
                         <input
                             type="text"
-                            placeholder="e.g. Dr. Roberto Arbenz"
+                            placeholder={t('batchReception.submitterName')}
                             value={consignment.submitterName}
                             onChange={(e) => setConsignment(prev => ({ ...prev, submitterName: e.target.value }))}
                             className="w-full p-2 rounded-lg border border-sf-divider bg-sf-surface text-sf-text"
@@ -439,11 +476,11 @@ const BatchIntake = ({
 
                     <div>
                         <label className="block font-bold text-sf-muted mb-1">
-                            Submitter Organization
+                            {t('batchReception.submitterOrg')}
                         </label>
                         <input
                             type="text"
-                            placeholder="e.g. ICTA / University"
+                            placeholder={t('batchReception.submitterOrg')}
                             value={consignment.submitterOrg}
                             onChange={(e) => setConsignment(prev => ({ ...prev, submitterOrg: e.target.value }))}
                             className="w-full p-2 rounded-lg border border-sf-divider bg-sf-surface text-sf-text"
@@ -452,7 +489,7 @@ const BatchIntake = ({
 
                     <div>
                         <label className="block font-bold text-sf-muted mb-1">
-                            Submitter Phone
+                            {t('batchReception.submitterPhone')}
                         </label>
                         <input
                             type="text"
@@ -465,7 +502,7 @@ const BatchIntake = ({
 
                     <div>
                         <label className="block font-bold text-sf-muted mb-1">
-                            Submitter Email
+                            {t('batchReception.submitterEmail')}
                         </label>
                         <input
                             type="email"
@@ -482,12 +519,12 @@ const BatchIntake = ({
             <div className="bg-sf-canvas p-4 rounded-2xl border border-sf-divider flex flex-wrap items-center justify-between gap-4 text-xs">
                 <div className="flex items-center gap-2 text-sf-text font-bold">
                     <Layers size={16} className="text-blue-600" />
-                    <span>Batch Defaults:</span>
+                    <span>{t('batchReception.defaults')}</span>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3">
                     <div className="flex items-center gap-1.5">
-                        <span className="text-sf-muted">Bundle:</span>
+                        <span className="text-sf-muted">{t('batchReception.bundle')}</span>
                         <select
                             value={defaults.analysisBundle}
                             onChange={(e) => handleBundleChange(e.target.value)}
@@ -500,7 +537,7 @@ const BatchIntake = ({
                     </div>
 
                     <div className="flex items-center gap-1.5">
-                        <span className="text-sf-muted">Std Mass (g):</span>
+                        <span className="text-sf-muted">{t('batchReception.standardMass')}</span>
                         <input
                             type="number"
                             min="0"
@@ -513,7 +550,7 @@ const BatchIntake = ({
                     </div>
 
                     <div className="flex items-center gap-1.5">
-                        <span className="text-sf-muted">Moisture:</span>
+                        <span className="text-sf-muted">{t('batchReception.moistureLabel')}</span>
                         <select
                             aria-label={t('batchIntake.moistureToApply')}
                             value={defaults.moistureOnArrival}
@@ -521,10 +558,10 @@ const BatchIntake = ({
                             className="p-1.5 rounded-lg border border-sf-divider bg-sf-surface text-sf-text text-xs"
                         >
                             <option value="">{t('batchIntake.notRecorded')}</option>
-                            <option value="DRY">Dry</option>
-                            <option value="MOIST">Moist</option>
-                            <option value="WET">Wet</option>
-                            <option value="SATURATED">Saturated</option>
+                            <option value="DRY">{t('batchReception.DRY')}</option>
+                            <option value="MOIST">{t('batchReception.MOIST')}</option>
+                            <option value="WET">{t('batchReception.WET')}</option>
+                            <option value="SATURATED">{t('batchReception.SATURATED')}</option>
                         </select>
                     </div>
 
@@ -555,7 +592,7 @@ const BatchIntake = ({
                     <input
                         ref={scanInputRef}
                         type="text"
-                        placeholder="Scan or type Sample Barcode / ID (Press Enter to add)..."
+                        placeholder={t('batchReception.scanPlaceholder')}
                         value={scanInput}
                         onChange={(e) => setScanInput(e.target.value)}
                         onKeyDown={(e) => {
@@ -573,21 +610,21 @@ const BatchIntake = ({
                         className="px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-md transition-all flex items-center gap-1.5 disabled:opacity-50"
                     >
                         {isScanning ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
-                        Add Sample
+                        {t('samples.addSample')}
                     </button>
                 </div>
 
                 {/* Running Count Badge (RC-13) */}
                 <div className="bg-sf-surface p-4 rounded-2xl shadow-sm border border-sf-divider flex items-center justify-between">
                     <div>
-                        <div className="text-xs text-sf-muted font-bold uppercase tracking-wider">Consignment Progress</div>
+                        <div className="text-xs text-sf-muted font-bold uppercase tracking-wider">{t('batchReception.progress')}</div>
                         <div className="text-xl font-bold text-sf-text mt-0.5">
-                            {samples.length} <span className="text-sm font-normal text-sf-muted">/ {expectedNum !== null ? expectedNum : t('reception.notDeclared')} expected</span>
+                            {samples.length} <span className="text-sm font-normal text-sf-muted">{expectedNum === null ? t('reception.notDeclared') : t('batchReception.expected', { count: expectedNum })}</span>
                         </div>
                         <div className="flex gap-2 text-[11px] mt-1 font-medium">
-                            <span className="text-emerald-600 dark:text-emerald-400">{acceptedCount} Accepted</span>
+                            <span className="text-emerald-600 dark:text-emerald-400">{t('batchReception.acceptedCount', { count: acceptedCount })}</span>
                             {rejectedCount > 0 && (
-                                <span className="text-red-600 dark:text-red-400 font-bold">• {rejectedCount} Rejected (Exception)</span>
+                                <span className="text-red-600 dark:text-red-400 font-bold">• {t('batchReception.rejectedCount', { count: rejectedCount })}</span>
                             )}
                         </div>
                     </div>
@@ -600,7 +637,7 @@ const BatchIntake = ({
                                     ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300'
                                     : 'bg-blue-100 text-blue-800 dark:bg-blue-950/40 dark:text-blue-300'
                         }`}>
-                            {samples.length === expectedNum ? 'Complete' : samples.length < expectedNum ? `${expectedNum - samples.length} missing` : `+${samples.length - expectedNum} extra`}
+                            {samples.length === expectedNum ? t('batchReception.complete') : samples.length < expectedNum ? t('batchReception.missing', { count: expectedNum - samples.length }) : t('batchReception.extra', { count: samples.length - expectedNum })}
                         </div>
                     )}
                 </div>
@@ -611,21 +648,21 @@ const BatchIntake = ({
                 <div className="p-4 border-b border-sf-divider flex justify-between items-center bg-sf-raised">
                     <h3 className="font-bold text-sm text-sf-text flex items-center gap-2">
                         <PackageCheck size={16} className="text-blue-600" />
-                        Scanned Samples ({samples.length})
+                        {t('batchReception.scanned', { count: samples.length })}
                     </h3>
 
                     {samples.length > 0 && (
                         <button
                             type="button"
                             onClick={() => {
-                                if (confirm('Are you sure you want to clear all scanned samples in this batch?')) {
+                                if (confirm(t('batchReception.clearConfirm'))) {
                                 setSamples([]);
                                 setBulkApplications([]);
                                 }
                             }}
                             className="text-xs text-red-500 hover:text-red-700 font-bold"
                         >
-                            Clear All
+                            {t('batchReception.clearAll')}
                         </button>
                     )}
                 </div>
@@ -634,21 +671,21 @@ const BatchIntake = ({
                     {samples.length === 0 ? (
                         <div className="text-center py-16 text-sf-muted">
                             <PackageCheck size={40} className="mx-auto mb-2 opacity-30" />
-                            <p className="font-medium text-sm">No samples added yet.</p>
-                            <p className="text-xs text-sf-muted mt-1">Scan barcodes above or click "Import Client Manifest".</p>
+                            <p className="font-medium text-sm">{t('batchReception.empty')}</p>
+                            <p className="text-xs text-sf-muted mt-1">{t('batchReception.emptyHelp')}</p>
                         </div>
                     ) : (
                         <table className="w-full text-left text-xs">
                             <thead className="bg-sf-canvas text-sf-muted sticky top-0 font-bold">
                                 <tr>
                                     <th className="p-3 w-12">#</th>
-                                    <th className="p-3">Sample ID</th>
-                                    <th className="p-3">Status</th>
-                                    <th className="p-3">Mass</th>
-                                    <th className="p-3">Moisture</th>
-                                    <th className="p-3">Coordinates / Site</th>
-                                    <th className="p-3">Exceptions / Evidence</th>
-                                    <th className="p-3 text-right">Actions</th>
+                                    <th className="p-3">{t('batchReception.sampleId')}</th>
+                                    <th className="p-3">{t('adminSection.colStatus')}</th>
+                                    <th className="p-3">{t('batchReception.mass')}</th>
+                                    <th className="p-3">{t('batchReception.moisture')}</th>
+                                    <th className="p-3">{t('batchReception.coordinates')}</th>
+                                    <th className="p-3">{t('batchReception.exceptions')}</th>
+                                    <th className="p-3 text-right">{t('common.actions')}</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-sf-divider">
@@ -659,11 +696,11 @@ const BatchIntake = ({
                                         <td className="p-3">
                                             {s.status === 'REJECTED' ? (
                                                 <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-700 dark:bg-red-950/60 dark:text-red-300 flex items-center gap-1 w-max">
-                                                    <AlertTriangle size={10} /> REJECTED
+                                                    <AlertTriangle size={10} /> {t('status.REJECTED')}
                                                 </span>
                                             ) : (
                                                 <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 flex items-center gap-1 w-max">
-                                                    <CheckCircle size={10} /> ACCEPTED
+                                                    <CheckCircle size={10} /> {t('status.ACCEPTED')}
                                                 </span>
                                             )}
                                         </td>
@@ -680,20 +717,20 @@ const BatchIntake = ({
                                                 </label>
                                             </div>}
                                         </td>
-                                        <td className="p-3 capitalize text-sf-muted">{s.moistureOnArrival?.toLowerCase() || t('batchIntake.notRecorded')}</td>
+                                        <td className="p-3 capitalize text-sf-muted">{s.moistureOnArrival ? t('batchReception.' + s.moistureOnArrival, s.moistureOnArrival) : t('batchIntake.notRecorded')}</td>
                                         <td className="p-3 text-sf-muted">
                                             {s.latitude && s.longitude ? (
                                                 <span className="font-mono">{s.latitude.toFixed(4)}, {s.longitude.toFixed(4)}</span>
                                             ) : s.siteName ? (
                                                 <span>{s.siteName}</span>
                                             ) : (
-                                                <span className="text-sf-muted italic">None</span>
+                                                <span className="text-sf-muted italic">{t('batchReception.none')}</span>
                                             )}
                                         </td>
                                         <td className="p-3">
                                             {s.status === 'REJECTED' ? (
                                                 <div className="text-red-600 dark:text-red-400 font-medium text-[11px] truncate max-w-[200px]" title={s.rejectionReason}>
-                                                    {s.rejectionReason || 'Non-conformance'}
+                                                    {s.rejectionReason || t('batchReception.nonConformance')}
                                                 </div>
                                             ) : (
                                                 <span className="text-sf-muted">—</span>
@@ -705,7 +742,7 @@ const BatchIntake = ({
                                                     type="button"
                                                     onClick={() => setEditingSampleIdx(idx)}
                                                     className="p-1.5 rounded-lg hover:bg-sf-canvas text-sf-muted hover:text-sf-text transition-colors"
-                                                    title="Edit / Record Exception"
+                                                    title={t('batchReception.editException')}
                                                 >
                                                     <Edit3 size={14} />
                                                 </button>
@@ -713,7 +750,7 @@ const BatchIntake = ({
                                                     type="button"
                                                     onClick={() => handleRemoveSample(idx)}
                                                     className="p-1.5 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/40 text-red-600 transition-colors"
-                                                    title="Remove"
+                                                    title={t('batchReception.remove')}
                                                 >
                                                     <Trash2 size={14} />
                                                 </button>
@@ -730,17 +767,17 @@ const BatchIntake = ({
                 {samples.length > 0 && (
                     <div className="p-4 bg-sf-canvas border-t border-sf-divider flex justify-between items-center">
                         <div className="text-xs text-sf-muted">
-                            Ready to batch receive <strong className="text-sf-text">{samples.length} samples</strong> into Consignment.
+                            {t('batchReception.ready', { count: samples.length })}
                         </div>
 
                         <button
                             type="button"
                             onClick={handleSubmitBatch}
-                            disabled={submitting}
+                            disabled={submitting || labRequired}
                             className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-lg transition-all flex items-center gap-2 disabled:opacity-50"
                         >
                             {submitting ? <Loader2 size={16} className="animate-spin" /> : <PackageCheck size={16} />}
-                            Submit Consignment ({samples.length} Samples)
+                            {t('batchReception.submit', { count: samples.length })}
                         </button>
                     </div>
                 )}
@@ -754,7 +791,7 @@ const BatchIntake = ({
                     index={editingSampleIdx}
                     defaults={defaults}
                     projectId={consignment.projectCode}
-                    labId={user?.labId}
+                    labId={receivingLabId}
                     onClose={() => setEditingSampleIdx(null)}
                     onSave={handleUpdateSample}
                 />

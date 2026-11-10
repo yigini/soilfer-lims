@@ -1,87 +1,82 @@
 # Glossary of Laboratory, Quality Control & System Terms
 
-A plain-language reference for laboratory, quality control (QC), soil chemistry, and system terms used across SoilFER LIMS.
+> *Time:* 5 minutes to look up any term.
+> *Who can do this:* All laboratory staff, QA officers, project coordinators, and IT administrators.
+
+Every entry below starts with a plain-language sentence for bench and reception staff, followed by technical or quality-assurance context where helpful.
 
 ---
 
 ## 1. Sample Intake, Preparation & Workflow Terms
 
-| Term | Plain-Language Meaning |
+| Term | Plain-Language Meaning (First Sentence) & Technical Context |
 | :--- | :--- |
-| **Accession / Laboratory Sample Code** | The unique barcode identifier assigned by the laboratory when a sample arrives (for example, `NRL-26-000142C`). Used inside the lab so technicians work blind to client details. |
-| **Air-Dry Basis (`AIR_DRY`)** | Reporting analytical results per kilogram of soil dried to equilibrium with ambient laboratory air ($< 40^\circ\text{C}$), rather than oven-dried at $105^\circ\text{C}$. |
-| **Aliquot** | A measured sub-portion of a prepared soil sample (weight in grams) or chemical extract (volume in millilitres) taken for a specific test. |
-| **Amendment (`CLERICAL` / `SCIENTIFIC`)** | A formal, audited process for correcting a sample after its Certificate of Analysis has already been issued. **Clerical** amendments fix text/metadata (like a misspelled client name); **Scientific** amendments re-open test results and immediately withdraw the existing PDF report until a new Report Revision (`Rev 2+`) is approved. |
-| **Analytical Attempt (`R1`, `R2`, ...)** | One complete execution of a test on a work item. `R1` is the initial measurement; `R2`, `R3`, etc. are repeat attempts created when a result is re-tested. |
-| **Certificate of Analysis (COA)** | The official, signed PDF report issued to a client showing approved sample results, methods, units, moisture basis, and quality statements. |
-| **Chain of Custody** | The chronological record showing everyone who handled a soil sample—from field collection and reception to drying, sub-sampling, storage, and disposal. |
-| **Consignment** | A batch of physical soil samples delivered together in one shipment, box, or submission under a single Consignment Number (`CSG-...`). |
-| **Container (`SampleContainer`)** | A barcoded jar, bag, vial, or packet holding either the original field sample or a prepared sub-sample (`C-LAB-YY-000001K`, e.g., $2\text{ mm}$ archive jar or $< 100\ \mu\text{m}$ MIR vial). |
-| **Override with Caveat** | Accepting a sample or batch that had a minor deviation (such as arriving slightly below recommended mass or having a borderline QC warning) by recording a mandatory written reason that is disclosed on the final report. |
-| **Oven-Dry Basis (`OVEN_DRY`)** | Expressing soil concentrations on a moisture-free basis (dried at $105^\circ\text{C}$ to constant weight). |
-| **Pre-Analytical Gate (`DRYING`, `PREPARATION`)** | A mandatory physical preparation step (air-drying $< 40^\circ\text{C}$, crushing, and sieving to $< 2\text{ mm}$) that must be completed before wet-chemistry or spectroscopy work items unlock on the bench. |
-| **Profile Reference** | An optional code (`{namespace}:{code}`, e.g., `SOILFER-GTM:PIT-01`) linking multiple soil bags taken from different depth layers of the same soil pit or sampling location. |
-| **Reported Value Selection** | The explicit, saved record (`ReportedValueSelection`) of which analytical value is officially reported for a work item (for example, the mean of replicates within repeatability $r$, the latest valid attempt, or a reviewer-selected attempt). |
-| **Superseded / Withdrawn Report** | When a report is being scientifically amended, the previous PDF is immediately marked **`WITHDRAWN`**. Once the corrected Revision (`Rev 2`) is issued, Revision 1 becomes **`SUPERSEDED`**. Public QR links never serve withdrawn or superseded PDFs. |
-| **Work Item (`WorkItem`)** | A single requested test on a single sample (for example, *Olsen P on Sample `NRL-26-000142C`*). |
+| *Accession / Laboratory Sample Code* | This is the unique barcode ID printed on a soil bag when it is accepted at **Sample Reception**. It lets bench technicians test the soil without seeing the farmer's or client's private contact details. |
+| *Air-Dry Basis* | This means reporting soil test results per kilogram of soil dried in warm room air (below 40 °C), which is the standard for routine fertility testing. Some clients or national maps also request conversion to an oven-dry basis (**Convert to oven-dry basis on request** in **Policies**). |
+| *Aliquot* | An aliquot is the small, measured scoop of prepared soil (in grams) or liquid extract (in millilitres) weighed or pipetted out for one test. |
+| *Amendment (Post-Release Report Correction)* | An amendment is the official way to fix a sample or **Certificate of Analysis** after the PDF report has already been released. Instead of overwriting the old PDF, SoilFER LIMS issues a new numbered **Revision** with an **Amended report statement** and retires the old public link. |
+| **Attempt** *(Work Attempt 1, 2, ...)* | An attempt is one run of a test on a sample in **Workbench**. Attempt 1 is the first measurement; if a manager asks for a re-test (**Returned**), you record Attempt 2 while Attempt 1 stays safely in history. |
+| **Certificate of Analysis** | This is the official PDF report generated in **Reports** (**Result Reports**) for a client. It lists the approved test values, units, analytical methods, preparation summary, quality control statement, and a QR verification link. |
+| *Chain of Custody* | Chain of custody is the step-by-step diary showing everyone who moved, stored, or tested a soil bag from reception (**Received**) to archive (**Archived**) or disposal (**Disposed**). |
+| *Consignment* | A consignment is a box or shipment of several soil bags that arrive together at **Sample Reception** under one shipment number. |
+| *Container / Sub-Sample Jar* | A container is a barcoded bag, plastic jar, or small vial holding either the original field soil or a sieved or finely ground sub-sample. |
+| *Oven-Dry Basis* | This means expressing nutrient concentrations on a completely water-free weight basis (calculated from a sub-sample dried at 105 °C to constant weight). |
+| *Preparation Gate (Drying & Sieving)* | A preparation gate is a required physical step—such as air-drying and 2 mm sieving—that must be ticked off (**Confirm Complete**) before chemical or spectral tests unlock in **Workbench**. |
+| *Profile Reference* | A profile reference is an optional code that links two or more soil bags taken from different depth layers (such as 0–20 cm and 20–50 cm) of the same soil pit. |
+| **Reported value** *(Selection)* | When a test has more than one attempt or replicate, the **Reported value** is the reviewer's saved choice in **Manager Task List** (**Report attempt**, **Report mean**, **Report class from selected fractions**, or **Not reportable**). |
+| **Superseded** *Report* | A **Superseded** report is an older PDF revision that has been replaced by a newer amended report revision. |
+| *Work Item* | A work item is one requested test on one soil sample—for example, Soil pH on Sample 142—that appears in **My Work** and **Workbench**. |
 
 ---
 
 ## 2. Quality Control (QC), Calibration & Metrology Terms
 
-| Term | Plain-Language Meaning |
+| Term | Plain-Language Meaning (First Sentence) & Technical Context |
 | :--- | :--- |
-| **Analytical Batch (`RunBatch`)** | A group of unknown customer samples prepared and analyzed together under the same reagent lot, instrument calibration, and set of QC samples (Blanks, Duplicates, LRMs, CRMs). |
-| **Blank (`BLANK` / Method Blank)** | A vessel containing all extraction and digestion reagents—but **no soil**—carried through the entire analytical procedure to check for reagent or glassware contamination. |
-| **Bracketed Repeat (`REPEAT_BRACKET`)** | When a mid-run calibration check (`CCV` or `CCB`) fails, re-analyzing only the unknown samples that were measured between the last passing check and the failed check. |
-| **Continuing Calibration Blank (`CCB`)** | An instrument blank run periodically during an analytical sequence to verify zero baseline drift or carryover between samples. |
-| **Calibration Verification (`ICV` / `CCV`)** | A standard solution of known concentration analyzed immediately after calibration (**Initial Calibration Verification, `ICV`**, typically from a second source) or every $N$ samples (**Continuing Calibration Verification, `CCV`**) to verify that the instrument calibration remains accurate. |
-| **Certified Reference Material (`CRM`)** | A soil standard purchased from an accredited metrological body (such as NIST, WEPAL, or GLOSOLAN) with a certified value and uncertainty, used to verify method **trueness** (absence of systematic bias). |
-| **Control Chart (Shewhart / Levey–Jennings)** | A graph plotting LRM or CRM measurements over time against the historical mean ($\bar{x}$), warning limits ($\pm 2s$), and action limits ($\pm 3s$) to spot drift or shifts before a method goes out of control. |
-| **Correlation Coefficient ($r$)** | A measure (between $0$ and $1$) of how closely calibration standards fit a straight line. Most soil methods require $r \ge 0.995$ (`qc.curveMinPoints` and `qc.curveMinR`). |
-| **Duplicate (`DUPLICATE`)** | Two separate sub-portions weighed from the same homogenized soil jar and analyzed independently in the same batch to verify method **precision** (repeatability). |
-| **Expanded Uncertainty ($U$)** | The interval ($\pm U$) around a reported result within which the true value is expected to lie with a stated confidence (typically $95\%$ using coverage factor $k = 2$). |
-| **`J` Flag (Estimated Value)** | A standard laboratory qualifier indicating that an analyte was definitively detected ($\ge \text{LOD}$) but fell below the Limit of Quantitation ($< \text{LOQ}$), so its numeric concentration has higher relative uncertainty. |
-| **Laboratory Reference Material (`LRM` / In-House Control)** | A large bulk soil sample collected, dried, thoroughly homogenized, and characterized by your own laboratory for daily batch-to-batch quality control. |
-| **Limit of Detection (`LOD`)** | The lowest concentration of an analyte that can be reliably distinguished from a blank (commonly $3 \times s_{\text{blank}}$). Results below the LOD are reported as `< LOD`. |
-| **Limit of Quantitation (`LOQ`)** | The lowest concentration that can be measured with acceptable quantitative precision (commonly $10 \times s_{\text{blank}}$). Depending on your lab's `results.betweenLodLoq` setting, values between LOD and LOQ are reported as `< LOQ` or with a `J` flag. |
-| **Non-Conformance Report (`NCR`)** | A formal quality record opened when an analytical batch fails repeatedly (exceeding `repeats.maxAttemptsBeforeNcr`) or a major procedural deviation occurs, documenting root cause and corrective action (CAPA). |
-| **Proficiency Testing (`PT`)** | An inter-laboratory comparison (such as GLOSOLAN PT or WEPAL) where multiple labs analyze blind soil samples and compare their results against the consensus value using a $z$-score. |
-| **Recovery (%)** | For a CRM, LRM, or check standard, $\text{Recovery (\%)} = (\text{Measured} / \text{Target}) \times 100\%$. Typical acceptable recovery for soil extractions is $90\%–110\%$. |
-| **Relative Percent Difference (`RPD`)** | A measure of agreement between two duplicate measurements ($D_1$ and $D_2$): $\text{RPD (\%)} = \frac{|D_1 - D_2|}{(D_1 + D_2)/2} \times 100\%$. Used when sample concentrations are well above the LOQ ($\ge 5 \times \text{LOQ}$). |
-| **Repeatability Limit ($r$)** | The maximum acceptable absolute difference between two replicate measurements performed by the same operator on the same instrument within a short interval ($r = 2.8 \times s_r$). |
-| **Westgard Rules** | A set of statistical rules applied to Control Charts to detect random error (`1-3s`, `R-4s`) or systematic drift (`2-2s`, `4-1s`, `10x`). |
-| **$z$-Score** | In Proficiency Testing, $z = (x - X) / \hat{\sigma}$, where $x$ is your lab's result, $X$ is the assigned consensus value, and $\hat{\sigma}$ is the standard deviation for proficiency assessment. $|z| \le 2.0$ is Satisfactory; $2.0 < |z| < 3.0$ is Questionable; $|z| \ge 3.0$ is Unsatisfactory. |
+| *Analytical Batch (Run)* | A batch is a tray or group of client soil samples tested together on the same instrument with the same reagents and quality control checks (**Blank**, **Duplicate**, and **Control**). |
+| **Blank** *(Method Blank)* | A **Blank** is a tube or flask containing all the chemical reagents—and zero soil—carried through the whole extraction to check that your water, acids, and glassware are clean. |
+| **Repeat calibration bracket** | When a mid-run calibration check drifts, **Repeat calibration bracket** means re-running only the samples measured after the last good calibration check rather than repeating the whole tray. |
+| **Calibration verification** | This is a standard solution of known strength measured right after calibrating an instrument (and periodically during a long run) to prove the instrument has not drifted. |
+| **Certified reference material (CRM)** | A **Certified reference material (CRM)** is a reference soil bought from an official standards body with a certified nutrient value and uncertainty. Running it checks that your method gives the true answer without bias. |
+| **Control chart** | A **Control chart** is a graph in **QA Dashboard** that plots your check soil results week after week so you can spot gradual instrument drift before a batch fails. |
+| *Correlation Coefficient* | This number (close to 1.000) shows how closely your calibration standards line up on a straight calibration curve (**Minimum curve correlation** in **Policies**). |
+| **Duplicate** *(Analytical Duplicate)* | A **Duplicate** is a second scoop weighed from the same prepared soil jar and tested in the same batch to prove your method gives repeatable numbers (**First reading** and **Second reading**). |
+| **Expanded uncertainty** | **Expanded uncertainty** is the plus-or-minus margin printed next to a test result showing the range where the true soil value lies (usually at 95% confidence using **Certificate coverage factor (k)** equal to 2). |
+| **Laboratory reference material (LRM)** | A **Laboratory reference material (LRM)** is a large bucket of local soil that your own laboratory dried, mixed thoroughly, and tested many times to use as a daily check soil in every batch. |
+| *Limit of Detection (LOD)* | The detection limit is the smallest trace of a nutrient your method can tell apart from a clean reagent **Blank**. |
+| *Limit of Quantitation (LOQ)* | The quantitation limit is the lowest nutrient level your method can measure with reliable numerical accuracy. In **Policies**, **Values between detection and quantification limits** controls whether trace readings below this limit print as **Report below quantification limit** (**< LOQ**) or **Report value with a flag**. |
+| *Non-Conformance Report (NCR)* | A non-conformance record in **QA Dashboard** is a structured note explaining what went wrong when a batch or sample had a serious quality problem and what your laboratory did to fix the cause. |
+| *Proficiency Testing (PT)* | Proficiency testing is an external blind check where many soil laboratories test the same reference soil sample (such as a GLOSOLAN round) and compare their scores. |
+| **Recovery** | **Recovery** is the percentage of the target value your instrument measured on a check standard or reference soil (100% means an exact match; limits are set via **Minimum control recovery** and **Maximum control recovery** in **Policies**). |
+| **RPD** *(Relative Percent Difference)* | **RPD** is the percentage difference between two **Duplicate** readings of the same soil sample, compared against **Maximum duplicate RPD** in **Policies**. |
+| **Repeatability limit** | The **Repeatability limit** is the largest acceptable difference between replicate readings of the same sample run by the same analyst on the same day. |
+| **Westgard decision rules** | **Westgard decision rules** are automatic checks on your **Control chart** that warn you when check soil points drift too far from the target average or trend to one side. |
+| *z-Score (PT Score)* | A z-score measures how many standard deviations your laboratory's proficiency testing result sits from the global consensus average (scores within 2 are satisfactory; boundaries are set in **PT z-score limits**). |
 
 ---
 
 ## 3. Soil Chemistry & Spectroscopy Terms
 
-| Term | Plain-Language Meaning |
+| Term | Plain-Language Meaning (First Sentence) & Technical Context |
 | :--- | :--- |
-| **Base Saturation (`BS%`)** | The percentage of Cation Exchange Capacity occupied by basic cations ($\text{Ca}^{2+}, \text{Mg}^{2+}, \text{K}^{+}, \text{Na}^{+}$): $\text{BS\%} = (\sum \text{Bases} / \text{CEC}) \times 100\%$. |
-| **Cation Exchange Capacity (`CEC`)** | A measure of how many positively charged nutrient ions a soil can hold on its clay and organic matter surfaces, expressed in $\text{cmol(+)/kg}$ (numerically equal to $\text{meq/100g}$). |
-| **C:N Ratio** | The mass ratio of Soil Organic Carbon ($\text{SOC}$) to Total Nitrogen ($\text{TN}$). Most agricultural topsoils fall between $8:1$ and $25:1$. |
-| **Electrical Conductivity (`EC`)** | A measure of soluble salts in a soil-water extract (e.g., 1:2.5 or saturated paste), expressed in $\mu\text{S/cm}$ or $\text{dS/m}$. |
-| **Exchangeable Sodium Percentage (`ESP`)** | The proportion of CEC occupied by sodium ($\text{Na}/\text{CEC} \times 100\%$). Values $\ge 15\%$ indicate a sodic soil with poor physical structure. |
-| **Mid-Infrared Spectroscopy (`MIR`)** | Measuring infrared absorption across fundamental molecular vibrations ($4000\text{--}400\text{ cm}^{-1}$) on finely ground soil ($< 100\ \mu\text{m}$). |
-| **Sodium Adsorption Ratio (`SAR`)** | An index of sodium hazard relative to calcium and magnesium: $\text{SAR} = \text{Na} / \sqrt{(\text{Ca} + \text{Mg})/2}$. |
-| **Soil Organic Carbon (`SOC`)** | Carbon stored in soil organic matter (measured by wet oxidation such as Walkley–Black or dry combustion), expressed in $\text{g/kg}$. |
-| **Texture Closure** | The physical check that the three mineral particle-size fractions ($\text{Sand \%} + \text{Silt \%} + \text{Clay \%}$) sum to $100\% \pm \text{tolerance}$ (default $\pm 2\%$). |
-| **Visible–Near-Infrared (`Vis-NIR` / `NIR`)** | Measuring light reflectance across $350\text{--}2500\text{ nm}$ on $2\text{ mm}$ air-dried soil. |
+| *Base Saturation* | Base saturation is the percentage of a soil's nutrient-holding capacity occupied by calcium, magnesium, potassium, and sodium (checked against **Maximum base saturation (%)** in **Policies**). |
+| *Cation Exchange Capacity (CEC)* | Cation exchange capacity measures how many positively charged nutrient ions a soil's clay and organic matter can hold onto for plant roots. |
+| *C:N Ratio* | The carbon-to-nitrogen ratio compares organic carbon against total nitrogen in a soil, indicating how quickly organic matter breaks down (checked against **Minimum C:N ratio** and **Maximum C:N ratio** in **Policies**). |
+| *Electrical Conductivity (EC)* | Electrical conductivity measures dissolved salts in a soil-water extract to check for soil salinity. |
+| **MIR** *(Mid-Infrared Spectroscopy)* | **MIR** shines mid-infrared light (4000 to 400 inverse centimetres) onto finely ground soil in **Spectral Library** to estimate soil properties rapidly alongside wet chemistry. |
+| *Soil Organic Carbon (SOC)* | Soil organic carbon is the carbon stored in decomposed plant and microbial matter in the soil, a core indicator of soil health and fertility. |
+| *Texture Closure* | Texture closure is the check in **Workbench** that **SAND**, **SILT**, and **CLAY** percentages add up to 100% within your laboratory's **Texture closure tolerance (%)**. |
+| **NIR** *(Visible–Near-Infrared Spectroscopy)* | **NIR** measures light reflectance (350 to 2500 nanometres) on 2 mm air-dried soil in **Spectral Library**. |
 
 ---
 
 ## 4. System, Data Exchange & IT Terms
 
-| Term | Plain-Language Meaning |
+| Term | Plain-Language Meaning (First Sentence) & Technical Context |
 | :--- | :--- |
-| **API Key (`slims_live_...`)** | A secret credential issued to an external system (such as a National Soil Information System) so it can read approved data from the Data Exchange API for specific authorized laboratories. |
-| **Boundary Cursor** | A bookmark token (`nextCursor`) returned by the Data Exchange API v2 so an external harvester can resume downloading the next page of samples or incremental changes without missing or duplicating rows. |
-| **Delivery Receipt** | An acknowledgement sent back to the LIMS by an external database confirming how many exported soil samples were successfully imported or quarantined. |
-| **Docker / Container** | The packaging technology used to run SoilFER LIMS on a server with all its required software included. |
-| **GLOSOLAN** | The **Global Soil Laboratory Network** coordinated by FAO to harmonize soil analytical SOPs and proficiency testing worldwide. |
-| **KoboToolbox** | A mobile field data collection app used by field teams to record GPS coordinates, depth horizons, and bag barcodes offline and sync them to SoilFER LIMS reception. |
-| **NSIS / OpenNSIS** | **National Soil Information System** / **FAO OpenNSIS**—the national database that aggregates approved soil profiles, analytical measurements, and maps across a country. |
-| **RBAC** | **Role-Based Access Control**—assigning each staff member a role (Reception, Technician, Reviewer, Lab Manager, Super Admin) that controls which buttons and pages they can use. |
-| **Snapshot (Data Exchange)** | A frozen, point-in-time copy of approved exchange records created via `POST /api/v2/data-exchange/snapshots` so a national database can download a large dataset page by page without changes mid-download. |
+| *API Key* | An integration key generated in **Admin Panel** → **National SIS & Data Exchange** (**Generate API Key**) that lets an authorized national soil database read approved results from your laboratory. |
+| *Docker Container* | The self-contained software package that runs the SoilFER LIMS server and database on your host machine. |
+| *GLOSOLAN* | The Global Soil Laboratory Network coordinated by FAO, which publishes harmonized soil analysis standard operating procedures and runs global proficiency testing. |
+| **KoboToolbox Integration** | The connection in **Projects** → **Data connections** that brings field mobile survey forms into **Sample Reception** as **Expected** arrivals. |
+| **National SIS & Data Exchange** | The gateway that publishes **Approved** soil sample records, replicate observations, map coordinates, and spectra to a National Soil Information System or FAO OpenNSIS. |
+| *Role-Based Access Control* | The permission system in **Laboratory Staff** where each person's **System Role** (**Sample Reception Officer**, **Laboratory Technician**, **Laboratory Manager**, **Quality & Audit Officer**, **Read-Only Viewer**) determines which screens and buttons they can use. |

@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 340" width="100%" role="img" aria-label="Result statuses from Ready to record and Draft saved through Recorded, Submitted, Accepted, Approved, and Published, plus Returned and Repeat requested">
+  <defs>
+    <style>
+      .bg { fill: #f8fafc; rx: 14px; stroke: #cbd5e1; stroke-width: 1.5px; }
+      .heading { font: 700 18px 'Segoe UI', Arial, sans-serif; fill: #0f172a; }
+      .card-tech { fill: #ffffff; stroke: #0f766e; stroke-width: 2px; rx: 10px; }
+      .card-rev { fill: #ffffff; stroke: #1d4ed8; stroke-width: 2px; rx: 10px; }
+      .card-warn { fill: #fffbeb; stroke: #d97706; stroke-width: 2px; rx: 10px; }
+      .card-pub { fill: #f0fdf4; stroke: #15803d; stroke-width: 2px; rx: 10px; }
+      .st { font: 700 14.5px 'Segoe UI', Arial, sans-serif; fill: #0f172a; }
+      .desc { font: 400 12px 'Segoe UI', Arial, sans-serif; fill: #334155; }
+      .who { font: 600 11.5px 'Segoe UI', Arial, sans-serif; fill: #0f766e; }
+      .who-rev { font: 600 11.5px 'Segoe UI', Arial, sans-serif; fill: #1d4ed8; }
+      .who-warn { font: 600 11.5px 'Segoe UI', Arial, sans-serif; fill: #b45309; }
+      .arrow { stroke: #475569; stroke-width: 2.2px; fill: none; marker-end: url(#arrow); }
+      .arrow-back { stroke: #d97706; stroke-width: 2.2px; stroke-dasharray: 5,4; fill: none; marker-end: url(#arrow-warn); }
+    </style>
+    <marker id="arrow" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+      <polygon points="0 0, 9 3.5, 0 7" fill="#475569" />
+    </marker>
+    <marker id="arrow-warn" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+      <polygon points="0 0, 9 3.5, 0 7" fill="#d97706" />
+    </marker>
+  </defs>
+
+  <rect x="8" y="8" width="1104" height="324" class="bg" />
+  <text x="32" y="40" class="heading">Result Statuses: What Each Badge Means &amp; Who Moves It On</text>
+
+  <!-- 1: Ready to record / Draft saved -->
+  <rect x="28" y="62" width="190" height="125" class="card-tech" />
+  <text x="42" y="88" class="st">Ready to record /</text>
+  <text x="42" y="108" class="st">Draft saved</text>
+  <text x="42" y="132" class="desc">Sample is prepared; readings</text>
+  <text x="42" y="148" class="desc">are being typed at the bench.</text>
+  <text x="42" y="172" class="who">Next: Technician records</text>
+
+  <line x1="218" y1="124" x2="248" y2="124" class="arrow" />
+
+  <!-- 2: Recorded -->
+  <rect x="250" y="62" width="190" height="125" class="card-tech" />
+  <text x="264" y="88" class="st">Recorded</text>
+  <text x="264" y="116" class="desc">Readings and QC controls are</text>
+  <text x="264" y="132" class="desc">saved in the run worksheet.</text>
+  <text x="264" y="172" class="who">Next: Technician submits</text>
+
+  <line x1="440" y1="124" x2="470" y2="124" class="arrow" />
+
+  <!-- 3: Submitted / Ready for review -->
+  <rect x="472" y="62" width="195" height="125" class="card-rev" />
+  <text x="486" y="88" class="st">Submitted /</text>
+  <text x="486" y="108" class="st">Ready for review</text>
+  <text x="486" y="132" class="desc">Run is sent to Manager Task</text>
+  <text x="486" y="148" class="desc">List for second-person check.</text>
+  <text x="486" y="172" class="who-rev">Next: Reviewer / Manager</text>
+
+  <line x1="667" y1="124" x2="697" y2="124" class="arrow" />
+
+  <!-- 4: Accepted / Approved -->
+  <rect x="699" y="62" width="185" height="125" class="card-rev" />
+  <text x="713" y="88" class="st">Accepted /</text>
+  <text x="713" y="108" class="st">Approved</text>
+  <text x="713" y="132" class="desc">Results and batch QC passed</text>
+  <text x="713" y="148" class="desc">review and final sign-off.</text>
+  <text x="713" y="172" class="who-rev">Next: Manager issues report</text>
+
+  <line x1="884" y1="124" x2="914" y2="124" class="arrow" />
+
+  <!-- 5: Published -->
+  <rect x="916" y="62" width="176" height="125" class="card-pub" />
+  <text x="930" y="88" class="st">Published</text>
+  <text x="930" y="116" class="desc">Certificate of Analysis is</text>
+  <text x="930" y="132" class="desc">ready in Reports (PDF).</text>
+  <text x="930" y="172" class="who" fill="#15803d">Done (Superseded if amended)</text>
+
+  <!-- Return / Repeat loop -->
+  <rect x="330" y="218" width="440" height="94" class="card-warn" />
+  <text x="348" y="244" class="st">Returned / Repeat requested / Redo / QC failed</text>
+  <text x="348" y="268" class="desc">Reviewer or Manager returns the item with a Review note (or orders a repeat after</text>
+  <text x="348" y="285" class="desc">QC failed). The Technician opens My Work or Workbench to record the new attempt.</text>
+  <text x="348" y="303" class="who-warn">Moved by: Reviewer / Lab Manager → Handled by: Lab Technician</text>
+
+  <path d="M 570 187 L 570 216" class="arrow-back" />
+  <path d="M 330 264 L 124 264 L 124 189" class="arrow-back" />
+</svg>

@@ -31,13 +31,14 @@ function harness(name) {
     const module = { exports: {} };
     const source = fs.readFileSync(path.resolve(__dirname, `../../../client/src/components/reception/${name}.jsx`), 'utf8');
     const code = esbuild.transformSync(source, { loader: 'jsx', format: 'cjs' }).code;
-    vm.runInNewContext(code, { module, exports: module.exports, console, alert: jest.fn(), confirm: () => true,
+    const alert = jest.fn();
+    vm.runInNewContext(code, { module, exports: module.exports, console, alert, confirm: () => true,
         localStorage: { getItem: () => null }, window: { addEventListener() {}, removeEventListener() {} },
         require: dependency => {
             if (dependency === 'react') return hooks;
             if (dependency === 'axios') return axios;
             if (dependency === 'lucide-react') return new Proxy({}, { get: () => () => null });
-            if (dependency.includes('LanguageContext')) return { useLanguage: () => ({ t: key => key }) };
+            if (dependency.includes('LanguageContext')) return { useLanguage: () => ({ t: (key, params) => params?.message ? `${key}: ${params.message}` : key }) };
             if (dependency.includes('useIntakeRules')) return () => ({ rules: require('../helpers/intakeRulesFixture')() });
             if (dependency.includes('audioCues')) return { playSuccessChime() {}, playErrorBuzz() {} };
             if (dependency.includes('coordParser')) return { parseCoordinates: () => ({ lat: 14.5, lng: -89.4, uncertaintyM: 10 }) };
@@ -47,13 +48,33 @@ function harness(name) {
             return children[child] || (children[child] = () => null);
         }
     });
-    return { states, children, axios, render(props = {}) { stateIndex = 0; effectIndex = 0; return module.exports.default(props); } };
+    return { states, children, axios, alert, render(props = {}) { stateIndex = 0; effectIndex = 0; return module.exports.default(props); } };
 }
 const button = (tree, label) => elements(tree, node => node.type === 'button').find(node => text(node).includes(label));
 const field = (tree, label) => elements(tree, node => node.props?.['aria-label'] === label)[0];
 const settle = () => new Promise(setImmediate);
 
 describe('Audit 0.12: batch observation entry and explicit actions', () => {
+    test('a lab-less global admin must pick an active lab and sees the server message', async () => {
+        const h = harness('BatchIntake'), props = { user: { role: 'SUPER_ADMIN', labId: null } };
+        h.axios.get.mockResolvedValue({ data: [{ id: 'active', name: 'Active Lab', code: 'A', isActive: true },
+            { id: 'inactive', name: 'Inactive Lab', code: 'I', isActive: false }] });
+        let tree = h.render(props);
+        elements(tree, node => node.type === h.children.ManifestImportModal)[0].props.onImport([{ originalId: 'bag', status: 'ACCEPTED' }]);
+        await settle(); tree = h.render(props);
+        const picker = elements(tree, node => node.props?.id === 'batch-receiving-lab')[0];
+        expect(elements(picker, node => node.type === 'option').map(node => node.props.value)).toEqual(['', 'active']);
+        expect(button(tree, 'batchReception.submit').props.disabled).toBe(true);
+        picker.props.onChange({ target: { value: 'active' } });
+        tree = h.render(props); await settle();
+        expect(h.axios.post).toHaveBeenCalledWith('/api/reception/mass-check', expect.objectContaining({ assignedLab: 'active' }));
+        h.axios.post.mockRejectedValueOnce({ response: { data: { message: 'Choose an active lab.', error: 'GENERIC' } }, message: '403' });
+        jest.spyOn(console, 'error').mockImplementation(() => {});
+        try { await button(tree, 'batchReception.submit').props.onClick(); } finally { jest.restoreAllMocks(); }
+        expect(h.axios.post).toHaveBeenCalledWith('/api/reception/consignments', expect.objectContaining({ assignedLab: 'active' }));
+        expect(h.alert).toHaveBeenCalledWith('batchIntake.submissionFailed: Choose an active lab.');
+    });
+
     test('bulk inputs do not apply to scanned rows until clicked; audit payload freezes the actual applied values', async () => {
         const h = harness('BatchIntake'), props = { analysisGroups: [{ id: 'group', analyses: ['PH_H2O'] }] };
         let tree = h.render(props);
@@ -62,11 +83,11 @@ describe('Audit 0.12: batch observation entry and explicit actions', () => {
         field(tree, 'batchIntake.massToApply').props.onChange({ target: { value: '550' } });
         field(tree, 'batchIntake.moistureToApply').props.onChange({ target: { value: 'MOIST' } });
         tree = h.render(props);
-        const scan = elements(tree, node => node.type === 'input' && node.props.placeholder?.startsWith('Scan or type'))[0];
+        const scan = elements(tree, node => node.type === 'input' && node.props.placeholder === 'batchReception.scanPlaceholder')[0];
         scan.props.onChange({ target: { value: 'bag-1' } });
-        tree = h.render(props); await button(tree, 'Add Sample').props.onClick(); tree = h.render(props); await settle();
+        tree = h.render(props); await button(tree, 'samples.addSample').props.onClick(); tree = h.render(props); await settle();
         expect(text(tree)).toContain('batchIntake.massNotRecorded');
-        const submit = async () => { tree = h.render(props); await button(tree, 'Submit Consignment').props.onClick();
+        const submit = async () => { tree = h.render(props); await button(tree, 'batchReception.submit').props.onClick();
             return h.axios.post.mock.calls.filter(([url]) => url === '/api/reception/consignments').at(-1)[1]; };
         let payload = await submit();
         expect(payload.samples[0]).toMatchObject({ receivedMass: null, moistureOnArrival: null, massWarningAcknowledged: false, positionalUncertaintyM: null });
@@ -92,9 +113,9 @@ describe('Audit 0.12: batch observation entry and explicit actions', () => {
         let checkbox = elements(tree, node => node.type === 'input' && node.props.type === 'checkbox')[0];
         expect(checkbox.props.checked).toBe(false);
         checkbox.props.onChange({ target: { checked: true } });
-        tree = h.render(props); await button(tree, 'Submit Consignment').props.onClick();
+        tree = h.render(props); await button(tree, 'batchReception.submit').props.onClick();
         expect(h.axios.post.mock.calls.filter(([url]) => url === '/api/reception/consignments').at(-1)[1].samples[0].massWarningAcknowledged).toBe(true);
-        tree = h.render(props); elements(tree, node => node.props?.title === 'Edit / Record Exception')[0].props.onClick();
+        tree = h.render(props); elements(tree, node => node.props?.title === 'batchReception.editException')[0].props.onClick();
         tree = h.render(props); elements(tree, node => node.type === h.children.BatchExceptionModal)[0].props.onSave({ originalId: 'low', status: 'ACCEPTED', receivedMass: 70 });
         checkbox = elements(h.render(props), node => node.type === 'input' && node.props.type === 'checkbox')[0];
         expect(checkbox.props.checked).toBe(false);
