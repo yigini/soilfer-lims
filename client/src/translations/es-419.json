@@ -3746,6 +3746,10 @@
     "pin": "PIN",
     "password": "Contraseña",
     "setPinHelp": "Defina un PIN de banco de 4 a 8 dígitos. Confírmelo con su contraseña.",
+    "setPinTitle": "Configura tu PIN de banco",
+    "newPinLabel": "Nuevo PIN de banco (4–8 dígitos)",
+    "passwordLabel": "Tu contraseña",
+    "pinHint": "Usa solo los dígitos del 0 al 9.",
     "unsentKept": "{count} cambio(s) aún no se enviaron y se conservan en este dispositivo. Vuelva a conectarse e inténtelo de nuevo.",
     "errors": {
       "generic": "No se pudo verificar el PIN.",
