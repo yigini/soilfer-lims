@@ -4070,6 +4070,7 @@
     "checksCount": "{checked}/{total} checks"
   },
   "intakeRules": {
+    "loadFailed": "Reception rules could not be loaded.",
     "loading": "Loading reception rules…",
     "failureNotes": {
       "container": "e.g. Bag torn, lid loose, visible leakage...",

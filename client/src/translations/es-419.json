@@ -4070,6 +4070,7 @@
     "checksCount": "{checked}/{total} verificaciones"
   },
   "intakeRules": {
+    "loadFailed": "No se pudieron cargar las reglas de recepción.",
     "loading": "Cargando reglas de recepción…",
     "failureNotes": {
       "container": "Por ejemplo: bolsa rota, tapa suelta, fuga visible…",

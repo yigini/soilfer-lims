@@ -3,7 +3,7 @@ import { X, AlertTriangle, CheckCircle, Camera, Upload, Trash2 } from 'lucide-re
 import axios from 'axios';
 import ComplianceChecklist from './ComplianceChecklist';
 import IntakeContextFields from './IntakeContextFields';
-import useIntakeRules from './useIntakeRules';
+import useIntakeRules, { intakeRulesErrorText } from './useIntakeRules';
 import { useLanguage } from '../../context/LanguageContext';
 import useUploadMediaUrls from '../../hooks/useUploadMediaUrls';
 
@@ -138,7 +138,7 @@ const BatchExceptionModal = ({ isOpen, sample, index, onClose, onSave, defaults 
                         </div>
                     </div>
 
-                    {rulesFailed && <p role="alert">{t('intakeRules.unavailable')}</p>}
+                    {rulesFailed && <p role="alert">{intakeRulesErrorText(rulesFailed, t)}</p>}
                     <ComplianceChecklist rules={rules} value={checklist} onChange={setChecklist} />
                     <IntakeContextFields rules={rules} sampling={sampling} setSampling={setSampling} />
                     {/* Rejection Details */}
