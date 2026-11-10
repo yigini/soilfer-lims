@@ -22,7 +22,7 @@ Do not try to teach the whole system to everyone in a single three-hour lecture.
 | Time | Activity | Screen Used |
 | :--- | :--- | :--- |
 | *0–10 min* | Sign in on the **Sign in to SoilFER LIMS** screen, pick your language, and tour the left sidebar and **Help** button. | **Sign in to SoilFER LIMS**, **Sample Reception** |
-| *10–25 min* | Walk through receiving one walk-in bag and one expected project box. Practice saving a draft intake (**Save Draft**), flagging a leaking or insufficient bag as **Rejected (Non-Conformance)**, and checking duplicate warnings (**Prior Receipt Detected for**). | **Sample Reception**, **Walk-in Intake** |
+| *10–25 min* | Walk through receiving one walk-in bag and one expected project box. Practice saving a draft intake (**Save Draft**), flagging a leaking or insufficient bag as **Rejected (Non-Conformance)** (refused with a problem record), and checking duplicate warnings (**Prior Receipt Detected for**). | **Sample Reception**, **Walk-in Intake** |
 | *25–35 min* | Click **Print labels**, print a **Standard (101 × 54 mm)** bag label and a **Compact (50 × 25 mm)** container label, and scan the barcode into the search box. | **Sample Reception** |
 | *35–45 min* | Open **My Work** and **Workbench** to complete the drying checklist (**Confirm Complete**) and the sieving and grinding record, including before-sieving mass and coarse stone mass. Complete Exercises 1, 2, and 3. | **My Work**, **Workbench** |
 
@@ -35,9 +35,9 @@ Do not try to teach the whole system to everyone in a single three-hour lecture.
 | Time | Activity | Screen Used |
 | :--- | :--- | :--- |
 | *0–10 min* | Open **My Work** to see assigned tests and status badges (**Pending**, **In Progress**, **Returned**). Check **Equipment** to confirm your meter or balance is **In Service** and **Ready / Calibrated**. | **My Work**, **Equipment** |
-| *10–25 min* | Open **Workbench** and start a pH and electrical conductivity batch. Scan sample barcodes into the batch grid and enter readings for the **Blank**, **Duplicate**, and **Control** (**Laboratory reference material (LRM)** or **Certified reference material (CRM)**) positions. | **Workbench** |
+| *10–25 min* | Open **Workbench** and start a pH and electrical conductivity batch. Scan sample barcodes into the batch grid and enter readings for the **Blank**, **Duplicate**, and **Control** (**Laboratory reference material (LRM)** (your lab's own in-house check soil) or **Certified reference material (CRM)** (official standard soil with a certified value)) positions. | **Workbench** |
 | *25–35 min* | Practice pasting a column of numbers from Excel into **Workbench** and checking the preview. Practice entering sand, silt, and clay together on the texture panel and checking that the sum equals 100%. | **Workbench** |
-| *35–45 min* | Submit the completed batch for review. Then inspect a work item that the manager returned (**Returned**) and record a second attempt with a short note. Complete Exercises 4, 5, and 6. | **Workbench**, **My Work** |
+| *35–45 min* | Submit the completed batch for review. Then inspect a work item that the manager returned (**Returned**) and record a second try with a short note. Complete Exercises 4, 5, and 6. | **Workbench**, **My Work** |
 
 ---
 
@@ -47,8 +47,8 @@ Do not try to teach the whole system to everyone in a single three-hour lecture.
 
 | Time | Activity | Screen Used |
 | :--- | :--- | :--- |
-| *0–15 min* | Open **Manager Task List** to review the batches submitted in Session 2. Inspect replicate readings, choose the official reported value (**Report attempt**, **Report mean**, or **Not reportable**), and click **Approve** or return a result for repeat. | **Manager Task List** |
-| *15–30 min* | Open **QA Dashboard** to inspect a batch where a control or duplicate failed. Practice choosing the right disposition (repeat the batch, repeat a calibration bracket, or record a nonconformance in **QA Dashboard**). | **QA Dashboard**, **Manager Task List** |
+| *0–15 min* | Open **Manager Task List** to review the batches submitted in Session 2. Inspect replicate readings, choose the final report number (**Report attempt** (use this measurement try on the report), **Report mean**, or **Not reportable**), and click **Approve** or return a result for repeat. | **Manager Task List** |
+| *15–30 min* | Open **QA Dashboard** to inspect a batch where a control or duplicate failed. Practice choosing the right batch decision (repeat the batch, repeat a group of samples between two instrument check standards, or record a problem record in **QA Dashboard**). | **QA Dashboard**, **Manager Task List** |
 | *30–40 min* | Open **Reports** (**Result Reports**) to preview and issue an official **Certificate of Analysis** PDF. Then practice opening a post-release report amendment and checking the new revision number. | **Reports** |
 | *40–45 min* | Review **Policies**, **Laboratory Staff**, and **Audit & Security** so the manager knows how to reset a password, adjust a method QC limit, and check the audit log. Complete Exercises 7, 8, 9, and 10. | **Policies**, **Laboratory Staff**, **Admin Panel** |
 

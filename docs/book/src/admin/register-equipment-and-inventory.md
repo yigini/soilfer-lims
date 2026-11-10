@@ -3,14 +3,14 @@
 > *Time:* 10–15 minutes.
 > *Who can do this:* Laboratory Administrators, Laboratory Managers, Quality & Audit Officers, and operators.
 
-This guide shows you how to register laboratory instruments and log calibration dates. It also covers adding reference material lots (**CRM** and **LRM**) and tracking reagent stock.
+This guide shows you how to register laboratory instruments and log calibration dates. It also covers adding reference material lots (**CRM** (certified reference material — official standard soil with a certified value) and **LRM** (laboratory reference material — your lab's own in-house check soil)) and tracking reagent stock.
 
 ---
 
 ## Before You Start
 
 - Gather the serial numbers, bench locations, and calibration due dates for your main instruments.
-- Have the certificate sheet or consensus values ready for any **Certified reference material (CRM)** or **Laboratory reference material (LRM)** lot you are entering.
+- Have the certificate sheet or consensus values ready for any **Certified reference material (CRM)** (official standard soil with a certified value) or **Laboratory reference material (LRM)** (your lab's own in-house check soil) lot you are entering.
 
 ---
 
@@ -47,7 +47,7 @@ This guide shows you how to register laboratory instruments and log calibration 
 1. Open **Admin Panel** and click the **Quality** tab (**Reference materials**).
 2. Select your **Laboratory** and click **Add reference lot**.
 3. Fill in the lot identity:
-   - **Code** and **Name** (for example, *LRM-SOIL-01*)
+   - **Code** and **Name** (for example, *CHECK-SOIL-01*)
    - **Kind**: choose **Certified reference material (CRM)**, **Laboratory reference material (LRM)**, **Check standard**, **Calibration standard**, or **Blank matrix**
    - **Matrix**, **Supplier**, **Certificate reference**, and **Lot number**
    - **Expiry (your local time)** and **Opened (your local time)**
@@ -61,7 +61,7 @@ This guide shows you how to register laboratory instruments and log calibration 
 3. Select the **Value type** (**Certified**, **Indicative**, **Consensus**, or **Lab assigned**).
 4. Enter the **Assigned value** and **Unit** using your laboratory's number format. If the certificate includes uncertainty, enter both **Expanded uncertainty** and **Certificate coverage factor (k)**.
 5. Click **Save**.
-6. If you ever need to update an assigned value later, click **Correct by new revision**, enter a **Reason**, and click **Save**. Earlier revisions remain marked **Superseded** while the new one becomes **Current**.
+6. If you ever need to update an assigned value later, click **Correct by new revision**, enter a **Reason**, and click **Save**. Earlier revisions remain marked **Superseded** (replaced by a newer version) while the new one becomes **Current**.
 
 ---
 
@@ -69,7 +69,7 @@ This guide shows you how to register laboratory instruments and log calibration 
 
 1. Click **Inventory** (**Reagents & Inventory**) in the left sidebar.
 2. Click **Add Inventory Item** and fill in:
-   - **Item Name**, **Item Code / SKU**, and **Category** (**Reagents & Chemicals**, **Reference Standards (CRM)**, **Consumables & Labware**, or **Glassware**)
+   - **Item Name**, **Item Code / SKU**, and **Category** (**Reagents & Chemicals**, **Reference Standards (CRM)** (certified reference material — official standard soil with a certified value), **Consumables & Labware**, or **Glassware**)
    - **Current Quantity**, **Unit of Measure**, and **Minimum Alert Threshold**
    - **Lot / Batch Number**, **Expiration Date**, **Storage Location / Shelf**, and **Supplier**
 3. When technicians open a new bottle or use stock, click **Adjust Stock** on that row to update the **Current Quantity**.
@@ -97,5 +97,5 @@ This guide shows you how to register laboratory instruments and log calibration 
 
 ### For the QA Person
 
-- *End-to-end metrological traceability:* Every analytical run in **Workbench** records the instrument's asset ID and calibration state alongside the exact reference material lot and value revision used for batch QC evaluation.
+- *Complete instrument and check-soil history:* Every analytical run in **Workbench** records the instrument's asset ID and calibration state alongside the exact reference material lot and value revision used for batch QC evaluation.
 - *Quarantine protection:* Changing a lot's status to **Quarantined** via **Change status** (with a mandatory reason) immediately blocks new bench runs from selecting that lot while keeping historical batch links intact.

@@ -25,7 +25,7 @@ Set up your laboratory in SoilFER LIMS before your team starts live testing. In 
 ### Step 2: Choose Your Laboratory Quality Rules
 
 1. Click **Policies** in the left menu.
-2. Choose the quality preset that matches how your laboratory works, and adjust any individual setting (such as **Maximum analytical batch size**, **Blanks per batch**, **Duplicate interval**, or **Minimum new password length**).
+2. Choose the starting rule set that matches how your laboratory works, and adjust any individual setting (such as **Maximum analytical batch size**, **Blanks per batch**, **Duplicate interval**, or **Minimum new password length**).
    *Your laboratory decides its own batch size and quality control rules (many laboratories use 20 samples per batch; see [Per-Lab Settings, Presets & Method Overrides](../usage/lab-settings-and-presets.md)).*
 3. Click **Save** and enter a brief note describing your policy update.
 
@@ -33,13 +33,13 @@ Set up your laboratory in SoilFER LIMS before your team starts live testing. In 
 
 1. Open **Admin Panel** and click **Analysis Configuration** (or open your laboratory's methods page).
 2. Enable the soil tests your laboratory performs (such as pH, electrical conductivity, organic carbon, extractable phosphorus, exchangeable cations, and particle size).
-3. Check the method quality control rules (**Maximum blank value**, **Minimum control recovery**, **Maximum control recovery**, and **Maximum duplicate RPD**) so they match your laboratory's validated standard operating procedures.
+3. Check the method quality control rules (**Maximum blank value**, **Minimum control recovery**, **Maximum control recovery**, and **Maximum duplicate RPD** (relative percent difference — largest allowed percent difference between two repeat readings of the same sample)) so they match your laboratory's validated standard operating procedures.
 
 ### Step 4: Register Equipment, Reference Soils, and Staff Accounts
 
 1. Click **Equipment** in the left menu and click **Register New Asset** to add each balance, pH meter, spectrophotometer, and drying oven.
 2. For each instrument, click **Log Event / Calibration** to record its **Last Calibration** and **Next Due Date** so its **ISO Readiness** shows **Ready / Calibrated**.
-3. Register your active reference soil lots (**Reference Standards (CRM)** and in-house control soils) with their target values so technicians can bind them when starting a run.
+3. Register your active reference soil lots (**Reference Standards (CRM)** (certified reference material — official standard soil with a certified value) and in-house control soils) with their target values so technicians can bind them when starting a run.
 4. Click **Laboratory Staff** in the left menu and click **Add User** to create an account for each reception clerk, technician, reviewer, and manager:
    - Fill in **Full Name**, **Username**, **Email Address**, **System Role**, **Assigned Laboratory**, and a **Temporary Password** of at least 12 characters.
    - Give each staff member their username and temporary password so they can sign in and set their own personal password.

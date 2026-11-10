@@ -19,7 +19,7 @@
 3. *Fill every required QC slot in the batch:*
    - **Blank** — reagent/method blank carried through extraction with no soil. Enter the numeric reading (such as 0 or 0.01).
    - **Duplicate** — second weighing of the same routine soil sample (**First reading** and **Second reading**).
-   - **Control** — select the active **Laboratory reference material (LRM)** check soil or **Certified reference material (CRM)** lot and enter its **Measured value**.
+   - **Control** — select the active **Laboratory reference material (LRM)** (your lab's own in-house check soil) check soil or **Certified reference material (CRM)** (official standard soil with a certified value) lot and enter its **Measured value**.
 4. *Enter or paste sample readings:* Type readings directly into **Workbench** (raw titration, weight, or dilution inputs calculate automatically) or paste a column from Excel and check the row preview.
 5. *Check texture sums (for particle size):* Enter sand, silt, and clay together and verify their sum is 100% within your lab's **Texture closure tolerance (%)**.
 6. *Submit for review:* When all sample and QC slots are complete, submit the batch (enter your PIN if **Require PIN when recording** is active). Status changes to **Submitted**.
@@ -31,5 +31,5 @@
 | What You See on Screen | What You Do |
 | :--- | :--- |
 | *Test row is locked in* **Workbench** | Drying or preparation is not finished yet. Complete the drying and sieving checklist first. |
-| *Work item badge says* **Returned** | Click the item in **My Work**, read your manager's note, and record a new repeat attempt in **Workbench**. Never overwrite the original attempt. |
-| *Batch QC badge shows* **Fail batch** *or* **Warn** | Do not hide or alter the control reading. Check for a typing mistake, or ask your **Laboratory Manager** whether to re-run the batch or calibration bracket. |
+| *Work item badge says* **Returned** | Click the item in **My Work**, read your manager's note, and record a new repeat try in **Workbench**. Never overwrite the original try. |
+| *Batch QC badge shows* **Fail batch** *or* **Warn** | Do not hide or alter the control reading. Check for a typing mistake, or ask your **Laboratory Manager** whether to re-run the batch or group of samples between two instrument check standards. |

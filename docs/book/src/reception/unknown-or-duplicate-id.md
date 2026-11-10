@@ -37,7 +37,7 @@ Resolve the three most common identity problems at reception: a barcode not foun
 2. Click **Record as unknown** (which sets **Recorded meaning** to **Not recorded**). Do not guess whether it is a **Confirmed soil profile / pit**.
 3. If the field sheet arrives later, open the sample in **Samples** and go to the **Sample & request** tab.
 4. Click **Correct the field reference**, enter the verified code and **Reason and source verification (required)**, and save.
-   *You should see the field provenance updated without altering any laboratory test results.*
+   *You should see the field origin details updated without altering any laboratory test results.*
 
 ---
 
@@ -57,4 +57,4 @@ Once the identity is confirmed and intake is completed, the sample receives its 
 ## For the QA Person
 
 - Every physical bag accepted by the laboratory receives a unique **Permanent Lab ID** even when two bags share a field code through **✓ Confirm as Re-submission**.
-- Updating **Soil profile / sampling point** via **Correct the field reference** records a provenance correction with **Reason and source verification (required)**. Analytical results and released reports remain intact.
+- Updating **Soil profile / sampling point** via **Correct the field reference** records a field origin correction with **Reason and source verification (required)**. Analytical results and released reports remain intact.

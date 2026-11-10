@@ -3,13 +3,13 @@
 > *Time:* 10–15 minutes
 > *Who can do this:* Laboratory Administrators, Super Administrators, and Laboratory Managers
 
-Every laboratory can choose its own quality preset and customize individual rules—from decimal separators and sample numbering to two-person review and retention days—without changing code or affecting other laboratories on the same server.
+Every laboratory can choose its own starting rule set and customize individual rules—from decimal separators and sample numbering to two-person review and retention days—without changing code or affecting other laboratories on the same server.
 
 ---
 
 ## Before You Start
 
-- Sit down with your Laboratory Manager or QA Officer so you agree on which preset fits your current operations (**ISO 17025 strict**, **Basic**, or **Advisory**). Have a short reason ready for any rule you customize.
+- Sit down with your Laboratory Manager or QA Officer so you agree on which starting rule set fits your current operations (**ISO 17025 strict**, **Basic**, or **Advisory**). Have a short reason ready for any rule you customize.
 
 ---
 
@@ -22,13 +22,13 @@ Every laboratory can choose its own quality preset and customize individual rule
 
 ### Step 2: Select a preset and record your reason
 
-1. In the **Preset** card, choose one of the options:
+1. In the **Preset** (ready-made set of quality rules) card, choose one of the options:
    - **ISO 17025 strict** — **Required, blocking** QC, frequent quality checks, and two-person review.
    - **Basic** — **Required, warnings** QC with lighter check frequencies.
    - **Advisory** — optional QC verdicts for training or pilot runs.
-   - **Inherit deployment defaults** — follow the server-wide preset.
-2. Type a short explanation in **Reason for change** (for example, *Adopt Basic preset for two-week regional pilot phase*).
-3. Click **Save preset**.
+   - **Inherit deployment defaults** — follow the server-wide starting rule set.
+2. Type a short explanation in **Reason for change** (for example, *Adopt Basic rule set for two-week regional pilot phase*).
+3. Click **Save preset** (save your chosen starting rule set).
 
 *(Screenshot placeholder: choosing a preset and editing laboratory policies — screenshot coming once the training data is ready)*
 
@@ -36,16 +36,16 @@ Every laboratory can choose its own quality preset and customize individual rule
 
 ## Task B: Customize a Whole-Laboratory Policy Setting
 
-1. Under **Scope**, select **Whole laboratory**.
-2. In the policy table, review each row's **Setting**, **Effective value**, **Source**, and **Compared with preset** status (**Differs from preset** highlights any custom override).
+1. Under **Scope** (which lab or tests a setting covers), select **Whole laboratory**.
+2. In the policy table, review each row's **Setting**, **Effective value**, **Source**, and **Compared with preset** (compared with the starting rule set) status (**Differs from preset** (customized from the starting rule set) highlights any custom setting).
 3. Click **Edit** on the setting you want to customize:
    - **Decimal separator** and **Thousands separator** (match your local spreadsheet conventions so bench paste works smoothly).
-   - **Sample code pattern**, **Consignment number format**, **Container code format**, and **Report number pattern**.
+   - **Sample code pattern**, **Consignment number format** (numbering pattern for incoming sample boxes), **Container code format**, and **Report number pattern**.
    - **Sample retention after report** (how many **days** soil bags are kept in archive before appearing in the disposal queue).
    - **Require a second reviewer** and **Require a second person for amendments** (**Yes** or **No**).
    - **Idle bench lock (0: off)** and **Require PIN when recording** for shared bench computers.
 4. Enter the new value, type a **Reason for change**, and click **Save change**.
-5. To return an overridden setting to its preset default later, click **Clear override** on that row.
+5. To return an customized setting to its standard starting value later, click **Clear override** (return to the standard rule) on that row.
 
 ---
 
@@ -80,5 +80,5 @@ If your laboratory runs fixed rack or autosampler trays where blanks, duplicates
 
 ### For the QA Person
 
-- *Immutable policy history:* Click **Change history** in **Policies** at any time to inspect every historical version (**Version**), who saved it, when it took effect, the previous and new values, and the recorded **Reason for change**.
-- *Historical batch protection:* Saving a new policy or preset applies only to new evaluations going forward. Completed batches and issued reports retain the policy snapshot under which they were evaluated.
+- *Permanent policy history:* Click **Change history** in **Policies** at any time to inspect every historical version (**Version**), who saved it, when it took effect, the previous and new values, and the recorded **Reason for change**.
+- *Historical batch protection:* Saving a new policy or starting rule set applies only to new evaluations going forward. Completed batches and issued reports retain the saved copy of the rules under which they were evaluated.

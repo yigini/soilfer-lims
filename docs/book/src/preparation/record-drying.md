@@ -34,13 +34,13 @@ Record the drying of accepted soil samples in the air-drying room or low-tempera
    - **Started** and **Ended**: enter when the sample went into and came out of the drying room or oven.
    - **Equipment**: select the drying oven or facility asset if your laboratory registers drying equipment.
 6. Click **Confirm Complete** on that sample row.
-   *You should see a green **Checklist Verified** receipt badge, and **Drying Gate:** in the inspector change to **✓ Completed**.*
+   *You should see a green **Checklist Verified** confirmation badge, and **Drying Gate:** (drying step that must finish first) in the detail panel change to **✓ Completed**.*
 
 ---
 
 ## What Happens Next
 
-Once **Air Drying** is confirmed, the sample's drying gate is **Completed** (or **Awaiting verification** if your laboratory requires manager verification). The sample now unlocks **Sample Preparation** (**Waiting for preparation**); see [Record Grinding, Sieving, and Splitting](record-grinding-sieving.md).
+Once **Air Drying** is confirmed, the sample's drying step is **Completed** (or **Awaiting verification** if your laboratory requires manager verification). The sample now unlocks **Sample Preparation** (**Waiting for preparation**); see [Record Grinding, Sieving, and Splitting](record-grinding-sieving.md).
 
 ---
 
@@ -54,5 +54,5 @@ Once **Air Drying** is confirmed, the sample's drying gate is **Completed** (or 
 
 ## For the QA Person
 
-- Completing **Air Drying** generates an immutable receipt (**Checklist Verified**) storing the checklist steps, the **Drying** measurements, the technician's username, and the timestamp.
+- Completing **Air Drying** generates a permanent, locked saved confirmation (**Checklist Verified**) storing the checklist steps, the **Drying** measurements, the technician's username, and the timestamp.
 - Routine soil preparation uses **Air dried** or **Oven 40 °C** so heat-sensitive nutrients and organic matter are not altered. **Oven 105 °C** is used only on a separate sub-sample for moisture determination when converting results to an **Oven-dry** basis.

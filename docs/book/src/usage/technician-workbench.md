@@ -59,5 +59,5 @@ Your submitted samples appear in your manager's **Manager Task List** under **Re
 ## For the QA Person
 
 - SoilFER LIMS uses a run-first workflow: clicking **Confirm and start** (**Start run**) freezes the **Method revision**, **Instrument**, **Analyst**, and quality control limits (**Frozen at first start**) for every row in the run.
-- Typing or importing values into the worksheet saves recoverable drafts (**✓ Drafts saved**), while recording writes a numbered attempt under **Attempts** only after the analyst confirms the preflight check (**Review Determinations Before Recording**).
+- Typing or importing values into the worksheet saves recoverable drafts (**✓ Drafts saved**), while recording writes a numbered try under **Attempts** (measurement tries) only after the analyst confirms the preflight check (**Review Determinations Before Recording**).
 - Submitting (**Review & Submit Samples for Review**) locks the recorded determinations so they become read-only for technicians while awaiting independent managerial review.

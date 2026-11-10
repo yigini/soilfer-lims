@@ -13,7 +13,7 @@ Follow these five stages in order for a calm, successful pilot.
 
 | Stage | What You Do | Open This Guide |
 | :--- | :--- | :--- |
-| *1. Pre-launch setup (2–3 days before training)* | Tick off your laboratory profile, staff accounts, quality preset, active methods, calibrated instruments, reference soil lots, and label printer test. | [Lab Go-Live Checklist](../admin/go-live-checklist.md) |
+| *1. Pre-launch setup (2–3 days before training)* | Tick off your laboratory profile, staff accounts, starting rule set, active methods, calibrated instruments, reference soil lots, and label printer test. | [Lab Go-Live Checklist](../admin/go-live-checklist.md) |
 | *2. Print and pin bench cards (1 day before training)* | Print the one-page A4 reference cards and wall posters. Pin them next to the reception desk, drying ovens, wet-chemistry benches, and the manager's computer. | [Printable Bench Cards & Posters](../print/index.md) |
 | *3. Run three short training sessions (45 minutes each)* | Train reception and preparation staff in Session 1, bench technicians in Session 2, and managers and QA officers in Session 3 using the practice exercises. | [Three-Session Lab Training Plan](./training-plan.md) and [Hands-On Practice Exercises & Answer Key](./practice-exercises.md) |
 | *4. Run Week 1 in parallel with your existing logbook* | Receive and test your first real box of samples alongside your existing paper or Excel sheets. Hold a 10-minute end-of-day check each afternoon. | [Day-One & Week-One Parallel-Run Guide](./day-one-guide.md) |

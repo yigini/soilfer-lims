@@ -35,8 +35,8 @@ Walk through a complete day at the reception desk using five practice soil bags 
 
 1. Look up the fifth practice bag in **Sample Reception**.
 2. Notice that the physical bag arrived torn and leaking, so the soil is contaminated.
-3. Select **Non-Conformance** / **Reject** and type what you observed in **Describe the observed problem** (for example, that the bag arrived torn and spilled in transit).
-   *You should see the sample recorded with status **Rejected (Non-Conformance)** so it never enters the drying room or bench queues.*
+3. Select **Non-Conformance** (problem record) / **Reject** and type what you observed in **Describe the observed problem** (for example, that the bag arrived torn and spilled in transit).
+   *You should see the sample recorded with status **Rejected (Non-Conformance)** (refused with a problem record) so it never enters the drying room or bench queues.*
 
 ### Afternoon: Register a Farmer Walk-In Sample and Hand Over to the Lab
 
@@ -65,6 +65,6 @@ Every sample you accepted now appears in the technician's queue with status **Wa
 
 ## For the QA Person
 
-- Scanning a barcode or synchronizing a field survey only locates or imports the record in **Expected** status; physical custody begins only when the reception clerk completes intake and sets the official reception date.
+- Scanning a barcode or synchronizing a field survey only locates or imports the record in **Expected** status; physical responsibility for the sample begins only when the reception clerk completes intake and sets the official reception date.
 - Every label print and reprint is logged in the audit trail before the browser print window opens, and reprints require a recorded reason in **Reason for reprint**.
 - Your laboratory configures which reception checks are mandatory or optional for project samples and walk-in customers under **Policies** (see [Per-Lab Settings, Presets & Method Overrides](../usage/lab-settings-and-presets.md)).

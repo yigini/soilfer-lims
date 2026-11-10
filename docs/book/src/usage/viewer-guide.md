@@ -34,7 +34,7 @@ Check the progress of your submitted soil samples, read approved analytical resu
 3. Click **View report** in the **Actions** column to open the Certificate of Analysis on screen.
 4. Read the sections of the certificate:
    - **Preparation records**: shows the actual **Drying** and **Preparation** completed before testing.
-   - Analytical results table: shows the approved **Reported value**, standardized measurement unit, method name, and fertility rating badge (see [Controlled Units & Agronomic Interpretation](agronomic-interpretation.md)).
+   - Analytical results table: shows the approved **Reported value** (the final number printed on the report), standardized measurement unit, method name, and fertility rating badge (see [Controlled Units & Agronomic Interpretation](agronomic-interpretation.md)).
    - Quality summary: shows **QC within limits for all reported values.** or lists any **QC deviations:** that the laboratory manager reviewed and accepted.
 5. Click **Print / Save as PDF** at the top of the report window to save or print the official PDF.
 
@@ -62,5 +62,5 @@ You can share the downloaded PDF with farmers, agronomists, or project partners.
 
 ## For the QA Person
 
-- **Viewer** accounts have read-only access scoped to their assigned laboratory or project and cannot edit samples, work items, or quality control records.
-- Every report displays its **Version** and states **Replaces** when an amended revision supersedes an earlier certificate.
+- **Viewer** accounts have read-only access limited to their assigned laboratory or project and cannot edit samples, work items, or quality control records.
+- Every report displays its **Version** and states **Replaces** when an amended revision replaces an earlier certificate.

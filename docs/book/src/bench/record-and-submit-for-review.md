@@ -45,14 +45,14 @@ Finish your bench work using SoilFER LIMS's two-step handoff: first confirm and 
 
 ## What Happens Next
 
-Once a sample is **Submitted**, its recorded determinations become read-only at the bench and appear in your manager's **Manager Task List** under **Review Submissions**. You can view your confirmation receipts at any time on the **Activity Receipts** tab.
+Once a sample is **Submitted**, its recorded determinations become read-only at the bench and appear in your manager's **Manager Task List** under **Review Submissions**. You can view your saved confirmation records at any time on the **Activity Receipts** (saved confirmation records) tab.
 
 ---
 
 ## If Something Goes Wrong
 
-- *If a row you typed appears under* **Excluded / Incomplete** *(**Remains Draft**) →* Read the red bullet under that sample row on the **Review Determinations Before Recording** screen (such as an unapproved override request or an incomplete replicate pair), click **Back to Worksheet**, fix the row, and click **Record all ready** again.
-- *If the network flickers while recording and you see* **Recording incomplete** *(**Recording was not confirmed for this row.**) →* Click **Retry failed** on the receipt banner to resend only the unconfirmed rows without duplicating the rows that already succeeded.
+- *If a row you typed appears under* **Excluded / Incomplete** *(**Remains Draft**) →* Read the red bullet under that sample row on the **Review Determinations Before Recording** screen (such as an unapproved special approval request or an incomplete replicate pair), click **Back to Worksheet**, fix the row, and click **Record all ready** again.
+- *If the network flickers while recording and you see* **Recording incomplete** *(**Recording was not confirmed for this row.**) →* Click **Retry failed** on the confirmation banner to resend only the unconfirmed rows without duplicating the rows that already succeeded.
 - *If you see* **No recorded samples are currently awaiting review submission. Record eligible worksheet items first.** *on the* **Ready to Submit** *tab →* Your numbers are still in **Draft saved** status. Complete Step 1 above first so their status becomes **Recorded**.
 
 ---
@@ -60,4 +60,4 @@ Once a sample is **Submitted**, its recorded determinations become read-only at 
 ## For the QA Person
 
 - Separating Step 1 (**Review Determinations Before Recording**) from Step 2 (**Review & Submit Samples for Review**) allows an analyst to record measurements safely at the end of each bench run (**Recorded**) while bundling completed sample packages for reviewer sign-off (**Submitted**).
-- Every recording action requires the explicit preflight confirmation checkbox (**I verified the lab sample codes, positions, values, units, flags, basis and replicate numbers against the raw bench data.**) and writes an auditable command receipt.
+- Every recording action requires the explicit preflight confirmation checkbox (**I verified the lab sample codes, positions, values, units, flags, basis and replicate numbers against the raw bench data.**) and writes an auditable saved confirmation record.

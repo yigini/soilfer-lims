@@ -37,13 +37,13 @@ Share a bench computer safely between several technicians using **Turn on bench 
    - If the reason is **Preparation error**, prepare a fresh sub-container in **Containers and aliquots** first. Select that new container under **Physical aliquot (optional)**.
    - If the reason is **Above range: dilution required**, dilute the extract, select your calculation template or enter the **Recorded dilution factor**, and measure the diluted sample.
 4. Enter the new measurement, click **Record all ready** (or **Record this sample**), and then submit it again on the **Ready to Submit** tab.
-   *Your new reading is saved as the next numbered attempt under **Attempts**, while the original attempt remains preserved in the audit history.*
+   *Your new reading is saved as the next numbered try under **Attempts** (measurement tries), while the original try remains preserved in the audit history.*
 
 ---
 
 ## What Happens Next
 
-Once you record and submit the repeat attempt, the sample returns to the reviewer's queue (**Review Submissions**). The reviewer can then inspect both attempts and choose the reported value.
+Once you record and submit the repeat try, the sample returns to the reviewer's queue (**Review Submissions**). The reviewer can then inspect both tries and choose the final report number.
 
 ---
 
@@ -52,11 +52,11 @@ Once you record and submit the repeat attempt, the sample returns to the reviewe
 - *If you click* **Switch analyst** *while offline and see* **change(s) are not sent yet, so they stay on this device. Reconnect and try again.** *→* Keep the window open, restore your network connection until the top pill shows **✓ Drafts saved**, and then click **Switch analyst**.
 - *If you type the wrong PIN and see* **The PIN is not correct.** *(or* **Too many wrong PINs. Try again in a few minutes.***) →* Wait a few minutes if locked out, or click **Switch analyst** and sign in again with your full password.
 - *If you try to repeat an item inside the same failed batch and see* **Use a new batch for this repeat; the previous QC failure is retained.** *→* Open the **My runs** tab and start a new run (**Start run**) for the repeat measurement.
-- *If you see* **Record every replicate from the previous attempt before submitting.** *→* Make sure you entered values for all required replicates (**Rep 1**, **Rep 2**) on the new attempt before submitting.
+- *If you see* **Record every replicate from the previous attempt before submitting.** (enter all required repeat readings from the earlier try before sending) *→* Make sure you entered values for all required replicates (**Rep 1**, **Rep 2**) on the new try before submitting.
 
 ---
 
 ## For the QA Person
 
 - When a work item is reassigned or handed over between technicians, any server draft saved by the first technician displays **by** that technician's name so authorship is always clear.
-- Every repeat attempt records its trigger reason (**Review outlier**, **Duplicate disagreement**, **Confirmation**, **QC batch failure**, **Above range: dilution required**, **Instrument fault**, **Preparation error**, or **Other**) and preserves all prior attempts under **Attempts**.
+- Every repeat try records its trigger reason (**Review outlier**, **Duplicate disagreement**, **Confirmation**, **QC batch failure**, **Above range: dilution required**, **Instrument fault**, **Preparation error**, or **Other**) and preserves all earlier tries under **Attempts**.

@@ -57,13 +57,13 @@ After installation, the standard GLOSOLAN analysis catalogue is loaded, while ea
 
 ## Task D: Configure Per-Analysis or Per-Method QC Rules
 
-Different methods have different precision and blank limits. A potentiometric pH run does not use the same duplicate RPD or blank limit as an Olsen phosphorus colorimetric run.
+Different methods have different precision and blank limits. A potentiometric pH run does not use the same duplicate relative percent difference (largest allowed percent difference between two repeat readings) or blank limit as an Olsen phosphorus colorimetric run.
 
 1. Open **Policies** for your laboratory.
-2. Under **Scope**, switch from **Whole laboratory** to **Analysis and method overrides**.
+2. Under **Scope** (which lab or tests a setting covers), switch from **Whole laboratory** to **Analysis and method overrides** (custom rules for one test or method).
 3. Select the parameter and either **All methods for this analysis** or one specific **Method**.
-4. Edit any method-specific policy row—such as **Blanks per batch**, **Maximum blank value**, **Duplicate interval**, **Maximum duplicate RPD**, **Minimum control recovery**, **Maximum control recovery**, **LRM window (%)**, or **Required sample replicates**. Enter a **Reason for change**, and click **Save change**.
-5. In the **Versioned QC rules** card for that analysis or method, review each **Blank**, **Duplicate pair**, **Control**, **Laboratory reference material**, or **Certified reference material** rule. Enter a reason if you adjust a criterion or action (**Fail batch**, **Warn**, or **Repeat calibration bracket**), and save a new immutable rule version.
+4. Edit any method-specific policy row—such as **Blanks per batch**, **Maximum blank value**, **Duplicate interval**, **Maximum duplicate RPD** (relative percent difference — largest allowed percent difference between two repeat readings of the same sample), **Minimum control recovery**, **Maximum control recovery**, **LRM window (%)** (allowed percent range for the laboratory reference material (your lab's in-house check soil)), or **Required sample replicates**. Enter a **Reason for change**, and click **Save change**.
+5. In the **Versioned QC rules** card for that analysis or method, review each **Blank**, **Duplicate pair**, **Control**, **Laboratory reference material** (your lab's own in-house check soil), or **Certified reference material** (official standard soil with a certified value) rule. Enter a reason if you adjust a criterion or action (**Fail batch**, **Warn**, or **Repeat calibration bracket** (re-test only the samples measured between the last good instrument check and the failed check)), and save a new permanent and locked rule version.
 
 ---
 
@@ -72,8 +72,8 @@ Different methods have different precision and blank limits. A potentiometric pH
 | Problem | What to Do |
 | :--- | :--- |
 | **Reporting Unit** *or* **Sample matrix** *dropdown is locked when editing a parameter* | Once a parameter has connected samples, work items, or results, its **Reporting Unit** and **Sample matrix** are locked so historical measurements are never silently re-labeled. Set the old parameter to **Inactive — retain existing work and history** and create a new parameter if you need a different unit. |
-| *Screen shows* **No usable LOQ is configured; this blank criterion will be invalid.** | If a method's **Blank criterion** is set to **< LOQ** or **< LOQ / 2**, the method must have a quantification limit configured. Otherwise choose **Absolute limit** with a numeric **Maximum blank value**. |
-| *Screen shows* **QC rules are immutable; save a new version.** | SoilFER LIMS never overwrites past QC rules in place. Save your update as a new version with a written reason so earlier batches keep the exact rules that were active when they were run. |
+| *Screen shows* **No usable LOQ is configured; this blank criterion will be invalid.** (no limit of quantification (lowest amount the method can measure reliably) is set yet) | If a method's **Blank criterion** is set to **< LOQ** (below the limit of quantification — the lowest amount the method can measure reliably) or **< LOQ / 2**, the method must have a quantification limit configured. Otherwise choose **Absolute limit** with a numeric **Maximum blank value**. |
+| *Screen shows* **QC rules are immutable; save a new version.** (past quality rules cannot be overwritten; save a new numbered version instead) | SoilFER LIMS never overwrites past QC rules in place. Save your update as a new version with a written reason so earlier batches keep the exact rules that were active when they were run. |
 
 ---
 

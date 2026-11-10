@@ -60,5 +60,5 @@ Release an official Certificate of Analysis for an **Approved** sample, print or
 
 ## For the QA Person
 
-- Every released report version is stored as an immutable record in the database. Later changes to method catalogue defaults or laboratory settings never alter an already-released Certificate of Analysis.
-- Public share links are scoped strictly to the single released report version and are automatically blocked if the report is **Withdrawn** or **Superseded**.
+- Every released report version is stored as a permanent, locked record in the database. Later changes to method catalogue defaults or laboratory settings never alter an already-released Certificate of Analysis.
+- Public share links are limited strictly to the single released report version and are automatically blocked if the report is **Withdrawn** or **Superseded** (replaced by a newer version).

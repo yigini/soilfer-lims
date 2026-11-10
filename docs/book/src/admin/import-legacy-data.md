@@ -58,5 +58,5 @@ If your laboratory has past soil test results in Excel spreadsheets or CSV files
 
 ### For the QA Person
 
-- *Explicit provenance tagging:* Results brought in through **Legacy Historical Data Harmonisation & Import** are stored with imported provenance rather than bench attempt lineage. Auditors and National Soil Information System harvesters never confuse legacy spreadsheet values with newly measured laboratory runs.
+- *Clear origin labels:* Results brought in through **Legacy Historical Data Harmonisation & Import** are clearly marked as imported historical records rather than new bench measurement tries. Auditors and national soil databases never confuse old spreadsheet numbers with newly measured lab runs.
 - *Mandatory method and unit binding:* Unmapped numbers without a method or unit are rejected before import so historical datasets never pollute national soil maps with ambiguous units.

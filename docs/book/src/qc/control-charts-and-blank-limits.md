@@ -2,7 +2,7 @@
 
 ## What This Is For
 
-Manage your laboratory's **Reference Materials** (check soils and certified standards), propose and approve statistical **Control charts** limits with two-person sign-off, resolve **QC review obligations**, and evaluate **LOD/LOQ proposals from method blanks**.
+Manage your laboratory's **Reference Materials** (check soils and certified standards), propose and approve statistical **Control charts** limits with two-person sign-off, resolve **QC review obligations**, and evaluate **LOD/LOQ proposals from method blanks** (proposed limit of detection and limit of quantification (lowest detectable and lowest reliably measurable amounts) calculated from blank runs).
 
 > *Screenshot placeholder — docs/book/src/img/screenshots/qc-control-charts-and-blank-history.png (screenshot coming once the training data is ready): The **Reference Materials** page showing **Control charts** (**Propose limits**, **Approve limits**, **QC review obligations**) and **LOD/LOQ proposals from method blanks**.*
 
@@ -20,7 +20,7 @@ Manage your laboratory's **Reference Materials** (check soils and certified stan
 ### Part 1: Check Reference Material Lots and Expiry Dates (**Reference Materials**)
 
 1. Click **Reference Materials** in the left menu (under the administration section).
-   *You should see your laboratory's registered **Laboratory reference material (LRM)** and **Certified reference material (CRM)** lots.*
+   *You should see your laboratory's registered **Laboratory reference material (LRM)** (your lab's own in-house check soil) and **Certified reference material (CRM)** (official standard soil with a certified value) lots.*
 2. Check the **Status** badge on each lot (**Active**, **Quarantined**, **Expired**, or **Retired**) and watch for lots flagged **Expiring soon**.
 3. Click a lot to inspect its **Assigned values by analyte** (**Assigned value**, **Unit**, **Method (optional)**, and **Expanded uncertainty**).
 
@@ -44,25 +44,25 @@ Manage your laboratory's **Reference Materials** (check soils and certified stan
 
 1. Scroll to **LOD/LOQ proposals from method blanks** and select a method series in **Choose a series**.
 2. Inspect all method blanks in the window (**Failed blanks stay selected by default. Review every row; give a reason for each exclusion.**).
-3. Check the **Trial calculation** (**Mean**, **Sample SD**, and proposed LOD and LOQ), type your **Proposal reason**, and click **Record proposal**.
+3. Check the **Trial calculation** (**Mean**, **Sample SD**, and proposed limit of detection (lowest detectable amount) and limit of quantification (lowest reliably measurable amount)), type your **Proposal reason**, and click **Record proposal**.
 
 ---
 
 ## What Happens Next
 
 - Newly approved control chart limits (**Approved limits**) apply automatically to future runs started with that check soil lot, while earlier runs keep the limits that were frozen when they started.
-- Recorded LOD/LOQ proposals appear under **Retained proposals** as permanent QA evidence for method validation reviews.
+- Saved detection and quantification limit proposals appear under **Retained proposals** as permanent QA evidence for method validation reviews.
 
 ---
 
 ## If Something Goes Wrong
 
 - *If you click* **Approve limits** *and see* **Approval requires a different named user.** *→* The manager who clicked **Propose limits** cannot approve their own proposal. Ask a second manager or administrator to sign in and approve it.
-- *If a technician cannot start a chart-mode run because of* **Keep every required reference position bound to an eligible lot.** *→* Check that the **LRM** lot is **Active**, not **Expired**, and has an assigned value for the run's analyte and method.
+- *If a technician cannot start a chart-mode run because of* **Keep every required reference position bound to an eligible lot.** *→* Check that the **LRM** (laboratory reference material — your lab's own in-house check soil) lot is **Active**, not **Expired**, and has an assigned value for the run's analyte and method.
 
 ---
 
 ## For the QA Person
 
-- *Immutable reference values*: Assigned values on a reference material lot cannot be overwritten in place (**Assigned values cannot be changed. Correct them by adding a new revision.**). Adding a corrected revision (**Correct by new revision**) leaves all historical runs untouched.
-- *Drift review obligations*: Resolving a 4-1s or 10x signal under **QC review obligations** documents your investigation without retroactively altering the run's quality control verdict.
+- *Permanent reference values*: Assigned values on a reference material lot cannot be overwritten in place (**Assigned values cannot be changed. Correct them by adding a new revision.**). Adding a corrected revision (**Correct by new revision**) leaves all historical runs untouched.
+- *Drift review obligations*: Resolving a 4-1s or 10x signal under **QC review obligations** documents your investigation without changing the run's quality control verdict.

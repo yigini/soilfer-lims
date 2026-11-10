@@ -2,12 +2,12 @@
 
 ## What This Is For
 
-Use **Manager Task List** and the sample **Review** tab to assign pending tests to technicians, check submitted measurements and quality control results, choose the official **Reported value** across attempts, return questionable results for repeat testing, and give final sample approval.
+Use **Manager Task List** and the sample **Review** tab to assign pending tests to technicians, check submitted measurements and quality control results, choose the official **Reported value** (the final number printed on the report) across tries, return questionable results for repeat testing, and give final sample approval.
 
 | What do you need to do? | Open this task page |
 |---|---|
 | Assign new sample tests to bench technicians | [Assign Pending Tests to Technicians](../review/assign-work-to-technicians.md) |
-| Check submitted results, cross-parameter plausibility flags, and select the reported value | [Review Submitted Results and Choose the Reported Value](../review/review-and-select-reported-value.md) |
+| Check submitted results, cross-parameter plausibility flags, and select the final report number | [Review Submitted Results and Choose the Reported Value](../review/review-and-select-reported-value.md) |
 | Send a test back for a repeat check or give final approval to a completed sample | [Return a Test for Repeat or Give Final Sample Approval](../review/return-for-repeat-or-approve.md) |
 | Decide what to do when a batch fails quality control | [What to Do When a QC Run Fails (Batch Disposition & Bracket Repeats)](../qc/handle-failed-qc-batch.md) |
 | Issue, print, or share a PDF Certificate of Analysis | [Issue, Print, and Share a Certificate of Analysis](../review/issue-and-share-reports.md) |
@@ -30,8 +30,8 @@ Use **Manager Task List** and the sample **Review** tab to assign pending tests 
 2. If any batches appear under **QC Exceptions**, resolve those first so their samples are not blocked during review (see [What to Do When a QC Run Fails](../qc/handle-failed-qc-batch.md)).
 3. Click **Assign Work** to assign pending tests to your bench staff (see [Assign Pending Tests to Technicians](../review/assign-work-to-technicians.md)).
 4. Click **Review Submissions** and click **Review** on a sample card to open that sample on its **Review** tab.
-5. Check the **Cross-parameter plausibility** panel and any pending **Override requests** from the technician.
-6. Under **Reported value** for each submitted test, compare the recorded attempts, select **Report attempt**, **Report mean**, or **Not reportable**, and click **Save reported value**.
+5. Check the **Cross-parameter plausibility** panel and any pending **Override requests** (requests to accept unusual readings) from the technician.
+6. Under **Reported value** for each submitted test, compare the recorded tries, select **Report attempt** (use this measurement try on the report), **Report mean**, or **Not reportable**, and click **Save reported value** (lock in the final number for the report).
 7. If a batch had a quality control warning, enter your explanation in **QC acknowledgement reason (required)**, then click **Accept Item** (or **Accept** for all submitted results).
    *If a result needs to be re-measured, click **Return for correction** instead to open **Return for repeat testing**.*
 8. Once every test on the sample is **Accepted**, click **Final approve sample** (or approve it from the **Final Approvals** tab in **Manager Task List**).
@@ -48,7 +48,7 @@ Approved samples are ready for report generation on the sample's **Reports** tab
 ## If Something Goes Wrong
 
 - *If you see* **Choose a reported value before accepting this test.** *→* Open the **Reported value** panel on that test row, pick **Report attempt**, **Report mean**, or **Not reportable**, and click **Save reported value** first.
-- *If you see* **Failed batch QC requires a manager disposition.** *→* The analytical run failed quality control. Click **QA Dashboard** (or **QC Exceptions** in **Manager Task List**) to record a batch disposition first.
+- *If you see* **Failed batch QC requires a manager disposition.** (a manager must record a decision on the failed batch before results can be approved) *→* The analytical run failed quality control. Click **QA Dashboard** (or **QC Exceptions** in **Manager Task List**) to record a batch decision first.
 - *If you see* **Enter a QC acknowledgement reason before acceptance.** *→* Type a short note in **QC acknowledgement reason (required)** explaining why the warning is acceptable for this sample.
 - *If you see* **Accept and select SAND, SILT and CLAY before TEXTURE.** *→* Save the **Reported value** for **Sand**, **Silt**, and **Clay** first, and then save the **Texture (Sand/Silt/Clay)** selection.
 
@@ -56,8 +56,8 @@ Approved samples are ready for report generation on the sample's **Reports** tab
 
 ## For the QA Person
 
-- *Two-person independence*: When **Require a second reviewer** is active in **Policies**, the server blocks a user from accepting or approving any attempt they recorded themselves.
-- *Explicit reported value selection*: SoilFER LIMS never uses a hidden "latest attempt wins" rule. Every approved test binds to an audited **Reported value** selection (**Automatic selection**, **Report attempt**, **Report mean** within the method's **Repeatability limit**, or **Not reportable** with a mandatory reason).
+- *Two-person independence*: When **Require a second reviewer** is active in **Policies**, the server blocks a user from accepting or approving any try they recorded themselves.
+- *Explicit final report number selection*: SoilFER LIMS never uses a hidden "latest try wins" rule. Every approved test binds to an audited **Reported value** selection (**Automatic selection**, **Report attempt**, **Report mean** within the method's **Repeatability limit**, or **Not reportable** with a mandatory reason).
 - *Advisory cross-parameter checks*: The **Cross-parameter plausibility** panel checks internal soil chemistry consistency on matching moisture bases:
   - **Texture closure**: checks whether Sand + Silt + Clay sums to 100 % within your laboratory tolerance (default 2 %).
   - **Exchangeable bases / CEC** and **Base saturation**: flags when the sum of exchangeable calcium, magnesium, potassium, and sodium exceeds the configured CEC factor (default 1.1 times CEC) or maximum base saturation (default 100 %).

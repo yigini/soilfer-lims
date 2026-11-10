@@ -17,7 +17,7 @@ Check your reception handoff queue at the end of a session, place accepted sampl
 
 ## Steps
 
-1. Click **Sample Reception** in the left menu. Review the **Recent Receipts** and **Laboratory Operational Handoff** sections on the reception dashboard.
+1. Click **Sample Reception** in the left menu. Review the **Recent Receipts** (samples checked in recently) and **Laboratory Operational Handoff** sections on the reception dashboard.
    *You should see every sample you accepted today with its **Permanent Lab ID** and status **Accepted**.*
 2. Check each physical bag on your tray against the screen list. Make sure every bag has its printed barcode sticker attached.
 3. If you need to record which shelf or drying rack the tray is moving to right now:
@@ -44,5 +44,5 @@ Preparation technicians see the handed-over samples in **My Work** and **Workben
 
 ## For the QA Person
 
-- Physical custody is tracked continuously from the receiving officer (**Receiving Officer** and **Custody Carrier** at intake) through every shelf transfer logged via **Record storage movement**.
+- Physical responsibility for the sample is tracked continuously from the receiving officer (**Receiving Officer** and **Custody Carrier** (person who brought the samples) at intake) through every shelf transfer logged via **Record storage movement**.
 - Undoing an intake (**Undo intake**) is restricted to samples that have not started preparation or analysis, and is logged in the sample's permanent audit history.

@@ -22,7 +22,7 @@ Record the crushing, sieving (typically to under 2 mm fine earth), fine grinding
 2. In the **Work type:** dropdown at the top left, select **Sample Preparation**.
    *You should see all dried samples that are ready for sieving, grinding, and splitting.*
 3. Find your sample row (or use **Find sample ID...**).
-   *In the right-hand inspector, verify that **Drying Gate:** shows **✓ Completed** and that the row status badge says **Ready**.*
+   *In the right-hand detail panel, verify that **Drying Gate:** (drying step that must finish first) shows **✓ Completed** and that the row status badge says **Ready**.*
 4. Tick all three procedural checks in the **Operational Checklist** as you complete the physical work at the preparation bench:
    - **Sample identity and completed drying record verified**.
    - **Required preparation steps completed according to the applicable laboratory procedure**.
@@ -33,7 +33,7 @@ Record the crushing, sieving (typically to under 2 mm fine earth), fine grinding
    - Under **Grinding** (when fine grinding is required): enter **Ground to (mm)** (such as 0.5 or 0.15), **Mass before (g)**, **Mass after (g)**, **Started**, **Ended**, and **Equipment**.
    - Under **Splitting** (when riffle splitting is required): enter **Mass before (g)**, **Mass after (g)**, **Started**, **Ended**, and **Equipment**.
 6. Click **Confirm Complete**.
-   *You should see **Checklist Verified** with a receipt code, and **Preparation Gate:** in the inspector change to **✓ Completed**.*
+   *You should see **Checklist Verified** with a confirmation code, and **Preparation Gate:** (sieving and grinding step that must finish first) in the detail panel change to **✓ Completed**.*
 
 ---
 
@@ -52,5 +52,5 @@ As soon as both **Air Drying** and **Sample Preparation** are confirmed, the sam
 
 ## For the QA Person
 
-- Recording **Coarse fraction (g)** alongside **Mass before (g)** and **Mass after (g)** during **Sieving** allows the system to compute the coarse fragment percentage. It also preserves the exact sieve aperture (**Sieve (mm)**) and mill fineness (**Ground to (mm)**) on the preparation receipt.
+- Recording **Coarse fraction (g)** alongside **Mass before (g)** and **Mass after (g)** during **Sieving** allows the system to compute the coarse fragment percentage. It also preserves the exact sieve aperture (**Sieve (mm)**) and mill fineness (**Ground to (mm)**) on the saved preparation record.
 - Depending on the ordered methods and your laboratory's **Policies**, the system automatically displays and validates the required step boxes (**Sieving**, **Grinding**, **Splitting**).
