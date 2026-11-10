@@ -163,9 +163,9 @@ describe('Help System Full Acceptance & Release Verification', () => {
 
     test('published password guidance uses the installation administrator in every locale', async () => {
         const oldContact = ['GLOSOLAN', 'fao.org'].join('@');
-        const phrases = { en: 'system administrator', es: 'administrador de tu sistema',
-            'es-419': 'administrador de tu sistema', fr: 'administrateur système',
-            pt: 'administrador do seu sistema' };
+        const phrases = { en: 'platform administrator', es: 'administrador de la plataforma',
+            'es-419': 'administrador de la plataforma', fr: 'administrateur de la plateforme',
+            pt: 'administrador da plataforma' };
         const publication = await prisma.helpPublication.findFirst({
             where: { articleId: 'start-passwords', isCurrent: true }
         });
@@ -179,11 +179,11 @@ describe('Help System Full Acceptance & Release Verification', () => {
                 where: { revisionId_locale: { revisionId: publication.revisionId, locale } }
             });
             expect(published.reviewStatus).toBe('APPROVED');
-            expect(published.steps).toContain(phrase);
+            expect(JSON.parse(published.steps)).toEqual(article.steps);
             const served = await helpContentService.getArticleById('start-passwords',
                 { role: 'SUPER_ADMIN' }, locale, false);
             expect(JSON.stringify(served)).not.toContain(oldContact);
-            expect(JSON.stringify(served)).toContain(phrase);
+            expect(JSON.stringify(served.fields)).toContain(phrase);
         }
     });
 

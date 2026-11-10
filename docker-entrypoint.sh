@@ -51,6 +51,7 @@ SEED_FLAG="prisma/.seed_complete"
 if [ ! -d "prisma" ]; then
     SEED_FLAG=".seed_complete"
 fi
+CATALOGUE_SEED_PENDING="${SEED_FLAG}.catalogue_pending"
 
 # Guard existing installations: detect database state safely (Fail-Closed)
 EXISTING_USERS=0
@@ -84,6 +85,10 @@ if [ -s "$DB_FILE" ]; then
     SCHEMA_READY=$(node -e 'const r = JSON.parse(process.argv[1]); console.log(r.schemaReady ? 1 : 0);' "$INSPECT_JSON")
 
     if [ "$EXISTING_USERS" -gt 0 ] 2>/dev/null; then
+        if [ -f "$CATALOGUE_SEED_PENDING" ] && [ ! -f "$SEED_FLAG" ]; then
+            echo "FATAL: First-time catalogue setup did not complete. Review the initial seeding failure before starting the application." >&2
+            exit 1
+        fi
         touch "$SEED_FLAG" 2>/dev/null || true
     fi
 fi
@@ -97,8 +102,15 @@ fi
 # Step 2: Resumable initial seed (runs if not yet seeded and no users exist)
 if [ ! -f "$SEED_FLAG" ] && [ "$EXISTING_USERS" -eq 0 ]; then
     echo "🌱 Seeding initial administrator and laboratory (${DEPLOYMENT_MODE:-local} mode)..."
+    touch "$CATALOGUE_SEED_PENDING"
     node seed.js
-    touch "$SEED_FLAG" 2>/dev/null || true
+    echo "Loading the standard analysis catalogue for this new installation..."
+    if ! node seeds/units.js || ! node seeds/references.js || ! node seeds/catalogue.js --confirm; then
+        echo "FATAL: First-time catalogue seeding failed. Startup stopped." >&2
+        exit 1
+    fi
+    touch "$SEED_FLAG"
+    rm -f "$CATALOGUE_SEED_PENDING"
 fi
 
 # Guarded: Only run prisma db push on existing databases if explicitly requested

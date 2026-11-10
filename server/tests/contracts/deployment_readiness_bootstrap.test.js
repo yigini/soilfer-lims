@@ -220,6 +220,9 @@ node() {
         touch "${testDir.replace(/\\/g, '/')}/prisma/.seeded"
         return 0
     fi
+    if [ "$1" = "seeds/catalogue.js" ] && [ "$FAIL_CATALOGUE" = "1" ]; then
+        return 78
+    fi
     if [ "$1" = "-e" ]; then
         if echo "$2" | grep -q "better-sqlite3"; then
             if [ -f "${testDir.replace(/\\/g, '/')}/prisma/.seeded" ]; then
@@ -249,10 +252,10 @@ bash "${entryScript.replace(/\\/g, '/')}"
 `);
         fs.chmodSync(driverScript, '755');
 
-        function runDriver(failSeed) {
+        function runDriver(failSeed, failCatalogue = '0') {
             return cp.spawnSync(bashPath, [driverScript], {
                 cwd: testDir,
-                env: { ...process.env, FAIL_SEED: failSeed },
+                env: { ...process.env, FAIL_SEED: failSeed, FAIL_CATALOGUE: failCatalogue },
                 encoding: 'utf8'
             });
         }
@@ -271,6 +274,7 @@ bash "${entryScript.replace(/\\/g, '/')}"
         const secondTrace = fs.readFileSync(traceFile, 'utf8');
         expect(secondTrace).toMatch(/node seed\.js/); // Retried seed!
         expect(secondTrace).not.toMatch(/npx prisma db push/); // Did not re-push schema!
+        expect(secondTrace).toMatch(/node seed\.js\nnode seeds\/units\.js\nnode seeds\/references\.js\nnode seeds\/catalogue\.js --confirm/);
         fs.writeFileSync(traceFile, '');
 
         // Run 3: Subsequent normal restart on already-seeded database
@@ -279,6 +283,23 @@ bash "${entryScript.replace(/\\/g, '/')}"
         const thirdTrace = fs.readFileSync(traceFile, 'utf8');
         expect(thirdTrace).not.toMatch(/node seed\.js/); // Skipped seed!
         expect(thirdTrace).not.toMatch(/npx prisma db push/);
+        expect(thirdTrace).not.toMatch(/node seeds\/(units|references|catalogue)\.js/);
+
+        // Reset just the owned driver markers to simulate another fresh install.
+        fs.unlinkSync(path.join(testDir, 'prisma', '.seed_complete'));
+        fs.unlinkSync(path.join(testDir, 'prisma', '.seeded'));
+        fs.writeFileSync(traceFile, '');
+        const failedCatalogue = runDriver('0', '1');
+        expect(failedCatalogue.status).toBe(1);
+        expect(failedCatalogue.stderr).toContain('First-time catalogue seeding failed');
+        expect(fs.readFileSync(traceFile, 'utf8')).not.toMatch(/node index\.js/);
+
+        // The admin exists now. A restart must halt before serving a partial catalogue.
+        fs.writeFileSync(traceFile, '');
+        const interruptedRestart = runDriver('0');
+        expect(interruptedRestart.status).toBe(1);
+        expect(interruptedRestart.stderr).toContain('First-time catalogue setup did not complete');
+        expect(fs.readFileSync(traceFile, 'utf8')).not.toMatch(/node (seed\.js|seeds\/|index\.js)/);
     });
 
     test('docker-entrypoint.sh database inspection fails closed on corrupt or unreadable database', () => {

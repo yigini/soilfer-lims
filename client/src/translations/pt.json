@@ -2310,7 +2310,9 @@
       "namePlaceholder": "ex. Maria Silva",
       "emailPlaceholder": "name@example.org",
       "labScope": "Escopo do Laboratório",
-      "globalScope": "Nenhum laboratório específico (Global)",
+      "selectLab": "Selecione um laboratório",
+      "loadLabsFailed": "Não foi possível carregar o diretório de laboratórios.",
+      "prepareFailed": "Não foi possível preparar o convite.",
       "successTitle": "Convite Criado",
       "successDetails": "Um token de convite de uso único, verificado criptograficamente, foi gerado. Nenhuma senha padrão ou em texto simples é criada.",
       "activationLinkLabel": "Link de Ativação de Uso Único",
@@ -4068,6 +4070,7 @@
     "checksCount": "{checked}/{total} verificações"
   },
   "intakeRules": {
+    "loadFailed": "Não foi possível carregar as regras de receção.",
     "loading": "A carregar regras de receção…",
     "failureNotes": {
       "container": "Ex.: saco rasgado, tampa solta, fuga visível…",

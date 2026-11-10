@@ -31,6 +31,8 @@ const Users = () => {
 
     // Modals state
     const [showInviteModal, setShowInviteModal] = useState(false);
+    const [inviteLabs, setInviteLabs] = useState([]);
+    const [loadingInviteLabs, setLoadingInviteLabs] = useState(false);
     const [showAccessReviewModal, setShowAccessReviewModal] = useState(false);
     const [showRecoveryModal, setShowRecoveryModal] = useState(false);
     const [showSuspendModal, setShowSuspendModal] = useState(false);
@@ -53,6 +55,28 @@ const Users = () => {
     useEffect(() => {
         fetchUsers();
     }, [fetchUsers]);
+
+    const needsInviteLab = user?.role === 'SUPER_ADMIN' && !user.labId && user.isActive !== false && user.status !== 'INACTIVE';
+
+    const handleOpenInvite = async () => {
+        if (needsInviteLab) {
+            setLoadingInviteLabs(true);
+            try {
+                const { data } = await axios.get('/api/labs/directory');
+                setInviteLabs(data.filter(lab => lab.isActive === true));
+            } catch (err) {
+                showDialog({
+                    title: t('common.error', 'Error'),
+                    message: err.response?.data?.message || err.response?.data?.error || t('staffManagement.invite.loadLabsFailed'),
+                    type: 'error'
+                });
+                return;
+            } finally {
+                setLoadingInviteLabs(false);
+            }
+        }
+        setShowInviteModal(true);
+    };
 
     const handleImpersonate = async (userId) => {
         showDialog({
@@ -101,7 +125,8 @@ const Users = () => {
                 </div>
 
                 <button
-                    onClick={() => setShowInviteModal(true)}
+                    onClick={handleOpenInvite}
+                    disabled={loadingInviteLabs}
                     className="px-5 py-2.5 bg-sf-primary text-white rounded-xl font-bold text-xs hover:bg-sf-primary/90 transition shadow-md shadow-sf-primary/20 flex items-center gap-2 self-start sm:self-auto"
                 >
                     <Plus size={16} /> {t('users.inviteStaff', 'Invite Team Member')}
@@ -275,6 +300,7 @@ const Users = () => {
                     onClose={() => setShowInviteModal(false)}
                     onSuccess={() => fetchUsers()}
                     defaultLabId={user.labId}
+                    availableLabs={needsInviteLab ? inviteLabs : []}
                 />
             )}
 

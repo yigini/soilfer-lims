@@ -55,7 +55,7 @@ Use this one-page checklist before you receive your first real box of soil sampl
 
 - [ ] Open **Admin Panel** and click **Analysis Configuration**.
 - [ ] Under **Test Methods**, confirm that every soil parameter your laboratory will run during the pilot is **Active**. Check its **Reporting Unit**, **Plausible Minimum**, **Plausible Maximum**, and **Display Decimals**.
-- [ ] Under **Analysis Packages**, verify that your routine soil test bundles include the right parameters for reception clerks to select in one click.
+- [ ] Under **Analysis Packages**, click **Create Analysis Package** to create your lab's analysis packages. The standard GLOSOLAN analysis catalogue is loaded on install, and each laboratory creates its own packages for reception clerks to select in one click.
 - [ ] Open **Laboratory Methodology Defaults** and confirm the **Active Methodology** for each parameter in your laboratory, then click **Save Defaults**.
 - [ ] Open **Policies**, select each active analysis and method under **Analysis and method overrides**, and verify its **Versioned QC rules** with your QA Officer. Check **Blanks per batch**, **Duplicate interval**, **Laboratory reference materials per batch**, **Certified reference material interval**, and acceptance windows.
 - 👉 *Step-by-step guide:* [Switch On Analytical Methods, Calculations, and QC Rules](./enable-methods-and-qc-rules.md)

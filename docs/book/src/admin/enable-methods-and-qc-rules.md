@@ -32,11 +32,14 @@ Before reception staff can assign tests to incoming samples, your laboratory nee
 
 ---
 
-## Task B: Add or Review Standard Methods and Analysis Packages
+## Task B: Review Standard Methods and Create Your Lab's Analysis Packages
+
+After installation, the standard GLOSOLAN analysis catalogue is loaded, while each laboratory creates its own analysis packages in **Admin Panel** under **Analysis Configuration** (**Analysis Packages**).
 
 1. In **Master Analysis Catalogue**, click the **Configure** (or method count) button in the **Methods** column on any parameter row to open **Standard Methods for** that parameter.
 2. Check that your laboratory's SOP is listed. To add a new method, click **Add Analytical Methodology**, enter the **Method Name** and **Standard / Citation Reference (Optional)**, tick **Set as Laboratory Default Method** if applicable, and click **Save Method**.
-3. To group parameters into one-click intake bundles, click the **Analysis Packages** pill at the top of **Analysis Configuration** and add or update your laboratory's test packages.
+3. Click the **Analysis Packages** pill at the top of **Analysis Configuration** to open **Analysis Packages & Suites**.
+4. Click **Create Analysis Package** to open **New Analysis Package**, enter a **Package ID (Code)** and **Package Display Name**, tick your parameters under **Select Included Analytical Parameters**, and click **Save Package**. Reception clerks can now select your laboratory's packages in one click during intake.
 
 ---
 

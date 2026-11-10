@@ -8,7 +8,7 @@ import axios from 'axios';
 import BatchExceptionModal from './BatchExceptionModal';
 import ComplianceChecklist from './ComplianceChecklist';
 import IntakeContextFields from './IntakeContextFields';
-import useIntakeRules from './useIntakeRules';
+import useIntakeRules, { intakeRulesErrorText } from './useIntakeRules';
 import ManifestImportModal from './ManifestImportModal';
 import LabelPrintDialog from '../common/LabelPrintDialog';
 import { playSuccessChime, playErrorBuzz } from '../../utils/audioCues';
@@ -579,7 +579,7 @@ const BatchIntake = ({
             <section className="bg-sf-surface p-4 border rounded-xl space-y-4">
                 <h3 className="font-semibold">{t('intakeRules.batchObservations')}</h3>
                 <p>{t('intakeRules.batchHelp')}</p>
-                {intakeRulesFailed && <p role="alert">{t('intakeRules.unavailable')}</p>}
+                {intakeRulesFailed && <p role="alert">{intakeRulesErrorText(intakeRulesFailed, t)}</p>}
                 <ComplianceChecklist rules={intakeRules} value={defaults.checklist} onChange={checklist => setDefaults(previous => ({ ...previous, checklist }))} />
                 <IntakeContextFields rules={intakeRules} sampling={defaults.samplingDetails} setSampling={update => setDefaults(previous => ({ ...previous,
                     samplingDetails: typeof update === 'function' ? update(previous.samplingDetails) : update }))} />

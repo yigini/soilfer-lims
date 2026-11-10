@@ -10,7 +10,7 @@ function elements(tree, predicate) {
     if (!tree || typeof tree !== 'object') return [];
     return [...(predicate(tree) ? [tree] : []), ...elements(tree.props?.children, predicate)];
 }
-function harness(page, { offline, axios = {}, search = '' } = {}) {
+function harness(page, { offline, axios = {}, search = '', user = { role: 'SAMPLE_RECEPTION' }, realRules = false } = {}) {
     const states = [], effects = [], navigate = jest.fn(), showDialog = jest.fn();
     let cursor = 0;
     const hooks = { ...React, useEffect: (fn, deps) => effects.push({ fn, deps }), useMemo: fn => fn(),
@@ -19,10 +19,17 @@ function harness(page, { offline, axios = {}, search = '' } = {}) {
             if (!(index in states)) states[index] = typeof initial === 'function' ? initial() : initial;
             return [states[index], update => { states[index] = typeof update === 'function' ? update(states[index]) : update; }];
         } };
+    const rulesModule = { exports: {} };
+    if (realRules) {
+        const rulesPath = path.resolve(__dirname, '../../../client/src/components/reception/useIntakeRules.js');
+        vm.runInNewContext(esbuild.transformSync(fs.readFileSync(rulesPath, 'utf8'), { format: 'cjs' }).code, {
+            module: rulesModule, exports: rulesModule.exports, require: name => name === 'react' ? hooks : axios
+        });
+    }
     const module = { exports: {} }, filename = path.resolve(__dirname, `../../../client/src/pages/${page}.jsx`);
     vm.runInNewContext(esbuild.transformSync(fs.readFileSync(filename, 'utf8'), { loader: 'jsx', format: 'cjs' }).code, {
         module, exports: module.exports, console, navigator: {}, URLSearchParams, setTimeout, clearTimeout,
-        window: { addEventListener() {}, removeEventListener() {} }, document: {}, localStorage: { getItem: () => null },
+        window: { addEventListener() {}, removeEventListener() {} }, document: {}, localStorage: { getItem: () => null, removeItem() {} },
         require: name => {
             if (name === 'react') return hooks;
             if (name === 'axios') return axios;
@@ -30,11 +37,12 @@ function harness(page, { offline, axios = {}, search = '' } = {}) {
             if (name === 'lucide-react') return new Proxy({}, { get: () => () => null });
             if (name === 'clsx') return (...classes) => classes.filter(Boolean).join(' ');
             if (name.includes('LanguageContext')) return { useLanguage: () => ({ t: (_, fallback) => typeof fallback === 'string' ? fallback : '' }) };
-            if (name.includes('AuthContext')) return { useAuth: () => ({ user: { role: 'SAMPLE_RECEPTION' }, token: 'auth-013' }) };
+            if (name.includes('AuthContext')) return { useAuth: () => ({ user, token: 'auth-013' }) };
             if (name.includes('DialogContext')) return { useDialog: () => ({ showDialog }) };
             if (name.includes('AnalysisCatalogueContext')) return { useAnalysisNames: () => code => code };
             if (name.includes('offlineDb')) return { getOfflineSample: offline };
-            if (name.includes('useIntakeRules')) return () => ({ rules: intakeRulesFixture(false), loading: false, error: '' });
+            if (name.includes('useIntakeRules')) return realRules ? rulesModule.exports
+                : () => ({ rules: intakeRulesFixture(false), loading: false, error: '' });
             if (name.includes('coordinateResolver')) return { resolveCoordinates: () => ({ isRecorded: false }) };
             if (name.includes('mapConfig')) return { parseCoordinates: () => null };
             if (name.includes('audioCues')) return new Proxy({}, { get: () => () => {} });
@@ -91,6 +99,44 @@ describe('Audit 0.13: scan and reception callers', () => {
         expect(axios.get).toHaveBeenCalledWith('/api/samples/lookup', { params: { code: 'database-013' }, headers: { Authorization: 'Bearer auth-013' } });
         expect(h.showDialog).not.toHaveBeenCalled();
     });
+    test('global walk-in reception sends the selected active lab and renders the rules API error', async () => {
+        const axios = {
+            get: jest.fn(url => url === '/api/labs/directory'
+                ? Promise.resolve({ data: [{ id: 'active', name: 'Active', code: 'A', isActive: true },
+                    { id: 'paused', name: 'Paused', code: 'P', isActive: false }] })
+                : Promise.reject({ message: 'Raw transport error',
+                    response: { data: { code: 'RULES_TEST', message: 'The rules API rejected this request.' } } })),
+            post: jest.fn().mockResolvedValue({ data: { id: 'synthetic-draft' } })
+        };
+        const h = harness('Reception', { axios, realRules: true, user: { role: 'SUPER_ADMIN', labId: null, username: 'synthetic' } });
+        const findButton = (tree, label) => elements(tree, node => node.type === 'button'
+            && elements(node, child => Array.isArray(child.props?.children)
+                ? child.props.children.includes(label) : child.props?.children === label).length)[0];
+        findButton(h.render(), 'Walk-in Sample').props.onClick();
+        h.render();
+        h.effects.find(effect => effect.fn.toString().includes('/api/labs/directory')).fn();
+        h.effects.find(effect => effect.fn.toString().includes('/api/reception/intake-rules')).fn();
+        await settle();
+        let tree = h.render();
+        const picker = elements(tree, node => node.props?.id === 'walk-in-receiving-lab')[0];
+        expect(elements(picker, node => node.type === 'option').map(node => node.props.value)).toEqual(['', 'active']);
+        expect(findButton(tree, 'Save Draft').props.disabled).toBe(true);
+        expect(axios.get).not.toHaveBeenCalledWith('/api/reception/intake-rules', expect.anything());
+        picker.props.onChange({ target: { value: 'active' } });
+
+        h.render();
+        h.effects.find(effect => effect.fn.toString().includes('/api/reception/intake-rules')).fn();
+        await settle();
+        tree = h.render();
+        expect(axios.get).toHaveBeenCalledWith('/api/reception/intake-rules',
+            { params: expect.objectContaining({ isWalkIn: true, assignedLab: 'active' }) });
+        expect(elements(tree, node => node.props?.role === 'alert').map(node => node.props.children))
+            .toContain('The rules API rejected this request. (RULES_TEST)');
+        await findButton(tree, 'Save Draft').props.onClick();
+        expect(axios.post).toHaveBeenCalledWith('/api/reception/intake',
+            expect.objectContaining({ assignedLab: 'active', isWalkIn: true, isDraft: true }));
+    });
+
     test('lookup messages exist in every shipped client locale', () => {
         for (const locale of ['en', 'es', 'es-419', 'fr', 'pt']) {
             const messages = require(`../../../client/src/translations/${locale}.json`).sampleLookup;

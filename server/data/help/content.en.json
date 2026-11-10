@@ -353,7 +353,7 @@
               "expected": "Your password is updated and must be different from your previous password."
             },
             {
-              "action": "If sign-in fails after several wrong attempts or you forget your password, wait a short time before trying again, or click Forgot password? and contact your Laboratory Manager. For manager or administrator access, contact your system administrator through your organization's usual support channel.",
+              "action": "If sign-in fails after several wrong attempts or you forget your password, wait a short time before trying again, or click Forgot password? and contact your Laboratory Manager.",
               "expected": "After a brief pause you can sign in again with the right password, or an administrator can issue a new temporary password from Laboratory Staff."
             }
           ]
@@ -373,7 +373,7 @@
         [
           "Reset Password",
           "Administrator password reset in Laboratory Staff",
-          "Staff ask their Laboratory Manager for a reset; managers and administrators should contact their system administrator through their organization's usual support channel."
+          "Staff ask their Laboratory Manager for a reset; managers can contact their platform administrator if locked out."
         ]
       ],
       "example": "Sign in with a temporary password, complete the Security Update Required dialog with a new 12-character password, click Log In Again, and sign in to your laboratory workspace.",
@@ -395,8 +395,7 @@
       "steps": [
         "Open the sign-in screen, enter your Username or ID and your temporary password, and click Secure Sign In. (Expected: The Security Update Required dialog opens immediately and asks you to set a personal password before opening any lab screens.)",
         "Enter your Current Temporary Password, type a New Private Password of at least 12 characters, confirm the new password, and click Update & Access System. (Expected: A Password Changed confirmation appears; click Log In Again and sign in with your new personal password.)",
-        "To change your own password later, open My Profile, enter your current password and a new password of at least 12 characters, and click Save Changes. (Expected: Your password is updated and must be different from your previous password.)",
-        "If sign-in fails after several wrong attempts or you forget your password, wait a short time before trying again, or ask your Laboratory Manager to reset it in Laboratory Staff. For manager or administrator access, contact your system administrator through your organization's usual support channel. (Expected: After a brief pause you can sign in again, or use the new temporary password from your administrator to set a new 12-character password.)"
+        "To change your own password later, open My Profile, enter your current password and a new password of at least 12 characters, and click Save Changes. (Expected: Your password is updated and must be different from your previous password.)"
       ],
       "caution": "After several wrong attempts your account is paused for a short time. Wait a few minutes before trying again, or ask your Laboratory Manager to reset your password in Laboratory Staff.",
       "related": [

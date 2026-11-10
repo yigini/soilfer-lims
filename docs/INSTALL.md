@@ -114,6 +114,16 @@ Sign in as the initial administrator, complete the required password change, the
 configure the laboratory and its staff. Set the installation's contact address in
 Branding settings; contact links stay empty until the administrator supplies one.
 
+A new database is initialized with the standard GLOSOLAN analysis catalogue,
+including 176 analyses and 467 methodologies with their units and references.
+Analysis bundles are configured by each laboratory. Before the first sample
+reception, review the available analyses and create any bundles your laboratory
+needs in **Admin Panel → Lab Configuration → Analyses & Methods**.
+
+Startup stops if initial catalogue loading fails. Review the first startup error
+before completing setup. Starting an existing installation leaves its catalogue
+in place.
+
 ## 5. Configure certificate renewal
 
 Standalone Certbot needs port 80 briefly during renewal. Save hooks that stop and
