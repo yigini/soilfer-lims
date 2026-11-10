@@ -342,7 +342,12 @@ const SamplesTable = ({ data, sort, order, onSort, selected = [], onSelect, onSe
     const handleSort = (field) => { const newOrder = sort === field && order === 'asc' ? 'desc' : 'asc'; onSort(field, newOrder); };
     const SortIcon = ({ field }) => { if (sort !== field) return null; return order === 'asc' ? <ArrowUp size={12} className="inline ml-1" /> : <ArrowDown size={12} className="inline ml-1" />; };
     const handleRowClick = (e, id) => { if (e.target.closest('button') || e.target.closest('input[type="checkbox"]')) return; navigate(`/samples/${id}`); };
-    const handleRowKeyDown = (e, id) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); navigate(`/samples/${id}`); } };
+    const handleRowKeyDown = (e, id) => {
+        if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) {
+            e.preventDefault();
+            navigate(`/samples/${id}`);
+        }
+    };
 
     return (
         <>
@@ -350,7 +355,7 @@ const SamplesTable = ({ data, sort, order, onSort, selected = [], onSelect, onSe
                 <table className="w-full text-sm text-left min-w-[700px]">
                     <thead className="text-[10px] font-black uppercase tracking-widest text-emerald-800 dark:text-emerald-400 bg-emerald-50/30 dark:bg-emerald-950/20 border-b border-sf-divider">
                         <tr>
-                            <th className="p-4 w-4"><input type="checkbox" className="rounded border-sf-divider text-emerald-600 focus:ring-emerald-500" onChange={(e) => onSelectAll(e.target.checked)} checked={data.length > 0 && selected.length === data.length} /></th>
+                            <th className="p-4 w-4"><input type="checkbox" className="rounded border-sf-divider text-emerald-600 focus:ring-emerald-500" onChange={(e) => onSelectAll(e.target.checked)} aria-label={t('bulkAssignment.selectPage')} checked={data.length > 0 && data.every(sample => selected.includes(sample.id))} /></th>
                             <th className="px-4 py-4 cursor-pointer hover:bg-emerald-100/50 transition-colors" onClick={() => handleSort('labId')}>{t('samples.table.id', 'ID')} <SortIcon field="labId" /></th>
                             <th className="px-4 py-4 cursor-pointer hover:bg-emerald-100/50 transition-colors" onClick={() => handleSort('projectCode')}>{t('samples.table.project', 'Project')} <SortIcon field="projectCode" /></th>
                             <th className="px-4 py-4 cursor-pointer hover:bg-emerald-100/50 transition-colors" onClick={() => handleSort('status')}>{t('samples.table.state', 'State')} <SortIcon field="status" /></th>
@@ -387,7 +392,7 @@ const SamplesTable = ({ data, sort, order, onSort, selected = [], onSelect, onSe
                                     className={`border-b border-sf-divider hover:bg-sf-canvas cursor-pointer transition-all duration-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-inset ${selected.includes(sample.id) ? 'bg-emerald-50/30 dark:bg-emerald-950/20' : ''} ${isDeleting ? 'line-through opacity-40 bg-red-50 dark:bg-red-900/10 scale-95' : ''}`}>
 
                                     {/* Checkbox */}
-                                    <td className="p-4 w-4"><input type="checkbox" className="rounded border-sf-divider text-emerald-600 focus:ring-emerald-500" checked={selected.includes(sample.id)} onChange={(e) => onSelect(sample.id, e.target.checked)} disabled={isDeleting} /></td>
+                                    <td className="p-4 w-4"><input type="checkbox" className="rounded border-sf-divider text-emerald-600 focus:ring-emerald-500" aria-label={t('bulkAssignment.selectSample', { sample: sample.labId || sample.originalId || sample.id })} checked={selected.includes(sample.id)} onChange={(e) => onSelect(sample.id, e.target.checked)} disabled={isDeleting} /></td>
 
                                     {/* ID */}
                                     <td className="px-4 py-4 font-medium text-sf-text whitespace-nowrap">

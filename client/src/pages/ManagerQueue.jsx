@@ -9,8 +9,10 @@ import {
 } from 'lucide-react';
 import { useRealtimeData, formatLastUpdated } from '../hooks/useRealtimeData';
 import { useLanguage } from '../context/LanguageContext';
+import { useAuth } from '../context/AuthContext';
 import { useNotifications } from '../context/NotificationContext';
 import BatchInspectionModal from '../components/qc/BatchInspectionModal';
+import BulkAssignmentDialog from '../components/sample/BulkAssignmentDialog';
 
 const QUEUE_Tabs = {
     EXCEPTIONS: 'exceptions',
@@ -40,13 +42,20 @@ const ManagerQueue = () => {
     const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
     const { t } = useLanguage();
+    const { hasPermission } = useAuth();
 
     const laneParam = (searchParams.get('lane') || searchParams.get('tab') || '').toLowerCase();
     const initialTab = Object.values(QUEUE_Tabs).includes(laneParam) ? laneParam : QUEUE_Tabs.INTAKE;
     const [activeTab, setActiveTab] = useState(initialTab);
     const [userSelected, setUserSelected] = useState(Boolean(laneParam));
+    const [selectedSamples, setSelectedSamples] = useState([]);
+    const [assignmentSelection, setAssignmentSelection] = useState(null);
+    const canAssignBulk = activeTab === QUEUE_Tabs.ASSIGN && hasPermission('ASSIGN_WORK');
     const selectedAnalysis = searchParams.get('analysis') || '';
     const selectedLabId = (searchParams.get('labId') || searchParams.get('labs') || '').trim();
+    useEffect(() => {
+        setSelectedSamples([]);
+    }, [activeTab, selectedAnalysis, selectedLabId]);
     const activeRequestIdRef = useRef(0);
     const isMountedRef = useRef(true);
 
@@ -455,10 +464,16 @@ const ManagerQueue = () => {
                         </div>
                     )}
 
+                    {canAssignBulk && data.length > 0 && <button type="button"
+                        disabled={!selectedSamples.length || loading}
+                        className="mb-3 rounded bg-sf-primary px-3 py-2 text-sm font-semibold text-white disabled:opacity-50"
+                        onClick={() => setAssignmentSelection({ sampleIds: selectedSamples })}>
+                        {t('bulkAssignment.assignSelected', { count: selectedSamples.length })}
+                    </button>}
+
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                        {data.map(item => (
-                            <QueueCard
-                                key={item.id}
+                        {data.map(item => {
+                            const card = <QueueCard
                                 item={item}
                                 type={activeTab}
                                 navigate={navigate}
@@ -468,8 +483,20 @@ const ManagerQueue = () => {
                                     setSelectedBatchId(batchId);
                                     setIsInspectionOpen(true);
                                 }}
-                            />
-                        ))}
+                            />;
+                            if (!canAssignBulk) return <React.Fragment key={item.id}>{card}</React.Fragment>;
+                            const id = item.sampleId || item.id;
+                            return <div key={item.id} className="flex flex-col gap-2">
+                                <label className="flex items-center gap-2 text-sm">
+                                    <input type="checkbox" checked={selectedSamples.includes(id)} onChange={event => {
+                                        const checked = event.target.checked;
+                                        setSelectedSamples(previous => checked ? [...new Set([...previous, id])] : previous.filter(value => value !== id));
+                                    }} />
+                                    {t('bulkAssignment.selectSample', { sample: item.labId || item.originalId || id })}
+                                </label>
+                                {card}
+                            </div>;
+                        })}
                     </div>
                 </div>
 
@@ -498,6 +525,11 @@ const ManagerQueue = () => {
                     </div>
                 )}
             </div>
+
+            {assignmentSelection && canAssignBulk && <BulkAssignmentDialog
+                selection={assignmentSelection} initialAnalysis={selectedAnalysis}
+                onClose={() => setAssignmentSelection(null)}
+                onAssigned={() => { setSelectedSamples([]); fetchQueueData(meta.page); refreshLive(); }} />}
 
             <BatchInspectionModal
                 batchId={selectedBatchId}

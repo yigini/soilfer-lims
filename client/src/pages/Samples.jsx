@@ -8,6 +8,7 @@ import SamplesHeader from '../components/samples/SamplesHeader';
 import SamplesFilterBar from '../components/samples/SamplesFilterBar';
 import SamplesFilterDrawer from '../components/samples/SamplesFilterDrawer';
 import SamplesTable from '../components/samples/SamplesTable';
+import BulkAssignmentDialog from '../components/sample/BulkAssignmentDialog';
 import { ChevronLeft, ChevronRight, AlertTriangle, X, Printer, Trash2 } from 'lucide-react';
 import LabelPrintDialog from '../components/common/LabelPrintDialog';
 import ExportModal from '../components/common/ExportModal';
@@ -62,6 +63,7 @@ const Samples = () => {
     // UI State
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [selected, setSelected] = useState([]);
+    const [assignmentSelection, setAssignmentSelection] = useState(null);
     const [options, setOptions] = useState({
         projects: [], countries: [], labs: []
     });
@@ -86,19 +88,15 @@ const Samples = () => {
         });
     }, [facets]);
 
+    const getSampleParams = useCallback((page, limit) => {
+        const params = { page, limit, sort, order, search, view, ...filters };
+        return Object.fromEntries(Object.entries(params).filter(([, value]) => value));
+    }, [sort, order, search, view, filters]);
+
     const fetchData = useCallback(async () => {
         setLoading(true);
         try {
-            const params = {
-                page: meta.page,
-                limit: meta.limit,
-                sort,
-                order,
-                search,
-                view,
-                ...filters
-            };
-            Object.keys(params).forEach(key => !params[key] && delete params[key]);
+            const params = getSampleParams(meta.page, meta.limit);
 
             const res = await axios.get('/api/samples', {
                 params,
@@ -113,7 +111,7 @@ const Samples = () => {
         } finally {
             setLoading(false);
         }
-    }, [token, meta.page, meta.limit, sort, order, search, view, filters]);
+    }, [token, meta.page, meta.limit, getSampleParams]);
 
     // Synchronize component state when URL search parameters change (e.g. notification deep link navigation)
     useEffect(() => {
@@ -504,6 +502,21 @@ const Samples = () => {
                 views={facets.views}
             />
 
+            {hasPermission('ASSIGN_WORK') && (
+                <div className="mb-3 flex flex-wrap items-center gap-3">
+                    <button type="button" disabled={!selected.length || loading}
+                        className="rounded bg-sf-primary px-3 py-2 text-sm font-semibold text-white disabled:opacity-50"
+                        onClick={() => setAssignmentSelection({ sampleIds: selected })}>
+                        {t('bulkAssignment.assignSelected', { count: selected.length })}
+                    </button>
+                    <button type="button" disabled={!meta.total || loading}
+                        className="rounded border border-sf-divider px-3 py-2 text-sm font-semibold disabled:opacity-50"
+                        onClick={() => setAssignmentSelection({ sampleQuery: getSampleParams(1, 100) })}>
+                        {t('bulkAssignment.selectFiltered')}
+                    </button>
+                </div>
+            )}
+
             <SamplesTable
                 data={data}
                 sort={sort}
@@ -518,6 +531,10 @@ const Samples = () => {
                 onPrintLabel={(sample) => setPrintTarget(sample)}
                 loading={loading}
             />
+
+            {assignmentSelection && hasPermission('ASSIGN_WORK') && <BulkAssignmentDialog
+                selection={assignmentSelection} onClose={() => setAssignmentSelection(null)}
+                onAssigned={() => { setSelected([]); fetchData(); }} />}
 
             <LabelPrintDialog
                 isOpen={!!printTarget}

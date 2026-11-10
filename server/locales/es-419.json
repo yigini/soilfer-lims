@@ -2335,5 +2335,9 @@
     "recordProblem": "Registrar un problema",
     "problemDescription": "Describa el problema *",
     "noProblemPhotos": "Aún no hay fotos del problema adjuntas."
+  },
+  "bulkAssignment": {
+    "notificationTitle": "Nueva asignación de trabajo",
+    "notificationBody": "Tareas asignadas por {name}: {count}. Abre Mi trabajo para ver las tareas."
   }
 }
