@@ -434,7 +434,7 @@
               "expected": "Vê quais as amostras que precisam de Secagem ao ar ou Preparação de amostras e quais as que estão prontas para análise de bancada."
             },
             {
-              "action": "Conclua primeiro as listas de verificação necessárias de secagem e crivagem. Clique em Confirmar conclusão. Depois abra a folha de análise ou clique em Nova Corrida Analítica.",
+              "action": "Conclua primeiro as listas de verificação necessárias de secagem e crivagem. Clique em Confirmar que o trabalho está concluído. Depois abra a folha de análise ou clique em Nova Corrida Analítica.",
               "expected": "A preparação confirmada desbloqueia as linhas de ensaio para que possa digitar ou colar resultados de amostras e leituras de controlo de qualidade."
             },
             {
@@ -452,7 +452,7 @@
         ],
         [
           "Lista de verificação confirmada",
-          "Selo verde de comprovativo apresentado após clicar em Confirmar conclusão na secagem ou preparação",
+          "Selo verde de comprovativo apresentado após clicar em Confirmar que o trabalho está concluído na secagem ou preparação",
           "Confirma que a preparação pré-analítica está concluída e que os ensaios de bancada podem começar."
         ],
         [
@@ -478,7 +478,7 @@
       ],
       "steps": [
         "Abra Meu trabalho ou Workbench. Verifique as tarefas que lhe foram atribuídas para hoje. (Esperado: Vê quais as amostras que precisam de Secagem ao ar ou Preparação de amostras e quais as que estão prontas para análise de bancada.)",
-        "Conclua primeiro as listas de verificação necessárias de secagem e crivagem. Clique em Confirmar conclusão. Depois abra a folha de análise ou clique em Nova Corrida Analítica. (Esperado: A preparação confirmada desbloqueia as linhas de ensaio para que possa digitar ou colar resultados de amostras e leituras de controlo de qualidade.)",
+        "Conclua primeiro as listas de verificação necessárias de secagem e crivagem. Clique em Confirmar que o trabalho está concluído. Depois abra a folha de análise ou clique em Nova Corrida Analítica. (Esperado: A preparação confirmada desbloqueia as linhas de ensaio para que possa digitar ou colar resultados de amostras e leituras de controlo de qualidade.)",
         "Clique em Rever conclusão para registar os resultados verificados e. Abra Pronto a submeter. Clique em Enviar. (Esperado: Os resultados registados passam para Enviados e concluídos e aparecem na Lista de tarefas do revisor.)"
       ],
       "caution": "Guardar um rascunho na folha de trabalho não envia os resultados ao gerente. Conclua sempre Rever conclusão e Pronto a submeter no final de uma corrida.",
@@ -514,7 +514,7 @@
           "title": "1. Registo de campo e localização de amostras",
           "steps": [
             {
-              "action": "Abra Recepção de amostras, escolha Amostra de projeto, Sem agendamento / Externo ou Lote de remessa / manifesto e digitalize ou digite o ID do saco em 1. Identificação.",
+              "action": "Abra Recepção de amostras, escolha Amostra de projeto, Sem agendamento / Externo ou Caixa de entrega de amostras e digitalize ou digite o ID do saco em 1. Identificação.",
               "expected": "Se a amostra tiver sido pré-registada a partir de um levantamento de campo, o estado mostra Esperado e os detalhes de campo são carregados automaticamente."
             }
           ]
@@ -571,7 +571,7 @@
         "server/config/roles.js"
       ],
       "steps": [
-        "Abra Recepção de amostras, escolha Amostra de projeto, Sem agendamento / Externo ou Lote de remessa / manifesto e digitalize ou digite o ID do saco em 1. Identificação. (Esperado: Se a amostra tiver sido pré-registada a partir de um levantamento de campo, o estado mostra Esperado e os detalhes de campo são carregados automaticamente.)",
+        "Abra Recepção de amostras, escolha Amostra de projeto, Sem agendamento / Externo ou Caixa de entrega de amostras e digitalize ou digite o ID do saco em 1. Identificação. (Esperado: Se a amostra tiver sido pré-registada a partir de um levantamento de campo, o estado mostra Esperado e os detalhes de campo são carregados automaticamente.)",
         "Pese o saco de solo e preencha 2. Condição verificando Recipiente Intacto / Selado e Quantidade de Amostra Suficiente (~500g). (Esperado: Qualquer saco danificado ou com peso baixo é sinalizado para que possa adicionar uma nota de condição, colocar o saco em quarentena ou rejeitá-lo.)",
         "Verifique o pacote de ensaios solicitado em 3. Análises, abra 4. Custódia. Clique em Concluir Recepção (ou Aceitar e imprimir etiqueta). (Esperado: O estado da amostra passa de Esperado para Aceito, as etiquetas de código de barras são impressas e as tarefas de secagem abrem-se no Workbench.)"
       ],
@@ -687,7 +687,7 @@
       "quick": "Abra Projetos para ver quantas amostras do seu projeto estão como Esperado, Aceito, Processando, Enviado ou Aprovado e saber a que função pertence o passo seguinte.",
       "before": [
         "Confirme que a sua conta de utilizador tem acesso ao projeto e ao laboratório na barra superior.",
-        "Tenha à mão o código do projeto ou a lista de remessa ao filtrar grandes campanhas de amostragem."
+        "Tenha à mão o código do projeto ou a lista da caixa de entrega ao filtrar grandes campanhas de amostragem."
       ],
       "sections": [
         {
@@ -758,7 +758,7 @@
       "category": "start",
       "kind": "guide",
       "title": "Inspecionar o trabalho do laboratório sem o alterar",
-      "summary": "Inspecione evidências de amostras, cartas de controlo de qualidade, não conformidades e registos de auditoria em modo de leitura.",
+      "summary": "Inspecione evidências de amostras, cartas de controlo de qualidade, registos de problemas e registos de auditoria em modo de leitura.",
       "roles": [
         "ALL"
       ],
@@ -783,11 +783,11 @@
               "expected": "Vê o histórico completo da condição na receção, comprovativos de secagem e crivagem, tentativas de medição e movimentos de armazenamento."
             },
             {
-              "action": "Abra o Painel de QA para inspecionar Cartas de controlo, registos de Não conformidade, rondas de Ensaios de Proficiência e o Registo de auditoria.",
+              "action": "Abra o Painel de QA para inspecionar Cartas de controlo, Registos de problemas, rondas de Ensaios de Proficiência e o Registo de auditoria.",
               "expected": "Cada verificação de controlo de qualidade, decisão sobre lote reprovado e alteração de configuração é apresentada indicando quem a realizou, quando e porquê."
             },
             {
-              "action": "Abra Relatórios para comparar o Certificado de análise em estado Atuais com quaisquer revisões marcadas como Retirado ou Substituídos.",
+              "action": "Abra Relatórios para comparar o Certificado de análise em estado Atuais com quaisquer revisões marcadas como Retirado ou Substituído por uma versão mais recente.",
               "expected": "Pode verificar o motivo exato e o aprovador de qualquer emenda efetuada após a emissão de um relatório."
             }
           ]
@@ -805,12 +805,12 @@
           "Rastreia todas as entregas desde a receção até ao armazenamento em arquivo e descarte."
         ],
         [
-          "Não conformidade",
+          "Registos de problemas",
           "Registo de incidentes de qualidade e ações corretivas no Painel de QA",
           "Associa corridas reprovadas ou entregas danificadas a investigações de causa raiz."
         ]
       ],
-      "example": "Rastreie a amostra DEMO-001 desde o seu Certificado de análise em Relatórios até aos registos de bancada da Tentativa 1 e Tentativa 2 e ao registo associado de Não conformidade no Painel de QA.",
+      "example": "Rastreie a amostra DEMO-001 desde o seu Certificado de análise em Relatórios até aos registos de bancada da Tentativa n.º 1 e Tentativa n.º 2 e ao Registo de problema associado no Painel de QA.",
       "success": "Verificou toda a cadeia de evidências de uma amostra ou relatório sem alterar quaisquer registos do laboratório.",
       "nextActor": "Oficial de Qualidade e Auditoria ou Gerente de Laboratório (se uma constatação de auditoria exigir acompanhamento)",
       "problems": [
@@ -827,8 +827,8 @@
       ],
       "steps": [
         "Abra Registo de amostras, pesquise o ID da amostra. Inspecione os separadores Visão geral, Trabalhos e resultados e Cadeia de custódia. (Esperado: Vê o histórico completo da condição na receção, comprovativos de secagem e crivagem, tentativas de medição e movimentos de armazenamento.)",
-        "Abra o Painel de QA para inspecionar Cartas de controlo, registos de Não conformidade, rondas de Ensaios de Proficiência e o Registo de auditoria. (Esperado: Cada verificação de controlo de qualidade, decisão sobre lote reprovado e alteração de configuração é apresentada indicando quem a realizou, quando e porquê.)",
-        "Abra Relatórios para comparar o Certificado de análise em estado Atuais com quaisquer revisões marcadas como Retirado ou Substituídos. (Esperado: Pode verificar o motivo exato e o aprovador de qualquer emenda efetuada após a emissão de um relatório.)"
+        "Abra o Painel de QA para inspecionar Cartas de controlo, Registos de problemas, rondas de Ensaios de Proficiência e o Registo de auditoria. (Esperado: Cada verificação de controlo de qualidade, decisão sobre lote reprovado e alteração de configuração é apresentada indicando quem a realizou, quando e porquê.)",
+        "Abra Relatórios para comparar o Certificado de análise em estado Atuais com quaisquer revisões marcadas como Retirado ou Substituído por uma versão mais recente. (Esperado: Pode verificar o motivo exato e o aprovador de qualquer emenda efetuada após a emissão de um relatório.)"
       ],
       "caution": "As contas de auditoria são só de leitura por conceção, permitindo inspecionar ecrãs ativos em segurança sem alterar dados.",
       "related": [
@@ -885,9 +885,9 @@
           "Use sempre a versão atual do relatório para recomendações agronómicas."
         ],
         [
-          "Substituídos",
+          "Substituído por uma versão mais recente",
           "Selo que indica um relatório antigo que foi substituído por uma versão emendada",
-          "Não utilize um PDF marcado como Substituídos. Transfira antes a revisão mais recente marcada como Atuais."
+          "Não utilize um PDF marcado como Substituído por uma versão mais recente. Transfira antes a revisão mais recente marcada como Atuais."
         ],
         [
           "Retirado",
@@ -915,7 +915,7 @@
         "Abra Relatórios (Relatórios de Resultados) e procure os relatórios marcados como Atuais. (Esperado: Apenas as amostras aprovadas com Certificados de análise emitidos aparecem disponíveis para transferência.)",
         "Clique no botão de transferência num relatório marcado como Atuais para guardar o PDF oficial do Certificado de análise. (Esperado: O PDF abre-se com os identificadores da amostra, métodos de ensaio, unidades, observações de qualidade e código QR de verificação.)"
       ],
-      "caution": "Se um PDF transferido anteriormente for mais tarde marcado como Retirado ou Substituídos, substitua-o de imediato pela nova revisão marcada como Atuais.",
+      "caution": "Se um PDF transferido anteriormente for mais tarde marcado como Retirado ou Substituído por uma versão mais recente, substitua-o de imediato pela nova revisão marcada como Atuais.",
       "related": [
         "start-first-login",
         "quality-support"
@@ -1065,7 +1065,7 @@
             },
             {
               "action": "Quando tudo estiver pronto, clique em Concluir Recepção (ou Aceitar e imprimir etiqueta) (ou em Aceitar com nota de condição, Colocar amostra em quarentena ou Rejeitar amostra se houver uma exceção).",
-              "expected": "O estado da amostra muda de Esperado para Aceito (ou Em quarentena / Rejeitado (Não conformidade)) e regista a data oficial de receção."
+              "expected": "O estado da amostra muda de Esperado para Aceito (ou Em quarentena / Rejeitada (problema registado)) e regista a data oficial de receção."
             },
             {
               "action": "Imprima e cole a etiqueta de código de barras do laboratório no saco e coloque a amostra no tabuleiro de entrega para a sala de secagem.",
@@ -1101,7 +1101,7 @@
           "action": "Verifique o registo de campo original em Projetos. Nunca digite coordenadas adivinhadas no formulário de receção."
         },
         {
-          "symptom": "Ao digitalizar o saco aparece Receção anterior detetada para esse ID de amostra.",
+          "symptom": "Ao digitalizar o saco aparece A amostra com o identificador {id} já deu entrada.",
           "why": "Esse saco de amostra já deu entrada anteriormente ou dois sacos partilham a mesma etiqueta de campo.",
           "action": "Abra o registo da amostra existente para verificar a data de receção. Consulte o seu Gerente de Laboratório antes de criar qualquer novo registo."
         }
@@ -1117,7 +1117,7 @@
         "Clique em 2. Condição, pese o saco na balança, digite o peso em gramas e responda a Recipiente Intacto / Selado e Quantidade de Amostra Suficiente (~500g). (Esperado: Se o saco estiver rasgado ou pesar menos do que a massa mínima exigida pelo laboratório, o ecrã destaca um aviso de condição.)",
         "Se uma verificação falhar, descreva o problema na nota de condição. Em seguida, clique em 3. Análises. Confirme o pacote de análises e os métodos solicitados. (Esperado: Todos os ensaios solicitados (incluindo painéis agrupados como areia, limo e argila) ficam selecionados para a amostra.)",
         "Clique em 4. Custódia para rever o resumo da receção. Se precisar de fazer uma pausa e confirmar com um supervisor, clique em Salvar rascunho. (Esperado: Um rascunho guardado permanece em Entradas incompletas (Rascunhos) e não envia uma amostra não recebida para a sala de secagem.)",
-        "Quando tudo estiver pronto, clique em Concluir Recepção (ou Aceitar e imprimir etiqueta) (ou em Aceitar com nota de condição, Colocar amostra em quarentena ou Rejeitar amostra se houver uma exceção). (Esperado: O estado da amostra muda de Esperado para Aceito (ou Em quarentena / Rejeitado (Não conformidade)) e regista a data oficial de receção.)",
+        "Quando tudo estiver pronto, clique em Concluir Recepção (ou Aceitar e imprimir etiqueta) (ou em Aceitar com nota de condição, Colocar amostra em quarentena ou Rejeitar amostra se houver uma exceção). (Esperado: O estado da amostra muda de Esperado para Aceito (ou Em quarentena / Rejeitada (problema registado)) e regista a data oficial de receção.)",
         "Imprima e cole a etiqueta de código de barras do laboratório no saco e coloque a amostra no tabuleiro de entrega para a sala de secagem. (Esperado: Os técnicos de preparação podem digitalizar a etiqueta e iniciar a Secagem ao ar no Workbench.)"
       ],
       "caution": "Não invente coordenadas GPS nem aceite um ID de amostra duplicado apenas para terminar a receção rapidamente.",
@@ -1141,9 +1141,9 @@
         "reception"
       ],
       "minutes": 3,
-      "quick": "Abra Recepção de amostras, selecione Lote de remessa / manifesto, digitalize ou insira o ID de cada saco para o adicionar à tabela do lote, registe os pesos individuais e quaisquer exceções de condição. Confirme a receção do lote.",
+      "quick": "Abra Recepção de amostras, selecione Caixa de entrega de amostras, digitalize ou insira o ID de cada saco para o adicionar à tabela do lote, registe os pesos individuais e quaisquer exceções de condição. Confirme a receção do lote.",
       "before": [
-        "Tenha à sua frente a caixa física de sacos de solo e o manifesto de remessa em papel ou digital.",
+        "Tenha à sua frente a caixa física de sacos de solo e o lista da caixa de entrega em papel ou digital.",
         "Verifique se a balança de bancada e a impressora de etiquetas de código de barras estão prontas."
       ],
       "sections": [
@@ -1151,7 +1151,7 @@
           "title": "Procedimento passo a passo",
           "steps": [
             {
-              "action": "Abra Recepção de amostras. Clique em Lote de remessa / manifesto. Depois escolha o projeto e o laboratório recetor.",
+              "action": "Abra Recepção de amostras. Clique em Caixa de entrega de amostras. Depois escolha o projeto e o laboratório recetor.",
               "expected": "O ecrã de receção em lote abre-se com Digitalizar ou inserir ID para adicionar... e Observações partilhadas do lote."
             },
             {
@@ -1167,22 +1167,22 @@
       ],
       "fields": [
         [
-          "Lote de remessa / manifesto",
+          "Caixa de entrega de amostras",
           "Modo de receção em lote na Recepção de amostras para receber uma caixa de amostras em conjunto",
           "Permite digitalizar vários sacos numa única tabela e introduzir notas de entrega partilhadas."
         ],
         [
           "Digitalizar ou inserir ID para adicionar...",
-          "Caixa de pesquisa e leitura de código de barras no ecrã Lote de remessa / manifesto",
+          "Caixa de pesquisa e leitura de código de barras no ecrã Caixa de entrega de amostras",
           "Adiciona cada saco digitalizado à tabela da remessa atual."
         ],
         [
           "Observações partilhadas do lote",
           "Caixa de notas para comentários gerais da entrega, como o nome do estafeta ou o estado da caixa",
-          "Guardada em todas as amostras recebidas nesse lote de remessa."
+          "Guardada em todas as amostras recebidas nesse caixa de entrega."
         ]
       ],
-      "example": "Em Lote de remessa / manifesto, digitalize 15 sacos da caixa BOX-2026-04, registe o peso de cada saco, coloque em quarentena um saco rasgado. Confirme a receção dos restantes 14 sacos intactos.",
+      "example": "Em Caixa de entrega de amostras, digitalize 15 sacos da caixa BOX-2026-04, registe o peso de cada saco, coloque em quarentena um saco rasgado. Confirme a receção dos restantes 14 sacos intactos.",
       "success": "A caixa inteira dá entrada, as exceções ficam isoladas com clareza e as etiquetas são impressas para todos os sacos aceites.",
       "nextActor": "Técnico de Preparação ou Gerente de Laboratório (para qualquer saco em quarentena)",
       "problems": [
@@ -1197,7 +1197,7 @@
         "client/src/components/reception/BatchIntake.jsx"
       ],
       "steps": [
-        "Abra Recepção de amostras. Clique em Lote de remessa / manifesto. Depois escolha o projeto e o laboratório recetor. (Esperado: O ecrã de receção em lote abre-se com Digitalizar ou inserir ID para adicionar... e Observações partilhadas do lote.)",
+        "Abra Recepção de amostras. Clique em Caixa de entrega de amostras. Depois escolha o projeto e o laboratório recetor. (Esperado: O ecrã de receção em lote abre-se com Digitalizar ou inserir ID para adicionar... e Observações partilhadas do lote.)",
         "Digitalize ou digite o ID de cada saco em Digitalizar ou inserir ID para adicionar..., introduza o peso de cada saco em gramas e sinalize qualquer saco danificado ou com peso insuficiente. (Esperado: Cada saco encontrado aparece na tabela do lote, e qualquer saco abaixo do peso mínimo exigido pelo laboratório ou em más condições é destacado.)",
         "Confirme as análises solicitadas, trate individualmente qualquer saco danificado ou em falta e conclua a receção do lote para imprimir as etiquetas de código de barras. (Esperado: Todos os sacos aceites passam de Esperado para Aceito e abrem tarefas de secagem e preparação no Workbench.)"
       ],
@@ -1382,7 +1382,7 @@
       "id": "intake-condition",
       "category": "intake",
       "kind": "guide",
-      "title": "Registar massa, condição e não conformidade",
+      "title": "Registar massa, condição e registo de problema",
       "summary": "Pese o saco de solo à chegada, verifique a condição do recipiente e trate amostras danificadas ou com peso insuficiente.",
       "roles": [
         "SAMPLE_RECEPTION",
@@ -1432,7 +1432,7 @@
         [
           "Aceitar e imprimir etiqueta",
           "Botões de exceção em 4. Custódia quando uma verificação de condição falha",
-          "Permite avançar com uma ressalva documentada, reter a amostra para revisão do gerente ou rejeitá-la como não conforme."
+          "Permite avançar com uma ressalva documentada, reter a amostra para revisão do gerente ou rejeitá-la e registar um problema."
         ]
       ],
       "example": "Pese um saco com fuga de 180 g em 2. Condição, selecione Reprovado em Recipiente Intacto / Selado e Quantidade de Amostra Suficiente (~500g), introduza \"Saco rasgado em trânsito, restam apenas 180 g\". Clique em Colocar amostra em quarentena em 4. Custódia.",
@@ -1480,7 +1480,7 @@
       "minutes": 3,
       "quick": "Em 3. Análises, escolha o pacote de análises solicitado ou marque os ensaios individuais, verifique a variante do método (como pH em água vs. pH em CaCl2). Mantenha juntos os painéis compostos, como areia, limo e argila.",
       "before": [
-        "Tenha à sua frente o formulário de pedido do cliente, a lista de ensaios do projeto ou o manifesto de remessa.",
+        "Tenha à sua frente o formulário de pedido do cliente, a lista de ensaios do projeto ou o lista da caixa de entrega.",
         "Verifique se o projeto já pré-selecionou os ensaios necessários."
       ],
       "sections": [
@@ -1492,7 +1492,7 @@
               "expected": "Vê os parâmetros selecionados, os códigos de método e a massa estimada de solo necessária para os ensaios."
             },
             {
-              "action": "Selecione um pacote predefinido de análises ou marque parâmetros individuais de acordo com o pedido escrito do cliente.",
+              "action": "Selecione um pacote de análises ou marque parâmetros individuais de acordo com o pedido escrito do cliente.",
               "expected": "A massa total de solo necessária é atualizada automaticamente e comparada com o peso que introduziu em 2. Condição."
             },
             {
@@ -1506,7 +1506,7 @@
         [
           "3. Análises",
           "Terceira etapa em Recepção de amostras para atribuir ensaios laboratoriais",
-          "Controla quais as portas de preparação e folhas de trabalho de bancada que são criadas para a amostra."
+          "Controla quais as etapas de preparação e folhas de trabalho de bancada que são criadas para a amostra."
         ],
         [
           "Metodologia",
@@ -1535,7 +1535,7 @@
       ],
       "steps": [
         "Abra 3. Análises em Recepção de amostras e reveja quaisquer análises pré-preenchidas a partir do projeto. (Esperado: Vê os parâmetros selecionados, os códigos de método e a massa estimada de solo necessária para os ensaios.)",
-        "Selecione um pacote predefinido de análises ou marque parâmetros individuais de acordo com o pedido escrito do cliente. (Esperado: A massa total de solo necessária é atualizada automaticamente e comparada com o peso que introduziu em 2. Condição.)",
+        "Selecione um pacote de análises ou marque parâmetros individuais de acordo com o pedido escrito do cliente. (Esperado: A massa total de solo necessária é atualizada automaticamente e comparada com o peso que introduziu em 2. Condição.)",
         "Verifique se está selecionada a variante correta do método (por exemplo, pH em água vs. pH em CaCl2) e se as frações granulométricas da textura estão selecionadas como um painel completo. (Esperado: As tarefas corretas de secagem, crivagem e bancada serão criadas quando concluir a receção em 4. Custódia.)"
       ],
       "caution": "Não misture diferentes métodos de extração de pH ou de fósforo disponível a menos que o projeto tenha solicitado especificamente ambos.",
@@ -1563,9 +1563,9 @@
         "scan"
       ],
       "minutes": 3,
-      "quick": "Se a leitura de um saco em 1. Identificação mostrar Receção anterior detetada para esse ID ou não encontrar correspondência, compare a etiqueta física com o Registo de amostras e Projetos antes de decidir se deve abrir o registo existente, mudar o modo de receção ou contactar a equipa do projeto.",
+      "quick": "Se a leitura de um saco em 1. Identificação mostrar A amostra com o identificador {id} já deu entrada ou não encontrar correspondência, compare a etiqueta física com o Registo de amostras e Projetos antes de decidir se deve abrir o registo existente, mudar o modo de receção ou contactar a equipa do projeto.",
       "before": [
-        "Tenha o saco físico de solo e a guia de remessa à sua frente.",
+        "Tenha o saco físico de solo e a guia da caixa de entrega à sua frente.",
         "Não altere nenhuma letra ou dígito num ID de amostra apenas para contornar um aviso de duplicado."
       ],
       "sections": [
@@ -1574,10 +1574,10 @@
           "steps": [
             {
               "action": "Digitalize ou digite o identificador do saco em 1. Identificação de Recepção de amostras e leia qualquer faixa de aviso com atenção.",
-              "expected": "Se o ID já tiver sido recebido, aparece uma faixa Receção anterior detetada para com os detalhes da amostra existente."
+              "expected": "Se o ID já tiver sido recebido, aparece uma faixa A amostra com o identificador {id} já deu entrada com os detalhes da amostra existente."
             },
             {
-              "action": "Se aparecer Receção anterior detetada para, compare o nome do projeto, a data de colheita e a profundidade no saco físico com o registo existente.",
+              "action": "Se aparecer A amostra com o identificador {id} já deu entrada, compare o nome do projeto, a data de colheita e a profundidade no saco físico com o registo existente.",
               "expected": "Consegue perceber se o mesmo saco foi digitalizado duas vezes por engano ou se dois sacos de campo diferentes receberam a mesma etiqueta."
             },
             {
@@ -1589,7 +1589,7 @@
       ],
       "fields": [
         [
-          "Receção anterior detetada para",
+          "A amostra com o identificador {id} já deu entrada",
           "Faixa de aviso apresentada quando um ID digitalizado já tem um registo de receção confirmado",
           "Evita dar entrada ao mesmo saco de amostra duas vezes."
         ],
@@ -1604,7 +1604,7 @@
           "Verifique aqui primeiro se um colega tiver começado a dar entrada ao saco mais cedo no mesmo dia."
         ]
       ],
-      "example": "Digitalize o saco FIELD-2026-005, veja Receção anterior detetada para FIELD-2026-005 do turno da manhã, verifique que o saco já tem a etiqueta do laboratório DEMO-26-000105 e coloque-o no tabuleiro de secagem sem o receber novamente.",
+      "example": "Digitalize o saco FIELD-2026-005, veja A amostra com o identificador FIELD-2026-005 já deu entrada do turno da manhã, verifique que o saco já tem a etiqueta do laboratório DEMO-26-000105 e coloque-o no tabuleiro de secagem sem o receber novamente.",
       "success": "As leituras duplicadas são detetadas de imediato e as trocas reais de etiquetagem no campo são encaminhadas com clareza.",
       "nextActor": "Oficial de Recepção de Amostras ou Gerente de Projetos (se dois sacos de campo partilharem a mesma etiqueta)",
       "problems": [
@@ -1619,8 +1619,8 @@
         "client/src/components/reception/BatchIntake.jsx"
       ],
       "steps": [
-        "Digitalize ou digite o identificador do saco em 1. Identificação de Recepção de amostras e leia qualquer faixa de aviso com atenção. (Esperado: Se o ID já tiver sido recebido, aparece uma faixa Receção anterior detetada para com os detalhes da amostra existente.)",
-        "Se aparecer Receção anterior detetada para, compare o nome do projeto, a data de colheita e a profundidade no saco físico com o registo existente. (Esperado: Consegue perceber se o mesmo saco foi digitalizado duas vezes por engano ou se dois sacos de campo diferentes receberam a mesma etiqueta.)",
+        "Digitalize ou digite o identificador do saco em 1. Identificação de Recepção de amostras e leia qualquer faixa de aviso com atenção. (Esperado: Se o ID já tiver sido recebido, aparece uma faixa A amostra com o identificador {id} já deu entrada com os detalhes da amostra existente.)",
+        "Se aparecer A amostra com o identificador {id} já deu entrada, compare o nome do projeto, a data de colheita e a profundidade no saco físico com o registo existente. (Esperado: Consegue perceber se o mesmo saco foi digitalizado duas vezes por engano ou se dois sacos de campo diferentes receberam a mesma etiqueta.)",
         "Se não for encontrado nenhum registo de projeto correspondente, verifique se o projeto correto está selecionado ou peça ao seu gerente para sincronizar o KoboToolbox em Projetos antes de utilizar o modo Sem agendamento / Externo. (Esperado: As amostras de projeto pré-registadas permanecem associadas ao seu levantamento de campo em vez de darem entrada como amostras externas desligadas.)"
       ],
       "caution": "Nunca adicione \"-2\" ou \"-B\" ao ID de uma amostra de projeto para forçar a receção de um saco duplicado sem aprovação do gerente.",
@@ -1647,7 +1647,7 @@
         "reception"
       ],
       "minutes": 3,
-      "quick": "Em 4. Custódia, reveja o resumo de identidade, condição e análises, clique em Concluir Recepção (ou Aceitar e imprimir etiqueta), cole a etiqueta de código de barras impressa no saco. Verifique Recebimentos recentes e Transferência operacional do laboratório.",
+      "quick": "Em 4. Custódia, reveja o resumo de identidade, condição e análises, clique em Concluir Recepção (ou Aceitar e imprimir etiqueta), cole a etiqueta de código de barras impressa no saco. Verifique Entradas recentes e Transferência operacional do laboratório.",
       "before": [
         "Confirme que as etapas 1. Identificação, 2. Condição e 3. Análises estão concluídas.",
         "Verifique se a impressora de etiquetas tem o tamanho correto de etiqueta colocado."
@@ -1665,8 +1665,8 @@
               "expected": "É atribuído um Código de Amostra do Laboratório oficial, o estado muda para Aceito e a data e hora de receção são guardadas."
             },
             {
-              "action": "Cole a etiqueta impressa no saco, coloque-o no carrinho da sala de secagem. Verifique Transferência operacional do laboratório e Recebimentos recentes no ecrã Recepção de amostras.",
-              "expected": "A amostra aparece em Recebimentos recentes e a respetiva tarefa de Secagem ao ar fica imediatamente visível no Workbench."
+              "action": "Cole a etiqueta impressa no saco, coloque-o no carrinho da sala de secagem. Verifique Transferência operacional do laboratório e Entradas recentes no ecrã Recepção de amostras.",
+              "expected": "A amostra aparece em Entradas recentes e a respetiva tarefa de Secagem ao ar fica imediatamente visível no Workbench."
             }
           ]
         }
@@ -1683,17 +1683,17 @@
           "Confirma que os sacos aceites foram encaminhados para a secagem e preparação."
         ],
         [
-          "Recebimentos recentes",
+          "Entradas recentes",
           "Lista de receções concluídas recentemente no ecrã Recepção de amostras",
           "Permite reimprimir uma etiqueta ou abrir a página da amostra logo após a entrada."
         ]
       ],
-      "example": "Em 4. Custódia, clique em Concluir Recepção (ou Aceitar e imprimir etiqueta) para DEMO-26-000142, cole a etiqueta Padrão (101 × 54 mm) no saco. Confirme que aparece em Recebimentos recentes.",
+      "example": "Em 4. Custódia, clique em Concluir Recepção (ou Aceitar e imprimir etiqueta) para DEMO-26-000142, cole a etiqueta Padrão (101 × 54 mm) no saco. Confirme que aparece em Entradas recentes.",
       "success": "A amostra tem uma etiqueta oficial de código de barras do laboratório e está visível para a equipa de preparação no Workbench.",
       "nextActor": "Técnico de Preparação na sala de secagem",
       "problems": [
         {
-          "symptom": "Terminou de preencher o formulário de receção, mas a amostra não aparece em Recebimentos recentes nem no Workbench.",
+          "symptom": "Terminou de preencher o formulário de receção, mas a amostra não aparece em Entradas recentes nem no Workbench.",
           "why": "Clicou em Salvar rascunho em vez de Concluir Recepção (ou Aceitar e imprimir etiqueta) ou fechou o separador antes de confirmar 4. Custódia.",
           "action": "Verifique Entradas incompletas (Rascunhos) no ecrã Recepção de amostras, clique em Retomar. Clique em Concluir Recepção (ou Aceitar e imprimir etiqueta) em 4. Custódia."
         }
@@ -1705,7 +1705,7 @@
       "steps": [
         "Em 4. Custódia, verifique uma última vez o ID da amostra, o peso, o estado da condição e a lista de ensaios atribuídos. (Esperado: Todos os detalhes correspondem ao saco físico e ao pedido do cliente antes de o registo ser bloqueado.)",
         "Clique em Concluir Recepção (ou Aceitar e imprimir etiqueta) (ou no botão de exceção de condição adequado). Imprima a etiqueta de código de barras na janela Imprimir etiquetas. (Esperado: É atribuído um Código de Amostra do Laboratório oficial, o estado muda para Aceito e a data e hora de receção são guardadas.)",
-        "Cole a etiqueta impressa no saco, coloque-o no carrinho da sala de secagem. Verifique Transferência operacional do laboratório e Recebimentos recentes no ecrã Recepção de amostras. (Esperado: A amostra aparece em Recebimentos recentes e a respetiva tarefa de Secagem ao ar fica imediatamente visível no Workbench.)"
+        "Cole a etiqueta impressa no saco, coloque-o no carrinho da sala de secagem. Verifique Transferência operacional do laboratório e Entradas recentes no ecrã Recepção de amostras. (Esperado: A amostra aparece em Entradas recentes e a respetiva tarefa de Secagem ao ar fica imediatamente visível no Workbench.)"
       ],
       "caution": "Cole sempre a etiqueta de código de barras impressa pelo laboratório no saco antes de pegar na amostra seguinte.",
       "related": [
@@ -1816,7 +1816,7 @@
         "samples"
       ],
       "minutes": 3,
-      "quick": "Abra o Registo de amostras, digite ou digitalize o ID da amostra, o ID de campo ou o código da remessa. Verifique os filtros ativos de estado, projeto e data se uma amostra esperada não aparecer.",
+      "quick": "Abra o Registo de amostras, digite ou digitalize o ID da amostra, o ID de campo ou o código da caixa de entrega. Verifique os filtros ativos de estado, projeto e data se uma amostra esperada não aparecer.",
       "before": [
         "Verifique a barra superior para confirmar que o laboratório correto está selecionado.",
         "Tenha pronta pelo menos parte do ID da amostra, do ID de campo ou do nome do projeto."
@@ -1835,7 +1835,7 @@
             },
             {
               "action": "Se uma amostra que sabe que existe não aparecer, reponha as listas pendentes de estado e projeto para mostrar todos os registos.",
-              "expected": "As amostras ocultas (como as que ainda estão no estado Esperado ou Rejeitado (Não conformidade)) voltam a ficar visíveis."
+              "expected": "As amostras ocultas (como as que ainda estão no estado Esperado ou Rejeitada (problema registado)) voltam a ficar visíveis."
             }
           ]
         }
@@ -1875,7 +1875,7 @@
       "steps": [
         "Abra o Registo de amostras no menu lateral e digite ou digitalize o identificador na barra de pesquisa. (Esperado: A tabela de amostras filtra-se de imediato para mostrar os registos correspondentes no seu laboratório.)",
         "Use os filtros de Projeto, Estado ou data para restringir a lista — por exemplo, para ver apenas amostras em Processando ou Aprovado. (Esperado: Os filtros selecionados permanecem ativos enquanto abre uma amostra e regressa à lista.)",
-        "Se uma amostra que sabe que existe não aparecer, reponha as listas pendentes de estado e projeto para mostrar todos os registos. (Esperado: As amostras ocultas (como as que ainda estão no estado Esperado ou Rejeitado (Não conformidade)) voltam a ficar visíveis.)"
+        "Se uma amostra que sabe que existe não aparecer, reponha as listas pendentes de estado e projeto para mostrar todos os registos. (Esperado: As amostras ocultas (como as que ainda estão no estado Esperado ou Rejeitada (problema registado)) voltam a ficar visíveis.)"
       ],
       "caution": "Verifique sempre os indicadores de filtros ativos antes de assumir que um registo de amostra se perdeu.",
       "related": [
@@ -1900,7 +1900,7 @@
         "samplesid"
       ],
       "minutes": 3,
-      "quick": "Abra uma amostra no Registo de amostras para inspecionar os detalhes de campo, as portas de preparação, os estados dos ensaios e o histórico de custódia. Quando estiver pronto para introduzir ou confirmar resultados de bancada, siga a ligação para o Workbench em vez de tentar digitar resultados na página de resumo.",
+      "quick": "Abra uma amostra no Registo de amostras para inspecionar os detalhes de campo, as etapas de preparação, os estados dos ensaios e o histórico de custódia. Quando estiver pronto para introduzir ou confirmar resultados de bancada, siga a ligação para o Workbench em vez de tentar digitar resultados na página de resumo.",
       "before": [
         "Abra o Registo de amostras. Clique na amostra que pretende inspecionar.",
         "Observe o selo de estado global da amostra no topo da página."
@@ -2003,8 +2003,8 @@
               "expected": "O selo identifica a tarefa de pré-requisito exata que tem de ser concluída primeiro."
             },
             {
-              "action": "Clique na tarefa de pré-requisito aberta para a concluir no Workbench (ou peça a um gerente para a verificar se a opção Exigir verificação do gerente nas portas de preparação estiver ativa em Políticas).",
-              "expected": "Assim que a porta de pré-requisito é confirmada, os ensaios analíticos dependentes são desbloqueados automaticamente."
+              "action": "Clique na tarefa de pré-requisito aberta para a concluir no Workbench (ou peça a um gerente para a verificar se a opção Exigir a aprovação das etapas de preparação pelo responsável estiver ativa em Políticas).",
+              "expected": "Assim que a etapa de pré-requisito é confirmada, os ensaios analíticos dependentes são desbloqueados automaticamente."
             }
           ]
         }
@@ -2012,18 +2012,18 @@
       "fields": [
         [
           "Secagem ao ar",
-          "Primeira porta de preparação que exige peso constante antes da crivagem",
+          "Primeira etapa de preparação que exige peso constante antes da crivagem",
           "Tem de ser confirmada como concluída antes de a crivagem e os ensaios de rotina de química húmida serem desbloqueados."
         ],
         [
           "Preparação de amostras",
-          "Segunda porta de preparação para crivagem (como 2 mm) ou moagem fina",
+          "Segunda etapa de preparação para crivagem (como 2 mm) ou moagem fina",
           "Desbloqueia os métodos de bancada que dependem de frações de solo homogeneizadas."
         ],
         [
-          "Portas operacionais",
+          "Etapas de preparação obrigatórias",
           "Controlos de verificação na página da amostra para etapas pré-analíticas",
-          "Mostra quem concluiu e verificou cada porta de preparação."
+          "Mostra quem concluiu e verificou cada etapa de preparação."
         ]
       ],
       "example": "Inspecione a amostra DEMO-26-000142 em Trabalhos e resultados, veja que o fósforo Olsen está a aguardar Preparação de amostras, conclua a lista de verificação de crivagem a 2 mm no Workbench e observe o desbloqueio do fósforo Olsen.",
@@ -2032,7 +2032,7 @@
       "problems": [
         {
           "symptom": "A Secagem ao ar e a Preparação de amostras foram ambas concluídas pelo técnico, mas as linhas de ensaio de bancada ainda mostram um bloqueio de pré-requisito.",
-          "why": "O seu laboratório tem a opção Exigir verificação do gerente nas portas de preparação ativa em Políticas. Um gerente ainda não clicou em verificar em Portas operacionais.",
+          "why": "O seu laboratório tem a opção Exigir a aprovação das etapas de preparação pelo responsável ativa em Políticas. Um gerente ainda não clicou em verificar em Etapas de preparação obrigatórias.",
           "action": "Peça ao seu Gerente de Laboratório ou Oficial de Qualidade e Auditoria para rever e verificar o registo de preparação no separador Trabalhos e resultados da amostra."
         }
       ],
@@ -2044,9 +2044,9 @@
       "steps": [
         "Observe os indicadores de etapa do fluxo de trabalho e os Pré-requisitos de preparação no separador Trabalhos e resultados da amostra. (Esperado: As etapas concluídas apresentam um estado confirmado a verde, as etapas ativas estão destacadas e as etapas futuras bloqueadas mostram o que estão a aguardar.)",
         "Leia qualquer selo de bloqueio numa linha de análise bloqueada (por exemplo, a aguardar Secagem ao ar, Preparação de amostras ou verificação da porta pelo gerente). (Esperado: O selo identifica a tarefa de pré-requisito exata que tem de ser concluída primeiro.)",
-        "Clique na tarefa de pré-requisito aberta para a concluir no Workbench (ou peça a um gerente para a verificar se a opção Exigir verificação do gerente nas portas de preparação estiver ativa em Políticas). (Esperado: Assim que a porta de pré-requisito é confirmada, os ensaios analíticos dependentes são desbloqueados automaticamente.)"
+        "Clique na tarefa de pré-requisito aberta para a concluir no Workbench (ou peça a um gerente para a verificar se a opção Exigir a aprovação das etapas de preparação pelo responsável estiver ativa em Políticas). (Esperado: Assim que a etapa de pré-requisito é confirmada, os ensaios analíticos dependentes são desbloqueados automaticamente.)"
       ],
-      "caution": "Nunca tente contornar uma porta de pré-requisito — conclua ou verifique a etapa de preparação em aberto. Assim, o registo de auditoria permaneça completo.",
+      "caution": "Nunca tente contornar uma etapa de pré-requisito — conclua ou verifique a etapa de preparação em aberto. Assim, o registo de auditoria permaneça completo.",
       "related": [
         "start-first-login",
         "quality-support"
@@ -2080,7 +2080,7 @@
           "title": "Procedimento passo a passo",
           "steps": [
             {
-              "action": "Abra a amostra no Registo de amostras (ou em Recebimentos recentes na Recepção de amostras). Clique em Imprimir etiquetas.",
+              "action": "Abra a amostra no Registo de amostras (ou em Entradas recentes na Recepção de amostras). Clique em Imprimir etiquetas.",
               "expected": "A janela Imprimir etiquetas abre-se com uma pré-visualização em tempo real do código de barras e opções de formato."
             },
             {
@@ -2127,7 +2127,7 @@
         "client/src/components/sample/WorkItemsTable.jsx"
       ],
       "steps": [
-        "Abra a amostra no Registo de amostras (ou em Recebimentos recentes na Recepção de amostras). Clique em Imprimir etiquetas. (Esperado: A janela Imprimir etiquetas abre-se com uma pré-visualização em tempo real do código de barras e opções de formato.)",
+        "Abra a amostra no Registo de amostras (ou em Entradas recentes na Recepção de amostras). Clique em Imprimir etiquetas. (Esperado: A janela Imprimir etiquetas abre-se com uma pré-visualização em tempo real do código de barras e opções de formato.)",
         "Selecione Formato: Padrão (101 × 54 mm) para sacos principais de amostra e frascos de arquivo ou Compacto (50 × 25 mm) para frascos pequenos, e defina Cópias por etiqueta. (Esperado: A pré-visualização atualiza-se de acordo com o tamanho de etiqueta escolhido.)",
         "Se estiver a reimprimir uma etiqueta existente, escreva o Motivo da reimpressão (como \"Etiqueta manchada na sala de secagem\"), imprima a etiqueta e faça uma leitura de teste no frasco. (Esperado: A etiqueta é impressa com nitidez e o evento de reimpressão fica registado no histórico de auditoria da amostra.)"
       ],
@@ -2228,7 +2228,7 @@
       "category": "preparation",
       "kind": "guide",
       "title": "Confirmar a secagem da amostra e verificar o comprovativo",
-      "summary": "Conclua a lista de verificação de secagem, registe os detalhes de secagem, clique em Confirmar conclusão. Verifique o comprovativo verde de confirmação.",
+      "summary": "Conclua a lista de verificação de secagem, registe os detalhes de secagem, clique em Confirmar que o trabalho está concluído. Verifique o comprovativo verde de confirmação.",
       "roles": [
         "LAB_TECHNICIAN",
         "LAB_MANAGER"
@@ -2239,11 +2239,11 @@
         "workbench"
       ],
       "minutes": 4,
-      "quick": "Conclua as verificações físicas obrigatórias de secagem, clique em Confirmar conclusão. Verifique o comprovativo Lista de verificação confirmada. Assinalar uma caixa sem clicar em Confirmar conclusão não guarda a conclusão.",
+      "quick": "Conclua as verificações físicas obrigatórias de secagem, clique em Confirmar que o trabalho está concluído. Verifique o comprovativo Lista de verificação confirmada. Assinalar uma caixa sem clicar em Confirmar que o trabalho está concluído não guarda a conclusão.",
       "before": [
         "Faça corresponder a etiqueta física do tabuleiro de secagem ao Código de Amostra do Laboratório e ao ID da amostra de campo no ecrã.",
         "Siga o procedimento de secagem do seu laboratório quanto à temperatura e ao tempo de secagem (muitos laboratórios de solos secam ao ar abaixo de 40 °C).",
-        "Certifique-se de que o computador tem ligação de rede ativa antes de clicar em Confirmar conclusão.",
+        "Certifique-se de que o computador tem ligação de rede ativa antes de clicar em Confirmar que o trabalho está concluído.",
         "Se a linha mostrar A evidência necessita de verificação devido a uma importação histórica, siga o guia de evidências em falta em vez de criar um registo duplicado."
       ],
       "sections": [
@@ -2260,7 +2260,7 @@
             },
             {
               "action": "Assinale cada item na Lista de verificação operacional apenas depois de concluir essa verificação física.",
-              "expected": "A linha mostra Lista de verificação operacional concluída e ativa o botão Confirmar conclusão."
+              "expected": "A linha mostra Lista de verificação operacional concluída e ativa o botão Confirmar que o trabalho está concluído."
             }
           ]
         },
@@ -2268,7 +2268,7 @@
           "title": "2. Confirmar e verificar uma única vez",
           "steps": [
             {
-              "action": "Clique em Confirmar conclusão na linha da amostra (ou utilize o botão de confirmação em lote apenas depois de verificar cada tabuleiro selecionado).",
+              "action": "Clique em Confirmar que o trabalho está concluído na linha da amostra (ou utilize o botão de confirmação em lote apenas depois de verificar cada tabuleiro selecionado).",
               "expected": "O servidor guarda o seu registo de secagem. Nunca inclua tabuleiros que ainda estejam húmidos apenas porque chegaram na mesma caixa."
             },
             {
@@ -2289,7 +2289,7 @@
           "Assinale cada caixa apenas após verificar a identidade do recipiente, o peso constante e a ausência de contaminação cruzada."
         ],
         [
-          "Confirmar conclusão",
+          "Confirmar que o trabalho está concluído",
           "Botão que guarda o registo de secagem e gera um comprovativo permanente",
           "Obrigatório para passar a tarefa de lista de verificação aberta para Lista de verificação confirmada."
         ],
@@ -2299,14 +2299,14 @@
           "Comprova que a Secagem ao ar terminou e desbloqueia a Preparação de amostras."
         ]
       ],
-      "example": "No Workbench em Secagem ao ar, introduza 35 °C, 620 g antes e 545 g depois para a amostra DEMO-26-000142, assinale as três caixas da Lista de verificação operacional. Clique em Confirmar conclusão.",
+      "example": "No Workbench em Secagem ao ar, introduza 35 °C, 620 g antes e 545 g depois para a amostra DEMO-26-000142, assinale as três caixas da Lista de verificação operacional. Clique em Confirmar que o trabalho está concluído.",
       "success": "A linha de secagem mostra Lista de verificação confirmada com data/hora e nome do operador. A Preparação de amostras fica desbloqueada.",
       "nextActor": "Técnico de Preparação (para crivagem e moagem) ou Gerente de Laboratório (se a verificação de portas estiver ativa)",
       "problems": [
         {
           "symptom": "As três caixas da lista de verificação estão assinaladas, mas não aparece o comprovativo Lista de verificação confirmada.",
-          "why": "Assinalou as caixas no ecrã mas não clicou em Confirmar conclusão, ou a ligação de rede caiu durante o armazenamento.",
-          "action": "Verifique a sua ligação. Clique em Confirmar conclusão. Depois confirme que aparece Lista de verificação confirmada na linha."
+          "why": "Assinalou as caixas no ecrã mas não clicou em Confirmar que o trabalho está concluído, ou a ligação de rede caiu durante o armazenamento.",
+          "action": "Verifique a sua ligação. Clique em Confirmar que o trabalho está concluído. Depois confirme que aparece Lista de verificação confirmada na linha."
         },
         {
           "symptom": "A secagem mostra Lista de verificação confirmada, mas a página da amostra ainda indica que a preparação está incompleta.",
@@ -2328,12 +2328,12 @@
       "steps": [
         "Abra o Workbench, escolha Secagem ao ar em Tipo de trabalho: e compare o ID da amostra no ecrã com o tabuleiro físico de secagem. (Esperado: Está a registar os detalhes de secagem para a amostra de solo exata que se encontra na sua bancada no laboratório ativo.)",
         "Seque o solo até peso constante seguindo o procedimento do laboratório e preencha Método, Temperatura (°C), Massa inicial (g), Massa final (g), Início, Fim e Equipamento. (Esperado: Todas as medições de secagem realizadas na bancada ficam registadas nos campos de Secagem.)",
-        "Assinale cada item na Lista de verificação operacional apenas depois de concluir essa verificação física. (Esperado: A linha mostra Lista de verificação operacional concluída e ativa o botão Confirmar conclusão.)",
-        "Clique em Confirmar conclusão na linha da amostra (ou utilize o botão de confirmação em lote apenas depois de verificar cada tabuleiro selecionado). (Esperado: O servidor guarda o seu registo de secagem. Nunca inclua tabuleiros que ainda estejam húmidos apenas porque chegaram na mesma caixa.)",
+        "Assinale cada item na Lista de verificação operacional apenas depois de concluir essa verificação física. (Esperado: A linha mostra Lista de verificação operacional concluída e ativa o botão Confirmar que o trabalho está concluído.)",
+        "Clique em Confirmar que o trabalho está concluído na linha da amostra (ou utilize o botão de confirmação em lote apenas depois de verificar cada tabuleiro selecionado). (Esperado: O servidor guarda o seu registo de secagem. Nunca inclua tabuleiros que ainda estejam húmidos apenas porque chegaram na mesma caixa.)",
         "Verifique se a linha apresenta agora Lista de verificação confirmada com o seu nome de utilizador, data e hora e referência do comprovativo. (Esperado: A lista de verificação editável é substituída por um comprovativo permanente de Lista de verificação confirmada.)",
         "Mude Tipo de trabalho: para Preparação de amostras para ver as tarefas de moagem e crivagem desbloqueadas. (Esperado: A Preparação de amostras fica desbloqueada para essa amostra, enquanto os ensaios químicos de bancada permanecem bloqueados até que a crivagem também seja confirmada.)"
       ],
-      "caution": "Assinalar apenas as caixas de verificação não conclui a secagem — clique sempre em Confirmar conclusão e procure o selo Lista de verificação confirmada.",
+      "caution": "Assinalar apenas as caixas de verificação não conclui a secagem — clique sempre em Confirmar que o trabalho está concluído e procure o selo Lista de verificação confirmada.",
       "related": [],
       "feature": "core",
       "reviewOwner": "Lab operations lead"
@@ -2343,7 +2343,7 @@
       "category": "preparation",
       "kind": "guide",
       "title": "Confirmar a preparação para o método atribuído",
-      "summary": "Registe a crivagem, a moagem e a divisão em subamostras no Workbench. Clique em Confirmar conclusão para desbloquear as análises de bancada.",
+      "summary": "Registe a crivagem, a moagem e a divisão em subamostras no Workbench. Clique em Confirmar que o trabalho está concluído para desbloquear as análises de bancada.",
       "roles": [
         "LAB_TECHNICIAN",
         "LAB_MANAGER"
@@ -2354,7 +2354,7 @@
         "workbench"
       ],
       "minutes": 3,
-      "quick": "No Workbench, selecione Preparação de amostras em Tipo de trabalho:, introduza os detalhes de Crivagem, Moagem e Divisão da amostra de solo, assinale os itens da Lista de verificação operacional. Clique em Confirmar conclusão.",
+      "quick": "No Workbench, selecione Preparação de amostras em Tipo de trabalho:, introduza os detalhes de Crivagem, Moagem e Divisão da amostra de solo, assinale os itens da Lista de verificação operacional. Clique em Confirmar que o trabalho está concluído.",
       "before": [
         "Confirme que a Secagem ao ar já está marcada como Lista de verificação confirmada para a amostra.",
         "Verifique a malha de crivo necessária para os ensaios atribuídos (a maioria dos métodos de rotina utiliza terra fina de 2 mm, enquanto os métodos espectrais ou de combustão podem exigir moagem fina)."
@@ -2372,7 +2372,7 @@
               "expected": "Todos os campos de preparação ficam preenchidos e a linha apresenta Lista de verificação operacional concluída."
             },
             {
-              "action": "Clique em Confirmar conclusão (e peça ao seu gerente para verificar a porta caso o laboratório tenha ativado Exigir verificação do gerente nas portas de preparação em Políticas).",
+              "action": "Clique em Confirmar que o trabalho está concluído (e peça ao seu gerente para verificar a etapa caso o laboratório tenha ativado Exigir a aprovação das etapas de preparação pelo responsável em Políticas).",
               "expected": "A linha mostra Lista de verificação confirmada, o estado da amostra passa para Processando e as linhas de ensaio de bancada são desbloqueadas automaticamente."
             }
           ]
@@ -2390,18 +2390,18 @@
           "Regista a forma como o solo seco foi homogeneizado e dividido em frascos de subamostra."
         ],
         [
-          "Confirmar conclusão",
+          "Confirmar que o trabalho está concluído",
           "Botão que guarda o registo de preparação e desbloqueia os ensaios de bancada",
           "Substitui a lista de verificação por um comprovativo permanente de Lista de verificação confirmada."
         ]
       ],
-      "example": "Para a amostra DEMO-26-000142, selecione Preparação de amostras no Workbench, registe a crivagem em crivo de latão de 2 mm obtendo 480 g de terra fina e 65 g de cascalho grosseiro, assinale a lista de verificação. Clique em Confirmar conclusão.",
+      "example": "Para a amostra DEMO-26-000142, selecione Preparação de amostras no Workbench, registe a crivagem em crivo de latão de 2 mm obtendo 480 g de terra fina e 65 g de cascalho grosseiro, assinale a lista de verificação. Clique em Confirmar que o trabalho está concluído.",
       "success": "A Preparação de amostras mostra Lista de verificação confirmada, os frascos preparados ficam registados e as folhas de trabalho de bancada são desbloqueadas.",
       "nextActor": "Técnico de Laboratório na bancada analítica (ou Gerente de Laboratório se for exigida verificação da porta)",
       "problems": [
         {
           "symptom": "Um ensaio espectral ou de carbono total permanece bloqueado mesmo após a confirmação da crivagem a 2 mm.",
-          "why": "Alguns métodos analíticos exigem uma etapa adicional de moagem fina ou um clique de verificação do gerente em Portas operacionais.",
+          "why": "Alguns métodos analíticos exigem uma etapa adicional de moagem fina ou um clique de verificação do gerente em Etapas de preparação obrigatórias.",
           "action": "Abra o separador Trabalhos e resultados da amostra, leia a mensagem de bloqueio em Pré-requisitos de preparação e conclua a moagem ou a verificação do gerente necessária."
         }
       ],
@@ -2413,7 +2413,7 @@
       "steps": [
         "Abra o Workbench, selecione Preparação de amostras em Tipo de trabalho: e faça corresponder o ID da amostra no ecrã ao tabuleiro de solo seco. (Esperado: O formulário de Preparação de amostras abre-se mostrando a Lista de verificação operacional e as secções de Crivagem, Moagem e Divisão.)",
         "Destorroe e crive o solo seco de acordo com o procedimento do laboratório, introduza a abertura da malha do crivo, o peso da terra fina, o peso dos elementos grosseiros e os detalhes de divisão de subamostras, e assinale a Lista de verificação operacional. (Esperado: Todos os campos de preparação ficam preenchidos e a linha apresenta Lista de verificação operacional concluída.)",
-        "Clique em Confirmar conclusão (e peça ao seu gerente para verificar a porta caso o laboratório tenha ativado Exigir verificação do gerente nas portas de preparação em Políticas). (Esperado: A linha mostra Lista de verificação confirmada, o estado da amostra passa para Processando e as linhas de ensaio de bancada são desbloqueadas automaticamente.)"
+        "Clique em Confirmar que o trabalho está concluído (e peça ao seu gerente para verificar a etapa caso o laboratório tenha ativado Exigir a aprovação das etapas de preparação pelo responsável em Políticas). (Esperado: A linha mostra Lista de verificação confirmada, o estado da amostra passa para Processando e as linhas de ensaio de bancada são desbloqueadas automaticamente.)"
       ],
       "caution": "Desmarque qualquer amostra que não tenha sido fisicamente crivada antes de confirmar várias linhas em simultâneo no Workbench.",
       "related": [
@@ -2440,7 +2440,7 @@
         "samplesid"
       ],
       "minutes": 4,
-      "quick": "Não volte a secar nem a crivar o solo apenas porque um selo parece incompleto. Verifique primeiro se aparece Lista de verificação confirmada na linha do Workbench, confirme se uma segunda porta de preparação ou verificação do gerente ainda está aberta e compare o número da tentativa.",
+      "quick": "Não volte a secar nem a crivar o solo apenas porque um selo parece incompleto. Verifique primeiro se aparece Lista de verificação confirmada na linha do Workbench, confirme se uma segunda etapa de preparação ou verificação do gerente ainda está aberta e compare o número da tentativa.",
       "before": [
         "Mantenha o separador atual do Workbench aberto para não perder notas não guardadas.",
         "Lembre-se de que a Secagem ao ar, a Preparação de amostras e cada ensaio de bancada têm estados independentes na mesma amostra.",
@@ -2455,11 +2455,11 @@
               "expected": "Consegue ver de imediato se o servidor guardou a sua confirmação ou se a lista de verificação ainda está aberta."
             },
             {
-              "action": "Se não aparecer Lista de verificação confirmada, verifique se as três caixas da Lista de verificação operacional estão assinaladas. Clique em Confirmar conclusão.",
+              "action": "Se não aparecer Lista de verificação confirmada, verifique se as três caixas da Lista de verificação operacional estão assinaladas. Clique em Confirmar que o trabalho está concluído.",
               "expected": "A confirmação é concluída e apresenta o selo Lista de verificação confirmada."
             },
             {
-              "action": "Se o dispositivo estava offline quando clicou em Confirmar conclusão, volte a ligar-se à rede do laboratório. Verifique o estado de sincronização antes de clicar novamente.",
+              "action": "Se o dispositivo estava offline quando clicou em Confirmar que o trabalho está concluído, volte a ligar-se à rede do laboratório. Verifique o estado de sincronização antes de clicar novamente.",
               "expected": "As confirmações em fila sincronizam-se sem criar tentativas duplicadas."
             }
           ]
@@ -2472,11 +2472,11 @@
               "expected": "Pode ver a Secagem ao ar e a Preparação de amostras lado a lado e identificar qual delas ainda está aberta ou a aguardar verificação."
             },
             {
-              "action": "Verifique se a linha indica A aguardar verificação do gerente (utilizado quando a opção Exigir verificação do gerente nas portas de preparação está ativa em Políticas).",
-              "expected": "Vê se um Gerente de Laboratório precisa de clicar em verificar em Portas operacionais para desbloquear os ensaios de bancada."
+              "action": "Verifique se a linha indica A aguardar verificação do gerente (utilizado quando a opção Exigir a aprovação das etapas de preparação pelo responsável está ativa em Políticas).",
+              "expected": "Vê se um Gerente de Laboratório precisa de clicar em verificar em Etapas de preparação obrigatórias para desbloquear os ensaios de bancada."
             },
             {
-              "action": "Se ambas as portas de preparação estiverem verificadas mas um ensaio de bancada continuar bloqueado, leia o selo de bloqueio nessa linha de ensaio (como uma calibração de instrumento expirada em Equipamento).",
+              "action": "Se ambas as etapas de preparação estiverem verificadas mas um ensaio de bancada continuar bloqueado, leia o selo de bloqueio nessa linha de ensaio (como uma calibração de instrumento expirada em Equipamento).",
               "expected": "Resolve o bloqueio exato em vez de repetir a preparação."
             }
           ]
@@ -2494,7 +2494,7 @@
           "Mostra o estado em tempo real da Secagem ao ar e da Preparação de amostras em conjunto."
         ],
         [
-          "Portas operacionais",
+          "Etapas de preparação obrigatórias",
           "Secção de verificação do gerente no separador Trabalhos e resultados da amostra",
           "Usada pelos gerentes para aprovar a preparação quando a verificação de portas está ativa em Políticas."
         ]
@@ -2505,8 +2505,8 @@
       "problems": [
         {
           "symptom": "O seu gerente pede-lhe para submeter a secagem para revisão, mas não existe nenhum botão Enviar em Secagem ao ar.",
-          "why": "A secagem e a crivagem utilizam Confirmar conclusão (e verificação opcional do gerente em Portas operacionais), enquanto Enviar se destina apenas a resultados analíticos de bancada.",
-          "action": "Clique em Confirmar conclusão na linha de secagem ou preparação. Peça ao gerente para verificar a porta em Trabalhos e resultados, se exigido pelas Políticas do laboratório."
+          "why": "A secagem e a crivagem utilizam Confirmar que o trabalho está concluído (e verificação opcional do gerente em Etapas de preparação obrigatórias), enquanto Enviar se destina apenas a resultados analíticos de bancada.",
+          "action": "Clique em Confirmar que o trabalho está concluído na linha de secagem ou preparação. Peça ao gerente para verificar a etapa em Trabalhos e resultados, se exigido pelas Políticas do laboratório."
         }
       ],
       "sources": [
@@ -2516,11 +2516,11 @@
       ],
       "steps": [
         "Abra a linha da amostra em Secagem ao ar ou Preparação de amostras no Workbench e procure o selo verde Lista de verificação confirmada, a referência do comprovativo e a data/hora. (Esperado: Consegue ver de imediato se o servidor guardou a sua confirmação ou se a lista de verificação ainda está aberta.)",
-        "Se não aparecer Lista de verificação confirmada, verifique se as três caixas da Lista de verificação operacional estão assinaladas. Clique em Confirmar conclusão. (Esperado: A confirmação é concluída e apresenta o selo Lista de verificação confirmada.)",
-        "Se o dispositivo estava offline quando clicou em Confirmar conclusão, volte a ligar-se à rede do laboratório. Verifique o estado de sincronização antes de clicar novamente. (Esperado: As confirmações em fila sincronizam-se sem criar tentativas duplicadas.)",
+        "Se não aparecer Lista de verificação confirmada, verifique se as três caixas da Lista de verificação operacional estão assinaladas. Clique em Confirmar que o trabalho está concluído. (Esperado: A confirmação é concluída e apresenta o selo Lista de verificação confirmada.)",
+        "Se o dispositivo estava offline quando clicou em Confirmar que o trabalho está concluído, volte a ligar-se à rede do laboratório. Verifique o estado de sincronização antes de clicar novamente. (Esperado: As confirmações em fila sincronizam-se sem criar tentativas duplicadas.)",
         "Abra a amostra no Registo de amostras, clique em Trabalhos e resultados. Inspecione o cartão Pré-requisitos de preparação. (Esperado: Pode ver a Secagem ao ar e a Preparação de amostras lado a lado e identificar qual delas ainda está aberta ou a aguardar verificação.)",
-        "Verifique se a linha indica A aguardar verificação do gerente (utilizado quando a opção Exigir verificação do gerente nas portas de preparação está ativa em Políticas). (Esperado: Vê se um Gerente de Laboratório precisa de clicar em verificar em Portas operacionais para desbloquear os ensaios de bancada.)",
-        "Se ambas as portas de preparação estiverem verificadas mas um ensaio de bancada continuar bloqueado, leia o selo de bloqueio nessa linha de ensaio (como uma calibração de instrumento expirada em Equipamento). (Esperado: Resolve o bloqueio exato em vez de repetir a preparação.)"
+        "Verifique se a linha indica A aguardar verificação do gerente (utilizado quando a opção Exigir a aprovação das etapas de preparação pelo responsável está ativa em Políticas). (Esperado: Vê se um Gerente de Laboratório precisa de clicar em verificar em Etapas de preparação obrigatórias para desbloquear os ensaios de bancada.)",
+        "Se ambas as etapas de preparação estiverem verificadas mas um ensaio de bancada continuar bloqueado, leia o selo de bloqueio nessa linha de ensaio (como uma calibração de instrumento expirada em Equipamento). (Esperado: Resolve o bloqueio exato em vez de repetir a preparação.)"
       ],
       "caution": "Nunca volte a dar entrada a uma amostra na receção nem repita a crivagem física apenas para limpar um selo de estado.",
       "related": [],
@@ -2543,7 +2543,7 @@
         "workbench"
       ],
       "minutes": 3,
-      "quick": "No Workbench, filtre por Secagem ao ar ou Preparação de amostras, selecione apenas os tabuleiros que concluíram fisicamente a etapa, verifique a lista de verificação e os parâmetros de cada linha. Clique em Confirmar conclusão.",
+      "quick": "No Workbench, filtre por Secagem ao ar ou Preparação de amostras, selecione apenas os tabuleiros que concluíram fisicamente a etapa, verifique a lista de verificação e os parâmetros de cada linha. Clique em Confirmar que o trabalho está concluído.",
       "before": [
         "Tenha à sua frente a folha da estante de secagem ou o registo da bancada de crivagem.",
         "Confira a etiqueta de cada tabuleiro na estante com as linhas selecionadas no ecrã."
@@ -2561,7 +2561,7 @@
               "expected": "Apenas as amostras fisicamente concluídas permanecem selecionadas no lote."
             },
             {
-              "action": "Preencha os itens obrigatórios da lista de verificação. Clique em Confirmar conclusão (ou no botão de confirmação em lote que mostra o número exato de amostras selecionadas).",
+              "action": "Preencha os itens obrigatórios da lista de verificação. Clique em Confirmar que o trabalho está concluído (ou no botão de confirmação em lote que mostra o número exato de amostras selecionadas).",
               "expected": "Cada amostra selecionada recebe o seu próprio comprovativo Lista de verificação confirmada e avança para a etapa seguinte."
             }
           ]
@@ -2574,7 +2574,7 @@
           "Filtra a fila para que possa processar toda uma estante de secagem ou crivagem de uma só vez."
         ],
         [
-          "Confirmar conclusão",
+          "Confirmar que o trabalho está concluído",
           "Botão de confirmação em lote no rodapé do Workbench",
           "Guarda os comprovativos de conclusão de preparação para todas as linhas selecionadas em simultâneo."
         ],
@@ -2602,7 +2602,7 @@
       "steps": [
         "Abra o Workbench, escolha Secagem ao ar ou Preparação de amostras em Tipo de trabalho:. Selecione as linhas correspondentes aos tabuleiros da sua estante. (Esperado: As linhas de amostra selecionadas ficam destacadas e a barra de ações em lote aparece na parte inferior da tabela.)",
         "Verifique cada linha selecionada para garantir que qualquer tabuleiro ainda húmido ou por crivar é desmarcado antes de confirmar. (Esperado: Apenas as amostras fisicamente concluídas permanecem selecionadas no lote.)",
-        "Preencha os itens obrigatórios da lista de verificação. Clique em Confirmar conclusão (ou no botão de confirmação em lote que mostra o número exato de amostras selecionadas). (Esperado: Cada amostra selecionada recebe o seu próprio comprovativo Lista de verificação confirmada e avança para a etapa seguinte.)"
+        "Preencha os itens obrigatórios da lista de verificação. Clique em Confirmar que o trabalho está concluído (ou no botão de confirmação em lote que mostra o número exato de amostras selecionadas). (Esperado: Cada amostra selecionada recebe o seu próprio comprovativo Lista de verificação confirmada e avança para a etapa seguinte.)"
       ],
       "caution": "Nunca utilize a opção de selecionar tudo para confirmar uma estante inteira sem verificar se algum tabuleiro individual ficou retido.",
       "related": [
@@ -2617,7 +2617,7 @@
       "category": "preparation",
       "kind": "guide",
       "title": "Resolver uma conclusão histórica com evidência em falta",
-      "summary": "Trate uma amostra histórica ou importada que apresente A evidência necessita de verificação na sua porta de preparação.",
+      "summary": "Trate uma amostra histórica ou importada que apresente A evidência necessita de verificação na sua etapa de preparação.",
       "roles": [
         "LAB_TECHNICIAN",
         "LAB_MANAGER"
@@ -2629,7 +2629,7 @@
         "manager-queue"
       ],
       "minutes": 3,
-      "quick": "Quando uma amostra importada ou antiga mostrar A evidência necessita de verificação em Pré-requisitos de preparação, não invente pesos falsos de secagem. Peça ao seu Gerente de Laboratório ou Oficial de Qualidade e Auditoria para rever o registo histórico e verificar a porta no separador Trabalhos e resultados da amostra.",
+      "quick": "Quando uma amostra importada ou antiga mostrar A evidência necessita de verificação em Pré-requisitos de preparação, não invente pesos falsos de secagem. Peça ao seu Gerente de Laboratório ou Oficial de Qualidade e Auditoria para rever o registo histórico e verificar a etapa no separador Trabalhos e resultados da amostra.",
       "before": [
         "Abra a amostra no Registo de amostras. Clique no separador Trabalhos e resultados.",
         "Verifique se a amostra teve origem na Importação de dados históricos ou num fluxo de trabalho anterior."
@@ -2639,7 +2639,7 @@
           "title": "Procedimento passo a passo",
           "steps": [
             {
-              "action": "Abra o separador Trabalhos e resultados da amostra e leia o selo de estado em Pré-requisitos de preparação e Portas operacionais.",
+              "action": "Abra o separador Trabalhos e resultados da amostra e leia o selo de estado em Pré-requisitos de preparação e Etapas de preparação obrigatórias.",
               "expected": "Se a conclusão histórica tiver sido importada sem um comprovativo completo de lista de verificação, a linha mostra A evidência necessita de verificação."
             },
             {
@@ -2647,7 +2647,7 @@
               "expected": "Confirma se o solo já foi seco e crivado ou se é necessária uma nova preparação física."
             },
             {
-              "action": "Peça ao Gerente de Laboratório para registar a decisão de verificação em Portas operacionais (ou abrir uma nova tentativa de preparação caso o solo tenha de ser preparado agora).",
+              "action": "Peça ao Gerente de Laboratório para registar a decisão de verificação em Etapas de preparação obrigatórias (ou abrir uma nova tentativa de preparação caso o solo tenha de ser preparado agora).",
               "expected": "A lacuna de evidência é resolvida com transparência no registo de auditoria e as linhas de ensaio de bancada são desbloqueadas."
             }
           ]
@@ -2660,7 +2660,7 @@
           "Alerta a equipa. Assim, os detalhes históricos em falta sejam revistos em vez de ignorados em silêncio."
         ],
         [
-          "Portas operacionais",
+          "Etapas de preparação obrigatórias",
           "Painel de verificação do gerente no separador Trabalhos e resultados da amostra",
           "Permite a um gerente autorizado verificar a preparação histórica ou exigir uma nova tentativa."
         ],
@@ -2670,14 +2670,14 @@
           "Fica verde assim que o gerente verifica o registo histórico ou uma nova tentativa é concluída."
         ]
       ],
-      "example": "Na amostra importada LEGACY-25-0041, veja A evidência necessita de verificação em Pré-requisitos de preparação, confirme que o frasco de 2 mm existe no arquivo. Peça ao Gerente de Laboratório para verificar a porta em Portas operacionais.",
+      "example": "Na amostra importada LEGACY-25-0041, veja A evidência necessita de verificação em Pré-requisitos de preparação, confirme que o frasco de 2 mm existe no arquivo. Peça ao Gerente de Laboratório para verificar a etapa em Etapas de preparação obrigatórias.",
       "success": "Os registos históricos de preparação são verificados com transparência por um gerente sem inventar números de bancada.",
       "nextActor": "Gerente de Laboratório ou Oficial de Qualidade e Auditoria",
       "problems": [
         {
           "symptom": "Um técnico tenta digitar pesos de secagem inventados apenas para limpar um selo A evidência necessita de verificação.",
           "why": "A equipa de bancada quer desbloquear rapidamente uma linha de ensaio, mas digitar pesos inventados cria dados falsos de auditoria.",
-          "action": "Pare. Peça ao seu Gerente de Laboratório para verificar a porta histórica em Portas operacionais no separador Trabalhos e resultados da amostra."
+          "action": "Pare. Peça ao seu Gerente de Laboratório para verificar a etapa histórica em Etapas de preparação obrigatórias no separador Trabalhos e resultados da amostra."
         }
       ],
       "sources": [
@@ -2686,11 +2686,11 @@
         "server/services/workbenchReadinessService.js"
       ],
       "steps": [
-        "Abra o separador Trabalhos e resultados da amostra e leia o selo de estado em Pré-requisitos de preparação e Portas operacionais. (Esperado: Se a conclusão histórica tiver sido importada sem um comprovativo completo de lista de verificação, a linha mostra A evidência necessita de verificação.)",
+        "Abra o separador Trabalhos e resultados da amostra e leia o selo de estado em Pré-requisitos de preparação e Etapas de preparação obrigatórias. (Esperado: Se a conclusão histórica tiver sido importada sem um comprovativo completo de lista de verificação, a linha mostra A evidência necessita de verificação.)",
         "Verifique o frasco físico de arquivo da amostra ou o caderno histórico do laboratório juntamente com o seu Gerente de Laboratório. (Esperado: Confirma se o solo já foi seco e crivado ou se é necessária uma nova preparação física.)",
-        "Peça ao Gerente de Laboratório para registar a decisão de verificação em Portas operacionais (ou abrir uma nova tentativa de preparação caso o solo tenha de ser preparado agora). (Esperado: A lacuna de evidência é resolvida com transparência no registo de auditoria e as linhas de ensaio de bancada são desbloqueadas.)"
+        "Peça ao Gerente de Laboratório para registar a decisão de verificação em Etapas de preparação obrigatórias (ou abrir uma nova tentativa de preparação caso o solo tenha de ser preparado agora). (Esperado: A lacuna de evidência é resolvida com transparência no registo de auditoria e as linhas de ensaio de bancada são desbloqueadas.)"
       ],
-      "caution": "Nunca digite temperaturas ou pesos inventados para amostras históricas — utilize a verificação do gerente em Portas operacionais.",
+      "caution": "Nunca digite temperaturas ou pesos inventados para amostras históricas — utilize a verificação do gerente em Etapas de preparação obrigatórias.",
       "related": [
         "start-first-login",
         "quality-support"
@@ -2725,15 +2725,15 @@
           "title": "Procedimento passo a passo",
           "steps": [
             {
-              "action": "Abra a amostra no Registo de amostras, clique em Trabalhos e resultados. Inspecione Pré-requisitos de preparação e Portas operacionais.",
+              "action": "Abra a amostra no Registo de amostras, clique em Trabalhos e resultados. Inspecione Pré-requisitos de preparação e Etapas de preparação obrigatórias.",
               "expected": "Vê o comprovativo original Lista de verificação confirmada com o nome do operador e a data/hora."
             },
             {
-              "action": "Peça a um Gerente de Laboratório para reabrir a porta de preparação com um motivo escrito, de modo a criar uma nova tentativa de preparação mantendo o comprovativo original preservado no histórico.",
+              "action": "Peça a um Gerente de Laboratório para reabrir a etapa de preparação com um motivo escrito, de modo a criar uma nova tentativa de preparação mantendo o comprovativo original preservado no histórico.",
               "expected": "A tarefa de preparação volta a aparecer no Workbench para a nova tentativa."
             },
             {
-              "action": "Realize a secagem ou crivagem física na porção de substituição, introduza as novas medições no Workbench, assinale a Lista de verificação operacional. Clique em Confirmar conclusão.",
+              "action": "Realize a secagem ou crivagem física na porção de substituição, introduza as novas medições no Workbench, assinale a Lista de verificação operacional. Clique em Confirmar que o trabalho está concluído.",
               "expected": "É registado um novo comprovativo Lista de verificação confirmada para a repetição da preparação, associado aos ensaios de bancada seguintes."
             }
           ]
@@ -2751,19 +2751,19 @@
           "Registe o código de barras do novo frasco de subamostra e marque qualquer frasco derramado ou contaminado como retirado."
         ],
         [
-          "Confirmar conclusão",
+          "Confirmar que o trabalho está concluído",
           "Botão no Workbench para guardar a nova tentativa de preparação",
           "Cria um novo comprovativo com data e hora para o material preparado de novo."
         ]
       ],
-      "example": "Depois de um frasco de 2 mm cair acidentalmente na bancada, peça ao gerente para reabrir a Preparação de amostras em DEMO-26-000142, crive uma nova porção de 200 g a partir do saco original, imprima uma nova etiqueta de frasco. Clique em Confirmar conclusão.",
+      "example": "Depois de um frasco de 2 mm cair acidentalmente na bancada, peça ao gerente para reabrir a Preparação de amostras em DEMO-26-000142, crive uma nova porção de 200 g a partir do saco original, imprima uma nova etiqueta de frasco. Clique em Confirmar que o trabalho está concluído.",
       "success": "O solo preparado novamente tem um novo comprovativo de preparação limpo enquanto o histórico original permanece intacto.",
-      "nextActor": "Gerente de Laboratório (para reabrir a porta) e Técnico de Preparação (para registar a nova tentativa)",
+      "nextActor": "Gerente de Laboratório (para reabrir a etapa) e Técnico de Preparação (para registar a nova tentativa)",
       "problems": [
         {
           "symptom": "As caixas de verificação de secagem ou crivagem estão bloqueadas e não podem ser editadas numa amostra que já confirmou.",
           "why": "Os comprovativos de preparação confirmados são bloqueados para proteger o registo de auditoria.",
-          "action": "Não tente editar o comprovativo antigo. Peça ao seu Gerente de Laboratório para reabrir a porta de preparação no separador Trabalhos e resultados da amostra."
+          "action": "Não tente editar o comprovativo antigo. Peça ao seu Gerente de Laboratório para reabrir a etapa de preparação no separador Trabalhos e resultados da amostra."
         }
       ],
       "sources": [
@@ -2772,9 +2772,9 @@
         "server/services/workbenchReadinessService.js"
       ],
       "steps": [
-        "Abra a amostra no Registo de amostras, clique em Trabalhos e resultados. Inspecione Pré-requisitos de preparação e Portas operacionais. (Esperado: Vê o comprovativo original Lista de verificação confirmada com o nome do operador e a data/hora.)",
-        "Peça a um Gerente de Laboratório para reabrir a porta de preparação com um motivo escrito, de modo a criar uma nova tentativa de preparação mantendo o comprovativo original preservado no histórico. (Esperado: A tarefa de preparação volta a aparecer no Workbench para a nova tentativa.)",
-        "Realize a secagem ou crivagem física na porção de substituição, introduza as novas medições no Workbench, assinale a Lista de verificação operacional. Clique em Confirmar conclusão. (Esperado: É registado um novo comprovativo Lista de verificação confirmada para a repetição da preparação, associado aos ensaios de bancada seguintes.)"
+        "Abra a amostra no Registo de amostras, clique em Trabalhos e resultados. Inspecione Pré-requisitos de preparação e Etapas de preparação obrigatórias. (Esperado: Vê o comprovativo original Lista de verificação confirmada com o nome do operador e a data/hora.)",
+        "Peça a um Gerente de Laboratório para reabrir a etapa de preparação com um motivo escrito, de modo a criar uma nova tentativa de preparação mantendo o comprovativo original preservado no histórico. (Esperado: A tarefa de preparação volta a aparecer no Workbench para a nova tentativa.)",
+        "Realize a secagem ou crivagem física na porção de substituição, introduza as novas medições no Workbench, assinale a Lista de verificação operacional. Clique em Confirmar que o trabalho está concluído. (Esperado: É registado um novo comprovativo Lista de verificação confirmada para a repetição da preparação, associado aos ensaios de bancada seguintes.)"
       ],
       "caution": "Etiquete sempre o frasco preparado de novo e marque qualquer frasco contaminado como retirado em Recipientes e alíquotas.",
       "related": [
@@ -2984,7 +2984,7 @@
         },
         {
           "symptom": "Duas das 40 linhas coladas foram excluídas na pré-visualização.",
-          "why": "Essas duas amostras ainda têm uma porta de Secagem ao ar ou Preparação de amostras aberta, ou os respetivos IDs apareceram duas vezes na lista colada.",
+          "why": "Essas duas amostras ainda têm uma etapa de Secagem ao ar ou Preparação de amostras aberta, ou os respetivos IDs apareceram duas vezes na lista colada.",
           "action": "Leia o motivo de exclusão junto a cada linha, aplique agora as 38 linhas válidas e conclua a preparação das 2 amostras bloqueadas antes de as registar."
         },
         {
@@ -3069,8 +3069,8 @@
           "Requer um instrumento que esteja Em Serviço e Pronto / Calibrado quando as verificações de equipamento são obrigatórias."
         ],
         [
-          "Número da tentativa",
-          "Mostra se esta é a primeira medição (Tentativa 1) ou uma repetição (Tentativa 2+)",
+          "Tentativa",
+          "Mostra se esta é a primeira medição (Tentativa n.º 1) ou uma repetição (Tentativa n.º 2+)",
           "As repetições são registadas como uma nova tentativa. Assim, as medições anteriores permaneçam intactas no registo de auditoria."
         ]
       ],
@@ -3379,7 +3379,7 @@
         "manager-queue"
       ],
       "minutes": 3,
-      "quick": "Quando um revisor devolver um resultado, abra o item em Meu trabalho ou no Workbench, leia a faixa com o motivo da devolução, realize a verificação ou nova análise solicitada na nova tentativa (Tentativa 2). Registe e envie o resultado corrigido.",
+      "quick": "Quando um revisor devolver um resultado, abra o item em Meu trabalho ou no Workbench, leia a faixa com o motivo da devolução, realize a verificação ou nova análise solicitada na nova tentativa (Tentativa n.º 2). Registe e envie o resultado corrigido.",
       "before": [
         "Leia atentamente o comentário de devolução do revisor para saber se deve verificar um cálculo/diluição ou repetir a análise do solo a partir do frasco.",
         "Verifique se tem o frasco correto da amostra e o instrumento calibrado prontos."
@@ -3390,7 +3390,7 @@
           "steps": [
             {
               "action": "Abra Meu trabalho ou Workbench e localize o item marcado como Devolvido.",
-              "expected": "A linha apresenta o motivo de devolução escrito pelo revisor e abre uma nova tentativa editável (como Tentativa 2), mantendo a Tentativa 1 selada."
+              "expected": "A linha apresenta o motivo de devolução escrito pelo revisor e abre uma nova tentativa editável (como Tentativa n.º 2), mantendo a Tentativa n.º 1 selada."
             },
             {
               "action": "Realize a nova medição ou correção solicitada pelo revisor. Introduza o novo valor, o instrumento e o controlo de qualidade do lote na tentativa ativa.",
@@ -3412,7 +3412,7 @@
         [
           "Tentativas",
           "Tentativas de medição numeradas num item de ensaio",
-          "A Tentativa 1 permanece selada de forma permanente para o histórico de auditoria enquanto introduz a repetição na Tentativa 2."
+          "A Tentativa n.º 1 permanece selada de forma permanente para o histórico de auditoria enquanto introduz a repetição na Tentativa n.º 2."
         ],
         [
           "Notas de revisão",
@@ -3420,14 +3420,14 @@
           "Indica se o problema foi um branco reprovado, desvio de duplicata ou erro de diluição."
         ]
       ],
-      "example": "Abra a tarefa devolvida de fósforo disponível Olsen para DEMO-26-000142, leia \"Branco excedeu o limite — reextrair com reagente fresco\", execute a Tentativa 2 com um novo lote de reagente, registe 14.2 mg/kg e envie para revisão.",
+      "example": "Abra a tarefa devolvida de fósforo disponível Olsen para DEMO-26-000142, leia \"Branco excedeu o limite — reextrair com reagente fresco\", execute a Tentativa n.º 2 com um novo lote de reagente, registe 14.2 mg/kg e envie para revisão.",
       "success": "A medição de repetição fica registada numa nova tentativa e é enviada de volta ao revisor com todo o histórico preservado.",
       "nextActor": "Gerente de Laboratório ou Oficial de Qualidade e Auditoria em Revisar envios",
       "problems": [
         {
-          "symptom": "Clica na Tentativa 1 de uma amostra devolvida e a caixa de valor não permite digitar.",
+          "symptom": "Clica na Tentativa n.º 1 de uma amostra devolvida e a caixa de valor não permite digitar.",
           "why": "As tentativas anteriores ficam seladas permanentemente após o envio. Assim, o laboratório nunca perca dados históricos.",
-          "action": "Selecione a nova tentativa ativa (Tentativa 2) na linha do Workbench para introduzir a sua medição de repetição."
+          "action": "Selecione a nova tentativa ativa (Tentativa n.º 2) na linha do Workbench para introduzir a sua medição de repetição."
         }
       ],
       "sources": [
@@ -3437,11 +3437,11 @@
         "client/src/components/workbench/ReviewSubmissionView.jsx"
       ],
       "steps": [
-        "Abra Meu trabalho ou Workbench e localize o item marcado como Devolvido. (Esperado: A linha apresenta o motivo de devolução escrito pelo revisor e abre uma nova tentativa editável (como Tentativa 2), mantendo a Tentativa 1 selada.)",
+        "Abra Meu trabalho ou Workbench e localize o item marcado como Devolvido. (Esperado: A linha apresenta o motivo de devolução escrito pelo revisor e abre uma nova tentativa editável (como Tentativa n.º 2), mantendo a Tentativa n.º 1 selada.)",
         "Realize a nova medição ou correção solicitada pelo revisor. Introduza o novo valor, o instrumento e o controlo de qualidade do lote na tentativa ativa. (Esperado: A nova tentativa é guardada na folha de trabalho juntamente com o histórico preservado da tentativa anterior.)",
         "Clique em Rever conclusão → Registar. Depois abra Pronto a submeter, adicione uma nota a explicar o que corrigiu. Clique em Enviar. (Esperado: A nova tentativa é enviada para Revisar envios e o alerta Devolvido desaparece da sua fila.)"
       ],
-      "caution": "Nunca tente eliminar nem substituir a Tentativa 1 — registe sempre as medições de repetição na nova tentativa.",
+      "caution": "Nunca tente eliminar nem substituir a Tentativa n.º 1 — registe sempre as medições de repetição na nova tentativa.",
       "related": [
         "start-first-login",
         "quality-support"
@@ -3480,7 +3480,7 @@
             },
             {
               "action": "Se a Secagem ao ar ou a Preparação de amostras ainda estiver aberta, mude Tipo de trabalho: no Workbench para essa etapa de preparação e conclua-a. Confirme-a primeiro.",
-              "expected": "Confirmar a porta de preparação em falta (e obter a verificação do gerente se exigido pelas Políticas) remove o bloqueio de pré-requisito."
+              "expected": "Confirmar a etapa de preparação em falta (e obter a verificação do gerente se exigido pelas Políticas) remove o bloqueio de pré-requisito."
             },
             {
               "action": "Se o bloqueio indicar que o instrumento está com Calibração Expirada / Bloqueado, abra Equipamento. Registe uma Calibração atual ou selecione outro instrumento Pronto / Calibrado.",
@@ -3502,8 +3502,8 @@
         ],
         [
           "A evidência necessita de verificação",
-          "Selo apresentado quando uma porta de preparação aguarda aprovação do gerente",
-          "Desaparece quando um gerente verifica a porta em Portas operacionais."
+          "Selo apresentado quando uma etapa de preparação aguarda aprovação do gerente",
+          "Desaparece quando um gerente verifica a etapa em Etapas de preparação obrigatórias."
         ]
       ],
       "example": "Veja que a introdução de pH para DEMO-26-000142 está bloqueada por Preparação de amostras, mude Tipo de trabalho: para Preparação de amostras, confirme a crivagem a 2 mm e regresse à linha de pH desbloqueada.",
@@ -3524,7 +3524,7 @@
       ],
       "steps": [
         "No Workbench (ou no separador Trabalhos e resultados da amostra), leia a mensagem de bloqueio apresentada na linha bloqueada. (Esperado: A mensagem identifica o requisito específico em falta: receção, Secagem ao ar, Preparação de amostras, verificação do gerente, atribuição ou prontidão de Equipamento.)",
-        "Se a Secagem ao ar ou a Preparação de amostras ainda estiver aberta, mude Tipo de trabalho: no Workbench para essa etapa de preparação e conclua-a. Confirme-a primeiro. (Esperado: Confirmar a porta de preparação em falta (e obter a verificação do gerente se exigido pelas Políticas) remove o bloqueio de pré-requisito.)",
+        "Se a Secagem ao ar ou a Preparação de amostras ainda estiver aberta, mude Tipo de trabalho: no Workbench para essa etapa de preparação e conclua-a. Confirme-a primeiro. (Esperado: Confirmar a etapa de preparação em falta (e obter a verificação do gerente se exigido pelas Políticas) remove o bloqueio de pré-requisito.)",
         "Se o bloqueio indicar que o instrumento está com Calibração Expirada / Bloqueado, abra Equipamento. Registe uma Calibração atual ou selecione outro instrumento Pronto / Calibrado. (Esperado: Assim que o pré-requisito ou a verificação do instrumento é cumprido, a linha de ensaio fica desbloqueada no Workbench.)"
       ],
       "caution": "Cada bloqueio no Workbench aponta para uma etapa específica em falta — conclua essa etapa em vez de procurar um atalho.",
@@ -4510,7 +4510,7 @@
         {
           "symptom": "O Solo de Referência falha com um alerta vermelho e o lote fica bloqueado para aprovação.",
           "why": "Quando o laboratório define o modo de bloqueio de CQ como Obrigatório, bloqueante, um Branco, Duplicata ou Solo de Referência reprovado bloqueia automaticamente a aprovação das amostras para evitar a emissão de dados incorretos.",
-          "action": "Verifique primeiro se houve um erro de digitação ou seleção errada do lote de Material de Referência. Se a corrida química tiver realmente sofrido deriva, notifique o seu Gerente de Laboratório para repetir o intervalo de calibração ou reprovar e repetir o lote."
+          "action": "Verifique primeiro se houve um erro de digitação ou seleção errada do lote de Material de Referência. Se a corrida química tiver realmente sofrido deriva, notifique o seu Gerente de Laboratório para repetir as amostras desde a última verificação válida do instrumento ou reprovar e repetir o lote."
         }
       ],
       "sources": [
@@ -4567,7 +4567,7 @@
               "expected": "Pode decidir se avança com uma ressalva de condição documentada ou se rejeita a amostra."
             },
             {
-              "action": "Registe a sua decisão de gerência para aceitar a amostra com ressalva (desbloqueando a Secagem ao ar) ou confirmar Rejeitado (Não conformidade) e notificar o cliente ou gerente de projeto.",
+              "action": "Registe a sua decisão de gerência para aceitar a amostra com ressalva (desbloqueando a Secagem ao ar) ou confirmar Rejeitada (problema registado) e notificar o cliente ou gerente de projeto.",
               "expected": "A decisão e o motivo ficam guardados no histórico de auditoria da amostra e refletidos em qualquer futuro Certificado de análise."
             }
           ]
@@ -4580,7 +4580,7 @@
           "Bloqueia a secagem e os ensaios de bancada até que um gerente avalie o saco físico."
         ],
         [
-          "Rejeitado (Não conformidade)",
+          "Rejeitada (problema registado)",
           "Estado final de uma amostra que não pode ser analisada devido a danos graves ou falta de solo",
           "Mantém um registo permanente do motivo pelo qual o saco entregue não pôde ser ensaiado."
         ],
@@ -4608,7 +4608,7 @@
       "steps": [
         "Abra Recepção de amostras ou Registo de amostras e filtre por amostras Em quarentena ou receções recentes com exceções de condição. (Esperado: Vê o peso medido pelo técnico de receção, as verificações de condição Aprovado/Reprovado e a descrição escrita do problema.)",
         "Inspecione o saco físico. Verifique 3. Análises para avaliar se existe solo não contaminado suficiente para os ensaios prioritários. (Esperado: Pode decidir se avança com uma ressalva de condição documentada ou se rejeita a amostra.)",
-        "Registe a sua decisão de gerência para aceitar a amostra com ressalva (desbloqueando a Secagem ao ar) ou confirmar Rejeitado (Não conformidade) e notificar o cliente ou gerente de projeto. (Esperado: A decisão e o motivo ficam guardados no histórico de auditoria da amostra e refletidos em qualquer futuro Certificado de análise.)"
+        "Registe a sua decisão de gerência para aceitar a amostra com ressalva (desbloqueando a Secagem ao ar) ou confirmar Rejeitada (problema registado) e notificar o cliente ou gerente de projeto. (Esperado: A decisão e o motivo ficam guardados no histórico de auditoria da amostra e refletidos em qualquer futuro Certificado de análise.)"
       ],
       "caution": "Nunca liberte um saco com fugas ou contaminação cruzada para análise de rotina sem documentar a ressalva de condição.",
       "related": [
@@ -4750,11 +4750,11 @@
             },
             {
               "action": "Se um resultado ou lote precisar de repetição ou correção, clique em Devolver (ou Devolver para revisão), selecione as linhas afetadas e escreva uma instrução clara a explicar o que corrigir.",
-              "expected": "Os itens devolvidos reabrem na Bancada de trabalho do técnico como uma nova tentativa (Tentativa 2), enquanto a Tentativa 1 permanece selada no histórico."
+              "expected": "Os itens devolvidos reabrem na Bancada de trabalho do técnico como uma nova tentativa (Tentativa n.º 2), enquanto a Tentativa n.º 1 permanece selada no histórico."
             },
             {
               "action": "Se as medições e os controlos de qualidade cumprirem os critérios do seu laboratório, clique em Aprovar.",
-              "expected": "As determinações avançam para Aprovado e bloqueiam o valor reportado oficial de cada parâmetro."
+              "expected": "As determinações avançam para Aprovado e bloqueiam o valor final do relatório oficial de cada parâmetro."
             }
           ]
         },
@@ -4813,8 +4813,8 @@
         "Abra a Lista de tarefas. Clique no separador Revisar envios. Verifique o seu laboratório ativo e os filtros da fila. (Esperado: Vê todos os lotes de métodos e determinações que os técnicos submeteram formalmente para revisão.)",
         "Abra um lote ou amostra submetida. Verifique quais as análises incluídas e se a submissão é total ou parcial. (Esperado: Vê as determinações exatas submetidas neste lote juntamente com outros ensaios da mesma amostra.)",
         "Inspecione os valores das amostras, as unidades, a base de humidade, o instrumento calibrado, os comprovativos de preparação e os resultados de CQ do lote (Branco, Duplicata, Solo de referência e verificações de calibração). (Esperado: Cada medição é suportada por CQ aprovado (ou um selo claro de aviso/falha) e rastreabilidade válida do equipamento.)",
-        "Se um resultado ou lote precisar de repetição ou correção, clique em Devolver (ou Devolver para revisão), selecione as linhas afetadas e escreva uma instrução clara a explicar o que corrigir. (Esperado: Os itens devolvidos reabrem na Bancada de trabalho do técnico como uma nova tentativa (Tentativa 2), enquanto a Tentativa 1 permanece selada no histórico.)",
-        "Se as medições e os controlos de qualidade cumprirem os critérios do seu laboratório, clique em Aprovar. (Esperado: As determinações avançam para Aprovado e bloqueiam o valor reportado oficial de cada parâmetro.)",
+        "Se um resultado ou lote precisar de repetição ou correção, clique em Devolver (ou Devolver para revisão), selecione as linhas afetadas e escreva uma instrução clara a explicar o que corrigir. (Esperado: Os itens devolvidos reabrem na Bancada de trabalho do técnico como uma nova tentativa (Tentativa n.º 2), enquanto a Tentativa n.º 1 permanece selada no histórico.)",
+        "Se as medições e os controlos de qualidade cumprirem os critérios do seu laboratório, clique em Aprovar. (Esperado: As determinações avançam para Aprovado e bloqueiam o valor final do relatório oficial de cada parâmetro.)",
         "Verifique se todas as análises solicitadas para a amostra já estão aprovadas para que possa avançar para Aprovações finais. (Esperado: As amostras com todos os ensaios aprovados aparecem em Aprovações finais para revisão global da amostra.)",
         "Assim que a validação em Aprovações finais estiver concluída, abra Relatórios para gerar e verificar o Certificado de análise oficial. (Esperado: A revisão técnica de lote (Etapa 1), a aprovação final da amostra (Etapa 2) e a emissão do relatório PDF permanecem distintas e totalmente rastreáveis.)"
       ],
@@ -4855,11 +4855,11 @@
             },
             {
               "action": "Clique em Devolver na determinação específica (ou reprove/devolva o lote se um controlo do lote tiver falhado) e escreva uma nota específica indicando o parâmetro, o motivo e se deve voltar a pesar ou diluir.",
-              "expected": "O sistema mantém a Tentativa 1 selada no registo de auditoria e abre a Tentativa 2 na Bancada de trabalho do técnico com a sua nota escrita."
+              "expected": "O sistema mantém a Tentativa n.º 1 selada no registo de auditoria e abre a Tentativa n.º 2 na Bancada de trabalho do técnico com a sua nota escrita."
             },
             {
-              "action": "Quando o técnico submeter a Tentativa 2, compare a Tentativa 1 e a Tentativa 2 em Revisar envios. Verifique qual a regra de valor reportado aplicável (média de réplicas concordantes ou última tentativa válida) antes de clicar em Aprovar.",
-              "expected": "O Valor reportado aprovado fica bloqueado de forma limpa com o histórico completo de ambas as tentativas."
+              "action": "Quando o técnico submeter a Tentativa n.º 2, compare a Tentativa n.º 1 e a Tentativa n.º 2 em Revisar envios. Verifique qual a regra de valor final do relatório aplicável (média de réplicas concordantes ou última tentativa válida) antes de clicar em Aprovar.",
+              "expected": "O Valor final do relatório aprovado fica bloqueado de forma limpa com o histórico completo de ambas as tentativas."
             }
           ]
         }
@@ -4876,13 +4876,13 @@
           "Escreva uma instrução concreta (como \"Repetir na diluição 1:10 — acima da curva de calibração\") em vez de apenas \"Corrigir\"."
         ],
         [
-          "Valor reportado",
+          "Valor final do relatório",
           "O valor oficial selecionado para o relatório após a revisão",
           "Segue a política do seu laboratório (média dentro do limite de repetibilidade, última tentativa válida ou escolha do revisor)."
         ]
       ],
-      "example": "Em Revisar envios, devolva o P Olsen da amostra DEMO-26-000142 com a nota \"Leitura de 95 mg/kg excede o padrão máximo — diluir 1:5 e voltar a medir na Tentativa 2\".",
-      "success": "O técnico recebe uma instrução inequívoca na sua bancada e regista a Tentativa 2 sem dúvidas.",
+      "example": "Em Revisar envios, devolva o P Olsen da amostra DEMO-26-000142 com a nota \"Leitura de 95 mg/kg excede o padrão máximo — diluir 1:5 e voltar a medir na Tentativa n.º 2\".",
+      "success": "O técnico recebe uma instrução inequívoca na sua bancada e regista a Tentativa n.º 2 sem dúvidas.",
       "nextActor": "Técnico de Laboratório atribuído em Meu trabalho e Bancada de trabalho",
       "problems": [
         {
@@ -4898,10 +4898,10 @@
       ],
       "steps": [
         "Abra Lista de tarefas → Revisar envios. Inspecione a corrida ou amostra submetida. (Esperado: Vê todas as tentativas de medição, a concordância entre réplicas e os resultados de controlo de qualidade.)",
-        "Clique em Devolver na determinação específica (ou reprove/devolva o lote se um controlo do lote tiver falhado) e escreva uma nota específica indicando o parâmetro, o motivo e se deve voltar a pesar ou diluir. (Esperado: O sistema mantém a Tentativa 1 selada no registo de auditoria e abre a Tentativa 2 na Bancada de trabalho do técnico com a sua nota escrita.)",
-        "Quando o técnico submeter a Tentativa 2, compare a Tentativa 1 e a Tentativa 2 em Revisar envios. Verifique qual a regra de valor reportado aplicável (média de réplicas concordantes ou última tentativa válida) antes de clicar em Aprovar. (Esperado: O Valor reportado aprovado fica bloqueado de forma limpa com o histórico completo de ambas as tentativas.)"
+        "Clique em Devolver na determinação específica (ou reprove/devolva o lote se um controlo do lote tiver falhado) e escreva uma nota específica indicando o parâmetro, o motivo e se deve voltar a pesar ou diluir. (Esperado: O sistema mantém a Tentativa n.º 1 selada no registo de auditoria e abre a Tentativa n.º 2 na Bancada de trabalho do técnico com a sua nota escrita.)",
+        "Quando o técnico submeter a Tentativa n.º 2, compare a Tentativa n.º 1 e a Tentativa n.º 2 em Revisar envios. Verifique qual a regra de valor final do relatório aplicável (média de réplicas concordantes ou última tentativa válida) antes de clicar em Aprovar. (Esperado: O Valor final do relatório aprovado fica bloqueado de forma limpa com o histórico completo de ambas as tentativas.)"
       ],
-      "caution": "Nunca peça a um técnico para editar um resultado fora do sistema. Utilize Devolver. Assim, a Tentativa 1 e a Tentativa 2 fiquem ambas preservadas.",
+      "caution": "Nunca peça a um técnico para editar um resultado fora do sistema. Utilize Devolver. Assim, a Tentativa n.º 1 e a Tentativa n.º 2 fiquem ambas preservadas.",
       "related": [
         "start-first-login",
         "quality-support"
@@ -4930,7 +4930,7 @@
       "quick": "Abra Lista de tarefas → Aprovações finais, inspecione em conjunto todos os resultados de ensaios aprovados da amostra, verifique quaisquer avisos de coerência entre parâmetros (como fecho textural, razão C:N ou soma de bases face à CTC). Clique em Aprovar para autorizar a emissão do relatório.",
       "before": [
         "Confirme que todos os ensaios individuais da amostra passaram na revisão da Etapa 1 (ou têm uma dispensa autorizada pela gerência caso um ensaio não tenha podido ser executado).",
-        "Verifique que não resta nenhuma Não conformidade aberta nem bloqueio de CQ por resolver na amostra."
+        "Verifique que não resta nenhum Registo de problema aberta nem bloqueio de CQ por resolver na amostra."
       ],
       "sections": [
         {
@@ -5049,7 +5049,7 @@
           "Indica o relatório oficial válido para clientes e auditores."
         ],
         [
-          "Valor reportado",
+          "Valor final do relatório",
           "Valor oficial aprovado impresso no Certificado de análise",
           "Bloqueado no momento da aprovação para que relatórios, exportações CSV e transmissões de dados mostrem sempre exatamente o mesmo número."
         ]
@@ -5119,7 +5119,7 @@
             },
             {
               "action": "Emita o Certificado de análise emendado em Relatórios.",
-              "expected": "A nova revisão do relatório passa ao estado Atuais com um aviso de substituição a indicar o que mudou. O PDF anterior fica permanentemente marcado como Substituídos."
+              "expected": "A nova revisão do relatório passa ao estado Atuais com um aviso de substituição a indicar o que mudou. O PDF anterior fica permanentemente marcado como Substituído por uma versão mais recente."
             }
           ]
         }
@@ -5131,7 +5131,7 @@
           "Impede que qualquer pessoa que leia o código QR do PDF antigo confie num resultado em reinvestigação."
         ],
         [
-          "Substituídos",
+          "Substituído por uma versão mais recente",
           "Estado permanente de uma revisão antiga do relatório assim que a revisão substituta é emitida",
           "Mantido no arquivo de auditoria enquanto encaminha os leitores para o novo relatório no estado Atuais."
         ],
@@ -5141,7 +5141,7 @@
           "Quando ativa, um segundo revisor autorizado tem de coassinar qualquer emenda antes de o novo relatório ser emitido."
         ]
       ],
-      "example": "Abra o relatório emitido RPT-DEMO-2026-00042, inicie uma emenda administrativa para corrigir um erro de digitação na profundidade de campo de \"0–2 cm\" para \"0–20 cm\", registe o motivo, obtenha a coassinatura e emita a Revisão 2 (Atuais) enquanto a Revisão 1 passa a Substituídos.",
+      "example": "Abra o relatório emitido RPT-DEMO-2026-00042, inicie uma emenda administrativa para corrigir um erro de digitação na profundidade de campo de \"0–2 cm\" para \"0–20 cm\", registe o motivo, obtenha a coassinatura e emita a Revisão 2 (Atuais) enquanto a Revisão 1 passa a Substituído por uma versão mais recente.",
       "success": "A correção é publicada de forma transparente numa nova revisão Atuais do relatório, preservando todo o histórico da Revisão 1.",
       "nextActor": "Segundo Revisor / Gerente de Laboratório e Cliente que recebe o PDF de substituição",
       "problems": [
@@ -5159,9 +5159,9 @@
       "steps": [
         "Abra Relatórios ou a amostra aprovada no Registo de amostras, inicie uma emenda de relatório, escolha emenda administrativa ou científica e escreva o motivo completo da alteração. (Esperado: Para uma emenda científica, o relatório emitido anteriormente é de imediato marcado como Retirado nas ligações públicas de verificação enquanto a correção decorre.)",
         "Efetue a correção permitida (ou peça ao técnico para registar a nova tentativa de bancada se houver repetição de análise) e conclua a revisão da gerência e a coassinatura da segunda pessoa, se exigido em Políticas. (Esperado: Tanto o valor original como o novo valor ficam preservados no histórico de auditoria.)",
-        "Emita o Certificado de análise emendado em Relatórios. (Esperado: A nova revisão do relatório passa ao estado Atuais com um aviso de substituição a indicar o que mudou. O PDF anterior fica permanentemente marcado como Substituídos.)"
+        "Emita o Certificado de análise emendado em Relatórios. (Esperado: A nova revisão do relatório passa ao estado Atuais com um aviso de substituição a indicar o que mudou. O PDF anterior fica permanentemente marcado como Substituído por uma versão mais recente.)"
       ],
-      "caution": "Envie sempre o novo PDF no estado Atuais ao cliente. Peça-lhe que descarte quaisquer impressões antigas marcadas como Substituídos.",
+      "caution": "Envie sempre o novo PDF no estado Atuais ao cliente. Peça-lhe que descarte quaisquer impressões antigas marcadas como Substituído por uma versão mais recente.",
       "related": [
         "start-first-login",
         "quality-support"
@@ -5189,7 +5189,7 @@
       "minutes": 3,
       "quick": "Em Relatórios, verifique que o selo do relatório indica Atuais, confirme o idioma do relatório e o âmbito do projeto, e descarregue ou partilhe o PDF atual ou a ligação de verificação.",
       "before": [
-        "Verifique que o estado do relatório é Atuais (nunca partilhe um relatório marcado como Retirado ou Substituídos).",
+        "Verifique que o estado do relatório é Atuais (nunca partilhe um relatório marcado como Retirado ou Substituído por uma versão mais recente).",
         "Confirme que o destinatário está autorizado a visualizar resultados daquele projeto ou pedido de cliente."
       ],
       "sections": [
@@ -5220,10 +5220,10 @@
         [
           "Criar ligação pública",
           "Código de verificação impresso no Certificado de análise",
-          "Mostra se o relatório está no estado Atuais ou se foi marcado como Retirado ou Substituídos."
+          "Mostra se o relatório está no estado Atuais ou se foi marcado como Retirado ou Substituído por uma versão mais recente."
         ],
         [
-          "Substituídos",
+          "Substituído por uma versão mais recente",
           "Selo numa revisão antiga substituída por uma emenda",
           "As ligações públicas antigas apresentam automaticamente um aviso de que existe uma revisão mais recente."
         ]
@@ -5789,7 +5789,7 @@
       "minutes": 3,
       "quick": "Abra Reagentes e Inventário para registar reagentes, padrões e material de laboratório, dar entrada de novas entregas com os respetivos números de lote e datas de validade, e registar o consumo de stock na unidade configurada para o artigo.",
       "before": [
-        "Tenha à sua frente a guia de remessa do fornecedor e os rótulos dos frascos de reagentes (com número do lote, quantidade, unidade e data de validade).",
+        "Tenha à sua frente a guia da caixa de entrega do fornecedor e os rótulos dos frascos de reagentes (com número do lote, quantidade, unidade e data de validade).",
         "Verifique a unidade base configurada para o artigo em Reagentes e Inventário (por exemplo, mL face a L, ou g face a kg)."
       ],
       "sections": [
@@ -5977,7 +5977,7 @@
               "expected": "São listados todos os lotes e determinações de amostras registados com esse instrumento ou lote."
             },
             {
-              "action": "Se um lote defeituoso ou instrumento não calibrado tiver afetado amostras aprovadas ou não aprovadas, abra um registo de Não conformidade no Painel de QA e devolva ou emende as amostras afetadas.",
+              "action": "Se um lote defeituoso ou instrumento não calibrado tiver afetado amostras aprovadas ou não aprovadas, abra um Registo de problema no Painel de QA e devolva ou emende as amostras afetadas.",
               "expected": "Circunscreve o problema exatamente aos lotes afetados sem ter de adivinhar quais as amostras que foram tocadas."
             }
           ]
@@ -5990,7 +5990,7 @@
           "Criada automaticamente sempre que os técnicos registam uma corrida na Bancada de trabalho."
         ],
         [
-          "Não conformidade",
+          "Registos de problemas",
           "Registo de incidente de qualidade no Painel de QA",
           "Utilizado para documentar a causa raiz e listar todos os lotes afetados por um instrumento defeituoso ou lote de reagente."
         ],
@@ -6000,7 +6000,7 @@
           "Permite a repetição direcionada da análise das amostras afetadas."
         ]
       ],
-      "example": "Após descobrir na quinta-feira que o lote NAHCO3-04 da solução extratora de P Olsen estava contaminado, rastreie os dois lotes que utilizaram o lote NAHCO3-04, registe uma Não conformidade e devolva essas amostras para a Tentativa 2.",
+      "example": "Após descobrir na quinta-feira que o lote NAHCO3-04 da solução extratora de P Olsen estava contaminado, rastreie os dois lotes que utilizaram o lote NAHCO3-04, registe um Registo de problema e devolva essas amostras para a Tentativa n.º 2.",
       "success": "Qualquer problema de equipamento ou reagente pode ser rastreado até às amostras exatas afetadas em poucos minutos.",
       "nextActor": "Oficial de Qualidade e Auditoria e Gerente de Laboratório",
       "problems": [
@@ -6017,7 +6017,7 @@
       "steps": [
         "Abra Equipamento (ou Reagentes e Inventário). Selecione o registo do instrumento ou do lote para ver o respetivo histórico de eventos e utilização. (Esperado: Vê a cronologia de calibrações, eventos de manutenção e lotes analíticos associados.)",
         "Abra o Painel de QA ou as corridas analíticas e filtre pelo instrumento ou lote no intervalo de datas suspeito. (Esperado: São listados todos os lotes e determinações de amostras registados com esse instrumento ou lote.)",
-        "Se um lote defeituoso ou instrumento não calibrado tiver afetado amostras aprovadas ou não aprovadas, abra um registo de Não conformidade no Painel de QA e devolva ou emende as amostras afetadas. (Esperado: Circunscreve o problema exatamente aos lotes afetados sem ter de adivinhar quais as amostras que foram tocadas.)"
+        "Se um lote defeituoso ou instrumento não calibrado tiver afetado amostras aprovadas ou não aprovadas, abra um Registo de problema no Painel de QA e devolva ou emende as amostras afetadas. (Esperado: Circunscreve o problema exatamente aos lotes afetados sem ter de adivinhar quais as amostras que foram tocadas.)"
       ],
       "caution": "Uma rastreabilidade rigorosa de lotes depende de a equipa de bancada selecionar o lote real do frasco na Bancada de trabalho em todas as corridas.",
       "related": [
@@ -6253,7 +6253,7 @@
           "Visível apenas neste dispositivo até ser sincronizado com o servidor."
         ],
         [
-          "Recuperar tentativa anterior",
+          "Verificar se a última tentativa foi guardada",
           "Comprovativo permanente atribuído apenas depois de o dispositivo voltar a ligar-se e sincronizar",
           "Necessário antes de o trabalho contar como oficialmente confirmado ou submetido."
         ]
@@ -6438,12 +6438,12 @@
       ],
       "fields": [
         [
-          "Descartar tentativa",
+          "Limpar a tentativa por concluir",
           "Valor e data/hora capturados no seu tablet ou portátil enquanto esteve desligado da rede",
           "Apresentados lado a lado com o registo do servidor para que possa compará-los antes de escolher."
         ],
         [
-          "Recuperar tentativa anterior",
+          "Verificar se a última tentativa foi guardada",
           "Valor atual, estado e operador armazenados na base de dados central do sistema",
           "Protegido contra substituição silenciosa por uma memória local offline mais antiga."
         ],
@@ -6630,7 +6630,7 @@
       "nextActor": "Técnico de Laboratório na bancada",
       "problems": [
         {
-          "symptom": "Consegue ler o artigo de Ajuda offline, mas clicar em Confirmar conclusão ou Enviar falha.",
+          "symptom": "Consegue ler o artigo de Ajuda offline, mas clicar em Confirmar que o trabalho está concluído ou Enviar falha.",
           "why": "A Ajuda offline permite-lhe ler instruções sem rede, mas os comprovativos finais do servidor e as submissões para revisão exigem uma ligação ativa à rede.",
           "action": "Guarde o seu trabalho como rascunho local enquanto estiver offline e, depois, volte a ligar-se ao Wi-Fi do laboratório para confirmar e submeter."
         }
@@ -6734,7 +6734,7 @@
         "Atribua o laboratório recetor. Selecione as análises predefinidas ou o pacote de ensaios encomendado para o projeto. (Esperado: Quando os sacos deste projeto chegarem à Recepção de amostras, as análises solicitadas ficam pré-preenchidas automaticamente em 3. Análises.)",
         "Guarde o projeto. Verifique se os contadores de amostras (Esperado, Aceito, Processando, Aprovado) aparecem no painel de Projetos. (Esperado: A equipa de receção, os técnicos e os gerentes de projeto podem acompanhar o projeto sob um código consistente.)"
       ],
-      "caution": "Defina sempre o pacote de análises predefinido num projeto antes de a primeira caixa de remessa chegar à receção.",
+      "caution": "Defina sempre o pacote de análises predefinido num projeto antes de a primeira caixa de entrega de amostras chegar à receção.",
       "related": [
         "start-first-login",
         "quality-support"
@@ -6881,7 +6881,7 @@
             },
             {
               "action": "Se já tiver sido emitido um Certificado de análise antes de o erro de campo ser descoberto, inicie uma emenda administrativa em Relatórios para publicar a revisão corrigida do relatório.",
-              "expected": "O novo relatório no estado Atuais apresenta os dados de campo corrigidos enquanto o PDF antigo fica marcado como Substituídos."
+              "expected": "O novo relatório no estado Atuais apresenta os dados de campo corrigidos enquanto o PDF antigo fica marcado como Substituído por uma versão mais recente."
             }
           ]
         }
@@ -6922,7 +6922,7 @@
       "steps": [
         "Quando a etiqueta física de um saco divergir dos dados de campo sincronizados (por exemplo, a profundidade indica 20–40 cm no saco mas 0–20 cm no ecrã), registe a discrepância nas notas da Recepção de amostras. (Esperado: Tanto o registo de campo original sincronizado como a observação do oficial de receção ficam preservados.)",
         "Peça ao Topógrafo de Campo ou ao Gerente de Projetos para verificar o caderno de campo ou a submissão no KoboToolbox e aplicar a correção autorizada de proveniência de campo em Projetos / Registo de amostras. (Esperado: O código do local, a profundidade ou as coordenadas GPS atualizados são registados na pista de auditoria sem apagar a importação original.)",
-        "Se já tiver sido emitido um Certificado de análise antes de o erro de campo ser descoberto, inicie uma emenda administrativa em Relatórios para publicar a revisão corrigida do relatório. (Esperado: O novo relatório no estado Atuais apresenta os dados de campo corrigidos enquanto o PDF antigo fica marcado como Substituídos.)"
+        "Se já tiver sido emitido um Certificado de análise antes de o erro de campo ser descoberto, inicie uma emenda administrativa em Relatórios para publicar a revisão corrigida do relatório. (Esperado: O novo relatório no estado Atuais apresenta os dados de campo corrigidos enquanto o PDF antigo fica marcado como Substituído por uma versão mais recente.)"
       ],
       "caution": "Mantenha sempre separadas as datas de colheita no campo e as datas de receção no laboratório. Corrigir uma data de campo nunca altera o registo de data/hora da receção no laboratório.",
       "related": [
@@ -6952,7 +6952,7 @@
         "maps"
       ],
       "minutes": 3,
-      "quick": "Etiquete cada saco físico de solo com o ID da amostra de campo exato introduzido no KoboToolbox, sincronize os seus formulários de campo preenchidos antes de a caixa da transportadora chegar ao laboratório e inclua uma guia de remessa dentro da caixa.",
+      "quick": "Etiquete cada saco físico de solo com o ID da amostra de campo exato introduzido no KoboToolbox, sincronize os seus formulários de campo preenchidos antes de a caixa da transportadora chegar ao laboratório e inclua uma guia da caixa de entrega dentro da caixa.",
       "before": [
         "Utilize marcadores permanentes resistentes à água e etiquetas de código de barras ou Tyvek resistentes ao rasgo em todos os sacos de solo.",
         "Verifique se cada saco na caixa de transporte tem uma entrada correspondente na sua lista de levantamento de campo."
@@ -6970,8 +6970,8 @@
               "expected": "A equipa de receção verá os registos pré-inscritos assim que ler os códigos dos sacos."
             },
             {
-              "action": "Acondicione bem os sacos selados com um manifesto de remessa impresso que liste todos os IDs de amostras de campo contidos na caixa.",
-              "expected": "A Recepção de amostras consegue dar entrada da caixa inteira em poucos minutos utilizando o modo Amostra de projeto ou Lote de remessa / manifesto."
+              "action": "Acondicione bem os sacos selados com um lista da caixa de entrega impresso que liste todos os IDs de amostras de campo contidos na caixa.",
+              "expected": "A Recepção de amostras consegue dar entrada da caixa inteira em poucos minutos utilizando o modo Amostra de projeto ou Caixa de entrega de amostras."
             }
           ]
         }
@@ -6988,7 +6988,7 @@
           "Confirma que o laboratório já tem o pré-registo digital à espera da caixa."
         ],
         [
-          "Lote de remessa / manifesto",
+          "Caixa de entrega de amostras",
           "Lista de sacos de amostras acondicionados dentro de uma caixa de transporte",
           "Ajuda a equipa de receção a detetar qualquer saco esquecido no veículo de campo."
         ]
@@ -7012,7 +7012,7 @@
       "steps": [
         "No campo, registe cada amostra no seu formulário KoboToolbox (ou modelo do projeto) utilizando exatamente o mesmo ID da amostra de campo escrito no saco físico. (Esperado: Cada saco físico tem um identificador digital único e correspondente.)",
         "Carregue os seus formulários KoboToolbox concluídos. Verifique em Projetos se as amostras aparecem no estado Esperado sob o laboratório recetor. (Esperado: A equipa de receção verá os registos pré-inscritos assim que ler os códigos dos sacos.)",
-        "Acondicione bem os sacos selados com um manifesto de remessa impresso que liste todos os IDs de amostras de campo contidos na caixa. (Esperado: A Recepção de amostras consegue dar entrada da caixa inteira em poucos minutos utilizando o modo Amostra de projeto ou Lote de remessa / manifesto.)"
+        "Acondicione bem os sacos selados com um lista da caixa de entrega impresso que liste todos os IDs de amostras de campo contidos na caixa. (Esperado: A Recepção de amostras consegue dar entrada da caixa inteira em poucos minutos utilizando o modo Amostra de projeto ou Caixa de entrega de amostras.)"
       ],
       "caution": "Nunca coloque uma etiqueta de papel manuscrita dentro de solo húmido onde apodrecerá. Fixe uma etiqueta resistente no exterior do saco selado.",
       "related": [
@@ -7164,7 +7164,7 @@
           "Exporta apenas resultados autorizados e aprovados para proteger a qualidade dos dados."
         ],
         [
-          "Valor reportado",
+          "Valor final do relatório",
           "O valor oficial aprovado por parâmetro incluído nas exportações padrão para CSV e Excel",
           "Coincide com o valor impresso no Certificado de análise atual da amostra."
         ],
@@ -7388,7 +7388,7 @@
       "category": "admin",
       "kind": "guide",
       "title": "Configurar um laboratório e o seu âmbito",
-      "summary": "Configure o perfil de um laboratório, o perfil predefinido de qualidade e as políticas operacionais em Gestão de laboratório.",
+      "summary": "Configure o perfil de um laboratório, o conjunto inicial de regras e as políticas operacionais em Gestão de laboratório.",
       "roles": [
         "SUPER_ADMIN",
         "LAB_MANAGER",
@@ -7400,21 +7400,21 @@
         "adminlabs"
       ],
       "minutes": 3,
-      "quick": "Abra Gestão de laboratório, selecione o seu laboratório, escolha uma predefinição inicial (ISO 17025 rigoroso, Básico ou Consultivo (apenas avisos)) ou ajuste regras individuais em Políticas e substituições de análises, escreva um Motivo da alteração. Guarde.",
+      "quick": "Abra Gestão de laboratório, selecione o seu laboratório, escolha um conjunto inicial em Conjunto inicial de regras (ISO 17025 rigoroso, Básico ou Consultivo (apenas avisos)) ou ajuste regras individuais em Políticas e Regras personalizadas por ensaio ou método, escreva um Motivo da alteração. Guarde.",
       "before": [
         "Confirme que iniciou sessão como Gerente de Laboratório ou Administrador do Sistema.",
-        "Lembre-se de que as definições são configuráveis por laboratório. Cada laboratório escolhe a predefinição e as políticas que correspondem à sua equipa e nível de acreditação."
+        "Lembre-se de que as definições são configuráveis por laboratório. Cada laboratório escolhe o conjunto inicial de regras e as políticas que correspondem à sua equipa e nível de acreditação."
       ],
       "sections": [
         {
           "title": "Procedimento passo a passo",
           "steps": [
             {
-              "action": "Clique em Gestão de laboratório no menu lateral. Abra os separadores de configuração do seu laboratório (Predefinições, Políticas e substituições de análises).",
-              "expected": "Vê o selo da predefinição ativa do seu laboratório (ISO 17025 rigoroso, Básico, Consultivo (apenas avisos) ou Personalizado) e todos os interruptores de políticas atuais."
+              "action": "Clique em Gestão de laboratório no menu lateral. Abra os separadores de configuração do seu laboratório (Conjunto inicial de regras, Políticas e Regras personalizadas por ensaio ou método).",
+              "expected": "Vê o selo da conjunto inicial de regras ativo do seu laboratório (ISO 17025 rigoroso, Básico, Consultivo (apenas avisos) ou Personalizado) e todos os interruptores de políticas atuais."
             },
             {
-              "action": "Selecione uma predefinição ou ajuste regras individuais em Políticas (como exigir um segundo revisor, exigir verificação da gerência nas etapas de preparação, modo de bloqueio de CQ, equipamento obrigatório ou mínimo de pontos de base na carta de controlo).",
+              "action": "Selecione um conjunto em Conjunto inicial de regras ou ajuste regras individuais em Políticas (como exigir um segundo revisor, Exigir a aprovação das etapas de preparação pelo responsável, modo de bloqueio de CQ, equipamento obrigatório ou mínimo de pontos de base na carta de controlo).",
               "expected": "O ecrã destaca quaisquer regras modificadas e verifica que as suas escolhas de política não entram em conflito com as regras de CQ ativas dos métodos."
             },
             {
@@ -7437,11 +7437,11 @@
         ],
         [
           "Motivo da alteração",
-          "Nota de auditoria obrigatória ao guardar alterações nas predefinições, Políticas ou substituições de análises",
+          "Nota de auditoria obrigatória ao guardar alterações em Conjunto inicial de regras, Políticas ou Regras personalizadas por ensaio ou método",
           "Regista porque é que uma política do laboratório foi atualizada e por quem."
         ]
       ],
-      "example": "Em Gestão de laboratório, selecione a predefinição Básico para um laboratório regional piloto de 3 pessoas, desative a exigência de verificação da gerência nas etapas de preparação em Políticas, introduza \"Fluxo inicial do piloto para equipa de 3 pessoas\" em Motivo da alteração. Guarde.",
+      "example": "Em Gestão de laboratório, selecione Básico em Conjunto inicial de regras para um laboratório regional piloto de 3 pessoas, desative Exigir a aprovação das etapas de preparação pelo responsável em Políticas, introduza \"Fluxo inicial do piloto para equipa de 3 pessoas\" em Motivo da alteração. Guarde.",
       "success": "As etapas de fluxo de trabalho, as regras de segundo revisor e o modo de bloqueio de CQ do seu laboratório correspondem à sua equipa real e objetivos de qualidade.",
       "nextActor": "Gerente de Laboratório e Oficial de Qualidade e Auditoria",
       "problems": [
@@ -7459,8 +7459,8 @@
         "client/src/pages/help/AdminHelpEditor.jsx"
       ],
       "steps": [
-        "Clique em Gestão de laboratório no menu lateral. Abra os separadores de configuração do seu laboratório (Predefinições, Políticas e substituições de análises). (Esperado: Vê o selo da predefinição ativa do seu laboratório (ISO 17025 rigoroso, Básico, Consultivo (apenas avisos) ou Personalizado) e todos os interruptores de políticas atuais.)",
-        "Selecione uma predefinição ou ajuste regras individuais em Políticas (como exigir um segundo revisor, exigir verificação da gerência nas etapas de preparação, modo de bloqueio de CQ, equipamento obrigatório ou mínimo de pontos de base na carta de controlo). (Esperado: O ecrã destaca quaisquer regras modificadas e verifica que as suas escolhas de política não entram em conflito com as regras de CQ ativas dos métodos.)",
+        "Clique em Gestão de laboratório no menu lateral. Abra os separadores de configuração do seu laboratório (Conjunto inicial de regras, Políticas e Regras personalizadas por ensaio ou método). (Esperado: Vê o selo da conjunto inicial de regras ativo do seu laboratório (ISO 17025 rigoroso, Básico, Consultivo (apenas avisos) ou Personalizado) e todos os interruptores de políticas atuais.)",
+        "Selecione um conjunto em Conjunto inicial de regras ou ajuste regras individuais em Políticas (como exigir um segundo revisor, Exigir a aprovação das etapas de preparação pelo responsável, modo de bloqueio de CQ, equipamento obrigatório ou mínimo de pontos de base na carta de controlo). (Esperado: O ecrã destaca quaisquer regras modificadas e verifica que as suas escolhas de política não entram em conflito com as regras de CQ ativas dos métodos.)",
         "Introduza um Motivo da alteração claro. Guarde a configuração. (Esperado: As alterações entram em vigor para o novo trabalho e ficam registadas no Registo de auditoria, enquanto os resultados aprovados históricos e relatórios emitidos permanecem intocados.)"
       ],
       "caution": "Alterar uma política em Gestão de laboratório afeta apenas o trabalho atual e futuro. Nunca altera amostras históricas já aprovadas.",
@@ -7577,7 +7577,7 @@
         "profile"
       ],
       "minutes": 3,
-      "quick": "Os Oficiais de Recepção de Amostras dão entrada de sacos e imprimem etiquetas. Os Técnicos de Laboratório executam folhas de trabalho de preparação e bancada. Os Oficiais de Qualidade e Auditoria reveem corridas, cartas de controlo e não conformidades. Os Gerentes de Laboratório supervisionam atribuições, aprovações, relatórios e configurações do laboratório. Os Visualizadores consultam resultados aprovados.",
+      "quick": "Os Oficiais de Recepção de Amostras dão entrada de sacos e imprimem etiquetas. Os Técnicos de Laboratório executam folhas de trabalho de preparação e bancada. Os Oficiais de Qualidade e Auditoria reveem corridas, cartas de controlo e registos de problemas. Os Gerentes de Laboratório supervisionam atribuições, aprovações, relatórios e configurações do laboratório. Os Visualizadores consultam resultados aprovados.",
       "before": [
         "Verifique o selo da sua própria função na barra superior.",
         "Abra Pessoal do laboratório se a função de um membro da equipa precisar de ser atualizada por um administrador."
@@ -7653,7 +7653,7 @@
       "category": "admin",
       "kind": "guide",
       "title": "Configurar uma análise sem afetar o trabalho existente",
-      "summary": "Ative análises de solo, verifique as unidades padrão e defina substituições de análises por laboratório no Catálogo de análises e em Gestão de laboratório.",
+      "summary": "Ative análises de solo, verifique as unidades padrão e defina regras personalizadas por ensaio ou método no Catálogo de análises e em Gestão de laboratório.",
       "roles": [
         "SUPER_ADMIN",
         "LAB_MANAGER",
@@ -7665,7 +7665,7 @@
         "admin?tab=lab-config"
       ],
       "minutes": 3,
-      "quick": "Abra o Catálogo de análises para rever os parâmetros, unidades e métodos disponíveis na plataforma. Utilize as substituições de análises em Gestão de laboratório para ativar os ensaios que o seu laboratório realiza e definir os prazos de resposta, a massa mínima de amostra e as regras de CQ do seu laboratório.",
+      "quick": "Abra o Catálogo de análises para rever os parâmetros, unidades e métodos disponíveis na plataforma. Utilize Regras personalizadas por ensaio ou método em Gestão de laboratório para ativar os ensaios que o seu laboratório realiza e definir os prazos de resposta, a massa mínima de amostra e as regras de CQ do seu laboratório.",
       "before": [
         "Confirme que iniciou sessão como Gerente de Laboratório ou Administrador do Sistema.",
         "Tenha à mão a lista de ensaios de solo de rotina do seu laboratório, os nomes dos métodos segundo os procedimentos operacionais padrão e as unidades de relatório."
@@ -7679,7 +7679,7 @@
               "expected": "Vê cada parâmetro (como pH, CE, carbono orgânico, azoto total, P Olsen, CTC e granulometria) com o respetivo esquema de entrada e unidade canónica."
             },
             {
-              "action": "Abra Gestão de laboratório → substituições de análises para ativar ou desativar análises específicas para o seu laboratório e configurar definições próprias, como massa mínima de amostra ou dias de prazo de resposta.",
+              "action": "Abra Gestão de laboratório → Regras personalizadas por ensaio ou método para ativar ou desativar análises específicas para o seu laboratório e configurar definições próprias, como massa mínima de amostra ou dias de prazo de resposta.",
               "expected": "Apenas as análises ativadas para o seu laboratório aparecem na Recepção de amostras e na Bancada de trabalho."
             },
             {
@@ -7706,7 +7706,7 @@
           "Mantém os resultados históricos, as cartas de controlo e os Certificados de análise consistentes."
         ]
       ],
-      "example": "Em Gestão de laboratório → substituições de análises, ative pH (água), CE, C orgânico Walkley-Black, N Kjeldahl, P Olsen e textura por densímetro para o Demo Soil Lab, e desative metais pesados vestigiais que não são executados nessa instalação.",
+      "example": "Em Gestão de laboratório → Regras personalizadas por ensaio ou método, ative pH (água), CE, C orgânico Walkley-Black, N Kjeldahl, P Olsen e textura por densímetro para o Demo Soil Lab, e desative metais pesados vestigiais que não são executados nessa instalação.",
       "success": "A Recepção de amostras e a Bancada de trabalho apresentam o menu exato de análises de solo e unidades praticados pelo seu laboratório.",
       "nextActor": "Oficial de Recepção de Amostras e Técnico de Laboratório",
       "problems": [
@@ -7725,7 +7725,7 @@
       ],
       "steps": [
         "Abra o Catálogo de análises no menu lateral para inspecionar os parâmetros de solo, as unidades padrão, os pré-requisitos de preparação e as variantes de métodos. (Esperado: Vê cada parâmetro (como pH, CE, carbono orgânico, azoto total, P Olsen, CTC e granulometria) com o respetivo esquema de entrada e unidade canónica.)",
-        "Abra Gestão de laboratório → substituições de análises para ativar ou desativar análises específicas para o seu laboratório e configurar definições próprias, como massa mínima de amostra ou dias de prazo de resposta. (Esperado: Apenas as análises ativadas para o seu laboratório aparecem na Recepção de amostras e na Bancada de trabalho.)",
+        "Abra Gestão de laboratório → Regras personalizadas por ensaio ou método para ativar ou desativar análises específicas para o seu laboratório e configurar definições próprias, como massa mínima de amostra ou dias de prazo de resposta. (Esperado: Apenas as análises ativadas para o seu laboratório aparecem na Recepção de amostras e na Bancada de trabalho.)",
         "Verifique que cada análise ativada está associada a pelo menos um método analítico ativo e esquema de entrada antes de receber amostras reais. (Esperado: Os técnicos dispõem de uma folha de trabalho completa e pronta a usar na Bancada de trabalho para cada ensaio oferecido na receção.)"
       ],
       "caution": "Nunca altere a unidade de uma análise existente que já tenha resultados aprovados. Crie ou ative antes uma entrada de método distinta.",
@@ -7764,7 +7764,7 @@
           "title": "Procedimento passo a passo",
           "steps": [
             {
-              "action": "Abra o Catálogo de análises (e Gestão de laboratório → Políticas / substituições de análises). Selecione o método analítico que pretende rever ou configurar.",
+              "action": "Abra o Catálogo de análises (e Gestão de laboratório → Políticas / Regras personalizadas por ensaio ou método). Selecione o método analítico que pretende rever ou configurar.",
               "expected": "Vê o código do método, a base de extração, a unidade, os passos de preparação necessários e as regras atuais de controlo de qualidade."
             },
             {
@@ -7813,7 +7813,7 @@
         "client/src/pages/help/AdminHelpEditor.jsx"
       ],
       "steps": [
-        "Abra o Catálogo de análises (e Gestão de laboratório → Políticas / substituições de análises). Selecione o método analítico que pretende rever ou configurar. (Esperado: Vê o código do método, a base de extração, a unidade, os passos de preparação necessários e as regras atuais de controlo de qualidade.)",
+        "Abra o Catálogo de análises (e Gestão de laboratório → Políticas / Regras personalizadas por ensaio ou método). Selecione o método analítico que pretende rever ou configurar. (Esperado: Vê o código do método, a base de extração, a unidade, os passos de preparação necessários e as regras atuais de controlo de qualidade.)",
         "Configure os requisitos de CQ de lote do seu laboratório para esse método — como o tamanho máximo do lote (muitos laboratórios utilizam 20), as posições obrigatórias de Branco, Duplicata e Solo de referência. Os limites de aprovação/aviso/reprovação. (Esperado: O sistema valida que as regras de CQ do seu método estão alinhadas com o modo global de bloqueio de CQ do seu laboratório.)",
         "Guarde as alterações com um Motivo da alteração escrito. (Esperado: As novas corridas analíticas na Bancada de trabalho passam imediatamente a utilizar as regras atualizadas do método, enquanto os lotes aprovados anteriormente mantêm as regras que estavam ativas quando foram aprovados.)"
       ],
@@ -8170,7 +8170,7 @@
         {
           "symptom": "Uma amostra histórica importada é aberta na Bancada de trabalho e apresenta A evidência necessita de verificação na sua etapa de preparação.",
           "why": "A folha de cálculo histórica continha apenas os números finais dos ensaios e não incluía pesos de secagem nem datas/horas de crivagem.",
-          "action": "Mantenha as amostras históricas aprovadas como registos de arquivo ou peça a um Gerente de Laboratório para verificar a etapa em Portas operacionais caso estejam a ser adicionados novos ensaios a um frasco de arquivo."
+          "action": "Mantenha as amostras históricas aprovadas como registos de arquivo ou peça a um Gerente de Laboratório para verificar a etapa em Etapas de preparação obrigatórias caso estejam a ser adicionados novos ensaios a um frasco de arquivo."
         }
       ],
       "sources": [
@@ -8430,7 +8430,7 @@
           "Fornece a explicação humana por detrás de cada ação sensível."
         ]
       ],
-      "example": "Em Painel de QA → Registo de auditoria, filtre pela amostra DEMO-26-000142 para ver a data/hora exata e o motivo quando a Tentativa 1 foi devolvida e a Tentativa 2 foi aprovada.",
+      "example": "Em Painel de QA → Registo de auditoria, filtre pela amostra DEMO-26-000142 para ver a data/hora exata e o motivo quando a Tentativa n.º 1 foi devolvida e a Tentativa n.º 2 foi aprovada.",
       "success": "Consegue responder à pergunta \"quem alterou este registo, quando, a partir de que valor e porquê?\" em menos de um minuto.",
       "nextActor": "Oficial de Qualidade e Auditoria, Gerente de Laboratório ou Auditor Externo",
       "problems": [
@@ -8477,10 +8477,10 @@
         "qa"
       ],
       "minutes": 3,
-      "quick": "Abra o Painel de QA para inspecionar as Cartas de controlo e os alertas de CQ ativos. Quando um Branco, uma Duplicata ou um Solo de referência do lote falhar, siga o fluxo de decisão em 4 passos: verifique se houve um erro de digitação, repita um intervalo de calibração se tiver ocorrido deriva a meio da corrida, reprove e repita o lote ou (apenas quando cientificamente justificado) aceite com uma ressalva documentada pela gerência.",
+      "quick": "Abra o Painel de QA para inspecionar as Cartas de controlo e os alertas de CQ ativos. Quando um Branco, uma Duplicata ou um Solo de referência do lote falhar, siga o fluxo de decisão em 4 passos: verifique se houve um erro de digitação, repita as amostras desde a última verificação válida do instrumento se tiver ocorrido deriva a meio da corrida, reprove e repita o lote ou (apenas quando cientificamente justificado) aceite com uma ressalva documentada pela gerência.",
       "before": [
         "Identifique o ID do lote analítico, o método e o lote de Material de referência envolvidos.",
-        "Verifique o registo físico de bancada e a impressão do instrumento com o técnico antes de tomar uma decisão de disposição."
+        "Verifique o registo físico de bancada e a impressão do instrumento com o técnico antes de tomar uma decisão sobre o lote."
       ],
       "sections": [
         {
@@ -8495,8 +8495,8 @@
               "expected": "Distingue um erro de transcrição de uma falha química real."
             },
             {
-              "action": "Registe a ação de gerência adequada: aplique uma correção de transcrição revista (se ativa em Políticas), selecione repetir o intervalo de calibração para deriva a meio da corrida, clique para reprovar o lote e devolver as amostras para a Tentativa 2, ou registe aceitar com ressalva com uma justificação escrita.",
-              "expected": "A decisão de CQ fica permanentemente associada ao lote e desbloqueia ou devolve as amostras afetadas em conformidade."
+              "action": "Registe a ação de gerência adequada: aplique uma correção de transcrição revista (se ativa em Políticas), selecione Repetir as amostras desde a última verificação válida do instrumento para deriva a meio da corrida, clique para reprovar o lote e devolver as amostras para a Tentativa n.º 2, ou registe aceitar com ressalva com uma justificação escrita.",
+              "expected": "A decisão do responsável sobre o lote fica permanentemente associada ao lote e desbloqueia ou devolve as amostras afetadas em conformidade."
             }
           ]
         }
@@ -8510,7 +8510,7 @@
         [
           "Ação em caso de falha",
           "Ações da gerência quando falha uma verificação de calibração ou um controlo de CQ do lote",
-          "Coloca novamente em fila o intervalo afetado de amostras ou o lote inteiro para uma nova Tentativa 2."
+          "Coloca novamente em fila o grupo afetado de amostras ou o lote inteiro para uma nova Tentativa n.º 2."
         ],
         [
           "Veredito",
@@ -8518,7 +8518,7 @@
           "Exige uma justificação científica detalhada e imprime a observação no relatório."
         ]
       ],
-      "example": "No Painel de QA, inspecione um lote de P Olsen reprovado em que o Branco leu 1,8 mg/kg devido a vidraria contaminada, clique para reprovar o lote, abra um registo de Não conformidade e devolva as amostras para a Tentativa 2.",
+      "example": "No Painel de QA, inspecione um lote de P Olsen reprovado em que o Branco leu 1,8 mg/kg devido a vidraria contaminada, clique para reprovar o lote, abra um Registo de problema e devolva as amostras para a Tentativa n.º 2.",
       "success": "As corridas de controlo de qualidade reprovadas são investigadas de forma sistemática e nunca passam despercebidas para os relatórios dos clientes.",
       "nextActor": "Gerente de Laboratório, Oficial de Qualidade e Auditoria e Técnico de bancada (para repetições)",
       "problems": [
@@ -8537,7 +8537,7 @@
       "steps": [
         "Abra o Painel de QA. Verifique os alertas ativos de controlo de qualidade e as Cartas de controlo para o método e o lote de Solo de referência. (Esperado: Vê a carta de controlo de Shewhart (regras de Westgard) com os valores z recentes do lote face às linhas de aviso de ±2 DP e às linhas de falha de ±3 DP (assim que o mínimo de pontos de base da carta de controlo do seu laboratório for atingido).)",
         "Inspecione a linha de controlo reprovada ou com aviso (Branco, Duplicata, Solo de referência ou verificação de calibração) para avaliar se se trata de um erro isolado de digitação, de uma deriva de calibração a meio da corrida ou de um problema de extração em todo o lote. (Esperado: Distingue um erro de transcrição de uma falha química real.)",
-        "Registe a ação de gerência adequada: aplique uma correção de transcrição revista (se ativa em Políticas), selecione repetir o intervalo de calibração para deriva a meio da corrida, clique para reprovar o lote e devolver as amostras para a Tentativa 2, ou registe aceitar com ressalva com uma justificação escrita. (Esperado: A decisão de CQ fica permanentemente associada ao lote e desbloqueia ou devolve as amostras afetadas em conformidade.)"
+        "Registe a ação de gerência adequada: aplique uma correção de transcrição revista (se ativa em Políticas), selecione Repetir as amostras desde a última verificação válida do instrumento para deriva a meio da corrida, clique para reprovar o lote e devolver as amostras para a Tentativa n.º 2, ou registe aceitar com ressalva com uma justificação escrita. (Esperado: A decisão do responsável sobre o lote fica permanentemente associada ao lote e desbloqueia ou devolve as amostras afetadas em conformidade.)"
       ],
       "caution": "Nunca utilize a aceitação com ressalva para deixar passar um Branco contaminado ou um Solo de referência reprovado quando existe solo suficiente para repetir a análise.",
       "related": [
@@ -8551,8 +8551,8 @@
       "id": "quality-nc",
       "category": "quality",
       "kind": "guide",
-      "title": "Registar e acompanhar uma não conformidade",
-      "summary": "Abra, investigue e encerre um relatório de Não conformidade com causa raiz e ação corretiva no Painel de QA.",
+      "title": "Registar e acompanhar um registo de problema",
+      "summary": "Abra, investigue e encerre um Registo de problema com causa raiz e ação corretiva no Painel de QA.",
       "roles": [
         "AUDIT_USER",
         "LAB_MANAGER",
@@ -8566,53 +8566,53 @@
         "manager-queue"
       ],
       "minutes": 3,
-      "quick": "Abra Painel de QA → Não conformidade para registar um incidente de qualidade (como falhas repetidas de CQ de lote, reagentes contaminados ou entregas de amostras danificadas), atribua um responsável, documente a contenção, a causa raiz e a ação corretiva. Verifique a eficácia antes de encerrar.",
+      "quick": "Abra Painel de QA → Registos de problemas para registar um incidente de qualidade (como falhas repetidas de CQ de lote, reagentes contaminados ou entregas de amostras danificadas), atribua um responsável, documente a contenção, a causa raiz e a ação corretiva. Verifique a eficácia antes de encerrar.",
       "before": [
         "Tenha à mão os IDs das amostras afetadas, números de lote ou códigos de equipamento.",
-        "Verifique se as Políticas do seu laboratório exigem automaticamente um registo de Não conformidade após um determinado número de tentativas de repetição."
+        "Verifique se as Políticas do seu laboratório exigem automaticamente um Registo de problema após um determinado número de tentativas de repetição."
       ],
       "sections": [
         {
           "title": "Procedimento passo a passo",
           "steps": [
             {
-              "action": "Abra o Painel de QA, clique no separador Não conformidade e crie um novo registo (ou abra um registo acionado automaticamente).",
-              "expected": "O formulário de Não conformidade abre com campos para descrição do incidente, gravidade, amostras ou lotes associados e responsável atribuído."
+              "action": "Abra o Painel de QA, clique no separador Registos de problemas e crie um novo registo (ou abra um registo acionado automaticamente).",
+              "expected": "O formulário de Registo de problema abre com campos para descrição do incidente, gravidade, amostras ou lotes associados e responsável atribuído."
             },
             {
               "action": "Registe as medidas imediatas de contenção (como colocar um lote de reagente em quarentena ou reter um lote analítico) e, depois, investigue e escreva a causa raiz e a ação corretiva/preventiva.",
               "expected": "A investigação e o plano de ação ficam guardados e associados aos lotes ou amostras afetados."
             },
             {
-              "action": "Assim que a ação corretiva estiver concluída e verificada (por exemplo, o lote de repetição passa no CQ), encerre o registo de Não conformidade com validação da gerência.",
-              "expected": "A Não conformidade encerrada permanece permanentemente pesquisável no Painel de QA para revisões da qualidade e auditorias."
+              "action": "Assim que a ação corretiva estiver concluída e verificada (por exemplo, o lote de repetição passa no CQ), encerre o Registo de problema com validação da gerência.",
+              "expected": "O Registo de problema encerrado permanece permanentemente pesquisável no Painel de QA para revisões da qualidade e auditorias."
             }
           ]
         }
       ],
       "fields": [
         [
-          "Não conformidade",
+          "Registos de problemas",
           "Separador no Painel de QA para acompanhar incidentes de qualidade e ações corretivas (CAPA)",
           "Associa problemas de bancada ou de receção à respetiva investigação de causa raiz."
         ],
         [
-          "Não conformidade",
-          "Campos de investigação obrigatórios antes de uma Não conformidade poder ser encerrada",
+          "Registos de problemas",
+          "Campos de investigação obrigatórios antes de um Registo de problema poder ser encerrada",
           "Garante que o laboratório corrige a causa subjacente. Assim, o problema não se repita na semana seguinte."
         ],
         [
           "ID amostra / laboratório",
-          "Ligação de rastreabilidade que associa a Não conformidade aos registos laboratoriais afetados",
+          "Ligação de rastreabilidade que associa o Registo de problema aos registos laboratoriais afetados",
           "Permite aos revisores confirmar que o incidente foi resolvido antes de aprovarem a amostra."
         ]
       ],
-      "example": "Em Painel de QA → Não conformidade, registe um incidente para a deriva num lote de P Olsen causada por um reagente de molibdato vencido, coloque o frasco antigo em quarentena, confirme que o lote de repetição passa e encerre o registo.",
+      "example": "Em Painel de QA → Registos de problemas, registe um incidente para a deriva num lote de P Olsen causada por um reagente de molibdato vencido, coloque o frasco antigo em quarentena, confirme que o lote de repetição passa e encerre o registo.",
       "success": "Os problemas de qualidade são contidos, investigados e encerrados com ações corretivas claras em vez de notas verbais informais.",
       "nextActor": "Oficial de Qualidade e Auditoria e Gerente de Laboratório",
       "problems": [
         {
-          "symptom": "O botão Encerrar num registo de Não conformidade está desativado.",
+          "symptom": "O botão Encerrar num Registo de problema está desativado.",
           "why": "Os campos de análise da causa raiz ou de ação corretiva ainda estão em branco, ou a sua função não tem permissão de validação da qualidade.",
           "action": "Preencha os detalhes da causa raiz, contenção e ação corretiva. Peça ao Oficial de Qualidade e Auditoria ou ao Gerente de Laboratório para validar."
         }
@@ -8624,11 +8624,11 @@
         "docs/book/src/usage/qc-management.md"
       ],
       "steps": [
-        "Abra o Painel de QA, clique no separador Não conformidade e crie um novo registo (ou abra um registo acionado automaticamente). (Esperado: O formulário de Não conformidade abre com campos para descrição do incidente, gravidade, amostras ou lotes associados e responsável atribuído.)",
+        "Abra o Painel de QA, clique no separador Registos de problemas e crie um novo registo (ou abra um registo acionado automaticamente). (Esperado: O formulário de Registo de problema abre com campos para descrição do incidente, gravidade, amostras ou lotes associados e responsável atribuído.)",
         "Registe as medidas imediatas de contenção (como colocar um lote de reagente em quarentena ou reter um lote analítico) e, depois, investigue e escreva a causa raiz e a ação corretiva/preventiva. (Esperado: A investigação e o plano de ação ficam guardados e associados aos lotes ou amostras afetados.)",
-        "Assim que a ação corretiva estiver concluída e verificada (por exemplo, o lote de repetição passa no CQ), encerre o registo de Não conformidade com validação da gerência. (Esperado: A Não conformidade encerrada permanece permanentemente pesquisável no Painel de QA para revisões da qualidade e auditorias.)"
+        "Assim que a ação corretiva estiver concluída e verificada (por exemplo, o lote de repetição passa no CQ), encerre o Registo de problema com validação da gerência. (Esperado: O Registo de problema encerrado permanece permanentemente pesquisável no Painel de QA para revisões da qualidade e auditorias.)"
       ],
-      "caution": "Encerrar um registo de Não conformidade não altera automaticamente os números das amostras. Quaisquer valores medidos de novo têm sempre de ser registados na Bancada de trabalho e revistos na Lista de tarefas.",
+      "caution": "Encerrar um Registo de problema não altera automaticamente os números das amostras. Quaisquer valores medidos de novo têm sempre de ser registados na Bancada de trabalho e revistos na Lista de tarefas.",
       "related": [
         "start-first-login",
         "quality-support"
@@ -8641,7 +8641,7 @@
       "category": "quality",
       "kind": "guide",
       "title": "Rastrear um resultado através de repetições e revisões de relatório",
-      "summary": "Rastreie um resultado de solo reportado ao longo de todas as tentativas de bancada (Tentativa 1, Tentativa 2) e revisões de relatório (Revisão 1, Revisão 2).",
+      "summary": "Rastreie um resultado de solo reportado ao longo de todas as tentativas de bancada (Tentativa n.º 1, Tentativa n.º 2) e revisões de relatório (Revisão 1, Revisão 2).",
       "roles": [
         "AUDIT_USER",
         "LAB_MANAGER",
@@ -8655,7 +8655,7 @@
         "result-reports"
       ],
       "minutes": 3,
-      "quick": "Utilize o Registo de amostras (separador Trabalhos e resultados), o Painel de QA e Relatórios para ver a cronologia completa de um resultado: desde a primeira medição na bancada, passando por quaisquer tentativas de repetição devolvidas, até ao Valor reportado aprovado e quaisquer Certificados de análise emendados.",
+      "quick": "Utilize o Registo de amostras (separador Trabalhos e resultados), o Painel de QA e Relatórios para ver a cronologia completa de um resultado: desde a primeira medição na bancada, passando por quaisquer tentativas de repetição devolvidas, até ao Valor final do relatório aprovado e quaisquer Certificados de análise emendados.",
       "before": [
         "Tenha à mão o código de laboratório da amostra ou o número do Certificado de análise.",
         "Consulte tanto o separador Trabalhos e resultados na página da amostra como o ecrã Relatórios para ver o histórico completo."
@@ -8666,14 +8666,14 @@
           "steps": [
             {
               "action": "Abra a amostra no Registo de amostras. Clique no separador Trabalhos e resultados para expandir a linha do parâmetro.",
-              "expected": "Vê todas as tentativas registadas (Tentativa 1, Tentativa 2 e seguintes) com o respetivo técnico, instrumento, data/hora, estado de CQ do lote e decisão do revisor."
+              "expected": "Vê todas as tentativas registadas (Tentativa n.º 1, Tentativa n.º 2 e seguintes) com o respetivo técnico, instrumento, data/hora, estado de CQ do lote e decisão do revisor."
             },
             {
-              "action": "Verifique qual a tentativa ou regra de réplicas que produziu o Valor reportado oficial apresentado na amostra.",
-              "expected": "Vê claramente porque é que a Tentativa 1 foi devolvida e porque é que a Tentativa 2 foi escolhida como o Valor reportado oficial."
+              "action": "Verifique qual a tentativa ou regra de réplicas que produziu o Valor final do relatório oficial apresentado na amostra.",
+              "expected": "Vê claramente porque é que a Tentativa n.º 1 foi devolvida e porque é que a Tentativa n.º 2 foi escolhida como o Valor final do relatório oficial."
             },
             {
-              "action": "Abra Relatórios para essa amostra para ver todas as revisões emitidas do Certificado de análise (Revisão 1 marcada como Substituídos e Revisão 2 marcada como Atuais) e o motivo escrito da emenda.",
+              "action": "Abra Relatórios para essa amostra para ver todas as revisões emitidas do Certificado de análise (Revisão 1 marcada como Substituído por uma versão mais recente e Revisão 2 marcada como Atuais) e o motivo escrito da emenda.",
               "expected": "Cada número alguma vez medido ou reportado nessa amostra fica documentado do início ao fim."
             }
           ]
@@ -8686,7 +8686,7 @@
           "As tentativas anteriores permanecem seladas e visíveis sempre que é realizada uma repetição."
         ],
         [
-          "Valor reportado",
+          "Valor final do relatório",
           "O valor oficial aprovado para o Certificado de análise",
           "Associado diretamente à(s) tentativa(s) de suporte e à validação do revisor."
         ],
@@ -8696,13 +8696,13 @@
           "Garante que qualquer pessoa que verifique um PDF antigo seja imediatamente encaminhada para a revisão no estado Atuais."
         ]
       ],
-      "example": "Na amostra DEMO-26-000142, rastreie o P Olsen desde a Tentativa 1 (devolvida devido a falha no branco) até à Tentativa 2 (aprovada com 14,2 mg/kg). Confirme que consta do relatório atual RPT-DEMO-2026-00042.",
+      "example": "Na amostra DEMO-26-000142, rastreie o P Olsen desde a Tentativa n.º 1 (devolvida devido a falha no branco) até à Tentativa n.º 2 (aprovada com 14,2 mg/kg). Confirme que consta do relatório atual RPT-DEMO-2026-00042.",
       "success": "Dispõe de uma rastreabilidade completa de ponta a ponta desde as tentativas brutas de bancada até a cada revisão de relatório emitida.",
       "nextActor": "Oficial de Qualidade e Auditoria, Gerente de Laboratório ou Cliente a verificar o relatório",
       "problems": [
         {
           "symptom": "Um agrónomo pergunta porque é que o seu PDF impresso do mês passado mostra um valor de potássio diferente do da tabela online de hoje.",
-          "why": "A amostra passou por uma emenda científica formal após a impressão do mês passado, tornando a Revisão 1 Substituídos e publicando o valor corrigido na Revisão 2 (Atuais).",
+          "why": "A amostra passou por uma emenda científica formal após a impressão do mês passado, tornando a Revisão 1 Substituído por uma versão mais recente e publicando o valor corrigido na Revisão 2 (Atuais).",
           "action": "Abra Relatórios para essa amostra, mostre o motivo e a data da emenda entre a Revisão 1 e a Revisão 2, e envie ao agrónomo o PDF da Revisão 2 no estado Atuais."
         }
       ],
@@ -8713,9 +8713,9 @@
         "docs/book/src/usage/qc-management.md"
       ],
       "steps": [
-        "Abra a amostra no Registo de amostras. Clique no separador Trabalhos e resultados para expandir a linha do parâmetro. (Esperado: Vê todas as tentativas registadas (Tentativa 1, Tentativa 2 e seguintes) com o respetivo técnico, instrumento, data/hora, estado de CQ do lote e decisão do revisor.)",
-        "Verifique qual a tentativa ou regra de réplicas que produziu o Valor reportado oficial apresentado na amostra. (Esperado: Vê claramente porque é que a Tentativa 1 foi devolvida e porque é que a Tentativa 2 foi escolhida como o Valor reportado oficial.)",
-        "Abra Relatórios para essa amostra para ver todas as revisões emitidas do Certificado de análise (Revisão 1 marcada como Substituídos e Revisão 2 marcada como Atuais) e o motivo escrito da emenda. (Esperado: Cada número alguma vez medido ou reportado nessa amostra fica documentado do início ao fim.)"
+        "Abra a amostra no Registo de amostras. Clique no separador Trabalhos e resultados para expandir a linha do parâmetro. (Esperado: Vê todas as tentativas registadas (Tentativa n.º 1, Tentativa n.º 2 e seguintes) com o respetivo técnico, instrumento, data/hora, estado de CQ do lote e decisão do revisor.)",
+        "Verifique qual a tentativa ou regra de réplicas que produziu o Valor final do relatório oficial apresentado na amostra. (Esperado: Vê claramente porque é que a Tentativa n.º 1 foi devolvida e porque é que a Tentativa n.º 2 foi escolhida como o Valor final do relatório oficial.)",
+        "Abra Relatórios para essa amostra para ver todas as revisões emitidas do Certificado de análise (Revisão 1 marcada como Substituído por uma versão mais recente e Revisão 2 marcada como Atuais) e o motivo escrito da emenda. (Esperado: Cada número alguma vez medido ou reportado nessa amostra fica documentado do início ao fim.)"
       ],
       "caution": "Verifique sempre o código QR ou a tabela em Relatórios se duas impressões da mesma amostra apresentarem números de revisão diferentes.",
       "related": [
