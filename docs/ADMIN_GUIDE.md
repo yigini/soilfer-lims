@@ -81,20 +81,20 @@ In multi-laboratory deployments, national ministries can host multiple regional 
 
 ## 4. FAO GLOSOLAN Method Catalogue & Analytical Packages
 
-SoilFER-LIMS natively includes the **FAO GLOSOLAN Standard Operating Procedures** catalogue:
+After installation, SoilFER-LIMS automatically loads the standard **FAO GLOSOLAN** analysis and method catalogue. No pre-built analysis bundles are shipped by default; each laboratory creates its own analysis packages to match its local testing services.
 
-Navigate to **Admin Panel → Lab Configuration → Analyses & Methods** (`/admin?tab=lab-config`):
+Navigate to **Admin Panel → Analysis Configuration** (`/admin?tab=lab-config`):
 
 ### A. Core Soil Properties (Measurands)
 * **Canonical Codes:** `pH`, `carbonOrganic`, `nitrogenTotal`, `electricalConductivity`, `exchangeableBases` (`Ca`, `Mg`, `K`, `Na`), `pSA` (Sand, Silt, Clay).
 * **One Canonical Unit per Analysis:** Each analysis stores one canonical reporting unit (`g/kg`, `mg/kg`, `cmol(+)/kg`, `dS/m`, `µS/cm`, `%`) and normalizes legacy synonyms automatically.
 * **Plausibility & Cross-Parameter Bounds:** Enforces physical bounds (e.g. `results.phMin`/`phMax`), regional typical ranges (`results.typicalMin`/`typicalMax`), and cross-parameter checks (Sum of Bases vs. CEC, Texture Closure $100\% \pm \text{tolerance}$, C:N ratio).
 
-### B. Standard Analysis Suites (Packages)
-Group common laboratory determinations into 1-click packages for intake officers:
-* **Routine Soil Fertility Suite:** pH ($1:2.5\ \text{H}_2\text{O}$), Organic Carbon (Walkley-Black), Total Nitrogen (Kjeldahl), Available Phosphorus (Olsen / Mehlich-3), Electrical Conductivity.
-* **Physical Soil Suite:** Particle Size Analysis (`SAND`, `SILT`, `CLAY` with USDA 12-class textural closure validation), Bulk Density, Moisture Content.
-* **Exchangeable Cations & CEC:** Ammonium Acetate extraction for exchangeable $\text{Ca}^{2+}$, $\text{Mg}^{2+}$, $\text{K}^+$, $\text{Na}^+$, and Effective Cation Exchange Capacity (ECEC).
+### B. Laboratory Analysis Packages
+Each laboratory defines its own one-click test packages in **Admin Panel → Analysis Configuration** (`/admin?tab=lab-config`) under the **Analysis Packages** tab (**Analysis Packages & Suites**):
+1. Click **Create Analysis Package** to open **New Analysis Package**.
+2. Enter a **Package ID (Code)** and **Package Display Name** that match your laboratory's service menu.
+3. Tick the active parameters under **Select Included Analytical Parameters** and click **Save Package**. Reception officers can then select your laboratory's packages in one click during sample intake.
 
 ---
 
