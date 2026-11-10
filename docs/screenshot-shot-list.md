@@ -26,9 +26,9 @@ This shot list covers all 41 screenshot placeholders across `docs/book/src/` so 
 
 | # | Target Image Path | Manual Page | What Must Be Visible (Current Screen Labels) | Signed-In Role | Demo-Lab State Needed |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| 6 | `docs/book/src/img/screenshots/reception-console-modes.png` | `docs/book/src/usage/reception-and-intake.md` | **Sample Reception & Intake** screen showing the **Project Sample**, **Walk-in / External**, **Sample delivery box**, and **Incomplete Intakes (Drafts)** cards (with badge count `1`). | **Sample Reception Officer** (`reception1`) | 1 expected project with 3 **Expected** samples (`FIELD-2026-013`..`015`) and 1 saved intake draft (`FIELD-2026-016`). |
-| 7 | `docs/book/src/img/screenshots/reception-single-sample.png` | `docs/book/src/reception/receive-one-sample.md` | **Reception Console** showing steps **1. ID & Field**, **2. Condition**, **3. Analyses** (with lab analysis package selected), and **4. Handover** (**Accept Sample** and **Save Draft**) for a single soil sample. | **Sample Reception Officer** (`reception1`) | `FIELD-2026-013` loaded in **Project Sample** mode with condition checks passing and *Routine Fertility Package* selected. |
-| 8 | `docs/book/src/img/screenshots/reception-consignment-batch.png` | `docs/book/src/reception/receive-consignment-box.md` | **Sample delivery box** screen showing **Scan or Enter Sample ID to add...**, **Shared batch observations**, the multi-row batch sample table, and **Finish check-in or submit delivery box**. | **Sample Reception Officer** (`reception1`) | `FIELD-2026-014` and `FIELD-2026-015` staged in **Sample delivery box** mode with shared delivery details filled in. |
+| 6 | `docs/book/src/img/screenshots/reception-console-modes.png` | `docs/book/src/usage/reception-and-intake.md` | **Sample Reception & Intake** screen showing the **Project Sample**, **Walk-in / External**, **Sample delivery box**, and **Incomplete Intakes (Drafts)** cards (with badge count `1`). | **Sample Reception Officer** (`reception1`) | 1 expected project with 3 **Expected** samples (`FIELD-2026-017`..`019`) and 1 saved intake draft (`FIELD-2026-016`). |
+| 7 | `docs/book/src/img/screenshots/reception-single-sample.png` | `docs/book/src/reception/receive-one-sample.md` | **Reception Console** showing steps **1. ID & Field**, **2. Condition**, **3. Analyses** (with lab analysis package selected), and **4. Handover** (**Accept Sample** and **Save Draft**) for a single soil sample. | **Sample Reception Officer** (`reception1`) | `FIELD-2026-017` loaded in **Project Sample** mode with condition checks passing and *Routine Fertility Package* selected. |
+| 8 | `docs/book/src/img/screenshots/reception-consignment-batch.png` | `docs/book/src/reception/receive-consignment-box.md` | **Sample delivery box** screen showing **Scan or Enter Sample ID to add...**, **Shared batch observations**, the multi-row batch sample table, and **Finish check-in or submit delivery box**. | **Sample Reception Officer** (`reception1`) | `FIELD-2026-018` and `FIELD-2026-019` staged in **Sample delivery box** mode with shared delivery details filled in. |
 | 9 | `docs/book/src/img/screenshots/reception-incomplete-drafts.png` | `docs/book/src/reception/save-and-resume-draft.md` | **Incomplete Intakes (Drafts)** list showing a saved draft check-in row with **Resume** and **Discard** buttons. | **Sample Reception Officer** (`reception1`) | Saved draft intake for `FIELD-2026-016` created by `reception1`. |
 | 10 | `docs/book/src/img/screenshots/reception-condition-checks.png` | `docs/book/src/reception/damaged-or-small-sample.md` | **2. Condition** (**Reception Compliance**) step showing **Container Intact / Sealed**, **Sample Quantity Sufficient**, **Fail** selected, **Describe the observed problem**, **Mass deficit**, and **Reject sample and record problem** / **Record a problem**. | **Sample Reception Officer** (`reception1`) | Unsaved intake preview on a torn/low-mass bag (120 g entered so **Mass deficit** warning and problem-record fields appear), or inspect `DEMO-26-0015` (**Rejected (problem recorded)**). |
 | 11 | `docs/book/src/img/screenshots/reception-id-lookup.png` | `docs/book/src/reception/unknown-or-duplicate-id.md` | **1. ID & Field** step in **Sample Reception** after scanning an already-received field code, showing **Sample ID {id} was already checked in** (with **This sample ID was previously received on** and **✓ Confirm as Re-submission**) plus the **Soil profile / sampling point** section. | **Sample Reception Officer** (`reception1`) | `Sample 1` (`DEMO-26-0001`, original ID `FIELD-2026-001`) already **Accepted**; type `FIELD-2026-001` in **Search manifest by Sample ID...**. |
@@ -88,7 +88,7 @@ This shot list covers all 41 screenshot placeholders across `docs/book/src/` so 
 
 ## 6. Demo Soil Lab Seed Needs Summary
 
-A single deterministic seed script for *Demo Soil Lab* (`DEMO`) covers all 41 screenshots above without resetting database state between captures:
+A single deterministic seed script for *Demo Soil Lab* (`DEMO`) covers all 41 screenshots above without resetting database state between captures. See [Set Up the Practice Lab](practice-lab-setup.md) for the command and safety rules to populate a local practice database.
 
 ### A. Facility & Policy Setup
 - *Laboratory:* `Demo Soil Lab` (code `DEMO`, timezone `UTC`, branding logo set, **ISO 17025 strict** starting rule set active).
@@ -106,7 +106,7 @@ A single deterministic seed script for *Demo Soil Lab* (`DEMO`) covers all 41 sc
 5. `reception1` — **Sample Reception Officer** (`DEMO`)
 6. `tech1` & `tech2` — **Laboratory Technician** (`DEMO`, both with 4-digit bench PINs set so **Turn on bench mode**, **Switch analyst**, and **Enter your PIN to unlock** work immediately)
 7. `viewer1` — **Read-Only Viewer** (scoped to project *National Topsoil Fertility Survey*)
-8. *Pending invitation:* 1 **Pending Staff Invitations** row (`tech3@demo-soil-lab.org`) for Shot 4.
+8. *Pending invitation:* 1 **Pending Staff Invitations** row (`tech3@example.test`) for Shot 4.
 
 ### C. Enabled Analyses, Methods & Analysis Packages
 - *Active soil parameters (with GLOSOLAN defaults, plausible min/max, LOQ, and 5-tier agronomic thresholds):*
@@ -135,7 +135,7 @@ A single deterministic seed script for *Demo Soil Lab* (`DEMO`) covers all 41 sc
 ### E. Project, Samples, Runs, Problem Records & Reports
 - *Project:* *National Topsoil Fertility Survey* (`PRJ-DEMO-2026`), with `viewer1` (**Read-Only Viewer**) attached.
 - *Pre-arrival & draft rows:*
-  - `FIELD-2026-013`, `FIELD-2026-014`, `FIELD-2026-015` — status **Expected** (for Shots 6, 7, 8, 10)
+  - `FIELD-2026-017`, `FIELD-2026-018`, `FIELD-2026-019` — status **Expected** (for Shots 6, 7, 8, 10)
   - `FIELD-2026-016` — saved in **Incomplete Intakes (Drafts)** (for Shots 6, 9)
 - *15 Demo Samples across every workflow stage:*
   - `Sample 1` (`DEMO-26-0001`, field ID `FIELD-2026-001`): **Accepted**, **Waiting for drying**, label printed once (Shots 11, 12, 13, 29)
