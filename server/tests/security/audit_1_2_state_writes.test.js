@@ -336,7 +336,7 @@ test('a new physical source file with embedded node-e Sample inserts fails the i
 test('the sole deferral is byte-bound inventory; a one-byte change becomes a failing embedded writer', () => {
     expect(exceptions).toHaveLength(2);
     expect(deferredSources).toEqual([{ path: 'server/scripts/rehearsal_docker_boundary.cjs',
-        sha256: 'c215311a252b83fb95dcf410d4e9c9bc79c24864ca782123d19631472b226f32',
+        sha256: 'd0cace00ac6f69fcdfa010068228322a6f0493064cba1b0781a3e30e279a5a80',
         reason: '#146 synthetic Docker fault adapter; deferred, see #245' }]);
     const filename = 'scripts/rehearsal_docker_boundary.cjs', source = fs.readFileSync(path.join(serverRoot, filename), 'utf8');
     const reported = scanSource(source, filename, exceptions);

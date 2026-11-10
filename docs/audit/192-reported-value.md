@@ -106,7 +106,7 @@ unchecked mean. Raw observation and spectral-reference expectations remain.
 | `audit_1_4_uuid_transactions.test.js` (accepted texture followed by fraction repeat) | Repeat an accepted fraction and review its recalculated TEXTURE again. | Real fraction/TEXTURE acceptance, then 409 WORK_REPEAT_STATE_REFUSED and identical counts/content for WorkItem/history, WorkAttempt, Result, ReviewDecision, AuditLog/WORKITEM events and selections. Preserve frozen accepted evidence (6074706976). |
 | `qc_controls.test.js` (positive manager disposition) | An independently invalid default Result can be accepted after PROCEED_WITH_WARNING. | Seed the intended valid 6.8 measurement before the disposition; keep the original failed-QC refusal, manager override, success and locked-batch assertions. #192 now rejects independently invalid sources; tests prove an override cannot bypass that check in any QC mode (6073676241). |
 
-Pin [6074706976](https://github.com/yigini/soilfer-lims/issues/192#issuecomment-6074706976)
+Pin 6074706976 (historical issue #192)
 keeps recalculation coverage in `workbench appends the second replica of a repeated
 fraction, recalculates from REPLICATE_ADDED and requires a new real review`: the
 actual event causes recalculation before acceptance, no review is inherited,

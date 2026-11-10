@@ -2,7 +2,7 @@
 
 **System:** SoilFER Laboratory Information Management System (SoilFER-LIMS)  
 **Component:** Data Exchange Gateway (V1 & V2)  
-**Authoritative Reference:** GitHub Issue [#140](https://github.com/yigini/soilfer-lims/issues/140)  
+**Authoritative Reference:** Historical issue 140<br>
 **Target Audience:** LIMS Platform Administrators, National Soil Data Managers, DevOps Engineers  
 
 ---
@@ -243,7 +243,7 @@ Under normal operation:
 Under degraded or transient database contention:
 - If hold or policy evaluation queries encounter unexpected infrastructure failures or temporary lock contention, the exchange gateway strictly **fails closed**.
 - Instead of returning misleading empty datasets (`200 OK`) or arbitrary `500 Internal Server Error`, the gateway returns a typed, retryable **HTTP 503 Service Unavailable** with machine-readable code `EXCHANGE_ELIGIBILITY_UNAVAILABLE`.
-- See the authoritative notice posted on [GitHub Issue #140 Comment 5972150911](https://github.com/yigini/soilfer-lims/issues/140#issuecomment-5972150911).
+- See the authoritative notice posted on GitHub Issue #140 Comment 5972150911 (historical issue 140).
 
 ### 7.2 Response Envelope & Correlation Headers
 

@@ -8,7 +8,7 @@
  * 2. Prominent banner displays "REJECTED FOR RE-ANALYSIS (Legacy)" with recorded metadata & justification
  * 3. Blank measurement (expected: 0, measured: 0.03, missing limit) displays "Not recorded" for Upper Limit (never 0, never implicit 0.05) and PASS status
  * 4. Manager action form is suppressed (no editable "Proceed with Warning" form, no prefilled old reason)
- * 5. Dedicated read-only "Manager QC Disposition (Recorded — Read Only)" card is displayed with ISO 17025 compliance statement
+ * 5. Dedicated read-only "Manager batch decision (read only)" card is displayed with ISO 17025 compliance statement
  * 6. High-resolution screenshot captured to artifacts/evidence-journeys/qc_inspection_legacy_reject_modal.png
  */
 
@@ -536,7 +536,7 @@ async function runQCInspectionEvidence() {
             expression: `
                 (() => {
                     const forms = Array.from(document.querySelectorAll('form'));
-                    const hasDispositionForm = forms.some(f => f.innerText.includes('Record Manager QC Disposition') || f.innerText.includes('Confirm Manager Disposition'));
+                    const hasDispositionForm = forms.some(f => f.innerText.includes('Save manager batch decision') || f.innerText.includes('Confirm manager decision'));
                     const radioInputs = Array.from(document.querySelectorAll('input[name="decision"]'));
                     const textareaReason = document.querySelector('textarea#disposition-reason');
                     return {
@@ -559,10 +559,10 @@ async function runQCInspectionEvidence() {
             expression: `
                 (() => {
                     const text = document.body.innerText;
-                    const hasCardHeader = text.includes('Manager QC Disposition (Recorded — Read Only)');
+                    const hasCardHeader = text.includes('Manager batch decision (read only)');
                     const hasAuditBadge = text.toUpperCase().includes('RECORDED AUDIT ENTRY');
                     const hasDecision = text.includes('REJECT_REANALYSIS');
-                    const hasHistoryStatement = text.includes('Recorded manager QC dispositions are preserved in audit history and cannot be overwritten through this interface.');
+                    const hasHistoryStatement = text.includes('Manager batch decisions are kept in audit history. This screen is read only.');
                     return { hasCardHeader, hasAuditBadge, hasDecision, hasHistoryStatement };
                 })()
             `,
@@ -610,7 +610,7 @@ async function runQCInspectionEvidence() {
         console.log(`[Evidence] Saved card screenshot to: ${cardScreenshotPath}`);
 
         // Also copy to antigravity brain artifacts directory for direct user inspection
-        const brainArtifactsDir = 'C:\\Users\\yigin\\.gemini\\antigravity\\brain\\80c11c12-5cb7-4455-a433-01544d488498';
+        const brainArtifactsDir = 'C:\\workspace\\.gemini\\antigravity\\brain\\80c11c12-5cb7-4455-a433-01544d488498';
         if (fs.existsSync(brainArtifactsDir)) {
             const brainPath1 = path.join(brainArtifactsDir, 'qc_inspection_legacy_reject_modal.png');
             fs.copyFileSync(screenshotPath, brainPath1);

@@ -4,7 +4,7 @@ const Database = require('better-sqlite3');
 
 // Unmodified own-Prisma7.10 emission of schema at main4a49798c2fcba592ba54b44ed11f17522226bcd2.
 // node server/node_modules/prisma/build/index.js migrate diff --from-empty --to-schema
-// C:/Users/yigin/AppData/Local/Temp/qc200-pre-import-a3ee0400-aa5a-4054-9215-4c52d2e26621.prisma
+// C:/workspace/AppData/Local/Temp/qc200-pre-import-a3ee0400-aa5a-4054-9215-4c52d2e26621.prisma
 // --script --config server/prisma.config.ts; cwd server. Schema SHA256
 // 55d6bf4eb422798e0bf8b117814efff15c11a7c3e7ebcff2e72a3eedc3dd5d26; 89 models.
 function createPre200ImportSchemaFixture() {

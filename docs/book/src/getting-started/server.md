@@ -69,7 +69,7 @@ Click **"Add Server"** and configure:
 >
 > If you want to learn how: [How to create SSH keys (DigitalOcean guide)](https://www.digitalocean.com/community/tutorials/how-to-set-up-ssh-keys-on-ubuntu-22-04)
 
-**Name:** Give your server a descriptive name like `soilfer-lims` or `soillab-server`.
+**Name:** Give your server a descriptive name like `soilfer-lims` or `lims-server`.
 
 ### 4. Create
 
@@ -77,7 +77,7 @@ Click **"Create & Buy now"**. Your server will be ready in about 30 seconds.
 
 ### 5. Note Your IP Address
 
-After creation, you'll see your server in the dashboard. The most important piece of information is the **IP address** — something like `46.19.33.37`. Write this down! You'll need it to:
+After creation, you'll see your server in the dashboard. The most important piece of information is the **IP address** — something like `203.0.113.10`. Write this down! You'll need it to:
 - Connect to the server via SSH
 - Point your domain to the server
 
@@ -114,7 +114,7 @@ Click **"Create Droplet"**. Note the IP address from the dashboard.
 Regardless of which provider you used, you now have:
 
 1. ✅ A server running Ubuntu Linux
-2. ✅ An IP address (e.g., `46.19.33.37`)
+2. ✅ An IP address (e.g., `203.0.113.10`)
 3. ✅ A root password (emailed to you) or SSH key access
 
 You're ready to connect! Continue to [Connecting to Your Server](./connecting.md).

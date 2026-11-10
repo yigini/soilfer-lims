@@ -16,15 +16,63 @@ describe('Audit 0.12: observed batch intake values', () => {
         await prisma.analysis.create({ data: { code: analysis, name: 'Audit mass method', matrix: 'SOIL', sampleMassRequired: 50, status: 'active' } });
     });
     afterEach(() => jest.restoreAllMocks());
-    const post = (path, body) => request(app).post(path).set('Authorization', `Bearer ${token}`).send(body);
+    const post = (path, body, actorToken = token) => request(app).post(path).set('Authorization', `Bearer ${actorToken}`).send(body);
     const row = data => ({ originalId: id('SMP-012'), status: 'ACCEPTED', ...data });
-    const receive = (samples, rest = {}) => post('/api/reception/consignments', { samples, ...rest, defaults: {
+    const receive = (samples, rest = {}, actorToken = token) => post('/api/reception/consignments', { samples, ...rest, defaults: {
         requiredAnalyses: [analysis], checklist: { items: Object.fromEntries(['container', 'label', 'quantity', 'condition', 'coc'].map(key => [key, { status: 'PASS' }])) }, ...rest.defaults
-    } });
+    } }, actorToken);
     const stored = originalId => prisma.sample.findFirst({ where: { originalId } });
     async function counts() {
         return Promise.all([prisma.sample.count(), prisma.consignment.count(), prisma.workItem.count(), prisma.auditLog.count()]);
     }
+    test('duplicate IDs within one file identify the failed row without committing anything', async () => {
+        const sample = row();
+        const before = await counts();
+        const response = await receive([sample, sample]);
+        expect(response.status).toBe(422);
+        expect(response.body.errors).toEqual([expect.objectContaining({
+            row: 2, originalId: sample.originalId, code: 'DUPLICATE_INTAKE_ROW', message: expect.any(String)
+        })]);
+        expect(await counts()).toEqual(before);
+    });
+
+    test('an already accepted same-lab ID reports the locked row without committing anything', async () => {
+        const sample = row();
+        expect((await receive([sample])).status).toBe(201);
+        const before = await counts();
+        const response = await receive([row(), sample]);
+        expect(response.status).toBe(422);
+        expect(response.body.errors).toEqual([expect.objectContaining({
+            row: 2, originalId: sample.originalId, code: 'SAMPLE_LOCKED', message: expect.any(String)
+        })]);
+        expect(await counts()).toEqual(before);
+    });
+
+    test('an ID registered at another lab is a private 409 while a direct foreign specimen reference is still denied', async () => {
+        const otherLab = 'LAB-AUDIT-012-OTHER';
+        await ensureTestLab(otherLab, 'GTM');
+        const otherToken = await getAuthToken('SAMPLE_RECEPTION', otherLab);
+        const sample = row();
+        expect((await receive([sample], {}, otherToken)).status).toBe(201);
+        const existing = await stored(sample.originalId);
+        const before = await counts();
+
+        const response = await receive([row(), { ...sample, originalId: ` ${sample.originalId} ` }]);
+        expect(response.status).toBe(409);
+        expect(response.body).toEqual({
+            code: 'SAMPLE_ID_IN_USE', row: 2, originalId: sample.originalId,
+            message: 'This sample ID is already registered. Sample IDs must be unique across the system.'
+        });
+        expect(await counts()).toEqual(before);
+
+        const direct = await receive([{ ...sample, sampleId: existing.id }]);
+        expect(direct.status).toBe(403);
+        expect(direct.body).toEqual({
+            code: 'SAMPLE_SCOPE_DENIED', message: 'The specimen is outside your laboratory scope.'
+        });
+        expect(await counts()).toEqual(before);
+    });
+
     test('absent observations remain null and mass is flagged, even if legacy defaults are present', async () => {
         const s = row({ latitude: 14.5, longitude: -89.4 });
         const response = await receive([s], { defaults: { requiredAnalyses: [analysis], receivedMass: 500, moistureOnArrival: 'MOIST' } });

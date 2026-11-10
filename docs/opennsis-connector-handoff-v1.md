@@ -2,7 +2,7 @@
 
 **Document Version:** 1.0.0  
 **Target Systems:** FAO OpenNSIS (`sis-database/owl2sql`), National Soil Information Systems (NSIS), SoilFER-LIMS  
-**Governing Issue:** GitHub Issue [#140](https://github.com/yigini/soilfer-lims/issues/140) (Packages P5 & P7 Handoff)  
+**Governing Issue:** Historical issue 140 (Packages P5 & P7 Handoff)<br>
 **Status:** Review-Ready Specification & Handoff Agreement  
 
 ---

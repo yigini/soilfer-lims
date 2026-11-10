@@ -13,7 +13,7 @@ const defaultBranding = {
         accent: '#D97706'
     },
     logoUrl: '/assets/img/soilfer-logo.png',
-    contactEmail: 'GLOSOLAN@fao.org',
+    contactEmail: '',
     defaultLanguage: 'en',
     dateFormat: 'YYYY-MM-DD',
     footerText: 'SoilFER-LIMS · Aligned with FAO Global Soil Partnership & GLOSOLAN'

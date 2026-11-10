@@ -29,7 +29,7 @@ function repeatBracketScope(analyte, evidence) {
         !Array.isArray(details.calibrationBrackets) || failing.some(row => !details.calibrationBrackets.some(bracket =>
             bracket.failedPositionId === row.positionId && Array.isArray(bracket.affectedPositionIds) &&
             bracket.affectedPositionIds.length > 0 && Array.isArray(bracket.affectedWorkItemIds) && bracket.affectedWorkItemIds.length > 0))) {
-        throw Object.assign(new Error('Only failed continuing calibration brackets may be repeated independently.'),
+        throw Object.assign(new Error('Repeat samples since the last good instrument check only after a failed continuing calibration check.'),
             { statusCode: 409, code: 'QC_BRACKET_REPEAT_NOT_ALLOWED' });
     }
     const brackets = details.calibrationBrackets.filter(row => failing.some(check => check.positionId === row.failedPositionId));

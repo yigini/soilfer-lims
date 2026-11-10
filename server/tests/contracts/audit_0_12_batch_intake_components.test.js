@@ -38,7 +38,10 @@ function harness(name) {
             if (dependency === 'react') return hooks;
             if (dependency === 'axios') return axios;
             if (dependency === 'lucide-react') return new Proxy({}, { get: () => () => null });
-            if (dependency.includes('LanguageContext')) return { useLanguage: () => ({ t: (key, params) => params?.message ? `${key}: ${params.message}` : key }) };
+            if (dependency.includes('LanguageContext')) return { useLanguage: () => ({
+                t: (key, params) => params?.row ? `${key} ${params.row} ${params.id ?? ''}: ${params.message}`
+                    : params?.message ? `${key}: ${params.message}` : key
+            }) };
             if (dependency.includes('useIntakeRules')) return () => ({ rules: require('../helpers/intakeRulesFixture')() });
             if (dependency.includes('audioCues')) return { playSuccessChime() {}, playErrorBuzz() {} };
             if (dependency.includes('coordParser')) return { parseCoordinates: () => ({ lat: 14.5, lng: -89.4, uncertaintyM: 10 }) };
@@ -73,6 +76,36 @@ describe('Audit 0.12: batch observation entry and explicit actions', () => {
         try { await button(tree, 'batchReception.submit').props.onClick(); } finally { jest.restoreAllMocks(); }
         expect(h.axios.post).toHaveBeenCalledWith('/api/reception/consignments', expect.objectContaining({ assignedLab: 'active' }));
         expect(h.alert).toHaveBeenCalledWith('batchIntake.submissionFailed: Choose an active lab.');
+    });
+
+    test('batch refusal lists each row and shows a taken-ID conflict without duplicating its message', async () => {
+        const h = harness('BatchIntake'), props = { user: { role: 'SAMPLE_RECEPTION', labId: 'lab' } };
+        let tree = h.render(props);
+        elements(tree, node => node.type === h.children.ManifestImportModal)[0].props.onImport([
+            { originalId: 'bag-1', status: 'ACCEPTED' }, { originalId: 'bag-2', status: 'ACCEPTED' }
+        ]);
+        h.render(props); await settle(); tree = h.render(props);
+        const submit = async (status, data) => {
+            h.axios.post.mockRejectedValueOnce({ response: { status, data } });
+            await button(tree, 'batchReception.submit').props.onClick();
+        };
+
+        jest.spyOn(console, 'error').mockImplementation(() => {});
+        try {
+            await submit(422, { error: 'Rows failed validation.', errors: [
+                { row: 1, originalId: 'bag-1', message: 'This ID occurs twice.' },
+                { row: 2, originalId: 'bag-2', message: 'Sample intake is locked.' }
+            ] });
+            expect(h.alert).toHaveBeenLastCalledWith([
+                'batchIntake.submissionFailed: Rows failed validation.',
+                'batchIntake.submissionRowError 1 bag-1: This ID occurs twice.',
+                'batchIntake.submissionRowError 2 bag-2: Sample intake is locked.'
+            ].join('\n'));
+
+            await submit(409, { code: 'SAMPLE_ID_IN_USE', row: 2, originalId: 'bag-2', message: 'This sample ID is already registered.' });
+            expect(h.alert).toHaveBeenLastCalledWith(
+                'batchIntake.submissionFailed: batchIntake.submissionRowError 2 bag-2: This sample ID is already registered.');
+        } finally { jest.restoreAllMocks(); }
     });
 
     test('bulk inputs do not apply to scanned rows until clicked; audit payload freezes the actual applied values', async () => {

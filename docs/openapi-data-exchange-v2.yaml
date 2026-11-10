@@ -11,7 +11,7 @@ info:
     name: SoilFER Technical Team
     url: https://github.com/yigini/soilfer-lims
 servers:
-  - url: https://lims.yigini.net/api/v2/data-exchange
+  - url: https://lims.example.org/api/v2/data-exchange
     description: Production Server
   - url: http://localhost:5000/api/v2/data-exchange
     description: Local Development Server
@@ -395,11 +395,11 @@ paths:
 
   /connections:
     servers:
-      - url: https://lims.yigini.net/api/v1/data-exchange
+      - url: https://lims.example.org/api/v1/data-exchange
         description: Production Administrative Server
       - url: http://localhost:5000/api/v1/data-exchange
         description: Local Administrative Server
-      - url: https://lims.yigini.net/api/v1/sis
+      - url: https://lims.example.org/api/v1/sis
         description: Legacy Production SIS Alias
       - url: http://localhost:5000/api/v1/sis
         description: Legacy Local SIS Alias
@@ -458,11 +458,11 @@ paths:
 
   /connections/{id}:
     servers:
-      - url: https://lims.yigini.net/api/v1/data-exchange
+      - url: https://lims.example.org/api/v1/data-exchange
         description: Production Administrative Server
       - url: http://localhost:5000/api/v1/data-exchange
         description: Local Administrative Server
-      - url: https://lims.yigini.net/api/v1/sis
+      - url: https://lims.example.org/api/v1/sis
         description: Legacy Production SIS Alias
       - url: http://localhost:5000/api/v1/sis
         description: Legacy Local SIS Alias
@@ -492,11 +492,11 @@ paths:
 
   /keys/{id}/rotate:
     servers:
-      - url: https://lims.yigini.net/api/v1/data-exchange
+      - url: https://lims.example.org/api/v1/data-exchange
         description: Production Administrative Server
       - url: http://localhost:5000/api/v1/data-exchange
         description: Local Administrative Server
-      - url: https://lims.yigini.net/api/v1/sis
+      - url: https://lims.example.org/api/v1/sis
         description: Legacy Production SIS Alias
       - url: http://localhost:5000/api/v1/sis
         description: Legacy Local SIS Alias
@@ -550,11 +550,11 @@ paths:
 
   /keys/{id}/confirm-rotation:
     servers:
-      - url: https://lims.yigini.net/api/v1/data-exchange
+      - url: https://lims.example.org/api/v1/data-exchange
         description: Production Administrative Server
       - url: http://localhost:5000/api/v1/data-exchange
         description: Local Administrative Server
-      - url: https://lims.yigini.net/api/v1/sis
+      - url: https://lims.example.org/api/v1/sis
         description: Legacy Production SIS Alias
       - url: http://localhost:5000/api/v1/sis
         description: Legacy Local SIS Alias
@@ -610,11 +610,11 @@ paths:
 
   /keys/{id}/abort-rotation:
     servers:
-      - url: https://lims.yigini.net/api/v1/data-exchange
+      - url: https://lims.example.org/api/v1/data-exchange
         description: Production Administrative Server
       - url: http://localhost:5000/api/v1/data-exchange
         description: Local Administrative Server
-      - url: https://lims.yigini.net/api/v1/sis
+      - url: https://lims.example.org/api/v1/sis
         description: Legacy Production SIS Alias
       - url: http://localhost:5000/api/v1/sis
         description: Legacy Local SIS Alias
