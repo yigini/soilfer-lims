@@ -82,6 +82,7 @@
 # Launching in Your Lab
 
 - [Pilot Launch Kit](./launch/index.md)
+  - [First Real User Test Kit (1-Hour Session)](./launch/user-test-kit.md)
   - [Three-Session Lab Training Plan](./launch/training-plan.md)
   - [Hands-On Practice Exercises & Answer Key](./launch/practice-exercises.md)
   - [Day-One & Week-One Parallel-Run Guide](./launch/day-one-guide.md)
