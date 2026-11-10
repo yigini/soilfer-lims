@@ -58,5 +58,5 @@ When technicians later record wet-chemistry readings in **Workbench**, they can 
 
 ## For the QA Person
 
-- The **Containers and aliquots** tree tracks parent-to-child lineage from the original **Bulk** bag through **Fine earth**, **Ground**, **Aliquot**, and **Archive** containers. It also displays which analytical attempt (**Linked attempt**) used each aliquot.
-- Even when you confirm several rows at once in **Table View**, the server validates and records an individual receipt for each sample.
+- The **Containers and aliquots** tree tracks parent-to-child lineage from the original **Bulk** bag through **Fine earth**, **Ground**, **Aliquot**, and **Archive** containers. It also displays which measurement try (**Linked attempt** (the measurement try connected to this jar)) used each aliquot.
+- Even when you confirm several rows at once in **Table View**, the server validates and records an individual saved confirmation for each sample.

@@ -61,7 +61,7 @@ If a technician or clerk forgets their password:
 
 ## Task D: Suspend or Reactivate a Staff Account
 
-Never delete an account that has recorded sample receipts, preparation steps, or bench results. Suspending preserves the historical audit trail while revoking sign-in access immediately.
+Never delete an account that has recorded sample check-ins, preparation steps, or bench results. Suspending preserves the historical audit trail while revoking sign-in access immediately.
 
 1. In **Laboratory Staff** (or **People & Access**), find the user row and click **Suspend User**.
 2. In the **Emergency Staff Suspension** window, enter the **Suspension Reason / Incident Reference** (for example, *Staff member completed fellowship rotation*).
@@ -91,4 +91,4 @@ Never delete an account that has recorded sample receipts, preparation steps, or
 ### For the QA Person
 
 - *No shared credentials:* Single-use activation and recovery tokens ensure that administrators never need to know or store a staff member's personal password.
-- *Preserved attribution:* Suspending an account via **Suspend Account Immediately** keeps every historical sample intake, preparation sign-off, bench attempt, and approval permanently linked to that individual's name in **Audit & Security**.
+- *Preserved attribution:* Suspending an account via **Suspend Account Immediately** keeps every historical sample intake, preparation sign-off, bench measurement try, and approval permanently linked to that individual's name in **Audit & Security**.

@@ -30,9 +30,9 @@ Check in a single soil sample bag at the reception desk, either from a pre-regis
    - **Label Legible & Matches ID**
    - **Sample Quantity Sufficient**
    - **Sample Condition (Dry, No Contam.)**
-   - **Chain of Custody Present**
+   - **Chain of Custody Present** (handover sheet arrived with the box)
    Click **All clear ✓** if every item passes, or mark individual items **OK**, **Fail**, or **N/A**.
-5. Weigh the bag on your bench scale, enter the received mass in grams and the carrier or courier name in **Delivered By (CoC Signee)**, and type any visual notes in **Intake Notes / Visual Observations**.
+5. Weigh the bag on your bench scale, enter the received mass in grams and the carrier or courier name in **Delivered By (CoC Signee)** (person who handed over the samples), and type any visual notes in **Intake Notes / Visual Observations**.
 6. In **3. Analyses**, verify the ticked **Analysis Requirements** match what the project ordered.
 7. In **4. Handover**, choose the initial storage shelf or drying tray and click **Accept & Print Label** (or **Complete Intake**).
    *You should see **INTAKE CONFIRMED!**, the sample status change to **Accepted**, its **Permanent Lab ID** appear, and the **Print labels** window open.*

@@ -2,7 +2,7 @@
 
 ## What This Is For
 
-Accept reviewed test items (including acknowledging any quality control warnings). This page also shows how to send a questionable test back to the bench with a clear **Repeat reason** or give **Final Approval** once every test on a sample is complete.
+Accept reviewed test items (including confirming any quality control warnings). This page also shows how to send a questionable test back to the bench with a clear **Repeat reason** or give **Final Approval** once every test on a sample is complete.
 
 > *Screenshot placeholder — docs/book/src/img/screenshots/review-accept-return-and-final-approve.png (screenshot coming once the training data is ready): The sample **Review** tab showing **QC acknowledgement reason (required)**, **Accept Item**, **Return for repeat testing**, and the **Final approve sample** button.*
 
@@ -11,7 +11,7 @@ Accept reviewed test items (including acknowledging any quality control warnings
 ## Before You Start
 
 - Sign in with a **Laboratory Manager** account on the **Sign in to SoilFER LIMS** screen.
-- Before accepting a test, make sure you have saved its **Reported value** selection (see [Review Submitted Results and Choose the Reported Value](review-and-select-reported-value.md)).
+- Before accepting a test, make sure you have saved its **Reported value** (the final number printed on the report) selection (see [Review Submitted Results and Choose the Reported Value](review-and-select-reported-value.md)).
 
 ---
 
@@ -31,8 +31,8 @@ Accept reviewed test items (including acknowledging any quality control warnings
 1. If a reading looks implausible or had an instrument or preparation problem, click the return arrow button (**Return for correction**) on that test row.
    *You should see the **Return for repeat testing** dialog open.*
 2. Under **Repeat reason**, select the reason that matches what happened:
-   - **Review outlier**, **Duplicate disagreement**, or **Confirmation**: keeps the original attempt marked **Questioned** while asking the technician for a check run.
-   - **QC batch failure**, **Above range: dilution required**, **Instrument fault**, or **Preparation error**: marks the original attempt **Invalidated** and opens a fresh repeat attempt.
+   - **Review outlier**, **Duplicate disagreement**, or **Confirmation**: keeps the original try marked **Questioned** while asking the technician for a check run.
+   - **QC batch failure**, **Above range: dilution required**, **Instrument fault**, or **Preparation error**: marks the original try **Invalidated** and opens a fresh repeat try.
    - **Other**: requires a detailed explanation in the note box.
 3. In **Review note**, type clear instructions for the technician (**Explain the evidence and what needs to be checked.**).
 4. Click **Confirm return**.
@@ -43,13 +43,13 @@ Accept reviewed test items (including acknowledging any quality control warnings
 ## What Happens Next
 
 - **Approved** samples are sealed against ordinary edits and are ready for report release on the **Reports** tab (see [Issue, Print, and Share a Certificate of Analysis](issue-and-share-reports.md)).
-- Returned items are re-measured by the technician as a new numbered attempt under **Attempts** and resubmitted for your review.
+- Returned items are re-measured by the technician as a new numbered try under **Attempts** (measurement tries) and resubmitted for your review.
 
 ---
 
 ## If Something Goes Wrong
 
-- *If you click* **Confirm return** *and see* **This laboratory’s configured attempt limit has been reached.** *→* The test has already been repeated the maximum number of times allowed by your laboratory policy. Use **Request a repeat-limit override**, enter the **Reason for exceeding the repeat limit** and **Impact assessment**, and submit. This automatically opens a linked record in **Nonconformities**.
+- *If you click* **Confirm return** *and see* **This laboratory’s configured attempt limit has been reached.** (this test has reached the maximum number of repeat tries allowed by your lab) *→* The test has already been repeated the maximum number of times allowed by your laboratory policy. Use **Request a repeat-limit override** (ask a manager to allow an extra repeat try), enter the **Reason for exceeding the repeat limit** and **Impact assessment**, and submit. This automatically opens a linked record in **Nonconformities** (problem records).
 - *If you see* **Use a transcription correction for a typo.** *→* If the bench measurement itself was valid and only typed wrongly, use a transcription correction rather than ordering a new physical repeat.
 - *If you need to reopen an* **Approved** *sample before a report has been issued →* Click **Undo Approval**, enter the mandatory audit reason, and confirm to return the sample to **In Progress**.
 
@@ -58,4 +58,4 @@ Accept reviewed test items (including acknowledging any quality control warnings
 ## For the QA Person
 
 - Blanket approval without submitted evidence is blocked (**Only submitted evidence can be reviewed and accepted. Blanket approval without submitted evidence is prohibited.**).
-- When a manager authorizes **Request a repeat-limit override**, the system atomically creates a **Repeat limit** nonconformity in **Nonconformities** so recurring analytical issues are investigated.
+- When a manager authorizes **Request a repeat-limit override**, the system automatically creates a **Repeat limit** problem record in **Nonconformities** so recurring analytical issues are investigated.

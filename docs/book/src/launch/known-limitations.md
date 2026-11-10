@@ -30,7 +30,7 @@ Every software pilot has a few sharp edges that are good to know in advance. Sha
 
 ## 4. Reference Material Lots Must Have Assigned Values Before Use
 
-- *What happens:* A technician selects a **Laboratory reference material (LRM)** or **Certified reference material (CRM)** lot on a batch control slot. If that lot has no **Assigned value** entered for the batch's analyte and method, the screen shows **No reference value exists for this analyte and method.**
+- *What happens:* A technician selects a **Laboratory reference material (LRM)** (your lab's own in-house check soil) or **Certified reference material (CRM)** (official standard soil with a certified value) lot on a batch control slot. If that lot has no **Assigned value** entered for the batch's analyte and method, the screen shows **No reference value exists for this analyte and method.**
 - *What to do instead:* Ask the **Laboratory Manager** or administrator to open **Admin Panel** → **Quality** (**Reference materials**). They can select the lot, click **Add assigned value**, and save the reference value and unit for that analyte.
 
 ---

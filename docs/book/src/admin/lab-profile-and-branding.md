@@ -47,7 +47,7 @@ Your laboratory's name, address, timezone, logo, and support email appear on the
 
 1. To choose a calm light or dark colour palette for your laboratory's benches, open **Admin Panel** and click the **Appearance** tab.
 2. Preview any palette in the **Theme Library** under **Curated Theme Palette** and choose **Light** or **Dark · Graphite** under **Display Mode**.
-3. Click **Use as this lab's default** (or **Use as platform default** for the whole server) and confirm **Confirm Laboratory Appearance Default**. Staff can still pick their own personal override or high-contrast theme in their profile if they wish.
+3. Click **Use as this lab's default** (or **Use as platform default** for the whole server) and confirm **Confirm Laboratory Appearance Default**. Staff can still pick their own personal theme choice or high-contrast theme in their profile if they wish.
 
 ---
 

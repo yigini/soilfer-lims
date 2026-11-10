@@ -37,10 +37,10 @@ Walk through a complete day managing laboratory work and quality control. You wi
 ### Afternoon: Handle a Batch Where Quality Control Failed
 
 1. In **Manager Task List**, click the **QC Exceptions** tab (or open **QA Dashboard** in the left menu).
-   *You should see any batch marked **QC failed** or **Awaiting disposition**.*
+   *You should see any batch marked **QC failed** or **Awaiting disposition** (waiting for the manager's decision on a failed batch).*
 2. Open the failed batch worksheet to see which control failed (for example, a duplicate pair that disagreed beyond your laboratory's limit, or a reference soil outside its target recovery range).
 3. Choose the appropriate manager decision for your laboratory:
-   - *Order a full or partial repeat:* To send a sample or batch back for re-testing, click **Return for repeat testing**, select a **Repeat reason** (such as **QC batch failure**, **Duplicate disagreement**, or **Instrument fault**), write clear instructions in **Review note**, and click **Confirm return**. If only a calibration bracket failed, choose **Repeat calibration bracket**.
+   - *Order a full or partial repeat:* To send a sample or batch back for re-testing, click **Return for repeat testing**, select a **Repeat reason** (such as **QC batch failure**, **Duplicate disagreement**, or **Instrument fault**), write clear instructions in **Review note**, and click **Confirm return**. If only a group of samples between two instrument check standards failed, choose **Repeat calibration bracket** (re-test only the samples measured between the last good instrument check and the failed check).
    - *Accept with a documented reason (when permitted by your laboratory's policy):* Enter the required explanation in **QC acknowledgement reason (required)** so your name and reason appear on the report record.
    *Your laboratory decides whether quality control failures block approval or allow a documented manager note (see [Per-Lab Settings, Presets & Method Overrides](../usage/lab-settings-and-presets.md)).*
 
@@ -61,13 +61,13 @@ Once a report is issued, its status is **Published** and clients or project coor
 
 ## If Something Goes Wrong
 
-- *If you see* **Failed batch QC requires a manager disposition.** *→* You cannot approve the results until you either order a repeat run or record a manager disposition on the failed batch in **Manager Task List** or **QA Dashboard**.
-- *If an error is discovered on a report that was already published →* Never edit the database directly. Open the sample or report amendment workflow to issue a new revision; the old report is automatically marked **Superseded** and public QR links stop serving the replaced PDF.
-- *If repeated attempts on the same item reach your laboratory's repeat limit →* If you see **This laboratory’s configured attempt limit has been reached.**, open **QA Dashboard** to record a nonconformity review before ordering another attempt.
+- *If you see* **Failed batch QC requires a manager disposition.** (a manager must record a decision on the failed batch before results can be approved) *→* You cannot approve the results until you either order a repeat run or record a manager batch decision on the failed batch in **Manager Task List** or **QA Dashboard**.
+- *If an error is discovered on a report that was already published →* Never edit the database directly. Open the sample or report amendment workflow to issue a new revision; the old report is automatically marked **Superseded** (replaced by a newer version) and public QR links stop serving the replaced PDF.
+- *If repeated tries on the same item reach your laboratory's repeat limit →* If you see **This laboratory’s configured attempt limit has been reached.** (this test has reached the maximum number of repeat tries allowed by your lab), open **QA Dashboard** to record a problem review before ordering another try.
 
 ---
 
 ## For the QA Person
 
-- Separation of duties is enforced according to your laboratory's policy in **Policies**: under strict ISO/IEC 17025 settings, the user who recorded an analytical attempt cannot approve that same attempt.
-- Every manager disposition, repeat order, and report amendment records the actor, timestamp, and written reason in the permanent audit log.
+- Separation of duties is enforced according to your laboratory's policy in **Policies**: under strict ISO/IEC 17025 settings, the user who recorded a measurement try cannot approve that same try.
+- Every manager batch decision, repeat order, and report amendment records the actor, timestamp, and written reason in the permanent audit log.

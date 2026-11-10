@@ -49,4 +49,4 @@ Once you complete the draft, the sample receives its **Permanent Lab ID** and mo
 
 ## For the QA Person
 
-- A **Draft** record is an operational scratchpad at the reception desk; it does not assign a **Permanent Lab ID**, does not set the official reception timestamp, and does not create preparation or analytical work items until intake is completed.
+- A **Draft** record is a temporary working note at the reception desk; it does not assign a **Permanent Lab ID**, does not set the official reception timestamp, and does not create preparation or analytical work items until intake is completed.

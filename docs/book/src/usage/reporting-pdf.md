@@ -52,7 +52,7 @@ Issue official PDF Certificates of Analysis for **Approved** samples, share veri
 
 ## For the QA Person
 
-- *Immutable report snapshots*: Every released report stores a frozen snapshot of the sample's provenance, recorded **Drying** and **Preparation** details, moisture basis, **Reported value** selections, units, methods, **QC deviations:** disclosures, and electronic sign-off timestamps.
+- *Locked report records*: Every released report saves a permanent copy of the sample's origin and history, recorded **Drying** and **Preparation** details, moisture basis, **Reported value** (the final number printed on the report) choices, units, methods, **QC deviations:** notes, and sign-off timestamps.
 - *Immediate withdrawal during scientific retests*: When a **Scientific retest** amendment is authorized on a sample with a released report, the released version is immediately marked **Withdrawn**. External share links cannot serve unverified data while retesting is underway.
-- *Traceable revisions*: When the new report version is released, the previous version moves to **Superseded** (**SUPERSEDED**). The new certificate states which report version it **Replaces** and why.
+- *Traceable revisions*: When the new report version is released, the previous version moves to **Superseded** (**SUPERSEDED** (replaced by a newer version)). The new certificate states which report version it **Replaces** and why.
 - *Master exports*: Exporting from **Data Results** (**Analytical Results Master**) via **CSV** or **Excel** outputs the official saved **Reported value** along with its **Reported value selection ID**, **Attempt IDs**, and **Batch IDs**.

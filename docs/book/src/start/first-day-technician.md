@@ -34,7 +34,7 @@ Walk through a complete technician shift using five practice soil samples. You w
 
 1. In **Workbench**, select your analytical method (for example, soil pH in water) and open the **QC run** worksheet (**Open run worksheet**).
    *Your laboratory decides the batch size and control positions (many laboratories use up to 20 samples per batch; see [Per-Lab Settings, Presets & Method Overrides](../usage/lab-settings-and-presets.md)).*
-2. Click **Select instrument** to pick the calibrated meter or instrument you are using today, verify the **Bound reference lot**, and click **Start run**.
+2. Click **Select instrument** to pick the calibrated meter or instrument you are using today, verify the **Bound reference lot** (check soil bottle linked to this batch slot), and click **Start run**.
    *You should see the run open with rows for your soil samples plus the required quality control positions:*
    - A *blank* (a reagent-only check with no soil, used to check for contamination; see [Glossary](../reference/glossary.md)).
    - A *duplicate* (a second weighing of one sample in the batch, used to check precision; see [Glossary](../reference/glossary.md)).
@@ -51,8 +51,8 @@ Walk through a complete technician shift using five practice soil samples. You w
 ### Step 5: Handle a Returned Item
 
 1. If the reviewer spots a question on one sample, that item reappears in **My Work** with status **Returned** or **Repeat requested**.
-2. Open the item, read the reviewer's **Review note**, re-measure or check the sample on a fresh attempt, and click **Submit** again.
-   *Your earlier attempt stays safely in the history, and the new attempt goes back to the reviewer.*
+2. Open the item, read the reviewer's **Review note**, re-measure or check the sample on a fresh try, and click **Submit** again.
+   *Your earlier try stays safely in the history, and the new try goes back to the reviewer.*
 
 ---
 
@@ -73,4 +73,4 @@ Your **Submitted** batch appears in your manager's **Manager Task List** under *
 ## For the QA Person
 
 - Starting a run (**Start run**) freezes the batch membership and quality control criteria version for that run so later policy edits never alter an in-progress or historical evaluation.
-- Returned items (**Returned** / **Repeat requested**) create a new numbered attempt rather than overwriting the original reading, preserving the complete chain of custody.
+- Returned items (**Returned** / **Repeat requested**) create a new numbered try rather than overwriting the original reading, preserving the full log of who handled the sample and where.

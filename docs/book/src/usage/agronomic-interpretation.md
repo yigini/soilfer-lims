@@ -68,7 +68,7 @@ Standardized units and approved agronomic ratings are saved inside the sample's 
 
 ## For the QA Person
 
-- *One canonical unit per analysis*: Each analysis definition stores one canonical unit. Where a method calculation template converts raw bench inputs (such as titration mL or extract mg/L) into the soil concentration, the conversion factor is recorded in **Recorded calculation evidence**.
+- *One standard unit per analysis*: Each soil test uses one standard reporting unit. When a method formula converts raw bench numbers (such as titration mL or extract mg/L) into the final soil value, the calculation steps are saved in **Recorded calculation evidence**.
 - *Configurable cross-check thresholds*: A **Laboratory Manager** or **System Administrator** can adjust the five cross-parameter rules in **Policies**:
   - **Texture closure**: checks whether Sand + Silt + Clay equals 100 % within **Texture closure tolerance (%)** (default 2 %; flags **Texture closure is outside the lab tolerance.**).
   - **Exchangeable bases / CEC**: checks whether Ca + Mg + K + Na exceeds **Maximum exchangeable bases / CEC factor** (default 1.1; flags **Exchangeable bases exceed the lab CEC factor.**).

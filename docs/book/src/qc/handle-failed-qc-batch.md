@@ -2,7 +2,7 @@
 
 ## What This Is For
 
-Inspect a failed analytical run in **QC Batch Inspection**. Check whether the failure was a typing mistake or a mid-run calibration drift, and record your official manager decision (**Re-analyze Batch**, **Repeat calibration bracket**, or **Proceed with Warning**).
+Inspect a failed analytical run in **QC Batch Inspection**. Check whether the failure was a typing mistake or a mid-run calibration drift, and record your official manager decision (**Re-analyze Batch**, **Repeat calibration bracket** (re-test only the samples measured between the last good instrument check and the failed check), or **Proceed with Warning**).
 
 ![QC Failed, What Now? Decision Tree](../img/diagrams/qc-failed-decision-tree.svg)
 
@@ -37,7 +37,7 @@ Inspect a failed analytical run in **QC Batch Inspection**. Check whether the fa
 
 ### Step 3: Record Your Manager QC Disposition (**Record Manager QC Disposition**)
 
-If the quality control failure is real (not a typing mistake), scroll down to **Record Manager QC Disposition** and choose one **Manager Decision**:
+If the quality control failure is real (not a typing mistake), scroll down to **Record Manager QC Disposition** (save the manager's decision on a failed batch) and choose one **Manager Decision**:
 
 1. **Repeat calibration bracket** (shown when a mid-run calibration check failed):
    - Select **Repeat calibration bracket** (**Repeat only the work covered by the failed continuing calibration checks.**).
@@ -47,7 +47,7 @@ If the quality control failure is real (not a typing mistake), scroll down to **
 3. **Proceed with Warning** (only when your laboratory SOP allows conditional acceptance):
    - Select **Proceed with Warning** when the samples are scientifically unaffected. For example, a tiny blank reading does not affect a batch where every soil sample has a very high concentration.
 4. In **Documented Technical Justification**, type your full scientific explanation or investigation summary.
-5. Click **Confirm Manager Disposition**.
+5. Click **Confirm Manager Disposition** (confirm the manager's batch decision).
    *You should see the banner update to **Manager QC Disposition (Recorded — Read Only)**.*
 
 ---
@@ -61,12 +61,12 @@ If the quality control failure is real (not a typing mistake), scroll down to **
 
 ## If Something Goes Wrong
 
-- *If you see* **Sealed results require amendments:** *after recording a disposition →* One or more samples in the batch were already approved or reported. Open **Sample amendments** on those samples to reopen them for retesting (see [Correct an Approved Sample or Issue an Amended Report](../review/amend-a-released-report.md)).
+- *If you see* **Sealed results require amendments:** *after recording a batch decision →* One or more samples in the batch were already approved or reported. Open **Sample amendments** on those samples to reopen them for retesting (see [Correct an Approved Sample or Issue an Amended Report](../review/amend-a-released-report.md)).
 - *If the* **Approve correction and re-evaluate** *button is refused (**Correction refused**) →* Check that you are not the same user who ran the batch or entered the original QC observation. Also verify that the batch has not already been dispositioned.
 
 ---
 
 ## For the QA Person
 
-- Recorded batch dispositions (**Record Manager QC Disposition**) are immutable and permanently stored in **Batch Lifecycle History** and **System Audit Logs**.
+- Recorded batch decisions (**Record Manager QC Disposition**) cannot be changed and are permanently stored in **Batch Lifecycle History** and **System Audit Logs**.
 - When **Review a transcription correction** is used, SoilFER LIMS never overwrites the failed observation. Both **Original failed evaluation** and **Replacement evaluation** remain visible under **Reviewed QC transcription correction**.

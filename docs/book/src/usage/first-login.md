@@ -43,7 +43,7 @@ When you open your laboratory's SoilFER LIMS address in a web browser, you see t
 If you are setting up a new laboratory for the first time, follow these five steps in order (or open the [Lab Go-Live Checklist](../admin/go-live-checklist.md)):
 
 1. *Set up your laboratory identity and branding:* Open **My Laboratory** (or **Lab Management**) and click the **Settings** tab to fill in your **Laboratory Name**, **City**, **IANA Timezone**, and **Contact Email**. Then open **Admin Panel** and **Branding & Identity** to upload your **Laboratory Logo**. See [Set Up Your Laboratory Profile, Report Branding, and Support Contact](../admin/lab-profile-and-branding.md).
-2. *Choose your quality preset and policies:* Open **Policies** to pick **ISO 17025 strict**, **Basic**, or **Advisory** and review your laboratory's rules. See [Choose a Quality Preset and Customize Laboratory Policies](../admin/configure-presets-and-policies.md).
+2. *Choose your starting rule set and policies:* Open **Policies** to pick **ISO 17025 strict**, **Basic**, or **Advisory** and review your laboratory's rules. See [Choose a Quality Preset and Customize Laboratory Policies](../admin/configure-presets-and-policies.md).
 3. *Switch on your analytical methods and QC rules:* Open **Admin Panel** and **Analysis Configuration** (plus **Laboratory Methodology Defaults**) to confirm your active tests, units, and **Versioned QC rules**. See [Switch On Analytical Methods, Calculations, and QC Rules](../admin/enable-methods-and-qc-rules.md).
 4. *Register instruments, reference materials, and stock:* Open **Equipment**, **Inventory**, and **Reference materials** under **Quality** to register your balances, meters, and reference soils. See [Register Instruments, Log Calibrations, and Track Reagent Stock](../admin/register-equipment-and-inventory.md).
 5. *Invite your laboratory team:* Open **Laboratory Staff** to create accounts for your receptionists, technicians, and reviewers. See [Create Staff Accounts, Assign Roles, and Reset Passwords](../admin/manage-users-and-roles.md).
@@ -55,7 +55,7 @@ If you are setting up a new laboratory for the first time, follow these five ste
 | Problem | What to Do |
 | :--- | :--- |
 | *Screen shows* **Invalid credentials** | Check your **Username** and **Password**. If you forgot your password, click **Forgot password?** on the sign-in screen and ask your **Laboratory Manager** or administrator to issue a **Credential Recovery Link** or click **Reset Password** in **Laboratory Staff**. |
-| *Account is paused after several wrong sign-in attempts* | SoilFER LIMS pauses sign-in briefly after repeated failed attempts (controlled by **Sign-in failures before account backoff**). Wait a few minutes and try again, or ask your administrator for a password reset. |
+| *Account is paused after several wrong sign-in tries* | SoilFER LIMS pauses sign-in briefly after repeated failed tries (controlled by **Sign-in failures before account backoff**). Wait a few minutes and try again, or ask your administrator for a password reset. |
 | *You cannot see* **Admin Panel** *or* **Policies** *in the left sidebar* | Only administrator and manager accounts can open setup screens. Ask your administrator to check your role in **Laboratory Staff**. |
 
 ---

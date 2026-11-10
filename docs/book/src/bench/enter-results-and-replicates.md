@@ -29,7 +29,7 @@ Enter sample readings in the **Workbench** worksheet grid using your keyboard or
 
 1. When your laboratory's policy or method requires duplicate readings on each sample, the row shows **Rep 1** and **Rep 2** boxes side by side.
 2. Type both readings.
-   *You should see the live **Mean**, **RPD** (or **Range**), and agreement status (**Pair passes** or **Pair fails**).*
+   *You should see the live **Mean**, **RPD** (relative percent difference between the two repeat readings, or **Range**), and agreement status (**Pair passes** or **Pair fails**).*
 3. If the first two readings disagree (**Pair fails**), record them first. Then enter a third reading in **Rep 3** (**Run third replicate**) so the reviewer can evaluate all three readings.
 
 ### Part 3: Enter Raw Bench Measurements for Automatic Calculation
@@ -41,10 +41,10 @@ Enter sample readings in the **Workbench** worksheet grid using your keyboard or
 
 ### Part 4: Handle Readings Below LOQ, Above Calibration Range, or Outside Typical Range
 
-1. If a reading is below the method's limit of quantification (**Below method LOQ**), click **Fill method LOQ** to apply the method's < LOQ reporting rule.
+1. If a reading is below the method's limit of quantification (**Below method LOQ** (below the limit of quantification — the lowest amount the method can measure reliably)), click **Fill method LOQ** (fill in the limit of quantification — the lowest amount the method can measure reliably) to apply the method's below-quantification-limit rule.
 2. If a reading exceeds the highest calibration standard (**Above calibration range**), record the initial reading first (**Record this reading first, then request a dilution repeat.**). Next, enter a **Reason** and click **Dilute and repeat?**.
-3. If a special soil sample falls **Outside typical range** (for example, a strongly saline or acid-sulfate soil), type your technical explanation in **Reason** and click **Request override**.
-   *Once your **Laboratory Manager** approves the request under **Override requests**, click **Use this approval** on the row.*
+3. If a special soil sample falls **Outside typical range** (for example, a strongly saline or acid-sulfate soil), type your technical explanation in **Reason** and click **Request override** (ask a reviewer to accept an unusual reading).
+   *Once your **Laboratory Manager** approves the request under **Override requests** (requests to accept unusual readings), click **Use this approval** on the row.*
 
 ---
 
@@ -64,5 +64,5 @@ Your typed or calculated values are saved as drafts (**Draft saved**). Next, ent
 
 ## For the QA Person
 
-- Raw calculation templates (**Method calculation templates**) compute the final concentration on the server. They freeze the **Recorded calculation evidence** (raw inputs, intermediate factors, template revision, and **Calibration curve**) with the attempt.
-- Plausibility overrides (**Request override**) require independent approval from a user with review authority. The analyst who requested the override cannot approve their own request.
+- Raw calculation templates (**Method calculation templates**) compute the final concentration on the server. They freeze the **Recorded calculation evidence** (raw inputs, intermediate factors, template revision, and **Calibration curve**) with the try.
+- Out-of-range approvals (**Request override**) require independent approval from a user with review authority. The analyst who requested the special approval cannot approve their own request.

@@ -33,31 +33,31 @@ Use the **Sample Reception** pages to check in soil bags arriving at the laborat
 2. Choose the intake mode that matches your arrival:
    - Click **Project Sample** for a pre-registered field survey sample that is currently in **Expected** status.
    - Click **Walk-in / External** for a sample brought directly to the counter by a farmer, advisor, or external client.
-   - Click **Consignment Batch** when checking in a whole box of pre-registered samples together.
+   - Click **Consignment Batch** (a whole box or delivery of samples) when checking in a whole box of pre-registered samples together.
    - Click **Incomplete Intakes (Drafts)** to resume a check-in you saved earlier with **Save Draft**.
 3. Follow the four steps across the top of the **Reception Console**: **1. ID & Field**, **2. Condition**, **3. Analyses**, and **4. Handover**.
-4. Click **Accept & Print Label** (or **Complete Intake**) to accept good samples, or click **Reject** (**Non-Conformance**) if a bag cannot be tested.
+4. Click **Accept & Print Label** (or **Complete Intake**) to accept good samples, or click **Reject** (**Non-Conformance** (problem record)) if a bag cannot be tested.
    *You should see accepted samples receive a **Permanent Lab ID**, move to **Accepted** status, and open the **Print labels** dialog.*
 
 ---
 
 ## What Happens Next
 
-Every sample you accept moves to **Accepted** (**Waiting for drying**) and appears in the preparation technician's queue in **My Work** and **Workbench**. Samples you save with **Save Draft** stay in **Draft** status until you finish them. Samples you reject stay in **Rejected (Non-Conformance)** and never enter analytical queues.
+Every sample you accept moves to **Accepted** (**Waiting for drying**) and appears in the preparation technician's queue in **My Work** and **Workbench**. Samples you save with **Save Draft** stay in **Draft** status until you finish them. Samples you reject stay in **Rejected (Non-Conformance)** (refused with a problem record) and never enter analytical queues.
 
 ---
 
 ## If Something Goes Wrong
 
 - *If you scan a barcode and see* **Sample Not Found** *(or* **Not Found***) →* Check whether the bag belongs to a walk-in client (**Walk-in / External**) or ask your manager to synchronize the field survey. See [Unknown or Duplicate Sample ID & Missing Location](../reception/unknown-or-duplicate-id.md).
-- *If a sample bag is light but the client still wants partial testing →* Record the actual weight, tick **Acknowledge this sample’s mass warning**, and note which tests have priority. See [Sample Arrived Damaged, Leaking, or Too Small](../reception/damaged-or-small-sample.md).
+- *If a sample bag is light but the client still wants partial testing →* Record the actual weight, tick **Acknowledge this sample’s mass warning** (confirm that you saw the low-weight warning), and note which tests have priority. See [Sample Arrived Damaged, Leaking, or Too Small](../reception/damaged-or-small-sample.md).
 - *If you accepted a sample by mistake before preparation started →* Open the sample in **Samples**, click the actions menu, and click **Undo intake**. See [Hand Over Accepted Samples to the Lab](../reception/handover-to-lab.md).
 
 ---
 
 ## For the QA Person
 
-- Looking up or scanning a sample in **Sample Reception** never marks it as received by itself; physical custody and the official **Received Date** are recorded only when the reception clerk completes the check-in.
-- Your laboratory configures which intake fields (**Sample context**, **Land use**, **Sampling date**, **Sampling depth**) and condition checks (**Container Intact / Sealed**, **Label Legible & Matches ID**, **Sample Quantity Sufficient**, **Sample Condition (Dry, No Contam.)**, **Chain of Custody Present**) are required, optional, or hidden under **Policies** (see [Per-Lab Settings, Presets & Method Overrides](lab-settings-and-presets.md)).
+- Looking up or scanning a sample in **Sample Reception** never marks it as received by itself; physical responsibility for the sample and the official **Received Date** are recorded only when the reception clerk completes the check-in.
+- Your laboratory configures which intake fields (**Sample context**, **Land use**, **Sampling date**, **Sampling depth**) and condition checks (**Container Intact / Sealed**, **Label Legible & Matches ID**, **Sample Quantity Sufficient**, **Sample Condition (Dry, No Contam.)**, **Chain of Custody Present** (handover sheet arrived with the box)) are required, optional, or hidden under **Policies** (see [Per-Lab Settings, Presets & Method Overrides](lab-settings-and-presets.md)).
 - The system calculates required soil mass from the requested test methods plus your laboratory's reserve factor so underweight bags are flagged with **Mass deficit** before acceptance.
 - Every intake acceptance, rejection, draft save, label print, label reprint, and order revision is recorded in the permanent audit trail with the staff member's name and timestamp.

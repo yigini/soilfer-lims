@@ -26,7 +26,7 @@ The menu on the left side of the screen shows only the pages your role uses. You
 | **My Work** | Lab Technician | See the preparation and analytical tasks assigned to you today. |
 | **Workbench** | Lab Technician | Build analytical batches, enter or paste readings, and send runs for review. |
 | **Manager Task List** | Lab Manager | Assign work, review completed runs, and handle quality control alerts. |
-| **QA Dashboard** | Lab Manager, Auditor | Inspect control charts, quality alerts, proficiency tests, and nonconformities. |
+| **QA Dashboard** | Lab Manager, Auditor | Inspect control charts, quality alerts, proficiency tests, and problem records. |
 | **Data Results** | Lab Manager, Project Manager | Browse and export reviewed analytical results across projects. |
 | **Reports** | Everyone | View, approve, and download PDF Certificates of Analysis. |
 | **Spectral Library** | Technician, Manager, Viewer | Upload and inspect mid-infrared and near-infrared soil spectra. |

@@ -12,11 +12,11 @@
 4. *Check the physical bag count and condition:* Count the soil bags in the box. Inspect each bag to confirm the label is readable, the bag is dry and intact, and there is enough soil for testing.
 5. *Accept healthy bags:* Select each intact bag, verify its field ID, depth, and test package, and click **Accept Sample**. Its status changes to **Accepted** and SoilFER LIMS issues a permanent laboratory sample code.
 6. *Flag damaged or problem bags immediately (never guess):*
-   - *Torn, leaking, or not enough soil:* Mark the bag **Rejected (Non-Conformance)** and record the reason.
+   - *Torn, leaking, or not enough soil:* Mark the bag **Rejected (Non-Conformance)** (refused with a problem record) and record the reason.
    - *Missing paperwork or unclear field ID:* Place the sample **On Hold** with a short note and tell your **Laboratory Manager**.
    - *Need to step away mid-box:* Click **Save Draft** (**Draft saved**) and resume later.
 7. *Print and stick on barcode labels:* Click **Print labels**. Choose **Standard (101 × 54 mm)** for main sample bags or **Compact (50 × 25 mm)** for small containers. Set **Copies per label**, and stick each label firmly onto its matching bag.
-8. *Hand over to preparation:* Place the labelled bags in the drying tray. Log the custody transfer (**Moved** or **Issued**) so technicians see them in **My Work** and **Workbench**.
+8. *Hand over to preparation:* Place the labelled bags in the drying tray. Log the sample handoff (**Moved** or **Issued**) so technicians see them in **My Work** and **Workbench**.
 
 ---
 

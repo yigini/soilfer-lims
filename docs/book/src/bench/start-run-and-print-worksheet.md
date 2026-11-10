@@ -22,7 +22,7 @@ Group a set of prepared soil samples into a numbered analytical run that shares 
 2. In the **Start run** panel, select the test you are running today under **Analysis** (**Choose analysis**).
 3. Under **Method revision** (**Choose method**), select your laboratory's standard operating procedure for this test.
 4. Under **Instrument**, select the specific balance, meter, or analyzer you are using (**Choose instrument**), or keep **Manual method** if the method does not use an instrument.
-5. If your laboratory tracks control charts for this method, select the active reference soil lot under **LRM lot for this run** (**Choose an LRM lot**).
+5. If your laboratory tracks control charts for this method, select the active reference soil lot under **LRM lot for this run** (**Choose an LRM lot** (pick your lab's in-house check soil bottle (laboratory reference material))).
 6. Select the samples to include in your batch:
    - Click **Select all eligible** to include all ready samples up to your laboratory's batch size limit, or tick individual sample checkboxes.
    - Or click inside **Scan a sample barcode** and scan each sample container on your rack.

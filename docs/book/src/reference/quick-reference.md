@@ -3,33 +3,33 @@
 > *Time:* 2 minutes.
 > *Who can do this:* All laboratory staff and IT administrators.
 
-A single-page cheat sheet for daily laboratory statuses, result qualifiers, configurable code formats, and server maintenance commands.
+A single-page cheat sheet for daily laboratory statuses, result flags, configurable code patterns, and server maintenance commands.
 
 ---
 
-## 1. Key Sample & Work Item Statuses at a Glance
+## 1. Key Sample & Test Task Statuses at a Glance
 
 | On-Screen Status Badge | Where You See It | What It Means | Who Acts Next |
 | :--- | :--- | :--- | :--- |
-| **Expected** | **Sample Reception** / **Projects** | Pre-registered from field survey or manifest; physical bag has not arrived at the counter yet | **Sample Reception Officer** |
+| **Expected** | **Sample Reception** / **Projects** | Pre-registered from a field survey or shipping list; the physical bag has not arrived at the counter yet | **Sample Reception Officer** |
 | **Received** / **Accepted** | **Sample Reception** | Physical bag inspected and accepted; barcode label ready for drying and preparation | **Sample Reception Officer** / **Laboratory Technician** |
 | **Assigned** / **Pending** | **My Work** / **Workbench** | Test task created and waiting for the technician to start | **Laboratory Technician** |
-| **In Progress** / **Processing** | **Workbench** | Drying and preparation finished; bench measurements actively being recorded | **Laboratory Technician** |
-| **Submitted** / **Review Pending** | **Manager Task List** | Technician submitted the batch for review | **Laboratory Manager** / **Quality & Audit Officer** |
-| **Returned** / **Redo** | **My Work** / **Workbench** | Reviewer returned the item for a repeat attempt (Attempt 2, Attempt 3) | **Laboratory Technician** |
-| **Approved** | **Manager Task List** / **Samples** | Approved by reviewer; **Reported value** locked; ready for PDF certificate | **Laboratory Manager** |
+| **In Progress** / **Processing** | **Workbench** | Drying and preparation finished; bench readings actively being entered | **Laboratory Technician** |
+| **Submitted** / **Review Pending** | **Manager Task List** | Technician sent the completed batch for review | **Laboratory Manager** / **Quality & Audit Officer** |
+| **Returned** / **Redo** | **My Work** / **Workbench** | Reviewer sent the item back for a repeat measurement try | **Laboratory Technician** |
+| **Approved** | **Manager Task List** / **Samples** | Approved by reviewer; **Reported value** (the final number printed on the report) locked; ready for PDF certificate | **Laboratory Manager** |
 | **Published** / **Released** | **Reports** (**Result Reports**) | Official **Certificate of Analysis** PDF issued and ready to download | Client / **Project Manager** |
 
 ---
 
-## 2. Common Result Qualifiers & Symbols on Reports
+## 2. Common Result Flags & Symbols on Reports
 
-| Qualifier | Plain-Language Meaning |
+| Symbol or Setting | Plain-Language Meaning |
 | :--- | :--- |
-| *Below detection limit (< LOD)* | Concentration is below the method's detection limit (not detected). |
-| **< LOQ** *(**Report below quantification limit**)* | Analyte was detected, but fell below the method's quantification limit when your laboratory's **Values between detection and quantification limits** policy is set to **Report below quantification limit**. |
-| *Flagged trace value (**Report value with a flag**)* | Estimated concentration between detection and quantification limits when your laboratory's policy is set to **Report value with a flag**. |
-| *Amended result marker on Revision 2+* | On an amended **Certificate of Analysis**, highlights a result that was updated or newly added compared to the **Superseded** revision along with the **Amended report statement**. |
+| **< LOD** *(below detection limit)* | The nutrient level is below the lowest amount the method can detect (not detected). |
+| **< LOQ** *(**Report below quantification limit**)* | The nutrient was detected, but fell below the lowest amount the method can measure reliably (limit of quantification, LOQ) when your lab's **Values between detection and quantification limits** setting is **Report below quantification limit**. |
+| *Flagged trace value (**Report value with a flag**)* | Estimated concentration between the detection and quantification limits when your lab's setting is **Report value with a flag**. |
+| *Amended result marker on Revision 2+* | On an updated **Certificate of Analysis**, highlights a result that was corrected or newly added compared to the **Superseded** (replaced) version along with the **Amended report statement**. |
 
 ---
 
@@ -39,8 +39,8 @@ All four numbering patterns below are configurable per laboratory in **Policies*
 
 | Setting in Policies | What It Identifies |
 | :--- | :--- |
-| **Consignment number format** | A shipment or box of incoming samples registered together in **Sample Reception** |
-| **Sample code pattern** | The primary laboratory sample barcode printed on **Standard (101 × 54 mm)** labels |
+| **Consignment number format** | A box or delivery of incoming samples checked in together in **Sample Reception** |
+| **Sample code pattern** | The main laboratory sample barcode printed on **Standard (101 × 54 mm)** labels |
 | **Container code format** | A specific sub-sample jar, fine-earth bag, or spectroscopy vial printed on **Compact (50 × 25 mm)** labels |
 | **Report number pattern** | An official issued **Certificate of Analysis** PDF in **Reports** |
 

@@ -53,7 +53,7 @@ Stick the printed label firmly onto the dry side of the bag, tray, or jar, and s
 
 ## If Something Goes Wrong
 
-- *If you see* **Receive the sample and issue its laboratory code before printing.** *→* The sample is still in **Expected** or **Draft** status. Complete its check-in in **Sample Reception** first so the system issues its **Permanent Lab ID**.
+- *If you see* **Receive the sample and issue its laboratory code before printing.** *→* The sample is still in **Expected** or **Draft** status. Complete its check-in on **Sample Reception** first so the system issues its **Permanent Lab ID**.
 - *If you see* **Enter a reason for the reprint.** *→* Because this sample already had its initial label printed, you must type a short explanation in **Reason for reprint** before the **Print labels** button will proceed.
 - *If you see* **This code does not fit this label at a readable bar width. Choose the standard format or ask the laboratory manager to review the issued code.** *→* Switch **Format** from **Compact (50 × 25 mm)** to **Standard (101 × 54 mm)** so the barcode bars are wide enough for bench scanners to read reliably.
 

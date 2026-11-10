@@ -58,5 +58,5 @@ Pasting or importing only fills in drafts (**Paste updates local drafts. Measure
 
 ## For the QA Person
 
-- Every **Instrument file import** stores an immutable import receipt linking the uploaded file's cryptographic fingerprint, filename, **Saved instrument mapping** revision, and raw **Source cells** to the run.
+- Every **Instrument file import** saves a permanent confirmation record linking the uploaded file, its filename, the **Saved instrument mapping** version, and the raw **Source cells** to the batch run.
 - Neither **Paste Values** nor **Instrument file import** bypasses validation or review; imported values go through the exact same plausibility checks, quality control evaluation, and preflight confirmation (**Review Determinations Before Recording**) as typed readings.

@@ -58,4 +58,4 @@ Record multi-part soil measurements that use specialized bench editors in **Work
 ## For the QA Person
 
 - When a particle size determination is recorded, SoilFER LIMS stores the three measured fractions (**Sand:**, **Silt:**, **Clay:**) and automatically derives the USDA texture classification so individual fraction tasks never drift out of sync.
-- Uploaded spectra are checked automatically for wavenumber range, flatlines, and baseline anomalies before being linked to the sample's work attempt. For full details on managing the spectral library, see [Spectral Data Management (MIR & Vis-NIR)](../usage/spectral.md).
+- Uploaded spectra are checked automatically for wavenumber range, flatlines, and baseline anomalies before being linked to the sample's measurement try. For full details on managing the spectral library, see [Spectral Data Management (MIR & Vis-NIR)](../usage/spectral.md).
