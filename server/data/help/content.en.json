@@ -313,7 +313,7 @@
       "category": "start",
       "kind": "guide",
       "title": "Signing in and passwords",
-      "summary": "Sign in with a temporary password, set a 12-character personal password, handle paused sign-in attempts, and request an administrator password reset.",
+      "summary": "Sign in with a temporary password, set a 12-character personal password, handle paused sign-in tries, and request an administrator password reset.",
       "roles": [
         "ALL"
       ],
@@ -326,7 +326,7 @@
         "users"
       ],
       "minutes": 3,
-      "quick": "New passwords need at least 12 characters. On your first sign-in with a temporary password, the app asks you to set your own password. After several wrong attempts, your account is paused for a short time—wait and try again, or ask your lab admin to reset your password.",
+      "quick": "New passwords need at least 12 characters. On your first sign-in with a temporary password, the app asks you to set your own password. After several wrong tries, your account is paused for a short time—wait and try again, or ask your lab admin to reset your password.",
       "before": [
         "Have your assigned username and, for a new or reset account, the temporary password provided by your Laboratory Manager or administrator.",
         "Prepare a personal password that is at least 12 characters long and different from your temporary or previous password."
@@ -353,7 +353,7 @@
               "expected": "Your password is updated and must be different from your previous password."
             },
             {
-              "action": "If sign-in fails after several wrong attempts or you forget your password, wait a short time before trying again, or click Forgot password? and contact your Laboratory Manager.",
+              "action": "If sign-in fails after several wrong tries or you forget your password, wait a short time before trying again, or click Forgot password? and contact your Laboratory Manager.",
               "expected": "After a brief pause you can sign in again with the right password, or an administrator can issue a new temporary password from Laboratory Staff."
             }
           ]
@@ -381,8 +381,8 @@
       "nextActor": "Laboratory Staff User, Laboratory Manager, or System Administrator",
       "problems": [
         {
-          "symptom": "Sign-in keeps showing Invalid credentials. Please try again. after several wrong attempts.",
-          "why": "After several wrong attempts in a row, the account is paused for a short time to protect access, or the password typed does not match.",
+          "symptom": "Sign-in keeps showing Invalid credentials. Please try again. after several wrong tries.",
+          "why": "After several wrong tries in a row, the account is paused for a short time to protect access, or the password typed does not match.",
           "action": "Stop retrying right away, wait a short time, and try again carefully—or ask your Laboratory Manager to click Reset Password for your account in Laboratory Staff."
         }
       ],
@@ -397,7 +397,7 @@
         "Enter your Current Temporary Password, type a New Private Password of at least 12 characters, confirm the new password, and click Update & Access System. (Expected: A Password Changed confirmation appears; click Log In Again and sign in with your new personal password.)",
         "To change your own password later, open My Profile, enter your current password and a new password of at least 12 characters, and click Save Changes. (Expected: Your password is updated and must be different from your previous password.)"
       ],
-      "caution": "After several wrong attempts your account is paused for a short time. Wait a few minutes before trying again, or ask your Laboratory Manager to reset your password in Laboratory Staff.",
+      "caution": "After several wrong tries your account is paused for a short time. Wait a few minutes before trying again, or ask your Laboratory Manager to reset your password in Laboratory Staff.",
       "related": [
         "start-first-login",
         "start-settings"
@@ -434,7 +434,7 @@
               "expected": "You see which samples need Air Drying or Sample Preparation and which samples are ready for bench analysis."
             },
             {
-              "action": "Finish any required drying and sieving checklists first and click Confirm Complete, then open your analysis worksheet or click New Analytical Run.",
+              "action": "Finish any required drying and sieving checklists first and click Confirm work is done, then open your analysis worksheet or click New Analytical Run.",
               "expected": "Confirmed preparation unlocks the test rows so you can type or paste sample results and quality control readings."
             },
             {
@@ -452,7 +452,7 @@
         ],
         [
           "Checklist Verified",
-          "Green receipt badge shown after you click Confirm Complete on drying or preparation",
+          "Green receipt badge shown after you click Confirm work is done on drying or preparation",
           "Confirms that pre-analytical preparation is complete and bench tests can begin."
         ],
         [
@@ -478,7 +478,7 @@
       ],
       "steps": [
         "Open My Work or Workbench and check the tasks assigned to you for today. (Expected: You see which samples need Air Drying or Sample Preparation and which samples are ready for bench analysis.)",
-        "Finish any required drying and sieving checklists first and click Confirm Complete, then open your analysis worksheet or click New Analytical Run. (Expected: Confirmed preparation unlocks the test rows so you can type or paste sample results and quality control readings.)",
+        "Finish any required drying and sieving checklists first and click Confirm work is done, then open your analysis worksheet or click New Analytical Run. (Expected: Confirmed preparation unlocks the test rows so you can type or paste sample results and quality control readings.)",
         "Click Review Completion to record your checked results, then open Ready to Submit and click Submit. (Expected: Your recorded results move to Sent & Completed and appear in the reviewer's Manager Task List.)"
       ],
       "caution": "Saving a draft worksheet does not send results to your manager. Always complete Review Completion and Ready to Submit at the end of a run.",
@@ -504,7 +504,7 @@
         "reception"
       ],
       "minutes": 3,
-      "quick": "Open Sample Reception, match the physical bag label to the project or consignment record, record weight and condition in 2. Condition, confirm requested tests in 3. Analyses, and complete intake in 4. Handover.",
+      "quick": "Open Sample Reception, match the physical bag label to the project or delivery box record, record weight and condition in 2. Condition, confirm requested tests in 3. Analyses, and complete intake in 4. Handover.",
       "before": [
         "Confirm you are signed in as a Sample Reception Officer or Laboratory Manager.",
         "Check that the bench scale is zeroed and the barcode label printer is loaded."
@@ -514,7 +514,7 @@
           "title": "1. Field registration and locating samples",
           "steps": [
             {
-              "action": "Open Sample Reception, choose Project Sample, Walk-in / External, or Consignment Batch, and scan or type the bag ID in 1. ID & Field.",
+              "action": "Open Sample Reception, choose Project Sample, Walk-in / External, or Sample delivery box, and scan or type the bag ID in 1. ID & Field.",
               "expected": "If the sample was pre-registered from a field survey, its status shows Expected and its field details load automatically."
             }
           ]
@@ -571,7 +571,7 @@
         "server/config/roles.js"
       ],
       "steps": [
-        "Open Sample Reception, choose Project Sample, Walk-in / External, or Consignment Batch, and scan or type the bag ID in 1. ID & Field. (Expected: If the sample was pre-registered from a field survey, its status shows Expected and its field details load automatically.)",
+        "Open Sample Reception, choose Project Sample, Walk-in / External, or Sample delivery box, and scan or type the bag ID in 1. ID & Field. (Expected: If the sample was pre-registered from a field survey, its status shows Expected and its field details load automatically.)",
         "Weigh the soil bag and complete 2. Condition by checking Container Intact / Sealed and Sample Quantity Sufficient. (Expected: Any damaged bag or low sample weight is flagged so you can add a condition note, quarantine the bag, or reject it.)",
         "Verify the requested test package in 3. Analyses, then open 4. Handover and click Complete Intake (or Accept & Print Label). (Expected: The sample status moves from Expected to Accepted, barcode labels print, and drying tasks open in Workbench.)"
       ],
@@ -614,7 +614,7 @@
             },
             {
               "action": "Open Review Submissions to inspect technician batch values and quality control results, then click Approve or Return.",
-              "expected": "Approved determinations advance toward sample completion, while returned items open a fresh repeat attempt on the technician's bench with your note."
+              "expected": "Approved determinations advance toward sample completion, while returned items open a fresh repeat try on the technician's bench with your note."
             },
             {
               "action": "Open Final Approvals to check whole-sample plausibility across all tests, approve the sample, and issue the Certificate of Analysis in Reports.",
@@ -657,7 +657,7 @@
       ],
       "steps": [
         "Open Dashboard and Manager Task List to check queue counts for unassigned work, Review Submissions, and Final Approvals. (Expected: You see all batches waiting for technical review and all samples waiting for final sign-off in your laboratory.)",
-        "Open Review Submissions to inspect technician batch values and quality control results, then click Approve or Return. (Expected: Approved determinations advance toward sample completion, while returned items open a fresh repeat attempt on the technician's bench with your note.)",
+        "Open Review Submissions to inspect technician batch values and quality control results, then click Approve or Return. (Expected: Approved determinations advance toward sample completion, while returned items open a fresh repeat try on the technician's bench with your note.)",
         "Open Final Approvals to check whole-sample plausibility across all tests, approve the sample, and issue the Certificate of Analysis in Reports. (Expected: The sample status moves to Approved and its official PDF report is ready to download or share.)"
       ],
       "caution": "Always check both Review Submissions (for individual method runs) and Final Approvals (for complete samples).",
@@ -687,7 +687,7 @@
       "quick": "Open Projects to view how many samples in your project are Expected, Accepted, Processing, Submitted, or Approved, and see which role owns the next step.",
       "before": [
         "Confirm that your user account has access to the project and laboratory in the top bar.",
-        "Keep your project code or consignment list handy when filtering large surveys."
+        "Keep your project code or delivery box list handy when filtering large surveys."
       ],
       "sections": [
         {
@@ -758,7 +758,7 @@
       "category": "start",
       "kind": "guide",
       "title": "Inspect laboratory work without changing it",
-      "summary": "Inspect sample evidence, quality control charts, non-conformances, and audit trails in read-only mode.",
+      "summary": "Inspect sample evidence, quality control charts, problem records, and audit trails in read-only mode.",
       "roles": [
         "ALL"
       ],
@@ -780,14 +780,14 @@
           "steps": [
             {
               "action": "Open Sample Registry, search for the sample ID, and inspect its Overview, Work & results, and Chain of Custody tabs.",
-              "expected": "You see the complete history of intake condition, drying and sieving receipts, measurement attempts, and storage moves."
+              "expected": "You see the complete history of intake condition, drying and sieving receipts, measurement tries, and storage moves."
             },
             {
-              "action": "Open QA Dashboard to inspect Control charts, Non-Conformance records, Proficiency Testing rounds, and the Audit Log.",
+              "action": "Open QA Dashboard to inspect Control charts, Problem records, Proficiency Testing rounds, and the Audit Log.",
               "expected": "Every quality control check, failed-batch decision, and setting change is displayed with who did it, when, and why."
             },
             {
-              "action": "Open Reports to compare the Current Certificate of Analysis with any Withdrawn or Superseded revisions.",
+              "action": "Open Reports to compare the Current Certificate of Analysis with any revisions marked Withdrawn or Replaced by newer version.",
               "expected": "You can verify the exact reason and approver for any post-release report amendment."
             }
           ]
@@ -805,12 +805,12 @@
           "Tracks every handoff from reception through archive storage and disposal."
         ],
         [
-          "Non-Conformance",
+          "Problem records",
           "Quality incident and corrective action tracker in QA Dashboard",
           "Links failed runs or damaged deliveries to root-cause investigations."
         ]
       ],
-      "example": "Trace sample DEMO-001 from its Certificate of Analysis in Reports back to its Attempt 1 and Attempt 2 bench records and linked Non-Conformance entry in QA Dashboard.",
+      "example": "Trace sample DEMO-001 from its Certificate of Analysis in Reports back to its Try #1 and Try #2 bench records and linked Problem record in QA Dashboard.",
       "success": "You have verified the full evidence chain for a sample or report without altering any laboratory records.",
       "nextActor": "Quality & Audit Officer or Laboratory Manager (if an audit finding needs follow-up)",
       "problems": [
@@ -826,9 +826,9 @@
         "server/config/roles.js"
       ],
       "steps": [
-        "Open Sample Registry, search for the sample ID, and inspect its Overview, Work & results, and Chain of Custody tabs. (Expected: You see the complete history of intake condition, drying and sieving receipts, measurement attempts, and storage moves.)",
-        "Open QA Dashboard to inspect Control charts, Non-Conformance records, Proficiency Testing rounds, and the Audit Log. (Expected: Every quality control check, failed-batch decision, and setting change is displayed with who did it, when, and why.)",
-        "Open Reports to compare the Current Certificate of Analysis with any Withdrawn or Superseded revisions. (Expected: You can verify the exact reason and approver for any post-release report amendment.)"
+        "Open Sample Registry, search for the sample ID, and inspect its Overview, Work & results, and Chain of Custody tabs. (Expected: You see the complete history of intake condition, drying and sieving receipts, measurement tries, and storage moves.)",
+        "Open QA Dashboard to inspect Control charts, Problem records, Proficiency Testing rounds, and the Audit Log. (Expected: Every quality control check, failed-batch decision, and setting change is displayed with who did it, when, and why.)",
+        "Open Reports to compare the Current Certificate of Analysis with any revisions marked Withdrawn or Replaced by newer version. (Expected: You can verify the exact reason and approver for any post-release report amendment.)"
       ],
       "caution": "Audit accounts are read-only by design so you can inspect live screens safely without changing data.",
       "related": [
@@ -885,9 +885,9 @@
           "Always use the Current report version for agronomic recommendations."
         ],
         [
-          "Superseded",
+          "Replaced by newer version",
           "Badge indicating an older report that was replaced by an amended version",
-          "Do not use a Superseded PDF; download the newest Current revision instead."
+          "Do not use a PDF marked Replaced by newer version; download the newest Current revision instead."
         ],
         [
           "Withdrawn",
@@ -915,7 +915,7 @@
         "Open Reports (Result Reports) and look for reports marked Current. (Expected: Only approved samples with issued Certificates of Analysis appear for download.)",
         "Click the download button on a Current report to save the official PDF Certificate of Analysis. (Expected: The PDF opens with the sample identifiers, test methods, units, quality remarks, and verification QR code.)"
       ],
-      "caution": "If a previously downloaded PDF is later marked Withdrawn or Superseded, replace it immediately with the new Current revision.",
+      "caution": "If a previously downloaded PDF is later marked Withdrawn or Replaced by newer version, replace it immediately with the new Current revision.",
       "related": [
         "start-first-login",
         "quality-support"
@@ -1065,7 +1065,7 @@
             },
             {
               "action": "When everything is ready, click Complete Intake (or Accept & Print Label) (or Accept with Condition Note, Quarantine Sample, or Reject Sample if there is an exception).",
-              "expected": "The sample status changes from Expected to Accepted (or Quarantined / Rejected (Non-Conformance)) and records the official reception date."
+              "expected": "The sample status changes from Expected to Accepted (or Quarantined / Rejected (problem recorded)) and records the official reception date."
             },
             {
               "action": "Print and attach the laboratory barcode label to the bag and place the sample on the drying room handover tray.",
@@ -1101,7 +1101,7 @@
           "action": "Check the original field record in Projects; never type guessed coordinates into the reception form."
         },
         {
-          "symptom": "Scanning the bag shows Prior Receipt Detected for that sample ID.",
+          "symptom": "Scanning the bag shows Sample ID {id} was already checked in.",
           "why": "That sample bag was already checked in earlier, or two bags share the same field label.",
           "action": "Open the existing sample record to check its reception date and ask your Laboratory Manager before creating any new record."
         }
@@ -1117,7 +1117,7 @@
         "Click 2. Condition, weigh the bag on your scale, type the weight in grams, and answer Container Intact / Sealed and Sample Quantity Sufficient. (Expected: If the bag is torn or weighs less than your laboratory's minimum required mass, the screen highlights a condition warning.)",
         "If a check fails, describe the problem in the condition note. Then click 3. Analyses and confirm the requested analysis package and methods. (Expected: All requested tests (including grouped panels such as sand, silt, and clay) are selected for the sample.)",
         "Click 4. Handover to review the intake summary. If you need to pause and check with a supervisor, click Save Draft. (Expected: A saved draft stays in Incomplete Intakes (Drafts) and does not send an unreceived sample to the drying room.)",
-        "When everything is ready, click Complete Intake (or Accept & Print Label) (or Accept with Condition Note, Quarantine Sample, or Reject Sample if there is an exception). (Expected: The sample status changes from Expected to Accepted (or Quarantined / Rejected (Non-Conformance)) and records the official reception date.)",
+        "When everything is ready, click Complete Intake (or Accept & Print Label) (or Accept with Condition Note, Quarantine Sample, or Reject Sample if there is an exception). (Expected: The sample status changes from Expected to Accepted (or Quarantined / Rejected (problem recorded)) and records the official reception date.)",
         "Print and attach the laboratory barcode label to the bag and place the sample on the drying room handover tray. (Expected: Preparation technicians can scan the label and start Air Drying in Workbench.)"
       ],
       "caution": "Do not invent GPS coordinates or accept a duplicate sample ID just to finish intake quickly.",
@@ -1130,7 +1130,7 @@
       "category": "intake",
       "kind": "guide",
       "title": "Receive several project samples together",
-      "summary": "Receive a whole box or consignment of project samples together while handling any damaged or missing bags.",
+      "summary": "Receive a whole sample delivery box of project samples together while handling any damaged or missing bags.",
       "roles": [
         "SAMPLE_RECEPTION",
         "LAB_MANAGER"
@@ -1141,9 +1141,9 @@
         "reception"
       ],
       "minutes": 3,
-      "quick": "Open Sample Reception, select Consignment Batch, scan or enter each bag ID to add it to the batch table, record individual weights and any condition exceptions, and confirm the batch receipt.",
+      "quick": "Open Sample Reception, select Sample delivery box, scan or enter each bag ID to add it to the batch table, record individual weights and any condition exceptions, and confirm the batch receipt.",
       "before": [
-        "Have the physical box of soil bags and the paper or digital consignment manifest in front of you.",
+        "Have the physical box of soil bags and the paper or digital delivery box list in front of you.",
         "Check that your bench scale and barcode label printer are ready."
       ],
       "sections": [
@@ -1151,7 +1151,7 @@
           "title": "Step-by-step procedure",
           "steps": [
             {
-              "action": "Open Sample Reception and click Consignment Batch, then choose the project and receiving laboratory.",
+              "action": "Open Sample Reception and click Sample delivery box, then choose the project and receiving laboratory.",
               "expected": "The batch intake screen opens with Scan or Enter Sample ID to add... and Shared batch observations."
             },
             {
@@ -1167,28 +1167,28 @@
       ],
       "fields": [
         [
-          "Consignment Batch",
+          "Sample delivery box",
           "Batch intake mode in Sample Reception for receiving a box of samples together",
           "Lets you scan multiple bags into one table and enter shared delivery notes."
         ],
         [
           "Scan or Enter Sample ID to add...",
-          "Search and barcode input box on the Consignment Batch screen",
-          "Adds each scanned bag to the current consignment table."
+          "Search and barcode input box on the Sample delivery box screen",
+          "Adds each scanned bag to the current delivery box table."
         ],
         [
           "Shared batch observations",
           "Notes box for delivery-wide comments such as courier name or box condition",
-          "Saved across all samples received in that consignment batch."
+          "Saved across all samples received in that sample delivery box."
         ]
       ],
-      "example": "In Consignment Batch, scan 15 bags from box BOX-2026-04, record each bag's weight, quarantine one torn bag, and confirm receipt for the remaining 14 intact bags.",
+      "example": "In Sample delivery box, scan 15 bags from box BOX-2026-04, record each bag's weight, quarantine one torn bag, and confirm receipt for the remaining 14 intact bags.",
       "success": "The entire box is checked in, exceptions are isolated cleanly, and labels are printed for all accepted bags.",
       "nextActor": "Preparation Technician or Laboratory Manager (for any quarantined bag)",
       "problems": [
         {
           "symptom": "One bag in the box is torn or missing, and you do not want to hold up the other 19 intact bags.",
-          "why": "Each bag in a consignment needs its own truthful status so good samples can proceed while problem bags are held.",
+          "why": "Each bag in a sample delivery box needs its own truthful status so good samples can proceed while problem bags are held.",
           "action": "Remove the missing bag from the active batch (keep it Expected) or mark the torn bag for quarantine/caveat, and complete intake for the intact bags."
         }
       ],
@@ -1197,7 +1197,7 @@
         "client/src/components/reception/BatchIntake.jsx"
       ],
       "steps": [
-        "Open Sample Reception and click Consignment Batch, then choose the project and receiving laboratory. (Expected: The batch intake screen opens with Scan or Enter Sample ID to add... and Shared batch observations.)",
+        "Open Sample Reception and click Sample delivery box, then choose the project and receiving laboratory. (Expected: The batch intake screen opens with Scan or Enter Sample ID to add... and Shared batch observations.)",
         "Scan or type each bag ID into Scan or Enter Sample ID to add..., enter each bag's weight in grams, and flag any damaged or underweight bag. (Expected: Each matched bag appears in the batch table, and any bag below your laboratory's minimum required weight or in poor condition is highlighted.)",
         "Confirm the requested analyses, handle any damaged or missing bag individually, and complete the batch intake to print barcode labels. (Expected: All accepted bags move from Expected to Accepted and open drying and preparation tasks in Workbench.)"
       ],
@@ -1382,7 +1382,7 @@
       "id": "intake-condition",
       "category": "intake",
       "kind": "guide",
-      "title": "Record mass, condition and nonconformance",
+      "title": "Record mass, condition and problem records",
       "summary": "Weigh the arriving soil bag, check container condition, and handle damaged or underweight samples.",
       "roles": [
         "SAMPLE_RECEPTION",
@@ -1432,7 +1432,7 @@
         [
           "Accept & Print Label",
           "Exception buttons in 4. Handover when a condition check fails",
-          "Lets you proceed with a documented caveat, hold the sample for manager review, or reject it as non-conforming."
+          "Lets you proceed with a documented caveat, hold the sample for manager review, or reject it and record a problem."
         ]
       ],
       "example": "Weigh a leaking bag at 180 g in 2. Condition, select Fail on Container Intact / Sealed and Sample Quantity Sufficient, enter \"Bag torn in transit, only 180 g remaining\", and click Quarantine Sample in 4. Handover.",
@@ -1480,7 +1480,7 @@
       "minutes": 3,
       "quick": "In 3. Analyses, pick the requested analysis package or check individual tests, verify the method variant (such as water pH vs. CaCl2 pH), and keep multi-part panels like sand, silt, and clay together.",
       "before": [
-        "Have the client request form, project test list, or consignment manifest in front of you.",
+        "Have the client request form, project test list, or delivery box list in front of you.",
         "Check whether the project already pre-selected the required tests."
       ],
       "sections": [
@@ -1492,7 +1492,7 @@
               "expected": "You see the selected parameters, method codes, and estimated soil mass needed for the tests."
             },
             {
-              "action": "Select an analysis preset package or check individual parameters to match the client's written request.",
+              "action": "Select an analysis package or check individual parameters to match the client's written request.",
               "expected": "The total required soil mass updates automatically and compares against the weight you entered in 2. Condition."
             },
             {
@@ -1506,7 +1506,7 @@
         [
           "3. Analyses",
           "Third step in Sample Reception for assigning laboratory tests",
-          "Controls which preparation gates and bench worksheets are created for the sample."
+          "Controls which required prep steps and bench worksheets are created for the sample."
         ],
         [
           "Methodology",
@@ -1535,7 +1535,7 @@
       ],
       "steps": [
         "Open 3. Analyses in Sample Reception and review any analyses pre-filled from the project. (Expected: You see the selected parameters, method codes, and estimated soil mass needed for the tests.)",
-        "Select an analysis preset package or check individual parameters to match the client's written request. (Expected: The total required soil mass updates automatically and compares against the weight you entered in 2. Condition.)",
+        "Select an analysis package or check individual parameters to match the client's written request. (Expected: The total required soil mass updates automatically and compares against the weight you entered in 2. Condition.)",
         "Check that the right method variant is selected (for example, pH in water vs. pH in CaCl2) and that particle-size texture fractions are selected as a complete panel. (Expected: The right drying, sieving, and bench tasks will be created when you finish intake in 4. Handover.)"
       ],
       "caution": "Do not mix different pH or phosphorus extraction methods unless the project specifically ordered both.",
@@ -1563,9 +1563,9 @@
         "scan"
       ],
       "minutes": 3,
-      "quick": "If scanning a bag in 1. ID & Field shows Prior Receipt Detected for that ID or finds no match, compare the physical label against Sample Registry and Projects before deciding whether to open the existing record, switch intake mode, or contact the project team.",
+      "quick": "If scanning a bag in 1. ID & Field shows Sample ID {id} was already checked in or finds no match, compare the physical label against Sample Registry and Projects before deciding whether to open the existing record, switch intake mode, or contact the project team.",
       "before": [
-        "Hold the physical soil bag and consignment sheet in front of you.",
+        "Hold the physical soil bag and delivery box sheet in front of you.",
         "Do not change a letter or digit on a sample ID just to bypass a duplicate warning."
       ],
       "sections": [
@@ -1574,10 +1574,10 @@
           "steps": [
             {
               "action": "Scan or type the bag identifier in 1. ID & Field of Sample Reception and read any warning banner carefully.",
-              "expected": "If the ID was already received, a Prior Receipt Detected for banner appears showing the existing sample details."
+              "expected": "If the ID was already received, a Sample ID {id} was already checked in banner appears showing the existing sample details."
             },
             {
-              "action": "If Prior Receipt Detected for appears, compare the project name, collection date, and depth on the physical bag with the existing record.",
+              "action": "If Sample ID {id} was already checked in appears, compare the project name, collection date, and depth on the physical bag with the existing record.",
               "expected": "You can tell whether the same bag was scanned twice by mistake or whether two different field bags were given the same label."
             },
             {
@@ -1589,7 +1589,7 @@
       ],
       "fields": [
         [
-          "Prior Receipt Detected for",
+          "Sample ID {id} was already checked in",
           "Warning banner shown when a scanned ID already has a confirmed intake record",
           "Prevents checking in the same sample bag twice."
         ],
@@ -1604,7 +1604,7 @@
           "Check here first if a colleague started checking in the bag earlier today."
         ]
       ],
-      "example": "Scan bag FIELD-2026-005, see Prior Receipt Detected for FIELD-2026-005 from this morning's shift, verify the bag already has lab label DEMO-26-000105, and place it on the drying tray without re-receiving it.",
+      "example": "Scan bag FIELD-2026-005, see Sample ID FIELD-2026-005 was already checked in from this morning's shift, verify the bag already has lab label DEMO-26-000105, and place it on the drying tray without re-receiving it.",
       "success": "Duplicate scans are caught immediately and genuine field labeling mix-ups are escalated cleanly.",
       "nextActor": "Sample Reception Officer or Project Manager (if two field bags share one label)",
       "problems": [
@@ -1619,8 +1619,8 @@
         "client/src/components/reception/BatchIntake.jsx"
       ],
       "steps": [
-        "Scan or type the bag identifier in 1. ID & Field of Sample Reception and read any warning banner carefully. (Expected: If the ID was already received, a Prior Receipt Detected for banner appears showing the existing sample details.)",
-        "If Prior Receipt Detected for appears, compare the project name, collection date, and depth on the physical bag with the existing record. (Expected: You can tell whether the same bag was scanned twice by mistake or whether two different field bags were given the same label.)",
+        "Scan or type the bag identifier in 1. ID & Field of Sample Reception and read any warning banner carefully. (Expected: If the ID was already received, a Sample ID {id} was already checked in banner appears showing the existing sample details.)",
+        "If Sample ID {id} was already checked in appears, compare the project name, collection date, and depth on the physical bag with the existing record. (Expected: You can tell whether the same bag was scanned twice by mistake or whether two different field bags were given the same label.)",
         "If no matching project record is found, check that the right project is selected or ask your manager to sync KoboToolbox in Projects before using Walk-in / External mode. (Expected: Pre-registered project samples stay linked to their field survey instead of being entered as unlinked walk-in samples.)"
       ],
       "caution": "Never add \"-2\" or \"-B\" to a project sample ID to force a duplicate bag through reception without manager approval.",
@@ -1647,7 +1647,7 @@
         "reception"
       ],
       "minutes": 3,
-      "quick": "In 4. Handover, review the summary of identity, condition, and analyses, click Complete Intake (or Accept & Print Label), attach the printed barcode label to the bag, and check Recent Receipts and Laboratory Operational Handoff.",
+      "quick": "In 4. Handover, review the summary of identity, condition, and analyses, click Complete Intake (or Accept & Print Label), attach the printed barcode label to the bag, and check Recent check-ins and Laboratory Operational Handoff.",
       "before": [
         "Confirm that steps 1. ID & Field, 2. Condition, and 3. Analyses are complete.",
         "Check that your label printer has the right label size loaded."
@@ -1665,8 +1665,8 @@
               "expected": "An official Laboratory Sample Code is assigned, the status updates to Accepted, and the reception timestamp is saved."
             },
             {
-              "action": "Attach the printed label to the bag, place it on the drying room cart, and check Laboratory Operational Handoff and Recent Receipts on the Sample Reception screen.",
-              "expected": "The sample appears in Recent Receipts and its Air Drying task is immediately visible in Workbench."
+              "action": "Attach the printed label to the bag, place it on the drying room cart, and check Laboratory Operational Handoff and Recent check-ins on the Sample Reception screen.",
+              "expected": "The sample appears in Recent check-ins and its Air Drying task is immediately visible in Workbench."
             }
           ]
         }
@@ -1683,17 +1683,17 @@
           "Confirms that accepted bags have been handed off to drying and preparation."
         ],
         [
-          "Recent Receipts",
+          "Recent check-ins",
           "List of recently completed intakes on the Sample Reception screen",
           "Lets you reprint a label or open the sample page right after check-in."
         ]
       ],
-      "example": "In 4. Handover, click Complete Intake (or Accept & Print Label) for DEMO-26-000142, stick the Standard (101 × 54 mm) label on the bag, and confirm it appears in Recent Receipts.",
+      "example": "In 4. Handover, click Complete Intake (or Accept & Print Label) for DEMO-26-000142, stick the Standard (101 × 54 mm) label on the bag, and confirm it appears in Recent check-ins.",
       "success": "The sample has an official lab barcode label and is visible to preparation staff in Workbench.",
       "nextActor": "Preparation Technician in the drying room",
       "problems": [
         {
-          "symptom": "You finished typing the intake form, but the sample is not in Recent Receipts or Workbench.",
+          "symptom": "You finished typing the intake form, but the sample is not in Recent check-ins or Workbench.",
           "why": "You clicked Save Draft instead of Complete Intake (or Accept & Print Label), or closed the tab before confirming 4. Handover.",
           "action": "Check Incomplete Intakes (Drafts) on the Sample Reception screen, click Resume, and click Complete Intake (or Accept & Print Label) in 4. Handover."
         }
@@ -1705,7 +1705,7 @@
       "steps": [
         "In 4. Handover, check the sample ID, weight, condition status, and assigned test list one final time. (Expected: All details match the physical bag and client request before the record is locked.)",
         "Click Complete Intake (or Accept & Print Label) (or the appropriate condition exception button) and print the barcode label from the Print labels dialog. (Expected: An official Laboratory Sample Code is assigned, the status updates to Accepted, and the reception timestamp is saved.)",
-        "Attach the printed label to the bag, place it on the drying room cart, and check Laboratory Operational Handoff and Recent Receipts on the Sample Reception screen. (Expected: The sample appears in Recent Receipts and its Air Drying task is immediately visible in Workbench.)"
+        "Attach the printed label to the bag, place it on the drying room cart, and check Laboratory Operational Handoff and Recent check-ins on the Sample Reception screen. (Expected: The sample appears in Recent check-ins and its Air Drying task is immediately visible in Workbench.)"
       ],
       "caution": "Always attach the printed laboratory barcode label to the bag before picking up the next sample.",
       "related": [
@@ -1816,7 +1816,7 @@
         "samples"
       ],
       "minutes": 3,
-      "quick": "Open Sample Registry, type or scan the sample ID, field ID, or consignment code, and check the active status, project, and date filters if an expected sample does not appear.",
+      "quick": "Open Sample Registry, type or scan the sample ID, field ID, or delivery box code, and check the active status, project, and date filters if an expected sample does not appear.",
       "before": [
         "Check the top bar to confirm the right laboratory is selected.",
         "Have at least part of the sample ID, field ID, or project name ready."
@@ -1835,7 +1835,7 @@
             },
             {
               "action": "If a sample you know exists does not appear, reset the status and project dropdowns to show all records.",
-              "expected": "Hidden samples (such as those still in Expected or Rejected (Non-Conformance) status) become visible again."
+              "expected": "Hidden samples (such as those still in Expected or Rejected (problem recorded) status) become visible again."
             }
           ]
         }
@@ -1875,7 +1875,7 @@
       "steps": [
         "Open Sample Registry from the side menu and type or scan the identifier into the search bar. (Expected: The sample table filters immediately to show matching records in your laboratory.)",
         "Use the Project, Status, or date filters to narrow the list—for example, to see only Processing or Approved samples. (Expected: Your selected filters stay active while you open a sample and return to the list.)",
-        "If a sample you know exists does not appear, reset the status and project dropdowns to show all records. (Expected: Hidden samples (such as those still in Expected or Rejected (Non-Conformance) status) become visible again.)"
+        "If a sample you know exists does not appear, reset the status and project dropdowns to show all records. (Expected: Hidden samples (such as those still in Expected or Rejected (problem recorded) status) become visible again.)"
       ],
       "caution": "Always check active filter badges before assuming a sample record was lost.",
       "related": [
@@ -1900,7 +1900,7 @@
         "samplesid"
       ],
       "minutes": 3,
-      "quick": "Open a sample in Sample Registry to inspect its field details, preparation gates, test statuses, and custody history. When you are ready to enter or confirm bench results, follow the link to Workbench instead of trying to type results on the summary page.",
+      "quick": "Open a sample in Sample Registry to inspect its field details, required prep steps, test statuses, and custody history. When you are ready to enter or confirm bench results, follow the link to Workbench instead of trying to type results on the summary page.",
       "before": [
         "Open Sample Registry and click the sample you want to inspect.",
         "Note the overall sample status badge at the top of the sample page."
@@ -1915,7 +1915,7 @@
             },
             {
               "action": "Click the Work & results tab to inspect Preparation Prerequisites (Air Drying and Sample Preparation) and the table of assigned analytical tests.",
-              "expected": "Each test row shows its current status, assigned technician, attempt history, and any blocker explanation."
+              "expected": "Each test row shows its current status, assigned technician, try history, and any blocker explanation."
             },
             {
               "action": "To record preparation or test measurements, click the action button on the task row to open it directly in Workbench.",
@@ -1958,7 +1958,7 @@
       ],
       "steps": [
         "In the Overview tab of the sample page, review the sample's reception condition, weight, project, and field sampling details. (Expected: You see the complete intake record and any condition notes recorded at reception.)",
-        "Click the Work & results tab to inspect Preparation Prerequisites (Air Drying and Sample Preparation) and the table of assigned analytical tests. (Expected: Each test row shows its current status, assigned technician, attempt history, and any blocker explanation.)",
+        "Click the Work & results tab to inspect Preparation Prerequisites (Air Drying and Sample Preparation) and the table of assigned analytical tests. (Expected: Each test row shows its current status, assigned technician, try history, and any blocker explanation.)",
         "To record preparation or test measurements, click the action button on the task row to open it directly in Workbench. (Expected: Workbench opens to that exact sample and method so you can record measurements with full batch quality control.)"
       ],
       "caution": "An individual test being Submitted does not mean the whole sample is finished—check all rows in Work & results.",
@@ -2003,8 +2003,8 @@
               "expected": "The badge names the exact prerequisite task that must be finished first."
             },
             {
-              "action": "Click the open prerequisite task to complete it in Workbench (or ask a manager to verify it if Require manager verification of preparation gates is enabled in Policies).",
-              "expected": "As soon as the prerequisite gate is confirmed, dependent analytical tests unlock automatically."
+              "action": "Click the open prerequisite task to complete it in Workbench (or ask a manager to verify it if Require manager sign-off on preparation steps is enabled in Policies).",
+              "expected": "As soon as the required prep step is confirmed, dependent analytical tests unlock automatically."
             }
           ]
         }
@@ -2012,18 +2012,18 @@
       "fields": [
         [
           "Air Drying",
-          "First preparation gate requiring constant weight before sieving",
+          "First required prep step requiring constant weight before sieving",
           "Must be confirmed complete before sieving and routine wet-chemistry tests unlock."
         ],
         [
           "Sample Preparation",
-          "Second preparation gate for sieving (such as 2 mm) or fine grinding",
+          "Second required prep step for sieving (such as 2 mm) or fine grinding",
           "Unlocks bench methods that depend on homogenized soil fractions."
         ],
         [
-          "Operational Gates",
+          "Required prep steps",
           "Verification controls on the sample page for pre-analytical steps",
-          "Shows who completed and verified each preparation gate."
+          "Shows who completed and verified each required prep step."
         ]
       ],
       "example": "Inspect sample DEMO-26-000142 in Work & results, see that Olsen P is waiting on Sample Preparation, complete the 2 mm sieving checklist in Workbench, and watch Olsen P unlock.",
@@ -2032,7 +2032,7 @@
       "problems": [
         {
           "symptom": "Air Drying and Sample Preparation are both completed by the technician, but bench test rows still show a prerequisite lock.",
-          "why": "Your laboratory has Require manager verification of preparation gates enabled in Policies, and a manager has not clicked verify on Operational Gates yet.",
+          "why": "Your laboratory has Require manager sign-off on preparation steps enabled in Policies, and a manager has not clicked verify on Required prep steps yet.",
           "action": "Ask your Laboratory Manager or Quality & Audit Officer to review and verify the preparation record on the sample's Work & results tab."
         }
       ],
@@ -2044,9 +2044,9 @@
       "steps": [
         "Look at the workflow stage indicators and Preparation Prerequisites on the sample's Work & results tab. (Expected: Completed stages show a green verified state, active stages are highlighted, and locked future stages show what they are waiting for.)",
         "Read any blocker badge on a locked analysis row (for example, waiting for Air Drying, Sample Preparation, or manager gate verification). (Expected: The badge names the exact prerequisite task that must be finished first.)",
-        "Click the open prerequisite task to complete it in Workbench (or ask a manager to verify it if Require manager verification of preparation gates is enabled in Policies). (Expected: As soon as the prerequisite gate is confirmed, dependent analytical tests unlock automatically.)"
+        "Click the open prerequisite task to complete it in Workbench (or ask a manager to verify it if Require manager sign-off on preparation steps is enabled in Policies). (Expected: As soon as the required prep step is confirmed, dependent analytical tests unlock automatically.)"
       ],
-      "caution": "Never try to bypass a prerequisite gate—finish or verify the open preparation step so the audit trail stays complete.",
+      "caution": "Never try to bypass a required prep step—finish or verify the open preparation step so the audit trail stays complete.",
       "related": [
         "start-first-login",
         "quality-support"
@@ -2080,7 +2080,7 @@
           "title": "Step-by-step procedure",
           "steps": [
             {
-              "action": "Open the sample in Sample Registry (or Recent Receipts in Sample Reception) and click Print labels.",
+              "action": "Open the sample in Sample Registry (or Recent check-ins in Sample Reception) and click Print labels.",
               "expected": "The Print labels dialog opens with a live barcode preview and format options."
             },
             {
@@ -2127,7 +2127,7 @@
         "client/src/components/sample/WorkItemsTable.jsx"
       ],
       "steps": [
-        "Open the sample in Sample Registry (or Recent Receipts in Sample Reception) and click Print labels. (Expected: The Print labels dialog opens with a live barcode preview and format options.)",
+        "Open the sample in Sample Registry (or Recent check-ins in Sample Reception) and click Print labels. (Expected: The Print labels dialog opens with a live barcode preview and format options.)",
         "Select Format: Standard (101 × 54 mm) for main sample bags and archive jars or Compact (50 × 25 mm) for small vials, and set Copies per label. (Expected: The preview updates to match your chosen label size.)",
         "If reprinting an existing label, type the Reason for reprint (such as \"Label smudged in drying room\"), print the label, and test-scan it against the jar. (Expected: The label prints cleanly and the reprint event is recorded in the sample's audit history.)"
       ],
@@ -2202,7 +2202,7 @@
         {
           "symptom": "The sample page says a jar is on Archive Shelf 3, but the jar is not there physically.",
           "why": "A technician took the jar to the bench for a repeat test without logging an Issued event in Chain of Custody.",
-          "action": "Check the Work & results tab to see which technician has an active repeat attempt on that sample, locate the jar at their bench, and log the custody movement."
+          "action": "Check the Work & results tab to see which technician has an active repeat try on that sample, locate the jar at their bench, and log the custody movement."
         }
       ],
       "sources": [
@@ -2228,7 +2228,7 @@
       "category": "preparation",
       "kind": "guide",
       "title": "Confirm sample drying and find its receipt",
-      "summary": "Complete the drying checklist, record drying details, click Confirm Complete, and verify the green confirmation receipt.",
+      "summary": "Complete the drying checklist, record drying details, click Confirm work is done, and verify the green confirmation receipt.",
       "roles": [
         "LAB_TECHNICIAN",
         "LAB_MANAGER"
@@ -2239,11 +2239,11 @@
         "workbench"
       ],
       "minutes": 4,
-      "quick": "Complete the required physical drying checks, click Confirm Complete, and verify the Checklist Verified receipt. Ticking a box without clicking Confirm Complete does not save the completion.",
+      "quick": "Complete the required physical drying checks, click Confirm work is done, and verify the Checklist Verified receipt. Ticking a box without clicking Confirm work is done does not save the completion.",
       "before": [
         "Match the physical drying tray label to the Laboratory Sample Code and Field Sample ID on screen.",
         "Follow your laboratory's drying procedure for temperature and drying time (many soil labs air-dry below 40 °C).",
-        "Make sure your computer has a working network connection before clicking Confirm Complete.",
+        "Make sure your computer has a working network connection before clicking Confirm work is done.",
         "If the row shows Evidence needs verification from a historical import, follow the missing-evidence guide instead of creating a duplicate entry."
       ],
       "sections": [
@@ -2260,7 +2260,7 @@
             },
             {
               "action": "Tick each item in Operational Checklist only after completing that physical check.",
-              "expected": "The row shows Operational checklist complete and enables the Confirm Complete button."
+              "expected": "The row shows Operational checklist complete and enables the Confirm work is done button."
             }
           ]
         },
@@ -2268,7 +2268,7 @@
           "title": "2. Confirm and verify once",
           "steps": [
             {
-              "action": "Click Confirm Complete on the sample row (or use the bulk confirmation button only after checking every selected tray).",
+              "action": "Click Confirm work is done on the sample row (or use the bulk confirmation button only after checking every selected tray).",
               "expected": "The server saves your drying record. Never include trays that are still wet just because they arrived in the same box."
             },
             {
@@ -2289,7 +2289,7 @@
           "Tick each box only after verifying container identity, constant weight, and absence of cross-contamination."
         ],
         [
-          "Confirm Complete",
+          "Confirm work is done",
           "Button that saves the drying record and generates a permanent receipt",
           "Required to move the task from open checklist to Checklist Verified."
         ],
@@ -2299,14 +2299,14 @@
           "Proves that Air Drying is finished and unlocks Sample Preparation."
         ]
       ],
-      "example": "In Workbench under Air Drying, enter 35 °C, 620 g before, and 545 g after for sample DEMO-26-000142, tick the three Operational Checklist boxes, and click Confirm Complete.",
+      "example": "In Workbench under Air Drying, enter 35 °C, 620 g before, and 545 g after for sample DEMO-26-000142, tick the three Operational Checklist boxes, and click Confirm work is done.",
       "success": "The drying row shows Checklist Verified with a timestamp and operator name, and Sample Preparation unlocks.",
       "nextActor": "Preparation Technician (for sieving and grinding) or Laboratory Manager (if gate verification is enabled)",
       "problems": [
         {
           "symptom": "All three checklist boxes are ticked, but no Checklist Verified receipt appears.",
-          "why": "You ticked the checkboxes on screen but did not click Confirm Complete, or the network dropped during save.",
-          "action": "Check your connection and click Confirm Complete, then verify that Checklist Verified appears on the row."
+          "why": "You ticked the checkboxes on screen but did not click Confirm work is done, or the network dropped during save.",
+          "action": "Check your connection and click Confirm work is done, then verify that Checklist Verified appears on the row."
         },
         {
           "symptom": "Drying shows Checklist Verified, but the sample page still says preparation is incomplete.",
@@ -2328,12 +2328,12 @@
       "steps": [
         "Open Workbench, choose Air Drying in Work type:, and compare the sample ID on screen with the physical drying tray. (Expected: You are recording drying details for the exact soil sample on your bench under your active laboratory.)",
         "Dry the soil to constant weight following your laboratory's procedure and fill in Method, Temperature (°C), Mass before (g), Mass after (g), Started, Ended, and Equipment. (Expected: All drying measurements performed at the bench are recorded in the Drying fields.)",
-        "Tick each item in Operational Checklist only after completing that physical check. (Expected: The row shows Operational checklist complete and enables the Confirm Complete button.)",
-        "Click Confirm Complete on the sample row (or use the bulk confirmation button only after checking every selected tray). (Expected: The server saves your drying record. Never include trays that are still wet just because they arrived in the same box.)",
+        "Tick each item in Operational Checklist only after completing that physical check. (Expected: The row shows Operational checklist complete and enables the Confirm work is done button.)",
+        "Click Confirm work is done on the sample row (or use the bulk confirmation button only after checking every selected tray). (Expected: The server saves your drying record. Never include trays that are still wet just because they arrived in the same box.)",
         "Check that the row now displays Checklist Verified with your username, timestamp, and receipt reference. (Expected: The editable checklist is replaced by a permanent Checklist Verified receipt.)",
         "Switch Work type: to Sample Preparation to see the unlocked grinding and sieving tasks. (Expected: Sample Preparation unlocks for that sample, while bench chemical tests remain locked until sieving is also confirmed.)"
       ],
-      "caution": "Ticking the checkboxes alone does not finish drying—always click Confirm Complete and look for Checklist Verified.",
+      "caution": "Ticking the checkboxes alone does not finish drying—always click Confirm work is done and look for Checklist Verified.",
       "related": [],
       "feature": "core",
       "reviewOwner": "Lab operations lead"
@@ -2343,7 +2343,7 @@
       "category": "preparation",
       "kind": "guide",
       "title": "Confirm preparation for the assigned method",
-      "summary": "Record sieving, grinding, and sub-sample splitting in Workbench and click Confirm Complete to unlock bench analyses.",
+      "summary": "Record sieving, grinding, and sub-sample splitting in Workbench and click Confirm work is done to unlock bench analyses.",
       "roles": [
         "LAB_TECHNICIAN",
         "LAB_MANAGER"
@@ -2354,7 +2354,7 @@
         "workbench"
       ],
       "minutes": 3,
-      "quick": "In Workbench, select Sample Preparation in Work type:, enter the Sieving, Grinding, and Splitting details for your soil sample, tick the Operational Checklist items, and click Confirm Complete.",
+      "quick": "In Workbench, select Sample Preparation in Work type:, enter the Sieving, Grinding, and Splitting details for your soil sample, tick the Operational Checklist items, and click Confirm work is done.",
       "before": [
         "Confirm that Air Drying is already marked Checklist Verified for the sample.",
         "Check the required sieve size for the assigned tests (most routine methods use 2 mm fine earth, while spectral or combustion methods may require fine grinding)."
@@ -2372,7 +2372,7 @@
               "expected": "All preparation fields are filled in and the row displays Operational checklist complete."
             },
             {
-              "action": "Click Confirm Complete (and ask your manager to verify the gate if your laboratory enables Require manager verification of preparation gates in Policies).",
+              "action": "Click Confirm work is done (and ask your manager to verify the step if your laboratory enables Require manager sign-off on preparation steps in Policies).",
               "expected": "The row shows Checklist Verified, the sample status moves to Processing, and bench test rows unlock automatically."
             }
           ]
@@ -2390,18 +2390,18 @@
           "Records how the dried soil was homogenized and divided into sub-sample jars."
         ],
         [
-          "Confirm Complete",
+          "Confirm work is done",
           "Button that saves the preparation record and unlocks bench tests",
           "Replaces the checklist with a permanent Checklist Verified receipt."
         ]
       ],
-      "example": "For sample DEMO-26-000142, select Sample Preparation in Workbench, record 2 mm brass sieving yielding 480 g fine earth and 65 g coarse gravel, tick the checklist, and click Confirm Complete.",
+      "example": "For sample DEMO-26-000142, select Sample Preparation in Workbench, record 2 mm brass sieving yielding 480 g fine earth and 65 g coarse gravel, tick the checklist, and click Confirm work is done.",
       "success": "Sample Preparation shows Checklist Verified, prepared jars are logged, and bench test worksheets unlock.",
       "nextActor": "Laboratory Technician at the analytical bench (or Laboratory Manager if gate verification is required)",
       "problems": [
         {
           "symptom": "A spectral or total carbon test remains locked even after 2 mm sieving is confirmed.",
-          "why": "Some analytical methods require an additional fine-grinding step or a manager verification click on Operational Gates.",
+          "why": "Some analytical methods require an additional fine-grinding step or a manager verification click on Required prep steps.",
           "action": "Open the sample's Work & results tab, read the blocker message under Preparation Prerequisites, and complete the required grinding or manager verification."
         }
       ],
@@ -2413,7 +2413,7 @@
       "steps": [
         "Open Workbench, select Sample Preparation in Work type:, and match the sample ID on screen to the dried soil tray. (Expected: The Sample Preparation form opens showing the Operational Checklist and the Sieving, Grinding, and Splitting sections.)",
         "Crush and sieve the dried soil according to your laboratory's procedure, enter the sieve mesh size, fine-earth weight, coarse fragment weight, and any sub-sample splitting details, and tick the Operational Checklist. (Expected: All preparation fields are filled in and the row displays Operational checklist complete.)",
-        "Click Confirm Complete (and ask your manager to verify the gate if your laboratory enables Require manager verification of preparation gates in Policies). (Expected: The row shows Checklist Verified, the sample status moves to Processing, and bench test rows unlock automatically.)"
+        "Click Confirm work is done (and ask your manager to verify the step if your laboratory enables Require manager sign-off on preparation steps in Policies). (Expected: The row shows Checklist Verified, the sample status moves to Processing, and bench test rows unlock automatically.)"
       ],
       "caution": "Deselect any sample that was not physically sieved before confirming multiple rows in Workbench.",
       "related": [
@@ -2440,7 +2440,7 @@
         "samplesid"
       ],
       "minutes": 4,
-      "quick": "Do not re-dry or re-sieve soil just because a badge looks incomplete. First check whether Checklist Verified appears on the row in Workbench, check whether a second preparation gate or manager verification is still open, and compare the attempt number.",
+      "quick": "Do not re-dry or re-sieve soil just because a badge looks incomplete. First check whether Checklist Verified appears on the row in Workbench, check whether a second required prep step or manager verification is still open, and compare the try number.",
       "before": [
         "Keep your current Workbench tab open so you do not lose any unsaved notes.",
         "Remember that Air Drying, Sample Preparation, and each bench test have separate statuses on the same sample.",
@@ -2455,12 +2455,12 @@
               "expected": "You can see immediately whether the server saved your confirmation or whether the checklist is still open."
             },
             {
-              "action": "If Checklist Verified is not shown, check that all three Operational Checklist boxes are ticked and click Confirm Complete.",
+              "action": "If Checklist Verified is not shown, check that all three Operational Checklist boxes are ticked and click Confirm work is done.",
               "expected": "The confirmation completes and displays the Checklist Verified badge."
             },
             {
-              "action": "If your device was offline when you clicked Confirm Complete, reconnect to the laboratory network and check the sync status before clicking again.",
-              "expected": "Queued confirmations sync cleanly without creating duplicate attempts."
+              "action": "If your device was offline when you clicked Confirm work is done, reconnect to the laboratory network and check the sync status before clicking again.",
+              "expected": "Queued confirmations sync cleanly without creating duplicate tries."
             }
           ]
         },
@@ -2472,11 +2472,11 @@
               "expected": "You can see Air Drying and Sample Preparation side by side and spot which one is still open or waiting for verification."
             },
             {
-              "action": "Check whether the row shows Waiting for manager verification (used when Require manager verification of preparation gates is switched on in Policies).",
-              "expected": "You see whether a Laboratory Manager needs to click verify on Operational Gates to unlock bench tests."
+              "action": "Check whether the row shows Waiting for manager verification (used when Require manager sign-off on preparation steps is switched on in Policies).",
+              "expected": "You see whether a Laboratory Manager needs to click verify on Required prep steps to unlock bench tests."
             },
             {
-              "action": "If both preparation gates are verified but a bench test is still blocked, read the blocker badge on that test row (such as an overdue instrument calibration in Equipment).",
+              "action": "If both required prep steps are verified but a bench test is still blocked, read the blocker badge on that test row (such as an overdue instrument calibration in Equipment).",
               "expected": "You fix the exact blocker instead of repeating preparation."
             }
           ]
@@ -2494,7 +2494,7 @@
           "Shows the live status of Air Drying and Sample Preparation together."
         ],
         [
-          "Operational Gates",
+          "Required prep steps",
           "Manager verification section on the sample's Work & results tab",
           "Used by managers to approve preparation when gate verification is enabled in Policies."
         ]
@@ -2505,8 +2505,8 @@
       "problems": [
         {
           "symptom": "Your manager asks you to submit drying for review, but there is no Submit button on Air Drying.",
-          "why": "Drying and sieving use Confirm Complete (and optional manager verification in Operational Gates), whereas Submit is only for analytical bench results.",
-          "action": "Click Confirm Complete on the drying or preparation row, and have your manager verify the gate in Work & results if required by your laboratory's Policies."
+          "why": "Drying and sieving use Confirm work is done (and optional manager verification in Required prep steps), whereas Submit is only for analytical bench results.",
+          "action": "Click Confirm work is done on the drying or preparation row, and have your manager verify the step in Work & results if required by your laboratory's Policies."
         }
       ],
       "sources": [
@@ -2516,11 +2516,11 @@
       ],
       "steps": [
         "Open the sample row under Air Drying or Sample Preparation in Workbench and check for the green Checklist Verified badge, receipt reference, and timestamp. (Expected: You can see immediately whether the server saved your confirmation or whether the checklist is still open.)",
-        "If Checklist Verified is not shown, check that all three Operational Checklist boxes are ticked and click Confirm Complete. (Expected: The confirmation completes and displays the Checklist Verified badge.)",
-        "If your device was offline when you clicked Confirm Complete, reconnect to the laboratory network and check the sync status before clicking again. (Expected: Queued confirmations sync cleanly without creating duplicate attempts.)",
+        "If Checklist Verified is not shown, check that all three Operational Checklist boxes are ticked and click Confirm work is done. (Expected: The confirmation completes and displays the Checklist Verified badge.)",
+        "If your device was offline when you clicked Confirm work is done, reconnect to the laboratory network and check the sync status before clicking again. (Expected: Queued confirmations sync cleanly without creating duplicate tries.)",
         "Open the sample in Sample Registry, click Work & results, and inspect the Preparation Prerequisites card. (Expected: You can see Air Drying and Sample Preparation side by side and spot which one is still open or waiting for verification.)",
-        "Check whether the row shows Waiting for manager verification (used when Require manager verification of preparation gates is switched on in Policies). (Expected: You see whether a Laboratory Manager needs to click verify on Operational Gates to unlock bench tests.)",
-        "If both preparation gates are verified but a bench test is still blocked, read the blocker badge on that test row (such as an overdue instrument calibration in Equipment). (Expected: You fix the exact blocker instead of repeating preparation.)"
+        "Check whether the row shows Waiting for manager verification (used when Require manager sign-off on preparation steps is switched on in Policies). (Expected: You see whether a Laboratory Manager needs to click verify on Required prep steps to unlock bench tests.)",
+        "If both required prep steps are verified but a bench test is still blocked, read the blocker badge on that test row (such as an overdue instrument calibration in Equipment). (Expected: You fix the exact blocker instead of repeating preparation.)"
       ],
       "caution": "Never re-enter a sample at reception or repeat physical sieving just to clear a status badge.",
       "related": [],
@@ -2543,7 +2543,7 @@
         "workbench"
       ],
       "minutes": 3,
-      "quick": "In Workbench, filter for Air Drying or Sample Preparation, select only the trays that have physically finished the step, verify each row's checklist and parameters, and click Confirm Complete.",
+      "quick": "In Workbench, filter for Air Drying or Sample Preparation, select only the trays that have physically finished the step, verify each row's checklist and parameters, and click Confirm work is done.",
       "before": [
         "Have your drying rack sheet or sieving bench log in front of you.",
         "Check every tray label on the rack against the rows selected on screen."
@@ -2561,7 +2561,7 @@
               "expected": "Only physically completed samples remain selected in the batch."
             },
             {
-              "action": "Complete the required checklist items and click Confirm Complete (or the batch confirmation button showing the exact count of selected samples).",
+              "action": "Complete the required checklist items and click Confirm work is done (or the batch confirmation button showing the exact count of selected samples).",
               "expected": "Every selected sample receives its own Checklist Verified receipt and moves to the next stage."
             }
           ]
@@ -2574,7 +2574,7 @@
           "Filters the queue so you can process a whole drying or sieving rack at once."
         ],
         [
-          "Confirm Complete",
+          "Confirm work is done",
           "Batch confirmation button in the Workbench footer",
           "Saves preparation completion receipts for all selected rows at once."
         ],
@@ -2602,7 +2602,7 @@
       "steps": [
         "Open Workbench, choose Air Drying or Sample Preparation in Work type:, and select the rows for the trays on your rack. (Expected: The selected sample rows highlight and the batch action bar appears at the bottom of the table.)",
         "Check each selected row to make sure any tray that is still damp or un-sieved is unchecked before confirming. (Expected: Only physically completed samples remain selected in the batch.)",
-        "Complete the required checklist items and click Confirm Complete (or the batch confirmation button showing the exact count of selected samples). (Expected: Every selected sample receives its own Checklist Verified receipt and moves to the next stage.)"
+        "Complete the required checklist items and click Confirm work is done (or the batch confirmation button showing the exact count of selected samples). (Expected: Every selected sample receives its own Checklist Verified receipt and moves to the next stage.)"
       ],
       "caution": "Never use select-all to confirm a whole rack without checking whether any individual tray was held back.",
       "related": [
@@ -2617,7 +2617,7 @@
       "category": "preparation",
       "kind": "guide",
       "title": "Resolve a legacy completion with missing evidence",
-      "summary": "Handle a historical or imported sample that shows Evidence needs verification on its preparation gate.",
+      "summary": "Handle a historical or imported sample that shows Evidence needs verification on its required prep step.",
       "roles": [
         "LAB_TECHNICIAN",
         "LAB_MANAGER"
@@ -2629,7 +2629,7 @@
         "manager-queue"
       ],
       "minutes": 3,
-      "quick": "When an imported or older sample shows Evidence needs verification under Preparation Prerequisites, do not invent fake drying weights. Ask your Laboratory Manager or Quality & Audit Officer to review the historical record and verify the gate on the sample's Work & results tab.",
+      "quick": "When an imported or older sample shows Evidence needs verification under Preparation Prerequisites, do not invent fake drying weights. Ask your Laboratory Manager or Quality & Audit Officer to review the historical record and verify the step on the sample's Work & results tab.",
       "before": [
         "Open the sample in Sample Registry and click the Work & results tab.",
         "Check whether the sample came from Legacy Data Import or an earlier workflow."
@@ -2639,7 +2639,7 @@
           "title": "Step-by-step procedure",
           "steps": [
             {
-              "action": "Open the sample's Work & results tab and read the status badge under Preparation Prerequisites and Operational Gates.",
+              "action": "Open the sample's Work & results tab and read the status badge under Preparation Prerequisites and Required prep steps.",
               "expected": "If historical completion was imported without a full checklist receipt, the row shows Evidence needs verification."
             },
             {
@@ -2647,7 +2647,7 @@
               "expected": "You confirm whether the soil was already dried and sieved or whether fresh physical preparation is needed."
             },
             {
-              "action": "Have the Laboratory Manager record the verification decision in Operational Gates (or open a new preparation attempt if the soil must be prepared now).",
+              "action": "Have the Laboratory Manager record the verification decision in Required prep steps (or open a new preparation try if the soil must be prepared now).",
               "expected": "The evidence gap is resolved transparently in the audit log and bench test rows unlock."
             }
           ]
@@ -2660,24 +2660,24 @@
           "Alerts staff so missing historical details are reviewed rather than silently ignored."
         ],
         [
-          "Operational Gates",
+          "Required prep steps",
           "Manager verification panel on the sample's Work & results tab",
-          "Allows an authorized manager to verify historical preparation or require a fresh attempt."
+          "Allows an authorized manager to verify historical preparation or require a fresh try."
         ],
         [
           "Preparation Prerequisites",
           "Card showing Air Drying and Sample Preparation readiness",
-          "Turns green once the manager verifies the historical record or a new attempt is completed."
+          "Turns green once the manager verifies the historical record or a new try is completed."
         ]
       ],
-      "example": "On imported sample LEGACY-25-0041, see Evidence needs verification under Preparation Prerequisites, confirm the 2 mm jar exists in archive storage, and have the Laboratory Manager verify the gate in Operational Gates.",
+      "example": "On imported sample LEGACY-25-0041, see Evidence needs verification under Preparation Prerequisites, confirm the 2 mm jar exists in archive storage, and have the Laboratory Manager verify the step in Required prep steps.",
       "success": "Historical preparation records are verified honestly by a manager without fabricating bench numbers.",
       "nextActor": "Laboratory Manager or Quality & Audit Officer",
       "problems": [
         {
           "symptom": "A technician tries to type made-up drying weights just to clear an Evidence needs verification badge.",
           "why": "Bench staff want to unlock a test row quickly, but typing invented weights creates false audit data.",
-          "action": "Stop and ask your Laboratory Manager to verify the historical gate in Operational Gates on the sample's Work & results tab."
+          "action": "Stop and ask your Laboratory Manager to verify the historical prep step in Required prep steps on the sample's Work & results tab."
         }
       ],
       "sources": [
@@ -2686,11 +2686,11 @@
         "server/services/workbenchReadinessService.js"
       ],
       "steps": [
-        "Open the sample's Work & results tab and read the status badge under Preparation Prerequisites and Operational Gates. (Expected: If historical completion was imported without a full checklist receipt, the row shows Evidence needs verification.)",
+        "Open the sample's Work & results tab and read the status badge under Preparation Prerequisites and Required prep steps. (Expected: If historical completion was imported without a full checklist receipt, the row shows Evidence needs verification.)",
         "Check the sample's physical archive jar or historical lab notebook with your Laboratory Manager. (Expected: You confirm whether the soil was already dried and sieved or whether fresh physical preparation is needed.)",
-        "Have the Laboratory Manager record the verification decision in Operational Gates (or open a new preparation attempt if the soil must be prepared now). (Expected: The evidence gap is resolved transparently in the audit log and bench test rows unlock.)"
+        "Have the Laboratory Manager record the verification decision in Required prep steps (or open a new preparation try if the soil must be prepared now). (Expected: The evidence gap is resolved transparently in the audit log and bench test rows unlock.)"
       ],
-      "caution": "Never type invented temperatures or weights for historical samples—use manager verification in Operational Gates.",
+      "caution": "Never type invented temperatures or weights for historical samples—use manager verification in Required prep steps.",
       "related": [
         "start-first-login",
         "quality-support"
@@ -2715,7 +2715,7 @@
         "samplesid"
       ],
       "minutes": 3,
-      "quick": "Never overwrite a completed preparation receipt. When a sample must be dried or sieved again (for example, after a spill or contamination check), ask your Laboratory Manager to reopen preparation on the sample's Work & results tab so you can record a new attempt in Workbench.",
+      "quick": "Never overwrite a completed preparation receipt. When a sample must be dried or sieved again (for example, after a spill or contamination check), ask your Laboratory Manager to reopen preparation on the sample's Work & results tab so you can record a new try in Workbench.",
       "before": [
         "Check that there is enough un-sieved soil remaining in the original bag or archive container.",
         "Have the reason for re-preparing the sample ready (such as container spill or failed quality check)."
@@ -2725,15 +2725,15 @@
           "title": "Step-by-step procedure",
           "steps": [
             {
-              "action": "Open the sample in Sample Registry, click Work & results, and inspect Preparation Prerequisites and Operational Gates.",
+              "action": "Open the sample in Sample Registry, click Work & results, and inspect Preparation Prerequisites and Required prep steps.",
               "expected": "You see the original Checklist Verified receipt with its operator name and timestamp."
             },
             {
-              "action": "Have a Laboratory Manager reopen the preparation gate with a written reason so a new preparation attempt is created while the original receipt stays preserved in history.",
-              "expected": "The preparation task reappears in Workbench for the new attempt."
+              "action": "Have a Laboratory Manager reopen the required prep step with a written reason so a new preparation try is created while the original receipt stays preserved in history.",
+              "expected": "The preparation task reappears in Workbench for the new try."
             },
             {
-              "action": "Perform the physical drying or sieving on the replacement portion, enter the new measurements in Workbench, tick the Operational Checklist, and click Confirm Complete.",
+              "action": "Perform the physical drying or sieving on the replacement portion, enter the new measurements in Workbench, tick the Operational Checklist, and click Confirm work is done.",
               "expected": "A new Checklist Verified receipt is recorded for the repeat preparation and linked to downstream bench tests."
             }
           ]
@@ -2743,7 +2743,7 @@
         [
           "Preparation Prerequisites",
           "Card on the sample's Work & results tab showing current and past preparation receipts",
-          "Preserves the original receipt alongside any reopened attempt."
+          "Preserves the original receipt alongside any reopened try."
         ],
         [
           "Containers and aliquots",
@@ -2751,19 +2751,19 @@
           "Record the new sub-sample jar barcode and mark any spilled or contaminated jar as retired."
         ],
         [
-          "Confirm Complete",
-          "Button in Workbench to save the new preparation attempt",
+          "Confirm work is done",
+          "Button in Workbench to save the new preparation try",
           "Creates a fresh timestamped receipt for the re-prepared material."
         ]
       ],
-      "example": "After a 2 mm jar is accidentally dropped at the bench, have the manager reopen Sample Preparation on DEMO-26-000142, sieve a fresh 200 g portion from the original bag, print a new jar label, and click Confirm Complete.",
+      "example": "After a 2 mm jar is accidentally dropped at the bench, have the manager reopen Sample Preparation on DEMO-26-000142, sieve a fresh 200 g portion from the original bag, print a new jar label, and click Confirm work is done.",
       "success": "The re-prepared soil has a clean new preparation receipt while the original history remains intact.",
-      "nextActor": "Laboratory Manager (to reopen the gate) and Preparation Technician (to record the new attempt)",
+      "nextActor": "Laboratory Manager (to reopen the step) and Preparation Technician (to record the new try)",
       "problems": [
         {
           "symptom": "The drying or sieving checkboxes are locked and cannot be edited on a sample you already confirmed.",
           "why": "Confirmed preparation receipts are locked to protect the audit trail.",
-          "action": "Do not try to edit the old receipt; ask your Laboratory Manager to reopen the preparation gate on the sample's Work & results tab."
+          "action": "Do not try to edit the old receipt; ask your Laboratory Manager to reopen the required prep step on the sample's Work & results tab."
         }
       ],
       "sources": [
@@ -2772,9 +2772,9 @@
         "server/services/workbenchReadinessService.js"
       ],
       "steps": [
-        "Open the sample in Sample Registry, click Work & results, and inspect Preparation Prerequisites and Operational Gates. (Expected: You see the original Checklist Verified receipt with its operator name and timestamp.)",
-        "Have a Laboratory Manager reopen the preparation gate with a written reason so a new preparation attempt is created while the original receipt stays preserved in history. (Expected: The preparation task reappears in Workbench for the new attempt.)",
-        "Perform the physical drying or sieving on the replacement portion, enter the new measurements in Workbench, tick the Operational Checklist, and click Confirm Complete. (Expected: A new Checklist Verified receipt is recorded for the repeat preparation and linked to downstream bench tests.)"
+        "Open the sample in Sample Registry, click Work & results, and inspect Preparation Prerequisites and Required prep steps. (Expected: You see the original Checklist Verified receipt with its operator name and timestamp.)",
+        "Have a Laboratory Manager reopen the required prep step with a written reason so a new preparation try is created while the original receipt stays preserved in history. (Expected: The preparation task reappears in Workbench for the new try.)",
+        "Perform the physical drying or sieving on the replacement portion, enter the new measurements in Workbench, tick the Operational Checklist, and click Confirm work is done. (Expected: A new Checklist Verified receipt is recorded for the repeat preparation and linked to downstream bench tests.)"
       ],
       "caution": "Always label the newly prepared jar and retire any contaminated jar in Containers and aliquots.",
       "related": [
@@ -2984,7 +2984,7 @@
         },
         {
           "symptom": "Two of your 40 pasted rows were excluded in the preview.",
-          "why": "Those two samples still have an open Air Drying or Sample Preparation gate, or their sample IDs appeared twice in the paste list.",
+          "why": "Those two samples still have an open Air Drying or Sample Preparation step, or their sample IDs appeared twice in the paste list.",
           "action": "Read the exclusion reason next to each row, apply the 38 valid rows now, and finish preparation for the 2 blocked samples before recording them."
         },
         {
@@ -3069,9 +3069,9 @@
           "Requires an instrument that is In Service and Ready / Calibrated when equipment checks are enforced."
         ],
         [
-          "Attempt number",
-          "Shows whether this is the first measurement (Attempt 1) or a repeat (Attempt 2+)",
-          "Repeats are recorded as a new attempt so earlier measurements stay intact in the audit trail."
+          "Try",
+          "Shows whether this is the first measurement (Try #1) or a repeat (Try #2+)",
+          "Repeats are recorded as a new try so earlier measurements stay intact in the audit trail."
         ]
       ],
       "example": "In Workbench, enter pH = 6.42 for sample DEMO-26-000142 using calibrated pH meter EQ-PH-01, record the determination in Review Completion, and submit it in Ready to Submit.",
@@ -3325,7 +3325,7 @@
         [
           "Submit",
           "Confirmation button that sends selected samples to Manager Task List",
-          "Locks the bench attempt and notifies the reviewer."
+          "Locks the bench try and notifies the reviewer."
         ],
         [
           "Sent & Completed",
@@ -3367,7 +3367,7 @@
       "category": "bench",
       "kind": "guide",
       "title": "Correct work returned by a reviewer",
-      "summary": "Read a reviewer's return note and record a fresh repeat attempt in Workbench without erasing the original measurement.",
+      "summary": "Read a reviewer's return note and record a fresh repeat try in Workbench without erasing the original measurement.",
       "roles": [
         "LAB_TECHNICIAN",
         "LAB_MANAGER"
@@ -3379,7 +3379,7 @@
         "manager-queue"
       ],
       "minutes": 3,
-      "quick": "When a reviewer returns a result, open the item in My Work or Workbench, read the return reason banner, perform the requested check or re-analysis in the new attempt (Attempt 2), and record and submit the corrected result.",
+      "quick": "When a reviewer returns a result, open the item in My Work or Workbench, read the return reason banner, perform the requested check or re-analysis in the new try (Try #2), and record and submit the corrected result.",
       "before": [
         "Read the reviewer's return comment carefully so you know whether to check a calculation/dilution or re-run the soil from the jar.",
         "Check that you have the right sample jar and calibrated instrument ready."
@@ -3390,15 +3390,15 @@
           "steps": [
             {
               "action": "Open My Work or Workbench and locate the item marked Returned.",
-              "expected": "The row displays the reviewer's written return reason and opens a fresh editable attempt (such as Attempt 2) while keeping Attempt 1 sealed."
+              "expected": "The row displays the reviewer's written return reason and opens a fresh editable try (such as Try #2) while keeping Try #1 sealed."
             },
             {
-              "action": "Perform the re-measurement or correction requested by the reviewer and enter the new value, instrument, and batch quality control in the active attempt.",
-              "expected": "The new attempt is saved on the worksheet alongside the preserved history of the earlier attempt."
+              "action": "Perform the re-measurement or correction requested by the reviewer and enter the new value, instrument, and batch quality control in the active try.",
+              "expected": "The new try is saved on the worksheet alongside the preserved history of the earlier try."
             },
             {
               "action": "Click Review Completion → Record, then open Ready to Submit, add a note explaining what you fixed, and click Submit.",
-              "expected": "The new attempt is sent to Review Submissions and the Returned alert clears from your queue."
+              "expected": "The new try is sent to Review Submissions and the Returned alert clears from your queue."
             }
           ]
         }
@@ -3410,9 +3410,9 @@
           "Always includes a written comment explaining why the work was returned."
         ],
         [
-          "Attempts",
-          "Numbered measurement attempts on a test item",
-          "Attempt 1 stays permanently sealed for audit history while you enter the repeat in Attempt 2."
+          "Tries",
+          "Numbered measurement tries on a test item",
+          "Try #1 stays permanently sealed for audit history while you enter the repeat in Try #2."
         ],
         [
           "Review Notes",
@@ -3420,14 +3420,14 @@
           "Tells you whether the issue was a failed blank, duplicate drift, or dilution mistake."
         ]
       ],
-      "example": "Open Returned Olsen P task for DEMO-26-000142, read \"Blank exceeded limit—re-extract with fresh reagent\", run Attempt 2 with a new reagent lot, record 14.2 mg/kg, and submit it for review.",
-      "success": "The repeat measurement is recorded in a new attempt and sent back to the reviewer with full history preserved.",
+      "example": "Open Returned Olsen P task for DEMO-26-000142, read \"Blank exceeded limit—re-extract with fresh reagent\", run Try #2 with a new reagent lot, record 14.2 mg/kg, and submit it for review.",
+      "success": "The repeat measurement is recorded in a new try and sent back to the reviewer with full history preserved.",
       "nextActor": "Laboratory Manager or Quality & Audit Officer in Review Submissions",
       "problems": [
         {
-          "symptom": "You click on Attempt 1 of a returned sample and the value box will not let you type.",
-          "why": "Earlier attempts are permanently sealed once submitted so the laboratory never loses historical data.",
-          "action": "Select the active new attempt (Attempt 2) on the row in Workbench to enter your repeat measurement."
+          "symptom": "You click on Try #1 of a returned sample and the value box will not let you type.",
+          "why": "Earlier tries are permanently sealed once submitted so the laboratory never loses historical data.",
+          "action": "Select the active new try (Try #2) on the row in Workbench to enter your repeat measurement."
         }
       ],
       "sources": [
@@ -3437,11 +3437,11 @@
         "client/src/components/workbench/ReviewSubmissionView.jsx"
       ],
       "steps": [
-        "Open My Work or Workbench and locate the item marked Returned. (Expected: The row displays the reviewer's written return reason and opens a fresh editable attempt (such as Attempt 2) while keeping Attempt 1 sealed.)",
-        "Perform the re-measurement or correction requested by the reviewer and enter the new value, instrument, and batch quality control in the active attempt. (Expected: The new attempt is saved on the worksheet alongside the preserved history of the earlier attempt.)",
-        "Click Review Completion → Record, then open Ready to Submit, add a note explaining what you fixed, and click Submit. (Expected: The new attempt is sent to Review Submissions and the Returned alert clears from your queue.)"
+        "Open My Work or Workbench and locate the item marked Returned. (Expected: The row displays the reviewer's written return reason and opens a fresh editable try (such as Try #2) while keeping Try #1 sealed.)",
+        "Perform the re-measurement or correction requested by the reviewer and enter the new value, instrument, and batch quality control in the active try. (Expected: The new try is saved on the worksheet alongside the preserved history of the earlier try.)",
+        "Click Review Completion → Record, then open Ready to Submit, add a note explaining what you fixed, and click Submit. (Expected: The new try is sent to Review Submissions and the Returned alert clears from your queue.)"
       ],
-      "caution": "Never try to delete or overwrite Attempt 1—always record repeat measurements in the new attempt.",
+      "caution": "Never try to delete or overwrite Try #1—always record repeat measurements in the new try.",
       "related": [
         "start-first-login",
         "quality-support"
@@ -3480,7 +3480,7 @@
             },
             {
               "action": "If Air Drying or Sample Preparation is still open, switch Work type: in Workbench to that preparation step and complete and confirm it first.",
-              "expected": "Confirming the missing preparation gate (and obtaining manager verification if required by Policies) clears the prerequisite lock."
+              "expected": "Confirming the missing required prep step (and obtaining manager verification if required by Policies) clears the prerequisite lock."
             },
             {
               "action": "If the blocker says the instrument is Calibration Overdue / Blocked, open Equipment and log a current Calibration or select another Ready / Calibrated instrument.",
@@ -3502,8 +3502,8 @@
         ],
         [
           "Evidence needs verification",
-          "Badge shown when a preparation gate awaits manager sign-off",
-          "Cleared when a manager verifies the gate in Operational Gates."
+          "Badge shown when a required prep step awaits manager sign-off",
+          "Cleared when a manager verifies the step in Required prep steps."
         ]
       ],
       "example": "See that pH entry for DEMO-26-000142 is blocked by Sample Preparation, switch Work type: to Sample Preparation, confirm 2 mm sieving, and return to the unlocked pH row.",
@@ -3524,7 +3524,7 @@
       ],
       "steps": [
         "In Workbench (or on the sample's Work & results tab), read the blocker message shown on the locked row. (Expected: The message names the specific unmet requirement: reception, Air Drying, Sample Preparation, manager verification, assignment, or Equipment readiness.)",
-        "If Air Drying or Sample Preparation is still open, switch Work type: in Workbench to that preparation step and complete and confirm it first. (Expected: Confirming the missing preparation gate (and obtaining manager verification if required by Policies) clears the prerequisite lock.)",
+        "If Air Drying or Sample Preparation is still open, switch Work type: in Workbench to that preparation step and complete and confirm it first. (Expected: Confirming the missing required prep step (and obtaining manager verification if required by Policies) clears the prerequisite lock.)",
         "If the blocker says the instrument is Calibration Overdue / Blocked, open Equipment and log a current Calibration or select another Ready / Calibrated instrument. (Expected: As soon as the prerequisite or instrument check is satisfied, the test row unlocks in Workbench.)"
       ],
       "caution": "Every lock in Workbench points to a specific missing step—finish that step rather than looking for a workaround.",
@@ -3656,7 +3656,7 @@
             },
             {
               "action": "Enter or apply only the rows that are still unrecorded, then complete Review Completion and Ready to Submit.",
-              "expected": "The batch completes cleanly without duplicate attempts or overwritten colleague entries."
+              "expected": "The batch completes cleanly without duplicate tries or overwritten colleague entries."
             }
           ]
         }
@@ -3697,7 +3697,7 @@
       "steps": [
         "If Workbench warns that a row was updated by another user or that a request timed out, copy or keep your unsaved numbers visible before refreshing. (Expected: Your measurements remain safe on your spreadsheet or bench sheet while you check what the server already saved.)",
         "Reload the worksheet and check the row status badges (Draft saved, Recorded, or Sent & Completed) and timestamps. (Expected: You can see immediately whether your previous click succeeded before the connection dropped or whether a colleague already recorded the row.)",
-        "Enter or apply only the rows that are still unrecorded, then complete Review Completion and Ready to Submit. (Expected: The batch completes cleanly without duplicate attempts or overwritten colleague entries.)"
+        "Enter or apply only the rows that are still unrecorded, then complete Review Completion and Ready to Submit. (Expected: The batch completes cleanly without duplicate tries or overwritten colleague entries.)"
       ],
       "caution": "Always check whether the server already recorded your click before retrying after a slow network response.",
       "related": [
@@ -4006,7 +4006,7 @@
               "expected": "The calculated value and its formula inputs are displayed clearly and distinguished from direct wet-chemistry measurements."
             },
             {
-              "action": "If a measured input is later repeated and updated in a new attempt, verify that the derived value updates automatically to match the new approved input.",
+              "action": "If a measured input is later repeated and updated in a new try, verify that the derived value updates automatically to match the new approved input.",
               "expected": "Derived values always stay synchronized with the current approved measured inputs."
             }
           ]
@@ -4048,7 +4048,7 @@
       "steps": [
         "Record and submit the required measured parameters in Workbench (such as Sand %, Silt %, and Clay %, or exchangeable Ca, Mg, K, and Na). (Expected: The system stores each measured value with its unit and method provenance.)",
         "Inspect the derived output badge (marked Derived) on the worksheet, sample page, or review screen. (Expected: The calculated value and its formula inputs are displayed clearly and distinguished from direct wet-chemistry measurements.)",
-        "If a measured input is later repeated and updated in a new attempt, verify that the derived value updates automatically to match the new approved input. (Expected: Derived values always stay synchronized with the current approved measured inputs.)"
+        "If a measured input is later repeated and updated in a new try, verify that the derived value updates automatically to match the new approved input. (Expected: Derived values always stay synchronized with the current approved measured inputs.)"
       ],
       "caution": "If a derived result looks implausible, check the units and decimal places of each measured input that feeds into it.",
       "related": [
@@ -4510,7 +4510,7 @@
         {
           "symptom": "Your Reference Soil fails with a red alert and the batch is blocked from approval.",
           "why": "When your laboratory sets QC blocking mode to Required, blocking, a failed Blank, Duplicate, or Reference Soil automatically blocks sample approval to prevent reporting bad data.",
-          "action": "Check first for a typing error or wrong Reference Material lot selection; if the chemical run truly drifted, notify your Laboratory Manager to repeat the calibration bracket or fail and re-run the batch."
+          "action": "Check first for a typing error or wrong Reference Material lot selection; if the chemical run truly drifted, notify your Laboratory Manager to repeat the samples since the last good instrument check or fail and re-run the batch."
         }
       ],
       "sources": [
@@ -4567,7 +4567,7 @@
               "expected": "You can decide whether to proceed with a documented condition caveat or reject the sample."
             },
             {
-              "action": "Record your manager decision to either accept the sample with a caveat (unlocking Air Drying) or confirm Rejected (Non-Conformance) and notify the client or project manager.",
+              "action": "Record your manager decision to either accept the sample with a caveat (unlocking Air Drying) or confirm Rejected (problem recorded) and notify the client or project manager.",
               "expected": "The decision and reason are saved in the sample's audit history and reflected on any future Certificate of Analysis."
             }
           ]
@@ -4580,7 +4580,7 @@
           "Blocks drying and bench tests until a manager reviews the physical bag."
         ],
         [
-          "Rejected (Non-Conformance)",
+          "Rejected (problem recorded)",
           "Final status for a sample that cannot be analyzed due to severe damage or missing soil",
           "Keeps a permanent record of why the delivered bag could not be tested."
         ],
@@ -4608,7 +4608,7 @@
       "steps": [
         "Open Sample Reception or Sample Registry and filter for Quarantined samples or recent intakes with condition exceptions. (Expected: You see the reception officer's measured weight, Pass/Fail condition checks, and written description of the problem.)",
         "Inspect the physical bag and check 3. Analyses to see whether there is enough uncontaminated soil for the priority tests. (Expected: You can decide whether to proceed with a documented condition caveat or reject the sample.)",
-        "Record your manager decision to either accept the sample with a caveat (unlocking Air Drying) or confirm Rejected (Non-Conformance) and notify the client or project manager. (Expected: The decision and reason are saved in the sample's audit history and reflected on any future Certificate of Analysis.)"
+        "Record your manager decision to either accept the sample with a caveat (unlocking Air Drying) or confirm Rejected (problem recorded) and notify the client or project manager. (Expected: The decision and reason are saved in the sample's audit history and reflected on any future Certificate of Analysis.)"
       ],
       "caution": "Never release a leaked or cross-contaminated bag into routine analysis without documenting the condition caveat.",
       "related": [
@@ -4750,11 +4750,11 @@
             },
             {
               "action": "If a result or batch needs re-testing or correction, click Return (or Return for Repeat), select the affected rows, and write a clear instruction explaining what to fix.",
-              "expected": "The returned items reopen on the technician's Workbench as a new attempt (Attempt 2) while Attempt 1 stays sealed in history."
+              "expected": "The returned items reopen on the technician's Workbench as a new try (Try #2) while Try #1 stays sealed in history."
             },
             {
               "action": "If the measurements and quality controls meet your laboratory's criteria, click Approve.",
-              "expected": "The determinations advance to Approved and lock the official reported value for each parameter."
+              "expected": "The determinations advance to Approved and lock the final report value for each parameter."
             }
           ]
         },
@@ -4781,7 +4781,7 @@
         [
           "Return for Revision",
           "Reviewer decision buttons in Review Submissions",
-          "Approve locks the accepted results; Return sends selected items back for a new bench attempt with your note."
+          "Approve locks the accepted results; Return sends selected items back for a new bench try with your note."
         ],
         [
           "Final Approvals",
@@ -4813,8 +4813,8 @@
         "Open Manager Task List and click the Review Submissions tab. Check your active laboratory and queue filters. (Expected: You see all method batches and determinations that technicians have formally submitted for review.)",
         "Open a submitted batch or sample and check which analyses are included and whether the submission is full or partial. (Expected: You see the exact determinations submitted in this batch alongside any other tests on the same sample.)",
         "Inspect the sample values, units, moisture basis, calibrated instrument, preparation receipts, and batch QC results (Blank, Duplicate, Reference Soil, and calibration checks). (Expected: Every measurement is backed by passing QC (or a clear warning/failure badge) and valid equipment traceability.)",
-        "If a result or batch needs re-testing or correction, click Return (or Return for Repeat), select the affected rows, and write a clear instruction explaining what to fix. (Expected: The returned items reopen on the technician's Workbench as a new attempt (Attempt 2) while Attempt 1 stays sealed in history.)",
-        "If the measurements and quality controls meet your laboratory's criteria, click Approve. (Expected: The determinations advance to Approved and lock the official reported value for each parameter.)",
+        "If a result or batch needs re-testing or correction, click Return (or Return for Repeat), select the affected rows, and write a clear instruction explaining what to fix. (Expected: The returned items reopen on the technician's Workbench as a new try (Try #2) while Try #1 stays sealed in history.)",
+        "If the measurements and quality controls meet your laboratory's criteria, click Approve. (Expected: The determinations advance to Approved and lock the final report value for each parameter.)",
         "Check whether all requested analyses on the sample are now approved so it can move to Final Approvals. (Expected: Samples with all tests approved appear in Final Approvals for whole-sample review.)",
         "Once Final Approvals sign-off is complete, open Reports to generate and check the official Certificate of Analysis. (Expected: Stage 1 batch review, Stage 2 final sample approval, and PDF report release remain distinct and fully traceable.)"
       ],
@@ -4843,7 +4843,7 @@
       "quick": "In Review Submissions, click Return (or Return for Repeat) on the affected determination or batch, state the exact problem (such as a failed blank, duplicate drift, or dilution check) and what the technician should do next, and confirm the return.",
       "before": [
         "Identify whether the whole analytical batch failed QC or only one individual sample needs a repeat.",
-        "Check which replicate or attempt value should be kept if multiple valid attempts exist."
+        "Check which replicate or try value should be kept if multiple valid tries exist."
       ],
       "sections": [
         {
@@ -4851,15 +4851,15 @@
           "steps": [
             {
               "action": "Open Manager Task List → Review Submissions and inspect the submitted run or sample.",
-              "expected": "You see all measurement attempts, replicate agreement, and quality control results."
+              "expected": "You see all measurement tries, replicate agreement, and quality control results."
             },
             {
               "action": "Click Return on the specific determination (or fail/return the batch if a batch control failed) and write a specific note naming the parameter, the reason, and whether to re-weigh or re-dilute.",
-              "expected": "The LIMS keeps Attempt 1 sealed for the audit log and opens Attempt 2 in the technician's Workbench with your written note."
+              "expected": "The LIMS keeps Try #1 sealed for the audit log and opens Try #2 in the technician's Workbench with your written note."
             },
             {
-              "action": "When the technician submits Attempt 2, compare Attempt 1 and Attempt 2 in Review Submissions and verify which reported value rule (such as average of agreeing replicates or latest valid attempt) applies before clicking Approve.",
-              "expected": "The approved Reported value is locked cleanly with full history of both attempts."
+              "action": "When the technician submits Try #2, compare Try #1 and Try #2 in Review Submissions and verify which final report value rule (such as average of agreeing replicates or latest valid try) applies before clicking Approve.",
+              "expected": "The approved Final report value is locked cleanly with full history of both tries."
             }
           ]
         }
@@ -4868,7 +4868,7 @@
         [
           "Return for Revision",
           "Reviewer action that sends a submitted item back to the bench",
-          "Creates a fresh editable attempt for the technician while preserving earlier attempts."
+          "Creates a fresh editable try for the technician while preserving earlier tries."
         ],
         [
           "Review Notes",
@@ -4876,13 +4876,13 @@
           "Write a concrete instruction (such as \"Re-run at 1:10 dilution—above calibration curve\") instead of just \"Fix\"."
         ],
         [
-          "Reported value",
+          "Final report value",
           "The official value selected for reporting after review",
-          "Follows your laboratory's policy (average within repeatability limit, latest valid attempt, or reviewer choice)."
+          "Follows your laboratory's policy (average within repeatability limit, latest valid try, or reviewer choice)."
         ]
       ],
-      "example": "In Review Submissions, return sample DEMO-26-000142 Olsen P with the note \"Reading 95 mg/kg exceeds top standard—dilute 1:5 and re-measure in Attempt 2\".",
-      "success": "The technician receives an unmistakable instruction on their bench and records Attempt 2 without guesswork.",
+      "example": "In Review Submissions, return sample DEMO-26-000142 Olsen P with the note \"Reading 95 mg/kg exceeds top standard—dilute 1:5 and re-measure in Try #2\".",
+      "success": "The technician receives an unmistakable instruction on their bench and records Try #2 without guesswork.",
       "nextActor": "Assigned Laboratory Technician in My Work and Workbench",
       "problems": [
         {
@@ -4897,11 +4897,11 @@
         "client/src/pages/ResultReports.jsx"
       ],
       "steps": [
-        "Open Manager Task List → Review Submissions and inspect the submitted run or sample. (Expected: You see all measurement attempts, replicate agreement, and quality control results.)",
-        "Click Return on the specific determination (or fail/return the batch if a batch control failed) and write a specific note naming the parameter, the reason, and whether to re-weigh or re-dilute. (Expected: The LIMS keeps Attempt 1 sealed for the audit log and opens Attempt 2 in the technician's Workbench with your written note.)",
-        "When the technician submits Attempt 2, compare Attempt 1 and Attempt 2 in Review Submissions and verify which reported value rule (such as average of agreeing replicates or latest valid attempt) applies before clicking Approve. (Expected: The approved Reported value is locked cleanly with full history of both attempts.)"
+        "Open Manager Task List → Review Submissions and inspect the submitted run or sample. (Expected: You see all measurement tries, replicate agreement, and quality control results.)",
+        "Click Return on the specific determination (or fail/return the batch if a batch control failed) and write a specific note naming the parameter, the reason, and whether to re-weigh or re-dilute. (Expected: The LIMS keeps Try #1 sealed for the audit log and opens Try #2 in the technician's Workbench with your written note.)",
+        "When the technician submits Try #2, compare Try #1 and Try #2 in Review Submissions and verify which final report value rule (such as average of agreeing replicates or latest valid try) applies before clicking Approve. (Expected: The approved Final report value is locked cleanly with full history of both tries.)"
       ],
-      "caution": "Never ask a technician to edit a result outside the LIMS—use Return so Attempt 1 and Attempt 2 are both preserved.",
+      "caution": "Never ask a technician to edit a result outside the LIMS—use Return so Try #1 and Try #2 are both preserved.",
       "related": [
         "start-first-login",
         "quality-support"
@@ -4930,7 +4930,7 @@
       "quick": "Open Manager Task List → Final Approvals, inspect all approved test results on the sample together, check any cross-parameter plausibility warnings (such as texture closure, C:N ratio, or sum of bases vs. CEC), and click Approve to authorize reporting.",
       "before": [
         "Confirm that all individual tests on the sample have passed Stage 1 review (or have an authorized manager waiver if a test could not be run).",
-        "Check that no open Non-Conformance or unresolved QC block remains on the sample."
+        "Check that no open Problem record or unresolved QC block remains on the sample."
       ],
       "sections": [
         {
@@ -4974,7 +4974,7 @@
       "problems": [
         {
           "symptom": "The final Approve button on a sample is disabled.",
-          "why": "One of the requested analyses on the sample is still unsubmitted, an earlier preparation gate lacks verification, or you recorded a bench measurement on that sample yourself while Require a second reviewer is active.",
+          "why": "One of the requested analyses on the sample is still unsubmitted, an earlier required prep step lacks verification, or you recorded a bench measurement on that sample yourself while Require a second reviewer is active.",
           "action": "Read the blocker explanation shown on the Final Approvals card and finish the remaining test review or ask a second manager to sign off."
         }
       ],
@@ -5028,7 +5028,7 @@
             },
             {
               "action": "Select the sample, choose the report language if needed, and preview the Certificate of Analysis.",
-              "expected": "The preview displays the sample identifiers, reception condition notes, approved Reported values, units, method names, and any Predicted or caveat badges."
+              "expected": "The preview displays the sample identifiers, reception condition notes, approved Final report values, units, method names, and any Predicted or caveat badges."
             },
             {
               "action": "Issue the report and download the PDF Certificate of Analysis.",
@@ -5049,7 +5049,7 @@
           "Indicates the valid official report for clients and auditors."
         ],
         [
-          "Reported value",
+          "Final report value",
           "Official approved value printed on the Certificate of Analysis",
           "Locked at approval so reports, CSV exports, and data feeds always show the exact same number."
         ]
@@ -5071,7 +5071,7 @@
       ],
       "steps": [
         "Click Reports in the side menu to open Result Reports and filter for Approved samples ready for reporting. (Expected: You see all approved samples and their current report status.)",
-        "Select the sample, choose the report language if needed, and preview the Certificate of Analysis. (Expected: The preview displays the sample identifiers, reception condition notes, approved Reported values, units, method names, and any Predicted or caveat badges.)",
+        "Select the sample, choose the report language if needed, and preview the Certificate of Analysis. (Expected: The preview displays the sample identifiers, reception condition notes, approved Final report values, units, method names, and any Predicted or caveat badges.)",
         "Issue the report and download the PDF Certificate of Analysis. (Expected: The report is published with status Current, a unique report number, a verification QR code, and locked results.)"
       ],
       "caution": "Once a Certificate of Analysis is issued, sample fields and results lock automatically—any later change requires a formal report amendment.",
@@ -5114,12 +5114,12 @@
               "expected": "For a scientific amendment, the previously issued report is immediately marked Withdrawn on public verification links while the correction is in progress."
             },
             {
-              "action": "Make the permitted correction (or have the technician record the new bench attempt if re-testing), and complete manager review and second-person sign-off if required by Policies.",
+              "action": "Make the permitted correction (or have the technician record the new bench try if re-testing), and complete manager review and second-person sign-off if required by Policies.",
               "expected": "The original value and the new value are both preserved in the audit history."
             },
             {
               "action": "Issue the amended Certificate of Analysis in Reports.",
-              "expected": "The new report revision becomes Current with a replacement notice showing what changed, and the older PDF is permanently marked Superseded."
+              "expected": "The new report revision becomes Current with a replacement notice showing what changed, and the older PDF is permanently marked Replaced by newer version."
             }
           ]
         }
@@ -5131,7 +5131,7 @@
           "Prevents anyone scanning the old PDF's QR code from relying on a result under re-investigation."
         ],
         [
-          "Superseded",
+          "Replaced by newer version",
           "Permanent status of an older report revision once the replacement revision is issued",
           "Kept in the audit archive while pointing readers to the new Current report."
         ],
@@ -5141,7 +5141,7 @@
           "When enabled, a second authorized reviewer must co-sign any amendment before the new report is issued."
         ]
       ],
-      "example": "Open issued report RPT-DEMO-2026-00042, start a clerical amendment to fix a field depth typo from \"0–2 cm\" to \"0–20 cm\", record the reason, obtain co-signature, and issue Revision 2 (Current) while Revision 1 becomes Superseded.",
+      "example": "Open issued report RPT-DEMO-2026-00042, start a clerical amendment to fix a field depth typo from \"0–2 cm\" to \"0–20 cm\", record the reason, obtain co-signature, and issue Revision 2 (Current) while Revision 1 becomes Replaced by newer version.",
       "success": "The correction is published transparently in a new Current report revision while preserving the full history of Revision 1.",
       "nextActor": "Second Reviewer / Laboratory Manager and Client receiving the replacement PDF",
       "problems": [
@@ -5158,10 +5158,10 @@
       ],
       "steps": [
         "Open Reports (Result Reports) or the approved sample in Sample Registry, start a report amendment, choose clerical or scientific amendment, and type the full reason for the change. (Expected: For a scientific amendment, the previously issued report is immediately marked Withdrawn on public verification links while the correction is in progress.)",
-        "Make the permitted correction (or have the technician record the new bench attempt if re-testing), and complete manager review and second-person sign-off if required by Policies. (Expected: The original value and the new value are both preserved in the audit history.)",
-        "Issue the amended Certificate of Analysis in Reports. (Expected: The new report revision becomes Current with a replacement notice showing what changed, and the older PDF is permanently marked Superseded.)"
+        "Make the permitted correction (or have the technician record the new bench try if re-testing), and complete manager review and second-person sign-off if required by Policies. (Expected: The original value and the new value are both preserved in the audit history.)",
+        "Issue the amended Certificate of Analysis in Reports. (Expected: The new report revision becomes Current with a replacement notice showing what changed, and the older PDF is permanently marked Replaced by newer version.)"
       ],
-      "caution": "Always send the new Current PDF to the client and ask them to discard any Superseded printouts.",
+      "caution": "Always send the new Current PDF to the client and ask them to discard any printouts marked Replaced by newer version.",
       "related": [
         "start-first-login",
         "quality-support"
@@ -5189,7 +5189,7 @@
       "minutes": 3,
       "quick": "In Reports (Result Reports), check that the report badge shows Current, confirm the report language and project scope, and download or share the Current PDF or verification link.",
       "before": [
-        "Verify that the report status is Current (never share a Withdrawn or Superseded report).",
+        "Verify that the report status is Current (never share a report marked Withdrawn or Replaced by newer version).",
         "Confirm that the recipient is authorized to view results for that project or client order."
       ],
       "sections": [
@@ -5220,10 +5220,10 @@
         [
           "Create Public Link",
           "Verification code printed on the Certificate of Analysis",
-          "Shows whether the report is Current or has been Withdrawn or Superseded."
+          "Shows whether the report is Current or has been Withdrawn or Replaced by newer version."
         ],
         [
-          "Superseded",
+          "Replaced by newer version",
           "Badge on an older revision replaced by an amendment",
           "Old public links automatically display a notice that a newer revision exists."
         ]
@@ -5233,7 +5233,7 @@
       "nextActor": "Client, Agronomist, or Project Manager",
       "problems": [
         {
-          "symptom": "A client scans the QR code on a printed PDF and sees a notice that the report was superseded.",
+          "symptom": "A client scans the QR code on a printed PDF and sees a notice that the report was replaced by a newer version.",
           "why": "The client is looking at an older printout (Revision 1) after the laboratory issued an amended Revision 2.",
           "action": "Download the latest Current revision from Reports and send it to the client to replace their old printout."
         }
@@ -5977,7 +5977,7 @@
               "expected": "Every batch and sample determination recorded with that instrument or lot is listed."
             },
             {
-              "action": "If a defective lot or uncalibrated instrument affected any unapproved or approved samples, open a Non-Conformance record in QA Dashboard and return or amend the affected samples.",
+              "action": "If a defective lot or uncalibrated instrument affected any unapproved or approved samples, open a Problem record in QA Dashboard and return or amend the affected samples.",
               "expected": "You contain the problem precisely to the affected batches without guessing which samples were touched."
             }
           ]
@@ -5990,7 +5990,7 @@
           "Created automatically whenever technicians record a run in Workbench."
         ],
         [
-          "Non-Conformance",
+          "Problem records",
           "Quality incident record in QA Dashboard",
           "Used to document the root cause and list every batch affected by a faulty instrument or reagent lot."
         ],
@@ -6000,7 +6000,7 @@
           "Allows targeted re-analysis of the affected samples."
         ]
       ],
-      "example": "After discovering that Olsen P extracting solution lot NAHCO3-04 was contaminated on Thursday, trace the two batches that used lot NAHCO3-04, log a Non-Conformance, and return those samples for Attempt 2.",
+      "example": "After discovering that Olsen P extracting solution lot NAHCO3-04 was contaminated on Thursday, trace the two batches that used lot NAHCO3-04, log a Problem record, and return those samples for Try #2.",
       "success": "Any equipment or reagent issue can be traced to the exact affected samples in minutes.",
       "nextActor": "Quality & Audit Officer and Laboratory Manager",
       "problems": [
@@ -6017,7 +6017,7 @@
       "steps": [
         "Open Equipment (or Reagents & Inventory) and select the instrument or lot record to view its event and usage history. (Expected: You see the timeline of calibrations, maintenance events, and linked analytical batches.)",
         "Open QA Dashboard or Analytical Runs and filter by the instrument or lot across the suspect date range. (Expected: Every batch and sample determination recorded with that instrument or lot is listed.)",
-        "If a defective lot or uncalibrated instrument affected any unapproved or approved samples, open a Non-Conformance record in QA Dashboard and return or amend the affected samples. (Expected: You contain the problem precisely to the affected batches without guessing which samples were touched.)"
+        "If a defective lot or uncalibrated instrument affected any unapproved or approved samples, open a Problem record in QA Dashboard and return or amend the affected samples. (Expected: You contain the problem precisely to the affected batches without guessing which samples were touched.)"
       ],
       "caution": "Accurate lot traceability depends on bench staff selecting the real bottle lot in Workbench on every run.",
       "related": [
@@ -6253,7 +6253,7 @@
           "Only visible on this device until synchronized with the server."
         ],
         [
-          "Recover previous attempt",
+          "Check if last try was saved",
           "Permanent receipt assigned only after the device reconnects and syncs",
           "Required before work counts as officially confirmed or submitted."
         ]
@@ -6430,7 +6430,7 @@
               "expected": "You can see which measurement came from the actual physical run at the bench."
             },
             {
-              "action": "Keep the authoritative server record if a colleague already entered the same run, or apply your local measurement (or ask the manager to return the task for a new attempt) if your device holds the real bench reading.",
+              "action": "Keep the authoritative server record if a colleague already entered the same run, or apply your local measurement (or ask the manager to return the task for a new try) if your device holds the real bench reading.",
               "expected": "The conflict is resolved transparently without silent data loss."
             }
           ]
@@ -6438,12 +6438,12 @@
       ],
       "fields": [
         [
-          "Discard attempt",
+          "Clear unfinished try",
           "Value and timestamp captured on your tablet or laptop while disconnected",
           "Displayed alongside the server record so you can compare them before choosing."
         ],
         [
-          "Recover previous attempt",
+          "Check if last try was saved",
           "Current value, status, and operator stored in the central LIMS database",
           "Protected from being overwritten silently by an older offline cache."
         ],
@@ -6471,7 +6471,7 @@
       "steps": [
         "Open the conflicted item in the sync view or Workbench and read why the server rejected the automatic update. (Expected: The message explains whether another technician recorded a value, the manager reassigned the task, or the sample was already approved.)",
         "Compare the value and timestamp on your device with the value and operator currently saved on the server. (Expected: You can see which measurement came from the actual physical run at the bench.)",
-        "Keep the authoritative server record if a colleague already entered the same run, or apply your local measurement (or ask the manager to return the task for a new attempt) if your device holds the real bench reading. (Expected: The conflict is resolved transparently without silent data loss.)"
+        "Keep the authoritative server record if a colleague already entered the same run, or apply your local measurement (or ask the manager to return the task for a new try) if your device holds the real bench reading. (Expected: The conflict is resolved transparently without silent data loss.)"
       ],
       "caution": "To avoid offline conflicts, coordinate with your bench team so only one device works on a given batch while disconnected.",
       "related": [
@@ -6630,7 +6630,7 @@
       "nextActor": "Laboratory Technician at the bench",
       "problems": [
         {
-          "symptom": "You can read the Help article offline, but clicking Confirm Complete or Submit fails.",
+          "symptom": "You can read the Help article offline, but clicking Confirm work is done or Submit fails.",
           "why": "Offline Help lets you read instructions while disconnected, but final server receipts and reviewer submissions require an active network connection.",
           "action": "Save your work as a local draft while offline, then reconnect to laboratory Wi-Fi to confirm and submit."
         }
@@ -6734,7 +6734,7 @@
         "Assign the receiving laboratory and select the default analyses or test package ordered for the project. (Expected: When bags from this project arrive at Sample Reception, their requested analyses pre-fill automatically in 3. Analyses.)",
         "Save the project and verify that its sample counters (Expected, Accepted, Processing, Approved) appear on the Projects dashboard. (Expected: Reception staff, technicians, and project managers can track the project under a consistent project code.)"
       ],
-      "caution": "Always set the default analysis package on a project before the first consignment box arrives at reception.",
+      "caution": "Always set the default analysis package on a project before the first sample delivery box arrives at reception.",
       "related": [
         "start-first-login",
         "quality-support"
@@ -6881,7 +6881,7 @@
             },
             {
               "action": "If a Certificate of Analysis was already issued before the field mistake was discovered, start a clerical amendment in Reports to publish the corrected report revision.",
-              "expected": "The new Current report shows the corrected field details while the old PDF is marked Superseded."
+              "expected": "The new Current report shows the corrected field details while the old PDF is marked Replaced by newer version."
             }
           ]
         }
@@ -6922,7 +6922,7 @@
       "steps": [
         "When a physical bag label disagrees with the synced field data (for example, depth says 20–40 cm on the bag but 0–20 cm on screen), record the discrepancy in the Sample Reception notes. (Expected: Both the original synced field record and the reception officer's observation are preserved.)",
         "Have the Field Surveyor or Project Manager verify the field notebook or KoboToolbox submission and apply the authorized field provenance correction in Projects / Sample Registry. (Expected: The updated site code, depth, or GPS coordinates are logged in the audit trail without erasing the original import.)",
-        "If a Certificate of Analysis was already issued before the field mistake was discovered, start a clerical amendment in Reports to publish the corrected report revision. (Expected: The new Current report shows the corrected field details while the old PDF is marked Superseded.)"
+        "If a Certificate of Analysis was already issued before the field mistake was discovered, start a clerical amendment in Reports to publish the corrected report revision. (Expected: The new Current report shows the corrected field details while the old PDF is marked Replaced by newer version.)"
       ],
       "caution": "Always keep field collection dates and laboratory reception dates separate—fixing a field date never changes the lab reception timestamp.",
       "related": [
@@ -6952,7 +6952,7 @@
         "maps"
       ],
       "minutes": 3,
-      "quick": "Label every physical soil bag with the exact Field Sample ID entered in KoboToolbox, sync your completed field forms before the courier box reaches the lab, and include a consignment list in the box.",
+      "quick": "Label every physical soil bag with the exact Field Sample ID entered in KoboToolbox, sync your completed field forms before the courier box reaches the lab, and include a delivery box list in the box.",
       "before": [
         "Use waterproof markers and tear-resistant barcode or tyvek tags on every soil bag.",
         "Check that every bag in the transport box has a matching entry in your field survey list."
@@ -6970,8 +6970,8 @@
               "expected": "Reception staff will see the pre-registered records as soon as they scan the bags."
             },
             {
-              "action": "Pack the sealed bags securely with a printed consignment manifest listing all Field Sample IDs in the box.",
-              "expected": "Sample Reception can check in the whole box in minutes using Project Sample or Consignment Batch mode."
+              "action": "Pack the sealed bags securely with a printed delivery box list listing all Field Sample IDs in the box.",
+              "expected": "Sample Reception can check in the whole box in minutes using Project Sample or Sample delivery box mode."
             }
           ]
         }
@@ -6988,7 +6988,7 @@
           "Confirms the lab has the digital pre-registration waiting for the box."
         ],
         [
-          "Consignment Batch",
+          "Sample delivery box",
           "List of sample bags packed inside one transport box",
           "Helps reception staff spot any bag left behind in the field vehicle."
         ]
@@ -7012,7 +7012,7 @@
       "steps": [
         "In the field, record each sample in your KoboToolbox form (or project template) using the exact same Field Sample ID written on the physical bag. (Expected: Every physical bag has a unique, matching digital identifier.)",
         "Upload your completed KoboToolbox forms and check in Projects that the samples appear as Expected under the receiving laboratory. (Expected: Reception staff will see the pre-registered records as soon as they scan the bags.)",
-        "Pack the sealed bags securely with a printed consignment manifest listing all Field Sample IDs in the box. (Expected: Sample Reception can check in the whole box in minutes using Project Sample or Consignment Batch mode.)"
+        "Pack the sealed bags securely with a printed delivery box list listing all Field Sample IDs in the box. (Expected: Sample Reception can check in the whole box in minutes using Project Sample or Sample delivery box mode.)"
       ],
       "caution": "Never put a handwritten paper tag inside wet soil where it will rot—attach a durable label to the outside of the sealed bag.",
       "related": [
@@ -7133,7 +7133,7 @@
         "datasheet"
       ],
       "minutes": 3,
-      "quick": "Open Data & Results, set your project, laboratory, and date filters, verify that you are exporting Approved results, and download the CSV or Excel file containing the official Reported values, units, and method codes.",
+      "quick": "Open Data & Results, set your project, laboratory, and date filters, verify that you are exporting Approved results, and download the CSV or Excel file containing the Final report values, units, and method codes.",
       "before": [
         "Confirm that the samples you want to export have completed Final Approvals (status Approved).",
         "Check the active filter bar in Data & Results so your export contains the exact project or batch you need."
@@ -7152,7 +7152,7 @@
             },
             {
               "action": "Click the export button to download the CSV or Excel file and check the exported row count against the filtered screen count.",
-              "expected": "The exported spreadsheet contains the official approved Reported values matching the Certificates of Analysis."
+              "expected": "The exported spreadsheet contains the approved Final report values matching the Certificates of Analysis."
             }
           ]
         }
@@ -7164,7 +7164,7 @@
           "Exports only authorized, approved results to protect data quality."
         ],
         [
-          "Reported value",
+          "Final report value",
           "The official approved value per parameter included in standard CSV and Excel exports",
           "Matches the value printed on the sample's Current Certificate of Analysis."
         ],
@@ -7193,7 +7193,7 @@
       "steps": [
         "Click Data & Results in the side menu and select your Project, Laboratory, and status filters. (Expected: The preview table updates to show the matching samples and their approved parameter values.)",
         "Check the table columns to verify sample identifiers, field coordinates, depth, parameter units, method variants, and provenance badges (Measured, Derived, or Predicted). (Expected: You confirm the scope and columns before generating the export file.)",
-        "Click the export button to download the CSV or Excel file and check the exported row count against the filtered screen count. (Expected: The exported spreadsheet contains the official approved Reported values matching the Certificates of Analysis.)"
+        "Click the export button to download the CSV or Excel file and check the exported row count against the filtered screen count. (Expected: The exported spreadsheet contains the approved Final report values matching the Certificates of Analysis.)"
       ],
       "caution": "Unapproved bench drafts are never included in external client or national exports—complete Final Approvals first.",
       "related": [
@@ -7285,7 +7285,7 @@
         "Check the synchronization and Delivery Receipts log to see the latest snapshot or change-feed checkpoint, imported count, and any quarantined records reported by the receiving system. (Expected: You can distinguish data pulled by the harvester from data confirmed as ingested via a delivery receipt.)",
         "If an external harvester reports an expired cursor (for example, after more than 72 hours offline or after a scope change), instruct the harvester operator to request a fresh baseline snapshot before resuming incremental changes. (Expected: The external national database stays 100% synchronized with your laboratory's Current approved results and any amended revisions.)"
       ],
-      "caution": "When a sample report is amended, Data Exchange automatically publishes the updated revision so national databases never keep superseded numbers.",
+      "caution": "When a sample report is amended, Data Exchange automatically publishes the updated revision so national databases never keep replaced numbers.",
       "related": [
         "start-first-login",
         "quality-support"
@@ -7388,7 +7388,7 @@
       "category": "admin",
       "kind": "guide",
       "title": "Configure a laboratory and its scope",
-      "summary": "Configure a laboratory's profile, quality preset, and operational policies in Laboratories.",
+      "summary": "Configure a laboratory's profile, starting rule set, and operational policies in Laboratories.",
       "roles": [
         "SUPER_ADMIN",
         "LAB_MANAGER",
@@ -7400,21 +7400,21 @@
         "adminlabs"
       ],
       "minutes": 3,
-      "quick": "Open Laboratories, select your laboratory, choose a starting preset in Presets (ISO 17025 strict, Basic, or Advisory (warnings only)) or fine-tune individual rules in Policies and Analysis overrides, type a Reason for change, and save.",
+      "quick": "Open Laboratories, select your laboratory, choose a starting rule set in Starting rule set (ISO 17025 strict, Basic, or Advisory (warnings only)) or fine-tune individual rules in Policies and Custom rules per test or method, type a Reason for change, and save.",
       "before": [
         "Confirm you are signed in as a Laboratory Manager or System Administrator.",
-        "Remember that settings are configurable per laboratory—each lab chooses the preset and policies that match its staffing and accreditation level."
+        "Remember that settings are configurable per laboratory—each lab chooses the starting rule set and policies that match its staffing and accreditation level."
       ],
       "sections": [
         {
           "title": "Step-by-step procedure",
           "steps": [
             {
-              "action": "Click Laboratories in the side menu and open your laboratory's configuration tabs (Presets, Policies, and Analysis overrides).",
-              "expected": "You see your laboratory's active preset badge (ISO 17025 strict, Basic, Advisory (warnings only), or Custom) and all current policy toggles."
+              "action": "Click Laboratories in the side menu and open your laboratory's configuration tabs (Starting rule set, Policies, and Custom rules per test or method).",
+              "expected": "You see your laboratory's active starting rule set badge (ISO 17025 strict, Basic, Advisory (warnings only), or Custom) and all current policy toggles."
             },
             {
-              "action": "Select a preset in Presets or adjust individual rules in Policies (such as Require a second reviewer, Require manager verification of preparation gates, QC blocking mode, Required equipment, or Minimum control-chart baseline points).",
+              "action": "Select a starting rule set in Starting rule set or adjust individual rules in Policies (such as Require a second reviewer, Require manager sign-off on preparation steps, QC blocking mode, Required equipment, or Minimum control-chart baseline points).",
               "expected": "The screen highlights any modified rules and checks that your policy choices do not conflict with active method QC rules."
             },
             {
@@ -7437,11 +7437,11 @@
         ],
         [
           "Reason for change",
-          "Mandatory audit note when saving changes to Presets, Policies, or Analysis overrides",
+          "Mandatory audit note when saving changes to Starting rule set, Policies, or Custom rules per test or method",
           "Records why a laboratory policy was updated and by whom."
         ]
       ],
-      "example": "In Laboratories, select Basic in Presets for a 3-person regional pilot lab, turn off Require manager verification of preparation gates in Policies, enter \"Pilot launch workflow for 3-person team\" in Reason for change, and save.",
+      "example": "In Laboratories, select Basic in Starting rule set for a 3-person regional pilot lab, turn off Require manager sign-off on preparation steps in Policies, enter \"Pilot launch workflow for 3-person team\" in Reason for change, and save.",
       "success": "Your laboratory's workflow gates, second-reviewer rules, and QC blocking mode match your real team and quality goals.",
       "nextActor": "Laboratory Manager and Quality & Audit Officer",
       "problems": [
@@ -7459,8 +7459,8 @@
         "client/src/pages/help/AdminHelpEditor.jsx"
       ],
       "steps": [
-        "Click Laboratories in the side menu and open your laboratory's configuration tabs (Presets, Policies, and Analysis overrides). (Expected: You see your laboratory's active preset badge (ISO 17025 strict, Basic, Advisory (warnings only), or Custom) and all current policy toggles.)",
-        "Select a preset in Presets or adjust individual rules in Policies (such as Require a second reviewer, Require manager verification of preparation gates, QC blocking mode, Required equipment, or Minimum control-chart baseline points). (Expected: The screen highlights any modified rules and checks that your policy choices do not conflict with active method QC rules.)",
+        "Click Laboratories in the side menu and open your laboratory's configuration tabs (Starting rule set, Policies, and Custom rules per test or method). (Expected: You see your laboratory's active starting rule set badge (ISO 17025 strict, Basic, Advisory (warnings only), or Custom) and all current policy toggles.)",
+        "Select a starting rule set in Starting rule set or adjust individual rules in Policies (such as Require a second reviewer, Require manager sign-off on preparation steps, QC blocking mode, Required equipment, or Minimum control-chart baseline points). (Expected: The screen highlights any modified rules and checks that your policy choices do not conflict with active method QC rules.)",
         "Enter a clear Reason for change and save the configuration. (Expected: Your changes take effect for new work and are logged in the Audit Log, while historical approved results and issued reports remain untouched.)"
       ],
       "caution": "Changing a policy in Laboratories only affects current and future work—it never alters historical approved samples.",
@@ -7577,7 +7577,7 @@
         "profile"
       ],
       "minutes": 3,
-      "quick": "Sample Reception Officers check in bags and print labels; Laboratory Technicians run preparation and bench worksheets; Quality & Audit Officers review runs, QC charts, and non-conformances; Laboratory Managers oversee assignments, approvals, reports, and lab settings; Viewers read approved results.",
+      "quick": "Sample Reception Officers check in bags and print labels; Laboratory Technicians run preparation and bench worksheets; Quality & Audit Officers review runs, QC charts, and problem records; Laboratory Managers oversee assignments, approvals, reports, and lab settings; Viewers read approved results.",
       "before": [
         "Check your own role badge in the top bar.",
         "Open Laboratory Staff if a team member's role needs to be updated by an administrator."
@@ -7614,7 +7614,7 @@
         ],
         [
           "Laboratory Manager",
-          "Roles for technical review, QC disposition, final sample approval, and Certificates of Analysis",
+          "Roles for technical review, manager batch decisions, final sample approval, and Certificates of Analysis",
           "Works in Manager Task List, QA Dashboard, Reports, and Laboratories."
         ]
       ],
@@ -7653,7 +7653,7 @@
       "category": "admin",
       "kind": "guide",
       "title": "Configure an analysis without breaking existing work",
-      "summary": "Enable soil analyses, check standard units, and set per-lab analysis overrides in Analysis Catalogue and Laboratories.",
+      "summary": "Enable soil analyses, check standard units, and set custom rules per test or method in Analysis Catalogue and Laboratories.",
       "roles": [
         "SUPER_ADMIN",
         "LAB_MANAGER",
@@ -7665,7 +7665,7 @@
         "admin?tab=lab-config"
       ],
       "minutes": 3,
-      "quick": "Open Analysis Catalogue to review the parameters, units, and methods available in the platform, and use Analysis overrides in Laboratories to enable the tests your laboratory performs and set your lab's turnaround times, minimum sample mass, and QC rules.",
+      "quick": "Open Analysis Catalogue to review the parameters, units, and methods available in the platform, and use Custom rules per test or method in Laboratories to enable the tests your laboratory performs and set your lab's turnaround times, minimum sample mass, and QC rules.",
       "before": [
         "Confirm you are signed in as a Laboratory Manager or System Administrator.",
         "Have your laboratory's list of routine soil tests, SOP method names, and reporting units ready."
@@ -7679,7 +7679,7 @@
               "expected": "You see each parameter (such as pH, EC, organic carbon, total nitrogen, Olsen P, CEC, and particle-size texture) with its input schema and canonical unit."
             },
             {
-              "action": "Open Laboratories → Analysis overrides to enable or disable specific analyses for your laboratory and configure per-lab settings such as minimum sample mass or turnaround days.",
+              "action": "Open Laboratories → Custom rules per test or method to enable or disable specific analyses for your laboratory and configure per-lab settings such as minimum sample mass or turnaround days.",
               "expected": "Only the analyses enabled for your laboratory appear in Sample Reception and Workbench."
             },
             {
@@ -7706,7 +7706,7 @@
           "Keeps historical results, control charts, and Certificates of Analysis consistent."
         ]
       ],
-      "example": "In Laboratories → Analysis overrides, enable pH (water), EC, Walkley-Black organic C, Kjeldahl N, Olsen P, and hydrometer texture for Demo Soil Lab, and disable trace heavy metals not run at that facility.",
+      "example": "In Laboratories → Custom rules per test or method, enable pH (water), EC, Walkley-Black organic C, Kjeldahl N, Olsen P, and hydrometer texture for Demo Soil Lab, and disable trace heavy metals not run at that facility.",
       "success": "Sample Reception and Workbench display the exact menu of soil analyses and units performed by your laboratory.",
       "nextActor": "Sample Reception Officer and Laboratory Technician",
       "problems": [
@@ -7725,7 +7725,7 @@
       ],
       "steps": [
         "Open Analysis Catalogue from the side menu to inspect the soil parameters, standard units, preparation prerequisites, and method variants. (Expected: You see each parameter (such as pH, EC, organic carbon, total nitrogen, Olsen P, CEC, and particle-size texture) with its input schema and canonical unit.)",
-        "Open Laboratories → Analysis overrides to enable or disable specific analyses for your laboratory and configure per-lab settings such as minimum sample mass or turnaround days. (Expected: Only the analyses enabled for your laboratory appear in Sample Reception and Workbench.)",
+        "Open Laboratories → Custom rules per test or method to enable or disable specific analyses for your laboratory and configure per-lab settings such as minimum sample mass or turnaround days. (Expected: Only the analyses enabled for your laboratory appear in Sample Reception and Workbench.)",
         "Verify that every enabled analysis is linked to at least one active analytical method and input schema before receiving live samples. (Expected: Technicians get a complete, ready-to-use worksheet in Workbench for every test offered at reception.)"
       ],
       "caution": "Never change the unit of an existing analysis that already has approved results—create or enable a distinct method entry instead.",
@@ -7754,7 +7754,7 @@
         "lab-methods"
       ],
       "minutes": 3,
-      "quick": "In Analysis Catalogue and Laboratories, check each method's required preparation gates (Air Drying and Sample Preparation), input fields, and quality control rules (batch size, Blank limit, Duplicate repeatability limit, and Reference Soil rules). Remember that all method QC rules are configurable per laboratory.",
+      "quick": "In Analysis Catalogue and Laboratories, check each method's required required prep steps (Air Drying and Sample Preparation), input fields, and quality control rules (batch size, Blank limit, Duplicate repeatability limit, and Reference Soil rules). Remember that all method QC rules are configurable per laboratory.",
       "before": [
         "Have your laboratory's method SOPs and quality control acceptance limits in front of you.",
         "Confirm you are signed in as a Laboratory Manager, Quality & Audit Officer, or System Administrator."
@@ -7764,7 +7764,7 @@
           "title": "Step-by-step procedure",
           "steps": [
             {
-              "action": "Open Analysis Catalogue (and Laboratories → Policies / Analysis overrides) and select the analytical method you want to review or configure.",
+              "action": "Open Analysis Catalogue (and Laboratories → Policies / Custom rules per test or method) and select the analytical method you want to review or configure.",
               "expected": "You see the method's code, extraction basis, unit, required preparation steps, and current quality control rules."
             },
             {
@@ -7796,7 +7796,7 @@
         ]
       ],
       "example": "Configure your laboratory's Olsen P method to require 1 Blank, 1 Duplicate, and 1 Reference Soil per 20 samples with a Duplicate repeatability limit of 10% RPD, enter a Reason for change, and save.",
-      "success": "Every analytical method in Workbench enforces your laboratory's exact preparation gates and batch QC rules.",
+      "success": "Every analytical method in Workbench enforces your laboratory's exact required prep steps and batch QC rules.",
       "nextActor": "Laboratory Technician (in Workbench) and Quality & Audit Officer (in QA Dashboard)",
       "problems": [
         {
@@ -7813,7 +7813,7 @@
         "client/src/pages/help/AdminHelpEditor.jsx"
       ],
       "steps": [
-        "Open Analysis Catalogue (and Laboratories → Policies / Analysis overrides) and select the analytical method you want to review or configure. (Expected: You see the method's code, extraction basis, unit, required preparation steps, and current quality control rules.)",
+        "Open Analysis Catalogue (and Laboratories → Policies / Custom rules per test or method) and select the analytical method you want to review or configure. (Expected: You see the method's code, extraction basis, unit, required preparation steps, and current quality control rules.)",
         "Configure your laboratory's batch QC requirements for that method—such as maximum batch size (many labs use 20), required Blank, Duplicate, and Reference Soil positions, and pass/warning/failure thresholds. (Expected: The LIMS validates that your method QC rules align with your laboratory's overall QC blocking mode.)",
         "Save your changes with a written Reason for change. (Expected: New analytical runs in Workbench immediately use the updated method rules, while previously approved batches keep the rules that were active when they were approved.)"
       ],
@@ -8168,9 +8168,9 @@
       "nextActor": "Laboratory Manager or Quality & Audit Officer",
       "problems": [
         {
-          "symptom": "An imported historical sample is opened in Workbench and shows Evidence needs verification on its preparation gate.",
+          "symptom": "An imported historical sample is opened in Workbench and shows Evidence needs verification on its required prep step.",
           "why": "The historical spreadsheet only had final test numbers and did not include drying weights or sieving timestamps.",
-          "action": "Keep approved historical samples as archive records, or have a Laboratory Manager verify the gate in Operational Gates if new tests are being added to an archived jar."
+          "action": "Keep approved historical samples as archive records, or have a Laboratory Manager verify the step in Required prep steps if new tests are being added to an archived jar."
         }
       ],
       "sources": [
@@ -8430,7 +8430,7 @@
           "Provides the human explanation behind every sensitive action."
         ]
       ],
-      "example": "In QA Dashboard → Audit Log, filter for sample DEMO-26-000142 to view the exact timestamp and reason when Attempt 1 was returned and Attempt 2 was approved.",
+      "example": "In QA Dashboard → Audit Log, filter for sample DEMO-26-000142 to view the exact timestamp and reason when Try #1 was returned and Try #2 was approved.",
       "success": "You can answer \"who changed this record, when, from what value, and why?\" in under a minute.",
       "nextActor": "Quality & Audit Officer, Laboratory Manager, or External Assessor",
       "problems": [
@@ -8477,10 +8477,10 @@
         "qa"
       ],
       "minutes": 3,
-      "quick": "Open QA Dashboard to inspect Control charts and active QC alerts. When a batch Blank, Duplicate, or Reference Soil fails, follow the 4-step decision workflow: check for a typing mistake, repeat a calibration bracket if drift happened mid-run, fail and re-run the batch, or (only when scientifically justified) accept with a documented manager caveat.",
+      "quick": "Open QA Dashboard to inspect Control charts and active QC alerts. When a batch Blank, Duplicate, or Reference Soil fails, follow the 4-step decision workflow: check for a typing mistake, repeat the samples since the last good instrument check if drift happened mid-run, fail and re-run the batch, or (only when scientifically justified) accept with a documented manager caveat.",
       "before": [
         "Identify the analytical batch ID, method, and Reference Material lot involved.",
-        "Check the physical bench log and instrument printout with the technician before making a disposition decision."
+        "Check the physical bench log and instrument printout with the technician before making a batch decision."
       ],
       "sections": [
         {
@@ -8495,8 +8495,8 @@
               "expected": "You distinguish a transcription typo from a real chemical failure."
             },
             {
-              "action": "Record the appropriate manager action: apply a reviewed transcription correction (if enabled in Policies), select Repeat calibration bracket for mid-run drift, click Fail batch to return samples for Attempt 2, or record Accept with caveat with a written justification.",
-              "expected": "The QC disposition is permanently linked to the batch and unlocks or returns the affected samples accordingly."
+              "action": "Record the appropriate manager action: apply a reviewed transcription correction (if enabled in Policies), select Repeat samples since last good instrument check for mid-run drift, click Fail batch to return samples for Try #2, or record Accept with caveat with a written justification.",
+              "expected": "The manager batch decision is permanently linked to the batch and unlocks or returns the affected samples accordingly."
             }
           ]
         }
@@ -8510,15 +8510,15 @@
         [
           "Failure action",
           "Manager actions when a calibration check or batch QC control fails",
-          "Re-queues either the affected bracket of samples or the entire batch for a fresh Attempt 2."
+          "Re-queues either the affected group of samples or the entire batch for a fresh Try #2."
         ],
         [
           "Verdict",
-          "Exception disposition allowing a manager to release results with a written quality remark",
+          "Manager batch decision allowing a manager to release results with a written quality remark",
           "Requires a detailed scientific reason and prints the remark on the report."
         ]
       ],
-      "example": "In QA Dashboard, inspect a failed Olsen P batch where the Blank read 1.8 mg/kg due to contaminated glassware, click Fail batch, open a Non-Conformance record, and return the samples for Attempt 2.",
+      "example": "In QA Dashboard, inspect a failed Olsen P batch where the Blank read 1.8 mg/kg due to contaminated glassware, click Fail batch, open a Problem record, and return the samples for Try #2.",
       "success": "Failed quality control runs are investigated systematically and never slip into client reports unnoticed.",
       "nextActor": "Laboratory Manager, Quality & Audit Officer, and Bench Technician (for re-runs)",
       "problems": [
@@ -8537,7 +8537,7 @@
       "steps": [
         "Open QA Dashboard and check the active quality control alerts and Control charts for the method and Reference Soil lot. (Expected: You see the Shewhart control chart plotting recent batch z-scores against the ±2 SD warning lines and ±3 SD failure lines (once your laboratory's Minimum control-chart baseline points are reached).)",
         "Inspect the failed or warning control row (Blank, Duplicate, Reference Soil, or calibration check) to see whether it is a single typing error, a mid-run calibration drift, or a batch-wide extraction issue. (Expected: You distinguish a transcription typo from a real chemical failure.)",
-        "Record the appropriate manager action: apply a reviewed transcription correction (if enabled in Policies), select Repeat calibration bracket for mid-run drift, click Fail batch to return samples for Attempt 2, or record Accept with caveat with a written justification. (Expected: The QC disposition is permanently linked to the batch and unlocks or returns the affected samples accordingly.)"
+        "Record the appropriate manager action: apply a reviewed transcription correction (if enabled in Policies), select Repeat samples since last good instrument check for mid-run drift, click Fail batch to return samples for Try #2, or record Accept with caveat with a written justification. (Expected: The manager batch decision is permanently linked to the batch and unlocks or returns the affected samples accordingly.)"
       ],
       "caution": "Never use Accept with caveat to wave through a contaminated Blank or failed Reference Soil when plenty of soil remains for a re-run.",
       "related": [
@@ -8551,8 +8551,8 @@
       "id": "quality-nc",
       "category": "quality",
       "kind": "guide",
-      "title": "Record and follow a nonconformance",
-      "summary": "Open, investigate, and close a Non-Conformance report (NCR) with root cause and corrective action in QA Dashboard.",
+      "title": "Record and follow a problem record",
+      "summary": "Open, investigate, and close a Problem record with root cause and corrective action in QA Dashboard.",
       "roles": [
         "AUDIT_USER",
         "LAB_MANAGER",
@@ -8566,53 +8566,53 @@
         "manager-queue"
       ],
       "minutes": 3,
-      "quick": "Open QA Dashboard → Non-Conformance to log a quality incident (such as repeated batch QC failures, contaminated reagents, or damaged sample deliveries), assign an owner, document containment, root cause, and corrective action, and verify effectiveness before closing.",
+      "quick": "Open QA Dashboard → Problem records to log a quality incident (such as repeated batch QC failures, contaminated reagents, or damaged sample deliveries), assign an owner, document containment, root cause, and corrective action, and verify effectiveness before closing.",
       "before": [
         "Have the affected sample IDs, batch numbers, or equipment codes ready.",
-        "Check whether your laboratory's Policies automatically require a Non-Conformance record after a set number of repeat attempts."
+        "Check whether your laboratory's Policies automatically require a Problem record after a set number of repeat tries."
       ],
       "sections": [
         {
           "title": "Step-by-step procedure",
           "steps": [
             {
-              "action": "Open QA Dashboard, click the Non-Conformance tab, and create a new record (or open an automatically triggered record).",
-              "expected": "The Non-Conformance form opens with fields for incident description, severity, linked samples or batches, and assigned owner."
+              "action": "Open QA Dashboard, click the Problem records tab, and create a new record (or open an automatically triggered record).",
+              "expected": "The Problem record form opens with fields for incident description, severity, linked samples or batches, and assigned owner."
             },
             {
               "action": "Record immediate containment steps (such as quarantining a reagent lot or holding a batch), then investigate and write the root cause and corrective/preventive action.",
               "expected": "The investigation and action plan are saved and linked to the affected batches or samples."
             },
             {
-              "action": "Once the corrective action is completed and verified (for example, the repeat batch passes QC), close the Non-Conformance record with manager sign-off.",
-              "expected": "The closed Non-Conformance remains permanently searchable in QA Dashboard for quality reviews and audits."
+              "action": "Once the corrective action is completed and verified (for example, the repeat batch passes QC), close the Problem record with manager sign-off.",
+              "expected": "The closed Problem record remains permanently searchable in QA Dashboard for quality reviews and audits."
             }
           ]
         }
       ],
       "fields": [
         [
-          "Non-Conformance",
+          "Problem records",
           "Tab in QA Dashboard for tracking quality incidents and corrective actions (CAPA)",
           "Links bench or reception problems to their root-cause investigation."
         ],
         [
-          "Non-Conformance",
-          "Required investigation fields before a Non-Conformance can be closed",
+          "Problem records",
+          "Required investigation fields before a Problem record can be closed",
           "Ensures the lab fixes the underlying cause so the problem does not repeat next week."
         ],
         [
           "Sample / Lab ID",
-          "Traceability link connecting the Non-Conformance to the affected lab records",
+          "Traceability link connecting the Problem record to the affected lab records",
           "Lets reviewers see that the incident was resolved before approving the sample."
         ]
       ],
-      "example": "In QA Dashboard → Non-Conformance, log an incident for Olsen P batch drift caused by an expired molybdate reagent, quarantine the old bottle, verify the repeat batch passes, and close the record.",
+      "example": "In QA Dashboard → Problem records, log an incident for Olsen P batch drift caused by an expired molybdate reagent, quarantine the old bottle, verify the repeat batch passes, and close the record.",
       "success": "Quality problems are contained, investigated, and closed with clear corrective actions rather than informal verbal notes.",
       "nextActor": "Quality & Audit Officer and Laboratory Manager",
       "problems": [
         {
-          "symptom": "The Close button on a Non-Conformance record is disabled.",
+          "symptom": "The Close button on a Problem record is disabled.",
           "why": "The root-cause analysis or corrective action fields are still blank, or your role does not have quality sign-off permission.",
           "action": "Fill in the root cause, containment, and corrective action details, and have the Quality & Audit Officer or Laboratory Manager sign off."
         }
@@ -8624,11 +8624,11 @@
         "docs/book/src/usage/qc-management.md"
       ],
       "steps": [
-        "Open QA Dashboard, click the Non-Conformance tab, and create a new record (or open an automatically triggered record). (Expected: The Non-Conformance form opens with fields for incident description, severity, linked samples or batches, and assigned owner.)",
+        "Open QA Dashboard, click the Problem records tab, and create a new record (or open an automatically triggered record). (Expected: The Problem record form opens with fields for incident description, severity, linked samples or batches, and assigned owner.)",
         "Record immediate containment steps (such as quarantining a reagent lot or holding a batch), then investigate and write the root cause and corrective/preventive action. (Expected: The investigation and action plan are saved and linked to the affected batches or samples.)",
-        "Once the corrective action is completed and verified (for example, the repeat batch passes QC), close the Non-Conformance record with manager sign-off. (Expected: The closed Non-Conformance remains permanently searchable in QA Dashboard for quality reviews and audits.)"
+        "Once the corrective action is completed and verified (for example, the repeat batch passes QC), close the Problem record with manager sign-off. (Expected: The closed Problem record remains permanently searchable in QA Dashboard for quality reviews and audits.)"
       ],
-      "caution": "Closing a Non-Conformance record does not automatically change sample numbers—any re-measured values must still be recorded in Workbench and reviewed in Manager Task List.",
+      "caution": "Closing a Problem record does not automatically change sample numbers—any re-measured values must still be recorded in Workbench and reviewed in Manager Task List.",
       "related": [
         "start-first-login",
         "quality-support"
@@ -8641,7 +8641,7 @@
       "category": "quality",
       "kind": "guide",
       "title": "Trace a result through repeats and report revisions",
-      "summary": "Trace a reported soil result across all bench attempts (Attempt 1, Attempt 2) and report revisions (Revision 1, Revision 2).",
+      "summary": "Trace a reported soil result across all bench tries (Try #1, Try #2) and report revisions (Revision 1, Revision 2).",
       "roles": [
         "AUDIT_USER",
         "LAB_MANAGER",
@@ -8655,7 +8655,7 @@
         "result-reports"
       ],
       "minutes": 3,
-      "quick": "Use Sample Registry (Work & results tab), QA Dashboard, and Reports to view the complete timeline of a result: from the first bench measurement, through any returned repeat attempts, to the approved Reported value and any amended Certificates of Analysis.",
+      "quick": "Use Sample Registry (Work & results tab), QA Dashboard, and Reports to view the complete timeline of a result: from the first bench measurement, through any returned repeat tries, to the approved Final report value and any amended Certificates of Analysis.",
       "before": [
         "Have the Laboratory Sample Code or Certificate of Analysis report number ready.",
         "Check both Work & results on the sample page and Reports for the full history."
@@ -8666,14 +8666,14 @@
           "steps": [
             {
               "action": "Open the sample in Sample Registry and click the Work & results tab to expand the parameter row.",
-              "expected": "You see every recorded attempt (Attempt 1, Attempt 2, and so on) with its technician, instrument, timestamp, batch QC status, and reviewer decision."
+              "expected": "You see every recorded try (Try #1, Try #2, and so on) with its technician, instrument, timestamp, batch QC status, and reviewer decision."
             },
             {
-              "action": "Check which attempt or replicate rule produced the official Reported value shown on the sample.",
-              "expected": "You can see clearly why Attempt 1 was returned and why Attempt 2 was chosen as the official Reported value."
+              "action": "Check which try or replicate rule produced the Final report value shown on the sample.",
+              "expected": "You can see clearly why Try #1 was returned and why Try #2 was chosen as the Final report value."
             },
             {
-              "action": "Open Reports (Result Reports) for that sample to view all issued Certificate of Analysis revisions (Revision 1 marked Superseded and Revision 2 marked Current) and the written amendment reason.",
+              "action": "Open Reports (Result Reports) for that sample to view all issued Certificate of Analysis revisions (Revision 1 marked Replaced by newer version and Revision 2 marked Current) and the written amendment reason.",
               "expected": "Every number ever measured or reported on that sample is accounted for from start to finish."
             }
           ]
@@ -8681,14 +8681,14 @@
       ],
       "fields": [
         [
-          "Attempts",
-          "Chronological bench measurement attempts on a parameter",
-          "Earlier attempts remain sealed and visible whenever a repeat is performed."
+          "Tries",
+          "Chronological bench measurement tries on a parameter",
+          "Earlier tries remain sealed and visible whenever a repeat is performed."
         ],
         [
-          "Reported value",
+          "Final report value",
           "The official value approved for the Certificate of Analysis",
-          "Linked directly to the supporting attempt(s) and reviewer sign-off."
+          "Linked directly to the supporting try or tries and reviewer sign-off."
         ],
         [
           "Withdrawn",
@@ -8696,13 +8696,13 @@
           "Ensures anyone checking an old PDF is immediately directed to the Current revision."
         ]
       ],
-      "example": "On sample DEMO-26-000142, trace Olsen P from Attempt 1 (returned due to blank failure) to Attempt 2 (approved at 14.2 mg/kg) and verify it appears on Current report RPT-DEMO-2026-00042.",
-      "success": "You have complete end-to-end lineage from raw bench attempts to every issued report revision.",
+      "example": "On sample DEMO-26-000142, trace Olsen P from Try #1 (returned due to blank failure) to Try #2 (approved at 14.2 mg/kg) and verify it appears on Current report RPT-DEMO-2026-00042.",
+      "success": "You have complete end-to-end lineage from raw bench tries to every issued report revision.",
       "nextActor": "Quality & Audit Officer, Laboratory Manager, or Client checking report verification",
       "problems": [
         {
           "symptom": "An agronomist asks why their printed PDF from last month shows a different potassium value than today's online table.",
-          "why": "The sample underwent a formal scientific amendment after last month's printout, making Revision 1 Superseded and publishing the corrected value in Revision 2 (Current).",
+          "why": "The sample underwent a formal scientific amendment after last month's printout, making Revision 1 Replaced by newer version and publishing the corrected value in Revision 2 (Current).",
           "action": "Open Reports for that sample, show the amendment reason and date between Revision 1 and Revision 2, and send the agronomist the Current Revision 2 PDF."
         }
       ],
@@ -8713,9 +8713,9 @@
         "docs/book/src/usage/qc-management.md"
       ],
       "steps": [
-        "Open the sample in Sample Registry and click the Work & results tab to expand the parameter row. (Expected: You see every recorded attempt (Attempt 1, Attempt 2, and so on) with its technician, instrument, timestamp, batch QC status, and reviewer decision.)",
-        "Check which attempt or replicate rule produced the official Reported value shown on the sample. (Expected: You can see clearly why Attempt 1 was returned and why Attempt 2 was chosen as the official Reported value.)",
-        "Open Reports (Result Reports) for that sample to view all issued Certificate of Analysis revisions (Revision 1 marked Superseded and Revision 2 marked Current) and the written amendment reason. (Expected: Every number ever measured or reported on that sample is accounted for from start to finish.)"
+        "Open the sample in Sample Registry and click the Work & results tab to expand the parameter row. (Expected: You see every recorded try (Try #1, Try #2, and so on) with its technician, instrument, timestamp, batch QC status, and reviewer decision.)",
+        "Check which try or replicate rule produced the Final report value shown on the sample. (Expected: You can see clearly why Try #1 was returned and why Try #2 was chosen as the Final report value.)",
+        "Open Reports (Result Reports) for that sample to view all issued Certificate of Analysis revisions (Revision 1 marked Replaced by newer version and Revision 2 marked Current) and the written amendment reason. (Expected: Every number ever measured or reported on that sample is accounted for from start to finish.)"
       ],
       "caution": "Always check the QR code or Reports table if two printouts for the same sample show different revision numbers.",
       "related": [

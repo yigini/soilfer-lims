@@ -18,7 +18,7 @@ Check which soil samples and analytical methods are waiting for you today. You c
 ## Steps
 
 1. Click **Workbench** in the left menu (or click **My Work** to view your personal dashboard first).
-   *You should see the **Technician Workbench** open. It shows tabs for **My runs**, **My Work**, **Worksheet**, **Ready to Submit**, **Sent & Completed**, and **Activity Receipts** (saved confirmation records).*
+   *You should see the **Technician Workbench** open. It shows tabs for **My runs**, **My Work**, **Worksheet**, **Ready to Submit**, **Sent & Completed**, and **Saved confirmation log ({count})**.*
 2. On the **My runs** tab, check whether you already have an active run in progress:
    - Keep **My runs** selected to see runs assigned to you. Click **All runs** to see all runs in your laboratory.
    - If your run is listed, click **Open run worksheet** to jump straight into its grid.
@@ -40,7 +40,7 @@ Once you open a run or method in the **Worksheet** tab, you can start a new anal
 ## If Something Goes Wrong
 
 - *If you see* **You have no tasks assigned for this sample** *(or your queue is empty) →* Ask your **Laboratory Manager** to assign the pending tests to you in **Manager Task List** under **Assign Work**. You can also check **All runs** if a colleague started the batch.
-- *If a sample is in your queue but says* **Blocked** *→* Click **Inspect →** on that row and look at **Drying Gate:** (drying step that must finish first) and **Preparation Gate:** (sieving and grinding step that must finish first) in the right-hand panel. Complete drying and preparation first (see [Preparation: Drying, Grinding, Storage & Custody](../usage/preparation-and-custody.md)).
+- *If a sample is in your queue but says* **Blocked** *→* Click **Inspect →** on that row and look at **Drying step:** and **Sieving & grinding step:** in the right-hand panel. Complete drying and preparation first (see [Preparation: Drying, Grinding, Storage & Custody](../usage/preparation-and-custody.md)).
 
 ---
 

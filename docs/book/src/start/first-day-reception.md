@@ -35,8 +35,8 @@ Walk through a complete day at the reception desk using five practice soil bags 
 
 1. Look up the fifth practice bag in **Sample Reception**.
 2. Notice that the physical bag arrived torn and leaking, so the soil is contaminated.
-3. Select **Non-Conformance** (problem record) / **Reject** and type what you observed in **Describe the observed problem** (for example, that the bag arrived torn and spilled in transit).
-   *You should see the sample recorded with status **Rejected (Non-Conformance)** (refused with a problem record) so it never enters the drying room or bench queues.*
+3. Select **Problem record** / **Reject** and type what you observed in **Describe the observed problem** (for example, that the bag arrived torn and spilled in transit).
+   *You should see the sample recorded with status **Rejected (problem recorded)** so it never enters the drying room or bench queues.*
 
 ### Afternoon: Register a Farmer Walk-In Sample and Hand Over to the Lab
 

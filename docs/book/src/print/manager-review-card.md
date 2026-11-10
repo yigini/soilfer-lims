@@ -10,9 +10,9 @@
 2. *Check the batch QC verdict first:* Verify that the batch **Blank**, **Duplicate pair**, and **Control** (**Laboratory reference material (LRM)** (your lab's own in-house check soil) or **Certified reference material (CRM)** (official standard soil with a certified value)) passed your laboratory's **Policies** criteria.
 3. *Check cross-parameter plausibility flags:* Review any warning flags (for example, texture sum of fractions, exchangeable bases vs. CEC, C:N ratio, or carbonate vs. water pH).
 4. *Select the final report number (when multiple tries or replicates exist):*
-   - Open **Reported value** (**Choose the value to report**).
-   - Pick **Report attempt** (single best valid try), **Report mean** (average of agreeing tries within the **Repeatability limit**), **Report class from selected fractions** (for texture), or **Not reportable** (with a written **Reason**).
-   - Click **Save reported value** (lock in the final number for the report).
+   - Open **Final report value** (**Choose the value to report**).
+   - Pick **Use this try on report**, **Report mean** (average of agreeing tries within the **Repeatability limit**), **Report class from selected fractions** (for texture), or **Not reportable** (with a written **Reason**).
+   - Click **Save final report value**.
 5. *Approve or return for repeat:*
    - Click **Approve** on valid results. If **Require a second reviewer** is enabled in **Policies**, a second reviewer must approve any batch you measured yourself.
    - If a measurement needs re-testing, return it to the technician with a clear reason note. It appears in their **My Work** queue as **Returned**.
@@ -24,7 +24,7 @@
 1. *Inspect the failure in* **QA Dashboard** *or* **Manager Task List**: Check which control slot failed (**Blank**, **Duplicate pair**, **LRM** (laboratory reference material — your lab's own in-house check soil), **CRM** (certified reference material — official standard soil with a certified value), or calibration check).
 2. *Choose the right action:*
    - *Typing or dilution-factor mistake on the raw reading:* Use a reviewed transcription correction with a mandatory reason (when **Allow reviewed transcription correction of undispositioned failed QC** is enabled).
-   - *Continuing calibration drift mid-run:* Select **Repeat calibration bracket** (re-test only the samples measured between the last good instrument check and the failed check) to re-run only the bracketed samples after recalibrating.
+   - *Continuing calibration drift mid-run:* Select **Repeat samples since last good instrument check** to re-run only the affected samples after recalibrating.
    - *Blank contamination or reference soil out of range:* Reject the batch (**Fail batch**) and return the affected samples for a fresh measurement try. Log a problem record in **QA Dashboard** if root-cause investigation is needed.
 
 ---

@@ -124,6 +124,7 @@ exports.getWorkItems = async (req, res) => {
 
 exports.assignWork = async (req, res) => {
     const { workItemIds, assignee, priority, dueDate } = req.body;
+    const summarizeNotifications = req.body.summarizeNotifications === true;
     const user = req.user;
 
     try {
@@ -260,31 +261,33 @@ exports.assignWork = async (req, res) => {
                 continue;
             }
 
-            // Send notification (bell) to assignee
-            await createNotification(
-                techUser.id,
-                'INFO',
-                `New Assignment: ${analysis}`,
-                `${getDisplayName(user)} assigned you "${analysis}" for sample ${item.labId || item.sampleId}.`,
-                `/samples/${item.sampleId}`
-            );
+            if (!summarizeNotifications) {
+                // Send notification (bell) to assignee
+                await createNotification(
+                    techUser.id,
+                    'INFO',
+                    `New Assignment: ${analysis}`,
+                    `${getDisplayName(user)} assigned you "${analysis}" for sample ${item.labId || item.sampleId}.`,
+                    `/samples/${item.sampleId}`
+                );
 
-            // Send internal message to assignee
-            await prisma.message.create({
-                data: {
-                    id: `msg-assign-${item.id}-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
-                    senderId: user.id,
-                    recipientId: techUser.id,
-                    subject: `📋 New Work Assigned: ${analysis}`,
-                    body: `You have been assigned a new analysis task.\n\n**Analysis:** ${analysis}\n**Sample:** ${item.labId || item.sampleId}\n**Priority:** ${priority || item.priority || 'NORMAL'}\n${dueDate ? `**Due:** ${new Date(dueDate).toLocaleDateString()}\n` : ''}\nPlease complete this task in a timely manner.\n\nAssigned by: ${getDisplayName(user)}`,
-                    status: 'SENT',
-                    folderSender: 'SENT',
-                    folderRecipient: 'INBOX',
-                    isRead: false,
-                    createdAt: now,
-                    updatedAt: now
-                }
-            });
+                // Send internal message to assignee
+                await prisma.message.create({
+                    data: {
+                        id: `msg-assign-${item.id}-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+                        senderId: user.id,
+                        recipientId: techUser.id,
+                        subject: `📋 New Work Assigned: ${analysis}`,
+                        body: `You have been assigned a new analysis task.\n\n**Analysis:** ${analysis}\n**Sample:** ${item.labId || item.sampleId}\n**Priority:** ${priority || item.priority || 'NORMAL'}\n${dueDate ? `**Due:** ${new Date(dueDate).toLocaleDateString()}\n` : ''}\nPlease complete this task in a timely manner.\n\nAssigned by: ${getDisplayName(user)}`,
+                        status: 'SENT',
+                        folderSender: 'SENT',
+                        folderRecipient: 'INBOX',
+                        isRead: false,
+                        createdAt: now,
+                        updatedAt: now
+                    }
+                });
+            }
 
             assignedCount++;
         }
@@ -311,6 +314,35 @@ exports.assignWork = async (req, res) => {
                 ...(errors[0]?.code && { code: errors[0].code }),
                 errors
             });
+        }
+
+        if (summarizeNotifications && assignedCount > 0) {
+            try {
+                const { resolveLocale } = require('../utils/localeResolver');
+                const locale = resolveLocale({ userPreference: techUser.language });
+                const notice = require('../locales/' + locale + '.json').bulkAssignment;
+                const body = notice.notificationBody
+                    .replace('{count}', new Intl.NumberFormat(locale).format(assignedCount))
+                    .replace('{name}', () => getDisplayName(user));
+                await createNotification(techUser.id, 'INFO', notice.notificationTitle, body, '/my-work');
+                await prisma.message.create({
+                    data: {
+                        id: crypto.randomUUID(),
+                        senderId: user.id,
+                        recipientId: techUser.id,
+                        subject: notice.notificationTitle,
+                        body,
+                        status: 'SENT',
+                        folderSender: 'SENT',
+                        folderRecipient: 'INBOX',
+                        isRead: false,
+                        createdAt: now,
+                        updatedAt: now
+                    }
+                });
+            } catch (notificationError) {
+                console.error('[assignWork] Batch notification failed:', notificationError);
+            }
         }
 
         // Real-time push: broadcast WORKITEM_UPDATE to target receiving lab(s)

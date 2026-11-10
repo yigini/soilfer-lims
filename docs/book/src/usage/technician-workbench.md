@@ -15,7 +15,7 @@ Use **Workbench** to organize your daily analytical runs, print paper bench work
 | Confirming your ready rows and sending finished samples to the reviewer | [Review, Record, and Submit Completed Samples](../bench/record-and-submit-for-review.md) |
 | Locking a shared bench PC with a PIN, switching analysts, or repeating a returned test | [Use Shared Bench Mode and Fix Returned or Repeated Work](../bench/shared-bench-and-returned-work.md) |
 
-> *Screenshot placeholder — docs/book/src/img/screenshots/workbench-overview.png (screenshot coming once the training data is ready): The **Technician Workbench** showing the **My runs**, **My Work**, **Worksheet**, **Ready to Submit**, **Sent & Completed**, and **Activity Receipts** tabs, plus the **Workbench density** toggle.*
+> *Screenshot placeholder — docs/book/src/img/screenshots/workbench-overview.png (screenshot coming once the training data is ready): The **Technician Workbench** showing the **My runs**, **My Work**, **Worksheet**, **Ready to Submit**, **Sent & Completed**, and **Saved confirmation log ({count})** tabs, plus the **Workbench density** toggle.*
 
 ---
 
@@ -59,5 +59,5 @@ Your submitted samples appear in your manager's **Manager Task List** under **Re
 ## For the QA Person
 
 - SoilFER LIMS uses a run-first workflow: clicking **Confirm and start** (**Start run**) freezes the **Method revision**, **Instrument**, **Analyst**, and quality control limits (**Frozen at first start**) for every row in the run.
-- Typing or importing values into the worksheet saves recoverable drafts (**✓ Drafts saved**), while recording writes a numbered try under **Attempts** (measurement tries) only after the analyst confirms the preflight check (**Review Determinations Before Recording**).
+- Typing or importing values into the worksheet saves recoverable drafts (**✓ Drafts saved**), while recording writes a numbered try under **Tries** only after the analyst confirms the preflight check (**Review Determinations Before Recording**).
 - Submitting (**Review & Submit Samples for Review**) locks the recorded determinations so they become read-only for technicians while awaiting independent managerial review.

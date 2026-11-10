@@ -434,7 +434,7 @@
               "expected": "Vous voyez quels échantillons nécessitent un Séchage à l’air libre ou une Préparation des échantillons et lesquels sont prêts pour l'analyse à la paillasse."
             },
             {
-              "action": "Complétez d'abord les listes de contrôle de séchage et de tamisage requises. Cliquez sur Confirmer la fin. Ouvrez votre feuille d'analyse ou créez une nouvelle série analytique.",
+              "action": "Complétez d'abord les listes de contrôle de séchage et de tamisage requises. Cliquez sur Confirmer que le travail est terminé. Ouvrez votre feuille d'analyse ou créez une nouvelle série analytique.",
               "expected": "La préparation confirmée déverrouille les lignes d'analyse afin que vous puissiez saisir ou coller les résultats d'échantillons et les lectures de contrôle qualité."
             },
             {
@@ -452,7 +452,7 @@
         ],
         [
           "Liste de contrôle vérifiée",
-          "Badge vert de reçu affiché après avoir cliqué sur Confirmer la fin pour le séchage ou la préparation",
+          "Badge vert de reçu affiché après avoir cliqué sur Confirmer que le travail est terminé pour le séchage ou la préparation",
           "Confirme que la préparation pré-analytique est terminée et que les essais à la paillasse peuvent commencer."
         ],
         [
@@ -478,7 +478,7 @@
       ],
       "steps": [
         "Ouvrez Mon travail ou Poste de travail. Consultez les tâches qui vous sont attribuées pour la journée. (Attendu : Vous voyez quels échantillons nécessitent un Séchage à l’air libre ou une Préparation des échantillons et lesquels sont prêts pour l'analyse à la paillasse.)",
-        "Complétez d'abord les listes de contrôle de séchage et de tamisage requises. Cliquez sur Confirmer la fin. Ouvrez votre feuille d'analyse ou créez une nouvelle série analytique. (Attendu : La préparation confirmée déverrouille les lignes d'analyse afin que vous puissiez saisir ou coller les résultats d'échantillons et les lectures de contrôle qualité.)",
+        "Complétez d'abord les listes de contrôle de séchage et de tamisage requises. Cliquez sur Confirmer que le travail est terminé. Ouvrez votre feuille d'analyse ou créez une nouvelle série analytique. (Attendu : La préparation confirmée déverrouille les lignes d'analyse afin que vous puissiez saisir ou coller les résultats d'échantillons et les lectures de contrôle qualité.)",
         "Cliquez sur Vérifier la réalisation pour enregistrer vos résultats vérifiés. Ouvrez Prêt à soumettre. Cliquez sur Soumettre. (Attendu : Vos résultats enregistrés passent dans Envoyés et terminés et apparaissent dans la Liste de tâches du réviseur.)"
       ],
       "caution": "L'enregistrement d'un brouillon de feuille de travail n'envoie pas les résultats à votre responsable. Terminez toujours Vérifier la réalisation et Prêt à soumettre à la fin d'une série.",
@@ -504,7 +504,7 @@
         "reception"
       ],
       "minutes": 3,
-      "quick": "Ouvrez Réception d'échantillons, associez l'étiquette du sac physique au dossier de projet ou au lot d'expédition, notez la masse et l'état dans 2. État, confirmez les analyses demandées dans 3. Analyses et validez la réception dans 4. Garde.",
+      "quick": "Ouvrez Réception d'échantillons, associez l'étiquette du sac physique au dossier de projet ou au boîte de livraison, notez la masse et l'état dans 2. État, confirmez les analyses demandées dans 3. Analyses et validez la réception dans 4. Garde.",
       "before": [
         "Vérifiez que vous êtes connecté en tant qu'Agent de Réception des Échantillons ou Responsable de Laboratoire.",
         "Assurez-vous que la balance de réception est tarée à zéro et que l'imprimante d'étiquettes codes-barres est chargée."
@@ -514,7 +514,7 @@
           "title": "1. Enregistrement de terrain et recherche des échantillons",
           "steps": [
             {
-              "action": "Ouvrez Réception d'échantillons, choisissez Échantillon de projet, Sans rendez-vous / Externe ou Lot d’expédition / manifeste. Scannez ou saisissez l'identifiant du sac dans 1. Identification.",
+              "action": "Ouvrez Réception d'échantillons, choisissez Échantillon de projet, Sans rendez-vous / Externe ou Boîte de livraison des échantillons. Scannez ou saisissez l'identifiant du sac dans 1. Identification.",
               "expected": "Si l'échantillon a été pré-enregistré lors d'une campagne de terrain, son statut affiche Attendu et ses informations de terrain se chargent automatiquement."
             }
           ]
@@ -571,7 +571,7 @@
         "server/config/roles.js"
       ],
       "steps": [
-        "Ouvrez Réception d'échantillons, choisissez Échantillon de projet, Sans rendez-vous / Externe ou Lot d’expédition / manifeste. Scannez ou saisissez l'identifiant du sac dans 1. Identification. (Attendu : Si l'échantillon a été pré-enregistré lors d'une campagne de terrain, son statut affiche Attendu et ses informations de terrain se chargent automatiquement.)",
+        "Ouvrez Réception d'échantillons, choisissez Échantillon de projet, Sans rendez-vous / Externe ou Boîte de livraison des échantillons. Scannez ou saisissez l'identifiant du sac dans 1. Identification. (Attendu : Si l'échantillon a été pré-enregistré lors d'une campagne de terrain, son statut affiche Attendu et ses informations de terrain se chargent automatiquement.)",
         "Pesez le sac de sol et complétez 2. État en vérifiant Récipient Intact / Scellé et Quantité d'Échantillon Suffisante (~500g). (Attendu : Tout sac endommagé ou de masse insuffisante est signalé afin que vous puissiez ajouter une note d'état, placer le sac en quarantaine ou le rejeter.)",
         "Vérifiez le forfait d'analyses demandé dans 3. Analyses. Ouvrez 4. Garde. Cliquez sur Finaliser la Réception (ou Accepter et imprimer l'étiquette). (Attendu : Le statut de l'échantillon passe de Attendu à Accepté, les étiquettes codes-barres s'impriment et les tâches de séchage s'ouvrent dans Poste de travail.)"
       ],
@@ -614,7 +614,7 @@
             },
             {
               "action": "Ouvrez Examiner les soumissions pour inspecter les valeurs de série des techniciens et les résultats de contrôle qualité. Cliquez sur Approuver ou Retourner pour révision.",
-              "expected": "Les déterminations approuvées progressent vers l'achèvement de l'échantillon, tandis que les éléments retournés ouvrent une nouvelle tentative sur la paillasse du technicien avec votre note."
+              "expected": "Les déterminations approuvées progressent vers l'achèvement de l'échantillon, tandis que les éléments retournés ouvrent un nouvel essai sur la paillasse du technicien avec votre note."
             },
             {
               "action": "Ouvrez Approbations finales pour vérifier la cohérence globale de l'échantillon sur l'ensemble des analyses, approuvez l'échantillon et émettez le Certificat d’analyse dans Rapports.",
@@ -657,7 +657,7 @@
       ],
       "steps": [
         "Ouvrez Tableau de bord et Liste de tâches pour vérifier les compteurs des travaux non attribués, d'Examiner les soumissions et d'Approbations finales. (Attendu : Vous voyez toutes les séries en attente de révision technique et tous les échantillons en attente de validation finale dans votre laboratoire.)",
-        "Ouvrez Examiner les soumissions pour inspecter les valeurs de série des techniciens et les résultats de contrôle qualité. Cliquez sur Approuver ou Retourner pour révision. (Attendu : Les déterminations approuvées progressent vers l'achèvement de l'échantillon, tandis que les éléments retournés ouvrent une nouvelle tentative sur la paillasse du technicien avec votre note.)",
+        "Ouvrez Examiner les soumissions pour inspecter les valeurs de série des techniciens et les résultats de contrôle qualité. Cliquez sur Approuver ou Retourner pour révision. (Attendu : Les déterminations approuvées progressent vers l'achèvement de l'échantillon, tandis que les éléments retournés ouvrent un nouvel essai sur la paillasse du technicien avec votre note.)",
         "Ouvrez Approbations finales pour vérifier la cohérence globale de l'échantillon sur l'ensemble des analyses, approuvez l'échantillon et émettez le Certificat d’analyse dans Rapports. (Attendu : Le statut de l'échantillon passe à Approuvé et son rapport PDF officiel est prêt à être téléchargé ou partagé.)"
       ],
       "caution": "Consultez toujours à la fois Examiner les soumissions (pour les séries par méthode) et Approbations finales (pour les échantillons complets).",
@@ -687,7 +687,7 @@
       "quick": "Ouvrez Projets pour voir combien d'échantillons de votre projet sont au statut Attendu, Accepté, En traitement, Soumis ou Approuvé, et identifier quel rôle est responsable de l'étape suivante.",
       "before": [
         "Vérifiez que votre compte utilisateur a accès au projet et au laboratoire dans la barre supérieure.",
-        "Gardez votre code de projet ou votre liste d'expédition à portée de main pour filtrer les grandes campagnes."
+        "Gardez votre code de projet ou votre liste de la boîte de livraison à portée de main pour filtrer les grandes campagnes."
       ],
       "sections": [
         {
@@ -758,7 +758,7 @@
       "category": "start",
       "kind": "guide",
       "title": "Inspecter le travail du laboratoire sans le modifier",
-      "summary": "Inspectez les preuves d'échantillons, les cartes de contrôle qualité, les non-conformités et les journaux d'audit en mode lecture seule.",
+      "summary": "Inspectez les preuves d'échantillons, les cartes de contrôle qualité, les fiches de problème et les journaux d'audit en mode lecture seule.",
       "roles": [
         "ALL"
       ],
@@ -780,14 +780,14 @@
           "steps": [
             {
               "action": "Ouvrez Registre des échantillons, recherchez l'identifiant de l'échantillon. Inspectez ses onglets Vue d’ensemble, Travaux et résultats et Chaîne de traçabilité.",
-              "expected": "Vous voyez l'historique complet de l'état à la réception, des reçus de séchage et de tamisage, des tentatives de mesure et des mouvements de stockage."
+              "expected": "Vous voyez l'historique complet de l'état à la réception, des reçus de séchage et de tamisage, des essais de mesure et des mouvements de stockage."
             },
             {
-              "action": "Ouvrez Tableau de bord QA pour inspecter les Cartes de contrôle, les fiches de Non-conformité, les essais d'aptitude interlaboratoires et le Journal d’audit.",
+              "action": "Ouvrez Tableau de bord QA pour inspecter les Cartes de contrôle, les Fiches de problème, les essais d'aptitude interlaboratoires et le Journal d’audit.",
               "expected": "Chaque vérification de contrôle qualité, décision sur série refusée et modification de paramètre s'affiche avec l'auteur, la date et le motif."
             },
             {
-              "action": "Ouvrez Rapports pour comparer le Certificat d’analyse Actuelles avec toute révision marquée Retiré ou Remplacées.",
+              "action": "Ouvrez Rapports pour comparer le Certificat d’analyse Actuelles avec toute révision marquée Retiré ou Remplacé par une version plus récente par une version plus récente.",
               "expected": "Vous pouvez vérifier le motif exact et l'approbateur de toute modification de rapport effectuée après publication."
             }
           ]
@@ -805,12 +805,12 @@
           "Suit chaque transfert depuis la réception jusqu'au stockage d'archive et à l'élimination."
         ],
         [
-          "Non-conformité",
+          "Fiches de problème",
           "Suivi des incidents qualité et des actions correctives dans Tableau de bord QA",
           "Relie les séries échouées ou les livraisons endommagées aux analyses de cause racine."
         ]
       ],
-      "example": "Retracez l'échantillon DEMO-001 depuis son Certificat d’analyse dans Rapports jusqu'à ses enregistrements de paillasse Tentative nº 1 et Tentative nº 2 et sa fiche de Non-conformité associée dans Tableau de bord QA.",
+      "example": "Retracez l'échantillon DEMO-001 depuis son Certificat d’analyse dans Rapports jusqu'à ses enregistrements de paillasse Essai n° 1 et Essai n° 2 et sa Fiche de problème associée dans Tableau de bord QA.",
       "success": "Vous avez vérifié la chaîne de preuves complète d'un échantillon ou d'un rapport sans altérer aucun enregistrement du laboratoire.",
       "nextActor": "Responsable Qualité et Audit ou Responsable de Laboratoire (si un constat d'audit nécessite un suivi)",
       "problems": [
@@ -826,9 +826,9 @@
         "server/config/roles.js"
       ],
       "steps": [
-        "Ouvrez Registre des échantillons, recherchez l'identifiant de l'échantillon. Inspectez ses onglets Vue d’ensemble, Travaux et résultats et Chaîne de traçabilité. (Attendu : Vous voyez l'historique complet de l'état à la réception, des reçus de séchage et de tamisage, des tentatives de mesure et des mouvements de stockage.)",
-        "Ouvrez Tableau de bord QA pour inspecter les Cartes de contrôle, les fiches de Non-conformité, les essais d'aptitude interlaboratoires et le Journal d’audit. (Attendu : Chaque vérification de contrôle qualité, décision sur série refusée et modification de paramètre s'affiche avec l'auteur, la date et le motif.)",
-        "Ouvrez Rapports pour comparer le Certificat d’analyse Actuelles avec toute révision marquée Retiré ou Remplacées. (Attendu : Vous pouvez vérifier le motif exact et l'approbateur de toute modification de rapport effectuée après publication.)"
+        "Ouvrez Registre des échantillons, recherchez l'identifiant de l'échantillon. Inspectez ses onglets Vue d’ensemble, Travaux et résultats et Chaîne de traçabilité. (Attendu : Vous voyez l'historique complet de l'état à la réception, des reçus de séchage et de tamisage, des essais de mesure et des mouvements de stockage.)",
+        "Ouvrez Tableau de bord QA pour inspecter les Cartes de contrôle, les Fiches de problème, les essais d'aptitude interlaboratoires et le Journal d’audit. (Attendu : Chaque vérification de contrôle qualité, décision sur série refusée et modification de paramètre s'affiche avec l'auteur, la date et le motif.)",
+        "Ouvrez Rapports pour comparer le Certificat d’analyse Actuelles avec toute révision marquée Retiré ou Remplacé par une version plus récente par une version plus récente. (Attendu : Vous pouvez vérifier le motif exact et l'approbateur de toute modification de rapport effectuée après publication.)"
       ],
       "caution": "Les comptes d'audit sont conçus en lecture seule afin que vous puissiez inspecter les écrans en direct en toute sécurité sans modifier les données.",
       "related": [
@@ -885,9 +885,9 @@
           "Utilisez toujours la version Actuelles du rapport pour vos recommandations agronomiques."
         ],
         [
-          "Remplacées",
+          "Remplacé par une version plus récente",
           "Badge indiquant un ancien rapport remplacé par une version modifiée",
-          "N'utilisez pas un PDF marqué Remplacées . Téléchargez plutôt la dernière révision Actuelles."
+          "N'utilisez pas un PDF marqué Remplacé par une version plus récente par une version plus récente . Téléchargez plutôt la dernière révision Actuelles."
         ],
         [
           "Retiré",
@@ -915,7 +915,7 @@
         "Ouvrez Rapports et recherchez les rapports portant la mention Actuelles. (Attendu : Seuls les échantillons approuvés disposant d'un Certificat d’analyse émis apparaissent pour le téléchargement.)",
         "Cliquez sur le bouton de téléchargement d'un rapport Actuelles pour enregistrer le Certificat d’analyse PDF officiel. (Attendu : Le PDF s'ouvre avec les identifiants de l'échantillon, les méthodes d'analyse, les unités, les remarques qualité et le code QR de vérification.)"
       ],
-      "caution": "Si un PDF précédemment téléchargé passe ensuite au statut Retiré ou Remplacées, remplacez-le immédiatement par la nouvelle révision Actuelles.",
+      "caution": "Si un PDF précédemment téléchargé passe ensuite au statut Retiré ou Remplacé par une version plus récente par une version plus récente, remplacez-le immédiatement par la nouvelle révision Actuelles.",
       "related": [
         "start-first-login",
         "quality-support"
@@ -1065,7 +1065,7 @@
             },
             {
               "action": "Lorsque tout est prêt, cliquez sur Finaliser la Réception (ou Accepter et imprimer l'étiquette) (ou sur le bouton d'exception avec réserve, mise en quarantaine ou rejet en cas d'anomalie).",
-              "expected": "Le statut de l'échantillon passe de Attendu à Accepté (ou En quarantaine / Rejeté (Non-conformité)) et enregistre la date officielle de réception."
+              "expected": "Le statut de l'échantillon passe de Attendu à Accepté (ou En quarantaine / Rejeté (problème consigné)) et enregistre la date officielle de réception."
             },
             {
               "action": "Imprimez et collez l'étiquette code-barres du laboratoire sur le sac. Déposez l'échantillon sur le chariot de transfert vers la salle de séchage.",
@@ -1101,7 +1101,7 @@
           "action": "Vérifiez le dossier de terrain d'origine dans Projets . Ne saisissez jamais de coordonnées approximatives dans le formulaire de réception."
         },
         {
-          "symptom": "Le scan du sac affiche Réception antérieure détectée pour cet identifiant d'échantillon.",
+          "symptom": "Le scan du sac affiche L'échantillon {id} a déjà été enregistré.",
           "why": "Ce sac d'échantillon a déjà été enregistré plus tôt, ou deux sacs portent la même étiquette de terrain.",
           "action": "Ouvrez le dossier d'échantillon existant pour vérifier sa date de réception. Consultez votre Responsable de Laboratoire avant de créer un nouvel enregistrement."
         }
@@ -1117,7 +1117,7 @@
         "Cliquez sur 2. État, pesez le sac sur la balance, saisissez la masse en grammes et renseignez Récipient Intact / Scellé ainsi que Quantité d'Échantillon Suffisante (~500g). (Attendu : Si le sac est déchiré ou pèse moins que la masse minimale requise par votre laboratoire, l'écran met en évidence un avertissement d'état.)",
         "Si un contrôle échoue, décrivez le problème dans la note d'état. Cliquez ensuite sur 3. Analyses. Confirmez le forfait d'analyses et les méthodes demandés. (Attendu : Toutes les analyses demandées (y compris les bilans groupés comme la granulométrie sable, limon et argile) sont sélectionnées pour l'échantillon.)",
         "Cliquez sur 4. Garde pour vérifier le récapitulatif de réception. Si vous devez interrompre la saisie pour consulter un superviseur, cliquez sur Enregistrer le brouillon. (Attendu : Un brouillon enregistré reste dans Réceptions incomplètes (Brouillons) et n'envoie pas un échantillon non réceptionné vers la salle de séchage.)",
-        "Lorsque tout est prêt, cliquez sur Finaliser la Réception (ou Accepter et imprimer l'étiquette) (ou sur le bouton d'exception avec réserve, mise en quarantaine ou rejet en cas d'anomalie). (Attendu : Le statut de l'échantillon passe de Attendu à Accepté (ou En quarantaine / Rejeté (Non-conformité)) et enregistre la date officielle de réception.)",
+        "Lorsque tout est prêt, cliquez sur Finaliser la Réception (ou Accepter et imprimer l'étiquette) (ou sur le bouton d'exception avec réserve, mise en quarantaine ou rejet en cas d'anomalie). (Attendu : Le statut de l'échantillon passe de Attendu à Accepté (ou En quarantaine / Rejeté (problème consigné)) et enregistre la date officielle de réception.)",
         "Imprimez et collez l'étiquette code-barres du laboratoire sur le sac. Déposez l'échantillon sur le chariot de transfert vers la salle de séchage. (Attendu : Les techniciens de préparation peuvent scanner l'étiquette et démarrer le Séchage à l’air libre dans Poste de travail.)"
       ],
       "caution": "N'inventez jamais de coordonnées GPS et n'acceptez pas un identifiant d'échantillon en doublon simplement pour terminer la réception plus vite.",
@@ -1130,7 +1130,7 @@
       "category": "intake",
       "kind": "guide",
       "title": "Réceptionner plusieurs échantillons de projet ensemble",
-      "summary": "Réceptionnez toute une caisse ou un lot d'expédition d'échantillons de projet tout en traitant individuellement les sacs endommagés ou manquants.",
+      "summary": "Réceptionnez toute une caisse ou un boîte de livraison d'échantillons de projet tout en traitant individuellement les sacs endommagés ou manquants.",
       "roles": [
         "SAMPLE_RECEPTION",
         "LAB_MANAGER"
@@ -1141,9 +1141,9 @@
         "reception"
       ],
       "minutes": 3,
-      "quick": "Ouvrez Réception d'échantillons, sélectionnez Lot d’expédition / manifeste, scannez ou saisissez l'identifiant de chaque sac pour l'ajouter au tableau du lot, notez les masses individuelles et toute anomalie d'état. Confirmez la réception du lot.",
+      "quick": "Ouvrez Réception d'échantillons, sélectionnez Boîte de livraison des échantillons, scannez ou saisissez l'identifiant de chaque sac pour l'ajouter au tableau du lot, notez les masses individuelles et toute anomalie d'état. Confirmez la réception du lot.",
       "before": [
-        "Ayez la caisse physique de sacs de sol et le manifeste d'expédition papier ou numérique devant vous.",
+        "Ayez la caisse physique de sacs de sol et le bordereau de boîte de livraison papier ou numérique devant vous.",
         "Vérifiez que votre balance de paillasse et votre imprimante d'étiquettes codes-barres sont prêtes."
       ],
       "sections": [
@@ -1151,7 +1151,7 @@
           "title": "Procédure étape par étape",
           "steps": [
             {
-              "action": "Ouvrez Réception d'échantillons. Cliquez sur Lot d’expédition / manifeste. Choisissez le projet et le laboratoire destinataire.",
+              "action": "Ouvrez Réception d'échantillons. Cliquez sur Boîte de livraison des échantillons. Choisissez le projet et le laboratoire destinataire.",
               "expected": "L'écran de réception par lot s'ouvre avec les champs Scanner ou saisir l'ID à ajouter... et Observations communes du lot."
             },
             {
@@ -1167,28 +1167,28 @@
       ],
       "fields": [
         [
-          "Lot d’expédition / manifeste",
+          "Boîte de livraison des échantillons",
           "Mode de réception groupée dans Réception d'échantillons pour enregistrer une caisse d'échantillons ensemble",
           "Permet de scanner plusieurs sacs dans un seul tableau et de saisir des notes de livraison communes."
         ],
         [
           "Scanner ou saisir l'ID à ajouter...",
-          "Zone de recherche et de lecture code-barres sur l'écran Lot d’expédition / manifeste",
-          "Ajoute chaque sac scanné au tableau du lot d'expédition en cours."
+          "Zone de recherche et de lecture code-barres sur l'écran Boîte de livraison des échantillons",
+          "Ajoute chaque sac scanné au tableau du boîte de livraison en cours."
         ],
         [
           "Observations communes du lot",
           "Zone de notes pour les commentaires communs à la livraison, comme le nom du transporteur ou l'état du colis",
-          "Enregistrée sur l'ensemble des échantillons reçus dans ce lot d'expédition."
+          "Enregistrée sur l'ensemble des échantillons reçus dans ce boîte de livraison."
         ]
       ],
-      "example": "Dans Lot d’expédition / manifeste, scannez 15 sacs du colis BOX-2026-04, saisissez la masse de chaque sac, mettez en quarantaine un sac déchiré. Confirmez la réception des 14 sacs intacts restants.",
+      "example": "Dans Boîte de livraison des échantillons, scannez 15 sacs du colis BOX-2026-04, saisissez la masse de chaque sac, mettez en quarantaine un sac déchiré. Confirmez la réception des 14 sacs intacts restants.",
       "success": "Toute la caisse est enregistrée, les exceptions sont isolées proprement et les étiquettes sont imprimées pour tous les sacs acceptés.",
       "nextActor": "Technicien de préparation ou Responsable de Laboratoire (pour tout sac mis en quarantaine)",
       "problems": [
         {
           "symptom": "Un sac de la caisse est déchiré ou manquant, et vous ne voulez pas retarder les 19 autres sacs intacts.",
-          "why": "Chaque sac d'un lot d'expédition doit avoir son propre statut exact afin que les échantillons conformes avancent pendant que les sacs problématiques sont retenus.",
+          "why": "Chaque sac d'un boîte de livraison doit avoir son propre statut exact afin que les échantillons conformes avancent pendant que les sacs problématiques sont retenus.",
           "action": "Retirez le sac manquant du lot actif (laissez-le au statut Attendu) ou marquez le sac déchiré pour quarantaine ou réserve. Finalisez la réception des sacs intacts."
         }
       ],
@@ -1197,7 +1197,7 @@
         "client/src/components/reception/BatchIntake.jsx"
       ],
       "steps": [
-        "Ouvrez Réception d'échantillons. Cliquez sur Lot d’expédition / manifeste. Choisissez le projet et le laboratoire destinataire. (Attendu : L'écran de réception par lot s'ouvre avec les champs Scanner ou saisir l'ID à ajouter... et Observations communes du lot.)",
+        "Ouvrez Réception d'échantillons. Cliquez sur Boîte de livraison des échantillons. Choisissez le projet et le laboratoire destinataire. (Attendu : L'écran de réception par lot s'ouvre avec les champs Scanner ou saisir l'ID à ajouter... et Observations communes du lot.)",
         "Scannez ou saisissez l'identifiant de chaque sac dans Scanner ou saisir l'ID à ajouter..., indiquez la masse de chaque sac en grammes et signalez tout sac endommagé ou de masse insuffisante. (Attendu : Chaque sac reconnu apparaît dans le tableau du lot. Tout sac inférieur à la masse minimale requise par votre laboratoire ou en mauvais état est mis en évidence.)",
         "Confirmez les analyses demandées, traitez individuellement tout sac endommagé ou manquant. Validez la réception du lot pour imprimer les étiquettes codes-barres. (Attendu : Tous les sacs acceptés passent du statut Attendu à Accepté et ouvrent des tâches de séchage et de préparation dans Poste de travail.)"
       ],
@@ -1382,7 +1382,7 @@
       "id": "intake-condition",
       "category": "intake",
       "kind": "guide",
-      "title": "Enregistrer la masse, l'état et les non-conformités",
+      "title": "Enregistrer la masse, l'état et les fiches de problème",
       "summary": "Pesez le sac de sol à son arrivée, vérifiez l'état du contenant et traitez les échantillons endommagés ou de masse insuffisante.",
       "roles": [
         "SAMPLE_RECEPTION",
@@ -1432,7 +1432,7 @@
         [
           "Accepter et imprimer l'étiquette",
           "Boutons de décision et d'exception dans 4. Garde lorsqu'un contrôle d'état échoue",
-          "Vous permet de poursuivre avec une réserve documentée, de placer l'échantillon en quarantaine pour examen par le responsable ou de le rejeter pour non-conformité."
+          "Vous permet de poursuivre avec une réserve documentée, de placer l'échantillon en quarantaine pour examen par le responsable ou de le rejeter en consignant un problème."
         ]
       ],
       "example": "Pesez un sac percé à 180 g dans 2. État, sélectionnez Non conforme pour Récipient Intact / Scellé et Quantité d'Échantillon Suffisante (~500g), saisissez « Sac déchiré pendant le transport, seulement 180 g restants ». Cliquez sur mettre en quarantaine dans 4. Garde.",
@@ -1480,7 +1480,7 @@
       "minutes": 3,
       "quick": "Dans 3. Analyses, choisissez le forfait d'analyses demandé ou cochez les analyses individuelles, vérifiez la variante de méthode (comme le pH eau par rapport au pH CaCl2). Conservez ensemble les bilans groupés tels que sable, limon et argile.",
       "before": [
-        "Ayez le formulaire de demande du client, la liste d'analyses du projet ou le manifeste d'expédition devant vous.",
+        "Ayez le formulaire de demande du client, la liste d'analyses du projet ou le bordereau de boîte de livraison devant vous.",
         "Vérifiez si le projet a déjà présélectionné les analyses requises."
       ],
       "sections": [
@@ -1492,7 +1492,7 @@
               "expected": "Vous voyez les paramètres sélectionnés, les codes de méthode et la masse de sol estimée nécessaire pour les essais."
             },
             {
-              "action": "Sélectionnez un forfait d'analyses prédéfini ou cochez des paramètres individuels pour correspondre à la demande écrite du client.",
+              "action": "Sélectionnez un forfait d'analyses ou cochez des paramètres individuels pour correspondre à la demande écrite du client.",
               "expected": "La masse totale de sol requise se met à jour automatiquement et se compare à la masse saisie dans 2. État."
             },
             {
@@ -1506,7 +1506,7 @@
         [
           "3. Analyses",
           "Troisième étape dans Réception d'échantillons pour attribuer les essais de laboratoire",
-          "Détermine quelles portes de préparation et quelles feuilles de travail de paillasse sont créées pour l'échantillon."
+          "Détermine quelles étapes de préparation et quelles feuilles de travail de paillasse sont créées pour l'échantillon."
         ],
         [
           "Méthodologie",
@@ -1535,7 +1535,7 @@
       ],
       "steps": [
         "Ouvrez 3. Analyses dans Réception d'échantillons. Vérifiez les analyses pré-remplies par le projet. (Attendu : Vous voyez les paramètres sélectionnés, les codes de méthode et la masse de sol estimée nécessaire pour les essais.)",
-        "Sélectionnez un forfait d'analyses prédéfini ou cochez des paramètres individuels pour correspondre à la demande écrite du client. (Attendu : La masse totale de sol requise se met à jour automatiquement et se compare à la masse saisie dans 2. État.)",
+        "Sélectionnez un forfait d'analyses ou cochez des paramètres individuels pour correspondre à la demande écrite du client. (Attendu : La masse totale de sol requise se met à jour automatiquement et se compare à la masse saisie dans 2. État.)",
         "Vérifiez que la bonne variante de méthode est sélectionnée (par exemple pH eau ou pH CaCl2) et que les fractions granulométriques de texture sont sélectionnées comme un bilan complet. (Attendu : Les bonnes tâches de séchage, de tamisage et d'analyse à la paillasse seront créées lorsque vous finaliserez la réception dans 4. Garde.)"
       ],
       "caution": "Ne mélangez pas différentes méthodes d'extraction de pH ou de phosphore à moins que le projet n'ait expressément commandé les deux.",
@@ -1563,9 +1563,9 @@
         "scan"
       ],
       "minutes": 3,
-      "quick": "Si le scan d'un sac dans 1. Identification affiche Réception antérieure détectée pour cet identifiant ou ne trouve aucune correspondance, comparez l'étiquette physique avec Registre des échantillons et Projets avant de décider d'ouvrir le dossier existant, de changer de mode de réception ou de contacter l'équipe de projet.",
+      "quick": "Si le scan d'un sac dans 1. Identification affiche L'échantillon {id} a déjà été enregistré ou ne trouve aucune correspondance, comparez l'étiquette physique avec Registre des échantillons et Projets avant de décider d'ouvrir le dossier existant, de changer de mode de réception ou de contacter l'équipe de projet.",
       "before": [
-        "Tenez le sac de sol physique et le bordereau d'expédition devant vous.",
+        "Tenez le sac de sol physique et le bordereau de boîte de livraison devant vous.",
         "Ne modifiez jamais une lettre ou un chiffre d'un identifiant d'échantillon simplement pour contourner un avertissement de doublon."
       ],
       "sections": [
@@ -1574,10 +1574,10 @@
           "steps": [
             {
               "action": "Scannez ou saisissez l'identifiant du sac dans 1. Identification de Réception d'échantillons et lisez attentivement toute bannière d'avertissement.",
-              "expected": "Si l'identifiant a déjà été reçu, une bannière Réception antérieure détectée pour s'affiche avec les détails de l'échantillon existant."
+              "expected": "Si l'identifiant a déjà été reçu, une bannière L'échantillon {id} a déjà été enregistré s'affiche avec les détails de l'échantillon existant."
             },
             {
-              "action": "Si Réception antérieure détectée pour apparaît, comparez le nom du projet, la date de prélèvement et la profondeur figurant sur le sac physique avec le dossier existant.",
+              "action": "Si L'échantillon {id} a déjà été enregistré apparaît, comparez le nom du projet, la date de prélèvement et la profondeur figurant sur le sac physique avec le dossier existant.",
               "expected": "Vous pouvez déterminer si le même sac a été scanné deux fois par erreur ou si deux sacs de terrain différents portent la même étiquette."
             },
             {
@@ -1589,7 +1589,7 @@
       ],
       "fields": [
         [
-          "Réception antérieure détectée pour",
+          "L'échantillon {id} a déjà été enregistré",
           "Bannière d'avertissement affichée lorsqu'un identifiant scanné possède déjà une réception confirmée",
           "Empêche d'enregistrer deux fois le même sac d'échantillon."
         ],
@@ -1604,7 +1604,7 @@
           "Vérifiez d'abord cette liste si un collègue a commencé l'enregistrement du sac plus tôt dans la journée."
         ]
       ],
-      "example": "Scannez le sac FIELD-2026-005, voyez l'alerte Réception antérieure détectée pour FIELD-2026-005 datant du poste du matin, vérifiez que le sac porte déjà l'étiquette laboratoire DEMO-26-000105 et placez-le sur le plateau de séchage sans le réceptionner une seconde fois.",
+      "example": "Scannez le sac FIELD-2026-005, voyez l'alerte L'échantillon FIELD-2026-005 a déjà été enregistré datant du poste du matin, vérifiez que le sac porte déjà l'étiquette laboratoire DEMO-26-000105 et placez-le sur le plateau de séchage sans le réceptionner une seconde fois.",
       "success": "Les doubles lectures sont détectées immédiatement et les vraies erreurs d'étiquetage de terrain sont signalées proprement.",
       "nextActor": "Agent de Réception des Échantillons ou Chef de Projet (si deux sacs de terrain portent la même étiquette)",
       "problems": [
@@ -1619,8 +1619,8 @@
         "client/src/components/reception/BatchIntake.jsx"
       ],
       "steps": [
-        "Scannez ou saisissez l'identifiant du sac dans 1. Identification de Réception d'échantillons et lisez attentivement toute bannière d'avertissement. (Attendu : Si l'identifiant a déjà été reçu, une bannière Réception antérieure détectée pour s'affiche avec les détails de l'échantillon existant.)",
-        "Si Réception antérieure détectée pour apparaît, comparez le nom du projet, la date de prélèvement et la profondeur figurant sur le sac physique avec le dossier existant. (Attendu : Vous pouvez déterminer si le même sac a été scanné deux fois par erreur ou si deux sacs de terrain différents portent la même étiquette.)",
+        "Scannez ou saisissez l'identifiant du sac dans 1. Identification de Réception d'échantillons et lisez attentivement toute bannière d'avertissement. (Attendu : Si l'identifiant a déjà été reçu, une bannière L'échantillon {id} a déjà été enregistré s'affiche avec les détails de l'échantillon existant.)",
+        "Si L'échantillon {id} a déjà été enregistré apparaît, comparez le nom du projet, la date de prélèvement et la profondeur figurant sur le sac physique avec le dossier existant. (Attendu : Vous pouvez déterminer si le même sac a été scanné deux fois par erreur ou si deux sacs de terrain différents portent la même étiquette.)",
         "Si aucun dossier de projet correspondant n'est trouvé, vérifiez que le bon projet est sélectionné ou demandez à votre responsable de synchroniser KoboToolbox dans Projets avant d'utiliser le mode Sans rendez-vous / Externe. (Attendu : Les échantillons de projet pré-enregistrés restent liés à leur enquête de terrain au lieu d'être saisis comme échantillons externes non rattachés.)"
       ],
       "caution": "N'ajoutez jamais « -2 » ou « -B » à un identifiant d'échantillon de projet pour forcer le passage d'un sac en doublon sans l'accord du responsable.",
@@ -1816,7 +1816,7 @@
         "samples"
       ],
       "minutes": 3,
-      "quick": "Ouvrez Registre des échantillons, saisissez ou scannez l'identifiant d'échantillon, l'identifiant de terrain ou le code d'expédition. Vérifiez les filtres actifs de statut, de projet et de date si un échantillon attendu n'apparaît pas.",
+      "quick": "Ouvrez Registre des échantillons, saisissez ou scannez l'identifiant d'échantillon, l'identifiant de terrain ou le code de boîte de livraison. Vérifiez les filtres actifs de statut, de projet et de date si un échantillon attendu n'apparaît pas.",
       "before": [
         "Vérifiez la barre supérieure pour confirmer que le bon laboratoire est sélectionné.",
         "Ayez au moins une partie de l'identifiant d'échantillon, de l'identifiant de terrain ou du nom du projet à disposition."
@@ -1835,7 +1835,7 @@
             },
             {
               "action": "Si un échantillon dont vous connaissez l'existence n'apparaît pas, réinitialisez les menus déroulants de statut et de projet pour afficher tous les dossiers.",
-              "expected": "Les échantillons masqués (comme ceux encore au statut Attendu ou Rejeté (Non-conformité)) redeviennent visibles."
+              "expected": "Les échantillons masqués (comme ceux encore au statut Attendu ou Rejeté (problème consigné)) redeviennent visibles."
             }
           ]
         }
@@ -1875,7 +1875,7 @@
       "steps": [
         "Ouvrez Registre des échantillons depuis le menu latéral. Saisissez ou scannez l'identifiant dans la barre de recherche. (Attendu : Le tableau des échantillons filtre immédiatement la liste pour afficher les dossiers correspondants dans votre laboratoire.)",
         "Utilisez les filtres de projet, de statut ou de date pour affiner la liste, par exemple pour ne voir que les échantillons En traitement ou Approuvé. (Attendu : Vos filtres sélectionnés restent actifs lorsque vous ouvrez une fiche d'échantillon puis revenez à la liste.)",
-        "Si un échantillon dont vous connaissez l'existence n'apparaît pas, réinitialisez les menus déroulants de statut et de projet pour afficher tous les dossiers. (Attendu : Les échantillons masqués (comme ceux encore au statut Attendu ou Rejeté (Non-conformité)) redeviennent visibles.)"
+        "Si un échantillon dont vous connaissez l'existence n'apparaît pas, réinitialisez les menus déroulants de statut et de projet pour afficher tous les dossiers. (Attendu : Les échantillons masqués (comme ceux encore au statut Attendu ou Rejeté (problème consigné)) redeviennent visibles.)"
       ],
       "caution": "Vérifiez toujours les badges de filtres actifs avant de supposer qu'un dossier d'échantillon a été perdu.",
       "related": [
@@ -1900,7 +1900,7 @@
         "samplesid"
       ],
       "minutes": 3,
-      "quick": "Ouvrez un échantillon dans Registre des échantillons pour inspecter ses données de terrain, ses portes de préparation, le statut de ses analyses et son historique de traçabilité. Lorsque vous êtes prêt à saisir ou confirmer des résultats de paillasse, suivez le lien vers Poste de travail au lieu d'essayer de taper des résultats sur la page récapitulative.",
+      "quick": "Ouvrez un échantillon dans Registre des échantillons pour inspecter ses données de terrain, ses étapes de préparation, le statut de ses analyses et son historique de traçabilité. Lorsque vous êtes prêt à saisir ou confirmer des résultats de paillasse, suivez le lien vers Poste de travail au lieu d'essayer de taper des résultats sur la page récapitulative.",
       "before": [
         "Ouvrez Registre des échantillons. Cliquez sur l'échantillon que vous souhaitez inspecter.",
         "Repérez le badge de statut global de l'échantillon en haut de la fiche."
@@ -1915,7 +1915,7 @@
             },
             {
               "action": "Cliquez sur l'onglet Travaux et résultats pour inspecter les Conditions préalables à la préparation (Séchage à l’air libre et Préparation des échantillons) et le tableau des analyses attribuées.",
-              "expected": "Chaque ligne d'analyse affiche son statut actuel, le technicien assigné, l'historique des tentatives et toute explication de blocage."
+              "expected": "Chaque ligne d'analyse affiche son statut actuel, le technicien assigné, l'historique des essais et toute explication de blocage."
             },
             {
               "action": "Pour enregistrer la préparation ou les mesures d'analyse, cliquez sur le bouton d'action de la ligne de tâche. Cela permet de l'ouvrir directement dans Poste de travail.",
@@ -1958,7 +1958,7 @@
       ],
       "steps": [
         "Dans l'onglet Vue d’ensemble de la fiche d'échantillon, vérifiez l'état à la réception, la masse, le projet et les informations de prélèvement sur le terrain. (Attendu : Vous voyez le dossier complet de réception ainsi que toutes les notes d'état consignées à l'arrivée.)",
-        "Cliquez sur l'onglet Travaux et résultats pour inspecter les Conditions préalables à la préparation (Séchage à l’air libre et Préparation des échantillons) et le tableau des analyses attribuées. (Attendu : Chaque ligne d'analyse affiche son statut actuel, le technicien assigné, l'historique des tentatives et toute explication de blocage.)",
+        "Cliquez sur l'onglet Travaux et résultats pour inspecter les Conditions préalables à la préparation (Séchage à l’air libre et Préparation des échantillons) et le tableau des analyses attribuées. (Attendu : Chaque ligne d'analyse affiche son statut actuel, le technicien assigné, l'historique des essais et toute explication de blocage.)",
         "Pour enregistrer la préparation ou les mesures d'analyse, cliquez sur le bouton d'action de la ligne de tâche. Cela permet de l'ouvrir directement dans Poste de travail. (Attendu : Poste de travail s'ouvre exactement sur cet échantillon et cette méthode afin que vous puissiez enregistrer les mesures avec le contrôle qualité complet de la série.)"
       ],
       "caution": "Le fait qu'une analyse individuelle soit au statut Soumis ne signifie pas que l'échantillon complet est terminé : vérifiez toutes les lignes dans Travaux et résultats.",
@@ -2003,8 +2003,8 @@
               "expected": "Le badge nomme exactement la tâche préalable qui doit être terminée en premier."
             },
             {
-              "action": "Cliquez sur la tâche préalable ouverte pour la compléter dans Poste de travail (ou demandez à un responsable de la valider si la vérification des portes de préparation est activée dans Politiques).",
-              "expected": "Dès que la porte préalable est confirmée, les analyses dépendantes se déverrouillent automatiquement."
+              "action": "Cliquez sur la tâche préalable ouverte pour la compléter dans Poste de travail (ou demandez à un responsable de la valider si Exiger la validation des étapes de préparation par le responsable est activé dans Politiques).",
+              "expected": "Dès que l'étape préalable est confirmée, les analyses dépendantes se déverrouillent automatiquement."
             }
           ]
         }
@@ -2012,18 +2012,18 @@
       "fields": [
         [
           "Séchage à l’air libre",
-          "Première porte de préparation exigeant une masse constante avant le tamisage",
+          "Première étape de préparation exigeant une masse constante avant le tamisage",
           "Doit être confirmée terminée avant que le tamisage et les analyses de chimie humide de routine ne se déverrouillent."
         ],
         [
           "Préparation des échantillons",
-          "Deuxième porte de préparation pour le tamisage (comme à 2 mm) ou le broyage fin",
+          "Deuxième étape de préparation pour le tamisage (comme à 2 mm) ou le broyage fin",
           "Déverrouille les méthodes de paillasse qui dépendent de fractions de sol homogénéisées."
         ],
         [
-          "Portes opérationnelles",
+          "Étapes de préparation obligatoires",
           "Commandes de vérification sur la fiche d'échantillon pour les étapes pré-analytiques",
-          "Indique qui a réalisé et vérifié chaque porte de préparation."
+          "Indique qui a réalisé et vérifié chaque étape de préparation."
         ]
       ],
       "example": "Inspectez l'échantillon DEMO-26-000142 dans Travaux et résultats, voyez que le phosphore Olsen attend la Préparation des échantillons, complétez la liste de contrôle de tamisage à 2 mm dans Poste de travail et observez le déverrouillage du phosphore Olsen.",
@@ -2032,7 +2032,7 @@
       "problems": [
         {
           "symptom": "Le Séchage à l’air libre et la Préparation des échantillons ont tous deux été terminés par le technicien, mais les lignes d'analyse à la paillasse affichent toujours un verrouillage préalable.",
-          "why": "Votre laboratoire a activé la validation des portes de préparation par le responsable dans Politiques, et aucun responsable n'a encore cliqué sur vérifier dans Portes opérationnelles.",
+          "why": "Votre laboratoire a activé Exiger la validation des étapes de préparation par le responsable dans Politiques, et aucun responsable n'a encore cliqué sur vérifier dans Étapes de préparation obligatoires.",
           "action": "Demandez à votre Responsable de Laboratoire ou Responsable Qualité et Audit d'examiner et de valider l'enregistrement de préparation dans l'onglet Travaux et résultats de l'échantillon."
         }
       ],
@@ -2044,7 +2044,7 @@
       "steps": [
         "Observez les indicateurs d'étape du parcours et la section Conditions préalables à la préparation dans l'onglet Travaux et résultats de l'échantillon. (Attendu : Les étapes terminées affichent un état vérifié en vert, les étapes actives sont mises en évidence et les étapes futures verrouillées indiquent ce qu'elles attendent.)",
         "Lisez tout badge de blocage sur une ligne d'analyse verrouillée (par exemple en attente de Séchage à l’air libre, de Préparation des échantillons ou d'une validation de porte par le responsable). (Attendu : Le badge nomme exactement la tâche préalable qui doit être terminée en premier.)",
-        "Cliquez sur la tâche préalable ouverte pour la compléter dans Poste de travail (ou demandez à un responsable de la valider si la vérification des portes de préparation est activée dans Politiques). (Attendu : Dès que la porte préalable est confirmée, les analyses dépendantes se déverrouillent automatiquement.)"
+        "Cliquez sur la tâche préalable ouverte pour la compléter dans Poste de travail (ou demandez à un responsable de la valider si Exiger la validation des étapes de préparation par le responsable est activé dans Politiques). (Attendu : Dès que l'étape préalable est confirmée, les analyses dépendantes se déverrouillent automatiquement.)"
       ],
       "caution": "N'essayez jamais de contourner une porte préalable : terminez ou validez l'étape de préparation ouverte afin que la piste d'audit reste complète.",
       "related": [
@@ -2202,7 +2202,7 @@
         {
           "symptom": "La fiche de l'échantillon indique qu'un pot se trouve sur l'étagère d'archive 3, mais le pot n'y est pas physiquement.",
           "why": "Un technicien a pris le pot à la paillasse pour une reprise d'analyse sans enregistrer d'événement de sortie dans Chaîne de traçabilité.",
-          "action": "Consultez l'onglet Travaux et résultats pour voir quel technicien a une nouvelle tentative active sur cet échantillon, localisez le pot sur sa paillasse. Enregistrez le mouvement de traçabilité."
+          "action": "Consultez l'onglet Travaux et résultats pour voir quel technicien a un nouvel essai actif sur cet échantillon, localisez le pot sur sa paillasse. Enregistrez le mouvement de traçabilité."
         }
       ],
       "sources": [
@@ -2228,7 +2228,7 @@
       "category": "preparation",
       "kind": "guide",
       "title": "Confirmer le séchage de l’échantillon et vérifier son reçu",
-      "summary": "Complétez la liste de contrôle de séchage, saisissez les paramètres de séchage, cliquez sur Confirmer la fin. Vérifiez le reçu vert de confirmation.",
+      "summary": "Complétez la liste de contrôle de séchage, saisissez les paramètres de séchage, cliquez sur Confirmer que le travail est terminé. Vérifiez le reçu vert de confirmation.",
       "roles": [
         "LAB_TECHNICIAN",
         "LAB_MANAGER"
@@ -2239,11 +2239,11 @@
         "workbench"
       ],
       "minutes": 4,
-      "quick": "Effectuez les contrôles physiques de séchage requis, cliquez sur Confirmer la fin. Vérifiez le reçu Liste de contrôle vérifiée. Cocher une case sans cliquer sur Confirmer la fin n'enregistre pas la validation.",
+      "quick": "Effectuez les contrôles physiques de séchage requis, cliquez sur Confirmer que le travail est terminé. Vérifiez le reçu Liste de contrôle vérifiée. Cocher une case sans cliquer sur Confirmer que le travail est terminé n'enregistre pas la validation.",
       "before": [
         "Vérifiez la concordance entre l'étiquette du plateau de séchage physique et l'ID de laboratoire ainsi que l'ID d’échantillon de terrain affichés à l'écran.",
         "Respectez la procédure de séchage de votre laboratoire concernant la température et la durée (de nombreux laboratoires de sols sèchent à l'air libre sous 40 °C).",
-        "Assurez-vous que votre ordinateur dispose d'une connexion réseau active avant de cliquer sur Confirmer la fin.",
+        "Assurez-vous que votre ordinateur dispose d'une connexion réseau active avant de cliquer sur Confirmer que le travail est terminé.",
         "Si la ligne affiche La preuve nécessite une vérification suite à une importation historique, suivez le guide sur les preuves manquantes au lieu de créer une saisie en doublon."
       ],
       "sections": [
@@ -2260,7 +2260,7 @@
             },
             {
               "action": "Cochez chaque point de la Liste de contrôle opérationnelle uniquement après avoir effectué ce contrôle physique.",
-              "expected": "La ligne indique que la liste de contrôle opérationnelle est complète et active le bouton Confirmer la fin."
+              "expected": "La ligne indique que la liste de contrôle opérationnelle est complète et active le bouton Confirmer que le travail est terminé."
             }
           ]
         },
@@ -2268,7 +2268,7 @@
           "title": "2. Confirmer et vérifier une seule fois",
           "steps": [
             {
-              "action": "Cliquez sur Confirmer la fin sur la ligne de l'échantillon (ou utilisez le bouton de confirmation groupée uniquement après avoir contrôlé chaque plateau sélectionné).",
+              "action": "Cliquez sur Confirmer que le travail est terminé sur la ligne de l'échantillon (ou utilisez le bouton de confirmation groupée uniquement après avoir contrôlé chaque plateau sélectionné).",
               "expected": "Le serveur enregistre votre fiche de séchage. N'incluez jamais des plateaux encore humides simplement parce qu'ils sont arrivés dans la même caisse."
             },
             {
@@ -2289,7 +2289,7 @@
           "Cochez chaque case uniquement après avoir vérifié l'identité du contenant, la masse constante et l'absence de contamination croisée."
         ],
         [
-          "Confirmer la fin",
+          "Confirmer que le travail est terminé",
           "Bouton qui enregistre le dossier de séchage et génère un reçu permanent",
           "Obligatoire pour faire passer la tâche de la liste ouverte au statut Liste de contrôle vérifiée."
         ],
@@ -2299,14 +2299,14 @@
           "Prouve que le Séchage à l’air libre est terminé et déverrouille la Préparation des échantillons."
         ]
       ],
-      "example": "Dans Poste de travail sous Séchage à l’air libre, saisissez 35 °C, 620 g avant et 545 g après pour l'échantillon DEMO-26-000142, cochez les trois cases de la Liste de contrôle opérationnelle. Cliquez sur Confirmer la fin.",
+      "example": "Dans Poste de travail sous Séchage à l’air libre, saisissez 35 °C, 620 g avant et 545 g après pour l'échantillon DEMO-26-000142, cochez les trois cases de la Liste de contrôle opérationnelle. Cliquez sur Confirmer que le travail est terminé.",
       "success": "La ligne de séchage affiche Liste de contrôle vérifiée avec l'horodatage et le nom de l'opérateur. La Préparation des échantillons se déverrouille.",
       "nextActor": "Technicien de préparation (pour le tamisage et le broyage) ou Responsable de Laboratoire (si la vérification des portes est activée)",
       "problems": [
         {
           "symptom": "Les trois cases de la liste de contrôle sont cochées, mais aucun reçu Liste de contrôle vérifiée n'apparaît.",
-          "why": "Vous avez coché les cases à l'écran mais n'avez pas cliqué sur Confirmer la fin, ou la connexion réseau a été interrompue pendant l'enregistrement.",
-          "action": "Vérifiez votre connexion. Cliquez sur Confirmer la fin. Assurez-vous que Liste de contrôle vérifiée s'affiche sur la ligne."
+          "why": "Vous avez coché les cases à l'écran mais n'avez pas cliqué sur Confirmer que le travail est terminé, ou la connexion réseau a été interrompue pendant l'enregistrement.",
+          "action": "Vérifiez votre connexion. Cliquez sur Confirmer que le travail est terminé. Assurez-vous que Liste de contrôle vérifiée s'affiche sur la ligne."
         },
         {
           "symptom": "Le séchage affiche Liste de contrôle vérifiée, mais la fiche de l'échantillon indique toujours que la préparation est incomplète.",
@@ -2328,12 +2328,12 @@
       "steps": [
         "Ouvrez Poste de travail, choisissez Séchage à l’air libre dans Type de tâche : et comparez l'identifiant d'échantillon à l'écran avec le plateau de séchage physique. (Attendu : Vous saisissez les informations de séchage exactement pour l'échantillon de sol présent sur votre paillasse dans votre laboratoire actif.)",
         "Séchez le sol jusqu'à masse constante selon le protocole de votre laboratoire et renseignez la méthode, la température (°C), la masse avant (g), la masse après (g), le début, la fin et l'équipement. (Attendu : Toutes les mesures de séchage effectuées à la paillasse sont consignées dans les champs de Séchage.)",
-        "Cochez chaque point de la Liste de contrôle opérationnelle uniquement après avoir effectué ce contrôle physique. (Attendu : La ligne indique que la liste de contrôle opérationnelle est complète et active le bouton Confirmer la fin.)",
-        "Cliquez sur Confirmer la fin sur la ligne de l'échantillon (ou utilisez le bouton de confirmation groupée uniquement après avoir contrôlé chaque plateau sélectionné). (Attendu : Le serveur enregistre votre fiche de séchage. N'incluez jamais des plateaux encore humides simplement parce qu'ils sont arrivés dans la même caisse.)",
+        "Cochez chaque point de la Liste de contrôle opérationnelle uniquement après avoir effectué ce contrôle physique. (Attendu : La ligne indique que la liste de contrôle opérationnelle est complète et active le bouton Confirmer que le travail est terminé.)",
+        "Cliquez sur Confirmer que le travail est terminé sur la ligne de l'échantillon (ou utilisez le bouton de confirmation groupée uniquement après avoir contrôlé chaque plateau sélectionné). (Attendu : Le serveur enregistre votre fiche de séchage. N'incluez jamais des plateaux encore humides simplement parce qu'ils sont arrivés dans la même caisse.)",
         "Vérifiez que la ligne affiche désormais Liste de contrôle vérifiée avec votre identifiant, l'horodatage et la référence du reçu. (Attendu : La liste de contrôle modifiable est remplacée par un reçu permanent Liste de contrôle vérifiée.)",
         "Passez Type de tâche : sur Préparation des échantillons pour voir les tâches de broyage et de tamisage déverrouillées. (Attendu : La Préparation des échantillons se déverrouille pour cet échantillon, tandis que les analyses chimiques à la paillasse restent verrouillées tant que le tamisage n'est pas lui aussi confirmé.)"
       ],
-      "caution": "Le simple fait de cocher les cases ne termine pas le séchage : cliquez toujours sur Confirmer la fin. Vérifiez l'apparition de Liste de contrôle vérifiée.",
+      "caution": "Le simple fait de cocher les cases ne termine pas le séchage : cliquez toujours sur Confirmer que le travail est terminé. Vérifiez l'apparition de Liste de contrôle vérifiée.",
       "related": [],
       "feature": "core",
       "reviewOwner": "Lab operations lead"
@@ -2343,7 +2343,7 @@
       "category": "preparation",
       "kind": "guide",
       "title": "Confirmer la préparation pour la méthode attribuée",
-      "summary": "Enregistrez le tamisage, le broyage et la division en sous-échantillons dans Poste de travail. Cliquez sur Confirmer la fin pour déverrouiller les analyses à la paillasse.",
+      "summary": "Enregistrez le tamisage, le broyage et la division en sous-échantillons dans Poste de travail. Cliquez sur Confirmer que le travail est terminé pour déverrouiller les analyses à la paillasse.",
       "roles": [
         "LAB_TECHNICIAN",
         "LAB_MANAGER"
@@ -2354,7 +2354,7 @@
         "workbench"
       ],
       "minutes": 3,
-      "quick": "Dans Poste de travail, sélectionnez Préparation des échantillons dans Type de tâche :, saisissez les détails de tamisage, de broyage et de division pour votre échantillon de sol, cochez les éléments de la Liste de contrôle opérationnelle. Cliquez sur Confirmer la fin.",
+      "quick": "Dans Poste de travail, sélectionnez Préparation des échantillons dans Type de tâche :, saisissez les détails de tamisage, de broyage et de division pour votre échantillon de sol, cochez les éléments de la Liste de contrôle opérationnelle. Cliquez sur Confirmer que le travail est terminé.",
       "before": [
         "Vérifiez que le Séchage à l’air libre porte déjà la mention Liste de contrôle vérifiée pour cet échantillon.",
         "Contrôlez l'ouverture de maille du tamis requise pour les analyses attribuées (la plupart des méthodes de routine utilisent de la terre fine à 2 mm, tandis que les méthodes spectrales ou par combustion peuvent exiger un broyage fin)."
@@ -2372,7 +2372,7 @@
               "expected": "Tous les champs de préparation sont renseignés et la ligne indique que la liste de contrôle opérationnelle est complète."
             },
             {
-              "action": "Cliquez sur Confirmer la fin (et demandez à votre responsable de valider la porte si votre laboratoire active la vérification des portes de préparation dans Politiques).",
+              "action": "Cliquez sur Confirmer que le travail est terminé (et demandez à votre responsable de valider l'étape si votre laboratoire active Exiger la validation des étapes de préparation par le responsable dans Politiques).",
               "expected": "La ligne affiche Liste de contrôle vérifiée, le statut de l'échantillon passe à En traitement et les lignes d'analyse à la paillasse se déverrouillent automatiquement."
             }
           ]
@@ -2390,18 +2390,18 @@
           "Consigne comment le sol séché a été homogénéisé et réparti dans les pots de sous-échantillons."
         ],
         [
-          "Confirmer la fin",
+          "Confirmer que le travail est terminé",
           "Bouton qui enregistre le dossier de préparation et déverrouille les analyses à la paillasse",
           "Remplace la liste de contrôle par un reçu permanent Liste de contrôle vérifiée."
         ]
       ],
-      "example": "Pour l'échantillon DEMO-26-000142, sélectionnez Préparation des échantillons dans Poste de travail, enregistrez un tamisage sur laiton à 2 mm donnant 480 g de terre fine et 65 g de refus graveleux, cochez la liste de contrôle. Cliquez sur Confirmer la fin.",
+      "example": "Pour l'échantillon DEMO-26-000142, sélectionnez Préparation des échantillons dans Poste de travail, enregistrez un tamisage sur laiton à 2 mm donnant 480 g de terre fine et 65 g de refus graveleux, cochez la liste de contrôle. Cliquez sur Confirmer que le travail est terminé.",
       "success": "Préparation des échantillons affiche Liste de contrôle vérifiée, les pots préparés sont enregistrés et les feuilles d'analyse à la paillasse se déverrouillent.",
       "nextActor": "Technicien de Laboratoire à la paillasse d'analyse (ou Responsable de Laboratoire si la vérification des portes est requise)",
       "problems": [
         {
           "symptom": "Une analyse spectrale ou de carbone total reste verrouillée même après la confirmation du tamisage à 2 mm.",
-          "why": "Certaines méthodes analytiques exigent une étape supplémentaire de broyage fin ou un clic de validation du responsable dans Portes opérationnelles.",
+          "why": "Certaines méthodes analytiques exigent une étape supplémentaire de broyage fin ou un clic de validation du responsable dans Étapes de préparation obligatoires.",
           "action": "Ouvrez l'onglet Travaux et résultats de l'échantillon, lisez le message de blocage sous Conditions préalables à la préparation et complétez le broyage ou la validation par le responsable requis."
         }
       ],
@@ -2413,7 +2413,7 @@
       "steps": [
         "Ouvrez Poste de travail, sélectionnez Préparation des échantillons dans Type de tâche : et associez l'identifiant d'échantillon à l'écran au plateau de sol séché. (Attendu : Le formulaire Préparation des échantillons s'ouvre en affichant la Liste de contrôle opérationnelle ainsi que les sections de tamisage, de broyage et de division.)",
         "Émottez et tamisez le sol séché selon la procédure de votre laboratoire, saisissez la maille du tamis, la masse de terre fine, la masse d'éléments grossiers et les détails de division en aliquotes. Cochez la Liste de contrôle opérationnelle. (Attendu : Tous les champs de préparation sont renseignés et la ligne indique que la liste de contrôle opérationnelle est complète.)",
-        "Cliquez sur Confirmer la fin (et demandez à votre responsable de valider la porte si votre laboratoire active la vérification des portes de préparation dans Politiques). (Attendu : La ligne affiche Liste de contrôle vérifiée, le statut de l'échantillon passe à En traitement et les lignes d'analyse à la paillasse se déverrouillent automatiquement.)"
+        "Cliquez sur Confirmer que le travail est terminé (et demandez à votre responsable de valider l'étape si votre laboratoire active Exiger la validation des étapes de préparation par le responsable dans Politiques). (Attendu : La ligne affiche Liste de contrôle vérifiée, le statut de l'échantillon passe à En traitement et les lignes d'analyse à la paillasse se déverrouillent automatiquement.)"
       ],
       "caution": "Désélectionnez tout échantillon qui n'a pas été physiquement tamisé avant de confirmer plusieurs lignes à la fois dans Poste de travail.",
       "related": [
@@ -2440,7 +2440,7 @@
         "samplesid"
       ],
       "minutes": 4,
-      "quick": "Ne remettez pas à sécher et ne retamisez pas un sol simplement parce qu'un badge paraît incomplet. Vérifiez d'abord si Liste de contrôle vérifiée figure sur la ligne dans Poste de travail, contrôlez si une seconde porte de préparation ou une validation par le responsable est encore ouverte et comparez le numéro d'essai.",
+      "quick": "Ne remettez pas à sécher et ne retamisez pas un sol simplement parce qu'un badge paraît incomplet. Vérifiez d'abord si Liste de contrôle vérifiée figure sur la ligne dans Poste de travail, contrôlez si une seconde étape de préparation ou une validation par le responsable est encore ouverte et comparez le numéro d'essai.",
       "before": [
         "Gardez votre onglet Poste de travail actuel ouvert. Cela permet de ne perdre aucune note non enregistrée.",
         "Rappelez-vous que le Séchage à l’air libre, la Préparation des échantillons et chaque analyse à la paillasse possèdent des statuts distincts sur un même échantillon.",
@@ -2455,12 +2455,12 @@
               "expected": "Vous voyez immédiatement si le serveur a bien enregistré votre confirmation ou si la liste de contrôle est encore ouverte."
             },
             {
-              "action": "Si Liste de contrôle vérifiée ne s'affiche pas, vérifiez que les trois cases de la Liste de contrôle opérationnelle sont cochées. Cliquez sur Confirmer la fin.",
+              "action": "Si Liste de contrôle vérifiée ne s'affiche pas, vérifiez que les trois cases de la Liste de contrôle opérationnelle sont cochées. Cliquez sur Confirmer que le travail est terminé.",
               "expected": "La confirmation s'exécute et affiche le badge Liste de contrôle vérifiée."
             },
             {
-              "action": "Si votre poste était hors ligne lorsque vous avez cliqué sur Confirmer la fin, reconnectez-vous au réseau du laboratoire. Vérifiez l'état de synchronisation avant de cliquer à nouveau.",
-              "expected": "Les confirmations en file d'attente se synchronisent proprement sans créer de tentatives en doublon."
+              "action": "Si votre poste était hors ligne lorsque vous avez cliqué sur Confirmer que le travail est terminé, reconnectez-vous au réseau du laboratoire. Vérifiez l'état de synchronisation avant de cliquer à nouveau.",
+              "expected": "Les confirmations en file d'attente se synchronisent proprement sans créer de essais en doublon."
             }
           ]
         },
@@ -2472,11 +2472,11 @@
               "expected": "Vous voyez côte à côte Séchage à l’air libre et Préparation des échantillons et repérez lequel est encore ouvert ou en attente de validation."
             },
             {
-              "action": "Vérifiez si la ligne indique une attente de validation par le responsable (utilisée lorsque la vérification des portes de préparation est activée dans Politiques).",
-              "expected": "Vous voyez si un Responsable de Laboratoire doit cliquer sur vérifier dans Portes opérationnelles pour déverrouiller les essais à la paillasse."
+              "action": "Vérifiez si la ligne indique une attente de validation par le responsable (utilisée lorsque la vérification des étapes de préparation est activée dans Politiques).",
+              "expected": "Vous voyez si un Responsable de Laboratoire doit cliquer sur vérifier dans Étapes de préparation obligatoires pour déverrouiller les essais à la paillasse."
             },
             {
-              "action": "Si les deux portes de préparation sont vérifiées mais qu'une analyse à la paillasse reste bloquée, lisez le badge de blocage sur cette ligne d'analyse (comme un étalonnage d'instrument expiré dans Équipement).",
+              "action": "Si les deux étapes de préparation sont vérifiées mais qu'une analyse à la paillasse reste bloquée, lisez le badge de blocage sur cette ligne d'analyse (comme un étalonnage d'instrument expiré dans Équipement).",
               "expected": "Vous corrigez la cause exacte du blocage au lieu de refaire la préparation."
             }
           ]
@@ -2494,7 +2494,7 @@
           "Affiche ensemble le statut en direct du Séchage à l’air libre et de la Préparation des échantillons."
         ],
         [
-          "Portes opérationnelles",
+          "Étapes de préparation obligatoires",
           "Section de vérification par le responsable dans l'onglet Travaux et résultats de l'échantillon",
           "Utilisée par les responsables pour approuver la préparation lorsque la vérification des portes est activée dans Politiques."
         ]
@@ -2505,8 +2505,8 @@
       "problems": [
         {
           "symptom": "Votre responsable vous demande de soumettre le séchage pour révision, mais il n'y a pas de bouton Soumettre sous Séchage à l’air libre.",
-          "why": "Le séchage et le tamisage utilisent Confirmer la fin (ainsi qu'une validation optionnelle par le responsable dans Portes opérationnelles), tandis que Soumettre concerne uniquement les résultats analytiques de paillasse.",
-          "action": "Cliquez sur Confirmer la fin sur la ligne de séchage ou de préparation. Demandez à votre responsable de valider la porte dans Travaux et résultats si les Politiques de votre laboratoire l'exigent."
+          "why": "Le séchage et le tamisage utilisent Confirmer que le travail est terminé (ainsi qu'une validation optionnelle par le responsable dans Étapes de préparation obligatoires), tandis que Soumettre concerne uniquement les résultats analytiques de paillasse.",
+          "action": "Cliquez sur Confirmer que le travail est terminé sur la ligne de séchage ou de préparation. Demandez à votre responsable de valider l'étape dans Travaux et résultats si les Politiques de votre laboratoire l'exigent."
         }
       ],
       "sources": [
@@ -2516,11 +2516,11 @@
       ],
       "steps": [
         "Ouvrez la ligne de l'échantillon sous Séchage à l’air libre ou Préparation des échantillons dans Poste de travail et recherchez le badge vert Liste de contrôle vérifiée, la référence du reçu et l'horodatage. (Attendu : Vous voyez immédiatement si le serveur a bien enregistré votre confirmation ou si la liste de contrôle est encore ouverte.)",
-        "Si Liste de contrôle vérifiée ne s'affiche pas, vérifiez que les trois cases de la Liste de contrôle opérationnelle sont cochées. Cliquez sur Confirmer la fin. (Attendu : La confirmation s'exécute et affiche le badge Liste de contrôle vérifiée.)",
-        "Si votre poste était hors ligne lorsque vous avez cliqué sur Confirmer la fin, reconnectez-vous au réseau du laboratoire. Vérifiez l'état de synchronisation avant de cliquer à nouveau. (Attendu : Les confirmations en file d'attente se synchronisent proprement sans créer de tentatives en doublon.)",
+        "Si Liste de contrôle vérifiée ne s'affiche pas, vérifiez que les trois cases de la Liste de contrôle opérationnelle sont cochées. Cliquez sur Confirmer que le travail est terminé. (Attendu : La confirmation s'exécute et affiche le badge Liste de contrôle vérifiée.)",
+        "Si votre poste était hors ligne lorsque vous avez cliqué sur Confirmer que le travail est terminé, reconnectez-vous au réseau du laboratoire. Vérifiez l'état de synchronisation avant de cliquer à nouveau. (Attendu : Les confirmations en file d'attente se synchronisent proprement sans créer de essais en doublon.)",
         "Ouvrez l'échantillon dans Registre des échantillons, cliquez sur Travaux et résultats. Inspectez la carte Conditions préalables à la préparation. (Attendu : Vous voyez côte à côte Séchage à l’air libre et Préparation des échantillons et repérez lequel est encore ouvert ou en attente de validation.)",
-        "Vérifiez si la ligne indique une attente de validation par le responsable (utilisée lorsque la vérification des portes de préparation est activée dans Politiques). (Attendu : Vous voyez si un Responsable de Laboratoire doit cliquer sur vérifier dans Portes opérationnelles pour déverrouiller les essais à la paillasse.)",
-        "Si les deux portes de préparation sont vérifiées mais qu'une analyse à la paillasse reste bloquée, lisez le badge de blocage sur cette ligne d'analyse (comme un étalonnage d'instrument expiré dans Équipement). (Attendu : Vous corrigez la cause exacte du blocage au lieu de refaire la préparation.)"
+        "Vérifiez si la ligne indique une attente de validation par le responsable (utilisée lorsque la vérification des étapes de préparation est activée dans Politiques). (Attendu : Vous voyez si un Responsable de Laboratoire doit cliquer sur vérifier dans Étapes de préparation obligatoires pour déverrouiller les essais à la paillasse.)",
+        "Si les deux étapes de préparation sont vérifiées mais qu'une analyse à la paillasse reste bloquée, lisez le badge de blocage sur cette ligne d'analyse (comme un étalonnage d'instrument expiré dans Équipement). (Attendu : Vous corrigez la cause exacte du blocage au lieu de refaire la préparation.)"
       ],
       "caution": "Ne réenregistrez jamais un échantillon à la réception et ne refaites jamais un tamisage physique simplement pour effacer un badge de statut.",
       "related": [],
@@ -2543,7 +2543,7 @@
         "workbench"
       ],
       "minutes": 3,
-      "quick": "Dans Poste de travail, filtrez sur Séchage à l’air libre ou Préparation des échantillons, sélectionnez uniquement les plateaux ayant physiquement terminé l'étape, vérifiez la liste de contrôle et les paramètres de chaque ligne. Cliquez sur Confirmer la fin.",
+      "quick": "Dans Poste de travail, filtrez sur Séchage à l’air libre ou Préparation des échantillons, sélectionnez uniquement les plateaux ayant physiquement terminé l'étape, vérifiez la liste de contrôle et les paramètres de chaque ligne. Cliquez sur Confirmer que le travail est terminé.",
       "before": [
         "Ayez la fiche de votre chariot de séchage ou votre cahier de tamisage devant vous.",
         "Vérifiez chaque étiquette de plateau sur l'étagère par rapport aux lignes sélectionnées à l'écran."
@@ -2561,7 +2561,7 @@
               "expected": "Seuls les échantillons physiquement terminés restent sélectionnés dans le lot."
             },
             {
-              "action": "Complétez les points requis de la liste de contrôle. Cliquez sur Confirmer la fin (ou sur le bouton de confirmation groupée indiquant le nombre exact d'échantillons sélectionnés).",
+              "action": "Complétez les points requis de la liste de contrôle. Cliquez sur Confirmer que le travail est terminé (ou sur le bouton de confirmation groupée indiquant le nombre exact d'échantillons sélectionnés).",
               "expected": "Chaque échantillon sélectionné reçoit son propre reçu Liste de contrôle vérifiée et passe à l'étape suivante."
             }
           ]
@@ -2574,7 +2574,7 @@
           "Filtre la file d'attente pour vous permettre de traiter toute une étagère de séchage ou de tamisage en une seule fois."
         ],
         [
-          "Confirmer la fin",
+          "Confirmer que le travail est terminé",
           "Bouton de confirmation groupée dans le pied de page de Poste de travail",
           "Enregistre simultanément les reçus de fin de préparation pour toutes les lignes sélectionnées."
         ],
@@ -2602,7 +2602,7 @@
       "steps": [
         "Ouvrez Poste de travail, choisissez Séchage à l’air libre ou Préparation des échantillons dans Type de tâche :. Sélectionnez les lignes correspondant aux plateaux de votre étagère. (Attendu : Les lignes d'échantillons sélectionnées sont mises en surbrillance et la barre d'action groupée apparaît en bas du tableau.)",
         "Vérifiez chaque ligne sélectionnée pour vous assurer que tout plateau encore humide ou non tamisé est décoché avant de confirmer. (Attendu : Seuls les échantillons physiquement terminés restent sélectionnés dans le lot.)",
-        "Complétez les points requis de la liste de contrôle. Cliquez sur Confirmer la fin (ou sur le bouton de confirmation groupée indiquant le nombre exact d'échantillons sélectionnés). (Attendu : Chaque échantillon sélectionné reçoit son propre reçu Liste de contrôle vérifiée et passe à l'étape suivante.)"
+        "Complétez les points requis de la liste de contrôle. Cliquez sur Confirmer que le travail est terminé (ou sur le bouton de confirmation groupée indiquant le nombre exact d'échantillons sélectionnés). (Attendu : Chaque échantillon sélectionné reçoit son propre reçu Liste de contrôle vérifiée et passe à l'étape suivante.)"
       ],
       "caution": "N'utilisez jamais la sélection globale pour confirmer toute une étagère sans vérifier si un plateau individuel a été mis de côté.",
       "related": [
@@ -2617,7 +2617,7 @@
       "category": "preparation",
       "kind": "guide",
       "title": "Résoudre une préparation historique sans preuve complète",
-      "summary": "Traitez un échantillon historique ou importé qui affiche La preuve nécessite une vérification sur sa porte de préparation.",
+      "summary": "Traitez un échantillon historique ou importé qui affiche La preuve nécessite une vérification sur sa étape de préparation.",
       "roles": [
         "LAB_TECHNICIAN",
         "LAB_MANAGER"
@@ -2629,7 +2629,7 @@
         "manager-queue"
       ],
       "minutes": 3,
-      "quick": "Lorsqu'un échantillon importé ou ancien affiche La preuve nécessite une vérification sous Conditions préalables à la préparation, n'inventez pas de fausses masses de séchage. Demandez à votre Responsable de Laboratoire ou Responsable Qualité et Audit d'examiner le dossier historique et de valider la porte dans l'onglet Travaux et résultats de l'échantillon.",
+      "quick": "Lorsqu'un échantillon importé ou ancien affiche La preuve nécessite une vérification sous Conditions préalables à la préparation, n'inventez pas de fausses masses de séchage. Demandez à votre Responsable de Laboratoire ou Responsable Qualité et Audit d'examiner le dossier historique et de valider l'étape dans l'onglet Travaux et résultats de l'échantillon.",
       "before": [
         "Ouvrez l'échantillon dans Registre des échantillons. Cliquez sur l'onglet Travaux et résultats.",
         "Vérifiez si l'échantillon provient d'une Importation de données historiques ou d'un flux de travail antérieur."
@@ -2639,7 +2639,7 @@
           "title": "Procédure étape par étape",
           "steps": [
             {
-              "action": "Ouvrez l'onglet Travaux et résultats de l'échantillon et lisez le badge de statut sous Conditions préalables à la préparation et Portes opérationnelles.",
+              "action": "Ouvrez l'onglet Travaux et résultats de l'échantillon et lisez le badge de statut sous Conditions préalables à la préparation et Étapes de préparation obligatoires.",
               "expected": "Si une réalisation historique a été importée sans reçu complet de liste de contrôle, la ligne affiche La preuve nécessite une vérification."
             },
             {
@@ -2647,7 +2647,7 @@
               "expected": "Vous confirmez si le sol a déjà été séché et tamisé ou si une nouvelle préparation physique est nécessaire."
             },
             {
-              "action": "Demandez au Responsable de Laboratoire d'enregistrer la décision de validation dans Portes opérationnelles (ou d'ouvrir une nouvelle tentative de préparation si le sol doit être préparé maintenant).",
+              "action": "Demandez au Responsable de Laboratoire d'enregistrer la décision de validation dans Étapes de préparation obligatoires (ou d'ouvrir un nouvel essai de préparation si le sol doit être préparé maintenant).",
               "expected": "L'absence de preuve historique est résolue de manière transparente dans le journal d'audit et les lignes d'analyse à la paillasse se déverrouillent."
             }
           ]
@@ -2660,24 +2660,24 @@
           "Alerte le personnel afin que les détails historiques manquants soient examinés plutôt qu'ignorés silencieusement."
         ],
         [
-          "Portes opérationnelles",
+          "Étapes de préparation obligatoires",
           "Panneau de validation par le responsable dans l'onglet Travaux et résultats de l'échantillon",
-          "Permet à un responsable autorisé de valider une préparation historique ou d'exiger une nouvelle tentative."
+          "Permet à un responsable autorisé de valider une préparation historique ou d'exiger un nouvel essai."
         ],
         [
           "Conditions préalables à la préparation",
           "Carte affichant l'état de préparation pour le Séchage à l’air libre et la Préparation des échantillons",
-          "Passe au vert dès que le responsable valide le dossier historique ou qu'une nouvelle tentative est complétée."
+          "Passe au vert dès que le responsable valide le dossier historique ou qu'un nouvel essai est complétée."
         ]
       ],
-      "example": "Sur l'échantillon importé LEGACY-25-0041, voyez La preuve nécessite une vérification sous Conditions préalables à la préparation, vérifiez que le pot à 2 mm existe bien en salle d'archivage. Demandez au Responsable de Laboratoire de valider la porte dans Portes opérationnelles.",
+      "example": "Sur l'échantillon importé LEGACY-25-0041, voyez La preuve nécessite une vérification sous Conditions préalables à la préparation, vérifiez que le pot à 2 mm existe bien en salle d'archivage. Demandez au Responsable de Laboratoire de valider l'étape dans Étapes de préparation obligatoires.",
       "success": "Les dossiers de préparation historiques sont validés de façon transparente par un responsable sans inventer de valeurs de paillasse.",
       "nextActor": "Responsable de Laboratoire ou Responsable Qualité et Audit",
       "problems": [
         {
           "symptom": "Un technicien tente de saisir des masses de séchage inventées simplement pour effacer un badge La preuve nécessite une vérification.",
           "why": "L'équipe de paillasse souhaite déverrouiller rapidement une ligne d'analyse, mais la saisie de masses fictives crée de fausses données d'audit.",
-          "action": "Arrêtez-vous. Demandez à votre Responsable de Laboratoire de valider la porte historique dans Portes opérationnelles sous l'onglet Travaux et résultats de l'échantillon."
+          "action": "Arrêtez-vous. Demandez à votre Responsable de Laboratoire de valider l'étape historique dans Étapes de préparation obligatoires sous l'onglet Travaux et résultats de l'échantillon."
         }
       ],
       "sources": [
@@ -2686,11 +2686,11 @@
         "server/services/workbenchReadinessService.js"
       ],
       "steps": [
-        "Ouvrez l'onglet Travaux et résultats de l'échantillon et lisez le badge de statut sous Conditions préalables à la préparation et Portes opérationnelles. (Attendu : Si une réalisation historique a été importée sans reçu complet de liste de contrôle, la ligne affiche La preuve nécessite une vérification.)",
+        "Ouvrez l'onglet Travaux et résultats de l'échantillon et lisez le badge de statut sous Conditions préalables à la préparation et Étapes de préparation obligatoires. (Attendu : Si une réalisation historique a été importée sans reçu complet de liste de contrôle, la ligne affiche La preuve nécessite une vérification.)",
         "Vérifiez le pot d'archive physique de l'échantillon ou le cahier de laboratoire historique avec votre Responsable de Laboratoire. (Attendu : Vous confirmez si le sol a déjà été séché et tamisé ou si une nouvelle préparation physique est nécessaire.)",
-        "Demandez au Responsable de Laboratoire d'enregistrer la décision de validation dans Portes opérationnelles (ou d'ouvrir une nouvelle tentative de préparation si le sol doit être préparé maintenant). (Attendu : L'absence de preuve historique est résolue de manière transparente dans le journal d'audit et les lignes d'analyse à la paillasse se déverrouillent.)"
+        "Demandez au Responsable de Laboratoire d'enregistrer la décision de validation dans Étapes de préparation obligatoires (ou d'ouvrir un nouvel essai de préparation si le sol doit être préparé maintenant). (Attendu : L'absence de preuve historique est résolue de manière transparente dans le journal d'audit et les lignes d'analyse à la paillasse se déverrouillent.)"
       ],
-      "caution": "Ne saisissez jamais de températures ou de masses inventées pour des échantillons historiques : utilisez la validation par le responsable dans Portes opérationnelles.",
+      "caution": "Ne saisissez jamais de températures ou de masses inventées pour des échantillons historiques : utilisez la validation par le responsable dans Étapes de préparation obligatoires.",
       "related": [
         "start-first-login",
         "quality-support"
@@ -2715,7 +2715,7 @@
         "samplesid"
       ],
       "minutes": 3,
-      "quick": "N'écrasez jamais un reçu de préparation terminé. Lorsqu'un échantillon doit être séché ou tamisé à nouveau (par exemple après un renversement ou un contrôle de contamination), demandez à votre Responsable de Laboratoire de rouvrir la préparation dans l'onglet Travaux et résultats de l'échantillon afin d'enregistrer une nouvelle tentative dans Poste de travail.",
+      "quick": "N'écrasez jamais un reçu de préparation terminé. Lorsqu'un échantillon doit être séché ou tamisé à nouveau (par exemple après un renversement ou un contrôle de contamination), demandez à votre Responsable de Laboratoire de rouvrir la préparation dans l'onglet Travaux et résultats de l'échantillon afin d'enregistrer un nouvel essai dans Poste de travail.",
       "before": [
         "Vérifiez qu'il reste suffisamment de sol non tamisé dans le sac d'origine ou le contenant d'archive.",
         "Préparez le motif de la reprise de préparation (tel qu'un pot renversé ou un contrôle qualité non conforme)."
@@ -2725,15 +2725,15 @@
           "title": "Procédure étape par étape",
           "steps": [
             {
-              "action": "Ouvrez l'échantillon dans Registre des échantillons, cliquez sur Travaux et résultats. Inspectez Conditions préalables à la préparation ainsi que Portes opérationnelles.",
+              "action": "Ouvrez l'échantillon dans Registre des échantillons, cliquez sur Travaux et résultats. Inspectez Conditions préalables à la préparation ainsi que Étapes de préparation obligatoires.",
               "expected": "Vous voyez le reçu Liste de contrôle vérifiée d'origine avec le nom de l'opérateur et son horodatage."
             },
             {
-              "action": "Demandez à un Responsable de Laboratoire de rouvrir la porte de préparation avec un motif écrit afin qu'une nouvelle tentative soit créée tout en conservant le reçu initial dans l'historique.",
-              "expected": "La tâche de préparation réapparaît dans Poste de travail pour la nouvelle tentative."
+              "action": "Demandez à un Responsable de Laboratoire de rouvrir la étape de préparation avec un motif écrit afin qu'un nouvel essai soit créée tout en conservant le reçu initial dans l'historique.",
+              "expected": "La tâche de préparation réapparaît dans Poste de travail pour le nouvel essai."
             },
             {
-              "action": "Effectuez le séchage ou le tamisage physique sur la prise d'essai de remplacement, saisissez les nouvelles mesures dans Poste de travail, cochez la Liste de contrôle opérationnelle. Cliquez sur Confirmer la fin.",
+              "action": "Effectuez le séchage ou le tamisage physique sur la prise d'essai de remplacement, saisissez les nouvelles mesures dans Poste de travail, cochez la Liste de contrôle opérationnelle. Cliquez sur Confirmer que le travail est terminé.",
               "expected": "Un nouveau reçu Liste de contrôle vérifiée est enregistré pour la préparation répétée et rattaché aux analyses de paillasse en aval."
             }
           ]
@@ -2743,7 +2743,7 @@
         [
           "Conditions préalables à la préparation",
           "Carte de l'onglet Travaux et résultats de l'échantillon affichant les reçus de préparation actuels et passés",
-          "Conserve le reçu d'origine à côté de toute tentative rouverte."
+          "Conserve le reçu d'origine à côté de tout essai rouvert."
         ],
         [
           "Contenants et aliquotes",
@@ -2751,19 +2751,19 @@
           "Enregistrez le code-barres du nouveau pot de sous-échantillon et marquez tout pot renversé ou contaminé comme Retiré."
         ],
         [
-          "Confirmer la fin",
-          "Bouton dans Poste de travail pour enregistrer la nouvelle tentative de préparation",
+          "Confirmer que le travail est terminé",
+          "Bouton dans Poste de travail pour enregistrer le nouvel essai de préparation",
           "Crée un nouveau reçu horodaté pour le matériau préparé à nouveau."
         ]
       ],
-      "example": "Après la chute accidentelle d'un pot à 2 mm à la paillasse, demandez au responsable de rouvrir la Préparation des échantillons sur DEMO-26-000142, tamisez une nouvelle portion de 200 g issue du sac d'origine, imprimez une nouvelle étiquette de pot. Cliquez sur Confirmer la fin.",
+      "example": "Après la chute accidentelle d'un pot à 2 mm à la paillasse, demandez au responsable de rouvrir la Préparation des échantillons sur DEMO-26-000142, tamisez une nouvelle portion de 200 g issue du sac d'origine, imprimez une nouvelle étiquette de pot. Cliquez sur Confirmer que le travail est terminé.",
       "success": "Le sol préparé à nouveau dispose d'un nouveau reçu de préparation propre tandis que l'historique initial reste intact.",
-      "nextActor": "Responsable de Laboratoire (pour rouvrir la porte) et Technicien de préparation (pour enregistrer la nouvelle tentative)",
+      "nextActor": "Responsable de Laboratoire (pour rouvrir l'étape) et Technicien de préparation (pour enregistrer le nouvel essai)",
       "problems": [
         {
           "symptom": "Les cases à cocher de séchage ou de tamisage sont verrouillées et ne peuvent pas être modifiées sur un échantillon que vous avez déjà confirmé.",
           "why": "Les reçus de préparation confirmés sont verrouillés. Cela permet de protéger la piste d'audit.",
-          "action": "N'essayez pas de modifier l'ancien reçu . Demandez à votre Responsable de Laboratoire de rouvrir la porte de préparation dans l'onglet Travaux et résultats de l'échantillon."
+          "action": "N'essayez pas de modifier l'ancien reçu . Demandez à votre Responsable de Laboratoire de rouvrir la étape de préparation dans l'onglet Travaux et résultats de l'échantillon."
         }
       ],
       "sources": [
@@ -2772,9 +2772,9 @@
         "server/services/workbenchReadinessService.js"
       ],
       "steps": [
-        "Ouvrez l'échantillon dans Registre des échantillons, cliquez sur Travaux et résultats. Inspectez Conditions préalables à la préparation ainsi que Portes opérationnelles. (Attendu : Vous voyez le reçu Liste de contrôle vérifiée d'origine avec le nom de l'opérateur et son horodatage.)",
-        "Demandez à un Responsable de Laboratoire de rouvrir la porte de préparation avec un motif écrit afin qu'une nouvelle tentative soit créée tout en conservant le reçu initial dans l'historique. (Attendu : La tâche de préparation réapparaît dans Poste de travail pour la nouvelle tentative.)",
-        "Effectuez le séchage ou le tamisage physique sur la prise d'essai de remplacement, saisissez les nouvelles mesures dans Poste de travail, cochez la Liste de contrôle opérationnelle. Cliquez sur Confirmer la fin. (Attendu : Un nouveau reçu Liste de contrôle vérifiée est enregistré pour la préparation répétée et rattaché aux analyses de paillasse en aval.)"
+        "Ouvrez l'échantillon dans Registre des échantillons, cliquez sur Travaux et résultats. Inspectez Conditions préalables à la préparation ainsi que Étapes de préparation obligatoires. (Attendu : Vous voyez le reçu Liste de contrôle vérifiée d'origine avec le nom de l'opérateur et son horodatage.)",
+        "Demandez à un Responsable de Laboratoire de rouvrir la étape de préparation avec un motif écrit afin qu'un nouvel essai soit créée tout en conservant le reçu initial dans l'historique. (Attendu : La tâche de préparation réapparaît dans Poste de travail pour le nouvel essai.)",
+        "Effectuez le séchage ou le tamisage physique sur la prise d'essai de remplacement, saisissez les nouvelles mesures dans Poste de travail, cochez la Liste de contrôle opérationnelle. Cliquez sur Confirmer que le travail est terminé. (Attendu : Un nouveau reçu Liste de contrôle vérifiée est enregistré pour la préparation répétée et rattaché aux analyses de paillasse en aval.)"
       ],
       "caution": "Étiquetez toujours le pot nouvellement préparé et marquez tout pot contaminé comme Retiré dans Contenants et aliquotes.",
       "related": [
@@ -2984,7 +2984,7 @@
         },
         {
           "symptom": "Deux de vos 40 lignes collées ont été exclues dans l'aperçu.",
-          "why": "Ces deux échantillons ont encore une porte Séchage à l’air libre ou Préparation des échantillons ouverte, ou leur identifiant apparaît deux fois dans la liste collée.",
+          "why": "Ces deux échantillons ont encore une étape Séchage à l’air libre ou Préparation des échantillons ouverte, ou leur identifiant apparaît deux fois dans la liste collée.",
           "action": "Lisez le motif d'exclusion à côté de chaque ligne, appliquez les 38 lignes valides maintenant et terminez la préparation des 2 échantillons bloqués avant de les enregistrer."
         },
         {
@@ -3070,8 +3070,8 @@
         ],
         [
           "Numéro d’essai",
-          "Indique s'il s'agit de la première mesure (Tentative nº 1) ou d'une reprise (Tentative nº 2+)",
-          "Les reprises sont enregistrées dans une nouvelle tentative afin que les mesures précédentes restent intactes dans la piste d'audit."
+          "Indique s'il s'agit de la première mesure (Essai n° 1) ou d'une reprise (Essai n° 2+)",
+          "Les reprises sont enregistrées dans un nouvel essai afin que les mesures précédentes restent intactes dans la piste d'audit."
         ]
       ],
       "example": "Dans Poste de travail, saisissez pH = 6,42 pour l'échantillon DEMO-26-000142 avec le pH-mètre étalonné EQ-PH-01, enregistrez la détermination dans Vérifier la réalisation. Soumettez-la dans Prêt à soumettre.",
@@ -3325,7 +3325,7 @@
         [
           "Soumettre",
           "Bouton de confirmation qui envoie les échantillons sélectionnés vers Liste de tâches",
-          "Verrouille la tentative de paillasse et notifie le réviseur."
+          "Verrouille l'essai de paillasse et notifie le réviseur."
         ],
         [
           "Envoyés et terminés",
@@ -3367,7 +3367,7 @@
       "category": "bench",
       "kind": "guide",
       "title": "Corriger un travail retourné par un réviseur",
-      "summary": "Lisez la note de retour du réviseur. Enregistrez une nouvelle tentative dans Poste de travail sans effacer la mesure d'origine.",
+      "summary": "Lisez la note de retour du réviseur. Enregistrez un nouvel essai dans Poste de travail sans effacer la mesure d'origine.",
       "roles": [
         "LAB_TECHNICIAN",
         "LAB_MANAGER"
@@ -3379,7 +3379,7 @@
         "manager-queue"
       ],
       "minutes": 3,
-      "quick": "Lorsqu'un réviseur retourne un résultat, ouvrez l'élément dans Mon travail ou Poste de travail, lisez la bannière indiquant le motif du retour, effectuez la vérification ou la ré-analyse demandée dans la nouvelle tentative (Tentative nº 2). Enregistrez. Soumettez le résultat corrigé.",
+      "quick": "Lorsqu'un réviseur retourne un résultat, ouvrez l'élément dans Mon travail ou Poste de travail, lisez la bannière indiquant le motif du retour, effectuez la vérification ou la ré-analyse demandée dans le nouvel essai (Essai n° 2). Enregistrez. Soumettez le résultat corrigé.",
       "before": [
         "Lisez attentivement le commentaire de retour du réviseur. Cela permet de savoir s'il faut vérifier un calcul ou une dilution, ou reprendre l'analyse à partir du pot de sol.",
         "Vérifiez que vous avez le bon pot d'échantillon et un instrument étalonné prêts."
@@ -3390,15 +3390,15 @@
           "steps": [
             {
               "action": "Ouvrez Mon travail ou Poste de travail et repérez l'élément marqué Retourné.",
-              "expected": "La ligne affiche le motif écrit du réviseur et ouvre une nouvelle tentative modifiable (comme Tentative nº 2) tout en gardant la Tentative nº 1 scellée."
+              "expected": "La ligne affiche le motif écrit du réviseur et ouvre un nouvel essai modifiable (comme Essai n° 2) tout en gardant l'Essai n° 1 scellée."
             },
             {
-              "action": "Effectuez la nouvelle mesure ou la correction demandée par le réviseur. Saisissez la nouvelle valeur, l'instrument et le contrôle qualité de la série dans la tentative active.",
-              "expected": "La nouvelle tentative est enregistrée sur la feuille de travail à côté de l'historique préservé de la tentative précédente."
+              "action": "Effectuez la nouvelle mesure ou la correction demandée par le réviseur. Saisissez la nouvelle valeur, l'instrument et le contrôle qualité de la série dans l'essai actif.",
+              "expected": "Le nouvel essai est enregistrée sur la feuille de travail à côté de l'historique préservé de l'essai précédent."
             },
             {
               "action": "Cliquez sur Vérifier la réalisation. Enregistrez, ouvrez ensuite Prêt à soumettre, ajoutez une note expliquant votre correction. Cliquez sur Soumettre.",
-              "expected": "La nouvelle tentative est envoyée dans Examiner les soumissions et l'alerte Retourné disparaît de votre file d'attente."
+              "expected": "Le nouvel essai est envoyée dans Examiner les soumissions et l'alerte Retourné disparaît de votre file d'attente."
             }
           ]
         }
@@ -3410,9 +3410,9 @@
           "Comporte toujours un commentaire écrit expliquant pourquoi le travail a été retourné."
         ],
         [
-          "Tentatives",
-          "Tentatives de mesure numérotées sur une analyse",
-          "La Tentative nº 1 reste définitivement scellée pour l'historique d'audit pendant que vous saisissez la reprise dans la Tentative nº 2."
+          "Essais",
+          "Essais de mesure numérotés sur une analyse",
+          "L'Essai n° 1 reste définitivement scellée pour l'historique d'audit pendant que vous saisissez la reprise dans l'Essai n° 2."
         ],
         [
           "Notes d'examen",
@@ -3420,14 +3420,14 @@
           "Vous indique si le problème provenait d'un blanc hors limite, d'une dérive sur duplicata ou d'une erreur de dilution."
         ]
       ],
-      "example": "Ouvrez la tâche de phosphore Olsen au statut Retourné pour DEMO-26-000142, lisez « Blanc hors limite — ré-extraire avec du réactif frais », exécutez la Tentative nº 2 avec un nouveau lot de réactif, enregistrez 14,2 mg/kg. Soumettez pour révision.",
-      "success": "La mesure répétée est enregistrée dans une nouvelle tentative et renvoyée au réviseur en conservant tout l'historique.",
+      "example": "Ouvrez la tâche de phosphore Olsen au statut Retourné pour DEMO-26-000142, lisez « Blanc hors limite — ré-extraire avec du réactif frais », exécutez l'Essai n° 2 avec un nouveau lot de réactif, enregistrez 14,2 mg/kg. Soumettez pour révision.",
+      "success": "La mesure répétée est enregistrée dans un nouvel essai et renvoyée au réviseur en conservant tout l'historique.",
       "nextActor": "Responsable de Laboratoire ou Responsable Qualité et Audit dans Examiner les soumissions",
       "problems": [
         {
-          "symptom": "Vous cliquez sur la Tentative nº 1 d'un échantillon retourné et la zone de valeur ne vous laisse pas écrire.",
-          "why": "Les tentatives précédentes sont définitivement scellées une fois soumises afin que le laboratoire ne perde jamais ses données historiques.",
-          "action": "Sélectionnez la nouvelle tentative active (Tentative nº 2) sur la ligne dans Poste de travail pour saisir votre mesure de reprise."
+          "symptom": "Vous cliquez sur l'Essai n° 1 d'un échantillon retourné et la zone de valeur ne vous laisse pas écrire.",
+          "why": "Les essais précédents sont définitivement scellées une fois soumises afin que le laboratoire ne perde jamais ses données historiques.",
+          "action": "Sélectionnez le nouvel essai actif (Essai n° 2) sur la ligne dans Poste de travail pour saisir votre mesure de reprise."
         }
       ],
       "sources": [
@@ -3437,11 +3437,11 @@
         "client/src/components/workbench/ReviewSubmissionView.jsx"
       ],
       "steps": [
-        "Ouvrez Mon travail ou Poste de travail et repérez l'élément marqué Retourné. (Attendu : La ligne affiche le motif écrit du réviseur et ouvre une nouvelle tentative modifiable (comme Tentative nº 2) tout en gardant la Tentative nº 1 scellée.)",
-        "Effectuez la nouvelle mesure ou la correction demandée par le réviseur. Saisissez la nouvelle valeur, l'instrument et le contrôle qualité de la série dans la tentative active. (Attendu : La nouvelle tentative est enregistrée sur la feuille de travail à côté de l'historique préservé de la tentative précédente.)",
-        "Cliquez sur Vérifier la réalisation. Enregistrez, ouvrez ensuite Prêt à soumettre, ajoutez une note expliquant votre correction. Cliquez sur Soumettre. (Attendu : La nouvelle tentative est envoyée dans Examiner les soumissions et l'alerte Retourné disparaît de votre file d'attente.)"
+        "Ouvrez Mon travail ou Poste de travail et repérez l'élément marqué Retourné. (Attendu : La ligne affiche le motif écrit du réviseur et ouvre un nouvel essai modifiable (comme Essai n° 2) tout en gardant l'Essai n° 1 scellée.)",
+        "Effectuez la nouvelle mesure ou la correction demandée par le réviseur. Saisissez la nouvelle valeur, l'instrument et le contrôle qualité de la série dans l'essai actif. (Attendu : Le nouvel essai est enregistrée sur la feuille de travail à côté de l'historique préservé de l'essai précédent.)",
+        "Cliquez sur Vérifier la réalisation. Enregistrez, ouvrez ensuite Prêt à soumettre, ajoutez une note expliquant votre correction. Cliquez sur Soumettre. (Attendu : Le nouvel essai est envoyée dans Examiner les soumissions et l'alerte Retourné disparaît de votre file d'attente.)"
       ],
-      "caution": "N'essayez jamais de supprimer ou d'écraser la Tentative nº 1 : enregistrez toujours les mesures répétées dans la nouvelle tentative.",
+      "caution": "N'essayez jamais de supprimer ou d'écraser l'Essai n° 1 : enregistrez toujours les mesures répétées dans le nouvel essai.",
       "related": [
         "start-first-login",
         "quality-support"
@@ -3480,7 +3480,7 @@
             },
             {
               "action": "Si le Séchage à l’air libre ou la Préparation des échantillons est encore ouvert, basculez Type de tâche : dans Poste de travail sur cette étape de préparation. Complétez-la. Confirmez-la d'abord.",
-              "expected": "La confirmation de la porte de préparation manquante (et l'obtention de la validation du responsable si Politiques l'exige) lève le verrouillage préalable."
+              "expected": "La confirmation de la étape de préparation manquante (et l'obtention de la validation du responsable si Politiques l'exige) lève le verrouillage préalable."
             },
             {
               "action": "Si le message indique que l'instrument est à l'état Étalonnage Expiré / Bloqué, ouvrez Équipement. Enregistrez un Étalonnage à jour ou sélectionnez un autre instrument Prêt / Étalonné.",
@@ -3502,8 +3502,8 @@
         ],
         [
           "La preuve nécessite une vérification",
-          "Badge affiché lorsqu'une porte de préparation attend la validation d'un responsable",
-          "Levé lorsqu'un responsable valide la porte dans Portes opérationnelles."
+          "Badge affiché lorsqu'une étape de préparation attend la validation d'un responsable",
+          "Levé lorsqu'un responsable valide l'étape dans Étapes de préparation obligatoires."
         ]
       ],
       "example": "Constatez que la saisie du pH pour DEMO-26-000142 est bloquée par la Préparation des échantillons, passez Type de tâche : sur Préparation des échantillons, confirmez le tamisage à 2 mm. Revenez à la ligne pH désormais déverrouillée.",
@@ -3524,7 +3524,7 @@
       ],
       "steps": [
         "Dans Poste de travail (ou dans l'onglet Travaux et résultats de l'échantillon), lisez le message de blocage affiché sur la ligne verrouillée. (Attendu : Le message nomme précisément l'exigence non remplie : réception, Séchage à l’air libre, Préparation des échantillons, validation par le responsable, attribution ou conformité dans Équipement.)",
-        "Si le Séchage à l’air libre ou la Préparation des échantillons est encore ouvert, basculez Type de tâche : dans Poste de travail sur cette étape de préparation. Complétez-la. Confirmez-la d'abord. (Attendu : La confirmation de la porte de préparation manquante (et l'obtention de la validation du responsable si Politiques l'exige) lève le verrouillage préalable.)",
+        "Si le Séchage à l’air libre ou la Préparation des échantillons est encore ouvert, basculez Type de tâche : dans Poste de travail sur cette étape de préparation. Complétez-la. Confirmez-la d'abord. (Attendu : La confirmation de la étape de préparation manquante (et l'obtention de la validation du responsable si Politiques l'exige) lève le verrouillage préalable.)",
         "Si le message indique que l'instrument est à l'état Étalonnage Expiré / Bloqué, ouvrez Équipement. Enregistrez un Étalonnage à jour ou sélectionnez un autre instrument Prêt / Étalonné. (Attendu : Dès que le prérequis ou le contrôle d'instrument est satisfait, la ligne d'analyse se déverrouille dans Poste de travail.)"
       ],
       "caution": "Chaque verrouillage dans Poste de travail désigne une étape manquante précise : terminez cette étape plutôt que de chercher un contournement.",
@@ -3656,7 +3656,7 @@
             },
             {
               "action": "Saisissez ou appliquez uniquement les lignes qui ne sont pas encore enregistrées. Terminez Vérifier la réalisation et Prêt à soumettre.",
-              "expected": "La série se termine proprement sans tentatives en doublon ni écrasement des saisies d'un collègue."
+              "expected": "La série se termine proprement sans essais en doublon ni écrasement des saisies d'un collègue."
             }
           ]
         }
@@ -3697,7 +3697,7 @@
       "steps": [
         "Si Poste de travail signale qu'une ligne a été mise à jour par un autre utilisateur ou qu'une requête a expiré, copiez ou gardez vos valeurs non sauvegardées visibles avant d'actualiser la page. (Attendu : Vos mesures restent en sécurité sur votre tableur ou votre feuille de paillasse pendant que vous vérifiez ce que le serveur a déjà enregistré.)",
         "Rechargez la feuille de travail. Vérifiez les badges de statut des lignes (Brouillon enregistré, Saisi ou Envoyés et terminés) ainsi que les horodatages. (Attendu : Vous voyez immédiatement si votre clic précédent a abouti avant la coupure réseau ou si un collègue a déjà enregistré la ligne.)",
-        "Saisissez ou appliquez uniquement les lignes qui ne sont pas encore enregistrées. Terminez Vérifier la réalisation et Prêt à soumettre. (Attendu : La série se termine proprement sans tentatives en doublon ni écrasement des saisies d'un collègue.)"
+        "Saisissez ou appliquez uniquement les lignes qui ne sont pas encore enregistrées. Terminez Vérifier la réalisation et Prêt à soumettre. (Attendu : La série se termine proprement sans essais en doublon ni écrasement des saisies d'un collègue.)"
       ],
       "caution": "Vérifiez toujours si le serveur a déjà pris en compte votre clic avant de réessayer après une réponse lente du réseau.",
       "related": [
@@ -4006,7 +4006,7 @@
               "expected": "La valeur calculée et les paramètres d'entrée de sa formule s'affichent clairement et se distinguent des mesures directes de chimie humide."
             },
             {
-              "action": "Si une mesure d'entrée est ultérieurement répétée et mise à jour dans une nouvelle tentative, vérifiez que la valeur dérivée se recalcule automatiquement selon la nouvelle mesure approuvée.",
+              "action": "Si une mesure d'entrée est ultérieurement répétée et mise à jour dans un nouvel essai, vérifiez que la valeur dérivée se recalcule automatiquement selon la nouvelle mesure approuvée.",
               "expected": "Les valeurs calculées restent toujours synchronisées avec les mesures d'entrée approuvées en vigueur."
             }
           ]
@@ -4048,7 +4048,7 @@
       "steps": [
         "Enregistrez. Soumettez les paramètres mesurés requis dans Poste de travail (tels que Sable %, Limon % et Argile %, ou les cations échangeables Ca, Mg, K et Na). (Attendu : Le système stocke chaque valeur mesurée avec son unité et la traçabilité de sa méthode.)",
         "Inspectez le badge de résultat calculé (marqué Calculé (dérivé)) sur la feuille de travail, la fiche de l'échantillon ou l'écran de révision. (Attendu : La valeur calculée et les paramètres d'entrée de sa formule s'affichent clairement et se distinguent des mesures directes de chimie humide.)",
-        "Si une mesure d'entrée est ultérieurement répétée et mise à jour dans une nouvelle tentative, vérifiez que la valeur dérivée se recalcule automatiquement selon la nouvelle mesure approuvée. (Attendu : Les valeurs calculées restent toujours synchronisées avec les mesures d'entrée approuvées en vigueur.)"
+        "Si une mesure d'entrée est ultérieurement répétée et mise à jour dans un nouvel essai, vérifiez que la valeur dérivée se recalcule automatiquement selon la nouvelle mesure approuvée. (Attendu : Les valeurs calculées restent toujours synchronisées avec les mesures d'entrée approuvées en vigueur.)"
       ],
       "caution": "Si un résultat dérivé paraît invraisemblable, vérifiez les unités et la position de la virgule de chaque mesure d'entrée qui l'alimente.",
       "related": [
@@ -4510,7 +4510,7 @@
         {
           "symptom": "Votre sol de référence échoue avec une alerte rouge et l'approbation de la série est bloquée.",
           "why": "Lorsque votre laboratoire configure le mode de contrôle qualité en blocage strict, un Blanc, un Duplicata ou un matériau de référence non conforme bloque automatiquement l'approbation des échantillons pour empêcher la publication de données erronées.",
-          "action": "Vérifiez d'abord s'il s'agit d'une faute de frappe ou d'une erreur de sélection du lot dans Matériaux de référence . Si la série chimique a réellement dérivé, prévenez votre Responsable de Laboratoire pour reprendre le segment d'étalonnage ou invalider et réanalyser la série."
+          "action": "Vérifiez d'abord s'il s'agit d'une faute de frappe ou d'une erreur de sélection du lot dans Matériaux de référence . Si la série chimique a réellement dérivé, prévenez votre Responsable de Laboratoire pour répéter les analyses depuis le dernier contrôle valide de l'instrument ou invalider et réanalyser la série."
         }
       ],
       "sources": [
@@ -4567,7 +4567,7 @@
               "expected": "Vous pouvez décider de poursuivre l’analyse avec une réserve d’état documentée ou de rejeter l’échantillon."
             },
             {
-              "action": "Enregistrez votre décision de responsable : accepter l’échantillon avec réserve (ce qui débloque Séchage à l’air libre) ou confirmer Rejeté (Non-conformité) et prévenir le client ou le chef de projet.",
+              "action": "Enregistrez votre décision de responsable : accepter l’échantillon avec réserve (ce qui débloque Séchage à l’air libre) ou confirmer Rejeté (problème consigné) et prévenir le client ou le chef de projet.",
               "expected": "La décision et son motif sont enregistrés dans l’historique d’audit de l’échantillon et figureront sur tout futur Certificat d’analyse."
             }
           ]
@@ -4580,7 +4580,7 @@
           "Bloque le séchage et les analyses à la paillasse tant qu’un responsable n’a pas examiné le sac physique."
         ],
         [
-          "Rejeté (Non-conformité)",
+          "Rejeté (problème consigné)",
           "Statut final d’un échantillon qui ne peut pas être analysé en raison d’un dommage grave ou d’une quantité de sol insuffisante",
           "Conserve une trace permanente de la raison pour laquelle le sac livré n’a pas pu être analysé."
         ],
@@ -4608,7 +4608,7 @@
       "steps": [
         "Ouvrez Réception d'échantillons ou Registre des échantillons et filtrez sur les échantillons En quarantaine ou les réceptions récentes comportant des réserves d’état. (Attendu : Vous voyez le poids mesuré par l’agent de réception, les contrôles d’état conformes ou non conformes et la description écrite du problème.)",
         "Inspectez le sac physique. Vérifiez dans 3. Analyses s’il y a suffisamment de sol non contaminé pour réaliser les essais prioritaires. (Attendu : Vous pouvez décider de poursuivre l’analyse avec une réserve d’état documentée ou de rejeter l’échantillon.)",
-        "Enregistrez votre décision de responsable : accepter l’échantillon avec réserve (ce qui débloque Séchage à l’air libre) ou confirmer Rejeté (Non-conformité) et prévenir le client ou le chef de projet. (Attendu : La décision et son motif sont enregistrés dans l’historique d’audit de l’échantillon et figureront sur tout futur Certificat d’analyse.)"
+        "Enregistrez votre décision de responsable : accepter l’échantillon avec réserve (ce qui débloque Séchage à l’air libre) ou confirmer Rejeté (problème consigné) et prévenir le client ou le chef de projet. (Attendu : La décision et son motif sont enregistrés dans l’historique d’audit de l’échantillon et figureront sur tout futur Certificat d’analyse.)"
       ],
       "caution": "Ne libérez jamais un sac ayant fui ou subi une contamination croisée vers les analyses de routine sans documenter la réserve sur l’état.",
       "related": [
@@ -4750,11 +4750,11 @@
             },
             {
               "action": "Si un résultat ou un lot nécessite une reprise ou une correction, cliquez sur Retourner (ou Retourner pour révision), sélectionnez les lignes concernées et rédigez une consigne claire expliquant ce qu’il faut corriger.",
-              "expected": "Les éléments retournés se rouvrent dans le Poste de travail du technicien sous forme d’une nouvelle tentative (Tentative nº 2), tandis que la Tentative nº 1 reste scellée dans l’historique."
+              "expected": "Les éléments retournés se rouvrent dans le Poste de travail du technicien sous forme d’un nouvel essai (Essai n° 2), tandis que l'Essai n° 1 reste scellée dans l’historique."
             },
             {
               "action": "Si les mesures et les contrôles qualité respectent les critères de votre laboratoire, cliquez sur Approuver.",
-              "expected": "Les déterminations passent au statut Approuvé et verrouillent la valeur rapportée officielle pour chaque paramètre."
+              "expected": "Les déterminations passent au statut Approuvé et verrouillent la valeur finale du rapport officielle pour chaque paramètre."
             }
           ]
         },
@@ -4781,7 +4781,7 @@
         [
           "Retourner pour révision",
           "Boutons de décision du réviseur dans Examiner les soumissions",
-          "Approuver verrouille les résultats acceptés ; Retourner renvoie les éléments sélectionnés pour une nouvelle tentative à la paillasse avec votre note."
+          "Approuver verrouille les résultats acceptés ; Retourner renvoie les éléments sélectionnés pour un nouvel essai à la paillasse avec votre note."
         ],
         [
           "Approbations finales",
@@ -4813,8 +4813,8 @@
         "Ouvrez Liste de tâches. Cliquez sur l’onglet Examiner les soumissions. Vérifiez votre laboratoire actif et les filtres de file. (Attendu : Vous voyez tous les lots de méthodes et toutes les déterminations que les techniciens ont formellement soumis pour examen.)",
         "Ouvrez un lot ou un échantillon soumis. Vérifiez quelles analyses sont incluses et s’il s’agit d’une soumission complète ou partielle. (Attendu : Vous voyez les déterminations exactes soumises dans ce lot ainsi que l’état des autres essais prévus sur le même échantillon.)",
         "Inspectez les valeurs des échantillons, les unités, la base d’humidité, l’instrument étalonné, les confirmations de préparation et les résultats CQ du lot (Blanc, Duplicata, sol de référence et contrôles d’étalonnage). (Attendu : Chaque mesure s’appuie sur un contrôle qualité conforme (ou un badge clair d’avertissement ou d’échec) et sur une traçabilité valide des équipements.)",
-        "Si un résultat ou un lot nécessite une reprise ou une correction, cliquez sur Retourner (ou Retourner pour révision), sélectionnez les lignes concernées et rédigez une consigne claire expliquant ce qu’il faut corriger. (Attendu : Les éléments retournés se rouvrent dans le Poste de travail du technicien sous forme d’une nouvelle tentative (Tentative nº 2), tandis que la Tentative nº 1 reste scellée dans l’historique.)",
-        "Si les mesures et les contrôles qualité respectent les critères de votre laboratoire, cliquez sur Approuver. (Attendu : Les déterminations passent au statut Approuvé et verrouillent la valeur rapportée officielle pour chaque paramètre.)",
+        "Si un résultat ou un lot nécessite une reprise ou une correction, cliquez sur Retourner (ou Retourner pour révision), sélectionnez les lignes concernées et rédigez une consigne claire expliquant ce qu’il faut corriger. (Attendu : Les éléments retournés se rouvrent dans le Poste de travail du technicien sous forme d’un nouvel essai (Essai n° 2), tandis que l'Essai n° 1 reste scellée dans l’historique.)",
+        "Si les mesures et les contrôles qualité respectent les critères de votre laboratoire, cliquez sur Approuver. (Attendu : Les déterminations passent au statut Approuvé et verrouillent la valeur finale du rapport officielle pour chaque paramètre.)",
         "Vérifiez si toutes les analyses demandées sur l’échantillon sont désormais approuvées afin qu’il puisse passer dans Approbations finales. (Attendu : Les échantillons dont tous les essais sont approuvés apparaissent dans Approbations finales pour la revue globale de l’échantillon.)",
         "Une fois la validation dans Approbations finales terminée, ouvrez Rapports pour générer et vérifier le Certificat d’analyse officiel. (Attendu : La revue technique de lot (étape 1), l’approbation finale de l’échantillon (étape 2) et l’émission du rapport PDF restent distinctes et entièrement traçables.)"
       ],
@@ -4843,7 +4843,7 @@
       "quick": "Dans Examiner les soumissions, cliquez sur Retourner (ou Retourner pour révision) sur la détermination ou le lot concerné, indiquez le problème exact (tel qu’un blanc non conforme, une dérive de duplicata ou une dilution à vérifier) ainsi que l’action attendue du technicien. Confirmez le retour.",
       "before": [
         "Déterminez si l’ensemble du lot analytique a échoué au contrôle qualité ou si un seul échantillon nécessite une reprise.",
-        "Vérifiez quelle répétition ou tentative doit être conservée si plusieurs tentatives valides existent."
+        "Vérifiez quelle répétition ou quel essai doit être conservé si plusieurs essais valides existent."
       ],
       "sections": [
         {
@@ -4851,15 +4851,15 @@
           "steps": [
             {
               "action": "Ouvrez Liste de tâches → Examiner les soumissions. Inspectez la série ou l’échantillon soumis.",
-              "expected": "Vous voyez toutes les tentatives de mesure, la concordance des réplicats et les résultats du contrôle qualité."
+              "expected": "Vous voyez tous les essais de mesure, la concordance des réplicats et les résultats du contrôle qualité."
             },
             {
               "action": "Cliquez sur Retourner sur la détermination concernée (ou invalidez/retournez le lot si un témoin de lot a échoué) et rédigez une note précise mentionnant le paramètre, le motif et s’il faut repeser ou rediluer.",
-              "expected": "Le système conserve la Tentative nº 1 scellée pour le journal d’audit et ouvre la Tentative nº 2 dans le Poste de travail du technicien avec votre note écrite."
+              "expected": "Le système conserve l'Essai n° 1 scellée pour le journal d’audit et ouvre l'Essai n° 2 dans le Poste de travail du technicien avec votre note écrite."
             },
             {
-              "action": "Lorsque le technicien soumet la Tentative nº 2, comparez la Tentative nº 1 et la Tentative nº 2 dans Examiner les soumissions. Vérifiez quelle règle de valeur rapportée (moyenne des réplicats concordants ou dernière tentative valide) s’applique avant de cliquer sur Approuver.",
-              "expected": "La Valeur rapportée approuvée est verrouillée proprement avec l’historique complet des deux tentatives."
+              "action": "Lorsque le technicien soumet l'Essai n° 2, comparez l'Essai n° 1 et l'Essai n° 2 dans Examiner les soumissions. Vérifiez quelle règle de valeur finale du rapport (moyenne des réplicats concordants ou dernier essai valide) s’applique avant de cliquer sur Approuver.",
+              "expected": "La Valeur finale du rapport approuvée est verrouillée proprement avec l’historique complet des deux essais."
             }
           ]
         }
@@ -4868,7 +4868,7 @@
         [
           "Retourner pour révision",
           "Action du réviseur qui renvoie un élément soumis vers la paillasse",
-          "Crée une nouvelle tentative modifiable pour le technicien tout en préservant les tentatives précédentes."
+          "Crée un nouvel essai modifiable pour le technicien tout en préservant les essais précédents."
         ],
         [
           "Notes d'examen",
@@ -4876,13 +4876,13 @@
           "Rédigez une instruction concrète (par exemple : « Reprendre à la dilution 1:10 — dépasse l’étalon haut ») plutôt qu’un simple « Corriger »."
         ],
         [
-          "Valeur rapportée",
+          "Valeur finale du rapport",
           "La valeur officielle sélectionnée pour le rapport après examen",
-          "Suit la politique de votre laboratoire (moyenne dans la limite de répétabilité, dernière tentative valide ou choix du réviseur)."
+          "Suit la politique de votre laboratoire (moyenne dans la limite de répétabilité, dernier essai valide ou choix du réviseur)."
         ]
       ],
-      "example": "Dans Examiner les soumissions, retournez le phosphore Olsen de l’échantillon DEMO-26-000142 avec la note « Lecture de 95 mg/kg supérieure à l’étalon haut — diluer au 1:5 et remesurer en Tentative nº 2 ».",
-      "success": "Le technicien reçoit une consigne explicite à sa paillasse et enregistre la Tentative nº 2 sans ambiguïté.",
+      "example": "Dans Examiner les soumissions, retournez le phosphore Olsen de l’échantillon DEMO-26-000142 avec la note « Lecture de 95 mg/kg supérieure à l’étalon haut — diluer au 1:5 et remesurer en Essai n° 2 ».",
+      "success": "Le technicien reçoit une consigne explicite à sa paillasse et enregistre l'Essai n° 2 sans ambiguïté.",
       "nextActor": "Technicien de Laboratoire désigné dans Mon travail et Poste de travail",
       "problems": [
         {
@@ -4897,11 +4897,11 @@
         "client/src/pages/ResultReports.jsx"
       ],
       "steps": [
-        "Ouvrez Liste de tâches → Examiner les soumissions. Inspectez la série ou l’échantillon soumis. (Attendu : Vous voyez toutes les tentatives de mesure, la concordance des réplicats et les résultats du contrôle qualité.)",
-        "Cliquez sur Retourner sur la détermination concernée (ou invalidez/retournez le lot si un témoin de lot a échoué) et rédigez une note précise mentionnant le paramètre, le motif et s’il faut repeser ou rediluer. (Attendu : Le système conserve la Tentative nº 1 scellée pour le journal d’audit et ouvre la Tentative nº 2 dans le Poste de travail du technicien avec votre note écrite.)",
-        "Lorsque le technicien soumet la Tentative nº 2, comparez la Tentative nº 1 et la Tentative nº 2 dans Examiner les soumissions. Vérifiez quelle règle de valeur rapportée (moyenne des réplicats concordants ou dernière tentative valide) s’applique avant de cliquer sur Approuver. (Attendu : La Valeur rapportée approuvée est verrouillée proprement avec l’historique complet des deux tentatives.)"
+        "Ouvrez Liste de tâches → Examiner les soumissions. Inspectez la série ou l’échantillon soumis. (Attendu : Vous voyez tous les essais de mesure, la concordance des réplicats et les résultats du contrôle qualité.)",
+        "Cliquez sur Retourner sur la détermination concernée (ou invalidez/retournez le lot si un témoin de lot a échoué) et rédigez une note précise mentionnant le paramètre, le motif et s’il faut repeser ou rediluer. (Attendu : Le système conserve l'Essai n° 1 scellée pour le journal d’audit et ouvre l'Essai n° 2 dans le Poste de travail du technicien avec votre note écrite.)",
+        "Lorsque le technicien soumet l'Essai n° 2, comparez l'Essai n° 1 et l'Essai n° 2 dans Examiner les soumissions. Vérifiez quelle règle de valeur finale du rapport (moyenne des réplicats concordants ou dernier essai valide) s’applique avant de cliquer sur Approuver. (Attendu : La Valeur finale du rapport approuvée est verrouillée proprement avec l’historique complet des deux essais.)"
       ],
-      "caution": "Ne demandez jamais à un technicien de modifier un résultat en dehors du système : utilisez Retourner afin que la Tentative nº 1 et la Tentative nº 2 soient toutes deux conservées.",
+      "caution": "Ne demandez jamais à un technicien de modifier un résultat en dehors du système : utilisez Retourner afin que l'Essai n° 1 et l'Essai n° 2 soient toutes deux conservées.",
       "related": [
         "start-first-login",
         "quality-support"
@@ -4930,7 +4930,7 @@
       "quick": "Ouvrez Liste de tâches → Approbations finales, inspectez ensemble tous les résultats d’analyse approuvés sur l’échantillon, vérifiez les alertes de cohérence inter-paramètres (bouclage granulométrique, rapport C/N ou somme des bases échangeables par rapport à la CEC). Cliquez sur Approuver pour autoriser l’édition du rapport.",
       "before": [
         "Vérifiez que toutes les analyses individuelles de l’échantillon ont franchi la revue de niveau 1 (ou disposent d’une dérogation autorisée par le responsable si un essai n’a pas pu être réalisé).",
-        "Assurez-vous qu’aucune Non-conformité ouverte ni aucun blocage CQ non résolu ne subsiste sur l’échantillon."
+        "Assurez-vous qu’aucune Fiche de problème ouverte ni aucun blocage CQ non résolu ne subsiste sur l’échantillon."
       ],
       "sections": [
         {
@@ -5049,7 +5049,7 @@
           "Indique la version officielle valide du rapport pour les clients et les auditeurs."
         ],
         [
-          "Valeur rapportée",
+          "Valeur finale du rapport",
           "Valeur officielle approuvée imprimée sur le Certificat d’analyse",
           "Verrouillée lors de l’approbation afin que les rapports, les exports CSV et les flux de données affichent toujours exactement le même chiffre."
         ]
@@ -5114,12 +5114,12 @@
               "expected": "Pour un amendement scientifique, le rapport précédemment émis est immédiatement marqué Retiré sur les liens publics de vérification pendant que la correction est en cours."
             },
             {
-              "action": "Effectuez la correction autorisée (ou demandez au technicien d’enregistrer la nouvelle tentative à la paillasse en cas de reprise d’essai). Validez la revue du responsable et la cosignature d’une seconde personne si Politiques l’exige.",
+              "action": "Effectuez la correction autorisée (ou demandez au technicien d’enregistrer le nouvel essai à la paillasse en cas de reprise d’essai). Validez la revue du responsable et la cosignature d’une seconde personne si Politiques l’exige.",
               "expected": "La valeur initiale et la nouvelle valeur sont toutes deux conservées dans l’historique d’audit."
             },
             {
               "action": "Émettez le Certificat d’analyse modifié dans Rapports.",
-              "expected": "La nouvelle révision du rapport devient Actuel avec une mention de remplacement détaillant ce qui a changé, et l’ancien PDF est définitivement marqué Remplacé."
+              "expected": "La nouvelle révision du rapport devient Actuel avec une mention de remplacement détaillant ce qui a changé, et l’ancien PDF est définitivement marqué Remplacé par une version plus récente."
             }
           ]
         }
@@ -5131,7 +5131,7 @@
           "Empêche toute personne scannant le code QR de l’ancien PDF de se fier à un résultat en cours de réexamen."
         ],
         [
-          "Remplacées",
+          "Remplacé par une version plus récente",
           "Statut permanent d’une ancienne révision de rapport une fois la révision de remplacement émise",
           "Conservée dans l’archive d’audit tout en orientant les lecteurs vers le nouveau rapport Actuel."
         ],
@@ -5141,7 +5141,7 @@
           "Lorsqu’il est activé, un second réviseur autorisé doit cosigner tout amendement avant l’émission du nouveau rapport."
         ]
       ],
-      "example": "Ouvrez le rapport émis RPT-DEMO-2026-00042, lancez un amendement administratif pour corriger une erreur de saisie de profondeur de « 0–2 cm » à « 0–20 cm », enregistrez le motif, obtenez la cosignature et émettez la Révision 2 (Actuel) tandis que la Révision 1 devient Remplacé.",
+      "example": "Ouvrez le rapport émis RPT-DEMO-2026-00042, lancez un amendement administratif pour corriger une erreur de saisie de profondeur de « 0–2 cm » à « 0–20 cm », enregistrez le motif, obtenez la cosignature et émettez la Révision 2 (Actuel) tandis que la Révision 1 devient Remplacé par une version plus récente.",
       "success": "La correction est publiée en toute transparence dans une nouvelle révision de rapport Actuel tout en conservant l’historique complet de la Révision 1.",
       "nextActor": "Second réviseur / Responsable de Laboratoire et Client recevant le PDF de remplacement",
       "problems": [
@@ -5158,10 +5158,10 @@
       ],
       "steps": [
         "Ouvrez Rapports ou l’échantillon approuvé dans Registre des échantillons, lancez un amendement de rapport, choisissez le type administratif ou scientifique. Saisissez le motif complet de la modification. (Attendu : Pour un amendement scientifique, le rapport précédemment émis est immédiatement marqué Retiré sur les liens publics de vérification pendant que la correction est en cours.)",
-        "Effectuez la correction autorisée (ou demandez au technicien d’enregistrer la nouvelle tentative à la paillasse en cas de reprise d’essai). Validez la revue du responsable et la cosignature d’une seconde personne si Politiques l’exige. (Attendu : La valeur initiale et la nouvelle valeur sont toutes deux conservées dans l’historique d’audit.)",
-        "Émettez le Certificat d’analyse modifié dans Rapports. (Attendu : La nouvelle révision du rapport devient Actuel avec une mention de remplacement détaillant ce qui a changé, et l’ancien PDF est définitivement marqué Remplacé.)"
+        "Effectuez la correction autorisée (ou demandez au technicien d’enregistrer le nouvel essai à la paillasse en cas de reprise d’essai). Validez la revue du responsable et la cosignature d’une seconde personne si Politiques l’exige. (Attendu : La valeur initiale et la nouvelle valeur sont toutes deux conservées dans l’historique d’audit.)",
+        "Émettez le Certificat d’analyse modifié dans Rapports. (Attendu : La nouvelle révision du rapport devient Actuel avec une mention de remplacement détaillant ce qui a changé, et l’ancien PDF est définitivement marqué Remplacé par une version plus récente.)"
       ],
-      "caution": "Envoyez toujours le nouveau PDF Actuel au client. Demandez-lui de détruire tout exemplaire imprimé Remplacé.",
+      "caution": "Envoyez toujours le nouveau PDF Actuel au client. Demandez-lui de détruire tout exemplaire imprimé marqué Remplacé par une version plus récente par une version plus récente.",
       "related": [
         "start-first-login",
         "quality-support"
@@ -5189,7 +5189,7 @@
       "minutes": 3,
       "quick": "Dans Rapports, vérifiez que le badge du rapport indique Actuel, contrôlez la langue du rapport et le périmètre du projet. Téléchargez ou partagez le PDF Actuel ou le lien de vérification.",
       "before": [
-        "Vérifiez que le statut du rapport est Actuel (ne partagez jamais un rapport Retiré ou Remplacé).",
+        "Vérifiez que le statut du rapport est Actuel (ne partagez jamais un rapport Retiré ou Remplacé par une version plus récente).",
         "Assurez-vous que le destinataire est autorisé à consulter les résultats de ce projet ou de cette commande client."
       ],
       "sections": [
@@ -5220,10 +5220,10 @@
         [
           "Créer un lien public",
           "Code de vérification imprimé sur le Certificat d’analyse",
-          "Indique si le rapport est Actuel ou s’il a été Retiré ou Remplacé."
+          "Indique si le rapport est Actuel ou s’il a été Retiré ou Remplacé par une version plus récente."
         ],
         [
-          "Remplacées",
+          "Remplacé par une version plus récente",
           "Badge figurant sur une ancienne révision remplacée par un amendement",
           "Les anciens liens publics affichent automatiquement un avis indiquant qu’une révision plus récente existe."
         ]
@@ -5977,7 +5977,7 @@
               "expected": "Chaque série et chaque détermination d’échantillon enregistrées avec cet instrument ou ce lot s’affichent."
             },
             {
-              "action": "Si un lot défectueux ou un instrument non étalonné a affecté des échantillons approuvés ou non approuvés, ouvrez une fiche de Non-conformité dans Tableau de bord QA et retournez ou amendez les échantillons concernés.",
+              "action": "Si un lot défectueux ou un instrument non étalonné a affecté des échantillons approuvés ou non approuvés, ouvrez une Fiche de problème dans Tableau de bord QA et retournez ou amendez les échantillons concernés.",
               "expected": "Vous circonscrivez précisément le problème aux séries touchées sans avoir à deviner quels échantillons ont été impactés."
             }
           ]
@@ -5990,7 +5990,7 @@
           "Créé automatiquement chaque fois qu’un technicien enregistre une série dans Poste de travail."
         ],
         [
-          "Non-conformité",
+          "Fiches de problème",
           "Fiche d’incident qualité dans Tableau de bord QA",
           "Permet de documenter la cause profonde et de lister chaque série affectée par un instrument défaillant ou un lot de réactif défectueux."
         ],
@@ -6000,7 +6000,7 @@
           "Permet de relancer de manière ciblée l’analyse des échantillons concernés."
         ]
       ],
-      "example": "Après avoir découvert jeudi que le lot NAHCO3-04 de solution d’extraction du phosphore Olsen était contaminé, retracez les deux séries ayant utilisé le lot NAHCO3-04, enregistrez une Non-conformité et retournez ces échantillons pour une Tentative nº 2.",
+      "example": "Après avoir découvert jeudi que le lot NAHCO3-04 de solution d’extraction du phosphore Olsen était contaminé, retracez les deux séries ayant utilisé le lot NAHCO3-04, enregistrez une Fiche de problème et retournez ces échantillons pour un Essai n° 2.",
       "success": "Tout problème d’équipement ou de réactif peut être retracé jusqu’aux échantillons exacts concernés en quelques minutes.",
       "nextActor": "Responsable Qualité et Audit et Responsable de Laboratoire",
       "problems": [
@@ -6017,7 +6017,7 @@
       "steps": [
         "Ouvrez Équipement (ou Réactifs et Inventaire). Sélectionnez la fiche de l’instrument ou du lot pour consulter l’historique de ses événements et de son utilisation. (Attendu : Vous voyez la chronologie des étalonnages, des opérations de maintenance et des séries analytiques associées.)",
         "Ouvrez Tableau de bord QA ou la liste des séries analytiques et filtrez par instrument ou par lot sur la période suspecte. (Attendu : Chaque série et chaque détermination d’échantillon enregistrées avec cet instrument ou ce lot s’affichent.)",
-        "Si un lot défectueux ou un instrument non étalonné a affecté des échantillons approuvés ou non approuvés, ouvrez une fiche de Non-conformité dans Tableau de bord QA et retournez ou amendez les échantillons concernés. (Attendu : Vous circonscrivez précisément le problème aux séries touchées sans avoir à deviner quels échantillons ont été impactés.)"
+        "Si un lot défectueux ou un instrument non étalonné a affecté des échantillons approuvés ou non approuvés, ouvrez une Fiche de problème dans Tableau de bord QA et retournez ou amendez les échantillons concernés. (Attendu : Vous circonscrivez précisément le problème aux séries touchées sans avoir à deviner quels échantillons ont été impactés.)"
       ],
       "caution": "La précision de la traçabilité par lot repose sur la sélection par les techniciens du véritable numéro de lot du flacon utilisé dans Poste de travail à chaque série.",
       "related": [
@@ -6253,7 +6253,7 @@
           "Visible uniquement sur cet appareil jusqu’à la synchronisation avec le serveur."
         ],
         [
-          "Récupérer la tentative précédente",
+          "Vérifier si le dernier essai a été enregistré",
           "Accusé permanent attribué uniquement après la reconnexion et la synchronisation de l’appareil",
           "Indispensable avant qu’un travail ne soit officiellement confirmé ou soumis."
         ]
@@ -6332,7 +6332,7 @@
             },
             {
               "action": "Si un élément a échoué à cause d’une brève coupure réseau, vérifiez si le serveur l’a déjà enregistré avant de cliquer sur Réessayer.",
-              "expected": "La nouvelle tentative aboutit proprement sans créer d’enregistrement en doublon."
+              "expected": "Le nouvel essai aboutit proprement sans créer d’enregistrement en doublon."
             },
             {
               "action": "Si un conflit est signalé (par exemple parce qu’un autre utilisateur a mis à jour la même tâche pendant que vous étiez hors ligne), comparez votre valeur locale à la valeur du serveur et sollicitez votre Responsable de Laboratoire si la tâche a été réattribuée ou approuvée.",
@@ -6386,7 +6386,7 @@
         "Ramenez l’appareil sur le réseau du laboratoire. Vérifiez que vous êtes connecté avec le même compte utilisateur et le même laboratoire. (Attendu : La connexion en ligne est rétablie et l’appareil se prépare à envoyer vos éléments en file d’attente sous votre identité.)",
         "Ouvrez la vue des travaux en attente ou de l’état de synchronisation dans l’application. (Attendu : Vous voyez chaque élément de la file et savez s’il est en attente, synchronisé ou s’il requiert votre attention.)",
         "Vérifiez que chaque élément de la file affiche un statut confirmé par le serveur et comparez le nombre d’éléments traités au nombre d’éléments restant en attente. (Attendu : Vous avez la certitude que chaque élément a été synchronisé — et pas seulement que l’icône Wi-Fi est passée au vert.)",
-        "Si un élément a échoué à cause d’une brève coupure réseau, vérifiez si le serveur l’a déjà enregistré avant de cliquer sur Réessayer. (Attendu : La nouvelle tentative aboutit proprement sans créer d’enregistrement en doublon.)",
+        "Si un élément a échoué à cause d’une brève coupure réseau, vérifiez si le serveur l’a déjà enregistré avant de cliquer sur Réessayer. (Attendu : Le nouvel essai aboutit proprement sans créer d’enregistrement en doublon.)",
         "Si un conflit est signalé (par exemple parce qu’un autre utilisateur a mis à jour la même tâche pendant que vous étiez hors ligne), comparez votre valeur locale à la valeur du serveur et sollicitez votre Responsable de Laboratoire si la tâche a été réattribuée ou approuvée. (Attendu : Les enregistrements du serveur ne sont jamais écrasés à l’aveugle.)",
         "Une fois vos brouillons synchronisés avec le serveur, ouvrez Poste de travail pour valider Vérifier la réalisation. Cliquez sur Soumettre dans Prêt à soumettre. (Attendu : Les brouillons de paillasse synchronisés sont formellement enregistrés et transmis au réviseur.)"
       ],
@@ -6430,7 +6430,7 @@
               "expected": "Vous pouvez identifier quelle mesure provient de la série réellement exécutée à la paillasse."
             },
             {
-              "action": "Conservez l’enregistrement faisant foi sur le serveur si un collègue a déjà saisi la même série, ou appliquez votre mesure locale (ou demandez au responsable de retourner la tâche pour une nouvelle tentative) si votre appareil détient la véritable lecture de paillasse.",
+              "action": "Conservez l’enregistrement faisant foi sur le serveur si un collègue a déjà saisi la même série, ou appliquez votre mesure locale (ou demandez au responsable de retourner la tâche pour un nouvel essai) si votre appareil détient la véritable lecture de paillasse.",
               "expected": "Le conflit est résolu de manière transparente sans perte silencieuse de données."
             }
           ]
@@ -6438,12 +6438,12 @@
       ],
       "fields": [
         [
-          "Annuler la tentative",
+          "Effacer l'essai inachevé",
           "Valeur et horodatage relevés sur votre tablette ou ordinateur portable hors connexion",
           "Affichés en regard de l’enregistrement du serveur. Cela permet de pouvoir les comparer avant de choisir."
         ],
         [
-          "Récupérer la tentative précédente",
+          "Vérifier si le dernier essai a été enregistré",
           "Valeur, statut et opérateur actuellement stockés dans la base de données centrale du système",
           "Protégés contre tout écrasement silencieux par un cache hors ligne plus ancien."
         ],
@@ -6471,7 +6471,7 @@
       "steps": [
         "Ouvrez l’élément en conflit dans la vue de synchronisation ou dans Poste de travail et lisez la raison pour laquelle le serveur a refusé la mise à jour automatique. (Attendu : Le message précise si un autre technicien a saisi une valeur, si le responsable a réattribué la tâche ou si l’échantillon a déjà été approuvé.)",
         "Comparez la valeur et l’horodatage figurant sur votre appareil avec la valeur et l’opérateur actuellement enregistrés sur le serveur. (Attendu : Vous pouvez identifier quelle mesure provient de la série réellement exécutée à la paillasse.)",
-        "Conservez l’enregistrement faisant foi sur le serveur si un collègue a déjà saisi la même série, ou appliquez votre mesure locale (ou demandez au responsable de retourner la tâche pour une nouvelle tentative) si votre appareil détient la véritable lecture de paillasse. (Attendu : Le conflit est résolu de manière transparente sans perte silencieuse de données.)"
+        "Conservez l’enregistrement faisant foi sur le serveur si un collègue a déjà saisi la même série, ou appliquez votre mesure locale (ou demandez au responsable de retourner la tâche pour un nouvel essai) si votre appareil détient la véritable lecture de paillasse. (Attendu : Le conflit est résolu de manière transparente sans perte silencieuse de données.)"
       ],
       "caution": "Pour éviter les conflits hors ligne, coordonnez-vous avec votre équipe de paillasse afin qu’un seul appareil travaille sur un lot donné hors connexion.",
       "related": [
@@ -6630,7 +6630,7 @@
       "nextActor": "Technicien de Laboratoire à la paillasse",
       "problems": [
         {
-          "symptom": "Vous pouvez lire l’article d’aide hors ligne, mais le clic sur Confirmer la fin ou Soumettre échoue.",
+          "symptom": "Vous pouvez lire l’article d’aide hors ligne, mais le clic sur Confirmer que le travail est terminé ou Soumettre échoue.",
           "why": "L’aide hors ligne permet de consulter les instructions sans connexion, mais les reçus finaux du serveur et les soumissions au réviseur exigent une connexion réseau active.",
           "action": "Enregistrez votre travail comme brouillon local pendant que vous êtes hors ligne. Reconnectez-vous au Wi-Fi du laboratoire pour confirmer et soumettre."
         }
@@ -6881,7 +6881,7 @@
             },
             {
               "action": "Si un Certificat d’analyse avait déjà été émis avant la découverte de l’erreur de terrain, lancez un amendement administratif dans Rapports pour publier la révision corrigée du rapport.",
-              "expected": "Le nouveau rapport Actuel affiche les informations de terrain corrigées tandis que l’ancien PDF est marqué Remplacé."
+              "expected": "Le nouveau rapport Actuel affiche les informations de terrain corrigées tandis que l’ancien PDF est marqué Remplacé par une version plus récente."
             }
           ]
         }
@@ -6922,7 +6922,7 @@
       "steps": [
         "Lorsqu’une étiquette de sac physique ne correspond pas aux données de terrain synchronisées (par exemple, une profondeur inscrite à 20–40 cm sur le sac mais à 0–20 cm à l’écran), consignez l’écart dans les notes de Réception d'échantillons. (Attendu : L’enregistrement de terrain synchronisé d’origine et l’observation de l’agent de réception sont tous deux conservés.)",
         "Demandez au Topographe de Terrain ou au Chef de Projet de vérifier le carnet de terrain ou la soumission KoboToolbox et d’appliquer la correction autorisée des données de terrain dans Projets / Registre des échantillons. (Attendu : Le code de site, la profondeur ou les coordonnées GPS mis à jour sont consignés dans le journal d’audit sans effacer l’importation initiale.)",
-        "Si un Certificat d’analyse avait déjà été émis avant la découverte de l’erreur de terrain, lancez un amendement administratif dans Rapports pour publier la révision corrigée du rapport. (Attendu : Le nouveau rapport Actuel affiche les informations de terrain corrigées tandis que l’ancien PDF est marqué Remplacé.)"
+        "Si un Certificat d’analyse avait déjà été émis avant la découverte de l’erreur de terrain, lancez un amendement administratif dans Rapports pour publier la révision corrigée du rapport. (Attendu : Le nouveau rapport Actuel affiche les informations de terrain corrigées tandis que l’ancien PDF est marqué Remplacé par une version plus récente.)"
       ],
       "caution": "Gardez toujours séparées les dates de prélèvement sur le terrain et les dates de réception au laboratoire : la correction d’une date de terrain ne modifie jamais l’horodatage de réception au laboratoire.",
       "related": [
@@ -6952,7 +6952,7 @@
         "maps"
       ],
       "minutes": 3,
-      "quick": "Étiquetez chaque sac de sol physique avec l’ID d’échantillon de terrain exact saisi dans KoboToolbox, synchronisez vos formulaires de terrain remplis avant que le colis n’arrive au laboratoire et joignez un bordereau d’expédition dans la caisse.",
+      "quick": "Étiquetez chaque sac de sol physique avec l’ID d’échantillon de terrain exact saisi dans KoboToolbox, synchronisez vos formulaires de terrain remplis avant que le colis n’arrive au laboratoire et joignez un bordereau de boîte de livraison dans la caisse.",
       "before": [
         "Utilisez des marqueurs indélébiles résistants à l’eau et des étiquettes codes-barres ou indéchirables (type Tyvek) sur chaque sac de sol.",
         "Vérifiez que chaque sac présent dans la caisse de transport correspond à une entrée de votre liste d’enquête de terrain."
@@ -6970,8 +6970,8 @@
               "expected": "Le personnel de réception verra les fiches préenregistrées dès qu’il scannera les sacs."
             },
             {
-              "action": "Emballez soigneusement les sacs scellés avec un manifeste d’expédition imprimé répertoriant tous les ID d’échantillon de terrain contenus dans la caisse.",
-              "expected": "La Réception d'échantillons peut réceptionner toute la caisse en quelques minutes en mode Échantillon de projet ou Lot d’expédition / manifeste."
+              "action": "Emballez soigneusement les sacs scellés avec un bordereau de boîte de livraison imprimé répertoriant tous les ID d’échantillon de terrain contenus dans la caisse.",
+              "expected": "La Réception d'échantillons peut réceptionner toute la caisse en quelques minutes en mode Échantillon de projet ou Boîte de livraison des échantillons."
             }
           ]
         }
@@ -6988,7 +6988,7 @@
           "Confirme que le laboratoire dispose du préenregistrement numérique en attendant l’arrivée de la caisse."
         ],
         [
-          "Lot d’expédition / manifeste",
+          "Boîte de livraison des échantillons",
           "Liste des sacs d’échantillons conditionnés dans une même caisse de transport",
           "Aide le personnel de réception à repérer immédiatement tout sac oublié dans le véhicule de terrain."
         ]
@@ -7012,7 +7012,7 @@
       "steps": [
         "Sur le terrain, enregistrez chaque échantillon dans votre formulaire KoboToolbox (ou modèle de projet) en utilisant exactement le même ID d’échantillon de terrain que celui inscrit sur le sac physique. (Attendu : Chaque sac physique possède un identifiant numérique unique et concordant.)",
         "Téléversez vos formulaires KoboToolbox complétés. Vérifiez dans Projets que les échantillons apparaissent au statut Attendu sous le laboratoire destinataire. (Attendu : Le personnel de réception verra les fiches préenregistrées dès qu’il scannera les sacs.)",
-        "Emballez soigneusement les sacs scellés avec un manifeste d’expédition imprimé répertoriant tous les ID d’échantillon de terrain contenus dans la caisse. (Attendu : La Réception d'échantillons peut réceptionner toute la caisse en quelques minutes en mode Échantillon de projet ou Lot d’expédition / manifeste.)"
+        "Emballez soigneusement les sacs scellés avec un bordereau de boîte de livraison imprimé répertoriant tous les ID d’échantillon de terrain contenus dans la caisse. (Attendu : La Réception d'échantillons peut réceptionner toute la caisse en quelques minutes en mode Échantillon de projet ou Boîte de livraison des échantillons.)"
       ],
       "caution": "Ne glissez jamais une étiquette en papier manuscrite directement au contact de la terre humide où elle risque de se dégrader : fixez une étiquette résistante à l’extérieur du sac scellé.",
       "related": [
@@ -7164,7 +7164,7 @@
           "Exporte uniquement des résultats autorisés et approuvés. Cela permet de protéger la qualité des données."
         ],
         [
-          "Valeur rapportée",
+          "Valeur finale du rapport",
           "Valeur officielle approuvée par paramètre incluse dans les exports standards CSV et Excel",
           "Correspond exactement à la valeur imprimée sur le Certificat d’analyse Actuel de l’échantillon."
         ],
@@ -7388,7 +7388,7 @@
       "category": "admin",
       "kind": "guide",
       "title": "Configurer un laboratoire et son périmètre",
-      "summary": "Configurer le profil d’un laboratoire, son profil qualité prédéfini et ses politiques opérationnelles dans Gestion de laboratoire.",
+      "summary": "Configurer le profil d’un laboratoire, son jeu de règles de départ et ses politiques opérationnelles dans Gestion de laboratoire.",
       "roles": [
         "SUPER_ADMIN",
         "LAB_MANAGER",
@@ -7400,7 +7400,7 @@
         "adminlabs"
       ],
       "minutes": 3,
-      "quick": "Ouvrez Gestion de laboratoire, sélectionnez votre laboratoire, choisissez un profil de départ dans Préréglages (ISO 17025 strict, Basique ou Consultatif (avertissements uniquement)) ou ajustez chaque règle dans Politiques et remplacements d’analyses, saisissez un Motif du changement. Enregistrez.",
+      "quick": "Ouvrez Gestion de laboratoire, sélectionnez votre laboratoire, choisissez un profil de départ dans Règles de départ (ISO 17025 strict, Basique ou Consultatif (avertissements uniquement)) ou ajustez chaque règle dans Politiques et Règles personnalisées par analyse ou méthode, saisissez un Motif du changement. Enregistrez.",
       "before": [
         "Vérifiez que vous êtes connecté en tant que Responsable de Laboratoire ou Administrateur Système.",
         "N’oubliez pas que les paramètres sont configurables par laboratoire : chaque laboratoire choisit le profil et les politiques adaptés à ses effectifs et à son niveau d’accréditation."
@@ -7410,11 +7410,11 @@
           "title": "Procédure étape par étape",
           "steps": [
             {
-              "action": "Cliquez sur Gestion de laboratoire dans le menu latéral. Ouvrez les onglets de configuration de votre laboratoire (Préréglages, Politiques et remplacements d’analyses).",
-              "expected": "Vous voyez le badge du préréglage actif de votre laboratoire (ISO 17025 strict, Basique, Consultatif (avertissements uniquement) ou Personnalisé) ainsi que toutes les règles actuellement activées."
+              "action": "Cliquez sur Gestion de laboratoire dans le menu latéral. Ouvrez les onglets de configuration de votre laboratoire (Règles de départ, Politiques et Règles personnalisées par analyse ou méthode).",
+              "expected": "Vous voyez le badge du jeu de règles de départ actif de votre laboratoire (ISO 17025 strict, Basique, Consultatif (avertissements uniquement) ou Personnalisé) ainsi que toutes les règles actuellement activées."
             },
             {
-              "action": "Sélectionnez un profil dans Préréglages ou ajustez les règles individuelles dans Politiques (telles que l’exigence d’un second réviseur, la vérification par le responsable des portes de préparation, le mode de blocage CQ, l’équipement obligatoire ou le Nombre minimal de points des cartes de contrôle).",
+              "action": "Sélectionnez un profil dans Règles de départ ou ajustez les règles individuelles dans Politiques (telles que l’exigence d’un second réviseur, Exiger la validation des étapes de préparation par le responsable, le mode de blocage CQ, l’équipement obligatoire ou le Nombre minimal de points des cartes de contrôle).",
               "expected": "L’écran met en évidence les règles modifiées et vérifie que vos choix de politiques n’entrent pas en conflit avec les règles CQ actives des méthodes."
             },
             {
@@ -7437,11 +7437,11 @@
         ],
         [
           "Motif du changement",
-          "Note d’audit obligatoire lors de l’enregistrement de modifications dans Préréglages, Politiques ou les remplacements d’analyses",
+          "Note d’audit obligatoire lors de l’enregistrement de modifications dans Règles de départ, Politiques ou Règles personnalisées par analyse ou méthode",
           "Consigne pourquoi une politique de laboratoire a été mise à jour et par qui."
         ]
       ],
-      "example": "Dans Gestion de laboratoire, sélectionnez le préréglage Basique pour un laboratoire pilote régional de 3 personnes, désactivez la vérification par le responsable des étapes de préparation dans Politiques, saisissez « Flux de lancement pilote pour équipe de 3 personnes » dans Motif du changement. Enregistrez.",
+      "example": "Dans Gestion de laboratoire, sélectionnez Basique dans Règles de départ pour un laboratoire pilote régional de 3 personnes, désactivez Exiger la validation des étapes de préparation par le responsable dans Politiques, saisissez « Flux de lancement pilote pour équipe de 3 personnes » dans Motif du changement. Enregistrez.",
       "success": "Les portes opérationnelles, les règles de double revue et le mode de blocage CQ de votre laboratoire correspondent réellement à votre équipe et à vos objectifs qualité.",
       "nextActor": "Responsable de Laboratoire et Responsable Qualité et Audit",
       "problems": [
@@ -7459,8 +7459,8 @@
         "client/src/pages/help/AdminHelpEditor.jsx"
       ],
       "steps": [
-        "Cliquez sur Gestion de laboratoire dans le menu latéral. Ouvrez les onglets de configuration de votre laboratoire (Préréglages, Politiques et remplacements d’analyses). (Attendu : Vous voyez le badge du préréglage actif de votre laboratoire (ISO 17025 strict, Basique, Consultatif (avertissements uniquement) ou Personnalisé) ainsi que toutes les règles actuellement activées.)",
-        "Sélectionnez un profil dans Préréglages ou ajustez les règles individuelles dans Politiques (telles que l’exigence d’un second réviseur, la vérification par le responsable des portes de préparation, le mode de blocage CQ, l’équipement obligatoire ou le Nombre minimal de points des cartes de contrôle). (Attendu : L’écran met en évidence les règles modifiées et vérifie que vos choix de politiques n’entrent pas en conflit avec les règles CQ actives des méthodes.)",
+        "Cliquez sur Gestion de laboratoire dans le menu latéral. Ouvrez les onglets de configuration de votre laboratoire (Règles de départ, Politiques et Règles personnalisées par analyse ou méthode). (Attendu : Vous voyez le badge du jeu de règles de départ actif de votre laboratoire (ISO 17025 strict, Basique, Consultatif (avertissements uniquement) ou Personnalisé) ainsi que toutes les règles actuellement activées.)",
+        "Sélectionnez un profil dans Règles de départ ou ajustez les règles individuelles dans Politiques (telles que l’exigence d’un second réviseur, Exiger la validation des étapes de préparation par le responsable, le mode de blocage CQ, l’équipement obligatoire ou le Nombre minimal de points des cartes de contrôle). (Attendu : L’écran met en évidence les règles modifiées et vérifie que vos choix de politiques n’entrent pas en conflit avec les règles CQ actives des méthodes.)",
         "Saisissez un Motif du changement clair. Enregistrez la configuration. (Attendu : Vos modifications s’appliquent aux nouveaux travaux et sont consignées dans le Journal d’audit, tandis que les résultats approuvés historiques et les rapports déjà émis restent intacts.)"
       ],
       "caution": "La modification d’une politique dans Gestion de laboratoire n’affecte que les travaux en cours et futurs : elle ne modifie jamais les échantillons historiques déjà approuvés.",
@@ -7577,7 +7577,7 @@
         "profile"
       ],
       "minutes": 3,
-      "quick": "Les Agents de Réception des Échantillons réceptionnent les sacs et impriment les étiquettes . Les Techniciens de Laboratoire exécutent la préparation et les feuilles de travail à la paillasse . Les Responsables Qualité et Audit examinent les séries, les cartes de contrôle et les non-conformités . Les Responsables de Laboratoire supervisent les attributions, les approbations, les rapports et les paramètres du laboratoire . Les Observateurs (Lecture Seule) consultent les résultats approuvés.",
+      "quick": "Les Agents de Réception des Échantillons réceptionnent les sacs et impriment les étiquettes . Les Techniciens de Laboratoire exécutent la préparation et les feuilles de travail à la paillasse . Les Responsables Qualité et Audit examinent les séries, les cartes de contrôle et les fiches de problème . Les Responsables de Laboratoire supervisent les attributions, les approbations, les rapports et les paramètres du laboratoire . Les Observateurs (Lecture Seule) consultent les résultats approuvés.",
       "before": [
         "Vérifiez le badge de votre propre rôle dans la barre supérieure.",
         "Ouvrez Personnel du laboratoire si le rôle d’un membre de l’équipe doit être mis à jour par un administrateur."
@@ -7665,7 +7665,7 @@
         "admin?tab=lab-config"
       ],
       "minutes": 3,
-      "quick": "Ouvrez Catalogue des analyses pour consulter les paramètres, unités et méthodes disponibles sur la plateforme. Utilisez les remplacements d’analyses dans Gestion de laboratoire pour activer les essais réalisés par votre laboratoire et définir vos délais de traitement, la masse minimale d’échantillon et les règles CQ.",
+      "quick": "Ouvrez Catalogue des analyses pour consulter les paramètres, unités et méthodes disponibles sur la plateforme. Utilisez Règles personnalisées par analyse ou méthode dans Gestion de laboratoire pour activer les essais réalisés par votre laboratoire et définir vos délais de traitement, la masse minimale d’échantillon et les règles CQ.",
       "before": [
         "Vérifiez que vous êtes connecté en tant que Responsable de Laboratoire ou Administrateur Système.",
         "Ayez à portée de main la liste des essais de sol de routine de votre laboratoire, les noms de méthodes de vos modes opératoires normalisés (SOP) et les unités de rapport."
@@ -7679,7 +7679,7 @@
               "expected": "Vous voyez chaque paramètre (pH, conductivité électrique, carbone organique, azote total, phosphore Olsen, CEC et granulométrie) avec son schéma de saisie et son unité canonique."
             },
             {
-              "action": "Ouvrez Gestion de laboratoire → remplacements d’analyses pour activer ou désactiver des analyses spécifiques pour votre laboratoire et configurer les paramètres propres à votre établissement, comme la masse minimale d’échantillon ou le délai en jours.",
+              "action": "Ouvrez Gestion de laboratoire → Règles personnalisées par analyse ou méthode pour activer ou désactiver des analyses spécifiques pour votre laboratoire et configurer les paramètres propres à votre établissement, comme la masse minimale d’échantillon ou le délai en jours.",
               "expected": "Seules les analyses activées pour votre laboratoire apparaissent dans Réception d'échantillons et Poste de travail."
             },
             {
@@ -7706,7 +7706,7 @@
           "Maintient la cohérence des résultats historiques, des cartes de contrôle et des Certificats d’analyse."
         ]
       ],
-      "example": "Dans Gestion de laboratoire → remplacements d’analyses, activez le pH (eau), la conductivité électrique, le carbone organique Walkley-Black, l’azote Kjeldahl, le phosphore Olsen et la granulométrie au densimètre pour Demo Soil Lab, et désactivez les éléments traces métalliques non réalisés sur ce site.",
+      "example": "Dans Gestion de laboratoire → Règles personnalisées par analyse ou méthode, activez le pH (eau), la conductivité électrique, le carbone organique Walkley-Black, l’azote Kjeldahl, le phosphore Olsen et la granulométrie au densimètre pour Demo Soil Lab, et désactivez les éléments traces métalliques non réalisés sur ce site.",
       "success": "Réception d'échantillons et Poste de travail affichent exactement le catalogue d’analyses de sol et les unités pratiqués par votre laboratoire.",
       "nextActor": "Agent de Réception des Échantillons et Technicien de Laboratoire",
       "problems": [
@@ -7725,7 +7725,7 @@
       ],
       "steps": [
         "Ouvrez Catalogue des analyses depuis le menu latéral pour inspecter les paramètres pédologiques, les unités standards, les Conditions préalables à la préparation et les variantes de méthodes. (Attendu : Vous voyez chaque paramètre (pH, conductivité électrique, carbone organique, azote total, phosphore Olsen, CEC et granulométrie) avec son schéma de saisie et son unité canonique.)",
-        "Ouvrez Gestion de laboratoire → remplacements d’analyses pour activer ou désactiver des analyses spécifiques pour votre laboratoire et configurer les paramètres propres à votre établissement, comme la masse minimale d’échantillon ou le délai en jours. (Attendu : Seules les analyses activées pour votre laboratoire apparaissent dans Réception d'échantillons et Poste de travail.)",
+        "Ouvrez Gestion de laboratoire → Règles personnalisées par analyse ou méthode pour activer ou désactiver des analyses spécifiques pour votre laboratoire et configurer les paramètres propres à votre établissement, comme la masse minimale d’échantillon ou le délai en jours. (Attendu : Seules les analyses activées pour votre laboratoire apparaissent dans Réception d'échantillons et Poste de travail.)",
         "Vérifiez que chaque analyse activée est liée à au moins une méthode analytique active et un schéma de saisie avant de réceptionner des échantillons réels. (Attendu : Les techniciens disposent d’une feuille de travail complète et prête à l’emploi dans Poste de travail pour chaque essai proposé à la réception.)"
       ],
       "caution": "Ne modifiez jamais l’unité d’une analyse existante qui possède déjà des résultats approuvés : créez ou activez plutôt une entrée de méthode distincte.",
@@ -7764,7 +7764,7 @@
           "title": "Procédure étape par étape",
           "steps": [
             {
-              "action": "Ouvrez Catalogue des analyses (ainsi que Gestion de laboratoire → Politiques / remplacements d’analyses). Sélectionnez la méthode analytique que vous souhaitez examiner ou configurer.",
+              "action": "Ouvrez Catalogue des analyses (ainsi que Gestion de laboratoire → Politiques / Règles personnalisées par analyse ou méthode). Sélectionnez la méthode analytique que vous souhaitez examiner ou configurer.",
               "expected": "Vous voyez le code de la méthode, la base d’extraction, l’unité, les étapes de préparation requises et les règles actuelles de contrôle qualité."
             },
             {
@@ -7813,7 +7813,7 @@
         "client/src/pages/help/AdminHelpEditor.jsx"
       ],
       "steps": [
-        "Ouvrez Catalogue des analyses (ainsi que Gestion de laboratoire → Politiques / remplacements d’analyses). Sélectionnez la méthode analytique que vous souhaitez examiner ou configurer. (Attendu : Vous voyez le code de la méthode, la base d’extraction, l’unité, les étapes de préparation requises et les règles actuelles de contrôle qualité.)",
+        "Ouvrez Catalogue des analyses (ainsi que Gestion de laboratoire → Politiques / Règles personnalisées par analyse ou méthode). Sélectionnez la méthode analytique que vous souhaitez examiner ou configurer. (Attendu : Vous voyez le code de la méthode, la base d’extraction, l’unité, les étapes de préparation requises et les règles actuelles de contrôle qualité.)",
         "Configurez les exigences CQ de lot de votre laboratoire pour cette méthode — telles que la taille maximale du lot (souvent 20 échantillons), les positions requises pour le Blanc, le Duplicata et le sol de référence, ainsi que les seuils de conformité, d’avertissement et d’échec. (Attendu : Le système vérifie que les règles CQ de votre méthode sont cohérentes avec le mode de blocage CQ global de votre laboratoire.)",
         "Enregistrez vos modifications en saisissant un Motif du changement écrit. (Attendu : Les nouvelles séries analytiques dans Poste de travail appliquent immédiatement les règles mises à jour, tandis que les lots précédemment approuvés conservent les règles qui étaient en vigueur au moment de leur approbation.)"
       ],
@@ -8170,7 +8170,7 @@
         {
           "symptom": "Un échantillon historique importé est ouvert dans Poste de travail et affiche La preuve nécessite une vérification sur son étape de préparation.",
           "why": "Le tableur historique ne contenait que les résultats finaux d’analyse et ne comportait ni masses de séchage ni horodatages de tamisage.",
-          "action": "Conservez les échantillons historiques approuvés comme dossiers d’archive, ou demandez à un Responsable de Laboratoire de vérifier l’étape dans Portes opérationnelles si de nouveaux essais sont ajoutés sur un pot archivé."
+          "action": "Conservez les échantillons historiques approuvés comme dossiers d’archive, ou demandez à un Responsable de Laboratoire de vérifier l’étape dans Étapes de préparation obligatoires si de nouveaux essais sont ajoutés sur un pot archivé."
         }
       ],
       "sources": [
@@ -8430,7 +8430,7 @@
           "Fournit l’explication humaine derrière chaque action sensible."
         ]
       ],
-      "example": "Dans Tableau de bord QA → Journal d’audit, filtrez sur l’échantillon DEMO-26-000142 pour consulter l’horodatage exact et le motif lorsque la Tentative nº 1 a été retournée et que la Tentative nº 2 a été approuvée.",
+      "example": "Dans Tableau de bord QA → Journal d’audit, filtrez sur l’échantillon DEMO-26-000142 pour consulter l’horodatage exact et le motif lorsque l'Essai n° 1 a été retournée et que l'Essai n° 2 a été approuvée.",
       "success": "Vous pouvez répondre en moins d’une minute à la question : « qui a modifié cet enregistrement, quand, à partir de quelle valeur et pourquoi ? ».",
       "nextActor": "Responsable Qualité et Audit, Responsable de Laboratoire ou Évaluateur externe",
       "problems": [
@@ -8477,7 +8477,7 @@
         "qa"
       ],
       "minutes": 3,
-      "quick": "Ouvrez Tableau de bord QA pour inspecter les Cartes de contrôle et les alertes CQ actives. Lorsqu’un Blanc, un Duplicata ou un sol de référence échoue dans une série, suivez le processus de décision en 4 étapes : vérifiez s’il s’agit d’une erreur de frappe, répétez le segment d’étalonnage si une dérive est survenue en cours de série, invalidez. Relancez le lot, ou (uniquement sur justification scientifique solide) acceptez avec une réserve documentée du responsable.",
+      "quick": "Ouvrez Tableau de bord QA pour inspecter les Cartes de contrôle et les alertes CQ actives. Lorsqu’un Blanc, un Duplicata ou un sol de référence échoue dans une série, suivez le processus de décision en 4 étapes : vérifiez s’il s’agit d’une erreur de frappe, répétez les analyses depuis le dernier contrôle valide de l'instrument si une dérive est survenue en cours de série, invalidez. Relancez le lot, ou (uniquement sur justification scientifique solide) acceptez avec une réserve documentée du responsable.",
       "before": [
         "Identifiez le numéro de la série analytique, la méthode et le lot de matériau de référence concernés.",
         "Vérifiez le cahier de paillasse physique et le ticket d’impression de l’instrument avec le technicien avant de prendre une décision."
@@ -8495,7 +8495,7 @@
               "expected": "Vous distinguez une faute de transcription d’une véritable défaillance chimique."
             },
             {
-              "action": "Enregistrez la décision appropriée du responsable : appliquer une correction de transcription contrôlée (si elle est autorisée dans Politiques), sélectionner la reprise du segment d’étalonnage en cas de dérive en cours de série, invalider le lot pour renvoyer les échantillons en Tentative nº 2, ou enregistrer une acceptation avec réserve accompagnée d’une justification écrite.",
+              "action": "Enregistrez la décision appropriée du responsable : appliquer une correction de transcription contrôlée (si elle est autorisée dans Politiques), sélectionner Répéter les analyses depuis le dernier contrôle valide de l'instrument en cas de dérive en cours de série, invalider le lot pour renvoyer les échantillons en Essai n° 2, ou enregistrer une acceptation avec réserve accompagnée d’une justification écrite.",
               "expected": "La décision CQ est liée de façon permanente au lot et débloque ou retourne les échantillons concernés en conséquence."
             }
           ]
@@ -8510,7 +8510,7 @@
         [
           "Action en cas d’échec",
           "Décisions du responsable lorsqu’un contrôle d’étalonnage ou un témoin CQ de lot échoue",
-          "Remet en file d’attente soit le segment d’échantillons concerné, soit la série complète pour une nouvelle Tentative nº 2."
+          "Remet en file d’attente soit le groupe d'échantillons concerné, soit la série complète pour une nouvelle Essai n° 2."
         ],
         [
           "Verdict",
@@ -8518,7 +8518,7 @@
           "Exige une justification scientifique détaillée et imprime la réserve sur le rapport."
         ]
       ],
-      "example": "Dans Tableau de bord QA, inspectez un lot de phosphore Olsen en échec où le Blanc affiche 1,8 mg/kg à cause d’une verrerie contaminée, invalidez le lot, ouvrez une fiche de Non-conformité et retournez les échantillons pour une Tentative nº 2.",
+      "example": "Dans Tableau de bord QA, inspectez un lot de phosphore Olsen en échec où le Blanc affiche 1,8 mg/kg à cause d’une verrerie contaminée, invalidez le lot, ouvrez une Fiche de problème et retournez les échantillons pour un Essai n° 2.",
       "success": "Les séries dont le contrôle qualité échoue font l’objet d’une investigation systématique et ne se glissent jamais dans les rapports clients sans avoir été traitées.",
       "nextActor": "Responsable de Laboratoire, Responsable Qualité et Audit et Technicien de paillasse (pour les reprises)",
       "problems": [
@@ -8537,7 +8537,7 @@
       "steps": [
         "Ouvrez Tableau de bord QA. Consultez les alertes de contrôle qualité actives ainsi que les Cartes de contrôle pour la méthode et le lot de sol de référence. (Attendu : Vous voyez la carte de contrôle de Shewhart traçant les scores z des séries récentes par rapport aux limites de surveillance à ±2 écarts-types et aux limites d’action à ±3 écarts-types selon les règles de Westgard (dès que le Nombre minimal de points de votre laboratoire est atteint).)",
         "Inspectez la ligne de témoin en avertissement ou en échec (Blanc, Duplicata, sol de référence ou contrôle d’étalonnage) pour déterminer s’il s’agit d’une simple erreur de saisie, d’une dérive d’étalonnage en cours de série ou d’un problème d’extraction touchant tout le lot. (Attendu : Vous distinguez une faute de transcription d’une véritable défaillance chimique.)",
-        "Enregistrez la décision appropriée du responsable : appliquer une correction de transcription contrôlée (si elle est autorisée dans Politiques), sélectionner la reprise du segment d’étalonnage en cas de dérive en cours de série, invalider le lot pour renvoyer les échantillons en Tentative nº 2, ou enregistrer une acceptation avec réserve accompagnée d’une justification écrite. (Attendu : La décision CQ est liée de façon permanente au lot et débloque ou retourne les échantillons concernés en conséquence.)"
+        "Enregistrez la décision appropriée du responsable : appliquer une correction de transcription contrôlée (si elle est autorisée dans Politiques), sélectionner Répéter les analyses depuis le dernier contrôle valide de l'instrument en cas de dérive en cours de série, invalider le lot pour renvoyer les échantillons en Essai n° 2, ou enregistrer une acceptation avec réserve accompagnée d’une justification écrite. (Attendu : La décision CQ est liée de façon permanente au lot et débloque ou retourne les échantillons concernés en conséquence.)"
       ],
       "caution": "N’utilisez jamais l’acceptation avec réserve pour laisser passer un Blanc contaminé ou un sol de référence non conforme lorsqu’il reste suffisamment de sol pour refaire l’analyse.",
       "related": [
@@ -8551,8 +8551,8 @@
       "id": "quality-nc",
       "category": "quality",
       "kind": "guide",
-      "title": "Enregistrer et suivre une non-conformité",
-      "summary": "Ouvrir, instruire et clôturer une fiche de Non-conformité avec analyse de cause profonde et action corrective dans Tableau de bord QA.",
+      "title": "Enregistrer et suivre une fiche de problème",
+      "summary": "Ouvrir, instruire et clôturer une Fiche de problème avec analyse de cause profonde et action corrective dans Tableau de bord QA.",
       "roles": [
         "AUDIT_USER",
         "LAB_MANAGER",
@@ -8566,53 +8566,53 @@
         "manager-queue"
       ],
       "minutes": 3,
-      "quick": "Ouvrez Tableau de bord QA → Non-conformité pour consigner un incident qualité (tel que des échecs CQ répétés sur un lot, des réactifs contaminés ou des livraisons d’échantillons endommagées), désigner un responsable, documenter les mesures immédiates, la cause profonde et l’action corrective. Vérifier l’efficacité avant de clôturer.",
+      "quick": "Ouvrez Tableau de bord QA → Fiches de problème pour consigner un incident qualité (tel que des échecs CQ répétés sur un lot, des réactifs contaminés ou des livraisons d’échantillons endommagées), désigner un responsable, documenter les mesures immédiates, la cause profonde et l’action corrective. Vérifier l’efficacité avant de clôturer.",
       "before": [
         "Ayez à portée de main les identifiants des échantillons, les numéros de lots ou les codes d’équipements concernés.",
-        "Vérifiez si les Politiques de votre laboratoire exigent automatiquement l’ouverture d’une fiche de Non-conformité après un nombre défini de reprises."
+        "Vérifiez si les Politiques de votre laboratoire exigent automatiquement l’ouverture d’une Fiche de problème après un nombre défini de reprises."
       ],
       "sections": [
         {
           "title": "Procédure étape par étape",
           "steps": [
             {
-              "action": "Ouvrez Tableau de bord QA, cliquez sur l’onglet Non-conformité et créez une nouvelle fiche (ou ouvrez une fiche déclenchée automatiquement).",
-              "expected": "Le formulaire de Non-conformité s’ouvre avec les champs de description de l’incident, de gravité, d’échantillons ou lots liés et de responsable désigné."
+              "action": "Ouvrez Tableau de bord QA, cliquez sur l’onglet Fiches de problème et créez une nouvelle fiche (ou ouvrez une fiche déclenchée automatiquement).",
+              "expected": "Le formulaire de Fiche de problème s’ouvre avec les champs de description de l’incident, de gravité, d’échantillons ou lots liés et de responsable désigné."
             },
             {
               "action": "Enregistrez les mesures conservatoires immédiates (comme la mise en quarantaine d’un lot de réactif ou le blocage d’une série). Menez l’investigation et rédigez la cause profonde ainsi que l’action corrective et préventive.",
               "expected": "L’analyse et le plan d’action sont enregistrés et reliés aux lots ou échantillons concernés."
             },
             {
-              "action": "Une fois l’action corrective réalisée et son efficacité vérifiée (par exemple lorsque la série de reprise réussit le CQ), clôturez la fiche de Non-conformité avec la validation du responsable.",
-              "expected": "La Non-conformité clôturée reste consultable de façon permanente dans Tableau de bord QA pour les revues de direction et les audits."
+              "action": "Une fois l’action corrective réalisée et son efficacité vérifiée (par exemple lorsque la série de reprise réussit le CQ), clôturez la Fiche de problème avec la validation du responsable.",
+              "expected": "La Fiche de problème clôturée reste consultable de façon permanente dans Tableau de bord QA pour les revues de direction et les audits."
             }
           ]
         }
       ],
       "fields": [
         [
-          "Non-conformité",
+          "Fiches de problème",
           "Onglet dans Tableau de bord QA dédié au suivi des incidents qualité et des actions correctives et préventives (CAPA)",
           "Relie les anomalies de paillasse ou de réception à leur analyse de cause profonde."
         ],
         [
-          "Non-conformité",
-          "Champs d’investigation obligatoires avant qu’une Non-conformité ne puisse être clôturée",
+          "Fiches de problème",
+          "Champs d’investigation obligatoires avant qu’une Fiche de problème ne puisse être clôturée",
           "Garantit que le laboratoire corrige la cause sous-jacente afin que le problème ne se reproduise pas la semaine suivante."
         ],
         [
           "ID échantillon / labo",
-          "Lien de traçabilité rattachant la Non-conformité aux dossiers de laboratoire concernés",
+          "Lien de traçabilité rattachant la Fiche de problème aux dossiers de laboratoire concernés",
           "Permet aux réviseurs de vérifier que l’incident a bien été résolu avant d’approuver l’échantillon."
         ]
       ],
-      "example": "Dans Tableau de bord QA → Non-conformité, enregistrez un incident pour une dérive de lot de phosphore Olsen causée par un réactif au molybdate expiré, mettez l’ancien flacon en quarantaine, vérifiez que la série de reprise est conforme. Clôturez la fiche.",
+      "example": "Dans Tableau de bord QA → Fiches de problème, enregistrez un incident pour une dérive de lot de phosphore Olsen causée par un réactif au molybdate expiré, mettez l’ancien flacon en quarantaine, vérifiez que la série de reprise est conforme. Clôturez la fiche.",
       "success": "Les anomalies qualité sont circonscrites, analysées et clôturées par des actions correctives claires plutôt que par de simples échanges verbaux.",
       "nextActor": "Responsable Qualité et Audit et Responsable de Laboratoire",
       "problems": [
         {
-          "symptom": "Le bouton de clôture d’une fiche de Non-conformité est désactivé.",
+          "symptom": "Le bouton de clôture d’une Fiche de problème est désactivé.",
           "why": "Les champs d’analyse de la cause profonde ou d’action corrective sont encore vides, ou votre rôle ne dispose pas de la permission de validation qualité.",
           "action": "Renseignez la cause profonde, les mesures conservatoires et l’action corrective. Demandez au Responsable Qualité et Audit ou au Responsable de Laboratoire de valider la clôture."
         }
@@ -8624,11 +8624,11 @@
         "docs/book/src/usage/qc-management.md"
       ],
       "steps": [
-        "Ouvrez Tableau de bord QA, cliquez sur l’onglet Non-conformité et créez une nouvelle fiche (ou ouvrez une fiche déclenchée automatiquement). (Attendu : Le formulaire de Non-conformité s’ouvre avec les champs de description de l’incident, de gravité, d’échantillons ou lots liés et de responsable désigné.)",
+        "Ouvrez Tableau de bord QA, cliquez sur l’onglet Fiches de problème et créez une nouvelle fiche (ou ouvrez une fiche déclenchée automatiquement). (Attendu : Le formulaire de Fiche de problème s’ouvre avec les champs de description de l’incident, de gravité, d’échantillons ou lots liés et de responsable désigné.)",
         "Enregistrez les mesures conservatoires immédiates (comme la mise en quarantaine d’un lot de réactif ou le blocage d’une série). Menez l’investigation et rédigez la cause profonde ainsi que l’action corrective et préventive. (Attendu : L’analyse et le plan d’action sont enregistrés et reliés aux lots ou échantillons concernés.)",
-        "Une fois l’action corrective réalisée et son efficacité vérifiée (par exemple lorsque la série de reprise réussit le CQ), clôturez la fiche de Non-conformité avec la validation du responsable. (Attendu : La Non-conformité clôturée reste consultable de façon permanente dans Tableau de bord QA pour les revues de direction et les audits.)"
+        "Une fois l’action corrective réalisée et son efficacité vérifiée (par exemple lorsque la série de reprise réussit le CQ), clôturez la Fiche de problème avec la validation du responsable. (Attendu : La Fiche de problème clôturée reste consultable de façon permanente dans Tableau de bord QA pour les revues de direction et les audits.)"
       ],
-      "caution": "La clôture d’une fiche de Non-conformité ne modifie pas automatiquement les valeurs des échantillons : toute nouvelle mesure doit toujours être saisie dans Poste de travail et examinée dans Liste de tâches.",
+      "caution": "La clôture d’une Fiche de problème ne modifie pas automatiquement les valeurs des échantillons : toute nouvelle mesure doit toujours être saisie dans Poste de travail et examinée dans Liste de tâches.",
       "related": [
         "start-first-login",
         "quality-support"
@@ -8641,7 +8641,7 @@
       "category": "quality",
       "kind": "guide",
       "title": "Retracer un résultat à travers les reprises et les révisions de rapport",
-      "summary": "Retracer un résultat de sol rapporté à travers toutes les tentatives à la paillasse (Tentative nº 1, Tentative nº 2) et toutes les révisions de rapport (Révision 1, Révision 2).",
+      "summary": "Retracer un résultat de sol rapporté à travers toutes les tentatives à la paillasse (Essai n° 1, Essai n° 2) et toutes les révisions de rapport (Révision 1, Révision 2).",
       "roles": [
         "AUDIT_USER",
         "LAB_MANAGER",
@@ -8655,7 +8655,7 @@
         "result-reports"
       ],
       "minutes": 3,
-      "quick": "Utilisez Registre des échantillons (onglet Travaux et résultats), Tableau de bord QA et Rapports pour consulter la chronologie complète d’un résultat : depuis la première mesure à la paillasse, en passant par les éventuelles reprises retournées, jusqu’à la Valeur rapportée approuvée et aux Certificats d’analyse amendés.",
+      "quick": "Utilisez Registre des échantillons (onglet Travaux et résultats), Tableau de bord QA et Rapports pour consulter la chronologie complète d’un résultat : depuis la première mesure à la paillasse, en passant par les éventuelles reprises retournées, jusqu’à la Valeur finale du rapport approuvée et aux Certificats d’analyse amendés.",
       "before": [
         "Ayez le code laboratoire de l’échantillon ou le numéro du Certificat d’analyse à portée de main.",
         "Consultez à la fois l’onglet Travaux et résultats sur la fiche de l’échantillon et l’écran Rapports pour obtenir l’historique complet."
@@ -8666,14 +8666,14 @@
           "steps": [
             {
               "action": "Ouvrez l’échantillon dans Registre des échantillons. Cliquez sur l’onglet Travaux et résultats pour développer la ligne du paramètre.",
-              "expected": "Vous voyez chaque tentative enregistrée (Tentative nº 1, Tentative nº 2, etc.) avec son technicien, son instrument, son horodatage, le statut CQ du lot et la décision du réviseur."
+              "expected": "Vous voyez chaque essai enregistré (Essai n° 1, Essai n° 2, etc.) avec son technicien, son instrument, son horodatage, le statut CQ du lot et la décision du réviseur."
             },
             {
-              "action": "Vérifiez quelle tentative ou quelle règle de calcul des répétitions a produit la Valeur rapportée officielle affichée sur l’échantillon.",
-              "expected": "Vous comprenez clairement pourquoi la Tentative nº 1 a été retournée et pourquoi la Tentative nº 2 a été retenue comme Valeur rapportée officielle."
+              "action": "Vérifiez quel essai ou quelle règle de calcul des répétitions a produit la Valeur finale du rapport officielle affichée sur l’échantillon.",
+              "expected": "Vous comprenez clairement pourquoi l'Essai n° 1 a été retournée et pourquoi l'Essai n° 2 a été retenue comme Valeur finale du rapport officielle."
             },
             {
-              "action": "Ouvrez Rapports pour cet échantillon. Cela permet de consulter toutes les révisions émises du Certificat d’analyse (la Révision 1 marquée Remplacé et la Révision 2 marquée Actuel) ainsi que le motif écrit de l’amendement.",
+              "action": "Ouvrez Rapports pour cet échantillon. Cela permet de consulter toutes les révisions émises du Certificat d’analyse (la Révision 1 marquée Remplacé par une version plus récente et la Révision 2 marquée Actuel) ainsi que le motif écrit de l’amendement.",
               "expected": "Chaque valeur ayant été mesurée ou rapportée sur cet échantillon est tracée de bout en bout."
             }
           ]
@@ -8681,14 +8681,14 @@
       ],
       "fields": [
         [
-          "Tentatives",
-          "Tentatives chronologiques de mesure à la paillasse pour un paramètre",
-          "Les tentatives antérieures restent scellées et visibles chaque fois qu’une reprise est effectuée."
+          "Essais",
+          "Essais chronologiques de mesure à la paillasse pour un paramètre",
+          "Les essais antérieurs restent scellés et visibles chaque fois qu’une reprise est effectuée."
         ],
         [
-          "Valeur rapportée",
+          "Valeur finale du rapport",
           "La valeur officielle approuvée pour figurer sur le Certificat d’analyse",
-          "Reliée directement à la ou aux tentatives retenues ainsi qu’à la validation du réviseur."
+          "Reliée directement à l'essai ou aux essais retenus ainsi qu’à la validation du réviseur."
         ],
         [
           "Retiré",
@@ -8696,13 +8696,13 @@
           "Garantit que toute personne vérifiant un ancien PDF est immédiatement orientée vers la révision Actuel."
         ]
       ],
-      "example": "Sur l’échantillon DEMO-26-000142, retracez le phosphore Olsen depuis la Tentative nº 1 (retournée pour échec du blanc) jusqu’à la Tentative nº 2 (approuvée à 14,2 mg/kg). Vérifiez qu’il figure sur le rapport Actuel RPT-DEMO-2026-00042.",
+      "example": "Sur l’échantillon DEMO-26-000142, retracez le phosphore Olsen depuis l'Essai n° 1 (retournée pour échec du blanc) jusqu’à l'Essai n° 2 (approuvée à 14,2 mg/kg). Vérifiez qu’il figure sur le rapport Actuel RPT-DEMO-2026-00042.",
       "success": "Vous disposez d’une traçabilité complète de bout en bout, depuis les essais bruts à la paillasse jusqu’à chaque révision de rapport émise.",
       "nextActor": "Responsable Qualité et Audit, Responsable de Laboratoire ou Client vérifiant l’authenticité d’un rapport",
       "problems": [
         {
           "symptom": "Un agronome demande pourquoi son PDF imprimé le mois dernier affiche une teneur en potassium différente de celle du tableau en ligne d’aujourd’hui.",
-          "why": "L’échantillon a fait l’objet d’un amendement scientifique formel après l’impression du mois dernier, ce qui a fait passer la Révision 1 au statut Remplacé et a publié la valeur corrigée dans la Révision 2 (Actuel).",
+          "why": "L’échantillon a fait l’objet d’un amendement scientifique formel après l’impression du mois dernier, ce qui a fait passer la Révision 1 au statut Remplacé par une version plus récente et a publié la valeur corrigée dans la Révision 2 (Actuel).",
           "action": "Ouvrez Rapports pour cet échantillon, montrez le motif et la date de l’amendement entre la Révision 1 et la Révision 2, et envoyez à l’agronome le PDF de la Révision 2 Actuel."
         }
       ],
@@ -8713,9 +8713,9 @@
         "docs/book/src/usage/qc-management.md"
       ],
       "steps": [
-        "Ouvrez l’échantillon dans Registre des échantillons. Cliquez sur l’onglet Travaux et résultats pour développer la ligne du paramètre. (Attendu : Vous voyez chaque tentative enregistrée (Tentative nº 1, Tentative nº 2, etc.) avec son technicien, son instrument, son horodatage, le statut CQ du lot et la décision du réviseur.)",
-        "Vérifiez quelle tentative ou quelle règle de calcul des répétitions a produit la Valeur rapportée officielle affichée sur l’échantillon. (Attendu : Vous comprenez clairement pourquoi la Tentative nº 1 a été retournée et pourquoi la Tentative nº 2 a été retenue comme Valeur rapportée officielle.)",
-        "Ouvrez Rapports pour cet échantillon. Cela permet de consulter toutes les révisions émises du Certificat d’analyse (la Révision 1 marquée Remplacé et la Révision 2 marquée Actuel) ainsi que le motif écrit de l’amendement. (Attendu : Chaque valeur ayant été mesurée ou rapportée sur cet échantillon est tracée de bout en bout.)"
+        "Ouvrez l’échantillon dans Registre des échantillons. Cliquez sur l’onglet Travaux et résultats pour développer la ligne du paramètre. (Attendu : Vous voyez chaque essai enregistré (Essai n° 1, Essai n° 2, etc.) avec son technicien, son instrument, son horodatage, le statut CQ du lot et la décision du réviseur.)",
+        "Vérifiez quel essai ou quelle règle de calcul des répétitions a produit la Valeur finale du rapport officielle affichée sur l’échantillon. (Attendu : Vous comprenez clairement pourquoi l'Essai n° 1 a été retournée et pourquoi l'Essai n° 2 a été retenue comme Valeur finale du rapport officielle.)",
+        "Ouvrez Rapports pour cet échantillon. Cela permet de consulter toutes les révisions émises du Certificat d’analyse (la Révision 1 marquée Remplacé par une version plus récente et la Révision 2 marquée Actuel) ainsi que le motif écrit de l’amendement. (Attendu : Chaque valeur ayant été mesurée ou rapportée sur cet échantillon est tracée de bout en bout.)"
       ],
       "caution": "Vérifiez toujours le code QR ou le tableau dans Rapports si deux exemplaires imprimés pour un même échantillon portent des numéros de révision différents.",
       "related": [

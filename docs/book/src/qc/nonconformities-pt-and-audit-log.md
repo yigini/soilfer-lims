@@ -2,9 +2,9 @@
 
 ## What This Is For
 
-Track and close laboratory **Nonconformities** (root cause and corrective action), log external **Proficiency testing** rounds and z-scores, and inspect the permanent and locked **System Audit Logs**.
+Track and close laboratory **Problem records** (root cause and corrective action), log external **Proficiency testing** rounds and z-scores, and inspect the permanent and locked **System Audit Logs**.
 
-> *Screenshot placeholder — docs/book/src/img/screenshots/qc-ncr-pt-and-audit-logs.png (screenshot coming once the training data is ready): The **QA Dashboard** showing **Nonconformities**, the **Proficiency testing** page showing z-score classifications, and **System Audit Logs**.*
+> *Screenshot placeholder — docs/book/src/img/screenshots/qc-ncr-pt-and-audit-logs.png (screenshot coming once the training data is ready): The **QA Dashboard** showing **Problem records**, the **Proficiency testing** page showing z-score classifications, and **System Audit Logs**.*
 
 ---
 
@@ -16,9 +16,9 @@ Track and close laboratory **Nonconformities** (root cause and corrective action
 
 ## Steps
 
-### Part 1: Investigate and Close **Nonconformities**
+### Part 1: Investigate and Close **Problem records**
 
-1. Click **QA Dashboard** in the left menu and open the **Nonconformities** (problem records) tab.
+1. Click **QA Dashboard** in the left menu and open the **Problem records** tab.
    *You should see all problem records filterable by **Status** (**Open**, **Action**, **Closed**) and **Source** (**Quality control**, **Proficiency testing**, **Repeat limit**, **Customer**, **Intake**, **Other**).*
 2. Click an **Open** problem record to investigate why it occurred:
    - Read the **Description** and source record (such as a failed **Certified reference material** (official standard soil with a certified value), a rejected batch, an **Unsatisfactory** proficiency test, or a **Repeat limit** special approval).
@@ -33,7 +33,7 @@ Track and close laboratory **Nonconformities** (root cause and corrective action
    - Enter the **Provider** (for example, GLOSOLAN or WEPAL), **Round**, **Analysis**, **Method**, **Unit**, and **Date**.
    - Enter the **Assigned value**, **Lab result**, **Expanded uncertainty**, assessment sigma, and **z-score**.
    - Check the resulting classification (**Satisfactory**, **Questionable**, or **Unsatisfactory**) and click **Save**.
-   *If a round is recorded as **Unsatisfactory**, SoilFER LIMS automatically creates a linked record in **Nonconformities** (**Open NCRs** (open problem records)) so you can document the investigation.*
+   *If a round is recorded as **Unsatisfactory**, SoilFER LIMS automatically creates a linked record in **Problem records** (**Open problem records**) so you can document the investigation.*
 
 ### Part 3: Inspect the **System Audit Logs**
 
@@ -46,7 +46,7 @@ Track and close laboratory **Nonconformities** (root cause and corrective action
 
 ## What Happens Next
 
-- Your proficiency testing results and problem record counts automatically feed the 30-day (**Last 30 days**) and 90-day (**Last 90 days**) trend charts on **QA Dashboard** (**Lab overview** -> **PT z-score trend** and **Open NCRs**).
+- Your proficiency testing results and problem record counts automatically feed the 30-day (**Last 30 days**) and 90-day (**Last 90 days**) trend charts on **QA Dashboard** (**Lab overview** -> **PT z-score trend** and **Open problem records**).
 
 ---
 

@@ -24,7 +24,7 @@ Every software pilot has a few sharp edges that are good to know in advance. Sha
 ## 3. Bench Tests Stay Locked Until Drying & Preparation Are Confirmed
 
 - *What happens:* When a sample is first accepted at reception (**Accepted**), its chemical and spectral test rows are locked. They cannot be submitted in **Workbench** until required drying and preparation steps are completed.
-- *What to do instead:* Complete the drying checklist and click **Confirm Complete**, then record the sieving or grinding step. The sample then moves to **Processing** and all assigned bench tests unlock automatically.
+- *What to do instead:* Complete the drying checklist and click **Confirm work is done**, then record the sieving or grinding step. The sample then moves to **Processing** and all assigned bench tests unlock automatically.
 
 ---
 

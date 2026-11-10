@@ -2,7 +2,7 @@
 
 ## What This Is For
 
-Work safely on a shared computer at the laboratory bench without mixing up two technicians' names or losing unsaved drafts. This page also explains how SoilFER LIMS tracks **Attempts** (measurement tries), typing corrections, and repeated tests.
+Work safely on a shared computer at the laboratory bench without mixing up two technicians' names or losing unsaved drafts. This page also explains how SoilFER LIMS tracks **Tries**, typing corrections, and repeated tests.
 
 | What do you need to do? | Open this section or page |
 |---|---|
@@ -35,7 +35,7 @@ Work safely on a shared computer at the laboratory bench without mixing up two t
 
 ### How Attempts, Corrections, and Repeats Work
 
-1. Every test ordered on a sample has one task row. Each time you measure that test, the system saves a numbered try under **Attempts** (such as **Attempt #1** (first measurement try) or *Try 2*).
+1. Every test ordered on a sample has one task row. Each time you measure that test, the system saves a numbered try under **Tries** (such as **Try #1** or *Try 2*).
 2. Earlier tries are never erased when a test is repeated:
    - If you made a pure typing mistake from your paper notebook before review, use a transcription correction (**Use a transcription correction for a typo.**). The corrected number is saved with a reason while keeping the old number in the audit log.
    - If an extract was spilled, an instrument drifted, or a reading was **Above calibration range**, record a repeat (**Preparation error**, **Instrument fault**, or **Above range: dilution required**). The earlier try is marked **Invalidated** and a new try opens.
@@ -45,7 +45,7 @@ Work safely on a shared computer at the laboratory bench without mixing up two t
 
 ## What Happens Next
 
-When a test has more than one try under **Attempts**, the reviewer sees all tries side by side on the sample's **Review** tab. They then select which value will appear on the Certificate of Analysis.
+When a test has more than one try under **Tries**, the reviewer sees all tries side by side on the sample's **Review** tab. They then select which value will appear on the Certificate of Analysis.
 
 ---
 
@@ -60,4 +60,4 @@ When a test has more than one try under **Attempts**, the reviewer sees all trie
 ## For the QA Person
 
 - Bench mode (**Turn on bench mode**) protects data integrity on shared terminals in two ways: an automatic idle screen lock that blocks stray keystrokes or barcode scans while the analyst is away, and an optional **Enter your PIN to record** check whenever results are committed.
-- Separating the test order from numbered **Attempts** (**Open**, **Recorded**, **Submitted**, **Accepted**, **Questioned**, **Invalidated**, **Superseded** (replaced by a newer version)) ensures complete ISO/IEC 17025 auditability across every repeat, dilution, and manager review decision.
+- Separating the test order from numbered **Tries** (**Open**, **Recorded**, **Submitted**, **Accepted**, **Questioned**, **Invalidated**, **Replaced by newer version**) ensures complete ISO/IEC 17025 auditability across every repeat, dilution, and manager review decision.

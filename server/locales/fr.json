@@ -2786,5 +2786,9 @@
     "recordProblem": "Consigner un problème",
     "problemDescription": "Décrivez le problème *",
     "noProblemPhotos": "Aucune photo du problème n’est encore jointe."
+  },
+  "bulkAssignment": {
+    "notificationTitle": "Nouveau travail attribué",
+    "notificationBody": "Tâches attribuées par {name} : {count}. Ouvrez Mon travail pour voir les tâches."
   }
 }

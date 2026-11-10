@@ -2786,5 +2786,9 @@
     "recordProblem": "Record a problem",
     "problemDescription": "Describe the problem *",
     "noProblemPhotos": "No photos of the problem attached yet."
+  },
+  "bulkAssignment": {
+    "notificationTitle": "New work assignment",
+    "notificationBody": "Work items assigned by {name}: {count}. Open My Work to see the tasks."
   }
 }

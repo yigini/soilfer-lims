@@ -29,11 +29,11 @@ Prepare accepted soil samples for laboratory testing by recording drying, sievin
 
 1. Click **Workbench** in the left menu and select **Air Drying** in the **Work type:** selector.
 2. Tick the three **Operational Checklist** items for **Air Drying**.
-3. Fill in the **Drying** record (**Method**, **Temperature (°C)**, **Mass before (g)**, **Mass after (g)**, **Started**, **Ended**, and **Equipment**) and click **Confirm Complete**.
+3. Fill in the **Drying** record (**Method**, **Temperature (°C)**, **Mass before (g)**, **Mass after (g)**, **Started**, **Ended**, and **Equipment**) and click **Confirm work is done**.
    *You should see the drying step change to **Completed** (**Checklist Verified**) and the sample status move to **Waiting for preparation**.*
 4. In **Workbench**, switch **Work type:** to **Sample Preparation**.
 5. Tick the three **Operational Checklist** items for **Sample Preparation**.
-6. Fill in the required step fields (**Sieving**, **Grinding**, and **Splitting**) and click **Confirm Complete**.
+6. Fill in the required step fields (**Sieving**, **Grinding**, and **Splitting**) and click **Confirm work is done**.
    *You should see the required preparation step change to **Completed** (**Checklist Verified**) and the sample status advance to **Processing** (**Prepared**).*
 
 ### Moving, Archiving, and Disposing Sample Material Later
@@ -54,7 +54,7 @@ Once both **Air Drying** and **Sample Preparation** are confirmed, every ordered
 
 ## If Something Goes Wrong
 
-- *If a test row in* **Workbench** *is locked and says* **Blocked** *→* Look at the **Readiness & State** column or the right-hand detail panel (**Drying Gate:** (drying step that must finish first) and **Preparation Gate:** (sieving and grinding step that must finish first)). Complete **Air Drying** first, then **Sample Preparation**, and the test row will unlock automatically.
+- *If a test row in* **Workbench** *is locked and says* **Blocked** *→* Look at the **Readiness & State** column or the right-hand detail panel (**Drying step:** and **Sieving & grinding step:**). Complete **Air Drying** first, then **Sample Preparation**, and the test row will unlock automatically.
 - *If you see* **Accept the sample before recording its preparation.** *→* The sample is still in **Received** or **Draft** status. Ask the reception clerk to complete intake so its status becomes **Accepted**.
 - *If you see* **Retention must expire before disposal.** *→* Keep the sample in archive storage until the **Retain until** date passes, or check retention rules under **Policies**.
 

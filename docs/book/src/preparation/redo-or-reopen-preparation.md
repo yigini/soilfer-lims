@@ -4,7 +4,7 @@
 
 Handle situations where a drying or preparation step needs a second look. You can verify a step in **Awaiting verification**, resolve a **Legacy Completion — Evidence Gap**, or return work for **Preparation error**.
 
-> *Screenshot placeholder — docs/book/src/img/screenshots/preparation-reopen-and-verify.png (screenshot coming once the training data is ready): The **Work & results** tab on a sample page showing **Preparation Prerequisites**, **Evidence needs verification**, and the manager verification controls on **Operational Gates**.*
+> *Screenshot placeholder — docs/book/src/img/screenshots/preparation-reopen-and-verify.png (screenshot coming once the training data is ready): The **Work & results** tab on a sample page showing **Preparation Prerequisites**, **Evidence needs verification**, and the manager verification controls on **Required prep steps**.*
 
 ---
 
@@ -21,7 +21,7 @@ Handle situations where a drying or preparation step needs a second look. You ca
 
 1. When a technician confirms **Air Drying** or **Sample Preparation** in a laboratory requiring verification, the task moves to **Awaiting verification**.
 2. Sign in as a **Laboratory Manager** and open the sample in **Samples**.
-3. Look at the **Ordered Analyses** table on the **Work & results** tab under **Operational Gates** (preparation steps that must finish first) and inspect the technician's checklist:
+3. Look at the **Ordered Analyses** table on the **Work & results** tab under **Required prep steps** and inspect the technician's checklist:
    - Click the green check button (**Approve submitted result**) to accept the preparation step so its status becomes **Completed**.
    - Or click the red return button (**Reject (Request Reanalysis)**) and enter a note if the technician must redo the step (**Repeat requested**).
 
@@ -57,5 +57,5 @@ Once the returned or unverified preparation step is confirmed and verified (**Ch
 
 ## For the QA Person
 
-- SoilFER LIMS never overwrites a completed saved preparation record or measurement try in place. Returning work for **Preparation error** marks the earlier try **Invalidated** under **Attempts** (measurement tries) and links the new try to the new **Aliquot**.
+- SoilFER LIMS never overwrites a completed saved preparation record or measurement try in place. Returning work for **Preparation error** marks the earlier try **Invalidated** under **Tries** and links the new try to the new **Aliquot**.
 - Reopening an approved sample (**Reopen Sample**) creates a distinct pass in the timeline (**Reopened Analytical Record — Multiple Passes**). Auditors can see every pass, reason, and approval date.

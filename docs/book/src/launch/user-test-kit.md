@@ -51,7 +51,7 @@ Hand over or read each task as a plain everyday request—do not read out button
 - *Plain request:*
   *"Sample 2 has finished air-drying in the drying room at 35 °C (weight before drying: 480 g; weight after drying: 455 g). Please record in the system that drying is finished so the sample can move on to sieving."*
 - *Manual page they may use:* [Record Sample Drying](../preparation/record-drying.md).
-- *How it should end:* You should see a green **Checklist Verified** badge on Sample 2's row in **Workbench** under **Air Drying**, and **Drying Gate:** (drying step that must finish first) change to **✓ Completed**.
+- *How it should end:* You should see a green **Checklist Verified** badge on Sample 2's row in **Workbench** under **Air Drying**, and **Drying step:** change to **✓ Completed**.
 
 ### Task 3: Enter a pH Result with a Duplicate *(Technician — Time limit: 12 minutes)*
 
@@ -116,7 +116,7 @@ Sit down for 15 minutes right after the session while everything is fresh. Turn 
 | Page | What Confused Them | Suggested Change |
 | :--- | :--- | :--- |
 | *Example: `bench/record-and-submit-for-review.md`* | *Technician stopped after **Recorded** and thought the manager already had the sample.* | *Add a short reminder at the top of the page that **Ready to Submit** is a separate second step.* |
-| *Example: `preparation/record-drying.md`* | *Technician looked for the save button before ticking all three checklist boxes.* | *Move the note about ticking all three boxes before **Confirm Complete** appears up into Step 4.* |
+| *Example: `preparation/record-drying.md`* | *Technician looked for the save button before ticking all three checklist boxes.* | *Move the note about ticking all three boxes before **Confirm work is done** appears up into Step 4.* |
 | *1.* | | |
 | *2.* | | |
 | *3.* | | |
