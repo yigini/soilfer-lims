@@ -76,17 +76,16 @@ export default function RecoveryLinkModal({ isOpen, user, onClose, onSuccess }) 
                             <div className="p-4 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/60 rounded-xl flex items-start gap-3">
                                 <CheckCircle2 size={20} className="text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
                                 <div className="text-xs text-emerald-900 dark:text-emerald-200 space-y-1">
-                                    <strong className="font-bold block text-sm">Recovery Link Generated</strong>
+                                    <strong className="font-bold block text-sm">{t('adminDetails.recoveryCreated')}</strong>
                                     <p>
-                                        A single-use, 30-minute recovery token was created for <strong>{user.name || user.username}</strong>.
-                                        Prior sessions were invalidated. The user will be required to establish a fresh credential.
+                                        {t('adminDetails.recoveryCreatedFor')} <strong>{user.name || user.username}</strong>{t('adminDetails.recoverySessions')}
                                     </p>
                                 </div>
                             </div>
 
                             <div className="space-y-2">
                                 <label className="text-[10px] font-black uppercase tracking-widest text-sf-muted block">
-                                    One-Time Access URL
+                                    {t('adminDetails.singleUseLink')}
                                 </label>
                                 <div className="flex items-center gap-2">
                                     <input
@@ -99,12 +98,12 @@ export default function RecoveryLinkModal({ isOpen, user, onClose, onSuccess }) 
                                         className="px-4 py-3 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-xl flex items-center gap-1.5 transition shrink-0"
                                     >
                                         <Copy size={14} />
-                                        {copied ? 'Copied!' : 'Copy'}
+                                        {copied ? t('common.copied') : t('common.copy')}
                                     </button>
                                 </div>
                                 <div className="flex items-center gap-2 text-[11px] text-sf-muted mt-2">
                                     <Clock size={13} />
-                                    <span>Expires in 30 minutes. Single-use only. Deliver via verified direct channel.</span>
+                                    <span>{t('adminDetails.recoveryExpires')}</span>
                                 </div>
                             </div>
                         </div>
@@ -114,7 +113,7 @@ export default function RecoveryLinkModal({ isOpen, user, onClose, onSuccess }) 
                                 onClick={onClose}
                                 className="px-6 py-2.5 bg-sf-primary text-white rounded-xl font-bold text-xs hover:bg-sf-primary/90 transition shadow-md shadow-sf-primary/20"
                             >
-                                Done
+                                {t('common.done')}
                             </button>
                         </div>
                     </div>
@@ -130,22 +129,22 @@ export default function RecoveryLinkModal({ isOpen, user, onClose, onSuccess }) 
 
                             <div className="p-3.5 bg-sf-raised/50 rounded-xl border border-sf-divider text-xs text-sf-muted space-y-1">
                                 <p>
-                                    Recovering access for <strong>{user.name || user.username}</strong> ({user.email || user.username}).
+                                    {t('adminDetails.recoveringAccess')} <strong>{user.name || user.username}</strong> ({user.email || user.username}).
                                 </p>
                                 <p className="text-[11px]">
-                                    Static password reset is disabled. This generates an audited, single-use, time-limited recovery link adhering to OWASP security guidelines.
+                                    {t('adminDetails.recoveryHelp')}
                                 </p>
                             </div>
 
                             <div>
                                 <label className="block text-[11px] font-bold text-sf-muted mb-1 uppercase tracking-wider">
-                                    Reason for Recovery Grant <span className="text-rose-500">*</span>
+                                    {t('adminDetails.recoveryReason')} <span className="text-rose-500">*</span>
                                 </label>
                                 <textarea
                                     rows={2}
                                     value={reason}
                                     onChange={(e) => setReason(e.target.value)}
-                                    placeholder="e.g. Technician misplaced password on field assignment"
+                                    placeholder={t('adminDetails.recoveryReasonExample')}
                                     required
                                     className="w-full p-3 bg-sf-canvas border border-sf-divider rounded-xl text-sm text-sf-text focus:ring-2 focus:ring-amber-500 outline-none transition resize-none"
                                 />
@@ -159,14 +158,14 @@ export default function RecoveryLinkModal({ isOpen, user, onClose, onSuccess }) 
                                 disabled={submitting}
                                 className="px-5 py-2.5 rounded-xl border border-sf-divider text-xs font-bold text-sf-muted hover:bg-sf-raised transition"
                             >
-                                Cancel
+                                {t('common.cancel')}
                             </button>
                             <button
                                 type="submit"
                                 disabled={submitting || !reason.trim()}
                                 className="px-6 py-2.5 bg-amber-600 text-white rounded-xl text-xs font-bold hover:bg-amber-700 transition shadow-md shadow-amber-600/20 disabled:opacity-50"
                             >
-                                {submitting ? 'Generating...' : 'Issue Recovery Link'}
+                                {submitting ? t('common.generating') : t('adminDetails.issueRecovery')}
                             </button>
                         </div>
                     </form>

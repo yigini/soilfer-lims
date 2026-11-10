@@ -76,8 +76,8 @@ const BrandingManager = () => {
         if (file) {
             if (file.size > 2 * 1024 * 1024) { // 2MB limit
                 showDialog({
-                    title: 'File too large',
-                    message: 'Please select an image under 2MB.',
+                    title: t('adminDetails.fileTooLarge'),
+                    message: t('adminDetails.imageSize'),
                     type: 'error'
                 });
                 return;
@@ -102,14 +102,14 @@ const BrandingManager = () => {
                 ...formData
             });
             showDialog({
-                title: 'Branding Updated',
-                message: 'Your branding settings have been saved. Refresh the page to see changes.',
+                title: t('adminDetails.brandingSaved'),
+                message: t('adminDetails.brandingSavedHelp'),
                 type: 'success'
             });
         } catch (e) {
             showDialog({
-                title: 'Error',
-                message: e.response?.data?.details || e.response?.data?.error || e.message || 'Failed to save branding settings',
+                title: t('common.error'),
+                message: e.response?.data?.details || e.response?.data?.error || e.message || t('adminDetails.brandingSaveFailed'),
                 type: 'error'
             });
         } finally {
@@ -118,7 +118,7 @@ const BrandingManager = () => {
     };
 
     if (isLoading) {
-        return <div className="p-12 text-center text-gray-500">Loading settings...</div>;
+        return <div className="p-12 text-center text-gray-500">{t('adminDetails.loadingSettings')}</div>;
     }
 
     return (
@@ -165,7 +165,7 @@ const BrandingManager = () => {
                                     {formData.logoUrl ? (
                                         <img
                                             src={formData.logoUrl}
-                                            alt="Logo"
+                                            alt={t('adminDetails.logo')}
                                             className="w-20 h-20 object-contain group-hover:opacity-100 transition-opacity"
                                             onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.classList.add('error-image'); }}
                                         />
@@ -185,31 +185,31 @@ const BrandingManager = () => {
                                     />
                                 </div>
                                 <div className="flex-1 space-y-3">
-                                    <label className="block text-sm font-medium text-sf-muted">Laboratory Logo</label>
+                                    <label className="block text-sm font-medium text-sf-muted">{t('adminDetails.labLogo')}</label>
                                     <div className="flex gap-3">
                                         <button
                                             onClick={() => fileInputRef.current?.click()}
                                             className="px-4 py-2 bg-white dark:bg-gray-700 border border-sf-divider rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
                                         >
-                                            Upload New
+                                            {t('adminDetails.uploadNew')}
                                         </button>
                                         <button
                                             onClick={handleRemoveLogo}
                                             className="px-4 py-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg text-sm font-medium transition-colors"
                                         >
-                                            Remove
+                                            {t('adminDetails.remove')}
                                         </button>
                                     </div>
                                     <p className="text-xs text-gray-500 leading-relaxed">
-                                        Suggested dimensions: 200x200px. <br />
-                                        Supports PNG, SVG, or JPG. Max file size 2MB.
+                                        {t('adminDetails.logoDimensions')} <br />
+                                        {t('adminDetails.logoFormats')}
                                     </p>
                                 </div>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-sf-divider">
                                 <div>
-                                    <label className="block text-sm font-medium text-sf-muted mb-2">Primary Color</label>
+                                    <label className="block text-sm font-medium text-sf-muted mb-2">{t('adminDetails.primaryColor')}</label>
                                     <div className="flex items-center gap-2 p-1.5 border border-sf-divider rounded-lg bg-white dark:bg-gray-700 focus-within:ring-2 focus-within:ring-blue-500">
                                         <input
                                             type="color"
@@ -226,7 +226,7 @@ const BrandingManager = () => {
                                     </div>
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-sf-muted mb-2">Secondary Color</label>
+                                    <label className="block text-sm font-medium text-sf-muted mb-2">{t('adminDetails.secondaryColor')}</label>
                                     <div className="flex items-center gap-2 p-1.5 border border-sf-divider rounded-lg bg-white dark:bg-gray-700 focus-within:ring-2 focus-within:ring-blue-500">
                                         <input
                                             type="color"
@@ -245,7 +245,7 @@ const BrandingManager = () => {
                             </div>
 
                             <div className="p-3 bg-sf-canvas border border-sf-divider rounded-xl text-xs text-sf-muted leading-relaxed">
-                                <span className="font-bold text-sf-text">Note:</span> Custom branding colors are preserved for organization identity and certificates. To configure sitewide color themes and Light/Dark modes for the platform, use the <strong>Appearance & Theme</strong> tab.
+                                <span className="font-bold text-sf-text">{t('adminDetails.note')}</span> {t('adminDetails.colorNote')} <strong>{t('adminDetails.appearanceTheme')}</strong> {t('adminDetails.colorNoteTab')}
                             </div>
                         </div>
                     </div>
@@ -255,27 +255,27 @@ const BrandingManager = () => {
                         <div className="p-6 border-b border-sf-divider bg-sf-canvas">
                             <h3 className="text-lg font-semibold text-sf-text flex items-center gap-2">
                                 <Type size={20} className="text-gray-500" />
-                                Organization Details
+                                {t('adminDetails.organizationDetails')}
                             </h3>
                         </div>
                         <div className="p-6 space-y-5">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                                 <div className="space-y-2">
-                                    <label className="text-sm font-medium text-sf-muted">Lab Name (App Title)</label>
+                                    <label className="text-sm font-medium text-sf-muted">{t('adminDetails.brandingLabName')}</label>
                                     <input
                                         type="text"
                                         className="w-full h-10 px-3 rounded-lg border border-sf-divider bg-sf-surface text-sf-text focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                                        placeholder="e.g. SoilFER LIMS"
+                                        placeholder={t('adminDetails.labTitleExample')}
                                         value={formData.title}
                                         onChange={(e) => handleChange('title', e.target.value)}
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-sm font-medium text-sf-muted">Organization Legal Name</label>
+                                    <label className="text-sm font-medium text-sf-muted">{t('adminDetails.legalName')}</label>
                                     <input
                                         type="text"
                                         className="w-full h-10 px-3 rounded-lg border border-sf-divider bg-sf-surface text-sf-text focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                                        placeholder="e.g. National Soil Institute"
+                                        placeholder={t('adminDetails.legalNameExample')}
                                         value={formData.organization}
                                         onChange={(e) => handleChange('organization', e.target.value)}
                                     />
@@ -283,18 +283,18 @@ const BrandingManager = () => {
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-sf-muted">Tagline / Subtitle</label>
+                                <label className="text-sm font-medium text-sf-muted">{t('adminDetails.tagline')}</label>
                                 <input
                                     type="text"
                                     className="w-full h-10 px-3 rounded-lg border border-sf-divider bg-sf-surface text-sf-text focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                                    placeholder="e.g. Advanced Analysis & Research Platform"
+                                    placeholder={t('adminDetails.taglineExample')}
                                     value={formData.tagline}
                                     onChange={(e) => handleChange('tagline', e.target.value)}
                                 />
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-sf-muted">Contact Email</label>
+                                <label className="text-sm font-medium text-sf-muted">{t('adminDetails.contactEmail')}</label>
                                 <div className="relative">
                                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
                                     <input
@@ -308,11 +308,11 @@ const BrandingManager = () => {
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-sf-muted">Footer Text</label>
+                                <label className="text-sm font-medium text-sf-muted">{t('adminDetails.footer')}</label>
                                 <textarea
                                     rows="2"
                                     className="w-full p-3 rounded-lg border border-sf-divider bg-sf-surface text-sf-text focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
-                                    placeholder="© 2026 Your Laboratory. All rights reserved."
+                                    placeholder={t('adminDetails.footerExample')}
                                     value={formData.footerText}
                                     onChange={(e) => handleChange('footerText', e.target.value)}
                                 />
@@ -325,13 +325,13 @@ const BrandingManager = () => {
                         <div className="p-6 border-b border-sf-divider bg-sf-canvas">
                             <h3 className="text-lg font-semibold text-sf-text flex items-center gap-2">
                                 <Globe size={20} className="text-gray-500" />
-                                Localization
+                                {t('adminDetails.localization')}
                             </h3>
                         </div>
                         <div className="p-6 space-y-5">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                                 <div className="space-y-2">
-                                    <label className="text-sm font-medium text-sf-muted">Default Language</label>
+                                    <label className="text-sm font-medium text-sf-muted">{t('adminDetails.defaultLanguage')}</label>
                                     <select
                                         className="w-full h-10 px-3 rounded-lg border border-sf-divider bg-sf-surface text-sf-text focus:ring-2 focus:ring-blue-500"
                                         value={formData.defaultLanguage}
@@ -342,20 +342,20 @@ const BrandingManager = () => {
                                                 <option key={lang.code} value={lang.code}>{lang.name}</option>
                                             ))
                                         ) : (
-                                            <option value="" disabled>No languages available</option>
+                                            <option value="" disabled>{t('adminDetails.noLanguages')}</option>
                                         )}
                                     </select>
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-sm font-medium text-sf-muted">Date Format</label>
+                                    <label className="text-sm font-medium text-sf-muted">{t('adminDetails.dateFormat')}</label>
                                     <select
                                         className="w-full h-10 px-3 rounded-lg border border-sf-divider bg-sf-surface text-sf-text focus:ring-2 focus:ring-blue-500"
                                         value={formData.dateFormat}
                                         onChange={(e) => handleChange('dateFormat', e.target.value)}
                                     >
-                                        <option value="YYYY-MM-DD">ISO (2026-02-03)</option>
-                                        <option value="DD/MM/YYYY">European (03/02/2026)</option>
-                                        <option value="MM/DD/YYYY">US (02/03/2026)</option>
+                                        <option value="YYYY-MM-DD">{t('adminDetails.isoDate')}</option>
+                                        <option value="DD/MM/YYYY">{t('adminDetails.dateEuropean')}</option>
+                                        <option value="MM/DD/YYYY">{t('adminDetails.dateUS')}</option>
                                     </select>
                                 </div>
                             </div>
@@ -363,9 +363,9 @@ const BrandingManager = () => {
                             <div className="p-4 bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/30 rounded-lg flex gap-3">
                                 <Clock className="text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" size={18} />
                                 <div>
-                                    <p className="text-sm font-medium text-blue-900 dark:text-blue-300">Automatic Timezone Handling</p>
+                                    <p className="text-sm font-medium text-blue-900 dark:text-blue-300">{t('adminDetails.autoTimezone')}</p>
                                     <p className="text-xs text-blue-700 dark:text-blue-400 mt-1">
-                                        The system automatically detects user timezones. All timestamps are stored in UTC and converted to local time for display.
+                                        {t('adminDetails.autoTimezoneHelp')}
                                     </p>
                                 </div>
                             </div>
@@ -377,14 +377,14 @@ const BrandingManager = () => {
                         <div className="p-6 border-b border-sf-divider bg-sf-canvas">
                             <h3 className="text-lg font-semibold text-sf-text flex items-center gap-2">
                                 <Globe size={20} className="text-gray-500" />
-                                Integrations
+                                {t('adminDetails.integrations')}
                             </h3>
                         </div>
                         <div className="p-6 space-y-5">
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-sf-muted">Cesium Ion Access Token</label>
+                                <label className="text-sm font-medium text-sf-muted">{t('adminDetails.cesiumAccess')}</label>
                                 <p className="text-xs text-sf-muted mb-1">
-                                    Used for the 3D Globe sample location viewer. Get your token from <a href="https://ion.cesium.com/tokens" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">ion.cesium.com/tokens</a>
+                                    {t('adminDetails.cesiumAccessHelp')} <a href="https://ion.cesium.com/tokens" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">ion.cesium.com/tokens</a>
                                 </p>
                                 <input
                                     type="text"
@@ -398,9 +398,9 @@ const BrandingManager = () => {
                             <div className="p-4 bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/30 rounded-lg flex gap-3">
                                 <Globe className="text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" size={18} />
                                 <div>
-                                    <p className="text-sm font-medium text-blue-900 dark:text-blue-300">3D Globe Viewer</p>
+                                    <p className="text-sm font-medium text-blue-900 dark:text-blue-300">{t('adminDetails.globeViewer')}</p>
                                     <p className="text-xs text-blue-700 dark:text-blue-400 mt-1">
-                                        When a valid Cesium token is set, samples with GPS coordinates will be viewable on an interactive 3D globe accessible from the navigation menu.
+                                        {t('adminDetails.globeHelp')}
                                     </p>
                                 </div>
                             </div>
@@ -412,7 +412,7 @@ const BrandingManager = () => {
                 <div className="lg:col-span-1">
                     <div className="sticky top-6">
                         <h4 className="text-sm font-bold text-sf-muted uppercase tracking-wider mb-4 flex items-center gap-2">
-                            <Eye size={16} /> Live Preview
+                            <Eye size={16} /> {t('adminDetails.livePreview')}
                         </h4>
 
                         <div className="bg-sf-surface rounded-xl shadow-lg border border-sf-divider overflow-hidden transform transition-all duration-300">
@@ -423,7 +423,7 @@ const BrandingManager = () => {
                                 <div className="flex items-center gap-3">
                                     <div className="w-8 h-8 rounded bg-gray-200 dark:bg-gray-700 flex items-center justify-center overflow-hidden">
                                         {formData.logoUrl ? (
-                                            <img src={formData.logoUrl} alt="Logo" className="w-6 h-6 object-contain" />
+                                            <img src={formData.logoUrl} alt={t('adminDetails.logo')} className="w-6 h-6 object-contain" />
                                         ) : (
                                             <div className="w-4 h-4 rounded-full bg-gray-400"></div>
                                         )}
@@ -449,17 +449,17 @@ const BrandingManager = () => {
 
                                 {/* Mock Main Content */}
                                 <div className="flex-1 p-4 bg-gray-50/50 dark:bg-black/20">
-                                    <h1 className="text-xl font-bold text-sf-text mb-2">Dashboard</h1>
+                                    <h1 className="text-xl font-bold text-sf-text mb-2">{t('adminDetails.dashboard')}</h1>
                                     <div className="p-4 bg-sf-surface rounded-lg shadow-sm border border-sf-divider mb-4">
-                                        <p className="text-sm text-gray-500 mb-1">Welcome back,</p>
-                                        <p className="font-medium text-sf-text">{formData.organization || 'Organization Name'}</p>
+                                        <p className="text-sm text-gray-500 mb-1">{t('adminDetails.welcomeBack')}</p>
+                                        <p className="font-medium text-sf-text">{formData.organization || t('adminDetails.organizationPreview')}</p>
                                     </div>
 
                                     <button className="px-4 py-2 rounded text-white text-sm font-medium w-full" style={{ backgroundColor: formData.colors.primary }}>
-                                        Primary Button
+                                        {t('adminDetails.primaryButton')}
                                     </button>
                                     <button className="mt-2 px-4 py-2 rounded text-white text-sm font-medium w-full" style={{ backgroundColor: formData.colors.secondary }}>
-                                        Secondary Button
+                                        {t('adminDetails.secondaryButton')}
                                     </button>
                                 </div>
                             </div>
@@ -472,7 +472,7 @@ const BrandingManager = () => {
 
                         <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
                             <p className="text-xs text-blue-800 dark:text-blue-300">
-                                <strong>Tip:</strong> Ensure your primary and secondary colors have enough contrast for accessibility.
+                                <strong>{t('adminDetails.tip')}</strong> {t('adminDetails.contrastHelp')}
                             </p>
                         </div>
                     </div>

@@ -70,7 +70,7 @@ export default function SuspendUserModal({ isOpen, user, onClose, onSuccess }) {
                                 {t('staffManagement.suspend.title', 'Emergency Staff Suspension')}
                             </div>
                             <h2 id="suspend-user-title" className="text-lg font-black text-sf-text">
-                                {isSuspending ? 'Suspend Account' : 'Reactivate Account'}
+                                {isSuspending ? t('adminDetails.suspendAccount') : t('adminDetails.reactivateAccount')}
                             </h2>
                         </div>
                     </div>
@@ -90,15 +90,15 @@ export default function SuspendUserModal({ isOpen, user, onClose, onSuccess }) {
 
                         <div className="text-xs text-sf-muted space-y-1.5">
                             <p>
-                                Target user: <strong>{user.name || user.username}</strong> ({user.role})
+                                {t('adminDetails.targetUser')} <strong>{user.name || user.username}</strong> ({user.role})
                             </p>
                             {isSuspending ? (
                                 <p>
-                                    Suspending will immediately revoke all active sessions. Unfinished tasks remain attributed and must be reassigned. Past results keep their authorship.
+                                    {t('adminDetails.suspendHelp')}
                                 </p>
                             ) : (
                                 <p>
-                                    Reactivating restores login capabilities. Previously revoked sessions remain invalid; user must log in again with their established credentials.
+                                    {t('adminDetails.reactivateHelp')}
                                 </p>
                             )}
                         </div>
@@ -106,13 +106,13 @@ export default function SuspendUserModal({ isOpen, user, onClose, onSuccess }) {
                         {isSuspending && (
                             <div>
                                 <label className="block text-[11px] font-bold text-sf-muted mb-1 uppercase tracking-wider">
-                                    Suspension Reason <span className="text-rose-500">*</span>
+                                    {t('adminDetails.suspendReason')} <span className="text-rose-500">*</span>
                                 </label>
                                 <textarea
                                     rows={2}
                                     value={reason}
                                     onChange={(e) => setReason(e.target.value)}
-                                    placeholder="e.g. Placement concluded / Security concern"
+                                    placeholder={t('adminDetails.suspendReasonExample')}
                                     required
                                     className="w-full p-3 bg-sf-canvas border border-sf-divider rounded-xl text-sm text-sf-text focus:ring-2 focus:ring-rose-500 outline-none transition resize-none"
                                 />
@@ -127,7 +127,7 @@ export default function SuspendUserModal({ isOpen, user, onClose, onSuccess }) {
                             disabled={submitting}
                             className="px-5 py-2.5 rounded-xl border border-sf-divider text-xs font-bold text-sf-muted hover:bg-sf-raised transition"
                         >
-                            Cancel
+                            {t('common.cancel')}
                         </button>
                         <button
                             type="submit"
@@ -136,7 +136,7 @@ export default function SuspendUserModal({ isOpen, user, onClose, onSuccess }) {
                                 isSuspending ? 'bg-rose-600 hover:bg-rose-700 shadow-rose-600/20' : 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/20'
                             }`}
                         >
-                            {submitting ? 'Processing...' : isSuspending ? 'Suspend Account' : 'Reactivate Account'}
+                            {submitting ? t('common.processing') : isSuspending ? t('adminDetails.suspendAccount') : t('adminDetails.reactivateAccount')}
                         </button>
                     </div>
                 </form>

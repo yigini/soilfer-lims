@@ -42,11 +42,11 @@ const AuditLogs = () => {
     // Human-readable mapping
     const getActionDisplay = (action, cat) => {
         const map = {
-            'STATUS_CHANGE': { text: 'Status Updated', icon: History, color: 'text-blue-600', bg: 'bg-blue-50' },
-            'WORKITEM_GENERATED': { text: 'Work Assigned', icon: Syringe, color: 'text-purple-600', bg: 'bg-purple-50' },
-            'USER_CREATED': { text: 'User Added', icon: UserCog, color: 'text-green-600', bg: 'bg-green-50' },
-            'SETTINGS_UPDATE': { text: 'System Config', icon: Settings, color: 'text-gray-600', bg: 'bg-gray-50' },
-            'Sample Created': { text: 'Sample Intake', icon: FilePlus, color: 'text-indigo-600', bg: 'bg-indigo-50' }
+            'STATUS_CHANGE': { text: t('auditSection.actions.statusUpdated'), icon: History, color: 'text-blue-600', bg: 'bg-blue-50' },
+            'WORKITEM_GENERATED': { text: t('adminDetails.auditAssigned'), icon: Syringe, color: 'text-purple-600', bg: 'bg-purple-50' },
+            'USER_CREATED': { text: t('auditSection.actions.userAdded'), icon: UserCog, color: 'text-green-600', bg: 'bg-green-50' },
+            'SETTINGS_UPDATE': { text: t('auditSection.actions.systemConfig'), icon: Settings, color: 'text-gray-600', bg: 'bg-gray-50' },
+            'Sample Created': { text: t('auditSection.actions.sampleIntake'), icon: FilePlus, color: 'text-indigo-600', bg: 'bg-indigo-50' }
         };
 
         const def = map[action] || { text: action.replace(/_/g, ' '), icon: ShieldAlert, color: 'text-gray-500', bg: 'bg-gray-50' };
@@ -101,10 +101,10 @@ const AuditLogs = () => {
                     <table className="w-full text-left">
                         <thead className="bg-sf-canvas/50 border-b border-sf-divider">
                             <tr>
-                                <th className="px-6 py-4 font-semibold text-sf-muted text-xs uppercase tracking-wider">Event</th>
-                                <th className="px-6 py-4 font-semibold text-sf-muted text-xs uppercase tracking-wider">User</th>
-                                <th className="px-6 py-4 font-semibold text-sf-muted text-xs uppercase tracking-wider">Details</th>
-                                <th className="px-6 py-4 font-semibold text-sf-muted text-xs uppercase tracking-wider">Timestamp</th>
+                                <th className="px-6 py-4 font-semibold text-sf-muted text-xs uppercase tracking-wider">{t('adminDetails.event')}</th>
+                                <th className="px-6 py-4 font-semibold text-sf-muted text-xs uppercase tracking-wider">{t('qaSection.colUser')}</th>
+                                <th className="px-6 py-4 font-semibold text-sf-muted text-xs uppercase tracking-wider">{t('qaSection.colDetails')}</th>
+                                <th className="px-6 py-4 font-semibold text-sf-muted text-xs uppercase tracking-wider">{t('qaSection.colTimestamp')}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-sf-divider">
@@ -112,13 +112,13 @@ const AuditLogs = () => {
                                 <tr>
                                     <td colSpan="4" className="px-6 py-12 text-center">
                                         <Loader className="animate-spin mx-auto text-indigo-500 mb-2" />
-                                        <span className="text-gray-500">Loading records...</span>
+                                        <span className="text-gray-500">{t('adminDetails.loadingRecords')}</span>
                                     </td>
                                 </tr>
                             ) : logs.length === 0 ? (
                                 <tr>
                                     <td colSpan="4" className="px-6 py-12 text-center text-gray-500">
-                                        No audit records found matching your filters.
+                                        {t('adminDetails.noAuditRecords')}
                                     </td>
                                 </tr>
                             ) : logs.map((log, i) => {
@@ -151,7 +151,7 @@ const AuditLogs = () => {
                                                 <div className="w-6 h-6 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center text-xs font-bold uppercase">
                                                     {(log.user || '?').charAt(0)}
                                                 </div>
-                                                <span className="font-medium text-sm text-sf-muted">{log.user || 'System'}</span>
+                                                <span className="font-medium text-sm text-sf-muted">{log.user || t('auditSection.system')}</span>
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
@@ -185,7 +185,7 @@ const AuditLogs = () => {
                 {/* Pagination */}
                 <div className="px-6 py-4 border-t border-sf-divider flex items-center justify-between">
                     <span className="text-sm text-gray-500">
-                        Showing page {meta.page} of {meta.totalPages} ({meta.total} records)
+                        {t('adminDetails.auditPage', { page: meta.page, pages: meta.totalPages, count: meta.total })}
                     </span>
                     <div className="flex gap-2">
                         <button

@@ -165,7 +165,7 @@ export default function LabManagement() {
             console.error('Failed to load workspace:', err);
             const status = err.response?.status;
             const msg = err.response?.data?.message || err.response?.data?.error || err.message;
-            setWorkspaceError({ status, message: msg || 'Failed to load laboratory workspace' });
+            setWorkspaceError({ status, message: msg || t('labManagement.errors.loadError') });
             if (options.throwOnError) throw err;
             return false;
         } finally {
@@ -443,7 +443,7 @@ export default function LabManagement() {
         } catch (err) {
             console.error('Failed to onboard lab:', err);
             const msg = err.response?.data?.message || err.response?.data?.error || err.message;
-            showDialog({ title: 'Onboarding Failed', message: msg || 'Failed to create laboratory', type: 'error' });
+            showDialog({ title: t('adminDetails.onboardingFailed'), message: msg || t('adminDetails.createLabFailed'), type: 'error' });
         } finally {
             setSubmittingOnboard(false);
         }
@@ -663,11 +663,11 @@ export default function LabManagement() {
                             <div className="p-4 sm:p-6 border-b border-sf-divider flex items-center justify-between shrink-0">
                                 <div>
                                     <div className="text-[10px] font-black uppercase tracking-widest text-sf-primary">
-                                        Facility Provisioning
+                                        {t('adminDetails.facilityProvisioning')}
                                     </div>
                                     <h2 id="onboard-lab-title" className="text-lg sm:text-xl font-black text-sf-text">{t('labDirectory.onboardTitle')}</h2>
                                 </div>
-                                <button onClick={() => setShowOnboardModal(false)} aria-label="Close" className="p-2 hover:bg-sf-raised rounded-xl transition text-sf-muted hover:text-sf-text">
+                                <button onClick={() => setShowOnboardModal(false)} aria-label={t('common.close')} className="p-2 hover:bg-sf-raised rounded-xl transition text-sf-muted hover:text-sf-text">
                                     <X size={18} />
                                 </button>
                             </div>
@@ -677,34 +677,34 @@ export default function LabManagement() {
                                 <div className="p-3 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/60 rounded-xl text-xs text-emerald-900 dark:text-emerald-200 flex items-start gap-2">
                                     <Shield size={16} className="text-emerald-600 shrink-0 mt-0.5" />
                                     <span>
-                                        Onboarding initializes laboratory identity, regional scope, and metadata. Staff accounts are provisioned separately via named invitation tokens. No static dummy passwords will be generated.
+                                        {t('adminDetails.onboardingHelp')}
                                     </span>
                                 </div>
 
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div>
                                         <label className="block text-[11px] font-bold text-sf-muted mb-1 uppercase tracking-wider">
-                                            Lab ID (Unique) <span className="text-rose-500">*</span>
+                                            {t('adminDetails.uniqueLabId')} <span className="text-rose-500">*</span>
                                         </label>
                                         <input
                                             type="text"
                                             required
                                             value={onboardForm.id}
                                             onChange={e => setOnboardForm({ ...onboardForm, id: e.target.value.toUpperCase() })}
-                                            placeholder="e.g. GTM-LAB-01"
+                                            placeholder={t('adminDetails.labIdExample')}
                                             className="w-full px-3 py-2 bg-sf-canvas border border-sf-divider rounded-xl text-sm font-mono text-sf-text focus:ring-2 focus:ring-sf-primary outline-none"
                                         />
                                     </div>
                                     <div>
                                         <label className="block text-[11px] font-bold text-sf-muted mb-1 uppercase tracking-wider">
-                                            Lab Code <span className="text-rose-500">*</span>
+                                            {t('adminDetails.labCode')} <span className="text-rose-500">*</span>
                                         </label>
                                         <input
                                             type="text"
                                             required
                                             value={onboardForm.code}
                                             onChange={e => setOnboardForm({ ...onboardForm, code: e.target.value.toUpperCase() })}
-                                            placeholder="e.g. GTM01"
+                                            placeholder={t('adminDetails.labCodeExample')}
                                             className="w-full px-3 py-2 bg-sf-canvas border border-sf-divider rounded-xl text-sm font-mono text-sf-text focus:ring-2 focus:ring-sf-primary outline-none"
                                         />
                                     </div>
@@ -712,14 +712,14 @@ export default function LabManagement() {
 
                                 <div>
                                     <label className="block text-[11px] font-bold text-sf-muted mb-1 uppercase tracking-wider">
-                                        Laboratory Full Name <span className="text-rose-500">*</span>
+                                        {t('adminDetails.labFullName')} <span className="text-rose-500">*</span>
                                     </label>
                                     <input
                                         type="text"
                                         required
                                         value={onboardForm.name}
                                         onChange={e => setOnboardForm({ ...onboardForm, name: e.target.value })}
-                                        placeholder="e.g. Central Soil Testing Laboratory"
+                                        placeholder={t('adminDetails.labNameExample')}
                                         className="w-full px-3 py-2 bg-sf-canvas border border-sf-divider rounded-xl text-sm text-sf-text focus:ring-2 focus:ring-sf-primary outline-none"
                                     />
                                 </div>
@@ -727,7 +727,7 @@ export default function LabManagement() {
                                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                     <div>
                                         <label className="block text-[11px] font-bold text-sf-muted mb-1 uppercase tracking-wider">
-                                            Country <span className="text-rose-500">*</span>
+                                            {t('adminDetails.country')} <span className="text-rose-500">*</span>
                                         </label>
                                         <input
                                             type="text"
@@ -740,7 +740,7 @@ export default function LabManagement() {
                                     </div>
                                     <div>
                                         <label className="block text-[11px] font-bold text-sf-muted mb-1 uppercase tracking-wider">
-                                            City
+                                            {t('adminDetails.city')}
                                         </label>
                                         <input
                                             type="text"
@@ -752,7 +752,7 @@ export default function LabManagement() {
                                     </div>
                                     <div>
                                         <label className="block text-[11px] font-bold text-sf-muted mb-1 uppercase tracking-wider">
-                                            IANA Time Zone <span className="text-rose-500">*</span>
+                                            {t('adminDetails.timeZone')} <span className="text-rose-500">*</span>
                                         </label>
                                         <select
                                             value={onboardForm.timezone}
@@ -769,7 +769,7 @@ export default function LabManagement() {
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div>
                                         <label className="block text-[11px] font-bold text-sf-muted mb-1 uppercase tracking-wider">
-                                            Contact Email
+                                            {t('adminDetails.contactEmail')}
                                         </label>
                                         <input
                                             type="email"
@@ -781,7 +781,7 @@ export default function LabManagement() {
                                     </div>
                                     <div>
                                         <label className="block text-[11px] font-bold text-sf-muted mb-1 uppercase tracking-wider">
-                                            Phone Number
+                                            {t('adminDetails.phoneNumber')}
                                         </label>
                                         <input
                                             type="text"
@@ -801,14 +801,14 @@ export default function LabManagement() {
                                         onClick={() => setShowOnboardModal(false)}
                                         className="px-5 py-2.5 rounded-xl border border-sf-divider text-xs font-bold text-sf-muted hover:bg-sf-raised transition"
                                     >
-                                        Cancel
+                                        {t('common.cancel')}
                                     </button>
                                     <button
                                         type="submit"
                                         disabled={submittingOnboard}
                                         className="px-6 py-2.5 bg-sf-primary text-white rounded-xl text-xs font-bold hover:bg-sf-primary/90 transition shadow-md shadow-sf-primary/20 disabled:opacity-50"
                                     >
-                                        {submittingOnboard ? 'Onboarding...' : 'Onboard Facility'}
+                                        {submittingOnboard ? t('adminDetails.onboarding') : t('adminDetails.onboardFacility')}
                                     </button>
                                 </div>
                             </form>
@@ -928,7 +928,7 @@ export default function LabManagement() {
 
                         <div>
                             <div className="text-[10px] font-black uppercase tracking-widest text-sf-muted">
-                                {lab?.code || selectedLabId} · {lab?.country || 'Facility'}
+                                {lab?.code || selectedLabId} · {lab?.country || t('adminDetails.facility')}
                             </div>
                             <h1 className="text-2xl sm:text-3xl font-black text-sf-text tracking-tight">
                                 {lab?.name || t('labManagement.title', 'Laboratory Workspace')}
@@ -1025,18 +1025,18 @@ export default function LabManagement() {
                             <div className="flex items-center justify-between">
                                 <div>
                                     <h2 className="text-base font-black text-sf-text">{t('labDirectory.keepMoving')}</h2>
-                                    <p className="text-xs text-sf-muted mt-0.5">Decisions and attention items requiring management action.</p>
+                                    <p className="text-xs text-sf-muted mt-0.5">{t('adminDetails.decisionsHelp')}</p>
                                 </div>
                                 <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${
                                     attentionList.length > 0 ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300' : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300'
                                 }`}>
-                                    {attentionList.length} to review
+                                    {attentionList.length} {t('adminDetails.toReview')}
                                 </span>
                             </div>
 
                             {attentionList.length === 0 ? (
                                 <div className="p-4 bg-sf-canvas rounded-xl text-xs text-emerald-700 dark:text-emerald-300 font-medium flex items-center gap-2">
-                                    <CheckCircle2 size={16} /> All facility governance and configuration checks are passing.
+                                    <CheckCircle2 size={16} /> {t('adminDetails.governanceClear')}
                                 </div>
                             ) : (
                                 <div className="space-y-3">
@@ -1059,31 +1059,31 @@ export default function LabManagement() {
                         <div className="p-6 rounded-2xl bg-sf-surface border border-sf-divider space-y-4">
                             <div>
                                 <h2 className="text-base font-black text-sf-text">{t('labDirectory.workAtLab')}</h2>
-                                <p className="text-xs text-sf-muted mt-0.5">Active assigned samples categorized by current workflow stage.</p>
+                                <p className="text-xs text-sf-muted mt-0.5">{t('adminDetails.workflowHelp')}</p>
                             </div>
 
                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                                 <div className="p-4 rounded-xl bg-sf-canvas border border-sf-divider">
                                     <div className="text-2xl font-black text-sf-text">{workload?.samples?.expected || 0}</div>
-                                    <div className="text-[10px] font-bold uppercase tracking-wider text-sf-muted mt-0.5">Expected</div>
+                                    <div className="text-[10px] font-bold uppercase tracking-wider text-sf-muted mt-0.5">{t('adminDetails.expected')}</div>
                                 </div>
                                 <div className="p-4 rounded-xl bg-sf-canvas border border-sf-divider">
                                     <div className="text-2xl font-black text-blue-600 dark:text-blue-400">{workload?.samples?.received || 0}</div>
-                                    <div className="text-[10px] font-bold uppercase tracking-wider text-sf-muted mt-0.5">Received</div>
+                                    <div className="text-[10px] font-bold uppercase tracking-wider text-sf-muted mt-0.5">{t('adminDetails.received')}</div>
                                 </div>
                                 <div className="p-4 rounded-xl bg-sf-canvas border border-sf-divider">
                                     <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400">{workload?.samples?.inAnalysis || 0}</div>
-                                    <div className="text-[10px] font-bold uppercase tracking-wider text-sf-muted mt-0.5">In Analysis</div>
+                                    <div className="text-[10px] font-bold uppercase tracking-wider text-sf-muted mt-0.5">{t('adminDetails.inAnalysis')}</div>
                                 </div>
                                 <div className="p-4 rounded-xl bg-sf-canvas border border-sf-divider">
                                     <div className="text-2xl font-black text-amber-600 dark:text-amber-400">{workload?.samples?.review || 0}</div>
-                                    <div className="text-[10px] font-bold uppercase tracking-wider text-sf-muted mt-0.5">Review Queue</div>
+                                    <div className="text-[10px] font-bold uppercase tracking-wider text-sf-muted mt-0.5">{t('adminDetails.reviewQueue')}</div>
                                 </div>
                             </div>
 
                             <div className="flex items-center justify-between pt-2">
                                 <span className="text-xs text-sf-muted">
-                                    Total active workload: {workload?.workItems?.open || 0} assigned tasks across {workload?.samples?.active || 0} samples.
+                                    {t('adminDetails.totalActiveWork')} {workload?.workItems?.open || 0} {t('adminDetails.assignedTasksAcross')} {workload?.samples?.active || 0} {t('adminDetails.samplesPeriod')}
                                 </span>
                                 <Link
                                     to="/workbench"
@@ -1099,7 +1099,7 @@ export default function LabManagement() {
                     <div className="space-y-6">
                         <div className="p-6 rounded-2xl bg-sf-surface border border-sf-divider space-y-4">
                             <div className="text-[10px] font-black uppercase tracking-widest text-sf-muted">
-                                Responsible Manager
+                                {t('adminDetails.responsibleManager')}
                             </div>
 
                             {responsibleMgr ? (
@@ -1114,25 +1114,25 @@ export default function LabManagement() {
                                 </div>
                             ) : (
                                 <div className="p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/60 rounded-xl text-xs text-amber-800 dark:text-amber-200">
-                                    No active Laboratory Manager assigned.
+                                    {t('adminDetails.noActiveManager')}
                                 </div>
                             )}
 
                             <div className="border-t border-sf-divider pt-3 space-y-2 text-xs">
                                 <div className="flex justify-between py-1">
-                                    <span className="text-sf-muted">Staff Members</span>
+                                    <span className="text-sf-muted">{t('adminDetails.staffMembers')}</span>
                                     <span className="font-bold text-sf-text">{workload?.staff?.total || 0}</span>
                                 </div>
                                 <div className="flex justify-between py-1">
-                                    <span className="text-sf-muted">Active Technicians</span>
+                                    <span className="text-sf-muted">{t('adminDetails.activeTechnicians')}</span>
                                     <span className="font-bold text-sf-text">{workload?.staff?.active || 0}</span>
                                 </div>
                                 <div className="flex justify-between py-1">
-                                    <span className="text-sf-muted">Local Timezone</span>
+                                    <span className="text-sf-muted">{t('adminDetails.localTimezone')}</span>
                                     <span className="font-mono text-sf-text">{lab?.timezone || t('labManagement.settings.timezoneNotSet', 'Not configured')}</span>
                                 </div>
                                 <div className="flex justify-between py-1">
-                                    <span className="text-sf-muted">Monthly Capacity</span>
+                                    <span className="text-sf-muted">{t('adminDetails.monthlyCapacity')}</span>
                                     <span className="font-mono text-sf-text">
                                         {lab?.capacity !== null && lab?.capacity !== undefined
                                             ? `${lab.capacity} samples/mo`
@@ -1140,8 +1140,8 @@ export default function LabManagement() {
                                     </span>
                                 </div>
                                 <div className="flex justify-between py-1">
-                                    <span className="text-sf-muted">Operational State</span>
-                                    <span className="font-bold text-sf-text">{isPaused ? 'Paused' : 'Active'}</span>
+                                    <span className="text-sf-muted">{t('adminDetails.operationalState')}</span>
+                                    <span className="font-bold text-sf-text">{isPaused ? t('projects.paused') : t('projects.active')}</span>
                                 </div>
                             </div>
 
@@ -1149,26 +1149,26 @@ export default function LabManagement() {
                                 onClick={() => setTab('people')}
                                 className="w-full py-2.5 bg-sf-canvas hover:bg-sf-raised border border-sf-divider rounded-xl text-xs font-bold text-sf-primary transition"
                             >
-                                Manage People & Access
+                                {t('adminDetails.peopleAndAccess')}
                             </button>
                         </div>
 
                         {/* Project Responsibility Summary */}
                         <div className="p-6 rounded-2xl bg-sf-surface border border-sf-divider space-y-3">
                             <div className="text-[10px] font-black uppercase tracking-widest text-sf-muted">
-                                Projects Context
+                                {t('adminDetails.projectsContext')}
                             </div>
                             <h3 className="font-bold text-sm text-sf-text">
-                                {workspace?.projects?.length || 0} Projects Assigned
+                                {workspace?.projects?.length || 0} {t('adminDetails.projectsAssigned')}
                             </h3>
                             <p className="text-xs text-sf-muted">
-                                This laboratory performs sample analyses for authorized shared field programmes and local contracted batches.
+                                {t('adminDetails.labServices')}
                             </p>
                             <button
                                 onClick={() => setTab('projects')}
                                 className="text-xs font-bold text-sf-primary hover:underline flex items-center gap-1"
                             >
-                                View Project Access Details <ChevronRight size={13} />
+                                {t('adminDetails.projectAccess')} <ChevronRight size={13} />
                             </button>
                         </div>
                     </div>
@@ -1571,35 +1571,35 @@ export default function LabManagement() {
                     <div>
                         <h2 className="text-lg font-black text-sf-text">{t('labDirectory.nextBatch')}</h2>
                         <p className="text-xs text-sf-muted mt-0.5">
-                            Specialist modules operating within this laboratory's verified context.
+                            {t('adminDetails.specialistModules')}
                         </p>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {[
                             {
-                                title: 'Method Defaults',
+                                title: t('adminDetails.methodDefaults'),
                                 icon: Sliders,
                                 path: `/lab-methods?labId=${selectedLabId}`,
                                 desc: 'Approved parameter names, analytical packages, and method revisions.',
                                 badge: 'Active Catalogue'
                             },
                             {
-                                title: 'Equipment & Calibration',
+                                title: t('adminDetails.equipmentAndCalibration'),
                                 icon: Monitor,
                                 path: `/equipment?labId=${selectedLabId}`,
                                 desc: 'Instruments, ISO 17025 calibration status, maintenance records.',
                                 badge: `${workload?.equipment?.total || 0} Assets`
                             },
                             {
-                                title: 'Chemical Inventory',
+                                title: t('adminDetails.chemicalInventory'),
                                 icon: Package,
                                 path: `/inventory?labId=${selectedLabId}`,
                                 desc: 'Reagents, reference materials, lots, same-lab storage locations.',
                                 badge: 'Inventory Ready'
                             },
                             {
-                                title: 'Quality Assurance',
+                                title: t('adminDetails.qualityAssurance'),
                                 icon: Award,
                                 path: `/qa?labId=${selectedLabId}`,
                                 desc: 'Control charts, proficiency rounds, duplicate precision monitoring.',
@@ -1642,7 +1642,7 @@ export default function LabManagement() {
                     <div>
                         <h2 className="text-lg font-black text-sf-text">{t('labDirectory.configuration')}</h2>
                         <p className="text-xs text-sf-muted mt-0.5">
-                            Facility identity, timezone normalization, and operational lifecycle state.
+                            {t('adminDetails.labSettingsHelp')}
                         </p>
                     </div>
 
@@ -1680,12 +1680,12 @@ export default function LabManagement() {
                             {numberFormatChanged && <label className="block text-sm">{t('policies.reason')}
                                 <input required value={policyReason} onChange={e => setPolicyReason(e.target.value)} className="block w-full border rounded p-2 bg-sf-canvas" /></label>}
                             <h3 className="font-black text-sm text-sf-text uppercase tracking-wider">
-                                Facility Profile & Local Time
+                                {t('adminDetails.profileAndTime')}
                             </h3>
 
                             <div>
                                 <label className="block text-[11px] font-bold text-sf-muted mb-1 uppercase tracking-wider">
-                                    Laboratory Name
+                                    {t('adminDetails.laboratoryName')}
                                 </label>
                                 <input
                                     type="text"
@@ -1698,7 +1698,7 @@ export default function LabManagement() {
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-[11px] font-bold text-sf-muted mb-1 uppercase tracking-wider">
-                                        City
+                                        {t('adminDetails.city')}
                                     </label>
                                     <input
                                         type="text"
@@ -1729,7 +1729,7 @@ export default function LabManagement() {
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-[11px] font-bold text-sf-muted mb-1 uppercase tracking-wider">
-                                        Contact Email
+                                        {t('adminDetails.contactEmail')}
                                     </label>
                                     <input
                                         type="email"
@@ -1740,7 +1740,7 @@ export default function LabManagement() {
                                 </div>
                                 <div>
                                     <label className="block text-[11px] font-bold text-sf-muted mb-1 uppercase tracking-wider">
-                                        Phone
+                                        {t('adminDetails.phone')}
                                     </label>
                                     <input
                                         type="text"
@@ -1753,7 +1753,7 @@ export default function LabManagement() {
 
                             <div>
                                 <label className="block text-[11px] font-bold text-sf-muted mb-1 uppercase tracking-wider">
-                                    Physical Address
+                                    {t('adminDetails.physicalAddress')}
                                 </label>
                                 <textarea
                                     rows={2}
@@ -1793,28 +1793,28 @@ export default function LabManagement() {
                         {/* Operational Status & Lifecycle Control */}
                         <div className="p-6 rounded-2xl bg-sf-surface border border-sf-divider space-y-4">
                             <h3 className="font-black text-sm text-sf-text uppercase tracking-wider">
-                                Operational Lifecycle Status
+                                {t('adminDetails.lifecycleStatus')}
                             </h3>
 
                             <div className="p-4 bg-sf-canvas rounded-xl border border-sf-divider space-y-2">
-                                <div className="text-xs text-sf-muted uppercase tracking-wider">Current State</div>
+                                <div className="text-xs text-sf-muted uppercase tracking-wider">{t('adminDetails.currentState')}</div>
                                 <div className="flex items-center gap-2">
                                     <span className={`w-2.5 h-2.5 rounded-full ${isPaused ? 'bg-amber-500' : 'bg-emerald-500'}`} />
                                     <span className="font-bold text-base text-sf-text">
-                                        {isPaused ? 'PAUSED' : 'ACTIVE / OPERATIONAL'}
+                                        {isPaused ? 'PAUSED' : t('adminDetails.operational')}
                                     </span>
                                 </div>
                                 <p className="text-xs text-sf-muted">
                                     {isPaused
-                                        ? 'Facility writes and intake are stopped. Scoped records and drafts are preserved.'
-                                        : 'Normal operations active. Analytical intake, assignment, and execution enabled.'}
+                                        ? t('adminDetails.writesPaused')
+                                        : t('adminDetails.normalOperations')}
                                 </p>
                             </div>
 
                             <div className="p-3.5 bg-sf-raised/50 rounded-xl border border-sf-divider text-xs text-sf-muted space-y-1.5">
-                                <strong className="font-bold text-sf-text block">Anti-Cascade Protection</strong>
+                                <strong className="font-bold text-sf-text block">{t('adminDetails.antiCascade')}</strong>
                                 <p>
-                                    Pausing or reactivating a laboratory operates on the facility entity only. Individual user accounts are never cascade-disabled.
+                                    {t('adminDetails.antiCascadeHelp')}
                                 </p>
                             </div>
 
@@ -1833,12 +1833,12 @@ export default function LabManagement() {
                                                 : 'bg-amber-600 hover:bg-amber-700 shadow-amber-600/20'
                                         }`}
                                     >
-                                        {isPaused ? 'Review Resume Operations' : 'Review Pause Operations'}
+                                        {isPaused ? t('adminDetails.reviewResume') : t('adminDetails.reviewPause')}
                                     </button>
                                 </div>
                             ) : (
                                 <div className="text-xs text-sf-muted italic">
-                                    Operational status transitions are reserved for authorized system administrators.
+                                    {t('adminDetails.authorizedTransitions')}
                                 </div>
                             )}
                         </div>
@@ -1876,7 +1876,7 @@ export default function LabManagement() {
                     <div>
                         <h2 className="text-lg font-black text-sf-text">{t('labDirectory.changeHistory')}</h2>
                         <p className="text-xs text-sf-muted mt-0.5">
-                            Scoped, redacted audit trail: actor, affected resource, reason, and operational impact.
+                            {t('adminDetails.auditHelp')}
                         </p>
                     </div>
 
@@ -1884,13 +1884,13 @@ export default function LabManagement() {
                         <div className="space-y-3">
                             <div className="p-4 bg-sf-canvas border border-sf-divider rounded-xl">
                                 <div className="text-[10px] font-black uppercase tracking-wider text-sf-muted">
-                                    RECENT FACILITY ACTIVITY
+                                    {t('adminDetails.recentFacilityActivity')}
                                 </div>
                                 <div className="font-bold text-sm text-sf-text mt-1">
-                                    Operational governance verified for {lab?.name}
+                                    {t('adminDetails.governanceVerified')} {lab?.name}
                                 </div>
                                 <div className="text-xs text-sf-muted mt-1">
-                                    RBAC policies, isolated schema invariants, and zero sample loss safeguards active.
+                                    {t('adminDetails.auditSafeguards')}
                                 </div>
                             </div>
                         </div>
@@ -1900,7 +1900,7 @@ export default function LabManagement() {
                                 to={`/admin/audit?labId=${selectedLabId}`}
                                 className="text-xs font-bold text-sf-primary hover:underline flex items-center gap-1"
                             >
-                                Open Full System Audit Log <ChevronRight size={13} />
+                                {t('adminDetails.fullAudit')} <ChevronRight size={13} />
                             </Link>
                         </div>
                     </div>
@@ -1932,7 +1932,7 @@ export default function LabManagement() {
                         setTargetUser(null);
                     }}
                     onSuccess={({ message }) => {
-                        showDialog({ title: 'Access Updated', message, type: 'success' });
+                        showDialog({ title: t('adminDetails.accessUpdated'), message, type: 'success' });
                         fetchWorkspace(selectedLabId);
                     }}
                 />
@@ -1961,7 +1961,7 @@ export default function LabManagement() {
                         setTargetUser(null);
                     }}
                     onSuccess={(msg) => {
-                        showDialog({ title: 'Account State Updated', message: msg, type: 'success' });
+                        showDialog({ title: t('adminDetails.accountUpdated'), message: msg, type: 'success' });
                         fetchWorkspace(selectedLabId);
                     }}
                 />
@@ -2001,7 +2001,7 @@ export default function LabManagement() {
                                     {t('labManagement.invitations.reissue.title', 'Invitation Reissued')}
                                 </h3>
                             </div>
-                            <button onClick={() => setReissuedModalData(null)} aria-label="Close" className="p-1 text-sf-muted hover:text-sf-text">
+                            <button onClick={() => setReissuedModalData(null)} aria-label={t('common.close')} className="p-1 text-sf-muted hover:text-sf-text">
                                 <X size={16} />
                             </button>
                         </div>
@@ -2055,20 +2055,20 @@ export default function LabManagement() {
                         className="bg-sf-surface rounded-2xl shadow-2xl w-full max-w-lg border border-sf-divider max-h-[calc(100dvh-1rem)] max-h-[calc(100vh-1rem)] sm:max-h-[92vh] flex flex-col min-h-0 overflow-hidden"
                     >
                         <div className="p-4 sm:p-6 border-b border-sf-divider flex items-center justify-between shrink-0">
-                            <h3 id="help-guidance-title" className="font-black text-base text-sf-text">Laboratory Guidance</h3>
-                            <button onClick={() => setShowHelpModal(false)} aria-label="Close" className="p-1 text-sf-muted hover:text-sf-text">
+                            <h3 id="help-guidance-title" className="font-black text-base text-sf-text">{t('adminDetails.labGuidance')}</h3>
+                            <button onClick={() => setShowHelpModal(false)} aria-label={t('common.close')} className="p-1 text-sf-muted hover:text-sf-text">
                                 <X size={16} />
                             </button>
                         </div>
                         <div className="p-4 sm:p-6 space-y-4 text-xs text-sf-muted overflow-y-auto flex-1 custom-scrollbar min-h-0">
                             <p>
-                                <strong>People & Access:</strong> Use named invitations for new staff. Changing roles preserves existing authorship and unfinished tasks.
+                                <strong>{t('adminDetails.peopleHeading')}</strong> {t('adminDetails.peopleHelp')}
                             </p>
                             <p>
-                                <strong>Projects:</strong> Service responsibility is distinct from project ownership. Only project owners can modify global access.
+                                <strong>{t('adminDetails.projectsHeading')}</strong> {t('adminDetails.projectsHelp')}
                             </p>
                             <p>
-                                <strong>Lifecycle:</strong> Pausing a laboratory halts new entries but never deactivates staff accounts.
+                                <strong>{t('adminDetails.lifecycleHeading')}</strong> {t('adminDetails.lifecycleHelp')}
                             </p>
                         </div>
                         <div className="p-3 sm:p-4 sm:px-6 border-t border-sf-divider bg-sf-canvas/50 flex justify-end shrink-0">
@@ -2076,7 +2076,7 @@ export default function LabManagement() {
                                 onClick={() => setShowHelpModal(false)}
                                 className="px-5 py-2 bg-sf-primary text-white rounded-xl text-xs font-bold"
                             >
-                                Close
+                                {t('common.close')}
                             </button>
                         </div>
                     </div>
