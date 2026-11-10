@@ -2688,6 +2688,8 @@
     "selectReceivingLab": "Select a receiving laboratory",
     "receivingLabsFailed": "Could not load receiving laboratories.",
     "submissionFailed": "Consignment submission failed: {message}",
+    "submissionRowError": "Row {row} (sample {id}): {message}",
+    "submissionRowErrorWithoutId": "Row {row}: {message}",
     "massToApply": "Mass to apply (g)",
     "moistureToApply": "Moisture to apply",
     "notRecorded": "Not recorded",

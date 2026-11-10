@@ -2688,6 +2688,8 @@
     "selectReceivingLab": "Sélectionner un laboratoire destinataire",
     "receivingLabsFailed": "Impossible de charger les laboratoires destinataires.",
     "submissionFailed": "Échec de l’envoi du lot : {message}",
+    "submissionRowError": "Ligne {row} (échantillon {id}) : {message}",
+    "submissionRowErrorWithoutId": "Ligne {row} : {message}",
     "massToApply": "Masse à appliquer (g)",
     "moistureToApply": "Humidité à appliquer",
     "notRecorded": "Non renseigné",
