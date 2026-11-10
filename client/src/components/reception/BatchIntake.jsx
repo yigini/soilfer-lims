@@ -260,7 +260,14 @@ const BatchIntake = ({
         } catch (err) {
             playErrorBuzz();
             console.error('Batch submission failed:', err);
-            alert(t('batchIntake.submissionFailed', { message: err.response?.data?.message || err.response?.data?.error || err.message }));
+            const { data, status } = err.response || {};
+            const message = data?.message || data?.error || err.message;
+            const takenId = status === 409 && data?.code === 'SAMPLE_ID_IN_USE';
+            const rowErrors = status === 422 && Array.isArray(data?.errors) ? data.errors : takenId ? [data] : [];
+            const details = rowErrors.map(row => t(row.originalId ? 'batchIntake.submissionRowError' : 'batchIntake.submissionRowErrorWithoutId', {
+                row: row.row, id: row.originalId, message: row.message || row.error || message
+            }));
+            alert(t('batchIntake.submissionFailed', { message: (takenId ? details : [message, ...details]).join('\n') }));
         } finally {
             setSubmitting(false);
         }

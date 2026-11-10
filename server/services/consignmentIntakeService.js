@@ -11,6 +11,9 @@ const { consignmentResponse } = require('./consignmentResponseService');
 function discrepancy(declared, received) {
     return declared == null ? { status: 'NOT_DECLARED', difference: null } : { status: declared === received ? 'MATCH' : declared > received ? 'MISSING' : 'EXCESS', difference: received - declared };
 }
+function submittedOriginalId(sample) {
+    return String(sample?.originalId || sample?.id || '').trim();
+}
 function rowError(error, row, sample) {
     return { row: row + 1, originalId: sample?.originalId || sample?.id || null, code: error.code || 'INTAKE_ROW_FAILED',
         message: error.message, ...(error.payload || {}), ...(error.reason ? { reason: error.reason } : {}) };
@@ -38,14 +41,25 @@ async function receiveConsignment(tx, { body, user, expectedSnapshots }) {
     const now = new Date();
     const lab = await resolveReceivingLab(tx, user, body.assignedLab);
     const receivingUser = user.labId ? user : { ...user, labId: lab.id };
-    // Authorize existing specimen owners before per-row diagnostics can echo
-    // their identities or wrap a scope denial as an intake validation error.
-    for (const sample of samples) {
-        const identifier = sample?.sampleId || sample?.id || sample?.originalId;
-        if (typeof identifier !== 'string' || !identifier.trim()) continue;
-        const existing = await tx.sample.findFirst({ where: { OR: [{ id: identifier }, { originalId: identifier }] } });
-        if (existing && !scope.canAccessEntity(user, existing, { altLabField: 'assignedLab' })) {
+    // Check scope before returning row details. A submitted original ID can
+    // collide across labs without the caller requesting the existing specimen.
+    for (const [index, sample] of samples.entries()) {
+        const originalId = submittedOriginalId(sample);
+        const reference = sample?.sampleId || sample?.id;
+        const identifier = typeof reference === 'string' && reference.trim() ? reference : originalId;
+        if (!identifier) continue;
+        const originalIds = originalId && originalId !== identifier ? [identifier, originalId] : [identifier];
+        const matches = await tx.sample.findMany({ where: { OR: [{ id: identifier }, { originalId: { in: originalIds } }] } });
+        const taken = matches.find(record => record.originalId === originalId && record.assignedLab && record.assignedLab !== lab.id);
+        const explicitReference = sample?.sampleId || (sample?.id !== originalId ? sample?.id : null);
+        const denied = matches.some(record => !scope.canAccessEntity(user, record, { altLabField: 'assignedLab' }) &&
+            (record !== taken || explicitReference === record.id || explicitReference === record.originalId));
+        if (denied) {
             throw new IntakeError(403, { code: 'SAMPLE_SCOPE_DENIED', message: 'The specimen is outside your laboratory scope.' });
+        }
+        if (taken) {
+            throw new IntakeError(409, { code: 'SAMPLE_ID_IN_USE', row: index + 1, originalId,
+                message: 'This sample ID is already registered. Sample IDs must be unique across the system.' });
         }
     }
     for (const value of [header.deliveredAt, header.custodyHandoverAt]) if (value != null && value !== '' && !Number.isFinite(new Date(value).getTime())) throw new IntakeError(422, { code: 'INTAKE_CUSTODY_INVALID', message: 'The custody date must be valid.' });
@@ -55,7 +69,7 @@ async function receiveConsignment(tx, { body, user, expectedSnapshots }) {
     for (const [index, sample] of samples.entries()) {
         try {
             if (!sample || typeof sample !== 'object' || Array.isArray(sample)) throw new IntakeError(422, { code: 'INTAKE_ROW_INVALID', message: 'Each consignment row must be a specimen object.' });
-            const originalId = String(sample.originalId || sample.id || '').trim();
+            const originalId = submittedOriginalId(sample);
             if (!originalId) throw new IntakeError(422, { code: 'INTAKE_IDENTIFIER_REQUIRED', message: 'A specimen identifier is required.' });
             if (seen.has(originalId)) throw new IntakeError(422, { code: 'DUPLICATE_INTAKE_ROW', message: 'This identifier appears more than once in the consignment.' });
             seen.add(originalId);

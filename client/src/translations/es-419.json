@@ -2688,6 +2688,8 @@
     "selectReceivingLab": "Seleccione un laboratorio receptor",
     "receivingLabsFailed": "No se pudieron cargar los laboratorios receptores.",
     "submissionFailed": "No se pudo enviar el envío: {message}",
+    "submissionRowError": "Fila {row} (muestra {id}): {message}",
+    "submissionRowErrorWithoutId": "Fila {row}: {message}",
     "massToApply": "Masa a aplicar (g)",
     "moistureToApply": "Humedad a aplicar",
     "notRecorded": "No registrado",
