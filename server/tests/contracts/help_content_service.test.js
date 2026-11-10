@@ -137,7 +137,7 @@ describe('Help Content Service Contract Tests', () => {
         expect(dryingArticle).toBeDefined();
         expect(dryingArticle.id).toBe('prep-drying');
         expect(Array.isArray(dryingArticle.steps)).toBe(true);
-        expect(dryingArticle.quick).toMatch(/Confirm Complete/i);
+        expect(dryingArticle.quick).toContain('Confirm work is done');
         expect(dryingArticle.sections.length).toBeGreaterThan(0);
     });
 
