@@ -144,10 +144,10 @@ test('mounted request/authorise routes keep requests pending, enforce a second p
  },{samples:true});
 });
 
-test('normal scientific retest review, reapproval and report generation preserve the withdrawn original and issue the next revision',async()=>{
- const f=await qcGateFixture({criteria:{blankPerBatch:0,lrmPerBatch:0,duplicateEvery:0,crmEveryNBatches:0,ccvEvery:0}});owned.push(f);
+test.each([false, true])('normal scientific retest review, reapproval and report generation preserve the withdrawn original and issue the next revision (batched=%s)',async batched=>{
+ const f=await qcGateFixture({criteria:{blankPerBatch:batched?1:0,lrmPerBatch:0,duplicateEvery:0,crmEveryNBatches:0,ccvEvery:0}});owned.push(f);
  require('../../scripts/install_sample_amendment_authorisation').installSampleAmendmentAuthorisation({dbPath:f.file,apply:true});
- await f.setPolicy([{key:'results.replicatesRequired',value:1},{key:'qc.mode',value:'OFF'},{key:'qc.requireBatchQc',value:'NOT_REQUIRED'}]);
+ await f.setPolicy([{key:'results.replicatesRequired',value:1},...(!batched?[{key:'qc.mode',value:'OFF'},{key:'qc.requireBatchQc',value:'NOT_REQUIRED'}]:[])]);
  const item=f.items[0],record=value=>inTransaction(f.db,tx=>writeResultsExecution(tx,{sampleId:item.sampleId,workItemId:item.id,
   actor:f.actor,measurements:[{param:f.analysisCode,value,replicateNo:1,equipmentId:f.instrument.id}]}));
  const submit=async()=>{
@@ -158,7 +158,15 @@ test('normal scientific retest review, reapproval and report generation preserve
  const authoriser=await f.db.user.create({data:{id:randomUUID(),username:'normal-amendment-authoriser-'+randomUUID(),
   email:randomUUID()+'@example.test',password:'owned-http-fixture',role:'LAB_MANAGER',labId:f.labId}});
  const other={id:authoriser.id,username:authoriser.username,role:authoriser.role,labId:f.labId};
- const [original]=await record('7.1');await submit();
+ let originalRun;
+ if(batched){
+  originalRun=await require('../../services/qcNativeRunService').buildNativeRun(f.db,f.actor,f.input);
+  originalRun=await require('../../services/qcNativeRunService').startNativeRun(f.db,originalRun.id,f.actor);
+ }
+ const [original]=await record('7.1');
+ if(batched)await require('../../services/qcNativeMeasurementService').writeNativeMeasurements(f.db,originalRun.id,f.actor,
+  {measurements:[{positionId:originalRun.positions.find(row=>row.kind==='BLANK').id,value:0}]});
+ await submit();
  let initialReport;
  await withQcRunHttp(f.db,f.actor,async(app,token)=>{
   const post=url=>request(app).post(url).set('Authorization','Bearer '+token);
@@ -174,11 +182,25 @@ test('normal scientific retest review, reapproval and report generation preserve
  const frozen=await f.db.report.findUnique({where:{id:initialReport.id}}),publicToken='owned-public-'+randomUUID();
  const link=await f.db.reportShareLink.create({data:{id:randomUUID(),reportId:frozen.id,createdBy:f.actor.username,
   tokenHash:createHash('sha256').update(publicToken).digest('hex')}});
+ const frozenQc=batched?await f.db.batch.findUnique({where:{id:originalRun.id},include:require('../../services/qcRunViewService').QC_RUN_INCLUDE}):null;
+ if(batched){
+  const connection=new Database(f.file);
+  try{
+   for(const target of [null,'unapproved-target'])expect(()=>connection.prepare('UPDATE WorkItem SET batchId=?,rackPosition=NULL WHERE id=?').run(target,item.id))
+    .toThrow('BATCH_MEMBERSHIP_FROZEN');
+  }finally{connection.close();}
+ }
  const {amendment}=await commands.command(f.db,{sampleId:item.sampleId,actor:f.actor,input:{type:'SCIENTIFIC',reason:'Client requested an analytical retest',
   reasonCode:'CLIENT_RETEST',selectedWorkItemIds:[item.id],idempotencyKey:randomUUID()}});
  const reopened=await commands.command(f.db,{sampleId:item.sampleId,amendmentId:amendment.id,actor:other,authorise:true,
   input:{expectedVersion:1,idempotencyKey:randomUUID()}}),child=reopened.attempts[0];
  expect(await f.db.sample.findUnique({where:{id:item.sampleId}})).toMatchObject({status:'PROCESSING',approvedBy:priorSample.approvedBy,approvedAt:priorSample.approvedAt});
+ if(batched){
+  const retainedQc=await f.db.batch.findUnique({where:{id:originalRun.id},include:require('../../services/qcRunViewService').QC_RUN_INCLUDE});
+  for(const key of ['analytes','measurements','evaluations','dispositions','events'])expect(retainedQc[key]).toEqual(frozenQc[key]);
+  const membership=run=>run.positions.map(position=>({...position,workItems:position.workItems.map(({workItem,...link})=>link)}));
+  expect(membership(retainedQc)).toEqual(membership(frozenQc));
+ }
  const withdrawn=await f.db.report.findUnique({where:{id:frozen.id}});
  expect(withdrawn).toEqual({...frozen,status:'WITHDRAWN',updatedAt:withdrawn.updatedAt});
  const retained=async()=>({report:await f.db.report.findUnique({where:{id:frozen.id}}),
@@ -202,7 +224,15 @@ test('normal scientific retest review, reapproval and report generation preserve
    expect(publicResponse.body).not.toHaveProperty('content');
   }
  },{reports:true});
- const [replacement]=await record('7.3');expect(replacement.attemptId).toBe(child.id);await submit();
+ let replacementRun;
+ if(batched){
+  replacementRun=await require('../../services/qcNativeRunService').buildNativeRun(f.db,other,f.input);
+  replacementRun=await require('../../services/qcNativeRunService').startNativeRun(f.db,replacementRun.id,other);
+ }
+ const [replacement]=await record('7.3');expect(replacement.attemptId).toBe(child.id);
+ if(batched)await require('../../services/qcNativeMeasurementService').writeNativeMeasurements(f.db,replacementRun.id,other,
+  {measurements:[{positionId:replacementRun.positions.find(row=>row.kind==='BLANK').id,value:0}]});
+ await submit();
  await withQcRunHttp(f.db,other,async(app,token)=>{
   const post=url=>request(app).post(url).set('Authorization','Bearer '+token);
   const review=await post('/api/work/'+item.id+'/review').send({decision:'ACCEPT',attemptId:child.id,
