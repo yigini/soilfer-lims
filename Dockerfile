@@ -84,6 +84,7 @@ COPY server/prisma/migrations/20261004190100_unique_active_workitem/migration.sq
 COPY server/prisma/migrations/20261008000100_work_attempt_contract/migration.sql /app/server/.migrations-backup/190/20261008000100_work_attempt_contract/migration.sql
 COPY server/prisma/migrations/20261008000200_repeat_correction_contract/migration.sql /app/server/.migrations-backup/191/20261008000200_repeat_correction_contract/migration.sql
 COPY server/prisma/migrations/20261111000100_closed_qc_repeat_membership/migration.sql /app/server/.migrations-backup/412/20261111000100_closed_qc_repeat_membership/migration.sql
+COPY server/prisma/migrations/20261111000200_batched_amendment_membership/migration.sql /app/server/.migrations-backup/413/20261111000200_batched_amendment_membership/migration.sql
 COPY server/prisma/migrations/20261009000100_reported_value_selection/migration.sql /app/server/.migrations-backup/192/20261009000100_reported_value_selection/migration.sql
 COPY server/prisma/migrations/20261009000200_batch_reagent_lots/migration.sql /app/server/.migrations-backup/194/20261009000200_batch_reagent_lots/migration.sql
 COPY server/prisma/migrations/20261009000300_result_override_requests/migration.sql /app/server/.migrations-backup/197/20261009000300_result_override_requests/migration.sql

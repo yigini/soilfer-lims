@@ -145,7 +145,7 @@ test('mounted request/authorise routes keep requests pending, enforce a second p
 });
 
 test.each([false, true])('normal scientific retest review, reapproval and report generation preserve the withdrawn original and issue the next revision (batched=%s)',async batched=>{
- const f=await qcGateFixture({criteria:{blankPerBatch:batched?1:0,lrmPerBatch:0,duplicateEvery:0,crmEveryNBatches:0,ccvEvery:0}});owned.push(f);
+ const f=await qcGateFixture({installBatchedAmendments:!batched,criteria:{blankPerBatch:batched?1:0,lrmPerBatch:0,duplicateEvery:0,crmEveryNBatches:0,ccvEvery:0}});owned.push(f);
  require('../../scripts/install_sample_amendment_authorisation').installSampleAmendmentAuthorisation({dbPath:f.file,apply:true});
  await f.setPolicy([{key:'results.replicatesRequired',value:1},...(!batched?[{key:'qc.mode',value:'OFF'},{key:'qc.requireBatchQc',value:'NOT_REQUIRED'}]:[])]);
  const item=f.items[0],record=value=>inTransaction(f.db,tx=>writeResultsExecution(tx,{sampleId:item.sampleId,workItemId:item.id,
@@ -163,9 +163,10 @@ test.each([false, true])('normal scientific retest review, reapproval and report
   originalRun=await require('../../services/qcNativeRunService').buildNativeRun(f.db,f.actor,f.input);
   originalRun=await require('../../services/qcNativeRunService').startNativeRun(f.db,originalRun.id,f.actor);
  }
- const [original]=await record('7.1');
+ let [original]=await record('7.1');
  if(batched)await require('../../services/qcNativeMeasurementService').writeNativeMeasurements(f.db,originalRun.id,f.actor,
   {measurements:[{positionId:originalRun.positions.find(row=>row.kind==='BLANK').id,value:0}]});
+ original=await f.db.result.findUnique({where:{id:original.id}});
  await submit();
  let initialReport;
  await withQcRunHttp(f.db,f.actor,async(app,token)=>{
@@ -184,6 +185,15 @@ test.each([false, true])('normal scientific retest review, reapproval and report
   tokenHash:createHash('sha256').update(publicToken).digest('hex')}});
  const frozenQc=batched?await f.db.batch.findUnique({where:{id:originalRun.id},include:require('../../services/qcRunViewService').QC_RUN_INCLUDE}):null;
  if(batched){
+  const installer=require('../../scripts/install_batched_amendment_membership');
+  const planned=installer.installBatchedAmendmentMembership({dbPath:f.file});
+  expect(planned).toMatchObject({classification:'PRE_413',mode:'DRY_RUN',totalChanges:0});
+  const installed=installer.installBatchedAmendmentMembership({dbPath:f.file,apply:true});
+  expect(installed).toMatchObject({classification:'COMPLETE',mode:'APPLIED',receipt:{retainedRowsPreserved:true,
+   rowsSha256:planned.rowsSha256,migrationsSha256:planned.migrationsSha256}});
+  const repeated=installer.installBatchedAmendmentMembership({dbPath:f.file,apply:true});
+  expect(repeated).toMatchObject({classification:'COMPLETE',mode:'NO_OP',totalChanges:0});
+  console.log(JSON.stringify({event:'OWNED_BATCHED_AMENDMENT_REHEARSAL',planned,installed,repeated}));
   const connection=new Database(f.file);
   try{
    for(const target of [null,'unapproved-target'])expect(()=>connection.prepare('UPDATE WorkItem SET batchId=?,rackPosition=NULL WHERE id=?').run(target,item.id))
@@ -192,6 +202,11 @@ test.each([false, true])('normal scientific retest review, reapproval and report
  }
  const {amendment}=await commands.command(f.db,{sampleId:item.sampleId,actor:f.actor,input:{type:'SCIENTIFIC',reason:'Client requested an analytical retest',
   reasonCode:'CLIENT_RETEST',selectedWorkItemIds:[item.id],idempotencyKey:randomUUID()}});
+ if(batched){
+  const connection=new Database(f.file);
+  try{expect(()=>connection.prepare('UPDATE WorkItem SET batchId=NULL,rackPosition=NULL WHERE id=?').run(item.id))
+   .toThrow('BATCH_MEMBERSHIP_FROZEN');}finally{connection.close();}
+ }
  const reopened=await commands.command(f.db,{sampleId:item.sampleId,amendmentId:amendment.id,actor:other,authorise:true,
   input:{expectedVersion:1,idempotencyKey:randomUUID()}}),child=reopened.attempts[0];
  expect(await f.db.sample.findUnique({where:{id:item.sampleId}})).toMatchObject({status:'PROCESSING',approvedBy:priorSample.approvedBy,approvedAt:priorSample.approvedAt});

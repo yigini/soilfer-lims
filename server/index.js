@@ -83,6 +83,11 @@ try {
     const amendmentsReadyBegan = beginReadinessStage();
     const amendmentsReady=require('./scripts/install_sample_amendment_authorisation').assertAmendmentStartupReady(dbPath, startupContext);
     console.log(JSON.stringify({event:'AMENDMENT_STARTUP_READY',...amendmentsReady, ...readinessTelemetry(amendmentsReadyBegan)}));
+    const batchedAmendmentReadyBegan = beginReadinessStage();
+    const batchedAmendmentReady = require('./scripts/install_batched_amendment_membership').assertBatchedAmendmentStartupReady(dbPath, startupContext);
+    console.log(JSON.stringify({ event: 'BATCHED_AMENDMENT_STARTUP_READY',
+        classification: batchedAmendmentReady.classification, totalChanges: batchedAmendmentReady.totalChanges,
+        ...readinessTelemetry(batchedAmendmentReadyBegan) }));
     const revisionsReadyBegan = beginReadinessStage();
     const revisionsReady=require('./scripts/install_report_revisions').assertReportRevisionStartupReady(dbPath, startupContext);
     console.log(JSON.stringify({event:'REPORT_REVISION_STARTUP_READY',...revisionsReady, ...readinessTelemetry(revisionsReadyBegan)}));

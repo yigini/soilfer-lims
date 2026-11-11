@@ -129,6 +129,9 @@ const QC_EVIDENCE_SOURCES = Object.freeze([
         directory: '20261009000200_batch_reagent_lots', sqlSha256: '6e409e753d9142381a668352be82ca4981e41847914f868cdacc32b7729cb580' }),
     // #191 pin6067875897: inspect the independently byte-bound successor DDL.
     // Existing sources and writer restrictions retain their exact behaviour.
+    Object.freeze({ functionName: 'loadBatchedAmendmentMigrationSource', loader: 'services/batchedAmendmentMigrationSource.js',
+        loaderSha256: '765dfa17bdad6cf6087979b4f6aa16dd47249a7ba7aa68778c07da022e42858c', directory: '20261111000200_batched_amendment_membership',
+        sqlSha256: 'ce73754e0808c9f2fa7bc6b651e3785f232041fd475b45fd987653e7523e9dd9', wholeSql: true }),
     Object.freeze({ functionName: 'loadClosedQcRepeatMigrationSource', loader: 'services/closedQcRepeatMigrationSource.js',
         loaderSha256: 'cd5e1530100e6d196472ddfdff765fca1d42cc229b228bd8924c8aaef62be6b1', directory: '20261111000100_closed_qc_repeat_membership',
         sqlSha256: '6b8dd68f7d7853f9e1a9ec581c2c029e649529b5d24858491df89804c0bf3724', wholeSql: true }),
