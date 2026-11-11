@@ -164,3 +164,16 @@ test('reference catalogue scope uses lab identity for national roles and keeps g
     const globalRows = await listMaterials(f.db, { ...f.actor, role: 'SUPER_ADMIN', labId: null });
     expect(globalRows.map(row => row.id).sort()).toEqual([f.material.id, f.otherMaterial.id].sort());
 });
+
+test('external viewers cannot read run options and retain the complete database snapshot', async () => {
+    const f = await fixture('EXTERNAL_VIEWER');
+    const before = await f.snapshot();
+    await withQcRunHttp(f.db, f.actor, async (app, token) => {
+        const response = await request(app)
+            .get('/api/qc/run-options')
+            .set('Authorization', 'Bearer ' + token)
+            .query({ labId: f.labId, analysisCode: f.analysisCode });
+        expect(response.status).toBe(403);
+    });
+    expect(await f.snapshot()).toEqual(before);
+});

@@ -21,7 +21,7 @@ router.get('/rules', checkPermission('VIEW_LAB_POLICIES'), qcRuleController.list
 router.post('/rules', checkPermission('MANAGE_LAB_POLICIES'), qcRuleController.change);
 
 router.post('/batches', checkPermission('CHANGE_STATUS'), qcController.createBatch);
-router.get('/run-options', checkPermission('VIEW_INVENTORY'), qcController.runOptions);
+router.get('/run-options', checkPermission('VIEW_EQUIPMENT'), qcController.runOptions);
 router.post('/runs/start', checkPermission('CHANGE_STATUS'), qcController.startWorkbenchRun);
 router.get('/batches', qcController.getBatches);
 router.get('/batches/:id', qcController.getBatchById);
