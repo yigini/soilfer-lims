@@ -1,15 +1,80 @@
 'use strict';
 
+const fs = require('node:fs');
+const os = require('node:os');
+const path = require('node:path');
+const { spawnSync } = require('node:child_process');
+const Database = require('better-sqlite3');
 const prisma = require('../../prisma');
 const {
     seedDemoLab,
     DEMO_LAB_ID,
     DEMO_LAB_NAME,
-    DEMO_PROJECT_CODE
+    DEMO_PROJECT_CODE,
+    DEMO_ADMIN_ID,
+    DEMO_ADMIN_USERNAME,
+    DEMO_ADMIN_EMAIL
 } = require('../../scripts/seed_demo_lab.cjs');
+
+const SERVER_DIR = path.resolve(__dirname, '../..');
+const SEED_SCRIPT_PATH = path.resolve(SERVER_DIR, 'scripts/seed_demo_lab.cjs');
+
+let templateTempDir = null;
+let cleanTemplateDb = null;
+
+async function cloneTemplateDatabase(targetPath, configureFn, journalMode = 'DELETE') {
+    const source = new Database(cleanTemplateDb || process.env.DATABASE_PATH, { readonly: true, fileMustExist: true });
+    try {
+        await source.backup(targetPath);
+    } finally {
+        source.close();
+    }
+
+    const db = new Database(targetPath, { fileMustExist: true });
+    try {
+        db.pragma('foreign_keys = ON');
+        if (typeof configureFn === 'function') {
+            configureFn(db);
+        }
+        if (journalMode === 'WAL') {
+            db.pragma('journal_mode = WAL');
+        }
+    } finally {
+        db.close();
+    }
+}
+
+function runSeedCliWithoutNodeEnv(candidateDbPath, extraEnv = {}) {
+    const childEnv = { ...process.env, DEMO_SEED: '1', DATABASE_PATH: candidateDbPath, ...extraEnv };
+    delete childEnv.NODE_ENV;
+    delete childEnv.DATABASE_URL;
+    delete childEnv.JEST_WORKER_ID;
+    return spawnSync(process.execPath, [SEED_SCRIPT_PATH], {
+        cwd: SERVER_DIR,
+        env: childEnv,
+        encoding: 'utf8'
+    });
+}
 
 describe('Practice-Lab Seed Script (Demo Soil Lab)', () => {
     jest.setTimeout(120000);
+
+    beforeAll(async () => {
+        templateTempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'demo-seed-clean-tpl-'));
+        cleanTemplateDb = path.join(templateTempDir, 'template.db');
+        const source = new Database(process.env.DATABASE_PATH, { readonly: true, fileMustExist: true });
+        try {
+            await source.backup(cleanTemplateDb);
+        } finally {
+            source.close();
+        }
+    });
+
+    afterAll(() => {
+        if (templateTempDir) {
+            fs.rmSync(templateTempDir, { recursive: true, force: true });
+        }
+    });
 
     test('refuses to run unless DEMO_SEED=1 is set', async () => {
         await expect(
@@ -29,7 +94,145 @@ describe('Practice-Lab Seed Script (Demo Soil Lab)', () => {
         ).rejects.toMatchObject({ code: 'DEMO_SEED_PRODUCTION_REFUSED' });
     });
 
-    test('seeds Demo Soil Lab through real workflow transitions and refuses a second run', async () => {
+    test('refuses unsupported DEMO_SEED_PROFILE values', async () => {
+        await expect(
+            seedDemoLab({
+                env: { ...process.env, DEMO_SEED: '1', DEMO_SEED_PROFILE: 'unknown-mode', NODE_ENV: 'test' },
+                silent: true
+            })
+        ).rejects.toMatchObject({ code: 'DEMO_SEED_INVALID_PROFILE' });
+    });
+
+    test.each(['DELETE', 'WAL'])(
+        'CLI exits 1 with DEMO_SEED_DATABASE_NOT_EMPTY and leaves a %s-mode database byte-identical when a lab already exists',
+        async journalMode => {
+            const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'demo-seed-lab-guard-'));
+            const candidateDb = path.join(tempDir, 'existing-lab.db');
+            try {
+                await cloneTemplateDatabase(
+                    candidateDb,
+                    db => {
+                        db.prepare('DELETE FROM "Lab"').run();
+                        db.prepare(
+                            'INSERT INTO "Lab" ("id", "code", "name", "country", "isActive") VALUES (?, ?, ?, ?, 1)'
+                        ).run('REAL-LAB', 'REAL', 'Regional Soil Reference Lab', 'KEN');
+                        db.prepare('UPDATE "Analysis" SET "status" = ? WHERE "code" = ?').run('inactive', 'PH_H2O');
+                    },
+                    journalMode
+                );
+
+                const beforeBytes = fs.readFileSync(candidateDb);
+                const beforeFiles = fs.readdirSync(tempDir).sort();
+
+                const res = runSeedCliWithoutNodeEnv(candidateDb);
+
+                expect(res.status).toBe(1);
+                expect(res.stderr).toContain('DEMO_SEED_DATABASE_NOT_EMPTY');
+                const afterBytes = fs.readFileSync(candidateDb);
+                const afterFiles = fs.readdirSync(tempDir).sort();
+                expect(Buffer.compare(afterBytes, beforeBytes)).toBe(0);
+                expect(afterFiles).toEqual(beforeFiles);
+            } finally {
+                fs.rmSync(tempDir, { recursive: true, force: true });
+            }
+        }
+    );
+
+    test.each(['DELETE', 'WAL'])(
+        'CLI exits 1 with DEMO_SEED_DATABASE_NOT_EMPTY and leaves a %s-mode database byte-identical when superadmin already exists',
+        async journalMode => {
+            const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'demo-seed-admin-guard-'));
+            const candidateDb = path.join(tempDir, 'existing-superadmin.db');
+            try {
+                await cloneTemplateDatabase(
+                    candidateDb,
+                    db => {
+                        db.prepare('DELETE FROM "Lab"').run();
+                        db.prepare(
+                            'INSERT INTO "User" ("id", "username", "password", "role", "name", "email", "isActive", "mustChangePassword", "updatedAt") VALUES (?, ?, ?, ?, ?, ?, 1, 1, CURRENT_TIMESTAMP)'
+                        ).run(
+                            'real-install-admin',
+                            'superadmin',
+                            '$2b$10$realInstallHashedPasswordMustStayUntouched00000000000',
+                            'SUPER_ADMIN',
+                            'Installation Administrator',
+                            'admin@reallab.example'
+                        );
+                    },
+                    journalMode
+                );
+
+                const beforeBytes = fs.readFileSync(candidateDb);
+                const beforeFiles = fs.readdirSync(tempDir).sort();
+
+                const res = runSeedCliWithoutNodeEnv(candidateDb);
+
+                expect(res.status).toBe(1);
+                expect(res.stderr).toContain('DEMO_SEED_DATABASE_NOT_EMPTY');
+                const afterBytes = fs.readFileSync(candidateDb);
+                const afterFiles = fs.readdirSync(tempDir).sort();
+                expect(Buffer.compare(afterBytes, beforeBytes)).toBe(0);
+                expect(afterFiles).toEqual(beforeFiles);
+            } finally {
+                fs.rmSync(tempDir, { recursive: true, force: true });
+            }
+        }
+    );
+
+    test('CLI exits 1 with DEMO_ADMIN_ALREADY_EXISTS and leaves the database byte-identical when demo-superadmin already exists', async () => {
+        const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'demo-seed-demoadmin-guard-'));
+        const candidateDb = path.join(tempDir, 'existing-demo-superadmin.db');
+        try {
+            await cloneTemplateDatabase(
+                candidateDb,
+                db => {
+                    db.prepare('DELETE FROM "Lab"').run();
+                    db.prepare(
+                        'INSERT INTO "User" ("id", "username", "password", "role", "name", "email", "isActive", "mustChangePassword", "updatedAt") VALUES (?, ?, ?, ?, ?, ?, 1, 0, CURRENT_TIMESTAMP)'
+                    ).run(
+                        DEMO_ADMIN_ID,
+                        DEMO_ADMIN_USERNAME,
+                        '$2b$10$existingDemoAdminHashMustNotBeOverwritten00000000000',
+                        'SUPER_ADMIN',
+                        'Alex Morgan',
+                        DEMO_ADMIN_EMAIL
+                    );
+                },
+                'WAL'
+            );
+
+            const beforeBytes = fs.readFileSync(candidateDb);
+            const beforeFiles = fs.readdirSync(tempDir).sort();
+
+            const res = runSeedCliWithoutNodeEnv(candidateDb);
+
+            expect(res.status).toBe(1);
+            expect(res.stderr).toContain('DEMO_ADMIN_ALREADY_EXISTS');
+            const afterBytes = fs.readFileSync(candidateDb);
+            const afterFiles = fs.readdirSync(tempDir).sort();
+            expect(Buffer.compare(afterBytes, beforeBytes)).toBe(0);
+            expect(afterFiles).toEqual(beforeFiles);
+        } finally {
+            fs.rmSync(tempDir, { recursive: true, force: true });
+        }
+    });
+
+    test('seeds Demo Soil Lab through real workflow transitions on an empty database and refuses a second run', async () => {
+        // The Jest suite template contains fixture labs; verify the pre-write guard refuses before clearing them.
+        await expect(
+            seedDemoLab({
+                env: { ...process.env, DEMO_SEED: '1', NODE_ENV: 'test' },
+                silent: true
+            })
+        ).rejects.toMatchObject({ code: 'DEMO_SEED_DATABASE_NOT_EMPTY' });
+
+        // Prepare an empty database (0 labs, 0 samples, 0 users) and verify deactivated analyses stay inactive.
+        await prisma.lab.deleteMany({});
+        await prisma.analysis.update({
+            where: { code: 'PH_CACL2' },
+            data: { status: 'inactive' }
+        });
+
         const summary = await seedDemoLab({
             env: { ...process.env, DEMO_SEED: '1', NODE_ENV: 'test' },
             silent: true
@@ -38,6 +241,9 @@ describe('Practice-Lab Seed Script (Demo Soil Lab)', () => {
         expect(summary.labId).toBe(DEMO_LAB_ID);
         expect(summary.labName).toBe(DEMO_LAB_NAME);
         expect(summary.projectCode).toBe(DEMO_PROJECT_CODE);
+
+        const untouchedInactiveAnalysis = await prisma.analysis.findUnique({ where: { code: 'PH_CACL2' } });
+        expect(untouchedInactiveAnalysis?.status).toBe('inactive');
 
         // 1. Facility & policies
         const lab = await prisma.lab.findUnique({ where: { id: DEMO_LAB_ID } });
@@ -52,15 +258,20 @@ describe('Practice-Lab Seed Script (Demo Soil Lab)', () => {
         });
         expect(activeOverrides).toBeGreaterThanOrEqual(4);
 
-        // 2. Accounts, @example.test emails, bench PINs, and pending invite
+        // 2. Accounts, @example.test emails, dedicated demo-superadmin (no superadmin), bench PINs, and pending invite
         const demoUsers = await prisma.user.findMany({
             where: { labId: DEMO_LAB_ID, isActive: true }
         });
         expect(demoUsers).toHaveLength(7);
-        const superUser = await prisma.user.findUnique({ where: { username: 'superadmin' } });
-        expect(superUser?.isActive).toBe(true);
 
-        for (const u of [...demoUsers, superUser]) {
+        const realSuperadmin = await prisma.user.findUnique({ where: { username: 'superadmin' } });
+        expect(realSuperadmin).toBeNull();
+
+        const demoSuperUser = await prisma.user.findUnique({ where: { username: DEMO_ADMIN_USERNAME } });
+        expect(demoSuperUser?.isActive).toBe(true);
+        expect(demoSuperUser?.email).toBe(DEMO_ADMIN_EMAIL);
+
+        for (const u of [...demoUsers, demoSuperUser]) {
             expect(u.email).toMatch(/@example\.test$/);
         }
 
@@ -252,12 +463,126 @@ describe('Practice-Lab Seed Script (Demo Soil Lab)', () => {
         const auditCount = await prisma.auditLog.count();
         expect(auditCount).toBeGreaterThan(50);
 
-        // 7. Second run on the same database refuses cleanly
+        // 7. Second run on the same database refuses cleanly with DEMO_LAB_ALREADY_EXISTS
         await expect(
             seedDemoLab({
                 env: { ...process.env, DEMO_SEED: '1', NODE_ENV: 'test' },
                 silent: true
             })
         ).rejects.toMatchObject({ code: 'DEMO_LAB_ALREADY_EXISTS' });
+    });
+
+    test('DEMO_SEED_PROFILE=user-test creates only the 1-hour user-test kit setup with no Sample 1 and exactly Samples 2 and 3', async () => {
+        const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'demo-seed-user-test-'));
+        const userTestDb = path.join(tempDir, 'user-test.db');
+        try {
+            const firstRun = runSeedCliWithoutNodeEnv(userTestDb, { DEMO_SEED_PROFILE: 'user-test' });
+            expect(firstRun.status).toBe(0);
+            expect(firstRun.stdout).toContain('Profile  : user-test');
+
+            const reader = new Database(userTestDb, { readonly: true, fileMustExist: true });
+            try {
+                // 1. One active Demo Soil Lab
+                const labs = reader.prepare('SELECT "id", "name", "isActive" FROM "Lab"').all();
+                expect(labs).toEqual([{ id: DEMO_LAB_ID, name: DEMO_LAB_NAME, isActive: 1 }]);
+
+                // 2. Only demo-superadmin + 1 Sample Reception Officer + 1 Laboratory Technician (no superadmin)
+                const users = reader
+                    .prepare('SELECT "username", "role", "email", "labId", "isActive" FROM "User" ORDER BY "username" ASC')
+                    .all();
+                expect(users.map(u => ({ username: u.username, role: u.role, labId: u.labId }))).toEqual([
+                    { username: DEMO_ADMIN_USERNAME, role: 'SUPER_ADMIN', labId: null },
+                    { username: 'reception1', role: 'SAMPLE_RECEPTION', labId: DEMO_LAB_ID },
+                    { username: 'tech1', role: 'LAB_TECHNICIAN', labId: DEMO_LAB_ID }
+                ]);
+                expect(users.every(u => u.isActive === 1 && /@example\.test$/.test(u.email))).toBe(true);
+
+                const invites = reader.prepare('SELECT COUNT(*) AS n FROM "StaffInvitation"').get();
+                expect(invites.n).toBe(0);
+
+                // 3. Soil pH method switched on, 1 calibrated pH meter, and 1 active check soil bottle
+                const methodDefaults = reader
+                    .prepare('SELECT "analysisCode", "methodologyId" FROM "LabMethodDefault" WHERE "labId" = ?')
+                    .all(DEMO_LAB_ID);
+                expect(methodDefaults).toEqual([
+                    { analysisCode: 'PH_H2O', methodologyId: 'ISO_10390_H2O' }
+                ]);
+
+                const equipment = reader
+                    .prepare(
+                        'SELECT a."name", a."assetType", a."status", q."calibrationStatus" FROM "EquipmentAsset" a JOIN "EquipmentQualification" q ON q."equipmentId" = a."id" WHERE a."labId" = ?'
+                    )
+                    .all(DEMO_LAB_ID);
+                expect(equipment).toEqual([
+                    {
+                        name: 'Bench pH Meter 01',
+                        assetType: 'PH_METER',
+                        status: 'IN_SERVICE',
+                        calibrationStatus: 'OK'
+                    }
+                ]);
+
+                const checkSoils = reader
+                    .prepare('SELECT "id", "code", "status" FROM "ReferenceMaterial" WHERE "labId" = ?')
+                    .all(DEMO_LAB_ID);
+                expect(checkSoils).toHaveLength(1);
+                expect(checkSoils[0]).toMatchObject({ code: 'LRM-DEMO-01', status: 'ACTIVE' });
+
+                const checkValues = reader
+                    .prepare('SELECT "analysisCode", "assignedValue" FROM "ReferenceValue" WHERE "referenceMaterialId" = ?')
+                    .all(checkSoils[0].id);
+                expect(checkValues).toEqual([{ analysisCode: 'PH_H2O', assignedValue: 6.45 }]);
+
+                // 4. NO Sample 1 anywhere, and EXACTLY two samples (Sample 2 and Sample 3)
+                const samples = reader
+                    .prepare(
+                        'SELECT "id", "originalId", "status", "dryingStatus", "preparationStatus" FROM "Sample" ORDER BY "originalId" ASC'
+                    )
+                    .all();
+                expect(samples).toHaveLength(2);
+                expect(samples.find(s => s.originalId === 'FIELD-2026-001')).toBeUndefined();
+                expect(samples.map(s => s.originalId)).toEqual(['FIELD-2026-002', 'FIELD-2026-003']);
+
+                // Sample 2: checked in as Accepted, waiting for Air Drying
+                const s2 = samples[0];
+                expect(s2.status).toBe('ACCEPTED');
+                expect(s2.dryingStatus).toBe('PENDING');
+                expect(s2.preparationStatus).toBe('PENDING');
+                const s2Items = reader
+                    .prepare('SELECT "analysis", "status", "assignedTo" FROM "WorkItem" WHERE "sampleId" = ?')
+                    .all(s2.id);
+                const s2ByCode = Object.fromEntries(s2Items.map(w => [w.analysis, w]));
+                expect(s2ByCode.DRYING).toMatchObject({ status: 'ASSIGNED', assignedTo: 'tech1' });
+                expect(s2ByCode.PH_H2O).toBeTruthy();
+
+                // Sample 3: checked in as Accepted, Air Drying & Sample Preparation finished, Soil pH ordered and assigned to tech1
+                const s3 = samples[1];
+                expect(s3.dryingStatus).toBe('DONE');
+                expect(s3.preparationStatus).toBe('DONE');
+                const s3Items = reader
+                    .prepare('SELECT "analysis", "status", "assignedTo" FROM "WorkItem" WHERE "sampleId" = ?')
+                    .all(s3.id);
+                const s3ByCode = Object.fromEntries(s3Items.map(w => [w.analysis, w]));
+                expect(Object.keys(s3ByCode).sort()).toEqual(['DRYING', 'PH_H2O', 'PREPARATION']);
+                expect(s3ByCode.DRYING.status).toBe('COMPLETED');
+                expect(s3ByCode.PREPARATION.status).toBe('COMPLETED');
+                expect(s3ByCode.PH_H2O).toEqual({
+                    analysis: 'PH_H2O',
+                    status: 'ASSIGNED',
+                    assignedTo: 'tech1'
+                });
+            } finally {
+                reader.close();
+            }
+
+            // 5. Second run refuses with DEMO_LAB_ALREADY_EXISTS and leaves database byte-identical
+            const seededBytes = fs.readFileSync(userTestDb);
+            const secondRun = runSeedCliWithoutNodeEnv(userTestDb, { DEMO_SEED_PROFILE: 'user-test' });
+            expect(secondRun.status).toBe(1);
+            expect(secondRun.stderr).toContain('DEMO_LAB_ALREADY_EXISTS');
+            expect(Buffer.compare(fs.readFileSync(userTestDb), seededBytes)).toBe(0);
+        } finally {
+            fs.rmSync(tempDir, { recursive: true, force: true });
+        }
     });
 });

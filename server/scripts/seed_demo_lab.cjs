@@ -4,15 +4,21 @@
  * Practice-Lab Seed Script ("Demo Soil Lab" / code "DEMO")
  *
  * Usage (from server/):
- *   DEMO_SEED=1 npm run seed:demo
+ *   DEMO_SEED=1 npm run seed:demo                            # default ("screenshots" profile)
+ *   DEMO_SEED=1 DEMO_SEED_PROFILE=user-test npm run seed:demo # 1-hour user-test kit profile
  *
  * Safety rules:
  *   1. Refuses unless DEMO_SEED=1 is set in the environment.
  *   2. Refuses when NODE_ENV=production.
- *   3. Refuses when a laboratory named "Demo Soil Lab" or coded "DEMO" already exists.
- *   4. Uses only fake names/places/clients and @example.test email addresses.
- *   5. Generates random one-time passwords and 4-digit bench PINs at runtime and prints them once.
- *   6. Drives every sample, batch, QC, review, report, NCR, and PT state through real app routes/services.
+ *   3. Refuses before any installer or write (DEMO_SEED_DATABASE_NOT_EMPTY) unless the target
+ *      database file is missing/tiny or holds no labs, no samples, and no users other than
+ *      accounts created by this script.
+ *   4. Refuses when "Demo Soil Lab" / "DEMO" (DEMO_LAB_ALREADY_EXISTS) or "demo-superadmin"
+ *      (DEMO_ADMIN_ALREADY_EXISTS) already exists; never upserts "superadmin" and never
+ *      reactivates shared analyses on an existing catalogue.
+ *   5. Uses only fake names/places/clients and @example.test email addresses.
+ *   6. Generates random one-time passwords and 4-digit bench PINs at runtime and prints them once.
+ *   7. Drives every sample, batch, QC, review, report, NCR, and PT state through real app routes/services.
  */
 
 const fs = require('node:fs');
@@ -26,6 +32,22 @@ const DEMO_LAB_ID = 'DEMO';
 const DEMO_LAB_NAME = 'Demo Soil Lab';
 const DEMO_PROJECT_CODE = 'PRJ-DEMO-2026';
 const DEMO_PROJECT_NAME = 'National Topsoil Fertility Survey';
+const DEMO_ADMIN_ID = 'user-demo-superadmin';
+const DEMO_ADMIN_USERNAME = 'demo-superadmin';
+const DEMO_ADMIN_EMAIL = 'demo-superadmin@example.test';
+const DEMO_SEED_PROFILES = Object.freeze(['screenshots', 'user-test']);
+const USER_TEST_ACCOUNT_USERNAMES = Object.freeze([DEMO_ADMIN_USERNAME, 'reception1', 'tech1']);
+
+const DEMO_ACCOUNT_SPECS = Object.freeze([
+    Object.freeze({ id: DEMO_ADMIN_ID, username: DEMO_ADMIN_USERNAME, role: 'SUPER_ADMIN', name: 'Alex Morgan', email: DEMO_ADMIN_EMAIL, labId: null, projects: Object.freeze([]) }),
+    Object.freeze({ username: 'manager1', role: 'LAB_MANAGER', name: 'amina.diallo', displayName: 'Amina Diallo', email: 'manager1@example.test', labId: DEMO_LAB_ID, projects: Object.freeze([]) }),
+    Object.freeze({ username: 'manager2', role: 'LAB_MANAGER', name: 'Carlos Mendez', email: 'manager2@example.test', labId: DEMO_LAB_ID, projects: Object.freeze([]) }),
+    Object.freeze({ username: 'qa1', role: 'AUDIT_USER', name: 'Priya Nair', email: 'qa1@example.test', labId: DEMO_LAB_ID, projects: Object.freeze([]) }),
+    Object.freeze({ username: 'reception1', role: 'SAMPLE_RECEPTION', name: 'Grace Osei', email: 'reception1@example.test', labId: DEMO_LAB_ID, projects: Object.freeze([]) }),
+    Object.freeze({ username: 'tech1', role: 'LAB_TECHNICIAN', name: 'Lukas Novak', email: 'tech1@example.test', labId: DEMO_LAB_ID, projects: Object.freeze([]), needsPin: true }),
+    Object.freeze({ username: 'tech2', role: 'LAB_TECHNICIAN', name: 'Mei Lin', email: 'tech2@example.test', labId: DEMO_LAB_ID, projects: Object.freeze([]), needsPin: true }),
+    Object.freeze({ username: 'viewer1', role: 'VIEWER', name: 'Samira Farah', email: 'viewer1@example.test', labId: DEMO_LAB_ID, projects: Object.freeze([DEMO_PROJECT_CODE]) })
+]);
 
 function failGuard(code, message) {
     const err = new Error(message);
@@ -49,6 +71,162 @@ function assertSeedSafetyEnv(env = process.env) {
     }
 }
 
+function resolveSeedProfile(options = {}, env = process.env) {
+    const raw = options.profile !== undefined ? options.profile : env.DEMO_SEED_PROFILE;
+    if (raw === undefined || raw === null || String(raw).trim() === '') {
+        return 'screenshots';
+    }
+    const normalized = String(raw).trim().toLowerCase();
+    if (!DEMO_SEED_PROFILES.includes(normalized)) {
+        throw failGuard(
+            'DEMO_SEED_INVALID_PROFILE',
+            `Unsupported DEMO_SEED_PROFILE "${raw}". Expected "screenshots" (default) or "user-test".`
+        );
+    }
+    return normalized;
+}
+
+function isScriptCreatedLabRow(row) {
+    if (!row || typeof row !== 'object') return false;
+    const codeMatches = row.code === undefined || row.code === DEMO_LAB_ID;
+    return row.id === DEMO_LAB_ID && row.name === DEMO_LAB_NAME && codeMatches;
+}
+
+function isScriptCreatedSampleRow(row, hasDemoLab) {
+    if (!hasDemoLab || !row || typeof row !== 'object') return false;
+    if (typeof row.originalId !== 'string' || !/^FIELD-2026-0(?:0[1-9]|1[0-9])$/.test(row.originalId)) {
+        return false;
+    }
+    if (row.projectCode !== undefined && row.projectCode !== DEMO_PROJECT_CODE) {
+        return false;
+    }
+    if (row.assignedLab !== undefined && row.assignedLab !== null && row.assignedLab !== DEMO_LAB_ID) {
+        return false;
+    }
+    if (
+        row.labId !== undefined &&
+        row.labId !== null &&
+        row.labId !== DEMO_LAB_ID &&
+        !/^DEMO-26-00(?:0[1-9]|1[0-4])$/.test(String(row.labId))
+    ) {
+        return false;
+    }
+    return true;
+}
+
+function isScriptCreatedUserRow(row) {
+    if (!row || typeof row !== 'object') return false;
+    if (row.username === DEMO_ADMIN_USERNAME) {
+        return (
+            row.id === DEMO_ADMIN_ID &&
+            row.email === DEMO_ADMIN_EMAIL &&
+            row.role === 'SUPER_ADMIN' &&
+            (row.labId === null || row.labId === undefined)
+        );
+    }
+    const spec = DEMO_ACCOUNT_SPECS.find(s => s.labId === DEMO_LAB_ID && s.username === row.username);
+    if (!spec) return false;
+    return row.email === spec.email && row.role === spec.role && row.labId === DEMO_LAB_ID;
+}
+
+/**
+ * Inspects the target SQLite file strictly read-only BEFORE any schema installer,
+ * Prisma initialization, or write can touch the file or create sidecars.
+ */
+function assertTargetDatabaseEmptyBeforeWrite(dbPath) {
+    const walPath = `${dbPath}-wal`;
+    const shmPath = `${dbPath}-shm`;
+    const dbExists = fs.existsSync(dbPath);
+    const walExisted = fs.existsSync(walPath);
+    const shmExisted = fs.existsSync(shmPath);
+    const walSize = walExisted ? fs.statSync(walPath).size : 0;
+
+    if (!dbExists) {
+        if (walSize > 0) {
+            throw failGuard(
+                'DEMO_SEED_DATABASE_NOT_EMPTY',
+                `Refusing to seed: orphan WAL file exists at ${walPath}.`
+            );
+        }
+        return { needsPush: true };
+    }
+
+    const dbSize = fs.statSync(dbPath).size;
+    if (dbSize < 100 && walSize === 0) {
+        return { needsPush: true };
+    }
+
+    const Database = require('better-sqlite3');
+    let reader = null;
+    try {
+        reader = new Database(dbPath, { readonly: true, fileMustExist: true });
+        const tableRows = reader
+            .prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%'")
+            .all();
+        const tables = new Set(tableRows.map(r => r.name));
+        if (tables.size === 0) {
+            return { needsPush: true };
+        }
+
+        const labs = tables.has('Lab') ? reader.prepare('SELECT * FROM "Lab" LIMIT 5').all() : [];
+        const samples = tables.has('Sample') ? reader.prepare('SELECT * FROM "Sample" LIMIT 25').all() : [];
+        const users = tables.has('User') ? reader.prepare('SELECT * FROM "User" LIMIT 20').all() : [];
+
+        const hasForeignLab = labs.length > 1 || labs.some(row => !isScriptCreatedLabRow(row));
+        const hasDemoLab = labs.some(row => isScriptCreatedLabRow(row));
+        const hasForeignSample = samples.length > 19 || samples.some(row => !isScriptCreatedSampleRow(row, hasDemoLab));
+        const hasForeignUser = users.length > DEMO_ACCOUNT_SPECS.length || users.some(row => !isScriptCreatedUserRow(row));
+
+        if (hasForeignLab || hasForeignSample || hasForeignUser) {
+            const reasons = [
+                hasForeignLab ? 'laboratories' : null,
+                hasForeignSample ? 'samples' : null,
+                hasForeignUser ? 'user accounts' : null
+            ].filter(Boolean).join(', ');
+            throw failGuard(
+                'DEMO_SEED_DATABASE_NOT_EMPTY',
+                `Refusing to seed: database ${dbPath} already contains non-demo ${reasons}.`
+            );
+        }
+
+        if (hasDemoLab) {
+            throw failGuard(
+                'DEMO_LAB_ALREADY_EXISTS',
+                `Refusing to seed: "${DEMO_LAB_NAME}" (${DEMO_LAB_ID}) already exists in ${dbPath}.\n` +
+                'To start fresh, stop the server, remove or replace the local SQLite database file (and any -wal/-shm files), ' +
+                'and run DEMO_SEED=1 npm run seed:demo again.'
+            );
+        }
+
+        if (users.some(row => row.username === DEMO_ADMIN_USERNAME || row.id === DEMO_ADMIN_ID || row.email === DEMO_ADMIN_EMAIL)) {
+            throw failGuard(
+                'DEMO_ADMIN_ALREADY_EXISTS',
+                `Refusing to seed: admin account "${DEMO_ADMIN_USERNAME}" already exists in ${dbPath}.`
+            );
+        }
+
+        return { needsPush: false };
+    } catch (err) {
+        if (err && typeof err.code === 'string' && err.code.startsWith('DEMO_')) {
+            throw err;
+        }
+        throw failGuard(
+            'DEMO_SEED_DATABASE_NOT_EMPTY',
+            `Refusing to seed: target file ${dbPath} is not a readable empty SQLite database (${err.message}).`
+        );
+    } finally {
+        if (reader) {
+            try { reader.close(); } catch (_) { /* ignore */ }
+        }
+        if (!walExisted && fs.existsSync(walPath) && fs.statSync(walPath).size === 0) {
+            try { fs.unlinkSync(walPath); } catch (_) { /* ignore */ }
+        }
+        if (!shmExisted && fs.existsSync(shmPath)) {
+            try { fs.unlinkSync(shmPath); } catch (_) { /* ignore */ }
+        }
+    }
+}
+
 function generateRandomPassword() {
     // >= 18 chars, upper + lower + digits + symbol, satisfies ISO17025_STRICT minLength=12.
     const raw = crypto.randomBytes(12).toString('base64url');
@@ -68,8 +246,7 @@ function runNodeScript(serverDir, scriptRelPath, args = [], env = process.env) {
     });
 }
 
-function ensureDatabaseSchemaInstalled(dbPath, serverDir, env) {
-    const needsPush = !fs.existsSync(dbPath) || fs.statSync(dbPath).size < 4096;
+function ensureDatabaseSchemaInstalled(dbPath, serverDir, env, needsPush = false) {
     if (needsPush) {
         fs.mkdirSync(path.dirname(dbPath), { recursive: true });
         const prismaCli = path.join(serverDir, 'node_modules', 'prisma', 'build', 'index.js');
@@ -239,6 +416,305 @@ function addDaysIso(days) {
     return new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
 }
 
+async function seedUserTestData({ api, prisma, tokens, credentials, accountSpecs, dbPath, silent, log }) {
+    log('[DEMO_SEED] Configuring user-test profile (Soil pH method, 1 calibrated pH meter, 1 check soil, Samples 2 & 3 only)...');
+
+    const currentPolicies = await api(tokens.demoAdmin, 'GET', `/api/labs/${DEMO_LAB_ID}/policies`);
+    await api(tokens.demoAdmin, 'PATCH', `/api/labs/${DEMO_LAB_ID}/policies`, {
+        presetCode: 'BASIC',
+        expectedVersion: currentPolicies.version,
+        reason: 'Configure Demo Soil Lab policies for the 1-hour first real user test',
+        changes: [
+            { key: 'gate.verificationRequired', value: false },
+            { key: 'bench.pinAtRecord', value: false },
+            { key: 'sample.codeFormat', value: '{LAB}-{YY}-{SEQ:4}' }
+        ]
+    });
+
+    await api(tokens.tech1, 'PUT', '/api/auth/bench/pin', {
+        password: credentials.tech1.password,
+        pin: credentials.tech1.pin
+    });
+
+    // Switch on Soil pH method default and configure batch QC limits matching Task 3 (blank 6.95, dup 6.42/6.45, check soil 6.45).
+    await api(tokens.demoAdmin, 'PUT', `/api/config/lab-defaults/${DEMO_LAB_ID}`, {
+        defaults: [
+            { analysisCode: 'PH_H2O', methodologyId: 'ISO_10390_H2O' }
+        ]
+    });
+
+    const qcListRes = await api(
+        tokens.demoAdmin,
+        'GET',
+        `/api/qc/rules?labId=${DEMO_LAB_ID}&analysisCode=PH_H2O`
+    );
+    await api(tokens.demoAdmin, 'POST', '/api/qc/rules', {
+        labId: DEMO_LAB_ID,
+        analysisCode: 'PH_H2O',
+        expectedVersion: qcListRes.data?.expectedVersion ?? 0,
+        reason: 'Configure Soil pH QC criteria for the 1-hour user test kit',
+        criteria: {
+            blankPerBatch: 1,
+            blankLimitMode: 'ABSOLUTE',
+            blankAbsLimit: 7.5,
+            duplicateEvery: 1,
+            duplicateMode: 'ABS_DIFF',
+            duplicateAbsMax: 0.2,
+            lrmPerBatch: 1,
+            lrmMode: 'FIXED_WINDOW',
+            lrmWindowPct: 10,
+            crmEveryNBatches: 0
+        }
+    });
+
+    // One pH meter Ready / Calibrated.
+    const phMeter = await api(tokens.demoAdmin, 'POST', '/api/equipment', {
+        labId: DEMO_LAB_ID,
+        name: 'Bench pH Meter 01',
+        assetType: 'PH_METER',
+        manufacturer: 'Metrohm Demo',
+        model: 'pH-913 Practice',
+        serialNumber: 'DEMO-PH-001',
+        internalAssetTag: 'EQ-DEMO-01',
+        location: 'Wet Chemistry Bench A',
+        criticality: 'CRITICAL'
+    });
+    await api(tokens.demoAdmin, 'POST', '/api/equipment/events', {
+        equipmentId: phMeter.id,
+        eventType: 'CALIBRATION',
+        performedDate: new Date().toISOString(),
+        outcome: 'PASS',
+        nextDueDate: addDaysIso(180),
+        certificateRef: 'CAL-DEMO-PH-2026',
+        summary: 'Three-point buffer calibration (pH 4.01, 7.00, 10.01); slope 98.9%.'
+    });
+    await prisma.equipmentMethodEligibility.create({
+        data: {
+            id: crypto.randomUUID(),
+            labId: DEMO_LAB_ID,
+            analysisCode: 'PH_H2O',
+            methodId: null,
+            eligibleEquipmentIds: JSON.stringify([phMeter.id]),
+            isRequired: true
+        }
+    });
+
+    // One active check soil bottle.
+    const lrmRes = await api(tokens.demoAdmin, 'POST', '/api/reference-materials', {
+        labId: DEMO_LAB_ID,
+        code: 'LRM-DEMO-01',
+        name: 'In-House Homogenized Topsoil Check (LRM)',
+        kind: 'LRM',
+        matrix: 'SOIL',
+        lotNumber: 'LRM-2026-B1',
+        supplier: 'Demo Soil Lab Internal QC Pool',
+        certificateRef: 'INT-LRM-2026-01',
+        expiryDate: addDaysIso(365),
+        status: 'ACTIVE'
+    });
+    const lrmMaterial = lrmRes.data || lrmRes.material || lrmRes;
+    await api(tokens.demoAdmin, 'POST', `/api/reference-materials/${lrmMaterial.id}/values`, {
+        analysisCode: 'PH_H2O',
+        assignedValue: 6.45,
+        unit: 'pH_units',
+        valueType: 'CONSENSUS'
+    });
+
+    // Open training project with NO pre-registered samples (Sample 1 is NOT created).
+    const project = await api(tokens.demoAdmin, 'POST', '/api/projects', {
+        labId: DEMO_LAB_ID,
+        code: DEMO_PROJECT_CODE,
+        name: DEMO_PROJECT_NAME,
+        description: 'Practice topsoil fertility project for the 1-hour user test session.',
+        client: 'Demo Agricultural Extension Service',
+        projectType: 'OPEN_INTAKE',
+        expectedSampleCount: 3,
+        priority: 'NORMAL',
+        sampleIds: []
+    });
+
+    const checklistPass = {
+        container: 'PASS',
+        label: 'PASS',
+        quantity: 'PASS',
+        condition: 'PASS',
+        coc: 'PASS'
+    };
+    const samplingDetails = {
+        landUse: 'CROPLAND',
+        samplingDate: '2026-10-15',
+        samplingDepth: '0-20 cm',
+        composite: 'YES'
+    };
+    const handoverAt = addDaysIso(-1);
+
+    // Sample 2 (FIELD-2026-002): checked in as Accepted, waiting for Air Drying (assigned to tech1 for Task 2).
+    const s2Res = await api(tokens.reception1, 'POST', '/api/reception/intake', {
+        originalId: 'FIELD-2026-002',
+        projectId: project.id,
+        decision: 'ACCEPTED',
+        isDraft: false,
+        requiredAnalyses: ['PH_H2O'],
+        receivedMass: 480,
+        moistureOnArrival: 'MOIST',
+        foreignMaterial: 'NONE',
+        checklist: checklistPass,
+        samplingDetails,
+        custodyHandoverAt: handoverAt,
+        custodyCarrierName: 'Demo Field Courier'
+    });
+    const sample2 = s2Res.sample || s2Res;
+    const s2Items = await prisma.workItem.findMany({ where: { sampleId: sample2.id } });
+    const s2Drying = s2Items.find(w => w.analysis === 'DRYING');
+    await api(tokens.demoAdmin, 'POST', '/api/work/assign', {
+        workItemIds: [s2Drying.id],
+        assignee: 'tech1'
+    });
+
+    // Sample 3 (FIELD-2026-003): checked in as Accepted, Air Drying & Sample Preparation finished, Soil pH assigned to tech1.
+    const s3Res = await api(tokens.reception1, 'POST', '/api/reception/intake', {
+        originalId: 'FIELD-2026-003',
+        projectId: project.id,
+        decision: 'ACCEPTED',
+        isDraft: false,
+        requiredAnalyses: ['PH_H2O'],
+        receivedMass: 500,
+        moistureOnArrival: 'DRY',
+        foreignMaterial: 'NONE',
+        checklist: checklistPass,
+        samplingDetails,
+        custodyHandoverAt: handoverAt,
+        custodyCarrierName: 'Demo Field Courier'
+    });
+    const sample3 = s3Res.sample || s3Res;
+    const s3Items = await prisma.workItem.findMany({ where: { sampleId: sample3.id } });
+    const s3Drying = s3Items.find(w => w.analysis === 'DRYING');
+    const s3Prep = s3Items.find(w => w.analysis === 'PREPARATION');
+    const s3Ph = s3Items.find(w => w.analysis === 'PH_H2O');
+
+    await api(tokens.demoAdmin, 'POST', '/api/work/assign', {
+        workItemIds: [s3Drying.id],
+        assignee: 'tech1'
+    });
+    await api(tokens.tech1, 'POST', '/api/workbench/operations/confirm', {
+        workItemId: s3Drying.id,
+        checklist: [true, true, true],
+        observations: 'Air-dried to constant weight at 35 °C.',
+        records: [{
+            gateCode: 'DRYING',
+            method: 'AIR',
+            temperatureC: 35,
+            massBeforeG: 500,
+            massAfterG: 478,
+            startedAt: addDaysIso(-2),
+            endedAt: addDaysIso(-1),
+            notes: 'Air-dried in drying room at 35 °C.'
+        }],
+        verificationRequired: false
+    });
+
+    const gateRows = await prisma.operationalGate.findMany({
+        where: {
+            code: { in: ['SIEVING', 'GRINDING', 'SPLITTING'] },
+            OR: [{ labId: null }, { labId: DEMO_LAB_ID }]
+        }
+    });
+    const effectivePrepSteps = new Map();
+    for (const row of gateRows.sort((a, b) => (a.labId ? 1 : 0) - (b.labId ? 1 : 0))) {
+        effectivePrepSteps.set(row.code, row);
+    }
+    const activePrepCodes = [...effectivePrepSteps.values()]
+        .filter(r => r.isActive)
+        .map(r => r.code);
+
+    const nowMs = Date.now();
+    const prepCandidates = [
+        {
+            gateCode: 'SIEVING',
+            sieveMm: 2.0,
+            massBeforeG: 478,
+            massAfterG: 445,
+            coarseFractionG: 33,
+            startedAt: new Date(nowMs - 4 * 60 * 60 * 1000).toISOString(),
+            endedAt: new Date(nowMs - 3 * 60 * 60 * 1000).toISOString(),
+            notes: 'Passed 2.0 mm stainless-steel mesh.'
+        },
+        {
+            gateCode: 'GRINDING',
+            grindMm: 0.5,
+            massBeforeG: 120,
+            massAfterG: 118,
+            startedAt: new Date(nowMs - 3 * 60 * 60 * 1000).toISOString(),
+            endedAt: new Date(nowMs - 2 * 60 * 60 * 1000).toISOString(),
+            notes: 'Sub-sample homogenized.'
+        },
+        {
+            gateCode: 'SPLITTING',
+            massBeforeG: 445,
+            massAfterG: 443,
+            startedAt: new Date(nowMs - 2 * 60 * 60 * 1000).toISOString(),
+            endedAt: new Date(nowMs - 60 * 60 * 1000).toISOString(),
+            notes: 'Riffle-split into bench container.'
+        }
+    ];
+
+    await api(tokens.demoAdmin, 'POST', '/api/work/assign', {
+        workItemIds: [s3Prep.id],
+        assignee: 'tech1'
+    });
+    await api(tokens.tech1, 'POST', '/api/workbench/operations/confirm', {
+        workItemId: s3Prep.id,
+        checklist: [true, true, true],
+        observations: 'Sample preparation completed (< 2 mm fine earth).',
+        records: prepCandidates.filter(r => activePrepCodes.includes(r.gateCode)),
+        verificationRequired: false
+    });
+
+    await api(tokens.demoAdmin, 'POST', '/api/work/assign', {
+        workItemIds: [s3Ph.id],
+        assignee: 'tech1'
+    });
+
+    if (!silent) {
+        console.log('\n========================================================================');
+        console.log(' Demo Soil Lab (DEMO) — 1-Hour User Test Kit Seeded Successfully');
+        console.log('========================================================================');
+        console.log(` Profile  : user-test`);
+        console.log(` Database : ${dbPath}`);
+        console.log(` Project  : ${DEMO_PROJECT_NAME} (${DEMO_PROJECT_CODE})`);
+        console.log('------------------------------------------------------------------------');
+        console.log(' One-Time Generated Practice Credentials (save these now; not stored in docs):');
+        console.log('------------------------------------------------------------------------');
+        for (const spec of accountSpecs) {
+            const c = credentials[spec.username];
+            const pinCol = c.pin ? ` | Bench PIN: ${c.pin}` : '';
+            console.log(
+                `  ${c.username.padEnd(15)} | ${spec.role.padEnd(17)} | ${c.email.padEnd(28)} | Password: ${c.password}${pinCol}`
+            );
+        }
+        console.log('------------------------------------------------------------------------');
+        console.log(' Physical Bag Labels for the Table:');
+        console.log('   - Sample 1 : NOT checked in yet (receptionist checks it in during Task 1)');
+        console.log(`   - Sample 2 : FIELD-2026-002 / ${sample2.labSampleCode || sample2.labId} (Accepted, waiting for Air Drying)`);
+        console.log(`   - Sample 3 : FIELD-2026-003 / ${sample3.labSampleCode || sample3.labId} (Dried & prepared, Soil pH assigned to tech1)`);
+        console.log('========================================================================\n');
+    }
+
+    return {
+        profile: 'user-test',
+        labId: DEMO_LAB_ID,
+        labName: DEMO_LAB_NAME,
+        projectCode: DEMO_PROJECT_CODE,
+        dbPath,
+        accounts: Object.values(credentials).map(({ username, role, email, pin }) => ({
+            username,
+            role,
+            email,
+            hasBenchPin: Boolean(pin)
+        }))
+    };
+}
+
 async function seedDemoLab(options = {}) {
     const env = options.env || process.env;
     const silent = Boolean(options.silent);
@@ -247,11 +723,16 @@ async function seedDemoLab(options = {}) {
     };
 
     assertSeedSafetyEnv(env);
+    const profile = resolveSeedProfile(options, env);
 
     const serverDir = path.resolve(__dirname, '..');
     const dbPath = env.DATABASE_PATH
         ? path.resolve(env.DATABASE_PATH)
         : path.resolve(serverDir, 'prisma', 'dev.db');
+
+    // Run read-only emptiness and collision checks BEFORE any schema installer,
+    // Prisma initialization, or write can touch the database file on disk.
+    const preflight = assertTargetDatabaseEmptyBeforeWrite(dbPath);
 
     process.env.DATABASE_PATH = dbPath;
     process.env.DATABASE_URL = `file:${dbPath}`;
@@ -260,7 +741,7 @@ async function seedDemoLab(options = {}) {
         process.env.JWT_SECRET = crypto.randomBytes(32).toString('hex');
     }
 
-    ensureDatabaseSchemaInstalled(dbPath, serverDir, process.env);
+    ensureDatabaseSchemaInstalled(dbPath, serverDir, process.env, preflight.needsPush);
 
     const prisma = require('../prisma');
     const existingDemoLab = await prisma.lab.findFirst({
@@ -285,28 +766,10 @@ async function seedDemoLab(options = {}) {
     log('[DEMO_SEED] Preparing base catalogues and help publications...');
     await ensureBaseCatalogues(prisma, serverDir, process.env);
 
-    // Ensure the required soil parameters are active in the catalogue.
-    const requiredActiveCodes = [
-        'PH_H2O', 'EC', 'P_OLSEN', 'SOC', 'TN',
-        'EXCH_CA', 'EXCH_MG', 'EXCH_K', 'EXCH_NA', 'CEC',
-        'SAND', 'SILT', 'CLAY', 'TEXTURE', 'SPEC_MIR'
-    ];
-    await prisma.analysis.updateMany({
-        where: { code: { in: requiredActiveCodes } },
-        data: { status: 'active' }
-    });
-
     // Generate runtime-only random credentials (never stored in docs or repo).
-    const accountSpecs = [
-        { username: 'superadmin', role: 'SUPER_ADMIN', name: 'Alex Morgan', email: 'superadmin@example.test', labId: null, projects: [] },
-        { username: 'manager1', role: 'LAB_MANAGER', name: 'amina.diallo', displayName: 'Amina Diallo', email: 'manager1@example.test', labId: DEMO_LAB_ID, projects: [] },
-        { username: 'manager2', role: 'LAB_MANAGER', name: 'Carlos Mendez', email: 'manager2@example.test', labId: DEMO_LAB_ID, projects: [] },
-        { username: 'qa1', role: 'AUDIT_USER', name: 'Priya Nair', email: 'qa1@example.test', labId: DEMO_LAB_ID, projects: [] },
-        { username: 'reception1', role: 'SAMPLE_RECEPTION', name: 'Grace Osei', email: 'reception1@example.test', labId: DEMO_LAB_ID, projects: [] },
-        { username: 'tech1', role: 'LAB_TECHNICIAN', name: 'Lukas Novak', email: 'tech1@example.test', labId: DEMO_LAB_ID, projects: [], needsPin: true },
-        { username: 'tech2', role: 'LAB_TECHNICIAN', name: 'Mei Lin', email: 'tech2@example.test', labId: DEMO_LAB_ID, projects: [], needsPin: true },
-        { username: 'viewer1', role: 'VIEWER', name: 'Samira Farah', email: 'viewer1@example.test', labId: DEMO_LAB_ID, projects: [DEMO_PROJECT_CODE] }
-    ];
+    const accountSpecs = profile === 'user-test'
+        ? DEMO_ACCOUNT_SPECS.filter(s => USER_TEST_ACCOUNT_USERNAMES.includes(s.username))
+        : DEMO_ACCOUNT_SPECS;
 
     const credentials = {};
     for (const spec of accountSpecs) {
@@ -319,26 +782,32 @@ async function seedDemoLab(options = {}) {
         };
     }
 
-    // Bootstrap or refresh superadmin with a runtime random password and @example.test email.
-    const superHash = await bcrypt.hash(credentials.superadmin.password, 10);
-    await prisma.user.upsert({
-        where: { username: 'superadmin' },
-        update: {
+    // Create dedicated demo-superadmin account; refuse if it already exists (never upsert).
+    const existingDemoAdmin = await prisma.user.findFirst({
+        where: {
+            OR: [
+                { username: DEMO_ADMIN_USERNAME },
+                { id: DEMO_ADMIN_ID },
+                { email: DEMO_ADMIN_EMAIL }
+            ]
+        }
+    });
+    if (existingDemoAdmin) {
+        throw failGuard(
+            'DEMO_ADMIN_ALREADY_EXISTS',
+            `Refusing to seed: admin account "${DEMO_ADMIN_USERNAME}" already exists in ${dbPath}.`
+        );
+    }
+
+    const superHash = await bcrypt.hash(credentials[DEMO_ADMIN_USERNAME].password, 10);
+    await prisma.user.create({
+        data: {
+            id: DEMO_ADMIN_ID,
+            username: DEMO_ADMIN_USERNAME,
             password: superHash,
             role: 'SUPER_ADMIN',
             name: 'Alex Morgan',
-            email: 'superadmin@example.test',
-            isActive: true,
-            mustChangePassword: false,
-            language: 'en'
-        },
-        create: {
-            id: 'user-superadmin-demo',
-            username: 'superadmin',
-            password: superHash,
-            role: 'SUPER_ADMIN',
-            name: 'Alex Morgan',
-            email: 'superadmin@example.test',
+            email: DEMO_ADMIN_EMAIL,
             isActive: true,
             mustChangePassword: false,
             language: 'en'
@@ -359,16 +828,16 @@ async function seedDemoLab(options = {}) {
     const api = createApiClient(`http://127.0.0.1:${port}`);
 
     try {
-        log('[DEMO_SEED] Authenticating superadmin and creating Demo Soil Lab (DEMO)...');
+        log(`[DEMO_SEED] Authenticating ${DEMO_ADMIN_USERNAME} and creating Demo Soil Lab (DEMO)...`);
         const tokens = {};
         const superLogin = await api(null, 'POST', '/api/auth/login', {
-            username: 'superadmin',
-            password: credentials.superadmin.password
+            username: DEMO_ADMIN_USERNAME,
+            password: credentials[DEMO_ADMIN_USERNAME].password
         });
-        tokens.superadmin = superLogin.token;
+        tokens.demoAdmin = superLogin.token;
 
         // 1. Create Demo Soil Lab (starts in DRAFT lifecycle state).
-        await api(tokens.superadmin, 'POST', '/api/labs', {
+        await api(tokens.demoAdmin, 'POST', '/api/labs', {
             id: DEMO_LAB_ID,
             code: DEMO_LAB_ID,
             name: DEMO_LAB_NAME,
@@ -385,8 +854,9 @@ async function seedDemoLab(options = {}) {
         });
 
         // 2. Create the 7 active DEMO staff accounts.
-        for (const spec of accountSpecs.filter(a => a.username !== 'superadmin')) {
-            await api(tokens.superadmin, 'POST', '/api/users', {
+        const labStaffSpecs = accountSpecs.filter(a => a.username !== DEMO_ADMIN_USERNAME);
+        for (const spec of labStaffSpecs) {
+            await api(tokens.demoAdmin, 'POST', '/api/users', {
                 username: spec.username,
                 password: credentials[spec.username].password,
                 role: spec.role,
@@ -394,28 +864,31 @@ async function seedDemoLab(options = {}) {
                 email: spec.email,
                 labId: DEMO_LAB_ID,
                 countries: [],
-                projects: spec.projects
+                projects: [...spec.projects]
             });
         }
 
-        // Clear first-login password-change gate so seeded accounts work immediately.
+        // Clear first-login password-change gate on DEMO staff accounts so they work immediately.
         await prisma.user.updateMany({
-            where: { username: { in: accountSpecs.map(a => a.username) } },
+            where: {
+                labId: DEMO_LAB_ID,
+                username: { in: labStaffSpecs.map(a => a.username) }
+            },
             data: { mustChangePassword: false, language: 'en', isActive: true }
         });
 
         // 3. Activate Demo Soil Lab via two-step lifecycle preview + commit.
-        const lifecyclePreview = await api(tokens.superadmin, 'POST', `/api/labs/${DEMO_LAB_ID}/lifecycle-preview`, {
+        const lifecyclePreview = await api(tokens.demoAdmin, 'POST', `/api/labs/${DEMO_LAB_ID}/lifecycle-preview`, {
             targetState: 'ACTIVE'
         });
-        await api(tokens.superadmin, 'POST', `/api/labs/${DEMO_LAB_ID}/lifecycle`, {
+        await api(tokens.demoAdmin, 'POST', `/api/labs/${DEMO_LAB_ID}/lifecycle`, {
             targetState: 'ACTIVE',
             reason: 'Activate Demo Soil Lab for practice sessions and manual screenshots',
             reviewToken: lifecyclePreview.reviewToken
         });
 
         // 4. Sign in all 7 DEMO staff accounts.
-        for (const spec of accountSpecs.filter(a => a.username !== 'superadmin')) {
+        for (const spec of labStaffSpecs) {
             const loginRes = await api(null, 'POST', '/api/auth/login', {
                 username: spec.username,
                 password: credentials[spec.username].password
@@ -424,8 +897,7 @@ async function seedDemoLab(options = {}) {
         }
 
         // 5. Branding, facility policies, bench PINs, and 1 pending staff invitation.
-        log('[DEMO_SEED] Configuring branding, ISO 17025 policies, bench PINs, and staff invitation...');
-        await api(tokens.superadmin, 'PUT', '/api/admin/settings/branding', {
+        await api(tokens.demoAdmin, 'PUT', '/api/admin/settings/branding', {
             title: DEMO_LAB_NAME,
             tagline: 'Practice & Training Facility',
             organization: 'Demo Soil Fertility Network',
@@ -436,6 +908,21 @@ async function seedDemoLab(options = {}) {
             colors: { primary: '#1d4ed8', secondary: '#0f172a', accent: '#d97706' },
             logoUrl: '/assets/img/logo-light.png'
         });
+
+        if (profile === 'user-test') {
+            return await seedUserTestData({
+                api,
+                prisma,
+                tokens,
+                credentials,
+                accountSpecs,
+                dbPath,
+                silent,
+                log
+            });
+        }
+
+        log('[DEMO_SEED] Configuring ISO 17025 policies, bench PINs, and staff invitation...');
 
         const patchDemoPolicies = async (changes, reason, presetCode) => {
             const current = await api(tokens.manager1, 'GET', `/api/labs/${DEMO_LAB_ID}/policies`);
@@ -1714,7 +2201,7 @@ async function seedDemoLab(options = {}) {
                 const c = credentials[spec.username];
                 const pinCol = c.pin ? ` | Bench PIN: ${c.pin}` : '';
                 console.log(
-                    `  ${c.username.padEnd(11)} | ${spec.role.padEnd(17)} | ${c.email.padEnd(24)} | Password: ${c.password}${pinCol}`
+                    `  ${c.username.padEnd(15)} | ${spec.role.padEnd(17)} | ${c.email.padEnd(28)} | Password: ${c.password}${pinCol}`
                 );
             }
             console.log('------------------------------------------------------------------------');
@@ -1724,6 +2211,7 @@ async function seedDemoLab(options = {}) {
         }
 
         return {
+            profile: 'screenshots',
             labId: DEMO_LAB_ID,
             labName: DEMO_LAB_NAME,
             projectCode: DEMO_PROJECT_CODE,
@@ -1754,7 +2242,13 @@ if (require.main === module) {
 module.exports = {
     seedDemoLab,
     assertSeedSafetyEnv,
+    resolveSeedProfile,
+    assertTargetDatabaseEmptyBeforeWrite,
     DEMO_LAB_ID,
     DEMO_LAB_NAME,
-    DEMO_PROJECT_CODE
+    DEMO_PROJECT_CODE,
+    DEMO_ADMIN_ID,
+    DEMO_ADMIN_USERNAME,
+    DEMO_ADMIN_EMAIL,
+    DEMO_SEED_PROFILES
 };

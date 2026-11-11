@@ -99,7 +99,7 @@ A single deterministic seed script for *Demo Soil Lab* (`DEMO`) covers all 41 sc
   - **Sample retention after report** = `365` days
 
 ### B. Users & Roles (7 Active Accounts + 1 Pending Invitation)
-1. `superadmin` — **Super Administrator** (global scope)
+1. `demo-superadmin` — **Super Administrator** (global scope)
 2. `manager1` — **Laboratory Manager** (`DEMO`, primary reviewer and amendment requester)
 3. `manager2` — **Laboratory Manager** (`DEMO`, second reviewer and amendment co-signer)
 4. `qa1` — **Quality & Audit Officer** (`DEMO`)
