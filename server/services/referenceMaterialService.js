@@ -48,7 +48,7 @@ async function listMaterials(db, actor, { labId, now = new Date() } = {}) {
         scope(normalized, { labId: lab.id });
         where.labId = lab.id;
     }
-    where = scopeGuard.buildScopedWhere(normalized, where, { labField: 'labId', altLabField: 'labId' });
+    where = scopeGuard.buildScopedWhere(normalized, where, { entityType: 'ReferenceMaterial', labField: 'labId', altLabField: 'labId' });
     const rows = await db.referenceMaterial.findMany({ where, include: { inventoryLot: true,
         values: { orderBy: [{ analysisCode: 'asc' }, { createdAt: 'desc' }, { id: 'asc' }] } }, orderBy: [{ code: 'asc' }, { lotNumber: 'asc' }, { id: 'asc' }] });
     return Promise.all(rows.map(async material => present(db, await hydrateLot(db, material), now)));
