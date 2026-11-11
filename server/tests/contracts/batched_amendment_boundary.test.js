@@ -139,4 +139,3 @@ test('the approved-amendment probe refuses open-ended inputs, roots and protecte
     expect(() => rejectedGuardWrite({ ...options, file: process.env.DATABASE_PATH }))
         .toThrow('configured, working or production database');
 });
-
