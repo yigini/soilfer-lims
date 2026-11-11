@@ -730,15 +730,27 @@ test.each(['repeat', 'return'].flatMap(command => [
     }));
     expect(memberships(after)).toEqual(memberships(retainedRun));
 });
-test.each(['QC_FAIL', 'REJECT', 'REPEAT_ORDERED'])('a historical CLOSED run after %s refuses a repeat with no writes', async prior => {
+test.each(['QC_FAIL', 'REJECT', 'REPEAT_ORDERED'].flatMap(prior =>
+    (prior === 'QC_FAIL' ? ['repeat', 'return'] : ['repeat']).map(command => ({ prior, command }))))('a historical CLOSED run after $prior refuses a $command with no writes', async ({ prior, command }) => {
     const f = await nativeFixture({ blankValue: 9.123456789 });
+    if (command === 'return') await f.submit();
     if (prior !== 'QC_FAIL') await require('../../services/qcDispositionStateService').dispositionBatch(f.run.id,
         prior === 'REJECT' ? 'REJECT' : 'REPEAT_BATCH', 'Historical final decision', f.manager, f.db);
     // Construct the retained terminal shape on this disposable fixture only.
     await f.db.batchAnalyte.updateMany({ where: { batchId: f.run.id }, data: { status: 'CLOSED' } });
     await f.db.batch.update({ where: { id: f.run.id }, data: { status: 'CLOSED' } });
     const before = await f.all(), run = await f.runEvidence();
-    const response = await f.command({ reason: 'INSTRUMENT_FAULT', note: 'Closed failure remains refused' }, f.manager);
+    let response;
+    if (command === 'repeat') {
+        response = await f.command({ reason: 'INSTRUMENT_FAULT', note: 'Closed failure remains refused' }, f.manager);
+    } else {
+        await f.http(f.manager, async (app, token) => {
+            response = await request(app).post('/api/work/' + f.items[0].id + '/review')
+                .set('Authorization', 'Bearer ' + token)
+                .send({ decision: 'RETURN', attemptId: f.attempt.id, reasonCode: 'REVIEW_OUTLIER',
+                    note: 'Closed failure remains refused' });
+        });
+    }
     expect(response.status).toBe(409);
     expect(response.body.code).toBe('ATTEMPT_REPEAT_RUN_DISPOSITION_REQUIRED');
     expect(await f.all()).toEqual(before);
