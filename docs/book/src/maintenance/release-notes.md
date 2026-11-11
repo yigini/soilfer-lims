@@ -1,12 +1,14 @@
-# Release Notes (1.11 & 1.12)
+# Release Notes (1.11, 1.12 & 1.13)
 
-This page summarizes what laboratory staff, managers, and server administrators will notice in the next SoilFER-LIMS update, followed by earlier updates in versions **1.12** and **1.11**.
+This page summarizes what laboratory staff, managers, and server administrators will notice in SoilFER-LIMS **1.13.0**, followed by earlier updates in versions **1.12** and **1.11**.
 
 For step-by-step update instructions, see [Updating SoilFER-LIMS](./updates.md).
 
 ---
 
-## What changes in the next update
+## Version 1.13.0 — 2026-11-11
+
+- *Built-in Help rewritten in plain words in 5 languages:* Every guide in **Help** (**Help with this page** and **Help Centre**) has been rewritten in short, everyday sentences across English, French, Portuguese, Spanish, and Latin American Spanish, so reception and bench staff can look up answers without technical jargon.
 
 ### Everyday words on screen: Old word on screen → new word
 
@@ -102,7 +104,6 @@ If you learned the earlier screen names, use this table to find the new label on
 
 ### Other improvements in this update
 
-- *Built-in Help rewritten in plain words in 5 languages:* Every guide in **Help** (**Help with this page** and **Help Centre**) has been rewritten in short, everyday sentences across English, French, Portuguese, Spanish, and Latin American Spanish, so reception and bench staff can look up answers without technical jargon.
 - *Clearer row-by-row errors during delivery box upload:* When checking in a box of samples in **Sample Reception**, any row that cannot be accepted now shows its exact row number and sample code (**Row {row} (sample {id}): {message}**). If a sample ID was already registered earlier in the system, the message clearly states **This sample ID is already registered. Sample IDs must be unique across the system.**
 - *Clearer bench PIN setup on shared computers:* When a technician sets up a personal PIN for the first time in **Workbench**, the **Set your bench PIN** window clearly labels **New bench PIN (4–8 digits)** with the hint **Use only the digits 0 to 9.** and **Your password**, keeping every label translated in the chosen screen language.
 - *Only Super Administrators can create a new laboratory:* Creating a new laboratory in **Lab Management** (**Onboard Laboratory**) is now restricted to **Super Administrator** accounts. **Laboratory Manager** accounts continue managing their own laboratory's profile, branding, staff, and daily settings.
