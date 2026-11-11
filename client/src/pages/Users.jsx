@@ -46,7 +46,7 @@ const Users = () => {
             setTotalPages(res.data.meta.pages || 1);
         } catch (e) {
             console.error('Failed to fetch users:', e);
-            showDialog({ title: 'Error', message: 'Failed to fetch users roster', type: 'error' });
+            showDialog({ title: t('common.error'), message: t('adminDetails.rosterFailed'), type: 'error' });
         } finally {
             setLoading(false);
         }
@@ -102,7 +102,7 @@ const Users = () => {
                 } catch (e) {
                     showDialog({
                         title: t('common.error', 'Error'),
-                        message: e.response?.data?.message || e.response?.data?.error || e.message || 'Impersonation failed',
+                        message: e.response?.data?.message || e.response?.data?.error || e.message || t('adminDetails.impersonationFailed'),
                         type: 'error'
                     });
                 }
@@ -154,7 +154,7 @@ const Users = () => {
                         <tr className="border-b border-sf-divider bg-sf-canvas/50 text-[10px] font-black uppercase tracking-wider text-sf-muted">
                             <th className="py-3.5 px-4 sm:px-6">{t('users.name', 'User')}</th>
                             <th className="py-3.5 px-4">{t('users.role', 'Role')}</th>
-                            <th className="py-3.5 px-4">Status</th>
+                            <th className="py-3.5 px-4">{t('qaOverview.status')}</th>
                             <th className="py-3.5 px-4">{t('users.lab', 'Scope (Lab/Country)')}</th>
                             <th className="py-3.5 px-4 sm:px-6 text-right">{t('common.actions', 'Actions')}</th>
                         </tr>
@@ -196,7 +196,7 @@ const Users = () => {
                                                     : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300'
                                             }`}>
                                                 <span className={`w-1.5 h-1.5 rounded-full ${isSuspended ? 'bg-rose-500' : 'bg-emerald-500'}`} />
-                                                {isSuspended ? 'Suspended' : 'Active'}
+                                                {isSuspended ? t('labManagement.people.statusSuspended') : t('projects.active')}
                                             </span>
                                         </td>
                                         <td className="py-3.5 px-4 text-xs text-sf-muted">
@@ -207,7 +207,7 @@ const Users = () => {
                                             ) : (
                                                 u.countries && u.countries.length > 0 ? (
                                                     <div className="flex items-center gap-1"><Shield size={13} /> {u.countries.join(', ')}</div>
-                                                ) : <span className="text-sf-muted italic">Global scope</span>
+                                                ) : <span className="text-sf-muted italic">{t('adminDetails.globalScope')}</span>
                                             )}
                                         </td>
                                         <td className="py-3.5 px-4 sm:px-6 text-right">
@@ -218,9 +218,9 @@ const Users = () => {
                                                         setShowAccessReviewModal(true);
                                                     }}
                                                     className="px-2.5 py-1 bg-sf-canvas hover:bg-sf-raised border border-sf-divider rounded-lg text-xs font-bold text-sf-text transition"
-                                                    title="Review and change role & scope"
+                                                    title={t('adminDetails.reviewRoleScope')}
                                                 >
-                                                    Review Access
+                                                    {t('labManagement.people.reviewAccess')}
                                                 </button>
 
                                                 <button
@@ -229,7 +229,7 @@ const Users = () => {
                                                         setShowRecoveryModal(true);
                                                     }}
                                                     className="p-1.5 text-sf-muted hover:text-amber-600 hover:bg-sf-raised rounded-lg transition"
-                                                    title="Issue One-Time Recovery Link"
+                                                    title={t('adminDetails.oneTimeRecovery')}
                                                 >
                                                     <KeyRound size={15} />
                                                 </button>
@@ -254,7 +254,7 @@ const Users = () => {
                                                             ? 'text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/30'
                                                             : 'text-sf-muted hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30'
                                                     }`}
-                                                    title={isSuspended ? 'Reactivate Account' : 'Suspend Account'}
+                                                    title={isSuspended ? t('adminDetails.reactivateAccount') : t('adminDetails.suspendAccount')}
                                                 >
                                                     <Power size={15} />
                                                 </button>
@@ -314,7 +314,7 @@ const Users = () => {
                         setSelectedUser(null);
                     }}
                     onSuccess={({ message }) => {
-                        showDialog({ title: 'Access Updated', message, type: 'success' });
+                        showDialog({ title: t('adminDetails.accessUpdated'), message, type: 'success' });
                         fetchUsers();
                     }}
                 />
@@ -341,7 +341,7 @@ const Users = () => {
                         setSelectedUser(null);
                     }}
                     onSuccess={(msg) => {
-                        showDialog({ title: 'Account State Updated', message: msg, type: 'success' });
+                        showDialog({ title: t('adminDetails.accountUpdated'), message: msg, type: 'success' });
                         fetchUsers();
                     }}
                 />

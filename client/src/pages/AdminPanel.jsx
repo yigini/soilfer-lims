@@ -147,8 +147,8 @@ const AdminPanel = () => {
             fetchLanguages();
         } catch (e) {
             showDialog({
-                title: 'Error',
-                message: e.response?.data?.error || 'Failed to add language',
+                title: t('common.error'),
+                message: e.response?.data?.error || t('adminDetails.languageAddFailed'),
                 type: 'error'
             });
         }
@@ -156,17 +156,17 @@ const AdminPanel = () => {
 
     const handleDeleteLanguage = async (code) => {
         showDialog({
-            title: 'Delete Language?',
-            message: 'Are you sure you want to delete this language? This action cannot be undone.',
+            title: t('adminDetails.deleteLanguage'),
+            message: t('adminDetails.deleteLanguageHelp'),
             type: 'confirm',
-            confirmText: 'Delete',
-            cancelText: 'Cancel',
+            confirmText: t('common.delete'),
+            cancelText: t('common.cancel'),
             onConfirm: async () => {
                 try {
                     await axios.delete(`/api/admin/languages/${code}`);
                     fetchLanguages();
                 } catch (e) {
-                    showDialog({ title: 'Error', message: 'Failed to delete language', type: 'error' });
+                    showDialog({ title: t('common.error'), message: t('adminDetails.deleteLanguageFailed'), type: 'error' });
                 }
             }
         });
@@ -178,8 +178,8 @@ const AdminPanel = () => {
             fetchLanguages();
             fetchSettings();
         } catch (e) {
-            const msg = e.response?.data?.details || e.response?.data?.error || 'Failed to set default language';
-            showDialog({ title: 'Error', message: msg, type: 'error' });
+            const msg = e.response?.data?.details || e.response?.data?.error || t('adminDetails.setDefaultLanguageFailed');
+            showDialog({ title: t('common.error'), message: msg, type: 'error' });
         }
     };
 
@@ -188,9 +188,9 @@ const AdminPanel = () => {
             await axios.put(`/api/admin/languages/${activeLang.code}`, { translations: translationsFromEditor });
             setEditorOpen(false);
             fetchLanguages();
-            showDialog({ title: 'Success', message: 'Translations saved successfully!', type: 'success' });
+            showDialog({ title: t('common.success'), message: t('adminDetails.translationsSaved'), type: 'success' });
         } catch (e) {
-            showDialog({ title: 'Error', message: 'Failed to save translations', type: 'error' });
+            showDialog({ title: t('common.error'), message: t('adminDetails.translationsFailed'), type: 'error' });
         }
     };
 

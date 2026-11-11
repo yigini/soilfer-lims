@@ -120,7 +120,7 @@ export default function AccessReviewModal({ isOpen, user, onClose, onSuccess, cu
                             {t('staffManagement.review.title', 'Pre-Change Access Review')}
                         </div>
                         <h2 id="access-review-title" className="text-lg sm:text-xl font-black text-sf-text">
-                            Review Access: {user.name || user.username}
+                            {t('adminDetails.reviewAccess')} {user.name || user.username}
                         </h2>
                     </div>
                     <button onClick={onClose} aria-label={t('common.close', 'Close')} className="p-2 hover:bg-sf-raised rounded-xl transition text-sf-muted hover:text-sf-text">
@@ -140,7 +140,7 @@ export default function AccessReviewModal({ isOpen, user, onClose, onSuccess, cu
                                 onClick={() => fetchPreview(proposedRole)}
                                 className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 transition"
                             >
-                                <RefreshCw size={12} /> Reload Current Revision
+                                <RefreshCw size={12} /> {t('adminDetails.reloadRevision')}
                             </button>
                         </div>
                     )}
@@ -155,7 +155,7 @@ export default function AccessReviewModal({ isOpen, user, onClose, onSuccess, cu
                     {/* Role Selection */}
                     <div>
                         <label className="block text-[11px] font-bold text-sf-muted mb-1.5 uppercase tracking-wider">
-                            Proposed System Role
+                            {t('adminDetails.proposedRole')}
                         </label>
                         <select
                             value={proposedRole}
@@ -173,7 +173,7 @@ export default function AccessReviewModal({ isOpen, user, onClose, onSuccess, cu
                             })}
                         </select>
                         <p className="text-xs text-sf-muted mt-1.5">
-                            Only roles you can assign within this laboratory scope are offered.
+                            {t('adminDetails.allowedRolesHelp')}
                         </p>
                     </div>
 
@@ -182,35 +182,35 @@ export default function AccessReviewModal({ isOpen, user, onClose, onSuccess, cu
                         {/* Current Column */}
                         <div className="p-4 rounded-xl bg-sf-canvas border border-sf-divider space-y-2.5">
                             <div className="text-[10px] font-black uppercase tracking-widest text-sf-muted">
-                                Current Access
+                                {t('adminDetails.currentAccess')}
                             </div>
                             <div className="text-base font-bold text-sf-text">
                                 {currentRoleTitle}
                             </div>
                             <ul className="text-xs text-sf-muted space-y-1.5 list-disc list-inside">
-                                <li>Assigned to: {user.labId || 'Global scope'}</li>
-                                <li>Prior results and reports keep original authorship</li>
-                                <li>{openTasks > 0 ? `${openTasks} unfinished work assignments` : 'No open tasks'}</li>
+                                <li>{t('adminDetails.assignedTo')} {user.labId || t('adminDetails.globalScope')}</li>
+                                <li>{t('adminDetails.priorAuthorship')}</li>
+                                <li>{openTasks > 0 ? `${openTasks} unfinished work assignments` : t('adminDetails.noOpenTasks')}</li>
                             </ul>
                         </div>
 
                         {/* Proposed Column */}
                         <div className="p-4 rounded-xl bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-200/80 dark:border-emerald-800/60 space-y-2.5">
                             <div className="text-[10px] font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400">
-                                Proposed Access
+                                {t('adminDetails.proposedAccess')}
                             </div>
                             <div className="text-base font-bold text-emerald-900 dark:text-emerald-200">
                                 {proposedRoleTitle}
                             </div>
                             <ul className="text-xs text-emerald-800/90 dark:text-emerald-300 space-y-1.5 list-disc list-inside">
                                 {preview?.proposed?.gainedCapabilities?.slice(0, 3).map((cap, i) => (
-                                    <li key={i}>Gains: {cap.replace(/_/g, ' ').toLowerCase()}</li>
+                                    <li key={i}>{t('adminDetails.gains')} {cap.replace(/_/g, ' ').toLowerCase()}</li>
                                 ))}
                                 {preview?.proposed?.lostCapabilities?.slice(0, 3).map((cap, i) => (
-                                    <li key={i} className="text-amber-700 dark:text-amber-300">Relinquishes: {cap.replace(/_/g, ' ').toLowerCase()}</li>
+                                    <li key={i} className="text-amber-700 dark:text-amber-300">{t('adminDetails.relinquishes')} {cap.replace(/_/g, ' ').toLowerCase()}</li>
                                 ))}
                                 {(!preview?.proposed?.gainedCapabilities?.length && !preview?.proposed?.lostCapabilities?.length) && (
-                                    <li>Permissions governed by updated role contract</li>
+                                    <li>{t('adminDetails.roleContractHelp')}</li>
                                 )}
                             </ul>
                         </div>
@@ -221,29 +221,29 @@ export default function AccessReviewModal({ isOpen, user, onClose, onSuccess, cu
                         <div className="p-3.5 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/60 rounded-xl text-xs text-amber-900 dark:text-amber-200 space-y-1">
                             <strong className="font-bold flex items-center gap-1.5">
                                 <AlertTriangle size={14} className="text-amber-600" />
-                                Handover Needed ({openTasks} open assignments)
+                                {t('adminDetails.handoverStart')}{openTasks} {t('adminDetails.handoverEnd')}
                             </strong>
                             <p>
-                                Changing roles does not delete or reassign active tasks. Completed results retain their original author. The lab manager should reassign open items.
+                                {t('adminDetails.handoverHelp')}
                             </p>
                         </div>
                     )}
 
                     {/* Non-reassignment & Session Note */}
                     <div className="text-xs text-sf-muted p-3 bg-sf-raised/40 rounded-xl border border-sf-divider">
-                        Committing access changes will increment the user's security version (<code className="font-mono text-[11px]">tokenVersion</code>) to revoke stale sessions and ensure immediate RBAC enforcement.
+                        {t('adminDetails.versionStart')}<code className="font-mono text-[11px]">{t('adminDetails.tokenVersion')}</code>{t('adminDetails.versionEnd')}
                     </div>
 
                     {/* Reason */}
                     <div>
                         <label className="block text-[11px] font-bold text-sf-muted mb-1 uppercase tracking-wider">
-                            Reason for this change <span className="text-rose-500">*</span>
+                            {t('adminDetails.changeReason')} <span className="text-rose-500">*</span>
                         </label>
                         <textarea
                             rows={2}
                             value={reason}
                             onChange={(e) => setReason(e.target.value)}
-                            placeholder="e.g. Technician promoted to QA review role for ISO 17025 audit"
+                            placeholder={t('adminDetails.changeReasonExample')}
                             required
                             className="w-full p-3 bg-sf-canvas border border-sf-divider rounded-xl text-sm text-sf-text focus:ring-2 focus:ring-sf-primary outline-none transition resize-none"
                         />
@@ -258,7 +258,7 @@ export default function AccessReviewModal({ isOpen, user, onClose, onSuccess, cu
                             className="mt-1 w-4 h-4 rounded text-sf-primary border-sf-divider focus:ring-sf-primary"
                         />
                         <span className="text-xs text-sf-muted font-medium">
-                            I have reviewed the scope, capabilities diff, and any unfinished tasks that require handover.
+                            {t('adminDetails.changeConfirmed')}
                         </span>
                     </label>
                 </div>
@@ -271,7 +271,7 @@ export default function AccessReviewModal({ isOpen, user, onClose, onSuccess, cu
                         disabled={submitting}
                         className="px-5 py-2.5 rounded-xl border border-sf-divider text-xs font-bold text-sf-muted hover:bg-sf-raised transition"
                     >
-                        Cancel
+                        {t('common.cancel')}
                     </button>
                     <button
                         type="button"
@@ -279,7 +279,7 @@ export default function AccessReviewModal({ isOpen, user, onClose, onSuccess, cu
                         disabled={submitting || !reason.trim() || !confirmImpact || !!conflictError}
                         className="px-6 py-2.5 bg-sf-primary text-white rounded-xl text-xs font-bold hover:bg-sf-primary/90 transition shadow-md shadow-sf-primary/20 disabled:opacity-50"
                     >
-                        {submitting ? 'Applying Changes...' : 'Apply These Access Changes'}
+                        {submitting ? t('adminDetails.applyingChanges') : t('adminDetails.applyAccessChanges')}
                     </button>
                 </div>
             </div>

@@ -22,8 +22,8 @@ const AnalysisConfig = () => {
 
     const navItems = [
         { id: 'analyses', label: t('analytics.testMethods', 'Analyses & Methodologies'), icon: FlaskConical, badge: `${analyses.length} Parameters` },
-        { id: 'groups', label: 'Analysis Packages', icon: Layers, badge: `${counts.groups} Packages` },
-        { id: 'categories', label: 'Property Categories', icon: Tag, badge: `${counts.categories} Domains` }
+        { id: 'groups', label: t('adminDetails.analysisPackages'), icon: Layers, badge: `${counts.groups} Packages` },
+        { id: 'categories', label: t('adminDetails.propertyCategories'), icon: Tag, badge: `${counts.categories} Domains` }
     ];
 
     return (

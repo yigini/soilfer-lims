@@ -107,25 +107,25 @@ export default function LabLifecycleModal({ isOpen, lab, targetState, onClose, o
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="p-4 rounded-xl bg-sf-canvas border border-sf-divider space-y-2">
                             <div className="text-[10px] font-black uppercase tracking-widest text-sf-muted">
-                                {isPausing ? 'What Pauses' : isResuming ? 'What Resumes' : 'What Retires'}
+                                {isPausing ? t('adminDetails.whatPauses') : isResuming ? t('adminDetails.whatResumes') : t('adminDetails.whatRetires')}
                             </div>
                             <ul className="text-xs text-sf-muted space-y-1.5 list-disc list-inside">
                                 {isPausing ? (
                                     <>
-                                        <li>New sample intake and assignments held</li>
-                                        <li>Result entry and operational writes paused</li>
-                                        <li>Integrations follow paused policy</li>
+                                        <li>{t('adminDetails.holdNewIntake')}</li>
+                                        <li>{t('adminDetails.pauseResultEntry')}</li>
+                                        <li>{t('adminDetails.pausedIntegrations')}</li>
                                     </>
                                 ) : isResuming ? (
                                     <>
-                                        <li>Active authorized staff can resume bench work</li>
-                                        <li>Normal intake and verification restored</li>
-                                        <li>Workflow readiness policies re-engaged</li>
+                                        <li>{t('adminDetails.resumeBench')}</li>
+                                        <li>{t('adminDetails.resumeIntake')}</li>
+                                        <li>{t('adminDetails.resumeReadiness')}</li>
                                     </>
                                 ) : (
                                     <>
-                                        <li>Laboratory placed in permanent read-only archive</li>
-                                        <li>All remaining active assignments must be resolved</li>
+                                        <li>{t('adminDetails.archiveReadOnly')}</li>
+                                        <li>{t('adminDetails.resolveAssignments')}</li>
                                     </>
                                 )}
                             </ul>
@@ -133,13 +133,13 @@ export default function LabLifecycleModal({ isOpen, lab, targetState, onClose, o
 
                         <div className="p-4 rounded-xl bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-200/80 dark:border-emerald-800/60 space-y-2">
                             <div className="text-[10px] font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400">
-                                What Stays Preserved
+                                {t('adminDetails.preservedData')}
                             </div>
                             <ul className="text-xs text-emerald-800/90 dark:text-emerald-300 space-y-1.5 list-disc list-inside">
-                                <li>All samples, raw evidence and signed reports</li>
-                                <li><strong>Staff accounts untouched</strong> (Anti-cascade safety)</li>
-                                <li>Historical attempts and original authors</li>
-                                <li>Quarantined drafts remain recoverable</li>
+                                <li>{t('adminDetails.preserveSamples')}</li>
+                                <li><strong>{t('adminDetails.preserveStaff')}</strong> {t('adminDetails.preserveStaffHint')}</li>
+                                <li>{t('adminDetails.preserveAttempts')}</li>
+                                <li>{t('adminDetails.preserveDrafts')}</li>
                             </ul>
                         </div>
                     </div>
@@ -148,25 +148,25 @@ export default function LabLifecycleModal({ isOpen, lab, targetState, onClose, o
                     <div className="p-3.5 bg-sf-raised/50 rounded-xl border border-sf-divider text-xs text-sf-muted flex items-start gap-2.5">
                         <Shield size={16} className="text-sf-primary shrink-0 mt-0.5" />
                         <div>
-                            <strong className="text-sf-text font-bold block mb-0.5">Anti-Cascade Safety Active</strong>
+                            <strong className="text-sf-text font-bold block mb-0.5">{t('adminDetails.antiCascadeActive')}</strong>
                             {isPausing
-                                ? 'Pausing this lab does not deactivate staff user accounts. Team members retain their credentials and can inspect historical records.'
+                                ? t('adminDetails.pausingStaff')
                                 : isResuming
-                                    ? 'Resuming this lab restores facility access. Any staff accounts that were individually disabled will remain disabled.'
-                                    : 'Retirement preserves historical chain of custody. Zero sample loss invariant is enforced.'}
+                                    ? t('adminDetails.resumingStaff')
+                                    : t('adminDetails.retiringCustody')}
                         </div>
                     </div>
 
                     {/* Reason */}
                     <div>
                         <label className="block text-[11px] font-bold text-sf-muted mb-1 uppercase tracking-wider">
-                            Lifecycle Change Reason <span className="text-rose-500">*</span>
+                            {t('adminDetails.lifecycleReason')} <span className="text-rose-500">*</span>
                         </label>
                         <textarea
                             rows={2}
                             value={reason}
                             onChange={(e) => setReason(e.target.value)}
-                            placeholder="e.g. Scheduled facility renovation / Annual recalibration shutdown"
+                            placeholder={t('adminDetails.lifecycleReasonExample')}
                             required
                             className="w-full p-3 bg-sf-canvas border border-sf-divider rounded-xl text-sm text-sf-text focus:ring-2 focus:ring-sf-primary outline-none transition resize-none"
                         />
@@ -181,7 +181,7 @@ export default function LabLifecycleModal({ isOpen, lab, targetState, onClose, o
                             className="mt-1 w-4 h-4 rounded text-sf-primary border-sf-divider focus:ring-sf-primary"
                         />
                         <span className="text-xs text-sf-muted font-medium">
-                            I have reviewed the operational impact, anti-cascade protections, and administrator recovery route.
+                            {t('adminDetails.lifecycleConfirmed')}
                         </span>
                     </label>
                 </div>
@@ -193,7 +193,7 @@ export default function LabLifecycleModal({ isOpen, lab, targetState, onClose, o
                         disabled={submitting}
                         className="px-5 py-2.5 rounded-xl border border-sf-divider text-xs font-bold text-sf-muted hover:bg-sf-raised transition"
                     >
-                        Cancel
+                        {t('common.cancel')}
                     </button>
                     <button
                         type="button"
@@ -203,7 +203,7 @@ export default function LabLifecycleModal({ isOpen, lab, targetState, onClose, o
                             isPausing ? 'bg-amber-600 hover:bg-amber-700 shadow-amber-600/20' : isRetiring ? 'bg-rose-600 hover:bg-rose-700 shadow-rose-600/20' : 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/20'
                         }`}
                     >
-                        {submitting ? 'Executing...' : isPausing ? 'Pause Laboratory' : isResuming ? 'Resume Laboratory' : 'Retire Laboratory'}
+                        {submitting ? t('common.processing') : isPausing ? t('adminDetails.pauseLab') : isResuming ? t('adminDetails.resumeLab') : t('adminDetails.retireLab')}
                     </button>
                 </div>
             </div>

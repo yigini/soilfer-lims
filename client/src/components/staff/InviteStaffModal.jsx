@@ -47,10 +47,10 @@ export default function InviteStaffModal({ isOpen, onClose, onSuccess, defaultLa
             }
         } catch (err) {
             setAssignableRoles([
-                { role: 'LAB_TECHNICIAN', displayName: 'Laboratory Technician', description: 'Record assigned work through workbench' },
-                { role: 'SAMPLE_RECEPTION', displayName: 'Intake Officer', description: 'Intake and sample registration' },
-                { role: 'AUDIT_USER', displayName: 'Quality & Audit Officer', description: 'Read-only QA and compliance review' },
-                { role: 'VIEWER', displayName: 'Viewer', description: 'Read-only directory access' }
+                { role: 'LAB_TECHNICIAN', displayName: 'Laboratory Technician', description: t('adminDetails.benchRoleHint') },
+                { role: 'SAMPLE_RECEPTION', displayName: 'Intake Officer', description: t('adminDetails.receptionRoleHint') },
+                { role: 'AUDIT_USER', displayName: 'Quality & Audit Officer', description: t('adminDetails.qaRoleHint') },
+                { role: 'VIEWER', displayName: 'Viewer', description: t('adminDetails.directoryRoleHint') }
             ]);
         } finally {
             setLoadingRoles(false);

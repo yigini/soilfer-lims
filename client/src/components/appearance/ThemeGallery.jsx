@@ -706,7 +706,7 @@ export const ThemeGallery = ({
                         {t('appearance.activeAppearance', 'Active Appearance')}:
                     </span>
                     <span className="font-bold text-sf-text">
-                        {themes?.find(t => t.id === activeThemeId)?.name || 'Classic'}
+                        {themes?.find(t => t.id === activeThemeId)?.name || t('adminDetails.classic')}
                     </span>
                     <span className="px-2 py-0.5 rounded-md bg-sf-hover text-sf-text font-medium text-xs">
                         {appearance === 'dark' ? t('appearance.dark', 'Dark') : t('appearance.light', 'Light')}
@@ -919,7 +919,7 @@ export const ThemeGallery = ({
 
                             {/* Color Palette Swatches */}
                             <div className="flex items-center gap-1.5 pt-1">
-                                <span className="text-[10px] text-sf-muted font-medium">Palette:</span>
+                                <span className="text-[10px] text-sf-muted font-medium">{t('adminDetails.palette')}</span>
                                 <div className="flex items-center gap-1">
                                     <span
                                         style={{ backgroundColor: tokens.canvas }}

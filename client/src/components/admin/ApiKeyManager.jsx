@@ -120,108 +120,108 @@ const ApiKeyManager = () => {
     const [sandboxCodeLang, setSandboxCodeLang] = useState('curl'); // 'curl' | 'python' | 'r' | 'js'
 
     const COUNTRIES = [
-        { code: '*', label: 'All Countries (*)' },
-        { code: 'GTM', label: 'Guatemala (GTM)' },
-        { code: 'HND', label: 'Honduras (HND)' },
-        { code: 'KEN', label: 'Kenya (KEN)' },
-        { code: 'ZMB', label: 'Zambia (ZMB)' },
-        { code: 'GHA', label: 'Ghana (GHA)' },
-        { code: 'MOZ', label: 'Mozambique (MOZ)' },
-        { code: 'TUN', label: 'Tunisia (TUN)' }
+        { code: '*', label: t('exchangeAdmin.allCountriesScope') },
+        { code: 'GTM', label: t('exchangeAdmin.countryGuatemala') },
+        { code: 'HND', label: t('exchangeAdmin.countryHonduras') },
+        { code: 'KEN', label: t('exchangeAdmin.countryKenya') },
+        { code: 'ZMB', label: t('exchangeAdmin.countryZambia') },
+        { code: 'GHA', label: t('exchangeAdmin.countryGhana') },
+        { code: 'MOZ', label: t('exchangeAdmin.countryMozambique') },
+        { code: 'TUN', label: t('exchangeAdmin.countryTunisia') }
     ];
 
     const ENDPOINTS = [
         // V2 Lossless Data Exchange Endpoints (Issue #140)
         {
             path: '/api/v2/data-exchange/capabilities',
-            title: 'Exchange Capabilities & Profiles',
-            desc: 'Discovery endpoint declaring supported exchange profiles (core-lossless-v2, opennsis), geometry constraints, horizons, and pagination limits.',
-            category: 'V2 System',
+            title: t('exchangeAdmin.capabilitiesProfiles'),
+            desc: t('exchangeAdmin.discoverProfiles'),
+            category: t('exchangeAdmin.systemCategory'),
             version: 'v2'
         },
         {
             path: '/api/v2/data-exchange/stats',
-            title: 'Scoped Dataset Statistics',
-            desc: 'Aggregate metrics scoped strictly to authorized laboratories and published/approved sample statuses (Scoped security compliance).',
-            category: 'V2 System',
+            title: t('exchangeAdmin.datasetStats'),
+            desc: t('exchangeAdmin.scopedMetrics'),
+            category: t('exchangeAdmin.systemCategory'),
             version: 'v2'
         },
         {
             path: '/api/v2/data-exchange/samples',
-            title: 'Lossless Specimen Registry & Provenance',
-            desc: 'Soil specimen registry with truthful coordinates, unrounded depth horizons, distinct collection/reception dates, and namespaced profiles.',
-            category: 'V2 Core Data',
+            title: t('exchangeAdmin.specimenRegistry'),
+            desc: t('exchangeAdmin.specimenDescription'),
+            category: t('exchangeAdmin.coreCategory'),
             version: 'v2'
         },
         {
             path: '/api/v2/data-exchange/observations',
-            title: 'Lossless Tabular Observations Matrix',
-            desc: 'Analytical chemistry observations retaining all replicate determinations, basis, censoring flags, and normalized units.',
-            category: 'V2 Core Data',
+            title: t('exchangeAdmin.observationsMatrix'),
+            desc: t('exchangeAdmin.observationsDescription'),
+            category: t('exchangeAdmin.coreCategory'),
             version: 'v2'
         },
         {
             path: '/api/v2/data-exchange/geojson',
-            title: 'RFC 7946 Spatial GeoJSON FeatureCollection',
-            desc: 'Strict RFC 7946 GeoJSON points (WGS84, no obsolete crs object) with complete specimen metadata properties.',
-            category: 'V2 Spatial',
+            title: t('exchangeAdmin.spatialCollection'),
+            desc: t('exchangeAdmin.spatialDescription'),
+            category: t('exchangeAdmin.spatialCategory'),
             version: 'v2'
         },
         {
             path: '/api/v2/data-exchange/spectra',
-            title: 'Lossless Spectroscopy Dataset (MIR/NIR)',
-            desc: 'Calibrated spectral signatures (MIR 400-4000 cm⁻¹ & Vis-NIR) linked to verified specimens.',
-            category: 'V2 Spectral',
+            title: t('exchangeAdmin.spectroscopyDataset'),
+            desc: t('exchangeAdmin.spectraDescription'),
+            category: t('exchangeAdmin.spectralCategory'),
             version: 'v2'
         },
         {
             path: '/api/v2/data-exchange/changes',
-            title: 'Monotonic Change Feed & Continuous Sync',
-            desc: 'Continuous synchronization feed with opaque boundary cursors, publication/withdrawal event types, and HTTP 410 cursor expiration guard.',
-            category: 'V2 ETL',
+            title: t('exchangeAdmin.changeFeed'),
+            desc: t('exchangeAdmin.changesDescription'),
+            category: t('exchangeAdmin.etlCategory'),
             version: 'v2'
         },
         // V1 Compatibility Endpoints
         {
             path: '/api/v1/data-exchange/stats',
-            title: 'V1 System Health & Statistics',
-            desc: 'Aggregate sample counts, approved determinations, laboratory active counts, and metrological metrics (legacy).',
-            category: 'V1 Legacy',
+            title: t('exchangeAdmin.legacyHealth'),
+            desc: t('exchangeAdmin.legacyHealthDescription'),
+            category: t('exchangeAdmin.v1Legacy'),
             version: 'v1'
         },
         {
             path: '/api/v1/data-exchange/samples',
-            title: 'V1 Samples Registry & Provenance',
-            desc: 'Sample registry formatted with v1 compatibility layer.',
-            category: 'V1 Legacy',
+            title: t('exchangeAdmin.legacySamples'),
+            desc: t('exchangeAdmin.legacySamplesDescription'),
+            category: t('exchangeAdmin.v1Legacy'),
             version: 'v1'
         },
         {
             path: '/api/v1/data-exchange/results',
-            title: 'V1 Analytical Chemistry Matrix',
-            desc: 'Soil determinations with method references and controlled units (v1 legacy format).',
-            category: 'V1 Legacy',
+            title: t('exchangeAdmin.legacyChemistry'),
+            desc: t('exchangeAdmin.legacyChemistryDescription'),
+            category: t('exchangeAdmin.v1Legacy'),
             version: 'v1'
         },
         {
             path: '/api/v1/data-exchange/geojson',
-            title: 'V1 GIS Spatial FeatureCollection',
-            desc: 'GeoJSON FeatureCollection formatted with v1 compatibility layer.',
-            category: 'V1 Legacy',
+            title: t('exchangeAdmin.legacySpatial'),
+            desc: t('exchangeAdmin.legacySpatialDescription'),
+            category: t('exchangeAdmin.v1Legacy'),
             version: 'v1'
         },
         {
             path: '/api/v1/data-exchange/spectra',
-            title: 'V1 Spectroscopy Dataset (NIR/MIR)',
-            desc: 'Calibrated spectral signatures formatted with v1 compatibility layer.',
-            category: 'V1 Legacy',
+            title: t('exchangeAdmin.legacySpectroscopy'),
+            desc: t('exchangeAdmin.legacySpectraDescription'),
+            category: t('exchangeAdmin.v1Legacy'),
             version: 'v1'
         },
         {
             path: '/api/v1/data-exchange/sync',
-            title: 'V1 Delta Synchronization (ETL)',
-            desc: 'Timestamp-based delta synchronization endpoint (v1 legacy).',
-            category: 'V1 Legacy',
+            title: t('exchangeAdmin.legacySync'),
+            desc: t('exchangeAdmin.legacySyncDescription'),
+            category: t('exchangeAdmin.v1Legacy'),
             version: 'v1'
         }
     ];
@@ -273,13 +273,13 @@ const ApiKeyManager = () => {
             await fetchConnections();
             await fetchKeys();
             showDialog({
-                title: 'Connection Status Updated',
-                message: `Connection "${conn.name}" is now ${newStatus}. Associated keys will have their access updated immediately.`,
+                title: t('exchangeAdmin.connectionUpdated'),
+                message: t('exchangeAdmin.connectionStatusMessage', { name: conn.name, status: (newStatus === 'ACTIVE' ? t('projects.active') : t('controlCharts.ruleStatus.DISABLED')) }),
                 type: 'info'
             });
         } catch (err) {
             showDialog({
-                title: 'Status Update Failed',
+                title: t('exchangeAdmin.connectionUpdateFailed'),
                 message: err.response?.data?.message || err.message,
                 type: 'error'
             });
@@ -305,13 +305,13 @@ const ApiKeyManager = () => {
             await fetchConnections();
             await fetchKeys();
             showDialog({
-                title: 'Connection Saved',
-                message: `Connection "${editingConnection.name}" was updated successfully. Auth version was incremented.`,
+                title: t('exchangeAdmin.connectionSaved'),
+                message: t('exchangeAdmin.connectionSavedMessage', { name: editingConnection.name }),
                 type: 'info'
             });
         } catch (err) {
             showDialog({
-                title: 'Save Failed',
+                title: t('exchangeAdmin.connectionSaveFailed'),
                 message: err.response?.data?.message || err.message,
                 type: 'error'
             });
@@ -364,10 +364,10 @@ const ApiKeyManager = () => {
         const idempotencyKey = rotationOperationsRef.current[keyId];
 
         showDialog({
-            title: 'Rotate API Key?',
-            message: `Are you sure you want to rotate "${keyName}"? A new secret key will be generated for the same connection identity and scopes with 24-hour bounded overlap (the prior key remains active until verified or confirmed to prevent disruption).`,
+            title: t('exchangeAdmin.confirmRotate'),
+            message: t('exchangeAdmin.rotateHelp', { name: keyName }),
             type: 'confirm',
-            confirmText: 'Rotate Key',
+            confirmText: t('exchangeAdmin.rotateKey'),
             onConfirm: async () => {
                 setRotatingKeyId(keyId);
                 try {
@@ -383,20 +383,20 @@ const ApiKeyManager = () => {
                         setGeneratedKey(res.data.apiKey);
                     } else if (res.data?.alreadyRotated) {
                         showDialog({
-                            title: res.data?.oldKeyActive ? 'Key Rotation In Progress (Bounded Overlap)' : 'Key Rotation Completed',
+                            title: res.data?.oldKeyActive ? t('exchangeAdmin.rotationInProgress') : t('exchangeAdmin.rotationDone'),
                             message: res.data?.oldKeyActive
-                                ? `Rotation is pending confirmation for this key. The prior key remains active under bounded overlap while awaiting verification of the replacement key (Prefix: ${res.data.keyInfo?.keyPrefix || 'slims_live_...'}).`
-                                : `Rotation was already committed for this key. The replacement key (Prefix: ${res.data.keyInfo?.keyPrefix || 'slims_live_...'}) is active.`,
+                                ? t('exchangeAdmin.rotationPendingMessage', { prefix: res.data.keyInfo?.keyPrefix || 'slims_live_...' })
+                                : t('exchangeAdmin.rotationDoneMessage', { prefix: res.data.keyInfo?.keyPrefix || 'slims_live_...' }),
                             type: 'info'
                         });
                     }
                     fetchKeys();
                 } catch (err) {
                     showDialog({
-                        title: 'Rotation Failed',
-                        message: `${err.response?.data?.message || err.response?.data?.error || err.message} (You can safely retry this operation using the retained operation key.)`,
+                        title: t('exchangeAdmin.rotationFailed'),
+                        message: t('exchangeAdmin.rotationRetryHelp', { error: err.response?.data?.message || err.response?.data?.error || err.message }),
                         type: 'error',
-                        confirmText: 'Retry Rotation',
+                        confirmText: t('exchangeAdmin.retryRotation'),
                         onConfirm: () => handleRotateKey(keyId, keyName)
                     });
                 } finally {
@@ -411,13 +411,13 @@ const ApiKeyManager = () => {
             await axios.post(`/api/v1/data-exchange/keys/${keyId}/confirm-rotation`);
             fetchKeys();
             showDialog({
-                title: 'Rotation Confirmed',
-                message: 'Key rotation has been confirmed and prior rotating keys have been retired.',
+                title: t('exchangeAdmin.rotationConfirmed'),
+                message: t('exchangeAdmin.rotationConfirmedHelp'),
                 type: 'info'
             });
         } catch (err) {
             showDialog({
-                title: 'Confirmation Failed',
+                title: t('exchangeAdmin.rotationConfirmFailed'),
                 message: err.response?.data?.error || err.message,
                 type: 'error'
             });
@@ -426,22 +426,22 @@ const ApiKeyManager = () => {
 
     const handleAbortRotation = async (keyId) => {
         showDialog({
-            title: 'Abort Key Rotation?',
-            message: 'Are you sure you want to abort this rotation? The original key will be restored to active status and the unconfirmed replacement key will be revoked.',
+            title: t('exchangeAdmin.confirmAbort'),
+            message: t('exchangeAdmin.confirmAbortHelp'),
             type: 'confirm',
-            confirmText: 'Abort Rotation',
+            confirmText: t('exchangeAdmin.abortRotation'),
             onConfirm: async () => {
                 try {
                     await axios.post(`/api/v1/data-exchange/keys/${keyId}/abort-rotation`);
                     fetchKeys();
                     showDialog({
-                        title: 'Rotation Aborted',
-                        message: 'Key rotation was aborted. Original key restored to active status.',
+                        title: t('exchangeAdmin.rotationAborted'),
+                        message: t('exchangeAdmin.rotationAbortedHelp'),
                         type: 'info'
                     });
                 } catch (err) {
                     showDialog({
-                        title: 'Abort Failed',
+                        title: t('exchangeAdmin.abortFailed'),
                         message: err.response?.data?.error || err.message,
                         type: 'error'
                     });
@@ -452,17 +452,17 @@ const ApiKeyManager = () => {
 
     const handleRevokeKey = (keyId, keyName) => {
         showDialog({
-            title: 'Revoke API Key?',
-            message: `Are you sure you want to revoke "${keyName}"? Any external Soil Information System using this key will immediately lose API access.`,
+            title: t('exchangeAdmin.confirmRevoke'),
+            message: t('exchangeAdmin.revokeHelp', { name: keyName }),
             type: 'confirm',
-            confirmText: 'Revoke Key',
+            confirmText: t('exchangeAdmin.revokeKey'),
             onConfirm: async () => {
                 try {
                     await axios.delete(`/api/v1/data-exchange/keys/${keyId}`);
                     fetchKeys();
                 } catch (err) {
                     showDialog({
-                        title: 'Error',
+                        title: t('common.error'),
                         message: err.response?.data?.error || err.message,
                         type: 'error'
                     });
@@ -573,9 +573,9 @@ const ApiKeyManager = () => {
                 <div className="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 flex items-center justify-center mx-auto mb-4 border border-amber-200 dark:border-amber-800/50">
                     <Shield size={24} />
                 </div>
-                <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">Access Restricted</h3>
+                <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">{t('exchangeAdmin.restricted')}</h3>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 leading-relaxed">
-                    National SIS & Data Exchange API key management and connection administration are strictly reserved for Super Administrators.
+                    {t('exchangeAdmin.restrictedHelp')}
                 </p>
             </div>
         );
@@ -592,26 +592,26 @@ const ApiKeyManager = () => {
                         </span>
                         <div className="min-w-0">
                             <h2 className="text-lg sm:text-xl font-bold tracking-tight text-sf-text">
-                                National SIS & Data Exchange Gateway
+                                {t('exchangeAdmin.gateway')}
                             </h2>
                             <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-1">
                                 <span className="inline-flex items-center text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 whitespace-nowrap">
-                                    v2.0 Lossless Gateway
+                                    {t('exchangeAdmin.losslessGateway')}
                                 </span>
                                 <span className="inline-flex items-center text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-sf-raised text-sf-text border border-sf-divider whitespace-nowrap">
-                                    v1.0 Compatible
+                                    {t('exchangeAdmin.v1Compatible')}
                                 </span>
                                 <span className="inline-flex items-center text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-teal-50 dark:bg-teal-950/40 text-teal-800 dark:text-teal-300 border border-teal-200 dark:border-teal-800 whitespace-nowrap">
-                                    Strict Scope Control
+                                    {t('exchangeAdmin.strictScope')}
                                 </span>
                                 <span className="inline-flex items-center text-[11px] text-sf-muted whitespace-nowrap">
-                                    FAO OpenNSIS & GSP Interoperable
+                                    {t('exchangeAdmin.interoperable')}
                                 </span>
                             </div>
                         </div>
                     </div>
                     <p className="text-xs text-sf-muted leading-relaxed pt-0.5">
-                        Secure machine-to-machine interface for exporting verified laboratory chemistry, physical metrology, Vis-NIR/MIR spectra, and geospatial soil provenance to national soil information systems and GIS portals.
+                        {t('exchangeAdmin.gatewayDescription')}
                     </p>
                 </div>
 
@@ -620,7 +620,7 @@ const ApiKeyManager = () => {
                         onClick={() => setIsCreateModalOpen(true)}
                         className="btn-primary w-full sm:w-auto flex items-center justify-center gap-2 text-xs font-bold whitespace-nowrap shadow-sm"
                     >
-                        <Plus size={16} /> <span>Generate API Key</span>
+                        <Plus size={16} /> <span>{t('exchangeAdmin.generateKey')}</span>
                     </button>
                 </div>
             </div>
@@ -636,7 +636,7 @@ const ApiKeyManager = () => {
                     }`}
                 >
                     <Key size={15} className={activeTab === 'keys' ? 'text-emerald-700 dark:text-emerald-400' : 'text-sf-muted'} />
-                    <span>Active API Keys</span>
+                    <span>{t('exchangeAdmin.activeKeys')}</span>
                     <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
                         activeTab === 'keys'
                             ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300'
@@ -654,7 +654,7 @@ const ApiKeyManager = () => {
                     }`}
                 >
                     <Layers size={15} className={activeTab === 'connections' ? 'text-emerald-700 dark:text-emerald-400' : 'text-sf-muted'} />
-                    <span>Connections & Telemetry</span>
+                    <span>{t('exchangeAdmin.connectionsTelemetry')}</span>
                     <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
                         activeTab === 'connections'
                             ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300'
@@ -672,7 +672,7 @@ const ApiKeyManager = () => {
                     }`}
                 >
                     <BookOpen size={15} className={activeTab === 'guide' ? 'text-emerald-700 dark:text-emerald-400' : 'text-sf-muted'} />
-                    <span>Step-by-Step Guide</span>
+                    <span>{t('exchangeAdmin.guide')}</span>
                 </button>
                 <button
                     onClick={() => setActiveTab('explorer')}
@@ -683,7 +683,7 @@ const ApiKeyManager = () => {
                     }`}
                 >
                     <Play size={15} className={activeTab === 'explorer' ? 'text-emerald-700 dark:text-emerald-400' : 'text-sf-muted'} />
-                    <span>Live API Sandbox</span>
+                    <span>{t('exchangeAdmin.sandbox')}</span>
                 </button>
             </div>
 
@@ -693,35 +693,35 @@ const ApiKeyManager = () => {
                     <div className="flex justify-between items-center">
                         <div>
                             <h3 className="text-sm font-bold text-sf-text flex items-center gap-2">
-                                <Key size={16} className="text-emerald-600 dark:text-emerald-400" /> Authorized External Consumer Keys
+                                <Key size={16} className="text-emerald-600 dark:text-emerald-400" /> {t('exchangeAdmin.externalKeys')}
                             </h3>
                             <p className="text-xs text-sf-muted">
-                                Cryptographically hashed API tokens. Keys can be scoped to specific countries or roles and revoked instantly.
+                                {t('exchangeAdmin.externalKeysHelp')}
                             </p>
                         </div>
                         <button
                             onClick={fetchKeys}
                             className="p-2 text-sf-muted hover:text-sf-text transition rounded-lg hover:bg-sf-raised"
-                            title="Refresh Keys"
+                            title={t('exchangeAdmin.refreshKeys')}
                         >
                             <RefreshCw size={16} />
                         </button>
                     </div>
 
                     {loading ? (
-                        <div className="p-12 text-center text-sf-muted text-sm">Loading authorized keys...</div>
+                        <div className="p-12 text-center text-sf-muted text-sm">{t('exchangeAdmin.loadingKeys')}</div>
                     ) : keys.length === 0 ? (
                         <div className="p-12 text-center bg-sf-canvas/40 rounded-3xl border border-dashed border-sf-divider space-y-3">
                             <Key size={40} className="mx-auto text-sf-muted" />
-                            <h4 className="font-bold text-sf-text">No Integration Keys Generated</h4>
+                            <h4 className="font-bold text-sf-text">{t('exchangeAdmin.noKeys')}</h4>
                             <p className="text-xs text-sf-muted max-w-md mx-auto">
-                                To connect your National Soil Information System (NSIS), QGIS, or an automated harvester, generate your first secure API key.
+                                {t('exchangeAdmin.noKeysHelp')}
                             </p>
                             <button
                                 onClick={() => setIsCreateModalOpen(true)}
                                 className="btn-primary inline-flex items-center gap-1.5 text-xs shadow-sm"
                             >
-                                <Plus size={14} /> Generate First Key
+                                <Plus size={14} /> {t('exchangeAdmin.firstKey')}
                             </button>
                         </div>
                     ) : (
@@ -729,12 +729,12 @@ const ApiKeyManager = () => {
                             <table className="w-full text-left text-sm min-w-[700px]">
                                 <thead className="bg-sf-canvas/50 border-b border-sf-divider text-xs font-bold uppercase text-sf-muted">
                                     <tr>
-                                        <th className="p-4">Integration & Connection</th>
-                                        <th className="p-4">Key Identifier</th>
-                                        <th className="p-4">Capabilities & Scope</th>
-                                        <th className="p-4">Created / Last Used</th>
-                                        <th className="p-4">Status</th>
-                                        <th className="p-4 text-right">Actions</th>
+                                        <th className="p-4">{t('exchangeAdmin.integrationConnection')}</th>
+                                        <th className="p-4">{t('exchangeAdmin.keyIdentifier')}</th>
+                                        <th className="p-4">{t('exchangeAdmin.capabilitiesScope')}</th>
+                                        <th className="p-4">{t('exchangeAdmin.createdUsed')}</th>
+                                        <th className="p-4">{t('qaOverview.status')}</th>
+                                        <th className="p-4 text-right">{t('common.actions')}</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-sf-divider">
@@ -750,9 +750,9 @@ const ApiKeyManager = () => {
                                                 <td className="p-4">
                                                     <div className="font-bold text-sf-text">{k.name}</div>
                                                     <div className="text-xs font-mono text-sf-muted mt-0.5">
-                                                        Conn: <span className="font-semibold text-emerald-700 dark:text-emerald-400">{k.connectionId || ('conn_' + k.id)}</span>
+                                                        {t('exchangeAdmin.connectionShort')} <span className="font-semibold text-emerald-700 dark:text-emerald-400">{k.connectionId || ('conn_' + k.id)}</span>
                                                     </div>
-                                                    <div className="text-[11px] text-sf-muted">Owner: {k.createdBy || 'Administrator'}</div>
+                                                    <div className="text-[11px] text-sf-muted">{t('exchangeAdmin.owner')} {k.createdBy || t('exchangeAdmin.administrator')}</div>
                                                 </td>
                                                 <td className="p-4 font-mono text-xs text-emerald-700 dark:text-emerald-400 font-bold">
                                                     {k.keyPrefix}••••••••
@@ -768,33 +768,33 @@ const ApiKeyManager = () => {
                                                             </span>
                                                         )) : (
                                                             <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
-                                                                NO CAPS
+                                                                {t('exchangeAdmin.noCapabilities')}
                                                             </span>
                                                         )}
                                                     </div>
                                                     <div className="text-xs text-sf-muted">
-                                                        Territory: {k.countries?.join(', ') || 'Global (*)'}
+                                                        {t('exchangeAdmin.territory')} {k.countries?.join(', ') || t('exchangeAdmin.globalScope')}
                                                     </div>
                                                     <div className="text-xs text-sf-muted font-medium">
-                                                        Labs: {Array.isArray(k.labs) ? (k.labs.includes('*') ? 'All Laboratories (*)' : k.labs.join(', ')) : (k.labs ? (JSON.parse(k.labs).includes('*') ? 'All Laboratories (*)' : JSON.parse(k.labs).join(', ')) : 'None')}
+                                                        {t('exchangeAdmin.labs')} {Array.isArray(k.labs) ? (k.labs.includes('*') ? t('exchangeAdmin.allLabs') : k.labs.join(', ')) : (k.labs ? (JSON.parse(k.labs).includes('*') ? t('exchangeAdmin.allLabs') : JSON.parse(k.labs).join(', ')) : t('common.none'))}
                                                     </div>
                                                 </td>
                                                 <td className="p-4 text-xs text-sf-muted space-y-0.5">
-                                                    <div>Created: {new Date(k.createdAt).toLocaleDateString()}</div>
-                                                    <div>Used: {k.lastUsedAt ? new Date(k.lastUsedAt).toLocaleDateString() : 'Never'}</div>
+                                                    <div>{t('exchangeAdmin.created')} {new Date(k.createdAt).toLocaleDateString()}</div>
+                                                    <div>{t('exchangeAdmin.used')} {k.lastUsedAt ? new Date(k.lastUsedAt).toLocaleDateString() : t('common.never')}</div>
                                                 </td>
                                                 <td className="p-4">
                                                     {(k.isRotating || k.keyStatus === 'ROTATING') ? (
-                                                        <span className="px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 text-xs font-bold inline-flex items-center gap-1.5" title="Rotating with bounded overlap grace period">
-                                                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span> Rotating (Grace Period)
+                                                        <span className="px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 text-xs font-bold inline-flex items-center gap-1.5" title={t('exchangeAdmin.rotationGraceTooltip')}>
+                                                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span> {t('exchangeAdmin.rotating')}
                                                         </span>
                                                     ) : k.isActive ? (
                                                         <span className="px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 text-xs font-bold inline-flex items-center gap-1.5">
-                                                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Active
+                                                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> {t('projects.active')}
                                                         </span>
                                                     ) : (
                                                         <span className="px-2.5 py-1 rounded-full bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 text-xs font-bold">
-                                                            {k.keyStatus === 'RETIRED' ? 'Retired' : 'Revoked'}
+                                                            {k.keyStatus === 'RETIRED' ? t('labManagement.status.retired') : t('resultReports.revoked')}
                                                         </span>
                                                     )}
                                                 </td>
@@ -805,14 +805,14 @@ const ApiKeyManager = () => {
                                                                 <button
                                                                     onClick={() => handleConfirmRotation(k.id)}
                                                                     className="p-2 text-sf-muted hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 rounded-lg transition"
-                                                                    title="Confirm Rotation (Retires prior rotating key immediately)"
+                                                                    title={t('exchangeAdmin.confirmRotationTooltip')}
                                                                 >
                                                                     <CheckCheck size={16} />
                                                                 </button>
                                                                 <button
                                                                     onClick={() => handleAbortRotation(k.id)}
                                                                     className="p-2 text-sf-muted hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/40 rounded-lg transition"
-                                                                    title="Abort Rotation (Restores original key, revokes unconfirmed replacement)"
+                                                                    title={t('exchangeAdmin.abortRotationTooltip')}
                                                                 >
                                                                     <RotateCcw size={16} />
                                                                 </button>
@@ -823,7 +823,7 @@ const ApiKeyManager = () => {
                                                                 onClick={() => handleRotateKey(k.id, k.name)}
                                                                 disabled={rotatingKeyId === k.id}
                                                                 className="p-2 text-sf-muted hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 rounded-lg transition disabled:opacity-50"
-                                                                title="Rotate API Key (Issues new secret token for existing connection ID)"
+                                                                title={t('exchangeAdmin.rotateTooltip')}
                                                             >
                                                                 <RefreshCw size={16} className={rotatingKeyId === k.id ? 'animate-spin text-emerald-700' : ''} />
                                                             </button>
@@ -832,7 +832,7 @@ const ApiKeyManager = () => {
                                                             <button
                                                                 onClick={() => handleRevokeKey(k.id, k.name)}
                                                                 className="p-2 text-sf-muted hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg transition"
-                                                                title="Revoke API Key"
+                                                                title={t('exchangeAdmin.revokeTooltip')}
                                                             >
                                                                 <Trash2 size={16} />
                                                             </button>
@@ -855,10 +855,10 @@ const ApiKeyManager = () => {
                     <div className="flex justify-between items-center">
                         <div>
                             <h3 className="text-sm font-bold text-sf-text flex items-center gap-2">
-                                <Layers size={16} className="text-emerald-600 dark:text-emerald-400" /> Managed Exchange Connections & Receiver Telemetry
+                                <Layers size={16} className="text-emerald-600 dark:text-emerald-400" /> {t('exchangeAdmin.managedConnections')}
                             </h3>
                             <p className="text-xs text-sf-muted mt-0.5">
-                                Authoritative connection identities, capability grants, status lifecycle controls, and receiver ingestion telemetry.
+                                {t('exchangeAdmin.managedConnectionsHelp')}
                             </p>
                         </div>
                         <button
@@ -866,32 +866,32 @@ const ApiKeyManager = () => {
                             disabled={connectionsLoading}
                             className="px-3 py-1.5 bg-sf-raised hover:bg-sf-hover text-sf-text rounded-xl text-xs font-semibold transition flex items-center gap-1.5 border border-sf-divider"
                         >
-                            <RefreshCw size={14} className={connectionsLoading ? 'animate-spin' : ''} /> Refresh
+                            <RefreshCw size={14} className={connectionsLoading ? 'animate-spin' : ''} /> {t('common.refresh')}
                         </button>
                     </div>
 
                     {connectionsLoading && connections.length === 0 ? (
                         <div className="p-12 text-center text-sf-muted text-xs">
                             <RefreshCw size={24} className="animate-spin mx-auto mb-2 text-emerald-600" />
-                            Loading exchange connections...
+                            {t('exchangeAdmin.loadingConnections')}
                         </div>
                     ) : connections.length === 0 ? (
                         <div className="p-8 text-center bg-sf-surface rounded-2xl border border-sf-divider text-sf-muted text-xs space-y-2">
                             <Layers size={32} className="mx-auto text-sf-muted/50 mb-1" />
-                            <p className="font-semibold text-sf-text">No Managed Connections Configured</p>
-                            <p>Connections are provisioned when creating integration API keys or by platform administrators.</p>
+                            <p className="font-semibold text-sf-text">{t('exchangeAdmin.noConnections')}</p>
+                            <p>{t('exchangeAdmin.noConnectionsHelp')}</p>
                         </div>
                     ) : (
                         <div className="overflow-x-auto rounded-2xl border border-sf-divider bg-sf-surface shadow-sm">
                             <table className="w-full text-left text-xs min-w-[750px]">
                                 <thead className="bg-sf-raised text-sf-muted uppercase font-bold text-[10px] tracking-wider border-b border-sf-divider">
                                     <tr>
-                                        <th className="p-4">Connection & Identity</th>
-                                        <th className="p-4">Status & Control</th>
-                                        <th className="p-4">Auth Version & Capabilities</th>
-                                        <th className="p-4">Authorized Scopes</th>
-                                        <th className="p-4">Receiver-Reported Telemetry</th>
-                                        <th className="p-4 text-right">Actions</th>
+                                        <th className="p-4">{t('exchangeAdmin.connectionIdentity')}</th>
+                                        <th className="p-4">{t('exchangeAdmin.statusControl')}</th>
+                                        <th className="p-4">{t('exchangeAdmin.authCapabilities')}</th>
+                                        <th className="p-4">{t('exchangeAdmin.authorizedScopes')}</th>
+                                        <th className="p-4">{t('exchangeAdmin.receiverTelemetry')}</th>
+                                        <th className="p-4 text-right">{t('common.actions')}</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-sf-divider">
@@ -906,13 +906,13 @@ const ApiKeyManager = () => {
                                                 </div>
                                                 {c.organization && (
                                                     <div className="text-[11px] text-sf-muted">
-                                                        Org: <span className="font-medium text-sf-text">{c.organization}</span>
+                                                        {t('exchangeAdmin.org')} <span className="font-medium text-sf-text">{c.organization}</span>
                                                         {c.contactEmail && ` (${c.contactEmail})`}
                                                     </div>
                                                 )}
                                                 {c.clientCode && (
                                                     <div className="text-[10px] text-sf-muted">
-                                                        Client Code: <span className="font-mono text-sf-text">{c.clientCode}</span>
+                                                        {t('exchangeAdmin.clientCode')} <span className="font-mono text-sf-text">{c.clientCode}</span>
                                                     </div>
                                                 )}
                                             </td>
@@ -920,11 +920,11 @@ const ApiKeyManager = () => {
                                                 <div>
                                                     {c.status === 'ACTIVE' ? (
                                                         <span className="px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 text-xs font-bold inline-flex items-center gap-1.5">
-                                                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Active
+                                                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> {t('projects.active')}
                                                         </span>
                                                     ) : (
                                                         <span className="px-2.5 py-1 rounded-full bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300 text-xs font-bold inline-flex items-center gap-1.5">
-                                                            <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span> Disabled
+                                                            <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span> {t('controlCharts.ruleStatus.DISABLED')}
                                                         </span>
                                                     )}
                                                 </div>
@@ -936,12 +936,12 @@ const ApiKeyManager = () => {
                                                             : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-900'
                                                     }`}
                                                 >
-                                                    {c.status === 'ACTIVE' ? 'Disable Connection' : 'Enable Connection'}
+                                                    {c.status === 'ACTIVE' ? t('exchangeAdmin.disableConnection') : t('exchangeAdmin.enableConnection')}
                                                 </button>
                                             </td>
                                             <td className="p-4 space-y-1.5">
                                                 <span className="px-2 py-0.5 rounded-md bg-sf-raised text-sf-text font-mono text-[11px] font-bold border border-sf-divider inline-block">
-                                                    Version {c.authVersion || 1}
+                                                    {t('resultReports.colVersion')} {c.authVersion || 1}
                                                 </span>
                                                 <div className="flex flex-wrap gap-1">
                                                     {(c.capabilities || []).length > 0 ? (
@@ -951,53 +951,53 @@ const ApiKeyManager = () => {
                                                             </span>
                                                         ))
                                                     ) : (
-                                                        <span className="text-[10px] text-sf-muted italic">None (Deny All)</span>
+                                                        <span className="text-[10px] text-sf-muted italic">{t('exchangeAdmin.denyAll')}</span>
                                                     )}
                                                 </div>
                                                 <div className="text-[10px] text-sf-muted">
-                                                    Active Keys Linked: <span className="font-bold text-sf-text">{c.activeKeyIds?.length || 0}</span>
+                                                    {t('exchangeAdmin.linkedKeys')} <span className="font-bold text-sf-text">{c.activeKeyIds?.length || 0}</span>
                                                 </div>
                                             </td>
                                             <td className="p-4 space-y-1">
                                                 <div className="text-[11px]">
-                                                    <span className="text-sf-muted">Countries: </span>
+                                                    <span className="text-sf-muted">{t('exchangeAdmin.countries')} </span>
                                                     <span className="font-medium text-sf-text">
-                                                        {(c.countries || []).join(', ') || 'All (*)'}
+                                                        {(c.countries || []).join(', ') || t('exchangeAdmin.allWildcard')}
                                                     </span>
                                                 </div>
                                                 <div className="text-[11px]">
-                                                    <span className="text-sf-muted">Labs: </span>
+                                                    <span className="text-sf-muted">{t('exchangeAdmin.labs')} </span>
                                                     <span className="font-medium text-sf-text">
-                                                        {c.labs?.length ? `${c.labs.length} laboratories` : 'None (Deny)'}
+                                                        {c.labs?.length ? `${c.labs.length} laboratories` : t('exchangeAdmin.deny')}
                                                     </span>
                                                 </div>
                                             </td>
                                             <td className="p-4 space-y-1">
                                                 <div className="text-[11px]">
-                                                    <span className="text-sf-muted">Receiver Ingested: </span>
+                                                    <span className="text-sf-muted">{t('exchangeAdmin.receiverIngested')} </span>
                                                     {(c.telemetry?.receiverReportedImported != null || c.telemetry?.totalImported != null) ? (
                                                         <span className="font-bold text-emerald-600 dark:text-emerald-400">
                                                             {c.telemetry.receiverReportedImported ?? c.telemetry.totalImported}
                                                         </span>
                                                     ) : (
-                                                        <span className="text-sf-muted italic">Not reported</span>
+                                                        <span className="text-sf-muted italic">{t('exchangeAdmin.notReported')}</span>
                                                     )}
                                                 </div>
                                                 <div className="text-[11px]">
-                                                    <span className="text-sf-muted">Receiver Quarantined: </span>
+                                                    <span className="text-sf-muted">{t('exchangeAdmin.receiverQuarantined')} </span>
                                                     {(c.telemetry?.receiverReportedQuarantined != null || c.telemetry?.totalQuarantined != null) ? (
                                                         <span className="font-bold text-amber-600 dark:text-amber-400">
                                                             {c.telemetry.receiverReportedQuarantined ?? c.telemetry.totalQuarantined}
                                                         </span>
                                                     ) : (
-                                                        <span className="text-sf-muted italic">Not reported</span>
+                                                        <span className="text-sf-muted italic">{t('exchangeAdmin.notReported')}</span>
                                                     )}
                                                 </div>
                                                 <div className="text-[10px] font-mono text-sf-muted">
-                                                    Reported Checkpoint: <span className="text-sf-text">{c.telemetry?.lastReportedCheckpoint || c.telemetry?.lastCheckpoint || 'Not reported'}</span>
+                                                    {t('exchangeAdmin.reportedCheckpoint')} <span className="text-sf-text">{c.telemetry?.lastReportedCheckpoint || c.telemetry?.lastCheckpoint || t('exchangeAdmin.notReported')}</span>
                                                 </div>
                                                 <div className="text-[10px] text-sf-muted">
-                                                    Last Receipt: <span className="text-sf-text">{c.telemetry?.lastReceiptAt ? new Date(c.telemetry.lastReceiptAt).toLocaleString() : 'Not reported'}</span>
+                                                    {t('exchangeAdmin.lastReceipt')} <span className="text-sf-text">{c.telemetry?.lastReceiptAt ? new Date(c.telemetry.lastReceiptAt).toLocaleString() : t('exchangeAdmin.notReported')}</span>
                                                 </div>
                                             </td>
                                             <td className="p-4 text-right">
@@ -1005,7 +1005,7 @@ const ApiKeyManager = () => {
                                                     onClick={() => setEditingConnection(JSON.parse(JSON.stringify(c)))}
                                                     className="px-3 py-1.5 bg-sf-raised hover:bg-sf-hover text-sf-text rounded-xl text-xs font-bold transition border border-sf-divider inline-flex items-center gap-1.5"
                                                 >
-                                                    <Sliders size={14} /> Edit Scopes
+                                                    <Sliders size={14} /> {t('exchangeAdmin.editScopes')}
                                                 </button>
                                             </td>
                                         </tr>
@@ -1023,7 +1023,7 @@ const ApiKeyManager = () => {
                     <div className="bg-sf-surface rounded-3xl p-6 max-w-lg w-full shadow-2xl border border-sf-divider space-y-4 max-h-[90vh] overflow-y-auto">
                         <div className="flex justify-between items-center border-b border-sf-divider pb-3">
                             <div>
-                                <h3 className="text-base font-bold text-sf-text">Edit Exchange Connection</h3>
+                                <h3 className="text-base font-bold text-sf-text">{t('exchangeAdmin.editConnection')}</h3>
                                 <p className="text-xs text-sf-muted font-mono">{editingConnection.id}</p>
                             </div>
                             <button
@@ -1037,7 +1037,7 @@ const ApiKeyManager = () => {
                         <form onSubmit={handleSaveConnectionEdit} className="space-y-4 text-xs">
                             <div>
                                 <label className="block text-sf-muted font-bold uppercase tracking-wider mb-1">
-                                    Connection Name
+                                    {t('exchangeAdmin.connectionName')}
                                 </label>
                                 <input
                                     type="text"
@@ -1051,20 +1051,20 @@ const ApiKeyManager = () => {
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
                                     <label className="block text-sf-muted font-bold uppercase tracking-wider mb-1">
-                                        Status
+                                        {t('qaOverview.status')}
                                     </label>
                                     <select
                                         value={editingConnection.status || 'ACTIVE'}
                                         onChange={(e) => setEditingConnection({ ...editingConnection, status: e.target.value })}
                                         className="w-full p-2.5 rounded-xl border border-sf-divider bg-sf-canvas text-sf-text font-medium"
                                     >
-                                        <option value="ACTIVE">ACTIVE (Operational)</option>
-                                        <option value="DISABLED">DISABLED (Halt All Keys)</option>
+                                        <option value="ACTIVE">{t('exchangeAdmin.activeOperational')}</option>
+                                        <option value="DISABLED">{t('exchangeAdmin.disabledHalt')}</option>
                                     </select>
                                 </div>
                                 <div>
                                     <label className="block text-sf-muted font-bold uppercase tracking-wider mb-1">
-                                        Contact Email
+                                        {t('adminDetails.contactEmail')}
                                     </label>
                                     <input
                                         type="email"
@@ -1077,14 +1077,14 @@ const ApiKeyManager = () => {
 
                             <div>
                                 <label className="block text-sf-muted font-bold uppercase tracking-wider mb-1.5">
-                                    Granted Capabilities
+                                    {t('exchangeAdmin.grantedCapabilities')}
                                 </label>
                                 <div className="grid grid-cols-2 gap-2 p-3 bg-sf-canvas rounded-xl border border-sf-divider">
                                     {[
-                                        { id: 'SPATIAL', label: 'SPATIAL (Exact GPS coordinates)' },
-                                        { id: 'SPECTRAL', label: 'SPECTRAL (Vis-NIR/MIR spectra)' },
-                                        { id: 'SNAPSHOT', label: 'SNAPSHOT (Point-in-time export)' },
-                                        { id: 'RECEIPT', label: 'RECEIPT (Delivery acknowledgements)' }
+                                        { id: 'SPATIAL', label: t('exchangeAdmin.spatialCapability') },
+                                        { id: 'SPECTRAL', label: t('exchangeAdmin.spectralCapability') },
+                                        { id: 'SNAPSHOT', label: t('exchangeAdmin.snapshotCapability') },
+                                        { id: 'RECEIPT', label: t('exchangeAdmin.receiptCapability') }
                                     ].map((cap) => (
                                         <label key={cap.id} className="flex items-center gap-2 cursor-pointer text-sf-text">
                                             <input
@@ -1108,7 +1108,7 @@ const ApiKeyManager = () => {
 
                             <div>
                                 <label className="block text-sf-muted font-bold uppercase tracking-wider mb-1.5">
-                                    Authorized Laboratories
+                                    {t('exchangeAdmin.authorizedLabs')}
                                 </label>
                                 <div className="p-3 bg-sf-canvas rounded-xl border border-sf-divider max-h-36 overflow-y-auto space-y-1.5">
                                     {availableLabs.map((l) => (
@@ -1138,14 +1138,14 @@ const ApiKeyManager = () => {
                                     onClick={() => setEditingConnection(null)}
                                     className="px-4 py-2 text-sf-muted hover:text-sf-text font-bold"
                                 >
-                                    Cancel
+                                    {t('common.cancel')}
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={updatingConnection}
                                     className="px-5 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold transition shadow-sm disabled:opacity-50"
                                 >
-                                    {updatingConnection ? 'Saving...' : 'Save Connection Changes'}
+                                    {updatingConnection ? t('common.saving') : t('exchangeAdmin.saveConnection')}
                                 </button>
                             </div>
                         </form>
@@ -1160,10 +1160,10 @@ const ApiKeyManager = () => {
                         <Sparkles size={20} className="text-emerald-700 dark:text-emerald-400 flex-shrink-0 mt-0.5" />
                         <div className="space-y-1">
                             <h4 className="text-sm font-bold text-emerald-900 dark:text-emerald-200">
-                                How to Connect External Systems in 4 Simple Steps
+                                {t('exchangeAdmin.fourSteps')}
                             </h4>
                             <p className="text-xs text-emerald-800/90 dark:text-emerald-300/90 leading-relaxed">
-                                SoilFER-LIMS provides automated data exchange with National Soil Information Systems (NSIS), FAO OpenNSIS, and GIS spatial portals. Follow this visual roadmap to integrate your platform.
+                                {t('exchangeAdmin.fourStepsHelp')}
                             </p>
                         </div>
                     </div>
@@ -1176,20 +1176,20 @@ const ApiKeyManager = () => {
                                     1
                                 </span>
                                 <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 px-2.5 py-1 rounded-lg">
-                                    Provisioning
+                                    {t('exchangeAdmin.provisioning')}
                                 </span>
                             </div>
                             <div>
-                                <h4 className="font-bold text-sf-text text-base">Generate an Integration Key</h4>
+                                <h4 className="font-bold text-sf-text text-base">{t('exchangeAdmin.generateIntegrationKey')}</h4>
                                 <p className="text-xs text-sf-muted mt-1 leading-relaxed">
-                                    Click <strong>&quot;Generate API Key&quot;</strong>. Provide a descriptive label (e.g. <em>Guatemala NSIS Node</em>), pick an access role, and select the permitted country scope.
+                                    {t('exchangeAdmin.provisionGuide', { action: t('exchangeAdmin.generateKey') })}
                                 </p>
                             </div>
                             <div className="p-3 bg-amber-50 dark:bg-amber-950/50 rounded-xl border border-amber-200 dark:border-amber-800 text-xs text-amber-800 dark:text-amber-300 space-y-1">
                                 <div className="font-bold flex items-center gap-1.5">
-                                    <Lock size={14} /> Security Notice
+                                    <Lock size={14} /> {t('exchangeAdmin.securityNotice')}
                                 </div>
-                                <p>The secret key (starts with <code className="font-mono font-bold">slims_live_</code>) is shown only once upon creation. Copy and store it in your server secrets vault.</p>
+                                <p>{t('exchangeAdmin.secretGuide', { prefix: 'slims_live_' })}</p>
                             </div>
                         </div>
 
@@ -1200,17 +1200,17 @@ const ApiKeyManager = () => {
                                     2
                                 </span>
                                 <span className="text-xs font-bold uppercase tracking-wider text-teal-700 dark:text-teal-400 bg-teal-50 dark:bg-teal-950/40 border border-teal-200 dark:border-teal-800 px-2.5 py-1 rounded-lg">
-                                    Authentication
+                                    {t('exchangeAdmin.authentication')}
                                 </span>
                             </div>
                             <div>
-                                <h4 className="font-bold text-sf-text text-base">Authenticate HTTP Requests</h4>
+                                <h4 className="font-bold text-sf-text text-base">{t('exchangeAdmin.authenticateHttp')}</h4>
                                 <p className="text-xs text-sf-muted mt-1 leading-relaxed">
-                                    Every HTTP request sent to SoilFER-LIMS must transmit the secret key via the <code className="font-mono text-emerald-700 dark:text-emerald-400 font-bold">X-API-Key</code> request header.
+                                    {t('exchangeAdmin.headerGuide', { header: 'X-API-Key' })}
                                 </p>
                             </div>
                             <div className="p-3 bg-gray-950 text-gray-200 rounded-xl font-mono text-xs space-y-1 border border-sf-divider">
-                                <div className="text-sf-muted text-[10px]">{'// Example Request Header'}</div>
+                                <div className="text-sf-muted text-[10px]">{t('exchangeAdmin.exampleHeader')}</div>
                                 <div className="text-emerald-400">X-API-Key: slims_live_abc123...</div>
                                 <div className="text-teal-300">Accept: application/json</div>
                             </div>
@@ -1223,35 +1223,35 @@ const ApiKeyManager = () => {
                                     3
                                 </span>
                                 <span className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 border border-sf-divider px-2.5 py-1 rounded-lg">
-                                    Harvesting
+                                    {t('exchangeAdmin.harvesting')}
                                 </span>
                             </div>
                             <div>
-                                <h4 className="font-bold text-sf-text text-base">Select Your Target Endpoint</h4>
+                                <h4 className="font-bold text-sf-text text-base">{t('exchangeAdmin.selectEndpoint')}</h4>
                                 <p className="text-xs text-sf-muted mt-1 leading-relaxed">
-                                    Depending on your application requirements, choose between V2 lossless representations, RFC 7946 spatial layers, or continuous delta feeds:
+                                    {t('exchangeAdmin.selectEndpointHelp')}
                                 </p>
                             </div>
                             <ul className="space-y-2 text-xs text-sf-muted">
                                 <li className="flex items-center gap-2">
                                     <Sparkles size={14} className="text-amber-500 flex-shrink-0" />
-                                    <span><strong>/api/v2/.../capabilities</strong>: Machine discovery of profiles & limits.</span>
+                                    <span><strong>/api/v2/.../capabilities</strong>{t('exchangeAdmin.capabilitiesHelp')}</span>
                                 </li>
                                 <li className="flex items-center gap-2">
                                     <Database size={14} className="text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
-                                    <span><strong>/api/v2/.../samples</strong>: Truthful coordinates, depth intervals & profiles.</span>
+                                    <span><strong>/api/v2/.../samples</strong>{t('exchangeAdmin.samplesHelp')}</span>
                                 </li>
                                 <li className="flex items-center gap-2">
                                     <Code2 size={14} className="text-teal-600 dark:text-teal-400 flex-shrink-0" />
-                                    <span><strong>/api/v2/.../observations</strong>: Full replicate determinations & basis metadata.</span>
+                                    <span><strong>/api/v2/.../observations</strong>{t('exchangeAdmin.observationsHelp')}</span>
                                 </li>
                                 <li className="flex items-center gap-2">
                                     <Globe size={14} className="text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
-                                    <span><strong>/api/v2/.../geojson</strong>: RFC 7946 FeatureCollection (QGIS, GeoNode).</span>
+                                    <span><strong>/api/v2/.../geojson</strong>{t('exchangeAdmin.geojsonHelp')}</span>
                                 </li>
                                 <li className="flex items-center gap-2">
                                     <RefreshCw size={14} className="text-purple-500 flex-shrink-0" />
-                                    <span><strong>/api/v2/.../changes</strong>: Continuous monotonic change feed with cursors.</span>
+                                    <span><strong>/api/v2/.../changes</strong>{t('exchangeAdmin.changesHelp')}</span>
                                 </li>
                             </ul>
                         </div>
@@ -1263,20 +1263,20 @@ const ApiKeyManager = () => {
                                     4
                                 </span>
                                 <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 px-2.5 py-1 rounded-lg">
-                                    Verification
+                                    {t('equipment.typeVerification')}
                                 </span>
                             </div>
                             <div>
-                                <h4 className="font-bold text-sf-text text-base">Test Live with Built-in Sandbox</h4>
+                                <h4 className="font-bold text-sf-text text-base">{t('exchangeAdmin.testSandbox')}</h4>
                                 <p className="text-xs text-sf-muted mt-1 leading-relaxed">
-                                    You can test your endpoints and preview real JSON responses directly inside the built-in Sandbox tool without writing code!
+                                    {t('exchangeAdmin.testSandboxHelp')}
                                 </p>
                             </div>
                             <button
                                 onClick={() => setActiveTab('explorer')}
                                 className="btn-primary w-full py-2.5 px-4 flex items-center justify-center gap-2 shadow-sm"
                             >
-                                <Play size={14} /> Open Live API Sandbox
+                                <Play size={14} /> {t('exchangeAdmin.openSandbox')}
                             </button>
                         </div>
                     </div>
@@ -1290,10 +1290,10 @@ const ApiKeyManager = () => {
                     <div className="lg:col-span-5 space-y-4 bg-sf-surface p-6 rounded-3xl border border-sf-divider shadow-sm">
                         <div className="space-y-1">
                             <h3 className="text-sm font-bold text-sf-text flex items-center gap-2">
-                                <Sliders size={16} className="text-emerald-600 dark:text-emerald-400" /> Interactive Request Builder
+                                <Sliders size={16} className="text-emerald-600 dark:text-emerald-400" /> {t('exchangeAdmin.requestBuilder')}
                             </h3>
                             <p className="text-xs text-sf-muted">
-                                Configure endpoint parameters and run live queries against the active server.
+                                {t('exchangeAdmin.requestBuilderHelp')}
                             </p>
                         </div>
 
@@ -1301,13 +1301,13 @@ const ApiKeyManager = () => {
                         <div className="space-y-2">
                             <div className="flex items-center justify-between">
                                 <label className="block text-xs font-bold uppercase tracking-wider text-sf-muted">
-                                    Target Endpoint
+                                    {t('exchangeAdmin.targetEndpoint')}
                                 </label>
                                 <div className="flex items-center gap-1 bg-sf-canvas p-1 rounded-lg border border-sf-divider">
                                     {[
-                                        { id: 'all', label: 'All' },
-                                        { id: 'v2', label: 'V2 Lossless' },
-                                        { id: 'v1', label: 'V1 Legacy' }
+                                        { id: 'all', label: t('exchangeAdmin.allVersions') },
+                                        { id: 'v2', label: t('exchangeAdmin.v2Lossless') },
+                                        { id: 'v1', label: t('exchangeAdmin.v1Legacy') }
                                     ].map((f) => (
                                         <button
                                             key={f.id}
@@ -1343,42 +1343,42 @@ const ApiKeyManager = () => {
                         {/* Query Parameters */}
                         <div className="p-4 bg-sf-canvas/30 rounded-2xl border border-sf-divider/50 space-y-3">
                             <div className="text-xs font-bold uppercase tracking-wider text-sf-muted">
-                                Query Parameters
+                                {t('exchangeAdmin.queryParameters')}
                             </div>
 
                             <div className="grid grid-cols-2 gap-2">
                                 <div>
                                     <label className="block text-[11px] font-semibold text-sf-muted mb-1">
-                                        Country Scope
+                                        {t('exchangeAdmin.countryScope')}
                                     </label>
                                     <select
                                         value={paramCountry}
                                         onChange={(e) => setParamCountry(e.target.value)}
                                         className="w-full p-2 rounded-lg border border-sf-divider bg-sf-surface text-xs text-sf-text focus:ring-2 focus:ring-emerald-600 outline-none"
                                     >
-                                        <option value="">All Permitted Countries</option>
-                                        <option value="GTM">Guatemala (GTM)</option>
-                                        <option value="HND">Honduras (HND)</option>
-                                        <option value="KEN">Kenya (KEN)</option>
-                                        <option value="ZMB">Zambia (ZMB)</option>
-                                        <option value="GHA">Ghana (GHA)</option>
-                                        <option value="MOZ">Mozambique (MOZ)</option>
-                                        <option value="TUN">Tunisia (TUN)</option>
+                                        <option value="">{t('exchangeAdmin.permittedCountries')}</option>
+                                        <option value="GTM">{t('exchangeAdmin.countryGuatemala')}</option>
+                                        <option value="HND">{t('exchangeAdmin.countryHonduras')}</option>
+                                        <option value="KEN">{t('exchangeAdmin.countryKenya')}</option>
+                                        <option value="ZMB">{t('exchangeAdmin.countryZambia')}</option>
+                                        <option value="GHA">{t('exchangeAdmin.countryGhana')}</option>
+                                        <option value="MOZ">{t('exchangeAdmin.countryMozambique')}</option>
+                                        <option value="TUN">{t('exchangeAdmin.countryTunisia')}</option>
                                     </select>
                                 </div>
 
                                 {(selectedEndpoint.includes('/samples') || selectedEndpoint.includes('/observations')) && selectedEndpoint.includes('/v2/') && (
                                     <div>
                                         <label className="block text-[11px] font-semibold text-sf-muted mb-1">
-                                            Exchange Profile
+                                            {t('exchangeAdmin.exchangeProfile')}
                                         </label>
                                         <select
                                             value={paramProfile}
                                             onChange={(e) => setParamProfile(e.target.value)}
                                             className="w-full p-2 rounded-lg border border-sf-divider bg-sf-surface text-xs text-sf-text focus:ring-2 focus:ring-emerald-600 outline-none"
                                         >
-                                            <option value="">Default (core-lossless-v2)</option>
-                                            <option value="opennsis">OpenNSIS (National Accession)</option>
+                                            <option value="">{t('exchangeAdmin.defaultProfile')}</option>
+                                            <option value="opennsis">{t('exchangeAdmin.openNsisProfile')}</option>
                                         </select>
                                     </div>
                                 )}
@@ -1386,7 +1386,7 @@ const ApiKeyManager = () => {
                                 {(selectedEndpoint.includes('/samples') || selectedEndpoint.includes('/results') || selectedEndpoint.includes('/observations') || selectedEndpoint.includes('/changes')) && (
                                     <div>
                                         <label className="block text-[11px] font-semibold text-sf-muted mb-1">
-                                            Limit (Records)
+                                            {t('exchangeAdmin.recordLimit')}
                                         </label>
                                         <input
                                             type="number"
@@ -1402,13 +1402,13 @@ const ApiKeyManager = () => {
                                 {(selectedEndpoint.includes('/changes') || (selectedEndpoint.includes('/v2/') && (selectedEndpoint.includes('/samples') || selectedEndpoint.includes('/observations')))) && (
                                     <div className="col-span-2">
                                         <label className="block text-[11px] font-semibold text-sf-muted mb-1">
-                                            Opaque Boundary Cursor (Optional)
+                                            {t('exchangeAdmin.opaqueCursor')}
                                         </label>
                                         <input
                                             type="text"
                                             value={paramCursor}
                                             onChange={(e) => setParamCursor(e.target.value)}
-                                            placeholder="e.g. eyJsYXN0VXBkYXRlZEF0IjoiMjAy..."
+                                            placeholder={t('exchangeAdmin.cursorExample', { cursor: 'eyJsYXN0VXBkYXRlZEF0IjoiMjAy...' })}
                                             className="w-full p-2 rounded-lg border border-sf-divider bg-sf-surface text-xs font-mono text-sf-text focus:ring-2 focus:ring-emerald-600 outline-none"
                                         />
                                     </div>
@@ -1417,14 +1417,14 @@ const ApiKeyManager = () => {
                                 {selectedEndpoint.includes('/spectra') && (
                                     <div>
                                         <label className="block text-[11px] font-semibold text-sf-muted mb-1">
-                                            Modality
+                                            {t('exchangeAdmin.modality')}
                                         </label>
                                         <select
                                             value={paramModality}
                                             onChange={(e) => setParamModality(e.target.value)}
                                             className="w-full p-2 rounded-lg border border-sf-divider bg-sf-surface text-xs text-sf-text focus:ring-2 focus:ring-emerald-600 outline-none"
                                         >
-                                            <option value="MIR">Mid-Infrared (MIR 400-4000 cm⁻¹)</option>
+                                            <option value="MIR">{t('exchangeAdmin.midInfrared')}</option>
                                             <option value="NIR">Vis-NIR (350-2500 nm)</option>
                                         </select>
                                     </div>
@@ -1433,7 +1433,7 @@ const ApiKeyManager = () => {
                                 {selectedEndpoint.includes('/sync') && (
                                     <div className="col-span-2">
                                         <label className="block text-[11px] font-semibold text-sf-muted mb-1">
-                                            Since (ISO 8601 Timestamp)
+                                            {t('exchangeAdmin.since')}
                                         </label>
                                         <input
                                             type="text"
@@ -1450,17 +1450,17 @@ const ApiKeyManager = () => {
                         {/* Optional Custom Key */}
                         <div className="space-y-1">
                             <label className="block text-xs font-bold text-sf-muted">
-                                Test with Specific API Key (Optional)
+                                {t('exchangeAdmin.testApiKey')}
                             </label>
                             <input
                                 type="text"
                                 value={customApiKey}
                                 onChange={(e) => setCustomApiKey(e.target.value)}
-                                placeholder="Auto: Uses Current Admin Session"
+                                placeholder={t('exchangeAdmin.autoSession')}
                                 className="w-full p-2.5 rounded-xl border border-sf-divider bg-sf-canvas text-xs font-mono text-sf-text focus:ring-2 focus:ring-emerald-600 outline-none"
                             />
                             <p className="text-[10px] text-sf-muted">
-                                Leave blank to use your current logged-in browser session automatically.
+                                {t('exchangeAdmin.autoSessionHelp')}
                             </p>
                         </div>
 
@@ -1473,12 +1473,12 @@ const ApiKeyManager = () => {
                             {sandboxLoading ? (
                                 <>
                                     <RefreshCw size={16} className="animate-spin" />
-                                    <span>Querying Endpoint...</span>
+                                    <span>{t('exchangeAdmin.querying')}</span>
                                 </>
                             ) : (
                                 <>
                                     <Play size={16} />
-                                    <span>Execute Live Query</span>
+                                    <span>{t('exchangeAdmin.executeQuery')}</span>
                                 </>
                             )}
                         </button>
@@ -1491,7 +1491,7 @@ const ApiKeyManager = () => {
                             <div className="flex justify-between items-center border-b border-gray-800 pb-3">
                                 <div className="flex items-center gap-2 text-xs font-bold">
                                     <Terminal size={16} className="text-emerald-400" />
-                                    <span>Ready-to-use Code Snippet</span>
+                                    <span>{t('exchangeAdmin.codeSnippet')}</span>
                                 </div>
                                 <div className="flex items-center gap-1 bg-gray-800 p-1 rounded-xl">
                                     {['curl', 'python', 'r', 'js'].map((lang) => (
@@ -1517,10 +1517,10 @@ const ApiKeyManager = () => {
                                 <button
                                     onClick={() => copyToClipboard(generateSnippet())}
                                     className="absolute top-2 right-2 p-1.5 bg-gray-800/80 hover:bg-gray-700 text-white rounded-lg text-xs flex items-center gap-1 transition shadow"
-                                    title="Copy Code"
+                                    title={t('exchangeAdmin.copyCode')}
                                 >
                                     {copied ? <CheckCheck size={14} className="text-emerald-400" /> : <Copy size={14} />}
-                                    <span className="text-[10px]">{copied ? 'Copied' : 'Copy'}</span>
+                                    <span className="text-[10px]">{copied ? t('exchangeAdmin.copied') : t('common.copy')}</span>
                                 </button>
                             </div>
                         </div>
@@ -1531,7 +1531,7 @@ const ApiKeyManager = () => {
                                 <div className="flex items-center gap-2">
                                     <Code2 size={16} className="text-emerald-600 dark:text-emerald-400" />
                                     <span className="text-xs font-bold text-sf-text uppercase tracking-wider">
-                                        Server Response Payload
+                                        {t('exchangeAdmin.serverResponse')}
                                     </span>
                                 </div>
 
@@ -1562,16 +1562,16 @@ const ApiKeyManager = () => {
                                     <button
                                         onClick={() => copyToClipboard(JSON.stringify(sandboxResponse, null, 2))}
                                         className="absolute top-3 right-3 p-1.5 bg-gray-800/80 hover:bg-gray-700 text-white rounded-lg text-xs flex items-center gap-1 transition shadow"
-                                        title="Copy JSON"
+                                        title={t('exchangeAdmin.copyJson')}
                                     >
                                         {copied ? <CheckCheck size={14} className="text-emerald-400" /> : <Copy size={14} />}
-                                        <span className="text-[10px]">{copied ? 'Copied JSON' : 'Copy JSON'}</span>
+                                        <span className="text-[10px]">{copied ? t('exchangeAdmin.copiedJson') : t('exchangeAdmin.copyJson')}</span>
                                     </button>
                                 </div>
                             ) : (
                                 <div className="p-10 text-center text-sf-muted text-xs border border-dashed border-sf-divider rounded-2xl space-y-2">
                                     <Terminal size={24} className="mx-auto text-sf-muted" />
-                                    <div>Click <strong>&quot;Execute Live Query&quot;</strong> above to send a real request and view the response.</div>
+                                    <div>{t('exchangeAdmin.liveQueryGuide', { action: t('exchangeAdmin.executeQuery') })}</div>
                                 </div>
                             )}
                         </div>
@@ -1586,14 +1586,14 @@ const ApiKeyManager = () => {
                         <header className="shrink-0 p-4 sm:p-6 border-b border-sf-divider">
                             <div className="flex items-start justify-between gap-3">
                                 <h2 id="create-api-key-title" className="flex items-start gap-2 font-bold text-base sm:text-lg text-sf-text">
-                                    <Key size={20} className="shrink-0 mt-0.5 text-emerald-700 dark:text-emerald-400" /> Issue Integration Secret Key
+                                    <Key size={20} className="shrink-0 mt-0.5 text-emerald-700 dark:text-emerald-400" /> {t('exchangeAdmin.issueKey')}
                                 </h2>
                                 <button type="button" onClick={closeCreateModal} disabled={creating} aria-label={t('common.close', 'Close')} className="shrink-0 p-2 -m-1 rounded-xl hover:bg-sf-hover text-sf-muted disabled:opacity-50">
                                     <X size={20} />
                                 </button>
                             </div>
                             <p id="create-api-key-description" className="mt-2 text-xs text-sf-muted">
-                                Create a cryptographically hashed access token for an external NSIS server, GIS system, or automated harvester.
+                                {t('exchangeAdmin.issueKeyHelp')}
                             </p>
                         </header>
                         <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-4 sm:p-6">
@@ -1601,14 +1601,14 @@ const ApiKeyManager = () => {
                             <fieldset disabled={creating} className="min-w-0 space-y-4">
                             <div>
                                 <label htmlFor="api-key-name" className="block text-xs font-bold text-sf-muted mb-1 uppercase tracking-wider">
-                                    Integration Name / Consumer Label *
+                                    {t('exchangeAdmin.consumerLabel')}
                                 </label>
                                 <input
                                     id="api-key-name"
                                     type="text"
                                     data-dialog-initial-focus
                                     required
-                                    placeholder="e.g. Kenya National Soil Database"
+                                    placeholder={t('exchangeAdmin.consumerExample')}
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
                                     className="w-full p-2.5 rounded-xl border border-sf-divider bg-sf-canvas text-sm font-medium focus:ring-2 focus:ring-emerald-600 outline-none text-sf-text"
@@ -1617,38 +1617,38 @@ const ApiKeyManager = () => {
 
                             <div>
                                 <label className="block text-xs font-bold text-sf-muted mb-1 uppercase tracking-wider">
-                                    Connection Identifier (Optional)
+                                    {t('exchangeAdmin.optionalConnectionId')}
                                 </label>
                                 <input
                                     type="text"
-                                    placeholder="e.g. conn_kenya_national_sis (leave blank for auto-generated)"
+                                    placeholder={t('exchangeAdmin.connectionIdExample')}
                                     value={customConnectionId}
                                     onChange={(e) => setCustomConnectionId(e.target.value)}
                                     className="w-full p-2.5 rounded-xl border border-sf-divider bg-sf-canvas text-sm font-mono focus:ring-2 focus:ring-emerald-600 outline-none text-sf-text"
                                 />
                                 <p className="text-[11px] text-sf-muted mt-1">
-                                    Persistent identity across key rotations. Distinct keys with different connections cannot acknowledge each other&apos;s snapshots.
+                                    {t('exchangeAdmin.persistentIdentity')}
                                 </p>
                             </div>
 
                             <div>
                                 <label className="block text-xs font-bold text-sf-muted mb-1 uppercase tracking-wider">
-                                    Access Role
+                                    {t('exchangeAdmin.accessRole')}
                                 </label>
                                 <select
                                     value={role}
                                     onChange={(e) => setRole(e.target.value)}
                                     className="w-full p-2.5 rounded-xl border border-sf-divider bg-sf-canvas text-sm font-medium focus:ring-2 focus:ring-emerald-600 outline-none text-sf-text"
                                 >
-                                    <option value="NSIS_CONSUMER">NSIS Consumer (Full Results & Metadata)</option>
-                                    <option value="EXTERNAL_GIS">GIS Harvester (Spatial GeoJSON & Coordinates)</option>
-                                    <option value="GLOBAL_HARVESTER">Global Soil Partnership (Global Sync)</option>
+                                    <option value="NSIS_CONSUMER">{t('exchangeAdmin.nsisConsumer')}</option>
+                                    <option value="EXTERNAL_GIS">{t('exchangeAdmin.gisHarvester')}</option>
+                                    <option value="GLOBAL_HARVESTER">{t('exchangeAdmin.gspSync')}</option>
                                 </select>
                             </div>
 
                             <div>
                                 <label className="block text-xs font-bold text-sf-muted mb-1 uppercase tracking-wider">
-                                    Granted Capabilities (Fine-Grained Permissions)
+                                    {t('exchangeAdmin.fineGrained')}
                                 </label>
                                 <div className="grid grid-cols-2 gap-2 text-xs">
                                     {[
@@ -1681,7 +1681,7 @@ const ApiKeyManager = () => {
 
                             <div>
                                 <label className="block text-xs font-bold text-sf-muted mb-1 uppercase tracking-wider">
-                                    Territorial Country Scope
+                                    {t('exchangeAdmin.territorialScope')}
                                 </label>
                                 <div className="grid grid-cols-2 gap-2 text-xs">
                                     {COUNTRIES.map((c) => (
@@ -1711,7 +1711,7 @@ const ApiKeyManager = () => {
 
                             <div>
                                 <label className="block text-xs font-bold text-sf-muted mb-1 uppercase tracking-wider">
-                                    Authorized Laboratory Scope *
+                                    {t('exchangeAdmin.authorizedLabScope')}
                                 </label>
                                 <div className="space-y-1.5 max-h-40 overflow-y-auto p-2.5 rounded-xl border border-sf-divider bg-sf-canvas/50">
                                     <label className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-sf-canvas cursor-pointer text-xs font-bold border-b border-sf-divider pb-2 mb-1">
@@ -1727,7 +1727,7 @@ const ApiKeyManager = () => {
                                             }}
                                             className="rounded text-emerald-700 focus:ring-emerald-600"
                                         />
-                                        <span>All Laboratories (Global Wildcard *)</span>
+                                        <span>{t('exchangeAdmin.allLabsGlobal')}</span>
                                     </label>
                                     {availableLabs.map((l) => (
                                         <label key={l.id} className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-sf-canvas cursor-pointer text-xs">
@@ -1749,25 +1749,25 @@ const ApiKeyManager = () => {
                                         </label>
                                     ))}
                                     {availableLabs.length === 0 && (
-                                        <p className="text-xs text-sf-muted italic p-2">Loading laboratories...</p>
+                                        <p className="text-xs text-sf-muted italic p-2">{t('exchangeAdmin.loadingLabs')}</p>
                                     )}
                                 </div>
                             </div>
 
                             <div>
                                 <label className="block text-xs font-bold text-sf-muted mb-1 uppercase tracking-wider">
-                                    Key Expiration
+                                    {t('exchangeAdmin.keyExpiration')}
                                 </label>
                                 <select
                                     value={expiresDays}
                                     onChange={(e) => setExpiresDays(e.target.value)}
                                     className="w-full p-2.5 rounded-xl border border-sf-divider bg-sf-canvas text-sm font-medium outline-none focus:ring-2 focus:ring-emerald-600 text-sf-text"
                                 >
-                                    <option value="90">90 Days</option>
-                                    <option value="180">180 Days</option>
-                                    <option value="365">1 Year (365 Days)</option>
-                                    <option value="730">2 Years</option>
-                                    <option value="0">Never Expires</option>
+                                    <option value="90">{t('exchangeAdmin.ninetyDays')}</option>
+                                    <option value="180">{t('exchangeAdmin.oneEightyDays')}</option>
+                                    <option value="365">{t('exchangeAdmin.oneYear')}</option>
+                                    <option value="730">{t('exchangeAdmin.twoYears')}</option>
+                                    <option value="0">{t('exchangeAdmin.neverExpires')}</option>
                                 </select>
                             </div>
 
@@ -1780,14 +1780,14 @@ const ApiKeyManager = () => {
                                     disabled={creating}
                                     className="px-4 py-2 text-sf-muted hover:text-sf-text text-xs font-bold disabled:opacity-50"
                                 >
-                                    Cancel
+                                    {t('common.cancel')}
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={creating}
                                     className="px-5 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold shadow-sm transition disabled:opacity-50"
                                 >
-                                    {creating ? 'Generating...' : 'Generate Secret Key'}
+                                    {creating ? t('common.generating') : t('exchangeAdmin.generateSecretKey')}
                                 </button>
                             </footer>
                     </form>
@@ -1804,9 +1804,9 @@ const ApiKeyManager = () => {
                         </div>
 
                         <div className="space-y-2">
-                            <h2 id="generated-api-key-title" className="text-xl font-black text-sf-text">API Key Successfully Generated</h2>
+                            <h2 id="generated-api-key-title" className="text-xl font-black text-sf-text">{t('exchangeAdmin.keyGenerated')}</h2>
                             <p id="generated-api-key-warning" className="text-xs text-amber-600 dark:text-amber-400 font-semibold bg-amber-50 dark:bg-amber-950/50 p-2.5 rounded-xl border border-amber-200 dark:border-amber-800">
-                                ⚠️ Make sure to copy your API key now. You will not be able to view it again!
+                                {t('exchangeAdmin.copyKeyNow')}
                             </p>
                         </div>
 
@@ -1819,7 +1819,7 @@ const ApiKeyManager = () => {
                                 className="p-2 bg-gray-800 hover:bg-gray-700 text-white rounded-xl flex-shrink-0 transition flex items-center gap-1 text-xs"
                             >
                                 {copied ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
-                                <span>{copied ? 'Copied' : 'Copy'}</span>
+                                <span>{copied ? t('exchangeAdmin.copied') : t('common.copy')}</span>
                             </button>
                         </div>
                         {secretCopyError && <p role="alert" className="text-sm text-red-700 dark:text-red-300">{secretCopyError}</p>}
@@ -1830,7 +1830,7 @@ const ApiKeyManager = () => {
                             onClick={() => setGeneratedKey(null)}
                             className="w-full py-3 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-xl text-xs transition shadow-sm"
                         >
-                            I Have Saved This Key Securely
+                            {t('exchangeAdmin.savedKey')}
                         </button>
                         </footer>
                     </div>

@@ -485,10 +485,10 @@ export const TranslationEditor = ({ language, onSave, onClose }) => {
                                 className="bg-transparent text-sf-text font-semibold pr-3 py-1 outline-none cursor-pointer"
                             >
                                 <option value="global" disabled={user?.role !== 'SUPER_ADMIN'} className="bg-sf-surface text-sf-text">
-                                    Global System {user?.role !== 'SUPER_ADMIN' ? `(${t('terminology.adminOnly', 'Super Admin Only')})` : ''}
+                                    {t('adminDetails.globalSystem')} {user?.role !== 'SUPER_ADMIN' ? `(${t('terminology.adminOnly', 'Super Admin Only')})` : ''}
                                 </option>
                                 {user?.labId && (
-                                    <option value="lab" className="bg-sf-surface text-sf-text">Own Lab ({user.labId})</option>
+                                    <option value="lab" className="bg-sf-surface text-sf-text">{t('adminDetails.ownLabStart')}{user.labId})</option>
                                 )}
                             </select>
                         </div>
@@ -567,7 +567,7 @@ export const TranslationEditor = ({ language, onSave, onClose }) => {
                             <AlertCircle size={16} />
                             <span>{error}</span>
                         </div>
-                        <button onClick={() => setError(null)} className="text-sf-danger hover:underline">Dismiss</button>
+                        <button onClick={() => setError(null)} className="text-sf-danger hover:underline">{t('adminDetails.dismiss')}</button>
                     </div>
                 )}
 
@@ -706,7 +706,7 @@ export const TranslationEditor = ({ language, onSave, onClose }) => {
                                         <h3 className="text-sm font-bold text-sf-text flex items-center gap-2">
                                             <span>{activeGroupDef?.name}</span>
                                             <span className="text-xs font-normal text-sf-muted">
-                                                ({filteredItems.length} of {activeGroupStats.total} {t('terminology.termsLabel', 'terms')})
+                                                ({filteredItems.length} {t('adminDetails.paginationOf')} {activeGroupStats.total} {t('terminology.termsLabel', 'terms')})
                                             </span>
                                         </h3>
                                         <p className="text-xs text-sf-muted mt-0.5">
@@ -730,7 +730,7 @@ export const TranslationEditor = ({ language, onSave, onClose }) => {
                                     <button
                                         onClick={() => handleExport('json')}
                                         className="btn-secondary text-xs flex items-center gap-1.5 py-1.5 px-3"
-                                        title="Export Group to JSON"
+                                        title={t('adminDetails.exportGroupJson')}
                                     >
                                         <Download size={14} />
                                         <span>{t('terminology.exportJson', 'Export JSON')}</span>
@@ -738,7 +738,7 @@ export const TranslationEditor = ({ language, onSave, onClose }) => {
                                     <button
                                         onClick={() => handleExport('csv')}
                                         className="btn-secondary text-xs flex items-center gap-1.5 py-1.5 px-3"
-                                        title="Export Group to CSV"
+                                        title={t('adminDetails.exportGroupCsv')}
                                     >
                                         <Download size={14} />
                                         <span>{t('terminology.exportCsv', 'Export CSV')}</span>
@@ -747,7 +747,7 @@ export const TranslationEditor = ({ language, onSave, onClose }) => {
                                         <button
                                             onClick={markAllVisibleAsReviewed}
                                             className="btn-secondary text-xs flex items-center gap-1.5 py-1.5 px-3 border-emerald-500/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/20"
-                                            title="Mark all filled items on this page as reviewed"
+                                            title={t('adminDetails.reviewFilled')}
                                         >
                                             <FileCheck2 size={14} />
                                             <span>{t('terminology.markReviewed', 'Approve Visible')}</span>
@@ -888,9 +888,9 @@ export const TranslationEditor = ({ language, onSave, onClose }) => {
                                     <table className="w-full text-left text-xs">
                                         <thead className="bg-sf-raised border-b border-sf-divider font-semibold text-sf-muted">
                                             <tr>
-                                                <th className="p-2.5">Key</th>
-                                                <th className="p-2.5">Current Value</th>
-                                                <th className="p-2.5">New Imported Value</th>
+                                                <th className="p-2.5">{t('adminDetails.translationKey')}</th>
+                                                <th className="p-2.5">{t('adminDetails.currentValue')}</th>
+                                                <th className="p-2.5">{t('adminDetails.importedValue')}</th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-sf-divider font-mono">
