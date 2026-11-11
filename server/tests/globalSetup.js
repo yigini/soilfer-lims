@@ -86,6 +86,7 @@ module.exports = async function globalSetup() {
         require('../scripts/install_calculation_templates').installCalculationTemplates({dbPath:testDbPath,apply:true});
         require('../scripts/install_cross_check_evaluations').installCrossCheckEvaluations({dbPath:testDbPath,apply:true});
         require('../scripts/install_sample_amendment_authorisation').installSampleAmendmentAuthorisation({dbPath:testDbPath,apply:true});
+        require('../scripts/install_batched_amendment_membership').installBatchedAmendmentMembership({dbPath:testDbPath,apply:true});
         require('../scripts/install_report_revisions').installReportRevisions({dbPath:testDbPath,apply:true});
         require('../scripts/install_bench_credentials').installBenchCredentials({dbPath:testDbPath,apply:true});
         require('../scripts/install_preparation_records').installPreparationRecords({dbPath:testDbPath,apply:true});

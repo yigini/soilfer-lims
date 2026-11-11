@@ -22,7 +22,11 @@ function assertClosedQcRepeatInstallationEvidence(db) {
     let receipt;
     try { receipt = row && JSON.parse(row.details); } catch (_) { /* Refuse below. */ }
     const { receiptSha256, ...content } = receipt || {};
-    if (actual?.type !== 'trigger' || normalize(actual.sql) !== normalize(source.guardSql)) throw fail(['Membership guard differs']);
+    if (actual?.type !== 'trigger' || normalize(actual.sql) !== normalize(source.guardSql)) {
+        if (!require('./batchedAmendmentInstallationEvidence').isVerifiedBatchedAmendmentSuccessor(db, actual)) {
+            throw fail(['Membership guard differs']);
+        }
+    }
     if (!receipt || receiptSha256 !== fingerprint(content) ||
         JSON.stringify(receipt.sources) !== JSON.stringify(closedQcRepeatSources(db))) throw fail(['Installation receipt differs']);
     return receipt;
@@ -31,7 +35,9 @@ function assertClosedQcRepeatInstallationEvidence(db) {
 function isVerifiedClosedQcRepeatSuccessor(db, actual) {
     const { normalize } = require('./workRepeatInstallationEvidence');
     const source = loadClosedQcRepeatMigrationSource();
-    if (actual?.type !== 'trigger' || normalize(actual.sql) !== normalize(source.guardSql)) return false;
+    if (actual?.type !== 'trigger' || normalize(actual.sql) !== normalize(source.guardSql)) {
+        if (!require('./batchedAmendmentInstallationEvidence').isVerifiedBatchedAmendmentSuccessor(db, actual)) return false;
+    }
     assertClosedQcRepeatInstallationEvidence(db);
     return true;
 }

@@ -112,3 +112,5 @@ server/services/sampleCodeMigrationSource.js text eol=lf
 
 server/prisma/migrations/20261111000100_closed_qc_repeat_membership/migration.sql text eol=lf
 server/services/closedQcRepeatMigrationSource.js text eol=lf
+server/prisma/migrations/20261111000200_batched_amendment_membership/migration.sql text eol=lf
+server/services/batchedAmendmentMigrationSource.js text eol=lf

@@ -382,6 +382,7 @@ bash "${entryScript.replace(/\\/g, '/')}"
         require('../../scripts/install_cross_check_evaluations').installCrossCheckEvaluations({ dbPath: targetDb, apply: true });
         expect(require('../../scripts/install_sample_amendment_authorisation').installSampleAmendmentAuthorisation({dbPath:targetDb,apply:true}))
             .toMatchObject({classification:'COMPLETE_210',newAmendmentCount:0,newAttemptLinkCount:0,newWithdrawalCount:0,backfilledCount:0});
+        require('../../scripts/install_batched_amendment_membership').installBatchedAmendmentMembership({dbPath:targetDb,apply:true});
         expect(require('../../scripts/install_report_revisions').installReportRevisions({dbPath:targetDb,apply:true}))
             .toMatchObject({classification:'COMPLETE_211',backfilledCount:0});
         expect(require('../../scripts/install_bench_credentials').installBenchCredentials({dbPath:targetDb,apply:true}))
@@ -446,6 +447,8 @@ bash "${entryScript.replace(/\\/g, '/')}"
                 `node "${path.join(serverDir, 'scripts/install_cross_check_evaluations.js').replace(/\\/g, '/')}"`)
             .replaceAll('node scripts/install_sample_amendment_authorisation.js',
                 `node "${path.join(serverDir, 'scripts/install_sample_amendment_authorisation.js').replace(/\\/g, '/')}"`)
+            .replaceAll('node scripts/install_batched_amendment_membership.js',
+                `node "${path.join(serverDir, 'scripts/install_batched_amendment_membership.js').replace(/\\/g, '/')}"`)
             .replaceAll('node scripts/install_report_revisions.js',
                 `node "${path.join(serverDir, 'scripts/install_report_revisions.js').replace(/\\/g, '/')}"`)
             .replaceAll('node scripts/install_bench_credentials.js',

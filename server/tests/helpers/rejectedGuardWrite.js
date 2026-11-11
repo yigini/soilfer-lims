@@ -20,6 +20,60 @@ const SAME_TRANSACTION_CASE = 'WorkAttempt_evidence_immutable_same_transaction';
 const EVIDENCE_FIELDS = Object.freeze(['evidenceData','evidenceHash','instrumentId']);
 
 function rejectedGuardWrite(options) {
+    if (Object.getOwnPropertyDescriptor(options, 'case')?.value === 'WorkItem_413_approved_membership') {
+        const keys = ['actor', 'file', 'case', 'scenario', 'tx', 'amendmentId', 'selectedId', 'probeId', 'targetBatchId'];
+        const scenarios = ['open-batch', 'unreleased-analyte', 'unselected-item', 'retained-rack'];
+        if (Object.getPrototypeOf(options) !== Object.prototype || Reflect.ownKeys(options).length !== keys.length ||
+            Reflect.ownKeys(options).some(key => !keys.includes(key)) ||
+            Object.values(Object.getOwnPropertyDescriptors(options)).some(d => !Object.hasOwn(d, 'value')) ||
+            !scenarios.includes(options.scenario) ||
+            !['amendmentId', 'selectedId', 'probeId', 'targetBatchId'].every(key => typeof options[key] === 'string' && options[key].length)) {
+            throw Error('Closed approved-amendment probe requires exact bound values only.');
+        }
+        const file = assertOwnedTestDatabase(options.file, options.actor);
+        const caller = path.relative(path.resolve(__dirname, '../..'), globalThis.expect?.getState?.().testPath || '').replace(/\\/g, '/');
+        if (caller !== 'tests/contracts/batched_amendment_boundary.test.js') throw Error('Closed amendment probe refuses this caller.');
+        const { tx, scenario, amendmentId, selectedId, probeId, targetBatchId } = options;
+        require('../../services/workflowStateRules').requireTransaction(tx);
+        // Only the active owned authorisation transaction may reach this fixed
+        // refusal statement. No SQL, expected result or guard change is accepted.
+        return (async () => {
+            const databases = await tx.$queryRawUnsafe('PRAGMA database_list');
+            assert.equal(path.resolve(databases.find(row => row.name === 'main').file), file);
+            assert.equal(Number((await tx.$queryRawUnsafe('PRAGMA foreign_keys'))[0].foreign_keys), 1);
+            const actual = await tx.$queryRawUnsafe("SELECT sql FROM sqlite_master WHERE type='trigger' AND name='WorkItem_batch_membership_guard'");
+            assert.equal(actual[0].sql + ';', require('../../services/batchedAmendmentMigrationSource').loadBatchedAmendmentMigrationSource().guardSql);
+            const amendment = await tx.sampleAmendment.findUnique({ where: { id: amendmentId } });
+            assert.equal(amendment.status, 'APPROVED'); assert.equal(amendment.type, 'SCIENTIFIC'); assert.ok(amendment.version > 1);
+            const selected = JSON.parse(amendment.selectedWorkItemIds);
+            assert.ok(selected.includes(selectedId));
+            const item = await tx.workItem.findUnique({ where: { id: probeId } });
+            assert.equal(item.sampleId, amendment.sampleId); assert.equal(item.status, 'ACCEPTED'); assert.ok(item.batchId);
+            if (scenario === 'unselected-item') assert.ok(probeId !== selectedId && !selected.includes(probeId));
+            else assert.equal(probeId, selectedId);
+            if (scenario === 'open-batch') {
+                const target = await tx.batch.findUnique({ where: { id: targetBatchId } });
+                assert.equal(target.status, 'OPEN'); assert.equal(target.startedAt, null); assert.notEqual(target.id, item.batchId);
+            }
+            const rows = async () => {
+                const tables = await tx.$queryRawUnsafe("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name");
+                const all = {};
+                for (const { name } of tables) all[name] = await tx.$queryRawUnsafe('SELECT * FROM "' + name.replaceAll('"', '""') + '" ORDER BY rowid');
+                return all;
+            };
+            const before = await rows();
+            let refusal;
+            try {
+                await tx.$executeRawUnsafe('UPDATE WorkItem SET status=?,batchId=?,rackPosition=? WHERE id=?',
+                    'REPEAT_REQUIRED', scenario === 'open-batch' ? targetBatchId : null,
+                    scenario === 'retained-rack' ? 1 : null, probeId);
+            } catch (error) { refusal = error; }
+            assert.ok(refusal, 'The closed amendment probe unexpectedly succeeded.');
+            assert.match(refusal.message, /BATCH_MEMBERSHIP_FROZEN/);
+            assert.deepEqual(await rows(), before, 'The refused amendment probe changed database rows.');
+            return { scenario, code: 'BATCH_MEMBERSHIP_FROZEN', unchanged: true };
+        })();
+    }
     // #191 pin6072132694: one closed scratch-only case in the existing
     // inventoried authority. No caller supplies SQL or an expected outcome.
     if (Object.getOwnPropertyDescriptor(options,'case')?.value === 'WorkItem_191_handoff_trigger') {

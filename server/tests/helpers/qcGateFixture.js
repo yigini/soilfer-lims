@@ -8,7 +8,7 @@ const { beforeGuards } = require('./legacyWorkflowDatabase');
 const { createSampleFixture, createWorkItemFixture } = require('./workflowFixtures');
 const { installCalculationReleasePrerequisites } = require('./calculationReleasePrerequisites');
 
-async function qcGateFixture({ installClosedQcRepeats = true, managedStartup = false, count = 1, criteria = {}, status = 'IN_PROGRESS', sharedSample = false, resolvedRules = true, installSelectionEvidence = true, installOverrideRequests = true, installInstrumentImports = true, installSampleContainers = true, installControlCharts = true, installOrderRevisions = true, fixedWindowPolicy = criteria.lrmMode !== 'CONTROL_CHART' && criteria.lrmPerBatch !== 0 } = {}) {
+async function qcGateFixture({ installClosedQcRepeats = true, installBatchedAmendments = installClosedQcRepeats, managedStartup = false, count = 1, criteria = {}, status = 'IN_PROGRESS', sharedSample = false, resolvedRules = true, installSelectionEvidence = true, installOverrideRequests = true, installInstrumentImports = true, installSampleContainers = true, installControlCharts = true, installOrderRevisions = true, fixedWindowPolicy = criteria.lrmMode !== 'CONTROL_CHART' && criteria.lrmPerBatch !== 0 } = {}) {
     const labId = randomUUID(), analysisCode = `QC-GATE-${randomUUID()}`, username = 'system:fixture';
     const historical = beforeGuards({ actor: username, ...(managedStartup ? { installWorkflowStateGuards: true } : { schemaVariant: 'PRE_1_3_SAMPLE_CODES' }), relatedRows: {
         Lab: [{ id: labId, code: labId, name: 'QC gate fixture', country: 'TEST', updatedAt: Date.now() }],
@@ -39,6 +39,7 @@ async function qcGateFixture({ installClosedQcRepeats = true, managedStartup = f
     installCalculationReleasePrerequisites(file);
     if (installSelectionEvidence) require('../../scripts/install_cross_check_evaluations').installCrossCheckEvaluations({ dbPath: file, apply: true });
     require('../../scripts/install_sample_amendment_authorisation').installSampleAmendmentAuthorisation({dbPath:file,apply:true});
+    if (installBatchedAmendments) require('../../scripts/install_batched_amendment_membership').installBatchedAmendmentMembership({dbPath:file,apply:true});
     require('../../scripts/install_report_revisions').installReportRevisions({dbPath:file,apply:true});
     require('../../scripts/install_bench_credentials').installBenchCredentials({dbPath:file,apply:true});
     require('../../scripts/install_signin_protection').installSignInProtection({dbPath:file,apply:true});

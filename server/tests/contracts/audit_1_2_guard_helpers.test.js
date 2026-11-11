@@ -111,3 +111,10 @@ test('an opted-in snapshot has its creation hash, no sidecars and no returned wr
     for (const suffix of ['-wal', '-shm', '-journal']) expect(fs.existsSync(`${preMigrationSnapshot.path}${suffix}`)).toBe(false);
     expect(probe(file)).toBeUndefined();
 });
+
+test('the closed approved-amendment probe refuses another test caller', () => {
+    const { file } = legacy();
+    expect(() => rejectedGuardWrite({ actor: 'system:fixture', file, case: 'WorkItem_413_approved_membership',
+        scenario: 'open-batch', tx: {}, amendmentId: 'owned-amendment', selectedId: 'owned-selected',
+        probeId: 'owned-selected', targetBatchId: 'owned-target' })).toThrow('refuses this caller');
+});

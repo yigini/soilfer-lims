@@ -133,8 +133,8 @@ function changeOwned(file, change) {
     } finally { db.close(); }
 }
 
-test('all 30 startup reports equal the legacy default path; one physical integrity/FK check and one retained policy snapshot', () => {
-    expect(stages).toHaveLength(30);
+test('all 31 startup reports equal the legacy default path; one physical integrity/FK check and one retained policy snapshot', () => {
+    expect(stages).toHaveLength(31);
     const file = cloneFixture(), before = triples(file);
     const old = startup(file), current = startup(file, { shared: true });
     expect(current.outcomes).toEqual(old.outcomes);
@@ -150,7 +150,7 @@ test('all 30 startup reports equal the legacy default path; one physical integri
     expect(triples(file)).toEqual(before);
     const order = current.outcomes.find(row => row.script === 'install_order_revisions').report;
     expect(order.impact).toHaveProperty('approvedAmendmentKitGate');
-    console.log(JSON.stringify({ event: 'ALL_30_OWNED_STARTUP_COMPARISON', reportsEqual: true,
+    console.log(JSON.stringify({ event: 'ALL_31_OWNED_STARTUP_COMPARISON', reportsEqual: true,
         oldPhysicalChecks: old.physical.length, newPhysicalChecks: current.physical.length,
         oldSnapshotCopies: old.snapshotCopies, newSnapshotCopies: current.snapshotCopies,
         oldStages: old.timings, newStages: current.timings, notProductionTimingOrStartupQualification: true }));
