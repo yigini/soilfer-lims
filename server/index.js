@@ -60,6 +60,11 @@ try {
     const repeatsReady=require('./scripts/install_work_repeat_contract').assertWorkRepeatStartupReady(dbPath, startupContext);
     console.log(JSON.stringify({event:'WORK_REPEAT_STARTUP_READY',classification:repeatsReady.classification,
         sources:repeatsReady.sources,totalChanges:repeatsReady.totalChanges, ...readinessTelemetry(repeatsReadyBegan)}));
+    const closedRepeatsReadyBegan = beginReadinessStage();
+    const closedRepeatsReady = require('./scripts/install_closed_qc_repeat_membership').assertClosedQcRepeatStartupReady(dbPath, startupContext);
+    console.log(JSON.stringify({ event: 'CLOSED_QC_REPEAT_STARTUP_READY',
+        classification: closedRepeatsReady.classification, totalChanges: closedRepeatsReady.totalChanges,
+        ...readinessTelemetry(closedRepeatsReadyBegan) }));
     const selectionsReadyBegan = beginReadinessStage();
     const selectionsReady=require('./scripts/install_reported_value_selections').assertReportedValueStartupReady(dbPath, startupContext);
     console.log(JSON.stringify({event:'REPORTED_VALUE_STARTUP_READY',...selectionsReady, ...readinessTelemetry(selectionsReadyBegan)}));

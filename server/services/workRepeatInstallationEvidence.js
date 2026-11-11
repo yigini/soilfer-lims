@@ -73,7 +73,12 @@ function assertRepeatInstallationEvidence(db) {
     if (!added.every(Boolean)) differences.push('Repeat columns are incomplete');
     for (const expected of repeatReleaseObjects()) {
         const actual = db.prepare('SELECT type,sql FROM sqlite_master WHERE name=?').get(expected.name);
-        if (!actual || actual.type !== expected.type || normalize(actual.sql) !== normalize(expected.sql)) differences.push(`${expected.name} differs`);
+        if (!actual || actual.type !== expected.type || normalize(actual.sql) !== normalize(expected.sql)) {
+            if (expected.name !== MEMBERSHIP_SUCCESSOR ||
+                !require('./closedQcRepeatInstallationEvidence').isVerifiedClosedQcRepeatSuccessor(db, actual)) {
+                differences.push(`${expected.name} differs`);
+            }
+        }
     }
     const sources = repeatSources(db);
     const row = db.prepare('SELECT details FROM "_schema_migrations" WHERE id=?').get(MARKER);
@@ -93,7 +98,9 @@ function isVerifiedRepeatSuccessor(db, expectedName, actual) {
 }
 function isVerifiedRepeatMembershipSuccessor(db,actual) {
     const successor=repeatReleaseObjects().find(row=>row.name===MEMBERSHIP_SUCCESSOR);
-    if(!actual || actual.type!==successor.type || normalize(actual.sql)!==normalize(successor.sql))return false;
+    if (!actual || actual.type !== successor.type || normalize(actual.sql) !== normalize(successor.sql)) {
+        if (!require('./closedQcRepeatInstallationEvidence').isVerifiedClosedQcRepeatSuccessor(db, actual)) return false;
+    }
     assertRepeatInstallationEvidence(db);
     return true;
 }

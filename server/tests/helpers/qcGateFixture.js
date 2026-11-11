@@ -8,7 +8,7 @@ const { beforeGuards } = require('./legacyWorkflowDatabase');
 const { createSampleFixture, createWorkItemFixture } = require('./workflowFixtures');
 const { installCalculationReleasePrerequisites } = require('./calculationReleasePrerequisites');
 
-async function qcGateFixture({ managedStartup = false, count = 1, criteria = {}, status = 'IN_PROGRESS', sharedSample = false, resolvedRules = true, installSelectionEvidence = true, installOverrideRequests = true, installInstrumentImports = true, installSampleContainers = true, installControlCharts = true, installOrderRevisions = true, fixedWindowPolicy = criteria.lrmMode !== 'CONTROL_CHART' && criteria.lrmPerBatch !== 0 } = {}) {
+async function qcGateFixture({ installClosedQcRepeats = true, managedStartup = false, count = 1, criteria = {}, status = 'IN_PROGRESS', sharedSample = false, resolvedRules = true, installSelectionEvidence = true, installOverrideRequests = true, installInstrumentImports = true, installSampleContainers = true, installControlCharts = true, installOrderRevisions = true, fixedWindowPolicy = criteria.lrmMode !== 'CONTROL_CHART' && criteria.lrmPerBatch !== 0 } = {}) {
     const labId = randomUUID(), analysisCode = `QC-GATE-${randomUUID()}`, username = 'system:fixture';
     const historical = beforeGuards({ actor: username, ...(managedStartup ? { installWorkflowStateGuards: true } : { schemaVariant: 'PRE_1_3_SAMPLE_CODES' }), relatedRows: {
         Lab: [{ id: labId, code: labId, name: 'QC gate fixture', country: 'TEST', updatedAt: Date.now() }],
@@ -32,6 +32,7 @@ async function qcGateFixture({ managedStartup = false, count = 1, criteria = {},
             require('../../scripts/bootstrap_pt_nonconformity').bootstrapPtNonconformity({ dbPath: file, apply: true });
         require(`../../scripts/${script}`)[method]({ dbPath: file, apply: true });
     }
+    if (installClosedQcRepeats) require('../../scripts/install_closed_qc_repeat_membership').installClosedQcRepeatMembership({ dbPath: file, apply: true });
     if (installSelectionEvidence) require('../../scripts/install_reported_value_selections').installReportedValueSelections({ dbPath: file, apply: true });
     require('../../scripts/install_batch_reagent_lots').installBatchReagentLots({ dbPath: file, apply: true });
     if (installOverrideRequests) require('../../scripts/install_result_override_requests').installResultOverrideRequests({ dbPath: file, apply: true });

@@ -1,4 +1,4 @@
-const { QC_RUN_INCLUDE } = require('./qcRunViewService');
+const { QC_RUN_INCLUDE, currentAnalyteEvidence } = require('./qcRunViewService');
 const { runAnalyteCode } = require('./analysisCodesService');
 const { TransitionError } = require('./workflowStateRules');
 async function assertRepeatBatchAllowed(db, item, batchId) {
@@ -15,21 +15,30 @@ async function assertRepeatBatchAllowed(db, item, batchId) {
     if (forbidden) throw new TransitionError('Choose a new batch for this repeat; the previous QC failure or repeat/reject decision is retained.',
         409, 'REPEAT_FAILED_BATCH', { workItemId: item.id, batchId, analysisCode: code });
 }
-async function assertRepeatSourceReleased(db,item) {
-    if(!item.batchId)return;
-    const batch=await db.batch.findUnique({where:{id:item.batchId},include:QC_RUN_INCLUDE});
-    const code=batch && runAnalyteCode(batch,item.analysis);
-    const member=batch?.positions.some(position=>position.workItems.some(link=>link.workItemId===item.id && runAnalyteCode(batch,link.analysisCode)===code));
-    const analyte=batch?.analytes.find(row=>row.analysisCode===code);
-    if(member && ['QC_PASS','QC_WARN','ACCEPTED_WITH_DEVIATION'].includes(analyte?.status))return;
-    if(member) {
-        // The existing #187 disposition authority remains the only way out
-        // of failed, pending or otherwise unaccepted run evidence.
-        try { if(await require('./qcRunRepeatService').repeatSource(db,item,null))return; }
-        catch(error){if(error.code!=='QC_WORK_ITEM_ALREADY_BATCHED')throw error;}
+async function assertRepeatSourceReleased(db, item) {
+    if (!item.batchId) return;
+    const batch = await db.batch.findUnique({ where: { id: item.batchId }, include: QC_RUN_INCLUDE });
+    const code = batch && runAnalyteCode(batch, item.analysis);
+    const member = batch?.positions.some(position => position.workItems.some(link =>
+        link.workItemId === item.id && runAnalyteCode(batch, link.analysisCode) === code));
+    const analyte = batch?.analytes.find(row => row.analysisCode === code);
+    if (member && ['QC_PASS', 'QC_WARN', 'ACCEPTED_WITH_DEVIATION'].includes(analyte?.status)) return;
+    if (member && analyte?.status === 'CLOSED') {
+        const evidence = currentAnalyteEvidence(batch, code);
+        const decision = evidence.disposition?.canonicalDecision || evidence.disposition?.decision;
+        const released = decision
+            ? ['ACCEPT_WITH_DEVIATION', 'PROCEED_WITH_WARNING'].includes(decision)
+            : ['PASS', 'WARN'].includes(evidence.result);
+        if (released) return;
     }
-    throw new TransitionError('Disposition the current run before requesting this repeat.',409,'ATTEMPT_REPEAT_RUN_DISPOSITION_REQUIRED',
-        {workItemId:item.id,batchId:item.batchId,analysisCode:code || item.analysis});
+    if (member) {
+        // Retain the existing explicit disposition path for failed or pending runs.
+        try { if (await require('./qcRunRepeatService').repeatSource(db, item, null)) return; }
+        catch (error) { if (error.code !== 'QC_WORK_ITEM_ALREADY_BATCHED') throw error; }
+    }
+    throw new TransitionError('Disposition the current run before requesting this repeat.', 409,
+        'ATTEMPT_REPEAT_RUN_DISPOSITION_REQUIRED',
+        { workItemId: item.id, batchId: item.batchId, analysisCode: code || item.analysis });
 }
 function mapRepeatRunError(error) {
     const text=`${error.message || ''} ${JSON.stringify(error.meta || {})}`;

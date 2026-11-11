@@ -686,3 +686,112 @@ test('a membership guard refusal during reservation rolls back all changes and e
         .rejects.toMatchObject({statusCode:409,code:'REPEAT_REPLACEMENT_BATCH_FROZEN'});
     expect(await f.all()).toEqual(before);
 });
+
+test.each(['repeat', 'return'].flatMap(command => [
+    { command, status: 'QC_PASS', blankValue: 0 },
+    { command, status: 'QC_WARN', blankValue: 9.123456789,
+        criteria: { failAction: { BLANK: 'WARN', DUPLICATE: 'WARN', LRM: 'FAIL_BATCH', CRM: 'WARN' } } },
+    { command, status: 'ACCEPTED_WITH_DEVIATION', blankValue: 9.123456789, disposition: true }
+]))('$command works after a $status native run is closed', async options => {
+    const { command } = options;
+    const f = await nativeFixture(options);
+    if (options.disposition) await require('../../services/qcDispositionStateService').dispositionBatch(f.run.id,
+        'ACCEPT_WITH_DEVIATION', 'Reviewed blank deviation retained for this run', f.manager, f.db);
+    if (command === 'return') await f.submit();
+    await require('../../services/qcRunMutationService').mutateQcRun(f.db, f.run.id, f.manager, { status: 'CLOSED' });
+    const retainedRun = await f.runEvidence();
+    expect(retainedRun.analytes[0].status).toBe('CLOSED');
+    const currentItem = await f.db.workItem.findUnique({ where: { id: f.items[0].id } });
+    await expect(require('../../services/workRepeatBatchService').assertRepeatSourceReleased(f.db, currentItem))
+        .resolves.toBeUndefined();
+    const parent = await f.db.workAttempt.findUnique({ where: { id: f.attempt.id } });
+    let response;
+    if (command === 'repeat') {
+        response = await f.command({ reason: 'INSTRUMENT_FAULT', note: 'Repeat requested after final QC' }, f.manager);
+        expect({ status: response.status, code: response.body.code }).toMatchObject({ status: 201 });
+    } else {
+        await f.http(f.manager, async (app, token) => {
+            response = await request(app)
+                .post('/api/work/' + f.items[0].id + '/review')
+                .set('Authorization', 'Bearer ' + token)
+                .send({ decision: 'RETURN', attemptId: parent.id, reasonCode: 'REVIEW_OUTLIER',
+                    note: 'Outlier checked after the completed run' });
+        });
+        expect({ status: response.status, code: response.body.code }).toMatchObject({ status: 200 });
+    }
+    expect(await f.db.workItem.findUnique({ where: { id: f.items[0].id } }))
+        .toMatchObject({ status: 'REPEAT_REQUIRED', batchId: null, rackPosition: null });
+    const after = await f.runEvidence();
+    for (const key of ['analytes', 'measurements', 'evaluations', 'dispositions', 'events']) {
+        expect(after[key]).toEqual(retainedRun[key]);
+    }
+    const memberships = run => run.positions.map(position => ({
+        ...position, workItems: position.workItems.map(({ workItem, ...membership }) => membership)
+    }));
+    expect(memberships(after)).toEqual(memberships(retainedRun));
+});
+test.each(['QC_FAIL', 'REJECT', 'REPEAT_ORDERED'])('a historical CLOSED run after %s refuses a repeat with no writes', async prior => {
+    const f = await nativeFixture({ blankValue: 9.123456789 });
+    if (prior !== 'QC_FAIL') await require('../../services/qcDispositionStateService').dispositionBatch(f.run.id,
+        prior === 'REJECT' ? 'REJECT' : 'REPEAT_BATCH', 'Historical final decision', f.manager, f.db);
+    // Construct the retained terminal shape on this disposable fixture only.
+    await f.db.batchAnalyte.updateMany({ where: { batchId: f.run.id }, data: { status: 'CLOSED' } });
+    await f.db.batch.update({ where: { id: f.run.id }, data: { status: 'CLOSED' } });
+    const before = await f.all(), run = await f.runEvidence();
+    const response = await f.command({ reason: 'INSTRUMENT_FAULT', note: 'Closed failure remains refused' }, f.manager);
+    expect(response.status).toBe(409);
+    expect(response.body.code).toBe('ATTEMPT_REPEAT_RUN_DISPOSITION_REQUIRED');
+    expect(await f.all()).toEqual(before);
+    expect(await f.runEvidence()).toEqual(run);
+});
+
+test.each([
+    { verdict: 'PASS', allowed: true },
+    { verdict: 'WARN', allowed: true },
+    { verdict: 'FAIL', allowed: false },
+    { verdict: null, allowed: false },
+    { verdict: 'FAIL', decision: 'ACCEPT_WITH_DEVIATION', allowed: true },
+    { verdict: 'PASS', decision: 'REJECT', allowed: false },
+    { verdict: 'PASS', decision: 'REPEAT_BATCH', allowed: false },
+    { verdict: 'PASS', decision: 'REPEAT_BRACKET', allowed: false },
+    { verdict: 'PASS', reopened: true, allowed: false },
+    { verdict: 'FAIL', decision: 'ACCEPT_WITH_DEVIATION', reopened: true, allowed: false }
+])('closed-run evidence uses the final verdict and disposition (%j)', async options => {
+    const evaluation = { id: 'latest-evaluation', analysisCode: 'PH', version: 2, verdict: options.verdict, details: '{}' };
+    const batch = { id: 'closed-run', analysis: 'PH', status: 'CLOSED',
+        analytes: [{ analysisCode: 'PH', status: 'CLOSED' }],
+        positions: [{ workItems: [{ workItemId: 'item', analysisCode: 'PH' }] }],
+        evaluations: [{ ...evaluation, id: 'earlier-pass', version: 1, verdict: 'PASS' },
+            ...(options.verdict === null ? [] : [evaluation])],
+        dispositions: options.decision ? [{ id: 'final-decision', analysisCode: 'PH', decision: options.decision,
+            decidedAt: '2026-01-01T00:00:00Z' }] : [],
+        events: options.reopened ? [{ type: 'REOPENED', at: '2026-01-02T00:00:00Z',
+            payload: JSON.stringify({ previousEvaluationIds: [evaluation.id], analysisCodes: ['PH'] }) }] : [] };
+    if (options.verdict === null) batch.evaluations = [];
+    const db = { batch: { findUnique: async () => batch } };
+    const result = require('../../services/workRepeatBatchService').assertRepeatSourceReleased(db,
+        { id: 'item', batchId: batch.id, analysis: 'PH', labId: 'lab' });
+    if (options.allowed) await expect(result).resolves.toBeUndefined();
+    else await expect(result).rejects.toMatchObject({ code: 'ATTEMPT_REPEAT_RUN_DISPOSITION_REQUIRED' });
+});
+
+test('the SQL boundary refuses closed failure evidence even if the service read is stale', async () => {
+    const f = await nativeFixture({ blankValue: 9.123456789 });
+    await f.db.batchAnalyte.updateMany({ where: { batchId: f.run.id }, data: { status: 'CLOSED' } });
+    await f.db.batch.update({ where: { id: f.run.id }, data: { status: 'CLOSED' } });
+    const before = await f.all(), run = await f.runEvidence();
+    const stale = extendRootClient(f.db, { query: { batch: { async findUnique({ args, query }) {
+        const batch = await query(args);
+        if (batch?.id !== f.run.id || !Array.isArray(batch.evaluations)) return batch;
+        return { ...batch, dispositions: [], evaluations: batch.evaluations.map(row => ({ ...row, verdict: 'PASS' })) };
+    } } } });
+    await withQcRunHttp(stale, f.manager, async (app, token) => {
+        const response = await request(app).post('/api/work-items/' + f.items[0].id + '/repeats')
+            .set('Authorization', 'Bearer ' + token)
+            .send({ reason: 'INSTRUMENT_FAULT', note: 'Stale read must still meet the stored final evidence' });
+        expect(response.status).toBe(409);
+        expect(response.body.code).toBe('ATTEMPT_REPEAT_RUN_DISPOSITION_REQUIRED');
+    }, { repeatCommands: true });
+    expect(await f.all()).toEqual(before);
+    expect(await f.runEvidence()).toEqual(run);
+});
