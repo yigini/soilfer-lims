@@ -79,6 +79,7 @@ module.exports = async function globalSetup() {
         require('../scripts/install_workitem_uniqueness').installWorkItemUniqueness({ dbPath: testDbPath, apply: true });
         require('../scripts/install_work_attempt_contract').installWorkAttemptContract({dbPath:testDbPath,apply:true});
         require('../scripts/install_work_repeat_contract').installWorkRepeatContract({dbPath:testDbPath,apply:true});
+        require('../scripts/install_closed_qc_repeat_membership').installClosedQcRepeatMembership({dbPath:testDbPath,apply:true});
         require('../scripts/install_reported_value_selections').installReportedValueSelections({dbPath:testDbPath,apply:true});
         require('../scripts/install_batch_reagent_lots').installBatchReagentLots({dbPath:testDbPath,apply:true});
         require('../scripts/install_result_override_requests').installResultOverrideRequests({dbPath:testDbPath,apply:true});

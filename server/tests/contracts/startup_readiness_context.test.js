@@ -133,8 +133,8 @@ function changeOwned(file, change) {
     } finally { db.close(); }
 }
 
-test('all 29 startup reports equal the legacy default path; one physical integrity/FK check and one retained policy snapshot', () => {
-    expect(stages).toHaveLength(29);
+test('all 30 startup reports equal the legacy default path; one physical integrity/FK check and one retained policy snapshot', () => {
+    expect(stages).toHaveLength(30);
     const file = cloneFixture(), before = triples(file);
     const old = startup(file), current = startup(file, { shared: true });
     expect(current.outcomes).toEqual(old.outcomes);
@@ -150,7 +150,7 @@ test('all 29 startup reports equal the legacy default path; one physical integri
     expect(triples(file)).toEqual(before);
     const order = current.outcomes.find(row => row.script === 'install_order_revisions').report;
     expect(order.impact).toHaveProperty('approvedAmendmentKitGate');
-    console.log(JSON.stringify({ event: 'ALL_29_OWNED_STARTUP_COMPARISON', reportsEqual: true,
+    console.log(JSON.stringify({ event: 'ALL_30_OWNED_STARTUP_COMPARISON', reportsEqual: true,
         oldPhysicalChecks: old.physical.length, newPhysicalChecks: current.physical.length,
         oldSnapshotCopies: old.snapshotCopies, newSnapshotCopies: current.snapshotCopies,
         oldStages: old.timings, newStages: current.timings, notProductionTimingOrStartupQualification: true }));
@@ -181,7 +181,7 @@ test.each([
     { corruptIntegrity: true }, { corruptForeignKeys: true }
 ])('bad shared SQL results still reach the existing owner refusal: %j', bad => {
     const file = cloneFixture();
-    const selected = stages.slice(23);
+    const selected = stages.slice(stages.findIndex(([script]) => script === 'install_lab_policy_schema'));
     const old = startup(file, { ...bad, selected }), current = startup(file, { ...bad, selected, shared: true });
     expect(current.outcomes).toEqual(old.outcomes);
     expect(current.outcomes.at(-1).error.code).toBe('LAB_POLICY_INTEGRITY_REFUSED');
@@ -199,7 +199,7 @@ test('a new startup never reuses a prior startup result', () => {
 
 test('changed bytes between stages cannot inherit cached integrity or chart results', () => {
     const file = cloneFixture();
-    const result = startup(file, { shared: true, selected: stages.slice(23), during: script => {
+    const result = startup(file, { shared: true, selected: stages.slice(stages.findIndex(([script]) => script === 'install_lab_policy_schema')), during: script => {
         if (script === 'install_lab_policy_schema') changeOwned(file, 'order-index');
     } });
     expect(result.outcomes.at(-1).error.code).toBe('ORDER_REVISION_SCHEMA_MISMATCH');
@@ -305,7 +305,7 @@ test('changed retained-copy bytes cannot reuse cached policy or integrity result
     const results = [false, true].map(shared => {
         const file = cloneFixture(), before = triples(file);
         let capturedCopy;
-        const result = startup(file, { shared, selected: stages.slice(23, 25),
+        const result = startup(file, { shared, selected: stages.filter(([script]) => ['install_lab_policy_schema', 'install_control_charts'].includes(script)),
             afterCopy: (source, destination) => {
                 if (source === file && destination.endsWith('snapshot.db')) capturedCopy = destination;
             },

@@ -374,6 +374,7 @@ bash "${entryScript.replace(/\\/g, '/')}"
         require('../../scripts/install_workitem_uniqueness').installWorkItemUniqueness({ dbPath: targetDb, apply: true });
         require('../../scripts/install_work_attempt_contract').installWorkAttemptContract({ dbPath: targetDb, apply: true });
         require('../../scripts/install_work_repeat_contract').installWorkRepeatContract({ dbPath: targetDb, apply: true });
+        require('../../scripts/install_closed_qc_repeat_membership').installClosedQcRepeatMembership({ dbPath: targetDb, apply: true });
         require('../../scripts/install_reported_value_selections').installReportedValueSelections({ dbPath: targetDb, apply: true });
         require('../../scripts/install_nonconformity_reports').installNonconformityReports({ dbPath: targetDb, apply: true });
         require('../../scripts/install_batch_reagent_lots').installBatchReagentLots({ dbPath: targetDb, apply: true });
@@ -429,6 +430,8 @@ bash "${entryScript.replace(/\\/g, '/')}"
                 `node "${path.join(serverDir, 'scripts/install_workitem_uniqueness.js').replace(/\\/g, '/')}"`)
             .replaceAll('node scripts/install_work_attempt_contract.js',
                 `node "${path.join(serverDir, 'scripts/install_work_attempt_contract.js').replace(/\\/g, '/')}"`)
+            .replaceAll('node scripts/install_closed_qc_repeat_membership.js',
+                `node "${path.join(serverDir, 'scripts/install_closed_qc_repeat_membership.js').replace(/\\/g, '/')}"`)
             .replaceAll('node scripts/install_work_repeat_contract.js',
                 `node "${path.join(serverDir, 'scripts/install_work_repeat_contract.js').replace(/\\/g, '/')}"`)
             .replaceAll('node scripts/install_reported_value_selections.js',

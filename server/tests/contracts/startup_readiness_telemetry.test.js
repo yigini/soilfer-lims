@@ -6,7 +6,7 @@ const entryPath = path.resolve(__dirname, '../../index.js');
 const telemetryPath = path.resolve(__dirname, '../../utils/startupReadinessTelemetry.js');
 const expectedEvents = [
     'WORKFLOW', 'RESULT_ATTEMPT', 'SAMPLE_HOLD', 'REFERENCE', 'QC_RULE', 'QC_RUN',
-    'QC_GATE_SCOPE', 'PT', 'NCR', 'RESULT_EQUIPMENT', 'WORK_ATTEMPT', 'WORK_REPEAT',
+    'QC_GATE_SCOPE', 'PT', 'NCR', 'RESULT_EQUIPMENT', 'WORK_ATTEMPT', 'WORK_REPEAT', 'CLOSED_QC_REPEAT',
     'REPORTED_VALUE', 'REAGENT_LOT', 'RESULT_OVERRIDE', 'CALCULATION', 'CROSS_CHECK',
     'AMENDMENT', 'REPORT_REVISION', 'BENCH_CREDENTIAL', 'PREPARATION_RECORD',
     'INSTRUMENT_IMPORT', 'SAMPLE_CONTAINER', 'LAB_POLICY', 'CONTROL_CHART', 'LABEL_PRINT', 'ORDER_REVISION', 'SAMPLE_CUSTODY', 'SIGNIN'
