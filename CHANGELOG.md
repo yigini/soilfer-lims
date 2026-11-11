@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.13.0] - 2026-11-11
+
+### Added
+- Assign several work items to a technician in one action.
+- Let global administrators choose the receiving laboratory for sample delivery boxes, walk-in intake and staff invitations.
+- Load the starter analysis catalogue on new installations while preserving existing catalogues.
+- Add practical role guides, workflow diagrams, a glossary, a first-user test kit and a screenshot list to the manual.
+
+### Changed
+- Use everyday screen labels and translated status labels across all five languages, including administration pages and scientific review screens.
+- Include Help v1.4.0 with the complete five-language rewrite in plain words.
+- Clarify personal bench PIN setup and keep the sign-in language selector within the page layout.
+- Reserve new-laboratory creation for Super Administrators by default.
+- Refresh runtime dependencies and consolidate installation instructions around HTTPS, proxy settings and off-host backups.
+- Tidy the repository for a clean snapshot, move root logo assets and use neutral examples and branding defaults.
+- Use the configured application signing key when confirming project change previews.
+
+### Fixed
+- Show row numbers, sample IDs and clear duplicate-ID messages when checking in a delivery box; sample IDs remain unique across the system.
+- Show intake-rule errors from the server and highlight only the current administration menu item.
+- Let laboratory technicians load quality-control run options using reference materials from their own laboratory.
+- Allow repeat or return after a closed batch only when its final quality decision permits it; failed and rejected work stays refused.
+- Allow authorised scientific retests of accepted batched work while retaining previous results, quality records and report versions.
+
 ## [1.12.2] - 2026-10-26
 
 ### Added

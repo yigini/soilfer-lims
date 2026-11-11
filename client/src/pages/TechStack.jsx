@@ -83,6 +83,20 @@ const techStack = [
 
 const changelog = [
     {
+        version: 'v1.13.0',
+        date: 'November 11, 2026',
+        tag: 'Everyday Laboratory Work',
+        badgeColor: 'bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300 border-blue-300 dark:border-blue-800',
+        changes: [
+            'Bulk work assignment and laboratory pickers make reception and staff setup easier; new installs receive the starter analysis catalogue.',
+            'Everyday labels, administration pages and Help v1.4.0 cover all five screen languages, with practical role guides and test materials.',
+            'Bench PIN setup, the sign-in language selector and administration navigation are clearer; laboratory creation defaults to Super Administrators.',
+            'Delivery box errors identify each affected row and sample; sample IDs remain unique across the system.',
+            'Quality-control run options use the laboratory reference catalogue, closed-batch repeats use the final quality decision, and scientific retests retain earlier evidence.',
+            'Runtime libraries, HTTPS installation guidance, neutral examples and project preview confirmation are updated.',
+        ],
+    },
+    {
         version: 'v1.12.2',
         date: 'October 25, 2026',
         tag: 'Transaction Handling',
