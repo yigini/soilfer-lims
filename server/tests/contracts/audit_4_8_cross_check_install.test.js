@@ -90,6 +90,7 @@ test('PRE_201 upgrades additively with every original analytical/QC/audit field,
 test('real direct startup refuses missing cross-check installation before app startup and preserves the owned file', async () => {
     const f = await fixture();
     require('../../scripts/bootstrap_pt_nonconformity').bootstrapPtNonconformity({ dbPath: f.file, apply: true });
+    require('../../scripts/install_closed_qc_repeat_membership').installClosedQcRepeatMembership({ dbPath: f.file, apply: true });
     // #199 is merged and now precedes the #201 startup gate. Install its real
     // additive owner on this owned historical file; retain honest catalogue
     // deferrals, with no fabricated catalogue or expanded fixture authority.
