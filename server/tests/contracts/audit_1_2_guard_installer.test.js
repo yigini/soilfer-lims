@@ -407,6 +407,13 @@ test('a complete guarded database passes the read-only gate, listens and answers
     expect(fingerprint(fixture.file)).toBe(beforeAmendments);
     expect(require('../../scripts/install_sample_amendment_authorisation').installSampleAmendmentAuthorisation({dbPath:fixture.file,apply:true}))
         .toMatchObject({classification:'COMPLETE_210',newAmendmentCount:0,newAttemptLinkCount:0,newWithdrawalCount:0,backfilledCount:0});
+    const beforeBatchedAmendment = fingerprint(fixture.file), missingBatchedAmendment = await realStartup(fixture.file);
+    expect(missingBatchedAmendment.accepted).toBe(false);
+    expect(missingBatchedAmendment.stderr).toContain('BATCHED_AMENDMENT_NOT_INSTALLED');
+    expect(missingBatchedAmendment.stdout).not.toMatch(/SCHEDULER|Enterprise Server|\[PRISMA\]/);
+    expect(fingerprint(fixture.file)).toBe(beforeBatchedAmendment);
+    expect(require('../../scripts/install_batched_amendment_membership').installBatchedAmendmentMembership({ dbPath: fixture.file, apply: true }))
+        .toMatchObject({ classification: 'COMPLETE', mode: 'APPLIED' });
     const beforeRevisions=fingerprint(fixture.file);
     const missingRevisions=await realStartup(fixture.file);
     expect(missingRevisions.accepted).toBe(false);
