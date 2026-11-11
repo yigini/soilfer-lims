@@ -6,6 +6,7 @@ const { withQcRunHttp } = require('../helpers/qcRunHttpHarness');
 const { registerRootClient } = require('../../utils/prismaClientIdentity');
 const { inTransaction } = require('../../services/workflowStateRules');
 const commands = require('../../services/sampleAmendmentCommandService');
+const { rejectedGuardWrite } = require('../helpers/rejectedGuardWrite');
 const owned = [];
 afterEach(async () => { for (const f of owned.splice(0)) await f.close(); });
 
@@ -109,10 +110,10 @@ test.each(['open-batch', 'unreleased-analyte', 'unselected-item', 'retained-rack
                 'UPDATE BatchAnalyte SET status=? WHERE batchId=? AND analysisCode=?', 'QC_FAIL', f.run.id, f.items[0].analysis);
             const before = await snapshot(tx);
             const id = scenario === 'unselected-item' ? f.items[1].id : f.items[0].id;
-            await expect(tx.$executeRawUnsafe(
-                'UPDATE WorkItem SET status=?,batchId=?,rackPosition=? WHERE id=?',
-                'REPEAT_REQUIRED', scenario === 'open-batch' ? f.target.id : null,
-                scenario === 'retained-rack' ? 1 : null, id)).rejects.toThrow('BATCH_MEMBERSHIP_FROZEN');
+            expect(await rejectedGuardWrite({ actor: 'system:fixture', file: f.file,
+                case: 'WorkItem_413_approved_membership', scenario, tx, amendmentId: f.amendment.id,
+                selectedId: f.items[0].id, probeId: id, targetBatchId: f.target.id }))
+                .toEqual({ scenario, code: 'BATCH_MEMBERSHIP_FROZEN', unchanged: true });
             expect(await snapshot(tx)).toEqual(before);
             if (scenario === 'unreleased-analyte') await tx.$executeRawUnsafe(
                 'UPDATE BatchAnalyte SET status=? WHERE batchId=? AND analysisCode=?', 'QC_PASS', f.run.id, f.items[0].analysis);
@@ -127,3 +128,15 @@ test.each(['open-batch', 'unreleased-analyte', 'unselected-item', 'retained-rack
         expect(await f.db.workItem.findUnique({ where: { id: f.items[1].id } }))
             .toMatchObject({ status: 'ACCEPTED', batchId: f.run.id });
     });
+test('the approved-amendment probe refuses open-ended inputs, roots and protected paths', async () => {
+    const f = await qcGateFixture(); owned.push(f);
+    const options = { actor: 'system:fixture', file: f.file, case: 'WorkItem_413_approved_membership',
+        scenario: 'open-batch', tx: f.db, amendmentId: 'owned-amendment', selectedId: f.items[0].id,
+        probeId: f.items[0].id, targetBatchId: 'owned-target' };
+    expect(() => rejectedGuardWrite({ ...options, statement: 'arbitrary input' })).toThrow('exact bound values only');
+    expect(() => rejectedGuardWrite({ ...options, scenario: 'unknown' })).toThrow('exact bound values only');
+    expect(() => rejectedGuardWrite(options)).toThrow('caller workflow transaction');
+    expect(() => rejectedGuardWrite({ ...options, file: process.env.DATABASE_PATH }))
+        .toThrow('configured, working or production database');
+});
+
