@@ -20,7 +20,7 @@ Track every physical soil bag and sub-sample container from the field to archive
 Purpose-built for wet-chemistry analysts and instrument operators:
 - **Structured Analytical Runs (`RunBatch`)**: Organize work items into batches with visual rack/microplate layouts (`MICROPLATE_96`, `CENTRIFUGE_24`, `RACK_40`), linked reagent lots, and verified instruments.
 - **Formula-Backed Worksheets**: Enter raw weights, extraction volumes, dilution factors, and instrument readings (pH, EC, Walkley–Black titration, Kjeldahl N, Olsen/Bray/Mehlich P, AAS/ICP cations, Hydrometer/Pipette texture, gravimetric moisture) while the LIMS computes final concentrations automatically.
-- **Shared Bench Terminals**: Support shared tablets and balance PCs in the wet lab with configurable idle auto-lock (`bench.idleLockMinutes`) and per-action **4–6 digit operator PIN** attribution (`bench.pinAtRecord`).
+- **Shared Bench Terminals**: Support shared tablets and balance PCs in the wet lab with configurable idle auto-lock (`bench.idleLockMinutes`) and per-action **4–8 digit operator PIN** attribution (`bench.pinAtRecord`).
 - **Append-Only Analytical Attempts (`R1`, `R2`, ...)**: Every repeat creates a numbered attempt without overwriting earlier measurements, with automatic Non-Conformance Report (`NCR`) prompts when attempts exceed `repeats.maxAttemptsBeforeNcr`.
 
 ---

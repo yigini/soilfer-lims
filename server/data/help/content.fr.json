@@ -257,7 +257,7 @@
               "expected": "Votre Tableau de bord s'ouvre avec le menu latéral correspondant au rôle qui vous est attribué."
             },
             {
-              "action": "Si votre laboratoire utilise des postes de paillasse partagés avec confirmation par code PIN, ouvrez Mon profil et définissez votre code PIN personnel de 4 à 6 chiffres.",
+              "action": "Lorsque le Poste de travail demande un PIN pour la première fois, définissez un PIN personnel de 4 à 8 chiffres dans cette boîte de dialogue et confirmez-le avec le mot de passe de votre compte. Si votre PIN est déjà défini, saisissez-le à la demande.",
               "expected": "Votre code PIN personnel est enregistré et prêt lorsque vous saisissez des résultats sur un ordinateur de paillasse partagé."
             }
           ]
@@ -277,10 +277,10 @@
         [
           "Mon profil",
           "Page des paramètres personnels du compte dans le menu latéral",
-          "Utilisez cette page pour modifier votre mot de passe, votre langue ou votre code PIN de paillasse partagée."
+          "Utilisez cette page pour modifier votre mot de passe et vos préférences de langue."
         ]
       ],
-      "example": "Connectez-vous en tant que technicienne Amina sur Demo Soil Lab, définissez un mot de passe de 12 caractères, vérifiez « Demo Soil Lab » et « Technicien de Laboratoire » dans la barre supérieure. Enregistrez un code PIN à 4 chiffres dans Mon profil.",
+      "example": "Connectez-vous avec le compte de la technicienne Amina dans Demo Soil Lab, définissez un mot de passe de 12 caractères et vérifiez « Demo Soil Lab » et « Technicien de laboratoire » dans la barre supérieure. À la première demande de PIN du Poste de travail, définissez un PIN personnel de 4 à 8 chiffres dans cette boîte de dialogue et confirmez-le avec le mot de passe de votre compte.",
       "success": "Vous êtes connecté sous votre propre nom avec le bon laboratoire et le bon rôle actifs.",
       "nextActor": "Agent de Réception des Échantillons, Technicien de Laboratoire, Responsable Qualité et Audit ou Responsable de Laboratoire",
       "problems": [
@@ -298,7 +298,7 @@
       "steps": [
         "Ouvrez l'écran de connexion, saisissez votre identifiant et votre mot de passe. Cliquez sur Connexion sécurisée. (Attendu : Si vous utilisez un mot de passe temporaire, la fenêtre Mise à jour de sécurité requise s'ouvre immédiatement.)",
         "Définissez un mot de passe personnel d'au moins 12 caractères, reconnectez-vous. Vérifiez le nom de votre laboratoire ainsi que votre rôle dans la barre supérieure. (Attendu : Votre Tableau de bord s'ouvre avec le menu latéral correspondant au rôle qui vous est attribué.)",
-        "Si votre laboratoire utilise des postes de paillasse partagés avec confirmation par code PIN, ouvrez Mon profil et définissez votre code PIN personnel de 4 à 6 chiffres. (Attendu : Votre code PIN personnel est enregistré et prêt lorsque vous saisissez des résultats sur un ordinateur de paillasse partagé.)"
+        "Lorsque le Poste de travail demande un PIN pour la première fois, définissez un PIN personnel de 4 à 8 chiffres dans cette boîte de dialogue et confirmez-le avec le mot de passe de votre compte. Si votre PIN est déjà défini, saisissez-le à la demande. (Attendu : Votre code PIN personnel est enregistré et prêt lorsque vous saisissez des résultats sur un ordinateur de paillasse partagé.)"
       ],
       "caution": "Ne saisissez jamais d'échantillons ou de résultats de paillasse sous le compte d'un collègue ou sous un mauvais nom de laboratoire.",
       "related": [
@@ -423,7 +423,7 @@
       "quick": "Ouvrez Mon travail ou Poste de travail, validez d'abord les contrôles de séchage et de préparation en attente, saisissez vos mesures de série et les échantillons de contrôle qualité. Envoyez le travail terminé au réviseur.",
       "before": [
         "Vérifiez la barre supérieure pour confirmer le nom de votre laboratoire et votre rôle Technicien de Laboratoire.",
-        "Préparez votre feuille de paillasse, vos pots d'échantillons et la vérification d'étalonnage de votre instrument."
+        "Préparez les échantillons d’entraînement reçus et acceptés, le travail attribué par le responsable, la feuille de paillasse, les flacons et la vérification de l’étalonnage de l’instrument."
       ],
       "sections": [
         {
@@ -438,7 +438,7 @@
               "expected": "La préparation confirmée déverrouille les lignes d'analyse afin que vous puissiez saisir ou coller les résultats d'échantillons et les lectures de contrôle qualité."
             },
             {
-              "action": "Cliquez sur Vérifier la réalisation pour enregistrer vos résultats vérifiés. Ouvrez Prêt à soumettre. Cliquez sur Soumettre.",
+              "action": "Lorsque le Poste de travail demande un PIN pour la première fois, définissez un PIN personnel de 4 à 8 chiffres dans cette boîte de dialogue et confirmez-le avec le mot de passe de votre compte. Si votre PIN est déjà défini, saisissez-le à la demande. Cliquez sur Vérifier la réalisation pour enregistrer vos résultats vérifiés. Ouvrez Prêt à soumettre. Cliquez sur Soumettre.",
               "expected": "Vos résultats enregistrés passent dans Envoyés et terminés et apparaissent dans la Liste de tâches du réviseur."
             }
           ]
@@ -479,7 +479,7 @@
       "steps": [
         "Ouvrez Mon travail ou Poste de travail. Consultez les tâches qui vous sont attribuées pour la journée. (Attendu : Vous voyez quels échantillons nécessitent un Séchage à l’air libre ou une Préparation des échantillons et lesquels sont prêts pour l'analyse à la paillasse.)",
         "Complétez d'abord les listes de contrôle de séchage et de tamisage requises. Cliquez sur Confirmer que le travail est terminé. Ouvrez votre feuille d'analyse ou créez une nouvelle série analytique. (Attendu : La préparation confirmée déverrouille les lignes d'analyse afin que vous puissiez saisir ou coller les résultats d'échantillons et les lectures de contrôle qualité.)",
-        "Cliquez sur Vérifier la réalisation pour enregistrer vos résultats vérifiés. Ouvrez Prêt à soumettre. Cliquez sur Soumettre. (Attendu : Vos résultats enregistrés passent dans Envoyés et terminés et apparaissent dans la Liste de tâches du réviseur.)"
+        "Lorsque le Poste de travail demande un PIN pour la première fois, définissez un PIN personnel de 4 à 8 chiffres dans cette boîte de dialogue et confirmez-le avec le mot de passe de votre compte. Si votre PIN est déjà défini, saisissez-le à la demande. Cliquez sur Vérifier la réalisation pour enregistrer vos résultats vérifiés. Ouvrez Prêt à soumettre. Cliquez sur Soumettre. (Attendu : Vos résultats enregistrés passent dans Envoyés et terminés et apparaissent dans la Liste de tâches du réviseur.)"
       ],
       "caution": "L'enregistrement d'un brouillon de feuille de travail n'envoie pas les résultats à votre responsable. Terminez toujours Vérifier la réalisation et Prêt à soumettre à la fin d'une série.",
       "related": [
@@ -599,21 +599,21 @@
         ""
       ],
       "minutes": 3,
-      "quick": "Consultez chaque matin le Tableau de bord et la Liste de tâches pour attribuer les analyses en attente, vérifier les séries soumises dans Examiner les soumissions, approuver les échantillons terminés dans Approbations finales et émettre les rapports PDF dans Rapports.",
+      "quick": "Ordre de la première journée : l’administrateur configure le laboratoire ; la réception reçoit et accepte les échantillons d’entraînement ; le responsable attribue le travail ; les techniciens préparent les échantillons et soumettent les séries depuis le Poste de travail ; le responsable examine ensuite les résultats et émet les rapports.",
       "before": [
-        "Vérifiez le nom de votre laboratoire actif dans la barre supérieure.",
-        "N'oubliez pas que lorsque votre laboratoire active l'exigence d'un second réviseur dans Politiques, vous ne pouvez pas approuver une série que vous avez saisie vous-même."
+        "Confirmez le nom du laboratoire actif dans la barre supérieure. Vérifiez que les échantillons d’entraînement ont été reçus et acceptés à la réception.",
+        "Lorsque la révision par deux personnes est activée, le réviseur doit être une autre personne que l’analyste. Si vous devez examiner les séries d’entraînement, ne les enregistrez pas vous-même."
       ],
       "sections": [
         {
           "title": "Procédure étape par étape",
           "steps": [
             {
-              "action": "Ouvrez Tableau de bord et Liste de tâches pour vérifier les compteurs des travaux non attribués, d'Examiner les soumissions et d'Approbations finales.",
-              "expected": "Vous voyez toutes les séries en attente de révision technique et tous les échantillons en attente de validation finale dans votre laboratoire."
+              "action": "Le matin, ouvrez Liste de tâches puis Attribuer le travail. Attribuez aux techniciens les analyses des échantillons d’entraînement reçus et acceptés.",
+              "expected": "Le travail attribué apparaît dans Mon travail pour chaque technicien, prêt pour la préparation et les analyses au poste de travail."
             },
             {
-              "action": "Ouvrez Examiner les soumissions pour inspecter les valeurs de série des techniciens et les résultats de contrôle qualité. Cliquez sur Approuver ou Retourner pour révision.",
+              "action": "À midi, le technicien devrait avoir soumis au moins deux séries depuis le Poste de travail pour le travail attribué le matin. Ouvrez Examiner les soumissions pour vérifier les valeurs et les contrôles qualité, puis cliquez sur Approuver ou Retourner pour révision.",
               "expected": "Les déterminations approuvées progressent vers l'achèvement de l'échantillon, tandis que les éléments retournés ouvrent un nouvel essai sur la paillasse du technicien avec votre note."
             },
             {
@@ -656,8 +656,8 @@
         "server/config/roles.js"
       ],
       "steps": [
-        "Ouvrez Tableau de bord et Liste de tâches pour vérifier les compteurs des travaux non attribués, d'Examiner les soumissions et d'Approbations finales. (Attendu : Vous voyez toutes les séries en attente de révision technique et tous les échantillons en attente de validation finale dans votre laboratoire.)",
-        "Ouvrez Examiner les soumissions pour inspecter les valeurs de série des techniciens et les résultats de contrôle qualité. Cliquez sur Approuver ou Retourner pour révision. (Attendu : Les déterminations approuvées progressent vers l'achèvement de l'échantillon, tandis que les éléments retournés ouvrent un nouvel essai sur la paillasse du technicien avec votre note.)",
+        "Le matin, ouvrez Liste de tâches puis Attribuer le travail. Attribuez aux techniciens les analyses des échantillons d’entraînement reçus et acceptés. (Attendu : Le travail attribué apparaît dans Mon travail pour chaque technicien, prêt pour la préparation et les analyses au poste de travail.)",
+        "À midi, le technicien devrait avoir soumis au moins deux séries depuis le Poste de travail pour le travail attribué le matin. Ouvrez Examiner les soumissions pour vérifier les valeurs et les contrôles qualité, puis cliquez sur Approuver ou Retourner pour révision. (Attendu : Les déterminations approuvées progressent vers l'achèvement de l'échantillon, tandis que les éléments retournés ouvrent un nouvel essai sur la paillasse du technicien avec votre note.)",
         "Ouvrez Approbations finales pour vérifier la cohérence globale de l'échantillon sur l'ensemble des analyses, approuvez l'échantillon et émettez le Certificat d’analyse dans Rapports. (Attendu : Le statut de l'échantillon passe à Approuvé et son rapport PDF officiel est prêt à être téléchargé ou partagé.)"
       ],
       "caution": "Consultez toujours à la fois Examiner les soumissions (pour les séries par méthode) et Approbations finales (pour les échantillons complets).",
@@ -928,7 +928,7 @@
       "category": "start",
       "kind": "guide",
       "title": "Choisir la langue, l'apparence et les préférences du profil",
-      "summary": "Modifiez votre langue d'affichage, le thème clair ou sombre, votre mot de passe et votre code PIN de paillasse partagée dans Mon profil.",
+      "summary": "Modifiez la langue, le thème clair ou sombre et le mot de passe dans Mon profil. Définissez votre PIN dans la boîte de dialogue PIN du Poste de travail.",
       "roles": [
         "ALL"
       ],
@@ -938,7 +938,7 @@
         "profile"
       ],
       "minutes": 3,
-      "quick": "Utilisez les boutons de langue et de thème dans la barre supérieure ou ouvrez Mon profil pour définir votre langue d'affichage, votre mot de passe et votre code PIN de paillasse de 4 à 6 chiffres sans affecter aucune donnée d'échantillon.",
+      "quick": "Utilisez les boutons de langue et de thème de la barre supérieure ou Mon profil pour vos préférences personnelles. À la première demande de PIN du Poste de travail, définissez un PIN personnel de 4 à 8 chiffres dans cette boîte de dialogue et confirmez-le avec le mot de passe de votre compte.",
       "before": [
         "Connectez-vous avec votre compte personnel.",
         "Rappelez-vous que changer la langue d'affichage traduit uniquement les libellés à l'écran : cela ne modifie jamais les valeurs numériques ni les unités enregistrées."
@@ -952,7 +952,7 @@
               "expected": "Les menus, boutons et articles d'aide passent immédiatement dans la langue choisie."
             },
             {
-              "action": "Ouvrez Mon profil depuis le menu latéral pour mettre à jour votre mot de passe personnel (au moins 12 caractères) ou votre code PIN de paillasse de 4 à 6 chiffres.",
+              "action": "Ouvrez Mon profil dans le menu latéral pour modifier votre mot de passe personnel (au moins 12 caractères). À la demande du Poste de travail, définissez un PIN de 4 à 8 chiffres dans sa boîte de dialogue et confirmez-le avec le mot de passe de votre compte.",
               "expected": "Vos paramètres de sécurité sont mis à jour uniquement pour votre compte."
             },
             {
@@ -979,7 +979,7 @@
           "Sauvegarde la mise à jour des préférences de votre profil et de votre mot de passe."
         ]
       ],
-      "example": "Passez la langue de l'interface sur Français dans la barre supérieure, ouvrez Mon profil, mettez à jour votre code PIN de paillasse. Cliquez sur Enregistrer les modifications.",
+      "example": "Choisissez Français dans la barre supérieure, ouvrez Mon profil, modifiez votre mot de passe et cliquez sur Enregistrer les modifications. À la première demande de PIN du Poste de travail, définissez un PIN personnel de 4 à 8 chiffres dans sa boîte de dialogue et confirmez-le avec le mot de passe de votre compte.",
       "success": "Votre langue d'affichage, votre apparence et vos paramètres personnels de sécurité sont enregistrés pour votre prise de poste.",
       "nextActor": "Vous pouvez poursuivre directement vers votre file de travail quotidienne",
       "problems": [
@@ -996,7 +996,7 @@
       ],
       "steps": [
         "Cliquez sur le Sélecteur de langue dans la barre supérieure ou sur l'écran de connexion pour basculer entre English, Español, Français et Português. (Attendu : Les menus, boutons et articles d'aide passent immédiatement dans la langue choisie.)",
-        "Ouvrez Mon profil depuis le menu latéral pour mettre à jour votre mot de passe personnel (au moins 12 caractères) ou votre code PIN de paillasse de 4 à 6 chiffres. (Attendu : Vos paramètres de sécurité sont mis à jour uniquement pour votre compte.)",
+        "Ouvrez Mon profil dans le menu latéral pour modifier votre mot de passe personnel (au moins 12 caractères). À la demande du Poste de travail, définissez un PIN de 4 à 8 chiffres dans sa boîte de dialogue et confirmez-le avec le mot de passe de votre compte. (Attendu : Vos paramètres de sécurité sont mis à jour uniquement pour votre compte.)",
         "Cliquez sur Enregistrer les modifications dans Mon profil pour sauvegarder vos préférences. (Attendu : Un message de confirmation s'affiche et vos paramètres restent actifs lors de votre prochaine connexion.)"
       ],
       "caution": "Les paramètres personnels du profil ne modifient jamais les méthodes d'analyse, les unités ou les règles qualité du laboratoire.",
@@ -9476,7 +9476,7 @@
               "expected": "Les brouillons sont validés par rapport aux bornes physiques, à la courbe d’étalonnage et à la répétabilité r."
             },
             {
-              "action": "Cliquez sur Enregistrer les déterminations (saisissez votre PIN à 4–6 chiffres si bench.pinAtRecord est actif), puis ouvrez Prêt à soumettre et cliquez sur Soumettre pour révision.",
+              "action": "Cliquez sur Enregistrer les déterminations (saisissez votre PIN à 4–8 chiffres si bench.pinAtRecord est actif), puis ouvrez Prêt à soumettre et cliquez sur Soumettre pour révision.",
               "expected": "Les résultats passent de brouillon SAVED à RECORDED puis SUBMITTED dans la file du réviseur."
             }
           ]
@@ -9518,7 +9518,7 @@
       "steps": [
         "Ouvrez la paillasse (/workbench), filtrez votre file ou groupe de méthodes et ouvrez la feuille de travail ou le lot analytique. (Expected: Les tâches assignées s’affichent avec les codes échantillons et les positions CQ (BLANK, DUPLICATE, LRM, CRM).)",
         "Saisissez ou collez les valeurs, appliquez les qualificatifs (< LOD, < LOQ) sans utiliser 0 pour une mesure absente, et traitez les lignes bloquées (Use a state/actor/evidence table and a concrete reviewer handoff. [Canonical successor: bench-states]). (Expected: Les brouillons sont validés par rapport aux bornes physiques, à la courbe d’étalonnage et à la répétabilité r.)",
-        "Cliquez sur Enregistrer les déterminations (saisissez votre PIN à 4–6 chiffres si bench.pinAtRecord est actif), puis ouvrez Prêt à soumettre et cliquez sur Soumettre pour révision. (Expected: Les résultats passent de brouillon SAVED à RECORDED puis SUBMITTED dans la file du réviseur.)"
+        "Cliquez sur Enregistrer les déterminations (saisissez votre PIN à 4–8 chiffres si bench.pinAtRecord est actif), puis ouvrez Prêt à soumettre et cliquez sur Soumettre pour révision. (Expected: Les résultats passent de brouillon SAVED à RECORDED puis SUBMITTED dans la file du réviseur.)"
       ],
       "caution": "Attention: The manager cannot see a result that is only saved. — Vérifiez le motif de blocage sur la ligne, sélectionnez la tentative active R2 en cas de reprise et complétez l’enregistrement ainsi que la soumission.",
       "related": [
@@ -9895,7 +9895,7 @@
               "expected": "Les brouillons sont validés par rapport aux bornes physiques, à la courbe d’étalonnage et à la répétabilité r."
             },
             {
-              "action": "Cliquez sur Enregistrer les déterminations (saisissez votre PIN à 4–6 chiffres si bench.pinAtRecord est actif), puis ouvrez Prêt à soumettre et cliquez sur Soumettre pour révision.",
+              "action": "Cliquez sur Enregistrer les déterminations (saisissez votre PIN à 4–8 chiffres si bench.pinAtRecord est actif), puis ouvrez Prêt à soumettre et cliquez sur Soumettre pour révision.",
               "expected": "Les résultats passent de brouillon SAVED à RECORDED puis SUBMITTED dans la file du réviseur."
             }
           ]
@@ -9937,7 +9937,7 @@
       "steps": [
         "Ouvrez la paillasse (/workbench), filtrez votre file ou groupe de méthodes et ouvrez la feuille de travail ou le lot analytique. (Expected: Les tâches assignées s’affichent avec les codes échantillons et les positions CQ (BLANK, DUPLICATE, LRM, CRM).)",
         "Saisissez ou collez les valeurs, appliquez les qualificatifs (< LOD, < LOQ) sans utiliser 0 pour une mesure absente, et traitez les lignes bloquées (Follow the return reason and eligible correction attempt without changing history. [Canonical successor: bench-returned]). (Expected: Les brouillons sont validés par rapport aux bornes physiques, à la courbe d’étalonnage et à la répétabilité r.)",
-        "Cliquez sur Enregistrer les déterminations (saisissez votre PIN à 4–6 chiffres si bench.pinAtRecord est actif), puis ouvrez Prêt à soumettre et cliquez sur Soumettre pour révision. (Expected: Les résultats passent de brouillon SAVED à RECORDED puis SUBMITTED dans la file du réviseur.)"
+        "Cliquez sur Enregistrer les déterminations (saisissez votre PIN à 4–8 chiffres si bench.pinAtRecord est actif), puis ouvrez Prêt à soumettre et cliquez sur Soumettre pour révision. (Expected: Les résultats passent de brouillon SAVED à RECORDED puis SUBMITTED dans la file du réviseur.)"
       ],
       "caution": "Attention: The old result is sealed and cannot be edited. — Vérifiez le motif de blocage sur la ligne, sélectionnez la tentative active R2 en cas de reprise et complétez l’enregistrement ainsi que la soumission.",
       "related": [

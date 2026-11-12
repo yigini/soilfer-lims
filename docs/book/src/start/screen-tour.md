@@ -48,7 +48,7 @@ The bar across the top of the screen stays visible on every page. From left to r
 2. **Help**: Opens the **Help with this page** drawer with step-by-step instructions for your current screen.
 3. **Language switcher**: Switches the screen and help text between English, Spanish, Latin American Spanish, French, and Portuguese.
 4. **Theme toggle**: Switches the screen between light mode and dark mode.
-5. **User Menu** (your name and role): Shows your active role and time zone. Click it to open **Profile Settings** (where you change your password or bench PIN) or click **Sign Out** when your shift ends.
+5. **User Menu** (your name and role): Shows your active role and time zone. Click it to open **Profile Settings** (where you change your password) or click **Sign Out** when your shift ends. Set your personal 4 to 8 digit bench PIN in the **Workbench PIN dialog** when prompted, and confirm it with your account password.
 
 ---
 

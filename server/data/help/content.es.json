@@ -257,7 +257,7 @@
               "expected": "Se abre tu Panel de control con el menú lateral correspondiente a tu rol asignado."
             },
             {
-              "action": "Si tu laboratorio utiliza ordenadores compartidos en la mesa de trabajo con confirmación por PIN, abre Mi perfil y configura tu PIN personal de 4 a 6 dígitos.",
+              "action": "Cuando Mesa de trabajo pida un PIN por primera vez, define un PIN personal de 4 a 8 dígitos en ese diálogo y confírmalo con la contraseña de tu cuenta. Si ya tienes un PIN, introdúcelo cuando se solicite.",
               "expected": "Tu PIN personal queda guardado y listo para cuando registres resultados en un ordenador compartido de la mesa de trabajo."
             }
           ]
@@ -277,10 +277,10 @@
         [
           "Mi perfil",
           "Página de configuración de la cuenta personal en el menú lateral",
-          "Utiliza esta página para cambiar tu contraseña, el idioma o el PIN de mesa de trabajo compartida."
+          "Utiliza esta página para cambiar tu contraseña y tus preferencias de idioma."
         ]
       ],
-      "example": "Inicia sesión como la técnica Amina en Demo Soil Lab, define una contraseña de 12 caracteres, comprueba \"Demo Soil Lab\" y \"Técnico de Laboratorio\" en la barra superior. Guarda un PIN de 4 dígitos en Mi perfil.",
+      "example": "Inicia sesión como la técnica Amina en Demo Soil Lab, define una contraseña de 12 caracteres y comprueba « Demo Soil Lab » y « Técnico de Laboratorio » en la barra superior. Cuando Mesa de trabajo pida un PIN por primera vez, define un PIN personal de 4 a 8 dígitos en ese diálogo y confírmalo con la contraseña de tu cuenta.",
       "success": "Has iniciado sesión con tu propio nombre y tienes activos el laboratorio y el rol correctos.",
       "nextActor": "Oficial de Recepción de Muestras, Técnico de Laboratorio, Oficial de Calidad y Auditoría o Gerente de Laboratorio",
       "problems": [
@@ -298,7 +298,7 @@
       "steps": [
         "Abre la pantalla de inicio de sesión, introduce tu nombre de usuario o ID y tu contraseña. Haz clic en Acceso Seguro. (Esperado: Si utilizas una contraseña temporal, el cuadro de diálogo Actualización de seguridad obligatoria se abre de inmediato.)",
         "Define una contraseña personal de al menos 12 caracteres, vuelve a iniciar sesión. Comprueba el nombre de tu laboratorio y tu rol en la barra superior. (Esperado: Se abre tu Panel de control con el menú lateral correspondiente a tu rol asignado.)",
-        "Si tu laboratorio utiliza ordenadores compartidos en la mesa de trabajo con confirmación por PIN, abre Mi perfil y configura tu PIN personal de 4 a 6 dígitos. (Esperado: Tu PIN personal queda guardado y listo para cuando registres resultados en un ordenador compartido de la mesa de trabajo.)"
+        "Cuando Mesa de trabajo pida un PIN por primera vez, define un PIN personal de 4 a 8 dígitos en ese diálogo y confírmalo con la contraseña de tu cuenta. Si ya tienes un PIN, introdúcelo cuando se solicite. (Esperado: Tu PIN personal queda guardado y listo para cuando registres resultados en un ordenador compartido de la mesa de trabajo.)"
       ],
       "caution": "Nunca introduzcas muestras ni resultados de análisis con la cuenta de un compañero ni bajo un nombre de laboratorio incorrecto.",
       "related": [
@@ -423,7 +423,7 @@
       "quick": "Abre Mi trabajo o Mesa de trabajo, completa primero las comprobaciones pendientes de secado y preparación, registra las mediciones de tu lote y las muestras de control de calidad. Envía el trabajo finalizado a tu revisor.",
       "before": [
         "Comprueba la barra superior para confirmar el nombre de tu laboratorio y tu rol de Técnico de Laboratorio.",
-        "Ten listos tu hoja de trabajo de mesa, los frascos de muestra y la comprobación de calibración del instrumento."
+        "Ten listas las muestras de práctica recibidas y aceptadas, el trabajo asignado por el gerente, la hoja de mesa, los frascos y la comprobación de calibración del instrumento."
       ],
       "sections": [
         {
@@ -438,7 +438,7 @@
               "expected": "La preparación confirmada desbloquea las filas de ensayo para que puedas escribir o pegar los resultados de las muestras y las lecturas de control de calidad."
             },
             {
-              "action": "Haz clic en Revisar finalización para registrar tus resultados comprobados y. Abre Listo para enviar. Haz clic en Enviar.",
+              "action": "Cuando Mesa de trabajo pida un PIN por primera vez, define un PIN personal de 4 a 8 dígitos en ese diálogo y confírmalo con la contraseña de tu cuenta. Si ya tienes un PIN, introdúcelo cuando se solicite. Haz clic en Revisar finalización para registrar tus resultados comprobados y. Abre Listo para enviar. Haz clic en Enviar.",
               "expected": "Tus resultados registrados pasan a Enviados y completados y aparecen en la Lista de tareas del revisor."
             }
           ]
@@ -479,7 +479,7 @@
       "steps": [
         "Abre Mi trabajo o Mesa de trabajo. Comprueba las tareas que tienes asignadas para hoy. (Esperado: Verás qué muestras necesitan Secado al aire o Preparación de muestras y cuáles están listas para el análisis en mesa.)",
         "Completa primero las listas de verificación de secado y tamizado requeridas. Haz clic en Confirmar que el trabajo ha terminado. Después abre tu hoja de trabajo analítica o haz clic en Nueva Corrida Analítica. (Esperado: La preparación confirmada desbloquea las filas de ensayo para que puedas escribir o pegar los resultados de las muestras y las lecturas de control de calidad.)",
-        "Haz clic en Revisar finalización para registrar tus resultados comprobados y. Abre Listo para enviar. Haz clic en Enviar. (Esperado: Tus resultados registrados pasan a Enviados y completados y aparecen en la Lista de tareas del revisor.)"
+        "Cuando Mesa de trabajo pida un PIN por primera vez, define un PIN personal de 4 a 8 dígitos en ese diálogo y confírmalo con la contraseña de tu cuenta. Si ya tienes un PIN, introdúcelo cuando se solicite. Haz clic en Revisar finalización para registrar tus resultados comprobados y. Abre Listo para enviar. Haz clic en Enviar. (Esperado: Tus resultados registrados pasan a Enviados y completados y aparecen en la Lista de tareas del revisor.)"
       ],
       "caution": "Guardar una hoja de trabajo en borrador no envía los resultados a tu responsable. Completa siempre Revisar finalización y Listo para enviar al finalizar una corrida.",
       "related": [
@@ -599,21 +599,21 @@
         ""
       ],
       "minutes": 3,
-      "quick": "Comprueba cada mañana Panel de control y Lista de tareas para asignar ensayos pendientes, revisar corridas enviadas por los técnicos en Revisar envíos, aprobar muestras completadas en Aprobaciones finales y emitir informes PDF en Informes.",
+      "quick": "Orden del primer día: el administrador configura el laboratorio; recepción recibe y acepta las muestras de práctica; el gerente asigna el trabajo; los técnicos preparan las muestras y envían los lotes desde Mesa de trabajo; el gerente revisa los resultados y emite los informes.",
       "before": [
-        "Confirma el nombre de tu laboratorio activo en la barra superior.",
-        "Recuerda que cuando tu laboratorio activa Exigir un segundo revisor en Políticas, no puedes aprobar una corrida que tú mismo hayas registrado."
+        "Confirma el nombre del laboratorio activo en la barra superior. Comprueba que las muestras de práctica se han recibido y aceptado en recepción.",
+        "Cuando está activa la revisión por dos personas, el revisor debe ser una persona distinta del analista. Si vas a revisar los lotes de práctica, no los registres personalmente."
       ],
       "sections": [
         {
           "title": "Procedimiento paso a paso",
           "steps": [
             {
-              "action": "Abre Panel de control y Lista de tareas para comprobar los contadores de trabajo sin asignar, Revisar envíos y Aprobaciones finales.",
-              "expected": "Verás todos los lotes pendientes de revisión técnica y todas las muestras que esperan aprobación final en tu laboratorio."
+              "action": "Por la mañana, abre Lista de tareas y Asignar trabajo. Asigna a los técnicos los ensayos de las muestras de práctica recibidas y aceptadas.",
+              "expected": "El trabajo asignado aparece en Mi trabajo para cada técnico, listo para la preparación y el análisis en mesa."
             },
             {
-              "action": "Abre Revisar envíos para inspeccionar los valores del lote del técnico y los resultados de control de calidad. Luego haz clic en Aprobar o Devolver.",
+              "action": "Al mediodía, el técnico debería haber enviado al menos dos lotes desde Mesa de trabajo para el trabajo asignado por la mañana. Abre Revisar envíos para comprobar los valores y los controles de calidad y haz clic en Aprobar o Devolver.",
               "expected": "Las determinaciones aprobadas avanzan hacia la finalización de la muestra, mientras que los elementos devueltos abren un nuevo intento de repetición en la mesa del técnico con tu nota."
             },
             {
@@ -656,8 +656,8 @@
         "server/config/roles.js"
       ],
       "steps": [
-        "Abre Panel de control y Lista de tareas para comprobar los contadores de trabajo sin asignar, Revisar envíos y Aprobaciones finales. (Esperado: Verás todos los lotes pendientes de revisión técnica y todas las muestras que esperan aprobación final en tu laboratorio.)",
-        "Abre Revisar envíos para inspeccionar los valores del lote del técnico y los resultados de control de calidad. Luego haz clic en Aprobar o Devolver. (Esperado: Las determinaciones aprobadas avanzan hacia la finalización de la muestra, mientras que los elementos devueltos abren un nuevo intento de repetición en la mesa del técnico con tu nota.)",
+        "Por la mañana, abre Lista de tareas y Asignar trabajo. Asigna a los técnicos los ensayos de las muestras de práctica recibidas y aceptadas. (Esperado: El trabajo asignado aparece en Mi trabajo para cada técnico, listo para la preparación y el análisis en mesa.)",
+        "Al mediodía, el técnico debería haber enviado al menos dos lotes desde Mesa de trabajo para el trabajo asignado por la mañana. Abre Revisar envíos para comprobar los valores y los controles de calidad y haz clic en Aprobar o Devolver. (Esperado: Las determinaciones aprobadas avanzan hacia la finalización de la muestra, mientras que los elementos devueltos abren un nuevo intento de repetición en la mesa del técnico con tu nota.)",
         "Abre Aprobaciones finales para comprobar la coherencia global de la muestra en todos los ensayos, aprueba la muestra y emite el Certificado de análisis en Informes. (Esperado: El estado de la muestra pasa a Aprobada y su informe oficial en PDF queda listo para descargar o compartir.)"
       ],
       "caution": "Revisa siempre tanto Revisar envíos (para corridas de métodos individuales) como Aprobaciones finales (para muestras completas).",
@@ -928,7 +928,7 @@
       "category": "start",
       "kind": "guide",
       "title": "Elegir el idioma, la apariencia y las preferencias de perfil",
-      "summary": "Cambia el idioma de pantalla, el tema claro u oscuro, tu contraseña y tu PIN de mesa compartida en Mi perfil.",
+      "summary": "Cambia el idioma, el tema claro u oscuro y la contraseña en Mi perfil. Define el PIN en el diálogo de PIN de Mesa de trabajo.",
       "roles": [
         "ALL"
       ],
@@ -938,7 +938,7 @@
         "profile"
       ],
       "minutes": 3,
-      "quick": "Utiliza los botones de idioma y tema en la barra superior o abre Mi perfil para configurar tu idioma de visualización preferido, tu contraseña y tu PIN de mesa de 4 a 6 dígitos sin afectar ningún dato de las muestras.",
+      "quick": "Utiliza los botones de idioma y tema de la barra superior o Mi perfil para tus preferencias personales. Cuando Mesa de trabajo pida un PIN por primera vez, define un PIN personal de 4 a 8 dígitos en ese diálogo y confírmalo con la contraseña de tu cuenta.",
       "before": [
         "Inicia sesión con tu cuenta personal.",
         "Recuerda que cambiar el idioma de visualización solo traduce las etiquetas de la pantalla: nunca modifica los números ni las unidades almacenadas."
@@ -952,7 +952,7 @@
               "expected": "Los menús, botones y artículos de Ayuda cambian de inmediato al idioma que hayas elegido."
             },
             {
-              "action": "Abre Mi perfil desde el menú lateral para actualizar tu contraseña personal (al menos 12 caracteres) o tu PIN de mesa de 4 a 6 dígitos.",
+              "action": "Abre Mi perfil en el menú lateral para actualizar tu contraseña personal (al menos 12 caracteres). Cuando Mesa de trabajo pida un PIN, defínelo en su diálogo con 4 a 8 dígitos y confírmalo con la contraseña de tu cuenta.",
               "expected": "Tus ajustes de seguridad se actualizan únicamente para tu cuenta."
             },
             {
@@ -979,7 +979,7 @@
           "Guarda la configuración actualizada de tu perfil y tu contraseña."
         ]
       ],
-      "example": "Cambia el idioma de la interfaz a Français en la barra superior, abre Mi perfil, actualiza tu PIN de mesa. Haz clic en Guardar cambios.",
+      "example": "Elige Español en la barra superior, abre Mi perfil, actualiza tu contraseña y haz clic en Guardar cambios. Cuando Mesa de trabajo pida un PIN por primera vez, define un PIN personal de 4 a 8 dígitos en ese diálogo y confírmalo con la contraseña de tu cuenta.",
       "success": "El idioma de tu pantalla, la apariencia y tus ajustes personales de seguridad quedan guardados para tu turno.",
       "nextActor": "Puedes continuar directamente hacia tu cola de trabajo diaria",
       "problems": [
@@ -996,7 +996,7 @@
       ],
       "steps": [
         "Haz clic en el selector de idioma de la barra superior o de la pantalla de inicio de sesión para cambiar entre English, Español, Français y Português. (Esperado: Los menús, botones y artículos de Ayuda cambian de inmediato al idioma que hayas elegido.)",
-        "Abre Mi perfil desde el menú lateral para actualizar tu contraseña personal (al menos 12 caracteres) o tu PIN de mesa de 4 a 6 dígitos. (Esperado: Tus ajustes de seguridad se actualizan únicamente para tu cuenta.)",
+        "Abre Mi perfil en el menú lateral para actualizar tu contraseña personal (al menos 12 caracteres). Cuando Mesa de trabajo pida un PIN, defínelo en su diálogo con 4 a 8 dígitos y confírmalo con la contraseña de tu cuenta. (Esperado: Tus ajustes de seguridad se actualizan únicamente para tu cuenta.)",
         "Haz clic en Guardar cambios dentro de Mi perfil para guardar tus preferencias. (Esperado: Aparece un mensaje de confirmación y tu configuración permanece activa la próxima vez que inicies sesión.)"
       ],
       "caution": "Los ajustes del perfil personal nunca cambian los métodos de ensayo, las unidades ni las reglas de calidad del laboratorio.",
@@ -9476,7 +9476,7 @@
               "expected": "Los borradores se validan frente a límites físicos, rango de calibración y repetibilidad r."
             },
             {
-              "action": "Pulsa Registrar determinaciones (introduce tu PIN de 4–6 dígitos si bench.pinAtRecord está activo) y luego en Listo para enviar pulsa Enviar muestras a revisión.",
+              "action": "Pulsa Registrar determinaciones (introduce tu PIN de 4–8 dígitos si bench.pinAtRecord está activo) y luego en Listo para enviar pulsa Enviar muestras a revisión.",
               "expected": "Las determinaciones pasan de borrador SAVED a RECORDED y SUBMITTED en la cola del Revisor / Responsable."
             }
           ]
@@ -9518,7 +9518,7 @@
       "steps": [
         "Abre el Workbench (/workbench), filtra tu cola o grupo de métodos y abre la hoja de trabajo o lote analítico. (Expected: Se cargan las tareas asignadas con sus códigos de muestra y posiciones CC (BLANK, DUPLICATE, LRM, CRM).)",
         "Introduce o pega los valores, aplica calificadores (< LOD, < LOQ) sin usar 0 para muestras no medidas y resuelve cualquier fila bloqueada (Use a state/actor/evidence table and a concrete reviewer handoff. [Canonical successor: bench-states]). (Expected: Los borradores se validan frente a límites físicos, rango de calibración y repetibilidad r.)",
-        "Pulsa Registrar determinaciones (introduce tu PIN de 4–6 dígitos si bench.pinAtRecord está activo) y luego en Listo para enviar pulsa Enviar muestras a revisión. (Expected: Las determinaciones pasan de borrador SAVED a RECORDED y SUBMITTED en la cola del Revisor / Responsable.)"
+        "Pulsa Registrar determinaciones (introduce tu PIN de 4–8 dígitos si bench.pinAtRecord está activo) y luego en Listo para enviar pulsa Enviar muestras a revisión. (Expected: Las determinaciones pasan de borrador SAVED a RECORDED y SUBMITTED en la cola del Revisor / Responsable.)"
       ],
       "caution": "Precaución: The manager cannot see a result that is only saved. — Revisa el motivo de bloqueo en la fila, selecciona el intento activo R2 si fue devuelto y completa tanto Registrar determinaciones como Enviar a revisión.",
       "related": [
@@ -9895,7 +9895,7 @@
               "expected": "Los borradores se validan frente a límites físicos, rango de calibración y repetibilidad r."
             },
             {
-              "action": "Pulsa Registrar determinaciones (introduce tu PIN de 4–6 dígitos si bench.pinAtRecord está activo) y luego en Listo para enviar pulsa Enviar muestras a revisión.",
+              "action": "Pulsa Registrar determinaciones (introduce tu PIN de 4–8 dígitos si bench.pinAtRecord está activo) y luego en Listo para enviar pulsa Enviar muestras a revisión.",
               "expected": "Las determinaciones pasan de borrador SAVED a RECORDED y SUBMITTED en la cola del Revisor / Responsable."
             }
           ]
@@ -9937,7 +9937,7 @@
       "steps": [
         "Abre el Workbench (/workbench), filtra tu cola o grupo de métodos y abre la hoja de trabajo o lote analítico. (Expected: Se cargan las tareas asignadas con sus códigos de muestra y posiciones CC (BLANK, DUPLICATE, LRM, CRM).)",
         "Introduce o pega los valores, aplica calificadores (< LOD, < LOQ) sin usar 0 para muestras no medidas y resuelve cualquier fila bloqueada (Follow the return reason and eligible correction attempt without changing history. [Canonical successor: bench-returned]). (Expected: Los borradores se validan frente a límites físicos, rango de calibración y repetibilidad r.)",
-        "Pulsa Registrar determinaciones (introduce tu PIN de 4–6 dígitos si bench.pinAtRecord está activo) y luego en Listo para enviar pulsa Enviar muestras a revisión. (Expected: Las determinaciones pasan de borrador SAVED a RECORDED y SUBMITTED en la cola del Revisor / Responsable.)"
+        "Pulsa Registrar determinaciones (introduce tu PIN de 4–8 dígitos si bench.pinAtRecord está activo) y luego en Listo para enviar pulsa Enviar muestras a revisión. (Expected: Las determinaciones pasan de borrador SAVED a RECORDED y SUBMITTED en la cola del Revisor / Responsable.)"
       ],
       "caution": "Precaución: The old result is sealed and cannot be edited. — Revisa el motivo de bloqueo en la fila, selecciona el intento activo R2 si fue devuelto y completa tanto Registrar determinaciones como Enviar a revisión.",
       "related": [
