@@ -81,12 +81,35 @@ export function PolicyValueEditor({ definition, value, onChange, t }) {
         {definition.type === 'sampleFormat' && !value.includes('{CHK}') && <p role="alert">{t('policies.sampleCodeNoCheck')}</p>}</div>;
 }
 
+function revealPolicyEditor(id) {
+    if (!id || typeof document === 'undefined') return;
+    const form = document.getElementById(id);
+    form?.scrollIntoView({ block: 'nearest' });
+    form?.querySelector('input:not([disabled]), select:not([disabled]), textarea:not([disabled])')?.focus({ preventScroll: true });
+}
+
 export default function LabPolicies({ labId }) {
     const { t } = useLanguage();
     const [data, setData] = useState(null), [loading, setLoading] = useState(true), [error, setError] = useState('');
     const [analysisCode, setAnalysisCode] = useState(''), [methodologyId, setMethodologyId] = useState('');
     const [refresh, setRefresh] = useState(0), [editing, setEditing] = useState(null), [reason, setReason] = useState(''), [saving, setSaving] = useState(false);
     const [preset, setPreset] = useState(''), [presetReason, setPresetReason] = useState('');
+    const editorId = editing ? `policy-editor-${encodeURIComponent(labId)}-${encodeURIComponent(editing.rowId)}` : null;
+    useEffect(() => { revealPolicyEditor(editorId); }, [editorId, editing?.clear]);
+    const openEditor = next => {
+        if (saving) return;
+        if (editing?.rowId === next.rowId && Boolean(editing.clear) === Boolean(next.clear)) {
+            revealPolicyEditor(editorId);
+            return;
+        }
+        const unsaved = editing && (editing.clear || reason.trim() || JSON.stringify(editing.value) !== editing.initialValue);
+        if (unsaved && !window.confirm(t('policyEditor.replaceUnsaved'))) {
+            revealPolicyEditor(editorId);
+            return;
+        }
+        setEditing({ ...next, initialValue: JSON.stringify(next.value) });
+        setReason('');
+    };
     useEffect(() => {
         let current = true;
         setLoading(true); setError('');
@@ -119,6 +142,28 @@ export default function LabPolicies({ labId }) {
         if (definition.key === 'numbers.thousandsSeparator' && value === ' ') return t('numbers.space');
         return definition.type === 'enum' ? t(`policies.options.${value}`, value) : String(value);
     };
+    const activeRowClass = 'border-t bg-blue-50 dark:bg-slate-800 ring-2 ring-inset ring-blue-400';
+    const renderEditor = rowId => editing?.rowId === rowId && data.canEdit && <tr className={activeRowClass}>
+        <td colSpan={5} className="p-2">
+            <form id={editorId} onSubmit={e => { e.preventDefault(); save({ reason, changes: [{ key: editing.key,
+            ...(editing.clear ? { clear: true } : { value: editing.value }),
+            analysisCode: editing.clear ? editing.scope.analysisCode : analysisCode || null,
+            methodologyId: editing.clear ? editing.scope.methodologyId : methodologyId || null }] }); }} className="border rounded p-4 space-y-3">
+                <h3 className="font-semibold">{t(data.registry[editing.key].description)}</h3>
+                {editing.clear ? <p>{t('policies.clearExplanation')}</p> : <div className="max-h-[50vh] overflow-y-auto">
+                    <PolicyValueEditor definition={data.registry[editing.key]} value={editing.value} t={t} onChange={value => setEditing({ ...editing, value })} />
+                </div>}
+                <div className="flex flex-wrap items-end gap-3">
+                    <div className="grow"><label>{t('policies.reason')}<input required value={reason}
+                        aria-describedby={`${editorId}-reason-hint`} onChange={e => setReason(e.target.value)} /></label>
+                        <p id={`${editorId}-reason-hint`} className="mt-1 text-sm">{t('policyEditor.reasonRequiredHint')}</p>
+                    </div>
+                    <div className="flex gap-2"><button disabled={saving || !reason.trim()}>{t('policies.save')}</button>
+                        <button type="button" disabled={saving} onClick={() => { setEditing(null); setReason(''); }}>{t('policies.cancel')}</button></div>
+                </div>
+            </form>
+        </td>
+    </tr>;
     if (loading) return <p role="status">{t('policies.loading')}</p>;
     if (!data) return <p role="alert">{error}</p>;
     return <section className="space-y-5 text-sf-text [&_input:not([type=checkbox])]:border [&_input:not([type=checkbox])]:rounded [&_input:not([type=checkbox])]:p-2 [&_select]:border [&_select]:rounded [&_select]:p-2 [&_button]:border [&_button]:rounded [&_button]:px-3 [&_button]:py-2 [&_button:disabled]:opacity-50 [&_label]:grid [&_label]:gap-1">
@@ -145,32 +190,39 @@ export default function LabPolicies({ labId }) {
                 const row = data.resolved[key], presetValue = definition.presets[data.presetCode || data.inheritedPreset];
                 const canChangeScope = definition.scope !== 'INSTALL' && (definition.scope === 'LAB+METHOD' || !analysisCode ||
                     (!methodologyId && (definition.analysisOverridesAll || definition.analysisOverrides?.includes(analysisCode))));
-                return <tr key={key} className="border-t"><td className="p-2">{t(definition.description)}{definition.unit && <span> ({t(`policies.units.${definition.unit}`, definition.unit)})</span>}{definition.help && <p className="text-xs">{t(definition.help)}</p>}</td>
+                const rowId = `setting:${key}`, active = editing?.rowId === rowId;
+                const scopeHintId = `policy-scope-${encodeURIComponent(labId)}-${encodeURIComponent(key)}`;
+                const scopeHint = t(definition.scope === 'INSTALL' ? 'policyEditor.installScopeOnly' :
+                    definition.analysisOverridesAll || definition.analysisOverrides?.includes(analysisCode) ? 'policyEditor.labOrAnalysisScopeOnly' : 'policyEditor.labScopeOnly');
+                return <React.Fragment key={key}><tr key={key} data-editing={active ? 'true' : undefined} className={active ? activeRowClass : 'border-t'}><td className="p-2">{t(definition.description)}{definition.unit && <span> ({t(`policies.units.${definition.unit}`, definition.unit)})</span>}{definition.help && <p className="text-xs">{t(definition.help)}</p>}</td>
                     <td className="p-2">{display(definition, row.value)}
                         {row.invalid && <p role="alert" data-testid="policy-stored-invalid">{t('policies.storedInvalid')}</p>}
                         {definition.type === 'sampleFormat' && !row.value.includes('{CHK}') && <p role="alert">{t('policies.sampleCodeNoCheck')}</p>}</td><td className="p-2">{t(`policies.sources.${row.source}`)}
                         {row.scope?.analysisCode && ` · ${row.scope.analysisCode}`}{row.scope?.methodologyId && ` · ${data.methodologies.find(m => m.id === row.scope.methodologyId)?.name || row.scope.methodologyId}`}
                         {row.profile && ` · ${row.profile}`} · {t('policies.version')} {row.version}</td>
                     <td className="p-2">{JSON.stringify(row.value) !== JSON.stringify(presetValue) ? t('policies.differs') : '—'}</td>
-                    <td>{data.canEdit && canChangeScope && <><button type="button" onClick={() => { setEditing({ key, value: JSON.parse(JSON.stringify(row.invalid ? presetValue : row.value)) }); setReason(''); }}>{t('policies.edit')}</button>
-                        {['LAB_OVERRIDE', 'ANALYSIS_OVERRIDE', 'METHOD_OVERRIDE'].includes(row.source) && <button type="button" onClick={() => { setEditing({ key, clear: true, scope: row.scope }); setReason(''); }}>{t('policies.clear')}</button>}</>}</td></tr>;
+                    <td>{data.canEdit && <><button type="button" disabled={saving || !canChangeScope}
+                        title={!canChangeScope ? scopeHint : undefined} aria-describedby={!canChangeScope ? scopeHintId : undefined}
+                        aria-expanded={active && !editing.clear} aria-controls={active ? editorId : undefined}
+                        onClick={() => { if (canChangeScope) openEditor({ key, rowId, value: JSON.parse(JSON.stringify(row.invalid ? presetValue : row.value)) }); }}>{t('policies.edit')}</button>
+                        {['LAB_OVERRIDE', 'ANALYSIS_OVERRIDE', 'METHOD_OVERRIDE'].includes(row.source) && <button type="button"
+                            disabled={saving || !canChangeScope} title={!canChangeScope ? scopeHint : undefined}
+                            aria-expanded={active && Boolean(editing.clear)} aria-controls={active ? editorId : undefined}
+                            onClick={() => { if (canChangeScope) openEditor({ key, rowId, clear: true, scope: row.scope }); }}>{t('policies.clear')}</button>}
+                        {!canChangeScope && <p id={scopeHintId} className="mt-1 text-xs">{scopeHint}</p>}</>}</td></tr>
+                    {renderEditor(rowId)}</React.Fragment>;
             })}</tbody></table></div>
-        {editing && data.canEdit && <form onSubmit={e => { e.preventDefault(); save({ reason, changes: [{ key: editing.key,
-            ...(editing.clear ? { clear: true } : { value: editing.value }),
-            analysisCode: editing.clear ? editing.scope.analysisCode : analysisCode || null,
-            methodologyId: editing.clear ? editing.scope.methodologyId : methodologyId || null }] }); }} className="border rounded p-4 space-y-3">
-            <h3>{t(data.registry[editing.key].description)}</h3>
-            {editing.clear ? <p>{t('policies.clearExplanation')}</p> : <PolicyValueEditor definition={data.registry[editing.key]} value={editing.value} t={t} onChange={value => setEditing({ ...editing, value })} />}
-            <label>{t('policies.reason')}<input required value={reason} onChange={e => setReason(e.target.value)} /></label>
-            <button disabled={saving || !reason.trim()}>{t('policies.save')}</button><button type="button" disabled={saving} onClick={() => setEditing(null)}>{t('policies.cancel')}</button>
-        </form>}
         <h3 className="font-bold">{t('policies.overrides')}</h3>
         <div className="overflow-x-auto"><table className="w-full text-sm"><thead><tr>{['setting', 'scope', 'value', 'reason'].map(key => <th className="text-left p-2" key={key}>{t(`policies.${key}`)}</th>)}<th /></tr></thead>
-            <tbody>{data.overrides.filter(row => !row.revokedAt && row.analysisCode).map(row => <tr className="border-t" key={row.id}>
+            <tbody>{data.overrides.filter(row => !row.revokedAt && row.analysisCode).map(row => {
+                const rowId = `override:${row.id}`, active = editing?.rowId === rowId;
+                return <React.Fragment key={row.id}><tr data-editing={active ? 'true' : undefined} className={active ? activeRowClass : 'border-t'}>
                 <td className="p-2">{t(data.registry[row.key].description)}</td><td className="p-2">{row.analysisCode} · {row.methodologyId ? data.methodologies.find(m => m.id === row.methodologyId)?.name || row.methodologyId : t('policies.allMethods')}</td>
                 <td className="p-2">{display(data.registry[row.key], row.value)}</td><td className="p-2">{row.reason}</td>
-                <td>{data.canEdit && <button type="button" onClick={() => { setEditing({ key: row.key, clear: true, scope: row }); setReason(''); }}>{t('policies.clear')}</button>}</td>
-            </tr>)}</tbody></table></div>
+                <td>{data.canEdit && <button type="button" disabled={saving} aria-expanded={active} aria-controls={active ? editorId : undefined}
+                    onClick={() => openEditor({ key: row.key, rowId, clear: true, scope: row })}>{t('policies.clear')}</button>}</td>
+            </tr>{renderEditor(rowId)}</React.Fragment>;
+            })}</tbody></table></div>
         <h3 className="font-bold">{t('policies.history')}</h3>
         {analysisCode && <QcRules key={`${labId}-${analysisCode}-${methodologyId}`} labId={labId} analysisCode={analysisCode} methodologyId={methodologyId || null} registry={data.registry} canEdit={data.canEdit} Editor={PolicyValueEditor} />}
         <ul>{data.history.map(row => { const event = JSON.parse(row.details); return <li key={row.id} className="border-t py-2">

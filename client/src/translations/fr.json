@@ -3151,6 +3151,13 @@
     "massCheckFailed": "Les besoins en masse n’ont pas pu être chargés. Le serveur vérifiera chaque ligne lors de l’envoi.",
     "positionalUncertainty": "Incertitude de position enregistrée (m)"
   },
+  "policyEditor": {
+    "reasonRequiredHint": "Un motif est nécessaire pour enregistrer.",
+    "labScopeOnly": "Ce paramètre ne peut être modifié qu’au niveau du laboratoire.",
+    "labOrAnalysisScopeOnly": "Ce paramètre peut être modifié au niveau du laboratoire ou de l’analyse, mais pas pour une seule méthode.",
+    "installScopeOnly": "Défini pour l’ensemble de l’installation.",
+    "replaceUnsaved": "Des modifications ne sont pas enregistrées. Les abandonner et ouvrir l’autre paramètre ?"
+  },
   "policies": {
     "sampleCodeNoCheck": "Sans caractère de contrôle, les erreurs de lecture sont plus difficiles à détecter.",
     "keys": {

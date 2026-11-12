@@ -3151,6 +3151,13 @@
     "massCheckFailed": "No se pudieron cargar los requisitos de masa. El servidor comprobará cada fila al enviar.",
     "positionalUncertainty": "Incertidumbre posicional registrada (m)"
   },
+  "policyEditor": {
+    "reasonRequiredHint": "Debes indicar un motivo para guardar.",
+    "labScopeOnly": "Este ajuste solo se puede cambiar en el ámbito del laboratorio.",
+    "labOrAnalysisScopeOnly": "Este ajuste se puede cambiar en el ámbito del laboratorio o del análisis, pero no para un único método.",
+    "installScopeOnly": "Definido para toda la instalación.",
+    "replaceUnsaved": "Tienes cambios sin guardar. ¿Quieres descartarlos y abrir el otro ajuste?"
+  },
   "policies": {
     "sampleCodeNoCheck": "Sin un carácter de control, los errores de lectura son más difíciles de detectar.",
     "keys": {

@@ -48,9 +48,10 @@ describe('Audit 1.0: real policy page controls', () => {
         tree = h.render(); await new Promise(resolve => setImmediate(resolve)); tree = h.render();
         elements(tree).find(node => node.type === 'select' && elements(node).some(option => option.props?.value === 'method')).props.onChange({ target: { value: 'method' } });
         h.render(); await new Promise(resolve => setImmediate(resolve)); tree = h.render();
-        const row = elements(tree).find(node => node.type === 'tr' && elements(node).some(child => child.props?.children === 'Decimal separator'));
-        expect(find(row, 'button', 'Edit')).toBeUndefined();
-        find(tree, 'button', 'Edit').props.onClick(); tree = h.render();
+        const row = elements(tree).find(node => node.type === 'tr' && node.key === 'numbers.decimalSeparator');
+        expect(find(row, 'button', 'Edit').props.disabled).toBe(true);
+        expect(find(row, 'button', 'Edit').props.title).toBe(locale.policyEditor.labScopeOnly);
+        elements(tree).find(node => node.type === 'button' && node.props.children === 'Edit' && !node.props.disabled).props.onClick(); tree = h.render();
         expect(find(tree, 'button', 'Save change').props.disabled).toBe(true);
         elements(tree).filter(node => node.type === 'input').at(-1).props.onChange({ target: { value: 'Method approved' } }); tree = h.render();
         elements(tree).filter(node => node.type === 'form').at(-1).props.onSubmit({ preventDefault() {} }); await new Promise(resolve => setImmediate(resolve));
