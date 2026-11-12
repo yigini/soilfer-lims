@@ -1,10 +1,16 @@
 # Release Notes (1.11, 1.12 & 1.13)
 
-This page summarizes what laboratory staff, managers, and server administrators will notice in SoilFER-LIMS **1.13.0**, followed by earlier updates in versions **1.12** and **1.11**.
+This page summarizes what laboratory staff, managers, and server administrators will notice in SoilFER-LIMS **1.13.1**, followed by earlier updates in versions **1.12** and **1.11**.
 
 For step-by-step update instructions, see [Updating SoilFER-LIMS](./updates.md).
 
 ---
+
+## Version 1.13.1 — 2026-11-13
+
+- **First-day task order:** reception receives and accepts the practice samples before the manager assigns work. Technicians then prepare and submit batches for review. When two-person review is on, the reviewer must be a different person from the analyst.
+- **Bench PIN guidance:** use a personal 4 to 8 digit PIN in the Workbench PIN dialog, confirmed with your account password when first set. Help v1.4.1 gives the same instructions in all five languages.
+- **Policy editing:** Edit and Clear open directly under the selected setting, including rows in Overrides. A highlight identifies the row, a hint explains the required reason, unavailable scopes are explained, and switching away from an unsaved edit asks for confirmation.
 
 ## Version 1.13.0 — 2026-11-11
 
