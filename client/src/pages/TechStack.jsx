@@ -83,6 +83,17 @@ const techStack = [
 
 const changelog = [
     {
+        version: 'v1.13.1',
+        date: 'November 13, 2026',
+        tag: 'First-Day Guidance and Policy Editing',
+        badgeColor: 'bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300 border-blue-300 dark:border-blue-800',
+        changes: [
+            'First-day guides and Help v1.4.1 explain reception, assignment, batch submission and separate review in the right order.',
+            'Bench PIN instructions use 4 to 8 digits and the Workbench PIN dialog across all five Help languages.',
+            'Policy editors stay beside their setting, with visible reason requirements, scope explanations and unsaved-change warnings.',
+        ],
+    },
+    {
         version: 'v1.13.0',
         date: 'November 11, 2026',
         tag: 'Everyday Laboratory Work',

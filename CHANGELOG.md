@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.13.1] - 2026-11-13
+
+### Fixed
+- Correct the first-day task order and explain bench PIN setup in the Workbench dialog using 4 to 8 digits.
+- Keep policy Edit and Clear forms beside the selected row, with a reason hint, scope explanations and a warning before replacing unsaved changes.
+
+### Changed
+- Include Help v1.4.1 with matching guidance across all five languages.
+
 ## [1.13.0] - 2026-11-11
 
 ### Added
