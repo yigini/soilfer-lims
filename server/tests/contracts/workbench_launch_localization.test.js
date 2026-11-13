@@ -126,3 +126,20 @@ test('shared review-card changes are confined to presentation and both deep-link
     expect(sample).toContain('item.methodology?.name');
     expect(work).toContain('/workbench?workItemId=${item.id}&sampleId=${item.sampleId}');
 });
+
+test.each(locales)('%s: a sample work-item row renders its translated Workbench action and keeps its destination', async locale => {
+    const t = localeTranslator(locale);
+    const item = { id: 'work-one', sampleId: 'sample-one', analysis: 'PH_H2O',
+        status: 'IN_PROGRESS', assignedTo: 'tech1', category: 'Analysis' };
+    const view = mountUi('components/sample/WorkItemsTable.jsx', {
+        workItems: [item], sampleId: item.sampleId, isGateOpen: true, loading: false
+    }, { user: { username: 'tech1', role: 'LAB_TECHNICIAN' }, translate: t });
+    await view.render();
+    const open = buttons(view).find(node => content(node) === t('workbenchUi.openWorkbench'));
+    expect(open).toBeDefined();
+    expect(open.props.title).toBe(t('workbenchUi.openTask'));
+    open.props.onClick();
+    expect(view.navigate).toHaveBeenCalledWith('/workbench?workItemId=work-one&sampleId=sample-one');
+    expect(view.axios.post).not.toHaveBeenCalled();
+    view.unmount();
+});

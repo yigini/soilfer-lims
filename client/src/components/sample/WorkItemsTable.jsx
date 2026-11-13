@@ -7,6 +7,7 @@ import { Save, CheckCircle, AlertTriangle, FileText, Upload, UserPlus, XCircle, 
 import SpectraViewer from '../SpectraViewer';
 import SpectraBatchUpload from '../SpectraBatchUpload';
 import { useAuth } from '../../context/AuthContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { useDialog } from '../../context/DialogContext';
 import InfoTooltip from '../common/InfoTooltip';
 
@@ -26,6 +27,7 @@ const WorkItemsTable = ({
     const navigate = useNavigate();
     const getAnalysisDisplayName = useAnalysisNames();
     const { user } = useAuth();
+    const { t } = useLanguage();
     const { showDialog } = useDialog();
     const isTech = user.role === 'LAB_TECHNICIAN';
     const isManager = ['LAB_MANAGER', 'SUPER_ADMIN'].includes(user.role);
