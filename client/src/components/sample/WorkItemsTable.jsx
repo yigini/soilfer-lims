@@ -721,9 +721,9 @@ const WorkItemsTable = ({
                                                         type="button"
                                                         onClick={() => navigate(`/workbench?workItemId=${item.id}&sampleId=${item.sampleId}`)}
                                                         className="inline-flex items-center gap-1 text-xs font-semibold text-sf-emerald hover:text-sf-emerald-hover hover:underline"
-                                                        title="Open task in Technician Workbench"
+                                                        title={t("workbenchUi.openTask")}
                                                     >
-                                                        <span>Open in Workbench →</span>
+                                                        <span>{t("workbenchUi.openWorkbench")}</span>
                                                     </button>
 
                                                     {/* MANAGER APPROVAL ACTIONS (Strictly SUBMITTED scientific determinations or AWAITING_VERIFICATION gates) */}

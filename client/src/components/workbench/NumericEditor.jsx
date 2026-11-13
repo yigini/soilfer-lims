@@ -20,7 +20,7 @@ export default function NumericEditor({
     validation = null,
     isInvalid = false,
     onEnterNext = null,
-    ariaLabel = 'Numeric determination',
+    ariaLabel = null,
     inputRef = null,
     numberFormat,
     onBarcodeRejected = null,
@@ -71,7 +71,7 @@ export default function NumericEditor({
                 onKeyDown={handleKeyDown}
                 disabled={disabled}
                 placeholder={placeholder}
-                aria-label={ariaLabel}
+                aria-label={ariaLabel ?? t("workbenchUi.numericDetermination")}
                 data-worksheet-column={worksheetColumn ?? undefined}
                 aria-invalid={red}
                 className={`w-28 px-2.5 py-1.5 text-sm font-mono tabular-nums rounded-md border transition-colors

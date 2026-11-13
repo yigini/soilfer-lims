@@ -1,3 +1,4 @@
+import { useLanguage } from '../../context/LanguageContext';
 import React, { useState, useEffect } from 'react';
 import { Send, CheckCircle, ArrowRight, Layers, ArrowLeft } from 'lucide-react';
 
@@ -13,6 +14,7 @@ export default function ReviewSubmissionView({
     onSubmit,
     isSubmitting = false
 }) {
+    const { t } = useLanguage();
     const [selectedSamples, setSelectedSamples] = useState(
         eligibleSamples.map(s => s.sampleId)
     );
@@ -43,12 +45,8 @@ export default function ReviewSubmissionView({
             {/* Header */}
             <div className="flex items-center justify-between pb-3 border-b border-sf-divider">
                 <div>
-                    <h3 className="text-lg font-bold text-sf-text">
-                        Review & Submit Samples for Review
-                    </h3>
-                    <p className="text-xs text-sf-muted mt-0.5">
-                        Submission bundles completed determinations by sample and places them into the QA / Reviewer queue.
-                    </p>
+                    <h3 className="text-lg font-bold text-sf-text">{t("workbenchUi.reviewSubmitSamplesForReview")}</h3>
+                    <p className="text-xs text-sf-muted mt-0.5">{t("workbenchUi.submissionBundlesCompletedDeterminationsBySampleAndPlacesT")}</p>
                 </div>
                 {onBack && (
                     <button
@@ -56,21 +54,18 @@ export default function ReviewSubmissionView({
                         onClick={onBack}
                         className="px-3 py-1.5 rounded-lg text-xs font-medium border border-sf-divider hover:bg-sf-hover transition-colors flex items-center gap-1.5 text-sf-text"
                     >
-                        <ArrowLeft size={13} /> Back
-                    </button>
+                        <ArrowLeft size={13} /> {t("common.back")}</button>
                 )}
             </div>
 
             {/* Explanation Notice */}
-            <div className="p-3.5 rounded-xl border border-blue-500/20 bg-blue-500/10 text-blue-800 dark:text-blue-300 text-xs leading-relaxed">
-                Samples submitted for review become read-only for technicians. The laboratory manager or assigned reviewer will inspect your determinations and make an accept or reanalysis decision.
-            </div>
+            <div className="p-3.5 rounded-xl border border-blue-500/20 bg-blue-500/10 text-blue-800 dark:text-blue-300 text-xs leading-relaxed">{t("workbenchUi.samplesSubmittedForReviewBecomeReadOnlyForTechniciansTheLa")}</div>
 
             {/* Samples List */}
             <div className="rounded-xl border border-sf-divider overflow-hidden bg-sf-surface">
                 <div className="px-4 py-2.5 bg-sf-canvas/80 font-semibold text-sf-text text-xs flex items-center justify-between border-b border-sf-divider">
-                    <span>Recorded Samples ({eligibleSamples.length})</span>
-                    <span className="text-[11px] text-sf-muted">Select samples to submit</span>
+                    <span>{t("workbenchUi.recordedSamplesCount", { count: eligibleSamples.length })}</span>
+                    <span className="text-[11px] text-sf-muted">{t("workbenchUi.selectSamplesToSubmit")}</span>
                 </div>
                 <div className="divide-y divide-sf-divider max-h-72 overflow-y-auto bg-sf-surface">
                     {eligibleSamples.map((group) => {
@@ -98,15 +93,14 @@ export default function ReviewSubmissionView({
                                             <span className="text-sf-muted ml-2">({group.originalId})</span>
                                         )}
                                         <div className="text-[11px] text-sf-muted mt-0.5">
-                                            {group.items?.map(i => i.analysis).join(', ') || 'Determinations'}
+                                            {group.items?.map(i => i.analysis).join(', ') || t("workbenchUi.determinations")}
                                         </div>
                                     </div>
                                 </div>
 
                                 <div className="flex items-center gap-2">
                                     <span className="text-[11px] text-sf-muted">
-                                        {group.completedCount} / {group.totalCount} tests complete
-                                    </span>
+                                        {t("workbenchUi.testsCompleteCount", { completed: group.completedCount, count: group.totalCount })}</span>
                                     <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
                                         group.submissionType === 'FULL'
                                             ? 'bg-emerald-500/15 text-emerald-800 dark:text-emerald-300'
@@ -119,9 +113,7 @@ export default function ReviewSubmissionView({
                         );
                     })}
                     {eligibleSamples.length === 0 && (
-                        <div className="p-6 text-center text-xs text-sf-muted">
-                            No recorded samples are currently awaiting review submission. Record eligible worksheet items first.
-                        </div>
+                        <div className="p-6 text-center text-xs text-sf-muted">{t("workbenchUi.noRecordedSamplesAreCurrentlyAwaitingReviewSubmissionRecor")}</div>
                     )}
                 </div>
             </div>
@@ -130,14 +122,12 @@ export default function ReviewSubmissionView({
             {eligibleSamples.length > 0 && (
                 <div className="p-4 rounded-xl border border-sf-divider bg-sf-surface flex flex-col gap-3">
                     <div>
-                        <label className="block text-xs font-semibold text-sf-text mb-1">
-                            Submission Notes for Reviewer (optional):
-                        </label>
+                        <label className="block text-xs font-semibold text-sf-text mb-1">{t("workbenchUi.submissionNotesForReviewerOptional")}</label>
                         <input
                             type="text"
                             value={submissionNote}
                             onChange={(e) => setSubmissionNote(e.target.value)}
-                            placeholder="e.g. Batch run 4 complete; QC duplicate verified on SMP-102"
+                            placeholder={t("workbenchUi.eGBatchRun4CompleteQCDuplicateVerifiedOnSMP102")}
                             className="w-full px-3 py-1.5 text-xs rounded border border-sf-divider bg-sf-canvas text-sf-text focus:outline-none focus:ring-1 focus:ring-emerald-500"
                         />
                     </div>
@@ -149,15 +139,12 @@ export default function ReviewSubmissionView({
                             onChange={(e) => setConfirmed(e.target.checked)}
                             className="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500"
                         />
-                        <span>
-                            I confirm that the selected samples are complete and ready for managerial review.
-                        </span>
+                        <span>{t("workbenchUi.iConfirmThatTheSelectedSamplesAreCompleteAndReadyForManage")}</span>
                     </label>
 
                     <div className="flex items-center justify-between pt-2 border-t border-sf-divider">
                         <span className="text-xs text-sf-muted">
-                            {selectedSamples.length} sample{selectedSamples.length === 1 ? '' : 's'} selected for handoff.
-                        </span>
+                            {t(selectedSamples.length === 1 ? "workbenchUi.handoffOne" : "workbenchUi.handoffMany", { count: selectedSamples.length })}</span>
                         <button
                             type="button"
                             data-testid="submit-for-review-btn"
@@ -166,7 +153,7 @@ export default function ReviewSubmissionView({
                             className="px-5 py-2 rounded-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 transition-colors flex items-center gap-1.5"
                         >
                             <Send size={13} />
-                            {isSubmitting ? 'Submitting...' : `Submit ${selectedSamples.length} Sample${selectedSamples.length === 1 ? '' : 's'} for Review`}
+                            {isSubmitting ? t("workbenchUi.submitting") : t(selectedSamples.length === 1 ? "workbenchUi.submitReviewOne" : "workbenchUi.submitReviewMany", { count: selectedSamples.length })}
                         </button>
                     </div>
                 </div>

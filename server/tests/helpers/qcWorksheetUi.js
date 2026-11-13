@@ -4,11 +4,13 @@ const esbuild = require('../../../client/node_modules/esbuild');
 const root = path.resolve(__dirname, '../../../client/src');
 const nodes = node => Array.isArray(node) ? node.flatMap(nodes) : !node || typeof node !== 'object' ? [] : [node, ...nodes(node.props?.children)];
 const content = node => Array.isArray(node) ? node.map(content).join('') : !node || typeof node !== 'object' ? String(node ?? '') : content(node.props?.children);
-const translate = key => key;
+const { localeTranslator } = require('./clientTranslation');
+const english = localeTranslator();
+const translate = (key, ...args) => key.startsWith('workbenchUi.') ? english(key, ...args) : key;
 
 // Execute real JSX callbacks and effect cleanup. Child Result editors remain
 // boundaries so the tests can inspect and exercise their existing draft props.
-function mountUi(filename, props = {}, { canEdit = true, user = null, responses = {}, axios: suppliedAxios, routeParams = {} } = {}) {
+function mountUi(filename, props = {}, { canEdit = true, user = null, responses = {}, axios: suppliedAxios, routeParams = {}, translate: translateOverride = translate, runEffects = true } = {}) {
     const hooks = [], effects = [], children = {}, cache = {}; let cursor = 0, tree;
     const equal = (a, b) => a && b && a.length === b.length && a.every((value, index) => value === b[index]);
     const react = { ...React,
@@ -33,7 +35,7 @@ function mountUi(filename, props = {}, { canEdit = true, user = null, responses 
                 if (name === 'axios') return axios;
                 if (name === 'react-router-dom') return { useParams: () => routeParams };
                 if (name === 'lucide-react') return new Proxy({}, { get: () => () => null });
-                if (name.includes('LanguageContext')) return { useLanguage: () => ({ t: translate }) };
+                if (name.includes('LanguageContext')) return { useLanguage: () => ({ t: translateOverride }) };
                 if (name.includes('AuthContext')) return { useAuth: () => ({ user, hasPermission: () => canEdit }) };
                 if (name.includes('useFocusTrap')) return { useFocusTrap: () => react.useRef(null) };
                 if (name.includes('AnalysisCatalogueContext')) return { useAnalysisNames: () => code => code };
@@ -59,7 +61,7 @@ function mountUi(filename, props = {}, { canEdit = true, user = null, responses 
     };
     return { axios, props, responses, children,
         async render(patch = {}) { Object.assign(props, patch); for (let index = 0; index < 5; index++) {
-            cursor = 0; tree = expand(component(props)); effects.splice(0).forEach(effect => effect()); await new Promise(resolve => setImmediate(resolve));
+            cursor = 0; tree = expand(component(props)); effects.splice(0).forEach(effect => { if (runEffects) effect(); }); await new Promise(resolve => setImmediate(resolve));
         } return tree; },
         unmount() { hooks.forEach(hook => hook?.cleanup?.()); hooks.length = 0; },
         find: id => nodes(tree).find(node => node.props?.['data-testid'] === id),

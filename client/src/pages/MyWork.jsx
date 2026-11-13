@@ -1,3 +1,4 @@
+import { useLanguage } from '../context/LanguageContext';
 import { useAnalysisNames } from '../context/AnalysisCatalogueContext';
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
@@ -12,22 +13,23 @@ import {
 import { formatLastUpdated } from '../hooks/useRealtimeData';
 
 // ─── Live Indicator ───
-const LiveBadge = ({ isLive, isStale, lastUpdated }) => (
+const LiveBadge = ({ isLive, isStale, lastUpdated, t }) => (
     <div className="flex items-center gap-2">
         <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${isStale ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'
             : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
             }`}>
             <span className={`w-1.5 h-1.5 rounded-full ${isStale ? 'bg-amber-500' : isLive ? 'bg-emerald-500 animate-pulse' : 'bg-emerald-500'
                 }`} />
-            {isStale ? 'Stale' : 'Live'}
+            {isStale ? t("workbenchUi.stale") : t("workbenchUi.live")}
         </div>
         {lastUpdated && (
-            <span className="text-[10px] text-sf-muted">{formatLastUpdated(lastUpdated)}</span>
+            <span className="text-[10px] text-sf-muted">{formatLastUpdated(lastUpdated, t)}</span>
         )}
     </div>
 );
 
 const MyWork = () => {
+    const { t } = useLanguage();
     const getAnalysisDisplayName = useAnalysisNames();
     const { user } = useAuth();
     const { registerBlockers, clearBlockers } = useHelp();
@@ -167,7 +169,7 @@ const MyWork = () => {
         return (
             <div className="flex items-center justify-center h-64 gap-3">
                 <RefreshCw size={20} className="animate-spin text-blue-500" />
-                <span className="text-sf-muted font-medium">Loading your work...</span>
+                <span className="text-sf-muted font-medium">{t("workbenchUi.loadingYourWork")}</span>
             </div>
         );
     }
@@ -177,12 +179,12 @@ const MyWork = () => {
             {/* ─── Header ─── */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-black text-sf-text">My Work</h1>
-                    <p className="text-sm text-gray-500 mt-0.5">Welcome back, {user.name || user.username}</p>
+                    <h1 className="text-2xl font-black text-sf-text">{t("nav.myWork")}</h1>
+                    <p className="text-sm text-gray-500 mt-0.5">{t("adminDetails.welcomeBack")} {user.name || user.username}</p>
                 </div>
                 <div className="flex items-center gap-3">
-                    <LiveBadge isLive={isLive} isStale={isStale} lastUpdated={lastUpdated} />
-                    <button onClick={fetchMyWork} className="p-2 rounded-lg hover:bg-sf-raised transition-colors" title="Refresh now">
+                    <LiveBadge isLive={isLive} isStale={isStale} lastUpdated={lastUpdated} t={t} />
+                    <button onClick={fetchMyWork} className="p-2 rounded-lg hover:bg-sf-raised transition-colors" title={t("workbenchUi.refreshNow")}>
                         <RefreshCw size={16} className="text-sf-muted" />
                     </button>
                 </div>
@@ -192,8 +194,8 @@ const MyWork = () => {
             {totalRedo > 0 && (
                 <div className="flex items-center gap-3 px-4 py-3 rounded-xl border bg-red-50 border-red-200 text-red-800 dark:bg-red-900/20 dark:border-red-800 dark:text-red-300">
                     <Zap size={16} className="shrink-0 animate-pulse" />
-                    <span className="text-sm font-bold">{totalRedo} item(s) require reanalysis / redo</span>
-                    <span className="text-xs text-red-500">Needs immediate attention</span>
+                    <span className="text-sm font-bold">{t("workbenchUi.redoRequiredCount", { count: totalRedo })}</span>
+                    <span className="text-xs text-red-500">{t("workbenchUi.needsImmediateAttention")}</span>
                 </div>
             )}
 
@@ -201,42 +203,42 @@ const MyWork = () => {
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
                 <div className="p-4 rounded-xl border bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800">
                     <div className="flex items-center justify-between mb-1">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">Active</span>
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">{t("projects.active")}</span>
                         <ClipboardList size={14} className="text-blue-500 opacity-60" />
                     </div>
                     <span className="text-2xl font-black text-blue-700 dark:text-blue-300">{totalActive}</span>
                 </div>
                 <div className="p-4 rounded-xl border bg-amber-50 border-amber-200 dark:bg-amber-900/20 dark:border-amber-800">
                     <div className="flex items-center justify-between mb-1">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">Recorded</span>
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">{t("workbench.recordedCount")}</span>
                         <CheckCircle size={14} className="text-amber-500 opacity-60" />
                     </div>
                     <span className="text-2xl font-black text-amber-700 dark:text-amber-300">{totalRecorded}</span>
                 </div>
                 <div className="p-4 rounded-xl border bg-purple-50 border-purple-200 dark:bg-purple-900/20 dark:border-purple-800">
                     <div className="flex items-center justify-between mb-1">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400">Awaiting Review</span>
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400">{t("dashboard.manager.stageAwaitingReview")}</span>
                         <Clock size={14} className="text-purple-500 opacity-60" />
                     </div>
                     <span className="text-2xl font-black text-purple-700 dark:text-purple-300">{totalReview}</span>
                 </div>
                 <div className={`p-4 rounded-xl border ${totalRedo > 0 ? 'bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800' : 'bg-gray-50 border-gray-200 dark:bg-gray-800 dark:border-gray-700'}`}>
                     <div className="flex items-center justify-between mb-1">
-                        <span className={`text-[10px] font-bold uppercase tracking-wider ${totalRedo > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-500'}`}>Needs Redo</span>
+                        <span className={`text-[10px] font-bold uppercase tracking-wider ${totalRedo > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-500'}`}>{t("workbenchUi.needsRedo")}</span>
                         <Zap size={14} className={`opacity-60 ${totalRedo > 0 ? 'text-red-500' : 'text-gray-400'}`} />
                     </div>
                     <span className={`text-2xl font-black ${totalRedo > 0 ? 'text-red-700 dark:text-red-300' : 'text-sf-muted'}`}>{totalRedo}</span>
                 </div>
                 <div className="p-4 rounded-xl border bg-emerald-50 border-emerald-200 dark:bg-emerald-900/20 dark:border-emerald-800">
                     <div className="flex items-center justify-between mb-1">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Accepted</span>
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">{t("workflow.filters.accepted")}</span>
                         <CheckCircle size={14} className="text-emerald-500 opacity-60" />
                     </div>
                     <span className="text-2xl font-black text-emerald-700 dark:text-emerald-300">{totalAccepted}</span>
                 </div>
                 <div className="p-4 rounded-xl border bg-gray-50 border-gray-200 dark:bg-gray-800 dark:border-gray-700">
                     <div className="flex items-center justify-between mb-1">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500">Waived</span>
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500">{t("workbenchUi.waived")}</span>
                         <Filter size={14} className="text-gray-400 opacity-60" />
                     </div>
                     <span className="text-2xl font-black text-sf-muted">{totalWaived}</span>
@@ -251,8 +253,7 @@ const MyWork = () => {
                         ? 'bg-white dark:bg-gray-700 text-sf-text shadow-sm'
                         : 'text-gray-500 hover:text-gray-700'
                         }`}
-                >
-                    Active ({activeWork.length})
+                >{t("workbenchUi.activeCount", { count: activeWork.length })}
                 </button>
                 <button
                     onClick={() => setActiveTab('recorded')}
@@ -260,8 +261,7 @@ const MyWork = () => {
                         ? 'bg-white dark:bg-gray-700 text-amber-700 dark:text-amber-300 shadow-sm'
                         : 'text-gray-500 hover:text-gray-700'
                         }`}
-                >
-                    Ready to Submit ({recordedWork.length})
+                >{t("workbenchUi.readyToSubmitCount", { count: recordedWork.length })}
                 </button>
                 <button
                     onClick={() => setActiveTab('review')}
@@ -269,8 +269,7 @@ const MyWork = () => {
                         ? 'bg-white dark:bg-gray-700 text-sf-text shadow-sm'
                         : 'text-gray-500 hover:text-gray-700'
                         }`}
-                >
-                    Awaiting Review ({reviewWork.length})
+                >{t("workbenchUi.awaitingReviewCount", { count: reviewWork.length })}
                 </button>
                 <button
                     onClick={() => setActiveTab('redo')}
@@ -278,8 +277,7 @@ const MyWork = () => {
                         ? 'bg-white dark:bg-gray-700 text-red-600 dark:text-red-400 shadow-sm'
                         : 'text-gray-500 hover:text-gray-700'
                         }`}
-                >
-                    Needs Redo ({redoWork.length})
+                >{t("workbenchUi.needsRedoCount", { count: redoWork.length })}
                 </button>
                 <button
                     onClick={() => setActiveTab('accepted')}
@@ -287,8 +285,7 @@ const MyWork = () => {
                         ? 'bg-white dark:bg-gray-700 text-emerald-600 dark:text-emerald-400 shadow-sm'
                         : 'text-gray-500 hover:text-gray-700'
                         }`}
-                >
-                    Accepted ({acceptedWork.length})
+                >{t("workbenchUi.acceptedCount", { count: acceptedWork.length })}
                 </button>
                 <button
                     onClick={() => setActiveTab('waived')}
@@ -296,8 +293,7 @@ const MyWork = () => {
                         ? 'bg-white dark:bg-gray-700 text-sf-text shadow-sm'
                         : 'text-gray-500 hover:text-gray-700'
                         }`}
-                >
-                    Waived ({waivedWork.length})
+                >{t("workbenchUi.waivedCount", { count: waivedWork.length })}
                 </button>
             </div>
 
@@ -354,10 +350,8 @@ const MyWork = () => {
                                                     navigate(`/samples/${group.sampleId}`);
                                                 }}
                                                 className="text-[10px] text-blue-500 hover:underline shrink-0"
-                                                title="View sample record"
-                                            >
-                                                Details
-                                            </button>
+                                                title={t("workbenchUi.viewSampleRecord")}
+                                            >{t("qaSection.colDetails")}</button>
                                         </div>
                                         <div className="text-[10px] text-sf-muted mt-0.5 truncate">
                                             {group.analyses?.map(a => getAnalysisDisplayName(a)).join(', ')}
@@ -383,18 +377,18 @@ const MyWork = () => {
 
                                     {/* Status badges */}
                                     {group.hasRecorded && (
-                                        <span className="px-2 py-0.5 rounded text-[9px] font-black uppercase bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">Recorded</span>
+                                        <span className="px-2 py-0.5 rounded text-[9px] font-black uppercase bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">{t("workbench.recordedCount")}</span>
                                     )}
                                     {group.hasReanalysis && (
-                                        <span className="px-2 py-0.5 rounded text-[9px] font-black uppercase bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300">Redo</span>
+                                        <span className="px-2 py-0.5 rounded text-[9px] font-black uppercase bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300">{t("workbenchUi.redo")}</span>
                                     )}
                                     {group.priority === 'URGENT' && (
-                                        <span className="px-2 py-0.5 rounded text-[9px] font-black uppercase bg-red-500 text-white">Urgent</span>
+                                        <span className="px-2 py-0.5 rounded text-[9px] font-black uppercase bg-red-500 text-white">{t("queue.urgent")}</span>
                                     )}
 
                                     <div className="flex items-center gap-1 text-xs font-semibold text-gray-400 group-hover:text-blue-500 transition-colors">
                                         <span className="hidden sm:inline text-[11px]">
-                                            {['active', 'recorded', 'redo'].includes(activeTab) || group.hasActive || group.hasReanalysis || group.hasRecorded ? 'Workbench' : 'View'}
+                                            {['active', 'recorded', 'redo'].includes(activeTab) || group.hasActive || group.hasReanalysis || group.hasRecorded ? t("nav.workbench") : t("common.view")}
                                         </span>
                                         <ArrowRight size={14} />
                                     </div>
@@ -405,8 +399,8 @@ const MyWork = () => {
                 ) : (
                     <div className="text-center py-16 text-sf-muted text-sm border border-dashed rounded-xl bg-sf-canvas">
                         <CheckCircle size={32} className="mx-auto mb-3 text-emerald-400" />
-                        <p className="font-bold text-base">{activeTab === 'active' ? 'All clear!' : 'Nothing completed yet'}</p>
-                        <p className="text-[11px] mt-1">{activeTab === 'active' ? 'No active work items — check back soon' : 'Completed work will appear here'}</p>
+                        <p className="font-bold text-base">{activeTab === 'active' ? t("workbenchUi.allClear") : t("workbenchUi.nothingCompletedYet")}</p>
+                        <p className="text-[11px] mt-1">{activeTab === 'active' ? t("workbenchUi.noActiveWorkItemsCheckBackSoon") : t("workbenchUi.completedWorkWillAppearHere")}</p>
                     </div>
                 )}
             </div>
@@ -414,7 +408,7 @@ const MyWork = () => {
             {/* ─── Pagination ─── */}
             {meta.totalPages > 1 && (
                 <div className="flex items-center justify-between pt-4">
-                    <span className="text-sm text-gray-500">Page {page} of {meta.totalPages}</span>
+                    <span className="text-sm text-gray-500">{t("workbenchUi.pageOf", { page: page, total: meta.totalPages })}</span>
                     <div className="flex gap-2">
                         <button disabled={page <= 1} onClick={() => setPage(p => p - 1)} className="p-2 border rounded-lg hover:bg-sf-raised disabled:opacity-50">
                             <ArrowLeft size={16} />
