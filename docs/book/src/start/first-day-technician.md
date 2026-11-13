@@ -6,6 +6,8 @@ Walk through a complete technician shift using five practice soil samples. You w
 
 ![Result statuses from Ready to record and Draft saved through Recorded, Submitted, Accepted, Approved, and Published](../img/diagrams/result-statuses.svg)
 
+See the [French and Portuguese bench examples](../bench/find-my-work.md#practice-screens-in-french-and-portuguese) from Demo Soil Lab before opening your practice run.
+
 ---
 
 ## Before You Start

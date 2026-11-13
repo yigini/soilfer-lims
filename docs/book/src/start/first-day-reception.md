@@ -6,6 +6,8 @@ Walk through a complete day at the reception desk using five practice soil bags 
 
 ![The sample journey from Sample Reception through Drying and Preparation, Workbench, Manager Task List, and Reports](../img/diagrams/sample-journey.svg)
 
+See the [French and Portuguese reception examples](../reception/receive-one-sample.md#practice-screens-in-french-and-portuguese) from Demo Soil Lab before practising the check-in steps.
+
 ---
 
 ## Before You Start

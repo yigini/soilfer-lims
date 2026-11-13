@@ -4,7 +4,23 @@
 
 Check which soil samples and analytical methods are waiting for you today. You can quickly see which items are **Ready** versus **Blocked** and open the right worksheet in **Workbench**.
 
-> *Screenshot placeholder — docs/book/src/img/screenshots/bench-find-my-work.png (screenshot coming once the training data is ready): The **My Work** and **Workbench** screens showing **My runs**, **My Work**, **Ready to Record**, and **Open run worksheet**.*
+## Practice screens in French and Portuguese
+
+The outlined card identifies the seeded analytical run marked RUNNING. Select the run to inspect its controls before opening the worksheet. No measurements are changed just to take a picture. These pictures use fictional **Demo Soil Lab** records on a local practice copy. The red outline points out the control to find; it is a guide annotation, not an application warning. Method names and practice notes keep their seeded wording. Select a picture to open it at full size.
+
+<details>
+<summary>Français</summary>
+
+[![French technician Workbench with the active practice run outlined in red](../img/screens/bench/find-my-work-fr.png)](../img/screens/bench/find-my-work-fr.png)
+
+</details>
+
+<details>
+<summary>Português</summary>
+
+[![Portuguese technician Workbench with the same active practice run outlined in red](../img/screens/bench/find-my-work-pt.png)](../img/screens/bench/find-my-work-pt.png)
+
+</details>
 
 ---
 

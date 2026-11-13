@@ -4,6 +4,24 @@
 
 Learn what each menu item and top-bar button does after you sign in to SoilFER LIMS.
 
+## Practice screens in French and Portuguese
+
+The manager overview shows the role menu, laboratory badge, work summaries and Help button. Other roles see their own menu. These pictures use fictional **Demo Soil Lab** records on a local practice copy. The red outline points out the control to find; it is a guide annotation, not an application warning. Method names and practice notes keep their seeded wording. Select a picture to open it at full size.
+
+<details>
+<summary>Français</summary>
+
+[![French manager overview for Demo Soil Lab, with the Help button outlined in red](../img/screens/start/first-day-fr.png)](../img/screens/start/first-day-fr.png)
+
+</details>
+
+<details>
+<summary>Português</summary>
+
+[![Portuguese manager overview for Demo Soil Lab, with the Help button outlined in red](../img/screens/start/first-day-pt.png)](../img/screens/start/first-day-pt.png)
+
+</details>
+
 ---
 
 ## Before You Start
