@@ -32,3 +32,5 @@
 | **Calibration Overdue / Blocked** | Red | Calibration due date has passed; log a fresh **Calibration** or **Verification** in **Equipment** before use. |
 | **Active** *(Reference lot)* | Green | **Certified reference material (CRM)** (official standard soil with a certified value) or **Laboratory reference material (LRM)** (your lab's own in-house check soil) lot is ready and valid for batch QC. |
 | **Expiring soon** / **Quarantined** / **Expired** | Amber / Red | Reference lot or reagent needs replacement or cannot be placed in a new batch. |
+
+{{#include ../_includes/pilot-support.md}}

@@ -2552,7 +2552,9 @@
       "requestFailureBody": "No se pudo cargar la guía debido a un error de red.",
       "noTranslationTitle": "Traducción no disponible",
       "noTranslationBody": "La guía para esta página aún no está disponible en el idioma seleccionado.",
-      "zeroPageSub": "Busque en la base de conocimientos o explore temas generales en el Centro de ayuda."
+      "zeroPageSub": "Busque en la base de conocimientos o explore temas generales en el Centro de ayuda.",
+      "manual": "Manual",
+      "openManual": "Abrir el manual en una pestaña nueva"
     },
     "support": {
       "title": "Contactar soporte",

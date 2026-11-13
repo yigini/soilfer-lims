@@ -33,3 +33,5 @@
 | *Test row is locked in* **Workbench** | Drying or preparation is not finished yet. Complete the drying and sieving checklist first. |
 | *Work item badge says* **Returned** | Click the item in **My Work**, read your manager's note, and record a new repeat try in **Workbench**. Never overwrite the original try. |
 | *Batch QC badge shows* **Fail batch** *or* **Warn** | Do not hide or alter the control reading. Check for a typing mistake, or ask your **Laboratory Manager** whether to re-run the batch or group of samples between two instrument check standards. |
+
+{{#include ../_includes/pilot-support.md}}

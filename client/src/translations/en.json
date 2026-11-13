@@ -2552,7 +2552,9 @@
       "requestFailureBody": "Could not load guidance due to a network error.",
       "noTranslationTitle": "Translation Unavailable",
       "noTranslationBody": "Guidance for this page is not yet available in your selected language.",
-      "zeroPageSub": "Search the knowledge base or explore general topics in Help Centre."
+      "zeroPageSub": "Search the knowledge base or explore general topics in Help Centre.",
+      "manual": "Manual",
+      "openManual": "Open the user manual in a new tab"
     },
     "support": {
       "title": "Contact Support",

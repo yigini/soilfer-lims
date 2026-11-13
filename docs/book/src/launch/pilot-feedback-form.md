@@ -70,3 +70,5 @@ ________________________________________________________________________________
 <br/>
 
 *Hand this sheet to your Laboratory Manager at the afternoon check-in. You can also email a photo of it to your pilot support contact.*
+
+{{#include ../_includes/pilot-support.md}}

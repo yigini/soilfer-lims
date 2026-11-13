@@ -24,6 +24,7 @@ import { useHelp } from '../../context/HelpContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
 import helpClientService from '../../services/helpClientService';
+import { useBrandingLinks } from '../../hooks/useBrandingContact';
 import clsx from 'clsx';
 
 export const ContextHelpDrawer = () => {
@@ -37,6 +38,7 @@ export const ContextHelpDrawer = () => {
     } = useHelp();
 
     const { t, locale } = useLanguage();
+    const { manualUrl } = useBrandingLinks();
     const { user } = useAuth();
     const location = useLocation();
 
@@ -706,7 +708,18 @@ export const ContextHelpDrawer = () => {
                             <span>{t('help.centre', 'Help Centre')}</span>
                             <ExternalLink size={12} />
                         </Link>
-                        <span className="text-[11px] text-sf-muted">SoilFER Knowledge Base</span>
+                        {manualUrl && (
+                            <a
+                                href={manualUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                aria-label={t('help.drawer.openManual', 'Open the user manual in a new tab')}
+                                className="font-bold text-sf-primary hover:underline flex items-center gap-1"
+                            >
+                                <span>{t('help.drawer.manual', 'Manual')}</span>
+                                <ExternalLink size={12} />
+                            </a>
+                        )}
                     </div>
                 </aside>
             </div>

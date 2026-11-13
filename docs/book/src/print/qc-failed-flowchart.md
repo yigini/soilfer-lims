@@ -24,3 +24,5 @@ When a batch **Blank**, **Duplicate**, or **Control** (**Laboratory reference ma
 ## Golden Rule for Bench Staff
 
 *A failed QC check is not a punishment. It is the safety net that catches a drifted meter or contaminated reagent before a wrong fertilizer recommendation reaches a farmer.*
+
+{{#include ../_includes/pilot-support.md}}

@@ -1,5 +1,6 @@
 const prisma = require('../prisma');
 const translationService = require('../services/TranslationService');
+const { withPublicSupportDefaults } = require('../config/publicSupport');
 
 const DEFAULT_LANGUAGES = [
     { code: 'en', name: 'English', isDefault: true },
@@ -63,9 +64,9 @@ exports.getPublicBranding = async (_req, res) => {
         if (settings?.branding) {
             branding = typeof settings.branding === 'string' ? JSON.parse(settings.branding) : settings.branding;
         }
-        res.json({ branding });
+        res.json({ branding: withPublicSupportDefaults(branding) });
     } catch (e) {
-        res.json({ branding: { title: 'SoilFER LIMS', logoUrl: '/assets/img/logo-light.png' } });
+        res.json({ branding: withPublicSupportDefaults({ title: 'SoilFER LIMS', logoUrl: '/assets/img/logo-light.png' }) });
     }
 };
 

@@ -1,15 +1,22 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 
-export default function useBrandingContact() {
-    const [contactEmail, setContactEmail] = useState('');
+export function useBrandingLinks() {
+    const [links, setLinks] = useState({ contactEmail: '', manualUrl: '' });
     useEffect(() => {
         let active = true;
         axios.get('/api/public/branding').then(({ data }) => {
-            const value = data?.branding?.contactEmail;
-            if (active) setContactEmail(typeof value === 'string' ? value.trim() : '');
+            const branding = data?.branding;
+            const contactEmail = typeof branding?.contactEmail === 'string' ? branding.contactEmail.trim() : '';
+            const manualUrl = typeof branding?.manualUrl === 'string' && /^https?:\/\//i.test(branding.manualUrl)
+                ? branding.manualUrl : '';
+            if (active) setLinks({ contactEmail, manualUrl });
         }).catch(() => {});
         return () => { active = false; };
     }, []);
-    return contactEmail;
+    return links;
+}
+
+export default function useBrandingContact() {
+    return useBrandingLinks().contactEmail;
 }

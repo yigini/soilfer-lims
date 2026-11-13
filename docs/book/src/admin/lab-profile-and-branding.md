@@ -36,7 +36,7 @@ Your laboratory's name, address, timezone, logo, and support email appear on the
 3. Under **Organization Details**:
    - Enter **Lab Name (App Title)** and **Organization Legal Name**.
    - Enter your **Tagline / Subtitle** and **Footer Text**.
-   - Enter your laboratory's **Contact Email**. This address is displayed as the support contact on the **Sign in to SoilFER LIMS** screen and inside the **Password Reset Instructions** dialog when a user clicks **Forgot password?**.
+   - Enter your laboratory's **Contact Email**. When no address is configured, the app shows the shared pilot support default. A Super Admin can replace the installation contact in **Branding & Identity**; the sign-in screen and **Password Reset Instructions** use that configured contact.
 4. Under **Localization**:
    - Choose the **Default Language** shown to visitors before sign-in and select your preferred **Date Format**.
 5. Check the **Live Preview** card on the right side of the screen, then click **Save** in the top right. You see **Branding Updated**.

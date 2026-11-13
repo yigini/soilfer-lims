@@ -4,6 +4,12 @@ SoilFER LIMS reads its server configuration from the `.env` file in the project 
 
 ---
 
+## Manual Link
+
+`MANUAL_URL` sets the public Manual link in the Help drawer. When it is unset, the shipped project-manual address is used. Set it to a full HTTP or HTTPS URL to use another hosted manual, or to an empty string to hide the link. A change takes effect when the application is started with the new setting.
+
+The shipped Manual URL and pilot support email defaults live in `shared/publicSupport.json`. Changing that email and running `node tools/docs/generate_support_contact.cjs` updates the contact included in the manual and printed cards. A configured **Contact Email** in the app continues to override the default shown by the app.
+
 ## Supported Environment Variables
 
 | Variable | Default | Required | Description |

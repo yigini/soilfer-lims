@@ -29,7 +29,11 @@ Find quick answers while you work, even if your laboratory internet connection i
 2. Type a short word into the search box (such as *blank*, *label*, *password*, or *pH*), or click **Common Questions (FAQs)** and use **Filter questions...** to narrow the list.
 3. Click any article to read it, or click **Print** inside an article to print a paper copy for your bench.
 
-### 3. Use Help When the Internet Is Offline
+### 3. Open the Full Manual
+
+Click **Manual** at the bottom of the Help drawer to open the full user manual in a new browser tab. The link is shown when your installation has a Manual URL configured. Keep the in-app Help drawer for guidance beside the screen where you are working.
+
+### 4. Use Help When the Internet Is Offline
 
 1. Once you open SoilFER LIMS in your browser, the help guides are saved on your computer for offline reading.
 2. If your internet connection drops, you will see **Downloaded Help (Offline)** or **Offline mode: reading locally synchronized copy.** at the top of the help panel.
@@ -52,3 +56,5 @@ At the bottom of any help article, you can click **Yes** or **No** next to **Was
   2. The sample code or batch number you were working on.
   3. The exact message shown on screen (or take a screenshot that does not show passwords).
   4. Approximately what time it happened.
+
+{{#include ../_includes/pilot-support.md}}
