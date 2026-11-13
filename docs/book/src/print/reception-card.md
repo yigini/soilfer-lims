@@ -27,3 +27,5 @@
 | **Sample ID {id} was already checked in** | That field sample ID was already received earlier. Check whether this bag is a second depth layer from the same pit or a duplicate shipment before creating a new entry. |
 | *Sample stays in* **Expected** *and will not print a permanent label* | An **Expected** row is only a field pre-registration. Physically inspect the bag and click **Accept Sample** first. |
 | *Label barcode will not scan* | Check that the printer ribbon or thermal head is clean, reprint using **Print labels**, or type the laboratory sample code into the search box. |
+
+{{#include ../_includes/pilot-support.md}}

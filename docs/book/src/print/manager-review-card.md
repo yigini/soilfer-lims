@@ -33,3 +33,5 @@
 
 1. *Issue the report:* Once all required tests on a sample are **Approved**, open **Reports** (**Result Reports**), preview the **Certificate of Analysis** PDF, and issue or download it.
 2. *Amend a released report:* Approved and reported results are locked. If a correction or client retest is ever needed after release, open a formal report amendment (co-signed by a second person when **Require a second person for amendments** is enabled). Issuing the new revision automatically retires public links to the replaced report version.
+
+{{#include ../_includes/pilot-support.md}}

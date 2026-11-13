@@ -22,6 +22,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Check shared pilot support text
+        run: node tools/docs/generate_support_contact.cjs --check
+
       - name: Setup mdBook
         uses: peaceiris/actions-mdbook@v2
         with:

@@ -39,3 +39,5 @@ During your first week with SoilFER LIMS, keep your existing paper logbook or Ex
 ### For the QA Person
 
 - *Parallel-run reconciliation:* Compare the LIMS **Certificate of Analysis** PDF against your legacy calculation sheet on Day 5. This comparison provides documented method verification before you retire manual spreadsheets.
+
+{{#include ../_includes/pilot-support.md}}

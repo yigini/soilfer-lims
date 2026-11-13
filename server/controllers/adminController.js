@@ -1,5 +1,6 @@
 const prisma = require('../prisma');
 const translationService = require('../services/TranslationService');
+const { withPublicSupportDefaults } = require('../config/publicSupport');
 
 // Initialize default settings if needed (best done in a script, but we'll keep logic here for now)
 const ensureSettings = async () => {
@@ -63,6 +64,7 @@ exports.getSettings = async (req, res) => {
             }
         }
 
+        settings.branding = withPublicSupportDefaults(settings.branding);
         res.success('SETTINGS_FETCHED', 'Settings fetched successfully', null, 200, settings);
     } catch (error) {
         console.error("Get Settings Error:", error);

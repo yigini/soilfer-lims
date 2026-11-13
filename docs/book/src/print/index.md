@@ -26,3 +26,5 @@ These one-page A4 reference cards and wall posters are designed to be printed an
 2. Click the printer icon in the top-right bar of this manual (or press Ctrl+P on Windows / Cmd+P on Mac).
 3. Select your printer (or save as a PDF), choose *A4* paper size, and set margins to *Default* or *Minimum* so the entire card fits on one single sheet.
 4. Put the printed sheet inside a clear plastic sleeve if it will sit near wet-chemistry benches or soil sieves.
+
+{{#include ../_includes/pilot-support.md}}

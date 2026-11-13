@@ -2552,7 +2552,9 @@
       "requestFailureBody": "Impossible de charger le guide en raison d'une erreur réseau.",
       "noTranslationTitle": "Traduction non disponible",
       "noTranslationBody": "Le guide pour cette page n'est pas encore disponible dans la langue sélectionnée.",
-      "zeroPageSub": "Recherchez dans la base de connaissances ou explorez les thèmes généraux dans le Centre d'aide."
+      "zeroPageSub": "Recherchez dans la base de connaissances ou explorez les thèmes généraux dans le Centre d'aide.",
+      "manual": "Manuel",
+      "openManual": "Ouvrir le manuel dans un nouvel onglet"
     },
     "support": {
       "title": "Contacter le support",
