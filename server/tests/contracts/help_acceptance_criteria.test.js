@@ -102,14 +102,15 @@ describe('Help System Full Acceptance & Release Verification', () => {
         });
         expect(resAccent.total).toBeGreaterThan(0);
 
-        // "reflectance" should find bench-spectra
+        // "reflectance" finds the canonical guide, not its retained legacy alias.
         const resReflectance = await helpContentService.searchHelp({
             query: 'reflectance',
             user: { role: 'SUPER_ADMIN' },
             locale: 'en',
             preview: true
         });
-        expect(resReflectance.results.some(a => a.id === 'bench-spectra')).toBe(true);
+        expect(resReflectance.results.some(a => a.id === 'method-spectral-import')).toBe(true);
+        expect(resReflectance.results.some(a => a.id === 'bench-spectra')).toBe(false);
     });
 
     test('7. Multi-language collections: all 5 locale files exist with 113 translated articles', () => {
