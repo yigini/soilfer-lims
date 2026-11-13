@@ -6,8 +6,9 @@ For step-by-step update instructions, see [Updating SoilFER-LIMS](./updates.md).
 
 ---
 
-## Version 1.14.0 — 2026-11-13
+## Version 1.14.0 — 2026-11-14
 
+- **First sign-in and account resets:** the required password update opens without crashing for a new administrator or a user whose password was reset. The server command in the reset guide now works with the current application.
 - **Find the manual:** an optional Manual link opens the configured guide address. Administrators can leave the address empty to hide the link while the hosted manual is being prepared.
 - **Support contact:** the default support address comes from one shared setting. Contacts already configured by administrators are kept.
 - **Workbench languages:** queues, numeric worksheets, submission and review screens, confirmation logs and the review-card labels use the selected screen language. Result values, method names and recorded status codes stay as data.
