@@ -83,6 +83,18 @@ const techStack = [
 
 const changelog = [
     {
+        version: 'v1.14.0',
+        date: 'November 13, 2026',
+        tag: 'Launch Guides and Workbench Languages',
+        badgeColor: 'bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300 border-blue-300 dark:border-blue-800',
+        changes: [
+            'An optional Manual link and a shared default support contact help staff find guidance; an empty Manual setting hides the link.',
+            'Older duplicate Help guides stay available by direct link while lists and search show the current guides.',
+            'Workbench queues, numeric entry, review handoff and confirmation logs cover all five languages.',
+            'Repeatable fictional practice data and French and Portuguese guide pictures support first-day exercises.',
+        ],
+    },
+    {
         version: 'v1.13.1',
         date: 'November 13, 2026',
         tag: 'First-Day Guidance and Policy Editing',

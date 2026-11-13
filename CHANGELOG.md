@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.14.0] - 2026-11-13
+
+### Added
+- Add an optional Manual link with a configurable address; an empty setting hides it until the manual is available.
+- Keep the default support contact in one shared place while preserving contacts already configured by administrators.
+- Add repeatable fictional practice-lab data and French and Portuguese pictures for first-day guides.
+
+### Fixed
+- Translate the Workbench, normal numeric entry, review handoff and confirmation log across all five screen languages.
+- Hide older duplicate Help guides from lists, counts and search while keeping their identifiers and direct links working.
+
 ## [1.13.1] - 2026-11-13
 
 ### Fixed
