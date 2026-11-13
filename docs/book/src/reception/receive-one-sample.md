@@ -4,7 +4,23 @@
 
 Check in a single soil sample bag at the reception desk, either from a pre-registered field survey (**Project Sample**) or from a customer arriving at the counter (**Walk-in / External**).
 
-> *Screenshot placeholder — docs/book/src/img/screenshots/reception-single-sample.png (screenshot coming once the training data is ready): The **Reception Console** showing **1. ID & Field**, **2. Condition**, **3. Analyses**, and **4. Handover** for a single soil sample.*
+## Practice screens in French and Portuguese
+
+Use this identifier lookup to load the expected practice field sample for inspection. No acceptance is recorded just to take a picture. These pictures use fictional **Demo Soil Lab** records on a local practice copy. The red outline points out the control to find; it is a guide annotation, not an application warning. Method names and practice notes keep their seeded wording. Select a picture to open it at full size.
+
+<details>
+<summary>Français</summary>
+
+[![French identifier lookup for an expected Demo Soil Lab field sample, with the identifier search outlined in red](../img/screens/reception/receive-one-fr.png)](../img/screens/reception/receive-one-fr.png)
+
+</details>
+
+<details>
+<summary>Português</summary>
+
+[![Portuguese identifier lookup for the same expected practice sample, with the identifier search outlined in red](../img/screens/reception/receive-one-pt.png)](../img/screens/reception/receive-one-pt.png)
+
+</details>
 
 ---
 

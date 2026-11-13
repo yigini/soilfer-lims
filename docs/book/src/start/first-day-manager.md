@@ -6,6 +6,8 @@ Walk through a complete day managing laboratory work and quality control. You wi
 
 ![Who does what in SoilFER LIMS across Reception Clerk, Laboratory Technician, Laboratory Manager, Laboratory Administrator, and Client or Viewer](../img/diagrams/who-does-what.svg)
 
+See the [French and Portuguese overview](screen-tour.md#practice-screens-in-french-and-portuguese) and [review examples](../review/review-and-select-reported-value.md#practice-screens-in-french-and-portuguese) from Demo Soil Lab before practising these steps.
+
 ---
 
 ## Before You Start

@@ -4,7 +4,23 @@
 
 Inspect measurements submitted by technicians, review quality control verdicts and **Cross-parameter plausibility** flags, approve or reject technician **Unusual-value requests**, and choose the official **Final report value** for each test.
 
-> *Screenshot placeholder — docs/book/src/img/screenshots/review-reported-value-selection.png (screenshot coming once the training data is ready): The sample **Review** tab showing the **Final report value** comparison table (**Use this try on report**, **Report mean**, **Not reportable**), **Save final report value**, and **Cross-parameter plausibility**.*
+## Practice screens in French and Portuguese
+
+This submitted conductivity result shows its recorded batch quality check, analyst, reading and final-value choices. The picture shows the review before any acceptance is recorded. These pictures use fictional **Demo Soil Lab** records on a local practice copy. The red outline points out the control to find; it is a guide annotation, not an application warning. Method names and practice notes keep their seeded wording. Select a picture to open it at full size.
+
+<details>
+<summary>Français</summary>
+
+[![French final report value controls for a submitted conductivity result with passing quality control](../img/screens/review/reported-value-fr.png)](../img/screens/review/reported-value-fr.png)
+
+</details>
+
+<details>
+<summary>Português</summary>
+
+[![Portuguese final report value controls for the same submitted conductivity result with passing quality control](../img/screens/review/reported-value-pt.png)](../img/screens/review/reported-value-pt.png)
+
+</details>
 
 ---
 
