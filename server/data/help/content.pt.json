@@ -257,7 +257,7 @@
               "expected": "O seu Painel abre-se com o menu lateral correspondente à função atribuída."
             },
             {
-              "action": "Se o seu laboratório utilizar computadores de bancada partilhados com confirmação por PIN, abra O meu perfil e defina o seu PIN pessoal de 4 a 6 dígitos.",
+              "action": "Quando o Workbench pedir um PIN de bancada pela primeira vez, use essa janela para definir um PIN pessoal de 4 a 8 dígitos e confirme-o com a palavra-passe da sua conta. Se já tiver um PIN, introduza-o quando for solicitado.",
               "expected": "O seu PIN pessoal fica guardado e pronto para quando registar resultados num computador de bancada partilhado."
             }
           ]
@@ -277,10 +277,10 @@
         [
           "O meu perfil",
           "Página de configurações da conta pessoal no menu lateral",
-          "Use esta página para alterar a sua palavra-passe, o idioma ou o PIN de bancada partilhada."
+          "Use esta página para alterar a sua palavra-passe e as preferências de idioma."
         ]
       ],
-      "example": "Inicie sessão como a técnica Amina no Demo Soil Lab, defina uma palavra-passe de 12 caracteres, verifique \"Demo Soil Lab\" e \"Técnico de Laboratório\" na barra superior. Guarde um PIN de 4 dígitos em O meu perfil.",
+      "example": "Inicie sessão como a técnica Amina no Demo Soil Lab, defina uma palavra-passe de 12 caracteres e confirme « Demo Soil Lab » e « Técnico de Laboratório » na barra superior. Quando o Workbench pedir um PIN pela primeira vez, defina um PIN pessoal de 4 a 8 dígitos nessa janela e confirme-o com a palavra-passe da sua conta.",
       "success": "Iniciou sessão com o seu próprio nome e tem o laboratório e a função corretos ativos.",
       "nextActor": "Oficial de Recepção de Amostras, Técnico de Laboratório, Oficial de Qualidade e Auditoria ou Gerente de Laboratório",
       "problems": [
@@ -298,7 +298,7 @@
       "steps": [
         "Abra o ecrã de início de sessão, introduza o seu Nome de utilizador ou ID e palavra-passe. Clique em Início de Sessão Seguro. (Esperado: Se estiver a usar uma palavra-passe temporária, a janela Atualização de segurança obrigatória abre-se de imediato.)",
         "Defina uma palavra-passe pessoal com pelo menos 12 caracteres, inicie sessão novamente. Verifique o nome do laboratório e a função na barra superior. (Esperado: O seu Painel abre-se com o menu lateral correspondente à função atribuída.)",
-        "Se o seu laboratório utilizar computadores de bancada partilhados com confirmação por PIN, abra O meu perfil e defina o seu PIN pessoal de 4 a 6 dígitos. (Esperado: O seu PIN pessoal fica guardado e pronto para quando registar resultados num computador de bancada partilhado.)"
+        "Quando o Workbench pedir um PIN de bancada pela primeira vez, use essa janela para definir um PIN pessoal de 4 a 8 dígitos e confirme-o com a palavra-passe da sua conta. Se já tiver um PIN, introduza-o quando for solicitado. (Esperado: O seu PIN pessoal fica guardado e pronto para quando registar resultados num computador de bancada partilhado.)"
       ],
       "caution": "Nunca introduza resultados de amostras ou de bancada com a conta de um colega nem sob o nome do laboratório errado.",
       "related": [
@@ -423,7 +423,7 @@
       "quick": "Abra Meu trabalho ou Workbench, conclua primeiro as verificações abertas de secagem e preparação, registe as medições do lote e as amostras de controlo de qualidade e envie o trabalho concluído ao revisor.",
       "before": [
         "Verifique a barra superior para confirmar o nome do seu laboratório e a função de Técnico de Laboratório.",
-        "Tenha prontos a sua folha de bancada, os frascos de amostra e a verificação de calibração do instrumento."
+        "Tenha prontas as amostras de treino recebidas e aceites, o trabalho atribuído pelo gerente, a folha de bancada, os frascos e a verificação da calibração do instrumento."
       ],
       "sections": [
         {
@@ -438,7 +438,7 @@
               "expected": "A preparação confirmada desbloqueia as linhas de ensaio para que possa digitar ou colar resultados de amostras e leituras de controlo de qualidade."
             },
             {
-              "action": "Clique em Rever conclusão para registar os resultados verificados e. Abra Pronto a submeter. Clique em Enviar.",
+              "action": "Quando o Workbench pedir um PIN de bancada pela primeira vez, use essa janela para definir um PIN pessoal de 4 a 8 dígitos e confirme-o com a palavra-passe da sua conta. Se já tiver um PIN, introduza-o quando for solicitado. Clique em Rever conclusão para registar os resultados verificados e. Abra Pronto a submeter. Clique em Enviar.",
               "expected": "Os resultados registados passam para Enviados e concluídos e aparecem na Lista de tarefas do revisor."
             }
           ]
@@ -479,7 +479,7 @@
       "steps": [
         "Abra Meu trabalho ou Workbench. Verifique as tarefas que lhe foram atribuídas para hoje. (Esperado: Vê quais as amostras que precisam de Secagem ao ar ou Preparação de amostras e quais as que estão prontas para análise de bancada.)",
         "Conclua primeiro as listas de verificação necessárias de secagem e crivagem. Clique em Confirmar que o trabalho está concluído. Depois abra a folha de análise ou clique em Nova Corrida Analítica. (Esperado: A preparação confirmada desbloqueia as linhas de ensaio para que possa digitar ou colar resultados de amostras e leituras de controlo de qualidade.)",
-        "Clique em Rever conclusão para registar os resultados verificados e. Abra Pronto a submeter. Clique em Enviar. (Esperado: Os resultados registados passam para Enviados e concluídos e aparecem na Lista de tarefas do revisor.)"
+        "Quando o Workbench pedir um PIN de bancada pela primeira vez, use essa janela para definir um PIN pessoal de 4 a 8 dígitos e confirme-o com a palavra-passe da sua conta. Se já tiver um PIN, introduza-o quando for solicitado. Clique em Rever conclusão para registar os resultados verificados e. Abra Pronto a submeter. Clique em Enviar. (Esperado: Os resultados registados passam para Enviados e concluídos e aparecem na Lista de tarefas do revisor.)"
       ],
       "caution": "Guardar um rascunho na folha de trabalho não envia os resultados ao gerente. Conclua sempre Rever conclusão e Pronto a submeter no final de uma corrida.",
       "related": [
@@ -599,21 +599,21 @@
         ""
       ],
       "minutes": 3,
-      "quick": "Verifique o Painel e a Lista de tarefas todas as manhãs para atribuir ensaios pendentes, rever corridas enviadas pelos técnicos em Revisar envios, aprovar amostras concluídas em Aprovações finais e emitir relatórios PDF em Relatórios.",
+      "quick": "Ordem do primeiro dia: o administrador configura o laboratório; a receção recebe e aceita as amostras de treino; o gerente atribui o trabalho; os técnicos preparam as amostras e submetem os lotes no Workbench; o gerente revê os resultados e emite os relatórios.",
       "before": [
-        "Confirme o nome do seu laboratório ativo na barra superior.",
-        "Lembre-se de que, quando o laboratório ativa Exigir um segundo revisor em Políticas, não pode aprovar uma corrida que tenha registado pessoalmente."
+        "Confirme o nome do laboratório ativo na barra superior. Verifique que as amostras de treino foram recebidas e aceites na receção.",
+        "Quando a revisão por duas pessoas está ativa, o revisor deve ser uma pessoa diferente do analista. Se vai rever os lotes de treino, não os registe pessoalmente."
       ],
       "sections": [
         {
           "title": "Procedimento passo a passo",
           "steps": [
             {
-              "action": "Abra o Painel e a Lista de tarefas para verificar as contagens das filas de trabalho não atribuído, Revisar envios e Aprovações finais.",
-              "expected": "Vê todos os lotes a aguardar revisão técnica e todas as amostras a aguardar aprovação final no seu laboratório."
+              "action": "De manhã, abra Lista de tarefas e Atribuir trabalho. Atribua aos técnicos os ensaios das amostras de treino recebidas e aceites.",
+              "expected": "O trabalho atribuído aparece em Meu trabalho para cada técnico, pronto para preparação e ensaio de bancada."
             },
             {
-              "action": "Abra Revisar envios para inspecionar os valores dos lotes dos técnicos e os resultados do controlo de qualidade. Depois clique em Aprovar ou Devolver.",
+              "action": "Ao meio-dia, o técnico deverá ter submetido pelo menos dois lotes no Workbench para o trabalho atribuído de manhã. Abra Revisar envios para verificar os valores e os controlos de qualidade e clique em Aprovar ou Devolver.",
               "expected": "As determinações aprovadas avançam para a conclusão da amostra, enquanto os itens devolvidos abrem uma nova tentativa de repetição na bancada do técnico com a sua nota."
             },
             {
@@ -656,8 +656,8 @@
         "server/config/roles.js"
       ],
       "steps": [
-        "Abra o Painel e a Lista de tarefas para verificar as contagens das filas de trabalho não atribuído, Revisar envios e Aprovações finais. (Esperado: Vê todos os lotes a aguardar revisão técnica e todas as amostras a aguardar aprovação final no seu laboratório.)",
-        "Abra Revisar envios para inspecionar os valores dos lotes dos técnicos e os resultados do controlo de qualidade. Depois clique em Aprovar ou Devolver. (Esperado: As determinações aprovadas avançam para a conclusão da amostra, enquanto os itens devolvidos abrem uma nova tentativa de repetição na bancada do técnico com a sua nota.)",
+        "De manhã, abra Lista de tarefas e Atribuir trabalho. Atribua aos técnicos os ensaios das amostras de treino recebidas e aceites. (Esperado: O trabalho atribuído aparece em Meu trabalho para cada técnico, pronto para preparação e ensaio de bancada.)",
+        "Ao meio-dia, o técnico deverá ter submetido pelo menos dois lotes no Workbench para o trabalho atribuído de manhã. Abra Revisar envios para verificar os valores e os controlos de qualidade e clique em Aprovar ou Devolver. (Esperado: As determinações aprovadas avançam para a conclusão da amostra, enquanto os itens devolvidos abrem uma nova tentativa de repetição na bancada do técnico com a sua nota.)",
         "Abra Aprovações finais para verificar a plausibilidade global da amostra em todos os ensaios, aprove a amostra e emita o Certificado de análise em Relatórios. (Esperado: O estado da amostra passa para Aprovado e o relatório oficial em PDF fica pronto para transferir ou partilhar.)"
       ],
       "caution": "Verifique sempre tanto Revisar envios (para corridas de métodos individuais) como Aprovações finais (para amostras completas).",
@@ -928,7 +928,7 @@
       "category": "start",
       "kind": "guide",
       "title": "Escolher idioma, aparência e preferências de perfil",
-      "summary": "Altere o idioma de visualização, o tema claro ou escuro, a palavra-passe e o PIN de bancada partilhada em O meu perfil.",
+      "summary": "Altere o idioma, o tema claro ou escuro e a palavra-passe em O meu perfil. Defina o PIN de bancada na janela de PIN do Workbench.",
       "roles": [
         "ALL"
       ],
@@ -938,7 +938,7 @@
         "profile"
       ],
       "minutes": 3,
-      "quick": "Use os botões de idioma e tema na barra superior ou abra O meu perfil para definir o idioma de visualização preferido, a palavra-passe e o PIN de bancada de 4 a 6 dígitos sem afetar quaisquer dados de amostras.",
+      "quick": "Use os botões de idioma e tema na barra superior ou O meu perfil para as suas preferências pessoais. Quando o Workbench pedir um PIN pela primeira vez, defina um PIN pessoal de 4 a 8 dígitos nessa janela e confirme-o com a palavra-passe da sua conta.",
       "before": [
         "Inicie sessão com a sua conta pessoal.",
         "Lembre-se de que alterar o idioma de visualização apenas traduz as etiquetas do ecrã — nunca altera os números guardados nem as unidades."
@@ -952,7 +952,7 @@
               "expected": "Os menus, botões e artigos de Ajuda mudam imediatamente para o idioma escolhido."
             },
             {
-              "action": "Abra O meu perfil no menu lateral para atualizar a sua palavra-passe pessoal (pelo menos 12 caracteres) ou o seu PIN de bancada de 4 a 6 dígitos.",
+              "action": "Abra O meu perfil no menu lateral para atualizar a palavra-passe pessoal (pelo menos 12 caracteres). Quando o Workbench pedir um PIN, defina-o na respetiva janela, com 4 a 8 dígitos, e confirme-o com a palavra-passe da sua conta.",
               "expected": "As definições de segurança são atualizadas apenas para a sua conta."
             },
             {
@@ -979,7 +979,7 @@
           "Guarda as definições de perfil e a palavra-passe atualizadas."
         ]
       ],
-      "example": "Mude o idioma da interface para Português na barra superior, abra O meu perfil, atualize o seu PIN de bancada. Clique em Guardar alterações.",
+      "example": "Escolha Português na barra superior, abra O meu perfil, atualize a palavra-passe e clique em Guardar alterações. Quando o Workbench pedir um PIN pela primeira vez, defina um PIN pessoal de 4 a 8 dígitos nessa janela e confirme-o com a palavra-passe da sua conta.",
       "success": "O idioma do ecrã, a aparência e as definições pessoais de segurança estão guardados para o seu turno.",
       "nextActor": "Pode prosseguir diretamente para a sua fila de trabalho diária",
       "problems": [
@@ -996,7 +996,7 @@
       ],
       "steps": [
         "Clique no seletor de idioma na barra superior ou no ecrã de início de sessão para alternar entre English, Español, Français e Português. (Esperado: Os menus, botões e artigos de Ajuda mudam imediatamente para o idioma escolhido.)",
-        "Abra O meu perfil no menu lateral para atualizar a sua palavra-passe pessoal (pelo menos 12 caracteres) ou o seu PIN de bancada de 4 a 6 dígitos. (Esperado: As definições de segurança são atualizadas apenas para a sua conta.)",
+        "Abra O meu perfil no menu lateral para atualizar a palavra-passe pessoal (pelo menos 12 caracteres). Quando o Workbench pedir um PIN, defina-o na respetiva janela, com 4 a 8 dígitos, e confirme-o com a palavra-passe da sua conta. (Esperado: As definições de segurança são atualizadas apenas para a sua conta.)",
         "Clique em Guardar alterações em O meu perfil para guardar as suas preferências. (Esperado: Aparece uma mensagem de confirmação e as suas definições permanecem ativas da próxima vez que iniciar sessão.)"
       ],
       "caution": "As definições do perfil pessoal nunca alteram métodos de ensaio, unidades ou regras de qualidade do laboratório.",
@@ -9476,7 +9476,7 @@
               "expected": "Os rascunhos são validados face aos limites de plausibilidade, curva de calibração e repetibilidade r."
             },
             {
-              "action": "Clique em Registar Determinações (introduza o PIN de 4–6 dígitos se bench.pinAtRecord estiver ativo) e, em Pronto a Submeter, clique em Submeter para Revisão.",
+              "action": "Clique em Registar Determinações (introduza o PIN de 4–8 dígitos se bench.pinAtRecord estiver ativo) e, em Pronto a Submeter, clique em Submeter para Revisão.",
               "expected": "Os resultados avançam de SAVED para RECORDED e SUBMITTED, entrando na fila do Revisor / Gestor."
             }
           ]
@@ -9518,7 +9518,7 @@
       "steps": [
         "Abra a Bancada (/workbench), filtre pela sua fila ou grupo de métodos e abra a folha de trabalho ou lote analítico. (Expected: As tarefas atribuídas carregam com os códigos de amostra e posições de CQ (BLANK, DUPLICATE, LRM, CRM).)",
         "Introduza ou cole os resultados, selecione qualificadores (< LOD, < LOQ) sem usar 0 para amostras não medidas e resolva linhas bloqueadas (Use a state/actor/evidence table and a concrete reviewer handoff. [Canonical successor: bench-states]). (Expected: Os rascunhos são validados face aos limites de plausibilidade, curva de calibração e repetibilidade r.)",
-        "Clique em Registar Determinações (introduza o PIN de 4–6 dígitos se bench.pinAtRecord estiver ativo) e, em Pronto a Submeter, clique em Submeter para Revisão. (Expected: Os resultados avançam de SAVED para RECORDED e SUBMITTED, entrando na fila do Revisor / Gestor.)"
+        "Clique em Registar Determinações (introduza o PIN de 4–8 dígitos se bench.pinAtRecord estiver ativo) e, em Pronto a Submeter, clique em Submeter para Revisão. (Expected: Os resultados avançam de SAVED para RECORDED e SUBMITTED, entrando na fila do Revisor / Gestor.)"
       ],
       "caution": "Atenção: The manager cannot see a result that is only saved. — Inspecione o alerta de bloqueio na linha, mude para a tentativa ativa R2 se foi devolvida e conclua Registar Determinações e Submeter para Revisão.",
       "related": [
@@ -9895,7 +9895,7 @@
               "expected": "Os rascunhos são validados face aos limites de plausibilidade, curva de calibração e repetibilidade r."
             },
             {
-              "action": "Clique em Registar Determinações (introduza o PIN de 4–6 dígitos se bench.pinAtRecord estiver ativo) e, em Pronto a Submeter, clique em Submeter para Revisão.",
+              "action": "Clique em Registar Determinações (introduza o PIN de 4–8 dígitos se bench.pinAtRecord estiver ativo) e, em Pronto a Submeter, clique em Submeter para Revisão.",
               "expected": "Os resultados avançam de SAVED para RECORDED e SUBMITTED, entrando na fila do Revisor / Gestor."
             }
           ]
@@ -9937,7 +9937,7 @@
       "steps": [
         "Abra a Bancada (/workbench), filtre pela sua fila ou grupo de métodos e abra a folha de trabalho ou lote analítico. (Expected: As tarefas atribuídas carregam com os códigos de amostra e posições de CQ (BLANK, DUPLICATE, LRM, CRM).)",
         "Introduza ou cole os resultados, selecione qualificadores (< LOD, < LOQ) sem usar 0 para amostras não medidas e resolva linhas bloqueadas (Follow the return reason and eligible correction attempt without changing history. [Canonical successor: bench-returned]). (Expected: Os rascunhos são validados face aos limites de plausibilidade, curva de calibração e repetibilidade r.)",
-        "Clique em Registar Determinações (introduza o PIN de 4–6 dígitos se bench.pinAtRecord estiver ativo) e, em Pronto a Submeter, clique em Submeter para Revisão. (Expected: Os resultados avançam de SAVED para RECORDED e SUBMITTED, entrando na fila do Revisor / Gestor.)"
+        "Clique em Registar Determinações (introduza o PIN de 4–8 dígitos se bench.pinAtRecord estiver ativo) e, em Pronto a Submeter, clique em Submeter para Revisão. (Expected: Os resultados avançam de SAVED para RECORDED e SUBMITTED, entrando na fila do Revisor / Gestor.)"
       ],
       "caution": "Atenção: The old result is sealed and cannot be edited. — Inspecione o alerta de bloqueio na linha, mude para a tentativa ativa R2 se foi devolvida e conclua Registar Determinações e Submeter para Revisão.",
       "related": [

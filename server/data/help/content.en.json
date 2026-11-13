@@ -257,7 +257,7 @@
               "expected": "Your Dashboard opens with the side menu matching your assigned role."
             },
             {
-              "action": "If your laboratory uses shared bench computers with PIN confirmation, open My Profile and set your personal 4 to 6 digit PIN.",
+              "action": "When Workbench first asks for a bench PIN, use its PIN dialog to set a personal 4 to 8 digit PIN and confirm it with your account password. If your PIN is already set, enter it when prompted.",
               "expected": "Your personal PIN is saved and ready when you record results on a shared bench computer."
             }
           ]
@@ -277,10 +277,10 @@
         [
           "My Profile",
           "Personal account settings page in the side menu",
-          "Use this page to change your password, language, or shared-bench PIN."
+          "Use this page to change your password and language preferences."
         ]
       ],
-      "example": "Sign in as technician Amina on Demo Soil Lab, set a 12-character password, check \"Demo Soil Lab\" and \"Laboratory Technician\" in the top bar, and save a 4-digit PIN in My Profile.",
+      "example": "Sign in as technician Amina on Demo Soil Lab, set a 12-character password, and check \"Demo Soil Lab\" and \"Laboratory Technician\" in the top bar. When Workbench first prompts for a PIN, set a personal 4 to 8 digit PIN in that dialog and confirm it with your account password.",
       "success": "You are signed in under your own name with the right laboratory and role active.",
       "nextActor": "Sample Reception Officer, Laboratory Technician, Quality & Audit Officer, or Laboratory Manager",
       "problems": [
@@ -298,7 +298,7 @@
       "steps": [
         "Open the sign-in screen, enter your Username or ID and password, and click Secure Sign In. (Expected: If you are using a temporary password, the Security Update Required dialog opens right away.)",
         "Set a personal password of at least 12 characters, sign in again, and check your laboratory name and role in the top bar. (Expected: Your Dashboard opens with the side menu matching your assigned role.)",
-        "If your laboratory uses shared bench computers with PIN confirmation, open My Profile and set your personal 4 to 6 digit PIN. (Expected: Your personal PIN is saved and ready when you record results on a shared bench computer.)"
+        "When Workbench first asks for a bench PIN, use its PIN dialog to set a personal 4 to 8 digit PIN and confirm it with your account password. If your PIN is already set, enter it when prompted. (Expected: Your personal PIN is saved and ready when you record results on a shared bench computer.)"
       ],
       "caution": "Never enter sample or bench results under a colleague's account or under the wrong laboratory name.",
       "related": [
@@ -423,7 +423,7 @@
       "quick": "Open My Work or Workbench, complete any open drying and preparation checks first, record your batch measurements and quality control samples, and send the finished work to your reviewer.",
       "before": [
         "Check the top bar to confirm your laboratory name and Laboratory Technician role.",
-        "Have your bench worksheet, sample jars, and instrument calibration check ready."
+        "Have the received and accepted practice samples, work assigned by your manager, bench worksheet, sample jars, and instrument calibration check ready."
       ],
       "sections": [
         {
@@ -438,7 +438,7 @@
               "expected": "Confirmed preparation unlocks the test rows so you can type or paste sample results and quality control readings."
             },
             {
-              "action": "Click Review Completion to record your checked results, then open Ready to Submit and click Submit.",
+              "action": "When Workbench first asks for a bench PIN, use its PIN dialog to set a personal 4 to 8 digit PIN and confirm it with your account password. If your PIN is already set, enter it when prompted. Click Review Completion to record your checked results, then open Ready to Submit and click Submit.",
               "expected": "Your recorded results move to Sent & Completed and appear in the reviewer's Manager Task List."
             }
           ]
@@ -479,7 +479,7 @@
       "steps": [
         "Open My Work or Workbench and check the tasks assigned to you for today. (Expected: You see which samples need Air Drying or Sample Preparation and which samples are ready for bench analysis.)",
         "Finish any required drying and sieving checklists first and click Confirm work is done, then open your analysis worksheet or click New Analytical Run. (Expected: Confirmed preparation unlocks the test rows so you can type or paste sample results and quality control readings.)",
-        "Click Review Completion to record your checked results, then open Ready to Submit and click Submit. (Expected: Your recorded results move to Sent & Completed and appear in the reviewer's Manager Task List.)"
+        "When Workbench first asks for a bench PIN, use its PIN dialog to set a personal 4 to 8 digit PIN and confirm it with your account password. If your PIN is already set, enter it when prompted. Click Review Completion to record your checked results, then open Ready to Submit and click Submit. (Expected: Your recorded results move to Sent & Completed and appear in the reviewer's Manager Task List.)"
       ],
       "caution": "Saving a draft worksheet does not send results to your manager. Always complete Review Completion and Ready to Submit at the end of a run.",
       "related": [
@@ -599,21 +599,21 @@
         ""
       ],
       "minutes": 3,
-      "quick": "Check Dashboard and Manager Task List each morning to assign pending tests, review submitted technician runs in Review Submissions, approve completed samples in Final Approvals, and issue PDF reports in Reports.",
+      "quick": "Order of the first day: the administrator sets up the laboratory; reception receives and accepts the practice samples; the manager assigns the work; technicians prepare samples and submit batches from Workbench; the manager then reviews results and issues reports.",
       "before": [
-        "Confirm your active laboratory name in the top bar.",
-        "Remember that when your laboratory enables Require a second reviewer in Policies, you cannot approve a run that you recorded yourself."
+        "Confirm your active laboratory name in the top bar. Make sure the practice samples have been received and accepted at reception.",
+        "When two-person review is on, the reviewer must be a different person from the analyst. As the manager who will review the practice work, do not record those batches yourself."
       ],
       "sections": [
         {
           "title": "Step-by-step procedure",
           "steps": [
             {
-              "action": "Open Dashboard and Manager Task List to check queue counts for unassigned work, Review Submissions, and Final Approvals.",
-              "expected": "You see all batches waiting for technical review and all samples waiting for final sign-off in your laboratory."
+              "action": "In the morning, open Manager Task List and Assign Work. Assign the tests on the received and accepted practice samples to the technicians.",
+              "expected": "The assigned work appears in each technician's My Work list, ready for preparation and bench testing."
             },
             {
-              "action": "Open Review Submissions to inspect technician batch values and quality control results, then click Approve or Return.",
+              "action": "By midday, the technician should have submitted at least two batches from Workbench for the work you assigned this morning. Open Review Submissions to inspect the batch values and quality control results, then click Approve or Return.",
               "expected": "Approved determinations advance toward sample completion, while returned items open a fresh repeat try on the technician's bench with your note."
             },
             {
@@ -656,8 +656,8 @@
         "server/config/roles.js"
       ],
       "steps": [
-        "Open Dashboard and Manager Task List to check queue counts for unassigned work, Review Submissions, and Final Approvals. (Expected: You see all batches waiting for technical review and all samples waiting for final sign-off in your laboratory.)",
-        "Open Review Submissions to inspect technician batch values and quality control results, then click Approve or Return. (Expected: Approved determinations advance toward sample completion, while returned items open a fresh repeat try on the technician's bench with your note.)",
+        "In the morning, open Manager Task List and Assign Work. Assign the tests on the received and accepted practice samples to the technicians. (Expected: The assigned work appears in each technician's My Work list, ready for preparation and bench testing.)",
+        "By midday, the technician should have submitted at least two batches from Workbench for the work you assigned this morning. Open Review Submissions to inspect the batch values and quality control results, then click Approve or Return. (Expected: Approved determinations advance toward sample completion, while returned items open a fresh repeat try on the technician's bench with your note.)",
         "Open Final Approvals to check whole-sample plausibility across all tests, approve the sample, and issue the Certificate of Analysis in Reports. (Expected: The sample status moves to Approved and its official PDF report is ready to download or share.)"
       ],
       "caution": "Always check both Review Submissions (for individual method runs) and Final Approvals (for complete samples).",
@@ -928,7 +928,7 @@
       "category": "start",
       "kind": "guide",
       "title": "Choose language, appearance and profile preferences",
-      "summary": "Change your display language, light or dark theme, password, and shared-bench PIN in My Profile.",
+      "summary": "Change your display language, light or dark theme, and password in My Profile. Set your bench PIN in the Workbench PIN dialog.",
       "roles": [
         "ALL"
       ],
@@ -938,7 +938,7 @@
         "profile"
       ],
       "minutes": 3,
-      "quick": "Use the language and theme buttons in the top bar or open My Profile to set your preferred display language, password, and 4 to 6 digit bench PIN without affecting any sample data.",
+      "quick": "Use the language and theme buttons in the top bar or My Profile for your account preferences. When Workbench first prompts for a PIN, set a personal 4 to 8 digit PIN in that dialog and confirm it with your account password.",
       "before": [
         "Sign in with your personal account.",
         "Remember that changing your display language only translates screen labels—it never changes stored numbers or units."
@@ -952,7 +952,7 @@
               "expected": "Menus, buttons, and Help articles switch immediately to your chosen language."
             },
             {
-              "action": "Open My Profile from the side menu to update your personal password (at least 12 characters) or your 4 to 6 digit bench PIN.",
+              "action": "Open My Profile from the side menu to update your personal password (at least 12 characters). Set your bench PIN in the Workbench PIN dialog when prompted, using 4 to 8 digits and your account password to confirm.",
               "expected": "Your security settings are updated for your account only."
             },
             {
@@ -979,7 +979,7 @@
           "Saves your updated profile settings and password."
         ]
       ],
-      "example": "Switch the interface language to Français in the top bar, open My Profile, update your bench PIN, and click Save Changes.",
+      "example": "Switch the interface language to Français in the top bar, open My Profile, update your password, and click Save Changes. When Workbench first asks for a bench PIN, set a personal 4 to 8 digit PIN in its dialog and confirm it with your account password.",
       "success": "Your screen language, appearance, and personal security settings are saved for your shift.",
       "nextActor": "You can continue directly to your daily work queue",
       "problems": [
@@ -996,7 +996,7 @@
       ],
       "steps": [
         "Click the language selector in the top bar or on the sign-in screen to switch between English, Español, Français, and Português. (Expected: Menus, buttons, and Help articles switch immediately to your chosen language.)",
-        "Open My Profile from the side menu to update your personal password (at least 12 characters) or your 4 to 6 digit bench PIN. (Expected: Your security settings are updated for your account only.)",
+        "Open My Profile from the side menu to update your personal password (at least 12 characters). Set your bench PIN in the Workbench PIN dialog when prompted, using 4 to 8 digits and your account password to confirm. (Expected: Your security settings are updated for your account only.)",
         "Click Save Changes in My Profile to store your preferences. (Expected: A confirmation message appears and your settings remain active the next time you sign in.)"
       ],
       "caution": "Personal profile settings never change laboratory test methods, units, or quality rules.",
@@ -9476,7 +9476,7 @@
               "expected": "Draft values are validated against physical bounds, calibration range, and replicate repeatability r."
             },
             {
-              "action": "Click Review Completion → Record Determinations (enter your 4-6 digit PIN if bench.pinAtRecord is active), then open Ready to Submit and click Submit Samples for Review.",
+              "action": "Click Review Completion → Record Determinations (enter your 4-8 digit PIN if bench.pinAtRecord is active), then open Ready to Submit and click Submit Samples for Review.",
               "expected": "Determinations advance from SAVED draft to RECORDED and then SUBMITTED, appearing in the Reviewer / Lab Manager queue."
             }
           ]
@@ -9518,7 +9518,7 @@
       "steps": [
         "Open Workbench (/workbench), filter by your assigned queue or method group, and open the worksheet or analytical run batch. (Expected: Assigned work items load with their Lab Sample Codes, required QC positions (BLANK, DUPLICATE, LRM, CRM), and input fields.)",
         "Enter or paste values, select any applicable qualifier (< LOD, < LOQ) without using 0 for unmeasured tasks, and resolve any blocked or unmatched rows (Use a state/actor/evidence table and a concrete reviewer handoff. [Canonical successor: bench-states]). (Expected: Draft values are validated against physical bounds, calibration range, and replicate repeatability r.)",
-        "Click Review Completion → Record Determinations (enter your 4-6 digit PIN if bench.pinAtRecord is active), then open Ready to Submit and click Submit Samples for Review. (Expected: Determinations advance from SAVED draft to RECORDED and then SUBMITTED, appearing in the Reviewer / Lab Manager queue.)"
+        "Click Review Completion → Record Determinations (enter your 4-8 digit PIN if bench.pinAtRecord is active), then open Ready to Submit and click Submit Samples for Review. (Expected: Determinations advance from SAVED draft to RECORDED and then SUBMITTED, appearing in the Reviewer / Lab Manager queue.)"
       ],
       "caution": "Caution: The manager cannot see a result that is only saved. — Check the blocker badge on the row, switch to the active R2 repeat attempt if the item was returned for re-test, and complete both Record Determinations and Submit for Review.",
       "related": [
@@ -9895,7 +9895,7 @@
               "expected": "Draft values are validated against physical bounds, calibration range, and replicate repeatability r."
             },
             {
-              "action": "Click Review Completion → Record Determinations (enter your 4-6 digit PIN if bench.pinAtRecord is active), then open Ready to Submit and click Submit Samples for Review.",
+              "action": "Click Review Completion → Record Determinations (enter your 4-8 digit PIN if bench.pinAtRecord is active), then open Ready to Submit and click Submit Samples for Review.",
               "expected": "Determinations advance from SAVED draft to RECORDED and then SUBMITTED, appearing in the Reviewer / Lab Manager queue."
             }
           ]
@@ -9937,7 +9937,7 @@
       "steps": [
         "Open Workbench (/workbench), filter by your assigned queue or method group, and open the worksheet or analytical run batch. (Expected: Assigned work items load with their Lab Sample Codes, required QC positions (BLANK, DUPLICATE, LRM, CRM), and input fields.)",
         "Enter or paste values, select any applicable qualifier (< LOD, < LOQ) without using 0 for unmeasured tasks, and resolve any blocked or unmatched rows (Follow the return reason and eligible correction attempt without changing history. [Canonical successor: bench-returned]). (Expected: Draft values are validated against physical bounds, calibration range, and replicate repeatability r.)",
-        "Click Review Completion → Record Determinations (enter your 4-6 digit PIN if bench.pinAtRecord is active), then open Ready to Submit and click Submit Samples for Review. (Expected: Determinations advance from SAVED draft to RECORDED and then SUBMITTED, appearing in the Reviewer / Lab Manager queue.)"
+        "Click Review Completion → Record Determinations (enter your 4-8 digit PIN if bench.pinAtRecord is active), then open Ready to Submit and click Submit Samples for Review. (Expected: Determinations advance from SAVED draft to RECORDED and then SUBMITTED, appearing in the Reviewer / Lab Manager queue.)"
       ],
       "caution": "Caution: The old result is sealed and cannot be edited. — Check the blocker badge on the row, switch to the active R2 repeat attempt if the item was returned for re-test, and complete both Record Determinations and Submit for Review.",
       "related": [

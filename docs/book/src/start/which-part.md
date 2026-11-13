@@ -21,6 +21,16 @@ You do not need to read this whole manual. Use the table below to find the chapt
 
 ---
 
+## Order of the First Day
+
+1. The administrator or manager [sets up the laboratory](./first-day-admin.md).
+2. Reception [receives and accepts the practice samples](./first-day-reception.md).
+3. The manager [assigns the work in the morning](./first-day-manager.md#morning-check-the-manager-task-list-and-assign-work).
+4. The technician [prepares the samples, records results, and submits batches](./first-day-technician.md).
+5. The manager [reviews submitted work from midday onwards](./first-day-manager.md#midday-review-a-passing-batch), handles QC exceptions, and issues the certificate. When two-person review is on, this reviewer must be a different person from the analyst.
+
+---
+
 ## How Every Task Page Works
 
 Every daily work page in this manual follows the same order so you can scan it quickly at the bench:

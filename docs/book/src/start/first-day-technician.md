@@ -11,7 +11,7 @@ Walk through a complete technician shift using five practice soil samples. You w
 ## Before You Start
 
 - Sign in with a **Laboratory Technician** account on the **Sign in to SoilFER LIMS** screen.
-- If your laboratory uses shared bench computers, open the **User Menu** in the top right, click **Profile Settings**, and make sure your 4 to 6 digit bench PIN is set.
+- If your laboratory uses bench PIN confirmation, set your personal **4 to 8 digit PIN** in the **Workbench PIN dialog** when it first appears for recording results or unlocking the bench. Confirm it with your account password. If your PIN is already set, enter it when prompted.
 - Make sure the five practice samples have been accepted at reception and are on your preparation bench.
 
 ---

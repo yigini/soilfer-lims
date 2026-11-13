@@ -11,7 +11,8 @@ Walk through a complete day managing laboratory work and quality control. You wi
 ## Before You Start
 
 - Sign in with a **Laboratory Manager** account on the **Sign in to SoilFER LIMS** screen.
-- Make sure your practice samples have been received and at least two practice batches have been submitted from **Workbench**.
+- Make sure your practice samples have been received and accepted at reception.
+- When two-person review is on, the reviewer must be a different person from the analyst. If you will review the practice batches, do not record them yourself.
 
 ---
 
@@ -26,6 +27,8 @@ Walk through a complete day managing laboratory work and quality control. You wi
    *You should see those tasks move from **Unassigned** to **Assigned** in each technician's **My Work** list.*
 
 ### Midday: Review a Passing Batch
+
+By now, the technician should have submitted at least two batches from **Workbench** for the work you assigned this morning.
 
 1. In **Manager Task List**, click the **Review Submissions** tab.
    *You should see runs sent by technicians with status **Submitted** / **Ready for review**.*
