@@ -3151,6 +3151,13 @@
     "massCheckFailed": "Não foi possível carregar os requisitos de massa. O servidor verificará cada linha ao enviar.",
     "positionalUncertainty": "Incerteza de posição registrada (m)"
   },
+  "policyEditor": {
+    "reasonRequiredHint": "É necessário indicar um motivo para guardar.",
+    "labScopeOnly": "Esta definição só pode ser alterada ao nível do laboratório.",
+    "labOrAnalysisScopeOnly": "Esta definição pode ser alterada ao nível do laboratório ou da análise, mas não para um único método.",
+    "installScopeOnly": "Definido para toda a instalação.",
+    "replaceUnsaved": "Existem alterações por guardar. Descartá-las e abrir a outra definição?"
+  },
   "policies": {
     "sampleCodeNoCheck": "Sem um caractere de verificação, os erros de leitura são mais difíceis de detectar.",
     "keys": {

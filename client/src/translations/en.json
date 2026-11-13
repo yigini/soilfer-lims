@@ -3151,6 +3151,13 @@
     "massCheckFailed": "Mass requirements could not be loaded. The server will check each row when you submit.",
     "positionalUncertainty": "Recorded positional uncertainty (m)"
   },
+  "policyEditor": {
+    "reasonRequiredHint": "A reason is required to save.",
+    "labScopeOnly": "This setting can only be changed at laboratory level.",
+    "labOrAnalysisScopeOnly": "This setting can be changed at laboratory or analysis level, but not for a single method.",
+    "installScopeOnly": "Set for the whole installation.",
+    "replaceUnsaved": "You have unsaved changes. Discard them and open the other setting?"
+  },
   "policies": {
     "sampleCodeNoCheck": "Without a check character, scanning errors are harder to detect.",
     "keys": {
