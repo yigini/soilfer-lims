@@ -22,23 +22,28 @@ docker exec -it soilfer-lims sh
 
 ```bash
 cd /app/server
-node -e "
-const {PrismaClient}=require('./prisma_client');
-const bcrypt=require('bcryptjs');
-const crypto=require('crypto');
-const p=new PrismaClient();
-(async()=>{
-  const tempPass = crypto.randomBytes(6).toString('base64url');
-  const hash=await bcrypt.hash(tempPass,10);
-  await p.user.updateMany({
-    where:{username:'admin'},
-    data:{password:hash, mustChangePassword:true}
-  });
-  console.log('Password reset successfully.');
-  console.log('Temporary password:', tempPass);
-  process.exit(0);
-})()
-"
+node <<'NODE'
+const prisma = require('./prisma');
+const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
+(async () => {
+  try {
+    const tempPass = 'Tmp-' + crypto.randomBytes(9).toString('base64url');
+    const hash = await bcrypt.hash(tempPass, 10);
+    await prisma.user.updateMany({
+      where: { username: 'admin' },
+      data: { password: hash, mustChangePassword: true, tokenVersion: { increment: 1 } }
+    });
+    console.log('Password reset successfully.');
+    console.log('Temporary password:', tempPass);
+  } finally {
+    await prisma.$disconnect();
+  }
+})().catch(() => {
+  console.error('Password reset failed.');
+  process.exitCode = 1;
+});
+NODE
 ```
 
 ### 4. Exit the Container

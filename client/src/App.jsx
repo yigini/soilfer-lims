@@ -247,10 +247,18 @@ const RequireAuth = ({ children, permission, requiredRole }) => {
     if (user.mustChangePassword) {
         return (
             <NotificationProvider>
-                <ForcePasswordChangeModal />
-                <div className="filter blur-sm pointer-events-none select-none h-screen overflow-hidden">
-                    <Layout>{children}</Layout>
-                </div>
+                <SyncProvider>
+                    <HelpProvider>
+                        <ForcePasswordChangeModal />
+                        <div className="filter blur-sm pointer-events-none select-none h-screen overflow-hidden">
+                            <Layout>
+                                <React.Suspense fallback={<LazyFallback />}>
+                                    {children}
+                                </React.Suspense>
+                            </Layout>
+                        </div>
+                    </HelpProvider>
+                </SyncProvider>
             </NotificationProvider>
         );
     }
