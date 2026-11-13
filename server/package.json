@@ -7,6 +7,7 @@
     "start": "node index.js",
     "dev": "node index.js",
     "seed": "node seed.js",
+    "seed:demo": "node scripts/seed_demo_lab.cjs",
     "provision:admin": "node scripts/provision_super_admin.js",
     "test": "jest --maxWorkers=1 --workerIdleMemoryLimit=512MB",
     "test:watch": "jest --watch",
