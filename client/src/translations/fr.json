@@ -4896,9 +4896,9 @@
     "refreshQueue": "Actualiser la file",
     "workbenchNavigation": "Navigation du poste de travail",
     "myWorkCount": "Mon travail ({{count}})",
-    "worksheetCount": "Feuille de saisie ({{count}})",
-    "readyToSubmitCount": "Prêt à envoyer ({{count}})",
-    "sentCompletedCount": "Envoyé et terminé ({{count}})",
+    "worksheetCount": "Feuille de travail ({{count}})",
+    "readyToSubmitCount": "Prêt à soumettre ({{count}})",
+    "sentCompletedCount": "Envoyés et terminés ({{count}})",
     "allWorkCount": "Tout le travail ({{count}})",
     "readyToRecordCount": "Prêt à enregistrer ({{count}})",
     "needsAttentionCount": "À vérifier ({{count}})",
@@ -4956,7 +4956,7 @@
     "noSamplesFoundMatchingYourFilter": "Aucun échantillon ne correspond au filtre.",
     "enter": "Entrée",
     "toAdvanceToNextRow": "pour passer à la ligne suivante",
-    "reviewCompletionCount": "Vérifier la fin des tâches ({{count}})",
+    "reviewCompletionCount": "Vérifier la réalisation ({{count}})",
     "pasteValues": "Coller des valeurs",
     "batchQCRuns": "Lots et séries de CQ",
     "switchToBatchTable": "Passer au tableau du lot",
@@ -5011,7 +5011,7 @@
     "submitting": "Envoi en cours...",
     "reviewDeterminationsBeforeRecording": "Vérifier les déterminations avant l'enregistrement",
     "verifyDeterminationsAndMetadataRecordingWritesDefensibleRe": "Vérifiez les déterminations et les métadonnées. L'enregistrement conserve les résultats traçables et marque les tâches comme terminées, sans les envoyer à l'acceptation du vérificateur.",
-    "backToWorksheet": "Retour à la feuille de saisie",
+    "backToWorksheet": "Retour à la feuille de travail",
     "eligibleToRecord": "Admissible à l'enregistrement",
     "excludedIncomplete": "Exclu / Incomplet",
     "airDry": "Séché à l'air",
@@ -5079,6 +5079,8 @@
     "selectedCount": "{{count}} sélectionné(s)",
     "press": "Appuyez sur",
     "valueTitle": "Valeur",
-    "numericDetermination": "Détermination numérique"
+    "numericDetermination": "Détermination numérique",
+    "acceptItem": "Accepter l'élément",
+    "returnForCorrection": "Renvoyer pour correction"
   }
 }

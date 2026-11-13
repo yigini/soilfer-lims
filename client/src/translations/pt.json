@@ -4897,8 +4897,8 @@
     "workbenchNavigation": "Navegação da bancada",
     "myWorkCount": "Meu trabalho ({{count}})",
     "worksheetCount": "Folha de trabalho ({{count}})",
-    "readyToSubmitCount": "Pronto para enviar ({{count}})",
-    "sentCompletedCount": "Enviado e concluído ({{count}})",
+    "readyToSubmitCount": "Pronto a submeter ({{count}})",
+    "sentCompletedCount": "Enviados e concluídos ({{count}})",
     "allWorkCount": "Todo o trabalho ({{count}})",
     "readyToRecordCount": "Pronto para registar ({{count}})",
     "needsAttentionCount": "Requer atenção ({{count}})",
@@ -5079,6 +5079,8 @@
     "selectedCount": "{{count}} selecionado(s)",
     "press": "Prima",
     "valueTitle": "Valor",
-    "numericDetermination": "Determinação numérica"
+    "numericDetermination": "Determinação numérica",
+    "acceptItem": "Aceitar item",
+    "returnForCorrection": "Devolver para correção"
   }
 }

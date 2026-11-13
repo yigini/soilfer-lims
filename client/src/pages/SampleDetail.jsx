@@ -1212,14 +1212,14 @@ const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
                                                             onClick={() => handleReviewItem(item.id, 'ACCEPTED')}
                                                             disabled={!reportedChoices[item.id]?.ready || Boolean(item.qcGateCode && item.qcGateCode !== 'QC_ACKNOWLEDGEMENT_REQUIRED') || item.qcAcknowledgementRequired && !qcAcknowledgementReason.trim()}
                                                             className="p-1.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded-lg transition-colors"
-                                                            title="Accept Item"
+                                                            title={t("workbenchUi.acceptItem")}
                                                         >
                                                             <Check size={16} />
                                                         </button>
                                                         <button
                                                             onClick={() => handleReviewItem(item.id, 'REANALYSIS_REQUIRED')}
                                                             className="p-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg transition-colors"
-                                                            title="Return for correction"
+                                                            title={t("workbenchUi.returnForCorrection")}
                                                         >
                                                             <X size={16} />
                                                         </button>

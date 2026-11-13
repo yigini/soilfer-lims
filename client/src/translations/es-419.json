@@ -5079,6 +5079,8 @@
     "selectedCount": "{{count}} seleccionado(s)",
     "press": "Presione",
     "valueTitle": "Valor",
-    "numericDetermination": "Determinación numérica"
+    "numericDetermination": "Determinación numérica",
+    "acceptItem": "Aceptar elemento",
+    "returnForCorrection": "Devolver para corrección"
   }
 }
