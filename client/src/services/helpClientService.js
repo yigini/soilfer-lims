@@ -1,4 +1,7 @@
 import axios from 'axios';
+import legacyAliases from '../../../server/data/help/legacy-aliases.json';
+
+const legacyAliasIds = new Set(legacyAliases.aliases.map(alias => alias.id));
 import {
     saveOfflineHelpPack,
     getOfflineHelpArticles,
@@ -66,6 +69,7 @@ export const helpClientService = {
 
         const countByCategory = {};
         offlineArticles.forEach(a => {
+            if (legacyAliasIds.has(a.id)) return;
             countByCategory[a.category] = (countByCategory[a.category] || 0) + 1;
         });
 
@@ -113,6 +117,7 @@ export const helpClientService = {
         // Offline fallback
         const meta = await getOfflineHelpMeta({ user, labId, locale });
         let articles = await getOfflineHelpArticles({ category, user, labId, locale });
+        articles = articles.filter(article => !legacyAliasIds.has(article.id));
 
         if (role && role !== 'all') {
             articles = articles.filter(a => {
@@ -251,6 +256,7 @@ export const helpClientService = {
         const scored = [];
 
         for (const art of allArticles) {
+            if (legacyAliasIds.has(art.id)) continue;
             if (role && role !== 'all') {
                 const roles = art.roles || ['all'];
                 if (!roles.includes('all') && !roles.includes(role.toLowerCase())) continue;

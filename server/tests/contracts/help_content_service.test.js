@@ -60,7 +60,7 @@ describe('Help Content Service Contract Tests', () => {
         }
     });
 
-    test('searchHelp finds spectra article by MIR keyword in preview', async () => {
+    test('searchHelp finds the canonical spectra article by MIR keyword in preview', async () => {
         const result = await helpContentService.searchHelp({
             query: 'MIR',
             user: { role: 'SUPER_ADMIN' },
@@ -68,8 +68,8 @@ describe('Help Content Service Contract Tests', () => {
             preview: true
         });
         expect(result.total).toBeGreaterThan(0);
-        const hasSpectra = result.results.some(r => r.id === 'bench-spectra');
-        expect(hasSpectra).toBe(true);
+        expect(result.results.some(r => r.id === 'method-spectral-import')).toBe(true);
+        expect(result.results.some(r => r.id === 'bench-spectra')).toBe(false);
     });
 
     test('searchHelp handles search queries safely with special characters', async () => {

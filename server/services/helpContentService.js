@@ -1,6 +1,8 @@
 const fs = require('fs');
 const path = require('path');
 const prisma = require('../prisma');
+const legacyAliasIds = require('../data/help/legacy-aliases.json').aliases.map(alias => alias.id);
+const legacyAliasSet = new Set(legacyAliasIds);
 
 // Load runtime data from server/data/help/
 const HELP_DATA_DIR = path.resolve(__dirname, '../data/help');
@@ -181,6 +183,7 @@ async function getTopics(user = null, locale = 'en', preview = false) {
     const canPreview = preview && isAuth && (user.role === 'SUPER_ADMIN' || user.permissions?.includes('HELP_EDIT_GLOBAL'));
 
     const where = {
+        id: { notIn: legacyAliasIds },
         archivedAt: null,
         visibility: { in: allowedVisibilities }
     };
@@ -238,6 +241,7 @@ async function getArticles({ category = null, role = null, user = null, locale =
     const canPreview = preview && isAuth && (user.role === 'SUPER_ADMIN' || user.permissions?.includes('HELP_EDIT_GLOBAL'));
 
     const where = {
+        id: { notIn: legacyAliasIds },
         archivedAt: null,
         visibility: { in: allowedVisibilities }
     };
@@ -509,6 +513,7 @@ async function searchHelp({ query = '', topic = null, role = null, user = null, 
     const canPreview = preview && isAuth && (user.role === 'SUPER_ADMIN' || user.permissions?.includes('HELP_EDIT_GLOBAL'));
 
     const where = {
+        id: { notIn: legacyAliasIds },
         archivedAt: null,
         visibility: { in: allowedVisibilities }
     };
@@ -899,6 +904,7 @@ async function getFaqs({ locale = 'en', topic = null } = {}) {
 
     const faqs = [];
     diskContent.articles.forEach(art => {
+        if (legacyAliasSet.has(art.id)) return;
         if (topic && art.category !== topic) return;
         if (Array.isArray(art.problems) && art.problems.length > 0) {
             art.problems.forEach((prob, idx) => {

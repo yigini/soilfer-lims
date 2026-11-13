@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "aliases": [
+    {
+      "id": "start-shift",
+      "successorId": "start-technician"
+    },
+    {
+      "id": "intake-identity",
+      "successorId": "tracking-identifiers"
+    },
+    {
+      "id": "bench-drying",
+      "successorId": "prep-drying"
+    },
+    {
+      "id": "bench-preparation",
+      "successorId": "prep-receipt"
+    },
+    {
+      "id": "bench-run",
+      "successorId": "bench-batch"
+    },
+    {
+      "id": "bench-save-submit",
+      "successorId": "bench-states"
+    },
+    {
+      "id": "bench-texture",
+      "successorId": "method-texture"
+    },
+    {
+      "id": "bench-spectra",
+      "successorId": "method-spectral-import"
+    },
+    {
+      "id": "review-results",
+      "successorId": "review-submission"
+    },
+    {
+      "id": "review-returned",
+      "successorId": "bench-returned"
+    },
+    {
+      "id": "assets-instrument",
+      "successorId": "assets-find"
+    },
+    {
+      "id": "offline-files",
+      "successorId": "offline-record"
+    },
+    {
+      "id": "connect-library",
+      "successorId": "method-spectral-inspect"
+    },
+    {
+      "id": "manage-catalogue",
+      "successorId": "admin-catalogue"
+    },
+    {
+      "id": "manage-language",
+      "successorId": "start-settings"
+    },
+    {
+      "id": "manage-load-error",
+      "successorId": "quality-loading"
+    },
+    {
+      "id": "manage-support",
+      "successorId": "quality-support"
+    }
+  ]
+}
