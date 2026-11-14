@@ -1,10 +1,15 @@
 # Release Notes (1.11–1.14)
 
-This page summarizes what laboratory staff, managers, and server administrators will notice in SoilFER-LIMS **1.14.0**, followed by earlier updates in versions **1.13**, **1.12** and **1.11**.
+This page summarizes what laboratory staff, managers, and server administrators will notice in SoilFER-LIMS **1.14.1**, followed by earlier updates.
 
 For step-by-step update instructions, see [Updating SoilFER-LIMS](./updates.md).
 
 ---
+
+## Version 1.14.1 — 2026-11-14
+
+- **New inventory items:** the form starts clear each time you open it, including after creating an item or cancelling. Previous entries and errors are cleared.
+- **Stock dialogs:** Add Item, Receive Stock and lot actions follow the selected screen language in all five supported languages.
 
 ## Version 1.14.0 — 2026-11-14
 
