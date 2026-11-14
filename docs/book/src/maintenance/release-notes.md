@@ -1,10 +1,19 @@
-# Release Notes (1.11, 1.12 & 1.13)
+# Release Notes (1.11–1.14)
 
-This page summarizes what laboratory staff, managers, and server administrators will notice in SoilFER-LIMS **1.13.1**, followed by earlier updates in versions **1.12** and **1.11**.
+This page summarizes what laboratory staff, managers, and server administrators will notice in SoilFER-LIMS **1.14.0**, followed by earlier updates in versions **1.13**, **1.12** and **1.11**.
 
 For step-by-step update instructions, see [Updating SoilFER-LIMS](./updates.md).
 
 ---
+
+## Version 1.14.0 — 2026-11-14
+
+- **First sign-in and account resets:** the required password update opens without crashing for a new administrator or a user whose password was reset. The server command in the reset guide now works with the current application.
+- **Find the manual:** an optional Manual link opens the configured guide address. Administrators can leave the address empty to hide the link while the hosted manual is being prepared.
+- **Support contact:** the default support address comes from one shared setting. Contacts already configured by administrators are kept.
+- **Workbench languages:** queues, numeric worksheets, submission and review screens, confirmation logs and the review-card labels use the selected screen language. Result values, method names and recorded status codes stay as data.
+- **Current Help guides:** menus, counts and search hide 17 older duplicate entries. Existing article identifiers and direct links continue to work; Help content remains v1.4.1.
+- **Practice before launch:** a repeatable Demo Soil Lab seed provides fictional exercises on a separate local copy. French and Portuguese pictures show the same practice records in the first-day guides. Practice data is never loaded automatically into a working laboratory.
 
 ## Version 1.13.1 — 2026-11-13
 
