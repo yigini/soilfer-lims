@@ -83,6 +83,16 @@ const techStack = [
 
 const changelog = [
     {
+        version: 'v1.14.1',
+        date: 'November 14, 2026',
+        tag: 'Inventory Dialogs',
+        badgeColor: 'bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300 border-blue-300 dark:border-blue-800',
+        changes: [
+            'New inventory items start with a clear form and no old error after create or cancel.',
+            'Add Item, Receive Stock and lot actions use the selected language across all five screen languages.',
+        ],
+    },
+    {
         version: 'v1.14.0',
         date: 'November 14, 2026',
         tag: 'Launch Guides and Workbench Languages',

@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.14.1] - 2026-11-14
+
+### Fixed
+- Start a new inventory item with a clear form and no previous error after creation or cancellation.
+- Show stock receipt and lot action dialogs in the selected language across all five supported languages.
+
 ## [1.14.0] - 2026-11-14
 
 ### Added
