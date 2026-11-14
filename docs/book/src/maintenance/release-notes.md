@@ -1,10 +1,16 @@
-# Release Notes (1.11–1.14)
+# Release Notes (1.11–1.15)
 
-This page summarizes what laboratory staff, managers, and server administrators will notice in SoilFER-LIMS **1.14.1**, followed by earlier updates.
+This page summarizes what laboratory staff, managers, and server administrators will notice in SoilFER-LIMS **1.15.0**, followed by earlier updates.
 
 For step-by-step update instructions, see [Updating SoilFER-LIMS](./updates.md).
 
 ---
+
+## Version 1.15.0 — 2026-11-14
+
+- **Instrument checks:** technicians can record calibration, verification and maintenance events for their laboratory. A laboratory setting can require a manager to accept the event; the author cannot sign off their own event. A calibration or verification awaiting acceptance keeps the instrument out of Ready and shows why; the last accepted dates remain visible.
+- **Prepared stock:** technicians can record reagent and standard lots for their laboratory, with quantities, units and optional parent-lot references. A laboratory setting can start these lots in quarantine for a manager to release. Recording a parent reference does not consume that stock.
+- **Screen languages:** new event choices, sign-off messages and prepared-lot guidance are available in all five screen languages.
 
 ## Version 1.14.1 — 2026-11-14
 
