@@ -2163,7 +2163,72 @@
     "showingExpired": "Showing: Expired Items",
     "showingExpiringSoon": "Showing: Expiring Soon Items",
     "showingQuarantined": "Showing: Quarantined Items",
-    "showingMissingQuantity": "Showing: Missing Quantity Items"
+    "showingMissingQuantity": "Showing: Missing Quantity Items",
+    "dialogs": {
+      "receiveStock": "Receive Stock",
+      "step": "Step {{step}}/{{total}}",
+      "selectItem": "Select Item",
+      "chooseItem": "Choose item",
+      "defaultLocation": "Default",
+      "lotPlaceholder": "e.g. LOT-2026-001",
+      "concentrationNotes": "Concentration / Notes",
+      "concentrationPlaceholder": "e.g. 1000 ppm",
+      "confirmReceipt": "Confirm Receipt",
+      "item": "Item",
+      "lot": "Lot",
+      "quantity": "Quantity",
+      "concentration": "Concentration",
+      "shortCode": "Short code",
+      "grade": "Grade",
+      "hazardClass": "Hazard class (optional)",
+      "reorderPoint": "Reorder point",
+      "createItem": "Create Item",
+      "createFailed": "Failed to create the item",
+      "receiveFailed": "Failed to receive stock",
+      "quickConsume": "Quick Consume",
+      "findingLot": "Finding best lot...",
+      "findLotFailed": "Failed to find the best lot",
+      "noAvailableLots": "No available lots with stock for this item.",
+      "autoSelectedLot": "Auto-selected Lot",
+      "available": "Available",
+      "expires": "Expires",
+      "amountToUse": "Amount to use ({{unit}})",
+      "consumeFailed": "Consumption failed",
+      "actionFailed": "Action failed",
+      "reason": "Reason",
+      "newLocation": "New Location",
+      "selectLocation": "Select location",
+      "delta": "Change (+/-)",
+      "actions": {
+        "consume": "Consume",
+        "adjust": "Adjust",
+        "transfer": "Transfer",
+        "quarantine": "Quarantine",
+        "release": "Release",
+        "dispose": "Dispose"
+      },
+      "actionTitles": {
+        "consume": "Consume Lot",
+        "adjust": "Adjust Lot",
+        "transfer": "Transfer Lot",
+        "quarantine": "Quarantine Lot",
+        "release": "Release Lot",
+        "dispose": "Dispose of Lot"
+      },
+      "itemTypes": {
+        "REAGENT": "Reagent",
+        "CHEMICAL": "Chemical",
+        "CONSUMABLE": "Consumable",
+        "STANDARD": "Standard",
+        "CRM": "Certified reference material (CRM)",
+        "CONTAINER": "Container",
+        "OTHER": "Other"
+      },
+      "units": {
+        "pcs": "pieces",
+        "box": "box"
+      }
+    }
   },
   "labs": {
     "title": "Laboratory Management",

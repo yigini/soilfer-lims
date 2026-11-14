@@ -2163,7 +2163,72 @@
     "showingExpired": "Mostrando: Artículos vencidos",
     "showingExpiringSoon": "Mostrando: Artículos por vencer",
     "showingQuarantined": "Mostrando: Artículos en cuarentena",
-    "showingMissingQuantity": "Mostrando: Artículos con cantidad faltante"
+    "showingMissingQuantity": "Mostrando: Artículos con cantidad faltante",
+    "dialogs": {
+      "receiveStock": "Recibir existencias",
+      "step": "Paso {{step}}/{{total}}",
+      "selectItem": "Seleccionar artículo",
+      "chooseItem": "Elegir artículo",
+      "defaultLocation": "Predeterminada",
+      "lotPlaceholder": "p. ej., LOT-2026-001",
+      "concentrationNotes": "Concentración / Notas",
+      "concentrationPlaceholder": "p. ej., 1000 ppm",
+      "confirmReceipt": "Confirmar recepción",
+      "item": "Artículo",
+      "lot": "Lote",
+      "quantity": "Cantidad",
+      "concentration": "Concentración",
+      "shortCode": "Código corto",
+      "grade": "Grado de pureza",
+      "hazardClass": "Clase de peligro (opcional)",
+      "reorderPoint": "Punto de reposición",
+      "createItem": "Crear artículo",
+      "createFailed": "No se pudo crear el artículo",
+      "receiveFailed": "No se pudieron recibir las existencias",
+      "quickConsume": "Consumo rápido",
+      "findingLot": "Buscando el mejor lote...",
+      "findLotFailed": "No se pudo encontrar el mejor lote",
+      "noAvailableLots": "No hay lotes disponibles con existencias para este artículo.",
+      "autoSelectedLot": "Lote seleccionado automáticamente",
+      "available": "Disponible",
+      "expires": "Vencimiento",
+      "amountToUse": "Cantidad a usar ({{unit}})",
+      "consumeFailed": "Error al registrar el consumo",
+      "actionFailed": "La acción falló",
+      "reason": "Motivo",
+      "newLocation": "Nueva ubicación",
+      "selectLocation": "Seleccionar ubicación",
+      "delta": "Cambio (+/-)",
+      "actions": {
+        "consume": "Consumir",
+        "adjust": "Ajustar",
+        "transfer": "Transferir",
+        "quarantine": "Poner en cuarentena",
+        "release": "Liberar",
+        "dispose": "Desechar"
+      },
+      "actionTitles": {
+        "consume": "Consumir lote",
+        "adjust": "Ajustar lote",
+        "transfer": "Transferir lote",
+        "quarantine": "Poner lote en cuarentena",
+        "release": "Liberar lote",
+        "dispose": "Desechar lote"
+      },
+      "itemTypes": {
+        "REAGENT": "Reactivo",
+        "CHEMICAL": "Producto químico",
+        "CONSUMABLE": "Consumible",
+        "STANDARD": "Patrón",
+        "CRM": "Material de referencia certificado (MRC)",
+        "CONTAINER": "Recipiente",
+        "OTHER": "Otro"
+      },
+      "units": {
+        "pcs": "piezas",
+        "box": "caja"
+      }
+    }
   },
   "labs": {
     "title": "Gestión de Laboratorios",
