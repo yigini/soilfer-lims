@@ -77,6 +77,7 @@ const AlertBanner = ({ alerts, alertFilter, onSelectFilter, onViewAlerts }) => {
 
 // ─── Quick Consume Modal (New) ──────────────────────────────────
 const QuickConsumeModal = ({ show, onClose, item, locations, onSuccess }) => {
+    const { t } = useLanguage();
     const [lot, setLot] = useState(null);
     const [loading, setLoading] = useState(true);
     const [quantity, setQuantity] = useState('');
@@ -92,12 +93,12 @@ const QuickConsumeModal = ({ show, onClose, item, locations, onSuccess }) => {
                     const available = res.data.filter(l => l.status === 'AVAILABLE' && l.currentQuantity > 0);
                     setLot(available[0] || null);
                 })
-                .catch(e => setError('Failed to find best lot'))
+                .catch(() => setError(t('inventory.dialogs.findLotFailed')))
                 .finally(() => setLoading(false));
         } else {
             setLot(null); setQuantity(''); setReason(''); setError('');
         }
-    }, [show, item]);
+    }, [show, item, t]);
 
     const handleConsume = async () => {
         setSaving(true); setError('');
@@ -108,7 +109,7 @@ const QuickConsumeModal = ({ show, onClose, item, locations, onSuccess }) => {
             });
             onSuccess(); onClose();
         } catch (e) {
-            setError(e.response?.data?.error || 'Consumption failed');
+            setError(e.response?.data?.error || t('inventory.dialogs.consumeFailed'));
         } finally { setSaving(false); }
     };
 
@@ -117,23 +118,23 @@ const QuickConsumeModal = ({ show, onClose, item, locations, onSuccess }) => {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={onClose}>
             <div className="bg-sf-surface rounded-2xl shadow-2xl w-full max-w-sm mx-4 overflow-hidden" onClick={e => e.stopPropagation()}>
                 <div className="px-6 py-4 border-b dark:border-gray-700 bg-blue-50 dark:bg-blue-900/20 flex justify-between items-center">
-                    <h3 className="font-bold flex items-center gap-2"><MinusCircle size={18} className="text-blue-600" /> Quick Consume</h3>
-                    <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X size={18} /></button>
+                    <h3 className="font-bold flex items-center gap-2"><MinusCircle size={18} className="text-blue-600" /> {t('inventory.dialogs.quickConsume')}</h3>
+                    <button onClick={onClose} aria-label={t('common.close')} className="text-gray-400 hover:text-gray-600"><X size={18} /></button>
                 </div>
                 <div className="p-6 space-y-4">
-                    {loading ? <div className="text-center py-4 text-gray-400">Finding best lot...</div> :
-                        !lot ? <div className="text-center py-4 text-red-500 text-sm">No available lots with stock for this item.</div> : (
+                    {loading ? <div className="text-center py-4 text-gray-400">{t('inventory.dialogs.findingLot')}</div> :
+                        !lot ? <div className="text-center py-4 text-red-500 text-sm">{t('inventory.dialogs.noAvailableLots')}</div> : (
                             <>
                                 <div className="text-sm">
-                                    <p className="text-gray-500 mb-1">Item: <b className="text-sf-text">{item.name}</b></p>
+                                    <p className="text-gray-500 mb-1">{t('inventory.dialogs.item')}: <b className="text-sf-text">{item.name}</b></p>
                                     <div className="p-2 rounded bg-sf-canvas/50 border dark:border-gray-600">
-                                        <p className="flex justify-between"><span>Auto-selected Lot:</span> <b className="font-mono text-xs">{lot.lotNumber}</b></p>
-                                        <p className="flex justify-between"><span>Available:</span> <b>{lot.currentQuantity} {item.unitOfMeasure}</b></p>
-                                        {lot.expiryDate && <p className="flex justify-between text-amber-600"><span>Expires:</span> <b>{new Date(lot.expiryDate).toLocaleDateString()}</b></p>}
+                                        <p className="flex justify-between"><span>{t('inventory.dialogs.autoSelectedLot')}:</span> <b className="font-mono text-xs">{lot.lotNumber}</b></p>
+                                        <p className="flex justify-between"><span>{t('inventory.dialogs.available')}:</span> <b>{lot.currentQuantity} {item.unitOfMeasure}</b></p>
+                                        {lot.expiryDate && <p className="flex justify-between text-amber-600"><span>{t('inventory.dialogs.expires')}:</span> <b>{new Date(lot.expiryDate).toLocaleDateString()}</b></p>}
                                     </div>
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-medium text-gray-500 mb-1">Amount to use ({item.unitOfMeasure}) *</label>
+                                    <label className="block text-xs font-medium text-gray-500 mb-1">{t('inventory.dialogs.amountToUse', { unit: item.unitOfMeasure })} *</label>
                                     <input type="number" step="0.01" value={quantity} onChange={e => setQuantity(e.target.value)} autoFocus
                                         className="w-full px-3 py-2 rounded-lg border dark:border-gray-600 bg-white dark:bg-gray-700 outline-none focus:ring-2 focus:ring-blue-500" />
                                 </div>
@@ -142,10 +143,10 @@ const QuickConsumeModal = ({ show, onClose, item, locations, onSuccess }) => {
                         )}
                 </div>
                 <div className="px-6 py-4 bg-sf-canvas/50 border-t dark:border-gray-700 flex justify-end gap-2">
-                    <button onClick={onClose} className="px-4 py-2 text-sm">Cancel</button>
+                    <button onClick={onClose} className="px-4 py-2 text-sm">{t('common.cancel')}</button>
                     <button onClick={handleConsume} disabled={!lot || !quantity || saving}
                         className="px-4 py-2 text-sm font-bold bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-40">
-                        {saving ? 'Processing...' : 'Confirm'}
+                        {saving ? t('common.processing') : t('common.confirm')}
                     </button>
                 </div>
             </div>
@@ -155,6 +156,7 @@ const QuickConsumeModal = ({ show, onClose, item, locations, onSuccess }) => {
 
 // ─── Receive Stock Modal ─────────────────────────────────────────
 const ReceiveStockModal = ({ show, onClose, items, locations, onSuccess, initialItemId }) => {
+    const { t } = useLanguage();
     const [step, setStep] = useState(1);
     const [form, setForm] = useState({ inventoryItemId: '', lotNumber: '', quantity: '', expiryDate: '', locationId: '', concentration: '', preparedBy: '', traceabilityNotes: '' });
     const [saving, setSaving] = useState(false);
@@ -175,7 +177,7 @@ const ReceiveStockModal = ({ show, onClose, items, locations, onSuccess, initial
             await axios.post('/api/inventory/lots', { ...form, quantity: parseFloat(form.quantity) });
             onSuccess(); onClose();
         } catch (e) {
-            setError(e.response?.data?.error || 'Failed to receive stock');
+            setError(e.response?.data?.error || t('inventory.dialogs.receiveFailed'));
         } finally { setSaving(false); }
     };
 
@@ -187,87 +189,87 @@ const ReceiveStockModal = ({ show, onClose, items, locations, onSuccess, initial
                 <div className="flex items-center justify-between px-6 py-4 border-b dark:border-gray-700 bg-gradient-to-r from-emerald-50 to-blue-50 dark:from-emerald-900/20 dark:to-blue-900/20">
                     <div className="flex items-center gap-2">
                         <PlusCircle className="text-emerald-600" size={20} />
-                        <h3 className="text-lg font-bold text-sf-text">Receive Stock</h3>
-                        <span className="text-xs px-2 py-0.5 rounded-full bg-gray-200 dark:bg-gray-600 text-sf-muted">Step {step}/3</span>
+                        <h3 className="text-lg font-bold text-sf-text">{t('inventory.dialogs.receiveStock')}</h3>
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-gray-200 dark:bg-gray-600 text-sf-muted">{t('inventory.dialogs.step', { step, total: 3 })}</span>
                     </div>
-                    <button onClick={onClose} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"><X size={20} /></button>
+                    <button onClick={onClose} aria-label={t('common.close')} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"><X size={20} /></button>
                 </div>
                 {/* Steps */}
                 <div className="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
                     {error && <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-sm">{error}</div>}
 
                     {step === 1 && (<>
-                        <label className="block text-sm font-medium text-sf-muted">Select Item *</label>
+                        <label className="block text-sm font-medium text-sf-muted">{t('inventory.dialogs.selectItem')} *</label>
                         <select value={form.inventoryItemId} onChange={e => setForm(f => ({ ...f, inventoryItemId: e.target.value }))}
                             className="w-full px-3 py-2.5 rounded-lg border dark:border-gray-600 bg-white dark:bg-gray-700 text-sf-text focus:ring-2 focus:ring-blue-500 outline-none">
-                            <option value="">— Choose item —</option>
-                            {items.filter(i => i.isActive).map(i => <option key={i.id} value={i.id}>{i.name} ({i.itemType})</option>)}
+                            <option value="">— {t('inventory.dialogs.chooseItem')} —</option>
+                            {items.filter(i => i.isActive).map(i => <option key={i.id} value={i.id}>{i.name} ({t('inventory.dialogs.itemTypes.' + i.itemType, i.itemType)})</option>)}
                         </select>
-                        {selectedItem && <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-sm text-blue-800 dark:text-blue-200">Unit: <b>{selectedItem.unitOfMeasure}</b> • Type: <b>{selectedItem.itemType}</b>{selectedItem.grade && <> • Grade: <b>{selectedItem.grade}</b></>}</div>}
+                        {selectedItem && <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-sm text-blue-800 dark:text-blue-200">{t('inventory.unit')}: <b>{selectedItem.unitOfMeasure}</b> • {t('inventory.category')}: <b>{t('inventory.dialogs.itemTypes.' + selectedItem.itemType, selectedItem.itemType)}</b>{selectedItem.grade && <> • {t('inventory.dialogs.grade')}: <b>{selectedItem.grade}</b></>}</div>}
                     </>)}
 
                     {step === 2 && (<>
                         <div className="grid grid-cols-2 gap-3">
                             <div>
-                                <label className="block text-xs font-medium text-sf-muted mb-1">Lot Number *</label>
-                                <input value={form.lotNumber} onChange={e => setForm(f => ({ ...f, lotNumber: e.target.value }))} placeholder="e.g. LOT-2026-001"
+                                <label className="block text-xs font-medium text-sf-muted mb-1">{t('inventory.lotNumber')} *</label>
+                                <input value={form.lotNumber} onChange={e => setForm(f => ({ ...f, lotNumber: e.target.value }))} placeholder={t('inventory.dialogs.lotPlaceholder')}
                                     className="w-full px-3 py-2 rounded-lg border dark:border-gray-600 bg-white dark:bg-gray-700 text-sf-text focus:ring-2 focus:ring-blue-500 outline-none text-sm" />
                             </div>
                             <div>
-                                <label className="block text-xs font-medium text-sf-muted mb-1">Quantity *</label>
+                                <label className="block text-xs font-medium text-sf-muted mb-1">{t('inventory.dialogs.quantity')} *</label>
                                 <input type="number" min="0.01" step="0.01" value={form.quantity} onChange={e => setForm(f => ({ ...f, quantity: e.target.value }))}
-                                    placeholder={selectedItem?.unitOfMeasure || 'qty'}
+                                    placeholder={selectedItem?.unitOfMeasure || t('inventory.dialogs.quantity')}
                                     className="w-full px-3 py-2 rounded-lg border dark:border-gray-600 bg-white dark:bg-gray-700 text-sf-text focus:ring-2 focus:ring-blue-500 outline-none text-sm" />
                             </div>
                         </div>
                         <div className="grid grid-cols-2 gap-3">
                             <div>
-                                <label className="block text-xs font-medium text-sf-muted mb-1">Expiry Date</label>
+                                <label className="block text-xs font-medium text-sf-muted mb-1">{t('inventory.expiryDate')}</label>
                                 <input type="date" value={form.expiryDate} onChange={e => setForm(f => ({ ...f, expiryDate: e.target.value }))}
                                     className="w-full px-3 py-2 rounded-lg border dark:border-gray-600 bg-white dark:bg-gray-700 text-sf-text focus:ring-2 focus:ring-blue-500 outline-none text-sm" />
                             </div>
                             <div>
-                                <label className="block text-xs font-medium text-sf-muted mb-1">Storage Location</label>
+                                <label className="block text-xs font-medium text-sf-muted mb-1">{t('inventory.location')}</label>
                                 <select value={form.locationId} onChange={e => setForm(f => ({ ...f, locationId: e.target.value }))}
                                     className="w-full px-3 py-2 rounded-lg border dark:border-gray-600 bg-white dark:bg-gray-700 text-sf-text focus:ring-2 focus:ring-blue-500 outline-none text-sm">
-                                    <option value="">Default</option>
+                                    <option value="">{t('inventory.dialogs.defaultLocation')}</option>
                                     {locations.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
                                 </select>
                             </div>
                         </div>
                         <div>
-                            <label className="block text-xs font-medium text-sf-muted mb-1">Concentration / Notes</label>
-                            <input value={form.concentration} onChange={e => setForm(f => ({ ...f, concentration: e.target.value }))} placeholder="e.g. 1000 ppm"
+                            <label className="block text-xs font-medium text-sf-muted mb-1">{t('inventory.dialogs.concentrationNotes')}</label>
+                            <input value={form.concentration} onChange={e => setForm(f => ({ ...f, concentration: e.target.value }))} placeholder={t('inventory.dialogs.concentrationPlaceholder')}
                                 className="w-full px-3 py-2 rounded-lg border dark:border-gray-600 bg-white dark:bg-gray-700 text-sf-text focus:ring-2 focus:ring-blue-500 outline-none text-sm" />
                         </div>
                     </>)}
 
                     {step === 3 && (<>
                         <div className="p-4 rounded-xl bg-sf-canvas/50 space-y-2 text-sm">
-                            <h4 className="font-bold text-sf-text mb-2">📋 Confirm Receipt</h4>
-                            <p><span className="text-gray-500">Item:</span> <b>{selectedItem?.name}</b></p>
-                            <p><span className="text-gray-500">Lot:</span> <b>{form.lotNumber}</b></p>
-                            <p><span className="text-gray-500">Quantity:</span> <b>{form.quantity} {selectedItem?.unitOfMeasure}</b></p>
-                            {form.expiryDate && <p><span className="text-gray-500">Expiry:</span> <b>{form.expiryDate}</b></p>}
-                            {form.concentration && <p><span className="text-gray-500">Concentration:</span> <b>{form.concentration}</b></p>}
+                            <h4 className="font-bold text-sf-text mb-2">📋 {t('inventory.dialogs.confirmReceipt')}</h4>
+                            <p><span className="text-gray-500">{t('inventory.dialogs.item')}:</span> <b>{selectedItem?.name}</b></p>
+                            <p><span className="text-gray-500">{t('inventory.dialogs.lot')}:</span> <b>{form.lotNumber}</b></p>
+                            <p><span className="text-gray-500">{t('inventory.dialogs.quantity')}:</span> <b>{form.quantity} {selectedItem?.unitOfMeasure}</b></p>
+                            {form.expiryDate && <p><span className="text-gray-500">{t('inventory.expiryDate')}:</span> <b>{form.expiryDate}</b></p>}
+                            {form.concentration && <p><span className="text-gray-500">{t('inventory.dialogs.concentration')}:</span> <b>{form.concentration}</b></p>}
                         </div>
                     </>)}
                 </div>
                 {/* Footer */}
                 <div className="flex items-center justify-between px-6 py-4 border-t dark:border-gray-700 bg-sf-canvas/50">
                     <button onClick={() => step > 1 ? setStep(s => s - 1) : onClose()} className="px-4 py-2 text-sm font-medium text-sf-muted hover:text-gray-900 dark:hover:text-gray-200">
-                        {step > 1 ? '← Back' : 'Cancel'}
+                        {step > 1 ? '← ' + t('common.back') : t('common.cancel')}
                     </button>
                     {step < 3 ? (
                         <button onClick={() => setStep(s => s + 1)}
                             disabled={(step === 1 && !form.inventoryItemId) || (step === 2 && (!form.lotNumber || !form.quantity))}
                             className="px-6 py-2 text-sm font-medium rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
-                            Next →
+                            {t('common.next')} →
                         </button>
                     ) : (
                         <button onClick={handleSubmit} disabled={saving}
                             className="px-6 py-2 text-sm font-bold rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 transition-colors flex items-center gap-2">
-                            {saving ? <RefreshCw size={14} className="animate-spin" /> : <CheckCircle size={14} />} Confirm Receipt
+                            {saving ? <RefreshCw size={14} className="animate-spin" /> : <CheckCircle size={14} />} {t('inventory.dialogs.confirmReceipt')}
                         </button>
                     )}
                 </div>
@@ -313,7 +315,7 @@ const ItemDrawer = ({ item, show, onClose, onAction, canManage, canConsume, loca
             setActionModal(null); setActionForm({ quantity: '', reason: '', locationId: '' });
             onAction(); // refresh
         } catch (e) {
-            setActionError(e.response?.data?.error || 'Action failed');
+            setActionError(e.response?.data?.error || t('inventory.dialogs.actionFailed'));
         } finally { setActionSaving(false); }
     };
 
@@ -419,24 +421,24 @@ const ItemDrawer = ({ item, show, onClose, onAction, canManage, canConsume, loca
                                                 <div className="flex items-center justify-end gap-1">
                                                     {canConsume && lot.status === 'AVAILABLE' && lot.currentQuantity > 0 && (
                                                         <button onClick={() => { setActionModal({ type: 'consume', lotId: lot.id }); setActionForm({ quantity: '', reason: '' }); setActionError(''); }}
-                                                            className="p-1 rounded hover:bg-blue-100 dark:hover:bg-blue-900/30 text-blue-600" title="Consume"><MinusCircle size={14} /></button>
+                                                            className="p-1 rounded hover:bg-blue-100 dark:hover:bg-blue-900/30 text-blue-600" title={t('inventory.dialogs.actions.consume')}><MinusCircle size={14} /></button>
                                                     )}
                                                     {canManage && (<>
                                                         {lot.status === 'AVAILABLE' && (
                                                             <button onClick={() => { setActionModal({ type: 'quarantine', lotId: lot.id }); setActionForm({ reason: '' }); setActionError(''); }}
-                                                                className="p-1 rounded hover:bg-yellow-100 dark:hover:bg-yellow-900/30 text-yellow-600" title="Quarantine"><ShieldAlert size={14} /></button>
+                                                                className="p-1 rounded hover:bg-yellow-100 dark:hover:bg-yellow-900/30 text-yellow-600" title={t('inventory.dialogs.actions.quarantine')}><ShieldAlert size={14} /></button>
                                                         )}
                                                         {lot.status === 'QUARANTINED' && (
                                                             <button onClick={() => { setActionModal({ type: 'release', lotId: lot.id }); setActionError(''); }}
-                                                                className="p-1 rounded hover:bg-green-100 dark:hover:bg-green-900/30 text-green-600" title="Release"><CheckCircle size={14} /></button>
+                                                                className="p-1 rounded hover:bg-green-100 dark:hover:bg-green-900/30 text-green-600" title={t('inventory.dialogs.actions.release')}><CheckCircle size={14} /></button>
                                                         )}
                                                         <button onClick={() => { setActionModal({ type: 'adjust', lotId: lot.id }); setActionForm({ quantity: '', reason: '' }); setActionError(''); }}
-                                                            className="p-1 rounded hover:bg-purple-100 dark:hover:bg-purple-900/30 text-purple-600" title="Adjust"><BarChart3 size={14} /></button>
+                                                            className="p-1 rounded hover:bg-purple-100 dark:hover:bg-purple-900/30 text-purple-600" title={t('inventory.dialogs.actions.adjust')}><BarChart3 size={14} /></button>
                                                         <button onClick={() => { setActionModal({ type: 'transfer', lotId: lot.id }); setActionForm({ locationId: '' }); setActionError(''); }}
-                                                            className="p-1 rounded hover:bg-cyan-100 dark:hover:bg-cyan-900/30 text-cyan-600" title="Transfer"><ArrowRightLeft size={14} /></button>
+                                                            className="p-1 rounded hover:bg-cyan-100 dark:hover:bg-cyan-900/30 text-cyan-600" title={t('inventory.dialogs.actions.transfer')}><ArrowRightLeft size={14} /></button>
                                                         {lot.status !== 'DISPOSED' && (
                                                             <button onClick={() => { setActionModal({ type: 'dispose', lotId: lot.id }); setActionForm({ reason: '' }); setActionError(''); }}
-                                                                className="p-1 rounded hover:bg-red-100 dark:hover:bg-red-900/30 text-red-500" title="Dispose"><Trash2 size={14} /></button>
+                                                                className="p-1 rounded hover:bg-red-100 dark:hover:bg-red-900/30 text-red-500" title={t('inventory.dialogs.actions.dispose')}><Trash2 size={14} /></button>
                                                         )}
                                                     </>)}
                                                 </div>
@@ -456,37 +458,37 @@ const ItemDrawer = ({ item, show, onClose, onAction, canManage, canConsume, loca
                 {actionModal && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setActionModal(null)}>
                         <div className="bg-sf-surface rounded-xl shadow-xl w-full max-w-sm mx-4 p-5" onClick={e => e.stopPropagation()}>
-                            <h4 className="font-bold text-sf-text mb-3 capitalize">{actionModal.type} Lot</h4>
+                            <h4 className="font-bold text-sf-text mb-3 capitalize">{t('inventory.dialogs.actionTitles.' + actionModal.type)}</h4>
                             {actionError && <div className="mb-3 p-2 rounded bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-sm">{actionError}</div>}
                             {needsQty && (
                                 <div className="mb-3">
-                                    <label className="block text-xs font-medium text-sf-muted mb-1">{actionModal.type === 'adjust' ? 'Delta (+/-)' : 'Quantity'} *</label>
+                                    <label className="block text-xs font-medium text-sf-muted mb-1">{actionModal.type === 'adjust' ? t('inventory.dialogs.delta') : t('inventory.dialogs.quantity')} *</label>
                                     <input type="number" step="0.01" value={actionForm.quantity} onChange={e => setActionForm(f => ({ ...f, quantity: e.target.value }))}
                                         className="w-full px-3 py-2 rounded-lg border dark:border-gray-600 bg-white dark:bg-gray-700 text-sm outline-none focus:ring-2 focus:ring-blue-500" />
                                 </div>
                             )}
                             {needsReason && (
                                 <div className="mb-3">
-                                    <label className="block text-xs font-medium text-sf-muted mb-1">Reason *</label>
+                                    <label className="block text-xs font-medium text-sf-muted mb-1">{t('inventory.dialogs.reason')} *</label>
                                     <textarea value={actionForm.reason} onChange={e => setActionForm(f => ({ ...f, reason: e.target.value }))} rows={2}
                                         className="w-full px-3 py-2 rounded-lg border dark:border-gray-600 bg-white dark:bg-gray-700 text-sm outline-none focus:ring-2 focus:ring-blue-500" />
                                 </div>
                             )}
                             {needsLocation && (
                                 <div className="mb-3">
-                                    <label className="block text-xs font-medium text-sf-muted mb-1">New Location *</label>
+                                    <label className="block text-xs font-medium text-sf-muted mb-1">{t('inventory.dialogs.newLocation')} *</label>
                                     <select value={actionForm.locationId} onChange={e => setActionForm(f => ({ ...f, locationId: e.target.value }))}
                                         className="w-full px-3 py-2 rounded-lg border dark:border-gray-600 bg-white dark:bg-gray-700 text-sm outline-none focus:ring-2 focus:ring-blue-500">
-                                        <option value="">— Select —</option>
+                                        <option value="">— {t('inventory.dialogs.selectLocation')} —</option>
                                         {locations.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
                                     </select>
                                 </div>
                             )}
                             <div className="flex justify-end gap-2 mt-4">
-                                <button onClick={() => setActionModal(null)} className="px-4 py-2 text-sm text-gray-500 hover:text-gray-700">Cancel</button>
+                                <button onClick={() => setActionModal(null)} className="px-4 py-2 text-sm text-gray-500 hover:text-gray-700">{t('common.cancel')}</button>
                                 <button onClick={executeAction} disabled={actionSaving || (needsQty && !actionForm.quantity) || (needsReason && actionForm.reason.length < 3) || (needsLocation && !actionForm.locationId)}
                                     className="px-4 py-2 text-sm font-medium rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-40 transition-colors">
-                                    {actionSaving ? 'Processing...' : 'Confirm'}
+                                    {actionSaving ? t('common.processing') : t('common.confirm')}
                                 </button>
                             </div>
                         </div>
@@ -498,17 +500,26 @@ const ItemDrawer = ({ item, show, onClose, onAction, canManage, canConsume, loca
 };
 
 // ─── Create Item Modal ───────────────────────────────────────────
+const emptyItemForm = () => ({ name: '', itemType: 'REAGENT', unitOfMeasure: 'mL', shortCode: '', grade: '', hazardClass: '', reorderPoint: 0 });
 const CreateItemModal = ({ show, onClose, onSuccess }) => {
-    const [form, setForm] = useState({ name: '', itemType: 'REAGENT', unitOfMeasure: 'mL', shortCode: '', grade: '', hazardClass: '', reorderPoint: 0 });
+    const { t } = useLanguage();
+    const [form, setForm] = useState(emptyItemForm);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
+
+    useEffect(() => {
+        if (show) {
+            setForm(emptyItemForm());
+            setError('');
+        }
+    }, [show]);
 
     const handleSubmit = async () => {
         setSaving(true); setError('');
         try {
             await axios.post('/api/inventory/items', form);
             onSuccess(); onClose();
-        } catch (e) { setError(e.response?.data?.error || 'Failed'); }
+        } catch (e) { setError(e.response?.data?.error || t('inventory.dialogs.createFailed')); }
         finally { setSaving(false); }
     };
 
@@ -517,39 +528,39 @@ const CreateItemModal = ({ show, onClose, onSuccess }) => {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={onClose}>
             <div className="bg-sf-surface rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden" onClick={e => e.stopPropagation()}>
                 <div className="flex items-center justify-between px-6 py-4 border-b dark:border-gray-700">
-                    <h3 className="text-lg font-bold text-sf-text flex items-center gap-2"><Plus size={18} /> New Catalog Item</h3>
-                    <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X size={20} /></button>
+                    <h3 className="text-lg font-bold text-sf-text flex items-center gap-2"><Plus size={18} /> {t('inventory.addItem')}</h3>
+                    <button onClick={onClose} aria-label={t('common.close')} className="text-gray-400 hover:text-gray-600"><X size={20} /></button>
                 </div>
                 <div className="p-6 space-y-3 max-h-[60vh] overflow-y-auto">
                     {error && <div className="p-2 rounded bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-sm">{error}</div>}
-                    <input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="Item name *"
+                    <input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder={t('inventory.itemName') + ' *'}
                         className="w-full px-3 py-2 rounded-lg border dark:border-gray-600 bg-white dark:bg-gray-700 text-sm outline-none focus:ring-2 focus:ring-blue-500" />
                     <div className="grid grid-cols-2 gap-3">
                         <select value={form.itemType} onChange={e => setForm(f => ({ ...f, itemType: e.target.value }))}
                             className="px-3 py-2 rounded-lg border dark:border-gray-600 bg-white dark:bg-gray-700 text-sm outline-none">
-                            {ITEM_TYPES.filter(t => t !== 'ALL').map(t => <option key={t} value={t}>{t}</option>)}
+                            {ITEM_TYPES.filter(type => type !== 'ALL').map(type => <option key={type} value={type}>{t('inventory.dialogs.itemTypes.' + type)}</option>)}
                         </select>
                         <select value={form.unitOfMeasure} onChange={e => setForm(f => ({ ...f, unitOfMeasure: e.target.value }))}
                             className="px-3 py-2 rounded-lg border dark:border-gray-600 bg-white dark:bg-gray-700 text-sm outline-none">
-                            {['g', 'mg', 'kg', 'mL', 'L', 'µL', 'pcs', 'box'].map(u => <option key={u} value={u}>{u}</option>)}
+                            {['g', 'mg', 'kg', 'mL', 'L', 'µL', 'pcs', 'box'].map(u => <option key={u} value={u}>{['pcs', 'box'].includes(u) ? t('inventory.dialogs.units.' + u) : u}</option>)}
                         </select>
                     </div>
                     <div className="grid grid-cols-2 gap-3">
-                        <input value={form.shortCode} onChange={e => setForm(f => ({ ...f, shortCode: e.target.value }))} placeholder="Short code"
+                        <input value={form.shortCode} onChange={e => setForm(f => ({ ...f, shortCode: e.target.value }))} placeholder={t('inventory.dialogs.shortCode')}
                             className="px-3 py-2 rounded-lg border dark:border-gray-600 bg-white dark:bg-gray-700 text-sm outline-none" />
-                        <input value={form.grade} onChange={e => setForm(f => ({ ...f, grade: e.target.value }))} placeholder="Grade"
+                        <input value={form.grade} onChange={e => setForm(f => ({ ...f, grade: e.target.value }))} placeholder={t('inventory.dialogs.grade')}
                             className="px-3 py-2 rounded-lg border dark:border-gray-600 bg-white dark:bg-gray-700 text-sm outline-none" />
                     </div>
-                    <input value={form.hazardClass} onChange={e => setForm(f => ({ ...f, hazardClass: e.target.value }))} placeholder="Hazard class (optional)"
+                    <input value={form.hazardClass} onChange={e => setForm(f => ({ ...f, hazardClass: e.target.value }))} placeholder={t('inventory.dialogs.hazardClass')}
                         className="w-full px-3 py-2 rounded-lg border dark:border-gray-600 bg-white dark:bg-gray-700 text-sm outline-none" />
-                    <input type="number" value={form.reorderPoint} onChange={e => setForm(f => ({ ...f, reorderPoint: parseFloat(e.target.value) || 0 }))} placeholder="Reorder point"
+                    <input type="number" value={form.reorderPoint} onChange={e => setForm(f => ({ ...f, reorderPoint: parseFloat(e.target.value) || 0 }))} placeholder={t('inventory.dialogs.reorderPoint')}
                         className="w-full px-3 py-2 rounded-lg border dark:border-gray-600 bg-white dark:bg-gray-700 text-sm outline-none" />
                 </div>
                 <div className="flex justify-end gap-2 px-6 py-4 border-t dark:border-gray-700">
-                    <button onClick={onClose} className="px-4 py-2 text-sm text-gray-500">Cancel</button>
+                    <button onClick={onClose} className="px-4 py-2 text-sm text-gray-500">{t('common.cancel')}</button>
                     <button onClick={handleSubmit} disabled={saving || !form.name}
                         className="px-5 py-2 text-sm font-medium rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-40">
-                        {saving ? 'Creating...' : 'Create Item'}
+                        {saving ? t('common.saving') : t('inventory.dialogs.createItem')}
                     </button>
                 </div>
             </div>
@@ -647,7 +658,7 @@ const Inventory = () => {
                                 <Plus size={14} /> {t('inventory.addItem', 'New Item')}
                             </button>
                             <button onClick={() => { setInitialReceiveItemId(null); setShowReceive(true); }} className="flex items-center gap-1.5 px-4 py-2 text-sm font-bold rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition-colors shadow-sm">
-                                <PlusCircle size={14} /> {t('inventory.adjustStock', 'Receive Stock')}
+                                <PlusCircle size={14} /> {t('inventory.dialogs.receiveStock')}
                             </button>
                         </>
                     )}
@@ -798,13 +809,13 @@ const Inventory = () => {
                                         <div className="flex items-center justify-end gap-2">
                                             {canConsume && ((item.usableStock > 0) || (item.usableStock === null && item.availableLotCount > 0)) && (
                                                 <button onClick={(e) => handleQuickConsume(e, item)}
-                                                    className="p-1.5 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors" title="Quick Consume (FEFO)">
+                                                    className="p-1.5 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors" title={t('inventory.dialogs.quickConsume') + ' (FEFO)'}>
                                                     <MinusCircle size={14} />
                                                 </button>
                                             )}
                                             {canManage && (
                                                 <button onClick={(e) => handleQuickReceive(e, item)}
-                                                    className="p-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-colors" title="Receive Stock">
+                                                    className="p-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-colors" title={t('inventory.dialogs.receiveStock')}>
                                                     <PlusCircle size={14} />
                                                 </button>
                                             )}
