@@ -691,9 +691,9 @@ const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
                                 <button
                                     onClick={() => navigate(`/workbench?sampleId=${sample?.id || id}`)}
                                     className="px-3 py-2 rounded-xl text-xs font-semibold bg-[var(--sf-selected)] text-sf-primary border border-sf-divider hover:bg-sf-hover flex items-center gap-1.5 transition-colors"
-                                    title="Open sample tasks in Technician Workbench"
+                                    title={t("workbenchUi.openSampleTasks")}
                                 >
-                                    <span>Open in Workbench →</span>
+                                    <span>{t("workbenchUi.openWorkbench")}</span>
                                 </button>
 
                                 {/* Final Approve Sample Button */}
@@ -1190,9 +1190,9 @@ const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
                                                     <span className="text-xs text-gray-400">({item.category || 'Analytical'})</span>
                                                 </div>
                                                 <div className="text-xs text-gray-500 flex flex-wrap gap-3">
-                                                    <span>Assigned: <strong>{item.assigneeName || item.assignedTo || 'Technician'}</strong></span>
-                                                    <span>Method: <strong>{item.methodology?.name || 'Standard'}</strong></span>
-                                                    <span>QC: <strong className={item.qcGateCode ? 'text-red-500' : 'text-emerald-500'}>{item.qcStatus === 'NOT_REQUIRED' ? t('qcRuns.notRequired') : item.qcStatus}</strong></span>
+                                                    <span>{t("workbenchUi.assignedLabel")} <strong>{item.assigneeName || item.assignedTo || t("workbenchUi.technician")}</strong></span>
+                                                    <span>{t("workbenchUi.methodLabel")} <strong>{item.methodology?.name || t("workbenchUi.standard")}</strong></span>
+                                                    <span>{t("workbenchUi.qcLabel")} <strong className={item.qcGateCode ? 'text-red-500' : 'text-emerald-500'}>{item.qcStatus === 'NOT_REQUIRED' ? t('qcRuns.notRequired') : item.qcStatus}</strong></span>
                                                 </div>
                                             </div>
 
@@ -1204,7 +1204,7 @@ const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
                                                     onClick={() => setInspectedItem(item)}
                                                     className="px-3 py-1.5 bg-sf-surface border border-sf-divider rounded-lg text-xs font-bold hover:bg-sf-raised text-sf-text transition-colors"
                                                 >
-                                                    Inspect
+                                                    {t("qaSection.inspect")}
                                                 </button>
                                                 {isManager && (
                                                     <div className="flex items-center gap-1">
@@ -1212,14 +1212,14 @@ const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
                                                             onClick={() => handleReviewItem(item.id, 'ACCEPTED')}
                                                             disabled={!reportedChoices[item.id]?.ready || Boolean(item.qcGateCode && item.qcGateCode !== 'QC_ACKNOWLEDGEMENT_REQUIRED') || item.qcAcknowledgementRequired && !qcAcknowledgementReason.trim()}
                                                             className="p-1.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded-lg transition-colors"
-                                                            title="Accept Item"
+                                                            title={t("workbenchUi.acceptItem")}
                                                         >
                                                             <Check size={16} />
                                                         </button>
                                                         <button
                                                             onClick={() => handleReviewItem(item.id, 'REANALYSIS_REQUIRED')}
                                                             className="p-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg transition-colors"
-                                                            title="Return for correction"
+                                                            title={t("workbenchUi.returnForCorrection")}
                                                         >
                                                             <X size={16} />
                                                         </button>

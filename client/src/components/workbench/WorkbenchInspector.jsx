@@ -33,7 +33,7 @@ export default function WorkbenchInspector({
     if (!selectedItem) {
         return (
             <aside className="w-full lg:w-64 p-4 rounded-xl border border-sf-divider bg-sf-surface text-sf-muted text-xs flex items-center justify-center min-h-[300px]">
-                <span>Select a row to inspect sample context and metadata.</span>
+                <span>{t("workbenchUi.selectARowToInspectSampleContextAndMetadata")}</span>
             </aside>
         );
     }
@@ -69,16 +69,14 @@ export default function WorkbenchInspector({
             {runBatch && <RunHeader batch={runBatch} analysisCode={selectedItem.analysis} />}
             {/* Header / Identity */}
             <div>
-                <span className="sf-kicker block mb-1">
-                    Selected Sample
-                </span>
+                <span className="sf-kicker block mb-1">{t("workbenchUi.selectedSample")}</span>
                 <div className="my-1.5">
                     <span className="sf-sample-id text-base px-2.5 py-1">
-                        {sampleDisplayId || labId || originalId || 'Sample'}
+                        {sampleDisplayId || labId || originalId || t("instrumentImport.statuses.SAMPLE")}
                     </span>
                 </div>
                 {originalId && (
-                    <p className="text-[11px] text-sf-muted font-mono truncate">Field ID: {originalId}</p>
+                    <p className="text-[11px] text-sf-muted font-mono truncate">{t("workbenchUi.fieldID2")} {originalId}</p>
                 )}
                 <p className="text-[11px] text-sf-muted mt-1 font-medium">
                     {getAnalysisDisplayName(analysis, methodDefinition?.name)}
@@ -102,18 +100,14 @@ export default function WorkbenchInspector({
 
             {/* Readiness Summary */}
             <div className="p-3 rounded-lg border border-sf-divider bg-sf-inset">
-                <span className="text-[10px] uppercase font-bold text-sf-muted block mb-1.5 tracking-wider">
-                    Execution Readiness
-                </span>
+                <span className="text-[10px] uppercase font-bold text-sf-muted block mb-1.5 tracking-wider">{t("workbenchUi.executionReadiness")}</span>
                 <div className="flex items-center gap-1.5 mb-1">
                     {readiness?.isReady ? (
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[var(--sf-success-bg)] text-[var(--sf-success)] border border-[var(--sf-success)]/20">
-                            <CheckCircle2 size={11} /> Ready to Record
-                        </span>
+                            <CheckCircle2 size={11} /> {t("workbenchUi.readyToRecord")}</span>
                     ) : (
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[var(--sf-warning-bg)] text-[var(--sf-warning)] border border-[var(--sf-warning)]/20">
-                            <AlertTriangle size={11} /> Blocked
-                        </span>
+                            <AlertTriangle size={11} /> {t("workflow.kpi.blocked")}</span>
                     )}
                 </div>
                 {readiness?.reasons?.map((reason, i) => (
@@ -125,25 +119,23 @@ export default function WorkbenchInspector({
 
             {/* Prerequisite Trail */}
             <div className="border-t border-sf-divider pt-3">
-                <span className="text-[10px] uppercase font-bold text-sf-muted block mb-2">
-                    Prerequisite Trail
-                </span>
+                <span className="text-[10px] uppercase font-bold text-sf-muted block mb-2">{t("workbenchUi.prerequisiteTrail")}</span>
                 <div className="flex flex-col gap-1.5">
                     <div className="flex items-center justify-between text-[11px]">
-                        <span className="text-sf-muted">Reception Intake:</span>
-                        <span className="font-medium text-emerald-600 dark:text-emerald-400">✓ Accepted</span>
+                        <span className="text-sf-muted">{t("workbenchUi.receptionIntake")}</span>
+                        <span className="font-medium text-emerald-600 dark:text-emerald-400">{t("workbenchUi.accepted2")}</span>
                     </div>
                     <div className="flex items-center justify-between text-[11px]">
                         <span className="text-sf-muted">{t('plainLabels.dryingStep')}</span>
                         <span className={`font-medium ${dryingStatus === 'DONE' ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600'}`}>
-                            {dryingStatus === 'DONE' ? '✓ Completed' : dryingStatus || 'Pending'}
+                            {dryingStatus === 'DONE' ? t("workbenchUi.completed") : dryingStatus || t("replicateGrid.status.PENDING")}
                         </span>
                     </div>
                     {!isOperationalGate && (
                         <div className="flex items-center justify-between text-[11px]">
                             <span className="text-sf-muted">{t('plainLabels.preparationStep')}</span>
                             <span className={`font-medium ${preparationStatus === 'DONE' ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600'}`}>
-                                {preparationStatus === 'DONE' ? '✓ Completed' : preparationStatus || 'Pending'}
+                                {preparationStatus === 'DONE' ? t("workbenchUi.completed") : preparationStatus || t("replicateGrid.status.PENDING")}
                             </span>
                         </div>
                     )}
@@ -153,56 +145,48 @@ export default function WorkbenchInspector({
             {/* Methodology Parameters */}
             {!isOperationalGate && (
                 <div className="border-t border-sf-divider pt-3 flex flex-col gap-2.5">
-                    <span className="text-[10px] uppercase font-bold text-sf-muted block">
-                        Determination Identity
-                    </span>
+                    <span className="text-[10px] uppercase font-bold text-sf-muted block">{t("workbenchUi.determinationIdentity")}</span>
 
                     {/* Result Basis */}
                     <div>
-                        <label className="block text-[11px] font-medium text-sf-muted mb-1">
-                            Result Basis
-                        </label>
+                        <label className="block text-[11px] font-medium text-sf-muted mb-1">{t("workbenchUi.resultBasis")}</label>
                         <select
                             disabled={isLocked}
                             value={basis}
                             onChange={(e) => onUpdateMeta(workItemId, 'basis', e.target.value)}
                             className="w-full px-2 py-1 text-xs rounded border border-sf-divider bg-sf-canvas text-sf-text focus:outline-none focus:ring-1 focus:ring-sf-primary focus:border-sf-primary"
                         >
-                            <option value="AIR_DRY">Air-dry (standard)</option>
-                            <option value="OVEN_DRY">Oven-dry (105°C moisture-corrected)</option>
-                            <option value="FIELD_MOIST">Field-moist</option>
+                            <option value="AIR_DRY">{t("workbenchUi.airDryStandard")}</option>
+                            <option value="OVEN_DRY">{t("workbenchUi.ovenDry105CMoistureCorrected")}</option>
+                            <option value="FIELD_MOIST">{t("workbenchUi.fieldMoist")}</option>
                         </select>
                     </div>
 
                     {/* Replicate Number */}
                     <div>
-                        <label className="block text-[11px] font-medium text-sf-muted mb-1">
-                            Replicate Determination
-                        </label>
+                        <label className="block text-[11px] font-medium text-sf-muted mb-1">{t("workbenchUi.replicateDetermination")}</label>
                         <select
                             disabled={isLocked}
                             value={replicateNo}
                             onChange={(e) => onUpdateMeta(workItemId, 'replicateNo', Number(e.target.value))}
                             className="w-full px-2 py-1 text-xs rounded border border-sf-divider bg-sf-canvas text-sf-text focus:outline-none focus:ring-1 focus:ring-sf-primary focus:border-sf-primary"
                         >
-                            <option value={1}>Replicate 1 (Primary)</option>
-                            <option value={2}>Replicate 2 (Quality duplicate)</option>
-                            <option value={3}>Replicate 3 (Triplicate)</option>
+                            <option value={1}>{t("workbenchUi.replicate1Primary")}</option>
+                            <option value={2}>{t("workbenchUi.replicate2QualityDuplicate")}</option>
+                            <option value={3}>{t("workbenchUi.replicate3Triplicate")}</option>
                         </select>
                     </div>
 
                     {/* Instrument Selector */}
                     <div>
-                        <label className="block text-[11px] font-medium text-sf-muted mb-1">
-                            Instrument Qualification
-                        </label>
+                        <label className="block text-[11px] font-medium text-sf-muted mb-1">{t("workbenchUi.instrumentQualification")}</label>
                         <select
                             disabled={Boolean(runBatch) || selectedItem.instrumentSource === 'RUN' || !canSelectInstrument(selectedItem) || eligibleEquipment.length === 0}
                             value={selectedEquipId}
                             onChange={(e) => onUpdateMeta(workItemId, 'instrumentId', e.target.value)}
                             className="w-full px-2 py-1 text-xs rounded border border-sf-divider bg-sf-canvas text-sf-text focus:outline-none focus:ring-1 focus:ring-sf-primary focus:border-sf-primary"
                         >
-                            <option value="">-- Select Instrument --</option>
+                            <option value="">{t("workbenchUi.selectInstrument")}</option>
                             {eligibleEquipment.map(eq => (
                                 <option key={eq.id} value={eq.id}>
                                     {eq.name} ({eq.readinessState || eq.calibrationStatus})
@@ -214,7 +198,7 @@ export default function WorkbenchInspector({
                         {selectedAsset && (
                             <div className="flex items-center gap-1 mt-1 text-[11px]">
                                 <Wrench size={11} className="text-sf-muted" />
-                                <span className="text-sf-muted">Calibration:</span>
+                                <span className="text-sf-muted">{t("workbenchUi.calibration")}</span>
                                 <span className={`font-semibold ${
                                     selectedAsset.calibrationStatus === 'OK' ? 'text-emerald-600 dark:text-emerald-400' :
                                     selectedAsset.calibrationStatus === 'DUE_SOON' ? 'text-amber-600 dark:text-amber-400' :
@@ -238,11 +222,9 @@ export default function WorkbenchInspector({
                         className="w-full py-1.5 px-2 rounded text-xs font-semibold text-rose-600 dark:text-rose-400 border border-rose-500/30 hover:bg-rose-500/10 flex items-center justify-center gap-1.5 transition-colors"
                     >
                         <Trash2 size={13} />
-                        <span>Discard Local Draft</span>
+                        <span>{t("workbenchUi.discardLocalDraft")}</span>
                     </button>
-                    <p className="text-[10px] text-sf-muted text-center mt-1">
-                        Purges draft and returns item to Assigned status.
-                    </p>
+                    <p className="text-[10px] text-sf-muted text-center mt-1">{t("workbenchUi.purgesDraftAndReturnsItemToAssignedStatus")}</p>
                 </div>
             )}
         </aside>

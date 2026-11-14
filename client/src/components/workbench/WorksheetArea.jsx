@@ -307,19 +307,19 @@ export default function WorksheetArea({
                                             tabIndex={-1}
                                             checked={allSelected}
                                             onChange={toggleSelectAll}
-                                            aria-label="Select all rows"
+                                            aria-label={t("workbenchUi.selectAllRows")}
                                             className="w-4 h-4 rounded text-sf-primary focus:ring-sf-primary"
                                         />
                                     </th>
-                                    <th className="py-2.5 px-3 font-semibold min-w-[130px]">{nativeControls ? t('qcWorksheet.position') : 'Sample'}</th>
+                                    <th className="py-2.5 px-3 font-semibold min-w-[130px]">{nativeControls ? t('qcWorksheet.position') : t("instrumentImport.statuses.SAMPLE")}</th>
                                     <th className="py-2.5 px-3 font-semibold min-w-[220px]">
-                                        {isTexture ? 'Fractions (Sand / Silt / Clay %)' :
-                                         isOperationalGate ? 'Completion checklist' :
-                                         isSpectral ? 'Spectra Acquisition Status' :
-                                         `Determination (${activeGroup?.unit || 'value'})`}
+                                        {isTexture ? t("workbenchUi.fractionsSandSiltClay") :
+                                         isOperationalGate ? t("workbenchUi.completionChecklist") :
+                                         isSpectral ? t("workbenchUi.spectraAcquisitionStatus") :
+                                         t("workbenchUi.determinationCount", { value0: activeGroup?.unit || t("workbenchUi.value") })}
                                     </th>
-                                    <th className="py-2.5 px-3 font-semibold min-w-[120px]">{nativeControls ? t('qcWorksheet.storedEvidence') : 'Readiness & State'}</th>
-                                    <th className="py-2.5 px-3 font-semibold text-right w-20">Details</th>
+                                    <th className="py-2.5 px-3 font-semibold min-w-[120px]">{nativeControls ? t('qcWorksheet.storedEvidence') : t("workbenchUi.readinessState")}</th>
+                                    <th className="py-2.5 px-3 font-semibold text-right w-20">{t("qaSection.colDetails")}</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-sf-divider">
@@ -371,7 +371,7 @@ export default function WorksheetArea({
                                                         onRevertValue={onRevertDraft && (val => onRevertDraft(item.workItemId, val))}
                                                         unit={activeGroup?.unit || ''}
                                                         placeholder="0.00"
-                                                        ariaLabel={`${item.sampleDisplayId || item.sampleId} determination`}
+                                                        ariaLabel={t("workbenchUi.sampleDetermination", { sampleId: item.sampleDisplayId || item.sampleId })}
                                                         onEnterNext={() => handleEnterNext(idx)}
                                                         inputRef={node => node ? inputRefs.current.set(item.workItemId, node) : inputRefs.current.delete(item.workItemId)}
                                                     />
@@ -404,7 +404,7 @@ export default function WorksheetArea({
                                                     checked={isChecked}
                                                     disabled={isResultGrid && !readyCandidates.some(row => row.workItemId === item.workItemId)}
                                                     onChange={() => toggleRowSelect(item.workItemId)}
-                                                    aria-label={`Select ${item.sampleDisplayId || item.sampleId}`}
+                                                    aria-label={t("workbenchUi.selectCount", { value0: item.sampleDisplayId || item.sampleId })}
                                                     className="w-4 h-4 rounded text-sf-primary focus:ring-sf-primary"
                                                 />
                                             </td>
@@ -416,18 +416,17 @@ export default function WorksheetArea({
                                                         <span
                                                             data-testid={`rack-pos-${item.workItemId}`}
                                                             className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-[var(--sf-blue-bg)] text-[var(--sf-blue)] border border-[var(--sf-blue)]/20 shrink-0"
-                                                            title={`Rack Position ${item.rackPosition}${item.batchId ? ` (Batch: ${item.batchId})` : ''}`}
+                                                            title={t("workbenchUi.rackPositionCountCount", { rackPosition: item.rackPosition, value1: item.batchId ? t("workbenchUi.batchCount", { batchId: item.batchId }) : '' })}
                                                         >
                                                             #{item.rackPosition}
                                                         </span>
                                                     )}
                                                     <span className="sf-sample-id">
-                                                        {item.sampleDisplayId || item.labId || item.originalId || 'Sample'}
+                                                        {item.sampleDisplayId || item.labId || item.originalId || t("instrumentImport.statuses.SAMPLE")}
                                                     </span>
                                                 </div>
                                                 {item.originalId && (
-                                                    <div className="text-[11px] text-sf-muted font-mono mt-0.5">
-                                                        Field: {item.originalId}
+                                                    <div className="text-[11px] text-sf-muted font-mono mt-0.5">{t("workbenchUi.field")} {item.originalId}
                                                     </div>
                                                 )}
                                                 {item.projectCode && (
@@ -475,7 +474,7 @@ export default function WorksheetArea({
                                                                     item.latestSpectralScan?.qcStatus === 'WARN' ? 'bg-amber-500/15 text-amber-700 dark:text-amber-300' :
                                                                     'bg-sf-primary/15 text-sf-primary'
                                                                 }`}>
-                                                                    ✓ {item.latestSpectralScan?.qcStatus ? `QC: ${item.latestSpectralScan.qcStatus}` : 'Scan Recorded'}
+                                                                    ✓ {item.latestSpectralScan?.qcStatus ? t("workbenchUi.qCCount", { qcStatus: item.latestSpectralScan.qcStatus }) : t("workbenchUi.scanRecorded2")}
                                                                 </span>
                                                                 {item.latestSpectralScan?.id && (
                                                                     <span className="text-[10px] font-mono text-sf-muted hidden sm:inline">
@@ -486,23 +485,17 @@ export default function WorksheetArea({
                                                                     type="button"
                                                                     onClick={() => onOpenSpectralIntake && onOpenSpectralIntake(item)}
                                                                     className="px-2 py-1 bg-sf-raised hover:bg-sf-hover text-sf-text rounded text-xs font-medium transition-colors border border-sf-divider"
-                                                                >
-                                                                    Inspect / Rescan
-                                                                </button>
+                                                                >{t("workbenchUi.inspectRescan")}</button>
                                                             </div>
                                                         ) : (
                                                             <div className="flex items-center gap-2">
-                                                                <span className="text-[11px] text-amber-700 dark:text-amber-300 bg-amber-500/10 px-2 py-0.5 rounded font-medium border border-amber-500/20">
-                                                                    Spectrum required
-                                                                </span>
+                                                                <span className="text-[11px] text-amber-700 dark:text-amber-300 bg-amber-500/10 px-2 py-0.5 rounded font-medium border border-amber-500/20">{t("workbenchUi.spectrumRequired")}</span>
                                                                 <button
                                                                     type="button"
                                                                     onClick={() => onOpenSpectralIntake && onOpenSpectralIntake(item)}
                                                                     disabled={!item.readiness?.isReady || isRecorded}
                                                                     className="px-2.5 py-1 bg-sf-primary hover:bg-sf-primary-hover text-sf-on-primary rounded text-xs font-semibold flex items-center gap-1 shadow-sm transition-colors"
-                                                                >
-                                                                    Upload spectra →
-                                                                </button>
+                                                                >{t("workbenchUi.uploadSpectra")}</button>
                                                             </div>
                                                         )}
                                                     </div>
@@ -525,30 +518,20 @@ export default function WorksheetArea({
                                                     <div className="flex items-center gap-1.5 flex-wrap">
                                                         {item.readiness?.isReady ? (
                                                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/15 text-emerald-700 dark:text-emerald-300">
-                                                                <CheckCircle2 size={10} /> Ready
-                                                            </span>
+                                                                <CheckCircle2 size={10} /> {t("workbenchUi.ready")}</span>
                                                         ) : (
                                                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-500/15 text-amber-700 dark:text-amber-300">
-                                                                <AlertTriangle size={10} /> Blocked
-                                                            </span>
+                                                                <AlertTriangle size={10} /> {t("workflow.kpi.blocked")}</span>
                                                         )}
 
                                                         {hasConflict ? (
-                                                            <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/15 text-amber-700 dark:text-amber-300">
-                                                                Conflict
-                                                            </span>
+                                                            <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/15 text-amber-700 dark:text-amber-300">{t("workbenchUi.conflict")}</span>
                                                         ) : isRecorded ? (
-                                                            <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-emerald-500/15 text-emerald-700 dark:text-emerald-300">
-                                                                Recorded
-                                                            </span>
+                                                            <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-emerald-500/15 text-emerald-700 dark:text-emerald-300">{t("workbench.recordedCount")}</span>
                                                         ) : draft ? (
-                                                            <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-sf-primary/15 text-sf-primary">
-                                                                Draft saved
-                                                            </span>
+                                                            <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-sf-primary/15 text-sf-primary">{t("dashboard.workQueue.status.draftSaved")}</span>
                                                         ) : (
-                                                            <span className="text-[10px] text-sf-muted">
-                                                                Pending
-                                                            </span>
+                                                            <span className="text-[10px] text-sf-muted">{t("replicateGrid.status.PENDING")}</span>
                                                         )}
                                                     </div>
 
@@ -566,9 +549,7 @@ export default function WorksheetArea({
                                                     onClick={() => setSelectedItemId(item.workItemId)}
                                                     tabIndex={-1}
                                                     className="px-2 py-1 rounded text-xs text-sf-primary hover:underline font-medium transition-colors"
-                                                >
-                                                    Inspect →
-                                                </button>
+                                                >{t("workbenchUi.inspect")}</button>
                                             </td>
                                         </tr>
                                     );
@@ -576,9 +557,7 @@ export default function WorksheetArea({
 
                                 {(nativeControls ? nativeControls.positions.length === 0 : filteredItems.length === 0) && (
                                     <tr>
-                                        <td colSpan={5} className="py-8 text-center text-sf-muted">
-                                            No samples found matching your filter.
-                                        </td>
+                                        <td colSpan={5} className="py-8 text-center text-sf-muted">{t("workbenchUi.noSamplesFoundMatchingYourFilter")}</td>
                                     </tr>
                                 )}
                             </tbody>
@@ -588,7 +567,7 @@ export default function WorksheetArea({
                     {/* Footer */}
                     <div className="p-3 bg-sf-raised border-t border-sf-divider flex items-center justify-between flex-wrap gap-2 text-xs">
                         <span className="text-sf-muted">
-                            {isResultGrid ? t('keyboardGrid.readyHint', { count: readyIds.size }) : <><strong className="text-sf-text">{selectedRows.size}</strong> selected · Press <kbd className="px-1 py-0.5 rounded border border-sf-divider bg-sf-surface text-sf-text font-mono">Enter</kbd> to advance to next row</>}
+                            {isResultGrid ? t('keyboardGrid.readyHint', { count: readyIds.size }) : <><strong className="text-sf-text">{t("workbenchUi.selectedCount", { count: selectedRows.size })}</strong> · {t("workbenchUi.press")} <kbd className="px-1 py-0.5 rounded border border-sf-divider bg-sf-surface text-sf-text font-mono">{t("workbenchUi.enter")}</kbd> {t("workbenchUi.toAdvanceToNextRow")}</>}
                         </span>
 
                         {isOperationalGate ? (
@@ -618,7 +597,7 @@ export default function WorksheetArea({
                                 data-testid="record-all-ready"
                                 className="px-4 py-2 rounded-lg text-xs font-semibold bg-sf-primary text-sf-on-primary hover:bg-sf-primary-hover disabled:opacity-50 transition-colors flex items-center gap-1.5"
                             >
-                                <span>{isResultGrid ? t('keyboardGrid.recordAllReady', { count: readyIds.size }) : `Review Completion (${selectedRows.size})`}</span>
+                                <span>{isResultGrid ? t('keyboardGrid.recordAllReady', { count: readyIds.size }) : t("workbenchUi.reviewCompletionCount", { count: selectedRows.size })}</span>
                                 <ArrowRight size={13} />
                             </button>
                         )}
@@ -667,7 +646,7 @@ export default function WorksheetArea({
                                 className="px-3 py-1.5 rounded-lg text-xs font-medium border border-sf-divider bg-sf-surface hover:bg-sf-hover transition-colors flex items-center gap-1.5 text-sf-text"
                             >
                                 <Clipboard size={13} />
-                                <span>Paste Values</span>
+                                <span>{t("workbenchUi.pasteValues")}</span>
                             </button>
 
                             <button
@@ -677,7 +656,7 @@ export default function WorksheetArea({
                                 className="px-3 py-1.5 rounded-lg text-xs font-medium border border-sf-divider bg-sf-surface hover:bg-sf-hover transition-colors flex items-center gap-1.5 text-sf-text"
                             >
                                 <Layers size={13} />
-                                <span>Batch & QC Runs</span>
+                                <span>{t("workbenchUi.batchQCRuns")}</span>
                             </button>
                         </>
                     )}
@@ -697,10 +676,10 @@ export default function WorksheetArea({
                         disabled={Boolean(selectedRun)}
                         onClick={() => setViewMode(prev => prev === 'single' ? 'table' : 'single')}
                         className="px-2.5 py-1.5 rounded-lg text-xs font-medium border border-sf-divider bg-sf-surface hover:bg-sf-hover transition-colors flex items-center gap-1.5 text-sf-text"
-                        title={viewMode === 'single' ? 'Switch to Batch Table' : 'Switch to Single Sample Card'}
+                        title={viewMode === 'single' ? t("workbenchUi.switchToBatchTable") : t("workbenchUi.switchToSingleSampleCard")}
                     >
                         {viewMode === 'single' ? <TableIcon size={13} /> : <LayoutList size={13} />}
-                        <span>{viewMode === 'single' ? 'Table View' : 'Card View'}</span>
+                        <span>{viewMode === 'single' ? t("workbenchUi.tableView") : t("workbenchUi.cardView")}</span>
                     </button>
 
                     <div className="relative">
@@ -710,7 +689,7 @@ export default function WorksheetArea({
                             disabled={Boolean(selectedRun)}
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            placeholder="Find sample ID..."
+                            placeholder={t("workbenchUi.findSampleID")}
                             className="pl-8 pr-3 py-1.5 text-xs rounded-lg border border-sf-divider bg-sf-surface text-sf-text placeholder:text-sf-muted focus:outline-none focus:ring-1 focus:ring-sf-primary w-44 sm:w-56"
                         />
                     </div>
@@ -736,18 +715,17 @@ export default function WorksheetArea({
                         <span>{getAnalysisDisplayName(activeGroup?.analysis, activeGroup?.analysisName)}</span>
                     </h3>
                     <p className="text-sf-muted text-xs mt-0.5">
-                        {activeGroup?.category} {activeGroup?.unit ? `· Target unit: ${activeGroup.unit}` : ''}
+                        {activeGroup?.category} {activeGroup?.unit ? t("workbenchUi.targetUnitCount", { unit: activeGroup.unit }) : ''}
                     </p>
                 </div>
 
                 <div className="flex items-center gap-2">
                     {activeGroup?.unit && (
-                        <span className="px-2.5 py-1 rounded text-xs font-semibold bg-sf-surface text-sf-text border border-sf-divider shadow-xs">
-                            Unit: {activeGroup.unit}
+                        <span className="px-2.5 py-1 rounded text-xs font-semibold bg-sf-surface text-sf-text border border-sf-divider shadow-xs">{t("workbenchUi.unit")} {activeGroup.unit}
                         </span>
                     )}
                     <span className="px-2.5 py-1 rounded text-xs font-semibold bg-sf-surface text-sf-text border border-sf-divider shadow-xs">
-                        {filteredItems.length} assigned sample{filteredItems.length === 1 ? '' : 's'}
+                        {t(filteredItems.length === 1 ? "workbenchUi.assignedSampleOne" : "workbenchUi.assignedSampleMany", { count: filteredItems.length })}
                     </span>
                 </div>
             </div>

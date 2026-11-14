@@ -6,7 +6,9 @@ const { nativeFixture } = require('../helpers/qcWorksheetUi');
 const root = path.resolve(__dirname, '../../../client/src');
 const strings = require('../../../client/src/translations/en.json').barcodeScan;
 const positive = 'GHA1-26-000123N', wrong = 'GHA1-26-000123K';
-const t = key => key.startsWith('barcodeScan.') ? strings[key.slice(12)] : key;
+const english = require('../helpers/clientTranslation').localeTranslator();
+const t = (key, ...args) => key.startsWith('workbenchUi.') ? english(key, ...args)
+    : key.startsWith('barcodeScan.') ? strings[key.slice(12)] : key;
 
 describe('Audit 4.2: real DOM barcode wedge and value-cell boundaries', () => {
     let dom, host, reactRoot, createRoot, axios, audio, scroll, props;

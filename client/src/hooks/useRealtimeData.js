@@ -236,13 +236,13 @@ export function useRealtimeData(url, options = {}) {
  * LiveIndicator — Reusable component showing connection status.
  * Import and place in any dashboard header.
  */
-export function formatLastUpdated(date) {
+export function formatLastUpdated(date, t) {
     if (!date) return '';
     const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
-    if (seconds < 5) return 'Just now';
-    if (seconds < 60) return `${seconds}s ago`;
+    if (seconds < 5) return t ? t("workbenchUi.justNow") : 'Just now';
+    if (seconds < 60) return t ? t("workbenchUi.secondsAgo", { count: seconds }) : `${seconds}s ago`;
     const minutes = Math.floor(seconds / 60);
-    if (minutes < 60) return `${minutes}m ago`;
+    if (minutes < 60) return t ? t("workbenchUi.minutesAgo", { count: minutes }) : `${minutes}m ago`;
     return date.toLocaleTimeString();
 }
 

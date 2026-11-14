@@ -196,13 +196,13 @@ export default function WorkbenchShell({
                 setSyncStatus('saved');
 
                 if (status === 400 && errData?.error === 'CONTRADICTORY_IDENTIFIERS') {
-                    addToast(errData.message || `Contradictory identifiers: work item '${initialWorkItemId}' does not belong to sample '${initialSampleId}'`, 'error');
+                    addToast(errData.message || t("workbenchUi.contradictoryIdentifiersWorkItemCountDoesNotBelongToSample", { initialWorkItemId: initialWorkItemId, initialSampleId: initialSampleId }), 'error');
                 } else if (status === 403) {
-                    addToast(errData?.message || 'Access denied: requested item belongs to another laboratory.', 'error');
+                    addToast(errData?.message || t("workbenchUi.accessDeniedRequestedItemBelongsToAnotherLaboratory"), 'error');
                 } else if (status === 404) {
-                    addToast(errData?.message || `Requested item '${initialWorkItemId || initialSampleId}' was not found.`, 'error');
+                    addToast(errData?.message || t("workbenchUi.requestedItemCountWasNotFound", { value0: initialWorkItemId || initialSampleId }), 'error');
                 } else {
-                    addToast(errData?.message || 'Failed to load requested deep-link item.', 'error');
+                    addToast(errData?.message || t("workbenchUi.failedToLoadRequestedDeepLinkItem"), 'error');
                 }
 
                 fetchQueue(viewToFetch, true);
@@ -211,7 +211,7 @@ export default function WorkbenchShell({
 
             // Normal queue failure or persistent error after fallback: show stable error without re-fetching
             setSyncStatus('offline');
-            addToast(errData?.message || 'Failed to load workbench queue.', 'error');
+            addToast(errData?.message || t("workbenchUi.failedToLoadWorkbenchQueue"), 'error');
         } finally {
             setIsLoading(false);
         }
@@ -273,7 +273,7 @@ export default function WorkbenchShell({
                 }
             }
             if (!found) {
-                addToast(`Work item ${initialWorkItemId} is not in current active queue (may be completed or in another view)`, 'info');
+                addToast(t("workbenchUi.workItemCountIsNotInCurrentActiveQueueMayBeCompletedOrInAn", { initialWorkItemId: initialWorkItemId }), 'info');
                 hasResolvedDeepLink.current = true;
                 return;
             }
@@ -533,12 +533,12 @@ export default function WorkbenchShell({
                 removePendingDraftOperations(workItemId, user.id).catch(() => {});
             }
             await axios.delete(`/api/workbench/drafts/item/${workItemId}`);
-            addToast('Draft discarded successfully', 'info');
+            addToast(t("workbenchUi.draftDiscardedSuccessfully"), 'info');
             fetchQueue(queueView);
             fetchReceipts();
         } catch (err) {
             console.error('[workbench] Failed to discard draft:', err);
-            addToast(err.response?.data?.error || 'Failed to discard draft', 'error');
+            addToast(err.response?.data?.error || t("workbenchUi.failedToDiscardDraft"), 'error');
         }
     };
 
@@ -559,13 +559,13 @@ export default function WorkbenchShell({
                 records: preparationPayload(records || []),
                 ...(Number.isInteger(version) && { version })
             });
-            addToast(`Operation confirmed successfully (${res.data.receipt?.receiptId || 'Verified'})`, 'success');
+            addToast(t("workbenchUi.operationConfirmedSuccessfullyCount", { value0: res.data.receipt?.receiptId || t("workbenchUi.verified") }), 'success');
             await fetchQueue(queueView);
             await fetchReceipts();
         } catch (err) {
             console.error('[workbench] Failed to confirm operation:', err);
             const missing = err.response?.data?.details?.missing;
-            addToast([err.response?.data?.error || err.response?.data?.message || 'Failed to confirm operational checklist',
+            addToast([err.response?.data?.error || err.response?.data?.message || t("workbenchUi.failedToConfirmOperationalChecklist"),
                 missing?.length ? missing.join(', ') : null].filter(Boolean).join(': '), 'error');
         } finally {
             setIsLoading(false);
@@ -581,12 +581,12 @@ export default function WorkbenchShell({
                 resolution,
                 reason
             });
-            addToast(`Conflict resolved (${resolution})`, 'success');
+            addToast(t("workbenchUi.conflictResolvedCount", { resolution: resolution }), 'success');
             fetchQueue(queueView);
             fetchReceipts();
         } catch (err) {
             console.error('[workbench] Failed to resolve conflict:', err);
-            addToast(err.response?.data?.error || 'Failed to resolve conflict', 'error');
+            addToast(err.response?.data?.error || t("workbenchUi.failedToResolveConflict"), 'error');
         }
     };
 
@@ -623,7 +623,7 @@ export default function WorkbenchShell({
             setActiveTab('review');
         } catch (err) {
             console.error('[workbench] Failed to preview completion:', err);
-            addToast('Failed to generate review preview', 'error');
+            addToast(t("workbenchUi.failedToGenerateReviewPreview"), 'error');
         } finally {
             setIsLoading(false);
         }
@@ -676,7 +676,7 @@ export default function WorkbenchShell({
                 return;
             }
             setCompletionReceipt(null);
-            addToast(`Successfully recorded ${res.data.saved} determination(s)`, 'success');
+            addToast(t("workbenchUi.successfullyRecordedCountDeterminationS", { count: res.data.saved }), 'success');
             await fetchQueue();
             await fetchReceipts();
 
@@ -689,7 +689,7 @@ export default function WorkbenchShell({
                 await fetchQueue();
                 await fetchReceipts();
             } else {
-                addToast(err.response?.data?.error || 'Failed to record determinations', 'error');
+                addToast(err.response?.data?.error || t("workbenchUi.failedToRecordDeterminations"), 'error');
             }
         } finally {
             setIsSubmitting(false);
@@ -723,13 +723,13 @@ export default function WorkbenchShell({
                 sampleIds,
                 note
             });
-            addToast(`Successfully submitted ${res.data.receipt?.sampleCount} sample(s) for review`, 'success');
+            addToast(t("workbenchUi.successfullySubmittedCountSampleSForReview", { count: res.data.receipt?.sampleCount }), 'success');
             await fetchQueue();
             await fetchReceipts();
             setActiveTab('activity');
         } catch (err) {
             console.error('[workbench] Failed to commit submissions:', err);
-            addToast(err.response?.data?.error || 'Failed to submit samples', 'error');
+            addToast(err.response?.data?.error || t("workbenchUi.failedToSubmitSamples"), 'error');
         } finally {
             setIsSubmitting(false);
         }
@@ -746,19 +746,15 @@ export default function WorkbenchShell({
         <div data-testid="workbench-shell" data-density={density} className={`flex flex-col gap-4 max-w-7xl mx-auto px-4 py-6 font-sans ${density === 'bench' ? 'workbench-density-bench' : ''}`}>
             {/* Top Ribbon */}
             <div className="flex items-center justify-between text-[11px] text-sf-muted border-b border-sf-divider pb-2">
-                <span className="sf-kicker">SoilFER LIMS / Technician Workspace</span>
-                <span>Role: {user?.role} · Lab: {user?.labId || 'Default'}</span>
+                <span className="sf-kicker">{t("workbenchUi.soilFERLIMSTechnicianWorkspace")}</span>
+                <span>{t("workbenchUi.roleLab", { role: user?.role, lab: user?.labId || t("appearance.defaultLabel") })}</span>
             </div>
 
             {/* Header */}
             <div className="flex items-center justify-between flex-wrap gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-sf-text tracking-tight">
-                        Technician Workbench
-                    </h1>
-                    <p className="text-xs text-sf-muted mt-0.5">
-                        Unified determination queue, method-aware worksheets, and two-step reviewer handoff
-                    </p>
+                    <h1 className="text-2xl font-bold text-sf-text tracking-tight">{t("workbenchUi.technicianWorkbench")}</h1>
+                    <p className="text-xs text-sf-muted mt-0.5">{t("workbenchUi.unifiedDeterminationQueueMethodAwareWorksheetsAndTwoStepRe")}</p>
                 </div>
 
                 {/* Save / Sync Status Pill */}
@@ -768,20 +764,15 @@ export default function WorkbenchShell({
                         onSwitchAnalyst={handleSwitchAnalyst} registerRecordGuard={registerRecordGuard} />
                     {syncStatus === 'saving' ? (
                         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[var(--sf-blue-bg)] text-[var(--sf-blue)] border border-[var(--sf-blue)]/20">
-                            <RefreshCw size={12} className="animate-spin" /> Saving drafts...
-                        </span>
+                            <RefreshCw size={12} className="animate-spin" /> {t("workbenchUi.savingDrafts")}</span>
                     ) : syncStatus === 'conflict' ? (
                         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[var(--sf-warning-bg)] text-[var(--sf-warning)] border border-[var(--sf-warning)]/20">
-                            <AlertTriangle size={12} /> {conflictCount} Conflict{conflictCount === 1 ? '' : 's'} to compare
-                        </span>
+                            <AlertTriangle size={12} /> {t(conflictCount === 1 ? "workbenchUi.conflictToCompareOne" : "workbenchUi.conflictToCompareMany", { count: conflictCount })}</span>
                     ) : syncStatus === 'offline' ? (
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[var(--sf-danger-bg)] text-[var(--sf-danger)] border border-[var(--sf-danger)]/20">
-                            Offline · Local edits preserved
-                        </span>
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[var(--sf-danger-bg)] text-[var(--sf-danger)] border border-[var(--sf-danger)]/20">{t("workbenchUi.offlineLocalEditsPreserved")}</span>
                     ) : (
                         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[var(--sf-success-bg)] text-[var(--sf-success)] border border-[var(--sf-success)]/20">
-                            <CheckCircle2 size={12} /> ✓ Drafts saved
-                        </span>
+                            <CheckCircle2 size={12} /> {t("workbenchUi.draftsSaved")}</span>
                     )}
 
                     <button
@@ -789,7 +780,7 @@ export default function WorkbenchShell({
                         onClick={fetchQueue}
                         disabled={isLoading}
                         className="p-1.5 rounded-lg border border-sf-divider hover:bg-sf-hover transition-colors text-sf-muted hover:text-sf-text"
-                        title="Refresh queue"
+                        title={t("workbenchUi.refreshQueue")}
                     >
                         <RefreshCw size={14} className={isLoading ? 'animate-spin' : ''} />
                     </button>
@@ -797,13 +788,13 @@ export default function WorkbenchShell({
             </div>
 
             {/* Navigation Tabs */}
-            <nav className="flex items-center gap-1.5 border-b border-sf-divider text-xs font-semibold" aria-label="Workbench navigation">
+            <nav className="flex items-center gap-1.5 border-b border-sf-divider text-xs font-semibold" aria-label={t("workbenchUi.workbenchNavigation")}>
                 {[
                     { id: 'runs', label: t('runFirst.myRuns') },
-                    { id: 'queue', label: `My Work (${stats.myWorkCount ?? stats.totalItems ?? 0})` },
-                    { id: 'worksheet', label: `Worksheet (${currentGroup?.items?.length || 0})` },
-                    { id: 'review', label: `Ready to Submit (${stats.readyToSubmitCount ?? 0})` },
-                    { id: 'completed', label: `Sent & Completed (${(stats.submittedCount || 0) + (stats.completedCount || 0)})` },
+                    { id: 'queue', label: t("workbenchUi.myWorkCount", { count: stats.myWorkCount ?? stats.totalItems ?? 0 }) },
+                    { id: 'worksheet', label: t("workbenchUi.worksheetCount", { count: currentGroup?.items?.length || 0 }) },
+                    { id: 'review', label: t("workbenchUi.readyToSubmitCount", { count: stats.readyToSubmitCount ?? 0 }) },
+                    { id: 'completed', label: t("workbenchUi.sentCompletedCount", { count: (stats.submittedCount || 0) + (stats.completedCount || 0) }) },
                     { id: 'activity', label: t('plainLabels.confirmationLog', { count: receipts.length }) },
                     ...(hasPermission?.('APPROVE_RESULTS') ? [{ id: 'overrides', label: t('overrideRequests.inbox') }] : [])
                 ].map(tab => (

@@ -4,6 +4,7 @@ const vm = require('vm');
 const esbuild = require('../../../client/node_modules/esbuild');
 const React = require('../../../client/node_modules/react');
 const ReactDOMServer = require('../../../client/node_modules/react-dom/server');
+const english = require('../helpers/clientTranslation').localeTranslator();
 
 // Execute the real component callbacks with persistent hook state. Child views
 // are boundaries; the editors and receipt are separately exercised below.
@@ -35,7 +36,7 @@ function harness(name, { groups, width = 1200, axios, offline } = {}) {
                 if (mod === '@lims/number-parse') return require('../../../shared/numberParse');
                 if (mod === 'lucide-react') return new Proxy({}, { get: () => () => null });
                 if (mod === 'clsx') return (...values) => values.filter(Boolean).join(' ');
-                if (mod.includes('LanguageContext')) return { useLanguage: () => ({ t: (_, fallback) => fallback }) };
+                if (mod.includes('LanguageContext')) return { useLanguage: () => ({ t: (key, fallback, params) => key.startsWith('workbenchUi.') ? english(key, fallback, params) : fallback }) };
                 if (mod.includes('AnalysisCatalogueContext')) return { useAnalysisNames: () => (code, label) => label || code };
                 if (mod.includes('AuthContext')) return { useAuth: () => ({ user: { id: 'tech', username: 'tech', role: 'LAB_TECHNICIAN', labId: 'lab' } }) };
                 if (mod.includes('HelpContext')) return { useHelp: () => ({ clearBlockers() {}, registerBlockers() {} }) };
