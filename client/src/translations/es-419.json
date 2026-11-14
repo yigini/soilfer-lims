@@ -3311,7 +3311,8 @@
       "qc_blankLodMultiplier": "Multiplicador de DE muestral para LOD",
       "qc_blankLoqMultiplier": "Multiplicador de DE muestral para LOQ",
       "reception_intakeRules": "Reglas de recepción y contexto de la muestra",
-      "qc_controlChartMinPoints": "Mínimo de puntos de referencia para gráficos de control"
+      "qc_controlChartMinPoints": "Mínimo de puntos de referencia para gráficos de control",
+      "inventory_technicianLotsStartQuarantined": "Los nuevos lotes preparados por técnicos empiezan en cuarentena"
     },
     "title": "Políticas",
     "yes": "Sí",
@@ -3442,7 +3443,8 @@
     },
     "help": {
       "qc_requireBatchQc": "AUTO exige CC de lote para métodos de medición con criterios de CC resueltos habilitados. Una excepción de método puede exigir o eximir la pertenencia al lote y su evaluación.",
-      "qc_calibrationFailAction": "Elija la acción ante fallas de verificación inicial o continua de calibración y blancos de calibración."
+      "qc_calibrationFailAction": "Elija la acción ante fallas de verificación inicial o continua de calibración y blancos de calibración.",
+      "inventory_technicianLotsStartQuarantined": "Retiene los lotes nuevos preparados por técnicos hasta que un responsable los libere. Las recepciones de existencias de los responsables se mantienen iguales."
     },
     "criticality": {
       "CRITICAL": "Crítico",
@@ -5147,5 +5149,30 @@
     "numericDetermination": "Determinación numérica",
     "acceptItem": "Aceptar elemento",
     "returnForCorrection": "Devolver para corrección"
+  },
+  "preparedLots": {
+    "addLot": "Agregar lote",
+    "preparedBy": "Preparado por",
+    "preparedByValue": "Preparado por: {{name}}",
+    "policyHint": "Las reglas del laboratorio pueden exigir que un responsable libere el lote antes de usarlo.",
+    "parentLots": "Lotes de origen (opcional)",
+    "parentHelp": "Seleccione los lotes usados para preparar este lote. Solo aparecen lotes del mismo laboratorio; la selección registra el origen sin consumir existencias.",
+    "searchParents": "Buscar lotes de origen",
+    "loadingParents": "Cargando lotes de origen…",
+    "parentsUnavailable": "No se pudieron cargar los lotes de origen. Cierre y vuelva a abrir el formulario para reintentar. Son opcionales.",
+    "noParents": "No hay lotes de origen en este laboratorio.",
+    "confirmPreparation": "Confirmar preparación",
+    "saveFailed": "No se pudo guardar el lote.",
+    "lotCount": "Lotes ({{count}})",
+    "quarantineByPolicy": "La regla del laboratorio retiene los lotes preparados por técnicos hasta que un responsable los libere.",
+    "quarantineHelp": "En cuarentena: un responsable debe revisar y liberar este lote antes de usarlo.",
+    "quarantineReason": "Motivo de cuarentena: {{reason}}",
+    "traceability": "Notas de trazabilidad",
+    "errors": {
+      "LOT_ITEM_TYPE_NOT_ALLOWED": "Este permiso solo permite preparar lotes de reactivos y patrones.",
+      "LOT_ATTACHMENT_NOT_ALLOWED": "Un responsable de inventario debe agregar los certificados.",
+      "PARENT_LOT_INVALID": "Elija lotes de origen del mismo laboratorio que el artículo.",
+      "CUSTODY_LOCATION_INVALID": "Elija un lugar activo de almacenamiento de reactivos en este laboratorio."
+    }
   }
 }

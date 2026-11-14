@@ -155,29 +155,55 @@ const QuickConsumeModal = ({ show, onClose, item, locations, onSuccess }) => {
 };
 
 // ─── Receive Stock Modal ─────────────────────────────────────────
-const ReceiveStockModal = ({ show, onClose, items, locations, onSuccess, initialItemId }) => {
+const ReceiveStockModal = ({ show, onClose, items, locations, onSuccess, initialItemId, canManage = false, actor }) => {
     const { t } = useLanguage();
     const [step, setStep] = useState(1);
     const [form, setForm] = useState({ inventoryItemId: '', lotNumber: '', quantity: '', expiryDate: '', locationId: '', concentration: '', preparedBy: '', traceabilityNotes: '' });
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
 
-    const reset = () => {
-        setStep(initialItemId ? 2 : 1);
-        setForm({ inventoryItemId: initialItemId || '', lotNumber: '', quantity: '', expiryDate: '', locationId: '', concentration: '', preparedBy: '', traceabilityNotes: '' });
-        setError('');
-    };
-    useEffect(() => { if (show) reset(); }, [show, initialItemId]);
+    const [parentLots, setParentLots] = useState([]);
+    const [parentLotIds, setParentLotIds] = useState([]);
+    const [parentSearch, setParentSearch] = useState('');
+    const [parentLoading, setParentLoading] = useState(false);
+    const [parentError, setParentError] = useState(false);
+    const selectedItem = items.find(item => item.id === form.inventoryItemId);
+    const selectedLabId = selectedItem?.labId;
+    const eligibleItems = items.filter(item => item.isActive && (canManage || ['REAGENT', 'STANDARD'].includes(item.itemType)));
 
-    const selectedItem = items.find(i => i.id === form.inventoryItemId);
+    useEffect(() => {
+        if (!show) return;
+        setStep(initialItemId ? 2 : 1);
+        setForm({ inventoryItemId: initialItemId || '', lotNumber: '', quantity: '', expiryDate: '', locationId: '', concentration: '', preparedBy: canManage ? '' : actor?.username || '', traceabilityNotes: '' });
+        setError('');
+        setParentLotIds([]);
+        setParentSearch('');
+    }, [show, initialItemId, canManage, actor?.username]);
+
+    useEffect(() => {
+        let current = true;
+        setParentLots([]);
+        setParentError(false);
+        if (!show || !selectedLabId) { setParentLoading(false); return () => { current = false; }; }
+        setParentLoading(true);
+        axios.get('/api/inventory/lots', { params: { status: 'ALL' } }).then(response => {
+            if (current) setParentLots((Array.isArray(response.data) ? response.data : []).filter(lot => lot.labId === selectedLabId));
+        }).catch(() => { if (current) setParentError(true); })
+            .finally(() => { if (current) setParentLoading(false); });
+        return () => { current = false; };
+    }, [show, selectedLabId]);
 
     const handleSubmit = async () => {
         setSaving(true); setError('');
         try {
-            await axios.post('/api/inventory/lots', { ...form, quantity: parseFloat(form.quantity) });
-            onSuccess(); onClose();
+            const payload = { ...form, quantity: parseFloat(form.quantity),
+                ...(parentLotIds.length ? { parentLotIds } : {}),
+                ...(!canManage ? { preparedBy: actor?.username || '' } : {}) };
+            const response = await axios.post('/api/inventory/lots', payload);
+            onSuccess(response.data); onClose();
         } catch (e) {
-            setError(e.response?.data?.error || t('inventory.dialogs.receiveFailed'));
+            const code = e.response?.data?.code;
+            setError(t(`preparedLots.errors.${code}`, e.response?.data?.error || t(canManage ? 'inventory.dialogs.receiveFailed' : 'preparedLots.saveFailed')));
         } finally { setSaving(false); }
     };
 
@@ -189,21 +215,21 @@ const ReceiveStockModal = ({ show, onClose, items, locations, onSuccess, initial
                 <div className="flex items-center justify-between px-6 py-4 border-b dark:border-gray-700 bg-gradient-to-r from-emerald-50 to-blue-50 dark:from-emerald-900/20 dark:to-blue-900/20">
                     <div className="flex items-center gap-2">
                         <PlusCircle className="text-emerald-600" size={20} />
-                        <h3 className="text-lg font-bold text-sf-text">{t('inventory.dialogs.receiveStock')}</h3>
+                        <h3 className="text-lg font-bold text-sf-text">{t(canManage ? 'inventory.dialogs.receiveStock' : 'preparedLots.addLot')}</h3>
                         <span className="text-xs px-2 py-0.5 rounded-full bg-gray-200 dark:bg-gray-600 text-sf-muted">{t('inventory.dialogs.step', { step, total: 3 })}</span>
                     </div>
                     <button onClick={onClose} aria-label={t('common.close')} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"><X size={20} /></button>
                 </div>
                 {/* Steps */}
                 <div className="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
-                    {error && <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-sm">{error}</div>}
+                    {error && <div role="alert" className="p-3 rounded-lg bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-sm">{error}</div>}
 
                     {step === 1 && (<>
                         <label className="block text-sm font-medium text-sf-muted">{t('inventory.dialogs.selectItem')} *</label>
-                        <select value={form.inventoryItemId} onChange={e => setForm(f => ({ ...f, inventoryItemId: e.target.value }))}
+                        <select aria-label={t('inventory.dialogs.selectItem')} value={form.inventoryItemId} onChange={e => { setForm(f => ({ ...f, inventoryItemId: e.target.value })); setParentLotIds([]); }}
                             className="w-full px-3 py-2.5 rounded-lg border dark:border-gray-600 bg-white dark:bg-gray-700 text-sf-text focus:ring-2 focus:ring-blue-500 outline-none">
                             <option value="">— {t('inventory.dialogs.chooseItem')} —</option>
-                            {items.filter(i => i.isActive).map(i => <option key={i.id} value={i.id}>{i.name} ({t('inventory.dialogs.itemTypes.' + i.itemType, i.itemType)})</option>)}
+                            {eligibleItems.map(i => <option key={i.id} value={i.id}>{i.name} ({t('inventory.dialogs.itemTypes.' + i.itemType, i.itemType)})</option>)}
                         </select>
                         {selectedItem && <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-sm text-blue-800 dark:text-blue-200">{t('inventory.unit')}: <b>{selectedItem.unitOfMeasure}</b> • {t('inventory.category')}: <b>{t('inventory.dialogs.itemTypes.' + selectedItem.itemType, selectedItem.itemType)}</b>{selectedItem.grade && <> • {t('inventory.dialogs.grade')}: <b>{selectedItem.grade}</b></>}</div>}
                     </>)}
@@ -212,7 +238,7 @@ const ReceiveStockModal = ({ show, onClose, items, locations, onSuccess, initial
                         <div className="grid grid-cols-2 gap-3">
                             <div>
                                 <label className="block text-xs font-medium text-sf-muted mb-1">{t('inventory.lotNumber')} *</label>
-                                <input value={form.lotNumber} onChange={e => setForm(f => ({ ...f, lotNumber: e.target.value }))} placeholder={t('inventory.dialogs.lotPlaceholder')}
+                                <input aria-label={t('inventory.lotNumber')} value={form.lotNumber} onChange={e => setForm(f => ({ ...f, lotNumber: e.target.value }))} placeholder={t('inventory.dialogs.lotPlaceholder')}
                                     className="w-full px-3 py-2 rounded-lg border dark:border-gray-600 bg-white dark:bg-gray-700 text-sf-text focus:ring-2 focus:ring-blue-500 outline-none text-sm" />
                             </div>
                             <div>
@@ -242,16 +268,35 @@ const ReceiveStockModal = ({ show, onClose, items, locations, onSuccess, initial
                             <input value={form.concentration} onChange={e => setForm(f => ({ ...f, concentration: e.target.value }))} placeholder={t('inventory.dialogs.concentrationPlaceholder')}
                                 className="w-full px-3 py-2 rounded-lg border dark:border-gray-600 bg-white dark:bg-gray-700 text-sf-text focus:ring-2 focus:ring-blue-500 outline-none text-sm" />
                         </div>
+                        {!canManage && <div>
+                            <label htmlFor="prepared-lot-actor" className="block text-xs font-medium text-sf-muted mb-1">{t('preparedLots.preparedBy')}</label>
+                            <input id="prepared-lot-actor" data-testid="prepared-lot-actor" value={actor?.username || ''} readOnly className="w-full px-3 py-2 rounded-lg border border-sf-divider bg-sf-canvas text-sm" />
+                            <p className="text-xs text-sf-muted mt-1">{t('preparedLots.policyHint')}</p>
+                        </div>}
+                        <fieldset className="border border-sf-divider rounded-lg p-3 space-y-2">
+                            <legend className="px-1 text-xs font-semibold">{t('preparedLots.parentLots')}</legend>
+                            <p className="text-xs text-sf-muted">{t('preparedLots.parentHelp')}</p>
+                            <input aria-label={t('preparedLots.searchParents')} value={parentSearch} onChange={e => setParentSearch(e.target.value)} placeholder={t('preparedLots.searchParents')} className="w-full px-2 py-1 rounded border border-sf-divider bg-sf-surface text-sm" />
+                            {parentLoading ? <p className="text-xs">{t('preparedLots.loadingParents')}</p> : parentError ? <p role="status" className="text-xs text-amber-700">{t('preparedLots.parentsUnavailable')}</p> : <div className="max-h-28 overflow-auto space-y-1">
+                                {parentLots.filter(lot => `${lot.lotNumber} ${lot.item?.name || ''}`.toLowerCase().includes(parentSearch.toLowerCase())).map(lot => <label key={lot.id} className="flex gap-2 items-start text-xs">
+                                    <input type="checkbox" data-testid={`prepared-lot-parent-${lot.id}`} checked={parentLotIds.includes(lot.id)} onChange={e => setParentLotIds(ids => e.target.checked ? [...ids, lot.id] : ids.filter(id => id !== lot.id))} />
+                                    <span>{lot.lotNumber} · {lot.item?.name} ({lot.status})</span>
+                                </label>)}
+                                {parentLots.length === 0 && <p className="text-xs text-sf-muted">{t('preparedLots.noParents')}</p>}
+                            </div>}
+                        </fieldset>
                     </>)}
 
                     {step === 3 && (<>
                         <div className="p-4 rounded-xl bg-sf-canvas/50 space-y-2 text-sm">
-                            <h4 className="font-bold text-sf-text mb-2">📋 {t('inventory.dialogs.confirmReceipt')}</h4>
+                            <h4 className="font-bold text-sf-text mb-2">📋 {t(canManage ? 'inventory.dialogs.confirmReceipt' : 'preparedLots.confirmPreparation')}</h4>
                             <p><span className="text-gray-500">{t('inventory.dialogs.item')}:</span> <b>{selectedItem?.name}</b></p>
                             <p><span className="text-gray-500">{t('inventory.dialogs.lot')}:</span> <b>{form.lotNumber}</b></p>
                             <p><span className="text-gray-500">{t('inventory.dialogs.quantity')}:</span> <b>{form.quantity} {selectedItem?.unitOfMeasure}</b></p>
                             {form.expiryDate && <p><span className="text-gray-500">{t('inventory.expiryDate')}:</span> <b>{form.expiryDate}</b></p>}
                             {form.concentration && <p><span className="text-gray-500">{t('inventory.dialogs.concentration')}:</span> <b>{form.concentration}</b></p>}
+                            {!canManage && <p>{t('preparedLots.preparedBy')} <b>{actor?.username}</b></p>}
+                            {parentLotIds.length > 0 && <p>{t('preparedLots.parentLots')}: {parentLots.filter(lot => parentLotIds.includes(lot.id)).map(lot => lot.lotNumber).join(', ')}</p>}
                         </div>
                     </>)}
                 </div>
@@ -269,7 +314,7 @@ const ReceiveStockModal = ({ show, onClose, items, locations, onSuccess, initial
                     ) : (
                         <button onClick={handleSubmit} disabled={saving}
                             className="px-6 py-2 text-sm font-bold rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 transition-colors flex items-center gap-2">
-                            {saving ? <RefreshCw size={14} className="animate-spin" /> : <CheckCircle size={14} />} {t('inventory.dialogs.confirmReceipt')}
+                            {saving ? <RefreshCw size={14} className="animate-spin" /> : <CheckCircle size={14} />} {t(canManage ? 'inventory.dialogs.confirmReceipt' : 'preparedLots.confirmPreparation')}
                         </button>
                     )}
                 </div>
@@ -279,7 +324,7 @@ const ReceiveStockModal = ({ show, onClose, items, locations, onSuccess, initial
 };
 
 // ─── Item Detail Drawer ──────────────────────────────────────────
-const ItemDrawer = ({ item, show, onClose, onAction, canManage, canConsume, locations }) => {
+const ItemDrawer = ({ item, show, onClose, onAction, canManage, canConsume, locations, canPrepare = false, onPrepare }) => {
     const { t } = useLanguage();
     const [actionModal, setActionModal] = useState(null); // { type, lotId }
     const [actionForm, setActionForm] = useState({ quantity: '', reason: '', locationId: '' });
@@ -287,6 +332,11 @@ const ItemDrawer = ({ item, show, onClose, onAction, canManage, canConsume, loca
     const [actionSaving, setActionSaving] = useState(false);
 
     if (!show || !item) return null;
+    const quarantineExplanation = lot => {
+        const hold = lot.transactions?.find(transaction => transaction.actionType === 'QUARANTINE' || transaction.actionType === 'RECEIVE' && transaction.reasonCode === 'TECHNICIAN_PREPARATION_QUARANTINED');
+        return hold?.reasonCode === 'TECHNICIAN_PREPARATION_QUARANTINED' ? t('preparedLots.quarantineByPolicy')
+            : hold?.freeTextReason ? t('preparedLots.quarantineReason', { reason: hold.freeTextReason }) : t('preparedLots.quarantineHelp');
+    };
     const isLotUsable = (l) => l.status === 'AVAILABLE' && (!l.expiryDate || new Date(l.expiryDate) > new Date());
     const usableLots = (item.lots || []).filter(isLotUsable);
     const hasNumericUsable = usableLots.some(l => l.currentQuantity != null && !isNaN(l.currentQuantity));
@@ -386,9 +436,10 @@ const ItemDrawer = ({ item, show, onClose, onAction, canManage, canConsume, loca
 
                 {/* Lots Table */}
                 <div className="px-6 pb-6">
-                    <h4 className="text-sm font-bold text-sf-muted mb-2 flex items-center gap-2">
-                        <Archive size={14} /> Lots ({(item.lots || []).length})
-                    </h4>
+                    <div className="flex items-center justify-between gap-2 mb-2">
+                        <h4 className="text-sm font-bold text-sf-muted flex items-center gap-2"><Archive size={14} /> {t('preparedLots.lotCount', { count: (item.lots || []).length })}</h4>
+                        {(canManage || (canPrepare && item.isActive !== false && ['REAGENT', 'STANDARD'].includes(item.itemType))) && <button type="button" onClick={() => onPrepare?.(item)} data-testid="drawer-add-lot" className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white">{t(canManage ? 'inventory.dialogs.receiveStock' : 'preparedLots.addLot')}</button>}
+                    </div>
                     <div className="rounded-xl border dark:border-gray-700 overflow-hidden">
                         <table className="w-full text-sm">
                             <thead className="bg-sf-canvas/60">
@@ -406,9 +457,13 @@ const ItemDrawer = ({ item, show, onClose, onAction, canManage, canConsume, loca
                                     const isExpired = lot.status === 'EXPIRED' || (lot.expiryDate && new Date(lot.expiryDate) <= new Date());
                                     return (
                                         <tr key={lot.id} className="hover:bg-sf-raised/30">
-                                            <td className="px-3 py-2 font-mono text-xs">{lot.lotNumber}</td>
+                                            <td className="px-3 py-2 font-mono text-xs">{lot.lotNumber}
+                                                {lot.preparedBy && <p className="font-sans text-xs text-sf-muted mt-1">{t('preparedLots.preparedByValue', { name: lot.preparedBy })}</p>}
+                                                {lot.traceabilityNotes && <details className="font-sans text-xs mt-1"><summary>{t('preparedLots.traceability')}</summary><p className="whitespace-pre-wrap">{lot.traceabilityNotes}</p></details>}
+                                            </td>
                                             <td className="px-3 py-2 text-center">
                                                 <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${isExpired ? STATUS_BADGES.EXPIRED : (STATUS_BADGES[lot.status] || '')}`}>{isExpired ? 'EXPIRED' : lot.status}</span>
+                                                {lot.status === 'QUARANTINED' && <p data-testid="lot-quarantine-explanation" className="text-xs text-amber-700 dark:text-amber-300 mt-1">{quarantineExplanation(lot)}</p>}
                                             </td>
                                             <td className="px-3 py-2 text-right font-bold">
                                                 {lot.currentQuantity != null ? lot.currentQuantity : <span className="text-amber-500 font-medium">Missing</span>} <span className="text-xs font-normal text-gray-400">{lot.unitOfMeasure}</span>
@@ -576,6 +631,8 @@ const Inventory = () => {
     const { showDialog } = useDialog();
     const { t } = useLanguage();
     const canManage = hasPermission('MANAGE_INVENTORY');
+    const canPrepare = hasPermission('PREPARE_INVENTORY_LOT');
+    const canAddLot = item => canManage || (canPrepare && item.isActive !== false && ['REAGENT', 'STANDARD'].includes(item.itemType));
     const canConsume = hasPermission('CONSUME_INVENTORY');
 
     const [items, setItems] = useState([]);
@@ -813,9 +870,9 @@ const Inventory = () => {
                                                     <MinusCircle size={14} />
                                                 </button>
                                             )}
-                                            {canManage && (
-                                                <button onClick={(e) => handleQuickReceive(e, item)}
-                                                    className="p-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-colors" title={t('inventory.dialogs.receiveStock')}>
+                                            {canAddLot(item) && (
+                                                <button data-testid={`add-lot-${item.id}`} onClick={(e) => handleQuickReceive(e, item)}
+                                                    className="p-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-colors" title={t(canManage ? 'inventory.dialogs.receiveStock' : 'preparedLots.addLot')}>
                                                     <PlusCircle size={14} />
                                                 </button>
                                             )}
@@ -831,10 +888,10 @@ const Inventory = () => {
             </div>
 
             {/* Modals */}
-            <ReceiveStockModal show={showReceive} onClose={() => setShowReceive(false)} items={items} locations={locations} onSuccess={fetchAll} initialItemId={initialReceiveItemId} />
+            <ReceiveStockModal show={showReceive} onClose={() => setShowReceive(false)} items={items} locations={locations} onSuccess={() => { fetchAll(); if (selectedItem) openItem(selectedItem); }} initialItemId={initialReceiveItemId} canManage={canManage} actor={user} />
             <QuickConsumeModal show={showQuickConsume} onClose={() => setShowQuickConsume(false)} item={quickConsumeItem} locations={locations} onSuccess={fetchAll} />
             <CreateItemModal show={showCreate} onClose={() => setShowCreate(false)} onSuccess={fetchAll} />
-            <ItemDrawer item={selectedItem} show={!!selectedItem} onClose={() => setSelectedItem(null)} onAction={() => { fetchAll(); if (selectedItem) openItem(selectedItem); }} canManage={canManage} canConsume={canConsume} locations={locations} />
+            <ItemDrawer item={selectedItem} show={!!selectedItem} onClose={() => setSelectedItem(null)} onAction={() => { fetchAll(); if (selectedItem) openItem(selectedItem); }} canManage={canManage} canConsume={canConsume} locations={locations} canPrepare={canPrepare} onPrepare={item => { setInitialReceiveItemId(item.id); setShowReceive(true); }} />
         </div>
     );
 };

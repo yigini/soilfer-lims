@@ -3311,7 +3311,8 @@
       "qc_blankLodMultiplier": "Multiplicateur d’écart-type pour LD",
       "qc_blankLoqMultiplier": "Multiplicateur d’écart-type pour LQ",
       "reception_intakeRules": "Règles de réception et contexte du prélèvement",
-      "qc_controlChartMinPoints": "Nombre minimal de points pour les cartes de contrôle"
+      "qc_controlChartMinPoints": "Nombre minimal de points pour les cartes de contrôle",
+      "inventory_technicianLotsStartQuarantined": "Les nouveaux lots préparés par les techniciens commencent en quarantaine"
     },
     "title": "Politiques",
     "yes": "Oui",
@@ -3442,7 +3443,8 @@
     },
     "help": {
       "qc_requireBatchQc": "AUTO exige le CQ du lot pour les méthodes de mesure dont les critères de CQ résolus sont actifs. Une dérogation de méthode peut exiger ou dispenser l’appartenance au lot et son évaluation.",
-      "qc_calibrationFailAction": "Choisir l’action après un échec de vérification initiale ou continue de l’étalonnage ou d’un blanc d’étalonnage."
+      "qc_calibrationFailAction": "Choisir l’action après un échec de vérification initiale ou continue de l’étalonnage ou d’un blanc d’étalonnage.",
+      "inventory_technicianLotsStartQuarantined": "Bloque les nouveaux lots préparés par les techniciens jusqu'à leur libération par un responsable. Les réceptions de stock des responsables sont inchangées."
     },
     "criticality": {
       "CRITICAL": "Critique",
@@ -5147,5 +5149,30 @@
     "numericDetermination": "Détermination numérique",
     "acceptItem": "Accepter l'élément",
     "returnForCorrection": "Renvoyer pour correction"
+  },
+  "preparedLots": {
+    "addLot": "Ajouter un lot",
+    "preparedBy": "Préparé par",
+    "preparedByValue": "Préparé par : {{name}}",
+    "policyHint": "Les règles du laboratoire peuvent exiger la libération du lot par un responsable avant utilisation.",
+    "parentLots": "Lots d'origine (facultatif)",
+    "parentHelp": "Choisissez les lots utilisés pour préparer ce lot. Seuls ceux du même laboratoire sont proposés ; la sélection enregistre l'origine sans consommer le stock.",
+    "searchParents": "Rechercher les lots d'origine",
+    "loadingParents": "Chargement des lots d'origine…",
+    "parentsUnavailable": "Impossible de charger les lots d'origine. Fermez puis rouvrez ce formulaire pour réessayer. Ils sont facultatifs.",
+    "noParents": "Aucun lot d'origine dans ce laboratoire.",
+    "confirmPreparation": "Confirmer la préparation",
+    "saveFailed": "Impossible d'enregistrer le lot.",
+    "lotCount": "Lots ({{count}})",
+    "quarantineByPolicy": "La règle du laboratoire bloque les lots préparés par les techniciens jusqu'à leur libération par un responsable.",
+    "quarantineHelp": "En quarantaine : un responsable doit examiner et libérer ce lot avant utilisation.",
+    "quarantineReason": "Motif de quarantaine : {{reason}}",
+    "traceability": "Notes de traçabilité",
+    "errors": {
+      "LOT_ITEM_TYPE_NOT_ALLOWED": "Cette autorisation permet uniquement de préparer des lots de réactifs et d'étalons.",
+      "LOT_ATTACHMENT_NOT_ALLOWED": "Les certificats doivent être ajoutés par un responsable du stock.",
+      "PARENT_LOT_INVALID": "Choisissez des lots d'origine du même laboratoire que l'article.",
+      "CUSTODY_LOCATION_INVALID": "Choisissez un lieu actif de stockage des réactifs dans ce laboratoire."
+    }
   }
 }
