@@ -2120,7 +2120,41 @@
     "typeVerification": "Verificación",
     "typeMaintenance": "Mantenimiento",
     "performedDate": "Fecha de realización",
-    "logEventFailed": "Error al registrar el evento de equipo"
+    "logEventFailed": "Error al registrar el evento de equipo",
+    "eventHistory": "Historial de eventos",
+    "noEvents": "Aún no hay eventos registrados.",
+    "recordedOutcome": "Resultado registrado",
+    "technicianEventHelp": "Registre trabajos de calibración, verificación o mantenimiento. Su cuenta autenticada queda registrada como autor; la regla del laboratorio puede exigir una decisión del responsable.",
+    "ownSignoffHelp": "Otro responsable debe revisar un evento que usted registró.",
+    "pendingSignoff": "Pendiente de validación del responsable",
+    "saveSignoff": "Guardar decisión",
+    "signoffFailed": "No se pudo guardar la decisión del responsable.",
+    "signoffReason": "Motivo de la decisión (obligatorio)",
+    "technicianEvents": {
+      "CALIBRATION_PERFORMED": "Calibración realizada",
+      "CALIBRATION_FAILED": "Calibración fallida",
+      "VERIFICATION_PERFORMED": "Verificación realizada",
+      "VERIFICATION_FAILED": "Verificación fallida",
+      "MAINTENANCE_PERFORMED": "Mantenimiento realizado",
+      "MAINTENANCE_FAILED": "Mantenimiento fallido"
+    },
+    "signoffActions": {
+      "APPROVED": "Aprobar evento",
+      "REJECTED": "Rechazar evento"
+    },
+    "signoffDecisions": {
+      "APPROVED": "Aprobado por el responsable",
+      "REJECTED": "Rechazado por el responsable"
+    },
+    "eventErrors": {
+      "EQUIPMENT_EVENT_TYPE_NOT_ALLOWED": "Este tipo de evento no está disponible para su rol.",
+      "EQUIPMENT_SIGNOFF_SELF": "Otro responsable debe validar su evento."
+    },
+    "eventOutcomes": {
+      "PASS": "Aprobado",
+      "FAIL": "No aprobado",
+      "NA": "No aplica"
+    }
   },
   "inventory": {
     "title": "Reactivos e Inventario",
@@ -3312,7 +3346,8 @@
       "qc_blankLoqMultiplier": "Multiplicador de DE muestral para LOQ",
       "reception_intakeRules": "Reglas de recepción y contexto de la muestra",
       "qc_controlChartMinPoints": "Mínimo de puntos de referencia para gráficos de control",
-      "inventory_technicianLotsStartQuarantined": "Los nuevos lotes preparados por técnicos empiezan en cuarentena"
+      "inventory_technicianLotsStartQuarantined": "Los nuevos lotes preparados por técnicos empiezan en cuarentena",
+      "equipment_technicianEventsRequireSignoff": "Los eventos de equipos de técnicos requieren validación del responsable"
     },
     "title": "Políticas",
     "yes": "Sí",
@@ -3444,7 +3479,8 @@
     "help": {
       "qc_requireBatchQc": "AUTO exige CC de lote para métodos de medición con criterios de CC resueltos habilitados. Una excepción de método puede exigir o eximir la pertenencia al lote y su evaluación.",
       "qc_calibrationFailAction": "Elija la acción ante fallas de verificación inicial o continua de calibración y blancos de calibración.",
-      "inventory_technicianLotsStartQuarantined": "Retiene los lotes nuevos preparados por técnicos hasta que un responsable los libere. Las recepciones de existencias de los responsables se mantienen iguales."
+      "inventory_technicianLotsStartQuarantined": "Retiene los lotes nuevos preparados por técnicos hasta que un responsable los libere. Las recepciones de existencias de los responsables se mantienen iguales.",
+      "equipment_technicianEventsRequireSignoff": "Registra los eventos de técnicos como pendientes de decisión del responsable. Los eventos fallidos siempre exigen esa decisión, en todos los perfiles."
     },
     "criticality": {
       "CRITICAL": "Crítico",

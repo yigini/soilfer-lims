@@ -42,6 +42,7 @@ const Equipment = () => {
     const { user, hasPermission } = useAuth();
     const { t } = useLanguage();
     const canManage = hasPermission('MANAGE_EQUIPMENT');
+    const canLog = hasPermission('LOG_EQUIPMENT_EVENT');
 
     const [assets, setAssets] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -264,6 +265,8 @@ const Equipment = () => {
                 onClose={() => setSelectedAsset(null)}
                 onUpdate={fetchAssets}
                 canManage={canManage}
+                canLog={canLog}
+                actor={user}
             />
 
             <RegisterAssetModal

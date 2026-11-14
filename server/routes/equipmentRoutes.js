@@ -9,7 +9,7 @@ const { verifyToken, checkPermission } = require('../middleware/authMiddleware')
 router.use(verifyToken);
 
 // Events (static paths first, before /:id)
-router.post('/events', checkPermission('MANAGE_EQUIPMENT'), equipmentEventController.logEvent);
+router.post('/events', checkPermission('LOG_EQUIPMENT_EVENT'), equipmentEventController.logEvent);
 router.patch('/events/:eventId/disposition', checkPermission('MANAGE_EQUIPMENT'), equipmentEventController.approveDisposition);
 
 // Eligibility (static paths first, before /:id)

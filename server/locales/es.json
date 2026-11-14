@@ -1605,7 +1605,8 @@
       "qc_blankLoqMultiplier": "Multiplicador de DE muestral para LOQ",
       "reception_intakeRules": "Reglas de recepción y contexto de la muestra",
       "qc_controlChartMinPoints": "Mínimo de puntos de referencia para gráficos de control",
-      "inventory_technicianLotsStartQuarantined": "Los nuevos lotes preparados por técnicos empiezan en cuarentena"
+      "inventory_technicianLotsStartQuarantined": "Los nuevos lotes preparados por técnicos empiezan en cuarentena",
+      "equipment_technicianEventsRequireSignoff": "Los eventos de equipos de técnicos requieren validación del responsable"
     },
     "title": "Políticas",
     "yes": "Sí",
@@ -1737,7 +1738,8 @@
     "help": {
       "qc_requireBatchQc": "AUTO exige CC de lote para métodos de medición con criterios de CC resueltos habilitados. Una excepción de método puede exigir o eximir la pertenencia al lote y su evaluación.",
       "qc_calibrationFailAction": "Elija la acción ante fallos de verificación inicial o continua de calibración y blancos de calibración.",
-      "inventory_technicianLotsStartQuarantined": "Retiene los lotes nuevos preparados por técnicos hasta que un responsable los libere. Las recepciones de existencias de los responsables se mantienen iguales."
+      "inventory_technicianLotsStartQuarantined": "Retiene los lotes nuevos preparados por técnicos hasta que un responsable los libere. Las recepciones de existencias de los responsables se mantienen iguales.",
+      "equipment_technicianEventsRequireSignoff": "Registra los eventos de técnicos como pendientes de decisión del responsable. Los eventos fallidos siempre exigen esa decisión, en todos los perfiles."
     },
     "criticality": {
       "CRITICAL": "Crítico",

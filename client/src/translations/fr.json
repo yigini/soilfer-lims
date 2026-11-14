@@ -2120,7 +2120,41 @@
     "typeVerification": "Vérification",
     "typeMaintenance": "Maintenance",
     "performedDate": "Date d'exécution",
-    "logEventFailed": "Échec de l'enregistrement de l'événement d'équipement"
+    "logEventFailed": "Échec de l'enregistrement de l'événement d'équipement",
+    "eventHistory": "Historique des événements",
+    "noEvents": "Aucun événement enregistré.",
+    "recordedOutcome": "Résultat consigné",
+    "technicianEventHelp": "Consignez les travaux d'étalonnage, de vérification ou de maintenance. Votre compte connecté est enregistré comme auteur ; la règle du laboratoire peut exiger une décision du responsable.",
+    "ownSignoffHelp": "Un autre responsable doit examiner un événement que vous avez consigné.",
+    "pendingSignoff": "En attente de validation du responsable",
+    "saveSignoff": "Enregistrer la décision",
+    "signoffFailed": "Impossible d'enregistrer la décision du responsable.",
+    "signoffReason": "Motif de la décision (obligatoire)",
+    "technicianEvents": {
+      "CALIBRATION_PERFORMED": "Étalonnage effectué",
+      "CALIBRATION_FAILED": "Échec de l'étalonnage",
+      "VERIFICATION_PERFORMED": "Vérification effectuée",
+      "VERIFICATION_FAILED": "Échec de la vérification",
+      "MAINTENANCE_PERFORMED": "Maintenance effectuée",
+      "MAINTENANCE_FAILED": "Échec de la maintenance"
+    },
+    "signoffActions": {
+      "APPROVED": "Valider l'événement",
+      "REJECTED": "Rejeter l'événement"
+    },
+    "signoffDecisions": {
+      "APPROVED": "Validé par le responsable",
+      "REJECTED": "Rejeté par le responsable"
+    },
+    "eventErrors": {
+      "EQUIPMENT_EVENT_TYPE_NOT_ALLOWED": "Ce type d'événement n'est pas disponible pour votre rôle.",
+      "EQUIPMENT_SIGNOFF_SELF": "Un autre responsable doit valider votre événement."
+    },
+    "eventOutcomes": {
+      "PASS": "Conforme",
+      "FAIL": "Non conforme",
+      "NA": "Sans objet"
+    }
   },
   "inventory": {
     "title": "Réactifs et Inventaire",
@@ -3312,7 +3346,8 @@
       "qc_blankLoqMultiplier": "Multiplicateur d’écart-type pour LQ",
       "reception_intakeRules": "Règles de réception et contexte du prélèvement",
       "qc_controlChartMinPoints": "Nombre minimal de points pour les cartes de contrôle",
-      "inventory_technicianLotsStartQuarantined": "Les nouveaux lots préparés par les techniciens commencent en quarantaine"
+      "inventory_technicianLotsStartQuarantined": "Les nouveaux lots préparés par les techniciens commencent en quarantaine",
+      "equipment_technicianEventsRequireSignoff": "Validation du responsable requise pour les événements d'équipement des techniciens"
     },
     "title": "Politiques",
     "yes": "Oui",
@@ -3444,7 +3479,8 @@
     "help": {
       "qc_requireBatchQc": "AUTO exige le CQ du lot pour les méthodes de mesure dont les critères de CQ résolus sont actifs. Une dérogation de méthode peut exiger ou dispenser l’appartenance au lot et son évaluation.",
       "qc_calibrationFailAction": "Choisir l’action après un échec de vérification initiale ou continue de l’étalonnage ou d’un blanc d’étalonnage.",
-      "inventory_technicianLotsStartQuarantined": "Bloque les nouveaux lots préparés par les techniciens jusqu'à leur libération par un responsable. Les réceptions de stock des responsables sont inchangées."
+      "inventory_technicianLotsStartQuarantined": "Bloque les nouveaux lots préparés par les techniciens jusqu'à leur libération par un responsable. Les réceptions de stock des responsables sont inchangées.",
+      "equipment_technicianEventsRequireSignoff": "Enregistre les événements des techniciens dans l'attente d'une décision du responsable. Les échecs nécessitent toujours cette décision, quel que soit le profil."
     },
     "criticality": {
       "CRITICAL": "Critique",

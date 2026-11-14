@@ -137,6 +137,7 @@ key('numbers.thousandsSeparator', 'enum', null, null, null, { scope: 'LAB', null
 key('intake.defaultAnalysisMassG', 'number', 10, 10, 10, { min: 0, unit: 'g' });
 key('intake.retentionMassG', 'number', 100, 100, 100, { scope: 'LAB', min: 0, unit: 'g' });
 key('referenceMaterials.expiryWarningDays', 'integer', 30, 30, 30, { ...integer, scope: 'LAB', unit: 'days' });
+key('equipment.technicianEventsRequireSignoff', 'boolean', true, false, false, { scope: 'LAB', help: 'policies.help.equipment_technicianEventsRequireSignoff' });
 key('inventory.technicianLotsStartQuarantined', 'boolean', true, false, false, { scope: 'LAB', help: 'policies.help.inventory_technicianLotsStartQuarantined' });
 key('equipment.requireEquipment', 'enum', 'AUTO', 'AUTO', 'AUTO', { allowedValues: ['AUTO', 'REQUIRED', 'NOT_REQUIRED'] });
 key('equipment.unconfiguredReadiness', 'equipmentReadinessMap', { CRITICAL: 'BLOCK', IMPORTANT: 'WARN', NON_CRITICAL: 'ALLOW' },

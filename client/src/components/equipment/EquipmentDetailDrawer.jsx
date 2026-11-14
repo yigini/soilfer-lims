@@ -17,7 +17,7 @@ const READINESS_COLORS = {
     NOT_CONFIGURED: 'text-gray-500 bg-sf-raised'
 };
 
-const EquipmentDetailDrawer = ({ assetId, show, onClose, onUpdate, canManage }) => {
+const EquipmentDetailDrawer = ({ assetId, show, onClose, onUpdate, canManage, canLog = false, actor }) => {
     const { t } = useLanguage();
     const [asset, setAsset] = useState(null);
     const [activeTab, setActiveTab] = useState('OVERVIEW');
@@ -129,19 +129,23 @@ const EquipmentDetailDrawer = ({ assetId, show, onClose, onUpdate, canManage }) 
                         <div className="p-6">
                             {activeTab === 'OVERVIEW' && <OverviewTab asset={asset} />}
                             {activeTab === 'MAINTENANCE' && <MaintenanceTab asset={asset} canManage={canManage} onAction={setLogModal} />}
-                            {activeTab === 'HISTORY' && <HistoryTab events={asset.events} />}
+                            {activeTab === 'HISTORY' && <HistoryTab events={asset.events} canManage={canManage} actor={actor} onUpdate={fetchDetails} />}
                             {activeTab === 'ELIGIBILITY' && <EligibilityTab asset={asset} />}
                         </div>
 
                         {/* Quick Actions (Sticky Bottom) */}
-                        <div className="sticky bottom-0 border-t dark:border-gray-700 bg-sf-canvas p-4 grid grid-cols-2 gap-3">
-                            <button onClick={() => setLogModal('MAINTENANCE')} className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-700 font-bold text-sm bg-sf-surface hover:bg-gray-50 transition-colors">
+                        {(canManage || canLog) && <div className="sticky bottom-0 border-t dark:border-gray-700 bg-sf-canvas p-4 grid grid-cols-2 gap-3">
+                            {canManage ? <><button onClick={() => setLogModal('MAINTENANCE')} className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-700 font-bold text-sm bg-sf-surface hover:bg-gray-50 transition-colors">
                                 <Wrench size={16} /> Log Maintenance
                             </button>
                             <button onClick={() => setLogModal('CALIBRATION')} className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-blue-600 text-white font-bold text-sm hover:bg-blue-700 transition-colors shadow-sm">
                                 <ClipboardCheck size={16} /> Calibration Task
                             </button>
-                        </div>
+                            </> : <button onClick={() => setLogModal('CALIBRATION_PERFORMED')}
+                                className="col-span-2 px-4 py-2.5 rounded-lg bg-blue-600 text-white font-bold text-sm">
+                                {t('equipment.logEvent', 'Log Event')}
+                            </button>}
+                        </div>}
                     </>
                 )}
             </div>
@@ -152,6 +156,8 @@ const EquipmentDetailDrawer = ({ assetId, show, onClose, onUpdate, canManage }) 
                 onClose={() => setLogModal(null)}
                 asset={asset}
                 eventType={logModal}
+                canManage={canManage}
+                canLog={canLog}
                 onSuccess={() => {
                     fetchDetails();
                     if (onUpdate) onUpdate();
@@ -219,6 +225,7 @@ const OverviewTab = ({ asset }) => (
 );
 
 const MaintenanceTab = ({ asset, canManage, onAction }) => {
+    const { t } = useLanguage();
     const calibStatus = asset.qualification?.calibrationStatus || 'NOT_CONFIGURED';
     const verifStatus = asset.qualification?.verificationStatus || 'NOT_CONFIGURED';
 
@@ -295,25 +302,69 @@ const MaintenanceTab = ({ asset, canManage, onAction }) => {
     );
 };
 
-const HistoryTab = ({ events = [] }) => (
-    <div className="space-y-4">
-        <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Audit Log & Event History</h4>
+const HistoryTab = ({ events = [], canManage = false, actor, onUpdate }) => {
+    const { t } = useLanguage();
+    const [decision, setDecision] = useState(null);
+    const [saving, setSaving] = useState(false);
+    const [error, setError] = useState('');
+    const saveDecision = async e => {
+        e.preventDefault();
+        if (!decision || !decision.reason.trim()) return;
+        setSaving(true); setError('');
+        try {
+            await axios.patch(`/api/equipment/events/${decision.eventId}/disposition`, {
+                decision: decision.value, reason: decision.reason.trim()
+            });
+            setDecision(null);
+            await onUpdate?.();
+        } catch (err) {
+            setError(t(`equipment.eventErrors.${err.response?.data?.code}`,
+                err.response?.data?.error || t('equipment.signoffFailed')));
+        } finally { setSaving(false); }
+    };
+    return <div className="space-y-4">
+        <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">{t('equipment.eventHistory')}</h4>
         <div className="relative border-l-2 border-sf-divider ml-3 pl-6 space-y-6">
-            {events.map((e, idx) => (
-                <div key={e.id} className="relative">
+            {events.map(e => {
+                const pending = e.requiresManagerSignoff && !['APPROVED', 'REJECTED'].includes(e.managerDecision);
+                const own = e.userId === actor?.username;
+                return <div key={e.id} className="relative">
                     <div className="absolute -left-[31px] top-1 w-2.5 h-2.5 rounded-full bg-blue-600 outline outline-4 outline-white dark:outline-gray-800" />
                     <div className="flex justify-between items-start mb-1">
-                        <span className="text-xs font-bold bg-blue-100 dark:bg-blue-900/40 text-blue-700 px-2 py-0.5 rounded uppercase">{e.eventType}</span>
+                        <span className="text-xs font-bold bg-blue-100 dark:bg-blue-900/40 text-blue-700 px-2 py-0.5 rounded uppercase">{t(`equipment.technicianEvents.${e.eventType}`, e.eventType)}</span>
                         <span className="text-[10px] text-gray-400 flex items-center gap-1"><Clock size={10} /> {new Date(e.ts).toLocaleString()}</span>
                     </div>
                     <div className="text-sm font-medium text-sf-text">{e.summary}</div>
-                    <div className="text-xs text-gray-500 flex items-center gap-1 mt-1"><User size={10} /> {e.userId} • Outcome: <span className={e.outcome === 'PASS' ? 'text-emerald-500' : e.outcome === 'FAIL' ? 'text-red-500' : ''}>{e.outcome}</span></div>
-                </div>
-            ))}
-            {events.length === 0 && <div className="text-gray-400 text-sm">No events found for this instrument.</div>}
+                    <div className="text-xs text-gray-500 flex items-center gap-1 mt-1"><User size={10} /> {e.userId} · {t('equipment.recordedOutcome')}: {t(`equipment.eventOutcomes.${e.outcome}`, e.outcome)}</div>
+                    {pending && <p role="status" className="text-xs font-semibold text-amber-700 mt-2">{t('equipment.pendingSignoff')}</p>}
+                    {e.managerDecision && <p className="text-xs mt-2">{t(`equipment.signoffDecisions.${e.managerDecision}`, e.managerDecision)}{e.managerReason ? ` · ${e.managerReason}` : ''}</p>}
+                    {canManage && pending && <div className="mt-2 space-y-2">
+                        {own && <p className="text-xs text-sf-muted">{t('equipment.ownSignoffHelp')}</p>}
+                        <div className="flex gap-2">
+                            {['APPROVED', 'REJECTED'].map(value => <button key={value} type="button" disabled={own || saving}
+                                className="rounded border px-3 py-1 text-xs disabled:opacity-50"
+                                onClick={() => { setDecision({ eventId: e.id, value, reason: '' }); setError(''); }}>
+                                {t(`equipment.signoffActions.${value}`)}
+                            </button>)}
+                        </div>
+                        {decision?.eventId === e.id && <form onSubmit={saveDecision} className="rounded border p-3 space-y-2">
+                            <p className="text-sm font-semibold">{t(`equipment.signoffActions.${decision.value}`)}</p>
+                            <label className="block text-sm">{t('equipment.signoffReason')}
+                                <input aria-label={t('equipment.signoffReason')} required value={decision.reason}
+                                    onChange={event => setDecision({ ...decision, reason: event.target.value })}
+                                    className="block w-full border rounded p-2 bg-sf-surface" />
+                            </label>
+                            {error && <p role="alert" className="text-red-600 text-sm">{error}</p>}
+                            <button type="submit" disabled={saving || !decision.reason.trim()} className="rounded border px-3 py-1 text-sm disabled:opacity-50">{t('equipment.saveSignoff')}</button>
+                            <button type="button" onClick={() => setDecision(null)} className="ml-3 text-sm">{t('common.cancel')}</button>
+                        </form>}
+                    </div>}
+                </div>;
+            })}
+            {events.length === 0 && <div className="text-gray-400 text-sm">{t('equipment.noEvents')}</div>}
         </div>
-    </div>
-);
+    </div>;
+};
 
 const EligibilityTab = ({ asset }) => {
     const getAnalysisDisplayName = useAnalysisNames();
