@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.15.0] - 2026-11-14
+
+### Added
+- Let technicians record instrument checks and prepare reagent or standard lots in their own laboratory.
+- Add laboratory settings for manager sign-off of technician instrument events and initial quarantine of technician-prepared lots.
+- Explain pending instrument sign-off and lot-entry errors in all five screen languages.
+
+### Fixed
+- Keep instruments awaiting calibration or verification acceptance out of Ready while retaining their last accepted dates.
+
 ## [1.14.1] - 2026-11-14
 
 ### Fixed

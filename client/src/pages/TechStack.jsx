@@ -83,6 +83,18 @@ const techStack = [
 
 const changelog = [
     {
+        version: 'v1.15.0',
+        date: 'November 14, 2026',
+        tag: 'Technician Instrument and Stock Records',
+        badgeColor: 'bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300 border-blue-300 dark:border-blue-800',
+        changes: [
+            'Technicians can record instrument checks and prepare reagent or standard lots for their laboratory.',
+            'Laboratory settings choose manager sign-off for technician instrument events and initial quarantine for prepared lots.',
+            'Instruments awaiting acceptance stay out of Ready while their last accepted dates remain visible.',
+            'New event choices, sign-off messages and prepared-lot guidance cover all five screen languages.',
+        ],
+    },
+    {
         version: 'v1.14.1',
         date: 'November 14, 2026',
         tag: 'Inventory Dialogs',
