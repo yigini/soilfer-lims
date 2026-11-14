@@ -148,7 +148,7 @@ const LogEventModal = ({ show, onClose, asset, eventType, onSuccess, canManage =
                                     />
                                 </div>
                             </div>
-                        ) : (
+                        ) : canManage ? (
                             <div>
                                 <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">{t('equipment.status', 'Outcome')}</label>
                                 <div className="flex gap-2">
@@ -168,7 +168,7 @@ const LogEventModal = ({ show, onClose, asset, eventType, onSuccess, canManage =
                                     </button>
                                 </div>
                             </div>
-                        )}
+                        ) : null}
                     </div>
 
                     {isScheduleSensitive && canManage && (

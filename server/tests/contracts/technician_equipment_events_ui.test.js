@@ -216,3 +216,24 @@ test('the technician outcome refusal is rendered in the selected language', asyn
     await submit(); expect(document.body.textContent).toContain(t('equipment.eventErrors.EQUIPMENT_EVENT_OUTCOME_INVALID'));
     expect(document.body.textContent).not.toContain('EQUIPMENT_EVENT_OUTCOME_INVALID');
 });
+
+
+test('technician failed maintenance retains Failed and offers no legacy outcome override', async () => {
+    await mount('LogEventModal.jsx', { show: true, asset: meter, eventType: 'MAINTENANCE_FAILED', canManage: false, canLog: true,
+        onSuccess: jest.fn(), onClose: jest.fn() }, { locale: 'fr' });
+    const legacyPass = buttons().find(node => node.textContent.trim() === 'PASS');
+    if (legacyPass) await click(legacyPass);
+    expect(document.body.textContent).toContain(t('equipment.recordedOutcome') + ': ' + t('equipment.eventOutcomes.FAIL'));
+    const legacyLabels = buttons().map(node => node.textContent.trim());
+    expect(legacyLabels).not.toContain('PASS'); expect(legacyLabels).not.toContain('FAIL');
+    await change(document.querySelector('input[required]:not([type="date"])'), 'Practice failed maintenance'); await submit();
+    expect(axios.post).toHaveBeenCalledWith('/api/equipment/events', expect.objectContaining({ eventType: 'MAINTENANCE_FAILED', outcome: 'FAIL' }));
+});
+
+test('manager maintenance retains its existing outcome controls and payload', async () => {
+    await mount('LogEventModal.jsx', { show: true, asset: meter, eventType: 'MAINTENANCE', canManage: true,
+        onSuccess: jest.fn(), onClose: jest.fn() });
+    expect(button('PASS')).toBeDefined(); expect(button('FAIL')).toBeDefined(); await click(button('FAIL'));
+    await change(document.querySelector('input[required]:not([type="date"])'), 'Practice manager maintenance'); await submit();
+    expect(axios.post).toHaveBeenCalledWith('/api/equipment/events', expect.objectContaining({ eventType: 'MAINTENANCE', outcome: 'FAIL' }));
+});
