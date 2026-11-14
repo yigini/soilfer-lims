@@ -164,3 +164,55 @@ test('all new equipment labels and the lab-only policy resolve in five languages
         expect(translate(policy.description)).not.toBe(policy.description); expect(translate(policy.help)).not.toBe(policy.help);
     }
 });
+
+
+test.each(['CALIBRATION', 'VERIFICATION'])('%s waiting for sign-off is explained without an overdue label or altered accepted dates', async kind => {
+    const label = kind === 'CALIBRATION' ? 'Calibration' : 'Verification';
+    const event = { ...pending, eventType: kind + '_PERFORMED', details: JSON.stringify({ performedDate: '2026-01-02', nextDueDate: '2028-01-01' }) };
+    const asset = { ...meter, readiness: 'BLOCKED', qualification: { calibrationStatus: 'OK', verificationStatus: 'OK',
+        [kind.toLowerCase() + 'Status']: 'OVERDUE', [`last${label}Date`]: '2026-01-01T00:00:00Z', [`next${label}DueDate`]: '2027-01-01T00:00:00Z' }, events: [event] };
+    await mount('EquipmentDetailDrawer.jsx', { show: true, assetId: meter.id, canManage: false, canLog: true, actor }, { locale: 'fr', asset });
+    expect(document.querySelector('[data-testid="equipment-awaiting-signoff"]').textContent).toBe(t('equipment.pendingSignoff'));
+    await click(button('MAINTENANCE'));
+    expect(document.querySelector('[data-testid="equipment-maintenance-awaiting-signoff"]').textContent).toBe(t('equipment.pendingSignoff'));
+    expect(document.body.textContent).not.toContain('OVERDUE'); expect(document.body.textContent).not.toContain('overdue calibration');
+    expect(document.body.textContent).toContain(new Date('2026-01-01T00:00:00Z').toLocaleDateString());
+    expect(document.body.textContent).toContain(new Date('2027-01-01T00:00:00Z').toLocaleDateString());
+    expect(document.body.textContent).not.toContain(new Date('2028-01-01T00:00:00Z').toLocaleDateString());
+    expect(asset.qualification[kind.toLowerCase() + 'Status']).toBe('OVERDUE');
+});
+
+test.each(['CALIBRATION', 'VERIFICATION'])('%s older pending evidence recorded later does not mask a newer accepted pass in the drawer', async kind => {
+    const older = { ...pending, eventType: kind + '_PERFORMED', ts: '2026-03-01T00:00:00Z', details: JSON.stringify({ performedDate: '2026-01-01' }) };
+    const newer = { ...pending, id: 'newer', eventType: kind, userId: 'manager', requiresManagerSignoff: false, managerDecision: 'APPROVED',
+        ts: '2026-02-01T00:00:00Z', details: JSON.stringify({ performedDate: '2026-02-01' }) };
+    const asset = { ...meter, events: [older, newer], qualification: { calibrationStatus: 'OK', verificationStatus: 'OK' } };
+    await mount('EquipmentDetailDrawer.jsx', { show: true, assetId: meter.id, canManage: false, canLog: true, actor }, { asset });
+    expect(document.querySelector('[data-testid="equipment-awaiting-signoff"]')).toBeNull();
+    await click(button('MAINTENANCE'));
+    expect(document.querySelector('[data-testid="equipment-maintenance-awaiting-signoff"]')).toBeNull();
+    expect(asset.events[0]).toBe(older);
+});
+
+test('matching performed dates retain the existing recorded-time tie breaker for the display reason', async () => {
+    const details = JSON.stringify({ performedDate: '2026-01-01' });
+    const events = [{ ...pending, ts: '2026-01-02T00:00:00Z', details },
+        { ...pending, id: 'accepted', requiresManagerSignoff: false, managerDecision: 'APPROVED', ts: '2026-01-03T00:00:00Z', details }];
+    await mount('EquipmentDetailDrawer.jsx', { show: true, assetId: meter.id, canManage: false, canLog: true, actor }, { asset: { ...meter, events } });
+    expect(document.querySelector('[data-testid="equipment-awaiting-signoff"]')).toBeNull();
+});
+
+test.each([{ label: 'failed', event: { ...pending, outcome: 'FAIL' } }, { label: 'rejected', event: { ...pending, requiresManagerSignoff: false, managerDecision: 'REJECTED' } }])('$label evidence is not described as merely waiting for a signature', async ({ event }) => {
+    await mount('EquipmentDetailDrawer.jsx', { show: true, assetId: meter.id, canManage: false, canLog: true, actor },
+        { asset: { ...meter, status: 'OUT_OF_SERVICE', readiness: 'BLOCKED', events: [event] } });
+    expect(document.querySelector('[data-testid="equipment-awaiting-signoff"]')).toBeNull();
+});
+
+test('the technician outcome refusal is rendered in the selected language', async () => {
+    await mount('LogEventModal.jsx', { show: true, asset: meter, canManage: false, canLog: true, onSuccess: jest.fn(), onClose: jest.fn() }, { locale: 'es' });
+    await change(document.querySelector('input[required]:not([type="date"])'), 'Practice calibration');
+    await change(document.querySelectorAll('input[type="date"]')[1], '2099-01-01');
+    axios.post.mockRejectedValueOnce({ response: { data: { code: 'EQUIPMENT_EVENT_OUTCOME_INVALID', error: 'EQUIPMENT_EVENT_OUTCOME_INVALID' } } });
+    await submit(); expect(document.body.textContent).toContain(t('equipment.eventErrors.EQUIPMENT_EVENT_OUTCOME_INVALID'));
+    expect(document.body.textContent).not.toContain('EQUIPMENT_EVENT_OUTCOME_INVALID');
+});

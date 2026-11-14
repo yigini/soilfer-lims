@@ -52,6 +52,22 @@ beforeAll(async () => {
 beforeEach(async () => { await preset('BASIC'); });
 afterAll(async () => { await prisma.$disconnect(); });
 
+async function readyAsset() {
+    const id = await makeAsset();
+    await prisma.equipmentScheduleRule.create({ data: { id: randomUUID(), equipmentId: id, labId: labA,
+        scheduleType: 'VERIFICATION', frequencyDays: 365, dueSoonDays: 30, active: true } });
+    for (const eventType of ['CALIBRATION', 'VERIFICATION']) {
+        const response = await auth('post', '/api/equipment/events', 'manager').send(eventBody(id, {
+            eventType, performedDate: atDay(-4), nextDueDate: atDay(365) }));
+        expect(response.status).toBe(200);
+    }
+    const current = await auth('get', `/api/equipment/${id}`);
+    expect(current.body).toMatchObject({ readiness: 'READY', status: 'IN_SERVICE' });
+    return { id, before: current.body };
+}
+const pendingBody = (id, kind, extra = {}) => eventBody(id, { eventType: `${kind}_PERFORMED`, outcome: 'PASS',
+    performedDate: atDay(-1), nextDueDate: atDay(730), ...extra });
+
 describe('Technician equipment event workflow', () => {
     test.each(eventTypes)('%s records the authenticated actor and one event audit', async type => {
         const id = await makeAsset();
@@ -164,6 +180,82 @@ describe('Technician equipment event workflow', () => {
     test('the equipment sign-off policy is laboratory-only with strict on and Basic/Advisory off', () => {
         expect(registry['equipment.technicianEventsRequireSignoff']).toMatchObject({ scope: 'LAB',
             presets: { ISO17025_STRICT: true, BASIC: false, ADVISORY: false } });
+    });
+
+    test.each(['CALIBRATION', 'VERIFICATION'])('%s pending sign-off blocks without replacing accepted dates; approval applies the new due date', async kind => {
+        const { id, before } = await readyAsset(); await preset('ISO17025_STRICT');
+        const created = await auth('post', '/api/equipment/events').send(pendingBody(id, kind));
+        expect(created.status).toBe(200); expect(created.body.requiresManagerSignoff).toBe(true);
+        const pending = (await auth('get', `/api/equipment/${id}`)).body;
+        const label = kind === 'CALIBRATION' ? 'Calibration' : 'Verification', statusKey = kind.toLowerCase() + 'Status';
+        expect(pending).toMatchObject({ readiness: 'BLOCKED', status: 'IN_SERVICE' });
+        expect(pending.qualification[statusKey]).toBe('OVERDUE');
+        for (const field of [`last${label}Date`, `next${label}DueDate`]) expect(pending.qualification[field]).toBe(before.qualification[field]);
+        const approved = await auth('patch', `/api/equipment/events/${created.body.id}/disposition`, 'reviewer').send({ decision: 'APPROVED', reason: 'Checked practice evidence' });
+        expect(approved.status).toBe(200);
+        const after = (await auth('get', `/api/equipment/${id}`)).body;
+        expect(after).toMatchObject({ readiness: 'READY', status: 'IN_SERVICE' });
+        expect(after.qualification[statusKey]).toBe('OK');
+        expect(after.qualification[`last${label}Date`].slice(0, 10)).toBe(atDay(-1));
+        expect(after.qualification[`next${label}DueDate`].slice(0, 10)).toBe(atDay(730));
+    });
+    test.each(['CALIBRATION', 'VERIFICATION'])('%s rejection retains the existing failed-event behavior', async kind => {
+        const { id } = await readyAsset(); await preset('ISO17025_STRICT');
+        const created = await auth('post', '/api/equipment/events').send(pendingBody(id, kind));
+        expect(created.status).toBe(200);
+        const response = await auth('patch', `/api/equipment/events/${created.body.id}/disposition`, 'reviewer').send({ decision: 'REJECTED', reason: 'Repeat the practice event' });
+        expect(response.status).toBe(200);
+        const after = (await auth('get', `/api/equipment/${id}`)).body;
+        expect(after).toMatchObject({ readiness: 'BLOCKED', status: 'OUT_OF_SERVICE' });
+        expect(after.qualification[kind.toLowerCase() + 'Status']).toBe('OVERDUE');
+    });
+    test.each(['CALIBRATION', 'VERIFICATION'])('%s older pending event cannot replace a newer accepted pass, even when recorded later', async kind => {
+        const { id } = await readyAsset(); await preset('ISO17025_STRICT');
+        const newer = await auth('post', '/api/equipment/events', 'manager').send(eventBody(id, { eventType: kind,
+            performedDate: atDay(-1), nextDueDate: atDay(730) }));
+        expect(newer.status).toBe(200);
+        const older = await auth('post', '/api/equipment/events').send(pendingBody(id, kind, { performedDate: atDay(-2), nextDueDate: atDay(365) }));
+        expect(older.status).toBe(200); expect(older.body.requiresManagerSignoff).toBe(true);
+        const after = (await auth('get', `/api/equipment/${id}`)).body;
+        expect(after).toMatchObject({ readiness: 'READY', status: 'IN_SERVICE' });
+        const label = kind === 'CALIBRATION' ? 'Calibration' : 'Verification';
+        expect(after.qualification[`last${label}Date`].slice(0, 10)).toBe(atDay(-1));
+        expect(after.qualification[`next${label}DueDate`].slice(0, 10)).toBe(atDay(730));
+    });
+    test.each([{ kind: 'CALIBRATION', policy: 'BASIC' }, { kind: 'VERIFICATION', policy: 'ADVISORY' }])('$policy allows $kind to pass immediately', async ({ kind, policy }) => {
+        const { id } = await readyAsset(); await preset(policy);
+        const body = pendingBody(id, kind); delete body.outcome;
+        const r = await auth('post', '/api/equipment/events').send(body);
+        expect(r.status).toBe(200); expect(r.body).toMatchObject({ outcome: 'PASS', requiresManagerSignoff: false });
+        expect((await auth('get', `/api/equipment/${id}`)).body).toMatchObject({ readiness: 'READY', status: 'IN_SERVICE' });
+    });
+    test.each([{ type: 'CALIBRATION_FAILED' }, { type: 'VERIFICATION_FAILED', outcome: 'PASS' }, { type: 'MAINTENANCE_FAILED', outcome: 'PASS' }])('$type forces FAIL for technicians despite an omitted or contradictory outcome', async ({ type, outcome }) => {
+        const id = await makeAsset(), body = eventBody(id, { eventType: type });
+        if (outcome !== undefined) body.outcome = outcome;
+        const r = await auth('post', '/api/equipment/events').send(body);
+        expect(r.status).toBe(200); expect(r.body).toMatchObject({ eventType: type, outcome: 'FAIL', requiresManagerSignoff: true });
+    });
+    test('a performed event accepts an explicit FAIL and follows the existing failed path', async () => {
+        const id = await makeAsset();
+        const r = await auth('post', '/api/equipment/events').send(eventBody(id, { outcome: 'FAIL' }));
+        expect(r.status).toBe(200); expect(r.body).toMatchObject({ outcome: 'FAIL', requiresManagerSignoff: true });
+        expect((await auth('get', `/api/equipment/${id}`)).body.status).toBe('OUT_OF_SERVICE');
+    });
+    test.each([{ label: 'NA', value: 'NA' }, { label: 'unknown', value: 'OTHER' }, { label: 'non-string', value: null }])('technician performed outcome $label is refused without an event', async ({ value }) => {
+        const id = await makeAsset();
+        const r = await auth('post', '/api/equipment/events').send(eventBody(id, { outcome: value }));
+        expect(r.status).toBe(400); expect(r.body.code).toBe('EQUIPMENT_EVENT_OUTCOME_INVALID');
+        expect(await prisma.equipmentEvent.count({ where: { equipmentId: id } })).toBe(0);
+    });
+    test.each([{ type: 'CALIBRATION_FAILED', outcome: 'PASS' }, { type: 'MAINTENANCE', outcome: 'NA' }])('manager $type/$outcome payload retains its existing behavior', async ({ type, outcome }) => {
+        const id = await makeAsset();
+        const r = await auth('post', '/api/equipment/events', 'manager').send(eventBody(id, { eventType: type, outcome }));
+        expect(r.status).toBe(200); expect(r.body).toMatchObject({ eventType: type, outcome, requiresManagerSignoff: false });
+    });
+    test('manager invalid outcomes retain the original error code', async () => {
+        const id = await makeAsset();
+        const r = await auth('post', '/api/equipment/events', 'manager').send(eventBody(id, { outcome: 'OTHER' }));
+        expect(r.status).toBe(400); expect(r.body.error).toBe('INVALID_OUTCOME');
     });
 
 });

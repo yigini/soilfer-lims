@@ -2148,7 +2148,8 @@
     },
     "eventErrors": {
       "EQUIPMENT_EVENT_TYPE_NOT_ALLOWED": "Ce type d'événement n'est pas disponible pour votre rôle.",
-      "EQUIPMENT_SIGNOFF_SELF": "Un autre responsable doit valider votre événement."
+      "EQUIPMENT_SIGNOFF_SELF": "Un autre responsable doit valider votre événement.",
+      "EQUIPMENT_EVENT_OUTCOME_INVALID": "Choisissez Conforme ou Non conforme pour cet événement."
     },
     "eventOutcomes": {
       "PASS": "Conforme",

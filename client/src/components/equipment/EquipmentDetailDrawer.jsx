@@ -17,6 +17,27 @@ const READINESS_COLORS = {
     NOT_CONFIGURED: 'text-gray-500 bg-sf-raised'
 };
 
+// Match the event chronology used by qualification; this is a display reason only.
+const getPendingQualificationKinds = (events = []) => {
+    const performedTime = event => {
+        let details;
+        try { details = typeof event.details === 'string' ? JSON.parse(event.details) : event.details; }
+        catch { details = null; }
+        const performed = details?.performedDate ? new Date(details.performedDate) : null;
+        return performed && !isNaN(performed.getTime()) ? performed.getTime()
+            : event.ts ? new Date(event.ts).getTime() : Date.now();
+    };
+    const ordered = [...events].sort((a, b) => {
+        const difference = performedTime(b) - performedTime(a);
+        return difference !== 0 ? difference : new Date(b.ts || 0).getTime() - new Date(a.ts || 0).getTime();
+    });
+    return ['CALIBRATION', 'VERIFICATION'].filter(kind => {
+        const latest = ordered.find(event => String(event.eventType || '').toUpperCase().includes(kind));
+        return latest?.requiresManagerSignoff && latest.outcome !== 'FAIL'
+            && !['APPROVED', 'REJECTED'].includes(latest.managerDecision);
+    });
+};
+
 const EquipmentDetailDrawer = ({ assetId, show, onClose, onUpdate, canManage, canLog = false, actor }) => {
     const { t } = useLanguage();
     const [asset, setAsset] = useState(null);
@@ -68,6 +89,7 @@ const EquipmentDetailDrawer = ({ assetId, show, onClose, onUpdate, canManage, ca
     };
 
     if (!show) return null;
+    const pendingKinds = getPendingQualificationKinds(asset?.events || []);
 
     return (
         <div className="fixed inset-0 z-40 flex justify-end bg-black/30 backdrop-blur-sm" onClick={onClose}>
@@ -87,6 +109,7 @@ const EquipmentDetailDrawer = ({ assetId, show, onClose, onUpdate, canManage, ca
                                 <div>
                                     <h3 className="text-xl font-bold text-sf-text">{asset.name}</h3>
                                     <p className="text-xs text-gray-400 font-mono tracking-wider">{asset.internalAssetTag} • {asset.assetType}</p>
+                                    {pendingKinds.length > 0 && <p role="status" data-testid="equipment-awaiting-signoff" className="text-xs font-semibold text-amber-700 mt-1">{t('equipment.pendingSignoff')}</p>}
                                 </div>
                             </div>
                             <div className="flex items-center gap-2">
@@ -128,7 +151,7 @@ const EquipmentDetailDrawer = ({ assetId, show, onClose, onUpdate, canManage, ca
                         {/* Tab Content */}
                         <div className="p-6">
                             {activeTab === 'OVERVIEW' && <OverviewTab asset={asset} />}
-                            {activeTab === 'MAINTENANCE' && <MaintenanceTab asset={asset} canManage={canManage} onAction={setLogModal} />}
+                            {activeTab === 'MAINTENANCE' && <MaintenanceTab asset={asset} canManage={canManage} onAction={setLogModal} pendingKinds={pendingKinds} />}
                             {activeTab === 'HISTORY' && <HistoryTab events={asset.events} canManage={canManage} actor={actor} onUpdate={fetchDetails} />}
                             {activeTab === 'ELIGIBILITY' && <EligibilityTab asset={asset} />}
                         </div>
@@ -224,10 +247,12 @@ const OverviewTab = ({ asset }) => (
     </div>
 );
 
-const MaintenanceTab = ({ asset, canManage, onAction }) => {
+const MaintenanceTab = ({ asset, canManage, onAction, pendingKinds = [] }) => {
     const { t } = useLanguage();
     const calibStatus = asset.qualification?.calibrationStatus || 'NOT_CONFIGURED';
     const verifStatus = asset.qualification?.verificationStatus || 'NOT_CONFIGURED';
+    const calibrationPending = pendingKinds.includes('CALIBRATION');
+    const verificationPending = pendingKinds.includes('VERIFICATION');
 
     return (
         <div className="space-y-6">
@@ -240,7 +265,7 @@ const MaintenanceTab = ({ asset, canManage, onAction }) => {
                     {asset.readinessWarnings?.includes('EQUIPMENT_NOT_CONFIGURED_WARNING') && (
                         <p className="mt-2 text-sm">{t('equipment.unconfiguredWarning')}</p>
                     )}
-                    <p className="text-sm text-gray-500">System check shows {asset.status.replace(/_/g, ' ')} state with {calibStatus.toLowerCase()} calibration.</p>
+                    {pendingKinds.length > 0 ? <p data-testid="equipment-maintenance-awaiting-signoff" className="text-sm text-amber-700">{t('equipment.pendingSignoff')}</p> : <p className="text-sm text-gray-500">System check shows {asset.status.replace(/_/g, ' ')} state with {calibStatus.toLowerCase()} calibration.</p>}
                 </div>
             </div>
 
@@ -253,13 +278,13 @@ const MaintenanceTab = ({ asset, canManage, onAction }) => {
                         <div>
                             <div className="flex items-center gap-2 mb-1">
                                 <span className="text-xs text-gray-500 font-medium">Last External Calibration</span>
-                                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded uppercase ${calibStatus === 'OK' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300' : calibStatus === 'OVERDUE' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' : calibStatus === 'DUE_SOON' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' : 'bg-gray-100 text-gray-500'}`}>
-                                    {calibStatus}
+                                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded uppercase ${calibrationPending ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' : calibStatus === 'OK' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300' : calibStatus === 'OVERDUE' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' : calibStatus === 'DUE_SOON' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' : 'bg-gray-100 text-gray-500'}`}>
+                                    {calibrationPending ? t('equipment.pendingSignoff') : calibStatus}
                                 </span>
                             </div>
                             <div className="font-bold text-sf-text">{asset.qualification?.lastCalibrationDate ? new Date(asset.qualification.lastCalibrationDate).toLocaleDateString() : 'None Recorded'}</div>
                             <div className="text-xs text-gray-400 mt-0.5">
-                                Next Due: <span className={calibStatus === 'OVERDUE' ? 'text-red-500 font-bold' : ''}>{asset.qualification?.nextCalibrationDueDate ? new Date(asset.qualification.nextCalibrationDueDate).toLocaleDateString() : 'Unscheduled'}</span>
+                                Next Due: <span className={!calibrationPending && calibStatus === 'OVERDUE' ? 'text-red-500 font-bold' : ''}>{asset.qualification?.nextCalibrationDueDate ? new Date(asset.qualification.nextCalibrationDueDate).toLocaleDateString() : 'Unscheduled'}</span>
                             </div>
                         </div>
                         {canManage && onAction && (
@@ -277,13 +302,13 @@ const MaintenanceTab = ({ asset, canManage, onAction }) => {
                         <div>
                             <div className="flex items-center gap-2 mb-1">
                                 <span className="text-xs text-gray-500 font-medium">Performance Verification</span>
-                                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded uppercase ${verifStatus === 'OK' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300' : verifStatus === 'OVERDUE' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' : verifStatus === 'DUE_SOON' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' : 'bg-gray-100 text-gray-500'}`}>
-                                    {verifStatus}
+                                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded uppercase ${verificationPending ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' : verifStatus === 'OK' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300' : verifStatus === 'OVERDUE' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' : verifStatus === 'DUE_SOON' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' : 'bg-gray-100 text-gray-500'}`}>
+                                    {verificationPending ? t('equipment.pendingSignoff') : verifStatus}
                                 </span>
                             </div>
                             <div className="font-bold text-sf-text">{asset.qualification?.lastVerificationDate ? new Date(asset.qualification.lastVerificationDate).toLocaleDateString() : 'None Recorded'}</div>
                             <div className="text-xs text-gray-400 mt-0.5">
-                                Next Due: <span className={verifStatus === 'OVERDUE' ? 'text-red-500 font-bold' : ''}>{asset.qualification?.nextVerificationDueDate ? new Date(asset.qualification.nextVerificationDueDate).toLocaleDateString() : 'Unscheduled'}</span>
+                                Next Due: <span className={!verificationPending && verifStatus === 'OVERDUE' ? 'text-red-500 font-bold' : ''}>{asset.qualification?.nextVerificationDueDate ? new Date(asset.qualification.nextVerificationDueDate).toLocaleDateString() : 'Unscheduled'}</span>
                             </div>
                         </div>
                         {canManage && onAction && (

@@ -2148,7 +2148,8 @@
     },
     "eventErrors": {
       "EQUIPMENT_EVENT_TYPE_NOT_ALLOWED": "This event type is not available for your role.",
-      "EQUIPMENT_SIGNOFF_SELF": "Another manager must sign off your event."
+      "EQUIPMENT_SIGNOFF_SELF": "Another manager must sign off your event.",
+      "EQUIPMENT_EVENT_OUTCOME_INVALID": "Choose Passed or Failed for this event."
     },
     "eventOutcomes": {
       "PASS": "Passed",

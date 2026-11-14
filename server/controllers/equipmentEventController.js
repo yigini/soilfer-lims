@@ -47,9 +47,18 @@ exports.logEvent = async (req, res) => {
         if (!canManage && !technicianEventTypes.has(normalizedType)) {
             return res.status(403).json({ error: 'EQUIPMENT_EVENT_TYPE_NOT_ALLOWED', code: 'EQUIPMENT_EVENT_TYPE_NOT_ALLOWED' });
         }
-        const normalizedOutcome = (outcome || 'PASS').trim().toUpperCase();
-        if (!['PASS', 'FAIL', 'NA'].includes(normalizedOutcome)) {
-            return res.status(400).json({ error: 'INVALID_OUTCOME', message: 'Outcome must be PASS, FAIL, or NA' });
+        let normalizedOutcome;
+        if (!canManage) {
+            normalizedOutcome = normalizedType.endsWith('_FAILED') ? 'FAIL'
+                : typeof outcome === 'string' ? outcome.trim().toUpperCase() : null;
+            if (!['PASS', 'FAIL'].includes(normalizedOutcome)) {
+                return res.status(400).json({ error: 'EQUIPMENT_EVENT_OUTCOME_INVALID', code: 'EQUIPMENT_EVENT_OUTCOME_INVALID' });
+            }
+        } else {
+            normalizedOutcome = (outcome || 'PASS').trim().toUpperCase();
+            if (!['PASS', 'FAIL', 'NA'].includes(normalizedOutcome)) {
+                return res.status(400).json({ error: 'INVALID_OUTCOME', message: 'Outcome must be PASS, FAIL, or NA' });
+            }
         }
 
         // Validate performedDate if provided

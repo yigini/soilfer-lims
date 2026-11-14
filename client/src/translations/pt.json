@@ -2148,7 +2148,8 @@
     },
     "eventErrors": {
       "EQUIPMENT_EVENT_TYPE_NOT_ALLOWED": "Este tipo de evento não está disponível para a sua função.",
-      "EQUIPMENT_SIGNOFF_SELF": "Outro responsável tem de validar o seu evento."
+      "EQUIPMENT_SIGNOFF_SELF": "Outro responsável tem de validar o seu evento.",
+      "EQUIPMENT_EVENT_OUTCOME_INVALID": "Escolha Conforme ou Não conforme para este registo."
     },
     "eventOutcomes": {
       "PASS": "Conforme",
