@@ -4,12 +4,15 @@ const esbuild = require('../../../client/node_modules/esbuild');
 const root = path.resolve(__dirname, '../../../client/src');
 const nodes = node => Array.isArray(node) ? node.flatMap(nodes) : !node || typeof node !== 'object' ? [] : [node, ...nodes(node.props?.children)];
 const content = node => Array.isArray(node) ? node.map(content).join('') : !node || typeof node !== 'object' ? String(node ?? '') : content(node.props?.children);
-const translate = key => key;
+const { localeTranslator } = require('./clientTranslation');
+const english = localeTranslator();
+const translate = (key, ...args) => key.startsWith('workbenchUi.') ? english(key, ...args) : key;
 
 // Execute real JSX callbacks and effect cleanup. Child Result editors remain
 // boundaries so the tests can inspect and exercise their existing draft props.
-function mountUi(filename, props = {}, { canEdit = true, user = null, responses = {}, axios: suppliedAxios, routeParams = {} } = {}) {
+function mountUi(filename, props = {}, { canEdit = true, user = null, responses = {}, axios: suppliedAxios, routeParams = {}, translate: translateOverride = translate, runEffects = true } = {}) {
     const hooks = [], effects = [], children = {}, cache = {}; let cursor = 0, tree;
+    const navigate = jest.fn();
     const equal = (a, b) => a && b && a.length === b.length && a.every((value, index) => value === b[index]);
     const react = { ...React,
         useState(initial) { const index = cursor++; if (!(index in hooks)) hooks[index] = { value: typeof initial === 'function' ? initial() : initial };
@@ -31,9 +34,10 @@ function mountUi(filename, props = {}, { canEdit = true, user = null, responses 
             { module, exports: module.exports, console, setTimeout, clearTimeout, Date, crypto: require('node:crypto').webcrypto, AbortController, FormData, window: browserWindow, require(name) {
                 if (name === 'react') return react;
                 if (name === 'axios') return axios;
-                if (name === 'react-router-dom') return { useParams: () => routeParams };
+                if (name === 'react-router-dom') return { useParams: () => routeParams, useNavigate: () => navigate };
                 if (name === 'lucide-react') return new Proxy({}, { get: () => () => null });
-                if (name.includes('LanguageContext')) return { useLanguage: () => ({ t: translate }) };
+                if (name.includes('LanguageContext')) return { useLanguage: () => ({ t: translateOverride }) };
+                if (name.includes('DialogContext')) return { useDialog: () => ({ showDialog: jest.fn() }) };
                 if (name.includes('AuthContext')) return { useAuth: () => ({ user, hasPermission: () => canEdit }) };
                 if (name.includes('useFocusTrap')) return { useFocusTrap: () => react.useRef(null) };
                 if (name.includes('AnalysisCatalogueContext')) return { useAnalysisNames: () => code => code };
@@ -57,9 +61,9 @@ function mountUi(filename, props = {}, { canEdit = true, user = null, responses 
         if (typeof node.type === 'function' && node.type.name === 'StoredQcEvidence') return expand(node.type(node.props));
         return { ...node, props: { ...node.props, children: expand(node.props?.children) } };
     };
-    return { axios, props, responses, children,
+    return { axios, props, responses, children, navigate,
         async render(patch = {}) { Object.assign(props, patch); for (let index = 0; index < 5; index++) {
-            cursor = 0; tree = expand(component(props)); effects.splice(0).forEach(effect => effect()); await new Promise(resolve => setImmediate(resolve));
+            cursor = 0; tree = expand(component(props)); effects.splice(0).forEach(effect => { if (runEffects) effect(); }); await new Promise(resolve => setImmediate(resolve));
         } return tree; },
         unmount() { hooks.forEach(hook => hook?.cleanup?.()); hooks.length = 0; },
         find: id => nodes(tree).find(node => node.props?.['data-testid'] === id),

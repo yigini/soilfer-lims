@@ -7,6 +7,7 @@ import { Save, CheckCircle, AlertTriangle, FileText, Upload, UserPlus, XCircle, 
 import SpectraViewer from '../SpectraViewer';
 import SpectraBatchUpload from '../SpectraBatchUpload';
 import { useAuth } from '../../context/AuthContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { useDialog } from '../../context/DialogContext';
 import InfoTooltip from '../common/InfoTooltip';
 
@@ -26,6 +27,7 @@ const WorkItemsTable = ({
     const navigate = useNavigate();
     const getAnalysisDisplayName = useAnalysisNames();
     const { user } = useAuth();
+    const { t } = useLanguage();
     const { showDialog } = useDialog();
     const isTech = user.role === 'LAB_TECHNICIAN';
     const isManager = ['LAB_MANAGER', 'SUPER_ADMIN'].includes(user.role);
@@ -721,9 +723,9 @@ const WorkItemsTable = ({
                                                         type="button"
                                                         onClick={() => navigate(`/workbench?workItemId=${item.id}&sampleId=${item.sampleId}`)}
                                                         className="inline-flex items-center gap-1 text-xs font-semibold text-sf-emerald hover:text-sf-emerald-hover hover:underline"
-                                                        title="Open task in Technician Workbench"
+                                                        title={t("workbenchUi.openTask")}
                                                     >
-                                                        <span>Open in Workbench →</span>
+                                                        <span>{t("workbenchUi.openWorkbench")}</span>
                                                     </button>
 
                                                     {/* MANAGER APPROVAL ACTIONS (Strictly SUBMITTED scientific determinations or AWAITING_VERIFICATION gates) */}

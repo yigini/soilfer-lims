@@ -51,9 +51,7 @@ export default function SingleSampleEditor({
 
     if (!items || items.length === 0) {
         return (
-            <div className="p-8 text-center bg-sf-surface border border-sf-divider rounded-2xl text-sf-muted text-xs">
-                No samples assigned in this method run.
-            </div>
+            <div className="p-8 text-center bg-sf-surface border border-sf-divider rounded-2xl text-sf-muted text-xs">{t("workbenchUi.noSamplesAssignedInThisMethodRun")}</div>
         );
     }
 
@@ -100,7 +98,7 @@ export default function SingleSampleEditor({
                             unit={activeGroup?.unit}
                             onChange={value => onDraftChange(currentItem.workItemId, value)}
                             disabled={disabled}
-                            ariaLabel={`${currentItem.sampleDisplayId || currentItem.sampleId} determination`}
+                            ariaLabel={t("workbenchUi.sampleDetermination", { sampleId: currentItem.sampleDisplayId || currentItem.sampleId })}
                         />
                     </div>
                     );
@@ -112,14 +110,13 @@ export default function SingleSampleEditor({
                 <button
                     onClick={() => setIsDrawerOpen(!isDrawerOpen)}
                     className="flex items-center gap-2 text-left focus:outline-none"
-                    aria-label="Open sample index selector"
+                    aria-label={t("workbenchUi.openSampleIndexSelector")}
                 >
                     <div className="p-2 rounded-xl bg-sf-primary/10 text-sf-primary">
                         <Layers size={18} />
                     </div>
                     <div>
-                        <div className="text-[10px] font-bold text-sf-muted uppercase tracking-wider">
-                            Sample {currentIndex + 1} of {totalCount}
+                        <div className="text-[10px] font-bold text-sf-muted uppercase tracking-wider">{t("workbenchUi.sampleOf", { index: currentIndex + 1, count: totalCount })}
                         </div>
                         <div className="text-xs font-bold text-sf-text flex items-center gap-1">
                             <span>{getAnalysisDisplayName(activeGroup?.analysis, activeGroup?.analysisName)}</span>
@@ -133,7 +130,7 @@ export default function SingleSampleEditor({
                         onClick={handlePrev}
                         disabled={currentIndex === 0}
                         className="p-2 rounded-xl border border-sf-divider bg-sf-inset text-sf-text disabled:opacity-40 active:scale-95"
-                        aria-label="Previous sample"
+                        aria-label={t("workbenchUi.previousSample")}
                     >
                         <ChevronLeft size={18} />
                     </button>
@@ -141,7 +138,7 @@ export default function SingleSampleEditor({
                         onClick={handleNext}
                         disabled={currentIndex === totalCount - 1}
                         className="p-2 rounded-xl border border-sf-divider bg-sf-inset text-sf-text disabled:opacity-40 active:scale-95"
-                        aria-label="Next sample"
+                        aria-label={t("workbench.nextSample")}
                     >
                         <ChevronRight size={18} />
                     </button>
@@ -151,9 +148,7 @@ export default function SingleSampleEditor({
             {/* Quick Sample Selector Drawer */}
             {isDrawerOpen && (
                 <div className="p-3 bg-sf-inset border border-sf-divider rounded-2xl max-h-48 overflow-y-auto space-y-1 shadow-inner animate-fadeIn">
-                    <div className="text-[10px] font-bold uppercase text-sf-muted px-1 mb-1">
-                        Jump to Sample:
-                    </div>
+                    <div className="text-[10px] font-bold uppercase text-sf-muted px-1 mb-1">{t("workbenchUi.jumpToSample")}</div>
                     <div className="grid grid-cols-2 gap-1.5">
                         {items.map((it, idx) => (
                             <button
@@ -181,11 +176,10 @@ export default function SingleSampleEditor({
             <div className="bg-sf-surface border border-sf-divider rounded-2xl p-4 shadow-sm space-y-2">
                 <div className="flex items-center justify-between">
                     <span className="sf-sample-id text-sm">
-                        {currentItem.sampleDisplayId || currentItem.labId || currentItem.originalId || 'Sample'}
+                        {currentItem.sampleDisplayId || currentItem.labId || currentItem.originalId || t("instrumentImport.statuses.SAMPLE")}
                     </span>
                     {currentItem.rackPosition != null && (
-                        <span className="px-2 py-0.5 rounded text-xs font-mono font-bold bg-[var(--sf-blue-bg)] text-[var(--sf-blue)] border border-[var(--sf-blue)]/20">
-                            Rack #{currentItem.rackPosition}
+                        <span className="px-2 py-0.5 rounded text-xs font-mono font-bold bg-[var(--sf-blue-bg)] text-[var(--sf-blue)] border border-[var(--sf-blue)]/20">{t("workbenchUi.rack")}{currentItem.rackPosition}
                         </span>
                     )}
                 </div>
@@ -193,13 +187,13 @@ export default function SingleSampleEditor({
                 <div className="grid grid-cols-2 gap-2 text-xs text-sf-muted pt-1">
                     {currentItem.originalId && (
                         <div>
-                            <span className="block text-[10px] font-bold uppercase tracking-wider">Field ID</span>
+                            <span className="block text-[10px] font-bold uppercase tracking-wider">{t("workbenchUi.fieldID")}</span>
                             <span className="font-mono text-sf-text">{currentItem.originalId}</span>
                         </div>
                     )}
                     {currentItem.projectCode && (
                         <div>
-                            <span className="block text-[10px] font-bold uppercase tracking-wider">Project</span>
+                            <span className="block text-[10px] font-bold uppercase tracking-wider">{t("common.project")}</span>
                             <span className="text-sf-text truncate block">{currentItem.projectCode}</span>
                         </div>
                     )}
@@ -211,10 +205,10 @@ export default function SingleSampleEditor({
                 ['FAIL', 'REVIEW_REQUIRED'].includes(currentItem.sampleReplicates?.status) ? 'bg-amber-500/10' : 'bg-sf-surface'}`}>
                 <div className="flex items-center justify-between border-b border-sf-divider pb-2">
                     <span className="text-xs font-bold uppercase tracking-wider text-sf-text">
-                        {isTexture ? 'Soil Texture Fractions' :
-                         isOperationalGate ? 'Operational Checklist' :
-                         isSpectral ? 'Spectroscopy Acquisition' :
-                         `Determination (${activeGroup?.unit || 'Value'})`}
+                        {isTexture ? t("workbenchUi.soilTextureFractions") :
+                         isOperationalGate ? t("workbenchUi.operationalChecklist") :
+                         isSpectral ? t("workbenchUi.spectroscopyAcquisition") :
+                         t("workbenchUi.determinationCount", { value0: activeGroup?.unit || t("workbenchUi.valueTitle") })}
                     </span>
                     <span className={clsx(
                         "px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider",
@@ -255,15 +249,11 @@ export default function SingleSampleEditor({
                     />
                 ) : isSpectral ? (
                     <div className="p-4 text-center space-y-3 bg-sf-inset rounded-xl border border-sf-divider">
-                        <p className="text-xs text-sf-muted">
-                            Spectral files and metadata are captured through the Spectral Library intake.
-                        </p>
+                        <p className="text-xs text-sf-muted">{t("workbenchUi.spectralFilesAndMetadataAreCapturedThroughTheSpectralLibra")}</p>
                         <button
                             onClick={() => onOpenSpectralIntake(currentItem)}
                             className="btn-primary text-xs font-bold px-4 py-2.5"
-                        >
-                            Open Spectral Capture
-                        </button>
+                        >{t("workbenchUi.openSpectralCapture")}</button>
                     </div>
                 ) : (currentItem.calculationTemplate ? (<CalculationEntry item={currentItem} disabled={disabled} onDraftChange={onDraftChange} onBarcodeRejected={onBarcodeRejected}
                     inputRef={node => onInputRef?.(currentItem.workItemId,node)}>{numericEntry}</CalculationEntry>) : numericEntry)}
@@ -303,9 +293,7 @@ export default function SingleSampleEditor({
                     onClick={handlePrev}
                     disabled={currentIndex === 0}
                     className="flex-1 py-3 px-4 rounded-xl border border-sf-divider bg-sf-surface hover:bg-sf-hover text-sf-text font-bold text-xs disabled:opacity-40 active:scale-95 transition-all"
-                >
-                    Previous
-                </button>
+                >{t("workbench.previousValue")}</button>
                 <button
                     onClick={handleNext}
                     disabled={currentIndex === totalCount - 1}

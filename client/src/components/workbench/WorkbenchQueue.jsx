@@ -82,10 +82,10 @@ export default function WorkbenchQueue({
             <div className="flex items-center justify-between flex-wrap gap-3">
                 <div className="flex items-center gap-1.5 flex-wrap">
                     {[
-                        { id: 'ALL', label: `All Work (${stats.total})` },
-                        { id: 'READY', label: `Ready to Record (${stats.ready})` },
-                        { id: 'ATTENTION', label: `Needs Attention (${stats.attention})` },
-                        { id: 'RECORDED', label: `Ready to Submit (${stats.recorded})` }
+                        { id: 'ALL', label: t("workbenchUi.allWorkCount", { count: stats.total }) },
+                        { id: 'READY', label: t("workbenchUi.readyToRecordCount", { count: stats.ready }) },
+                        { id: 'ATTENTION', label: t("workbenchUi.needsAttentionCount", { count: stats.attention }) },
+                        { id: 'RECORDED', label: t("workbenchUi.readyToSubmitCount", { count: stats.recorded }) }
                     ].map(tab => (
                         <button
                             key={tab.id}
@@ -108,7 +108,7 @@ export default function WorkbenchQueue({
                         type="text"
                         value={searchQuery}
                         onChange={(e) => onSearchChange(e.target.value)}
-                        placeholder="Search by sample ID or method..."
+                        placeholder={t("workbenchUi.searchBySampleIDOrMethod")}
                         className="pl-8 pr-3 py-1.5 text-xs rounded-lg border border-sf-divider bg-sf-surface text-sf-text placeholder:text-sf-muted focus:outline-none focus:ring-1 focus:ring-emerald-500 w-64"
                     />
                 </div>
@@ -119,13 +119,13 @@ export default function WorkbenchQueue({
                 <table className="w-full border-collapse text-left text-xs">
                     <thead>
                         <tr className="bg-sf-canvas/80 text-sf-muted border-b border-sf-divider">
-                            <th className="py-2.5 px-4 font-semibold">Sample ID</th>
-                            <th className="py-2.5 px-4 font-semibold">Analysis Method</th>
-                            <th className="py-2.5 px-4 font-semibold">Priority</th>
-                            <th className="py-2.5 px-4 font-semibold">Prerequisites</th>
-                            <th className="py-2.5 px-4 font-semibold">Execution Readiness</th>
-                            <th className="py-2.5 px-4 font-semibold">Current State</th>
-                            <th className="py-2.5 px-4 font-semibold text-right">Action</th>
+                            <th className="py-2.5 px-4 font-semibold">{t("samples.sampleId")}</th>
+                            <th className="py-2.5 px-4 font-semibold">{t("workbenchUi.analysisMethod")}</th>
+                            <th className="py-2.5 px-4 font-semibold">{t("workbenchUi.priority")}</th>
+                            <th className="py-2.5 px-4 font-semibold">{t("workbenchUi.prerequisites")}</th>
+                            <th className="py-2.5 px-4 font-semibold">{t("workbenchUi.executionReadiness")}</th>
+                            <th className="py-2.5 px-4 font-semibold">{t("adminDetails.currentState")}</th>
+                            <th className="py-2.5 px-4 font-semibold text-right">{t("dashboard.workQueue.colAction")}</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-sf-divider">
@@ -142,12 +142,11 @@ export default function WorkbenchQueue({
                                     <td className="py-3 px-4">
                                         <div className="flex items-center gap-1.5">
                                             <span className="font-mono font-bold text-sf-text">
-                                                {item.sampleDisplayId || item.labId || item.originalId || 'Sample'}
+                                                {item.sampleDisplayId || item.labId || item.originalId || t("instrumentImport.statuses.SAMPLE")}
                                             </span>
                                         </div>
                                         {item.originalId && (
-                                            <div className="text-[11px] text-sf-muted font-mono">
-                                                Field: {item.originalId}
+                                            <div className="text-[11px] text-sf-muted font-mono">{t("workbenchUi.field")} {item.originalId}
                                             </div>
                                         )}
                                         {item.projectCode && (
@@ -176,30 +175,30 @@ export default function WorkbenchQueue({
                                                 URGENT
                                             </span>
                                         ) : (
-                                            <span className="text-sf-muted">Normal</span>
+                                            <span className="text-sf-muted">{t("receptionDesk.Normal")}</span>
                                         )}
                                     </td>
 
                                     <td className="py-3 px-4">
                                         {item.category === 'Operational Gates' ? (
-                                            <span className="text-[11px] text-sf-muted italic">Prerequisite task</span>
+                                            <span className="text-[11px] text-sf-muted italic">{t("workbenchUi.prerequisiteTask")}</span>
                                         ) : (
                                             <div className="flex items-center gap-2">
                                                 <span
                                                     className={`inline-flex items-center gap-0.5 text-[11px] font-medium ${
                                                         item.dryingStatus === 'DONE' ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'
                                                     }`}
-                                                    title={`Drying: ${item.dryingStatus || 'PENDING'}`}
+                                                    title={t("workbenchUi.dryingCount", { value0: item.dryingStatus || 'PENDING' })}
                                                 >
-                                                    <Droplets size={11} /> {item.dryingStatus === 'DONE' ? 'Dry ✓' : 'Dry …'}
+                                                    <Droplets size={11} /> {item.dryingStatus === 'DONE' ? t("workbenchUi.dry") : t("workbenchUi.dry2")}
                                                 </span>
                                                 <span
                                                     className={`inline-flex items-center gap-0.5 text-[11px] font-medium ${
                                                         item.preparationStatus === 'DONE' ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'
                                                     }`}
-                                                    title={`Preparation: ${item.preparationStatus || 'PENDING'}`}
+                                                    title={t("workbenchUi.preparationCount", { value0: item.preparationStatus || 'PENDING' })}
                                                 >
-                                                    <FlaskConical size={11} /> {item.preparationStatus === 'DONE' ? 'Prep ✓' : 'Prep …'}
+                                                    <FlaskConical size={11} /> {item.preparationStatus === 'DONE' ? t("workbenchUi.prep") : t("workbenchUi.prep2")}
                                                 </span>
                                             </div>
                                         )}
@@ -208,15 +207,13 @@ export default function WorkbenchQueue({
                                     <td className="py-3 px-4">
                                         {item.readiness?.isReady ? (
                                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">
-                                                <CheckCircle2 size={11} /> Ready
-                                            </span>
+                                                <CheckCircle2 size={11} /> {t("workbenchUi.ready")}</span>
                                         ) : (
                                             <div>
                                                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-500/15 text-amber-700 dark:text-amber-300">
-                                                    <AlertTriangle size={11} /> Blocked
-                                                </span>
+                                                    <AlertTriangle size={11} /> {t("workflow.kpi.blocked")}</span>
                                                 <p className="text-[10px] text-sf-muted mt-0.5 max-w-[180px] truncate">
-                                                    {item.readiness?.reasons?.[0] || 'Prerequisites incomplete'}
+                                                    {item.readiness?.reasons?.[0] || t("workbenchUi.prerequisitesIncomplete")}
                                                 </p>
                                             </div>
                                         )}
@@ -226,7 +223,7 @@ export default function WorkbenchQueue({
                                         {isSpectral ? (
                                             item.hasSpectrum || item.latestSpectralScan || isRecorded ? (
                                                 <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-medium bg-emerald-500/15 text-emerald-800 dark:text-emerald-300">
-                                                    <span>✓ Scan recorded</span>
+                                                    <span>{t("workbenchUi.scanRecorded")}</span>
                                                     {item.latestSpectralScan?.qcStatus && (
                                                         <span className={`text-[9px] px-1 py-0.2 rounded font-bold ${
                                                             item.latestSpectralScan.qcStatus === 'PASS' ? 'bg-emerald-200 text-emerald-900 dark:bg-emerald-900 dark:text-emerald-200' :
@@ -239,24 +236,24 @@ export default function WorkbenchQueue({
                                                 </span>
                                             ) : (
                                                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-amber-500/10 text-amber-700 dark:text-amber-300">
-                                                    <span>Scan required</span>
+                                                    <span>{t("workbenchUi.scanRequired")}</span>
                                                 </span>
                                             )
                                         ) : isRecorded ? (
                                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-emerald-500/15 text-emerald-800 dark:text-emerald-300">
-                                                <span>✓ Recorded</span>
+                                                <span>{t("workbenchUi.recorded")}</span>
                                                 {item.currentResult && <span className="font-mono font-bold">({item.currentResult})</span>}
                                             </span>
                                         ) : hasDraft ? (
                                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-blue-500/15 text-blue-800 dark:text-blue-300">
-                                                <span>Draft:</span>
-                                                <span className="font-mono font-semibold">{item.draft.value || 'saved'}</span>
+                                                <span>{t("workbenchUi.draft")}</span>
+                                                <span className="font-mono font-semibold">{item.draft.value || t("workbenchUi.saved")}</span>
                                                 {/* #202 B16: a handed-over draft names the analyst who saved it. */}
                                                 {item.draft.savedBy && item.draft.savedBy !== user?.username &&
                                                     <span data-testid="draft-saved-by">{t('bench.draftBy', { name: item.draft.savedBy })}</span>}
                                             </span>
                                         ) : (
-                                            <span className="text-sf-muted">Awaiting input</span>
+                                            <span className="text-sf-muted">{t("workbenchUi.awaitingInput")}</span>
                                         )}
                                     </td>
 
@@ -267,7 +264,7 @@ export default function WorkbenchQueue({
                                                 onClick={() => onOpenSpectralIntake(item)}
                                                 className="px-2.5 py-1 rounded text-xs font-semibold bg-blue-500/10 hover:bg-blue-500/20 text-blue-700 dark:text-blue-300 transition-colors inline-flex items-center gap-1 border border-blue-200 dark:border-blue-900/50"
                                             >
-                                                <span>Spectra</span>
+                                                <span>{t("workbenchUi.spectra")}</span>
                                                 <ArrowRight size={12} />
                                             </button>
                                         ) : (
@@ -276,7 +273,7 @@ export default function WorkbenchQueue({
                                                 onClick={() => onOpenWorksheet(item.analysis, item.sampleId)}
                                                 className="px-2.5 py-1 rounded text-xs font-semibold bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 transition-colors inline-flex items-center gap-1 border border-emerald-200 dark:border-emerald-900/50"
                                             >
-                                                <span>Open</span>
+                                                <span>{t("sampleHolds.open")}</span>
                                                 <ArrowRight size={12} />
                                             </button>
                                         )}
@@ -288,7 +285,7 @@ export default function WorkbenchQueue({
                         {filteredItems.length === 0 && (
                             <tr>
                                 <td colSpan={7} className="py-8 text-center text-sf-muted">
-                                    {searchQuery ? `No work items match "${searchQuery}".` : 'No work items match the selected filter.'}
+                                    {searchQuery ? t("workbenchUi.noWorkItemsMatchCount", { searchQuery: searchQuery }) : t("workbenchUi.noWorkItemsMatchTheSelectedFilter")}
                                 </td>
                             </tr>
                         )}

@@ -1,3 +1,4 @@
+import { useLanguage } from '../../context/LanguageContext';
 import React, { useState } from 'react';
 import {
     Clock, CheckCircle, FileText, Send, Trash2,
@@ -14,6 +15,7 @@ export default function ActivityReceiptsView({
     onRefresh,
     isLoading = false
 }) {
+    const { t } = useLanguage();
     const [search, setSearch] = useState('');
     const [filter, setFilter] = useState('ALL');
 
@@ -21,25 +23,25 @@ export default function ActivityReceiptsView({
         switch (action) {
             case 'WORKBENCH_COMPLETE':
                 return {
-                    label: 'Determinations Recorded',
+                    label: t("workbenchUi.determinationsRecorded"),
                     color: 'bg-emerald-500/15 text-emerald-800 dark:text-emerald-300',
                     icon: CheckCircle
                 };
             case 'WORKBENCH_SUBMIT':
                 return {
-                    label: 'Submitted for Review',
+                    label: t("workbenchUi.submittedForReview"),
                     color: 'bg-blue-500/15 text-blue-800 dark:text-blue-300',
                     icon: Send
                 };
             case 'DRAFT_DISCARDED':
                 return {
-                    label: 'Draft Discarded',
+                    label: t("workbenchUi.draftDiscarded"),
                     color: 'bg-sf-hover text-sf-muted',
                     icon: Trash2
                 };
             case 'DRAFT_CONFLICT_RESOLVED':
                 return {
-                    label: 'Conflict Resolved',
+                    label: t("workbenchUi.conflictResolved"),
                     color: 'bg-amber-500/15 text-amber-800 dark:text-amber-300',
                     icon: AlertCircle
                 };
@@ -68,12 +70,8 @@ export default function ActivityReceiptsView({
             {/* Header & Controls */}
             <div className="flex items-center justify-between flex-wrap gap-3 pb-3 border-b border-sf-divider">
                 <div>
-                    <h3 className="text-lg font-bold text-sf-text">
-                        Workbench Activity & Receipts
-                    </h3>
-                    <p className="text-xs text-sf-muted mt-0.5">
-                        Durable audit trail of determinations, submissions, and draft operations.
-                    </p>
+                    <h3 className="text-lg font-bold text-sf-text">{t("workbenchUi.workbenchActivityReceipts")}</h3>
+                    <p className="text-xs text-sf-muted mt-0.5">{t("workbenchUi.durableAuditTrailOfDeterminationsSubmissionsAndDraftOperat")}</p>
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -83,7 +81,7 @@ export default function ActivityReceiptsView({
                             type="text"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            placeholder="Search sample or receipt..."
+                            placeholder={t("workbenchUi.searchSampleOrReceipt")}
                             className="pl-8 pr-3 py-1.5 text-xs rounded-lg border border-sf-divider bg-sf-surface text-sf-text placeholder:text-sf-muted focus:outline-none focus:ring-1 focus:ring-emerald-500"
                         />
                     </div>
@@ -103,11 +101,11 @@ export default function ActivityReceiptsView({
             {/* Filter Pills */}
             <div className="flex gap-2 flex-wrap text-xs">
                 {[
-                    { id: 'ALL', label: 'All Receipts' },
-                    { id: 'WORKBENCH_COMPLETE', label: 'Recorded Determinations' },
-                    { id: 'WORKBENCH_SUBMIT', label: 'Submissions' },
-                    { id: 'DRAFT_CONFLICT_RESOLVED', label: 'Conflict Resolutions' },
-                    { id: 'DRAFT_DISCARDED', label: 'Discards' }
+                    { id: 'ALL', label: t("workbenchUi.allReceipts") },
+                    { id: 'WORKBENCH_COMPLETE', label: t("workbenchUi.recordedDeterminations") },
+                    { id: 'WORKBENCH_SUBMIT', label: t("workbenchUi.submissions") },
+                    { id: 'DRAFT_CONFLICT_RESOLVED', label: t("workbenchUi.conflictResolutions") },
+                    { id: 'DRAFT_DISCARDED', label: t("workbenchUi.discards") }
                 ].map(p => (
                     <button
                         key={p.id}
@@ -151,8 +149,7 @@ export default function ActivityReceiptsView({
                                     <p className="text-sf-text mt-1 leading-snug">
                                         {r.details}
                                     </p>
-                                    <div className="font-mono text-[10px] text-sf-muted mt-1">
-                                        ID: {r.id}
+                                    <div className="font-mono text-[10px] text-sf-muted mt-1">{t("workbenchUi.iD")} {r.id}
                                     </div>
                                 </div>
                             </div>
@@ -165,9 +162,7 @@ export default function ActivityReceiptsView({
                 })}
 
                 {filtered.length === 0 && (
-                    <div className="p-8 text-center text-xs text-sf-muted">
-                        No activity receipts matching the current criteria.
-                    </div>
+                    <div className="p-8 text-center text-xs text-sf-muted">{t("workbenchUi.noActivityReceiptsMatchingTheCurrentCriteria")}</div>
                 )}
             </div>
         </div>
