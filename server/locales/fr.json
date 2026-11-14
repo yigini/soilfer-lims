@@ -1604,7 +1604,8 @@
       "qc_blankLodMultiplier": "Multiplicateur d’écart-type pour LD",
       "qc_blankLoqMultiplier": "Multiplicateur d’écart-type pour LQ",
       "reception_intakeRules": "Règles de réception et contexte du prélèvement",
-      "qc_controlChartMinPoints": "Nombre minimal de points pour les cartes de contrôle"
+      "qc_controlChartMinPoints": "Nombre minimal de points pour les cartes de contrôle",
+      "inventory_technicianLotsStartQuarantined": "Les nouveaux lots préparés par les techniciens commencent en quarantaine"
     },
     "title": "Politiques",
     "yes": "Oui",
@@ -1735,7 +1736,8 @@
     },
     "help": {
       "qc_requireBatchQc": "AUTO exige le CQ du lot pour les méthodes de mesure dont les critères de CQ résolus sont actifs. Une dérogation de méthode peut exiger ou dispenser l’appartenance au lot et son évaluation.",
-      "qc_calibrationFailAction": "Choisir l’action après un échec de vérification initiale ou continue de l’étalonnage ou d’un blanc d’étalonnage."
+      "qc_calibrationFailAction": "Choisir l’action après un échec de vérification initiale ou continue de l’étalonnage ou d’un blanc d’étalonnage.",
+      "inventory_technicianLotsStartQuarantined": "Bloque les nouveaux lots préparés par les techniciens jusqu'à leur libération par un responsable. Les réceptions de stock des responsables sont inchangées."
     },
     "criticality": {
       "CRITICAL": "Critique",

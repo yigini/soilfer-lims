@@ -1604,7 +1604,8 @@
       "qc_blankLodMultiplier": "Multiplicador de DP amostral para LOD",
       "qc_blankLoqMultiplier": "Multiplicador de DP amostral para LOQ",
       "reception_intakeRules": "Regras de receção e contexto da amostra",
-      "qc_controlChartMinPoints": "Mínimo de pontos de base para cartas de controlo"
+      "qc_controlChartMinPoints": "Mínimo de pontos de base para cartas de controlo",
+      "inventory_technicianLotsStartQuarantined": "Novos lotes preparados por técnicos começam em quarentena"
     },
     "title": "Políticas",
     "yes": "Sim",
@@ -1735,7 +1736,8 @@
     },
     "help": {
       "qc_requireBatchQc": "AUTO exige CQ de lote para métodos de medição com critérios de CQ resolvidos habilitados. Uma exceção de método pode exigir ou dispensar a participação no lote e sua avaliação.",
-      "qc_calibrationFailAction": "Escolha a ação após falhas na verificação inicial ou contínua da calibração e nos brancos de calibração."
+      "qc_calibrationFailAction": "Escolha a ação após falhas na verificação inicial ou contínua da calibração e nos brancos de calibração.",
+      "inventory_technicianLotsStartQuarantined": "Retém novos lotes preparados por técnicos até à libertação por um responsável. As receções de stock dos responsáveis mantêm-se iguais."
     },
     "criticality": {
       "CRITICAL": "Crítico",

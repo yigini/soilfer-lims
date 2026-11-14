@@ -3311,7 +3311,8 @@
       "qc_blankLodMultiplier": "LOD sample-SD multiplier",
       "qc_blankLoqMultiplier": "LOQ sample-SD multiplier",
       "reception_intakeRules": "Reception and sample context rules",
-      "qc_controlChartMinPoints": "Minimum control-chart baseline points"
+      "qc_controlChartMinPoints": "Minimum control-chart baseline points",
+      "inventory_technicianLotsStartQuarantined": "New technician-prepared lots start in quarantine"
     },
     "title": "Policies",
     "yes": "Yes",
@@ -3442,7 +3443,8 @@
     },
     "help": {
       "qc_requireBatchQc": "AUTO requires batch QC for measurement methods with enabled resolved QC criteria. A method override can require or waive batch membership and evaluation.",
-      "qc_calibrationFailAction": "Choose the action for failed initial or continuing calibration verification and calibration blanks."
+      "qc_calibrationFailAction": "Choose the action for failed initial or continuing calibration verification and calibration blanks.",
+      "inventory_technicianLotsStartQuarantined": "Hold newly prepared technician lots until a manager releases them. Manager stock receipts are unchanged."
     },
     "criticality": {
       "CRITICAL": "Critical",
@@ -5147,5 +5149,30 @@
     "numericDetermination": "Numeric determination",
     "acceptItem": "Accept Item",
     "returnForCorrection": "Return for correction"
+  },
+  "preparedLots": {
+    "addLot": "Add lot",
+    "preparedBy": "Prepared by",
+    "preparedByValue": "Prepared by: {{name}}",
+    "policyHint": "Laboratory rules may require manager release before this lot can be used.",
+    "parentLots": "Parent lots (optional)",
+    "parentHelp": "Choose the lots used to prepare this lot. Only lots from the same laboratory are shown; selecting one records provenance and does not consume its stock.",
+    "searchParents": "Search parent lots",
+    "loadingParents": "Loading parent lots…",
+    "parentsUnavailable": "Parent lots could not be loaded. Close and reopen this form to retry. They are optional.",
+    "noParents": "No parent lots in this laboratory.",
+    "confirmPreparation": "Confirm preparation",
+    "saveFailed": "Could not save the lot.",
+    "lotCount": "Lots ({{count}})",
+    "quarantineByPolicy": "Laboratory policy holds technician-prepared lots until a manager releases them for use.",
+    "quarantineHelp": "Quarantined: a manager must review and release this lot before use.",
+    "quarantineReason": "Quarantine reason: {{reason}}",
+    "traceability": "Traceability notes",
+    "errors": {
+      "LOT_ITEM_TYPE_NOT_ALLOWED": "This permission allows preparation of reagent and standard lots only.",
+      "LOT_ATTACHMENT_NOT_ALLOWED": "Certificates must be added by an inventory manager.",
+      "PARENT_LOT_INVALID": "Choose parent lots from the same laboratory as the item.",
+      "CUSTODY_LOCATION_INVALID": "Choose an active reagent storage location in this laboratory."
+    }
   }
 }
