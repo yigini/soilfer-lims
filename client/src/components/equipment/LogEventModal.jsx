@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import technicianEventTypes from '../../../../shared/technicianEquipmentEventTypes.json';
 import { useLanguage } from '../../context/LanguageContext';
 import { X, ClipboardCheck, Wrench, ShieldAlert, CheckCircle, XCircle, AlertTriangle, Calendar, Info, RefreshCw } from 'lucide-react';
 
-const LogEventModal = ({ show, onClose, asset, eventType, onSuccess }) => {
+const LogEventModal = ({ show, onClose, asset, eventType, onSuccess, canManage = false, canLog = false }) => {
     const { t } = useLanguage();
     const todayStr = new Date().toISOString().split('T')[0];
 
     const [form, setForm] = useState({
-        eventType: eventType || 'CALIBRATION',
+        eventType: canManage ? eventType || 'CALIBRATION' : technicianEventTypes.includes(eventType) ? eventType : technicianEventTypes[0],
         summary: '',
         performedDate: todayStr,
         details: '',
@@ -20,16 +21,16 @@ const LogEventModal = ({ show, onClose, asset, eventType, onSuccess }) => {
 
     // Sync eventType when the prop changes
     useEffect(() => {
-        if (eventType) {
-            setForm(prev => ({
-                ...prev,
-                eventType,
-                performedDate: prev.performedDate || todayStr
-            }));
+        if (show) {
+            const selectedType = canManage ? eventType || 'CALIBRATION'
+                : technicianEventTypes.includes(eventType) ? eventType : technicianEventTypes[0];
+            setForm(prev => ({ ...prev, eventType: selectedType,
+                outcome: !canManage ? selectedType.endsWith('_FAILED') ? 'FAIL' : 'PASS' : prev.outcome,
+                performedDate: prev.performedDate || todayStr }));
         }
-    }, [eventType, todayStr]);
+    }, [eventType, todayStr, show, canManage]);
 
-    if (!show || !asset) return null;
+    if (!show || !asset || (!canManage && !canLog)) return null;
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -44,7 +45,7 @@ const LogEventModal = ({ show, onClose, asset, eventType, onSuccess }) => {
             onSuccess();
             onClose();
         } catch (err) {
-            setError(err.response?.data?.message || err.response?.data?.error || t('equipment.logEventFailed', 'Failed to log event'));
+            setError(t(`equipment.eventErrors.${err.response?.data?.code}`, err.response?.data?.message || err.response?.data?.error || t('equipment.logEventFailed', 'Failed to log event')));
         } finally {
             setSaving(false);
         }
@@ -77,7 +78,7 @@ const LogEventModal = ({ show, onClose, asset, eventType, onSuccess }) => {
                     {/* Event Type Selector */}
                     <div>
                         <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">{t('equipment.eventType', 'Event Type')} *</label>
-                        <div className="grid grid-cols-3 gap-2">
+                        {canManage ? <div className="grid grid-cols-3 gap-2">
                             <button
                                 type="button"
                                 onClick={() => setForm({ ...form, eventType: 'CALIBRATION' })}
@@ -99,7 +100,13 @@ const LogEventModal = ({ show, onClose, asset, eventType, onSuccess }) => {
                             >
                                 {t('equipment.typeMaintenance', 'Maintenance')}
                             </button>
-                        </div>
+                        </div> : <select aria-label={t('equipment.eventType')} value={form.eventType}
+                            onChange={e => setForm({ ...form, eventType: e.target.value,
+                                outcome: e.target.value.endsWith('_FAILED') ? 'FAIL' : 'PASS' })}
+                            className="w-full rounded-lg border p-2 bg-sf-surface">
+                            {technicianEventTypes.map(type => <option key={type} value={type}>{t(`equipment.technicianEvents.${type}`)}</option>)}
+                        </select>}
+                        {!canManage && <p className="text-xs text-sf-muted mt-2">{t('equipment.technicianEventHelp')}</p>}
                     </div>
 
                     <div>
@@ -141,7 +148,7 @@ const LogEventModal = ({ show, onClose, asset, eventType, onSuccess }) => {
                                     />
                                 </div>
                             </div>
-                        ) : (
+                        ) : canManage ? (
                             <div>
                                 <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">{t('equipment.status', 'Outcome')}</label>
                                 <div className="flex gap-2">
@@ -161,10 +168,10 @@ const LogEventModal = ({ show, onClose, asset, eventType, onSuccess }) => {
                                     </button>
                                 </div>
                             </div>
-                        )}
+                        ) : null}
                     </div>
 
-                    {isScheduleSensitive && (
+                    {isScheduleSensitive && canManage && (
                         <div>
                             <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">{t('equipment.status', 'Outcome')}</label>
                             <div className="flex gap-2">
@@ -197,7 +204,8 @@ const LogEventModal = ({ show, onClose, asset, eventType, onSuccess }) => {
                         />
                     </div>
 
-                    {form.outcome === 'FAIL' && (
+                    {!canManage && <p className="text-sm">{t('equipment.recordedOutcome')}: {t(`equipment.eventOutcomes.${form.outcome}`)}</p>}
+                    {form.outcome === 'FAIL' && isScheduleSensitive && (
                         <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-xs flex items-start gap-2 border border-red-100 dark:border-red-900/40">
                             <AlertTriangle size={14} className="mt-0.5 shrink-0" />
                             <p><b>Warning:</b> Marking this event as FAIL will automatically place this instrument into OUT OF SERVICE.</p>

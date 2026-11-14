@@ -1605,7 +1605,8 @@
       "qc_blankLoqMultiplier": "LOQ sample-SD multiplier",
       "reception_intakeRules": "Reception and sample context rules",
       "qc_controlChartMinPoints": "Minimum control-chart baseline points",
-      "inventory_technicianLotsStartQuarantined": "New technician-prepared lots start in quarantine"
+      "inventory_technicianLotsStartQuarantined": "New technician-prepared lots start in quarantine",
+      "equipment_technicianEventsRequireSignoff": "Technician equipment events require manager sign-off"
     },
     "title": "Policies",
     "yes": "Yes",
@@ -1737,7 +1738,8 @@
     "help": {
       "qc_requireBatchQc": "AUTO requires batch QC for measurement methods with enabled resolved QC criteria. A method override can require or waive batch membership and evaluation.",
       "qc_calibrationFailAction": "Choose the action for failed initial or continuing calibration verification and calibration blanks.",
-      "inventory_technicianLotsStartQuarantined": "Hold newly prepared technician lots until a manager releases them. Manager stock receipts are unchanged."
+      "inventory_technicianLotsStartQuarantined": "Hold newly prepared technician lots until a manager releases them. Manager stock receipts are unchanged.",
+      "equipment_technicianEventsRequireSignoff": "Record technician events as awaiting a manager decision. Failed events always require a manager decision under every preset."
     },
     "criticality": {
       "CRITICAL": "Critical",

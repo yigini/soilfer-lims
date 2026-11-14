@@ -98,6 +98,8 @@ const calculateQualification = (asset, events = [], scheduleRules = [], now = ne
             lastCalibrationDate = latestCalib.parsedPerformedDate;
             calibrationStatus = 'OVERDUE'; // Represents blocked/failed
             calibFailed = true;
+        } else if (latestCalib.isPendingSignoff) {
+            calibrationStatus = 'OVERDUE'; // Await acceptance without replacing dates or recording a failure.
         } else if (latestCalib.isPass) {
             lastCalibrationDate = latestCalib.parsedPerformedDate;
             if (latestCalib.parsedNextDueDate) {
@@ -131,6 +133,8 @@ const calculateQualification = (asset, events = [], scheduleRules = [], now = ne
             lastVerificationDate = latestVerif.parsedPerformedDate;
             verificationStatus = 'OVERDUE';
             verifFailed = true;
+        } else if (latestVerif.isPendingSignoff) {
+            verificationStatus = 'OVERDUE'; // Await acceptance without replacing dates or recording a failure.
         } else if (latestVerif.isPass) {
             lastVerificationDate = latestVerif.parsedPerformedDate;
             if (latestVerif.parsedNextDueDate) {

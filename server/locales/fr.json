@@ -1605,7 +1605,8 @@
       "qc_blankLoqMultiplier": "Multiplicateur d’écart-type pour LQ",
       "reception_intakeRules": "Règles de réception et contexte du prélèvement",
       "qc_controlChartMinPoints": "Nombre minimal de points pour les cartes de contrôle",
-      "inventory_technicianLotsStartQuarantined": "Les nouveaux lots préparés par les techniciens commencent en quarantaine"
+      "inventory_technicianLotsStartQuarantined": "Les nouveaux lots préparés par les techniciens commencent en quarantaine",
+      "equipment_technicianEventsRequireSignoff": "Validation du responsable requise pour les événements d'équipement des techniciens"
     },
     "title": "Politiques",
     "yes": "Oui",
@@ -1737,7 +1738,8 @@
     "help": {
       "qc_requireBatchQc": "AUTO exige le CQ du lot pour les méthodes de mesure dont les critères de CQ résolus sont actifs. Une dérogation de méthode peut exiger ou dispenser l’appartenance au lot et son évaluation.",
       "qc_calibrationFailAction": "Choisir l’action après un échec de vérification initiale ou continue de l’étalonnage ou d’un blanc d’étalonnage.",
-      "inventory_technicianLotsStartQuarantined": "Bloque les nouveaux lots préparés par les techniciens jusqu'à leur libération par un responsable. Les réceptions de stock des responsables sont inchangées."
+      "inventory_technicianLotsStartQuarantined": "Bloque les nouveaux lots préparés par les techniciens jusqu'à leur libération par un responsable. Les réceptions de stock des responsables sont inchangées.",
+      "equipment_technicianEventsRequireSignoff": "Enregistre les événements des techniciens dans l'attente d'une décision du responsable. Les échecs nécessitent toujours cette décision, quel que soit le profil."
     },
     "criticality": {
       "CRITICAL": "Critique",

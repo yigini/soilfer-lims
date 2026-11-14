@@ -2,6 +2,18 @@ const prisma = require('../prisma');
 const { randomUUID: uuidv4 } = require('crypto');
 const scopeGuard = require('../utils/scopeGuard');
 const { recomputeAndPersist } = require('../services/equipmentQualificationService');
+const { hasPermission } = require('../config/roles');
+const policyService = require('../services/policyService');
+const technicianEventTypes = new Set(require('../../shared/technicianEquipmentEventTypes.json'));
+
+const recordEventAudit = (tx, event, user, action, details) => tx.auditLog.create({
+    data: {
+        id: uuidv4(), entity: 'EQUIPMENT_EVENT', entityId: event.id, action,
+        details: JSON.stringify({ equipmentId: event.equipmentId, ...details }),
+        performedBy: user.username, performedByName: user.name || user.username,
+        labId: event.labId, timestamp: new Date()
+    }
+});
 
 /**
  * Log an equipment event (Calibration, Verification, Maintenance, etc.)
@@ -31,9 +43,22 @@ exports.logEvent = async (req, res) => {
         }
 
         const normalizedType = eventType.trim().toUpperCase();
-        const normalizedOutcome = (outcome || 'PASS').trim().toUpperCase();
-        if (!['PASS', 'FAIL', 'NA'].includes(normalizedOutcome)) {
-            return res.status(400).json({ error: 'INVALID_OUTCOME', message: 'Outcome must be PASS, FAIL, or NA' });
+        const canManage = hasPermission(req.user, 'MANAGE_EQUIPMENT');
+        if (!canManage && !technicianEventTypes.has(normalizedType)) {
+            return res.status(403).json({ error: 'EQUIPMENT_EVENT_TYPE_NOT_ALLOWED', code: 'EQUIPMENT_EVENT_TYPE_NOT_ALLOWED' });
+        }
+        let normalizedOutcome;
+        if (!canManage) {
+            normalizedOutcome = normalizedType.endsWith('_FAILED') ? 'FAIL'
+                : typeof outcome === 'string' ? outcome.trim().toUpperCase() : null;
+            if (!['PASS', 'FAIL'].includes(normalizedOutcome)) {
+                return res.status(400).json({ error: 'EQUIPMENT_EVENT_OUTCOME_INVALID', code: 'EQUIPMENT_EVENT_OUTCOME_INVALID' });
+            }
+        } else {
+            normalizedOutcome = (outcome || 'PASS').trim().toUpperCase();
+            if (!['PASS', 'FAIL', 'NA'].includes(normalizedOutcome)) {
+                return res.status(400).json({ error: 'INVALID_OUTCOME', message: 'Outcome must be PASS, FAIL, or NA' });
+            }
         }
 
         // Validate performedDate if provided
@@ -106,6 +131,8 @@ exports.logEvent = async (req, res) => {
 
         // Transaction: Create event + Recompute qualification & asset state
         const result = await prisma.$transaction(async (tx) => {
+            const needsPolicySignoff = !canManage && await policyService.get(asset.labId,
+                'equipment.technicianEventsRequireSignoff', { db: tx });
             const event = await tx.equipmentEvent.create({
                 data: {
                     id: uuidv4(),
@@ -117,12 +144,16 @@ exports.logEvent = async (req, res) => {
                     details: Object.keys(detailsObj).length > 0 ? JSON.stringify(detailsObj) : null,
                     attachmentIds: attachments ? JSON.stringify(attachments) : null,
                     outcome: normalizedOutcome,
-                    requiresManagerSignoff: normalizedOutcome === 'FAIL',
+                    requiresManagerSignoff: normalizedOutcome === 'FAIL' || needsPolicySignoff,
                     ts: new Date()
                 }
             });
 
             await recomputeAndPersist(equipmentId, tx, userId);
+            await recordEventAudit(tx, event, req.user, 'EQUIPMENT_EVENT_LOGGED', {
+                eventType: event.eventType, outcome: event.outcome,
+                requiresManagerSignoff: event.requiresManagerSignoff
+            });
 
             return event;
         });
@@ -130,7 +161,7 @@ exports.logEvent = async (req, res) => {
         res.json(result);
     } catch (err) {
         console.error('[EquipmentEvent] Log error:', err);
-        res.status(500).json({ error: 'Failed to log equipment event' });
+        res.status(err.statusCode || 500).json({ error: err.code || 'Failed to log equipment event', ...(err.code && { code: err.code }) });
     }
 };
 
@@ -193,6 +224,10 @@ exports.approveDisposition = async (req, res) => {
             return res.status(403).json({ error: 'Access Denied: Event belongs to another lab.' });
         }
 
+        if (event.userId === req.user.username) {
+            return res.status(409).json({ error: 'EQUIPMENT_SIGNOFF_SELF', code: 'EQUIPMENT_SIGNOFF_SELF' });
+        }
+
         const updatedEvent = await prisma.$transaction(async (tx) => {
             const ev = await tx.equipmentEvent.update({
                 where: { id: eventId },
@@ -204,6 +239,7 @@ exports.approveDisposition = async (req, res) => {
             });
 
             await recomputeAndPersist(event.equipmentId, tx, req.user.username);
+            await recordEventAudit(tx, ev, req.user, 'EQUIPMENT_EVENT_DISPOSITION', { decision, reason: reason || null });
 
             return ev;
         });

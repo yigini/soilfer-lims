@@ -17,7 +17,28 @@ const READINESS_COLORS = {
     NOT_CONFIGURED: 'text-gray-500 bg-sf-raised'
 };
 
-const EquipmentDetailDrawer = ({ assetId, show, onClose, onUpdate, canManage }) => {
+// Match the event chronology used by qualification; this is a display reason only.
+const getPendingQualificationKinds = (events = []) => {
+    const performedTime = event => {
+        let details;
+        try { details = typeof event.details === 'string' ? JSON.parse(event.details) : event.details; }
+        catch { details = null; }
+        const performed = details?.performedDate ? new Date(details.performedDate) : null;
+        return performed && !isNaN(performed.getTime()) ? performed.getTime()
+            : event.ts ? new Date(event.ts).getTime() : Date.now();
+    };
+    const ordered = [...events].sort((a, b) => {
+        const difference = performedTime(b) - performedTime(a);
+        return difference !== 0 ? difference : new Date(b.ts || 0).getTime() - new Date(a.ts || 0).getTime();
+    });
+    return ['CALIBRATION', 'VERIFICATION'].filter(kind => {
+        const latest = ordered.find(event => String(event.eventType || '').toUpperCase().includes(kind));
+        return latest?.requiresManagerSignoff && latest.outcome !== 'FAIL'
+            && !['APPROVED', 'REJECTED'].includes(latest.managerDecision);
+    });
+};
+
+const EquipmentDetailDrawer = ({ assetId, show, onClose, onUpdate, canManage, canLog = false, actor }) => {
     const { t } = useLanguage();
     const [asset, setAsset] = useState(null);
     const [activeTab, setActiveTab] = useState('OVERVIEW');
@@ -68,6 +89,7 @@ const EquipmentDetailDrawer = ({ assetId, show, onClose, onUpdate, canManage }) 
     };
 
     if (!show) return null;
+    const pendingKinds = getPendingQualificationKinds(asset?.events || []);
 
     return (
         <div className="fixed inset-0 z-40 flex justify-end bg-black/30 backdrop-blur-sm" onClick={onClose}>
@@ -87,6 +109,7 @@ const EquipmentDetailDrawer = ({ assetId, show, onClose, onUpdate, canManage }) 
                                 <div>
                                     <h3 className="text-xl font-bold text-sf-text">{asset.name}</h3>
                                     <p className="text-xs text-gray-400 font-mono tracking-wider">{asset.internalAssetTag} • {asset.assetType}</p>
+                                    {pendingKinds.length > 0 && <p role="status" data-testid="equipment-awaiting-signoff" className="text-xs font-semibold text-amber-700 mt-1">{t('equipment.pendingSignoff')}</p>}
                                 </div>
                             </div>
                             <div className="flex items-center gap-2">
@@ -128,20 +151,24 @@ const EquipmentDetailDrawer = ({ assetId, show, onClose, onUpdate, canManage }) 
                         {/* Tab Content */}
                         <div className="p-6">
                             {activeTab === 'OVERVIEW' && <OverviewTab asset={asset} />}
-                            {activeTab === 'MAINTENANCE' && <MaintenanceTab asset={asset} canManage={canManage} onAction={setLogModal} />}
-                            {activeTab === 'HISTORY' && <HistoryTab events={asset.events} />}
+                            {activeTab === 'MAINTENANCE' && <MaintenanceTab asset={asset} canManage={canManage} onAction={setLogModal} pendingKinds={pendingKinds} />}
+                            {activeTab === 'HISTORY' && <HistoryTab events={asset.events} canManage={canManage} actor={actor} onUpdate={fetchDetails} />}
                             {activeTab === 'ELIGIBILITY' && <EligibilityTab asset={asset} />}
                         </div>
 
                         {/* Quick Actions (Sticky Bottom) */}
-                        <div className="sticky bottom-0 border-t dark:border-gray-700 bg-sf-canvas p-4 grid grid-cols-2 gap-3">
-                            <button onClick={() => setLogModal('MAINTENANCE')} className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-700 font-bold text-sm bg-sf-surface hover:bg-gray-50 transition-colors">
+                        {(canManage || canLog) && <div className="sticky bottom-0 border-t dark:border-gray-700 bg-sf-canvas p-4 grid grid-cols-2 gap-3">
+                            {canManage ? <><button onClick={() => setLogModal('MAINTENANCE')} className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-700 font-bold text-sm bg-sf-surface hover:bg-gray-50 transition-colors">
                                 <Wrench size={16} /> Log Maintenance
                             </button>
                             <button onClick={() => setLogModal('CALIBRATION')} className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-blue-600 text-white font-bold text-sm hover:bg-blue-700 transition-colors shadow-sm">
                                 <ClipboardCheck size={16} /> Calibration Task
                             </button>
-                        </div>
+                            </> : <button onClick={() => setLogModal('CALIBRATION_PERFORMED')}
+                                className="col-span-2 px-4 py-2.5 rounded-lg bg-blue-600 text-white font-bold text-sm">
+                                {t('equipment.logEvent', 'Log Event')}
+                            </button>}
+                        </div>}
                     </>
                 )}
             </div>
@@ -152,6 +179,8 @@ const EquipmentDetailDrawer = ({ assetId, show, onClose, onUpdate, canManage }) 
                 onClose={() => setLogModal(null)}
                 asset={asset}
                 eventType={logModal}
+                canManage={canManage}
+                canLog={canLog}
                 onSuccess={() => {
                     fetchDetails();
                     if (onUpdate) onUpdate();
@@ -218,9 +247,12 @@ const OverviewTab = ({ asset }) => (
     </div>
 );
 
-const MaintenanceTab = ({ asset, canManage, onAction }) => {
+const MaintenanceTab = ({ asset, canManage, onAction, pendingKinds = [] }) => {
+    const { t } = useLanguage();
     const calibStatus = asset.qualification?.calibrationStatus || 'NOT_CONFIGURED';
     const verifStatus = asset.qualification?.verificationStatus || 'NOT_CONFIGURED';
+    const calibrationPending = pendingKinds.includes('CALIBRATION');
+    const verificationPending = pendingKinds.includes('VERIFICATION');
 
     return (
         <div className="space-y-6">
@@ -233,7 +265,7 @@ const MaintenanceTab = ({ asset, canManage, onAction }) => {
                     {asset.readinessWarnings?.includes('EQUIPMENT_NOT_CONFIGURED_WARNING') && (
                         <p className="mt-2 text-sm">{t('equipment.unconfiguredWarning')}</p>
                     )}
-                    <p className="text-sm text-gray-500">System check shows {asset.status.replace(/_/g, ' ')} state with {calibStatus.toLowerCase()} calibration.</p>
+                    {pendingKinds.length > 0 ? <p data-testid="equipment-maintenance-awaiting-signoff" className="text-sm text-amber-700">{t('equipment.pendingSignoff')}</p> : <p className="text-sm text-gray-500">System check shows {asset.status.replace(/_/g, ' ')} state with {calibStatus.toLowerCase()} calibration.</p>}
                 </div>
             </div>
 
@@ -246,13 +278,13 @@ const MaintenanceTab = ({ asset, canManage, onAction }) => {
                         <div>
                             <div className="flex items-center gap-2 mb-1">
                                 <span className="text-xs text-gray-500 font-medium">Last External Calibration</span>
-                                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded uppercase ${calibStatus === 'OK' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300' : calibStatus === 'OVERDUE' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' : calibStatus === 'DUE_SOON' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' : 'bg-gray-100 text-gray-500'}`}>
-                                    {calibStatus}
+                                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded uppercase ${calibrationPending ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' : calibStatus === 'OK' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300' : calibStatus === 'OVERDUE' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' : calibStatus === 'DUE_SOON' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' : 'bg-gray-100 text-gray-500'}`}>
+                                    {calibrationPending ? t('equipment.pendingSignoff') : calibStatus}
                                 </span>
                             </div>
                             <div className="font-bold text-sf-text">{asset.qualification?.lastCalibrationDate ? new Date(asset.qualification.lastCalibrationDate).toLocaleDateString() : 'None Recorded'}</div>
                             <div className="text-xs text-gray-400 mt-0.5">
-                                Next Due: <span className={calibStatus === 'OVERDUE' ? 'text-red-500 font-bold' : ''}>{asset.qualification?.nextCalibrationDueDate ? new Date(asset.qualification.nextCalibrationDueDate).toLocaleDateString() : 'Unscheduled'}</span>
+                                Next Due: <span className={!calibrationPending && calibStatus === 'OVERDUE' ? 'text-red-500 font-bold' : ''}>{asset.qualification?.nextCalibrationDueDate ? new Date(asset.qualification.nextCalibrationDueDate).toLocaleDateString() : 'Unscheduled'}</span>
                             </div>
                         </div>
                         {canManage && onAction && (
@@ -270,13 +302,13 @@ const MaintenanceTab = ({ asset, canManage, onAction }) => {
                         <div>
                             <div className="flex items-center gap-2 mb-1">
                                 <span className="text-xs text-gray-500 font-medium">Performance Verification</span>
-                                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded uppercase ${verifStatus === 'OK' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300' : verifStatus === 'OVERDUE' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' : verifStatus === 'DUE_SOON' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' : 'bg-gray-100 text-gray-500'}`}>
-                                    {verifStatus}
+                                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded uppercase ${verificationPending ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' : verifStatus === 'OK' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300' : verifStatus === 'OVERDUE' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' : verifStatus === 'DUE_SOON' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' : 'bg-gray-100 text-gray-500'}`}>
+                                    {verificationPending ? t('equipment.pendingSignoff') : verifStatus}
                                 </span>
                             </div>
                             <div className="font-bold text-sf-text">{asset.qualification?.lastVerificationDate ? new Date(asset.qualification.lastVerificationDate).toLocaleDateString() : 'None Recorded'}</div>
                             <div className="text-xs text-gray-400 mt-0.5">
-                                Next Due: <span className={verifStatus === 'OVERDUE' ? 'text-red-500 font-bold' : ''}>{asset.qualification?.nextVerificationDueDate ? new Date(asset.qualification.nextVerificationDueDate).toLocaleDateString() : 'Unscheduled'}</span>
+                                Next Due: <span className={!verificationPending && verifStatus === 'OVERDUE' ? 'text-red-500 font-bold' : ''}>{asset.qualification?.nextVerificationDueDate ? new Date(asset.qualification.nextVerificationDueDate).toLocaleDateString() : 'Unscheduled'}</span>
                             </div>
                         </div>
                         {canManage && onAction && (
@@ -295,25 +327,69 @@ const MaintenanceTab = ({ asset, canManage, onAction }) => {
     );
 };
 
-const HistoryTab = ({ events = [] }) => (
-    <div className="space-y-4">
-        <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Audit Log & Event History</h4>
+const HistoryTab = ({ events = [], canManage = false, actor, onUpdate }) => {
+    const { t } = useLanguage();
+    const [decision, setDecision] = useState(null);
+    const [saving, setSaving] = useState(false);
+    const [error, setError] = useState('');
+    const saveDecision = async e => {
+        e.preventDefault();
+        if (!decision || !decision.reason.trim()) return;
+        setSaving(true); setError('');
+        try {
+            await axios.patch(`/api/equipment/events/${decision.eventId}/disposition`, {
+                decision: decision.value, reason: decision.reason.trim()
+            });
+            setDecision(null);
+            await onUpdate?.();
+        } catch (err) {
+            setError(t(`equipment.eventErrors.${err.response?.data?.code}`,
+                err.response?.data?.error || t('equipment.signoffFailed')));
+        } finally { setSaving(false); }
+    };
+    return <div className="space-y-4">
+        <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">{t('equipment.eventHistory')}</h4>
         <div className="relative border-l-2 border-sf-divider ml-3 pl-6 space-y-6">
-            {events.map((e, idx) => (
-                <div key={e.id} className="relative">
+            {events.map(e => {
+                const pending = e.requiresManagerSignoff && !['APPROVED', 'REJECTED'].includes(e.managerDecision);
+                const own = e.userId === actor?.username;
+                return <div key={e.id} className="relative">
                     <div className="absolute -left-[31px] top-1 w-2.5 h-2.5 rounded-full bg-blue-600 outline outline-4 outline-white dark:outline-gray-800" />
                     <div className="flex justify-between items-start mb-1">
-                        <span className="text-xs font-bold bg-blue-100 dark:bg-blue-900/40 text-blue-700 px-2 py-0.5 rounded uppercase">{e.eventType}</span>
+                        <span className="text-xs font-bold bg-blue-100 dark:bg-blue-900/40 text-blue-700 px-2 py-0.5 rounded uppercase">{t(`equipment.technicianEvents.${e.eventType}`, e.eventType)}</span>
                         <span className="text-[10px] text-gray-400 flex items-center gap-1"><Clock size={10} /> {new Date(e.ts).toLocaleString()}</span>
                     </div>
                     <div className="text-sm font-medium text-sf-text">{e.summary}</div>
-                    <div className="text-xs text-gray-500 flex items-center gap-1 mt-1"><User size={10} /> {e.userId} • Outcome: <span className={e.outcome === 'PASS' ? 'text-emerald-500' : e.outcome === 'FAIL' ? 'text-red-500' : ''}>{e.outcome}</span></div>
-                </div>
-            ))}
-            {events.length === 0 && <div className="text-gray-400 text-sm">No events found for this instrument.</div>}
+                    <div className="text-xs text-gray-500 flex items-center gap-1 mt-1"><User size={10} /> {e.userId} · {t('equipment.recordedOutcome')}: {t(`equipment.eventOutcomes.${e.outcome}`, e.outcome)}</div>
+                    {pending && <p role="status" className="text-xs font-semibold text-amber-700 mt-2">{t('equipment.pendingSignoff')}</p>}
+                    {e.managerDecision && <p className="text-xs mt-2">{t(`equipment.signoffDecisions.${e.managerDecision}`, e.managerDecision)}{e.managerReason ? ` · ${e.managerReason}` : ''}</p>}
+                    {canManage && pending && <div className="mt-2 space-y-2">
+                        {own && <p className="text-xs text-sf-muted">{t('equipment.ownSignoffHelp')}</p>}
+                        <div className="flex gap-2">
+                            {['APPROVED', 'REJECTED'].map(value => <button key={value} type="button" disabled={own || saving}
+                                className="rounded border px-3 py-1 text-xs disabled:opacity-50"
+                                onClick={() => { setDecision({ eventId: e.id, value, reason: '' }); setError(''); }}>
+                                {t(`equipment.signoffActions.${value}`)}
+                            </button>)}
+                        </div>
+                        {decision?.eventId === e.id && <form onSubmit={saveDecision} className="rounded border p-3 space-y-2">
+                            <p className="text-sm font-semibold">{t(`equipment.signoffActions.${decision.value}`)}</p>
+                            <label className="block text-sm">{t('equipment.signoffReason')}
+                                <input aria-label={t('equipment.signoffReason')} required value={decision.reason}
+                                    onChange={event => setDecision({ ...decision, reason: event.target.value })}
+                                    className="block w-full border rounded p-2 bg-sf-surface" />
+                            </label>
+                            {error && <p role="alert" className="text-red-600 text-sm">{error}</p>}
+                            <button type="submit" disabled={saving || !decision.reason.trim()} className="rounded border px-3 py-1 text-sm disabled:opacity-50">{t('equipment.saveSignoff')}</button>
+                            <button type="button" onClick={() => setDecision(null)} className="ml-3 text-sm">{t('common.cancel')}</button>
+                        </form>}
+                    </div>}
+                </div>;
+            })}
+            {events.length === 0 && <div className="text-gray-400 text-sm">{t('equipment.noEvents')}</div>}
         </div>
-    </div>
-);
+    </div>;
+};
 
 const EligibilityTab = ({ asset }) => {
     const getAnalysisDisplayName = useAnalysisNames();
