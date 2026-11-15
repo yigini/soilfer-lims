@@ -5,7 +5,8 @@
 const prisma = require('../prisma');
 const crypto = require('crypto');
 const { hasPermission } = require('../config/roles');
-const policyService = require('../services/policyService');
+const inventoryWriteService = require('../services/inventoryWriteService');
+const { audit, createTransaction } = inventoryWriteService;
 
 // ─── Helpers ──────────────────────────────────────────────────────
 
@@ -15,46 +16,6 @@ const uuid = () => crypto.randomUUID();
 const labScope = (user, extraWhere = {}) => {
     if (user.role === 'SUPER_ADMIN') return extraWhere;
     return { ...extraWhere, labId: user.labId };
-};
-
-/** Create an audit log entry */
-const audit = async (tx, { entity, entityId, action, details, user, labId, before, after }) => {
-    await (tx || prisma).auditLog.create({
-        data: {
-            id: uuid(),
-            entity,
-            entityId,
-            action,
-            details,
-            performedBy: user.username,
-            performedByName: user.name || user.username,
-            labId: labId || user.labId,
-            before: before ? JSON.stringify(before) : null,
-            after: after ? JSON.stringify(after) : null,
-            timestamp: new Date()
-        }
-    });
-};
-
-/** Create an inventory transaction */
-const createTransaction = async (tx, { labId, user, actionType, lotId, delta, unit, reasonCode, freeTextReason, sampleId, workItemId, analysisCode }) => {
-    return (tx || prisma).inventoryTransaction.create({
-        data: {
-            id: uuid(),
-            labId,
-            userId: user.id || user.username,
-            userName: user.name || user.username,
-            actionType,
-            inventoryLotId: lotId,
-            deltaQuantity: delta,
-            unit,
-            reasonCode: reasonCode || null,
-            freeTextReason: freeTextReason || null,
-            sampleId: sampleId || null,
-            workItemId: workItemId || null,
-            analysisCode: analysisCode || null
-        }
-    });
 };
 
 /** Human-readable transaction description */
@@ -275,47 +236,10 @@ exports.getItem = async (req, res) => {
 /** POST /api/inventory/items — create catalog item */
 exports.createItem = async (req, res) => {
     try {
-        const user = req.user;
-        const labId = user.role === 'SUPER_ADMIN' ? (req.body.labId || user.labId) : user.labId;
-        if (!labId) return res.status(400).json({ error: 'labId is required' });
-
-        const { name, itemType, unitOfMeasure } = req.body;
-        if (!name || !itemType || !unitOfMeasure) {
-            return res.status(400).json({ error: 'name, itemType, and unitOfMeasure are required' });
-        }
-
-        if (req.body.defaultLocationId) {
-            const location = await prisma.inventoryLocation.findUnique({ where: { id: req.body.defaultLocationId } });
-            if (!location || location.labId !== labId) return res.status(403).json({ error: 'Access denied' });
-        }
-        const item = await prisma.inventoryItem.create({
-            data: {
-                id: uuid(),
-                labId,
-                itemType,
-                name,
-                shortCode: req.body.shortCode || null,
-                grade: req.body.grade || null,
-                unitOfMeasure,
-                defaultLocationId: req.body.defaultLocationId || null,
-                storageConditions: req.body.storageConditions ? JSON.stringify(req.body.storageConditions) : null,
-                hazardClass: req.body.hazardClass || null,
-                sopLink: req.body.sopLink || null,
-                reorderPoint: req.body.reorderPoint || 0,
-                reorderQuantity: req.body.reorderQuantity || 0,
-                preferredVendor: req.body.preferredVendor || null,
-                notes: req.body.notes || null
-            }
-        });
-
-        await audit(null, {
-            entity: 'INVENTORY', entityId: item.id, action: 'ITEM_CREATED',
-            details: `Created inventory item: ${item.name} (${item.itemType})`,
-            user, labId
-        });
-
+        const item = await inventoryWriteService.createItem(req.user, req.body);
         res.status(201).json(item);
     } catch (e) {
+        if (e.inputPayload) return res.status(e.statusCode).json(e.inputPayload);
         console.error('[INVENTORY] createItem error:', e);
         res.status(500).json({ error: e.message });
     }
@@ -389,84 +313,10 @@ exports.getLots = async (req, res) => {
 /** POST /api/inventory/lots — receive stock (create lot) */
 exports.createLot = async (req, res) => {
     try {
-        const user = req.user;
-        const canManage = hasPermission(user, 'MANAGE_INVENTORY');
-        const { inventoryItemId, lotNumber, quantity, expiryDate, locationId, concentration, preparedBy, traceabilityNotes, coaAttachment, parentLotIds } = req.body;
-
-        if (!inventoryItemId || !lotNumber || quantity == null || quantity <= 0) {
-            return res.status(400).json({ error: 'inventoryItemId, lotNumber, and positive quantity are required' });
-        }
-
-        const item = await prisma.inventoryItem.findUnique({ where: { id: inventoryItemId } });
-        if (!item) return res.status(404).json({ error: 'Inventory item not found' });
-        if (user.role !== 'SUPER_ADMIN' && item.labId !== user.labId) {
-            return res.status(403).json({ error: 'Access denied' });
-        }
-        if (!canManage && !['REAGENT', 'STANDARD'].includes(item.itemType)) {
-            return res.status(403).json({ error: 'LOT_ITEM_TYPE_NOT_ALLOWED', code: 'LOT_ITEM_TYPE_NOT_ALLOWED' });
-        }
-        if (!canManage && Object.hasOwn(req.body, 'coaAttachment')) {
-            return res.status(403).json({ error: 'LOT_ATTACHMENT_NOT_ALLOWED', code: 'LOT_ATTACHMENT_NOT_ALLOWED' });
-        }
-        if (parentLotIds !== undefined && (!Array.isArray(parentLotIds) || parentLotIds.some(id => typeof id !== 'string' || !id.trim()))) {
-            return res.status(400).json({ error: 'PARENT_LOT_INVALID', code: 'PARENT_LOT_INVALID' });
-        }
-        const parentIds = [...new Set(parentLotIds || [])];
-
-        const lot = await prisma.$transaction(async (tx) => {
-            const parents = parentIds.length ? await tx.inventoryLot.findMany({
-                where: { id: { in: parentIds }, labId: item.labId },
-                select: { id: true, lotNumber: true }
-            }) : [];
-            if (parents.length !== parentIds.length) {
-                throw Object.assign(new Error('PARENT_LOT_INVALID'), { statusCode: 400, code: 'PARENT_LOT_INVALID' });
-            }
-            const quarantinedByPolicy = !canManage && await policyService.get(item.labId,
-                'inventory.technicianLotsStartQuarantined', { db: tx });
-            const storageId = locationId || item.defaultLocationId || null;
-            if (storageId) {
-                const storage = await tx.inventoryLocation.findUnique({ where: { id: storageId } });
-                if (!storage || storage.labId !== item.labId || storage.purpose !== 'REAGENT' || !storage.isActive)
-                    throw Object.assign(new Error('Choose an active reagent location in this laboratory.'), { statusCode: 400, code: 'CUSTODY_LOCATION_INVALID' });
-            }
-            const parentNotes = parents.length ? `Parent lots: ${parents.map(parent => `${parent.lotNumber} (${parent.id})`).join('; ')}` : null;
-            const notes = parentNotes ? [traceabilityNotes, parentNotes].filter(Boolean).join('\n') : traceabilityNotes || null;
-            const recordedPreparer = canManage ? preparedBy || null : user.username;
-            const newLot = await tx.inventoryLot.create({
-                data: {
-                    id: uuid(),
-                    inventoryItemId,
-                    labId: item.labId,
-                    lotNumber,
-                    receivedDate: req.body.receivedDate ? new Date(req.body.receivedDate) : new Date(),
-                    expiryDate: expiryDate ? new Date(expiryDate) : null,
-                    initialQuantity: quantity,
-                    currentQuantity: quantity,
-                    unitOfMeasure: item.unitOfMeasure,
-                    locationId: storageId,
-                    concentration: concentration || null,
-                    preparedBy: recordedPreparer,
-                    traceabilityNotes: notes,
-                    coaAttachment: canManage && coaAttachment ? JSON.stringify(coaAttachment) : null,
-                    ...(!canManage && { status: quarantinedByPolicy ? 'QUARANTINED' : 'AVAILABLE' })
-                }
-            });
-            await createTransaction(tx, {
-                labId: item.labId, user, actionType: 'RECEIVE',
-                lotId: newLot.id, delta: quantity, unit: item.unitOfMeasure,
-                reasonCode: canManage ? 'STOCK_RECEIPT' : quarantinedByPolicy ? 'TECHNICIAN_PREPARATION_QUARANTINED' : 'TECHNICIAN_PREPARATION'
-            });
-            const message = `${canManage ? 'Received' : 'Prepared'} ${quantity} ${item.unitOfMeasure} of ${item.name} (Lot ${lotNumber})`;
-            await audit(tx, {
-                entity: 'INVENTORY', entityId: newLot.id, action: canManage ? 'LOT_RECEIVED' : 'LOT_PREPARED',
-                details: !canManage || parentIds.length ? JSON.stringify({ message, parentLotIds: parentIds,
-                    preparedBy: recordedPreparer, quarantinedByPolicy: Boolean(quarantinedByPolicy) }) : message,
-                user, labId: item.labId
-            });
-            return newLot;
-        });
+        const lot = await inventoryWriteService.createLot(req.user, req.body);
         res.status(201).json(lot);
     } catch (e) {
+        if (e.inputPayload) return res.status(e.statusCode).json(e.inputPayload);
         console.error('[INVENTORY] createLot error:', e);
         res.status(e.statusCode || 500).json({ error: e.message, ...(e.code && { code: e.code }) });
     }
@@ -810,41 +660,10 @@ exports.getLocations = async (req, res) => {
 /** POST /api/inventory/locations */
 exports.createLocation = async (req, res) => {
     try {
-        if (!req.body || typeof req.body !== 'object' || Array.isArray(req.body)) return res.status(400).json({ code: 'CUSTODY_LOCATION_INVALID', error: 'Provide a location request.' });
-        const user = req.user;
-        const labId = require('../utils/scopeGuard').hasGlobalAccess(user) ? (req.body.labId || user.labId) : user.labId;
-        if (typeof labId !== 'string' || !labId.trim()) return res.status(400).json({ code: 'CUSTODY_LAB_REQUIRED', error: 'labId required' });
-        const purpose = req.body.purpose || 'REAGENT';
-        if (!require('../config/custodyContract').LOCATION_PURPOSES.includes(purpose) || typeof req.body.name !== 'string' || !req.body.name.trim() ||
-            req.body.parentLocationId != null && typeof req.body.parentLocationId !== 'string')
-            return res.status(400).json({ code: 'CUSTODY_LOCATION_INVALID', error: 'Choose a name and valid location purpose.' });
-        if (req.body.parentLocationId) {
-            const parent = await prisma.inventoryLocation.findUnique({ where: { id: req.body.parentLocationId } });
-            if (parent && parent.labId !== labId) return res.status(403).json({ error: 'Access denied' });
-            if (!parent || parent.labId !== labId || parent.purpose !== purpose || !parent.isActive)
-                return res.status(400).json({ code: 'CUSTODY_LOCATION_INVALID', error: 'Choose an active parent location with the same laboratory and purpose.' });
-        }
-
-        const location = await prisma.inventoryLocation.create({
-            data: {
-                id: uuid(),
-                labId,
-                purpose,
-                name: req.body.name.trim(),
-                locationType: req.body.locationType || 'SHELF',
-                parentLocationId: req.body.parentLocationId || null,
-                temperatureRange: req.body.temperatureRange || null
-            }
-        });
-
-        await audit(null, {
-            entity: 'INVENTORY', entityId: location.id, action: 'LOCATION_CREATED',
-            details: `Created storage location: ${location.name}`,
-            user, labId
-        });
-
+        const location = await inventoryWriteService.createLocation(req.user, req.body);
         res.status(201).json(location);
     } catch (e) {
+        if (e.inputPayload) return res.status(e.statusCode).json(e.inputPayload);
         res.status(500).json({ error: e.message });
     }
 };
