@@ -120,9 +120,10 @@ async function validate(db, user, input) {
     for (const item of items) { push(itemIndex, 'id:' + item.id, item); push(itemIndex, itemKey(item), item); push(itemIndex, nameKey(item), item); }
     duplicates(plan.rows.locations, values => values.name && locKey(values.name, values.purpose || 'REAGENT'));
     for (const row of plan.rows.locations) {
-        const values = row.values; values.purpose ||= 'REAGENT'; values.locationType ||= 'SHELF';
-        required(row, ['name']); oneOf(row, 'purpose', LOCATION_PURPOSES); oneOf(row, 'locationType', LOCATION_TYPES);
+        const values = row.values; values.purpose ||= 'REAGENT';
         row.existing = match(row, locationIndex.get(row.key) || [], 'name');
+        values.locationType ||= row.existing?.locationType || 'SHELF';
+        required(row, ['name']); oneOf(row, 'purpose', LOCATION_PURPOSES); oneOf(row, 'locationType', LOCATION_TYPES);
         row.status = row.existing ? plan.duplicateMode === 'UPDATE' ? 'DUPLICATE_UPDATE' : 'DUPLICATE_SKIP' : 'NEW';
         row.record = row.existing || { id: 'import:locations:' + row._index, name: values.name, purpose: values.purpose, isActive: true, _plan: row };
         registerSource(sourceLocations, row, [row.key, row.existing && 'id:' + row.existing.id]);
