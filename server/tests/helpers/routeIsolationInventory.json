@@ -240,6 +240,10 @@
     "registration": 1
   },
   {
+    "key": "GET /api/equipment/export",
+    "registration": 1
+  },
+  {
     "key": "GET /api/exports/history",
     "registration": 1
   },
@@ -1041,6 +1045,14 @@
   },
   {
     "key": "POST /api/equipment/events",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/equipment/import/commit",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/equipment/import/preview",
     "registration": 1
   },
   {
