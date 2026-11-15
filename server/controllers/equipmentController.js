@@ -1,3 +1,4 @@
+const writeService = require('../services/equipmentWriteService');
 const prisma = require('../prisma');
 const { randomUUID: uuidv4 } = require('crypto');
 const { equipmentView, generateMismatchReport } = require('../services/equipmentQualificationService');
@@ -78,63 +79,9 @@ exports.getEquipmentDetails = async (req, res) => {
  */
 exports.addEquipment = async (req, res) => {
     try {
-        const { name, assetType, manufacturer, model, serialNumber, internalAssetTag, criticality, locationId } = req.body;
-        const labId = req.user.labId;
-
-        if (!['LAB_MANAGER', 'SUPER_ADMIN'].includes(req.user.role)) {
-            return res.status(403).json({ error: 'Manager permissions required to register equipment' });
-        }
-
-        if (!labId && req.user.role !== 'SUPER_ADMIN') {
-            return res.status(403).json({ error: 'Administrative role required to add equipment across labs' });
-        }
-
-        let targetLabId = labId;
-        if (req.user.role === 'SUPER_ADMIN') {
-            targetLabId = req.body.labId || labId;
-        } else {
-            targetLabId = req.user.labId;
-            if (req.body.labId && req.body.labId !== req.user.labId) {
-                return res.status(403).json({ error: 'Cannot register equipment for another laboratory' });
-            }
-        }
-
-        const asset = await prisma.equipmentAsset.create({
-            data: {
-                id: uuidv4(),
-                labId: targetLabId,
-                name,
-                assetType,
-                manufacturer,
-                model,
-                serialNumber,
-                internalAssetTag,
-                criticality: criticality || 'IMPORTANT',
-                locationId,
-                status: 'IN_SERVICE',
-                qualification: {
-                    create: {
-                        id: uuidv4(),
-                        labId: targetLabId,
-                        calibrationStatus: 'NOT_CONFIGURED',
-                        verificationStatus: 'NOT_CONFIGURED'
-                    }
-                },
-                events: {
-                    create: {
-                        id: uuidv4(),
-                        labId: targetLabId,
-                        userId: req.user.username,
-                        eventType: 'REGISTER',
-                        summary: `Equipment registered: ${name}`,
-                        outcome: 'NA'
-                    }
-                }
-            }
-        });
-
-        res.json(asset);
+        res.json(await writeService.addEquipment(req.user, req.body));
     } catch (err) {
+        if (err.inputPayload) return res.status(err.statusCode).json(err.inputPayload);
         console.error('[Equipment] Create error:', err);
         res.status(500).json({ error: 'Failed to register equipment' });
     }
@@ -191,49 +138,9 @@ exports.updateStatus = async (req, res) => {
  */
 exports.updateEquipment = async (req, res) => {
     try {
-        const { id } = req.params;
-        const { name, assetType, manufacturer, model, serialNumber, internalAssetTag, criticality, locationId } = req.body;
-
-        if (!['LAB_MANAGER', 'SUPER_ADMIN'].includes(req.user.role)) {
-            return res.status(403).json({ error: 'Manager permissions required to edit equipment' });
-        }
-
-        const asset = await prisma.equipmentAsset.findUnique({ where: { id } });
-        if (!asset) return res.status(404).json({ error: 'Equipment not found' });
-
-        // Lab scope check (LG-18, P27)
-        if (req.user.role !== 'SUPER_ADMIN') {
-            if (req.user.labId !== asset.labId) {
-                return res.status(403).json({ error: 'EQUIPMENT_OUTSIDE_SCOPE', message: 'Cannot modify equipment belonging to another laboratory' });
-            }
-        }
-
-        const updated = await prisma.equipmentAsset.update({
-            where: { id },
-            data: {
-                name,
-                assetType,
-                manufacturer,
-                model,
-                serialNumber,
-                internalAssetTag,
-                criticality,
-                locationId,
-                events: {
-                    create: {
-                        id: uuidv4(),
-                        labId: asset.labId,
-                        userId: req.user.username,
-                        eventType: 'METADATA_UPDATE',
-                        summary: `Equipment details updated: ${name}`,
-                        outcome: 'NA'
-                    }
-                }
-            }
-        });
-
-        res.json(updated);
+        res.json(await writeService.updateEquipment(req.user, req.params, req.body));
     } catch (err) {
+        if (err.inputPayload) return res.status(err.statusCode).json(err.inputPayload);
         console.error('[Equipment] Update error:', err);
         res.status(500).json({ error: 'Failed to update equipment details' });
     }

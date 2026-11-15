@@ -1,3 +1,4 @@
+const writeService = require('../services/equipmentWriteService');
 const prisma = require('../prisma');
 const { randomUUID: uuidv4 } = require('crypto');
 const scopeGuard = require('../utils/scopeGuard');
@@ -6,160 +7,16 @@ const { hasPermission } = require('../config/roles');
 const policyService = require('../services/policyService');
 const technicianEventTypes = new Set(require('../../shared/technicianEquipmentEventTypes.json'));
 
-const recordEventAudit = (tx, event, user, action, details) => tx.auditLog.create({
-    data: {
-        id: uuidv4(), entity: 'EQUIPMENT_EVENT', entityId: event.id, action,
-        details: JSON.stringify({ equipmentId: event.equipmentId, ...details }),
-        performedBy: user.username, performedByName: user.name || user.username,
-        labId: event.labId, timestamp: new Date()
-    }
-});
+const { recordEventAudit } = require('../services/equipmentWriteService');
 
 /**
  * Log an equipment event (Calibration, Verification, Maintenance, etc.)
  */
 exports.logEvent = async (req, res) => {
     try {
-        const {
-            equipmentId,
-            eventType,
-            summary,
-            details,
-            outcome = 'PASS',
-            performedDate,
-            nextDueDate,
-            attachments,
-            idempotencyKey
-        } = req.body;
-
-        if (!equipmentId) {
-            return res.status(400).json({ error: 'MISSING_EQUIPMENT_ID', message: 'Equipment ID is required' });
-        }
-        if (!eventType || typeof eventType !== 'string') {
-            return res.status(400).json({ error: 'MISSING_EVENT_TYPE', message: 'Event type is required' });
-        }
-        if (!summary || typeof summary !== 'string' || !summary.trim()) {
-            return res.status(400).json({ error: 'MISSING_SUMMARY', message: 'Summary is required' });
-        }
-
-        const normalizedType = eventType.trim().toUpperCase();
-        const canManage = hasPermission(req.user, 'MANAGE_EQUIPMENT');
-        if (!canManage && !technicianEventTypes.has(normalizedType)) {
-            return res.status(403).json({ error: 'EQUIPMENT_EVENT_TYPE_NOT_ALLOWED', code: 'EQUIPMENT_EVENT_TYPE_NOT_ALLOWED' });
-        }
-        let normalizedOutcome;
-        if (!canManage) {
-            normalizedOutcome = normalizedType.endsWith('_FAILED') ? 'FAIL'
-                : typeof outcome === 'string' ? outcome.trim().toUpperCase() : null;
-            if (!['PASS', 'FAIL'].includes(normalizedOutcome)) {
-                return res.status(400).json({ error: 'EQUIPMENT_EVENT_OUTCOME_INVALID', code: 'EQUIPMENT_EVENT_OUTCOME_INVALID' });
-            }
-        } else {
-            normalizedOutcome = (outcome || 'PASS').trim().toUpperCase();
-            if (!['PASS', 'FAIL', 'NA'].includes(normalizedOutcome)) {
-                return res.status(400).json({ error: 'INVALID_OUTCOME', message: 'Outcome must be PASS, FAIL, or NA' });
-            }
-        }
-
-        // Validate performedDate if provided
-        let parsedPerformedDate = null;
-        if (performedDate) {
-            parsedPerformedDate = new Date(performedDate);
-            if (isNaN(parsedPerformedDate.getTime())) {
-                return res.status(400).json({ error: 'INVALID_PERFORMED_DATE', message: 'Invalid performed date format' });
-            }
-            const tomorrow = new Date(Date.now() + 86400000);
-            if (parsedPerformedDate > tomorrow) {
-                return res.status(400).json({ error: 'FUTURE_PERFORMED_DATE', message: 'Performed date cannot be in the future' });
-            }
-        }
-
-        // Validate nextDueDate if provided
-        let parsedNextDueDate = null;
-        if (nextDueDate) {
-            parsedNextDueDate = new Date(nextDueDate);
-            if (isNaN(parsedNextDueDate.getTime())) {
-                return res.status(400).json({ error: 'INVALID_NEXT_DUE_DATE', message: 'Invalid next due date format' });
-            }
-        }
-
-        const userId = req.user.username;
-
-        const asset = await prisma.equipmentAsset.findUnique({
-            where: { id: equipmentId },
-            include: { qualification: true }
-        });
-
-        if (!asset) return res.status(404).json({ error: 'Equipment not found' });
-
-        // SECURITY: Enforce Lab Scope
-        try {
-            scopeGuard.ensureScope(req.user, asset);
-        } catch (e) {
-            return res.status(403).json({ error: 'Access Denied: Equipment belongs to another lab.' });
-        }
-
-        // Idempotency / repeat submit guard (within 5 seconds)
-        const fiveSecondsAgo = new Date(Date.now() - 5000);
-        const duplicate = await prisma.equipmentEvent.findFirst({
-            where: {
-                equipmentId,
-                eventType: normalizedType,
-                summary: summary.trim(),
-                outcome: normalizedOutcome,
-                userId,
-                ts: { gte: fiveSecondsAgo }
-            }
-        });
-        if (duplicate) {
-            return res.json(duplicate);
-        }
-
-        const detailsObj = typeof details === 'object' && details !== null
-            ? { ...details }
-            : (details ? { rawNotes: details } : {});
-
-        if (parsedPerformedDate) {
-            detailsObj.performedDate = parsedPerformedDate.toISOString().slice(0, 10);
-        }
-        if (parsedNextDueDate) {
-            detailsObj.nextDueDate = parsedNextDueDate.toISOString().slice(0, 10);
-        }
-        if (idempotencyKey) {
-            detailsObj.idempotencyKey = idempotencyKey;
-        }
-
-        // Transaction: Create event + Recompute qualification & asset state
-        const result = await prisma.$transaction(async (tx) => {
-            const needsPolicySignoff = !canManage && await policyService.get(asset.labId,
-                'equipment.technicianEventsRequireSignoff', { db: tx });
-            const event = await tx.equipmentEvent.create({
-                data: {
-                    id: uuidv4(),
-                    equipmentId,
-                    labId: asset.labId,
-                    userId,
-                    eventType: normalizedType,
-                    summary: summary.trim(),
-                    details: Object.keys(detailsObj).length > 0 ? JSON.stringify(detailsObj) : null,
-                    attachmentIds: attachments ? JSON.stringify(attachments) : null,
-                    outcome: normalizedOutcome,
-                    requiresManagerSignoff: normalizedOutcome === 'FAIL' || needsPolicySignoff,
-                    ts: new Date()
-                }
-            });
-
-            await recomputeAndPersist(equipmentId, tx, userId);
-            await recordEventAudit(tx, event, req.user, 'EQUIPMENT_EVENT_LOGGED', {
-                eventType: event.eventType, outcome: event.outcome,
-                requiresManagerSignoff: event.requiresManagerSignoff
-            });
-
-            return event;
-        });
-
-        res.json(result);
+        res.json(await writeService.logEvent(req.user, req.body));
     } catch (err) {
+        if (err.inputPayload) return res.status(err.statusCode).json(err.inputPayload);
         console.error('[EquipmentEvent] Log error:', err);
         res.status(err.statusCode || 500).json({ error: err.code || 'Failed to log equipment event', ...(err.code && { code: err.code }) });
     }
