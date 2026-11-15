@@ -257,7 +257,7 @@
               "expected": "O seu Painel abre-se com o menu lateral correspondente à função atribuída."
             },
             {
-              "action": "Quando o Bancada de trabalho pedir um PIN de bancada pela primeira vez, use essa janela para definir um PIN pessoal de 4 a 8 dígitos e confirme-o com a palavra-passe da sua conta. Se já tiver um PIN, introduza-o quando for solicitado.",
+              "action": "Quando o Workbench pedir um PIN de bancada pela primeira vez, use essa janela para definir um PIN pessoal de 4 a 8 dígitos e confirme-o com a palavra-passe da sua conta. Se já tiver um PIN, introduza-o quando for solicitado.",
               "expected": "O seu PIN pessoal fica guardado e pronto para quando registar resultados num computador de bancada partilhado."
             }
           ]
@@ -280,7 +280,7 @@
           "Use esta página para alterar a sua palavra-passe e as preferências de idioma."
         ]
       ],
-      "example": "Inicie sessão como a técnica Amina no Demo Soil Lab, defina uma palavra-passe de 12 caracteres e confirme « Demo Soil Lab » e « Técnico de Laboratório » na barra superior. Quando o Bancada de trabalho pedir um PIN pela primeira vez, defina um PIN pessoal de 4 a 8 dígitos nessa janela e confirme-o com a palavra-passe da sua conta.",
+      "example": "Inicie sessão como a técnica Amina no Demo Soil Lab, defina uma palavra-passe de 12 caracteres e confirme « Demo Soil Lab » e « Técnico de Laboratório » na barra superior. Quando o Workbench pedir um PIN pela primeira vez, defina um PIN pessoal de 4 a 8 dígitos nessa janela e confirme-o com a palavra-passe da sua conta.",
       "success": "Iniciou sessão com o seu próprio nome e tem o laboratório e a função corretos ativos.",
       "nextActor": "Oficial de Recepção de Amostras, Técnico de Laboratório, Oficial de Qualidade e Auditoria ou Gerente de Laboratório",
       "problems": [
@@ -298,7 +298,7 @@
       "steps": [
         "Abra o ecrã de início de sessão, introduza o seu Nome de utilizador ou ID e palavra-passe. Clique em Início de Sessão Seguro. (Esperado: Se estiver a usar uma palavra-passe temporária, a janela Atualização de segurança obrigatória abre-se de imediato.)",
         "Defina uma palavra-passe pessoal com pelo menos 12 caracteres, inicie sessão novamente. Verifique o nome do laboratório e a função na barra superior. (Esperado: O seu Painel abre-se com o menu lateral correspondente à função atribuída.)",
-        "Quando o Bancada de trabalho pedir um PIN de bancada pela primeira vez, use essa janela para definir um PIN pessoal de 4 a 8 dígitos e confirme-o com a palavra-passe da sua conta. Se já tiver um PIN, introduza-o quando for solicitado. (Esperado: O seu PIN pessoal fica guardado e pronto para quando registar resultados num computador de bancada partilhado.)"
+        "Quando o Workbench pedir um PIN de bancada pela primeira vez, use essa janela para definir um PIN pessoal de 4 a 8 dígitos e confirme-o com a palavra-passe da sua conta. Se já tiver um PIN, introduza-o quando for solicitado. (Esperado: O seu PIN pessoal fica guardado e pronto para quando registar resultados num computador de bancada partilhado.)"
       ],
       "caution": "Nunca introduza resultados de amostras ou de bancada com a conta de um colega nem sob o nome do laboratório errado.",
       "related": [
@@ -417,10 +417,10 @@
       "keywords": [
         "start-technician",
         "start",
-        "Bancada de trabalho"
+        "workbench"
       ],
       "minutes": 3,
-      "quick": "Abra Meu trabalho ou Bancada de trabalho, conclua primeiro as verificações abertas de secagem e preparação, registe as medições do lote e as amostras de controlo de qualidade e envie o trabalho concluído ao revisor.",
+      "quick": "Abra Meu trabalho ou Workbench, conclua primeiro as verificações abertas de secagem e preparação, registe as medições do lote e as amostras de controlo de qualidade e envie o trabalho concluído ao revisor.",
       "before": [
         "Verifique a barra superior para confirmar o nome do seu laboratório e a função de Técnico de Laboratório.",
         "Tenha prontas as amostras de treino recebidas e aceites, o trabalho atribuído pelo gerente, a folha de bancada, os frascos e a verificação da calibração do instrumento."
@@ -430,7 +430,7 @@
           "title": "Procedimento passo a passo",
           "steps": [
             {
-              "action": "Abra Meu trabalho ou Bancada de trabalho. Verifique as tarefas que lhe foram atribuídas para hoje.",
+              "action": "Abra Meu trabalho ou Workbench. Verifique as tarefas que lhe foram atribuídas para hoje.",
               "expected": "Vê quais as amostras que precisam de Secagem ao ar ou Preparação de amostras e quais as que estão prontas para análise de bancada."
             },
             {
@@ -438,7 +438,7 @@
               "expected": "A preparação confirmada desbloqueia as linhas de ensaio para que possa digitar ou colar resultados de amostras e leituras de controlo de qualidade."
             },
             {
-              "action": "Quando o Bancada de trabalho pedir um PIN de bancada pela primeira vez, use essa janela para definir um PIN pessoal de 4 a 8 dígitos e confirme-o com a palavra-passe da sua conta. Se já tiver um PIN, introduza-o quando for solicitado. Clique em Rever conclusão para registar os resultados verificados e. Abra Pronto a submeter. Clique em Enviar.",
+              "action": "Quando o Workbench pedir um PIN de bancada pela primeira vez, use essa janela para definir um PIN pessoal de 4 a 8 dígitos e confirme-o com a palavra-passe da sua conta. Se já tiver um PIN, introduza-o quando for solicitado. Clique em Rever conclusão para registar os resultados verificados e. Abra Pronto a submeter. Clique em Enviar.",
               "expected": "Os resultados registados passam para Enviados e concluídos e aparecem na Lista de tarefas do revisor."
             }
           ]
@@ -457,18 +457,18 @@
         ],
         [
           "Pronto a submeter",
-          "Separador de entrega no Bancada de trabalho para enviar resultados registados a um revisor",
+          "Separador de entrega no Workbench para enviar resultados registados a um revisor",
           "Guardar ou registar um resultado mantém-no na sua bancada até que o envie aqui."
         ]
       ],
-      "example": "No Demo Soil Lab, confirme a Secagem ao ar e a Preparação de amostras a 2 mm para cinco sacos de solo, introduza as leituras de pH no Bancada de trabalho, registe as determinações e envie-as em Pronto a submeter.",
+      "example": "No Demo Soil Lab, confirme a Secagem ao ar e a Preparação de amostras a 2 mm para cinco sacos de solo, introduza as leituras de pH no Workbench, registe as determinações e envie-as em Pronto a submeter.",
       "success": "Os comprovativos de preparação e os resultados analíticos estão registados e visíveis na fila do revisor.",
       "nextActor": "Oficial de Qualidade e Auditoria ou Gerente de Laboratório na Lista de tarefas",
       "problems": [
         {
           "symptom": "Digitou os resultados na folha de trabalho, mas o gerente não os vê na Lista de tarefas.",
           "why": "Os valores foram guardados como rascunho ou registados na bancada, mas não foram enviados a partir de Pronto a submeter.",
-          "action": "Abra o Bancada de trabalho, conclua Rever conclusão se necessário e. Abra Pronto a submeter. Clique em Enviar."
+          "action": "Abra o Workbench, conclua Rever conclusão se necessário e. Abra Pronto a submeter. Clique em Enviar."
         }
       ],
       "sources": [
@@ -477,9 +477,9 @@
         "server/config/roles.js"
       ],
       "steps": [
-        "Abra Meu trabalho ou Bancada de trabalho. Verifique as tarefas que lhe foram atribuídas para hoje. (Esperado: Vê quais as amostras que precisam de Secagem ao ar ou Preparação de amostras e quais as que estão prontas para análise de bancada.)",
+        "Abra Meu trabalho ou Workbench. Verifique as tarefas que lhe foram atribuídas para hoje. (Esperado: Vê quais as amostras que precisam de Secagem ao ar ou Preparação de amostras e quais as que estão prontas para análise de bancada.)",
         "Conclua primeiro as listas de verificação necessárias de secagem e crivagem. Clique em Confirmar que o trabalho está concluído. Depois abra a folha de análise ou clique em Nova Corrida Analítica. (Esperado: A preparação confirmada desbloqueia as linhas de ensaio para que possa digitar ou colar resultados de amostras e leituras de controlo de qualidade.)",
-        "Quando o Bancada de trabalho pedir um PIN de bancada pela primeira vez, use essa janela para definir um PIN pessoal de 4 a 8 dígitos e confirme-o com a palavra-passe da sua conta. Se já tiver um PIN, introduza-o quando for solicitado. Clique em Rever conclusão para registar os resultados verificados e. Abra Pronto a submeter. Clique em Enviar. (Esperado: Os resultados registados passam para Enviados e concluídos e aparecem na Lista de tarefas do revisor.)"
+        "Quando o Workbench pedir um PIN de bancada pela primeira vez, use essa janela para definir um PIN pessoal de 4 a 8 dígitos e confirme-o com a palavra-passe da sua conta. Se já tiver um PIN, introduza-o quando for solicitado. Clique em Rever conclusão para registar os resultados verificados e. Abra Pronto a submeter. Clique em Enviar. (Esperado: Os resultados registados passam para Enviados e concluídos e aparecem na Lista de tarefas do revisor.)"
       ],
       "caution": "Guardar um rascunho na folha de trabalho não envia os resultados ao gerente. Conclua sempre Rever conclusão e Pronto a submeter no final de uma corrida.",
       "related": [
@@ -533,7 +533,7 @@
           "steps": [
             {
               "action": "Verifique o pacote de ensaios solicitado em 3. Análises, abra 4. Custódia. Clique em Concluir Recepção (ou Aceitar e imprimir etiqueta).",
-              "expected": "O estado da amostra passa de Esperado para Aceito, as etiquetas de código de barras são impressas e as tarefas de secagem abrem-se no Bancada de trabalho."
+              "expected": "O estado da amostra passa de Esperado para Aceito, as etiquetas de código de barras são impressas e as tarefas de secagem abrem-se no Workbench."
             }
           ]
         }
@@ -573,7 +573,7 @@
       "steps": [
         "Abra Recepção de amostras, escolha Amostra de projeto, Sem agendamento / Externo ou Caixa de entrega de amostras e digitalize ou digite o ID do saco em 1. Identificação. (Esperado: Se a amostra tiver sido pré-registada a partir de um levantamento de campo, o estado mostra Esperado e os detalhes de campo são carregados automaticamente.)",
         "Pese o saco de solo e preencha 2. Condição verificando Recipiente Intacto / Selado e Quantidade de Amostra Suficiente (~500g). (Esperado: Qualquer saco danificado ou com peso baixo é sinalizado para que possa adicionar uma nota de condição, colocar o saco em quarentena ou rejeitá-lo.)",
-        "Verifique o pacote de ensaios solicitado em 3. Análises, abra 4. Custódia. Clique em Concluir Recepção (ou Aceitar e imprimir etiqueta). (Esperado: O estado da amostra passa de Esperado para Aceito, as etiquetas de código de barras são impressas e as tarefas de secagem abrem-se no Bancada de trabalho.)"
+        "Verifique o pacote de ensaios solicitado em 3. Análises, abra 4. Custódia. Clique em Concluir Recepção (ou Aceitar e imprimir etiqueta). (Esperado: O estado da amostra passa de Esperado para Aceito, as etiquetas de código de barras são impressas e as tarefas de secagem abrem-se no Workbench.)"
       ],
       "caution": "Nunca clique em Concluir Recepção (ou Aceitar e imprimir etiqueta) sem ter o saco físico de solo à sua frente.",
       "related": [
@@ -599,7 +599,7 @@
         ""
       ],
       "minutes": 3,
-      "quick": "Ordem do primeiro dia: o administrador configura o laboratório; a receção recebe e aceita as amostras de treino; o gerente atribui o trabalho; os técnicos preparam as amostras e submetem os lotes no Bancada de trabalho; o gerente revê os resultados e emite os relatórios.",
+      "quick": "Ordem do primeiro dia: o administrador configura o laboratório; a receção recebe e aceita as amostras de treino; o gerente atribui o trabalho; os técnicos preparam as amostras e submetem os lotes no Workbench; o gerente revê os resultados e emite os relatórios.",
       "before": [
         "Confirme o nome do laboratório ativo na barra superior. Verifique que as amostras de treino foram recebidas e aceites na receção.",
         "Quando a revisão por duas pessoas está ativa, o revisor deve ser uma pessoa diferente do analista. Se vai rever os lotes de treino, não os registe pessoalmente."
@@ -613,8 +613,8 @@
               "expected": "O trabalho atribuído aparece em Meu trabalho para cada técnico, pronto para preparação e ensaio de bancada."
             },
             {
-              "action": "Ao meio-dia, o técnico deverá ter submetido pelo menos dois lotes no Bancada de trabalho para o trabalho atribuído de manhã. Abra Revisar envios para verificar os valores e os controlos de qualidade e clique em Aprovar ou Devolver.",
-              "expected": "As determinações aprovadas avançam para a conclusão da amostra, enquanto os itens devolvidos abrem uma nova tentativa de repetição na Bancada de trabalho com a sua nota."
+              "action": "Ao meio-dia, o técnico deverá ter submetido pelo menos dois lotes no Workbench para o trabalho atribuído de manhã. Abra Revisar envios para verificar os valores e os controlos de qualidade e clique em Aprovar ou Devolver.",
+              "expected": "As determinações aprovadas avançam para a conclusão da amostra, enquanto os itens devolvidos abrem uma nova tentativa de repetição na bancada do técnico com a sua nota."
             },
             {
               "action": "Abra Aprovações finais para verificar a plausibilidade global da amostra em todos os ensaios, aprove a amostra e emita o Certificado de análise em Relatórios.",
@@ -646,8 +646,8 @@
       "problems": [
         {
           "symptom": "Um técnico diz que terminou um lote, mas não aparece nada em Revisar envios.",
-          "why": "O técnico guardou ou registou os valores no Bancada de trabalho sem clicar em Enviar no separador Pronto a submeter, ou está ativo um filtro na fila.",
-          "action": "Limpe quaisquer filtros ativos na Lista de tarefas. Peça ao técnico para verificar Pronto a submeter e Enviados e concluídos no Bancada de trabalho."
+          "why": "O técnico guardou ou registou os valores no Workbench sem clicar em Enviar no separador Pronto a submeter, ou está ativo um filtro na fila.",
+          "action": "Limpe quaisquer filtros ativos na Lista de tarefas. Peça ao técnico para verificar Pronto a submeter e Enviados e concluídos no Workbench."
         }
       ],
       "sources": [
@@ -657,7 +657,7 @@
       ],
       "steps": [
         "De manhã, abra Lista de tarefas e Atribuir trabalho. Atribua aos técnicos os ensaios das amostras de treino recebidas e aceites. (Esperado: O trabalho atribuído aparece em Meu trabalho para cada técnico, pronto para preparação e ensaio de bancada.)",
-        "Ao meio-dia, o técnico deverá ter submetido pelo menos dois lotes no Bancada de trabalho para o trabalho atribuído de manhã. Abra Revisar envios para verificar os valores e os controlos de qualidade e clique em Aprovar ou Devolver. (Esperado: As determinações aprovadas avançam para a conclusão da amostra, enquanto os itens devolvidos abrem uma nova tentativa de repetição na Bancada de trabalho com a sua nota.)",
+        "Ao meio-dia, o técnico deverá ter submetido pelo menos dois lotes no Workbench para o trabalho atribuído de manhã. Abra Revisar envios para verificar os valores e os controlos de qualidade e clique em Aprovar ou Devolver. (Esperado: As determinações aprovadas avançam para a conclusão da amostra, enquanto os itens devolvidos abrem uma nova tentativa de repetição na bancada do técnico com a sua nota.)",
         "Abra Aprovações finais para verificar a plausibilidade global da amostra em todos os ensaios, aprove a amostra e emita o Certificado de análise em Relatórios. (Esperado: O estado da amostra passa para Aprovado e o relatório oficial em PDF fica pronto para transferir ou partilhar.)"
       ],
       "caution": "Verifique sempre tanto Revisar envios (para corridas de métodos individuais) como Aprovações finais (para amostras completas).",
@@ -928,7 +928,7 @@
       "category": "start",
       "kind": "guide",
       "title": "Escolher idioma, aparência e preferências de perfil",
-      "summary": "Altere o idioma, o tema claro ou escuro e a palavra-passe em O meu perfil. Defina o PIN de bancada na janela de PIN do Bancada de trabalho.",
+      "summary": "Altere o idioma, o tema claro ou escuro e a palavra-passe em O meu perfil. Defina o PIN de bancada na janela de PIN do Workbench.",
       "roles": [
         "ALL"
       ],
@@ -938,7 +938,7 @@
         "profile"
       ],
       "minutes": 3,
-      "quick": "Use os botões de idioma e tema na barra superior ou O meu perfil para as suas preferências pessoais. Quando o Bancada de trabalho pedir um PIN pela primeira vez, defina um PIN pessoal de 4 a 8 dígitos nessa janela e confirme-o com a palavra-passe da sua conta.",
+      "quick": "Use os botões de idioma e tema na barra superior ou O meu perfil para as suas preferências pessoais. Quando o Workbench pedir um PIN pela primeira vez, defina um PIN pessoal de 4 a 8 dígitos nessa janela e confirme-o com a palavra-passe da sua conta.",
       "before": [
         "Inicie sessão com a sua conta pessoal.",
         "Lembre-se de que alterar o idioma de visualização apenas traduz as etiquetas do ecrã — nunca altera os números guardados nem as unidades."
@@ -952,7 +952,7 @@
               "expected": "Os menus, botões e artigos de Ajuda mudam imediatamente para o idioma escolhido."
             },
             {
-              "action": "Abra O meu perfil no menu lateral para atualizar a palavra-passe pessoal (pelo menos 12 caracteres). Quando o Bancada de trabalho pedir um PIN, defina-o na respetiva janela, com 4 a 8 dígitos, e confirme-o com a palavra-passe da sua conta.",
+              "action": "Abra O meu perfil no menu lateral para atualizar a palavra-passe pessoal (pelo menos 12 caracteres). Quando o Workbench pedir um PIN, defina-o na respetiva janela, com 4 a 8 dígitos, e confirme-o com a palavra-passe da sua conta.",
               "expected": "As definições de segurança são atualizadas apenas para a sua conta."
             },
             {
@@ -979,7 +979,7 @@
           "Guarda as definições de perfil e a palavra-passe atualizadas."
         ]
       ],
-      "example": "Escolha Português na barra superior, abra O meu perfil, atualize a palavra-passe e clique em Guardar alterações. Quando o Bancada de trabalho pedir um PIN pela primeira vez, defina um PIN pessoal de 4 a 8 dígitos nessa janela e confirme-o com a palavra-passe da sua conta.",
+      "example": "Escolha Português na barra superior, abra O meu perfil, atualize a palavra-passe e clique em Guardar alterações. Quando o Workbench pedir um PIN pela primeira vez, defina um PIN pessoal de 4 a 8 dígitos nessa janela e confirme-o com a palavra-passe da sua conta.",
       "success": "O idioma do ecrã, a aparência e as definições pessoais de segurança estão guardados para o seu turno.",
       "nextActor": "Pode prosseguir diretamente para a sua fila de trabalho diária",
       "problems": [
@@ -996,7 +996,7 @@
       ],
       "steps": [
         "Clique no seletor de idioma na barra superior ou no ecrã de início de sessão para alternar entre English, Español, Français e Português. (Esperado: Os menus, botões e artigos de Ajuda mudam imediatamente para o idioma escolhido.)",
-        "Abra O meu perfil no menu lateral para atualizar a palavra-passe pessoal (pelo menos 12 caracteres). Quando o Bancada de trabalho pedir um PIN, defina-o na respetiva janela, com 4 a 8 dígitos, e confirme-o com a palavra-passe da sua conta. (Esperado: As definições de segurança são atualizadas apenas para a sua conta.)",
+        "Abra O meu perfil no menu lateral para atualizar a palavra-passe pessoal (pelo menos 12 caracteres). Quando o Workbench pedir um PIN, defina-o na respetiva janela, com 4 a 8 dígitos, e confirme-o com a palavra-passe da sua conta. (Esperado: As definições de segurança são atualizadas apenas para a sua conta.)",
         "Clique em Guardar alterações em O meu perfil para guardar as suas preferências. (Esperado: Aparece uma mensagem de confirmação e as suas definições permanecem ativas da próxima vez que iniciar sessão.)"
       ],
       "caution": "As definições do perfil pessoal nunca alteram métodos de ensaio, unidades ou regras de qualidade do laboratório.",
@@ -1069,7 +1069,7 @@
             },
             {
               "action": "Imprima e cole a etiqueta de código de barras do laboratório no saco e coloque a amostra no tabuleiro de entrega para a sala de secagem.",
-              "expected": "Os técnicos de preparação podem digitalizar a etiqueta e iniciar a Secagem ao ar no Bancada de trabalho."
+              "expected": "Os técnicos de preparação podem digitalizar a etiqueta e iniciar a Secagem ao ar no Workbench."
             }
           ]
         }
@@ -1092,7 +1092,7 @@
         ]
       ],
       "example": "Em Recepção de amostras, selecione Amostra de projeto, digitalize DEMO-FIELD-001, registe 650 g com Aprovado em ambas as verificações de condição, confirme o pacote de fertilidade. Clique em Concluir Recepção (ou Aceitar e imprimir etiqueta).",
-      "success": "O estado da amostra é Aceito, as etiquetas de código de barras são impressas e as tarefas de secagem aparecem no Bancada de trabalho.",
+      "success": "O estado da amostra é Aceito, as etiquetas de código de barras são impressas e as tarefas de secagem aparecem no Workbench.",
       "nextActor": "O oficial de receção entrega o saco de amostra etiquetado ao técnico de preparação",
       "problems": [
         {
@@ -1118,7 +1118,7 @@
         "Se uma verificação falhar, descreva o problema na nota de condição. Em seguida, clique em 3. Análises. Confirme o pacote de análises e os métodos solicitados. (Esperado: Todos os ensaios solicitados (incluindo painéis agrupados como areia, limo e argila) ficam selecionados para a amostra.)",
         "Clique em 4. Custódia para rever o resumo da receção. Se precisar de fazer uma pausa e confirmar com um supervisor, clique em Salvar rascunho. (Esperado: Um rascunho guardado permanece em Entradas incompletas (Rascunhos) e não envia uma amostra não recebida para a sala de secagem.)",
         "Quando tudo estiver pronto, clique em Concluir Recepção (ou Aceitar e imprimir etiqueta) (ou em Aceitar com nota de condição, Colocar amostra em quarentena ou Rejeitar amostra se houver uma exceção). (Esperado: O estado da amostra muda de Esperado para Aceito (ou Em quarentena / Rejeitada (problema registado)) e regista a data oficial de receção.)",
-        "Imprima e cole a etiqueta de código de barras do laboratório no saco e coloque a amostra no tabuleiro de entrega para a sala de secagem. (Esperado: Os técnicos de preparação podem digitalizar a etiqueta e iniciar a Secagem ao ar no Bancada de trabalho.)"
+        "Imprima e cole a etiqueta de código de barras do laboratório no saco e coloque a amostra no tabuleiro de entrega para a sala de secagem. (Esperado: Os técnicos de preparação podem digitalizar a etiqueta e iniciar a Secagem ao ar no Workbench.)"
       ],
       "caution": "Não invente coordenadas GPS nem aceite um ID de amostra duplicado apenas para terminar a receção rapidamente.",
       "related": [],
@@ -1160,7 +1160,7 @@
             },
             {
               "action": "Confirme as análises solicitadas, trate individualmente qualquer saco danificado ou em falta e conclua a receção do lote para imprimir as etiquetas de código de barras.",
-              "expected": "Todos os sacos aceites passam de Esperado para Aceito e abrem tarefas de secagem e preparação no Bancada de trabalho."
+              "expected": "Todos os sacos aceites passam de Esperado para Aceito e abrem tarefas de secagem e preparação no Workbench."
             }
           ]
         }
@@ -1199,7 +1199,7 @@
       "steps": [
         "Abra Recepção de amostras. Clique em Caixa de entrega de amostras. Depois escolha o projeto e o laboratório recetor. (Esperado: O ecrã de receção em lote abre-se com Digitalizar ou inserir ID para adicionar... e Observações partilhadas do lote.)",
         "Digitalize ou digite o ID de cada saco em Digitalizar ou inserir ID para adicionar..., introduza o peso de cada saco em gramas e sinalize qualquer saco danificado ou com peso insuficiente. (Esperado: Cada saco encontrado aparece na tabela do lote, e qualquer saco abaixo do peso mínimo exigido pelo laboratório ou em más condições é destacado.)",
-        "Confirme as análises solicitadas, trate individualmente qualquer saco danificado ou em falta e conclua a receção do lote para imprimir as etiquetas de código de barras. (Esperado: Todos os sacos aceites passam de Esperado para Aceito e abrem tarefas de secagem e preparação no Bancada de trabalho.)"
+        "Confirme as análises solicitadas, trate individualmente qualquer saco danificado ou em falta e conclua a receção do lote para imprimir as etiquetas de código de barras. (Esperado: Todos os sacos aceites passam de Esperado para Aceito e abrem tarefas de secagem e preparação no Workbench.)"
       ],
       "caution": "Nunca marque um saco em falta como recebido apenas porque consta no manifesto em papel.",
       "related": [
@@ -1271,7 +1271,7 @@
       "nextActor": "Oficial de Recepção de Amostras ou Gerente de Laboratório",
       "problems": [
         {
-          "symptom": "Guardou uma amostra em Recepção de amostras, mas o técnico de preparação não a vê no Bancada de trabalho.",
+          "symptom": "Guardou uma amostra em Recepção de amostras, mas o técnico de preparação não a vê no Workbench.",
           "why": "Clicar em Salvar rascunho apenas guarda um rascunho inacabado. As amostras só avançam para a preparação quando a receção é concluída em 4. Custódia.",
           "action": "Abra Recepção de amostras, clique em Retomar junto à amostra em Entradas incompletas (Rascunhos). Clique em Concluir Recepção (ou Aceitar e imprimir etiqueta) em 4. Custódia."
         }
@@ -1666,7 +1666,7 @@
             },
             {
               "action": "Cole a etiqueta impressa no saco, coloque-o no carrinho da sala de secagem. Verifique Transferência operacional do laboratório e Entradas recentes no ecrã Recepção de amostras.",
-              "expected": "A amostra aparece em Entradas recentes e a respetiva tarefa de Secagem ao ar fica imediatamente visível no Bancada de trabalho."
+              "expected": "A amostra aparece em Entradas recentes e a respetiva tarefa de Secagem ao ar fica imediatamente visível no Workbench."
             }
           ]
         }
@@ -1689,11 +1689,11 @@
         ]
       ],
       "example": "Em 4. Custódia, clique em Concluir Recepção (ou Aceitar e imprimir etiqueta) para DEMO-26-000142, cole a etiqueta Padrão (101 × 54 mm) no saco. Confirme que aparece em Entradas recentes.",
-      "success": "A amostra tem uma etiqueta oficial de código de barras do laboratório e está visível para a equipa de preparação no Bancada de trabalho.",
+      "success": "A amostra tem uma etiqueta oficial de código de barras do laboratório e está visível para a equipa de preparação no Workbench.",
       "nextActor": "Técnico de Preparação na sala de secagem",
       "problems": [
         {
-          "symptom": "Terminou de preencher o formulário de receção, mas a amostra não aparece em Entradas recentes nem no Bancada de trabalho.",
+          "symptom": "Terminou de preencher o formulário de receção, mas a amostra não aparece em Entradas recentes nem no Workbench.",
           "why": "Clicou em Salvar rascunho em vez de Concluir Recepção (ou Aceitar e imprimir etiqueta) ou fechou o separador antes de confirmar 4. Custódia.",
           "action": "Verifique Entradas incompletas (Rascunhos) no ecrã Recepção de amostras, clique em Retomar. Clique em Concluir Recepção (ou Aceitar e imprimir etiqueta) em 4. Custódia."
         }
@@ -1705,7 +1705,7 @@
       "steps": [
         "Em 4. Custódia, verifique uma última vez o ID da amostra, o peso, o estado da condição e a lista de ensaios atribuídos. (Esperado: Todos os detalhes correspondem ao saco físico e ao pedido do cliente antes de o registo ser bloqueado.)",
         "Clique em Concluir Recepção (ou Aceitar e imprimir etiqueta) (ou no botão de exceção de condição adequado). Imprima a etiqueta de código de barras na janela Imprimir etiquetas. (Esperado: É atribuído um Código de Amostra do Laboratório oficial, o estado muda para Aceito e a data e hora de receção são guardadas.)",
-        "Cole a etiqueta impressa no saco, coloque-o no carrinho da sala de secagem. Verifique Transferência operacional do laboratório e Entradas recentes no ecrã Recepção de amostras. (Esperado: A amostra aparece em Entradas recentes e a respetiva tarefa de Secagem ao ar fica imediatamente visível no Bancada de trabalho.)"
+        "Cole a etiqueta impressa no saco, coloque-o no carrinho da sala de secagem. Verifique Transferência operacional do laboratório e Entradas recentes no ecrã Recepção de amostras. (Esperado: A amostra aparece em Entradas recentes e a respetiva tarefa de Secagem ao ar fica imediatamente visível no Workbench.)"
       ],
       "caution": "Cole sempre a etiqueta de código de barras impressa pelo laboratório no saco antes de pegar na amostra seguinte.",
       "related": [
@@ -1890,7 +1890,7 @@
       "category": "tracking",
       "kind": "guide",
       "title": "Ler a página da amostra sem repetir a introdução de resultados",
-      "summary": "Leia os separadores Visão geral, Trabalhos e resultados e Cadeia de custódia de uma amostra e aceda em segurança ao Bancada de trabalho.",
+      "summary": "Leia os separadores Visão geral, Trabalhos e resultados e Cadeia de custódia de uma amostra e aceda em segurança ao Workbench.",
       "roles": [
         "ALL"
       ],
@@ -1900,7 +1900,7 @@
         "samplesid"
       ],
       "minutes": 3,
-      "quick": "Abra uma amostra no Registo de amostras para inspecionar os detalhes de campo, as etapas de preparação, os estados dos ensaios e o histórico de custódia. Quando estiver pronto para introduzir ou confirmar resultados de bancada, siga a ligação para o Bancada de trabalho em vez de tentar digitar resultados na página de resumo.",
+      "quick": "Abra uma amostra no Registo de amostras para inspecionar os detalhes de campo, as etapas de preparação, os estados dos ensaios e o histórico de custódia. Quando estiver pronto para introduzir ou confirmar resultados de bancada, siga a ligação para o Workbench em vez de tentar digitar resultados na página de resumo.",
       "before": [
         "Abra o Registo de amostras. Clique na amostra que pretende inspecionar.",
         "Observe o selo de estado global da amostra no topo da página."
@@ -1918,8 +1918,8 @@
               "expected": "Cada linha de ensaio mostra o estado atual, o técnico atribuído, o histórico de tentativas e a explicação de qualquer bloqueio."
             },
             {
-              "action": "Para registar medições de preparação ou de ensaio, clique no botão de ação na linha da tarefa para a abrir diretamente no Bancada de trabalho.",
-              "expected": "O Bancada de trabalho abre-se nessa amostra e método exatos para que possa registar medições com o controlo de qualidade completo do lote."
+              "action": "Para registar medições de preparação ou de ensaio, clique no botão de ação na linha da tarefa para a abrir diretamente no Workbench.",
+              "expected": "O Workbench abre-se nessa amostra e método exatos para que possa registar medições com o controlo de qualidade completo do lote."
             }
           ]
         }
@@ -1941,8 +1941,8 @@
           "Explica por que motivo as análises de bancada estão bloqueadas caso a secagem ou a crivagem ainda estejam abertas."
         ]
       ],
-      "example": "Abra a amostra DEMO-26-000142 no Registo de amostras, clique em Trabalhos e resultados para ver que a Secagem ao ar está confirmada e que o pH está pronto. Clique na ação da linha de pH para abrir o Bancada de trabalho.",
-      "success": "Consegue ler o estado completo de uma amostra numa única página e saltar diretamente para o Bancada de trabalho para executar o trabalho atribuído.",
+      "example": "Abra a amostra DEMO-26-000142 no Registo de amostras, clique em Trabalhos e resultados para ver que a Secagem ao ar está confirmada e que o pH está pronto. Clique na ação da linha de pH para abrir o Workbench.",
+      "success": "Consegue ler o estado completo de uma amostra numa única página e saltar diretamente para o Workbench para executar o trabalho atribuído.",
       "nextActor": "Técnico de Laboratório ou Gerente de Laboratório",
       "problems": [
         {
@@ -1959,7 +1959,7 @@
       "steps": [
         "No separador Visão geral da página da amostra, reveja a condição na receção, o peso, o projeto e os detalhes de amostragem de campo. (Esperado: Vê o registo completo de entrada e quaisquer notas de condição registadas na receção.)",
         "Clique no separador Trabalhos e resultados para inspecionar os Pré-requisitos de preparação (Secagem ao ar e Preparação de amostras) e a tabela de ensaios analíticos atribuídos. (Esperado: Cada linha de ensaio mostra o estado atual, o técnico atribuído, o histórico de tentativas e a explicação de qualquer bloqueio.)",
-        "Para registar medições de preparação ou de ensaio, clique no botão de ação na linha da tarefa para a abrir diretamente no Bancada de trabalho. (Esperado: O Bancada de trabalho abre-se nessa amostra e método exatos para que possa registar medições com o controlo de qualidade completo do lote.)"
+        "Para registar medições de preparação ou de ensaio, clique no botão de ação na linha da tarefa para a abrir diretamente no Workbench. (Esperado: O Workbench abre-se nessa amostra e método exatos para que possa registar medições com o controlo de qualidade completo do lote.)"
       ],
       "caution": "O facto de um ensaio individual estar como Enviado não significa que a amostra inteira esteja concluída — verifique todas as linhas em Trabalhos e resultados.",
       "related": [
@@ -2003,7 +2003,7 @@
               "expected": "O selo identifica a tarefa de pré-requisito exata que tem de ser concluída primeiro."
             },
             {
-              "action": "Clique na tarefa de pré-requisito aberta para a concluir no Bancada de trabalho (ou peça a um gerente para a verificar se a opção Exigir a aprovação das etapas de preparação pelo responsável estiver ativa em Políticas).",
+              "action": "Clique na tarefa de pré-requisito aberta para a concluir no Workbench (ou peça a um gerente para a verificar se a opção Exigir a aprovação das etapas de preparação pelo responsável estiver ativa em Políticas).",
               "expected": "Assim que a etapa de pré-requisito é confirmada, os ensaios analíticos dependentes são desbloqueados automaticamente."
             }
           ]
@@ -2026,9 +2026,9 @@
           "Mostra quem concluiu e verificou cada etapa de preparação."
         ]
       ],
-      "example": "Inspecione a amostra DEMO-26-000142 em Trabalhos e resultados, veja que o fósforo Olsen está a aguardar Preparação de amostras, conclua a lista de verificação de crivagem a 2 mm no Bancada de trabalho e observe o desbloqueio do fósforo Olsen.",
+      "example": "Inspecione a amostra DEMO-26-000142 em Trabalhos e resultados, veja que o fósforo Olsen está a aguardar Preparação de amostras, conclua a lista de verificação de crivagem a 2 mm no Workbench e observe o desbloqueio do fósforo Olsen.",
       "success": "Consegue ver num relance por que motivo uma etapa seguinte está a aguardar e qual a tarefa que a desbloqueia.",
-      "nextActor": "Técnico de Preparação, Técnico de Bancada de trabalho ou Gerente de Laboratório",
+      "nextActor": "Técnico de Preparação, Técnico de Bancada ou Gerente de Laboratório",
       "problems": [
         {
           "symptom": "A Secagem ao ar e a Preparação de amostras foram ambas concluídas pelo técnico, mas as linhas de ensaio de bancada ainda mostram um bloqueio de pré-requisito.",
@@ -2044,7 +2044,7 @@
       "steps": [
         "Observe os indicadores de etapa do fluxo de trabalho e os Pré-requisitos de preparação no separador Trabalhos e resultados da amostra. (Esperado: As etapas concluídas apresentam um estado confirmado a verde, as etapas ativas estão destacadas e as etapas futuras bloqueadas mostram o que estão a aguardar.)",
         "Leia qualquer selo de bloqueio numa linha de análise bloqueada (por exemplo, a aguardar Secagem ao ar, Preparação de amostras ou verificação da porta pelo gerente). (Esperado: O selo identifica a tarefa de pré-requisito exata que tem de ser concluída primeiro.)",
-        "Clique na tarefa de pré-requisito aberta para a concluir no Bancada de trabalho (ou peça a um gerente para a verificar se a opção Exigir a aprovação das etapas de preparação pelo responsável estiver ativa em Políticas). (Esperado: Assim que a etapa de pré-requisito é confirmada, os ensaios analíticos dependentes são desbloqueados automaticamente.)"
+        "Clique na tarefa de pré-requisito aberta para a concluir no Workbench (ou peça a um gerente para a verificar se a opção Exigir a aprovação das etapas de preparação pelo responsável estiver ativa em Políticas). (Esperado: Assim que a etapa de pré-requisito é confirmada, os ensaios analíticos dependentes são desbloqueados automaticamente.)"
       ],
       "caution": "Nunca tente contornar uma etapa de pré-requisito — conclua ou verifique a etapa de preparação em aberto. Assim, o registo de auditoria permaneça completo.",
       "related": [
@@ -2236,7 +2236,7 @@
       "keywords": [
         "prep-drying",
         "preparation",
-        "Bancada de trabalho"
+        "workbench"
       ],
       "minutes": 4,
       "quick": "Conclua as verificações físicas obrigatórias de secagem, clique em Confirmar que o trabalho está concluído. Verifique o comprovativo Lista de verificação confirmada. Assinalar uma caixa sem clicar em Confirmar que o trabalho está concluído não guarda a conclusão.",
@@ -2251,7 +2251,7 @@
           "title": "1. Verificar a amostra e realizar o trabalho",
           "steps": [
             {
-              "action": "Abra o Bancada de trabalho, escolha Secagem ao ar em Tipo de trabalho: e compare o ID da amostra no ecrã com o tabuleiro físico de secagem.",
+              "action": "Abra o Workbench, escolha Secagem ao ar em Tipo de trabalho: e compare o ID da amostra no ecrã com o tabuleiro físico de secagem.",
               "expected": "Está a registar os detalhes de secagem para a amostra de solo exata que se encontra na sua bancada no laboratório ativo."
             },
             {
@@ -2299,7 +2299,7 @@
           "Comprova que a Secagem ao ar terminou e desbloqueia a Preparação de amostras."
         ]
       ],
-      "example": "No Bancada de trabalho em Secagem ao ar, introduza 35 °C, 620 g antes e 545 g depois para a amostra DEMO-26-000142, assinale as três caixas da Lista de verificação operacional. Clique em Confirmar que o trabalho está concluído.",
+      "example": "No Workbench em Secagem ao ar, introduza 35 °C, 620 g antes e 545 g depois para a amostra DEMO-26-000142, assinale as três caixas da Lista de verificação operacional. Clique em Confirmar que o trabalho está concluído.",
       "success": "A linha de secagem mostra Lista de verificação confirmada com data/hora e nome do operador. A Preparação de amostras fica desbloqueada.",
       "nextActor": "Técnico de Preparação (para crivagem e moagem) ou Gerente de Laboratório (se a verificação de portas estiver ativa)",
       "problems": [
@@ -2316,7 +2316,7 @@
         {
           "symptom": "Os ensaios químicos de bancada continuam bloqueados após a confirmação da secagem.",
           "why": "Os métodos de bancada de rotina exigem que tanto a Secagem ao ar como a Preparação de amostras (como a crivagem a 2 mm) sejam concluídas primeiro.",
-          "action": "Mude Tipo de trabalho: para Preparação de amostras no Bancada de trabalho e conclua a etapa de crivagem e moagem."
+          "action": "Mude Tipo de trabalho: para Preparação de amostras no Workbench e conclua a etapa de crivagem e moagem."
         }
       ],
       "sources": [
@@ -2326,7 +2326,7 @@
         "server/services/workbenchReadinessService.js"
       ],
       "steps": [
-        "Abra o Bancada de trabalho, escolha Secagem ao ar em Tipo de trabalho: e compare o ID da amostra no ecrã com o tabuleiro físico de secagem. (Esperado: Está a registar os detalhes de secagem para a amostra de solo exata que se encontra na sua bancada no laboratório ativo.)",
+        "Abra o Workbench, escolha Secagem ao ar em Tipo de trabalho: e compare o ID da amostra no ecrã com o tabuleiro físico de secagem. (Esperado: Está a registar os detalhes de secagem para a amostra de solo exata que se encontra na sua bancada no laboratório ativo.)",
         "Seque o solo até peso constante seguindo o procedimento do laboratório e preencha Método, Temperatura (°C), Massa inicial (g), Massa final (g), Início, Fim e Equipamento. (Esperado: Todas as medições de secagem realizadas na bancada ficam registadas nos campos de Secagem.)",
         "Assinale cada item na Lista de verificação operacional apenas depois de concluir essa verificação física. (Esperado: A linha mostra Lista de verificação operacional concluída e ativa o botão Confirmar que o trabalho está concluído.)",
         "Clique em Confirmar que o trabalho está concluído na linha da amostra (ou utilize o botão de confirmação em lote apenas depois de verificar cada tabuleiro selecionado). (Esperado: O servidor guarda o seu registo de secagem. Nunca inclua tabuleiros que ainda estejam húmidos apenas porque chegaram na mesma caixa.)",
@@ -2343,7 +2343,7 @@
       "category": "preparation",
       "kind": "guide",
       "title": "Confirmar a preparação para o método atribuído",
-      "summary": "Registe a crivagem, a moagem e a divisão em subamostras no Bancada de trabalho. Clique em Confirmar que o trabalho está concluído para desbloquear as análises de bancada.",
+      "summary": "Registe a crivagem, a moagem e a divisão em subamostras no Workbench. Clique em Confirmar que o trabalho está concluído para desbloquear as análises de bancada.",
       "roles": [
         "LAB_TECHNICIAN",
         "LAB_MANAGER"
@@ -2351,10 +2351,10 @@
       "keywords": [
         "prep-preparation",
         "preparation",
-        "Bancada de trabalho"
+        "workbench"
       ],
       "minutes": 3,
-      "quick": "No Bancada de trabalho, selecione Preparação de amostras em Tipo de trabalho:, introduza os detalhes de Crivagem, Moagem e Divisão da amostra de solo, assinale os itens da Lista de verificação operacional. Clique em Confirmar que o trabalho está concluído.",
+      "quick": "No Workbench, selecione Preparação de amostras em Tipo de trabalho:, introduza os detalhes de Crivagem, Moagem e Divisão da amostra de solo, assinale os itens da Lista de verificação operacional. Clique em Confirmar que o trabalho está concluído.",
       "before": [
         "Confirme que a Secagem ao ar já está marcada como Lista de verificação confirmada para a amostra.",
         "Verifique a malha de crivo necessária para os ensaios atribuídos (a maioria dos métodos de rotina utiliza terra fina de 2 mm, enquanto os métodos espectrais ou de combustão podem exigir moagem fina)."
@@ -2364,7 +2364,7 @@
           "title": "Procedimento passo a passo",
           "steps": [
             {
-              "action": "Abra o Bancada de trabalho, selecione Preparação de amostras em Tipo de trabalho: e faça corresponder o ID da amostra no ecrã ao tabuleiro de solo seco.",
+              "action": "Abra o Workbench, selecione Preparação de amostras em Tipo de trabalho: e faça corresponder o ID da amostra no ecrã ao tabuleiro de solo seco.",
               "expected": "O formulário de Preparação de amostras abre-se mostrando a Lista de verificação operacional e as secções de Crivagem, Moagem e Divisão."
             },
             {
@@ -2381,7 +2381,7 @@
       "fields": [
         [
           "Preparação de amostras",
-          "Segunda porta pré-analítica no Bancada de trabalho para destorroamento, crivagem e divisão",
+          "Segunda porta pré-analítica no Workbench para destorroamento, crivagem e divisão",
           "Tem de ser confirmada como concluída antes do desbloqueio das folhas de trabalho de pH, fósforo, carbono ou textura."
         ],
         [
@@ -2395,7 +2395,7 @@
           "Substitui a lista de verificação por um comprovativo permanente de Lista de verificação confirmada."
         ]
       ],
-      "example": "Para a amostra DEMO-26-000142, selecione Preparação de amostras no Bancada de trabalho, registe a crivagem em crivo de latão de 2 mm obtendo 480 g de terra fina e 65 g de cascalho grosseiro, assinale a lista de verificação. Clique em Confirmar que o trabalho está concluído.",
+      "example": "Para a amostra DEMO-26-000142, selecione Preparação de amostras no Workbench, registe a crivagem em crivo de latão de 2 mm obtendo 480 g de terra fina e 65 g de cascalho grosseiro, assinale a lista de verificação. Clique em Confirmar que o trabalho está concluído.",
       "success": "A Preparação de amostras mostra Lista de verificação confirmada, os frascos preparados ficam registados e as folhas de trabalho de bancada são desbloqueadas.",
       "nextActor": "Técnico de Laboratório na bancada analítica (ou Gerente de Laboratório se for exigida verificação da porta)",
       "problems": [
@@ -2411,11 +2411,11 @@
         "server/services/workbenchReadinessService.js"
       ],
       "steps": [
-        "Abra o Bancada de trabalho, selecione Preparação de amostras em Tipo de trabalho: e faça corresponder o ID da amostra no ecrã ao tabuleiro de solo seco. (Esperado: O formulário de Preparação de amostras abre-se mostrando a Lista de verificação operacional e as secções de Crivagem, Moagem e Divisão.)",
+        "Abra o Workbench, selecione Preparação de amostras em Tipo de trabalho: e faça corresponder o ID da amostra no ecrã ao tabuleiro de solo seco. (Esperado: O formulário de Preparação de amostras abre-se mostrando a Lista de verificação operacional e as secções de Crivagem, Moagem e Divisão.)",
         "Destorroe e crive o solo seco de acordo com o procedimento do laboratório, introduza a abertura da malha do crivo, o peso da terra fina, o peso dos elementos grosseiros e os detalhes de divisão de subamostras, e assinale a Lista de verificação operacional. (Esperado: Todos os campos de preparação ficam preenchidos e a linha apresenta Lista de verificação operacional concluída.)",
         "Clique em Confirmar que o trabalho está concluído (e peça ao seu gerente para verificar a etapa caso o laboratório tenha ativado Exigir a aprovação das etapas de preparação pelo responsável em Políticas). (Esperado: A linha mostra Lista de verificação confirmada, o estado da amostra passa para Processando e as linhas de ensaio de bancada são desbloqueadas automaticamente.)"
       ],
-      "caution": "Desmarque qualquer amostra que não tenha sido fisicamente crivada antes de confirmar várias linhas em simultâneo no Bancada de trabalho.",
+      "caution": "Desmarque qualquer amostra que não tenha sido fisicamente crivada antes de confirmar várias linhas em simultâneo no Workbench.",
       "related": [
         "start-first-login",
         "quality-support"
@@ -2436,13 +2436,13 @@
       "keywords": [
         "prep-receipt",
         "preparation",
-        "Bancada de trabalho",
+        "workbench",
         "samplesid"
       ],
       "minutes": 4,
-      "quick": "Não volte a secar nem a crivar o solo apenas porque um selo parece incompleto. Verifique primeiro se aparece Lista de verificação confirmada na linha do Bancada de trabalho, confirme se uma segunda etapa de preparação ou verificação do gerente ainda está aberta e compare o número da tentativa.",
+      "quick": "Não volte a secar nem a crivar o solo apenas porque um selo parece incompleto. Verifique primeiro se aparece Lista de verificação confirmada na linha do Workbench, confirme se uma segunda etapa de preparação ou verificação do gerente ainda está aberta e compare o número da tentativa.",
       "before": [
-        "Mantenha o separador atual do Bancada de trabalho aberto para não perder notas não guardadas.",
+        "Mantenha o separador atual do Workbench aberto para não perder notas não guardadas.",
         "Lembre-se de que a Secagem ao ar, a Preparação de amostras e cada ensaio de bancada têm estados independentes na mesma amostra.",
         "Não limpe o armazenamento do navegador nem registe uma amostra duplicada para resolver uma dúvida de estado."
       ],
@@ -2451,7 +2451,7 @@
           "title": "1. Verificar o que a aplicação confirmou",
           "steps": [
             {
-              "action": "Abra a linha da amostra em Secagem ao ar ou Preparação de amostras no Bancada de trabalho e procure o selo verde Lista de verificação confirmada, a referência do comprovativo e a data/hora.",
+              "action": "Abra a linha da amostra em Secagem ao ar ou Preparação de amostras no Workbench e procure o selo verde Lista de verificação confirmada, a referência do comprovativo e a data/hora.",
               "expected": "Consegue ver de imediato se o servidor guardou a sua confirmação ou se a lista de verificação ainda está aberta."
             },
             {
@@ -2499,7 +2499,7 @@
           "Usada pelos gerentes para aprovar a preparação quando a verificação de portas está ativa em Políticas."
         ]
       ],
-      "example": "Consulte a amostra DEMO-26-000142 em Trabalhos e resultados, veja que a Secagem ao ar tem Lista de verificação confirmada enquanto a Preparação de amostras ainda está aberta, e conclua a Preparação de amostras no Bancada de trabalho.",
+      "example": "Consulte a amostra DEMO-26-000142 em Trabalhos e resultados, veja que a Secagem ao ar tem Lista de verificação confirmada enquanto a Preparação de amostras ainda está aberta, e conclua a Preparação de amostras no Workbench.",
       "success": "Identifica a porta aberta ou a etapa de verificação exata e desbloqueia os ensaios de bancada sem refazer trabalho já concluído.",
       "nextActor": "Técnico de Laboratório ou Gerente de Laboratório",
       "problems": [
@@ -2515,7 +2515,7 @@
         "client/src/components/sample/WorkItemsTable.jsx"
       ],
       "steps": [
-        "Abra a linha da amostra em Secagem ao ar ou Preparação de amostras no Bancada de trabalho e procure o selo verde Lista de verificação confirmada, a referência do comprovativo e a data/hora. (Esperado: Consegue ver de imediato se o servidor guardou a sua confirmação ou se a lista de verificação ainda está aberta.)",
+        "Abra a linha da amostra em Secagem ao ar ou Preparação de amostras no Workbench e procure o selo verde Lista de verificação confirmada, a referência do comprovativo e a data/hora. (Esperado: Consegue ver de imediato se o servidor guardou a sua confirmação ou se a lista de verificação ainda está aberta.)",
         "Se não aparecer Lista de verificação confirmada, verifique se as três caixas da Lista de verificação operacional estão assinaladas. Clique em Confirmar que o trabalho está concluído. (Esperado: A confirmação é concluída e apresenta o selo Lista de verificação confirmada.)",
         "Se o dispositivo estava offline quando clicou em Confirmar que o trabalho está concluído, volte a ligar-se à rede do laboratório. Verifique o estado de sincronização antes de clicar novamente. (Esperado: As confirmações em fila sincronizam-se sem criar tentativas duplicadas.)",
         "Abra a amostra no Registo de amostras, clique em Trabalhos e resultados. Inspecione o cartão Pré-requisitos de preparação. (Esperado: Pode ver a Secagem ao ar e a Preparação de amostras lado a lado e identificar qual delas ainda está aberta ou a aguardar verificação.)",
@@ -2540,10 +2540,10 @@
       "keywords": [
         "prep-batch",
         "preparation",
-        "Bancada de trabalho"
+        "workbench"
       ],
       "minutes": 3,
-      "quick": "No Bancada de trabalho, filtre por Secagem ao ar ou Preparação de amostras, selecione apenas os tabuleiros que concluíram fisicamente a etapa, verifique a lista de verificação e os parâmetros de cada linha. Clique em Confirmar que o trabalho está concluído.",
+      "quick": "No Workbench, filtre por Secagem ao ar ou Preparação de amostras, selecione apenas os tabuleiros que concluíram fisicamente a etapa, verifique a lista de verificação e os parâmetros de cada linha. Clique em Confirmar que o trabalho está concluído.",
       "before": [
         "Tenha à sua frente a folha da estante de secagem ou o registo da bancada de crivagem.",
         "Confira a etiqueta de cada tabuleiro na estante com as linhas selecionadas no ecrã."
@@ -2553,7 +2553,7 @@
           "title": "Procedimento passo a passo",
           "steps": [
             {
-              "action": "Abra o Bancada de trabalho, escolha Secagem ao ar ou Preparação de amostras em Tipo de trabalho:. Selecione as linhas correspondentes aos tabuleiros da sua estante.",
+              "action": "Abra o Workbench, escolha Secagem ao ar ou Preparação de amostras em Tipo de trabalho:. Selecione as linhas correspondentes aos tabuleiros da sua estante.",
               "expected": "As linhas de amostra selecionadas ficam destacadas e a barra de ações em lote aparece na parte inferior da tabela."
             },
             {
@@ -2570,12 +2570,12 @@
       "fields": [
         [
           "Tipo de trabalho:",
-          "Seletor no Bancada de trabalho para alternar entre Secagem ao ar, Preparação de amostras e ensaios de bancada",
+          "Seletor no Workbench para alternar entre Secagem ao ar, Preparação de amostras e ensaios de bancada",
           "Filtra a fila para que possa processar toda uma estante de secagem ou crivagem de uma só vez."
         ],
         [
           "Confirmar que o trabalho está concluído",
-          "Botão de confirmação em lote no rodapé do Bancada de trabalho",
+          "Botão de confirmação em lote no rodapé do Workbench",
           "Guarda os comprovativos de conclusão de preparação para todas as linhas selecionadas em simultâneo."
         ],
         [
@@ -2584,9 +2584,9 @@
           "Crie ou imprima etiquetas para frascos de 2 mm e tubos de moagem fina após a crivagem."
         ]
       ],
-      "example": "Selecione 12 tabuleiros secos na Estante A no Bancada de trabalho, desmarque 1 amostra de argila pesada que precisa de mais um dia de secagem. Confirme a conclusão das 11 amostras secas.",
+      "example": "Selecione 12 tabuleiros secos na Estante A no Workbench, desmarque 1 amostra de argila pesada que precisa de mais um dia de secagem. Confirme a conclusão das 11 amostras secas.",
       "success": "Todos os tabuleiros concluídos do lote são confirmados em conjunto enquanto os tabuleiros inacabados permanecem abertos.",
-      "nextActor": "Técnico de Preparação ou Analista de Bancada de trabalho",
+      "nextActor": "Técnico de Preparação ou Analista de Bancada",
       "problems": [
         {
           "symptom": "Uma amostra de argila pesada numa estante de 20 amostras ainda está húmida quando as outras 19 já estão secas.",
@@ -2600,7 +2600,7 @@
         "server/services/workbenchReadinessService.js"
       ],
       "steps": [
-        "Abra o Bancada de trabalho, escolha Secagem ao ar ou Preparação de amostras em Tipo de trabalho:. Selecione as linhas correspondentes aos tabuleiros da sua estante. (Esperado: As linhas de amostra selecionadas ficam destacadas e a barra de ações em lote aparece na parte inferior da tabela.)",
+        "Abra o Workbench, escolha Secagem ao ar ou Preparação de amostras em Tipo de trabalho:. Selecione as linhas correspondentes aos tabuleiros da sua estante. (Esperado: As linhas de amostra selecionadas ficam destacadas e a barra de ações em lote aparece na parte inferior da tabela.)",
         "Verifique cada linha selecionada para garantir que qualquer tabuleiro ainda húmido ou por crivar é desmarcado antes de confirmar. (Esperado: Apenas as amostras fisicamente concluídas permanecem selecionadas no lote.)",
         "Preencha os itens obrigatórios da lista de verificação. Clique em Confirmar que o trabalho está concluído (ou no botão de confirmação em lote que mostra o número exato de amostras selecionadas). (Esperado: Cada amostra selecionada recebe o seu próprio comprovativo Lista de verificação confirmada e avança para a etapa seguinte.)"
       ],
@@ -2625,7 +2625,7 @@
       "keywords": [
         "prep-evidence",
         "preparation",
-        "Bancada de trabalho",
+        "workbench",
         "manager-queue"
       ],
       "minutes": 3,
@@ -2711,11 +2711,11 @@
       "keywords": [
         "prep-repeat",
         "preparation",
-        "Bancada de trabalho",
+        "workbench",
         "samplesid"
       ],
       "minutes": 3,
-      "quick": "Nunca substitua um comprovativo de preparação concluído. Quando uma amostra tiver de ser seca ou crivada novamente (por exemplo, após um derrame ou verificação de contaminação), peça ao seu Gerente de Laboratório para reabrir a preparação no separador Trabalhos e resultados da amostra, de modo a registar uma nova tentativa no Bancada de trabalho.",
+      "quick": "Nunca substitua um comprovativo de preparação concluído. Quando uma amostra tiver de ser seca ou crivada novamente (por exemplo, após um derrame ou verificação de contaminação), peça ao seu Gerente de Laboratório para reabrir a preparação no separador Trabalhos e resultados da amostra, de modo a registar uma nova tentativa no Workbench.",
       "before": [
         "Verifique se resta solo não crivado suficiente no saco original ou recipiente de arquivo.",
         "Tenha pronto o motivo para repetir a preparação da amostra (como derrame do recipiente ou falha no controlo de qualidade)."
@@ -2730,10 +2730,10 @@
             },
             {
               "action": "Peça a um Gerente de Laboratório para reabrir a etapa de preparação com um motivo escrito, de modo a criar uma nova tentativa de preparação mantendo o comprovativo original preservado no histórico.",
-              "expected": "A tarefa de preparação volta a aparecer no Bancada de trabalho para a nova tentativa."
+              "expected": "A tarefa de preparação volta a aparecer no Workbench para a nova tentativa."
             },
             {
-              "action": "Realize a secagem ou crivagem física na porção de substituição, introduza as novas medições no Bancada de trabalho, assinale a Lista de verificação operacional. Clique em Confirmar que o trabalho está concluído.",
+              "action": "Realize a secagem ou crivagem física na porção de substituição, introduza as novas medições no Workbench, assinale a Lista de verificação operacional. Clique em Confirmar que o trabalho está concluído.",
               "expected": "É registado um novo comprovativo Lista de verificação confirmada para a repetição da preparação, associado aos ensaios de bancada seguintes."
             }
           ]
@@ -2752,7 +2752,7 @@
         ],
         [
           "Confirmar que o trabalho está concluído",
-          "Botão no Bancada de trabalho para guardar a nova tentativa de preparação",
+          "Botão no Workbench para guardar a nova tentativa de preparação",
           "Cria um novo comprovativo com data e hora para o material preparado de novo."
         ]
       ],
@@ -2773,8 +2773,8 @@
       ],
       "steps": [
         "Abra a amostra no Registo de amostras, clique em Trabalhos e resultados. Inspecione Pré-requisitos de preparação e Etapas de preparação obrigatórias. (Esperado: Vê o comprovativo original Lista de verificação confirmada com o nome do operador e a data/hora.)",
-        "Peça a um Gerente de Laboratório para reabrir a etapa de preparação com um motivo escrito, de modo a criar uma nova tentativa de preparação mantendo o comprovativo original preservado no histórico. (Esperado: A tarefa de preparação volta a aparecer no Bancada de trabalho para a nova tentativa.)",
-        "Realize a secagem ou crivagem física na porção de substituição, introduza as novas medições no Bancada de trabalho, assinale a Lista de verificação operacional. Clique em Confirmar que o trabalho está concluído. (Esperado: É registado um novo comprovativo Lista de verificação confirmada para a repetição da preparação, associado aos ensaios de bancada seguintes.)"
+        "Peça a um Gerente de Laboratório para reabrir a etapa de preparação com um motivo escrito, de modo a criar uma nova tentativa de preparação mantendo o comprovativo original preservado no histórico. (Esperado: A tarefa de preparação volta a aparecer no Workbench para a nova tentativa.)",
+        "Realize a secagem ou crivagem física na porção de substituição, introduza as novas medições no Workbench, assinale a Lista de verificação operacional. Clique em Confirmar que o trabalho está concluído. (Esperado: É registado um novo comprovativo Lista de verificação confirmada para a repetição da preparação, associado aos ensaios de bancada seguintes.)"
       ],
       "caution": "Etiquete sempre o frasco preparado de novo e marque qualquer frasco contaminado como retirado em Recipientes e alíquotas.",
       "related": [
@@ -2789,7 +2789,7 @@
       "category": "bench",
       "kind": "guide",
       "title": "Encontrar o trabalho atribuído a si",
-      "summary": "Encontre as amostras e corridas analíticas que lhe foram atribuídas em Meu trabalho e no Bancada de trabalho.",
+      "summary": "Encontre as amostras e corridas analíticas que lhe foram atribuídas em Meu trabalho e no Workbench.",
       "roles": [
         "LAB_TECHNICIAN",
         "LAB_MANAGER"
@@ -2797,11 +2797,11 @@
       "keywords": [
         "bench-find",
         "bench",
-        "Bancada de trabalho",
+        "workbench",
         "my-work"
       ],
       "minutes": 3,
-      "quick": "Abra Meu trabalho ou Bancada de trabalho, selecione o seu método no seletor da folha de trabalho. Verifique os filtros de estado e atribuição para ver quais as amostras que estão prontas para análise hoje.",
+      "quick": "Abra Meu trabalho ou Workbench, selecione o seu método no seletor da folha de trabalho. Verifique os filtros de estado e atribuição para ver quais as amostras que estão prontas para análise hoje.",
       "before": [
         "Verifique a barra superior para confirmar o nome do seu laboratório ativo.",
         "Limpe qualquer texto de pesquisa antigo ou filtro de projeto da sessão anterior."
@@ -2811,7 +2811,7 @@
           "title": "Procedimento passo a passo",
           "steps": [
             {
-              "action": "Clique em Meu trabalho ou Bancada de trabalho no menu lateral. Verifique os separadores da fila e o seletor de método.",
+              "action": "Clique em Meu trabalho ou Workbench no menu lateral. Verifique os separadores da fila e o seletor de método.",
               "expected": "Vê as tarefas de preparação e os ensaios analíticos atribuídos a si ou abertos para a sua equipa de bancada."
             },
             {
@@ -2832,24 +2832,24 @@
           "Destaca tarefas em atraso e quaisquer itens marcados como Devolvido por um revisor para correção."
         ],
         [
-          "Bancada de trabalho",
+          "Workbench",
           "Ecrã principal de bancada para listas de verificação de preparação, folhas de trabalho e Corridas Analíticas",
           "Agrupa as amostras por método para que possa introduzir ou colar um lote completo de uma só vez."
         ],
         [
           "Tipo de trabalho:",
-          "Lista pendente no Bancada de trabalho para alternar entre tarefas de preparação e métodos analíticos",
+          "Lista pendente no Workbench para alternar entre tarefas de preparação e métodos analíticos",
           "Selecione a variante exata do método correspondente ao procedimento operacional da sua bancada."
         ]
       ],
-      "example": "Abra o Bancada de trabalho, escolha pH (1:2.5 água) no seletor de método, veja 18 amostras prontas e 2 amostras marcadas como Devolvido para repetição e inicie a corrida de bancada.",
+      "example": "Abra o Workbench, escolha pH (1:2.5 água) no seletor de método, veja 18 amostras prontas e 2 amostras marcadas como Devolvido para repetição e inicie a corrida de bancada.",
       "success": "Localizou todas as amostras prontas para o seu método e confirmou que nenhuma está oculta por filtros antigos.",
-      "nextActor": "O Técnico de Laboratório inicia a corrida no Bancada de trabalho",
+      "nextActor": "O Técnico de Laboratório inicia a corrida no Workbench",
       "problems": [
         {
           "symptom": "Uma amostra que sabe que chegou ontem não aparece na folha de trabalho do seu método.",
           "why": "A amostra ainda não foi atribuída a esse método, ainda se encontra na Recepção de amostras ou está oculta por um filtro ativo na fila.",
-          "action": "Limpe os filtros no Bancada de trabalho ou procure a amostra no Registo de amostras para consultar o separador Trabalhos e resultados."
+          "action": "Limpe os filtros no Workbench ou procure a amostra no Registo de amostras para consultar o separador Trabalhos e resultados."
         }
       ],
       "sources": [
@@ -2859,11 +2859,11 @@
         "client/src/components/workbench/ReviewSubmissionView.jsx"
       ],
       "steps": [
-        "Clique em Meu trabalho ou Bancada de trabalho no menu lateral. Verifique os separadores da fila e o seletor de método. (Esperado: Vê as tarefas de preparação e os ensaios analíticos atribuídos a si ou abertos para a sua equipa de bancada.)",
+        "Clique em Meu trabalho ou Workbench no menu lateral. Verifique os separadores da fila e o seletor de método. (Esperado: Vê as tarefas de preparação e os ensaios analíticos atribuídos a si ou abertos para a sua equipa de bancada.)",
         "Filtre por método de análise (como pH, fósforo disponível Olsen ou carbono orgânico Walkley-Black) para agrupar todas as amostras prontas para uma corrida de instrumento. (Esperado: A folha de trabalho lista todas as amostras para esse método juntamente com a respetiva prontidão de preparação e prioridade.)",
         "Verifique o selo de estado em cada linha — trabalhe nas linhas que estão prontas ou marcadas como Devolvido para repetição. Deixe as linhas bloqueadas até que a respetiva porta de secagem ou crivagem esteja concluída. (Esperado: Inicia a corrida analítica com amostras que estão fisicamente preparadas e prontas na bancada.)"
       ],
-      "caution": "Confirme sempre que o nome do método e a base de extração no Bancada de trabalho correspondem à sua folha física de bancada antes de digitar resultados.",
+      "caution": "Confirme sempre que o nome do método e a base de extração no Workbench correspondem à sua folha física de bancada antes de digitar resultados.",
       "related": [
         "start-first-login",
         "quality-support"
@@ -2884,10 +2884,10 @@
       "keywords": [
         "bench-batch",
         "bench",
-        "Bancada de trabalho"
+        "workbench"
       ],
       "minutes": 6,
-      "quick": "No Bancada de trabalho, confira todas as linhas coladas ou digitadas com a sua folha de bancada, exclua quaisquer itens em falta ou bloqueados, clique em Rever conclusão. Confirme Registar. Depois abra Pronto a submeter. Clique em Enviar.",
+      "quick": "No Workbench, confira todas as linhas coladas ou digitadas com a sua folha de bancada, exclua quaisquer itens em falta ou bloqueados, clique em Rever conclusão. Confirme Registar. Depois abra Pronto a submeter. Clique em Enviar.",
       "before": [
         "Inicie sessão com a sua própria conta. Confirme o nome do laboratório na barra superior.",
         "Tenha prontos a impressão do instrumento ou folha de cálculo, os IDs das amostras e as leituras de controlo de qualidade (branco, duplicata e solo de referência).",
@@ -2899,7 +2899,7 @@
           "title": "1. Selecionar o trabalho e preparar os dados",
           "steps": [
             {
-              "action": "Abra o Bancada de trabalho. Selecione o seu método de análise no seletor da folha de trabalho. Verifique se a variante do método e a unidade apresentadas correspondem à corrida de bancada.",
+              "action": "Abra o Workbench. Selecione o seu método de análise no seletor da folha de trabalho. Verifique se a variante do método e a unidade apresentadas correspondem à corrida de bancada.",
               "expected": "A folha de trabalho lista as amostras atribuídas para esse método exato."
             },
             {
@@ -2969,7 +2969,7 @@
         ],
         [
           "Pronto a submeter",
-          "Separadores de entrega no Bancada de trabalho para enviar o trabalho registado ao revisor",
+          "Separadores de entrega no Workbench para enviar o trabalho registado ao revisor",
           "Use Pronto a submeter para enviar corridas concluídas e Enviados e concluídos para verificar o comprovativo de envio."
         ]
       ],
@@ -2989,8 +2989,8 @@
         },
         {
           "symptom": "Digitou e guardou a folha de trabalho, mas o gerente não vê nada em Revisar envios.",
-          "why": "Guardar um rascunho ou clicar em Registar mantém o trabalho no Bancada de trabalho até que o envie a partir de Pronto a submeter.",
-          "action": "Abra Pronto a submeter no Bancada de trabalho, selecione as amostras registadas. Clique em Enviar."
+          "why": "Guardar um rascunho ou clicar em Registar mantém o trabalho no Workbench até que o envie a partir de Pronto a submeter.",
+          "action": "Abra Pronto a submeter no Workbench, selecione as amostras registadas. Clique em Enviar."
         }
       ],
       "sources": [
@@ -3001,7 +3001,7 @@
         "client/src/components/workbench/WorkbenchShell.jsx"
       ],
       "steps": [
-        "Abra o Bancada de trabalho. Selecione o seu método de análise no seletor da folha de trabalho. Verifique se a variante do método e a unidade apresentadas correspondem à corrida de bancada. (Esperado: A folha de trabalho lista as amostras atribuídas para esse método exato.)",
+        "Abra o Workbench. Selecione o seu método de análise no seletor da folha de trabalho. Verifique se a variante do método e a unidade apresentadas correspondem à corrida de bancada. (Esperado: A folha de trabalho lista as amostras atribuídas para esse método exato.)",
         "Se estiver a colar a partir do Excel ou de um ficheiro de instrumento, copie duas colunas — ID da amostra e Valor do resultado — sem linhas de cabeçalho, mantendo os IDs das amostras formatados como texto. (Esperado: Cada resultado mantém-se associado ao respetivo ID da amostra, mesmo que a folha de cálculo esteja numa ordem de linhas diferente.)",
         "Clique em Colar valores, cole as duas colunas na caixa. Clique em Ver correspondências e exclusões. (Esperado: A pré-visualização destaca as linhas correspondentes a verde e explica quaisquer IDs duplicados, amostras não atribuídas, números inválidos ou linhas bloqueadas.)",
         "Compare as linhas correspondentes e as linhas excluídas com a sua folha de bancada e corrija qualquer erro de digitação na origem. (Esperado: Todas as linhas da folha de cálculo são verificadas antes de aplicar os valores.)",
@@ -3022,7 +3022,7 @@
       "category": "bench",
       "kind": "guide",
       "title": "Introduzir um resultado com os metadados obrigatórios",
-      "summary": "Digite o resultado de uma única amostra no Bancada de trabalho juntamente com o instrumento, unidades, base de humidade e ligações de controlo de qualidade.",
+      "summary": "Digite o resultado de uma única amostra no Workbench juntamente com o instrumento, unidades, base de humidade e ligações de controlo de qualidade.",
       "roles": [
         "LAB_TECHNICIAN",
         "LAB_MANAGER"
@@ -3030,10 +3030,10 @@
       "keywords": [
         "bench-single",
         "bench",
-        "Bancada de trabalho"
+        "workbench"
       ],
       "minutes": 3,
-      "quick": "No Bancada de trabalho, localize a linha da amostra na folha de trabalho do método, selecione o instrumento calibrado e o lote de reagente, digite a medição na unidade apresentada, clique em Rever conclusão para a registar e envie-a em Pronto a submeter.",
+      "quick": "No Workbench, localize a linha da amostra na folha de trabalho do método, selecione o instrumento calibrado e o lote de reagente, digite a medição na unidade apresentada, clique em Rever conclusão para a registar e envie-a em Pronto a submeter.",
       "before": [
         "Confirme que a Secagem ao ar e a Preparação de amostras estão marcadas como Lista de verificação confirmada para a amostra.",
         "Verifique se o instrumento utilizado está listado como Pronto / Calibrado em Equipamento."
@@ -3043,7 +3043,7 @@
           "title": "Procedimento passo a passo",
           "steps": [
             {
-              "action": "Abra o Bancada de trabalho, selecione o seu método analítico e encontre a linha da amostra digitalizando o código de barras ou digitando o Código de Amostra do Laboratório.",
+              "action": "Abra o Workbench, selecione o seu método analítico e encontre a linha da amostra digitalizando o código de barras ou digitando o Código de Amostra do Laboratório.",
               "expected": "A linha da amostra abre-se mostrando o campo de introdução obrigatório, a unidade, a base de humidade e o seletor de instrumento."
             },
             {
@@ -3074,7 +3074,7 @@
           "As repetições são registadas como uma nova tentativa. Assim, as medições anteriores permaneçam intactas no registo de auditoria."
         ]
       ],
-      "example": "No Bancada de trabalho, introduza pH = 6.42 para a amostra DEMO-26-000142 usando o medidor de pH calibrado EQ-PH-01, registe a determinação em Rever conclusão e envie-a em Pronto a submeter.",
+      "example": "No Workbench, introduza pH = 6.42 para a amostra DEMO-26-000142 usando o medidor de pH calibrado EQ-PH-01, registe a determinação em Rever conclusão e envie-a em Pronto a submeter.",
       "success": "O resultado individual, a associação ao instrumento e os metadados ficam registados e são enviados para a fila do revisor.",
       "nextActor": "Oficial de Qualidade e Auditoria ou Gerente de Laboratório na Lista de tarefas",
       "problems": [
@@ -3091,7 +3091,7 @@
         "client/src/components/workbench/ReviewSubmissionView.jsx"
       ],
       "steps": [
-        "Abra o Bancada de trabalho, selecione o seu método analítico e encontre a linha da amostra digitalizando o código de barras ou digitando o Código de Amostra do Laboratório. (Esperado: A linha da amostra abre-se mostrando o campo de introdução obrigatório, a unidade, a base de humidade e o seletor de instrumento.)",
+        "Abra o Workbench, selecione o seu método analítico e encontre a linha da amostra digitalizando o código de barras ou digitando o Código de Amostra do Laboratório. (Esperado: A linha da amostra abre-se mostrando o campo de introdução obrigatório, a unidade, a base de humidade e o seletor de instrumento.)",
         "Digite o valor medido, escolha o instrumento calibrado e o lote ativo de reagente ou material de referência. Selecione um qualificador (como < LD ou < LQ) se a leitura estiver abaixo do limite de deteção. (Esperado: O valor é guardado como rascunho na folha de trabalho e verificado face aos limites do intervalo plausível.)",
         "Clique em Rever conclusão. Confirme Registar. Depois abra Pronto a submeter. Clique em Enviar. (Esperado: O resultado avança de rascunho guardado para Registrado e depois Enviado para revisão técnica.)"
       ],
@@ -3116,13 +3116,13 @@
       "keywords": [
         "bench-paste",
         "bench",
-        "Bancada de trabalho"
+        "workbench"
       ],
       "minutes": 3,
-      "quick": "No Bancada de trabalho, clique em Colar valores, cole duas colunas separadas por tabulação ou vírgula (ID da amostra e Valor do resultado), clique em Ver correspondências e exclusões, verifique todas as linhas correspondentes e excluídas. Clique em Aplicar.",
+      "quick": "No Workbench, clique em Colar valores, cole duas colunas separadas por tabulação ou vírgula (ID da amostra e Valor do resultado), clique em Ver correspondências e exclusões, verifique todas as linhas correspondentes e excluídas. Clique em Aplicar.",
       "before": [
         "Formate a coluna ID da amostra na sua folha de cálculo como texto para preservar os zeros à esquerda.",
-        "Certifique-se de que todas as linhas da lista a colar pertencem à mesma variante de método e unidade apresentadas no Bancada de trabalho."
+        "Certifique-se de que todas as linhas da lista a colar pertencem à mesma variante de método e unidade apresentadas no Workbench."
       ],
       "sections": [
         {
@@ -3130,11 +3130,11 @@
           "steps": [
             {
               "action": "Na sua folha de cálculo, selecione as duas colunas de dados (ID da amostra na coluna 1 e Valor do resultado na coluna 2, sem cabeçalhos de coluna) e copie-as.",
-              "expected": "A área de transferência guarda pares limpos de ID e valor prontos para o Bancada de trabalho."
+              "expected": "A área de transferência guarda pares limpos de ID e valor prontos para o Workbench."
             },
             {
-              "action": "No Bancada de trabalho, clique em Colar valores, cole o texto na caixa de introdução. Clique em Ver correspondências e exclusões.",
-              "expected": "O Bancada de trabalho associa cada ID da amostra à respetiva linha independentemente da ordem na folha de cálculo e lista quaisquer linhas sem correspondência, duplicadas ou bloqueadas."
+              "action": "No Workbench, clique em Colar valores, cole o texto na caixa de introdução. Clique em Ver correspondências e exclusões.",
+              "expected": "O Workbench associa cada ID da amostra à respetiva linha independentemente da ordem na folha de cálculo e lista quaisquer linhas sem correspondência, duplicadas ou bloqueadas."
             },
             {
               "action": "Corrija qualquer ID duplicado ou erro de digitação na folha de cálculo se necessário. Clique em Aplicar para preencher as linhas correspondentes da folha de trabalho.",
@@ -3146,7 +3146,7 @@
       "fields": [
         [
           "Colar valores",
-          "Botão de introdução em lote na barra de ferramentas do Bancada de trabalho",
+          "Botão de introdução em lote na barra de ferramentas do Workbench",
           "Aceita dados em duas colunas copiados do Excel, Calc ou exportações CSV de instrumentos."
         ],
         [
@@ -3177,8 +3177,8 @@
         "client/src/components/workbench/ReviewSubmissionView.jsx"
       ],
       "steps": [
-        "Na sua folha de cálculo, selecione as duas colunas de dados (ID da amostra na coluna 1 e Valor do resultado na coluna 2, sem cabeçalhos de coluna) e copie-as. (Esperado: A área de transferência guarda pares limpos de ID e valor prontos para o Bancada de trabalho.)",
-        "No Bancada de trabalho, clique em Colar valores, cole o texto na caixa de introdução. Clique em Ver correspondências e exclusões. (Esperado: O Bancada de trabalho associa cada ID da amostra à respetiva linha independentemente da ordem na folha de cálculo e lista quaisquer linhas sem correspondência, duplicadas ou bloqueadas.)",
+        "Na sua folha de cálculo, selecione as duas colunas de dados (ID da amostra na coluna 1 e Valor do resultado na coluna 2, sem cabeçalhos de coluna) e copie-as. (Esperado: A área de transferência guarda pares limpos de ID e valor prontos para o Workbench.)",
+        "No Workbench, clique em Colar valores, cole o texto na caixa de introdução. Clique em Ver correspondências e exclusões. (Esperado: O Workbench associa cada ID da amostra à respetiva linha independentemente da ordem na folha de cálculo e lista quaisquer linhas sem correspondência, duplicadas ou bloqueadas.)",
         "Corrija qualquer ID duplicado ou erro de digitação na folha de cálculo se necessário. Clique em Aplicar para preencher as linhas correspondentes da folha de trabalho. (Esperado: As linhas correspondentes são preenchidas como rascunhos guardados prontos para Rever conclusão.)"
       ],
       "caution": "Nunca cole valores apenas pela posição — inclua sempre a coluna ID da amostra para que Ver correspondências e exclusões possa confirmar cada associação.",
@@ -3202,14 +3202,14 @@
       "keywords": [
         "bench-states",
         "bench",
-        "Bancada de trabalho",
+        "workbench",
         "samplesid"
       ],
       "minutes": 3,
       "quick": "Digitar ou aplicar valores cria um Rascunho salvo na bancada. Clicar em Rever conclusão → Registar fixa a medição na bancada. Clicar em Enviar em Pronto a submeter entrega-a ao gerente. A aprovação do gerente marca-a como Aprovado.",
       "before": [
-        "Abra o Bancada de trabalho e observe o selo de estado em cada linha da folha de trabalho.",
-        "Verifique os separadores no topo do Bancada de trabalho (folha de trabalho, Pronto a submeter e Enviados e concluídos)."
+        "Abra o Workbench e observe o selo de estado em cada linha da folha de trabalho.",
+        "Verifique os separadores no topo do Workbench (folha de trabalho, Pronto a submeter e Enviados e concluídos)."
       ],
       "sections": [
         {
@@ -3254,7 +3254,7 @@
         {
           "symptom": "Terminou de registar o seu lote, mas o gerente diz que Revisar envios continua vazio.",
           "why": "Clicar em Registar em Rever conclusão conclui a Etapa 3 na bancada, mas a Etapa 4 (Enviar em Pronto a submeter) ainda não foi clicada.",
-          "action": "Abra o separador Pronto a submeter no Bancada de trabalho, selecione as amostras registadas. Clique em Enviar."
+          "action": "Abra o separador Pronto a submeter no Workbench, selecione as amostras registadas. Clique em Enviar."
         }
       ],
       "sources": [
@@ -3289,10 +3289,10 @@
       "keywords": [
         "bench-submit",
         "bench",
-        "Bancada de trabalho"
+        "workbench"
       ],
       "minutes": 3,
-      "quick": "Abra o separador Pronto a submeter no Bancada de trabalho, verifique quais as determinações incluídas para cada amostra (e se o envio é total ou parcial), adicione eventuais notas de bancada para o revisor, clique em Enviar. Consulte Enviados e concluídos.",
+      "quick": "Abra o separador Pronto a submeter no Workbench, verifique quais as determinações incluídas para cada amostra (e se o envio é total ou parcial), adicione eventuais notas de bancada para o revisor, clique em Enviar. Consulte Enviados e concluídos.",
       "before": [
         "Confirme que já clicou em Rever conclusão e registou as suas determinações.",
         "Verifique se as linhas de controlo de qualidade do lote (Branco, Duplicata e Solo de Referência) estão registadas para a corrida."
@@ -3302,7 +3302,7 @@
           "title": "Procedimento passo a passo",
           "steps": [
             {
-              "action": "Clique no separador Pronto a submeter no Bancada de trabalho e reveja a lista de amostras com determinações registadas.",
+              "action": "Clique no separador Pronto a submeter no Workbench e reveja a lista de amostras com determinações registadas.",
               "expected": "Cada cartão de amostra mostra quais os ensaios prontos a enviar agora e se outros ensaios atribuídos a essa amostra ainda estão pendentes."
             },
             {
@@ -3319,7 +3319,7 @@
       "fields": [
         [
           "Pronto a submeter",
-          "Separador do Bancada de trabalho que lista todas as determinações registadas a aguardar envio para um revisor",
+          "Separador do Workbench que lista todas as determinações registadas a aguardar envio para um revisor",
           "Mostra com clareza os envios totais e parciais de amostras."
         ],
         [
@@ -3329,7 +3329,7 @@
         ],
         [
           "Enviados e concluídos",
-          "Separador do Bancada de trabalho que mostra o trabalho já enviado e os respetivos comprovativos",
+          "Separador do Workbench que mostra o trabalho já enviado e os respetivos comprovativos",
           "Consulte este separador sempre que quiser confirmar que um lote foi enviado."
         ]
       ],
@@ -3350,7 +3350,7 @@
         "client/src/components/workbench/ReviewSubmissionView.jsx"
       ],
       "steps": [
-        "Clique no separador Pronto a submeter no Bancada de trabalho e reveja a lista de amostras com determinações registadas. (Esperado: Cada cartão de amostra mostra quais os ensaios prontos a enviar agora e se outros ensaios atribuídos a essa amostra ainda estão pendentes.)",
+        "Clique no separador Pronto a submeter no Workbench e reveja a lista de amostras com determinações registadas. (Esperado: Cada cartão de amostra mostra quais os ensaios prontos a enviar agora e se outros ensaios atribuídos a essa amostra ainda estão pendentes.)",
         "Escreva uma nota clara de bancada caso o revisor deva ter conhecimento de uma diluição, interferência de cor ou condição da amostra, assinale a caixa de confirmação. Clique em Enviar. (Esperado: O servidor confirma a entrega e atribui um comprovativo de envio.)",
         "Clique em Enviados e concluídos para visualizar os itens enviados e as respetivas datas e horas de confirmação. (Esperado: Tem a prova de que o lote foi entregue em Revisar envios na Lista de tarefas.)"
       ],
@@ -3367,7 +3367,7 @@
       "category": "bench",
       "kind": "guide",
       "title": "Corrigir trabalho devolvido por um revisor",
-      "summary": "Leia a nota de devolução do revisor. Registe uma nova tentativa de repetição no Bancada de trabalho sem apagar a medição original.",
+      "summary": "Leia a nota de devolução do revisor. Registe uma nova tentativa de repetição no Workbench sem apagar a medição original.",
       "roles": [
         "LAB_TECHNICIAN",
         "LAB_MANAGER"
@@ -3375,11 +3375,11 @@
       "keywords": [
         "bench-returned",
         "bench",
-        "Bancada de trabalho",
+        "workbench",
         "manager-queue"
       ],
       "minutes": 3,
-      "quick": "Quando um revisor devolver um resultado, abra o item em Meu trabalho ou no Bancada de trabalho, leia a faixa com o motivo da devolução, realize a verificação ou nova análise solicitada na nova tentativa (Tentativa n.º 2). Registe e envie o resultado corrigido.",
+      "quick": "Quando um revisor devolver um resultado, abra o item em Meu trabalho ou no Workbench, leia a faixa com o motivo da devolução, realize a verificação ou nova análise solicitada na nova tentativa (Tentativa n.º 2). Registe e envie o resultado corrigido.",
       "before": [
         "Leia atentamente o comentário de devolução do revisor para saber se deve verificar um cálculo/diluição ou repetir a análise do solo a partir do frasco.",
         "Verifique se tem o frasco correto da amostra e o instrumento calibrado prontos."
@@ -3389,7 +3389,7 @@
           "title": "Procedimento passo a passo",
           "steps": [
             {
-              "action": "Abra Meu trabalho ou Bancada de trabalho e localize o item marcado como Devolvido.",
+              "action": "Abra Meu trabalho ou Workbench e localize o item marcado como Devolvido.",
               "expected": "A linha apresenta o motivo de devolução escrito pelo revisor e abre uma nova tentativa editável (como Tentativa n.º 2), mantendo a Tentativa n.º 1 selada."
             },
             {
@@ -3427,7 +3427,7 @@
         {
           "symptom": "Clica na Tentativa n.º 1 de uma amostra devolvida e a caixa de valor não permite digitar.",
           "why": "As tentativas anteriores ficam seladas permanentemente após o envio. Assim, o laboratório nunca perca dados históricos.",
-          "action": "Selecione a nova tentativa ativa (Tentativa n.º 2) na linha do Bancada de trabalho para introduzir a sua medição de repetição."
+          "action": "Selecione a nova tentativa ativa (Tentativa n.º 2) na linha do Workbench para introduzir a sua medição de repetição."
         }
       ],
       "sources": [
@@ -3437,7 +3437,7 @@
         "client/src/components/workbench/ReviewSubmissionView.jsx"
       ],
       "steps": [
-        "Abra Meu trabalho ou Bancada de trabalho e localize o item marcado como Devolvido. (Esperado: A linha apresenta o motivo de devolução escrito pelo revisor e abre uma nova tentativa editável (como Tentativa n.º 2), mantendo a Tentativa n.º 1 selada.)",
+        "Abra Meu trabalho ou Workbench e localize o item marcado como Devolvido. (Esperado: A linha apresenta o motivo de devolução escrito pelo revisor e abre uma nova tentativa editável (como Tentativa n.º 2), mantendo a Tentativa n.º 1 selada.)",
         "Realize a nova medição ou correção solicitada pelo revisor. Introduza o novo valor, o instrumento e o controlo de qualidade do lote na tentativa ativa. (Esperado: A nova tentativa é guardada na folha de trabalho juntamente com o histórico preservado da tentativa anterior.)",
         "Clique em Rever conclusão → Registar. Depois abra Pronto a submeter, adicione uma nota a explicar o que corrigiu. Clique em Enviar. (Esperado: A nova tentativa é enviada para Revisar envios e o alerta Devolvido desaparece da sua fila.)"
       ],
@@ -3454,7 +3454,7 @@
       "category": "bench",
       "kind": "guide",
       "title": "Descobrir por que motivo a introdução de resultados está bloqueada",
-      "summary": "Descubra por que razão uma linha de ensaio está bloqueada no Bancada de trabalho e qual a etapa que a desbloqueia.",
+      "summary": "Descubra por que razão uma linha de ensaio está bloqueada no Workbench e qual a etapa que a desbloqueia.",
       "roles": [
         "LAB_TECHNICIAN",
         "LAB_MANAGER"
@@ -3462,7 +3462,7 @@
       "keywords": [
         "bench-blocked",
         "bench",
-        "Bancada de trabalho"
+        "workbench"
       ],
       "minutes": 3,
       "quick": "Quando uma linha da folha de trabalho estiver bloqueada, leia o selo de bloqueio na linha (ou clique no Botão de Ajuda na página): este indicará se a amostra ainda aguarda Secagem ao ar, Preparação de amostras, verificação da porta pelo gerente, atribuição de trabalho ou calibração do instrumento.",
@@ -3475,16 +3475,16 @@
           "title": "Procedimento passo a passo",
           "steps": [
             {
-              "action": "No Bancada de trabalho (ou no separador Trabalhos e resultados da amostra), leia a mensagem de bloqueio apresentada na linha bloqueada.",
+              "action": "No Workbench (ou no separador Trabalhos e resultados da amostra), leia a mensagem de bloqueio apresentada na linha bloqueada.",
               "expected": "A mensagem identifica o requisito específico em falta: receção, Secagem ao ar, Preparação de amostras, verificação do gerente, atribuição ou prontidão de Equipamento."
             },
             {
-              "action": "Se a Secagem ao ar ou a Preparação de amostras ainda estiver aberta, mude Tipo de trabalho: no Bancada de trabalho para essa etapa de preparação e conclua-a. Confirme-a primeiro.",
+              "action": "Se a Secagem ao ar ou a Preparação de amostras ainda estiver aberta, mude Tipo de trabalho: no Workbench para essa etapa de preparação e conclua-a. Confirme-a primeiro.",
               "expected": "Confirmar a etapa de preparação em falta (e obter a verificação do gerente se exigido pelas Políticas) remove o bloqueio de pré-requisito."
             },
             {
               "action": "Se o bloqueio indicar que o instrumento está com Calibração Expirada / Bloqueado, abra Equipamento. Registe uma Calibração atual ou selecione outro instrumento Pronto / Calibrado.",
-              "expected": "Assim que o pré-requisito ou a verificação do instrumento é cumprido, a linha de ensaio fica desbloqueada no Bancada de trabalho."
+              "expected": "Assim que o pré-requisito ou a verificação do instrumento é cumprido, a linha de ensaio fica desbloqueada no Workbench."
             }
           ]
         }
@@ -3508,10 +3508,10 @@
       ],
       "example": "Veja que a introdução de pH para DEMO-26-000142 está bloqueada por Preparação de amostras, mude Tipo de trabalho: para Preparação de amostras, confirme a crivagem a 2 mm e regresse à linha de pH desbloqueada.",
       "success": "Resolve a causa real do bloqueio em poucos cliques e prossegue a corrida em segurança.",
-      "nextActor": "Técnico de Preparação, Técnico de Bancada de trabalho ou Gerente de Laboratório, consoante o bloqueio",
+      "nextActor": "Técnico de Preparação, Técnico de Bancada ou Gerente de Laboratório, consoante o bloqueio",
       "problems": [
         {
-          "symptom": "Um técnico abre o Registo de amostras na esperança de digitar aí os resultados porque o Bancada de trabalho está bloqueado.",
+          "symptom": "Um técnico abre o Registo de amostras na esperança de digitar aí os resultados porque o Workbench está bloqueado.",
           "why": "As mesmas regras de prontidão protegem todos os ecrãs do sistema para que solo não seco ou não crivado nunca seja analisado prematuramente.",
           "action": "Siga a mensagem de bloqueio para concluir ou verificar a etapa aberta de preparação ou equipamento no ecrã adequado."
         }
@@ -3523,11 +3523,11 @@
         "client/src/components/workbench/ReviewSubmissionView.jsx"
       ],
       "steps": [
-        "No Bancada de trabalho (ou no separador Trabalhos e resultados da amostra), leia a mensagem de bloqueio apresentada na linha bloqueada. (Esperado: A mensagem identifica o requisito específico em falta: receção, Secagem ao ar, Preparação de amostras, verificação do gerente, atribuição ou prontidão de Equipamento.)",
-        "Se a Secagem ao ar ou a Preparação de amostras ainda estiver aberta, mude Tipo de trabalho: no Bancada de trabalho para essa etapa de preparação e conclua-a. Confirme-a primeiro. (Esperado: Confirmar a etapa de preparação em falta (e obter a verificação do gerente se exigido pelas Políticas) remove o bloqueio de pré-requisito.)",
-        "Se o bloqueio indicar que o instrumento está com Calibração Expirada / Bloqueado, abra Equipamento. Registe uma Calibração atual ou selecione outro instrumento Pronto / Calibrado. (Esperado: Assim que o pré-requisito ou a verificação do instrumento é cumprido, a linha de ensaio fica desbloqueada no Bancada de trabalho.)"
+        "No Workbench (ou no separador Trabalhos e resultados da amostra), leia a mensagem de bloqueio apresentada na linha bloqueada. (Esperado: A mensagem identifica o requisito específico em falta: receção, Secagem ao ar, Preparação de amostras, verificação do gerente, atribuição ou prontidão de Equipamento.)",
+        "Se a Secagem ao ar ou a Preparação de amostras ainda estiver aberta, mude Tipo de trabalho: no Workbench para essa etapa de preparação e conclua-a. Confirme-a primeiro. (Esperado: Confirmar a etapa de preparação em falta (e obter a verificação do gerente se exigido pelas Políticas) remove o bloqueio de pré-requisito.)",
+        "Se o bloqueio indicar que o instrumento está com Calibração Expirada / Bloqueado, abra Equipamento. Registe uma Calibração atual ou selecione outro instrumento Pronto / Calibrado. (Esperado: Assim que o pré-requisito ou a verificação do instrumento é cumprido, a linha de ensaio fica desbloqueada no Workbench.)"
       ],
-      "caution": "Cada bloqueio no Bancada de trabalho aponta para uma etapa específica em falta — conclua essa etapa em vez de procurar um atalho.",
+      "caution": "Cada bloqueio no Workbench aponta para uma etapa específica em falta — conclua essa etapa em vez de procurar um atalho.",
       "related": [
         "start-first-login",
         "quality-support"
@@ -3548,7 +3548,7 @@
       "keywords": [
         "bench-qualifiers",
         "bench",
-        "Bancada de trabalho"
+        "workbench"
       ],
       "minutes": 3,
       "quick": "Quando a leitura de uma amostra estiver abaixo do limite de deteção ou de quantificação do método, selecione o qualificador < LD ou < LQ na linha em vez de digitar 0. Se uma amostra não tiver sido medida na corrida de hoje, deixe-a em branco e exclua-a do envio de hoje.",
@@ -3634,10 +3634,10 @@
       "keywords": [
         "bench-concurrent",
         "bench",
-        "Bancada de trabalho"
+        "workbench"
       ],
       "minutes": 3,
-      "quick": "Se aparecer uma mensagem de conflito ao guardar ou de tempo limite de rede no Bancada de trabalho, não feche o separador nem volte a colar às cegas. Mantenha a folha de bancada à mão, atualize ou inspecione o estado mais recente do servidor na linha e volte a aplicar apenas as linhas que ainda não foram guardadas.",
+      "quick": "Se aparecer uma mensagem de conflito ao guardar ou de tempo limite de rede no Workbench, não feche o separador nem volte a colar às cegas. Mantenha a folha de bancada à mão, atualize ou inspecione o estado mais recente do servidor na linha e volte a aplicar apenas as linhas que ainda não foram guardadas.",
       "before": [
         "Mantenha o caderno de bancada em papel ou a folha de cálculo aberta até ver Enviados e concluídos.",
         "Coordene com os colegas de bancada para que duas pessoas não digitem exatamente no mesmo lote de corrida ao mesmo tempo."
@@ -3647,7 +3647,7 @@
           "title": "Procedimento passo a passo",
           "steps": [
             {
-              "action": "Se o Bancada de trabalho avisar que uma linha foi atualizada por outro utilizador ou que um pedido excedeu o tempo limite, copie ou mantenha visíveis os números não guardados antes de atualizar.",
+              "action": "Se o Workbench avisar que uma linha foi atualizada por outro utilizador ou que um pedido excedeu o tempo limite, copie ou mantenha visíveis os números não guardados antes de atualizar.",
               "expected": "As suas medições permanecem seguras na folha de cálculo ou folha de bancada enquanto verifica o que o servidor já guardou."
             },
             {
@@ -3674,7 +3674,7 @@
         ],
         [
           "Enviados e concluídos",
-          "Separador do Bancada de trabalho que mostra os envios confirmados",
+          "Separador do Workbench que mostra os envios confirmados",
           "Verifique primeiro aqui se tiver ocorrido uma falha de rede no exato momento em que clicou em Enviar."
         ]
       ],
@@ -3683,9 +3683,9 @@
       "nextActor": "Técnico de Laboratório ou Gerente de Laboratório",
       "problems": [
         {
-          "symptom": "Tenta guardar um rascunho numa linha e o Bancada de trabalho indica que o estado da tarefa mudou.",
+          "symptom": "Tenta guardar um rascunho numa linha e o Workbench indica que o estado da tarefa mudou.",
           "why": "Um gerente reatribuiu a tarefa ou outro técnico registou e enviou essa linha a partir de um segundo terminal enquanto o seu separador estava aberto.",
-          "action": "Atualize o Bancada de trabalho para ver o responsável e o estado atuais antes de realizar qualquer outra ação."
+          "action": "Atualize o Workbench para ver o responsável e o estado atuais antes de realizar qualquer outra ação."
         }
       ],
       "sources": [
@@ -3695,7 +3695,7 @@
         "client/src/components/workbench/ReviewSubmissionView.jsx"
       ],
       "steps": [
-        "Se o Bancada de trabalho avisar que uma linha foi atualizada por outro utilizador ou que um pedido excedeu o tempo limite, copie ou mantenha visíveis os números não guardados antes de atualizar. (Esperado: As suas medições permanecem seguras na folha de cálculo ou folha de bancada enquanto verifica o que o servidor já guardou.)",
+        "Se o Workbench avisar que uma linha foi atualizada por outro utilizador ou que um pedido excedeu o tempo limite, copie ou mantenha visíveis os números não guardados antes de atualizar. (Esperado: As suas medições permanecem seguras na folha de cálculo ou folha de bancada enquanto verifica o que o servidor já guardou.)",
         "Recarregue a folha de trabalho. Verifique os selos de estado das linhas (Rascunho salvo, Registrado ou Enviados e concluídos) e as respetivas datas e horas. (Esperado: Consegue ver de imediato se o clique anterior teve sucesso antes da falha de ligação ou se um colega já registou a linha.)",
         "Introduza ou aplique apenas as linhas que ainda não estão registadas e. Conclua Rever conclusão e Pronto a submeter. (Esperado: O lote é concluído sem tentativas duplicadas nem substituição de registos de colegas.)"
       ],
@@ -3721,13 +3721,13 @@
       "keywords": [
         "method-ph",
         "methods",
-        "Bancada de trabalho",
+        "workbench",
         "adminmethods"
       ],
       "minutes": 3,
-      "quick": "No Bancada de trabalho, selecione a variante exata do método de pH solicitada para a amostra (por exemplo, H2O 1:2.5 vs. CaCl2 0.01 M), confirme que o medidor de pH mostra Pronto / Calibrado, registe as verificações de tampão e os controlos de qualidade do lote e envie a corrida.",
+      "quick": "No Workbench, selecione a variante exata do método de pH solicitada para a amostra (por exemplo, H2O 1:2.5 vs. CaCl2 0.01 M), confirme que o medidor de pH mostra Pronto / Calibrado, registe as verificações de tampão e os controlos de qualidade do lote e envie a corrida.",
       "before": [
-        "Verifique o cabeçalho do método no Bancada de trabalho para confirmar se a corrida é de pH em água (H2O), CaCl2 ou KCl e qual a razão solo:solução.",
+        "Verifique o cabeçalho do método no Workbench para confirmar se a corrida é de pH em água (H2O), CaCl2 ou KCl e qual a razão solo:solução.",
         "Calibre o elétrodo de pH com soluções tampão frescas. Registe a calibração em Equipamento, se necessário."
       ],
       "sections": [
@@ -3735,12 +3735,12 @@
           "title": "Procedimento passo a passo",
           "steps": [
             {
-              "action": "Abra o Bancada de trabalho. Escolha a variante específica do método de pH atribuída às suas amostras.",
+              "action": "Abra o Workbench. Escolha a variante específica do método de pH atribuída às suas amostras.",
               "expected": "Apenas as amostras solicitadas para esse método exato de extração de pH aparecem na folha de trabalho."
             },
             {
               "action": "Selecione o medidor de pH calibrado, introduza as leituras de Branco, Duplicata e Solo de Referência do lote juntamente com os valores de pH das amostras (e a temperatura da suspensão, se registada).",
-              "expected": "O Bancada de trabalho verifica cada leitura face aos limites plausíveis de pH e avalia a repetibilidade da duplicata e os valores-alvo do solo de referência."
+              "expected": "O Workbench verifica cada leitura face aos limites plausíveis de pH e avalia a repetibilidade da duplicata e os valores-alvo do solo de referência."
             },
             {
               "action": "Clique em Rever conclusão → Registar. Depois abra Pronto a submeter. Clique em Enviar.",
@@ -3766,13 +3766,13 @@
           "Verificadas automaticamente face aos limites de repetibilidade de pH e da carta de controlo do laboratório."
         ]
       ],
-      "example": "Selecione pH (H2O 1:2.5) no Bancada de trabalho, associe o medidor de pH EQ-PH-01, introduza Solo de Referência = 6.10, par de Duplicata = 6.42 / 6.45 e 18 leituras de amostras. Depois registe e envie.",
+      "example": "Selecione pH (H2O 1:2.5) no Workbench, associe o medidor de pH EQ-PH-01, introduza Solo de Referência = 6.10, par de Duplicata = 6.42 / 6.45 e 18 leituras de amostras. Depois registe e envie.",
       "success": "As medições de pH do solo ficam registadas no método de extração correto com calibração do elétrodo e controlo de qualidade verificados.",
       "nextActor": "Oficial de Qualidade e Auditoria ou Gerente de Laboratório em Revisar envios",
       "problems": [
         {
-          "symptom": "A sua folha de bancada tem colunas para pH em água e pH em CaCl2, mas só vê uma coluna de pH no Bancada de trabalho.",
-          "why": "Cada método de extração de pH tem a sua própria folha de trabalho separada no Bancada de trabalho para manter distintos os métodos e as regras de CQ.",
+          "symptom": "A sua folha de bancada tem colunas para pH em água e pH em CaCl2, mas só vê uma coluna de pH no Workbench.",
+          "why": "Cada método de extração de pH tem a sua própria folha de trabalho separada no Workbench para manter distintos os métodos e as regras de CQ.",
           "action": "Cole ou introduza primeiro a coluna de pH em água na folha de trabalho de pH em água e. Mude o seletor de método para pH em CaCl2 para introduzir a segunda coluna."
         }
       ],
@@ -3783,8 +3783,8 @@
         "server/services/workbenchReadinessService.js"
       ],
       "steps": [
-        "Abra o Bancada de trabalho. Escolha a variante específica do método de pH atribuída às suas amostras. (Esperado: Apenas as amostras solicitadas para esse método exato de extração de pH aparecem na folha de trabalho.)",
-        "Selecione o medidor de pH calibrado, introduza as leituras de Branco, Duplicata e Solo de Referência do lote juntamente com os valores de pH das amostras (e a temperatura da suspensão, se registada). (Esperado: O Bancada de trabalho verifica cada leitura face aos limites plausíveis de pH e avalia a repetibilidade da duplicata e os valores-alvo do solo de referência.)",
+        "Abra o Workbench. Escolha a variante específica do método de pH atribuída às suas amostras. (Esperado: Apenas as amostras solicitadas para esse método exato de extração de pH aparecem na folha de trabalho.)",
+        "Selecione o medidor de pH calibrado, introduza as leituras de Branco, Duplicata e Solo de Referência do lote juntamente com os valores de pH das amostras (e a temperatura da suspensão, se registada). (Esperado: O Workbench verifica cada leitura face aos limites plausíveis de pH e avalia a repetibilidade da duplicata e os valores-alvo do solo de referência.)",
         "Clique em Rever conclusão → Registar. Depois abra Pronto a submeter. Clique em Enviar. (Esperado: O lote de pH é enviado sob a sua variante exata de método. Assim, o pH em água e o pH em solução salina nunca sejam misturados nos relatórios de clientes.)"
       ],
       "caution": "O pH em solução salina (CaCl2 ou KCl) é tipicamente inferior ao pH em água no mesmo solo — nunca misture as duas variantes num único lote.",
@@ -3809,12 +3809,12 @@
       "keywords": [
         "method-ec",
         "methods",
-        "Bancada de trabalho"
+        "workbench"
       ],
       "minutes": 3,
-      "quick": "No Bancada de trabalho, verifique o método de extração de CE apresentado (como extrato aquoso 1:5 vs. pasta saturada) e a unidade exigida no cabeçalho da coluna (como dS/m, mS/cm ou µS/cm) antes de digitar ou colar leituras.",
+      "quick": "No Workbench, verifique o método de extração de CE apresentado (como extrato aquoso 1:5 vs. pasta saturada) e a unidade exigida no cabeçalho da coluna (como dS/m, mS/cm ou µS/cm) antes de digitar ou colar leituras.",
       "before": [
-        "Verifique a unidade apresentada no visor do condutivímetro (µS/cm, mS/cm ou dS/m) e compare-a com a unidade indicada no Bancada de trabalho.",
+        "Verifique a unidade apresentada no visor do condutivímetro (µS/cm, mS/cm ou dS/m) e compare-a com a unidade indicada no Workbench.",
         "Confirme que a verificação de calibração da célula de condutividade e a compensação de temperatura estão ativas."
       ],
       "sections": [
@@ -3822,7 +3822,7 @@
           "title": "Procedimento passo a passo",
           "steps": [
             {
-              "action": "Abra o Bancada de trabalho. Selecione o método atribuído de condutividade elétrica (CE).",
+              "action": "Abra o Workbench. Selecione o método atribuído de condutividade elétrica (CE).",
               "expected": "O cabeçalho da folha de trabalho apresenta a razão de extração exata e a unidade padrão configurada para o laboratório."
             },
             {
@@ -3853,14 +3853,14 @@
           "Deteta rapidamente um erro de fator 1000 na escala de unidades caso µS/cm tenha sido digitado num campo em dS/m."
         ]
       ],
-      "example": "Repare que o condutivímetro lê 420 µS/cm enquanto o cabeçalho da coluna no Bancada de trabalho exige dS/m. Introduza 0.42 dS/m de acordo com a escala do Solo de Referência, registe e envie.",
+      "example": "Repare que o condutivímetro lê 420 µS/cm enquanto o cabeçalho da coluna no Workbench exige dS/m. Introduza 0.42 dS/m de acordo com a escala do Solo de Referência, registe e envie.",
       "success": "Os valores de condutividade elétrica ficam registados na escala de unidades e método de extração corretos com CQ aprovado.",
       "nextActor": "Oficial de Qualidade e Auditoria ou Gerente de Laboratório em Revisar envios",
       "problems": [
         {
           "symptom": "O valor de CE do Solo de Referência ou da amostra é sinalizado como sendo 1000 vezes superior ao normal.",
           "why": "O aparelho apresentava µS/cm (por exemplo, 350 µS/cm) e foi digitado 350 diretamente numa coluna que esperava dS/m (0.35 dS/m).",
-          "action": "Verifique a unidade no cabeçalho da coluna no Bancada de trabalho e converta as leituras de µS/cm para dS/m (dividindo por 1000) antes de registar."
+          "action": "Verifique a unidade no cabeçalho da coluna no Workbench e converta as leituras de µS/cm para dS/m (dividindo por 1000) antes de registar."
         }
       ],
       "sources": [
@@ -3870,7 +3870,7 @@
         "server/services/workbenchReadinessService.js"
       ],
       "steps": [
-        "Abra o Bancada de trabalho. Selecione o método atribuído de condutividade elétrica (CE). (Esperado: O cabeçalho da folha de trabalho apresenta a razão de extração exata e a unidade padrão configurada para o laboratório.)",
+        "Abra o Workbench. Selecione o método atribuído de condutividade elétrica (CE). (Esperado: O cabeçalho da folha de trabalho apresenta a razão de extração exata e a unidade padrão configurada para o laboratório.)",
         "Verifique se as leituras do aparelho estão na mesma escala de unidades indicada no cabeçalho da folha de trabalho (lembrando que 1 dS/m = 1 mS/cm = 1000 µS/cm) antes de introduzir ou colar valores. (Esperado: Todas as leituras de amostras, brancos e solos de referência do lote utilizam uma única escala de unidades consistente.)",
         "Inspecione as linhas de Branco, Duplicata e Solo de Referência para detetar erros de escala de unidades. Depois clique em Rever conclusão → Registar e envie o lote em Pronto a submeter. (Esperado: O lote de CE é registado e enviado para revisão com unidades consistentes em todas as linhas.)"
       ],
@@ -3896,11 +3896,11 @@
       "keywords": [
         "method-texture",
         "methods",
-        "Bancada de trabalho",
+        "workbench",
         "samplesid"
       ],
       "minutes": 3,
-      "quick": "No Bancada de trabalho, abra o painel granulométrico de textura, introduza % de Areia, % de Limo e % de Argila em conjunto para cada amostra, verifique se as três frações somam 100 % dentro da tolerância configurada no laboratório (muitos laboratórios usam ±2 %). Consulte a classe textural calculada.",
+      "quick": "No Workbench, abra o painel granulométrico de textura, introduza % de Areia, % de Limo e % de Argila em conjunto para cada amostra, verifique se as três frações somam 100 % dentro da tolerância configurada no laboratório (muitos laboratórios usam ±2 %). Consulte a classe textural calculada.",
       "before": [
         "Tenha pronta a sua folha de bancada do densímetro (Bouyoucos) ou da pipeta com as percentagens calculadas de Areia, Limo e Argila.",
         "Conheça a tolerância de fecho textural configurada para o seu laboratório em Políticas."
@@ -3910,12 +3910,12 @@
           "title": "Procedimento passo a passo",
           "steps": [
             {
-              "action": "Abra o Bancada de trabalho. Selecione o painel do método granulométrico de textura.",
+              "action": "Abra o Workbench. Selecione o painel do método granulométrico de textura.",
               "expected": "Cada linha de amostra apresenta campos de introdução interligados para % de Areia, % de Limo e % de Argila em simultâneo."
             },
             {
               "action": "Introduza % de Areia, % de Limo e % de Argila para cada amostra e para o Solo de Referência e a Duplicata do lote.",
-              "expected": "O Bancada de trabalho calcula automaticamente a soma (Areia + Limo + Argila), verifica se está dentro de 100 % ± a tolerância configurada no laboratório e determina a classe textural USDA do solo (como Franco ou Franco-Argiloso)."
+              "expected": "O Workbench calcula automaticamente a soma (Areia + Limo + Argila), verifica se está dentro de 100 % ± a tolerância configurada no laboratório e determina a classe textural USDA do solo (como Franco ou Franco-Argiloso)."
             },
             {
               "action": "Resolva qualquer aviso de fecho textural em que as três frações não somem ~100 %. Depois clique em Rever conclusão → Registar e envie o painel em Pronto a submeter.",
@@ -3946,7 +3946,7 @@
       "nextActor": "Oficial de Qualidade e Auditoria ou Gerente de Laboratório em Revisar envios",
       "problems": [
         {
-          "symptom": "O Bancada de trabalho apresenta um aviso de fecho textural porque Areia + Limo + Argila soma 94.5 %.",
+          "symptom": "O Workbench apresenta um aviso de fecho textural porque Areia + Limo + Argila soma 94.5 %.",
           "why": "Uma das três frações foi mal transcrita a partir do caderno de bancada ou faltou uma correção de branco/temperatura do densímetro.",
           "action": "Volte a verificar as leituras do densímetro ou da pipeta e as correções de temperatura na folha de bancada antes de registar a linha."
         }
@@ -3958,8 +3958,8 @@
         "server/services/workbenchReadinessService.js"
       ],
       "steps": [
-        "Abra o Bancada de trabalho. Selecione o painel do método granulométrico de textura. (Esperado: Cada linha de amostra apresenta campos de introdução interligados para % de Areia, % de Limo e % de Argila em simultâneo.)",
-        "Introduza % de Areia, % de Limo e % de Argila para cada amostra e para o Solo de Referência e a Duplicata do lote. (Esperado: O Bancada de trabalho calcula automaticamente a soma (Areia + Limo + Argila), verifica se está dentro de 100 % ± a tolerância configurada no laboratório e determina a classe textural USDA do solo (como Franco ou Franco-Argiloso).)",
+        "Abra o Workbench. Selecione o painel do método granulométrico de textura. (Esperado: Cada linha de amostra apresenta campos de introdução interligados para % de Areia, % de Limo e % de Argila em simultâneo.)",
+        "Introduza % de Areia, % de Limo e % de Argila para cada amostra e para o Solo de Referência e a Duplicata do lote. (Esperado: O Workbench calcula automaticamente a soma (Areia + Limo + Argila), verifica se está dentro de 100 % ± a tolerância configurada no laboratório e determina a classe textural USDA do solo (como Franco ou Franco-Argiloso).)",
         "Resolva qualquer aviso de fecho textural em que as três frações não somem ~100 %. Depois clique em Rever conclusão → Registar e envie o painel em Pronto a submeter. (Esperado: As três frações e a classe textural derivada são registadas e enviadas em conjunto como um painel coerente.)"
       ],
       "caution": "Nunca ajuste arbitrariamente uma fração apenas para forçar a soma a dar 100 % — encontre e corrija o erro real de cálculo ou digitação.",
@@ -3985,7 +3985,7 @@
         "method-derived",
         "methods",
         "samplesid",
-        "Bancada de trabalho"
+        "workbench"
       ],
       "minutes": 3,
       "quick": "Os parâmetros derivados são calculados automaticamente pelo sistema a partir dos resultados medidos na bancada. Nunca tente digitar diretamente sobre um valor derivado — se um valor derivado parecer incorreto, verifique e corrija o valor medido que lhe serve de base.",
@@ -3998,7 +3998,7 @@
           "title": "Procedimento passo a passo",
           "steps": [
             {
-              "action": "Registe e envie os parâmetros medidos necessários no Bancada de trabalho (como % de Areia, % de Limo e % de Argila, ou Ca, Mg, K e Na trocáveis).",
+              "action": "Registe e envie os parâmetros medidos necessários no Workbench (como % de Areia, % de Limo e % de Argila, ou Ca, Mg, K e Na trocáveis).",
               "expected": "O sistema guarda cada valor medido com a respetiva unidade e proveniência de método."
             },
             {
@@ -4016,7 +4016,7 @@
         [
           "Medido",
           "Selo de proveniência para um valor registado diretamente a partir de um instrumento de bancada ou titulação",
-          "Dado primário introduzido pelo técnico no Bancada de trabalho."
+          "Dado primário introduzido pelo técnico no Workbench."
         ],
         [
           "Calculado (derivado)",
@@ -4046,7 +4046,7 @@
         "server/services/workbenchReadinessService.js"
       ],
       "steps": [
-        "Registe e envie os parâmetros medidos necessários no Bancada de trabalho (como % de Areia, % de Limo e % de Argila, ou Ca, Mg, K e Na trocáveis). (Esperado: O sistema guarda cada valor medido com a respetiva unidade e proveniência de método.)",
+        "Registe e envie os parâmetros medidos necessários no Workbench (como % de Areia, % de Limo e % de Argila, ou Ca, Mg, K e Na trocáveis). (Esperado: O sistema guarda cada valor medido com a respetiva unidade e proveniência de método.)",
         "Inspecione o selo de resultado derivado (marcado como Calculado (derivado)) na folha de trabalho, na página da amostra ou no ecrã de revisão. (Esperado: O valor calculado e os dados de entrada da fórmula são apresentados com clareza e distinguidos das medições diretas de química húmida.)",
         "Se um valor medido de entrada for mais tarde repetido e atualizado numa nova tentativa, confirme que o valor derivado é atualizado automaticamente de acordo com o novo valor aprovado. (Esperado: Os valores derivados permanecem sempre sincronizados com os valores medidos aprovados atuais.)"
       ],
@@ -4063,7 +4063,7 @@
       "category": "methods",
       "kind": "guide",
       "title": "Utilizar campos de resultado categóricos, de texto e compostos",
-      "summary": "Preencha listas pendentes categóricas, campos de texto de observação e painéis de resultados com vários campos no Bancada de trabalho.",
+      "summary": "Preencha listas pendentes categóricas, campos de texto de observação e painéis de resultados com vários campos no Workbench.",
       "roles": [
         "LAB_TECHNICIAN",
         "LAB_MANAGER",
@@ -4072,13 +4072,13 @@
       "keywords": [
         "method-other-inputs",
         "methods",
-        "Bancada de trabalho",
+        "workbench",
         "admin"
       ],
       "minutes": 3,
       "quick": "Nem todas as observações de solo são um único número. Quando um método utiliza uma escolha em lista pendente (como classe de efervescência ou cor Munsell do solo), uma observação de texto ou um grupo de vários campos, preencha todos os campos obrigatórios indicados na linha antes de clicar em Rever conclusão.",
       "before": [
-        "Verifique os controlos de introdução apresentados na folha de trabalho do método no Bancada de trabalho.",
+        "Verifique os controlos de introdução apresentados na folha de trabalho do método no Workbench.",
         "Tenha pronta a sua folha de observações de bancada ou a carta de cores de solo Munsell."
       ],
       "sections": [
@@ -4086,7 +4086,7 @@
           "title": "Procedimento passo a passo",
           "steps": [
             {
-              "action": "Abra o Bancada de trabalho. Selecione o método atribuído para carregar os respetivos controlos de introdução específicos.",
+              "action": "Abra o Workbench. Selecione o método atribuído para carregar os respetivos controlos de introdução específicos.",
               "expected": "Consoante o método configurado no Catálogo de análises, as linhas apresentam caixas numéricas, listas pendentes ou campos compostos agrupados."
             },
             {
@@ -4134,7 +4134,7 @@
         "server/services/workbenchReadinessService.js"
       ],
       "steps": [
-        "Abra o Bancada de trabalho. Selecione o método atribuído para carregar os respetivos controlos de introdução específicos. (Esperado: Consoante o método configurado no Catálogo de análises, as linhas apresentam caixas numéricas, listas pendentes ou campos compostos agrupados.)",
+        "Abra o Workbench. Selecione o método atribuído para carregar os respetivos controlos de introdução específicos. (Esperado: Consoante o método configurado no Catálogo de análises, as linhas apresentam caixas numéricas, listas pendentes ou campos compostos agrupados.)",
         "Selecione a opção correspondente nas listas pendentes categóricas (por exemplo, classe de efervescência de carbonatos) ou preencha todos os subcampos obrigatórios num painel composto. (Esperado: Cada linha é validada face às opções permitidas e aos campos obrigatórios desse método.)",
         "Clique em Rever conclusão → Registar e envie as observações concluídas em Pronto a submeter. (Esperado: As observações categóricas e compostas são registadas e enviadas com o mesmo registo de auditoria que os ensaios numéricos.)"
       ],
@@ -4160,10 +4160,10 @@
       "keywords": [
         "method-spectral-import",
         "methods",
-        "Bancada de trabalho"
+        "workbench"
       ],
       "minutes": 5,
-      "quick": "Abra a importação espectral a partir do seu método no Bancada de trabalho, escolha o espectrómetro calibrado em Identificar e carregar, associe cada espectro à amostra e réplica atribuídas em Associar e inspecionar, verifique o intervalo de número de onda e os alertas de qualidade. Confirme a importação em Confirmar Importação para obter o Comprovativo.",
+      "quick": "Abra a importação espectral a partir do seu método no Workbench, escolha o espectrómetro calibrado em Identificar e carregar, associe cada espectro à amostra e réplica atribuídas em Associar e inspecionar, verifique o intervalo de número de onda e os alertas de qualidade. Confirme a importação em Confirmar Importação para obter o Comprovativo.",
       "before": [
         "Tenha prontos os ficheiros exportados do espectrómetro (como espectros OPUS, JCAMP-DX, ASD ou CSV) e o registo de leituras.",
         "Confirme que o espectrómetro está registado e Pronto / Calibrado em Equipamento.",
@@ -4174,7 +4174,7 @@
           "title": "1. Identificar e carregar",
           "steps": [
             {
-              "action": "A partir do método espectral atribuído no Bancada de trabalho, abra o assistente de importação espectral. Em Identificar e carregar, selecione o espectrómetro e a modalidade (MIR ou Vis-NIR).",
+              "action": "A partir do método espectral atribuído no Workbench, abra o assistente de importação espectral. Em Identificar e carregar, selecione o espectrómetro e a modalidade (MIR ou Vis-NIR).",
               "expected": "A sessão de importação fica associada ao instrumento calibrado e às definições do método."
             },
             {
@@ -4235,7 +4235,7 @@
           "Associa os espectros às tarefas das amostras e à Biblioteca espectral."
         ]
       ],
-      "example": "No Bancada de trabalho, abra a importação espectral para MIR, carregue 10 ficheiros de leituras em réplica em Identificar e carregar, verifique as correspondências de amostras e curvas em Associar e inspecionar, clique em Confirmar Importação. Consulte o Comprovativo.",
+      "example": "No Workbench, abra a importação espectral para MIR, carregue 10 ficheiros de leituras em réplica em Identificar e carregar, verifique as correspondências de amostras e curvas em Associar e inspecionar, clique em Confirmar Importação. Consulte o Comprovativo.",
       "success": "Os ficheiros espectrais brutos são verificados, associados às amostras e ficam visíveis na Biblioteca espectral com um comprovativo de confirmação.",
       "nextActor": "O Técnico de Laboratório conclui o envio de bancada ou o Revisor inspeciona os espectros e previsões",
       "problems": [
@@ -4247,7 +4247,7 @@
         {
           "symptom": "O espectro aparece na Biblioteca espectral, mas a amostra ainda não está como Aprovado.",
           "why": "Carregar um espectro é apenas a etapa de recolha de dados. A tarefa ainda precisa de ser enviada e aprovada na Lista de tarefas.",
-          "action": "Conclua o envio de bancada no Bancada de trabalho. Assim, o revisor possa aprovar a tarefa espectral em Revisar envios."
+          "action": "Conclua o envio de bancada no Workbench. Assim, o revisor possa aprovar a tarefa espectral em Revisar envios."
         }
       ],
       "sources": [
@@ -4255,7 +4255,7 @@
         "client/src/pages/SpectralLibrary.jsx"
       ],
       "steps": [
-        "A partir do método espectral atribuído no Bancada de trabalho, abra o assistente de importação espectral. Em Identificar e carregar, selecione o espectrómetro e a modalidade (MIR ou Vis-NIR). (Esperado: A sessão de importação fica associada ao instrumento calibrado e às definições do método.)",
+        "A partir do método espectral atribuído no Workbench, abra o assistente de importação espectral. Em Identificar e carregar, selecione o espectrómetro e a modalidade (MIR ou Vis-NIR). (Esperado: A sessão de importação fica associada ao instrumento calibrado e às definições do método.)",
         "Selecione os ficheiros originais exportados do espectrómetro e avance para a etapa de pré-visualização. (Esperado: O sistema analisa os ficheiros, verifica as somas de controlo (checksums) e lista os espectros reconhecidos e eventuais ficheiros ilegíveis.)",
         "Em Associar e inspecionar, confirme que o nome de cada ficheiro de espectro ou ID de leitura está associado ao Código de Amostra do Laboratório e ao número de réplica corretos. (Esperado: Cada leitura incluída fica ligada a uma tarefa de amostra atribuída em vez de ser adivinhada pela ordem das linhas.)",
         "Inspecione a curva de absorvância ou refletância, o intervalo de número de onda/comprimento de onda (como 4000–400 cm⁻¹ para MIR ou 350–2500 nm para Vis-NIR), a repetibilidade das réplicas e os avisos de bandas atmosféricas de CO₂/H₂O. (Esperado: Qualquer desvio da linha de base, pico saturado ou divergência entre réplicas é sinalizado visualmente antes da importação.)",
@@ -4288,7 +4288,7 @@
       "minutes": 3,
       "quick": "Abra a Biblioteca espectral no menu lateral para pesquisar espectros por ID da amostra, projeto ou instrumento, inspecione o gráfico de absorvância/refletância e os eixos de número de onda, compare leituras em réplica. Verifique os selos de qualidade espectral.",
       "before": [
-        "Confirme que os espectros foram importados através do assistente de importação espectral no Bancada de trabalho.",
+        "Confirme que os espectros foram importados através do assistente de importação espectral no Workbench.",
         "Tenha pronto o Código de Amostra do Laboratório ou o nome do projeto para filtrar a biblioteca."
       ],
       "sections": [
@@ -4384,7 +4384,7 @@
           "title": "Procedimento passo a passo",
           "steps": [
             {
-              "action": "Abra a amostra no Bancada de trabalho, na Biblioteca espectral ou na Lista de tarefas. Verifique o selo de proveniência junto a cada resultado.",
+              "action": "Abra a amostra no Workbench, na Biblioteca espectral ou na Lista de tarefas. Verifique o selo de proveniência junto a cada resultado.",
               "expected": "Os resultados de química húmida mostram Medido, os cálculos por fórmula mostram Calculado (derivado) e as estimativas por modelo espectral mostram Previsto."
             },
             {
@@ -4432,7 +4432,7 @@
         "server/services/workbenchReadinessService.js"
       ],
       "steps": [
-        "Abra a amostra no Bancada de trabalho, na Biblioteca espectral ou na Lista de tarefas. Verifique o selo de proveniência junto a cada resultado. (Esperado: Os resultados de química húmida mostram Medido, os cálculos por fórmula mostram Calculado (derivado) e as estimativas por modelo espectral mostram Previsto.)",
+        "Abra a amostra no Workbench, na Biblioteca espectral ou na Lista de tarefas. Verifique o selo de proveniência junto a cada resultado. (Esperado: Os resultados de química húmida mostram Medido, os cálculos por fórmula mostram Calculado (derivado) e as estimativas por modelo espectral mostram Previsto.)",
         "Para qualquer resultado no estado Previsto, inspecione o nome do modelo de calibração, a versão do modelo, o intervalo de incerteza e o estado de valor atípico espectral / domínio de aplicabilidade. (Esperado: As amostras cujo espectro fica fora do domínio de treino do modelo de calibração são sinalizadas com avisos de fora do domínio.)",
         "Durante a revisão ou emissão de relatório, confirme que as previsões fora do domínio são encaminhadas para análise de referência por química húmida em vez de serem libertadas sem verificação. (Esperado: Os relatórios para clientes e as exportações de dados distinguem claramente as estimativas no estado Previsto dos valores de referência no estado Medido.)"
       ],
@@ -4458,11 +4458,11 @@
       "keywords": [
         "method-qc",
         "methods",
-        "Bancada de trabalho",
+        "workbench",
         "qa"
       ],
       "minutes": 3,
-      "quick": "No Bancada de trabalho, abra Corridas Analíticas ou clique em Nova Corrida Analítica, selecione o lote ativo de Material de Referência e o instrumento calibrado, introduza as leituras de Branco, Duplicata e Solo de Referência juntamente com as amostras de clientes e reveja a avaliação aprovado/aviso/reprovado antes de enviar.",
+      "quick": "No Workbench, abra Corridas Analíticas ou clique em Nova Corrida Analítica, selecione o lote ativo de Material de Referência e o instrumento calibrado, introduza as leituras de Branco, Duplicata e Solo de Referência juntamente com as amostras de clientes e reveja a avaliação aprovado/aviso/reprovado antes de enviar.",
       "before": [
         "Verifique qual o lote ativo de Material de Referência (MRL ou MRC) que está na sua bancada hoje.",
         "Saiba que o tamanho do lote e os limites de CQ são configurados por laboratório e por método em Laboratórios e Catálogo de análises."
@@ -4472,7 +4472,7 @@
           "title": "Procedimento passo a passo",
           "steps": [
             {
-              "action": "No Bancada de trabalho, abra Corridas Analíticas. Clique em Nova Corrida Analítica para o seu método.",
+              "action": "No Workbench, abra Corridas Analíticas. Clique em Nova Corrida Analítica para o seu método.",
               "expected": "O construtor de corridas cria um lote com as posições de CQ exigidas (Branco, Duplicata, Solo de Referência e verificações de calibração) com base nas regras do método do seu laboratório."
             },
             {
@@ -4520,7 +4520,7 @@
         "server/services/workbenchReadinessService.js"
       ],
       "steps": [
-        "No Bancada de trabalho, abra Corridas Analíticas. Clique em Nova Corrida Analítica para o seu método. (Esperado: O construtor de corridas cria um lote com as posições de CQ exigidas (Branco, Duplicata, Solo de Referência e verificações de calibração) com base nas regras do método do seu laboratório.)",
+        "No Workbench, abra Corridas Analíticas. Clique em Nova Corrida Analítica para o seu método. (Esperado: O construtor de corridas cria um lote com as posições de CQ exigidas (Branco, Duplicata, Solo de Referência e verificações de calibração) com base nas regras do método do seu laboratório.)",
         "Selecione o lote ativo de Material de Referência, introduza os valores medidos para o Branco, o par de Duplicata, o Solo de Referência e as amostras de clientes, e avalie a corrida. (Esperado: O sistema compara o Branco com o limite do branco, a Duplicata com o limite de repetibilidade (DPR) e o Solo de Referência com a média-alvo e o desvio-padrão (z-score).)",
         "Se todas as verificações de CQ passarem (ou mostrarem apenas um aviso entre 2 e 3 desvios-padrão), registe e envie a corrida. Se uma verificação de CQ falhar (além de 3 desvios-padrão), pare e siga o procedimento de CQ reprovado do seu laboratório com o gerente. (Esperado: As corridas aprovadas avançam sem entraves para Revisar envios, enquanto as corridas reprovadas ficam retidas até serem repetidas ou objeto de decisão.)"
       ],
@@ -4750,7 +4750,7 @@
             },
             {
               "action": "Se um resultado ou lote precisar de repetição ou correção, clique em Devolver (ou Devolver para revisão), selecione as linhas afetadas e escreva uma instrução clara a explicar o que corrigir.",
-              "expected": "Os itens devolvidos reabrem na Bancada de trabalho como uma nova tentativa (Tentativa n.º 2), enquanto a Tentativa n.º 1 permanece selada no histórico."
+              "expected": "Os itens devolvidos reabrem na Bancada de trabalho do técnico como uma nova tentativa (Tentativa n.º 2), enquanto a Tentativa n.º 1 permanece selada no histórico."
             },
             {
               "action": "Se as medições e os controlos de qualidade cumprirem os critérios do seu laboratório, clique em Aprovar.",
@@ -4813,7 +4813,7 @@
         "Abra a Lista de tarefas. Clique no separador Revisar envios. Verifique o seu laboratório ativo e os filtros da fila. (Esperado: Vê todos os lotes de métodos e determinações que os técnicos submeteram formalmente para revisão.)",
         "Abra um lote ou amostra submetida. Verifique quais as análises incluídas e se a submissão é total ou parcial. (Esperado: Vê as determinações exatas submetidas neste lote juntamente com outros ensaios da mesma amostra.)",
         "Inspecione os valores das amostras, as unidades, a base de humidade, o instrumento calibrado, os comprovativos de preparação e os resultados de CQ do lote (Branco, Duplicata, Solo de referência e verificações de calibração). (Esperado: Cada medição é suportada por CQ aprovado (ou um selo claro de aviso/falha) e rastreabilidade válida do equipamento.)",
-        "Se um resultado ou lote precisar de repetição ou correção, clique em Devolver (ou Devolver para revisão), selecione as linhas afetadas e escreva uma instrução clara a explicar o que corrigir. (Esperado: Os itens devolvidos reabrem na Bancada de trabalho como uma nova tentativa (Tentativa n.º 2), enquanto a Tentativa n.º 1 permanece selada no histórico.)",
+        "Se um resultado ou lote precisar de repetição ou correção, clique em Devolver (ou Devolver para revisão), selecione as linhas afetadas e escreva uma instrução clara a explicar o que corrigir. (Esperado: Os itens devolvidos reabrem na Bancada de trabalho do técnico como uma nova tentativa (Tentativa n.º 2), enquanto a Tentativa n.º 1 permanece selada no histórico.)",
         "Se as medições e os controlos de qualidade cumprirem os critérios do seu laboratório, clique em Aprovar. (Esperado: As determinações avançam para Aprovado e bloqueiam o valor final do relatório oficial de cada parâmetro.)",
         "Verifique se todas as análises solicitadas para a amostra já estão aprovadas para que possa avançar para Aprovações finais. (Esperado: As amostras com todos os ensaios aprovados aparecem em Aprovações finais para revisão global da amostra.)",
         "Assim que a validação em Aprovações finais estiver concluída, abra Relatórios para gerar e verificar o Certificado de análise oficial. (Esperado: A revisão técnica de lote (Etapa 1), a aprovação final da amostra (Etapa 2) e a emissão do relatório PDF permanecem distintas e totalmente rastreáveis.)"
@@ -4855,7 +4855,7 @@
             },
             {
               "action": "Clique em Devolver na determinação específica (ou reprove/devolva o lote se um controlo do lote tiver falhado) e escreva uma nota específica indicando o parâmetro, o motivo e se deve voltar a pesar ou diluir.",
-              "expected": "O sistema mantém a Tentativa n.º 1 selada no registo de auditoria e abre a Tentativa n.º 2 na Bancada de trabalho com a sua nota escrita."
+              "expected": "O sistema mantém a Tentativa n.º 1 selada no registo de auditoria e abre a Tentativa n.º 2 na Bancada de trabalho do técnico com a sua nota escrita."
             },
             {
               "action": "Quando o técnico submeter a Tentativa n.º 2, compare a Tentativa n.º 1 e a Tentativa n.º 2 em Revisar envios. Verifique qual a regra de valor final do relatório aplicável (média de réplicas concordantes ou última tentativa válida) antes de clicar em Aprovar.",
@@ -4898,7 +4898,7 @@
       ],
       "steps": [
         "Abra Lista de tarefas → Revisar envios. Inspecione a corrida ou amostra submetida. (Esperado: Vê todas as tentativas de medição, a concordância entre réplicas e os resultados de controlo de qualidade.)",
-        "Clique em Devolver na determinação específica (ou reprove/devolva o lote se um controlo do lote tiver falhado) e escreva uma nota específica indicando o parâmetro, o motivo e se deve voltar a pesar ou diluir. (Esperado: O sistema mantém a Tentativa n.º 1 selada no registo de auditoria e abre a Tentativa n.º 2 na Bancada de trabalho com a sua nota escrita.)",
+        "Clique em Devolver na determinação específica (ou reprove/devolva o lote se um controlo do lote tiver falhado) e escreva uma nota específica indicando o parâmetro, o motivo e se deve voltar a pesar ou diluir. (Esperado: O sistema mantém a Tentativa n.º 1 selada no registo de auditoria e abre a Tentativa n.º 2 na Bancada de trabalho do técnico com a sua nota escrita.)",
         "Quando o técnico submeter a Tentativa n.º 2, compare a Tentativa n.º 1 e a Tentativa n.º 2 em Revisar envios. Verifique qual a regra de valor final do relatório aplicável (média de réplicas concordantes ou última tentativa válida) antes de clicar em Aprovar. (Esperado: O Valor final do relatório aprovado fica bloqueado de forma limpa com o histórico completo de ambas as tentativas.)"
       ],
       "caution": "Nunca peça a um técnico para editar um resultado fora do sistema. Utilize Devolver. Assim, a Tentativa n.º 1 e a Tentativa n.º 2 fiquem ambas preservadas.",
@@ -5358,7 +5358,7 @@
         "assets-find",
         "assets",
         "equipment",
-        "Bancada de trabalho"
+        "workbench"
       ],
       "minutes": 3,
       "quick": "Abra Equipamento (Equipamentos e Instrumentos) para verificar quais os instrumentos que estão Em Serviço e apresentam Pronto / Calibrado para o seu método antes de iniciar uma corrida na Bancada de trabalho.",
@@ -5699,7 +5699,7 @@
         "assets-lots",
         "assets",
         "inventory",
-        "Bancada de trabalho"
+        "workbench"
       ],
       "minutes": 3,
       "quick": "Registe os seus materiais de referência certificados (MRC) e materiais de referência internos do laboratório (MRL) em Equipamento → Materiais de referência e os reagentes em Reagentes e Inventário. Depois, selecione o número do lote ativo e dentro da validade ao registar uma corrida na Bancada de trabalho.",
@@ -6127,7 +6127,7 @@
       "keywords": [
         "offline-prepare",
         "offline",
-        "Bancada de trabalho"
+        "workbench"
       ],
       "minutes": 3,
       "quick": "Antes de levar um tablet ou portátil para uma sala sem Wi-Fi, inicie sessão, verifique se a barra superior mostra o laboratório correto, abra a sua fila atribuída na Bancada de trabalho. Confirme que o pacote offline terminou de ser guardado em memória local.",
@@ -6213,7 +6213,7 @@
       "keywords": [
         "offline-record",
         "offline",
-        "Bancada de trabalho",
+        "workbench",
         "reception"
       ],
       "minutes": 3,
@@ -6300,7 +6300,7 @@
       "keywords": [
         "offline-sync",
         "offline",
-        "Bancada de trabalho"
+        "workbench"
       ],
       "minutes": 4,
       "quick": "Volte a ligar o seu dispositivo à rede do laboratório, verifique o estado da sincronização, confirme que cada item em fila recebe um comprovativo de confirmação do servidor, resolva qualquer conflito com cuidado e depois conclua Rever conclusão e Pronto a submeter.",
@@ -6409,7 +6409,7 @@
       "keywords": [
         "offline-conflict",
         "offline",
-        "Bancada de trabalho"
+        "workbench"
       ],
       "minutes": 3,
       "quick": "Se um registo offline apresentar um conflito após voltar a ligar à rede, compare a sua medição local e a data/hora com o estado atual do servidor na Bancada de trabalho, e fale com o seu Gerente de Laboratório antes de substituir qualquer valor registado por um colega.",
@@ -8914,7 +8914,7 @@
       "keywords": [
         "start-technician",
         "start",
-        "Bancada de trabalho"
+        "workbench"
       ],
       "minutes": 3,
       "quick": "Follow assigned work from preparation to reviewer handoff using five demo samples. [Canonical successor: start-technician] Abra /workbench, confirme o seu laboratório ativo e os filtros de função, e utilize os emblemas de estado para identificar a próxima ação permitida.",
@@ -9045,12 +9045,12 @@
       ],
       "example": "Leia C-NRL-26-000289K em /scan para confirmar que pertence à amostra NRL-26-000142C (fração 2 mm) arquivada na Sala A / Estante 2.",
       "success": "A identidade da amostra, a etiqueta de código de barras, as dependências do fluxo e a custódia física estão verificadas.",
-      "nextActor": "Técnico de Preparação, Analista de Bancada de trabalho ou Fiel de Arquivo",
+      "nextActor": "Técnico de Preparação, Analista de Bancada ou Fiel de Arquivo",
       "problems": [
         {
           "symptom": "A UUID is confused with the human-readable sample number.",
           "why": "Filtros ativos estão a ocultar o registo, o UUID interno foi confundido com o código legível ou falta concluir um pré-requisito.",
-          "action": "Limpe os filtros em /samples, confira a pré-visualização da etiqueta antes de imprimir e siga a ligação para a Bancada de trabalho para concluir tarefas pendentes."
+          "action": "Limpe os filtros em /samples, confira a pré-visualização da etiqueta antes de imprimir e siga a ligação para a Bancada para concluir tarefas pendentes."
         }
       ],
       "sources": [
@@ -9063,7 +9063,7 @@
         "Inspecione a identidade, o mapa de dependências do fluxo ou o painel de cadeia de custódia (Show a synthetic label and explain which identifier to use in each context. [Canonical successor: tracking-identifiers]). (Expected: Pode ver quais os portões pré-analíticos (DRYING, PREPARATION) e tarefas de bancada que estão concluídos, em curso ou bloqueados.)",
         "Ao imprimir etiquetas ou mover um contentor para outra prateleira/caixa, pré-visualize a etiqueta e confirme o movimento de custódia. (Expected: Os eventos de impressão e movimentação de arquivo ficam registados na Cadeia de Custódia sem alterar resultados analíticos.)"
       ],
-      "caution": "Atenção: A UUID is confused with the human-readable sample number. — Limpe os filtros em /samples, confira a pré-visualização da etiqueta antes de imprimir e siga a ligação para a Bancada de trabalho para concluir tarefas pendentes.",
+      "caution": "Atenção: A UUID is confused with the human-readable sample number. — Limpe os filtros em /samples, confira a pré-visualização da etiqueta antes de imprimir e siga a ligação para a Bancada para concluir tarefas pendentes.",
       "related": [
         "tracking-identifiers"
       ],
@@ -9083,7 +9083,7 @@
       "keywords": [
         "prep-drying",
         "preparation",
-        "Bancada de trabalho"
+        "workbench"
       ],
       "minutes": 4,
       "quick": "Conclua as verificações físicas necessárias, selecione Confirmar conclusão e verifique o comprovativo. Uma caixa assinalada não prova que o servidor aceitou a conclusão.",
@@ -9098,7 +9098,7 @@
           "title": "1. Check the sample and perform the work",
           "steps": [
             {
-              "action": "In Bancada de trabalho, open the assigned Sample drying task. Compare its sample identifier with the container and bench log.",
+              "action": "In Workbench, open the assigned Sample drying task. Compare its sample identifier with the container and bench log.",
               "expected": "You are documenting the physical material actually handled, under the correct task and laboratory."
             },
             {
@@ -9173,7 +9173,7 @@
         "server/services/workbenchReadinessService.js"
       ],
       "steps": [
-        "In Bancada de trabalho, open the assigned Sample drying task. Compare its sample identifier with the container and bench log. (Expected: You are documenting the physical material actually handled, under the correct task and laboratory.)",
+        "In Workbench, open the assigned Sample drying task. Compare its sample identifier with the container and bench log. (Expected: You are documenting the physical material actually handled, under the correct task and laboratory.)",
         "Read every displayed checklist item. Perform and verify the drying work under the applicable lab procedure; record its required evidence in the designated records. (Expected: The checklist reflects work that has happened. A tutorial, task assignment or sample receipt is not evidence that drying is complete.)",
         "Select each checklist item only after checking it. Confirm that the row shows Operational checklist complete. (Expected: All required checks are marked. The final confirmation action becomes available; the checks alone are not yet the durable receipt.)",
         "Select Confirm Complete on that row. For a permitted bulk action, compare every selected sample first and use the displayed Confirm … Complete count. (Expected: The operation is sent for confirmation. Do not select unperformed samples merely because they share a batch.)",
@@ -9200,7 +9200,7 @@
       "keywords": [
         "prep-receipt",
         "preparation",
-        "Bancada de trabalho",
+        "workbench",
         "samplesid"
       ],
       "minutes": 4,
@@ -9215,7 +9215,7 @@
           "title": "1. Establish what the application confirmed",
           "steps": [
             {
-              "action": "Open the preparation row in Bancada de trabalho and look for Checklist Verified, a receipt identifier and a recorded time.",
+              "action": "Open the preparation row in Workbench and look for Checklist Verified, a receipt identifier and a recorded time.",
               "expected": "You can say whether a durable confirmation is visible, rather than relying on a ticked checkbox or remembered toast."
             },
             {
@@ -9279,7 +9279,7 @@
         "client/src/components/sample/WorkItemsTable.jsx"
       ],
       "steps": [
-        "Open the preparation row in Bancada de trabalho and look for Checklist Verified, a receipt identifier and a recorded time. (Expected: You can say whether a durable confirmation is visible, rather than relying on a ticked checkbox or remembered toast.)",
+        "Open the preparation row in Workbench and look for Checklist Verified, a receipt identifier and a recorded time. (Expected: You can say whether a durable confirmation is visible, rather than relying on a ticked checkbox or remembered toast.)",
         "If no receipt is shown, check whether all required checklist items were completed and whether Confirm Complete was selected successfully. (Expected: An unconfirmed checklist remains an entry task. A connection or authorization error is not success.)",
         "If the request outcome was uncertain, restore the connection and inspect the existing operation receipt before retrying. (Expected: You avoid submitting the same confirmation repeatedly because a response was lost.)",
         "With a receipt present, compare the sample identifier and preparation task/attempt with the sample page entry. (Expected: A different attempt or aggregate sample state is recognized as different context, not automatically a failed save.)",
@@ -9306,7 +9306,7 @@
       "keywords": [
         "bench-batch",
         "bench",
-        "Bancada de trabalho"
+        "workbench"
       ],
       "minutes": 6,
       "quick": "Verifique todas as linhas coladas face às amostras visíveis, exclua itens em falta ou inválidos, selecione Rever conclusão, confirme Registar N determinações e utilize Pronto a submeter para entregar o lote ao revisor.",
@@ -9321,7 +9321,7 @@
           "title": "1. Select the work and prepare the data",
           "steps": [
             {
-              "action": "Open Bancada de trabalho and choose the required analysis method in Worksheet. Compare the displayed parameter and method with your bench record.",
+              "action": "Open Workbench and choose the required analysis method in Worksheet. Compare the displayed parameter and method with your bench record.",
               "expected": "The worksheet contains the assigned tasks for that method. The same sample may legitimately have other analyses elsewhere."
             },
             {
@@ -9423,7 +9423,7 @@
         "client/src/components/workbench/WorkbenchShell.jsx"
       ],
       "steps": [
-        "Open Bancada de trabalho and choose the required analysis method in Worksheet. Compare the displayed parameter and method with your bench record. (Expected: The worksheet contains the assigned tasks for that method. The same sample may legitimately have other analyses elsewhere.)",
+        "Open Workbench and choose the required analysis method in Worksheet. Compare the displayed parameter and method with your bench record. (Expected: The worksheet contains the assigned tasks for that method. The same sample may legitimately have other analyses elsewhere.)",
         "For a spreadsheet paste, prepare two columns: Sample ID and Result Value. Copy the data rows, without column headings. Keep identifiers as text so leading zeros are not lost. (Expected: Each result remains attached to its own identifier. Do not rely on the worksheet and spreadsheet having the same row order.)",
         "Select Paste Values, paste the two columns and select Preview Matches & Exclusions. (Expected: A preview identifies matched rows and explains duplicates, unassigned samples, sealed tasks, invalid numbers and prerequisite failures.)",
         "Compare the included identifiers and values with the source record. Resolve errors at their cause. If 38 of 40 rows match, do not describe the import as 40 completed results. (Expected: You can account for every source row as included or excluded. A sample with an unresolved prerequisite remains blocked.)",
@@ -9454,11 +9454,11 @@
       "keywords": [
         "bench-states",
         "bench",
-        "Bancada de trabalho",
+        "workbench",
         "samplesid"
       ],
       "minutes": 3,
-      "quick": "Use a state/actor/evidence table and a concrete reviewer handoff. [Canonical successor: bench-states] Na Bancada de trabalho (/workbench), confirme a prontidão do equipamento e as posições de CQ do lote, introduza ou cole os valores com a unidade/base correta, clique em Registar Determinações (introduzindo o PIN de bancada se solicitado) e depois em Submeter para Revisão.",
+      "quick": "Use a state/actor/evidence table and a concrete reviewer handoff. [Canonical successor: bench-states] Na Bancada (/workbench), confirme a prontidão do equipamento e as posições de CQ do lote, introduza ou cole os valores com a unidade/base correta, clique em Registar Determinações (introduzindo o PIN de bancada se solicitado) e depois em Submeter para Revisão.",
       "before": [
         "Confirme que os portões DRYING e PREPARATION estão concluídos e o equipamento está READY.",
         "Verifique o método analítico, a base de humidade (AIR_DRY ou OVEN_DRY) e os lotes de reagentes."
@@ -9468,7 +9468,7 @@
           "title": "Procedimento passo a passo",
           "steps": [
             {
-              "action": "Abra a Bancada de trabalho (/workbench), filtre pela sua fila ou grupo de métodos e abra a folha de trabalho ou lote analítico.",
+              "action": "Abra a Bancada (/workbench), filtre pela sua fila ou grupo de métodos e abra a folha de trabalho ou lote analítico.",
               "expected": "As tarefas atribuídas carregam com os códigos de amostra e posições de CQ (BLANK, DUPLICATE, LRM, CRM)."
             },
             {
@@ -9516,7 +9516,7 @@
         "client/src/components/workbench/ReviewSubmissionView.jsx"
       ],
       "steps": [
-        "Abra a Bancada de trabalho (/workbench), filtre pela sua fila ou grupo de métodos e abra a folha de trabalho ou lote analítico. (Expected: As tarefas atribuídas carregam com os códigos de amostra e posições de CQ (BLANK, DUPLICATE, LRM, CRM).)",
+        "Abra a Bancada (/workbench), filtre pela sua fila ou grupo de métodos e abra a folha de trabalho ou lote analítico. (Expected: As tarefas atribuídas carregam com os códigos de amostra e posições de CQ (BLANK, DUPLICATE, LRM, CRM).)",
         "Introduza ou cole os resultados, selecione qualificadores (< LOD, < LOQ) sem usar 0 para amostras não medidas e resolva linhas bloqueadas (Use a state/actor/evidence table and a concrete reviewer handoff. [Canonical successor: bench-states]). (Expected: Os rascunhos são validados face aos limites de plausibilidade, curva de calibração e repetibilidade r.)",
         "Clique em Registar Determinações (introduza o PIN de 4–8 dígitos se bench.pinAtRecord estiver ativo) e, em Pronto a Submeter, clique em Submeter para Revisão. (Expected: Os resultados avançam de SAVED para RECORDED e SUBMITTED, entrando na fila do Revisor / Gestor.)"
       ],
@@ -9541,7 +9541,7 @@
       "keywords": [
         "method-texture",
         "methods",
-        "Bancada de trabalho",
+        "workbench",
         "samplesid"
       ],
       "minutes": 3,
@@ -9628,7 +9628,7 @@
       "keywords": [
         "method-spectral-import",
         "methods",
-        "Bancada de trabalho"
+        "workbench"
       ],
       "minutes": 5,
       "quick": "Carregue os ficheiros exportados do instrumento, associe cada aquisição à amostra e repetição atribuídas, confira os números de onda e CQ, e confirme o comprovativo.",
@@ -9642,7 +9642,7 @@
           "title": "1. Identify and upload",
           "steps": [
             {
-              "action": "Open spectral import from the assigned Bancada de trabalho method. In Identify & Upload, select the verified spectrometer and provide required run/acquisition details.",
+              "action": "Open spectral import from the assigned Workbench method. In Identify & Upload, select the verified spectrometer and provide required run/acquisition details.",
               "expected": "The import is associated with the correct instrument and method context. Missing or ineligible instruments need correction, not a free-text substitute."
             },
             {
@@ -9723,7 +9723,7 @@
         "client/src/pages/SpectralLibrary.jsx"
       ],
       "steps": [
-        "Open spectral import from the assigned Bancada de trabalho method. In Identify & Upload, select the verified spectrometer and provide required run/acquisition details. (Expected: The import is associated with the correct instrument and method context. Missing or ineligible instruments need correction, not a free-text substitute.)",
+        "Open spectral import from the assigned Workbench method. In Identify & Upload, select the verified spectrometer and provide required run/acquisition details. (Expected: The import is associated with the correct instrument and method context. Missing or ineligible instruments need correction, not a free-text substitute.)",
         "Select the original export files and continue to staging preview. (Expected: The system reports recognized files and parsing problems. A staged file has not yet completed the task or been accepted for reporting.)",
         "In Match & Inspect, compare each detected sample/scan identifier with the label and assigned task. (Expected: Each included spectrum has an intentional sample/task match. Similar filenames and row order alone do not establish identity.)",
         "Inspect the plot, axis type and unit, acquisition metadata, replicates and reported validation issues. (Expected: You can recognize an unexpected axis, missing range or wrong sample match and follow the applicable profile/QC requirements.)",
@@ -9831,7 +9831,7 @@
         {
           "symptom": "The technician says results were saved, but Review Submissions is empty",
           "why": "Saved and recorded results may still be waiting for submission.",
-          "action": "Ask for the submission receipt. If it exists, compare lab and queue filters; otherwise the technician completes the handoff in Bancada de trabalho."
+          "action": "Ask for the submission receipt. If it exists, compare lab and queue filters; otherwise the technician completes the handoff in Workbench."
         },
         {
           "symptom": "Final approval is disabled",
@@ -9873,11 +9873,11 @@
       "keywords": [
         "bench-returned",
         "bench",
-        "Bancada de trabalho",
+        "workbench",
         "manager-queue"
       ],
       "minutes": 3,
-      "quick": "Follow the return reason and eligible correction attempt without changing history. [Canonical successor: bench-returned] Na Bancada de trabalho (/workbench), confirme a prontidão do equipamento e as posições de CQ do lote, introduza ou cole os valores com a unidade/base correta, clique em Registar Determinações (introduzindo o PIN de bancada se solicitado) e depois em Submeter para Revisão.",
+      "quick": "Follow the return reason and eligible correction attempt without changing history. [Canonical successor: bench-returned] Na Bancada (/workbench), confirme a prontidão do equipamento e as posições de CQ do lote, introduza ou cole os valores com a unidade/base correta, clique em Registar Determinações (introduzindo o PIN de bancada se solicitado) e depois em Submeter para Revisão.",
       "before": [
         "Confirme que os portões DRYING e PREPARATION estão concluídos e o equipamento está READY.",
         "Verifique o método analítico, a base de humidade (AIR_DRY ou OVEN_DRY) e os lotes de reagentes."
@@ -9887,7 +9887,7 @@
           "title": "Procedimento passo a passo",
           "steps": [
             {
-              "action": "Abra a Bancada de trabalho (/workbench), filtre pela sua fila ou grupo de métodos e abra a folha de trabalho ou lote analítico.",
+              "action": "Abra a Bancada (/workbench), filtre pela sua fila ou grupo de métodos e abra a folha de trabalho ou lote analítico.",
               "expected": "As tarefas atribuídas carregam com os códigos de amostra e posições de CQ (BLANK, DUPLICATE, LRM, CRM)."
             },
             {
@@ -9935,7 +9935,7 @@
         "client/src/components/workbench/ReviewSubmissionView.jsx"
       ],
       "steps": [
-        "Abra a Bancada de trabalho (/workbench), filtre pela sua fila ou grupo de métodos e abra a folha de trabalho ou lote analítico. (Expected: As tarefas atribuídas carregam com os códigos de amostra e posições de CQ (BLANK, DUPLICATE, LRM, CRM).)",
+        "Abra a Bancada (/workbench), filtre pela sua fila ou grupo de métodos e abra a folha de trabalho ou lote analítico. (Expected: As tarefas atribuídas carregam com os códigos de amostra e posições de CQ (BLANK, DUPLICATE, LRM, CRM).)",
         "Introduza ou cole os resultados, selecione qualificadores (< LOD, < LOQ) sem usar 0 para amostras não medidas e resolva linhas bloqueadas (Follow the return reason and eligible correction attempt without changing history. [Canonical successor: bench-returned]). (Expected: Os rascunhos são validados face aos limites de plausibilidade, curva de calibração e repetibilidade r.)",
         "Clique em Registar Determinações (introduza o PIN de 4–8 dígitos se bench.pinAtRecord estiver ativo) e, em Pronto a Submeter, clique em Submeter para Revisão. (Expected: Os resultados avançam de SAVED para RECORDED e SUBMITTED, entrando na fila do Revisor / Gestor.)"
       ],
@@ -9961,7 +9961,7 @@
         "assets-find",
         "assets",
         "equipment",
-        "Bancada de trabalho"
+        "workbench"
       ],
       "minutes": 3,
       "quick": "Read instrument identity, lab, eligibility and availability. [Canonical successor: assets-find] Em /equipment, consulte os emblemas de prontidão dos equipamentos (READY, WARNING, BLOCKED) por criticidade, registe calibrações e manutenções de regresso ao serviço e associe lotes ativos de reagentes e CRM/LRM às corridas analíticas.",
@@ -10045,7 +10045,7 @@
       "keywords": [
         "offline-record",
         "offline",
-        "Bancada de trabalho",
+        "workbench",
         "reception"
       ],
       "minutes": 3,
