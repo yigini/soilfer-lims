@@ -627,8 +627,8 @@ const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
                                 {nextAction?.action !== 'VIEW' && nextAction?.action !== 'VIEW_REPORT' && (
                                     <button
                                         onClick={() => {
-                                            if (nextAction.action === 'RECEIVE') setReceiveModalOpen(true);
-                                            else if (nextAction.action === 'ACCEPT_INTAKE') setAcceptIntakeModalOpen(true);
+                                            if (nextAction.action === 'RECEIVE') navigate(`/reception?sampleId=${encodeURIComponent(sample.id)}`);
+                                            else if (nextAction.action === 'ACCEPT_INTAKE') navigate(`/reception?sampleId=${encodeURIComponent(sample.id)}`);
                                             else if (nextAction.action === 'ASSIGN') {
                                                 handleFocusAssignment();
                                             }
@@ -637,7 +637,7 @@ const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
                                                 navigate({ search: `?tab=review` });
                                             }
                                             else if (nextAction.action === 'APPROVE') handleApproveSample();
-                                            else if (nextAction.action === 'RELEASE_REPORT') setReportModalOpen(true);
+                                            else if (nextAction.action === 'RELEASE_REPORT') handleGenerateReport();
                                             else if (nextAction.action === 'PREPARATION') setActiveTab('work');
                                         }}
                                         className="px-4 py-2 rounded-xl text-xs font-bold bg-[var(--sf-primary)] hover:brightness-95 text-[var(--sf-on-primary)] flex items-center gap-2 shadow-sm transition-all animate-pulse"
