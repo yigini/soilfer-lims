@@ -5,17 +5,18 @@ export const INVENTORY_COLUMNS = schema.inventory;
 export const IMPORT_MAX_ROWS = 2000;
 export const IMPORT_MAX_BYTES = 2 * 1024 * 1024;
 const failure = code => Object.assign(new Error(code), { code });
-const CONTROL = /[\u0000-\u001f\u007f-\u009f]/;
+const containsControl = value => Array.from(value).some(char => { const code = char.charCodeAt(0); return code <= 31 || code >= 127 && code <= 159; });
+const formulaPrefix = value => { let index = 0; while (index < value.length && value.charCodeAt(index) <= 32) index++; return /^[=+\-@']/.test(value.slice(index)); };
 export const normalizeImportHeader = value => String(value ?? '').normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
 // The server escapes an original apostrophe too, so this reverses only the CSV
 // transport escape. XLSX string cells do not use this convention.
-export const decodeImportCsvCell = value => /^'[\u0000-\u0020]*[=+\-@']/.test(value) ? value.slice(1) : value;
+export const decodeImportCsvCell = value => value.startsWith("'") && formulaPrefix(value.slice(1)) ? value.slice(1) : value;
 function text(value) {
     const result = value == null ? '' : String(value);
-    if (CONTROL.test(result)) throw failure('IMPORT_CONTROL_CHARACTER');
+    if (containsControl(result)) throw failure('IMPORT_CONTROL_CHARACTER');
     return result.trim();
 }
-function fromCsv(source, name) {
+function fromCsv(source, name, t) {
     const candidates = [',', ';', '\t'].map(delimiter => {
         const rows = delimitedText.parseDelimited(source.replace(/^\uFEFF/, ''), delimiter);
         const width = rows[0]?.cells.length || 0;
@@ -23,8 +24,8 @@ function fromCsv(source, name) {
     }).sort((a, b) => b.score - a.score || b.width - a.width);
     const parsed = candidates[0].rows;
     if (!parsed.length || !parsed[0].cells.some(cell => cell.trim())) throw failure('IMPORT_EMPTY_FILE');
-    if (parsed.some(row => row.error)) throw failure('IMPORT_INVALID_CSV');
-    const headers = parsed[0].cells.map((cell, index) => text(decodeImportCsvCell(cell)) || `Column ${index + 1}`);
+    if (parsed.some(row => row.error || row.cells.length > parsed[0].cells.length)) throw failure('IMPORT_INVALID_CSV');
+    const headers = parsed[0].cells.map((cell, index) => text(decodeImportCsvCell(cell)) || (t ? t('bulkImport.unnamedColumn', { index: index + 1 }) : String(index + 1)));
     const rows = parsed.slice(1).filter(row => row.cells.some(cell => cell.trim())).map(row => ({ rowNumber: row.rowNumber, cells: row.cells.map(cell => decodeImportCsvCell(cell)) }));
     if (rows.length > IMPORT_MAX_ROWS) throw failure('IMPORT_TOO_LARGE');
     return [{ id: 'sheet-0', name, headers, rows }];
@@ -32,6 +33,7 @@ function fromCsv(source, name) {
 function workbookCell(cell) {
     if (!cell) return '';
     if (cell.f) return '=' + cell.f;
+    if (cell.t === 'e') return cell.w || '#ERROR';
     if (cell.t === 'n' && cell.z && XLSX.SSF.is_date(cell.z)) {
         const date = XLSX.SSF.parse_date_code(cell.v);
         if (date) return `${String(date.y).padStart(4, '0')}-${String(date.m).padStart(2, '0')}-${String(date.d).padStart(2, '0')}`;
@@ -39,26 +41,32 @@ function workbookCell(cell) {
     // Numeric cells use their actual value, independent of display grouping.
     return cell.t === 'n' || cell.t === 'b' ? String(cell.v) : String(cell.v ?? '');
 }
-export async function readInventoryImportFile(file) {
+export async function readInventoryImportFile(file, t) {
     if (!file || !file.name) throw failure('IMPORT_EMPTY_FILE');
     if (file.size > IMPORT_MAX_BYTES) throw failure('IMPORT_TOO_LARGE');
-    if (/\.(csv|tsv)$/i.test(file.name)) return fromCsv(await file.text(), file.name);
+    if (/\.(csv|tsv)$/i.test(file.name)) return fromCsv(await file.text(), file.name, t);
     if (!/\.(xlsx|xls)$/i.test(file.name)) throw failure('IMPORT_UNSUPPORTED_FILE');
     let workbook;
-    try { workbook = XLSX.read(await file.arrayBuffer(), { type: 'array', cellNF: true, cellFormula: true, sheetRows: IMPORT_MAX_ROWS + 2 }); }
+    try { workbook = XLSX.read(await file.arrayBuffer(), { type: 'array', cellNF: true, cellFormula: true }); }
     catch { throw failure('IMPORT_INVALID_WORKBOOK'); }
     const sheets = workbook.SheetNames.map((name, index) => {
         const sheet = workbook.Sheets[name];
-        if (!sheet['!ref']) return { id: 'sheet-' + index, name, headers: [], rows: [] };
-        const range = XLSX.utils.decode_range(sheet['!fullref'] || sheet['!ref']);
-        if (range.e.r - range.s.r > IMPORT_MAX_ROWS) throw failure('IMPORT_TOO_LARGE');
-        const headers = [];
-        for (let column = range.s.c; column <= range.e.c; column++) headers.push(text(workbookCell(sheet[XLSX.utils.encode_cell({ r: range.s.r, c: column })])) || `Column ${column + 1}`);
-        const rows = [];
-        for (let row = range.s.r + 1; row <= range.e.r; row++) {
-            const cells = headers.map((_header, column) => workbookCell(sheet[XLSX.utils.encode_cell({ r: row, c: column + range.s.c })]));
-            if (cells.some(cell => cell.trim())) rows.push({ rowNumber: row + 1, cells });
+        const populated = new Map(), columns = new Set();
+        // Count actual rows, rather than a formatted worksheet range. Empty leading
+        // rows must not move the header or silently truncate a later data row.
+        for (const [address, cell] of Object.entries(sheet)) {
+            if (!/^[A-Z]+\d+$/i.test(address)) continue;
+            const value = workbookCell(cell); if (!value.trim()) continue;
+            const position = XLSX.utils.decode_cell(address);
+            if (!populated.has(position.r)) populated.set(position.r, new Map());
+            populated.get(position.r).set(position.c, value); columns.add(position.c);
         }
+        const rowNumbers = [...populated.keys()].sort((a, b) => a - b), columnNumbers = [...columns].sort((a, b) => a - b);
+        if (!rowNumbers.length) return { id: 'sheet-' + index, name, headers: [], rows: [] };
+        if (rowNumbers.length - 1 > IMPORT_MAX_ROWS) throw failure('IMPORT_TOO_LARGE');
+        const header = populated.get(rowNumbers[0]);
+        const headers = columnNumbers.map(column => text(header.get(column)) || (t ? t('bulkImport.unnamedColumn', { index: column + 1 }) : String(column + 1)));
+        const rows = rowNumbers.slice(1).map(row => ({ rowNumber: row + 1, cells: columnNumbers.map(column => populated.get(row).get(column) || '') }));
         return { id: 'sheet-' + index, name, headers, rows };
     });
     if (!sheets.some(sheet => sheet.rows.length)) throw failure('IMPORT_EMPTY_FILE');
@@ -122,13 +130,13 @@ export function inventoryImportTemplate(t) {
         ['quantity / reorderPoint / reorderQuantity', t('bulkImport.numberFormatHint')], ['receivedDate / expiryDate', 'YYYY-MM-DD'],
         ['duplicateMode', 'SKIP | UPDATE'], [t('bulkImport.stockRule'), t('bulkImport.stockRuleHint')]
     ];
-    XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet(allowed), 'Allowed values');
+    XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet(allowed), t('bulkImport.allowedValuesSheet'));
     return workbook;
 }
 export function downloadInventoryImportTemplate(t) { XLSX.writeFile(inventoryImportTemplate(t), 'inventory-import-template.xlsx'); }
 export function importCsvReport(result, t) {
     const cell = value => {
-        let text = String(value ?? ''); if (/^[\u0000-\u0020]*[=+\-@']/.test(text)) text = "'" + text;
+        let text = String(value ?? ''); if (formulaPrefix(text)) text = "'" + text;
         return '"' + text.replace(/"/g, '""') + '"';
     };
     const rows = [[t('bulkImport.sheet'), t('bulkImport.row'), t('bulkImport.result'), t('bulkImport.problems')]];

@@ -891,6 +891,8 @@ const Inventory = () => {
             </div>
 
             {/* Modals */}
+            {showImport && canManage && <InventoryImportDialog onClose={() => setShowImport(false)} onImported={() => { fetchAll(); if (selectedItem) openItem(selectedItem); }} />}
+
             <ReceiveStockModal show={showReceive} onClose={() => setShowReceive(false)} items={items} locations={locations} onSuccess={() => { fetchAll(); if (selectedItem) openItem(selectedItem); }} initialItemId={initialReceiveItemId} canManage={canManage} actor={user} />
             <QuickConsumeModal show={showQuickConsume} onClose={() => setShowQuickConsume(false)} item={quickConsumeItem} locations={locations} onSuccess={fetchAll} />
             <CreateItemModal show={showCreate} onClose={() => setShowCreate(false)} onSuccess={fetchAll} />

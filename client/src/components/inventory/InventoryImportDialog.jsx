@@ -20,7 +20,7 @@ export default function InventoryImportDialog({ onClose, onImported }) {
     useEffect(() => { let current = true;
         if (superAdmin) axios.get('/api/labs').then(response => {
             const rows = response.data?.data || response.data;
-            if (current) setLabs((Array.isArray(rows) ? rows : []).filter(lab => lab.isActive !== false));
+            if (current) setLabs((Array.isArray(rows) ? rows : []).filter(lab => lab.isActive === true));
         }).catch(() => { if (current) setLabError(true); });
         return () => { current = false; sequence.current++; };
     }, [superAdmin]);
@@ -30,7 +30,7 @@ export default function InventoryImportDialog({ onClose, onImported }) {
         if (!file) return;
         invalidate(); const request = ++sequence.current; setBusy(true); setSheets([]); setFileName('');
         try {
-            const loaded = await readInventoryImportFile(file);
+            const loaded = await readInventoryImportFile(file, t);
             if (request !== sequence.current) return;
             setSheets(loaded); setMapping(initialInventoryImportMapping(loaded, t)); setFileName(file.name);
         } catch (failure) { if (request === sequence.current) setError(errorText(failure.code || 'IMPORT_INVALID_WORKBOOK')); }
