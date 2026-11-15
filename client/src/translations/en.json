@@ -163,7 +163,7 @@
     "equipmentRuleHint": "Existing instruments keep their type, criticality, status, calibration and analysis assignments. Update changes only the name, manufacturer, model, serial number and location.",
     "openEquipment": "Import equipment",
     "exampleEquipment": "Practice pH meter",
-    "eligibleAnalysesHint": "Active analysis codes for this lab, separated by | or ;. Leave empty if none."
+    "eligibleAnalysesHint": "Active analysis codes for this lab, separated by | or ;. Leave empty if none. If no assignment exists yet, equipment is required for that analysis."
   },
   "exchangeAdmin": {
     "systemCategory": "V2 System",

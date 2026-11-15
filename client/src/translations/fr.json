@@ -163,7 +163,7 @@
     "equipmentRuleHint": "Les instruments existants conservent leur type, leur criticité, leur état, leur étalonnage et leurs analyses affectées. La mise à jour modifie uniquement le nom, le fabricant, le modèle, le numéro de série et l’emplacement.",
     "openEquipment": "Importer des équipements",
     "exampleEquipment": "pH-mètre de démonstration",
-    "eligibleAnalysesHint": "Codes d’analyse actifs pour ce laboratoire, séparés par | ou ;. Laissez vide si aucun."
+    "eligibleAnalysesHint": "Codes d’analyse actifs pour ce laboratoire, séparés par | ou ;. Laissez vide si aucun. Si aucune affectation n’existe encore, un équipement devient obligatoire pour cette analyse."
   },
   "exchangeAdmin": {
     "systemCategory": "Système V2",

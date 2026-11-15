@@ -73,11 +73,14 @@ async function apply(db, user, plan) {
                 details: { importFileName: plan.fileName }
             }, { db });
             for (const analysisCode of row.analyses) {
-                const current = await db.equipmentMethodEligibility.findFirst({ where: { labId: plan.labId, analysisCode } });
-                const ids = current ? JSON.parse(current.eligibleEquipmentIds || '[]') : [];
-                if (!Array.isArray(ids) || ids.some(id => typeof id !== 'string')) throw problem(409, 'IMPORT_ELIGIBILITY_INVALID');
-                await writes.updateEligibility(user, { analysisCode, methodId: current?.methodId,
-                    eligibleEquipmentIds: [...new Set([...ids, asset.id])], isRequired: current?.isRequired ?? true }, { db, labId: plan.labId });
+                const mappings = await db.equipmentMethodEligibility.findMany({ where: { labId: plan.labId, analysisCode } });
+                for (const current of mappings.length ? mappings : [null]) {
+                    const ids = current ? JSON.parse(current.eligibleEquipmentIds || '[]') : [];
+                    if (!Array.isArray(ids) || ids.some(id => typeof id !== 'string')) throw problem(409, 'IMPORT_ELIGIBILITY_INVALID');
+                    await writes.updateEligibility(user, { analysisCode, methodId: current?.methodId,
+                        eligibleEquipmentIds: [...new Set([...ids, asset.id])], isRequired: current?.isRequired ?? true },
+                    { db, labId: plan.labId, mappingId: current?.id });
+                }
             }
             row.outcome = 'created';
         } else {

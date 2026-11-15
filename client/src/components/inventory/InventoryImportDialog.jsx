@@ -126,6 +126,7 @@ export default function InventoryImportDialog({ onClose, onImported, module: imp
                         </div>}
                     </details>)}
                     <p className="text-xs text-sf-muted">{t('bulkImport.numberFormatHint')}</p>
+                    {equipment && <p className="text-xs text-sf-muted">{t('bulkImport.eligibleAnalysesHint')}</p>}
                 </section>}
                 {sheets.length > 0 && <div className="space-y-3 rounded bg-sf-canvas p-3 text-sm">
                     <label className="flex flex-col gap-1">{t('bulkImport.duplicates')}

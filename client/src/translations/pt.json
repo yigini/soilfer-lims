@@ -163,7 +163,7 @@
     "equipmentRuleHint": "Os instrumentos existentes mantêm o tipo, a criticidade, o estado, a calibração e as análises atribuídas. A atualização altera apenas o nome, o fabricante, o modelo, o número de série e a localização.",
     "openEquipment": "Importar equipamentos",
     "exampleEquipment": "Medidor de pH de demonstração",
-    "eligibleAnalysesHint": "Códigos de análise ativos neste laboratório, separados por | ou ;. Deixe vazio se não houver nenhum."
+    "eligibleAnalysesHint": "Códigos de análise ativos neste laboratório, separados por | ou ;. Deixe vazio se não houver nenhum. Se ainda não existir uma atribuição, o equipamento passa a ser obrigatório para essa análise."
   },
   "exchangeAdmin": {
     "systemCategory": "Sistema V2",

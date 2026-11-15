@@ -265,7 +265,7 @@ async function logEvent(user, body, { db = prisma } = {}) {
     return result;
 }
 
-async function updateEligibility(user, body, { db = prisma, labId = user.labId } = {}) {
+async function updateEligibility(user, body, { db = prisma, labId = user.labId, mappingId } = {}) {
     if (labId !== user.labId && user.role !== 'SUPER_ADMIN') throw inputError(403, { error: 'Access denied' });
     const { analysisCode, methodId, eligibleEquipmentIds, isRequired } = body;
 
@@ -288,8 +288,9 @@ async function updateEligibility(user, body, { db = prisma, labId = user.labId }
     }
     // Upsert logic
     const existing = await db.equipmentMethodEligibility.findFirst({
-        where: { labId, analysisCode }
+        where: { labId, analysisCode, ...(mappingId && { id: mappingId }) }
     });
+    if (mappingId && !existing) throw inputError(404, { error: 'Eligibility mapping not found' });
 
     const data = {
         labId,

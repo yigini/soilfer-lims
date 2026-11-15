@@ -47,6 +47,7 @@ test('preview leaves database and WAL unchanged; calibration uses the real event
     const asset = await prisma.equipmentAsset.findUnique({ where: { id: assetId }, include: { qualification: true, events: true } });
     expect(asset).toMatchObject({ status: 'IN_SERVICE', criticality: 'CRITICAL', qualification: { calibrationStatus: 'OK', verificationStatus: 'NOT_CONFIGURED', lastUpdatedBy: users.manager.username } });
     expect(asset.events.find(e => e.eventType === 'CALIBRATION')).toMatchObject({ userId: users.manager.username, outcome: 'PASS', requiresManagerSignoff: false });
+    expect(await prisma.equipmentMethodEligibility.findFirst({ where: { labId: labA, analysisCode: code } })).toMatchObject({ methodId: null, isRequired: true, equipmentTypeRequired: null });
     const options = await eligibleEquipmentForItem(prisma, { analysis: code }, labA);
     expect(options.eligibleEquipment).toEqual([expect.objectContaining({ id: assetId, readiness: 'READY', calibrationStatus: 'OK' })]);
     const api = await request(app).get('/api/equipment/eligibility/' + code).set('Authorization', 'Bearer ' + tokens.tech);
@@ -83,15 +84,26 @@ test('a partial description update retains omitted name, serial number, type and
     expect(result.status).toBe(200);
     expect(await prisma.equipmentAsset.findFirst({ where: { labId: labA } })).toMatchObject({ name: 'Practice meter', manufacturer: 'Changed maker', serialNumber: 'KEEP-SERIAL', locationId: 'Practice bench', assetType: 'PH_METER' });
 });
-test('eligibility appends multiple imported instruments and retains the existing instruments, method and required flag', async () => {
-    const existing = await writes.addEquipment(users.manager, row({ internalAssetTag: 'KEEP' }));
-    const method = await prisma.methodology.create({ data: { id: randomUUID(), analysisCode: code, name: 'Practice method', labId: labA } });
-    await writes.updateEligibility(users.manager, { analysisCode: code, methodId: method.id, eligibleEquipmentIds: [existing.id], isRequired: false });
-    const result = await auth('commit', book([row({ eligibleAnalyses: code }), row({ rowNumber: 3, internalAssetTag: 'PRACTICE-02', eligibleAnalyses: code })]));
+test('eligibility appends each imported instrument to every existing method mapping without replacing evidence', async () => {
+    const oldA = await writes.addEquipment(users.manager, row({ internalAssetTag: 'KEEP-A' }));
+    const oldB = await writes.addEquipment(users.manager, row({ internalAssetTag: 'KEEP-B' }));
+    const methods = [];
+    for (const [index, labId] of [[0, labA], [1, null]]) methods.push(await prisma.methodology.create({ data: { id: randomUUID(), analysisCode: code, name: 'Practice method ' + index, labId } }));
+    const originals = [];
+    for (const [index, old] of [[0, oldA], [1, oldB]]) originals.push(await prisma.equipmentMethodEligibility.create({ data: {
+        id: randomUUID(), labId: labA, analysisCode: code, methodId: methods[index].id, eligibleEquipmentIds: JSON.stringify([old.id]), isRequired: index === 1, equipmentTypeRequired: 'PH_METER'
+    } }));
+    const result = await auth('commit', book([row({ eligibleAnalyses: code, lastCalibrationDate: atDay(-1), nextCalibrationDueDate: atDay(365) }),
+        row({ rowNumber: 3, internalAssetTag: 'PRACTICE-02', eligibleAnalyses: code, lastCalibrationDate: atDay(-1), nextCalibrationDueDate: atDay(365) })]));
     expect(result.status).toBe(200); expect(result.body.totals.created).toBe(2);
-    const mapping = await prisma.equipmentMethodEligibility.findFirst({ where: { labId: labA, analysisCode: code } });
-    expect(mapping).toMatchObject({ methodId: method.id, isRequired: false });
-    expect(JSON.parse(mapping.eligibleEquipmentIds)).toEqual([existing.id, ...result.body.sheets.equipment.map(r => r.id)]);
+    const newIds = result.body.sheets.equipment.map(r => r.id);
+    for (const original of originals) {
+        const mapping = await prisma.equipmentMethodEligibility.findUnique({ where: { id: original.id } });
+        expect(mapping).toMatchObject({ id: original.id, methodId: original.methodId, isRequired: original.isRequired, equipmentTypeRequired: original.equipmentTypeRequired });
+        expect(JSON.parse(mapping.eligibleEquipmentIds)).toEqual([...JSON.parse(original.eligibleEquipmentIds), ...newIds]);
+        const choices = await eligibleEquipmentForItem(prisma, { analysis: code, methodologyId: original.methodId }, labA);
+        expect(choices.eligibleEquipment.filter(asset => asset.readiness === 'READY').map(asset => asset.id).sort()).toEqual([...newIds].sort());
+    }
 });
 test.each([true, false])('atomic=%s uses one transaction and only the permitted rows', async atomic => {
     const body = { ...book([row(), row({ rowNumber: 91, internalAssetTag: 'BAD', assetType: 'INVALID' })]), atomic };
@@ -147,6 +159,13 @@ test('scope is enforced for explicit lab, row lab, active destination and Super 
     const result = await auth('commit', { ...book([row({ eligibleAnalyses: code, lastCalibrationDate: atDay(-1), nextCalibrationDueDate: atDay(365) })]), labId: labA }, 'super');
     expect(result.status).toBe(200); expect(result.body.totals.created).toBe(1);
     expect((await prisma.equipmentEvent.findFirst({ where: { labId: labA, eventType: 'CALIBRATION' } })).userId).toBe(users.super.username);
+});
+test('an explicitly selected eligibility row must belong to the chosen laboratory and analysis', async () => {
+    const asset = await writes.addEquipment(users.manager, row());
+    const foreign = await prisma.equipmentMethodEligibility.create({ data: { id: randomUUID(), labId: labB, analysisCode: code, eligibleEquipmentIds: '[]', isRequired: false } });
+    await expect(writes.updateEligibility(users.manager, { analysisCode: code, eligibleEquipmentIds: [asset.id] }, { mappingId: foreign.id })).rejects.toMatchObject({ statusCode: 404 });
+    expect(await prisma.equipmentMethodEligibility.findUnique({ where: { id: foreign.id } })).toEqual(foreign);
+    expect(await prisma.equipmentMethodEligibility.count({ where: { labId: labA } })).toBe(0);
 });
 test('same tag in another lab is never matched or updated', async () => {
     const foreign = await writes.addEquipment(users.super, { ...row(), labId: labB });
