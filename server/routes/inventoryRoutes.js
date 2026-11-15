@@ -12,7 +12,7 @@ router.put('/items/:id', checkPermission('MANAGE_INVENTORY'), inv.updateItem);
 
 // ─── Lots ────────────────────────────────────────────────────────
 router.get('/lots', checkPermission('VIEW_INVENTORY'), inv.getLots);
-router.post('/lots', checkPermission('PREPARE_INVENTORY_LOT', { alternativePermission: 'MANAGE_INVENTORY' }), inv.createLot);
+router.post('/lots', checkPermission('PREPARE_INVENTORY_LOT').or('MANAGE_INVENTORY'), inv.createLot);
 router.post('/lots/:id/consume', checkPermission('CONSUME_INVENTORY'), inv.consumeLot);
 router.post('/lots/:id/adjust', checkPermission('MANAGE_INVENTORY'), inv.adjustLot);
 router.post('/lots/:id/quarantine', checkPermission('MANAGE_INVENTORY'), inv.quarantineLot);

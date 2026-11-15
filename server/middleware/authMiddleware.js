@@ -134,7 +134,7 @@ const verifyToken = async (req, res, next) => {
  * @param {string} permissionKey Key from PERMISSIONS object (e.g. 'CREATE_SAMPLE')
  */
 const checkPermission = (permissionKey, { alternativePermission } = {}) => {
-    return (req, res, next) => {
+    const middleware = (req, res, next) => {
         const user = req.user;
         if (!user) return res.status(401).json({ error: 'User not authenticated' });
 
@@ -166,6 +166,8 @@ const checkPermission = (permissionKey, { alternativePermission } = {}) => {
 
         next();
     };
+    middleware.or = alternativePermission => checkPermission(permissionKey, { alternativePermission });
+    return middleware;
 };
 
 module.exports = {

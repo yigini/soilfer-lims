@@ -14,6 +14,7 @@ test('single permission style preserves every existing inventory receipt allow/d
         for (const user of users) {
             const previous = hasPermission(user, 'MANAGE_INVENTORY') ? { next: true, code: 200, body: null } : result(checkPermission('PREPARE_INVENTORY_LOT'), user);
             expect(result(checkPermission('PREPARE_INVENTORY_LOT', { alternativePermission: 'MANAGE_INVENTORY' }), user)).toEqual(previous);
+            expect(result(checkPermission('PREPARE_INVENTORY_LOT').or('MANAGE_INVENTORY'), user)).toEqual(previous);
         }
         expect(result(checkPermission('MANAGE_INVENTORY'), { role: 'lab_manager' }).next).toBe(false);
     } finally { warning.mockRestore(); }
