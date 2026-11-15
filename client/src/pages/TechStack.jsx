@@ -83,6 +83,18 @@ const techStack = [
 
 const changelog = [
     {
+        version: 'v1.16.0',
+        date: 'November 15, 2026',
+        tag: 'Inventory Imports and Everyday Help',
+        badgeColor: 'bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300 border-blue-300 dark:border-blue-800',
+        changes: [
+            'Preview and import inventory or equipment spreadsheets with clear row reports and existing laboratory rules.',
+            'Read seven new Help guides in five languages, with complete Portuguese wording and a short manager summary.',
+            'Use translated stock, custody, worksheet and review messages without the corrected page crashes.',
+            'Export equipment status and current readiness and receive clear calibration-date errors.'
+        ]
+    },
+    {
         version: 'v1.15.0',
         date: 'November 14, 2026',
         tag: 'Technician Instrument and Stock Records',
