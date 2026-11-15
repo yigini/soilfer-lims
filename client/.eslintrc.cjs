@@ -9,9 +9,11 @@ module.exports = {
   ],
   ignorePatterns: ['dist', '.eslintrc.cjs'],
   parserOptions: { ecmaVersion: 'latest', sourceType: 'module' },
+  globals: { __APP_VERSION__: 'readonly', __BUILD_DATE__: 'readonly' },
   settings: { react: { version: '18.3' } },
   plugins: ['react-refresh'],
   rules: {
+    'no-undef': 'error',
     'react/jsx-no-target-blank': 'off',
     'react-refresh/only-export-components': [
       'warn',
