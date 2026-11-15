@@ -39,8 +39,8 @@ const crypto = require('crypto');
   } finally {
     await prisma.$disconnect();
   }
-})().catch(() => {
-  console.error('Password reset failed.');
+})().catch(error => {
+  console.error('Password reset failed:', error.message);
   process.exitCode = 1;
 });
 NODE
