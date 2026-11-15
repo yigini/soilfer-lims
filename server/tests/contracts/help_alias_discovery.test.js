@@ -38,15 +38,15 @@ test('only the 17 retained compatibility aliases are in the discovery exclusion 
     }
 });
 
-test.each(locales)('%s discovery contains the 97 canonical guides with matching topic counts', async locale => {
+test.each(locales)('%s discovery contains the 104 canonical guides with matching topic counts', async locale => {
     const articles = await help.getArticles({ user, locale });
-    expect(articles).toHaveLength(97);
+    expect(articles).toHaveLength(104);
     expect(articles.every(a => !aliases.has(a.id))).toBe(true);
     const topics = await help.getTopics(user, locale);
-    expect(topics.reduce((n, t) => n + t.articleCount, 0)).toBe(97);
+    expect(topics.reduce((n, t) => n + t.articleCount, 0)).toBe(104);
     for (const topic of topics) expect(topic.articleCount).toBe(articles.filter(a => a.category === topic.id).length);
     const preview = await help.getArticles({ user: { role: 'SUPER_ADMIN' }, locale, preview: true });
-    expect(preview).toHaveLength(97);
+    expect(preview).toHaveLength(104);
     const search = await help.searchHelp({ user, locale, query: 'start-first-login', limit: 200 });
     expect(search.results.some(a => a.id === 'start-first-login')).toBe(true);
     expect(search.results.every(a => !aliases.has(a.id))).toBe(true);
@@ -56,7 +56,7 @@ test.each(locales)('%s discovery contains the 97 canonical guides with matching 
 
 test.each(locales)('%s legacy direct reads and the full offline pack retain every alias', async locale => {
     const pack = await help.getOfflinePack({ user, locale });
-    expect(pack.articles).toHaveLength(114);
+    expect(pack.articles).toHaveLength(121);
     for (const { id } of metadata.aliases) {
         expect(pack.articles.some(a => a.id === id)).toBe(true);
         const article = await help.getArticleById(id, user, locale);
@@ -112,10 +112,10 @@ function offlineClient(locale, online = false) {
 test.each(locales)('%s older offline packs hide aliases in discovery but keep direct access', async locale => {
     const { client, purge } = offlineClient(locale);
     const articles = await client.getArticles({ user, locale });
-    expect(articles.articles).toHaveLength(97);
+    expect(articles.articles).toHaveLength(104);
     expect(articles.articles.every(a => !aliases.has(a.id))).toBe(true);
     const topics = await client.getTopics({ user, locale });
-    expect(topics.topics.reduce((n, a) => n + a.articleCount, 0)).toBe(97);
+    expect(topics.topics.reduce((n, a) => n + a.articleCount, 0)).toBe(104);
     const result = await client.searchHelp({ user, locale, query: 'start-shift' });
     expect(result.results.some(a => aliases.has(a.id))).toBe(false);
     expect(result.total).toBe(0);

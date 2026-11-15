@@ -599,7 +599,7 @@
         ""
       ],
       "minutes": 3,
-      "quick": "Ordre de la première journée : l’administrateur configure le laboratoire ; la réception reçoit et accepte les échantillons d’entraînement ; le responsable attribue le travail ; les techniciens préparent les échantillons et soumettent les séries depuis le Poste de travail ; le responsable examine ensuite les résultats et émet les rapports.",
+      "quick": "Attribuez les échantillons acceptés et suivez le travail du jour. Révisez les résultats et contrôles qualité, renvoyez le travail à reprendre, puis approuvez les échantillons terminés et publiez leurs rapports.",
       "before": [
         "Confirmez le nom du laboratoire actif dans la barre supérieure. Vérifiez que les échantillons d’entraînement ont été reçus et acceptés à la réception.",
         "Lorsque la révision par deux personnes est activée, le réviseur doit être une autre personne que l’analyste. Si vous devez examiner les séries d’entraînement, ne les enregistrez pas vous-même."
@@ -10544,6 +10544,483 @@
       "caution": "Attention: A screenshot exposes credentials or unnecessary sample data. — Suivez le lot ou l’échantillon dans /qa et /admin/audit, vérifiez la dernière révision dans /result-reports et protégez vos brouillons avant de recharger l’application.",
       "related": [
         "quality-support"
+      ],
+      "feature": "core",
+      "reviewOwner": "Lab operations lead"
+    },
+    {
+      "id": "start-messages",
+      "category": "start",
+      "kind": "guide",
+      "title": "Lire et envoyer des messages",
+      "summary": "Utilisez la messagerie de Mon profil pour les messages internes et les discussions. Un message ne valide pas le travail du laboratoire.",
+      "roles": [
+        "all"
+      ],
+      "keywords": [
+        "start-messages",
+        "start"
+      ],
+      "minutes": 3,
+      "quick": "Ouvrez Mon profil puis Messagerie. Choisissez Rédiger, vérifiez le destinataire et écrivez l’objet et le message, puis Envoyer. Gardez les messages inachevés en brouillon.",
+      "before": [
+        "Préparez le nom du destinataire et le code d’échantillon ou de lot utile à votre question."
+      ],
+      "sections": [
+        {
+          "title": "Que faire",
+          "steps": [
+            {
+              "action": "Ouvrez Mon profil puis Messagerie. Choisissez les messages reçus, envoyés, les brouillons ou la discussion.",
+              "expected": "Vous voyez vos messages et les destinataires disponibles."
+            },
+            {
+              "action": "Choisissez Rédiger, le bon destinataire et un objet et un message clairs. Utilisez Enregistrer le brouillon si le message n’est pas prêt.",
+              "expected": "Un brouillon n’a pas été envoyé."
+            },
+            {
+              "action": "Choisissez Envoyer et vérifiez les messages envoyés après confirmation. Lisez les réponses dans la boîte de réception ou la discussion.",
+              "expected": "Un message envoyé apparaît dans les messages envoyés ; un échec reste à résoudre."
+            }
+          ]
+        }
+      ],
+      "fields": [],
+      "example": "Demandez au responsable de revoir DEMO-001 en indiquant l’écran et votre question. La décision officielle se prend dans l’écran de révision.",
+      "success": "Le message est envoyé à la bonne personne et vous savez où lire sa réponse.",
+      "nextActor": "Destinataire du message",
+      "problems": [
+        {
+          "symptom": "Le destinataire manque.",
+          "why": "L’annuaire présente les contacts disponibles pour votre compte.",
+          "action": "Demandez au responsable quel contact utiliser ; n’envoyez pas les informations à une autre personne."
+        }
+      ],
+      "sources": [
+        "client/src/pages/Profile.jsx",
+        "client/src/components/messaging/MessagingCenter.jsx",
+        "client/src/context/NotificationContext.jsx"
+      ],
+      "steps": [
+        "Ouvrez Mon profil puis Messagerie. Choisissez les messages reçus, envoyés, les brouillons ou la discussion. (Résultat attendu: Vous voyez vos messages et les destinataires disponibles.)",
+        "Choisissez Rédiger, le bon destinataire et un objet et un message clairs. Utilisez Enregistrer le brouillon si le message n’est pas prêt. (Résultat attendu: Un brouillon n’a pas été envoyé.)",
+        "Choisissez Envoyer et vérifiez les messages envoyés après confirmation. Lisez les réponses dans la boîte de réception ou la discussion. (Résultat attendu: Un message envoyé apparaît dans les messages envoyés ; un échec reste à résoudre.)"
+      ],
+      "caution": "Les messages sont des conversations. L’approbation des échantillons, la révision des résultats et la publication des rapports nécessitent leurs propres actions.",
+      "related": [
+        "start-manager",
+        "quality-pilot-help"
+      ],
+      "feature": "core",
+      "reviewOwner": "Lab operations lead"
+    },
+    {
+      "id": "quality-qc-failed",
+      "category": "quality",
+      "kind": "guide",
+      "title": "Que faire lorsqu’un contrôle qualité échoue",
+      "summary": "Arrêtez le travail concerné, examinez les preuves et demandez une décision enregistrée sans remplacer les mesures d’origine.",
+      "roles": [
+        "all"
+      ],
+      "keywords": [
+        "quality-qc-failed",
+        "quality",
+        "workbench"
+      ],
+      "minutes": 3,
+      "quick": "Lisez le contrôle en échec, comparez-le au relevé de paillasse et prévenez le responsable. Suivez la décision de correction ou de répétition enregistrée.",
+      "before": [
+        "Gardez le code de la série, le résultat du contrôle, l’unité, le lot de référence et le relevé de l’instrument."
+      ],
+      "sections": [
+        {
+          "title": "Que faire",
+          "steps": [
+            {
+              "action": "Ouvrez la série dans la paillasse ou la vue qualité et lisez quel contrôle a échoué.",
+              "expected": "Vous savez quel contrôle et quel travail nécessitent une intervention."
+            },
+            {
+              "action": "Comparez valeur, unité, date et matériau ou instrument au relevé. Décrivez une erreur suspectée au lieu de modifier une mesure pour la rendre conforme.",
+              "expected": "Les preuves d’origine restent disponibles."
+            },
+            {
+              "action": "Demandez au responsable de revoir les preuves et d’enregistrer une décision. Suivez la répétition ou la correction révisée demandée.",
+              "expected": "La décision et tout nouvel essai restent liés au travail d’origine."
+            }
+          ]
+        }
+      ],
+      "fields": [],
+      "example": "Un sol de contrôle est hors de la plage acceptée. Notez valeur, unité et lot, puis demandez l’évaluation de la série.",
+      "success": "Le travail concerné dispose d’une décision justifiée et, si nécessaire, d’une répétition traçable.",
+      "nextActor": "Responsable du laboratoire ou de la qualité",
+      "problems": [
+        {
+          "symptom": "La série ou l’envoi reste verrouillé.",
+          "why": "Une décision qualité, une répétition ou une autre personne peut encore être nécessaire.",
+          "action": "Lisez le motif et demandez au responsable d’utiliser le parcours prévu ; n’effacez pas la série d’origine."
+        }
+      ],
+      "sources": [
+        "server/services/qcGateService.js",
+        "server/services/qcDispositionStateService.js",
+        "client/src/pages/QADashboard.jsx"
+      ],
+      "steps": [
+        "Ouvrez la série dans la paillasse ou la vue qualité et lisez quel contrôle a échoué. (Résultat attendu: Vous savez quel contrôle et quel travail nécessitent une intervention.)",
+        "Comparez valeur, unité, date et matériau ou instrument au relevé. Décrivez une erreur suspectée au lieu de modifier une mesure pour la rendre conforme. (Résultat attendu: Les preuves d’origine restent disponibles.)",
+        "Demandez au responsable de revoir les preuves et d’enregistrer une décision. Suivez la répétition ou la correction révisée demandée. (Résultat attendu: La décision et tout nouvel essai restent liés au travail d’origine.)"
+      ],
+      "caution": "Un fichier lisible ou un résultat enregistré ne signifie pas que le contrôle qualité est conforme. Suivez les procédures du laboratoire.",
+      "related": [
+        "method-qc",
+        "quality-qc",
+        "bench-blocked"
+      ],
+      "feature": "core",
+      "reviewOwner": "Lab operations lead"
+    },
+    {
+      "id": "quality-pilot-help",
+      "category": "quality",
+      "kind": "guide",
+      "title": "Demander de l’aide pendant le pilote",
+      "summary": "Décrivez l’écran, l’action et le message exact, puis utilisez le contact configuré dans l’Aide.",
+      "roles": [
+        "all"
+      ],
+      "keywords": [
+        "quality-pilot-help",
+        "quality"
+      ],
+      "minutes": 3,
+      "quick": "Lisez d’abord l’Aide de l’écran. Si le problème persiste, contactez le responsable ou choisissez Contact support dans l’Aide. Un brouillon de courriel n’est pas une demande envoyée.",
+      "before": [
+        "Notez l’écran, la version, l’heure et un exemple sans information privée inutile."
+      ],
+      "sections": [
+        {
+          "title": "Que faire",
+          "steps": [
+            {
+              "action": "Ouvrez l’Aide depuis l’écran concerné et lisez le guide ou l’explication du blocage.",
+              "expected": "Vous pouvez vérifier si l’écran explique la suite."
+            },
+            {
+              "action": "Choisissez Contact support. Décrivez votre action, le résultat attendu et le message exact.",
+              "expected": "Une demande est préparée ; sa préparation ne confirme pas sa livraison."
+            },
+            {
+              "action": "Si un brouillon s’ouvre, vérifiez son destinataire et son contenu, puis envoyez-le depuis votre messagerie. Sans contact configuré, demandez au responsable le canal approuvé.",
+              "expected": "La demande parvient au contact seulement après son envoi par le canal configuré."
+            }
+          ]
+        }
+      ],
+      "fields": [],
+      "example": "« Dans Inventaire, l’aperçu signale une date invalide à la ligne 7. Aucune ligne n’a été importée. » Ajoutez la version et l’heure.",
+      "success": "La bonne personne reçoit les informations nécessaires pour reproduire le problème.",
+      "nextActor": "Responsable du laboratoire ou contact du pilote",
+      "problems": [
+        {
+          "symptom": "Une demande est préparée, mais personne ne l’a reçue.",
+          "why": "Ouvrir un brouillon ne l’envoie pas.",
+          "action": "Vérifiez le brouillon et les messages envoyés, ou demandez au responsable comment transmettre la demande."
+        }
+      ],
+      "sources": [
+        "client/src/pages/help/HelpCentre.jsx",
+        "client/src/pages/help/ArticleReader.jsx"
+      ],
+      "steps": [
+        "Ouvrez l’Aide depuis l’écran concerné et lisez le guide ou l’explication du blocage. (Résultat attendu: Vous pouvez vérifier si l’écran explique la suite.)",
+        "Choisissez Contact support. Décrivez votre action, le résultat attendu et le message exact. (Résultat attendu: Une demande est préparée ; sa préparation ne confirme pas sa livraison.)",
+        "Si un brouillon s’ouvre, vérifiez son destinataire et son contenu, puis envoyez-le depuis votre messagerie. Sans contact configuré, demandez au responsable le canal approuvé. (Résultat attendu: La demande parvient au contact seulement après son envoi par le canal configuré.)"
+      ],
+      "caution": "Ne joignez ni mots de passe, ni PIN personnels, ni jetons, ni données clients sans rapport avec la demande.",
+      "related": [
+        "start-messages",
+        "quality-support",
+        "offline-help"
+      ],
+      "feature": "core",
+      "reviewOwner": "Lab operations lead"
+    },
+    {
+      "id": "assets-technician-events",
+      "category": "assets",
+      "kind": "guide",
+      "title": "Enregistrer un contrôle d’instrument comme technicien",
+      "summary": "Enregistrez les preuves d’étalonnage, de vérification ou de maintenance sous votre nom et vérifiez la disponibilité.",
+      "roles": [
+        "all"
+      ],
+      "keywords": [
+        "assets-technician-events",
+        "assets",
+        "equipment",
+        "workbench"
+      ],
+      "minutes": 3,
+      "quick": "Ouvrez Équipements, choisissez l’instrument et enregistrez l’événement autorisé, son résultat réel et ses dates. Vérifiez si une validation ou une autre action reste nécessaire.",
+      "before": [
+        "Vérifiez l’identifiant physique et préparez le relevé réel du contrôle ou de la maintenance."
+      ],
+      "sections": [
+        {
+          "title": "Que faire",
+          "steps": [
+            {
+              "action": "Ouvrez Équipements et le bon instrument. Choisissez un type d’événement proposé à votre rôle.",
+              "expected": "L’événement est lié au bon instrument."
+            },
+            {
+              "action": "Saisissez le travail, son résultat réel et sa date. Ajoutez la prochaine échéance si elle est connue, puis enregistrez.",
+              "expected": "L’événement vous identifie comme la personne l’ayant réalisé."
+            },
+            {
+              "action": "Lisez la disponibilité et l’historique. Demandez à un autre responsable habilité de valider l’événement lorsque cela est requis.",
+              "expected": "Enregistrer ne contourne ni une validation, ni une échéance dépassée, ni une mise hors service."
+            }
+          ]
+        }
+      ],
+      "fields": [],
+      "example": "Conservez une vérification en échec, recherchez la cause et enregistrez un contrôle ultérieur réellement conforme si réalisé, sans réécrire l’échec.",
+      "success": "Les preuves sont enregistrées et les restrictions actuelles sont comprises.",
+      "nextActor": "Un autre responsable habilité si une validation est requise",
+      "problems": [
+        {
+          "symptom": "Vous êtes le seul responsable et ne pouvez pas valider votre propre événement en échec.",
+          "why": "La personne qui enregistre un événement ne peut pas l’approuver.",
+          "action": "Demandez à un autre responsable habilité. Un contrôle ultérieur réellement conforme peut remplacer l’échec pour la qualification ; conservez les deux traces et faites revoir la mise hors service."
+        }
+      ],
+      "sources": [
+        "client/src/components/equipment/LogEventModal.jsx",
+        "server/controllers/equipmentEventController.js",
+        "server/services/equipmentQualificationService.js"
+      ],
+      "steps": [
+        "Ouvrez Équipements et le bon instrument. Choisissez un type d’événement proposé à votre rôle. (Résultat attendu: L’événement est lié au bon instrument.)",
+        "Saisissez le travail, son résultat réel et sa date. Ajoutez la prochaine échéance si elle est connue, puis enregistrez. (Résultat attendu: L’événement vous identifie comme la personne l’ayant réalisé.)",
+        "Lisez la disponibilité et l’historique. Demandez à un autre responsable habilité de valider l’événement lorsque cela est requis. (Résultat attendu: Enregistrer ne contourne ni une validation, ni une échéance dépassée, ni une mise hors service.)"
+      ],
+      "caution": "Un événement conforme plus récent peut remplacer l’échec pour la qualification, mais ne lève pas automatiquement une mise hors service.",
+      "related": [
+        "assets-calibration",
+        "assets-maintain",
+        "assets-equipment-import"
+      ],
+      "feature": "core",
+      "reviewOwner": "Lab operations lead"
+    },
+    {
+      "id": "assets-prepared-lots",
+      "category": "assets",
+      "kind": "guide",
+      "title": "Enregistrer un réactif ou étalon préparé",
+      "summary": "Conservez ensemble le lot préparé, sa quantité, son emplacement et ses lots parents, puis suivez la règle de quarantaine du laboratoire.",
+      "roles": [
+        "all"
+      ],
+      "keywords": [
+        "assets-prepared-lots",
+        "assets",
+        "inventory"
+      ],
+      "minutes": 3,
+      "quick": "Dans Inventaire, choisissez le réactif ou l’étalon et préparez un lot. Enregistrez quantités, dates et lots parents réels ; vérifiez son état avant utilisation.",
+      "before": [
+        "Préparez le relevé de préparation, les étiquettes des lots parents et un emplacement réactif actif du laboratoire."
+      ],
+      "sections": [
+        {
+          "title": "Que faire",
+          "steps": [
+            {
+              "action": "Choisissez le bon réactif ou étalon et l’action de préparation d’un lot. Saisissez numéro, quantité positive, concentration utile, péremption et emplacement.",
+              "expected": "Le lot appartient au bon article et au bon laboratoire."
+            },
+            {
+              "action": "Sélectionnez les lots parents réellement utilisés et ajoutez les notes de traçabilité. Suivez la procédure approuvée avant d’utiliser un matériau en quarantaine. Enregistrez.",
+              "expected": "Le relevé conserve le préparateur et les lots parents."
+            },
+            {
+              "action": "Vérifiez l’état du lot. S’il commence en quarantaine selon la règle du laboratoire, demandez au responsable de le revoir et de le libérer avant utilisation.",
+              "expected": "Seul un lot autorisé par son état et les règles est choisi pour le travail."
+            }
+          ]
+        }
+      ],
+      "fields": [],
+      "example": "Enregistrez DEMO-PREP-01 avec sa quantité préparée et son lot parent réels. Si la règle impose une quarantaine, attendez sa libération.",
+      "success": "La préparation est traçable et sa disponibilité a été vérifiée.",
+      "nextActor": "Responsable du laboratoire si une libération est requise",
+      "problems": [
+        {
+          "symptom": "Le lot n’est pas proposé à la paillasse.",
+          "why": "Il peut être en quarantaine, périmé ou indisponible.",
+          "action": "Vérifiez ses détails avec le responsable. N’utilisez ni quantité ni import pour contourner son état."
+        }
+      ],
+      "sources": [
+        "client/src/pages/Inventory.jsx",
+        "server/services/inventoryWriteService.js"
+      ],
+      "steps": [
+        "Choisissez le bon réactif ou étalon et l’action de préparation d’un lot. Saisissez numéro, quantité positive, concentration utile, péremption et emplacement. (Résultat attendu: Le lot appartient au bon article et au bon laboratoire.)",
+        "Sélectionnez les lots parents réellement utilisés et ajoutez les notes de traçabilité. Suivez la procédure approuvée avant d’utiliser un matériau en quarantaine. Enregistrez. (Résultat attendu: Le relevé conserve le préparateur et les lots parents.)",
+        "Vérifiez l’état du lot. S’il commence en quarantaine selon la règle du laboratoire, demandez au responsable de le revoir et de le libérer avant utilisation. (Résultat attendu: Seul un lot autorisé par son état et les règles est choisi pour le travail.)"
+      ],
+      "caution": "Enregistrer une préparation ne certifie pas sa qualité. Suivez la méthode, les contrôles et la décision de libération.",
+      "related": [
+        "assets-lots",
+        "assets-expiry",
+        "assets-inventory-import"
+      ],
+      "feature": "core",
+      "reviewOwner": "Lab operations lead"
+    },
+    {
+      "id": "assets-inventory-import",
+      "category": "assets",
+      "kind": "guide",
+      "title": "Importer le stock depuis une feuille de calcul",
+      "summary": "Les responsables prévisualisent emplacements, articles et lots, puis confirment les lignes valides à enregistrer dans le laboratoire choisi.",
+      "roles": [
+        "all"
+      ],
+      "keywords": [
+        "assets-inventory-import",
+        "assets",
+        "inventory",
+        "import",
+        "CSV",
+        "XLSX"
+      ],
+      "minutes": 3,
+      "quick": "Choisissez Importer le stock dans Inventaire. Téléchargez le modèle, associez le fichier, vérifiez les lignes et le laboratoire, puis confirmez Importer les lignes.",
+      "before": [
+        "Utilisez CSV ou Excel : au plus 2 000 lignes par feuille et 2 Mo pour le fichier et la requête. Point décimal et dates AAAA-MM-JJ."
+      ],
+      "sections": [
+        {
+          "title": "Que faire",
+          "steps": [
+            {
+              "action": "Choisissez Importer le stock et Télécharger le modèle, ou exportez une feuille existante. Conservez les noms de colonnes. Seul un administrateur global choisit un autre laboratoire actif.",
+              "expected": "La structure du fichier est reconnue."
+            },
+            {
+              "action": "Associez les feuilles et colonnes, puis choisissez Prévisualiser les lignes. Vérifiez les lignes d’origine, erreurs, laboratoire et mode d’ignorance ou de mise à jour des descriptions.",
+              "expected": "L’aperçu montre les effets prévus et ne change aucun stock."
+            },
+            {
+              "action": "Gardez l’option tout ou rien si chaque ligne doit être valide. Désactivez-la seulement pour enregistrer les lignes valides. Confirmez le laboratoire et choisissez Importer les lignes ; lisez et téléchargez le compte rendu.",
+              "expected": "La confirmation valide à nouveau et indique créations, mises à jour, lignes ignorées ou refusées."
+            }
+          ]
+        }
+      ],
+      "fields": [],
+      "example": "Un fichier contient un emplacement, un réactif et son lot. Corrigez les références inconnues avant de confirmer.",
+      "success": "Le compte rendu et l’inventaire correspondent aux changements attendus.",
+      "nextActor": "Responsable des stocks",
+      "problems": [
+        {
+          "symptom": "Le bouton d’import manque ou une ligne ne trouve pas son parent.",
+          "why": "L’import exige la gestion des stocks et des références du laboratoire choisi.",
+          "action": "Demandez au responsable d’importer, ou corrigez laboratoire et référence, puis prévisualisez à nouveau."
+        }
+      ],
+      "sources": [
+        "client/src/components/inventory/InventoryImportDialog.jsx",
+        "server/services/inventoryImportService.js"
+      ],
+      "steps": [
+        "Choisissez Importer le stock et Télécharger le modèle, ou exportez une feuille existante. Conservez les noms de colonnes. Seul un administrateur global choisit un autre laboratoire actif. (Résultat attendu: La structure du fichier est reconnue.)",
+        "Associez les feuilles et colonnes, puis choisissez Prévisualiser les lignes. Vérifiez les lignes d’origine, erreurs, laboratoire et mode d’ignorance ou de mise à jour des descriptions. (Résultat attendu: L’aperçu montre les effets prévus et ne change aucun stock.)",
+        "Gardez l’option tout ou rien si chaque ligne doit être valide. Désactivez-la seulement pour enregistrer les lignes valides. Confirmez le laboratoire et choisissez Importer les lignes ; lisez et téléchargez le compte rendu. (Résultat attendu: La confirmation valide à nouveau et indique créations, mises à jour, lignes ignorées ou refusées.)"
+      ],
+      "caution": "Les lots existants sont toujours ignorés : ni quantité, ni état, ni péremption ne changent. Utilisez l’ajustement ou la libération séparée.",
+      "related": [
+        "assets-stock",
+        "assets-lots",
+        "assets-prepared-lots"
+      ],
+      "feature": "core",
+      "reviewOwner": "Lab operations lead"
+    },
+    {
+      "id": "assets-equipment-import",
+      "category": "assets",
+      "kind": "guide",
+      "title": "Importer des équipements depuis une feuille de calcul",
+      "summary": "Les responsables ajoutent des instruments identifiés, des preuves d’étalonnage facultatives et des analyses autorisées après un aperçu.",
+      "roles": [
+        "all"
+      ],
+      "keywords": [
+        "assets-equipment-import",
+        "assets",
+        "equipment",
+        "import",
+        "CSV",
+        "XLSX"
+      ],
+      "minutes": 3,
+      "quick": "Choisissez Importer des équipements dans Équipements, associez un instrument par ligne, vérifiez Prévisualiser les lignes, puis confirmez Importer les lignes.",
+      "before": [
+        "Préparez des identifiants uniques et des preuves réelles. Dates AAAA-MM-JJ ; la prochaine échéance doit suivre le dernier étalonnage."
+      ],
+      "sections": [
+        {
+          "title": "Que faire",
+          "steps": [
+            {
+              "action": "Choisissez Importer des équipements et Télécharger le modèle. L’administrateur global choisit un laboratoire actif. Indiquez identifiant, nom et type, puis associez et prévisualisez le fichier.",
+              "expected": "Chaque ligne a une identité et un laboratoire clairs."
+            },
+            {
+              "action": "Vérifiez les dates et codes d’analyse actifs, séparés par | ou ;. Une nouvelle affectation exige un équipement par défaut ; les affectations existantes conservent méthode et caractère obligatoire.",
+              "expected": "Les nouvelles preuves utilisent le parcours normal ; sans dates, l’instrument reste non configuré."
+            },
+            {
+              "action": "Confirmez et importez. Vérifiez compte rendu et disponibilité réelle avant de travailler. L’export CSV ajoute état et disponibilité ; l’import ignore ces colonnes.",
+              "expected": "L’enregistrement suit une nouvelle validation et la disponibilité dépend toujours des règles."
+            }
+          ]
+        }
+      ],
+      "fields": [],
+      "example": "Ajoutez DEMO-PH-01 avec ses vraies dates et le code pH actif. Vérifiez sa disponibilité avant de le choisir à la paillasse.",
+      "success": "L’instrument apparaît une seule fois avec les preuves et affectations prévues.",
+      "nextActor": "Responsable des équipements",
+      "problems": [
+        {
+          "symptom": "Une ligne signale des dates ou une analyse indisponible.",
+          "why": "Les dates ne se suivent pas, ou l’analyse est inactive ou d’un autre laboratoire.",
+          "action": "Corrigez la ligne et prévisualisez à nouveau. N’inventez pas de preuve et ne changez pas de laboratoire pour contourner l’erreur."
+        }
+      ],
+      "sources": [
+        "client/src/components/inventory/InventoryImportDialog.jsx",
+        "server/services/equipmentImportService.js",
+        "server/controllers/equipmentExportController.js"
+      ],
+      "steps": [
+        "Choisissez Importer des équipements et Télécharger le modèle. L’administrateur global choisit un laboratoire actif. Indiquez identifiant, nom et type, puis associez et prévisualisez le fichier. (Résultat attendu: Chaque ligne a une identité et un laboratoire clairs.)",
+        "Vérifiez les dates et codes d’analyse actifs, séparés par | ou ;. Une nouvelle affectation exige un équipement par défaut ; les affectations existantes conservent méthode et caractère obligatoire. (Résultat attendu: Les nouvelles preuves utilisent le parcours normal ; sans dates, l’instrument reste non configuré.)",
+        "Confirmez et importez. Vérifiez compte rendu et disponibilité réelle avant de travailler. L’export CSV ajoute état et disponibilité ; l’import ignore ces colonnes. (Résultat attendu: L’enregistrement suit une nouvelle validation et la disponibilité dépend toujours des règles.)"
+      ],
+      "caution": "La mise à jour des descriptions conserve type, criticité, état, étalonnage et affectations existants. L’import ne remet pas un instrument bloqué en service.",
+      "related": [
+        "assets-technician-events",
+        "assets-register",
+        "assets-calibration"
       ],
       "feature": "core",
       "reviewOwner": "Lab operations lead"
