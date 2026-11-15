@@ -56,6 +56,7 @@ async function mount(locale = 'en', canManage = true) {
         if (name.includes('AuthContext')) return { useAuth: () => ({ user: { role: 'LAB_MANAGER' },
             hasPermission: permission => permission === 'MANAGE_INVENTORY' ? canManage : true }) };
         if (name.includes('DialogContext')) return { useDialog: () => ({ showDialog: jest.fn() }) };
+        if (name.endsWith('InventoryImportDialog')) return () => null;
         if (name.endsWith('InfoTooltip')) return { default: () => null };
         throw Error('Unexpected inventory dependency: ' + name);
     } });

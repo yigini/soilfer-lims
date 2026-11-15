@@ -61,6 +61,7 @@ async function mount(locale = 'en', { permissions = ['PREPARE_INVENTORY_LOT', 'C
         if (name.includes('LanguageContext')) return { useLanguage: () => ({ t, language: locale }) };
         if (name.includes('AuthContext')) return { useAuth: () => ({ user: actor, hasPermission: permission => permissions.includes(permission) }) };
         if (name.includes('DialogContext')) return { useDialog: () => ({ showDialog: jest.fn() }) };
+        if (name.endsWith('InventoryImportDialog')) return () => null;
         if (name.endsWith('InfoTooltip')) return { default: () => null };
         throw Error('Unexpected prepared-lot UI dependency: ' + name);
     } });

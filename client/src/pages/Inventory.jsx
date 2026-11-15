@@ -10,6 +10,7 @@ import {
     PlusCircle, Eye, Archive, CheckCircle, XCircle, RefreshCw, BarChart3
 } from 'lucide-react';
 import InfoTooltip from '../components/common/InfoTooltip';
+import InventoryImportDialog from '../components/inventory/InventoryImportDialog';
 
 // ─── Constants ───────────────────────────────────────────────────
 const ITEM_TYPES = ['ALL', 'REAGENT', 'CHEMICAL', 'CONSUMABLE', 'STANDARD', 'CRM', 'CONTAINER', 'OTHER'];
@@ -648,6 +649,7 @@ const Inventory = () => {
     const [showQuickConsume, setShowQuickConsume] = useState(false);
     const [quickConsumeItem, setQuickConsumeItem] = useState(null);
     const [showExportMenu, setShowExportMenu] = useState(false);
+    const [showImport, setShowImport] = useState(false);
     const [alertFilter, setAlertFilter] = useState(null);
     const [alertsList, setAlertsList] = useState([]);
 
@@ -719,6 +721,7 @@ const Inventory = () => {
                             </button>
                         </>
                     )}
+                    {canManage && <button type="button" onClick={() => setShowImport(true)} className="px-3 py-2 rounded-lg border border-sf-divider text-sm">{t('bulkImport.open')}</button>}
                     <div className="relative">
                         <button onClick={() => setShowExportMenu(!showExportMenu)} className="p-2 rounded-lg border dark:border-gray-600 hover:bg-sf-raised relative">
                             <Download size={16} className="text-gray-500" />
@@ -888,6 +891,8 @@ const Inventory = () => {
             </div>
 
             {/* Modals */}
+            {showImport && canManage && <InventoryImportDialog onClose={() => setShowImport(false)} onImported={() => { fetchAll(); if (selectedItem) openItem(selectedItem); }} />}
+
             <ReceiveStockModal show={showReceive} onClose={() => setShowReceive(false)} items={items} locations={locations} onSuccess={() => { fetchAll(); if (selectedItem) openItem(selectedItem); }} initialItemId={initialReceiveItemId} canManage={canManage} actor={user} />
             <QuickConsumeModal show={showQuickConsume} onClose={() => setShowQuickConsume(false)} item={quickConsumeItem} locations={locations} onSuccess={fetchAll} />
             <CreateItemModal show={showCreate} onClose={() => setShowCreate(false)} onSuccess={fetchAll} />
