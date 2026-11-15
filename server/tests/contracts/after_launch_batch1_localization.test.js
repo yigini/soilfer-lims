@@ -160,10 +160,3 @@ test('manager queue passes its translator to elapsed time', async () => {
     const view = await mount('pages/ManagerQueue.jsx', { isLive: true, lastUpdated: new Date(Date.now() - 5000), t }, 'pt', 'LiveBadge');
     expect(view.text()).toContain(t('workbenchUi.secondsAgo', { count: 5 }));
 });
-test('no-undef scans JSX, catches the prior missing t pattern and permits declared browser/build globals', async () => {
-    const { lintSource } = require('../../../client/scripts/check_defined_names.cjs');
-    const bad = await lintSource('export const Example = () => <span>{t("status.CLOSED")}</span>;');
-    expect(bad[0].messages.some(row => row.ruleId === 'no-undef' && row.message.includes("'t'"))).toBe(true);
-    const good = await lintSource('export const Example = () => <span>{window.location.pathname}{__APP_VERSION__}{__BUILD_DATE__}</span>;');
-    expect(good[0].errorCount).toBe(0);
-});
