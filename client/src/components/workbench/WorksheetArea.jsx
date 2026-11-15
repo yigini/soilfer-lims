@@ -668,7 +668,7 @@ export default function WorksheetArea({
                         <select data-testid="worksheet-run-select" value={selectedRun} onChange={event => openWorksheet(event.target.value)}>
                             <option value="">{t('qcWorksheet.assignedSamples')}</option>
                             {(runBatch && !runList.some(row => row.id === runBatch.id) ? [runBatch, ...runList] : runList)
-                                .map(row => <option key={row.id} value={row.id}>{row.id} · {row.status}</option>)}
+                                .map(row => <option key={row.id} value={row.id}>{row.id} · {t(`status.${row.status}`, row.status)}</option>)}
                         </select>
                     </label>}
                     <button

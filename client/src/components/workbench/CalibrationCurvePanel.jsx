@@ -34,7 +34,7 @@ export default function CalibrationCurvePanel({ batch, analyte, canEdit, onChang
         {state?.criteria && <p className="text-xs">{t('calculations.minimumLevels')}: {state.criteria.curveMinPoints.value}
             {' · '}{t('calculations.minimumR')}: {state.criteria.curveMinR.value}</p>}
         {state?.latest && <p className="text-xs" data-testid="calibration-latest">
-            {t('calculations.revision')} {state.latest.revision} · {state.latest.status} · r={state.latest.r ?? '—'} · r²={state.latest.rSquared ?? '—'}
+            {t('calculations.revision')} {state.latest.revision} · {t(`status.${state.latest.status}`, state.latest.status)} · r={state.latest.r ?? '—'} · r²={state.latest.rSquared ?? '—'}
             {' · '}{t('calculations.appliedLimits')}: {state.latest.minPointsApplied} / {state.latest.minRApplied}</p>}
         {state?.active?.requiresCurve && <>
             {points.map((point,index) => <div className="grid grid-cols-2 gap-2" key={index}>
@@ -54,7 +54,7 @@ export default function CalibrationCurvePanel({ batch, analyte, canEdit, onChang
                 onClick={save} className="btn-primary px-3 py-2">{t('calculations.recordCurve')}</button>
             <details className="text-xs"><summary>{t('calculations.curveHistory')}</summary>
                 {state.rows.map(row => <div key={row.id} className="p-2 border-b">
-                    {t('calculations.revision')} {row.revision} · {row.status} · {row.recordedBy} · {row.reason}
+                    {t('calculations.revision')} {row.revision} · {t(`status.${row.status}`, row.status)} · {row.recordedBy} · {row.reason}
                     <table className="w-full"><tbody>{row.points.map(point => <tr key={point.ordinal}><td>{point.standardConcentration}</td><td>{point.response}</td></tr>)}</tbody></table>
                 </div>)}
             </details>

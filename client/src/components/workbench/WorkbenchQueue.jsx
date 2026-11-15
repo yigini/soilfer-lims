@@ -230,7 +230,7 @@ export default function WorkbenchQueue({
                                                             item.latestSpectralScan.qcStatus === 'WARN' ? 'bg-amber-200 text-amber-900 dark:bg-amber-900 dark:text-amber-200' :
                                                             'bg-rose-200 text-rose-900 dark:bg-rose-900 dark:text-rose-200'
                                                         }`}>
-                                                            {item.latestSpectralScan.qcStatus}
+                                                            {t(`status.${item.latestSpectralScan.qcStatus}`, item.latestSpectralScan.qcStatus)}
                                                         </span>
                                                     )}
                                                 </span>

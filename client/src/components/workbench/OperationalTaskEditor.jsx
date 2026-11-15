@@ -28,16 +28,19 @@ export default function OperationalTaskEditor({
     const rawChecks = Array.isArray(checks) ? checks : [false, false, false];
 
     const fallbackSteps = analysis === 'DRYING' ? [
-        'Sample container inspected and sample identity verified against intake record',
-        'Sample spread evenly on clean drying tray and placed in drying facility (<= 40°C)',
-        'Drying completed to constant weight and recorded in preparation log'
+        t('workbenchRare.checklist.fallbackDRYING0'),
+        t('workbenchRare.checklist.fallbackDRYING1'),
+        t('workbenchRare.checklist.fallbackDRYING2')
     ] : [
-        'Sample identity and completed drying record verified',
-        'Required preparation steps completed according to the applicable laboratory procedure',
-        'Prepared material and retained portions labelled for their intended analyses'
+        t('workbenchRare.checklist.PREPARATION0'),
+        t('workbenchRare.checklist.PREPARATION1'),
+        t('workbenchRare.checklist.PREPARATION2')
     ];
 
     const sopSteps = checklists[analysis]?.steps || fallbackSteps;
+
+    const displayStep = (step, index) => checklists[analysis]?.steps
+        ? t(`workbenchRare.checklist.${analysis}${index}`) : step;
 
     const toggleCheck = (index) => {
         if (disabled || savedReceipt) return;
@@ -56,10 +59,10 @@ export default function OperationalTaskEditor({
             <div className="flex flex-col gap-2 p-2.5 rounded-lg border border-amber-500/30 bg-amber-500/10 text-xs">
                 <div className="flex items-center gap-1.5 font-bold text-amber-700 dark:text-amber-300">
                     <AlertTriangle size={14} className="text-amber-600 dark:text-amber-400 shrink-0" />
-                    <span>Legacy Completion — Evidence Gap</span>
+                    <span>{t('workbenchRare.evidenceGap')}</span>
                 </div>
                 <p className="text-[11px] text-amber-800 dark:text-amber-200 leading-tight">
-                    Recorded as “Done” without procedural checklist evidence. Dependent result entry requires documented verification or an authorized new preparation attempt.
+                    {t('workbenchRare.evidenceGapDescription')}
                 </p>
             </div>
         );
@@ -72,7 +75,7 @@ export default function OperationalTaskEditor({
                 <div className="flex items-center justify-between">
                     <span className="inline-flex items-center gap-1.5 font-bold text-emerald-700 dark:text-emerald-300">
                         <CheckCircle2 size={14} className="text-emerald-600 dark:text-emerald-400" />
-                        <span>Checklist Verified</span>
+                        <span>{t('workbenchRare.checklistVerified')}</span>
                     </span>
                     <span className="text-[10px] font-mono text-emerald-700 dark:text-emerald-400">
                         {savedReceipt.receiptId}
@@ -82,19 +85,19 @@ export default function OperationalTaskEditor({
                     {sopSteps.map((step, idx) => (
                         <div key={idx} className="flex items-start gap-1.5 text-[11px] text-sf-text">
                             <CheckSquare size={13} className="text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
-                            <span>{step}</span>
+                            <span>{displayStep(step, idx)}</span>
                         </div>
                     ))}
                 </div>
                 {(savedReceipt.preparationRecords || []).map(row => (
                     <div key={row.id} className="text-[10px] text-sf-text font-mono">
-                        {[row.gateCode, row.method, row.temperatureC != null && `${row.temperatureC} °C`, row.sieveMm != null && `${row.sieveMm} mm`,
+                        {[row.gateCode && t(`workbench.preparationRecord.steps.${row.gateCode}`, row.gateCode), row.method && t(`workbench.preparationRecord.methods.${row.method}`, row.method), row.temperatureC != null && `${row.temperatureC} °C`, row.sieveMm != null && `${row.sieveMm} mm`,
                             row.coarseFractionPct != null && `${row.coarseFractionPct} %`, row.grindMm != null && `${row.grindMm} mm`,
                             `${row.durationMinutes} min`].filter(Boolean).join(' · ')}
                     </div>
                 ))}
                 <div className="text-[10px] text-sf-muted mt-1 border-t border-sf-divider pt-1">
-                    Confirmed by {savedReceipt.recordedBy || 'Technician'} · {savedReceipt.recordedAt ? new Date(savedReceipt.recordedAt).toLocaleString() : 'Recorded'}
+                    {t('workbenchRare.confirmedBy', { actor: savedReceipt.recordedBy || t('workbenchRare.technician'), date: savedReceipt.recordedAt ? new Date(savedReceipt.recordedAt).toLocaleString() : t('workbenchRare.recorded') })}
                 </div>
             </div>
         );
@@ -123,7 +126,7 @@ export default function OperationalTaskEditor({
                             <span className="mt-0.5 text-sf-primary flex-shrink-0">
                                 {isChecked ? <CheckSquare size={14} /> : <Square size={14} />}
                             </span>
-                            <span className="leading-snug">{step}</span>
+                            <span className="leading-snug">{displayStep(step, idx)}</span>
                         </button>
                     );
                 })}
@@ -142,10 +145,10 @@ export default function OperationalTaskEditor({
                     {isAllComplete ? (
                         <>
                             <CheckCircle2 size={12} />
-                            <span>Operational checklist complete</span>
+                            <span>{t('workbenchRare.checklistComplete')}</span>
                         </>
                     ) : (
-                        <span>Checklist: {completedCount}/{sopSteps.length} confirmed</span>
+                        <span>{t('workbenchRare.checklistCount', { count: completedCount, total: sopSteps.length })}</span>
                     )}
                 </span>
 

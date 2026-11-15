@@ -33,7 +33,7 @@ const LiveBadge = ({ isLive, isStale, lastUpdated, t }) => (
             {isStale ? t('queue.stale', 'Stale') : t('queue.live', 'Live')}
         </div>
         {lastUpdated && (
-            <span className="text-[10px] text-sf-muted">{formatLastUpdated(lastUpdated)}</span>
+            <span className="text-[10px] text-sf-muted">{formatLastUpdated(lastUpdated, t)}</span>
         )}
     </div>
 );
