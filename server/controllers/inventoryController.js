@@ -3,6 +3,7 @@
  * Lot-level traceability, RBAC enforcement, lab-scoped, append-only ledger
  */
 const prisma = require('../prisma');
+const { csvCell } = require('../utils/importCsv');
 const crypto = require('crypto');
 const { hasPermission } = require('../config/roles');
 const inventoryWriteService = require('../services/inventoryWriteService');
@@ -885,25 +886,49 @@ exports.exportData = async (req, res) => {
         const user = req.user;
         const type = req.params.type; // stock | expiry | transactions
         const where = labScope(user);
+        const importable = ['locations', 'items', 'lots'].includes(type);
+        if (req.query.labId) {
+            if (user.role !== 'SUPER_ADMIN' && req.query.labId !== user.labId) return res.status(403).json({ code: 'IMPORT_LAB_FORBIDDEN', error: 'Access denied' });
+            where.labId = req.query.labId;
+        }
+        if (importable && user.role === 'SUPER_ADMIN' && !where.labId) return res.status(400).json({ code: 'IMPORT_LAB_REQUIRED', error: 'Choose a laboratory.' });
         let csvRows = [];
 
-        if (type === 'stock') {
+        if (importable) {
+            const { inventory: columns } = require('../../shared/importColumns.json');
+            const headers = columns[type];
+            const locations = await prisma.inventoryLocation.findMany({ where });
+            const locationById = new Map(locations.map(row => [row.id, row]));
+            const records = type === 'locations' ? locations : type === 'items' ? await prisma.inventoryItem.findMany({ where })
+                : await prisma.inventoryLot.findMany({ where, include: { item: true, location: true } });
+            csvRows.push(headers.map(csvCell).join(','));
+            for (const record of records) {
+                const location = locationById.get(type === 'items' ? record.defaultLocationId : record.parentLocationId);
+                const values = type === 'locations' ? { ...record, parentLocationName: location?.name, parentLocationPurpose: location?.purpose }
+                    : type === 'items' ? { ...record, defaultLocationName: location?.name, defaultLocationPurpose: location?.purpose }
+                    : { ...record, itemShortCode: record.item.shortCode, itemName: record.item.name, itemType: record.item.itemType, quantity: record.currentQuantity,
+                        locationName: record.location?.name, locationPurpose: record.location?.purpose,
+                        receivedDate: record.receivedDate ? new Date(record.receivedDate).toISOString().slice(0, 10) : '',
+                        expiryDate: record.expiryDate ? new Date(record.expiryDate).toISOString().slice(0, 10) : '' };
+                csvRows.push(headers.map(column => csvCell(values[column])).join(','));
+            }
+        } else if (type === 'stock') {
             const items = await prisma.inventoryItem.findMany({
                 where: { ...where, isActive: true },
                 include: { lots: { include: { location: true } } }
             });
-            csvRows.push('Item Name,Type,Short Code,Lot Number,Status,Current Qty,Unit,Expiry Date,Location');
+            csvRows.push('labId,itemName,itemType,itemShortCode,lotNumber,status,quantity,unitOfMeasure,expiryDate,locationName');
             for (const item of items) {
                 for (const lot of item.lots) {
                     csvRows.push([
-                        `"${item.name}"`, item.itemType, item.shortCode || '',
+                        item.labId, item.name, item.itemType, item.shortCode || '',
                         lot.lotNumber, lot.status, lot.currentQuantity, lot.unitOfMeasure,
                         lot.expiryDate ? new Date(lot.expiryDate).toISOString().split('T')[0] : '',
                         lot.location?.name || ''
-                    ].join(','));
+                    ].map(csvCell).join(','));
                 }
                 if (item.lots.length === 0) {
-                    csvRows.push([`"${item.name}"`, item.itemType, item.shortCode || '', '', '', '0', item.unitOfMeasure, '', ''].join(','));
+                    csvRows.push([item.labId, item.name, item.itemType, item.shortCode || '', '', '', '0', item.unitOfMeasure, '', ''].map(csvCell).join(','));
                 }
             }
         } else if (type === 'expiry') {
@@ -918,11 +943,11 @@ exports.exportData = async (req, res) => {
             for (const lot of lots) {
                 const daysLeft = Math.ceil((new Date(lot.expiryDate) - now) / (24 * 60 * 60 * 1000));
                 csvRows.push([
-                    `"${lot.item.name}"`, lot.item.itemType, lot.lotNumber, lot.status,
+                    lot.item.name, lot.item.itemType, lot.lotNumber, lot.status,
                     new Date(lot.expiryDate).toISOString().split('T')[0],
                     daysLeft, lot.currentQuantity, lot.unitOfMeasure,
                     lot.location?.name || ''
-                ].join(','));
+                ].map(csvCell).join(','));
             }
         } else if (type === 'transactions') {
             const { from, to } = req.query;
@@ -942,13 +967,13 @@ exports.exportData = async (req, res) => {
             for (const tx of txns) {
                 csvRows.push([
                     new Date(tx.timestamp).toISOString(), tx.userName || tx.userId, tx.actionType,
-                    `"${tx.lot?.item?.name || ''}"`, tx.lot?.lotNumber || '',
-                    tx.deltaQuantity, tx.unit, `"${tx.freeTextReason || tx.reasonCode || ''}"`,
+                    tx.lot?.item?.name || '', tx.lot?.lotNumber || '',
+                    tx.deltaQuantity, tx.unit, tx.freeTextReason || tx.reasonCode || '',
                     tx.sampleId || '', tx.workItemId || '', tx.analysisCode || ''
-                ].join(','));
+                ].map(csvCell).join(','));
             }
         } else {
-            return res.status(400).json({ error: 'Invalid export type. Use: stock, expiry, transactions' });
+            return res.status(400).json({ error: 'Invalid export type. Use: stock, expiry, transactions, locations, items, lots' });
         }
 
         // Log export
