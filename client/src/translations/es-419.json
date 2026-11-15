@@ -56,7 +56,8 @@
     "datasets": {
       "locations": "Ubicaciones",
       "items": "Artículos",
-      "lots": "Lotes"
+      "lots": "Lotes",
+      "equipment": "Equipos"
     },
     "status": {
       "NEW": "Nuevo",
@@ -104,7 +105,16 @@
       "locationId": "Identificador de la ubicación existente",
       "concentration": "Concentración",
       "preparedBy": "Preparado por",
-      "traceabilityNotes": "Notas de trazabilidad"
+      "traceabilityNotes": "Notas de trazabilidad",
+      "internalAssetTag": "Identificador interno",
+      "assetType": "Tipo de equipo",
+      "manufacturer": "Fabricante",
+      "model": "Modelo",
+      "serialNumber": "Número de serie",
+      "criticality": "Criticidad",
+      "lastCalibrationDate": "Fecha de la última calibración",
+      "nextCalibrationDueDate": "Próxima fecha de calibración",
+      "eligibleAnalyses": "Códigos de análisis permitidos"
     },
     "errors": {
       "IMPORT_INTERNAL_ERROR": "No se pudo completar la importación. Compruebe el resultado antes de intentarlo de nuevo.",
@@ -141,8 +151,19 @@
       "IMPORT_INVALID_SHEETS": "Elija ubicaciones, artículos o lotes para cada hoja que desee importar.",
       "IMPORT_INVALID_SHEET": "No se pudieron leer las filas de la hoja.",
       "IMPORT_INVALID_ROW": "No se pudo leer esta fila.",
-      "IMPORT_INVALID_ROW_NUMBER": "El número de fila de origen no es válido."
-    }
+      "IMPORT_INVALID_ROW_NUMBER": "El número de fila de origen no es válido.",
+      "IMPORT_CALIBRATION_DATE_REQUIRED": "Indique la fecha de la última calibración si proporciona una próxima fecha.",
+      "IMPORT_FUTURE_DATE": "La fecha de calibración no puede estar en el futuro.",
+      "IMPORT_INVALID_ANALYSIS_LIST": "Use cada código de análisis una sola vez, separado por | o ;, sin entradas vacías.",
+      "IMPORT_ANALYSIS_UNAVAILABLE": "Un análisis está inactivo o no está disponible para este laboratorio.",
+      "IMPORT_ELIGIBILITY_INVALID": "Una asignación de equipo existente no es válida. Pida al responsable del laboratorio que la revise antes de importar."
+    },
+    "equipmentTitle": "Importar equipos",
+    "equipmentIntro": "Lea un archivo CSV o Excel, asocie sus columnas y revise cada fila antes de guardar. Las fechas de calibración y las asignaciones de análisis solo se aplican a instrumentos nuevos. La columna de ubicación contiene el nombre de la ubicación o de la mesa de trabajo.",
+    "equipmentRuleHint": "Los instrumentos existentes conservan su tipo, criticidad, estado, calibración y asignaciones de análisis. La actualización solo cambia el nombre, fabricante, modelo, número de serie y ubicación.",
+    "openEquipment": "Importar equipos",
+    "exampleEquipment": "Medidor de pH de práctica",
+    "eligibleAnalysesHint": "Códigos de análisis activos para este laboratorio, separados por | o ;. Déjelo vacío si no hay ninguno."
   },
   "exchangeAdmin": {
     "systemCategory": "Sistema V2",

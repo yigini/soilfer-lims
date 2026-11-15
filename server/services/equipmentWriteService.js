@@ -265,8 +265,8 @@ async function logEvent(user, body, { db = prisma } = {}) {
     return result;
 }
 
-async function updateEligibility(user, body, { db = prisma } = {}) {
-    const { labId } = user;
+async function updateEligibility(user, body, { db = prisma, labId = user.labId } = {}) {
+    if (labId !== user.labId && user.role !== 'SUPER_ADMIN') throw inputError(403, { error: 'Access denied' });
     const { analysisCode, methodId, eligibleEquipmentIds, isRequired } = body;
 
     if (!['LAB_MANAGER', 'SUPER_ADMIN'].includes(user.role)) {

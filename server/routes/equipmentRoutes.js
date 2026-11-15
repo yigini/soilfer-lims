@@ -8,6 +8,12 @@ const { verifyToken, checkPermission } = require('../middleware/authMiddleware')
 // Authentication required for all equipment routes
 router.use(verifyToken);
 
+// Import/export (static paths first, before /:id)
+const imports = require('../controllers/equipmentImportController');
+router.post('/import/preview', checkPermission('MANAGE_EQUIPMENT'), imports.preview);
+router.post('/import/commit', checkPermission('MANAGE_EQUIPMENT'), imports.commit);
+router.get('/export', checkPermission('VIEW_EQUIPMENT'), require('../controllers/equipmentExportController').exportEquipment);
+
 // Events (static paths first, before /:id)
 router.post('/events', checkPermission('LOG_EQUIPMENT_EVENT'), equipmentEventController.logEvent);
 router.patch('/events/:eventId/disposition', checkPermission('MANAGE_EQUIPMENT'), equipmentEventController.approveDisposition);

@@ -32,6 +32,11 @@ cases.push({ key: 'POST /api/inventory/method-requirements', path: `${stock}/met
     body: { analysisCode: 'PH_H2O', inventoryItemId: '{inventoryItemB}', methodId: '{methodA}' } });
 add('DELETE /api/inventory/method-requirements/:id', `${stock}/method-requirements/{methodRequirementA}`);
 
+for (const mode of ['preview', 'commit']) add(`POST /api/equipment/import/${mode}`, `/api/equipment/import/${mode}`, {
+    labId: '{labA}', fileName: 'synthetic-equipment.xlsx', duplicateMode: 'SKIP', atomic: true,
+    sheets: { equipment: [{ internalAssetTag: 'SYNTHETIC-IMPORT', name: 'Synthetic instrument', assetType: 'OTHER' }] }
+});
+add('GET /api/equipment/export', '/api/equipment/export', null, { labId: '{labA}' });
 add('GET /api/equipment', '/api/equipment', null, { labId: '{labA}', type: 'OTHER' });
 add('GET /api/equipment/:id', asset);
 add('POST /api/equipment', '/api/equipment', { labId: '{labA}', name: 'Synthetic new instrument', assetType: 'OTHER', criticality: 'NON_CRITICAL' });

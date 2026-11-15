@@ -2,6 +2,7 @@ import * as XLSX from 'xlsx';
 import delimitedText from '@lims/delimited-text';
 import schema from '../../../shared/importColumns.json';
 export const INVENTORY_COLUMNS = schema.inventory;
+export const EQUIPMENT_COLUMNS = schema.equipment;
 export const IMPORT_MAX_ROWS = 2000;
 export const IMPORT_MAX_BYTES = 2 * 1024 * 1024;
 const failure = code => Object.assign(new Error(code), { code });
@@ -72,31 +73,33 @@ export async function readInventoryImportFile(file, t) {
     if (!sheets.some(sheet => sheet.rows.length)) throw failure('IMPORT_EMPTY_FILE');
     return sheets;
 }
-export function initialInventoryImportMapping(sheets, t) {
+export function initialInventoryImportMapping(sheets, t, columns = INVENTORY_COLUMNS) {
     const mapping = {};
     for (const sheet of sheets) {
         const normalized = sheet.headers.map(normalizeImportHeader), title = normalizeImportHeader(sheet.name);
-        let dataset = Object.keys(INVENTORY_COLUMNS).find(key => title === key || title === normalizeImportHeader(t('bulkImport.datasets.' + key))) || '';
-        if (!dataset && sheets.length === 1) dataset = normalized.includes('lotnumber') ? 'lots' : normalized.includes('itemtype') ? 'items' : normalized.includes('purpose') || normalized.includes('locationtype') ? 'locations' : '';
-        mapping[sheet.id] = { dataset, columns: dataset ? inventoryColumnMapping(sheet, dataset, t) : {} };
+        let dataset = Object.keys(columns).find(key => title === key || title === normalizeImportHeader(t('bulkImport.datasets.' + key))) || '';
+        if (!dataset && sheets.length === 1 && columns.equipment) dataset = 'equipment';
+        if (!dataset && sheets.length === 1 && !columns.equipment) dataset = normalized.includes('lotnumber') ? 'lots' : normalized.includes('itemtype') ? 'items' : normalized.includes('purpose') || normalized.includes('locationtype') ? 'locations' : '';
+        mapping[sheet.id] = { dataset, columns: dataset ? inventoryColumnMapping(sheet, dataset, t, columns) : {} };
     }
     return mapping;
 }
-export function inventoryColumnMapping(sheet, dataset, t) {
-    return Object.fromEntries(INVENTORY_COLUMNS[dataset].map(column => {
+export function inventoryColumnMapping(sheet, dataset, t, columns = INVENTORY_COLUMNS) {
+    return Object.fromEntries(columns[dataset].map(column => {
         const names = [normalizeImportHeader(column), normalizeImportHeader(t('bulkImport.columns.' + column))];
         const matches = sheet.headers.map((header, index) => names.includes(normalizeImportHeader(header)) ? index : -1).filter(index => index >= 0);
         return [column, matches.length === 1 ? matches[0] : -1];
     }));
 }
-export function prepareInventoryImport(sheets, mapping, options) {
+export function prepareInventoryImport(sheets, mapping, options, datasets = INVENTORY_COLUMNS) {
     const payload = { sheets: {}, duplicateMode: options.duplicateMode, atomic: options.atomic, fileName: options.fileName,
         ...(options.labId && { labId: options.labId }) };
     for (const sheet of sheets) {
         const choice = mapping[sheet.id];
         if (!choice?.dataset) continue;
         if (payload.sheets[choice.dataset]) throw failure('IMPORT_DUPLICATE_SHEET');
-        const columns = INVENTORY_COLUMNS[choice.dataset];
+        const columns = datasets[choice.dataset];
+        if (!columns) throw failure('IMPORT_INVALID_SHEETS');
         const mapped = Object.values(choice.columns).filter(index => index >= 0);
         if (new Set(mapped).size !== mapped.length) throw failure('IMPORT_DUPLICATE_MAPPING');
         const used = new Set(mapped);
@@ -115,16 +118,23 @@ export function prepareInventoryImport(sheets, mapping, options) {
     if (new TextEncoder().encode(JSON.stringify(payload)).length > IMPORT_MAX_BYTES) throw failure('IMPORT_TOO_LARGE');
     return payload;
 }
-export function inventoryImportTemplate(t) {
+export function inventoryImportTemplate(t, kind = 'inventory') {
+    const datasets = schema[kind];
     const workbook = XLSX.utils.book_new();
     const examples = {
+        equipment: { internalAssetTag: 'EXAMPLE-METER', name: t('bulkImport.exampleEquipment'), assetType: 'PH_METER', criticality: 'IMPORTANT' },
         locations: { name: t('bulkImport.exampleLocation'), purpose: 'REAGENT', locationType: 'SHELF' },
         items: { shortCode: 'EXAMPLE-ITEM', name: t('bulkImport.exampleItem'), itemType: 'REAGENT', unitOfMeasure: 'mL', defaultLocationName: t('bulkImport.exampleLocation') },
         lots: { itemShortCode: 'EXAMPLE-ITEM', lotNumber: 'EXAMPLE-LOT', quantity: '10.5', expiryDate: '2030-12-31' }
     };
-    for (const [dataset, columns] of Object.entries(INVENTORY_COLUMNS))
+    for (const [dataset, columns] of Object.entries(datasets))
         XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet([columns, columns.map(column => examples[dataset][column] || '')]), dataset);
-    const allowed = [
+    const allowed = kind === 'equipment' ? [
+        [t('bulkImport.field'), t('bulkImport.allowedValues')], ['assetType', schema.assetTypes.join(' | ')],
+        ['criticality', schema.criticalities.join(' | ')], ['lastCalibrationDate / nextCalibrationDueDate', 'YYYY-MM-DD'],
+        ['eligibleAnalyses', t('bulkImport.eligibleAnalysesHint')], ['duplicateMode', 'SKIP | UPDATE'],
+        [t('bulkImport.stockRule'), t('bulkImport.equipmentRuleHint')]
+    ] : [
         [t('bulkImport.field'), t('bulkImport.allowedValues')],
         ['purpose', 'REAGENT | SAMPLE'], ['locationType', schema.locationTypes.join(' | ')], ['itemType', schema.itemTypes.join(' | ')],
         ['quantity / reorderPoint / reorderQuantity', t('bulkImport.numberFormatHint')], ['receivedDate / expiryDate', 'YYYY-MM-DD'],
@@ -133,7 +143,7 @@ export function inventoryImportTemplate(t) {
     XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet(allowed), t('bulkImport.allowedValuesSheet'));
     return workbook;
 }
-export function downloadInventoryImportTemplate(t) { XLSX.writeFile(inventoryImportTemplate(t), 'inventory-import-template.xlsx'); }
+export function downloadInventoryImportTemplate(t, kind = 'inventory') { XLSX.writeFile(inventoryImportTemplate(t, kind), kind + '-import-template.xlsx'); }
 export function importCsvReport(result, t) {
     const cell = value => {
         let text = String(value ?? ''); if (formulaPrefix(text)) text = "'" + text;
