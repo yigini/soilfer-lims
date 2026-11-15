@@ -30,7 +30,7 @@ export default function MyRunsPanel({ groups, onOpenRun, onStarted }) {
         {error && <p role="alert" className="text-red-600 text-sm">{error}</p>}
         {loading ? <p>{t('runFirst.loading')}</p> : !runs.length ? <p className="text-sf-muted">{t('runFirst.noRuns')}</p> :
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">{runs.map(run => <button type="button" key={run.id} onClick={() => onOpenRun(run)} className="rounded-xl border border-sf-divider bg-sf-surface p-4 text-left space-y-2 hover:border-sf-primary">
-                <strong className="text-sm">{run.analysis} · {run.id}</strong><p className="text-xs">{run.status} · {run.instrument || t('runFirst.manual')}</p>
+                <strong className="text-sm">{run.analysis} · {run.id}</strong><p className="text-xs">{t(`status.${run.status}`, run.status)} · {run.instrument || t('runFirst.manual')}</p>
                 <p className="text-xs text-sf-muted">{t('runFirst.analyst')}: {run.analystUsername || t('runFirst.notStarted')}</p>
             </button>)}</div>}
     </section>;

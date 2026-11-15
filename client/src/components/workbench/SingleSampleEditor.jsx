@@ -216,7 +216,7 @@ export default function SingleSampleEditor({
                         currentItem.isReady ? "bg-blue-500/15 text-blue-600 dark:text-blue-400" :
                         "bg-amber-500/15 text-amber-600 dark:text-amber-400"
                     )}>
-                        {currentItem.status}
+                        {t(`status.${currentItem.status}`, currentItem.status)}
                     </span>
                 </div>
 
