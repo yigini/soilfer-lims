@@ -188,7 +188,7 @@ const ReceiveStockModal = ({ show, onClose, items, locations, onSuccess, initial
         if (!show || !selectedLabId) { setParentLoading(false); return () => { current = false; }; }
         setParentLoading(true);
         axios.get('/api/inventory/lots', { params: { status: 'ALL' } }).then(response => {
-            if (current) setParentLots((Array.isArray(response.data) ? response.data : []).filter(lot => lot.labId === selectedLabId));
+            if (current) setParentLots((Array.isArray(response.data) ? response.data : []).filter(lot => lot.labId === selectedLabId && ['AVAILABLE', 'QUARANTINED'].includes(lot.status)));
         }).catch(() => { if (current) setParentError(true); })
             .finally(() => { if (current) setParentLoading(false); });
         return () => { current = false; };
@@ -281,7 +281,7 @@ const ReceiveStockModal = ({ show, onClose, items, locations, onSuccess, initial
                             {parentLoading ? <p className="text-xs">{t('preparedLots.loadingParents')}</p> : parentError ? <p role="status" className="text-xs text-amber-700">{t('preparedLots.parentsUnavailable')}</p> : <div className="max-h-28 overflow-auto space-y-1">
                                 {parentLots.filter(lot => `${lot.lotNumber} ${lot.item?.name || ''}`.toLowerCase().includes(parentSearch.toLowerCase())).map(lot => <label key={lot.id} className="flex gap-2 items-start text-xs">
                                     <input type="checkbox" data-testid={`prepared-lot-parent-${lot.id}`} checked={parentLotIds.includes(lot.id)} onChange={e => setParentLotIds(ids => e.target.checked ? [...ids, lot.id] : ids.filter(id => id !== lot.id))} />
-                                    <span>{lot.lotNumber} · {lot.item?.name} ({lot.status})</span>
+                                    <span>{lot.lotNumber} · {lot.item?.name} ({t(`inventory.lotStatuses.${lot.status}`)})</span>
                                 </label>)}
                                 {parentLots.length === 0 && <p className="text-xs text-sf-muted">{t('preparedLots.noParents')}</p>}
                             </div>}
@@ -463,11 +463,11 @@ const ItemDrawer = ({ item, show, onClose, onAction, canManage, canConsume, loca
                                                 {lot.traceabilityNotes && <details className="font-sans text-xs mt-1"><summary>{t('preparedLots.traceability')}</summary><p className="whitespace-pre-wrap">{lot.traceabilityNotes}</p></details>}
                                             </td>
                                             <td className="px-3 py-2 text-center">
-                                                <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${isExpired ? STATUS_BADGES.EXPIRED : (STATUS_BADGES[lot.status] || '')}`}>{isExpired ? 'EXPIRED' : lot.status}</span>
+                                                <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${isExpired ? STATUS_BADGES.EXPIRED : (STATUS_BADGES[lot.status] || '')}`}>{t(`inventory.lotStatuses.${isExpired ? 'EXPIRED' : lot.status}`)}</span>
                                                 {lot.status === 'QUARANTINED' && <p data-testid="lot-quarantine-explanation" className="text-xs text-amber-700 dark:text-amber-300 mt-1">{quarantineExplanation(lot)}</p>}
                                             </td>
                                             <td className="px-3 py-2 text-right font-bold">
-                                                {lot.currentQuantity != null ? lot.currentQuantity : <span className="text-amber-500 font-medium">Missing</span>} <span className="text-xs font-normal text-gray-400">{lot.unitOfMeasure}</span>
+                                                {lot.currentQuantity != null ? lot.currentQuantity : <span className="text-amber-500 font-medium">{t('inventory.missing')}</span>} <span className="text-xs font-normal text-gray-400">{lot.unitOfMeasure}</span>
                                             </td>
                                             <td className={`px-3 py-2 text-xs text-center ${isExpired ? 'text-red-600 font-bold' : ''}`}>
                                                 {lot.expiryDate ? new Date(lot.expiryDate).toLocaleDateString() : '—'}

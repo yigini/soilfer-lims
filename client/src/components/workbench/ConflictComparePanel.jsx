@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useLanguage } from '../../context/LanguageContext';
 import { AlertCircle, Check, ArrowRight } from 'lucide-react';
 
 /**
@@ -13,12 +14,13 @@ export default function ConflictComparePanel({
     onUseServer,
     onKeepLocal
 }) {
+    const { t } = useLanguage();
     const [reason, setReason] = useState('');
     const [error, setError] = useState('');
 
     const handleKeepLocal = () => {
         if (!reason.trim()) {
-            setError('A reason is mandatory to retain your local draft over the server value.');
+            setError(t('workbenchRare.reasonMandatory'));
             return;
         }
         setError('');
@@ -29,24 +31,24 @@ export default function ConflictComparePanel({
         <div className="p-3.5 rounded-lg border border-amber-500/30 bg-amber-500/10 text-sf-text">
             <div className="flex items-center gap-2 mb-2 text-amber-600 dark:text-amber-400">
                 <AlertCircle size={16} />
-                <span className="font-semibold text-xs uppercase tracking-wider">Concurrency Conflict Detected</span>
+                <span className="font-semibold text-xs uppercase tracking-wider">{t('workbenchRare.conflictTitle')}</span>
             </div>
 
             <p className="text-xs text-sf-muted mb-3 leading-relaxed">
-                This item was updated on the server while you were editing. Both values are preserved below for review:
+                {t('workbenchRare.conflictDescription')}
             </p>
 
             <div className="grid grid-cols-2 gap-2 p-2.5 rounded bg-sf-surface border border-sf-divider mb-3 text-xs">
                 <div>
-                    <span className="block text-[10px] uppercase font-bold text-sf-muted">Your Local Draft</span>
+                    <span className="block text-[10px] uppercase font-bold text-sf-muted">{t('workbenchRare.localDraft')}</span>
                     <span className="text-sm font-mono font-semibold text-sf-primary">
-                        {localValue || '<empty>'}
+                        {localValue || t('workbenchRare.empty')}
                     </span>
                 </div>
                 <div>
-                    <span className="block text-[10px] uppercase font-bold text-sf-muted">Server Value</span>
+                    <span className="block text-[10px] uppercase font-bold text-sf-muted">{t('workbenchRare.serverValue')}</span>
                     <span className="text-sm font-mono font-semibold text-emerald-600 dark:text-emerald-400">
-                        {serverValue || '<empty>'}
+                        {serverValue || t('workbenchRare.empty')}
                     </span>
                 </div>
             </div>
@@ -58,12 +60,12 @@ export default function ConflictComparePanel({
                     className="w-full py-1.5 px-3 rounded text-xs font-medium bg-sf-surface border border-sf-divider hover:bg-sf-hover text-sf-text flex items-center justify-center gap-1.5 transition-colors"
                 >
                     <Check size={14} className="text-emerald-500" />
-                    <span>Adopt Server Value ({serverValue})</span>
+                    <span>{t('workbenchRare.adoptServer', { value: serverValue })}</span>
                 </button>
 
                 <div className="border-t border-amber-500/20 pt-2 mt-1">
                     <label className="block text-[11px] font-medium text-sf-muted mb-1">
-                        Reason for retaining local draft (required):
+                        {t('workbenchRare.reasonRequired')}
                     </label>
                     <textarea
                         rows={2}
@@ -72,7 +74,7 @@ export default function ConflictComparePanel({
                             setReason(e.target.value);
                             if (error) setError('');
                         }}
-                        placeholder="e.g. Verified against physical laboratory bench notebook..."
+                        placeholder={t('workbenchRare.reasonPlaceholder')}
                         className="w-full p-2 text-xs rounded border border-sf-divider bg-sf-canvas text-sf-text placeholder:text-sf-muted focus:outline-none focus:ring-1 focus:ring-amber-500"
                     />
                     {error && (
@@ -87,7 +89,7 @@ export default function ConflictComparePanel({
                         className="w-full mt-2 py-1.5 px-3 rounded text-xs font-medium bg-amber-600 hover:bg-amber-700 text-white flex items-center justify-center gap-1.5 transition-colors"
                     >
                         <ArrowRight size={14} />
-                        <span>Keep Local Draft with Reason</span>
+                        <span>{t('workbenchRare.keepLocal')}</span>
                     </button>
                 </div>
             </div>

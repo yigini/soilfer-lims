@@ -1,4 +1,5 @@
 import React, { useMemo, useRef } from 'react';
+import { useLanguage } from '../../context/LanguageContext';
 import { calculateUsdaTexture } from '../../utils/soilCalculations';
 import numberParse from '@lims/number-parse';
 import NumberPreview from './NumberPreview';
@@ -23,6 +24,7 @@ export default function TextureEditor({
     onBarcodeRejected = null,
     onRevertValues = null
 }) {
+    const { t } = useLanguage();
     const Input = onBarcodeRejected ? BarcodeSafeInput : 'input';
     let sandVal = '';
     let siltVal = '';
@@ -81,7 +83,7 @@ export default function TextureEditor({
             {[sandVal, siltVal, clayVal].map((value, index) => <NumberPreview key={index} value={value} numberFormat={numberFormat} />)}
             <div className="flex items-center gap-2 flex-wrap">
                 <div className="flex items-center gap-1">
-                    <span className="text-[11px] text-sf-muted font-medium">Sand:</span>
+                    <span className="text-[11px] text-sf-muted font-medium" >{t('workbenchRare.sand')}:</span>
                     <Input
                         {...(onBarcodeRejected ? { onBarcodeRejected } : {})}
                         ref={node => { sandRef.current = node; if (inputRef) inputRef(node); }}
@@ -99,7 +101,7 @@ export default function TextureEditor({
                         }}
                         disabled={disabled}
                         placeholder="0.0"
-                        aria-label={`${sampleId} Sand %`}
+                        aria-label={`${sampleId} ${t('workbenchRare.sand')} %`}
                         className="w-16 px-2 py-1 text-xs font-mono rounded border border-sf-divider
                             bg-sf-surface text-sf-text placeholder:text-sf-muted focus:outline-none focus:ring-1 focus:ring-sf-primary focus:border-sf-primary"
                     />
@@ -107,7 +109,7 @@ export default function TextureEditor({
                 </div>
 
                 <div className="flex items-center gap-1">
-                    <span className="text-[11px] text-sf-muted font-medium">Silt:</span>
+                    <span className="text-[11px] text-sf-muted font-medium" >{t('workbenchRare.silt')}:</span>
                     <Input
                         {...(onBarcodeRejected ? { onBarcodeRejected } : {})}
                         ref={siltRef}
@@ -125,7 +127,7 @@ export default function TextureEditor({
                         }}
                         disabled={disabled}
                         placeholder="0.0"
-                        aria-label={`${sampleId} Silt %`}
+                        aria-label={`${sampleId} ${t('workbenchRare.silt')} %`}
                         className="w-16 px-2 py-1 text-xs font-mono rounded border border-sf-divider
                             bg-sf-surface text-sf-text placeholder:text-sf-muted focus:outline-none focus:ring-1 focus:ring-sf-primary focus:border-sf-primary"
                     />
@@ -133,7 +135,7 @@ export default function TextureEditor({
                 </div>
 
                 <div className="flex items-center gap-1">
-                    <span className="text-[11px] text-sf-muted font-medium">Clay:</span>
+                    <span className="text-[11px] text-sf-muted font-medium" >{t('workbenchRare.clay')}:</span>
                     <Input
                         {...(onBarcodeRejected ? { onBarcodeRejected } : {})}
                         ref={clayRef}
@@ -151,7 +153,7 @@ export default function TextureEditor({
                         }}
                         disabled={disabled}
                         placeholder="0.0"
-                        aria-label={`${sampleId} Clay %`}
+                        aria-label={`${sampleId} ${t('workbenchRare.clay')} %`}
                         className="w-16 px-2 py-1 text-xs font-mono rounded border border-sf-divider
                             bg-sf-surface text-sf-text placeholder:text-sf-muted focus:outline-none focus:ring-1 focus:ring-sf-primary focus:border-sf-primary"
                     />
@@ -171,13 +173,13 @@ export default function TextureEditor({
                             </span>
                         ) : (
                             <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-medium bg-amber-500/15 text-amber-700 dark:text-amber-300"
-                                title={tolVal !== null ? `Total is ${total}%. Allowed tolerance is ±${tolVal}%.` : `Total is ${total}%. Closure tolerance is not configured.`}>
-                                <span>⚠ Sum {total}% ({tolVal !== null ? `error ${closureError}% > ±${tolVal}%` : (closureError > 0 ? 'closure tolerance unconfigured' : 'closure error')})</span>
+                                title={tolVal !== null ? t('workbenchRare.closureTolerance', { total, tolerance: tolVal }) : t('workbenchRare.closureUnconfigured', { total })}>
+                                <span>⚠ {t('workbenchRare.sum', { total })} ({tolVal !== null ? t('workbenchRare.closureErrorTolerance', { error: closureError, tolerance: tolVal }) : (closureError > 0 ? t('workbenchRare.toleranceMissing') : t('workbenchRare.closureError'))})</span>
                             </span>
                         )
                     ) : (
                         <span className="text-[10px] text-sf-muted italic">
-                            All 3 fractions required for closure check
+                            {t('workbenchRare.fractionsRequired')}
                         </span>
                     )}
                 </div>

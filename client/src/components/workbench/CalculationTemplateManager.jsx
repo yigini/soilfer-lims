@@ -50,7 +50,7 @@ export default function CalculationTemplateManager({ batch, analyte, onChanged }
             {error && <p role="alert">{error}</p>}
             <label className="grid gap-1 text-xs">{t('calculations.template')}<select disabled={busy} value={selected}
                 onChange={event => setSelected(event.target.value)} className="p-2 border rounded bg-sf-canvas">
-                {rows.map(row => <option key={row.id} value={row.id}>{row.variant} · v{row.version} · {row.status}</option>)}
+                {rows.map(row => <option key={row.id} value={row.id}>{row.variant} · v{row.version} · {t(`status.${row.status}`, row.status)}</option>)}
             </select></label>
             {source && <>
                 <p className="text-xs">{t('calculations.active')}: {state?.active ? rows.find(row => row.id === state.active.templateId)?.variant || '—' : t('calculations.inactive')}</p>

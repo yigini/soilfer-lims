@@ -261,30 +261,30 @@ const MaintenanceTab = ({ asset, canManage, onAction, pendingKinds = [] }) => {
                     {asset.readiness === 'READY' ? <CheckCircle size={32} /> : asset.readiness === 'BLOCKED' ? <ShieldAlert size={32} /> : <AlertTriangle size={32} />}
                 </div>
                 <div>
-                    <h4 className="text-lg font-bold">Instrument Readiness: {asset.readiness}</h4>
+                    <h4 className="text-lg font-bold">{t('equipment.readinessLabel', { status: t(`equipment.qualificationLabels.${asset.readiness}`) })}</h4>
                     {asset.readinessWarnings?.includes('EQUIPMENT_NOT_CONFIGURED_WARNING') && (
                         <p className="mt-2 text-sm">{t('equipment.unconfiguredWarning')}</p>
                     )}
-                    {pendingKinds.length > 0 ? <p data-testid="equipment-maintenance-awaiting-signoff" className="text-sm text-amber-700">{t('equipment.pendingSignoff')}</p> : <p className="text-sm text-gray-500">System check shows {asset.status.replace(/_/g, ' ')} state with {calibStatus.toLowerCase()} calibration.</p>}
+                    {pendingKinds.length > 0 ? <p data-testid="equipment-maintenance-awaiting-signoff" className="text-sm text-amber-700">{t('equipment.pendingSignoff')}</p> : <p className="text-sm text-gray-500">{t('equipment.systemCheck', { status: t(`equipment.qualificationLabels.${asset.status}`), calibration: t(`equipment.qualificationLabels.${calibStatus}`) })}</p>}
                 </div>
             </div>
 
             <section>
                 <div className="flex justify-between items-center mb-3">
-                    <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Calibration & Verification</h4>
+                    <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest">{t('equipment.calibrationVerification')}</h4>
                 </div>
                 <div className="space-y-3">
                     <div className="p-4 rounded-xl border dark:border-gray-700 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
                         <div>
                             <div className="flex items-center gap-2 mb-1">
-                                <span className="text-xs text-gray-500 font-medium">Last External Calibration</span>
+                                <span className="text-xs text-gray-500 font-medium">{t('equipment.lastExternalCalibration')}</span>
                                 <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded uppercase ${calibrationPending ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' : calibStatus === 'OK' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300' : calibStatus === 'OVERDUE' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' : calibStatus === 'DUE_SOON' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' : 'bg-gray-100 text-gray-500'}`}>
-                                    {calibrationPending ? t('equipment.pendingSignoff') : calibStatus}
+                                    {calibrationPending ? t('equipment.pendingSignoff') : t(`equipment.qualificationLabels.${calibStatus}`)}
                                 </span>
                             </div>
-                            <div className="font-bold text-sf-text">{asset.qualification?.lastCalibrationDate ? new Date(asset.qualification.lastCalibrationDate).toLocaleDateString() : 'None Recorded'}</div>
+                            <div className="font-bold text-sf-text">{asset.qualification?.lastCalibrationDate ? new Date(asset.qualification.lastCalibrationDate).toLocaleDateString() : t('equipment.noneRecorded')}</div>
                             <div className="text-xs text-gray-400 mt-0.5">
-                                Next Due: <span className={!calibrationPending && calibStatus === 'OVERDUE' ? 'text-red-500 font-bold' : ''}>{asset.qualification?.nextCalibrationDueDate ? new Date(asset.qualification.nextCalibrationDueDate).toLocaleDateString() : 'Unscheduled'}</span>
+                                {t('equipment.nextDue')}: <span className={!calibrationPending && calibStatus === 'OVERDUE' ? 'text-red-500 font-bold' : ''}>{asset.qualification?.nextCalibrationDueDate ? new Date(asset.qualification.nextCalibrationDueDate).toLocaleDateString() : t('equipment.unscheduled')}</span>
                             </div>
                         </div>
                         {canManage && onAction && (
@@ -293,7 +293,7 @@ const MaintenanceTab = ({ asset, canManage, onAction, pendingKinds = [] }) => {
                                 onClick={() => onAction('CALIBRATION')}
                                 className="self-start sm:self-center px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm transition-colors"
                             >
-                                <ClipboardCheck size={14} /> Log Calibration
+                                <ClipboardCheck size={14} /> {t('equipment.logCalibration')}
                             </button>
                         )}
                     </div>
@@ -301,14 +301,14 @@ const MaintenanceTab = ({ asset, canManage, onAction, pendingKinds = [] }) => {
                     <div className="p-4 rounded-xl border dark:border-gray-700 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
                         <div>
                             <div className="flex items-center gap-2 mb-1">
-                                <span className="text-xs text-gray-500 font-medium">Performance Verification</span>
+                                <span className="text-xs text-gray-500 font-medium">{t('equipment.performanceVerification')}</span>
                                 <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded uppercase ${verificationPending ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' : verifStatus === 'OK' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300' : verifStatus === 'OVERDUE' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' : verifStatus === 'DUE_SOON' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' : 'bg-gray-100 text-gray-500'}`}>
-                                    {verificationPending ? t('equipment.pendingSignoff') : verifStatus}
+                                    {verificationPending ? t('equipment.pendingSignoff') : t(`equipment.qualificationLabels.${verifStatus}`)}
                                 </span>
                             </div>
-                            <div className="font-bold text-sf-text">{asset.qualification?.lastVerificationDate ? new Date(asset.qualification.lastVerificationDate).toLocaleDateString() : 'None Recorded'}</div>
+                            <div className="font-bold text-sf-text">{asset.qualification?.lastVerificationDate ? new Date(asset.qualification.lastVerificationDate).toLocaleDateString() : t('equipment.noneRecorded')}</div>
                             <div className="text-xs text-gray-400 mt-0.5">
-                                Next Due: <span className={!verificationPending && verifStatus === 'OVERDUE' ? 'text-red-500 font-bold' : ''}>{asset.qualification?.nextVerificationDueDate ? new Date(asset.qualification.nextVerificationDueDate).toLocaleDateString() : 'Unscheduled'}</span>
+                                {t('equipment.nextDue')}: <span className={!verificationPending && verifStatus === 'OVERDUE' ? 'text-red-500 font-bold' : ''}>{asset.qualification?.nextVerificationDueDate ? new Date(asset.qualification.nextVerificationDueDate).toLocaleDateString() : t('equipment.unscheduled')}</span>
                             </div>
                         </div>
                         {canManage && onAction && (
@@ -317,7 +317,7 @@ const MaintenanceTab = ({ asset, canManage, onAction, pendingKinds = [] }) => {
                                 onClick={() => onAction('VERIFICATION')}
                                 className="self-start sm:self-center px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm transition-colors"
                             >
-                                <ClipboardCheck size={14} /> Log Verification
+                                <ClipboardCheck size={14} /> {t('equipment.logVerification')}
                             </button>
                         )}
                     </div>
