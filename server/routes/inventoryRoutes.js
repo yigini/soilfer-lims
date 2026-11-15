@@ -4,6 +4,10 @@ const { verifyToken, checkPermission } = require('../middleware/authMiddleware')
 const inv = require('../controllers/inventoryController');
 router.use(verifyToken);
 
+const imports = require('../controllers/inventoryImportController');
+router.post('/import/preview', checkPermission('MANAGE_INVENTORY'), imports.preview);
+router.post('/import/commit', checkPermission('MANAGE_INVENTORY'), imports.commit);
+
 // ─── Items (catalog) ─────────────────────────────────────────────
 router.get('/items', checkPermission('VIEW_INVENTORY'), inv.getItems);
 router.get('/items/:id', checkPermission('VIEW_INVENTORY'), inv.getItem);

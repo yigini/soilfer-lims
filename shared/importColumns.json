@@ -1,0 +1,66 @@
+{
+  "inventory": {
+    "locations": [
+      "labId",
+      "name",
+      "purpose",
+      "locationType",
+      "parentLocationName",
+      "parentLocationPurpose",
+      "parentLocationId",
+      "temperatureRange"
+    ],
+    "items": [
+      "labId",
+      "shortCode",
+      "name",
+      "itemType",
+      "unitOfMeasure",
+      "grade",
+      "defaultLocationName",
+      "defaultLocationPurpose",
+      "defaultLocationId",
+      "hazardClass",
+      "sopLink",
+      "reorderPoint",
+      "reorderQuantity",
+      "preferredVendor",
+      "notes"
+    ],
+    "lots": [
+      "labId",
+      "itemShortCode",
+      "itemName",
+      "itemType",
+      "inventoryItemId",
+      "lotNumber",
+      "quantity",
+      "unitOfMeasure",
+      "receivedDate",
+      "expiryDate",
+      "locationName",
+      "locationPurpose",
+      "locationId",
+      "concentration",
+      "preparedBy",
+      "traceabilityNotes"
+    ]
+  },
+  "itemTypes": [
+    "REAGENT",
+    "CHEMICAL",
+    "CONSUMABLE",
+    "STANDARD",
+    "CRM",
+    "CONTAINER",
+    "OTHER"
+  ],
+  "locationTypes": [
+    "ROOM",
+    "FRIDGE",
+    "FREEZER",
+    "CABINET",
+    "SHELF",
+    "OTHER"
+  ]
+}

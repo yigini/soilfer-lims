@@ -1080,6 +1080,14 @@
     "registration": 1
   },
   {
+    "key": "POST /api/inventory/import/commit",
+    "registration": 1
+  },
+  {
+    "key": "POST /api/inventory/import/preview",
+    "registration": 1
+  },
+  {
     "key": "POST /api/inventory/items",
     "registration": 1
   },
