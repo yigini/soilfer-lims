@@ -577,7 +577,7 @@ function listPackages(filename) {
             qualification: 'Read-only operational identifiers for the package decision. No automatic mapping or publication.' };
     } finally { if (db.inTransaction) db.exec('ROLLBACK'); db.close(); }
 }
-function execute({ dbPath, apply = false, listOnly = false }) {
+function runCatalogueCorrection({ dbPath, apply = false, listOnly = false }) {
     const receipt = { ok: false, issue: 424, mode: listOnly ? 'LIST_PACKAGES' : apply ? 'APPLY' : 'DRY_RUN', totalChanges: 0, auditRowsCreated: 0, sqliteTotalChanges: 0 };
     let db;
     try {
@@ -633,10 +633,10 @@ function cli(args) {
             else if (args[i] === '--list-packages' && !listOnly) listOnly = true;
             else throw new Refusal('INVALID_ARGUMENTS');
         }
-        return execute({ dbPath, apply, listOnly });
+        return runCatalogueCorrection({ dbPath, apply, listOnly });
     } catch (error) { return { ok: false, issue: 424, totalChanges: 0, auditRowsCreated: 0, sqliteTotalChanges: 0, error: { code: error.code || 'INVALID_ARGUMENTS' } }; }
 }
-module.exports = { execute, cli, EXTRA_DEFAULTS, RETIRE_CODES, CODE_HOLDERS, METHOD_HOLDERS, JSON_HOLDERS, PARTNERS };
+module.exports = { runCatalogueCorrection, cli, EXTRA_DEFAULTS, RETIRE_CODES, CODE_HOLDERS, METHOD_HOLDERS, JSON_HOLDERS, PARTNERS };
 if (require.main === module) {
     const receipt = cli(process.argv.slice(2));
     process.stdout.write(JSON.stringify(receipt, null, 2) + '\n');
