@@ -1,6 +1,10 @@
 const cases = [];
 function add(key, path, body, query) { cases.push({ key, path, ...(body && { body }), ...(query && { query }) }); }
 const stock = '/api/inventory', lot = `${stock}/lots/{inventoryLotA}`, asset = '/api/equipment/{equipmentA}';
+for (const mode of ['preview', 'commit']) add(`POST /api/inventory/import/${mode}`, `${stock}/import/${mode}`, {
+    labId: '{labA}', fileName: 'synthetic-inventory.xlsx', duplicateMode: 'SKIP', atomic: true,
+    sheets: { lots: [{ inventoryItemId: '{inventoryItemA}', lotNumber: 'Synthetic import lot', quantity: '1', locationId: '{reagentLocationA}' }] }
+});
 add('GET /api/inventory/items', `${stock}/items`, null, { labId: '{labA}', search: 'R2-REAGENT-A' });
 add('GET /api/inventory/items/:id', `${stock}/items/{inventoryItemA}`);
 add('POST /api/inventory/items', `${stock}/items`, { labId: '{labA}', name: 'Synthetic new reagent', itemType: 'REAGENT',
@@ -19,7 +23,7 @@ add('POST /api/inventory/locations', `${stock}/locations`, { name: 'Synthetic ne
 add('GET /api/inventory/transactions', `${stock}/transactions`, null, { lotId: '{inventoryLotA}', labId: '{labA}' });
 add('GET /api/inventory/alerts', `${stock}/alerts`, null, { labId: '{labA}' });
 add('GET /api/inventory/fefo/:itemId', `${stock}/fefo/{inventoryItemA}`);
-for (const type of ['stock', 'expiry', 'transactions']) cases.push({ key: 'GET /api/inventory/export/:type',
+for (const type of ['stock', 'expiry', 'transactions', 'locations', 'items', 'lots']) cases.push({ key: 'GET /api/inventory/export/:type',
     path: `${stock}/export/${type}`, variant: type, query: { labId: '{labA}' } });
 add('GET /api/inventory/method-requirements', `${stock}/method-requirements`, null, { analysisCode: 'PH_H2O', labId: '{labA}' });
 add('POST /api/inventory/method-requirements', `${stock}/method-requirements`, { analysisCode: 'PH_H2O', inventoryItemId: '{inventoryItemA}',
