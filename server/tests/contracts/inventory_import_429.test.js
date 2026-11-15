@@ -190,6 +190,8 @@ test('parent locations are created before their children; a cycle refuses with n
 test('descriptive UPDATE preserves a location type when that column is omitted', async () => {
     const location = await writes.createLocation(users.manager, { name: 'Cold store', purpose: 'REAGENT', locationType: 'FRIDGE' });
     const body = { ...workbook(), duplicateMode: 'UPDATE', sheets: { locations: [{ name: location.name, temperatureRange: '2-8 C' }] } };
+    const preview = await auth('preview', body); expect(preview.status).toBe(200);
+    expect(preview.body.sheets.locations[0].values.locationType).toBe('FRIDGE');
     expect((await auth('commit', body)).status).toBe(200);
     expect(await prisma.inventoryLocation.findUnique({ where: { id: location.id } })).toMatchObject({ locationType: 'FRIDGE', temperatureRange: '2-8 C' });
 });
