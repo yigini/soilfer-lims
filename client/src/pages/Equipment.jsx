@@ -6,11 +6,12 @@ import {
     Monitor, Beaker, Scale, Thermometer, Activity, Search, Plus,
     Settings, Filter, ChevronRight, X, ShieldAlert, AlertTriangle,
     CheckCircle, XCircle, RefreshCw, Calendar, History, Wrench,
-    ClipboardCheck, MapPin, Tag, Hash, Info, Download
+    ClipboardCheck, MapPin, Tag, Hash, Info, Download, Upload
 } from 'lucide-react';
 
 import EquipmentDetailDrawer from '../components/equipment/EquipmentDetailDrawer';
 import RegisterAssetModal from '../components/equipment/RegisterAssetModal';
+import InventoryImportDialog from '../components/inventory/InventoryImportDialog';
 
 const ASSET_TYPES = ['ALL', 'SPECTROMETER', 'BALANCE', 'PH_METER', 'EC_METER', 'OVEN', 'SHAKER', 'AUTO_ANALYZER', 'OTHER'];
 const TYPE_ICONS = {
@@ -50,31 +51,17 @@ const Equipment = () => {
     const [typeFilter, setTypeFilter] = useState('ALL');
     const [selectedAsset, setSelectedAsset] = useState(null);
     const [showRegister, setShowRegister] = useState(false);
+    const [showImport, setShowImport] = useState(false);
+    const [exportError, setExportError] = useState(false);
 
-    const handleExportCSV = () => {
-        const headers = ['Name', 'Serial Number', 'Asset Tag', 'Type', 'Status', 'Readiness', 'Last Calibration', 'Next Calibration', 'Manufacturer / Model'];
-        const rows = assets.map(a => [
-            `"${a.name || ''}"`,
-            `"${a.serialNumber || '-'}"`,
-            `"${a.internalAssetTag || '-'}"`,
-            `"${a.assetType || ''}"`,
-            `"${a.status || ''}"`,
-            `"${a.readiness || ''}"`,
-            a.qualification?.lastCalibrationDate ? `"${new Date(a.qualification.lastCalibrationDate).toLocaleDateString()}"` : '"-"',
-            a.qualification?.nextCalibrationDueDate ? `"${new Date(a.qualification.nextCalibrationDueDate).toLocaleDateString()}"` : '"-"',
-            `"${(a.manufacturer || '').replace(/"/g, '""')} ${(a.model || '').replace(/"/g, '""')}"`
-        ]);
-
-        const csvContent = [headers, ...rows].map(e => e.join(',')).join('\n');
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.setAttribute('href', url);
-        link.setAttribute('download', `equipment_registry_${new Date().toISOString().split('T')[0]}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
+    const handleExportCSV = async () => {
+        if (user?.role === 'SUPER_ADMIN') { setShowImport(true); return; }
+        setExportError(false);
+        try {
+            const response = await axios.get('/api/equipment/export', { responseType: 'blob' });
+            const url = URL.createObjectURL(new Blob([response.data], { type: 'text/csv;charset=utf-8' }));
+            const link = document.createElement('a'); link.href = url; link.download = 'equipment.csv'; link.click(); URL.revokeObjectURL(url);
+        } catch { setExportError(true); }
     };
 
     const fetchAssets = useCallback(async () => {
@@ -124,6 +111,9 @@ const Equipment = () => {
                     >
                         <Download size={16} /> {t('equipment.exportCSV', 'Export')}
                     </button>
+                    {canManage && <button onClick={() => setShowImport(true)} className="flex items-center gap-1.5 px-3 py-2 text-sm font-bold rounded-lg border border-sf-divider">
+                        <Upload size={16} />{t('bulkImport.openEquipment')}
+                    </button>}
                     {canManage && (
                         <button onClick={() => setShowRegister(true)} className="flex items-center gap-1.5 px-4 py-2 text-sm font-bold rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors shadow-sm">
                             <Plus size={16} /> {t('equipment.registerAsset', 'Register Instrument')}
@@ -131,6 +121,9 @@ const Equipment = () => {
                     )}
                 </div>
             </div>
+
+            {exportError && <p role="alert">{t('bulkImport.errors.IMPORT_EXPORT_FAILED')}</p>}
+            {showImport && canManage && <InventoryImportDialog module="equipment" onClose={() => setShowImport(false)} onImported={() => { fetchAssets(); setSelectedAsset(null); }} />}
 
             {/* Quick Stats */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">

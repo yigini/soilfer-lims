@@ -56,7 +56,8 @@
     "datasets": {
       "locations": "Emplacements",
       "items": "Articles",
-      "lots": "Lots"
+      "lots": "Lots",
+      "equipment": "Équipements"
     },
     "status": {
       "NEW": "Nouveau",
@@ -104,7 +105,16 @@
       "locationId": "Identifiant de l’emplacement existant",
       "concentration": "Concentration",
       "preparedBy": "Préparé par",
-      "traceabilityNotes": "Notes de traçabilité"
+      "traceabilityNotes": "Notes de traçabilité",
+      "internalAssetTag": "Identifiant interne",
+      "assetType": "Type d’équipement",
+      "manufacturer": "Fabricant",
+      "model": "Modèle",
+      "serialNumber": "Numéro de série",
+      "criticality": "Criticité",
+      "lastCalibrationDate": "Date du dernier étalonnage",
+      "nextCalibrationDueDate": "Prochaine échéance d’étalonnage",
+      "eligibleAnalyses": "Codes des analyses autorisées"
     },
     "errors": {
       "IMPORT_INTERNAL_ERROR": "L’importation n’a pas abouti. Vérifiez le résultat avant de réessayer.",
@@ -141,8 +151,19 @@
       "IMPORT_INVALID_SHEETS": "Choisissez emplacements, articles ou lots pour chaque feuille à importer.",
       "IMPORT_INVALID_SHEET": "Impossible de lire les lignes de la feuille.",
       "IMPORT_INVALID_ROW": "Impossible de lire cette ligne.",
-      "IMPORT_INVALID_ROW_NUMBER": "Le numéro de ligne source est invalide."
-    }
+      "IMPORT_INVALID_ROW_NUMBER": "Le numéro de ligne source est invalide.",
+      "IMPORT_CALIBRATION_DATE_REQUIRED": "Indiquez la date du dernier étalonnage lorsqu’une prochaine échéance est fournie.",
+      "IMPORT_FUTURE_DATE": "La date d’étalonnage ne peut pas être future.",
+      "IMPORT_INVALID_ANALYSIS_LIST": "Utilisez chaque code d’analyse une seule fois, séparé par | ou ;, sans entrée vide.",
+      "IMPORT_ANALYSIS_UNAVAILABLE": "Une analyse est inactive ou indisponible pour ce laboratoire.",
+      "IMPORT_ELIGIBILITY_INVALID": "Une affectation d’équipement existante est invalide. Demandez au responsable du laboratoire de la vérifier avant l’import."
+    },
+    "equipmentTitle": "Importer des équipements",
+    "equipmentIntro": "Lisez un fichier CSV ou Excel, associez ses colonnes, puis vérifiez chaque ligne avant d’enregistrer. Les dates d’étalonnage et les analyses affectées concernent uniquement les nouveaux instruments. La colonne emplacement contient le nom de l’emplacement ou de la paillasse.",
+    "equipmentRuleHint": "Les instruments existants conservent leur type, leur criticité, leur état, leur étalonnage et leurs analyses affectées. La mise à jour modifie uniquement le nom, le fabricant, le modèle, le numéro de série et l’emplacement.",
+    "openEquipment": "Importer des équipements",
+    "exampleEquipment": "pH-mètre de démonstration",
+    "eligibleAnalysesHint": "Codes d’analyse actifs pour ce laboratoire, séparés par | ou ;. Laissez vide si aucun. Si aucune affectation n’existe encore, un équipement devient obligatoire pour cette analyse."
   },
   "exchangeAdmin": {
     "systemCategory": "Système V2",

@@ -62,5 +62,37 @@
     "CABINET",
     "SHELF",
     "OTHER"
+  ],
+  "equipment": {
+    "equipment": [
+      "labId",
+      "internalAssetTag",
+      "name",
+      "assetType",
+      "manufacturer",
+      "model",
+      "serialNumber",
+      "criticality",
+      "locationId",
+      "lastCalibrationDate",
+      "nextCalibrationDueDate",
+      "eligibleAnalyses"
+    ]
+  },
+  "assetTypes": [
+    "SPECTROMETER",
+    "BALANCE",
+    "PH_METER",
+    "EC_METER",
+    "OVEN",
+    "SHAKER",
+    "AUTO_ANALYZER",
+    "OTHER"
+  ],
+  "criticalities": [
+    "CRITICAL",
+    "IMPORTANT",
+    "NON_CRITICAL",
+    "STANDARD"
   ]
 }

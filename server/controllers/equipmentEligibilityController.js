@@ -1,3 +1,4 @@
+const writeService = require('../services/equipmentWriteService');
 const prisma = require('../prisma');
 const { randomUUID: uuidv4 } = require('crypto');
 const { equipmentView } = require('../services/equipmentQualificationService');
@@ -22,53 +23,9 @@ exports.getEligibility = async (req, res) => {
  */
 exports.updateEligibility = async (req, res) => {
     try {
-        const { labId } = req.user;
-        const { analysisCode, methodId, eligibleEquipmentIds, isRequired } = req.body;
-
-        if (!['LAB_MANAGER', 'SUPER_ADMIN'].includes(req.user.role)) {
-            return res.status(403).json({ error: 'Manager permissions required' });
-        }
-
-        if (!labId || !analysisCode || eligibleEquipmentIds != null &&
-            (!Array.isArray(eligibleEquipmentIds) || eligibleEquipmentIds.some(id => typeof id !== 'string'))) {
-            return res.status(400).json({ error: 'A laboratory, analysis and equipment ID array are required' });
-        }
-        if (methodId) {
-            const method = await prisma.methodology.findUnique({ where: { id: methodId } });
-            if (!method || method.labId && method.labId !== labId) return res.status(403).json({ error: 'Access denied' });
-        }
-        const equipmentIds = [...new Set(eligibleEquipmentIds || [])];
-        if (equipmentIds.length) {
-            const ownedCount = await prisma.equipmentAsset.count({ where: { id: { in: equipmentIds }, labId } });
-            if (ownedCount !== equipmentIds.length) return res.status(403).json({ error: 'Access denied' });
-        }
-        // Upsert logic
-        const existing = await prisma.equipmentMethodEligibility.findFirst({
-            where: { labId, analysisCode }
-        });
-
-        const data = {
-            labId,
-            analysisCode,
-            methodId,
-            eligibleEquipmentIds: JSON.stringify(eligibleEquipmentIds || []),
-            isRequired: isRequired ?? true
-        };
-
-        let mapping;
-        if (existing) {
-            mapping = await prisma.equipmentMethodEligibility.update({
-                where: { id: existing.id },
-                data
-            });
-        } else {
-            mapping = await prisma.equipmentMethodEligibility.create({
-                data: { id: uuidv4(), ...data }
-            });
-        }
-
-        res.json(mapping);
+        res.json(await writeService.updateEligibility(req.user, req.body));
     } catch (err) {
+        if (err.inputPayload) return res.status(err.statusCode).json(err.inputPayload);
         console.error('[EquipmentEligibility] Update error:', err);
         res.status(500).json({ error: 'Failed to update eligibility' });
     }

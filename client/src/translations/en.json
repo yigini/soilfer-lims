@@ -56,7 +56,8 @@
     "datasets": {
       "locations": "Locations",
       "items": "Items",
-      "lots": "Lots"
+      "lots": "Lots",
+      "equipment": "Equipment"
     },
     "status": {
       "NEW": "New",
@@ -104,7 +105,16 @@
       "locationId": "Existing location ID",
       "concentration": "Concentration",
       "preparedBy": "Prepared by",
-      "traceabilityNotes": "Traceability notes"
+      "traceabilityNotes": "Traceability notes",
+      "internalAssetTag": "Asset tag",
+      "assetType": "Equipment type",
+      "manufacturer": "Manufacturer",
+      "model": "Model",
+      "serialNumber": "Serial number",
+      "criticality": "Criticality",
+      "lastCalibrationDate": "Last calibration date",
+      "nextCalibrationDueDate": "Next calibration due date",
+      "eligibleAnalyses": "Eligible analysis codes"
     },
     "errors": {
       "IMPORT_INTERNAL_ERROR": "The import could not be completed. Check the result before trying again.",
@@ -141,8 +151,19 @@
       "IMPORT_INVALID_SHEETS": "Choose locations, items or lots for each sheet to import.",
       "IMPORT_INVALID_SHEET": "The sheet could not be read as rows.",
       "IMPORT_INVALID_ROW": "This row could not be read.",
-      "IMPORT_INVALID_ROW_NUMBER": "The source row number is invalid."
-    }
+      "IMPORT_INVALID_ROW_NUMBER": "The source row number is invalid.",
+      "IMPORT_CALIBRATION_DATE_REQUIRED": "Enter the last calibration date when a next due date is supplied.",
+      "IMPORT_FUTURE_DATE": "The calibration date cannot be in the future.",
+      "IMPORT_INVALID_ANALYSIS_LIST": "Use each analysis code once, separated by | or ;, with no empty entries.",
+      "IMPORT_ANALYSIS_UNAVAILABLE": "An analysis is inactive or unavailable to this laboratory.",
+      "IMPORT_ELIGIBILITY_INVALID": "An existing equipment assignment is invalid. Ask a lab manager to check it before importing."
+    },
+    "equipmentTitle": "Import equipment",
+    "equipmentIntro": "Read a CSV or Excel file, map its columns, then check every row before saving. Calibration dates and analysis assignments apply only to new instruments. The location column is a location or bench label.",
+    "equipmentRuleHint": "Existing instruments keep their type, criticality, status, calibration and analysis assignments. Update changes only the name, manufacturer, model, serial number and location.",
+    "openEquipment": "Import equipment",
+    "exampleEquipment": "Practice pH meter",
+    "eligibleAnalysesHint": "Active analysis codes for this lab, separated by | or ;. Leave empty if none. If no assignment exists yet, equipment is required for that analysis."
   },
   "exchangeAdmin": {
     "systemCategory": "V2 System",

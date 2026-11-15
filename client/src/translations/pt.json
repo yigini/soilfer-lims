@@ -56,7 +56,8 @@
     "datasets": {
       "locations": "Locais",
       "items": "Artigos",
-      "lots": "Lotes"
+      "lots": "Lotes",
+      "equipment": "Equipamentos"
     },
     "status": {
       "NEW": "Novo",
@@ -104,7 +105,16 @@
       "locationId": "Identificador do local existente",
       "concentration": "Concentração",
       "preparedBy": "Preparado por",
-      "traceabilityNotes": "Notas de rastreabilidade"
+      "traceabilityNotes": "Notas de rastreabilidade",
+      "internalAssetTag": "Identificador interno",
+      "assetType": "Tipo de equipamento",
+      "manufacturer": "Fabricante",
+      "model": "Modelo",
+      "serialNumber": "Número de série",
+      "criticality": "Criticidade",
+      "lastCalibrationDate": "Data da última calibração",
+      "nextCalibrationDueDate": "Próxima data de calibração",
+      "eligibleAnalyses": "Códigos das análises permitidas"
     },
     "errors": {
       "IMPORT_INTERNAL_ERROR": "Não foi possível concluir a importação. Verifique o resultado antes de tentar novamente.",
@@ -141,8 +151,19 @@
       "IMPORT_INVALID_SHEETS": "Escolha locais, artigos ou lotes para cada folha a importar.",
       "IMPORT_INVALID_SHEET": "Não foi possível ler as linhas da folha.",
       "IMPORT_INVALID_ROW": "Não foi possível ler esta linha.",
-      "IMPORT_INVALID_ROW_NUMBER": "O número da linha de origem é inválido."
-    }
+      "IMPORT_INVALID_ROW_NUMBER": "O número da linha de origem é inválido.",
+      "IMPORT_CALIBRATION_DATE_REQUIRED": "Indique a data da última calibração quando fornecer a próxima data de calibração.",
+      "IMPORT_FUTURE_DATE": "A data de calibração não pode estar no futuro.",
+      "IMPORT_INVALID_ANALYSIS_LIST": "Utilize cada código de análise uma única vez, separado por | ou ;, sem entradas vazias.",
+      "IMPORT_ANALYSIS_UNAVAILABLE": "Uma análise está inativa ou indisponível neste laboratório.",
+      "IMPORT_ELIGIBILITY_INVALID": "Uma atribuição de equipamento existente é inválida. Peça ao responsável do laboratório para a verificar antes de importar."
+    },
+    "equipmentTitle": "Importar equipamentos",
+    "equipmentIntro": "Leia um ficheiro CSV ou Excel, associe as colunas e verifique cada linha antes de guardar. As datas de calibração e as análises atribuídas aplicam-se apenas a instrumentos novos. A coluna de localização contém o nome do local ou da bancada.",
+    "equipmentRuleHint": "Os instrumentos existentes mantêm o tipo, a criticidade, o estado, a calibração e as análises atribuídas. A atualização altera apenas o nome, o fabricante, o modelo, o número de série e a localização.",
+    "openEquipment": "Importar equipamentos",
+    "exampleEquipment": "Medidor de pH de demonstração",
+    "eligibleAnalysesHint": "Códigos de análise ativos neste laboratório, separados por | ou ;. Deixe vazio se não houver nenhum. Se ainda não existir uma atribuição, o equipamento passa a ser obrigatório para essa análise."
   },
   "exchangeAdmin": {
     "systemCategory": "Sistema V2",

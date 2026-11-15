@@ -4,10 +4,12 @@ import { X, Upload, Download, RefreshCw } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
-import { INVENTORY_COLUMNS, readInventoryImportFile, initialInventoryImportMapping, inventoryColumnMapping,
+import { INVENTORY_COLUMNS, EQUIPMENT_COLUMNS, readInventoryImportFile, initialInventoryImportMapping, inventoryColumnMapping,
     prepareInventoryImport, downloadInventoryImportTemplate, importCsvReport } from '../../utils/inventoryImport';
 
-export default function InventoryImportDialog({ onClose, onImported }) {
+export default function InventoryImportDialog({ onClose, onImported, module: importModule = 'inventory' }) {
+    const equipment = importModule === 'equipment';
+    const columns = equipment ? EQUIPMENT_COLUMNS : INVENTORY_COLUMNS;
     const { user } = useAuth(), { t } = useLanguage();
     const superAdmin = user?.role === 'SUPER_ADMIN';
     const [labs, setLabs] = useState([]), [labId, setLabId] = useState(''), [labError, setLabError] = useState(false);
@@ -32,7 +34,7 @@ export default function InventoryImportDialog({ onClose, onImported }) {
         try {
             const loaded = await readInventoryImportFile(file, t);
             if (request !== sequence.current) return;
-            setSheets(loaded); setMapping(initialInventoryImportMapping(loaded, t)); setFileName(file.name);
+            setSheets(loaded); setMapping(initialInventoryImportMapping(loaded, t, columns)); setFileName(file.name);
         } catch (failure) { if (request === sequence.current) setError(errorText(failure.code || 'IMPORT_INVALID_WORKBOOK')); }
         finally { if (request === sequence.current) setBusy(false); }
     };
@@ -40,10 +42,10 @@ export default function InventoryImportDialog({ onClose, onImported }) {
     const preview = async () => {
         if (superAdmin && !labId) { setError(errorText('IMPORT_LAB_REQUIRED')); return; }
         let payload;
-        try { payload = prepareInventoryImport(sheets, mapping, options); }
+        try { payload = prepareInventoryImport(sheets, mapping, options, columns); }
         catch (failure) { setError(errorText(failure.code)); return; }
         const request = ++sequence.current; setBusy(true); setError(''); setConfirmed(false);
-        try { const response = await axios.post('/api/inventory/import/preview', payload);
+        try { const response = await axios.post('/api/' + importModule + '/import/preview', payload);
             if (request === sequence.current) { setResult(response.data); setPage(0); setStatusFilter('ALL'); }
         } catch (failure) { if (request === sequence.current) setError(errorText(failure.response?.data?.code || 'IMPORT_INTERNAL_ERROR')); }
         finally { if (request === sequence.current) setBusy(false); }
@@ -52,7 +54,7 @@ export default function InventoryImportDialog({ onClose, onImported }) {
         if (!confirmed || !result || result.mode !== 'preview') return;
         const request = ++sequence.current; setBusy(true); setError('');
         try {
-            const response = await axios.post('/api/inventory/import/commit', prepareInventoryImport(sheets, mapping, options));
+            const response = await axios.post('/api/' + importModule + '/import/commit', prepareInventoryImport(sheets, mapping, options, columns));
             if (request === sequence.current) { setResult(response.data); setConfirmed(false); setPage(0); if (response.data.committed) onImported?.(response.data); }
         } catch (failure) {
             if (request === sequence.current) {
@@ -68,8 +70,8 @@ export default function InventoryImportDialog({ onClose, onImported }) {
     const exportSheet = async dataset => {
         if (superAdmin && !labId) { setError(errorText('IMPORT_LAB_REQUIRED')); return; }
         setBusy(true); setError('');
-        try { const response = await axios.get('/api/inventory/export/' + dataset, { responseType: 'blob', params: superAdmin ? { labId } : {} });
-            saveBlob(new Blob([response.data], { type: 'text/csv;charset=utf-8' }), 'inventory-' + dataset + '.csv'); }
+        try { const response = await axios.get('/api/' + importModule + (equipment ? '/export' : '/export/' + dataset), { responseType: 'blob', params: superAdmin ? { labId } : {} });
+            saveBlob(new Blob([response.data], { type: 'text/csv;charset=utf-8' }), importModule + '-' + dataset + '.csv'); }
         catch (failure) { setError(errorText(failure.response?.data?.code || 'IMPORT_EXPORT_FAILED')); }
         finally { setBusy(false); }
     };
@@ -79,13 +81,13 @@ export default function InventoryImportDialog({ onClose, onImported }) {
     const canCommit = result?.mode === 'preview' && result.totalRows > result.totals.errors && (!atomic || result.totals.errors === 0);
     const inputClass = 'rounded border border-sf-divider bg-sf-surface px-2 py-1.5 text-sm';
     return <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-3">
-        <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="inventory-import-title" className="w-full max-w-5xl rounded-xl bg-sf-surface text-sf-text shadow-xl flex flex-col max-h-[94vh]">
+        <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby={importModule + '-import-title'} className="w-full max-w-5xl rounded-xl bg-sf-surface text-sf-text shadow-xl flex flex-col max-h-[94vh]">
             <header className="flex items-center justify-between p-4 border-b border-sf-divider">
-                <h2 id="inventory-import-title" className="font-bold text-lg">{t('bulkImport.title')}</h2>
+                <h2 id={importModule + '-import-title'} className="font-bold text-lg">{t(equipment ? 'bulkImport.equipmentTitle' : 'bulkImport.title')}</h2>
                 <button type="button" onClick={onClose} disabled={busy} aria-label={t('common.close')} className="p-2"><X size={18} /></button>
             </header>
             <div className="p-4 space-y-5 overflow-y-auto">
-                <p className="text-sm text-sf-muted">{t('bulkImport.intro')}</p>
+                <p className="text-sm text-sf-muted">{t(equipment ? 'bulkImport.equipmentIntro' : 'bulkImport.intro')}</p>
                 {error && <p role="alert" className="rounded bg-red-50 text-red-800 p-3 text-sm">{error}</p>}
                 <div className="flex flex-wrap items-end gap-3">
                     {superAdmin ? <label className="flex flex-col gap-1 text-sm">{t('bulkImport.laboratory')}
@@ -95,8 +97,8 @@ export default function InventoryImportDialog({ onClose, onImported }) {
                         </select>
                         {labError && <span role="alert">{t('bulkImport.labsUnavailable')}</span>}
                     </label> : <p className="text-sm">{t('bulkImport.destination', { lab: user?.lab?.name || t('bulkImport.currentLab') })}</p>}
-                    <button type="button" disabled={busy} className={inputClass + ' inline-flex gap-2 items-center'} onClick={() => downloadInventoryImportTemplate(t)}><Download size={14} />{t('bulkImport.template')}</button>
-                    {Object.keys(INVENTORY_COLUMNS).map(dataset => <button key={dataset} type="button" className={inputClass} disabled={busy || superAdmin && !labId} onClick={() => exportSheet(dataset)}>{t('bulkImport.exportSheet', { sheet: t('bulkImport.datasets.' + dataset) })}</button>)}
+                    <button type="button" disabled={busy} className={inputClass + ' inline-flex gap-2 items-center'} onClick={() => downloadInventoryImportTemplate(t, importModule)}><Download size={14} />{t('bulkImport.template')}</button>
+                    {Object.keys(columns).map(dataset => <button key={dataset} type="button" className={inputClass} disabled={busy || superAdmin && !labId} onClick={() => exportSheet(dataset)}>{t('bulkImport.exportSheet', { sheet: t('bulkImport.datasets.' + dataset) })}</button>)}
                 </div>
                 <label className="flex flex-col gap-1 text-sm font-medium">{t('bulkImport.chooseFile')}
                     <input type="file" accept=".csv,.tsv,.xlsx,.xls" disabled={busy} aria-label={t('bulkImport.chooseFile')} onChange={event => load(event.target.files?.[0])} className={inputClass} />
@@ -111,11 +113,11 @@ export default function InventoryImportDialog({ onClose, onImported }) {
                         <label className="my-2 flex items-center gap-2 text-sm">{t('bulkImport.sheetContains')}
                             <select aria-label={t('bulkImport.assignSheet', { sheet: sheet.name })} value={mapping[sheet.id]?.dataset || ''} disabled={busy} className={inputClass} onChange={event => {
                                 invalidate(); const dataset = event.target.value;
-                                setMapping(previous => ({ ...previous, [sheet.id]: { dataset, columns: dataset ? inventoryColumnMapping(sheet, dataset, t) : {} } }));
-                            }}><option value="">{t('bulkImport.ignoreSheet')}</option>{Object.keys(INVENTORY_COLUMNS).map(dataset => <option key={dataset} value={dataset}>{t('bulkImport.datasets.' + dataset)}</option>)}</select>
+                                setMapping(previous => ({ ...previous, [sheet.id]: { dataset, columns: dataset ? inventoryColumnMapping(sheet, dataset, t, columns) : {} } }));
+                            }}><option value="">{t('bulkImport.ignoreSheet')}</option>{Object.keys(columns).map(dataset => <option key={dataset} value={dataset}>{t('bulkImport.datasets.' + dataset)}</option>)}</select>
                         </label>
                         {mapping[sheet.id]?.dataset && <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                            {INVENTORY_COLUMNS[mapping[sheet.id].dataset].map(column => <label key={column} className="flex flex-col gap-1 text-xs">{t('bulkImport.columns.' + column, column)}
+                            {columns[mapping[sheet.id].dataset].map(column => <label key={column} className="flex flex-col gap-1 text-xs">{t('bulkImport.columns.' + column, column)}
                                 <select aria-label={t('bulkImport.mapColumn', { sheet: sheet.name, column: t('bulkImport.columns.' + column, column) })} className={inputClass} disabled={busy} value={mapping[sheet.id].columns[column] ?? -1}
                                     onChange={event => { invalidate(); const index = Number(event.target.value); setMapping(previous => ({ ...previous, [sheet.id]: { ...previous[sheet.id], columns: { ...previous[sheet.id].columns, [column]: index } } })); }}>
                                     <option value={-1}>{t('bulkImport.notMapped')}</option>{sheet.headers.map((header, index) => <option key={index} value={index}>{header} ({index + 1})</option>)}
@@ -124,6 +126,7 @@ export default function InventoryImportDialog({ onClose, onImported }) {
                         </div>}
                     </details>)}
                     <p className="text-xs text-sf-muted">{t('bulkImport.numberFormatHint')}</p>
+                    {equipment && <p className="text-xs text-sf-muted">{t('bulkImport.eligibleAnalysesHint')}</p>}
                 </section>}
                 {sheets.length > 0 && <div className="space-y-3 rounded bg-sf-canvas p-3 text-sm">
                     <label className="flex flex-col gap-1">{t('bulkImport.duplicates')}
@@ -131,7 +134,7 @@ export default function InventoryImportDialog({ onClose, onImported }) {
                             <option value="SKIP">{t('bulkImport.skipExisting')}</option><option value="UPDATE">{t('bulkImport.updateDescriptions')}</option>
                         </select>
                     </label>
-                    <p className="text-xs text-sf-muted">{t('bulkImport.stockRuleHint')}</p>
+                    <p className="text-xs text-sf-muted">{t(equipment ? 'bulkImport.equipmentRuleHint' : 'bulkImport.stockRuleHint')}</p>
                     <label className="flex items-start gap-2"><input type="checkbox" checked={atomic} disabled={busy} onChange={event => { invalidate(); setAtomic(event.target.checked); }} />{t('bulkImport.atomic')}</label>
                     <p className="text-xs text-sf-muted">{t('bulkImport.partialHint')}</p>
                 </div>}
