@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.16.0] - 2026-11-15
+
+### Added
+- Import inventory locations, items and lots from CSV or Excel with column mapping, row previews and downloadable result reports.
+- Import equipment with optional calibration evidence and analysis assignments using the existing laboratory rules.
+- Add seven Help guides for messages, failed quality checks, pilot support, instrument events, prepared lots and the import screens in all five languages.
+
+### Changed
+- Include Help v1.5.0 with a short manager summary, complete Portuguese guidance and the original article identifiers and search keywords.
+- Translate stock, custody, worksheet, review and spectral-import messages consistently across all five screen languages.
+
+### Fixed
+- Prevent page crashes in inventory and sample actions and connect reception and report actions to their supported flows.
+- Restore status and current readiness in equipment exports, skip malformed eligibility mappings and explain calibration dates that are not in order.
+
 ## [1.15.0] - 2026-11-14
 
 ### Added

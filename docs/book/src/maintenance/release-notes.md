@@ -1,10 +1,17 @@
-# Release Notes (1.11–1.15)
+# Release Notes (1.11–1.16)
 
-This page summarizes what laboratory staff, managers, and server administrators will notice in SoilFER-LIMS **1.15.0**, followed by earlier updates.
+This page summarizes what laboratory staff, managers, and server administrators will notice in SoilFER-LIMS **1.16.0**, followed by earlier updates.
 
 For step-by-step update instructions, see [Updating SoilFER-LIMS](./updates.md).
 
 ---
+
+## Version 1.16.0 — 2026-11-15
+
+- **Import stock:** laboratory managers can add locations, items and lots from CSV or Excel, map columns, preview every row and confirm which valid rows to save. Preview changes nothing. Existing lots are skipped, so imports do not alter their quantities, status or expiry.
+- **Import equipment:** managers can add tagged instruments, optional calibration records and analysis assignments. Existing instruments receive description updates only; their type, criticality, status and calibration are retained. The equipment export again shows status and current readiness.
+- **Help with everyday work:** Help v1.5.0 adds guides for messages, failed quality checks, pilot support, instrument events, prepared lots and both import screens in all five languages. The manager quick summary is short again, and Portuguese guidance uses Bancada de trabalho while keeping the original search keywords and direct links.
+- **Clearer screens:** stock, custody, worksheet, review and spectral-import messages use the selected screen language. Page crashes and broken action links are corrected. Imports explain invalid calibration-date order without changing laboratory qualification rules.
 
 ## Version 1.15.0 — 2026-11-14
 
