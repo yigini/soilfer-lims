@@ -840,16 +840,16 @@ const Reception = () => {
                                 }));
                             }
 
-        const field = targetSample.fieldMetadata ? (typeof targetSample.fieldMetadata === 'string' ? JSON.parse(targetSample.fieldMetadata) : targetSample.fieldMetadata) : {};
-        const sourceValue = value => value && typeof value === 'object' && Object.hasOwn(value, 'value') ? value.value : value;
-        const savedDate = sourceValue(field.collectionDate ?? field.collection_date ?? field.samplingDate ?? recData?.samplingDetails?.date);
-        setSampling(prev => ({ ...prev, ...recData?.samplingDetails,
-            landUse: sourceValue(field.landUse) ?? recData?.samplingDetails?.landUse ?? '',
-            isComposite: sourceValue(field.isComposite) ?? recData?.samplingDetails?.isComposite,
-            date: savedDate ? String(savedDate).slice(0, 10) : '',
-            depthTopCm: targetSample.depthTopCm ?? recData?.samplingDetails?.depthTopCm ?? null,
-            depthBottomCm: targetSample.depthBottomCm ?? recData?.samplingDetails?.depthBottomCm ?? null }));
-        const savedChecklist = recData?.checklist || meta?.nonConformance?.checklist;
+                            const field = found.fieldMetadata ? (typeof found.fieldMetadata === 'string' ? JSON.parse(found.fieldMetadata) : found.fieldMetadata) : {};
+                            const sourceValue = value => value && typeof value === 'object' && Object.hasOwn(value, 'value') ? value.value : value;
+                            const savedDate = sourceValue(field.collectionDate ?? field.collection_date ?? field.samplingDate ?? recData?.samplingDetails?.date);
+                            setSampling(prev => ({ ...prev, ...recData?.samplingDetails,
+                                landUse: sourceValue(field.landUse) ?? recData?.samplingDetails?.landUse ?? '',
+                                isComposite: sourceValue(field.isComposite) ?? recData?.samplingDetails?.isComposite,
+                                date: savedDate ? String(savedDate).slice(0, 10) : '',
+                                depthTopCm: found.depthTopCm ?? recData?.samplingDetails?.depthTopCm ?? null,
+                                depthBottomCm: found.depthBottomCm ?? recData?.samplingDetails?.depthBottomCm ?? null }));
+                            const savedChecklist = recData?.checklist || meta?.nonConformance?.checklist;
                             if (savedChecklist) setChecklistData(savedChecklist);
                             if (recData?.notes || found.notes) setIntakeNotes(recData?.notes || found.notes || '');
 

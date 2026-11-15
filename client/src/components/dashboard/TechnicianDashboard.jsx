@@ -1,3 +1,4 @@
+import { useLanguage } from '../../context/LanguageContext';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -7,20 +8,23 @@ import {
 import { useRealtimeData, formatLastUpdated } from '../../hooks/useRealtimeData';
 
 // ─── Live Indicator ───
-const LiveBadge = ({ isLive, isStale, lastUpdated }) => (
+const LiveBadge = ({ isLive, isStale, lastUpdated }) => {
+    const { t } = useLanguage();
+    return (
     <div className="flex items-center gap-2">
         <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${isStale ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'
             : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
             }`}>
             <span className={`w-1.5 h-1.5 rounded-full ${isStale ? 'bg-amber-500' : isLive ? 'bg-emerald-500 animate-pulse' : 'bg-emerald-500'
                 }`} />
-            {isStale ? 'Stale' : 'Live'}
+            {isStale ? t('workbenchRare.stale') : t('workbenchRare.live')}
         </div>
         {lastUpdated && (
-            <span className="text-[10px] text-gray-400">{formatLastUpdated(lastUpdated)}</span>
+            <span className="text-[10px] text-gray-400">{formatLastUpdated(lastUpdated, t)}</span>
         )}
     </div>
-);
+    );
+};
 
 const TechnicianDashboard = ({ user }) => {
     const navigate = useNavigate();

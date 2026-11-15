@@ -348,7 +348,7 @@ export default function BatchModal({
                                     >
                                         {batches.map(b => (
                                             <option key={b.id} value={b.id}>
-                                                {b.id} · {b.runProfile?.name || b.profile || t('qcWorksheet.notStored')} · Status: {b.status} · {b.workItems?.length || 0} samples
+                                                {b.id} · {b.runProfile?.name || b.profile || t('qcWorksheet.notStored')} · Status: {t(`status.${b.status}`, b.status)} · {b.workItems?.length || 0} samples
                                             </option>
                                         ))}
                                     </select>
@@ -415,7 +415,7 @@ export default function BatchModal({
                                 >
                                     {batches.map(b => (
                                         <option key={b.id} value={b.id}>
-                                            {b.id} · Status: {b.status}
+                                            {b.id} · Status: {t(`status.${b.status}`, b.status)}
                                         </option>
                                     ))}
                                 </select>
@@ -430,7 +430,7 @@ export default function BatchModal({
                                         currentBatch.status === 'CLOSED' ? 'bg-purple-500/15 text-purple-800 dark:text-purple-300' :
                                         'bg-sf-surface text-sf-muted'
                                     }`} data-testid="batch-qc-status-badge">
-                                        {currentBatch.result === 'NOT_REQUIRED' || currentBatch.qcMode === 'OFF' ? t('qcRuns.notRequired') : currentBatch.status}
+                                        {currentBatch.result === 'NOT_REQUIRED' || currentBatch.qcMode === 'OFF' ? t('qcRuns.notRequired') : t(`status.${currentBatch.status}`, currentBatch.status)}
                                     </span>
                                 </div>
                             )}

@@ -6,7 +6,7 @@ if (!SECRET_KEY) {
     throw new Error('JWT_SECRET is not defined in config/auth (checking .env)');
 }
 
-const { PERMISSIONS, getPermissionsForRole } = require('../config/roles');
+const { PERMISSIONS, getPermissionsForRole, hasPermission } = require('../config/roles');
 
 /**
  * Middleware to verify JWT and attach user to request
@@ -133,10 +133,13 @@ const verifyToken = async (req, res, next) => {
  * Factory to check strictly defined permissions from the Matrix
  * @param {string} permissionKey Key from PERMISSIONS object (e.g. 'CREATE_SAMPLE')
  */
-const checkPermission = (permissionKey) => {
+const checkPermission = (permissionKey, { alternativePermission } = {}) => {
     return (req, res, next) => {
         const user = req.user;
         if (!user) return res.status(401).json({ error: 'User not authenticated' });
+
+        // Preserve the existing inventory receipt grant through its original role check.
+        if (alternativePermission && hasPermission(user, alternativePermission)) return next();
 
         const currentRole = user.role ? user.role.trim() : '';
         const currentKey = permissionKey ? permissionKey.trim() : '';

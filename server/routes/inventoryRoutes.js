@@ -2,12 +2,6 @@ const express = require('express');
 const router = express.Router();
 const { verifyToken, checkPermission } = require('../middleware/authMiddleware');
 const inv = require('../controllers/inventoryController');
-const { hasPermission } = require('../config/roles');
-
-// Preserve existing stock-receipt authority, including national managers.
-const mayPrepareLot = (req, res, next) => hasPermission(req.user, 'MANAGE_INVENTORY')
-    ? next() : checkPermission('PREPARE_INVENTORY_LOT')(req, res, next);
-
 router.use(verifyToken);
 
 // ─── Items (catalog) ─────────────────────────────────────────────
@@ -18,7 +12,7 @@ router.put('/items/:id', checkPermission('MANAGE_INVENTORY'), inv.updateItem);
 
 // ─── Lots ────────────────────────────────────────────────────────
 router.get('/lots', checkPermission('VIEW_INVENTORY'), inv.getLots);
-router.post('/lots', mayPrepareLot, inv.createLot);
+router.post('/lots', checkPermission('PREPARE_INVENTORY_LOT', { alternativePermission: 'MANAGE_INVENTORY' }), inv.createLot);
 router.post('/lots/:id/consume', checkPermission('CONSUME_INVENTORY'), inv.consumeLot);
 router.post('/lots/:id/adjust', checkPermission('MANAGE_INVENTORY'), inv.adjustLot);
 router.post('/lots/:id/quarantine', checkPermission('MANAGE_INVENTORY'), inv.quarantineLot);

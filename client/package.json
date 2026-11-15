@@ -8,10 +8,11 @@
     "dev": "vite --host",
     "prebuild": "node scripts/generate-workflow-contract.cjs",
     "build": "vite build",
-    "lint": "eslint .",
+    "lint": "eslint . && npm run lint:defined",
     "preview": "vite preview",
     "i18n:check": "node scripts/i18n-audit.js",
-    "i18n:audit": "node scripts/i18n-audit.js"
+    "i18n:audit": "node scripts/i18n-audit.js",
+    "lint:defined": "node scripts/check_defined_names.cjs"
   },
   "dependencies": {
     "@xyflow/react": "^12.10.0",
