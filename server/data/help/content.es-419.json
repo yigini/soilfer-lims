@@ -599,7 +599,7 @@
         ""
       ],
       "minutes": 3,
-      "quick": "Orden del primer día: el administrador configura el laboratorio; recepción recibe y acepta las muestras de práctica; el gerente asigna el trabajo; los técnicos preparan las muestras y envían los lotes desde Mesa de trabajo; el gerente revisa los resultados y emite los informes.",
+      "quick": "Asigne las muestras aceptadas y siga el trabajo del día. Revise resultados y controles de calidad, devuelva lo que necesite repetirse y apruebe las muestras completas antes de emitir sus informes.",
       "before": [
         "Confirme el nombre del laboratorio activo en la barra superior. Verifique que las muestras de práctica se hayan recibido y aceptado en recepción.",
         "Cuando está activa la revisión por dos personas, el revisor debe ser una persona distinta del analista. Si va a revisar los lotes de práctica, no los registre personalmente."
@@ -10544,6 +10544,483 @@
       "caution": "Precaución: A screenshot exposes credentials or unnecessary sample data. — Consulte el lote o muestra en /qa y /admin/audit, confirme la revisión activa en /result-reports y resguarde sus borradores antes de recargar.",
       "related": [
         "quality-support"
+      ],
+      "feature": "core",
+      "reviewOwner": "Lab operations lead"
+    },
+    {
+      "id": "start-messages",
+      "category": "start",
+      "kind": "guide",
+      "title": "Leer y enviar mensajes",
+      "summary": "Use el Centro de mensajes en Mi perfil para mensajes internos y conversaciones. Un mensaje no aprueba el trabajo del laboratorio.",
+      "roles": [
+        "all"
+      ],
+      "keywords": [
+        "start-messages",
+        "start"
+      ],
+      "minutes": 3,
+      "quick": "Abra Mi perfil y Centro de mensajes. Elija Redactar, confirme el destinatario y escriba el asunto y el mensaje, después Enviar. Guarde lo inacabado como borrador.",
+      "before": [
+        "Tenga el nombre del destinatario y el código de muestra o lote necesario para la pregunta."
+      ],
+      "sections": [
+        {
+          "title": "Qué hacer",
+          "steps": [
+            {
+              "action": "Abra Mi perfil y Centro de mensajes. Elija recibidos, enviados, borradores o conversación.",
+              "expected": "Ve sus mensajes y los destinatarios disponibles."
+            },
+            {
+              "action": "Elija Redactar, el destinatario correcto y un asunto y mensaje claros. Use Guardar borrador si todavía no está listo.",
+              "expected": "Un borrador no se ha enviado."
+            },
+            {
+              "action": "Pulse Enviar y revise Enviados tras la confirmación. Lea las respuestas en la bandeja de entrada o la conversación.",
+              "expected": "Un mensaje enviado aparece en Enviados; un envío fallido aún necesita atención."
+            }
+          ]
+        }
+      ],
+      "fields": [],
+      "example": "Pida al responsable que revise DEMO-001 e incluya la pantalla y la pregunta. La decisión oficial se registra en la pantalla de revisión.",
+      "success": "El mensaje se envió a la persona correcta y sabe dónde consultar la respuesta.",
+      "nextActor": "Destinatario del mensaje",
+      "problems": [
+        {
+          "symptom": "No aparece el destinatario.",
+          "why": "El directorio muestra los contactos disponibles para su cuenta.",
+          "action": "Pregunte al responsable qué contacto usar; no envíe la información a otra persona."
+        }
+      ],
+      "sources": [
+        "client/src/pages/Profile.jsx",
+        "client/src/components/messaging/MessagingCenter.jsx",
+        "client/src/context/NotificationContext.jsx"
+      ],
+      "steps": [
+        "Abra Mi perfil y Centro de mensajes. Elija recibidos, enviados, borradores o conversación. (Resultado esperado: Ve sus mensajes y los destinatarios disponibles.)",
+        "Elija Redactar, el destinatario correcto y un asunto y mensaje claros. Use Guardar borrador si todavía no está listo. (Resultado esperado: Un borrador no se ha enviado.)",
+        "Pulse Enviar y revise Enviados tras la confirmación. Lea las respuestas en la bandeja de entrada o la conversación. (Resultado esperado: Un mensaje enviado aparece en Enviados; un envío fallido aún necesita atención.)"
+      ],
+      "caution": "Los mensajes son conversaciones. Aprobar muestras, revisar resultados y emitir informes requiere las acciones correspondientes.",
+      "related": [
+        "start-manager",
+        "quality-pilot-help"
+      ],
+      "feature": "core",
+      "reviewOwner": "Lab operations lead"
+    },
+    {
+      "id": "quality-qc-failed",
+      "category": "quality",
+      "kind": "guide",
+      "title": "Qué hacer cuando falla un control de calidad",
+      "summary": "Detenga el trabajo afectado, revise la evidencia y solicite una decisión registrada sin sustituir las mediciones originales.",
+      "roles": [
+        "all"
+      ],
+      "keywords": [
+        "quality-qc-failed",
+        "quality",
+        "workbench"
+      ],
+      "minutes": 3,
+      "quick": "Lea el control fallido, compárelo con el registro de trabajo y avise al responsable. Siga la decisión registrada de corrección o repetición.",
+      "before": [
+        "Tenga el código de corrida, el resultado del control, la unidad, el lote de referencia y el registro del instrumento."
+      ],
+      "sections": [
+        {
+          "title": "Qué hacer",
+          "steps": [
+            {
+              "action": "Abra la corrida en la mesa de trabajo o la vista de calidad y lea qué control falló.",
+              "expected": "Sabe qué control y qué trabajo necesitan atención."
+            },
+            {
+              "action": "Compare valor, unidad, fecha y material o instrumento con el registro. Describa un posible error en lugar de cambiar una medición para que pase.",
+              "expected": "La evidencia original sigue disponible."
+            },
+            {
+              "action": "Pida al responsable que revise la evidencia y registre una decisión. Siga la repetición o corrección revisada que se indique.",
+              "expected": "La decisión y cualquier nuevo intento mantienen el vínculo con el trabajo original."
+            }
+          ]
+        }
+      ],
+      "fields": [],
+      "example": "Un suelo de control está fuera del intervalo aceptado. Registre valor, unidad y lote y solicite la evaluación de la corrida.",
+      "success": "El trabajo afectado tiene una decisión justificada y, si hace falta, una repetición trazable.",
+      "nextActor": "Responsable del laboratorio o de calidad",
+      "problems": [
+        {
+          "symptom": "La corrida o el envío sigue bloqueado.",
+          "why": "Puede faltar una decisión de calidad, repetición u otra persona que revise.",
+          "action": "Lea el motivo y pida al responsable que use el proceso previsto; no borre la corrida original."
+        }
+      ],
+      "sources": [
+        "server/services/qcGateService.js",
+        "server/services/qcDispositionStateService.js",
+        "client/src/pages/QADashboard.jsx"
+      ],
+      "steps": [
+        "Abra la corrida en la mesa de trabajo o la vista de calidad y lea qué control falló. (Resultado esperado: Sabe qué control y qué trabajo necesitan atención.)",
+        "Compare valor, unidad, fecha y material o instrumento con el registro. Describa un posible error en lugar de cambiar una medición para que pase. (Resultado esperado: La evidencia original sigue disponible.)",
+        "Pida al responsable que revise la evidencia y registre una decisión. Siga la repetición o corrección revisada que se indique. (Resultado esperado: La decisión y cualquier nuevo intento mantienen el vínculo con el trabajo original.)"
+      ],
+      "caution": "Un archivo legible o resultado guardado no significa que el control de calidad haya pasado. Siga los procedimientos del laboratorio.",
+      "related": [
+        "method-qc",
+        "quality-qc",
+        "bench-blocked"
+      ],
+      "feature": "core",
+      "reviewOwner": "Lab operations lead"
+    },
+    {
+      "id": "quality-pilot-help",
+      "category": "quality",
+      "kind": "guide",
+      "title": "Pedir ayuda durante el piloto",
+      "summary": "Describa la pantalla, la acción y el mensaje exacto y use el contacto configurado en Ayuda.",
+      "roles": [
+        "all"
+      ],
+      "keywords": [
+        "quality-pilot-help",
+        "quality"
+      ],
+      "minutes": 3,
+      "quick": "Lea primero la Ayuda de la pantalla. Si sigue con dudas, contacte al responsable o elija Contact support en Ayuda. Un borrador de correo no es una solicitud enviada.",
+      "before": [
+        "Anote pantalla, versión, hora y un ejemplo sin información privada innecesaria."
+      ],
+      "sections": [
+        {
+          "title": "Qué hacer",
+          "steps": [
+            {
+              "action": "Abra Ayuda desde la pantalla afectada y lea la guía o la explicación del bloqueo.",
+              "expected": "Puede comprobar si la pantalla explica el siguiente paso."
+            },
+            {
+              "action": "Elija Contact support. Describa lo que intentó, lo que esperaba y el mensaje exacto.",
+              "expected": "Se prepara una solicitud; prepararla no confirma su entrega."
+            },
+            {
+              "action": "Si se abre un borrador, revise destinatario y contenido y envíelo desde su aplicación de correo. Sin contacto configurado, pregunte al responsable cuál es el canal aprobado.",
+              "expected": "La solicitud llega al contacto solo después de enviarla por el canal configurado."
+            }
+          ]
+        }
+      ],
+      "fields": [],
+      "example": "«En Inventario, la vista previa indica una fecha inválida en la fila 7. No se importó ninguna fila». Añada la versión y la hora.",
+      "success": "La persona correcta recibe suficiente información para reproducir el problema.",
+      "nextActor": "Responsable del laboratorio o contacto del piloto",
+      "problems": [
+        {
+          "symptom": "Una solicitud está preparada, pero nadie la recibió.",
+          "why": "Abrir un borrador no lo envía.",
+          "action": "Revise el borrador y Enviados o pregunte al responsable cómo entregar la solicitud."
+        }
+      ],
+      "sources": [
+        "client/src/pages/help/HelpCentre.jsx",
+        "client/src/pages/help/ArticleReader.jsx"
+      ],
+      "steps": [
+        "Abra Ayuda desde la pantalla afectada y lea la guía o la explicación del bloqueo. (Resultado esperado: Puede comprobar si la pantalla explica el siguiente paso.)",
+        "Elija Contact support. Describa lo que intentó, lo que esperaba y el mensaje exacto. (Resultado esperado: Se prepara una solicitud; prepararla no confirma su entrega.)",
+        "Si se abre un borrador, revise destinatario y contenido y envíelo desde su aplicación de correo. Sin contacto configurado, pregunte al responsable cuál es el canal aprobado. (Resultado esperado: La solicitud llega al contacto solo después de enviarla por el canal configurado.)"
+      ],
+      "caution": "No incluya contraseñas, PIN personales, tokens ni datos de clientes ajenos a la consulta en mensajes o capturas.",
+      "related": [
+        "start-messages",
+        "quality-support",
+        "offline-help"
+      ],
+      "feature": "core",
+      "reviewOwner": "Lab operations lead"
+    },
+    {
+      "id": "assets-technician-events",
+      "category": "assets",
+      "kind": "guide",
+      "title": "Registrar una comprobación del instrumento como técnico",
+      "summary": "Registre evidencia de calibración, verificación o mantenimiento con su nombre y compruebe la disponibilidad.",
+      "roles": [
+        "all"
+      ],
+      "keywords": [
+        "assets-technician-events",
+        "assets",
+        "equipment",
+        "workbench"
+      ],
+      "minutes": 3,
+      "quick": "Abra Equipos, elija el instrumento y registre el evento permitido, su resultado real y las fechas. Compruebe si falta una aprobación u otra acción.",
+      "before": [
+        "Compruebe el identificador físico y tenga el registro real de la comprobación o mantenimiento."
+      ],
+      "sections": [
+        {
+          "title": "Qué hacer",
+          "steps": [
+            {
+              "action": "Abra Equipos y el instrumento correcto. Elija un tipo de evento disponible para su perfil.",
+              "expected": "El evento queda vinculado al instrumento previsto."
+            },
+            {
+              "action": "Registre el trabajo, el resultado real y la fecha. Añada la próxima fecha si la conoce y guarde.",
+              "expected": "El evento le identifica como la persona que lo realizó."
+            },
+            {
+              "action": "Lea la disponibilidad y el historial. Pida a otro responsable habilitado que revise el evento cuando se necesite aprobación.",
+              "expected": "Guardar no evita una aprobación, una fecha vencida ni una restricción de fuera de servicio."
+            }
+          ]
+        }
+      ],
+      "fields": [],
+      "example": "Conserve una verificación fallida, investigue la causa y registre una comprobación posterior realmente aprobada si se realiza; no reescriba la falla.",
+      "success": "La evidencia está registrada y se comprenden las restricciones actuales.",
+      "nextActor": "Otro responsable habilitado si se necesita aprobación",
+      "problems": [
+        {
+          "symptom": "Es el único responsable y no puede aprobar el evento fallido que registró.",
+          "why": "La persona que registra un evento no puede aprobarlo.",
+          "action": "Solicite a otro responsable habilitado. Una comprobación posterior realmente aprobada puede sustituir la falla para la calificación; conserve ambos registros y solicite revisar las restricciones de servicio."
+        }
+      ],
+      "sources": [
+        "client/src/components/equipment/LogEventModal.jsx",
+        "server/controllers/equipmentEventController.js",
+        "server/services/equipmentQualificationService.js"
+      ],
+      "steps": [
+        "Abra Equipos y el instrumento correcto. Elija un tipo de evento disponible para su perfil. (Resultado esperado: El evento queda vinculado al instrumento previsto.)",
+        "Registre el trabajo, el resultado real y la fecha. Añada la próxima fecha si la conoce y guarde. (Resultado esperado: El evento le identifica como la persona que lo realizó.)",
+        "Lea la disponibilidad y el historial. Pida a otro responsable habilitado que revise el evento cuando se necesite aprobación. (Resultado esperado: Guardar no evita una aprobación, una fecha vencida ni una restricción de fuera de servicio.)"
+      ],
+      "caution": "Un evento posterior aprobado puede sustituir la falla para la calificación, pero no elimina automáticamente una restricción de fuera de servicio.",
+      "related": [
+        "assets-calibration",
+        "assets-maintain",
+        "assets-equipment-import"
+      ],
+      "feature": "core",
+      "reviewOwner": "Lab operations lead"
+    },
+    {
+      "id": "assets-prepared-lots",
+      "category": "assets",
+      "kind": "guide",
+      "title": "Registrar un reactivo o patrón preparado",
+      "summary": "Conserve juntos el lote preparado, la cantidad, la ubicación y los lotes de origen y siga la política de cuarentena del laboratorio.",
+      "roles": [
+        "all"
+      ],
+      "keywords": [
+        "assets-prepared-lots",
+        "assets",
+        "inventory"
+      ],
+      "minutes": 3,
+      "quick": "En Inventario, elija el reactivo o patrón y prepare un lote. Registre cantidades, fechas y lotes de origen reales y compruebe el estado antes de usarlo.",
+      "before": [
+        "Tenga el registro de preparación, las etiquetas de origen y una ubicación activa de reactivos del laboratorio."
+      ],
+      "sections": [
+        {
+          "title": "Qué hacer",
+          "steps": [
+            {
+              "action": "Elija el reactivo o patrón correcto y la acción de preparar un lote. Introduzca número, cantidad positiva, concentración pertinente, caducidad y ubicación.",
+              "expected": "El lote pertenece al artículo y laboratorio correctos."
+            },
+            {
+              "action": "Seleccione los lotes de origen usados realmente y añada notas de trazabilidad. Siga el procedimiento aprobado antes de usar material en cuarentena. Guarde.",
+              "expected": "El registro conserva a quien preparó el lote y los lotes de origen."
+            },
+            {
+              "action": "Compruebe el estado del lote. Si comienza en cuarentena por la política del laboratorio, pida al responsable que lo revise y libere antes de usarlo.",
+              "expected": "Solo se elige un lote permitido por su estado y las reglas."
+            }
+          ]
+        }
+      ],
+      "fields": [],
+      "example": "Registre DEMO-PREP-01 con su cantidad preparada y lote de origen reales. Si la política exige cuarentena, espere la liberación.",
+      "success": "La preparación es trazable y se comprobó su disponibilidad.",
+      "nextActor": "Responsable del laboratorio si se necesita liberación",
+      "problems": [
+        {
+          "symptom": "El lote no aparece en la mesa de trabajo.",
+          "why": "Puede estar en cuarentena, vencido o no disponible.",
+          "action": "Compruebe los detalles con el responsable. No cambie cantidades ni use la importación para evitar su estado."
+        }
+      ],
+      "sources": [
+        "client/src/pages/Inventory.jsx",
+        "server/services/inventoryWriteService.js"
+      ],
+      "steps": [
+        "Elija el reactivo o patrón correcto y la acción de preparar un lote. Introduzca número, cantidad positiva, concentración pertinente, caducidad y ubicación. (Resultado esperado: El lote pertenece al artículo y laboratorio correctos.)",
+        "Seleccione los lotes de origen usados realmente y añada notas de trazabilidad. Siga el procedimiento aprobado antes de usar material en cuarentena. Guarde. (Resultado esperado: El registro conserva a quien preparó el lote y los lotes de origen.)",
+        "Compruebe el estado del lote. Si comienza en cuarentena por la política del laboratorio, pida al responsable que lo revise y libere antes de usarlo. (Resultado esperado: Solo se elige un lote permitido por su estado y las reglas.)"
+      ],
+      "caution": "Registrar una preparación no certifica su calidad. Siga el método, las comprobaciones y la decisión de liberación.",
+      "related": [
+        "assets-lots",
+        "assets-expiry",
+        "assets-inventory-import"
+      ],
+      "feature": "core",
+      "reviewOwner": "Lab operations lead"
+    },
+    {
+      "id": "assets-inventory-import",
+      "category": "assets",
+      "kind": "guide",
+      "title": "Importar existencias desde una hoja de cálculo",
+      "summary": "Los responsables previsualizan ubicaciones, artículos y lotes y confirman las filas válidas para el laboratorio elegido.",
+      "roles": [
+        "all"
+      ],
+      "keywords": [
+        "assets-inventory-import",
+        "assets",
+        "inventory",
+        "import",
+        "CSV",
+        "XLSX"
+      ],
+      "minutes": 3,
+      "quick": "Elija Importar existencias en Inventario. Descargue la plantilla, asocie el archivo, revise filas y laboratorio y confirme Importar filas.",
+      "before": [
+        "Use CSV o Excel: máximo 2.000 filas por hoja y 2 MB para archivo y solicitud. Punto decimal y fechas AAAA-MM-DD."
+      ],
+      "sections": [
+        {
+          "title": "Qué hacer",
+          "steps": [
+            {
+              "action": "Elija Importar existencias y Descargar plantilla, o exporte una hoja existente. Conserve los nombres de columnas. Solo un administrador global elige otro laboratorio activo.",
+              "expected": "La importación reconoce la estructura del archivo."
+            },
+            {
+              "action": "Asocie hojas y columnas y elija Vista previa de filas. Revise filas originales, errores, laboratorio y el modo de omitir registros o actualizar descripciones.",
+              "expected": "La vista previa muestra lo que ocurriría sin cambiar existencias."
+            },
+            {
+              "action": "Mantenga todo o nada si todas las filas deben ser válidas. Desactívelo solo para guardar las filas válidas. Confirme el laboratorio y elija Importar filas; lea y descargue el informe.",
+              "expected": "La confirmación vuelve a validar e indica lo creado, actualizado, omitido o rechazado."
+            }
+          ]
+        }
+      ],
+      "fields": [],
+      "example": "Un archivo contiene una ubicación, un reactivo y su lote. Corrija las referencias desconocidas antes de confirmar.",
+      "success": "El informe y el inventario coinciden con los cambios previstos.",
+      "nextActor": "Responsable de inventario",
+      "problems": [
+        {
+          "symptom": "Falta el botón de importación o una fila no encuentra su origen.",
+          "why": "La importación exige gestión de inventario y referencias del laboratorio elegido.",
+          "action": "Pida al responsable que importe o corrija laboratorio y referencia y vuelva a previsualizar."
+        }
+      ],
+      "sources": [
+        "client/src/components/inventory/InventoryImportDialog.jsx",
+        "server/services/inventoryImportService.js"
+      ],
+      "steps": [
+        "Elija Importar existencias y Descargar plantilla, o exporte una hoja existente. Conserve los nombres de columnas. Solo un administrador global elige otro laboratorio activo. (Resultado esperado: La importación reconoce la estructura del archivo.)",
+        "Asocie hojas y columnas y elija Vista previa de filas. Revise filas originales, errores, laboratorio y el modo de omitir registros o actualizar descripciones. (Resultado esperado: La vista previa muestra lo que ocurriría sin cambiar existencias.)",
+        "Mantenga todo o nada si todas las filas deben ser válidas. Desactívelo solo para guardar las filas válidas. Confirme el laboratorio y elija Importar filas; lea y descargue el informe. (Resultado esperado: La confirmación vuelve a validar e indica lo creado, actualizado, omitido o rechazado.)"
+      ],
+      "caution": "Los lotes existentes siempre se omiten: cantidad, estado y caducidad no cambian. Use el ajuste o liberación separados.",
+      "related": [
+        "assets-stock",
+        "assets-lots",
+        "assets-prepared-lots"
+      ],
+      "feature": "core",
+      "reviewOwner": "Lab operations lead"
+    },
+    {
+      "id": "assets-equipment-import",
+      "category": "assets",
+      "kind": "guide",
+      "title": "Importar equipos desde una hoja de cálculo",
+      "summary": "Los responsables añaden instrumentos identificados, evidencia opcional de calibración y análisis permitidos tras revisar una vista previa.",
+      "roles": [
+        "all"
+      ],
+      "keywords": [
+        "assets-equipment-import",
+        "assets",
+        "equipment",
+        "import",
+        "CSV",
+        "XLSX"
+      ],
+      "minutes": 3,
+      "quick": "Elija Importar equipos en Equipos, asocie un instrumento por fila, revise Vista previa de filas y confirme Importar filas.",
+      "before": [
+        "Tenga identificadores únicos y evidencia real. Fechas AAAA-MM-DD; la próxima fecha debe seguir a la última calibración."
+      ],
+      "sections": [
+        {
+          "title": "Qué hacer",
+          "steps": [
+            {
+              "action": "Elija Importar equipos y Descargar plantilla. El administrador global elige un laboratorio activo. Indique identificador, nombre y tipo y asocie y previsualice el archivo.",
+              "expected": "Cada fila tiene una identidad y laboratorio claros."
+            },
+            {
+              "action": "Revise fechas y códigos de análisis activos, separados por | o ;. Una nueva asignación exige equipo por defecto; las existentes conservan método y obligatoriedad.",
+              "expected": "La nueva evidencia sigue el proceso normal; sin fechas, el instrumento queda sin configurar."
+            },
+            {
+              "action": "Confirme e importe. Revise el informe y la disponibilidad real antes de trabajar. El CSV añade estado y disponibilidad; la importación ignora esas columnas.",
+              "expected": "El registro sigue otra validación y la disponibilidad depende de las reglas."
+            }
+          ]
+        }
+      ],
+      "fields": [],
+      "example": "Añada DEMO-PH-01 con sus fechas reales y el código pH activo. Compruebe la disponibilidad antes de elegirlo en la mesa de trabajo.",
+      "success": "El instrumento aparece una vez con la evidencia y asignaciones previstas.",
+      "nextActor": "Responsable de equipos",
+      "problems": [
+        {
+          "symptom": "Una fila indica fechas erróneas o un análisis no disponible.",
+          "why": "Las fechas no están ordenadas, o el análisis está inactivo o es de otro laboratorio.",
+          "action": "Corrija la fila y vuelva a previsualizar. No invente evidencia ni cambie de laboratorio para evitar el error."
+        }
+      ],
+      "sources": [
+        "client/src/components/inventory/InventoryImportDialog.jsx",
+        "server/services/equipmentImportService.js",
+        "server/controllers/equipmentExportController.js"
+      ],
+      "steps": [
+        "Elija Importar equipos y Descargar plantilla. El administrador global elige un laboratorio activo. Indique identificador, nombre y tipo y asocie y previsualice el archivo. (Resultado esperado: Cada fila tiene una identidad y laboratorio claros.)",
+        "Revise fechas y códigos de análisis activos, separados por | o ;. Una nueva asignación exige equipo por defecto; las existentes conservan método y obligatoriedad. (Resultado esperado: La nueva evidencia sigue el proceso normal; sin fechas, el instrumento queda sin configurar.)",
+        "Confirme e importe. Revise el informe y la disponibilidad real antes de trabajar. El CSV añade estado y disponibilidad; la importación ignora esas columnas. (Resultado esperado: El registro sigue otra validación y la disponibilidad depende de las reglas.)"
+      ],
+      "caution": "Actualizar descripciones conserva tipo, criticidad, estado, calibración y análisis asignados existentes. La importación no devuelve al servicio un instrumento bloqueado.",
+      "related": [
+        "assets-technician-events",
+        "assets-register",
+        "assets-calibration"
       ],
       "feature": "core",
       "reviewOwner": "Lab operations lead"

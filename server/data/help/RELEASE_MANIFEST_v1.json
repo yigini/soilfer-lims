@@ -1,10 +1,10 @@
 {
-  "releaseVersion": "v1.4.1",
-  "publishedAt": "2026-11-12T23:24:40.787Z",
+  "releaseVersion": "v1.5.0",
+  "publishedAt": "2026-11-15T11:59:17.909Z",
   "provenance": "system-app-review",
   "reviewScope": "Application navigation, UI controls, error recovery, and operational workflows verified against SoilFER LIMS v3.4 controls",
   "scientificBoundary": "Operational workflow guidance only; chemical method protocols and lab-specific policies are managed separately via laboratory-local notes (HelpLabNote) requiring lab manager authorization",
-  "totalArticles": 114,
+  "totalArticles": 121,
   "locales": [
     "en",
     "es",
@@ -32,7 +32,7 @@
         "es": "b54e6a515539546efb1c3a45aa89a68adff27a7ca76edbd85ea1b2e3b1f9e707",
         "es-419": "dc669cfb680986d0d1830f9f46a95dba56192d7bb2919c665e4a96f730b5bc6b",
         "fr": "94cdbd352ec0669846230db4ba2590f5964965969134d32d07c673719737b238",
-        "pt": "ce0db4194fe0be5699b6cd51847f6884dd29e727378d818eca8636ea95167512"
+        "pt": "d31575a17247d2743fb2a88bf82992ad2aef91dce96793c28f7f442717a935f8"
       },
       "mappedRoutes": [
         "/login",
@@ -81,7 +81,7 @@
         "es": "871ccf7e778026b42b529b2303eed8c4dea9a48037de7e16bdd23832b4771ede",
         "es-419": "0582117baba957d85728a1df2661cd811e536f1b28b229602d48c3ab00d20922",
         "fr": "6930ca6f040b75ecaf890d30bdf69959b25a89f0cc620228811b84824e21ae41",
-        "pt": "6f6f150b7fb717dc812342d8a87e185c385f79fa25c7f59e6ed4f33440afbba2"
+        "pt": "93cd1d079fadc66df928a6966820379b5cb033a89348aa6b13c4cbdfb2206558"
       },
       "mappedRoutes": [
         "/",
@@ -108,7 +108,7 @@
         "es": "7a258edb975efc03356f3fc268a5c381db6f338ede673fcbe50849489b64d08e",
         "es-419": "30491ada73166670842aaa6b8892c58d6b4fb963fddcc0e3790420e6387d782e",
         "fr": "7c0aac535c89791a82aab1d4c9d15f047debb723bd31e9e1378fd11f64a795b8",
-        "pt": "2d9d804bd2148c9097e300e3d97f26514ba1ed2ef56d489e3488f03284e5ea51"
+        "pt": "e941cbe3a4a731531bff2f3a4d7c50021529d5753e28a916a5ea15b8e8d5e5c7"
       },
       "mappedRoutes": [
         "/",
@@ -134,7 +134,7 @@
         "es": "1465b787c7be2b625145200a276cc063612da680bb7908d63d9f0a03ee46c657",
         "es-419": "1d9e1c0e237213849d9155f12755a8f62d2c9d339938892f03d3eef67423bc59",
         "fr": "25d2fb5b89edc5444911e0ac710dcdc8b7e32df821566073a3957eafec8b0356",
-        "pt": "fac1f283e5bea604bb81112c82616b952f811ba00b9a7ec7b8b6b47c73dca964"
+        "pt": "2b2d7613f971b13eaefaaadbe7c0e7cb87efc54120bc41019262adbca4375283"
       },
       "mappedRoutes": [
         "/",
@@ -242,7 +242,7 @@
         "es": "042361d48b2ec6d03760d133596d88b7bb38c98e45291562aca4736f3b7b4432",
         "es-419": "fa4b8ff30d50b563d106ca704a27146a5d6ef43aa55a97dc6fe8a79351a71330",
         "fr": "6f82867540ff788c1651c71fdc1db82344fd725da06a02b729d1c1128b967034",
-        "pt": "df120a75d2032fa5b390f03694c961a3269b8de8016318e1005a64a56541abe9"
+        "pt": "67b56ff800fdb3993b87ec2153b32a2237b8a854a782060fd3ff686bab4e5b84"
       },
       "mappedRoutes": [
         "/profile",
@@ -268,7 +268,7 @@
         "es": "3aece2b26b48a71d2361e5454ac7dc8999a9a8011668ef4a54f7d65809dd91f6",
         "es-419": "a1564137a75c839005ca1591a46e2d8ee70a4404936ab172788c03173a19bc66",
         "fr": "f962ed03a5ca5b3cc02dfa1ac5524fd96498a97e343fc4a7c9fc27fd0872b5d1",
-        "pt": "5f34384b0bf20e36b50d3c49b3b14d699d47267745c5acd407e9b0942e11754c"
+        "pt": "2198285fbdd06cd6cef98b7e637839e67045e9f018ae67392cba28ab1e6c42f0"
       },
       "mappedRoutes": [
         "/reception"
@@ -293,7 +293,7 @@
         "es": "6add78176687be3a8002ef12fedafbefaf869bfe688dd3064d42d630f7fb60a2",
         "es-419": "30a9adc206265b61d0751333a28e4b62d7c480e6b5dd8a0193007c0fc068742f",
         "fr": "5d3f21f7f41a5b492f3671437339f0e9a8909caa8eb23da702986b7c5fc064e9",
-        "pt": "a8894d65037fc5dd8f9ed7e01ac44f41aae19b8de6d5ec505c79b78abc651fba"
+        "pt": "a407d99c98a44e623a3d4538333607f77169535391ebf48a717a81d6ca771bbd"
       },
       "mappedRoutes": [
         "/reception"
@@ -445,7 +445,7 @@
         "es": "3c66b7bb261de82323e18ea640c4591cea255110fb2bea68217b3f11fcce3e0e",
         "es-419": "69671d6a76500363e1f91354203b4c5e60eaf36effcdef96394d1dc69f13935e",
         "fr": "a5132590426427ae1cd29f5b982b7c3c4189097f509681f9183d9ab1aa17a809",
-        "pt": "67668095880abf2e9c9748873d308063606d4ca81f05aeecc02c21bc3c2f6841"
+        "pt": "a9a96aaabc1d76261e5ad7a7ab4a1742c1ff774d9b9cc9b178cdf961366914b8"
       },
       "mappedRoutes": [
         "/reception"
@@ -522,7 +522,7 @@
         "es": "3d47a1bce1b503d8f2020cc7bcd800d85dfa44d8559d07c2c8db5d9a63d7afda",
         "es-419": "7a0e4104d11394112f155fe5f9f9ce72527f6c645a22424c1a0403a1ce66504a",
         "fr": "6b05d34f64fd8dc91a7f9698d61a5b7f6773f6ba287c4e4633540c2537f815b2",
-        "pt": "f45dd6ce491f862241a127a4302f63df7d49a0f42ba21a519b378bc81a3dce88"
+        "pt": "114053c855f7cf13438d251060400788564de29fe62a68262e8392defee9bd73"
       },
       "mappedRoutes": [
         "/samples/:id"
@@ -547,7 +547,7 @@
         "es": "42b9c6cf373d5c95b1cf3b5fac45cec29387bf7eba35436e20a0515793df60e3",
         "es-419": "361abeac7545d6e0adba3597530a659979e347051220c8e3e5c16ad6117215ce",
         "fr": "b554146f8c1988853b0e104652de854270be7d9bbbe5e4f19ea1a0c08c4ccae8",
-        "pt": "96a15c7c5cf596ba737e238ad304d73086aeac8a87f01a9d5184e5a112413dc1"
+        "pt": "71044a143e8959d7a4da6e9bbc171373ce4274e39cf711ccc850eb8a10be6341"
       },
       "mappedRoutes": [
         "/samples/:id/map",
@@ -624,7 +624,7 @@
         "es": "4089e5c7a3ba1a7a7e758b89b7cb6d8c69302e2ce35921b9a808b20d663c994a",
         "es-419": "c23b593420427dbf7a62954fc8048b56418cff2a3a331867d7f8da1c6169f01e",
         "fr": "8ee6358e0c2de71d02b09691965b708f49e97dd28d1d3b299cd0a14545d5e62e",
-        "pt": "0a4a244820766a2b28ec024b597d917b84da36ca8c6bd102ca36fcec07303c6b"
+        "pt": "e45f8b98cd29e9531aad548eb887b75b72d578c31775a684dd5b53e0ccb37c44"
       },
       "mappedRoutes": [
         "/my-work",
@@ -650,7 +650,7 @@
         "es": "d09374f3539daa112b2121091ebdaffe9c5e8829265c8b0413c99528e218e78a",
         "es-419": "707f3c6728f9de02f13f3b80ba8f8910127673d5f7ef23755ccb9955b5bd8a96",
         "fr": "8f16556d14674c27d6628884a6911c988aaec46e644bd9b5bc657091090d966d",
-        "pt": "0d1f9d415ee79b95a3e032a73c92e92a2e0bd43bfd2b10935601c2886b0265c5"
+        "pt": "e6eb760a1cf31ebb4047cc9e439c966ccd36da47cfde6fb46061ba04118011e1"
       },
       "mappedRoutes": [
         "/my-work",
@@ -676,7 +676,7 @@
         "es": "cde2b8f53a14d002b392f950c55c98e8d6a6f4dce4e0788fc8ec942faa936a9a",
         "es-419": "9ed2ec7573fbc2d6b05f1bd0aa01d07966534480e36d2f20bc53ce7c74b34d27",
         "fr": "e564bdc2337949f71b2bbf97c7505a6c6931f8bbd260ea804936ab0ed38998fa",
-        "pt": "ef1d20dd5e33e434b4812684869fc77f7d45363eec3e4d6782196495e135b285"
+        "pt": "6885b046c8c4bd2ef90c4e4369a8c8d07aa8eaad8feb9af49496e8b3f54efc25"
       },
       "mappedRoutes": [
         "/samples/:id",
@@ -705,7 +705,7 @@
         "es": "10523722a049b0bc64db209da1a6d414e9f98f467ee28d7b054ac80031d27523",
         "es-419": "248dd187bb0e563eb026304cd1f414eb3537f2cf7808606600c775e877efd240",
         "fr": "419754593a0c69976ccc4b8e4cf5ca7e4854a8addd851affbd3e144e75ef912a",
-        "pt": "6cc050228aa5f9bdb43462539d5880c408ec04cccf422fd1f3ff18ef0fabde8c"
+        "pt": "d643f61c987c4c74f67ba6cfc47cf06f83794afa3b819991be3698f33cc69666"
       },
       "mappedRoutes": [
         "/my-work",
@@ -758,7 +758,7 @@
         "es": "1873d4056ff9a952e781daa9ea37415df9894f3e04e75d9142585bdcf71e8ab3",
         "es-419": "51bf43f1f14ac9a98b4eaaca16f62963ca9c2d487e3fb8d62cd2901f18f1658e",
         "fr": "152ad68f5792abe82269dd4671b92657126db06acef56757dd1246bdb85db645",
-        "pt": "8f4eab43b1739cabefe7ce9c698369abdaaa501303a32460c7309f44dc98cf7b"
+        "pt": "d4288c617a1c21c614ccfb4826a8d90d82ef9416ca7640cc2c0a73f90280dbb1"
       },
       "mappedRoutes": [
         "/samples/:id",
@@ -785,7 +785,7 @@
         "es": "2481209341578fc48b4b3a6c25c60b52e9d273f9f51a3f3abc23d94e2a9122bf",
         "es-419": "4fb33d64e0bae8e067f06c6ff4aafdbb806112318fc2d0b3957e35a7195fc1e9",
         "fr": "03538bda6b0caad9eecf59ec5645b1fc45b9c5e8721dbe537cd3357097625592",
-        "pt": "e93440c2f5168e94312067674b58efcc536a1d1454eeb8c017ac72bc5a9f0d9f"
+        "pt": "ebcb3350e4d5fae9cf413ee2e05bff234cf26790a8d475e7079c510de3825f46"
       },
       "mappedRoutes": [
         "/my-work",
@@ -811,7 +811,7 @@
         "es": "f4e4b84f985d825e39aee9d4ead7824c4ee5f03284a28620ede1bf9a49681a4f",
         "es-419": "7f1493c00919037efa29c0b0b5dd06384e62903168b3dee8b611b02c7e123529",
         "fr": "7d96fdc68bea5d6aa09fbb4b72c2b2397a13a86f67fd2585b70dde80270cff99",
-        "pt": "3831fd90595da558a91a85ffee387e0a56583f17afefe9e6a4da9045e4bc0e77"
+        "pt": "155935597a922e67580a6da6598d3d498e228233787b4efb15dfcb920794725c"
       },
       "mappedRoutes": [
         "/my-work",
@@ -837,7 +837,7 @@
         "es": "7522e48f3b0e680173875b09f6b37be7a27a653e39723d2415a7fd2d3c718a77",
         "es-419": "e6bb9f7426d4012dba2bb8129a1ebebfa5755687ca0be92737667c7d0e3748f8",
         "fr": "c15f3d026909eb8dcdab672696f55695a228ac83f4984f04883d39b95df65ee2",
-        "pt": "b48c6d5449fdb3f551d44146ef711307512fb14aa042b8e902389fb99e6c9cd9"
+        "pt": "b50bba21bf440e5eb4faa0a1befb96b74a56bb3faeb652aa66b7fc88a4da81c3"
       },
       "mappedRoutes": [
         "/my-work",
@@ -863,7 +863,7 @@
         "es": "48d732d8bd0dac4761f9d4691cc2facea4a2e665eba0fb7b2c5b9ff8633a461d",
         "es-419": "d3f6587dfa73e47df3c3504a6494bc91be5a9053bab19ba138bdeb7df13abac7",
         "fr": "90d8a5fb48004c038b606583467ce61d651fc1d79424883bb1c375de46e9671b",
-        "pt": "6e66923652e0cbd36cd5cff2b35190ec452aadd43b4d0044658115a883090d9d"
+        "pt": "c5fe64397022b020b15a6d360b46466c786a881f969461435d97671bb7759758"
       },
       "mappedRoutes": [
         "/my-work",
@@ -918,7 +918,7 @@
         "es": "d15680ece92379fbf159cbe9d9669bf963a7c8ab8caaef742606acc5e4786733",
         "es-419": "214fbc1c075384ece3fee97ccb7e348a0750ee1ade867b277d9eca5d1f015fdb",
         "fr": "344d15518fd31a64710fe4c71fa6b8d633f3880200618c47a65f7d84b423c619",
-        "pt": "a2edde364ae1987f1624f2a29e35cceb7367e7672fafe76ad03099124d55da97"
+        "pt": "28cb8a0416f9f2602347fd85d9c5eef9807f8972d10db33ae26bee1149e56f15"
       },
       "mappedRoutes": [
         "/my-work",
@@ -944,7 +944,7 @@
         "es": "5f1ce69dd91303c65dbd73be9d90997a3055bd4c936f92d7317d58e1ff34ad9c",
         "es-419": "6738711def07ba7461301f12e78ed20afe72021bb756f49ae52359e42f0e60d0",
         "fr": "0185294099a299b4b07175e92369772b8acffc702db307691affa5aa7158856f",
-        "pt": "cc7e2a7d7a222531054ba5fd3df0dbc8baea67e5b3554a49505f53735bd469ed"
+        "pt": "524517a2cfee889be7d58e61e986d56f41658566887d3a7ed42e0246ede041b5"
       },
       "mappedRoutes": [
         "/my-work",
@@ -971,7 +971,7 @@
         "es": "18fe1bdd89bac38a5ec4c72a481b1980be36b8420a982dfcca2eb81a860e871d",
         "es-419": "09b45edee5fb0fa54fc8edc925ae4d1bb731eb0cc597837c629947306445c91d",
         "fr": "c8faa258733e69cf871531d287ee83b5343700448b3128f48f897219949e8bd9",
-        "pt": "77ec2bc262321e24205d1a5161b2fc5d2ccb22d0b3dbb99eca5f1ab726b61866"
+        "pt": "089f681f7f42af83a76e9c0126e39b64d86362d1e432dbfd32acbda6616da6a2"
       },
       "mappedRoutes": [
         "/my-work",
@@ -1023,7 +1023,7 @@
         "es": "6eccd2c402c89e88059bd3fb74063fce1580aa13534826106a90000f50c71091",
         "es-419": "cd6db651cc533e8d04a135237a2401e103e3a4112a4795e0b99eab17bcc7ab38",
         "fr": "a44379afd0a0ba0fd8df5f4d5af7a7f3c03e6469791433aa72f706ac6dae697e",
-        "pt": "e3b22d17da16d0f47497f77a4989364d5df9a5e233935b9d8829283d45f6df93"
+        "pt": "8e82ae45c5ba73e838b1904da9a9f4212ea41e785ee6b6249c7ea24603359958"
       },
       "mappedRoutes": [
         "/my-work",
@@ -1049,7 +1049,7 @@
         "es": "7bcc5ebb88a8ba399b1c65b287c2d3af9033cb6bc0fb6242be6742e72fb17f94",
         "es-419": "68c5eed5fe13c93786b16f3f2e9bf6983dd8dec21a4fc042a77fd4b721b7d4e6",
         "fr": "e7ae26376c6df86b2ae471b98de261789b811024001fe93bd6ecf3fe7668bfc3",
-        "pt": "fa6f36500e10a8d01f3856fa929dcf12014b07592f5b2b704f5d6d171a4a9dcf"
+        "pt": "f4d4ff6b7484a6950b2c0c10cec15f2df72ad27a73f74afb0933db67f25d6eda"
       },
       "mappedRoutes": [
         "/my-work",
@@ -1077,7 +1077,7 @@
         "es": "5930558a45a775d7a05ea765142a22f68c7ba34638c4cbb6fdc412fbbdd9e404",
         "es-419": "4471a0c4f71b4c764686ce6f99a112a003d17751386734418135d2b798960222",
         "fr": "30f7859ca2eede485a9a654ed721420f55ba2c6b0308f9d2cfa4f4125a52d542",
-        "pt": "501f975a6cc07e76209d75f9b63033afc5c8b001461558fed04541cf39810529"
+        "pt": "fb26fa2db55e60c25966cdf00b2a0df920bed1d22ed570d1d6f529538ccf77f9"
       },
       "mappedRoutes": [
         "/my-work",
@@ -1103,7 +1103,7 @@
         "es": "523d5fff1ac485642aba91d760c084fa20224361c9d0e9aa979995cc864cf52d",
         "es-419": "c1523e5fc1b835cccab854a75c1dc78086871412addc1a2f3d1e8e1a792c0df4",
         "fr": "4a8a5954c7fc67df9275cfce6e47bfefec9e9f6176c1eff4c36c4d877c8687b3",
-        "pt": "84fc372b9d379ebd72acb7464b457c82ba356374242963e46b7246b090c82d83"
+        "pt": "010d9e1a5cf2108cbca0aaa8f0f7095624b01fcc622508d21b79d0f8669f046e"
       },
       "mappedRoutes": [
         "/samples/:id",
@@ -1130,7 +1130,7 @@
         "es": "073f47ec3886c477f9cf4b8f401a9e05aeceeaf6978406a87306cbe87d0dabfa",
         "es-419": "012d8031b19e5e0c805f367c6f8f8ae7bd7da67555f6a7c4a90adcad492da7e5",
         "fr": "2d568fc8745d7b99a7afe397ba304935ccd32544d72c80154ceaeeb9b658d47d",
-        "pt": "3935bd6bd2361aceed6332dfbb9bd10bcdc81a840ddecf479f22fd9fd0ed73f4"
+        "pt": "7a1bedfa2ab886a4432bde5f60c99d4da04dd6aec940e48dad4cd1363fbffb9c"
       },
       "mappedRoutes": [
         "/samples/:id",
@@ -1157,7 +1157,7 @@
         "es": "86d8174aaff3297d5d2f36f05288985e8135b5ab8ac5b5caf3d91963b373feb0",
         "es-419": "0f0983f7569a0dbcf67dd3a96927f22305287a7980183eb86216018f7af21327",
         "fr": "3a2af3f252b7aafe7f7e336683089b48085bcde515129f2d1fddd6fd119b1309",
-        "pt": "72c3de0abcdb4799c0f4445eadc319c43ceb7640cd4053850e4505579e368f66"
+        "pt": "7ad88cc168c5cd0af2d9bcb55d9cfeac6fa62d12d314dfcaf622218d787818a3"
       },
       "mappedRoutes": [
         "/my-work",
@@ -1184,7 +1184,7 @@
         "es": "5b174d827aaa42fcfe4c7a9088c5d00f4b7bd0a65877f00763c77c3d2b0af18b",
         "es-419": "22f26e1acb772e2c3e0c46c4a6dea6fce47c8b01222d7583e5ef78aa7b9ff7da",
         "fr": "0866631342f07475adf30054d1be1ab296fbf4a6047b42e2f88f4d9c7f9a0e75",
-        "pt": "9a56759243f94865bf4ccbb74ea36ced05b25efbe3a9f86aae322ad0f63ad6d2"
+        "pt": "b921543d0ba2370c86d6c04000f911f286420620f7c47c403115bf2cd8bf8b08"
       },
       "mappedRoutes": [
         "/my-work",
@@ -1236,7 +1236,7 @@
         "es": "db3ae96db2444e1715ef244b163bc3763a0293452caae2f39673aac8c7dc8cce",
         "es-419": "f47228ad3ab5cbf3a9d2bed7ab43d15fcb5d55e476c57c5dd61db91f5c834f4f",
         "fr": "35c45155a5714a6106ea175a04d32345343306ebdd0701a0dbe4a31c9014b3d4",
-        "pt": "0da35c2572658a5879563e52b5cd71fa74fb9a2adef0c66a3adf0f216da01311"
+        "pt": "7fbeac734ed0f0663bcbab09f6b63b08ec7cb4d90ed008aa6878f1e132847038"
       },
       "mappedRoutes": [
         "/spectral-library",
@@ -1263,7 +1263,7 @@
         "es": "391a5f4f4a0e1d7b8ae66c73642832ca4a5f44f411bfd1daf45a460a34573384",
         "es-419": "a8b0dbcb3f4c3e43f8e6c44f2b6d4c58ecdc3d0c2aac2b038d9950d60cf4ad44",
         "fr": "e9689a692fd33849bb407bd129235980b2efa522b0852dea0fd0aee44012649b",
-        "pt": "30bbac488aca1fda32afb919acfad69d2c64780e6714871b165019bf15328819"
+        "pt": "448667e2fd778b12c24653572b7a41a39fc446d37a8fd8ac547f05b949e3d9bf"
       },
       "mappedRoutes": [
         "/my-work",
@@ -2555,7 +2555,7 @@
         "es": "afac3eb187d7872191a459ccddaf7cb90053e1d24940b4b56603fbbc9fd89801",
         "es-419": "1aa0b3ce6e59355589ac768fe3da1f7a40cc6db86c81912f381083f033a887a4",
         "fr": "ea70ad3f7ad1177b80081ce9c22911073ba72a254fff21fecf4e5144361b68e5",
-        "pt": "3d2a66dca290633d0e046aa8f4f83c567c0a638829821776aa3f33b1a70b276a"
+        "pt": "f75a3dc1c6b428d0318b851523547c6a796f755a722e199cdd52d3cfbfeabcc3"
       },
       "mappedRoutes": [
         "/login"
@@ -2580,7 +2580,7 @@
         "es": "7b836b4b3a7bfda9d63cff166e339cea20dcd4e3294f1689b479ea12a82017a9",
         "es-419": "27e0f4f0a247c86bf5ed3df1380974232cc5ab71f327df8594b7482b551e205c",
         "fr": "8d4f2f8dcb57d24c6a1fb26116fe7fbac29c45028aa978a2b6b1280ae9105b04",
-        "pt": "823d473de810442356b05d1bce48faa25a7a9f4d5c7602cffebaa343df6d8a18"
+        "pt": "f91b2d61411083e43642d1bebb2f05ad9ee08064c6086892dad6b970ccbd56b2"
       },
       "mappedRoutes": []
     },
@@ -2603,7 +2603,7 @@
         "es": "33b2765588491ba28a781234a4b9c24446235b718d0559ef397372b8af9fd269",
         "es-419": "1e90702ddf794e70de401c431394db07cbd9fc22a6ea8f79225897adf8dd1f15",
         "fr": "dae31ebff93db888da216019695d3764d4a92d1327f0e69e15be8cf77116e790",
-        "pt": "8c427d15e448909e62899c8404fc47445025f315d06718aec0997c2e263fa8d9"
+        "pt": "df53eedcfda1bc6c6d213cd1e8e9d950001adc94ca83c9374efac6e6a2063236"
       },
       "mappedRoutes": []
     },
@@ -2626,7 +2626,7 @@
         "es": "dfda8f0900b332e1ce692244a899ebb6404dfbfd34ea816e490727d870959f2c",
         "es-419": "5a702b644e3ccc973c47b68dbb95607be74914c42188cf5d6da8f29d05a58983",
         "fr": "7243d88550a7240816f4f56f903a202f4c8e1ce456565cd3d3eb9122e04cb1aa",
-        "pt": "7990de3c97161d4f62598aa0175626436203bd1b6bc98ed97f38270153002d8f"
+        "pt": "349919b3d406832cbd17eb2eb4b0b5f1cfa1e551331d993f64506004873a2976"
       },
       "mappedRoutes": []
     },
@@ -2649,7 +2649,7 @@
         "es": "d9403091a8a7531e17b468b708857496ba577f71a097d4a67dfc47c7cdf81aa5",
         "es-419": "40a3f45ddb0fd59f7e7a29d355944e25f8a7b7d482ef3d66995bbb5937711923",
         "fr": "1b81af61b96bc6ede8e4eb3ec4d54fa20b36a46f99ed1a746f44ecfb96b59e27",
-        "pt": "dae3a45ffb62c56d8deff76c53b002770de568d2d2f584fe02c9d2f5abdfe5ae"
+        "pt": "db187a260cf7308bf9b34a4f92600029466f9bbf361756457cad484eea795803"
       },
       "mappedRoutes": [
         "/workbench"
@@ -2674,7 +2674,7 @@
         "es": "389d5de27db2654ac7878b748e8d28a3bb474da2cff491c1db8d277334ae3fcd",
         "es-419": "31ca27547d011de1756e8c9c2a2d1ea1235fa3c547cf6a475b95c637f1bbcd89",
         "fr": "44d97fc5f8d1aa68f6313a2d4ff4a1b03a1bbbc58770673bb5254793fa58cd36",
-        "pt": "d02e72a8c014caf0cad87bdab10a40f505cd8e9b8bc8e84cb710eb9990f55873"
+        "pt": "45cb46111fd16188f07a268f2497388ae4293c04c5139b6816904e91df6d19fa"
       },
       "mappedRoutes": [
         "/workbench"
@@ -2699,7 +2699,7 @@
         "es": "d6ae8acf9639e3eba83270f42fabcecd542cd58201814a9101ef055ac9b1ca3f",
         "es-419": "f203536925788dd9033c3c5738647227b69a315bf21929937ea6590ff456c2af",
         "fr": "f6f59b9bc9a5643f56dc1074b057103575c0cd319ca536106b2b8971cf6236ea",
-        "pt": "5690b94a6042f27fb2f3a5088fb0b3f4d6e1dd90a6c2b829b8467542a7c22fb9"
+        "pt": "f990f2eb6097ca70724eaca9e959aa89b4acac97576e2d0df2cb29ac1776dc01"
       },
       "mappedRoutes": []
     },
@@ -2722,7 +2722,7 @@
         "es": "947e133d8751957ae4e444e5609ce2483438d367bb7a133b1f3b29ece4a4e838",
         "es-419": "947e133d8751957ae4e444e5609ce2483438d367bb7a133b1f3b29ece4a4e838",
         "fr": "27d23c610d46588d8caf402a7c065c90a143510e7d95ecd10256c29c000557b4",
-        "pt": "fa4059c0be34597a589fd5c44da4904e41f675dc69d0ac779ca5cf28f77afb21"
+        "pt": "3e7cb81949ff651b1465231a665c3067d54e3e33681d4e1e5be2141211874339"
       },
       "mappedRoutes": []
     },
@@ -2745,7 +2745,7 @@
         "es": "92062ef3cc6198a00083c85342e10a8f0e013d80c324eef5a97bfb8ce435a566",
         "es-419": "c476d96b5f7bc69648492951f410c02a3e93c73aa068a0b9e00f79af059fab41",
         "fr": "138ae91eb61588475e30df5514336456353a28a1e07925ceecab5481f94b5f75",
-        "pt": "d1296b4e3963d13fe574c7a677ca145885e1fc2346a4e157c38ebb111210fc6a"
+        "pt": "0e254d4b3359415245d45466fabc4f7996921cdce6166bc16cce18c4e2a3a7aa"
       },
       "mappedRoutes": [
         "/manager-queue"
@@ -2770,7 +2770,7 @@
         "es": "9e6902590fc2cc3b2559dc5e8d023f2f372ea81da6a86d9ab3b10391636b12e2",
         "es-419": "5280223b1256c0fe23fed3f86dd7db4235385c46f2d9d93dd3ca19ad8afcec88",
         "fr": "39b73849da97f9089e93eb88c3101be5f19af8732691669548db4817cc27c67b",
-        "pt": "d30f4c17c36bc7a6fbe874c5a61d280a328ad740b4f8894d9a14bcaeacc1fcc9"
+        "pt": "ea89ceff7d9fd25f47f8bb0f9f3a07aa481b0ba65aa790732f13fcef398e0540"
       },
       "mappedRoutes": []
     },
@@ -2793,7 +2793,7 @@
         "es": "570053a186bfeee71e173d0a12a94a803aa4f1fc39ac8f1d33642e58ac7be888",
         "es-419": "fd27061f05449d502efe4761f810734aa29129b15b1090d9aba22716e3473dfb",
         "fr": "9e37aa08ca89ea2bd7e137b7a3c1989ff3a5fa4b12f32c6f9c708003f1e728a1",
-        "pt": "83bdd261a2f2ce9d120d17452837359b06088cb5613a29577e30a595061904b2"
+        "pt": "d7a59a9ba4b6fbe15214dfec82e5a5ab18221871bf3410ac60e0abe8f1ba86b0"
       },
       "mappedRoutes": []
     },
@@ -2816,7 +2816,7 @@
         "es": "bad2018496c5f01d2600f92d48a64e729267bd269c809b8a9619c623a0e0ce47",
         "es-419": "8cd848921db7569b4629088ea1d7830d76a6b5044e7a098929f7fb11fe7386b5",
         "fr": "5ef92cce153becaf4d9d20ff71aceba6e8ae3972016e2b9e099204ed1a22aed7",
-        "pt": "5817522af7941c11ff871b9e9bc49d0d53f9dd9a00ac77c54ee3e4402b2b8640"
+        "pt": "491b184da4d3c01b07899d31e06ad1cafe8ce12b4e90f1c64de4b8cbd4b32c89"
       },
       "mappedRoutes": []
     },
@@ -2839,7 +2839,7 @@
         "es": "d8aea6dba571b134877efca29867536043f2f1d3f72e893c661114743115c83f",
         "es-419": "a0e006e79a193aa5f2de8a3f087fc9c02a535d158d7cb4df6c9c23dcff0e0cab",
         "fr": "b888f2a11d4896e1ba586fdd84e20a0f210a6678a92ca75343e7c39b9cd35d79",
-        "pt": "ac95cc2ac6570240ddf257b31aa36ab0bcd19f2664371a84319ef37f5b07bb4b"
+        "pt": "09e993cf11a627f943468bc601c4c9c4af6b655f0515f347024278d6376a32d4"
       },
       "mappedRoutes": []
     },
@@ -2862,7 +2862,7 @@
         "es": "ede88c987d89ce86dcfba3c8b7112c56be0abd35b6f8c350c85cee22c086bfb1",
         "es-419": "10df29e6f97b0bd40211ea2a50f1ead8408df51e771b4538107990cfa7d8db25",
         "fr": "ef3609164970d910b383bf73849a72091d8442bc8e0aadbec80cb48d94068841",
-        "pt": "a4fd1c7e4edfef1edb990a20b1242a5b561d28e3de5df67431b9ebab17cc1fd8"
+        "pt": "1e3ea730e2ff909261ebb571405dedb21ff4df24c4a9e993e01c482ad3d9e8ca"
       },
       "mappedRoutes": []
     },
@@ -2885,7 +2885,7 @@
         "es": "e63206958d2b3d14ee847cb4bfcd2670a84ceece90d5c130d403d8ef9fda461e",
         "es-419": "d3afea894f64f574547030b7b949a6848c69e337a9a7c9a27e29200f158bb2dd",
         "fr": "050e2bc93881b0784bb826af38454520b1a70978f2dd00d9e30c138e984d0c41",
-        "pt": "a21fcadc5431ab74507a259cc88e0c49fb2ebf78e22863b8fe4eb95eb00f4060"
+        "pt": "ed6129dbd41f72e108785823e9fb89e75968b32e71ff63d890dc5fbbe8eadad9"
       },
       "mappedRoutes": []
     },
@@ -2908,7 +2908,7 @@
         "es": "79408d8ca170ba3ea6edcc7dd05fd5362e28a58aed112f7da951338766ac112c",
         "es-419": "d733f5cde14ea941c540157dfc5add8ccd7a0e0cc30af23efa1cd0093de9379b",
         "fr": "1c636edc4354779fe51538dca3cca33594fc800738ae07f8b3f5801521cf3726",
-        "pt": "07ff22e3c0a0013c9126453af89ee8c47b907b1ec475783e50004d64d060e45a"
+        "pt": "4fbc969dcbe9cea5b5985ea5468242c3d12699716e045cbd3c01fb5de6559716"
       },
       "mappedRoutes": []
     },
@@ -2931,10 +2931,190 @@
         "es": "0e3ae3500814f5314ff07105cf271a3c5a560c499e765acd7113691816d7c926",
         "es-419": "ae526d03f1e5190893e765d968d34f236751f705e8dc910603c70a4697d478a2",
         "fr": "8703a876cb5e8351eef28f53009e93c09e4d568bd18be724a01bdff3d9b17627",
-        "pt": "87c6bd35776f26f336785073b3cc8b05ab0152ac33c7e4c2116ef2c96cdb0998"
+        "pt": "820d783cdddc7bb9a7034642ed6a0217b334d801ee1def28739e696f84dd081c"
       },
       "mappedRoutes": [
         "/login"
+      ]
+    },
+    {
+      "id": "start-messages",
+      "category": "start",
+      "kind": "guide",
+      "revisionNumber": 1,
+      "revisionId": "7b8b8874-abab-4921-baf9-2b617cbd0a42",
+      "sourceLocale": "en",
+      "approvedLocales": [
+        "en",
+        "es",
+        "es-419",
+        "fr",
+        "pt"
+      ],
+      "localeHashes": {
+        "en": "a522e0027a11253556e5f9c164f903efaec27fac3b0d8b936b286923a66129fa",
+        "es": "dcd473dbcaae3251b03b8cb2350f75361b3bde4c6fec6ebac05b857926fbe72c",
+        "es-419": "dcd473dbcaae3251b03b8cb2350f75361b3bde4c6fec6ebac05b857926fbe72c",
+        "fr": "2064694acd2254b04c54de0bdd599aea8c128076ef347aea680d7c3ecf12c01c",
+        "pt": "d9783153145db2952e53d1104d39a2c88a88b3175e1f5ba21e3302084ed0f142"
+      },
+      "mappedRoutes": [
+        "/profile"
+      ]
+    },
+    {
+      "id": "quality-qc-failed",
+      "category": "quality",
+      "kind": "guide",
+      "revisionNumber": 1,
+      "revisionId": "75b72a65-0f78-4ffe-a7bd-3c383f4911ac",
+      "sourceLocale": "en",
+      "approvedLocales": [
+        "en",
+        "es",
+        "es-419",
+        "fr",
+        "pt"
+      ],
+      "localeHashes": {
+        "en": "969df52e20f3450cf3fd9c72d6dd38d3573d7597c7f760d8cfa86d24f59d4781",
+        "es": "f0427734f7ffbc4fa7bd5ce5f85545e40c1143351ef5e70e3f50f1fbbb9460d2",
+        "es-419": "f0427734f7ffbc4fa7bd5ce5f85545e40c1143351ef5e70e3f50f1fbbb9460d2",
+        "fr": "97ec2ed0c4aeaf49058b91f5435da22e667432f579f4333047b375ca49fd5a4e",
+        "pt": "eac44ac846609c8de4fa17d4b5ac723b146160d96c826ae5bd93ff9f0053cd56"
+      },
+      "mappedRoutes": [
+        "/my-work",
+        "/workbench",
+        "/manager-queue",
+        "/qa"
+      ]
+    },
+    {
+      "id": "quality-pilot-help",
+      "category": "quality",
+      "kind": "guide",
+      "revisionNumber": 1,
+      "revisionId": "577be654-15c6-40ab-a629-1c97bdfe5feb",
+      "sourceLocale": "en",
+      "approvedLocales": [
+        "en",
+        "es",
+        "es-419",
+        "fr",
+        "pt"
+      ],
+      "localeHashes": {
+        "en": "180148a97001f9c93c1cdc52ab48cfa264b301b82f26cc490ba02fbc27da89cb",
+        "es": "bfac50766179b4fab861f1b9ff528072d9320a435fd762a5d5eb0980316d5575",
+        "es-419": "bfac50766179b4fab861f1b9ff528072d9320a435fd762a5d5eb0980316d5575",
+        "fr": "6194943c484ac8492f53afd3c970bccf72daad2d1797ba33da5388a184acdbc3",
+        "pt": "d32c4fd6b84d7ebf6161bccb0b53f4e463ae2dc537dfee5322c77eadaad98eb9"
+      },
+      "mappedRoutes": [
+        "/help"
+      ]
+    },
+    {
+      "id": "assets-technician-events",
+      "category": "assets",
+      "kind": "guide",
+      "revisionNumber": 1,
+      "revisionId": "dbc17c25-4b77-4100-9d82-48da77262781",
+      "sourceLocale": "en",
+      "approvedLocales": [
+        "en",
+        "es",
+        "es-419",
+        "fr",
+        "pt"
+      ],
+      "localeHashes": {
+        "en": "319e9a9baef8b62634c8456fea654fb01ca6da95b6fa5b3e61e7da97695d9a26",
+        "es": "1735221f23ca956965d9807a110ebb65e0ea063edacdf9bf32151903b9db66f2",
+        "es-419": "1735221f23ca956965d9807a110ebb65e0ea063edacdf9bf32151903b9db66f2",
+        "fr": "6f1534c61630641599e2d2a4f5f575422c9cd63c83c72e47aff3910d5fc24670",
+        "pt": "baed276a77841fd31197d34aeaec35f6c9f4484a0ec1586b023d80cdc0e82909"
+      },
+      "mappedRoutes": [
+        "/workbench",
+        "/equipment"
+      ]
+    },
+    {
+      "id": "assets-prepared-lots",
+      "category": "assets",
+      "kind": "guide",
+      "revisionNumber": 1,
+      "revisionId": "e886503a-edef-436a-93fa-0ba3571e164a",
+      "sourceLocale": "en",
+      "approvedLocales": [
+        "en",
+        "es",
+        "es-419",
+        "fr",
+        "pt"
+      ],
+      "localeHashes": {
+        "en": "8fdff63d54928893b0707743428ad5340133e44be8d331fe57c7362a884fd850",
+        "es": "c845588cf6bef6287a79f2fe19773093df5dbed47e521da824bc4a9638150f05",
+        "es-419": "c845588cf6bef6287a79f2fe19773093df5dbed47e521da824bc4a9638150f05",
+        "fr": "17084cccda9af3a997c420b7dc66fb8cd88d213737e090c3d80d46fd35bec2f3",
+        "pt": "108ed9187b8aefd27bbae8b60277bc28b4239d492dbf1a590309bec044ef6e29"
+      },
+      "mappedRoutes": [
+        "/workbench",
+        "/inventory"
+      ]
+    },
+    {
+      "id": "assets-inventory-import",
+      "category": "assets",
+      "kind": "guide",
+      "revisionNumber": 1,
+      "revisionId": "075b36b6-3095-4146-84f9-e7fb61f86594",
+      "sourceLocale": "en",
+      "approvedLocales": [
+        "en",
+        "es",
+        "es-419",
+        "fr",
+        "pt"
+      ],
+      "localeHashes": {
+        "en": "7dfbb47b294715d747b69a8741b5af3794510b668b6853591b2d7c1735745c32",
+        "es": "bcfa57615bf537977cc0639bfcea043a045a383b1e7ceda73806d28b19228c18",
+        "es-419": "bcfa57615bf537977cc0639bfcea043a045a383b1e7ceda73806d28b19228c18",
+        "fr": "066c9feac864d02bba769acab99bcc4888d21b9219057677290245650692bafb",
+        "pt": "e9dc322ac1fb83be0074853c50d8e659b32d65734ec4cd4ff5e7468c991ce249"
+      },
+      "mappedRoutes": [
+        "/inventory"
+      ]
+    },
+    {
+      "id": "assets-equipment-import",
+      "category": "assets",
+      "kind": "guide",
+      "revisionNumber": 1,
+      "revisionId": "8a5323ad-8a4a-4dfd-8ee9-94fe0956ac68",
+      "sourceLocale": "en",
+      "approvedLocales": [
+        "en",
+        "es",
+        "es-419",
+        "fr",
+        "pt"
+      ],
+      "localeHashes": {
+        "en": "63f9467809066e69a8d96cbedbe7bff79ec363e9fdc8170b328fdaf2c415c40a",
+        "es": "d85a561971993ebcc06430998b43f69d4d8c04af53cf8b816e6e26b8156aaef8",
+        "es-419": "d85a561971993ebcc06430998b43f69d4d8c04af53cf8b816e6e26b8156aaef8",
+        "fr": "8fd0e59f3f029d87ded4724ca775fb159cdbe36d1bdf005e7da0dc93c0fb09fc",
+        "pt": "090f1669f67d1f284409adaa9f13e8a3700ced18ddf82e4184cde66397f8af30"
+      },
+      "mappedRoutes": [
+        "/equipment"
       ]
     }
   ]

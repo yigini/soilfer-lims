@@ -156,7 +156,8 @@
       "IMPORT_FUTURE_DATE": "La date d’étalonnage ne peut pas être future.",
       "IMPORT_INVALID_ANALYSIS_LIST": "Utilisez chaque code d’analyse une seule fois, séparé par | ou ;, sans entrée vide.",
       "IMPORT_ANALYSIS_UNAVAILABLE": "Une analyse est inactive ou indisponible pour ce laboratoire.",
-      "IMPORT_ELIGIBILITY_INVALID": "Une affectation d’équipement existante est invalide. Demandez au responsable du laboratoire de la vérifier avant l’import."
+      "IMPORT_ELIGIBILITY_INVALID": "Une affectation d’équipement existante est invalide. Demandez au responsable du laboratoire de la vérifier avant l’import.",
+      "IMPORT_CALIBRATION_DATE_ORDER": "La prochaine date d’étalonnage doit être postérieure à la date du dernier étalonnage."
     },
     "equipmentTitle": "Importer des équipements",
     "equipmentIntro": "Lisez un fichier CSV ou Excel, associez ses colonnes, puis vérifiez chaque ligne avant d’enregistrer. Les dates d’étalonnage et les analyses affectées concernent uniquement les nouveaux instruments. La colonne emplacement contient le nom de l’emplacement ou de la paillasse.",

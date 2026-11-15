@@ -1,6 +1,8 @@
 const prisma = require('../prisma');
 const { scalar, problem } = require('../services/rowImport');
-const columns = require('../../shared/importColumns.json').equipment.equipment;
+const importColumns = require('../../shared/importColumns.json').equipment.equipment;
+const columns = [...importColumns, 'status', 'readiness'];
+const { equipmentView } = require('../services/equipmentQualificationService');
 const { csvCell } = require('../utils/importCsv');
 exports.exportEquipment = async (req, res) => {
     try {
@@ -15,16 +17,18 @@ exports.exportEquipment = async (req, res) => {
         ]);
         const codes = new Map();
         for (const mapping of mappings) {
-            const ids = JSON.parse(mapping.eligibleEquipmentIds || '[]');
-            if (!Array.isArray(ids)) continue;
+            let ids;
+            try { ids = JSON.parse(mapping.eligibleEquipmentIds || '[]'); } catch { continue; }
+            if (!Array.isArray(ids) || ids.some(id => typeof id !== 'string' || !id.trim())) continue;
             for (const id of ids) { if (!codes.has(id)) codes.set(id, []); codes.get(id).push(mapping.analysisCode); }
         }
         const iso = date => date ? new Date(date).toISOString().slice(0, 10) : '';
-        const rows = assets.map(asset => {
-            const values = { ...asset, lastCalibrationDate: iso(asset.qualification?.lastCalibrationDate),
-                nextCalibrationDueDate: iso(asset.qualification?.nextCalibrationDueDate), eligibleAnalyses: (codes.get(asset.id) || []).sort().join(' | ') };
+        const rows = await Promise.all(assets.map(async asset => {
+            const view = await equipmentView(asset);
+            const values = { ...view, lastCalibrationDate: iso(view.qualification?.lastCalibrationDate),
+                nextCalibrationDueDate: iso(view.qualification?.nextCalibrationDueDate), eligibleAnalyses: (codes.get(asset.id) || []).sort().join(' | ') };
             return columns.map(column => values[column] ?? '');
-        });
+        }));
         res.type('text/csv').attachment('equipment.csv').send([columns, ...rows].map(row => row.map(csvCell).join(',')).join('\n'));
     } catch (error) {
         res.status(error.statusCode || 500).json({ code: error.code || 'IMPORT_EXPORT_FAILED', error: 'Equipment export could not be completed.' });

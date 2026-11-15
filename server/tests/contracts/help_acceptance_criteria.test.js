@@ -12,7 +12,7 @@ describe('Help System Full Acceptance & Release Verification', () => {
     );
 
     test('1. Every article is present with revision 1 and validated locale entries', async () => {
-        expect(rawContent.articles.length).toBe(114);
+        expect(rawContent.articles.length).toBe(121);
         for (const art of rawContent.articles) {
             const dbArt = await prisma.helpArticle.findUnique({
                 where: { id: art.id },
@@ -32,7 +32,7 @@ describe('Help System Full Acceptance & Release Verification', () => {
         }
     });
 
-    test('2. FAQ and Article summary consistency across all 27 articles (authorized preview)', async () => {
+    test('2. FAQ and Article summary consistency across all 121 articles (authorized preview)', async () => {
         for (const art of rawContent.articles) {
             const loaded = await helpContentService.getArticleById(art.id, { role: 'SUPER_ADMIN' }, 'en', true);
             expect(loaded).toBeDefined();
@@ -113,14 +113,14 @@ describe('Help System Full Acceptance & Release Verification', () => {
         expect(resReflectance.results.some(a => a.id === 'bench-spectra')).toBe(false);
     });
 
-    test('7. Multi-language collections: all 5 locale files exist with 113 translated articles', () => {
+    test('7. Multi-language collections: all 5 locale files exist with 121 translated articles', () => {
         const locales = ['en', 'es', 'es-419', 'fr', 'pt'];
         for (const loc of locales) {
             const filePath = path.resolve(__dirname, `../../data/help/content.${loc}.json`);
             expect(fs.existsSync(filePath)).toBe(true);
             const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
             expect(data.articles).toBeDefined();
-            expect(data.articles.length).toBe(114);
+            expect(data.articles.length).toBe(121);
             for (const a of data.articles) {
                 expect(a.id).toBeDefined();
                 expect(a.title).toBeDefined();

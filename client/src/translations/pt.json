@@ -156,7 +156,8 @@
       "IMPORT_FUTURE_DATE": "A data de calibração não pode estar no futuro.",
       "IMPORT_INVALID_ANALYSIS_LIST": "Utilize cada código de análise uma única vez, separado por | ou ;, sem entradas vazias.",
       "IMPORT_ANALYSIS_UNAVAILABLE": "Uma análise está inativa ou indisponível neste laboratório.",
-      "IMPORT_ELIGIBILITY_INVALID": "Uma atribuição de equipamento existente é inválida. Peça ao responsável do laboratório para a verificar antes de importar."
+      "IMPORT_ELIGIBILITY_INVALID": "Uma atribuição de equipamento existente é inválida. Peça ao responsável do laboratório para a verificar antes de importar.",
+      "IMPORT_CALIBRATION_DATE_ORDER": "A próxima data de calibração tem de ser posterior à data da última calibração."
     },
     "equipmentTitle": "Importar equipamentos",
     "equipmentIntro": "Leia um ficheiro CSV ou Excel, associe as colunas e verifique cada linha antes de guardar. As datas de calibração e as análises atribuídas aplicam-se apenas a instrumentos novos. A coluna de localização contém o nome do local ou da bancada.",

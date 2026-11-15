@@ -141,7 +141,8 @@
         "offline-prepare",
         "offline-record",
         "offline-sync",
-        "offline-conflict"
+        "offline-conflict",
+        "quality-qc-failed"
       ],
       "auth": "authenticated",
       "currentPermission": null,
@@ -183,7 +184,10 @@
         "offline-prepare",
         "offline-record",
         "offline-sync",
-        "offline-conflict"
+        "offline-conflict",
+        "quality-qc-failed",
+        "assets-technician-events",
+        "assets-prepared-lots"
       ],
       "auth": "authenticated",
       "currentPermission": null,
@@ -204,7 +208,8 @@
         "review-return",
         "review-final",
         "review-partial",
-        "quality-nc"
+        "quality-nc",
+        "quality-qc-failed"
       ],
       "auth": "authenticated",
       "currentPermission": null,
@@ -239,7 +244,9 @@
         "assets-lots",
         "assets-stock",
         "assets-expiry",
-        "assets-trace"
+        "assets-trace",
+        "assets-prepared-lots",
+        "assets-inventory-import"
       ],
       "auth": "authenticated",
       "currentPermission": null,
@@ -254,7 +261,9 @@
         "assets-calibration",
         "assets-maintain",
         "assets-register",
-        "assets-trace"
+        "assets-trace",
+        "assets-technician-events",
+        "assets-equipment-import"
       ],
       "auth": "authenticated",
       "currentPermission": null,
@@ -396,7 +405,8 @@
         "method-qc",
         "assets-trace",
         "quality-qc",
-        "quality-nc"
+        "quality-nc",
+        "quality-qc-failed"
       ],
       "auth": "authenticated",
       "currentPermission": null,
@@ -494,7 +504,8 @@
         "start-settings",
         "offline-install",
         "offline-account",
-        "admin-role-reference"
+        "admin-role-reference",
+        "start-messages"
       ],
       "auth": "authenticated",
       "currentPermission": null,
@@ -544,7 +555,8 @@
         "offline-help",
         "start-settings",
         "quality-loading",
-        "quality-support"
+        "quality-support",
+        "quality-pilot-help"
       ],
       "auth": "authenticated",
       "currentPermission": null,

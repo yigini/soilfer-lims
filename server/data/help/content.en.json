@@ -599,7 +599,7 @@
         ""
       ],
       "minutes": 3,
-      "quick": "Order of the first day: the administrator sets up the laboratory; reception receives and accepts the practice samples; the manager assigns the work; technicians prepare samples and submit batches from Workbench; the manager then reviews results and issues reports.",
+      "quick": "Assign accepted samples and follow the day’s work. Review submitted results and quality controls, return work needing another try, then approve completed samples and issue their reports.",
       "before": [
         "Confirm your active laboratory name in the top bar. Make sure the practice samples have been received and accepted at reception.",
         "When two-person review is on, the reviewer must be a different person from the analyst. As the manager who will review the practice work, do not record those batches yourself."
@@ -10544,6 +10544,483 @@
       "caution": "Caution: A screenshot exposes credentials or unnecessary sample data. — Follow the linked Batch ID or Sample ID in /qa and /admin/audit, verify the latest Report Revision in /result-reports, and preserve unsynced drafts before reloading the app.",
       "related": [
         "quality-support"
+      ],
+      "feature": "core",
+      "reviewOwner": "Lab operations lead"
+    },
+    {
+      "id": "start-messages",
+      "category": "start",
+      "kind": "guide",
+      "title": "Read and send messages",
+      "summary": "Use the Messaging Center in My Profile for internal messages and chat. A message does not approve laboratory work.",
+      "roles": [
+        "all"
+      ],
+      "keywords": [
+        "start-messages",
+        "start"
+      ],
+      "minutes": 3,
+      "quick": "Open My Profile and Messaging Center. Choose Compose, check the recipient and write your subject and message, then Send. Keep unfinished messages as drafts.",
+      "before": [
+        "Have the recipient’s name and the sample or batch code needed for your question."
+      ],
+      "sections": [
+        {
+          "title": "What to do",
+          "steps": [
+            {
+              "action": "Open My Profile and Messaging Center. Choose Inbox, Sent, Drafts or Chat.",
+              "expected": "You see your messages and available recipients."
+            },
+            {
+              "action": "Choose Compose, select the right recipient and write a clear subject and message. Use Save Draft if you are not ready.",
+              "expected": "A draft has not been sent."
+            },
+            {
+              "action": "Choose Send and check Sent after confirmation. Read replies in Inbox or Chat.",
+              "expected": "A successfully sent message appears in Sent; a failed send still needs attention."
+            }
+          ]
+        }
+      ],
+      "fields": [],
+      "example": "Ask your manager to review DEMO-001, including the screen and your question. Use the review screen for the official decision.",
+      "success": "The message is sent to the right person and you know where to find the reply.",
+      "nextActor": "Message recipient",
+      "problems": [
+        {
+          "symptom": "The recipient is missing.",
+          "why": "The directory shows contacts available to your account.",
+          "action": "Ask your manager which contact to use; do not send laboratory information to a different person."
+        }
+      ],
+      "sources": [
+        "client/src/pages/Profile.jsx",
+        "client/src/components/messaging/MessagingCenter.jsx",
+        "client/src/context/NotificationContext.jsx"
+      ],
+      "steps": [
+        "Open My Profile and Messaging Center. Choose Inbox, Sent, Drafts or Chat. (Expected: You see your messages and available recipients.)",
+        "Choose Compose, select the right recipient and write a clear subject and message. Use Save Draft if you are not ready. (Expected: A draft has not been sent.)",
+        "Choose Send and check Sent after confirmation. Read replies in Inbox or Chat. (Expected: A successfully sent message appears in Sent; a failed send still needs attention.)"
+      ],
+      "caution": "Messages are conversations. Sample approval, result review and report release still need their own actions.",
+      "related": [
+        "start-manager",
+        "quality-pilot-help"
+      ],
+      "feature": "core",
+      "reviewOwner": "Lab operations lead"
+    },
+    {
+      "id": "quality-qc-failed",
+      "category": "quality",
+      "kind": "guide",
+      "title": "What to do when a quality check fails",
+      "summary": "Stop affected work, inspect the evidence and ask for a recorded decision without replacing the original measurements.",
+      "roles": [
+        "all"
+      ],
+      "keywords": [
+        "quality-qc-failed",
+        "quality",
+        "workbench"
+      ],
+      "minutes": 3,
+      "quick": "Read the failed control, compare it with the bench record and tell your manager. Follow the recorded correction or repeat decision.",
+      "before": [
+        "Keep the run code, control result, unit, reference lot and instrument record available."
+      ],
+      "sections": [
+        {
+          "title": "What to do",
+          "steps": [
+            {
+              "action": "Open the affected run in Workbench or the quality view and read which check failed.",
+              "expected": "You know which check and work need attention."
+            },
+            {
+              "action": "Compare the value, unit, date and material or instrument with the bench record. Describe a suspected mistake instead of changing a measurement to make it pass.",
+              "expected": "The original evidence stays available."
+            },
+            {
+              "action": "Ask the manager to review the evidence and record a decision. Follow the repeat or reviewed-correction flow when instructed.",
+              "expected": "The decision and any new attempt remain linked to the original work."
+            }
+          ]
+        }
+      ],
+      "fields": [],
+      "example": "A check-soil result is outside the laboratory’s accepted range. Record its value, unit and lot and ask the manager to assess the run.",
+      "success": "The affected work has a justified decision and, where needed, a traceable repeat.",
+      "nextActor": "Laboratory Manager or Quality Officer",
+      "problems": [
+        {
+          "symptom": "The run or submission button stays locked.",
+          "why": "A quality decision, repeat or different reviewer may still be required.",
+          "action": "Read the reason and ask the manager to use the supported decision flow; do not erase the original run."
+        }
+      ],
+      "sources": [
+        "server/services/qcGateService.js",
+        "server/services/qcDispositionStateService.js",
+        "client/src/pages/QADashboard.jsx"
+      ],
+      "steps": [
+        "Open the affected run in Workbench or the quality view and read which check failed. (Expected: You know which check and work need attention.)",
+        "Compare the value, unit, date and material or instrument with the bench record. Describe a suspected mistake instead of changing a measurement to make it pass. (Expected: The original evidence stays available.)",
+        "Ask the manager to review the evidence and record a decision. Follow the repeat or reviewed-correction flow when instructed. (Expected: The decision and any new attempt remain linked to the original work.)"
+      ],
+      "caution": "A readable file or a saved result does not mean that quality control passed. Follow the laboratory’s method and quality procedures.",
+      "related": [
+        "method-qc",
+        "quality-qc",
+        "bench-blocked"
+      ],
+      "feature": "core",
+      "reviewOwner": "Lab operations lead"
+    },
+    {
+      "id": "quality-pilot-help",
+      "category": "quality",
+      "kind": "guide",
+      "title": "Ask for help during the pilot",
+      "summary": "Describe the screen, action and exact message, then use the contact configured in Help.",
+      "roles": [
+        "all"
+      ],
+      "keywords": [
+        "quality-pilot-help",
+        "quality"
+      ],
+      "minutes": 3,
+      "quick": "Read the screen’s Help first. If still stuck, contact your manager or choose Contact support in Help. An email draft is not a sent request.",
+      "before": [
+        "Note the screen, application version, time and a safe example of the problem."
+      ],
+      "sections": [
+        {
+          "title": "What to do",
+          "steps": [
+            {
+              "action": "Open Help from the affected screen and read the related guide or blocker explanation.",
+              "expected": "You can check whether the screen explains the next step."
+            },
+            {
+              "action": "Choose Contact support. Describe what you tried, what you expected and the exact message.",
+              "expected": "A request is prepared; preparation does not confirm delivery."
+            },
+            {
+              "action": "If an email draft opens, review its recipient and details and send it from your email application. Without a configured contact, ask your supervisor for the approved channel.",
+              "expected": "The request reaches its contact only after you send it through the configured channel."
+            }
+          ]
+        }
+      ],
+      "fields": [],
+      "example": "“In Inventory, preview marks row 7 as an invalid date. I expected the file to be read; no rows were imported.” Add the version and time.",
+      "success": "The right person receives enough information to reproduce the problem.",
+      "nextActor": "Laboratory supervisor or pilot support contact",
+      "problems": [
+        {
+          "symptom": "A request was prepared, but nobody received it.",
+          "why": "Opening an email draft does not send it.",
+          "action": "Check the draft and Sent folder, or ask the supervisor how to deliver the prepared request."
+        }
+      ],
+      "sources": [
+        "client/src/pages/help/HelpCentre.jsx",
+        "client/src/pages/help/ArticleReader.jsx"
+      ],
+      "steps": [
+        "Open Help from the affected screen and read the related guide or blocker explanation. (Expected: You can check whether the screen explains the next step.)",
+        "Choose Contact support. Describe what you tried, what you expected and the exact message. (Expected: A request is prepared; preparation does not confirm delivery.)",
+        "If an email draft opens, review its recipient and details and send it from your email application. Without a configured contact, ask your supervisor for the approved channel. (Expected: The request reaches its contact only after you send it through the configured channel.)"
+      ],
+      "caution": "Leave passwords, personal PINs, tokens and unrelated client details out of messages and screenshots.",
+      "related": [
+        "start-messages",
+        "quality-support",
+        "offline-help"
+      ],
+      "feature": "core",
+      "reviewOwner": "Lab operations lead"
+    },
+    {
+      "id": "assets-technician-events",
+      "category": "assets",
+      "kind": "guide",
+      "title": "Record an instrument check as a technician",
+      "summary": "Record calibration, verification or maintenance evidence under your own name and check the resulting readiness.",
+      "roles": [
+        "all"
+      ],
+      "keywords": [
+        "assets-technician-events",
+        "assets",
+        "equipment",
+        "workbench"
+      ],
+      "minutes": 3,
+      "quick": "Open Equipment, choose the instrument and record the allowed event, its real outcome and dates. Check whether manager sign-off or another action is still needed.",
+      "before": [
+        "Check the physical instrument identifier and have the actual check or maintenance record."
+      ],
+      "sections": [
+        {
+          "title": "What to do",
+          "steps": [
+            {
+              "action": "Open Equipment and the correct instrument. Choose an event type offered to your role.",
+              "expected": "The event belongs to the intended instrument."
+            },
+            {
+              "action": "Enter what you did, the real pass or fail outcome and the performed date. Add the next due date when known, then save.",
+              "expected": "The event records you as the person who performed it."
+            },
+            {
+              "action": "Read readiness and event history. Ask a different eligible manager to review an event when sign-off is required.",
+              "expected": "Saving does not bypass sign-off, an overdue check or an out-of-service restriction."
+            }
+          ]
+        }
+      ],
+      "fields": [],
+      "example": "Keep a failed verification, investigate the cause and record a later genuine passing check if performed; do not rewrite the failure.",
+      "success": "The evidence is recorded and current instrument restrictions are understood.",
+      "nextActor": "A different eligible manager when sign-off is needed",
+      "problems": [
+        {
+          "symptom": "You are the only manager and cannot sign off your own failed event.",
+          "why": "The person who recorded an event cannot approve it.",
+          "action": "Ask another eligible manager. A later genuine passing check can supersede the failure for qualification; retain both records and have any service restriction reviewed."
+        }
+      ],
+      "sources": [
+        "client/src/components/equipment/LogEventModal.jsx",
+        "server/controllers/equipmentEventController.js",
+        "server/services/equipmentQualificationService.js"
+      ],
+      "steps": [
+        "Open Equipment and the correct instrument. Choose an event type offered to your role. (Expected: The event belongs to the intended instrument.)",
+        "Enter what you did, the real pass or fail outcome and the performed date. Add the next due date when known, then save. (Expected: The event records you as the person who performed it.)",
+        "Read readiness and event history. Ask a different eligible manager to review an event when sign-off is required. (Expected: Saving does not bypass sign-off, an overdue check or an out-of-service restriction.)"
+      ],
+      "caution": "A later passing event can supersede an earlier failure for qualification, but does not automatically clear an out-of-service restriction.",
+      "related": [
+        "assets-calibration",
+        "assets-maintain",
+        "assets-equipment-import"
+      ],
+      "feature": "core",
+      "reviewOwner": "Lab operations lead"
+    },
+    {
+      "id": "assets-prepared-lots",
+      "category": "assets",
+      "kind": "guide",
+      "title": "Record a prepared reagent or standard",
+      "summary": "Keep the prepared lot, quantity, location and parent-lot traceability together, then follow the laboratory’s quarantine policy.",
+      "roles": [
+        "all"
+      ],
+      "keywords": [
+        "assets-prepared-lots",
+        "assets",
+        "inventory"
+      ],
+      "minutes": 3,
+      "quick": "In Inventory, choose the reagent or standard and prepare a lot. Record real quantities, dates and parent lots; check its status before use.",
+      "before": [
+        "Have the preparation record, parent-lot labels and an active reagent storage location in your laboratory."
+      ],
+      "sections": [
+        {
+          "title": "What to do",
+          "steps": [
+            {
+              "action": "Choose the correct reagent or standard and the action to prepare a lot. Enter its lot number, positive quantity, concentration when relevant, expiry and location.",
+              "expected": "The lot belongs to the right item and laboratory."
+            },
+            {
+              "action": "Select the parent lots actually used and add traceability notes. Follow the approved procedure before using quarantined material. Save the preparation.",
+              "expected": "The record keeps the preparer and parent lots."
+            },
+            {
+              "action": "Check the new lot’s status. If laboratory policy starts it in quarantine, ask the manager to review and release it before use.",
+              "expected": "Only a lot allowed by its status and laboratory rules is selected for work."
+            }
+          ]
+        }
+      ],
+      "fields": [],
+      "example": "Record practice lot DEMO-PREP-01 with its actual quantity and parent lot. If policy requires quarantine, wait for manager release.",
+      "success": "The preparation is traceable and availability has been checked.",
+      "nextActor": "Laboratory Manager when release is required",
+      "problems": [
+        {
+          "symptom": "The lot is unavailable at the bench.",
+          "why": "It may be quarantined, expired or otherwise unavailable.",
+          "action": "Check its details and ask the manager to review it. Do not use import or quantity changes to bypass its status."
+        }
+      ],
+      "sources": [
+        "client/src/pages/Inventory.jsx",
+        "server/services/inventoryWriteService.js"
+      ],
+      "steps": [
+        "Choose the correct reagent or standard and the action to prepare a lot. Enter its lot number, positive quantity, concentration when relevant, expiry and location. (Expected: The lot belongs to the right item and laboratory.)",
+        "Select the parent lots actually used and add traceability notes. Follow the approved procedure before using quarantined material. Save the preparation. (Expected: The record keeps the preparer and parent lots.)",
+        "Check the new lot’s status. If laboratory policy starts it in quarantine, ask the manager to review and release it before use. (Expected: Only a lot allowed by its status and laboratory rules is selected for work.)"
+      ],
+      "caution": "Recording preparation does not certify quality. Follow the method, required checks and release decision.",
+      "related": [
+        "assets-lots",
+        "assets-expiry",
+        "assets-inventory-import"
+      ],
+      "feature": "core",
+      "reviewOwner": "Lab operations lead"
+    },
+    {
+      "id": "assets-inventory-import",
+      "category": "assets",
+      "kind": "guide",
+      "title": "Import inventory from a spreadsheet",
+      "summary": "Managers preview locations, items and lots, then confirm which valid rows to save in the selected laboratory.",
+      "roles": [
+        "all"
+      ],
+      "keywords": [
+        "assets-inventory-import",
+        "assets",
+        "inventory",
+        "import",
+        "CSV",
+        "XLSX"
+      ],
+      "minutes": 3,
+      "quick": "Choose Import stock in Inventory. Download a template, map the file, preview rows and the destination, then confirm Import rows.",
+      "before": [
+        "Use CSV or Excel: at most 2,000 rows per sheet and 2 MB for the file and request. Use decimal points and YYYY-MM-DD dates."
+      ],
+      "sections": [
+        {
+          "title": "What to do",
+          "steps": [
+            {
+              "action": "Choose Import stock and Download template, or export an existing sheet. Keep location, item and lot column names. Only a global administrator chooses another active laboratory.",
+              "expected": "The import can recognise the file structure."
+            },
+            {
+              "action": "Map the sheets and columns and choose Preview rows. Check original row numbers, errors, the destination and skip or description-update mode.",
+              "expected": "Preview shows what would happen and changes no stock."
+            },
+            {
+              "action": "Keep all-or-nothing if every row must pass. Turn it off only to save valid rows without the errors. Confirm the destination and choose Import rows; read and download the result report.",
+              "expected": "Commit validates again and reports created, updated, skipped and refused rows."
+            }
+          ]
+        }
+      ],
+      "fields": [],
+      "example": "A file contains a storage location, reagent item and lot. Correct unknown item or location references before confirming.",
+      "success": "The receipt and inventory list agree with the intended changes.",
+      "nextActor": "Inventory manager",
+      "problems": [
+        {
+          "symptom": "Import is missing or a row cannot find its parent.",
+          "why": "Import needs inventory-management permission and references in the chosen laboratory.",
+          "action": "Ask the manager to import, or correct the laboratory and item or location reference, then preview again."
+        }
+      ],
+      "sources": [
+        "client/src/components/inventory/InventoryImportDialog.jsx",
+        "server/services/inventoryImportService.js"
+      ],
+      "steps": [
+        "Choose Import stock and Download template, or export an existing sheet. Keep location, item and lot column names. Only a global administrator chooses another active laboratory. (Expected: The import can recognise the file structure.)",
+        "Map the sheets and columns and choose Preview rows. Check original row numbers, errors, the destination and skip or description-update mode. (Expected: Preview shows what would happen and changes no stock.)",
+        "Keep all-or-nothing if every row must pass. Turn it off only to save valid rows without the errors. Confirm the destination and choose Import rows; read and download the result report. (Expected: Commit validates again and reports created, updated, skipped and refused rows.)"
+      ],
+      "caution": "Existing lots always skip: import never changes quantity, status or expiry. Use the separate adjustment or release action.",
+      "related": [
+        "assets-stock",
+        "assets-lots",
+        "assets-prepared-lots"
+      ],
+      "feature": "core",
+      "reviewOwner": "Lab operations lead"
+    },
+    {
+      "id": "assets-equipment-import",
+      "category": "assets",
+      "kind": "guide",
+      "title": "Import equipment from a spreadsheet",
+      "summary": "Managers can add tagged instruments, optional calibration evidence and eligible analyses after checking a preview.",
+      "roles": [
+        "all"
+      ],
+      "keywords": [
+        "assets-equipment-import",
+        "assets",
+        "equipment",
+        "import",
+        "CSV",
+        "XLSX"
+      ],
+      "minutes": 3,
+      "quick": "Choose Import equipment in Equipment, map one instrument per row, review Preview rows, then confirm Import rows.",
+      "before": [
+        "Have unique asset tags and genuine calibration evidence. Use YYYY-MM-DD dates; the next due date must follow the last calibration date."
+      ],
+      "sections": [
+        {
+          "title": "What to do",
+          "steps": [
+            {
+              "action": "Choose Import equipment and Download template. A global administrator must select an active laboratory. Enter each tag, name and type, then map and preview the file.",
+              "expected": "Every row has a clear instrument identity and destination."
+            },
+            {
+              "action": "Check optional calibration dates and active analysis codes, separated by | or ;. A new analysis assignment requires equipment by default; existing assignments keep their method and required flag.",
+              "expected": "New calibration uses the normal event flow; no dates leave a new instrument not configured."
+            },
+            {
+              "action": "Confirm and import. Check the receipt and actual readiness before work. CSV export includes status and readiness as extra columns; import ignores them.",
+              "expected": "The save follows revalidation and readiness still follows laboratory rules."
+            }
+          ]
+        }
+      ],
+      "fields": [],
+      "example": "Add DEMO-PH-01 with its real calibration dates and active pH analysis code. Check readiness before selecting it in Workbench.",
+      "success": "The instrument appears once with the intended evidence and assignments.",
+      "nextActor": "Equipment manager",
+      "problems": [
+        {
+          "symptom": "A row reports a calibration-date or unavailable-analysis error.",
+          "why": "Dates are not in order, or the analysis is inactive or belongs to another laboratory.",
+          "action": "Correct the row and preview again. Do not invent calibration evidence or change laboratories to bypass an error."
+        }
+      ],
+      "sources": [
+        "client/src/components/inventory/InventoryImportDialog.jsx",
+        "server/services/equipmentImportService.js",
+        "server/controllers/equipmentExportController.js"
+      ],
+      "steps": [
+        "Choose Import equipment and Download template. A global administrator must select an active laboratory. Enter each tag, name and type, then map and preview the file. (Expected: Every row has a clear instrument identity and destination.)",
+        "Check optional calibration dates and active analysis codes, separated by | or ;. A new analysis assignment requires equipment by default; existing assignments keep their method and required flag. (Expected: New calibration uses the normal event flow; no dates leave a new instrument not configured.)",
+        "Confirm and import. Check the receipt and actual readiness before work. CSV export includes status and readiness as extra columns; import ignores them. (Expected: The save follows revalidation and readiness still follows laboratory rules.)"
+      ],
+      "caution": "Description updates keep existing type, criticality, status, calibration and analysis assignments. Import does not return a blocked instrument to service.",
+      "related": [
+        "assets-technician-events",
+        "assets-register",
+        "assets-calibration"
       ],
       "feature": "core",
       "reviewOwner": "Lab operations lead"

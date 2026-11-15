@@ -50,6 +50,7 @@ async function validate(db, user, input) {
         oneOf(row, 'assetType', schema.assetTypes); oneOf(row, 'criticality', schema.criticalities);
         row.lastCalibrationDate = date(row, 'lastCalibrationDate');
         row.nextCalibrationDueDate = date(row, 'nextCalibrationDueDate');
+        if (row.lastCalibrationDate && row.nextCalibrationDueDate && row.nextCalibrationDueDate <= row.lastCalibrationDate) issue(row, 'IMPORT_CALIBRATION_DATE_ORDER', 'nextCalibrationDueDate');
         if (v.nextCalibrationDueDate && !v.lastCalibrationDate) issue(row, 'IMPORT_CALIBRATION_DATE_REQUIRED', 'lastCalibrationDate');
         if (row.lastCalibrationDate && new Date(row.lastCalibrationDate + 'T00:00:00Z') > new Date(Date.now() + 86400000)) issue(row, 'IMPORT_FUTURE_DATE', 'lastCalibrationDate');
         row.analyses = v.eligibleAnalyses ? v.eligibleAnalyses.split(/[|;]/).map(code => code.trim()) : [];

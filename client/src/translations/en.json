@@ -156,7 +156,8 @@
       "IMPORT_FUTURE_DATE": "The calibration date cannot be in the future.",
       "IMPORT_INVALID_ANALYSIS_LIST": "Use each analysis code once, separated by | or ;, with no empty entries.",
       "IMPORT_ANALYSIS_UNAVAILABLE": "An analysis is inactive or unavailable to this laboratory.",
-      "IMPORT_ELIGIBILITY_INVALID": "An existing equipment assignment is invalid. Ask a lab manager to check it before importing."
+      "IMPORT_ELIGIBILITY_INVALID": "An existing equipment assignment is invalid. Ask a lab manager to check it before importing.",
+      "IMPORT_CALIBRATION_DATE_ORDER": "The next calibration date must be after the last calibration date."
     },
     "equipmentTitle": "Import equipment",
     "equipmentIntro": "Read a CSV or Excel file, map its columns, then check every row before saving. Calibration dates and analysis assignments apply only to new instruments. The location column is a location or bench label.",

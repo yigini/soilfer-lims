@@ -156,7 +156,8 @@
       "IMPORT_FUTURE_DATE": "La fecha de calibración no puede estar en el futuro.",
       "IMPORT_INVALID_ANALYSIS_LIST": "Use cada código de análisis una sola vez, separado por | o ;, sin entradas vacías.",
       "IMPORT_ANALYSIS_UNAVAILABLE": "Un análisis está inactivo o no está disponible para este laboratorio.",
-      "IMPORT_ELIGIBILITY_INVALID": "Una asignación de equipo existente no es válida. Pida al responsable del laboratorio que la revise antes de importar."
+      "IMPORT_ELIGIBILITY_INVALID": "Una asignación de equipo existente no es válida. Pida al responsable del laboratorio que la revise antes de importar.",
+      "IMPORT_CALIBRATION_DATE_ORDER": "La próxima fecha de calibración debe ser posterior a la última fecha de calibración."
     },
     "equipmentTitle": "Importar equipos",
     "equipmentIntro": "Lea un archivo CSV o Excel, asocie sus columnas y revise cada fila antes de guardar. Las fechas de calibración y las asignaciones de análisis solo se aplican a instrumentos nuevos. La columna de ubicación contiene el nombre de la ubicación o de la mesa de trabajo.",

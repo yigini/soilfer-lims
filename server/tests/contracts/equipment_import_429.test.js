@@ -201,8 +201,38 @@ test('CSV has template column names, exact descriptions and formula-safe text; e
     const body = book([row({ name: '=1+1', serialNumber: '"Practice, serial"', manufacturer: "'maker", eligibleAnalyses: code })]);
     expect((await auth('commit', body)).status).toBe(200);
     const exported = await request(app).get('/api/equipment/export').set('Authorization', 'Bearer ' + tokens.manager);
-    expect(exported.status).toBe(200); expect(exported.text.split('\n')[0]).toBe(imports.COLUMNS.equipment.map(c => '"' + c + '"').join(','));
+    expect(exported.status).toBe(200); expect(exported.text.split('\n')[0]).toBe([...imports.COLUMNS.equipment, 'status', 'readiness'].map(c => '"' + c + '"').join(','));
     expect(exported.text).toContain('"\'=1+1"'); expect(exported.text).toContain('""Practice, serial""'); expect(exported.text).toContain("''maker");
     expect((await request(app).get('/api/equipment/export').set('Authorization', 'Bearer ' + tokens.super)).body.code).toBe('IMPORT_LAB_REQUIRED');
     expect((await request(app).get('/api/equipment/export?labId=' + labB).set('Authorization', 'Bearer ' + tokens.manager)).status).toBe(403);
+});
+
+test.each([-1, -2])('new import refuses a next calibration date %s days from now when it is not after the last date', async next => {
+    const body = book([row({ lastCalibrationDate: atDay(-1), nextCalibrationDueDate: atDay(next) })]);
+    const response = await auth('preview', body); expect(response.status).toBe(200);
+    expect(response.body.sheets.equipment[0].errors).toContainEqual({ code: 'IMPORT_CALIBRATION_DATE_ORDER', field: 'nextCalibrationDueDate' });
+    expect((await auth('commit', body)).status).toBe(422); expect((await counts()).assets).toBe(0);
+});
+test('descriptive updates ignore calibration dates instead of changing qualification', async () => {
+    await auth('commit', book());
+    const asset = await prisma.equipmentAsset.findFirst({ where: { labId: labA } });
+    const qualification = await prisma.equipmentQualification.findUnique({ where: { equipmentId: asset.id } });
+    const result = await auth('commit', { ...book([row({ manufacturer: 'Updated maker', lastCalibrationDate: atDay(-1), nextCalibrationDueDate: atDay(-2) })]), duplicateMode: 'UPDATE' });
+    expect(result.status).toBe(200); expect(result.body.totals.updated).toBe(1);
+    expect(await prisma.equipmentQualification.findUnique({ where: { equipmentId: asset.id } })).toEqual(qualification);
+    expect((await prisma.equipmentAsset.findUnique({ where: { id: asset.id } })).manufacturer).toBe('Updated maker');
+});
+test.each(['not-json', '{}', 'null', '[7]', '[""]'])('export skips malformed eligibility %s and retains real read-time status and readiness', async invalid => {
+    const result = await auth('commit', book([row({ eligibleAnalyses: code })])); expect(result.status).toBe(200);
+    const id = result.body.sheets.equipment[0].id;
+    await prisma.equipmentQualification.update({ where: { equipmentId: id }, data: { calibrationStatus: 'OK', lastCalibrationDate: new Date(atDay(-10)), nextCalibrationDueDate: new Date(atDay(-1)) } });
+    await prisma.equipmentMethodEligibility.create({ data: { id: randomUUID(), labId: labA, analysisCode: code + '-broken', eligibleEquipmentIds: invalid } });
+    const response = await request(app).get('/api/equipment/export').set('Authorization', 'Bearer ' + tokens.manager);
+    expect(response.status).toBe(200);
+    const parsed = require('../../../shared/delimitedText').parseDelimited(response.text, ',');
+    const headers = parsed[0].cells, data = Object.fromEntries(headers.map((key, index) => [key, parsed[1].cells[index]]));
+    expect(headers.slice(0, -2)).toEqual(imports.COLUMNS.equipment); expect(headers.slice(-2)).toEqual(['status', 'readiness']);
+    expect(data).toMatchObject({ internalAssetTag: 'PRACTICE-01', status: 'IN_SERVICE', readiness: 'BLOCKED', eligibleAnalyses: code });
+    expect(data.eligibleAnalyses).not.toContain('-broken');
+    expect((await prisma.equipmentQualification.findUnique({ where: { equipmentId: id } })).calibrationStatus).toBe('OK'); // Export projects expiry without writing.
 });
