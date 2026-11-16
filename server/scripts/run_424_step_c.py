@@ -347,9 +347,60 @@ def run(args):
                 pass
         failure = {'at': now(), 'stage': stage, 'error': error.code if isinstance(error, Stopped) else type(error).__name__,
                    'details': error.details if isinstance(error, Stopped) else {}, 'partial': result,
-                   'noAutomaticRestoreOrScriptRetry': True}
+                   'noAutomaticRestoreOrScriptRetry': True, 'restartedUnchanged': False}
+        # A refused plan must not leave an unchanged, previously healthy app down.
+        # Once an apply was called, even a reported rollback needs a person.
+        if result['scriptApplyCalls'] == 0:
+            context = locals()
+            required = ['before', 'db_mount', 'backup', 'original_files', 'config', 'host', 'mounts',
+                        'initial_health', 'health_code', 'source_guard_code', 'source_guards']
+            if all(name in context for name in required):
+                try:
+                    recovered = restart_unchanged_before_apply(docker=docker, data=data, save=save,
+                        timeout=args.startup_timeout, **{name: context[name] for name in required})
+                    failure.update(restartedUnchanged=True, unchangedRestart=recovered)
+                except Exception as recovery_error:
+                    failure['unchangedRestartRefused'] = recovery_error.code if isinstance(recovery_error, Stopped) else type(recovery_error).__name__
+            else:
+                failure['unchangedRestartRefused'] = 'NO_COMPLETE_STOPPED_BACKUP_CONTEXT'
+        else:
+            failure['unchangedRestartRefused'] = 'APPLY_ALREADY_CALLED'
         save('failure.json', failure)
         raise Stopped('WRAPPER_STOPPED', stage=stage, cause=failure['error'])
+
+def restart_unchanged_before_apply(*, docker, data, save, timeout, before, db_mount, backup,
+                                   original_files, config, host, mounts, initial_health, health_code,
+                                   source_guard_code, source_guards):
+    require(not docker.inspect(before['Id'])['State']['Running'], 'APPLICATION_ALREADY_RUNNING')
+    require(not docker.writers(db_mount), 'WRITER_REMAINS_BEFORE_UNCHANGED_RESTART')
+    require(file_set(backup) == original_files == file_set(data), 'DATABASE_FILES_DIFFER_FROM_STOPPED_BACKUP')
+    current = docker.inspect(before['Id'])
+    require(current['Image'] == before['Image'] and exact(current['Config'], config)
+            and exact(current['HostConfig'], host) and exact(normalized_mounts(current['Mounts']), mounts), 'UNCHANGED_RESTART_CONFIGURATION_DIFFERS')
+    require(shutil.disk_usage(data).free > 10000000000, 'STRICT_UNCHANGED_RESTART_10GB_GATE_FAILED')
+    restart_at = now()
+    save('unchanged-restart-intent.json', {'at': restart_at, 'containerId': before['Id'],
+         'databaseFilesEqualStoppedBackup': True, 'scriptApplyCalls': 0})
+    docker.command('start', before['Id'])
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        current = docker.inspect(before['Id'])
+        require(current['State']['Running'] and not current['State'].get('OOMKilled')
+                and current['RestartCount'] == before['RestartCount'], 'UNCHANGED_APP_EXITED_RESTARTED_OR_OOM')
+        require(current['Image'] == before['Image'] and exact(current['Config'], config)
+                and exact(current['HostConfig'], host) and exact(normalized_mounts(current['Mounts']), mounts), 'UNCHANGED_APP_CONFIGURATION_DIFFERS')
+        if current['State'].get('Health', {}).get('Status') == 'healthy':
+            healthy = docker.node(before['Id'], health_code)
+            if healthy == initial_health:
+                require(exact(docker.node(before['Id'], source_guard_code), source_guards), 'UNCHANGED_APP_SOURCE_OR_HELP_DIFFERS')
+                result = {'at': now(), 'health': healthy, 'containerId': before['Id'], 'imageId': before['Image'],
+                          'databaseFilesEqualStoppedBackupBeforeRestart': True, 'stoppedBackupFiles': original_files,
+                          'sameContainerConfigurationAndMounts': True, 'sourceAndHelpPreserved': True,
+                          'scriptApplyCalls': 0, 'noAutomaticApplyRetryOrDataRestore': True}
+                save('unchanged-restart-receipt.json', result)
+                return result
+        time.sleep(3)
+    raise Stopped('UNCHANGED_APP_HEALTH_TIMEOUT')
 
 def parser():
     result = argparse.ArgumentParser(description=__doc__)
