@@ -132,11 +132,12 @@ def projected_receipt(value):
                          for row in value.get('records', [])]
     return result
 
-VERIFY_JS = r"""const D=require('better-sqlite3'),Module=require('node:module'),path=require('node:path'),crypto=require('node:crypto');
+VERIFY_JS = r"""const Module=require('node:module'),path=require('node:path'),crypto=require('node:crypto');
 let input='';process.stdin.setEncoding('utf8');process.stdin.on('data',s=>input+=s);process.stdin.on('end',()=>{
 const payload=JSON.parse(input);if(crypto.createHash('sha256').update(payload.scriptSource).digest('hex')!==payload.scriptSha256)throw Error('Verifier source hash differs');
 // Compile the hash-bound module in memory: no maintenance file is installed in the app.
 const filename='/app/server/scripts/fix_424_step_c_packages.js',mod=new Module(filename);mod.filename=filename;mod.paths=Module._nodeModulePaths(path.dirname(filename));mod._compile(payload.scriptSource,filename);
+const D=Module.createRequire(filename)('better-sqlite3');
 const script=mod.exports,r=payload.receipt,db=new D('/app/server/prisma/dev.db',{readonly:true,fileMustExist:true});
 try{db.pragma('foreign_keys=ON');db.exec('BEGIN');const ids=new Map(r.records.filter(x=>x.state==='changed').map(x=>[x.target,x]));
 for(const row of r.records){if(!['Analysis','AnalysisGroup'].includes(row.table))throw Error('Unapproved table');const key=row.table==='Analysis'?'code':'id';const actual=db.prepare('SELECT * FROM '+row.table+' WHERE '+key+'=?').get(row.target);if(script.rowHash(actual)!==row.afterRowSha256)throw Error('Target after-state differs');}
@@ -265,6 +266,7 @@ def run(args):
         applied = invoke('single-apply', True)
         require(applied['planSha256'] == dry['planSha256'] and applied['totalChanges'] == applied['auditRowsCreated'] == args.expected_changes
                 and applied['sqliteTotalChanges'] == args.expected_changes * 2, 'APPLY_COUNTS_OR_PLAN_DIFFER')
+        result.update(changedTargets=applied['totalChanges'], auditRows=applied['auditRowsCreated'], sqliteTotalChanges=applied['sqliteTotalChanges'])
         stage = 'second-dry-run'
         second = invoke('second-dry-run')
         require(second['plannedChanges'] == second['totalChanges'] == second['auditRowsCreated'] == second['sqliteTotalChanges'] == 0, 'SECOND_DRY_RUN_NOT_NO_OP')
@@ -273,6 +275,7 @@ def run(args):
         if args.mode == 'rehearsal':
             repeated = invoke('rehearsal-second-apply', True)
             require(repeated['plannedChanges'] == repeated['totalChanges'] == repeated['auditRowsCreated'] == repeated['sqliteTotalChanges'] == 0, 'SECOND_APPLY_NOT_IDEMPOTENT')
+        stage = 'independent-readback'
         verification_input = {'receipt': projected_receipt(applied), 'scriptSource': script.read_bytes().decode('utf-8'),
                               'scriptSha256': args.expected_script_sha256}
         verification = docker.node(helper, VERIFY_JS, verification_input)

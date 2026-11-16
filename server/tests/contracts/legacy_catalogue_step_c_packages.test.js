@@ -277,10 +277,13 @@ test('the actual wrapper verifier accepts full database/audit rows using the Jav
         .replace('/app/server/prisma/dev.db', file.replaceAll('\\', '/'));
     const sourceFile = path.resolve(__dirname, '../../scripts/fix_424_step_c_packages.js');
     const payload = { receipt: applied, scriptSource: fs.readFileSync(sourceFile, 'utf8'), scriptSha256: digest(sourceFile) };
-    const verified = spawnSync(process.execPath, ['-e', verification], { input: JSON.stringify(payload), encoding: 'utf8' });
+    // Docker exec starts in /app, outside /app/server/node_modules. The verifier
+    // must resolve through its script filename, never the process working directory.
+    const outsideServer = path.resolve(__dirname, '../../..');
+    const verified = spawnSync(process.execPath, ['-e', verification], { input: JSON.stringify(payload), encoding: 'utf8', cwd: outsideServer });
     expect({ status: verified.status, output: verified.stderr }).toEqual({ status: 0, output: '' });
     expect(JSON.parse(verified.stdout)).toMatchObject({ allTargetRowsAndAuditBeforeAfterVerified: true, auditRows: 19, canonicalJsonFromSameJavaScriptImplementation: true });
     const bad = JSON.parse(JSON.stringify(applied)); bad.records.find(row => row.state === 'changed').afterRowSha256 = 'incorrect';
-    expect(spawnSync(process.execPath, ['-e', verification], { input: JSON.stringify({ ...payload, receipt: bad }), encoding: 'utf8' }).status).not.toBe(0);
-    expect(spawnSync(process.execPath, ['-e', verification], { input: JSON.stringify({ ...payload, scriptSha256: 'wrong' }), encoding: 'utf8' }).status).not.toBe(0);
+    expect(spawnSync(process.execPath, ['-e', verification], { input: JSON.stringify({ ...payload, receipt: bad }), encoding: 'utf8', cwd: outsideServer }).status).not.toBe(0);
+    expect(spawnSync(process.execPath, ['-e', verification], { input: JSON.stringify({ ...payload, scriptSha256: 'wrong' }), encoding: 'utf8', cwd: outsideServer }).status).not.toBe(0);
 });
