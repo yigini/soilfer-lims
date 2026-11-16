@@ -65,11 +65,15 @@ beforeAll(() => {
     edit(baseline, db => {
         for (let i = 0; i < 10; i++) db.prepare('INSERT INTO Lab(id,code,name,country,updatedAt) VALUES(?,?,?,?,?)')
             .run('lab-' + i, 'LAB-' + i, 'Fictional lab ' + i, 'TEST', '2026-01-01T00:00:00.000Z');
-        const codes = new Set([...Object.keys(script.REPLACEMENTS), ...script.PARTNERS, ...script.DEFERRED_CODES, 'porosity', 'gypsum', 'UNTOUCHED']);
+        const codes = new Set([...Object.keys(script.REPLACEMENTS), ...script.PARTNERS, ...script.DEFERRED_CODES, 'porosity', 'gypsum', 'UNTOUCHED', 'SOIL_MOISTURE']);
         for (const code of codes) {
             db.prepare('INSERT INTO Analysis(code,name,units,status,isGlobal,labId) VALUES(?,?,?,\'active\',1,NULL)').run(code, 'Fixture measurement ' + code, '%');
             db.prepare('INSERT INTO Methodology(id,analysisCode,name,isDefault,labId,updatedAt) VALUES(?,?,?,1,NULL,?)')
                 .run('method-' + code, code, 'Fixture method ' + code, '2026-01-01T00:00:00.000Z');
+        }
+        for (const [code, name] of Object.entries({ moistureContent: 'Volumetric Moisture Content',
+            VOL_MOISTURE: 'Volumetric Water Content (θv)', SOIL_MOISTURE: 'Gravimetric Moisture Content (θm)' })) {
+            db.prepare('UPDATE Analysis SET name=? WHERE code=?').run(name, code);
         }
         for (const [id, codes] of Object.entries(packages)) db.prepare('INSERT INTO AnalysisGroup(id,name,analyses,labId) VALUES(?,?,?,NULL)').run(id, id + ' package', JSON.stringify(codes));
         db.prepare('INSERT INTO AnalysisGroup(id,name,analyses,labId) VALUES(\'untouched\',\'Untouched package\',\'["UNTOUCHED"]\',NULL)').run();
@@ -103,6 +107,58 @@ test('all fourteen free codes and five package rows give nineteen exact before/a
         expect(JSON.parse(audit.before)).toEqual(record.before); expect(JSON.parse(audit.after)).toEqual(record.after);
     }
     for (const code of script.DEFERRED_CODES) expect(after.Analysis.find(row => row.code === code)).toEqual(before.Analysis.find(row => row.code === code));
+});
+
+test('pin 5 preserves the volumetric test in both packages and leaves the gravimetric definition untouched', () => {
+    const file = fixture(), before = snapshot(file), result = apply(file);
+    expect(result.ok).toBe(true);
+    expect(result.packages.find(row => row.id === 'FULL_CHARACTERIZATION').afterCodes).toEqual([
+        'PH_H2O', 'SOC', 'TN', 'extractableElements', 'EXCH_CA', 'EXCH_MG', 'EXCH_K', 'EXCH_NA',
+        'CEC', 'ECEC', 'EXCH_ACID', 'EC', 'SAND', 'SILT', 'CLAY', 'BD_WHOLE', 'CACO3', 'VOL_MOISTURE'
+    ]);
+    expect(result.packages.find(row => row.id === 'PHYSICAL_PROPERTIES').afterCodes).toEqual([
+        'SAND', 'SILT', 'CLAY', 'BD_WHOLE', 'BD_FINE', 'VOL_MOISTURE', 'AWC', 'porosity'
+    ]);
+    expect(result.packages.every(row => !row.afterCodes.includes('SOIL_MOISTURE'))).toBe(true);
+    const contexts = result.eligibility.filter(row => row.code === 'VOL_MOISTURE');
+    expect(contexts).toHaveLength(11);
+    expect(contexts.every(row => row.methodId === 'method-VOL_MOISTURE' && !row.error)).toBe(true);
+    expect(result.eligibility.some(row => row.code === 'SOIL_MOISTURE')).toBe(false);
+    const after = snapshot(file);
+    expect(after.Analysis.find(row => row.code === 'SOIL_MOISTURE')).toEqual(before.Analysis.find(row => row.code === 'SOIL_MOISTURE'));
+    expect(after.Analysis.find(row => row.code === 'VOL_MOISTURE')).toEqual(before.Analysis.find(row => row.code === 'VOL_MOISTURE'));
+    expect(after.Methodology).toEqual(before.Methodology);
+    expect(apply(file)).toMatchObject({ ok: true, totalChanges: 0, auditRowsCreated: 0 });
+});
+
+test('pin 5 does not require or use the gravimetric test as a substitute', () => {
+    const file = fixture(); edit(file, db => {
+        db.prepare("DELETE FROM Methodology WHERE analysisCode='SOIL_MOISTURE'").run();
+        db.prepare("UPDATE Analysis SET status='inactive' WHERE code='SOIL_MOISTURE'").run();
+    });
+    const before = snapshot(file), result = apply(file);
+    expect(result.ok).toBe(true);
+    expect(result.eligibility.some(row => row.code === 'SOIL_MOISTURE')).toBe(false);
+    expect(snapshot(file).Analysis.find(row => row.code === 'SOIL_MOISTURE')).toEqual(before.Analysis.find(row => row.code === 'SOIL_MOISTURE'));
+});
+
+test.each([
+    ['absent', db => { db.prepare("DELETE FROM Methodology WHERE analysisCode='VOL_MOISTURE'").run(); db.prepare("DELETE FROM Analysis WHERE code='VOL_MOISTURE'").run(); }, 'PARAMETER_MISSING'],
+    ['inactive', db => db.prepare("UPDATE Analysis SET status='inactive' WHERE code='VOL_MOISTURE'").run(), 'PARAMETER_NOT_ACTIVE_GLOBAL'],
+    ['lab-owned', db => db.prepare("UPDATE Analysis SET labId='lab-0' WHERE code='VOL_MOISTURE'").run(), 'PARAMETER_NOT_ACTIVE_GLOBAL'],
+    ['not global', db => db.prepare("UPDATE Analysis SET isGlobal=0 WHERE code='VOL_MOISTURE'").run(), 'PARAMETER_NOT_ACTIVE_GLOBAL'],
+    ['invalid definition', db => db.prepare("UPDATE Analysis SET validation='invalid' WHERE code='VOL_MOISTURE'").run(), 'PARAMETER_CONFIGURATION_INVALID'],
+    ['no default', db => db.prepare("UPDATE Methodology SET isDefault=0 WHERE analysisCode='VOL_MOISTURE'").run(), 'DEFAULT_METHOD_MISSING'],
+    ['two defaults', db => db.prepare("INSERT INTO Methodology(id,analysisCode,name,isDefault,updatedAt) VALUES('second-vol','VOL_MOISTURE','Second volumetric method',1,'2026-01-01')").run(), 'DEFAULT_CONFLICT'],
+    ['invalid tenth-lab override', db => db.prepare("INSERT INTO LabMethodDefault(id,labId,analysisCode,methodologyId,updatedAt) VALUES('bad-vol','lab-9','VOL_MOISTURE','method-TN','2026-01-01')").run(), 'INVALID_LAB_OVERRIDE']
+])('pin 5 leaves the legacy moisture code untouched when the volumetric partner is %s', (_label, change, code) => {
+    const file = fixture(); edit(file, change);
+    const result = refusal(file, code);
+    expect(result.ok).toBe(false);
+    expect(snapshot(file).Analysis.find(row => row.code === 'moistureContent').status).toBe('active');
+    for (const id of ['FULL_CHARACTERIZATION', 'PHYSICAL_PROPERTIES']) {
+        expect(inspect(file, db => JSON.parse(db.prepare('SELECT analyses FROM AnalysisGroup WHERE id=?').get(id).analyses))).toContain('moistureContent');
+    }
 });
 test('the pinned two active pSA lines stay untouched and pSA stays active: eighteen changes', async () => {
     const file = fixture(); await order(file, 'pSA', 'ACTIVE', 2);

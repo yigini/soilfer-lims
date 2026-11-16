@@ -16,7 +16,7 @@ const REPLACEMENTS = Object.freeze({
     nitrogenTotal: ['TN'], cationExchangeCapacitySoil: ['CEC'], effectiveCec: ['ECEC'],
     acidityExchangeable: ['EXCH_ACID'], exchangeableBases: ['EXCH_CA', 'EXCH_MG', 'EXCH_K', 'EXCH_NA'],
     pSA: ['SAND', 'SILT', 'CLAY'], bulkDensityWholeSoil: ['BD_WHOLE'],
-    bulkDensityFineEarth: ['BD_FINE'], moistureContent: ['SOIL_MOISTURE'],
+    bulkDensityFineEarth: ['BD_FINE'], moistureContent: ['VOL_MOISTURE'],
     availableWaterHoldingCapacity: ['AWC'], totalCarbonateEquivalent: ['CACO3']
 });
 for (const replacements of Object.values(REPLACEMENTS)) Object.freeze(replacements);
