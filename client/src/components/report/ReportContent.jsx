@@ -105,7 +105,11 @@ const ReportContent = ({ data, publication = {}, withdrawalBanner }) => {
     const fmtDate = (d) => d ? new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
 
     // Location data (prefer structured locationData, fallback to raw)
-    const loc = locationData || {};
+    // This marker is frozen at NEW issue time. Historical versions keep their
+    // original presentation, including wording that newer issues correct.
+    const presentation = data.presentation?.version === 1 ? data.presentation : null;
+    const loc = presentation?.location || locationData || {};
+    const displayedMethods = presentation?.methods || methodologies;
 
     return (
         <div className="report-document">
@@ -261,7 +265,7 @@ const ReportContent = ({ data, publication = {}, withdrawalBanner }) => {
                 {safeGroups.length > 0 ? (
                     safeGroups.map((group, idx) => (
                         <div key={idx} className="report-results-group">
-                            <h3 className="report-category-title">{toScalar(group.categoryName, 'Analytical Parameters')}</h3>
+                            <h3 className="report-category-title">{toScalar(presentation?.groupNames[idx] || group.categoryName, 'Analytical Parameters')}</h3>
                             <table className="report-results-table">
                                 <thead>
                                     <tr>
@@ -296,7 +300,7 @@ const ReportContent = ({ data, publication = {}, withdrawalBanner }) => {
                                                         </span>
                                                     )}
                                                 </td>
-                                                <td className="param-method">{toScalar(item.standard || item.method, 'Standard Laboratory Method')}</td>
+                                                <td className="param-method">{presentation ? item.certificateMethodText || presentation.methodNotRecorded : toScalar(item.standard || item.method, 'Standard Laboratory Method')}</td>
                                                 <td className="param-value">
                                                     {item.reportedValueSelectionId ? formatReportedValue(item) : formatResultValue(item.value, item.decimalPlaces, item.param)}
                                                 </td>
@@ -338,7 +342,7 @@ const ReportContent = ({ data, publication = {}, withdrawalBanner }) => {
             {/* ═══════════════════════════════════════════════════
                 7. METHODOLOGY FOOTNOTES
             ═══════════════════════════════════════════════════ */}
-            {methodologies && methodologies.length > 0 && (
+            {displayedMethods && displayedMethods.length > 0 && (
                 <section className="report-section report-methods-section">
                     <h2 className="report-section-title">Analytical Methods</h2>
                     <table className="report-methods-table">
@@ -350,7 +354,7 @@ const ReportContent = ({ data, publication = {}, withdrawalBanner }) => {
                             </tr>
                         </thead>
                         <tbody>
-                            {methodologies.map((m, i) => (
+                            {displayedMethods.map((m, i) => (
                                 <tr key={i}>
                                     <td>{m.paramName}</td>
                                     <td>{m.method}</td>
@@ -367,12 +371,12 @@ const ReportContent = ({ data, publication = {}, withdrawalBanner }) => {
             ═══════════════════════════════════════════════════ */}
             <footer className="report-footer-section">
                 <div className="report-methodology-note">
-                    <strong>General Note:</strong> {data.qcStatement || (data.qcWarnings?.length ? data.qcWarningStatement : 'All analyses were performed according to standard laboratory protocols.')}
-                    Results are reported on an air-dry fine-earth (&lt;2 mm) basis unless otherwise indicated.
+                    <strong>General Note:</strong> {presentation ? [presentation.qcStatement, presentation.basisStatement].filter(Boolean).join(' ') : <>{data.qcStatement || (data.qcWarnings?.length ? data.qcWarningStatement : 'All analyses were performed according to standard laboratory protocols.')}
+                    Results are reported on an air-dry fine-earth (&lt;2 mm) basis unless otherwise indicated.</>}
                 </div>
 
                 {/* Approval Trail (SD-17: Separated Episodes on Certificate) */}
-                {sample?.episodes && sample.episodes.length > 1 ? (
+                {!presentation && sample?.episodes && sample.episodes.length > 1 ? (
                     <div className="report-approval-trail space-y-1.5 my-2 p-2.5 bg-gray-50 rounded border border-gray-200">
                         <div className="font-bold text-xs text-gray-800 uppercase tracking-wider">Analytical Approval Passes:</div>
                         {sample.episodes.map(ep => (
@@ -387,7 +391,7 @@ const ReportContent = ({ data, publication = {}, withdrawalBanner }) => {
                 ) : sample?.approvedBy ? (
                     <div className="report-approval-trail">
                         <span className="approval-label">Results Approved:</span>
-                        <span className="approval-value">{sample.approvedBy}{sample.approvedAt ? ` — ${fmtDate(sample.approvedAt)}` : ''}</span>
+                        <span className="approval-value">{presentation ? presentation.approvalName : sample.approvedBy}{sample.approvedAt ? ` — ${fmtDate(sample.approvedAt)}` : ''}</span>
                     </div>
                 ) : null}
 
@@ -395,11 +399,11 @@ const ReportContent = ({ data, publication = {}, withdrawalBanner }) => {
                 <div className="report-signature-block">
                     <div className="signature-column">
                         <div className="signature-signed-area">
-                            <div className="signature-name">{signedBy?.name || 'Laboratory Manager'}</div>
+                            <div className="signature-name">{presentation ? presentation.approvalName : signedBy?.name || 'Laboratory Manager'}</div>
                             <div className="signature-esign">✓ Electronically Signed</div>
                         </div>
                         <div className="signature-rule"></div>
-                        <div className="signature-title">{signedBy?.title || 'Laboratory Manager'}</div>
+                        <div className="signature-title">{presentation ? presentation.approvalRole : signedBy?.title || 'Laboratory Manager'}</div>
                     </div>
                     <div className="signature-column">
                         <div className="signature-signed-area">
@@ -422,7 +426,7 @@ const ReportContent = ({ data, publication = {}, withdrawalBanner }) => {
                 </div>
 
                 <div className="report-generation-info">
-                    Report generated on {fmtDate(reportDate)} · {lab?.name || 'Laboratory'} · SoilFER LIMS v{generated?.version || '1.0'}
+                    Report generated on {fmtDate(reportDate)} · {lab?.name || 'Laboratory'} · SoilFER LIMS v{presentation ? presentation.appVersion : generated?.version || '1.0'}
                 </div>
             </footer>
         </div>

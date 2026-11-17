@@ -43,10 +43,11 @@ function generateReportPdfBuffer(reportContent, publication = {}) {
             const locale = ['en', 'es', 'es-419', 'fr', 'pt'].includes(reportContent.meta?.locale) ? reportContent.meta.locale : 'en';
             const labels = require(`../locales/${locale}.json`).resultReports;
             const evidenceText = describeReportEvidence(reportContent.evidence, locale);
-            const qcStatement = reportContent.qcStatement || (reportContent.evidence ? evidenceText.qcStatement
+            const presentation = reportContent.presentation?.version === 1 ? reportContent.presentation : null;
+            const qcStatement = presentation?.qcStatement || reportContent.qcStatement || (reportContent.evidence ? evidenceText.qcStatement
                 : reportContent.qcWarnings?.length ? reportContent.qcWarningStatement : evidenceText.qcStatement);
             const preparationStatement = [reportContent.preparationStatement || evidenceText.preparationStatement,
-                reportContent.basisStatement].filter(Boolean).join('\n');
+                presentation?.basisStatement || reportContent.basisStatement].filter(Boolean).join('\n');
             const number = publication.reportNumber || reportContent.reportNumber || labels.notRecorded;
             const issuedAt = publication.publishedAt || reportContent.publication?.publishedAt;
             const issuedDate = issuedAt ? new Date(issuedAt).toISOString().split('T')[0] : labels.notRecorded;
@@ -196,7 +197,7 @@ function generateReportPdfBuffer(reportContent, publication = {}) {
             doc.font('Helvetica').fontSize(8).fillColor(cDark)
                 .text(sample.labId || sample.id || 'N/A', rightX + 110, currentY + 24)
                 .text(sample.originalId || 'N/A', rightX + 110, currentY + 36)
-                .text(`${sample.projectCode || reportContent.project?.code || 'SOILFER'} (${sample.countryName || 'Regional'})`, rightX + 110, currentY + 48)
+                .text(`${sample.projectCode || reportContent.project?.code || 'SOILFER'} (${presentation?.location.country || sample.countryName || 'Regional'})`, rightX + 110, currentY + 48)
                 .text(`${client.name || sample.clientName || 'General Intake'}`, rightX + 110, currentY + 60, { width: colWidth - 118, ellipsis: true })
                 .text(`${sampleDepth} ${sample.horizon ? `[${sample.horizon}]` : ''}`, rightX + 110, currentY + 72)
                 .text(iso(sample.receptionDate)?.split('T')[0] || labels.notRecorded, rightX + 110, currentY + 84)
@@ -221,6 +222,7 @@ function generateReportPdfBuffer(reportContent, publication = {}) {
             const sampleEvidence = sample.reportEvidence || {};
             const condition = sampleEvidence.conditionOnReceipt || {};
             const sampleText = [
+                ...(presentation ? [`${presentation.locationLabel}: ${presentation.locationText}`] : []),
                 `${labels.conditionOnReceipt}: ${[condition.moisture, condition.status, condition.note].filter(Boolean).join(' · ') || labels.notRecorded}`,
                 `${labels.intakeNonconformities}: ${sampleEvidence.intakeNonconformities?.join('; ') || labels.notRecorded}`,
                 `${labels.analysisDates}: ${sampleEvidence.analysisStart || labels.notRecorded} – ${sampleEvidence.analysisEnd || labels.notRecorded}`,
@@ -264,7 +266,7 @@ function generateReportPdfBuffer(reportContent, publication = {}) {
             let sandVal = null, siltVal = null, clayVal = null;
             let socVal = null, tnVal = null;
 
-            resultGroups.forEach(group => {
+            resultGroups.forEach((group, groupIndex) => {
                 // Category sub-header
                 if (currentY > 720) {
                     doc.addPage();
@@ -273,7 +275,7 @@ function generateReportPdfBuffer(reportContent, publication = {}) {
 
                 doc.rect(startX, currentY, pageWidth, 14).fill('#E2E8F0');
                 doc.fillColor(cPrimary).font('Helvetica-Bold').fontSize(8)
-                    .text(group.categoryName || 'Standard Chemical Determinations', startX + 6, currentY + 3);
+                    .text(presentation?.groupNames[groupIndex] || group.categoryName || 'Standard Chemical Determinations', startX + 6, currentY + 3);
                 currentY += 15;
 
                 (group.items || []).forEach(item => {
@@ -287,7 +289,7 @@ function generateReportPdfBuffer(reportContent, publication = {}) {
                     // payloads without it retain the existing interpretation formatter.
                     const interpretation = notReportable ? null : Object.hasOwn(item, 'interpretation')
                         ? item.interpretation?.label : getInterpretation(item.param, item.value, item.unit);
-                    const noteText = [resultNotes(item, labels),
+                    const noteText = [resultNotes(presentation ? { ...item, flags: [], qcNotes: [] } : item, labels),
                         notReportable ? null : `${labels.interpretation}: ${interpretation || labels.notStated}`
                     ].filter(Boolean).join('\n');
                     const noteHeight=noteText ? doc.font('Helvetica').fontSize(7.5).heightOfString(noteText,{width:pageWidth-12})+8 : 0;
@@ -317,7 +319,7 @@ function generateReportPdfBuffer(reportContent, publication = {}) {
                         col1 + 6, currentY + 4, { width: 145, ellipsis: true });
 
                     doc.font('Helvetica').fontSize(7.5).fillColor(cGray)
-                        .text(item.method || item.standard || labels.methodNotRecorded, col2 + 4, currentY + 4, { width: 120, ellipsis: true });
+                        .text(presentation ? item.certificateMethodText || presentation.methodNotRecorded : item.method || item.standard || labels.methodNotRecorded, col2 + 4, currentY + 4, { width: 120, ellipsis: true });
 
                     doc.font('Helvetica-Bold').fontSize(8).fillColor(cDark)
                         .text(valueText,col3+4,currentY+4,{width:60,align:'right'});
@@ -351,8 +353,9 @@ function generateReportPdfBuffer(reportContent, publication = {}) {
             currentY += 10;
 
             // Display only the actual methods frozen into this report payload.
-            if (reportContent.methodologies?.length) {
-                const methodText = reportContent.methodologies.map(method => `${method.param}: ${method.method || labels.methodNotRecorded}` +
+            const displayedMethods = presentation?.methods || reportContent.methodologies;
+            if (displayedMethods?.length) {
+                const methodText = displayedMethods.map(method => `${presentation ? method.paramName : method.param}: ${method.method || labels.methodNotRecorded}` +
                     `${method.methodVersion != null ? ` · v${method.methodVersion}` : ''}` +
                     `${method.standard ? ` · ${method.standard}` : ''}` +
                     `${method.reference?.citation ? ` · ${method.reference.citation}` : ''}`).join('\n');
@@ -412,11 +415,11 @@ function generateReportPdfBuffer(reportContent, publication = {}) {
             const signedBy = reportContent.signedBy || {};
             const issuer = reportContent.publication?.issuer || {};
             const signatureRows = [
-                { text: signedBy.username && signedBy.date ? signedBy.name || signedBy.username : labels.approvalNotRecorded, font: 'Helvetica-Bold', size: 9 },
-                { text: `${labels.approvalRole}: ${signedBy.title || labels.notRecorded}`, font: 'Helvetica', size: 7.5 },
+                { text: presentation ? presentation.approvalName : signedBy.username && signedBy.date ? signedBy.name || signedBy.username : labels.approvalNotRecorded, font: 'Helvetica-Bold', size: 9 },
+                { text: `${labels.approvalRole}: ${presentation ? presentation.approvalRole : signedBy.title || labels.notRecorded}`, font: 'Helvetica', size: 7.5 },
                 { text: `${labels.approvedAt}: ${iso(signedBy.date) || labels.notRecorded}`, font: 'Helvetica', size: 7.5 },
-                { text: `${labels.issuedBy}: ${issuer.name || issuer.username || labels.notRecorded}`, font: 'Helvetica-Bold', size: 8, gapBefore: 10 },
-                { text: `${labels.issuerRole}: ${issuer.role || labels.notRecorded}`, font: 'Helvetica', size: 7.5 },
+                { text: `${labels.issuedBy}: ${presentation ? presentation.issuerName : issuer.name || issuer.username || labels.notRecorded}`, font: 'Helvetica-Bold', size: 8, gapBefore: 10 },
+                { text: `${labels.issuerRole}: ${presentation ? presentation.issuerRole : issuer.role || labels.notRecorded}`, font: 'Helvetica', size: 7.5 },
                 { text: `${labels.issuedAt}: ${iso(issuedAt) || labels.notRecorded}`, font: 'Helvetica', size: 7.5 }
             ];
             let signatureEnd = 24;

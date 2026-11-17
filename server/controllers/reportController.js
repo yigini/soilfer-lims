@@ -190,6 +190,8 @@ async function generateReport(req, res) {
             content.publication.retention = { days: retention.days, retainUntil: retention.retainUntil.toISOString() };
             if (revisionEvidence) revisionService.applyRevision(content, { ...revisionEvidence, locale: content.meta?.locale,
                 statementPolicy: await policyService.get(lab.id, 'report.amendedStatement', { db: tx }) });
+            // Freeze client-facing wording only for this newly issued version.
+            require('../services/certificatePresentation').freezeCertificatePresentation(content);
             await tx.reportShareLink.updateMany({
                 where: { isRevoked: false, report: { sampleId, status: 'PUBLISHED' } },
                 data: { isRevoked: true, revokedAt: publishedAt, revokedBy: req.user.username }
@@ -244,7 +246,8 @@ async function generateReport(req, res) {
             sampleId: report.sampleId,
             sampleLabId: report.sampleLabId,
             generatedAt: report.generatedAt,
-            generatedBy: report.generatedBy
+            generatedBy: report.generatedBy,
+            warnings: JSON.parse(report.content).presentation.warnings
         });
     } catch (err) {
         if (err.code === 'P2002' && String(err.meta?.target || err.message).includes('amendmentId')) {
