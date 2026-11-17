@@ -610,6 +610,8 @@
     "qcNotRequiredFor": "Quality-control checks were not required for: {{parameters}}.",
     "qcIncompleteFor": "The recorded quality-control evidence is incomplete for: {{parameters}}.",
     "qcExceptionFor": "The recorded quality checks show exceptions for: {{parameters}}.",
+    "qcFailedFor": "Recorded quality checks failed for: {{parameters}}.",
+    "qcWarningsFor": "Recorded quality checks have warnings for: {{parameters}}.",
     "qcCorrectionFor": "Corrected quality-control evidence was reviewed for: {{parameters}}.",
     "qcOutsideRepeatFor": "A calibration check is being repeated outside the reported result scope for: {{parameters}}.",
     "certificateDefaultBasis": "Results are reported on an air-dry fine-earth (<2 mm) basis unless otherwise indicated.",

@@ -610,6 +610,8 @@
     "qcNotRequiredFor": "Não eram necessários controlos de qualidade para: {{parameters}}.",
     "qcIncompleteFor": "Os registos de controlo de qualidade estão incompletos para: {{parameters}}.",
     "qcExceptionFor": "Os controlos de qualidade registados apresentam exceções para: {{parameters}}.",
+    "qcFailedFor": "Os controlos de qualidade registados falharam para: {{parameters}}.",
+    "qcWarningsFor": "Os controlos de qualidade registados apresentam avisos para: {{parameters}}.",
     "qcCorrectionFor": "Foram revistos registos corrigidos de controlo de qualidade para: {{parameters}}.",
     "qcOutsideRepeatFor": "Está a ser repetido um controlo de calibração fora do âmbito do resultado apresentado para: {{parameters}}.",
     "certificateDefaultBasis": "Os resultados são expressos em terra fina (<2 mm) seca ao ar, salvo indicação em contrário.",

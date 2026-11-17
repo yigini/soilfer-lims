@@ -29,7 +29,9 @@ function freezeCertificatePresentation(content) {
         for (const row of qc.deviations) {
             const key = row.qcStatus === 'NO_BATCH' ? 'qcNoBatchFor'
                 : row.qcStatus === 'NOT_REQUIRED' ? 'qcNotRequiredFor'
-                    : ['EVIDENCE_INCOMPLETE', 'NOT_RECORDED'].includes(row.qcStatus) ? 'qcIncompleteFor' : 'qcExceptionFor';
+                    : ['EVIDENCE_INCOMPLETE', 'NOT_RECORDED'].includes(row.qcStatus) ? 'qcIncompleteFor'
+                        : ['FAIL', 'QC_FAIL', 'REJECT', 'REPEAT', 'REPEAT_ORDERED'].includes(row.qcStatus) ? 'qcFailedFor'
+                            : ['WARN', 'QC_WARN', 'PROCEED_WITH_WARNING'].includes(row.qcStatus) ? 'qcWarningsFor' : 'qcExceptionFor';
             buckets.set(key, [...(buckets.get(key) || []), row.analysisCode]);
         }
         for (const [key, codes] of buckets) sentences.push(sentence(key, codes));
@@ -37,10 +39,21 @@ function freezeCertificatePresentation(content) {
     if (qc?.reviewedCorrections?.length) sentences.push(sentence('qcCorrectionFor', qc.reviewedCorrections.map(row => row.analysisCode)));
     if (qc?.calibrationBracketRepeats?.length) sentences.push(sentence('qcOutsideRepeatFor', qc.calibrationBracketRepeats.map(row => row.analysisCode)));
     const signed = content.signedBy || {}, issuer = content.publication?.issuer || {};
-    const fullName = person => person.name && person.name !== person.username ? person.name : labels.nameNotRecorded;
+    const fullName = person => {
+        const name = scalar(person.name).trim();
+        return name && name !== scalar(person.username).trim() ? name : labels.nameNotRecorded;
+    };
     const location = { ...(content.locationData || {}) };
-    const enteredCountry = scalar(content.fieldMetadata?.country || content.receptionData?.country);
-    if (enteredCountry) location.country = enteredCountry;
+    const fm = content.fieldMetadata || {}, rd = content.receptionData || {};
+    const entered = {
+        country: [fm.country, rd.country], district: [fm.district, rd.district], village: [fm.village, rd.village],
+        region: [fm.region, fm.province, rd.region, rd.province],
+        locationDescription: [fm.locationDescription, fm.location_description, rd.locationDescription]
+    };
+    for (const [key, candidates] of Object.entries(entered)) {
+        const label = candidates.map(scalar).find(text => text !== '');
+        if (label != null) location[key] = label;
+    }
     content.presentation = {
         version: 1, locale, appVersion, methodNotRecorded: labels.methodNotRecorded,
         methods: [...new Map(methods.map(row => [JSON.stringify(row), row])).values()],

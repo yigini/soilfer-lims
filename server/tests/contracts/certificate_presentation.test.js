@@ -96,3 +96,21 @@ test('generation releases a new immutable version with named missing-method warn
         }, { reports: true });
     } finally { await f.close(); }
 });
+
+test.each(['en', 'es', 'es-419', 'fr', 'pt'])('new %s notes preserve failed versus warning meaning without raw status codes', locale => {
+    const c = reportPresentationFixture(locale), labels = require('../../locales/' + locale + '.json').resultReports;
+    c.evidence.qc.deviations = [{ analysisCode: 'SAND', qcStatus: 'QC_FAIL' }, { analysisCode: 'CLAY', qcStatus: 'PROCEED_WITH_WARNING' }];
+    const p = freezeCertificatePresentation(c);
+    expect(p.qcStatement).toBe(labels.qcFailedFor.replace('{{parameters}}', 'Sand fraction') + ' ' + labels.qcWarningsFor.replace('{{parameters}}', 'Clay fraction'));
+    expect(p.qcStatement).not.toMatch(/QC_FAIL|PROCEED_WITH_WARNING/);
+});
+
+test('structured location labels are frozen as entered, rather than their internal identifiers', () => {
+    const c = reportPresentationFixture();
+    c.fieldMetadata.district = { value: 'district-id', label: 'A Coruña' };
+    c.fieldMetadata.province = { value: 'region-id', label: 'Galicia' };
+    const p = freezeCertificatePresentation(c);
+    expect(p.location).toMatchObject({ country: 'España', district: 'A Coruña', region: 'Galicia' });
+    expect(p.locationText).toBe('A Coruña, Galicia, España');
+    expect(p.locationText).not.toMatch(/district-id|region-id/);
+});
