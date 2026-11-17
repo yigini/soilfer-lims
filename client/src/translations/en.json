@@ -3165,6 +3165,8 @@
     "viewReport": "View report",
     "shareReport": "Share report",
     "printPdf": "Print / Save as PDF",
+    "pdfDownloading": "Preparing PDF…",
+    "pdfDownloadFailed": "The report PDF could not be downloaded. Please try again.",
     "noReportContent": "No report content available",
     "manageShareLinks": "Manage Share Links",
     "createPublicLink": "Create Public Link",

@@ -92,6 +92,9 @@ jobs:
         run: npx playwright install --with-deps chromium
         working-directory: server
 
+      - name: Install PDF inspection tools for browser report contract
+        run: command -v pdftotext && command -v pdfinfo || sudo apt-get install -y poppler-utils
+
       - name: Run server test suite
         run: npm test
         working-directory: server

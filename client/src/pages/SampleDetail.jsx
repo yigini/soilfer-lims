@@ -21,7 +21,7 @@ import FieldMap from '../components/sample/FieldMap';
 import IntakeRequestCard from '../components/sample/IntakeRequestCard';
 import AnalysisUpdateModal from '../components/sample/AnalysisUpdateModal';
 import LabelPrintDialog from '../components/common/LabelPrintDialog';
-import ReportContent from '../components/report/ReportContent';
+import ReportViewer from '../components/report/ReportViewer';
 import SpectraViewer from '../components/SpectraViewer';
 import StorageMovementModal from '../components/sample/StorageMovementModal';
 import EvidenceInspectionModal from '../components/sample/EvidenceInspectionModal';
@@ -1583,32 +1583,7 @@ const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
             )}
 
             {/* Report Viewer Modal */}
-            {reportModal && (
-                <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[130] flex items-center justify-center p-4">
-                    <div className="bg-sf-surface rounded-2xl shadow-2xl w-full max-w-5xl h-[90vh] flex flex-col overflow-hidden border border-sf-divider">
-                        <div className="px-6 py-4 border-b border-sf-divider flex justify-between items-center bg-sf-surface no-print">
-                            <div>
-                                <h2 className="text-xl font-black text-sf-text flex items-center gap-2">
-                                    <FileText size={20} className="text-indigo-600" />
-                                    Report — {reportModal.sampleLabId || reportModal.sampleId?.slice(0, 8)}
-                                </h2>
-                                <p className="text-xs text-gray-500 mt-0.5">Version {reportModal.version} • Generated {reportModal.generatedAt ? new Date(reportModal.generatedAt).toLocaleDateString('en-GB') : '—'}</p>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <button onClick={() => window.print()} className="p-2.5 hover:bg-sf-raised rounded-xl text-sf-emerald transition-colors" title="Print">
-                                    <Printer size={20} />
-                                </button>
-                                <button onClick={() => setReportModal(null)} className="p-2.5 hover:bg-sf-raised rounded-xl text-sf-muted transition-colors">
-                                    <XCircle size={24} />
-                                </button>
-                            </div>
-                        </div>
-                        <div className="flex-1 overflow-y-auto p-8 bg-sf-canvas" data-surface="paper">
-                            <ReportContent data={reportModal.content ? (typeof reportModal.content === 'string' ? JSON.parse(reportModal.content) : reportModal.content) : reportModal} showActions />
-                        </div>
-                    </div>
-                </div>
-            )}
+            {reportModal && <ReportViewer report={reportModal} onClose={() => setReportModal(null)} />}
 
             {/* Return for Correction Modal */}
             {returningSubmissionId && (

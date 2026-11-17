@@ -4,7 +4,7 @@ import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { useDialog } from '../context/DialogContext';
 import { useLanguage } from '../context/LanguageContext';
-import ReportContent from '../components/report/ReportContent';
+import ReportViewer from '../components/report/ReportViewer';
 import {
     FileText, Search, Share2, Download, ExternalLink, Copy, XCircle,
     ChevronLeft, ChevronRight, Clock, User, Shield, Link2, LinkIcon,
@@ -417,41 +417,7 @@ const ResultReports = ({
             </div>
 
             {/* ─── REPORT VIEWER MODAL ─── */}
-            {selectedReport && (
-                <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                    <div className="bg-sf-surface rounded-2xl shadow-2xl w-full max-w-5xl h-[90vh] flex flex-col overflow-hidden border border-sf-divider">
-                        {/* Header */}
-                        <div className="px-6 py-4 border-b border-sf-divider flex justify-between items-center bg-sf-surface no-print">
-                            <div>
-                                <h2 className="text-xl font-black text-sf-text">
-                                    Report — {selectedReport.sampleLabId || selectedReport.sampleId?.slice(0, 8)}
-                                </h2>
-                                <p className="text-xs text-gray-500 mt-0.5">Version {selectedReport.version} • Generated {formatDate(selectedReport.generatedAt)} by {selectedReport.generatedBy}</p>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <button onClick={() => window.print()} className="p-2.5 hover:bg-indigo-100 dark:hover:bg-indigo-900/30 rounded-xl text-sf-emerald transition-colors" title="Print / Save as PDF">
-                                    <Printer size={20} />
-                                </button>
-                                <button onClick={() => setSelectedReport(null)} className="p-2.5 hover:bg-sf-raised rounded-xl text-gray-500 transition-colors">
-                                    <XCircle size={24} />
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Report Content */}
-                        <div className="flex-1 overflow-y-auto p-8 bg-sf-canvas" data-surface="paper">
-                            {selectedReport.content ? (
-                                <ReportContent data={typeof selectedReport.content === 'string' ? JSON.parse(selectedReport.content) : selectedReport.content}
-                                    publication={{status:selectedReport.status,withdrawal:selectedReport.withdrawal}}
-                                    withdrawalBanner={selectedReport.withdrawal && t('resultReports.withdrawnPendingAmendment',
-                                        'Withdrawn pending amendment {{amendmentId}}',{amendmentId:selectedReport.withdrawal.amendmentId})} showActions />
-                            ) : (
-                                <div className="text-center text-gray-400 py-20">No report content available</div>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            )}
+            {selectedReport && <ReportViewer report={selectedReport} onClose={() => setSelectedReport(null)} />}
 
             {/* ─── SHARE LINK MODAL ─── */}
             {shareModal && (

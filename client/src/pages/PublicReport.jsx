@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import ReportContent from '../components/report/ReportContent';
+import ReportPdfButton from '../components/report/ReportPdfButton';
 import { useLanguage } from '../context/LanguageContext';
 
 /**
@@ -74,12 +75,8 @@ const PublicReport = () => {
                         Shared Report · Version {report?.version}
                     </span>
                     <div style={{ display: 'flex', gap: 8 }}>
-                        <button
-                            onClick={() => window.print()}
-                            style={{ padding: '8px 16px', background: '#1e3a5f', color: '#fff', border: 'none', borderRadius: 6, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}
-                        >
-                            🖨 Print / Save as PDF
-                        </button>
+                        <ReportPdfButton report={report} publicToken={token}
+                            style={{ padding: '8px 16px', background: '#1e3a5f', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer' }} />
                     </div>
                 </div>
 
