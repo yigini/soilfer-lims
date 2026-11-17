@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
@@ -36,6 +37,8 @@ const ResultReports = ({
     const [statusFilter, setStatusFilter] = useState(defaultStatus);
     const [pagination, setPagination] = useState(initialPagination || { total: initialReports ? initialReports.length : 0, page: 1, pages: 1, limit: 25 });
     const [selectedReport, setSelectedReport] = useState(null);
+    const [pdfDownloading, setPdfDownloading] = useState(false);
+    const pdfRequestRef = useRef(false);
     const [shareModal, setShareModal] = useState(null); // reportId for share dialog
     const [shareLinks, setShareLinks] = useState([]);
     const [shareLoading, setShareLoading] = useState(false);
@@ -200,6 +203,38 @@ const ResultReports = ({
             setShareLinks(linksRes.data || []);
         } catch (e) {
             showDialog({ type: 'error', title: 'Error', message: 'Failed to revoke link' });
+        }
+    };
+
+    // Download the stored version being viewed, never the sample's latest report.
+    const downloadReportPdf = async () => {
+        if (!selectedReport || pdfRequestRef.current) return;
+        pdfRequestRef.current = true;
+        setPdfDownloading(true);
+        try {
+            const response = await axios.get(`/api/reports/${encodeURIComponent(selectedReport.id)}/pdf`, {
+                responseType: 'blob'
+            });
+            const blob = response.data;
+            if (!blob.type.includes('application/pdf') || await blob.slice(0, 5).text() !== '%PDF-') {
+                throw new Error('Invalid report PDF response');
+            }
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            const sample = String(selectedReport.sampleLabId || selectedReport.sampleId || 'Report').replace(/[^a-zA-Z0-9_-]/g, '_');
+            link.href = url;
+            link.download = `SoilFER_Report_${sample}_v${selectedReport.version}.pdf`;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            // Let the browser consume the download before releasing its blob.
+            window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+        } catch {
+            showDialog({ type: 'error', title: t('common.error', 'Error'),
+                message: t('resultReports.pdfDownloadFailed', 'The report PDF could not be downloaded. Please try again.') });
+        } finally {
+            pdfRequestRef.current = false;
+            setPdfDownloading(false);
         }
     };
 
@@ -417,9 +452,9 @@ const ResultReports = ({
             </div>
 
             {/* ─── REPORT VIEWER MODAL ─── */}
-            {selectedReport && (
-                <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                    <div className="bg-sf-surface rounded-2xl shadow-2xl w-full max-w-5xl h-[90vh] flex flex-col overflow-hidden border border-sf-divider">
+            {selectedReport && createPortal(
+                <div className="report-viewer-modal fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label={t('resultReports.viewReport', 'View report')}>
+                    <div className="report-viewer-shell bg-sf-surface rounded-2xl shadow-2xl w-full max-w-5xl h-[90vh] flex flex-col overflow-hidden border border-sf-divider">
                         {/* Header */}
                         <div className="px-6 py-4 border-b border-sf-divider flex justify-between items-center bg-sf-surface no-print">
                             <div>
@@ -429,7 +464,10 @@ const ResultReports = ({
                                 <p className="text-xs text-gray-500 mt-0.5">Version {selectedReport.version} • Generated {formatDate(selectedReport.generatedAt)} by {selectedReport.generatedBy}</p>
                             </div>
                             <div className="flex items-center gap-2">
-                                <button onClick={() => window.print()} className="p-2.5 hover:bg-indigo-100 dark:hover:bg-indigo-900/30 rounded-xl text-sf-emerald transition-colors" title="Print / Save as PDF">
+                                <button onClick={downloadReportPdf} disabled={pdfDownloading} aria-busy={pdfDownloading}
+                                    aria-label={t('resultReports.printPdf', 'Print / Save as PDF')}
+                                    className="p-2.5 hover:bg-indigo-100 dark:hover:bg-indigo-900/30 rounded-xl text-sf-emerald transition-colors disabled:opacity-50"
+                                    title={pdfDownloading ? t('resultReports.pdfDownloading', 'Preparing PDF…') : t('resultReports.printPdf', 'Print / Save as PDF')}>
                                     <Printer size={20} />
                                 </button>
                                 <button onClick={() => setSelectedReport(null)} className="p-2.5 hover:bg-sf-raised rounded-xl text-gray-500 transition-colors">
@@ -439,7 +477,7 @@ const ResultReports = ({
                         </div>
 
                         {/* Report Content */}
-                        <div className="flex-1 overflow-y-auto p-8 bg-sf-canvas" data-surface="paper">
+                        <div className="report-viewer-scroll flex-1 overflow-y-auto p-8 bg-sf-canvas" data-surface="paper">
                             {selectedReport.content ? (
                                 <ReportContent data={typeof selectedReport.content === 'string' ? JSON.parse(selectedReport.content) : selectedReport.content}
                                     publication={{status:selectedReport.status,withdrawal:selectedReport.withdrawal}}
@@ -451,7 +489,7 @@ const ResultReports = ({
                         </div>
                     </div>
                 </div>
-            )}
+            , document.body)}
 
             {/* ─── SHARE LINK MODAL ─── */}
             {shareModal && (

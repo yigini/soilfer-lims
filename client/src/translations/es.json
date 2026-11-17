@@ -3165,6 +3165,8 @@
     "viewReport": "Ver informe",
     "shareReport": "Compartir informe",
     "printPdf": "Imprimir / Guardar en PDF",
+    "pdfDownloading": "Preparando PDF…",
+    "pdfDownloadFailed": "No se ha podido descargar el PDF del informe. Inténtelo de nuevo.",
     "noReportContent": "No hay contenido disponible para el informe",
     "manageShareLinks": "Gestionar enlaces compartidos",
     "createPublicLink": "Crear enlace público",
