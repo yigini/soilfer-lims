@@ -39,7 +39,7 @@ test('the real report viewer downloads its official stored version and prints th
                 param, name, value, unit, method: `Recorded method ${index + 1}`, standard: `Recorded SOP ${index + 1}`,
                 uncertainty: { state: 'NOT_STATED' }
             })) }],
-            methodologies: parameters.map(([param, name], index) => ({ param, paramName: name, method: `Recorded method ${index + 1}`,
+            methodologies: parameters.map(([param, name], index) => ({ param, name, method: `Recorded method ${index + 1}`,
                 methodVersion: '1', standard: `Recorded SOP ${index + 1}`,
                 reference: { citation: `Recorded reference ${index + 1}. ` + 'Documented procedure, preparation, calibration and measurement conditions retained for this synthetic report. '.repeat(7) } })),
             signedBy: { name: 'Owned PDF Reviewer', username: 'owned-reviewer', title: 'Laboratory manager', date: at },
@@ -134,6 +134,25 @@ test('the real report viewer downloads its official stored version and prints th
                 await page.getByRole('button', { name: 'OK', exact: true }).click();
                 await page.unroute(`**/api/reports/${selected.id}/pdf`);
             }
+            await page.goto(`${base}/samples/${selected.sampleId}`);
+            await page.getByRole('button', { name: 'View report v2', exact: true }).click();
+            await page.getByRole('dialog', { name: 'View report', exact: true }).locator('.report-document').waitFor();
+            const sampleResponse = page.waitForResponse(response => response.url() === `${base}/api/reports/${selected.id}/pdf`);
+            const sampleDownload = page.waitForEvent('download');
+            await page.getByRole('dialog', { name: 'View report', exact: true }).getByRole('button', { name: 'Print / Save as PDF', exact: true }).click();
+            expect((await sampleResponse).status()).toBe(200);
+            expect(fs.readFileSync(await (await sampleDownload).path())).toEqual(await (await sampleResponse).body());
+
+            const anonymous = await browser.newContext();
+            const publicPage = await anonymous.newPage();
+            await publicPage.goto(`${base}/report/${shareToken}`);
+            await publicPage.locator('.report-document').waitFor();
+            const sharedResponse = publicPage.waitForResponse(response => response.url() === `${base}/api/reports/public/${shareToken}/pdf`);
+            const sharedDownload = publicPage.waitForEvent('download');
+            await publicPage.getByRole('button', { name: 'Print / Save as PDF', exact: true }).click();
+            expect((await sharedResponse).status()).toBe(200);
+            expect(fs.readFileSync(await (await sharedDownload).path())).toEqual(await (await sharedResponse).body());
+            await anonymous.close();
             expect(await f.db.report.findMany({ orderBy: { version: 'asc' } })).toEqual(frozenBefore);
             fs.writeFileSync(path.join(artifacts, 'checks.json'), JSON.stringify({ pages, selectedVersion: 2, officialRoute: true,
                 footerEveryPage: true, methods: true, signature: true, disclaimer: true, printIsolation: true, explicit403and500: true }, null, 2));
