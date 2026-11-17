@@ -110,6 +110,7 @@ const ReportContent = ({ data, publication = {}, withdrawalBanner }) => {
     const presentation = data.presentation?.version === 1 ? data.presentation : null;
     const loc = presentation?.location || locationData || {};
     const displayedMethods = presentation?.methods || methodologies;
+    const approvalPasses = presentation ? presentation.approvalPasses || [] : sample?.episodes || [];
 
     return (
         <div className="report-document">
@@ -258,7 +259,7 @@ const ReportContent = ({ data, publication = {}, withdrawalBanner }) => {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                     <h2 className="report-section-title" style={{ margin: 0 }}>Certificate of Analysis</h2>
                     <span style={{ fontSize: 11, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>
-                        Analytical Measurements (ISO/IEC 17025)
+                        {presentation ? presentation.measurementsHeading : 'Analytical Measurements (ISO/IEC 17025)'}
                     </span>
                 </div>
 
@@ -282,6 +283,9 @@ const ReportContent = ({ data, publication = {}, withdrawalBanner }) => {
                                                 <td className="param-name">
                                                     {item.amendmentChange === 'CHANGED' ? '† ' : item.amendmentChange === 'ADDED' ? '‡ ' : ''}
                                                     {toScalar(item.name || item.param)}
+                                                    {presentation && item.flags?.length > 0 && <div style={{fontSize:'8pt',fontWeight:400,color:'#4b5563'}}>
+                                                        {presentation.resultFlagsLabel}: {item.flags.join(', ')}
+                                                    </div>}
                                                     {item.provenance && item.provenance !== 'MEASURED' && (
                                                         <span style={{
                                                             marginLeft: 8,
@@ -376,14 +380,14 @@ const ReportContent = ({ data, publication = {}, withdrawalBanner }) => {
                 </div>
 
                 {/* Approval Trail (SD-17: Separated Episodes on Certificate) */}
-                {!presentation && sample?.episodes && sample.episodes.length > 1 ? (
+                {approvalPasses.length > 1 ? (
                     <div className="report-approval-trail space-y-1.5 my-2 p-2.5 bg-gray-50 rounded border border-gray-200">
-                        <div className="font-bold text-xs text-gray-800 uppercase tracking-wider">Analytical Approval Passes:</div>
-                        {sample.episodes.map(ep => (
+                        <div className="font-bold text-xs text-gray-800 uppercase tracking-wider">{presentation ? presentation.approvalPassesTitle : 'Analytical Approval Passes:'}</div>
+                        {approvalPasses.map(ep => (
                             <div key={ep.episodeNumber} className="text-xs text-gray-700 flex justify-between">
                                 <span className="font-semibold">{ep.label}:</span>
                                 <span>
-                                    {ep.approvedAt ? `Approved by ${ep.approvedBy || 'Manager'} on ${fmtDate(ep.approvedAt)}` : 'In Progress / Current Pass'}
+                                    {presentation ? ep.text : ep.approvedAt ? `Approved by ${ep.approvedBy || 'Manager'} on ${fmtDate(ep.approvedAt)}` : 'In Progress / Current Pass'}
                                 </span>
                             </div>
                         ))}

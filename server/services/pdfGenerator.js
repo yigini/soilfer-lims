@@ -1,7 +1,7 @@
 /**
  * SoilFER-LIMS Analytical Report & Certificate of Analysis PDF Generator
  * 
- * Generates ISO/IEC 17025 compliant, publication-grade Soil Analysis Certificates.
+ * Generates Soil Analysis Certificates from frozen report content.
  * Pure JavaScript implementation using PDFKit (zero external binary / headless Chrome dependencies).
  */
 
@@ -132,7 +132,7 @@ function generateReportPdfBuffer(reportContent, publication = {}) {
             }
 
             // =========================================================================
-            // 2. DOCUMENT TITLE & ACCREDITATION STATEMENT
+            // 2. DOCUMENT TITLE
             // =========================================================================
             doc.fillColor(cDark)
                 .font('Helvetica-Bold')
@@ -289,7 +289,7 @@ function generateReportPdfBuffer(reportContent, publication = {}) {
                     // payloads without it retain the existing interpretation formatter.
                     const interpretation = notReportable ? null : Object.hasOwn(item, 'interpretation')
                         ? item.interpretation?.label : getInterpretation(item.param, item.value, item.unit);
-                    const noteText = [resultNotes(presentation ? { ...item, flags: [], qcNotes: [] } : item, labels),
+                    const noteText = [resultNotes(presentation ? { ...item, qcNotes: [] } : item, presentation ? { ...labels, qcFlags: presentation.resultFlagsLabel } : labels),
                         notReportable ? null : `${labels.interpretation}: ${interpretation || labels.notStated}`
                     ].filter(Boolean).join('\n');
                     const noteHeight=noteText ? doc.font('Helvetica').fontSize(7.5).heightOfString(noteText,{width:pageWidth-12})+8 : 0;
@@ -405,6 +405,22 @@ function generateReportPdfBuffer(reportContent, publication = {}) {
             // =========================================================================
             // 7. QA/QC ACCEPTANCE & DIGITAL ENDORSEMENT
             // =========================================================================
+            if (presentation?.approvalPasses?.length > 1) {
+                if (currentY > 710) { doc.addPage(); currentY = 40; }
+                doc.fillColor(cPrimary).font('Helvetica-Bold').fontSize(8.5)
+                    .text(presentation.approvalPassesTitle, startX, currentY, { width: pageWidth });
+                currentY = doc.y + 6;
+                const bottomMargin = doc.page.margins.bottom;
+                doc.page.margins.bottom = 92;
+                for (const pass of presentation.approvalPasses) {
+                    const text = `${pass.label}: ${pass.text}`;
+                    const height = doc.font('Helvetica').fontSize(7.5).heightOfString(text, { width: pageWidth });
+                    if (currentY + Math.min(height, 710) > 750) { doc.addPage(); currentY = 40; }
+                    doc.fillColor(cDark).text(text, startX, currentY, { width: pageWidth });
+                    currentY = doc.y + 6;
+                }
+                doc.page.margins.bottom = bottomMargin;
+            }
             if (currentY > 640) {
                 doc.addPage();
                 currentY = 40;

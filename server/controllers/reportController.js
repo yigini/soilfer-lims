@@ -180,7 +180,7 @@ async function generateReport(req, res) {
             const identity = await allocateReportIdentity(tx, { sampleId, lab, publishedAt,
                 resolveFormat: () => policyService.get(lab.id, 'report.numberFormat', { db: tx }) });
             const policySnapshot = await policyService.snapshot(lab.id, { db: tx });
-            const { content, searchKeys } = await assembleReport(sampleId, req.user, { db: tx, qcBatches, qcModes, qcModeEvidence, qcGates, qcAcknowledgements, reportedSelectionProof,
+            const { content, searchKeys, approvalPassEvidence } = await assembleReport(sampleId, req.user, { db: tx, qcBatches, qcModes, qcModeEvidence, qcGates, qcAcknowledgements, reportedSelectionProof,
                 basis: req.body?.basis });
             content.policy = { version: policySnapshot.version, presetCode: policySnapshot.presetCode,
                 reportNumberFormat: policySnapshot.values['report.numberFormat'], qcModes, qcModeEvidence };
@@ -191,7 +191,7 @@ async function generateReport(req, res) {
             if (revisionEvidence) revisionService.applyRevision(content, { ...revisionEvidence, locale: content.meta?.locale,
                 statementPolicy: await policyService.get(lab.id, 'report.amendedStatement', { db: tx }) });
             // Freeze client-facing wording only for this newly issued version.
-            require('../services/certificatePresentation').freezeCertificatePresentation(content);
+            require('../services/certificatePresentation').freezeCertificatePresentation(content, { approvalPassEvidence });
             await tx.reportShareLink.updateMany({
                 where: { isRevoked: false, report: { sampleId, status: 'PUBLISHED' } },
                 data: { isRevoked: true, revokedAt: publishedAt, revokedBy: req.user.username }

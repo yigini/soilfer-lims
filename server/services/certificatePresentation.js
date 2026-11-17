@@ -1,11 +1,12 @@
 const parameterNames = require('../data/analysisDisplayNames.json');
 const appVersion = require('../package.json').version;
+const { iso } = require('./reportContentEvidence');
 const locales = ['en', 'es', 'es-419', 'fr', 'pt'];
 const scalar = value => value && typeof value === 'object' ? scalar(value.label ?? value.name ?? value.value) : value == null ? '' : String(value);
 
 // Called only while creating a NEW immutable report. Rendering never calls
 // this function, consults current profiles, or upgrades a historical snapshot.
-function freezeCertificatePresentation(content) {
+function freezeCertificatePresentation(content, { approvalPassEvidence = [] } = {}) {
     const locale = locales.includes(content.meta?.locale) ? content.meta.locale : 'en';
     const dictionary = require(`../locales/${locale}.json`), labels = dictionary.resultReports;
     const groups = content.resultGroups || [], items = groups.flatMap(group => group.items || []);
@@ -39,10 +40,24 @@ function freezeCertificatePresentation(content) {
     if (qc?.reviewedCorrections?.length) sentences.push(sentence('qcCorrectionFor', qc.reviewedCorrections.map(row => row.analysisCode)));
     if (qc?.calibrationBracketRepeats?.length) sentences.push(sentence('qcOutsideRepeatFor', qc.calibrationBracketRepeats.map(row => row.analysisCode)));
     const signed = content.signedBy || {}, issuer = content.publication?.issuer || {};
-    const fullName = person => {
+    const recordedName = person => {
         const name = scalar(person.name).trim();
-        return name && name !== scalar(person.username).trim() ? name : labels.nameNotRecorded;
+        return name && name !== scalar(person.username).trim() ? name : null;
     };
+    const fullName = person => recordedName(person) || labels.nameNotRecorded;
+    const approvalPasses = (content.sample?.episodes || []).map(episode => {
+        const date = iso(episode.approvedAt);
+        const retained = approvalPassEvidence.find(row => row.episodeNumber === episode.episodeNumber &&
+            row.username === episode.approvedBy && iso(row.date) === date);
+        const matchingSignature = episode.approvedBy === signed.username && date && date === iso(signed.date);
+        const name = fullName(retained || (matchingSignature ? signed : {}));
+        return { episodeNumber: episode.episodeNumber, label: scalar(episode.label), name, date,
+            text: date ? labels.approvalPassRecorded.replace('{{name}}', name).replace('{{date}}', date.slice(0, 10)) : labels.approvalPassPending };
+    });
+    const nameWarnings = [
+        ...(!recordedName(signed) ? [{ code: 'REPORT_SIGNATORY_NAME_NOT_RECORDED', severity: 'WARNING', signature: 'approver', message: labels.signatoryNameMissingWarning }] : []),
+        ...(!recordedName(issuer) ? [{ code: 'REPORT_ISSUER_NAME_NOT_RECORDED', severity: 'WARNING', signature: 'issuer', message: labels.issuerNameMissingWarning }] : [])
+    ];
     const location = { ...(content.locationData || {}) };
     const fm = content.fieldMetadata || {}, rd = content.receptionData || {};
     const entered = {
@@ -56,9 +71,11 @@ function freezeCertificatePresentation(content) {
     }
     content.presentation = {
         version: 1, locale, appVersion, methodNotRecorded: labels.methodNotRecorded,
+        measurementsHeading: 'Analytical Measurements', resultFlagsLabel: labels.certificateResultFlags,
+        approvalPassesTitle: labels.approvalPassesTitle, approvalPasses,
         methods: [...new Map(methods.map(row => [JSON.stringify(row), row])).values()],
-        warnings: uniqueMissing.length ? [{ code: 'REPORT_METHOD_NOT_RECORDED', severity: 'WARNING', parameters: uniqueMissing,
-            message: sentence('methodsMissingWarning', uniqueMissing.map(row => row.param)) }] : [],
+        warnings: [...(uniqueMissing.length ? [{ code: 'REPORT_METHOD_NOT_RECORDED', severity: 'WARNING', parameters: uniqueMissing,
+            message: sentence('methodsMissingWarning', uniqueMissing.map(row => row.param)) }] : []), ...nameWarnings],
         qcStatement: sentences.join(' '), basisStatement: content.basisStatement || labels.certificateDefaultBasis,
         approvalName: fullName(signed), approvalRole: dictionary.roles[signed.title] || labels.notRecorded,
         issuerName: fullName(issuer), issuerRole: dictionary.roles[issuer.role] || labels.notRecorded,

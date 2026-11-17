@@ -27,12 +27,15 @@ test.each(['en', 'es', 'es-419', 'fr', 'pt'])('new %s certificates use frozen cl
     const html = renderReportHtml(content), texts = await reportPdfTexts(content), pdf = texts.join('\n');
     for (const output of [html, pdf]) {
         for (const phrase of [labels.methodNotRecorded, labels.certificateParticleSize, 'Marta Example', 'A Coruña', 'España', presentation.approvalRole]) expect(output).toContain(phrase);
-        expect(output).not.toMatch(/Standard Laboratory Method|LAB_MANAGER|internal-reviewer|INTERNAL MANAGER FREE TEXT|INTERNAL DISPOSITION|PROCEED_WITH_WARNING|QC_WARN|NO_BATCH/);
+        expect(output).not.toMatch(/Standard Laboratory Method|LAB_MANAGER|internal-reviewer|INTERNAL MANAGER FREE TEXT|INTERNAL DISPOSITION|PROCEED_WITH_WARNING|NO_BATCH/);
         expect(output).toContain(presentation.qcStatement);
     }
     expect(html).toContain(presentation.qcStatement + ' ' + presentation.basisStatement.replace('<', '&lt;').replace('>', '&gt;'));
     expect(html).toContain('SoilFER LIMS v' + require('../../package.json').version);
-    expect(html).toContain('Analytical Measurements (ISO/IEC 17025)');
+    expect(html).toContain('Analytical Measurements');
+    expect(html).not.toContain('ISO/IEC 17025');
+    expect(presentation.qcStatement).not.toMatch(/QC_WARN|PROCEED_WITH_WARNING|NO_BATCH/);
+    expect(html).toContain('QC_WARN'); expect(pdf).toContain('QC_WARN');
     expect(content.evidence).toEqual(evidenceBefore);
     const frozen = JSON.parse(JSON.stringify(content));
     expect(renderReportHtml(frozen)).toBe(html);
@@ -61,7 +64,7 @@ test('mixed categories stay intact, unknown people stay unnamed, and QC comments
     expect(p.qcStatement).not.toMatch(/KEEP INTERNAL|internal-person|EVIDENCE_INCOMPLETE/);
 });
 
-test('generation releases a new immutable version with named missing-method warnings and preserves the old version', async () => {
+test.each([true, false])('generation returns nonblocking release warnings and preserves every approval pass, names recorded=%s', async namesRecorded => {
     const { qcGateFixture } = require('../helpers/qcGateFixture');
     const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
     const { appendReportedSelection } = require('../../services/reportedValueSelectionService');
@@ -69,6 +72,7 @@ test('generation releases a new immutable version with named missing-method warn
     const f = await qcGateFixture({ status: 'ACCEPTED', criteria: { blankPerBatch: 0, lrmPerBatch: 0, duplicateEvery: 0, crmEveryNBatches: 0, ccvEvery: 0 } });
     try {
         const at = new Date('2026-11-17T12:00:00Z');
+        await f.db.user.update({ where: { username: f.actor.username }, data: { name: namesRecorded ? 'Owned Full Issuer' : null } });
         const sample = await createSampleFixture(f.db, { data: { id: randomUUID(), originalId: randomUUID(), assignedLab: f.labId,
             status: 'APPROVED', approvedBy: f.actor.username, approvedAt: at, dryingStatus: 'DONE', preparationStatus: 'DONE', receptionDate: at } });
         const item = await createWorkItemFixture(f.db, { data: { id: randomUUID(), sampleId: sample.id, labId: f.labId, analysis: f.analysisCode,
@@ -79,7 +83,14 @@ test('generation releases a new immutable version with named missing-method warn
         await f.db.$transaction(tx => appendReportedSelection(tx, item, f.actor));
         await f.db.auditLog.create({ data: { id: randomUUID(), entity: 'SAMPLE', entityId: sample.id, sampleId: sample.id,
             action: 'SAMPLE_APPROVED', performedBy: f.actor.username, timestamp: at,
-            after: JSON.stringify({ approval: { username: f.actor.username, name: 'Owned Full Reviewer', role: f.actor.role, approvedAt: at.toISOString() } }) } });
+            after: JSON.stringify({ approval: { username: f.actor.username, name: namesRecorded ? 'Owned Full Reviewer' : null, role: f.actor.role, approvedAt: at.toISOString() } }) } });
+        const priorAt = new Date('2026-11-16T12:00:00Z');
+        await f.db.auditLog.create({ data: { id: randomUUID(), entity: 'SAMPLE', entityId: sample.id, sampleId: sample.id,
+            action: 'SAMPLE_APPROVED', performedBy: f.actor.username, timestamp: priorAt,
+            after: JSON.stringify({ approval: { username: f.actor.username, name: namesRecorded ? 'Owned Earlier Reviewer' : null,
+                role: f.actor.role, approvedAt: priorAt.toISOString() } }) } });
+        await f.db.auditLog.create({ data: { id: randomUUID(), entity: 'SAMPLE', entityId: sample.id, sampleId: sample.id,
+            action: 'UNDO_APPROVAL', performedBy: f.actor.username, timestamp: new Date('2026-11-16T13:00:00Z'), details: 'INTERNAL REOPEN REASON' } });
         const historicalContent = JSON.stringify(reportPresentationFixture('en'));
         const old = await f.db.report.create({ data: { id: randomUUID(), sampleId: sample.id, labId: f.labId, version: 1,
             generatedBy: f.actor.username, status: 'DRAFT', content: historicalContent } });
@@ -87,9 +98,22 @@ test('generation releases a new immutable version with named missing-method warn
         await withQcRunHttp(f.db, f.actor, async (app, token) => {
             const issued = await request(app).post('/api/reports/generate/' + sample.id).set('Authorization', 'Bearer ' + token).send({});
             expect({ status: issued.status, body: issued.body }).toMatchObject({ status: 200, body: { version: 2,
-                warnings: [{ code: 'REPORT_METHOD_NOT_RECORDED', severity: 'WARNING', parameters: [{ name: 'QC gate analyte' }] }] } });
+                warnings: expect.arrayContaining([{ code: 'REPORT_METHOD_NOT_RECORDED', severity: 'WARNING',
+                    parameters: [{ param: f.analysisCode, name: 'QC gate analyte' }], message: expect.any(String) }]) } });
             const stored = await f.db.report.findUnique({ where: { id: issued.body.id } }), content = JSON.parse(stored.content);
-            expect(content.presentation).toMatchObject({ version: 1, approvalName: 'Owned Full Reviewer', appVersion: require('../../package.json').version });
+            expect(content.presentation).toMatchObject({ version: 1, approvalName: namesRecorded ? 'Owned Full Reviewer' : 'Name not recorded', appVersion: require('../../package.json').version });
+            expect(content.presentation.approvalPasses.map(row => row.name)).toEqual(namesRecorded
+                ? ['Owned Earlier Reviewer', 'Owned Full Reviewer'] : ['Name not recorded', 'Name not recorded']);
+            expect(content.presentation.approvalPasses.map(row => row.date)).toEqual([priorAt.toISOString(), at.toISOString()]);
+            const warningCodes = issued.body.warnings.map(row => row.code);
+            expect(warningCodes).toEqual(namesRecorded ? ['REPORT_METHOD_NOT_RECORDED']
+                : ['REPORT_METHOD_NOT_RECORDED', 'REPORT_SIGNATORY_NAME_NOT_RECORDED', 'REPORT_ISSUER_NAME_NOT_RECORDED']);
+            const html = renderReportHtml(content), pdf = (await reportPdfTexts(content)).join('\n');
+            for (const output of [html, pdf]) {
+                expect(output).toContain('Initial Analytical Pass'); expect(output).toContain('Reopened Pass 1');
+                expect(output).not.toContain('INTERNAL REOPEN REASON'); expect(output).not.toContain(f.actor.username);
+                if (namesRecorded) { expect(output).toContain('Owned Earlier Reviewer'); expect(output).toContain('Owned Full Reviewer'); }
+            }
             expect(content.presentation.warnings).toEqual(issued.body.warnings);
             expect((await f.db.report.findUnique({ where: { id: old.id } })).content).toBe(historicalContent);
             expect(await f.db.result.findMany()).toEqual(results); expect(await f.db.workAttempt.findMany()).toEqual(attempts);
@@ -113,4 +137,58 @@ test('structured location labels are frozen as entered, rather than their intern
     expect(p.location).toMatchObject({ country: 'España', district: 'A Coruña', region: 'Galicia' });
     expect(p.locationText).toBe('A Coruña, Galicia, España');
     expect(p.locationText).not.toMatch(/district-id|region-id/);
+});
+
+test.each(['en', 'es', 'es-419', 'fr', 'pt'])('two approval passes retain frozen names and dates in both %s render paths', async locale => {
+    const content = reportPresentationFixture(locale, false);
+    const firstAt = '2026-11-16T12:00:00.000Z', lastAt = content.signedBy.date;
+    content.sample.episodes = [
+        { episodeNumber: 1, label: 'Initial Analytical Pass', approvedBy: 'first-user', approvedAt: firstAt },
+        { episodeNumber: 2, label: 'Reopened Pass 1', approvedBy: content.signedBy.username, approvedAt: lastAt, reopenReason: 'INTERNAL REOPEN REASON' }
+    ];
+    const proof = [{ episodeNumber: 1, username: 'first-user', name: 'Earlier Full Reviewer', date: firstAt },
+        { episodeNumber: 2, username: content.signedBy.username, name: content.signedBy.name, date: lastAt }];
+    const p = freezeCertificatePresentation(content, { approvalPassEvidence: proof });
+    expect(p.approvalPasses.map(row => [row.label, row.name, row.date])).toEqual([
+        ['Initial Analytical Pass', 'Earlier Full Reviewer', firstAt], ['Reopened Pass 1', 'Marta Example', lastAt]
+    ]);
+    const html = renderReportHtml(content), pdfTexts = await reportPdfTexts(content), pdf = pdfTexts.join('\n');
+    for (const output of [html, pdf]) {
+        for (const text of ['Initial Analytical Pass', 'Reopened Pass 1', 'Earlier Full Reviewer', 'Marta Example', '2026-11-16', '2026-11-17']) expect(output).toContain(text);
+        expect(output).not.toMatch(/first-user|internal-reviewer|INTERNAL REOPEN REASON/);
+    }
+    proof[0].name = 'CHANGED DIRECTORY NAME';
+    expect(renderReportHtml(content)).toBe(html); expect(await reportPdfTexts(content)).toEqual(pdfTexts);
+});
+
+test.each(['en', 'es', 'es-419', 'fr', 'pt'].flatMap(locale => ['approver', 'issuer', 'both'].map(which => [locale, which])))(
+    'missing %s/%s profile names produce named nonblocking release warnings', (locale, which) => {
+        const content = reportPresentationFixture(locale, false), labels = require('../../locales/' + locale + '.json').resultReports;
+        if (which !== 'issuer') content.signedBy.name = content.signedBy.username;
+        if (which !== 'approver') content.publication.issuer.name = '  ';
+        const p = freezeCertificatePresentation(content);
+        const expected = [
+            ...(which !== 'issuer' ? [{ code: 'REPORT_SIGNATORY_NAME_NOT_RECORDED', severity: 'WARNING', signature: 'approver', message: labels.signatoryNameMissingWarning }] : []),
+            ...(which !== 'approver' ? [{ code: 'REPORT_ISSUER_NAME_NOT_RECORDED', severity: 'WARNING', signature: 'issuer', message: labels.issuerNameMissingWarning }] : [])
+        ];
+        expect(p.warnings).toEqual(expected);
+        for (const row of p.warnings) expect(row.message).toEqual(expect.any(String));
+    });
+
+test('new render paths retain client-relevant and unknown result flags, censoring and neutral method standards', async () => {
+    const content = reportPresentationFixture('en', false);
+    const flags = ['BELOW_LOQ', 'CENSORED_VALUE', 'OUTSIDE_TYPICAL_RANGE', 'OVERRIDE_APPROVED', 'CUSTOM_CLIENT_MARKER'];
+    content.resultGroups[0].items.push({ param: 'ZN', name: 'Zinc', value: '<0.5', unit: 'mg/kg', censoring: 'BELOW_LOQ',
+        flags: [...flags], method: 'Retained zinc method', methodVersion: 2,
+        executedMethods: [{ method: 'Retained zinc method', methodVersion: 2, standard: 'ISO 10390:2021' }],
+        qcNotes: ['INTERNAL MANAGER FREE TEXT'] });
+    const p = freezeCertificatePresentation(content), html = renderReportHtml(content), pdf = (await reportPdfTexts(content)).join('\n');
+    for (const output of [html, pdf]) {
+        for (const flag of flags) expect(output).toContain(flag);
+        expect(output).toContain('ISO 10390:2021'); expect(output).not.toContain('ISO/IEC 17025');
+        expect(output).not.toContain('INTERNAL MANAGER FREE TEXT');
+    }
+    expect(html).toContain('&lt;0.5'); expect(pdf).toContain('<0.5 (LOQ)');
+    expect(content.resultGroups[0].items.at(-1).flags).toEqual(flags);
+    expect(p.qcStatement).not.toMatch(/BELOW_LOQ|CENSORED_VALUE|CUSTOM_CLIENT_MARKER/);
 });
