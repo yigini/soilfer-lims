@@ -1,5 +1,7 @@
 # Your First Day as a Laboratory Technician
 
+Use [Menu names in your language](screen-tour.md#menu-names-in-your-language) to find the same screen names in English, Spanish, Latin American Spanish, French or Portuguese.
+
 ## What This Is For
 
 Walk through a complete technician shift using five practice soil samples. You will record drying and sieving, start an analytical batch at the bench, enter sample readings along with a blank, a duplicate, and a reference soil, send the completed run for review, and fix one returned item.

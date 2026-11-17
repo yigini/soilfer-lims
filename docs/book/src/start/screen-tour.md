@@ -49,12 +49,57 @@ The menu on the left side of the screen shows only the pages your role uses. You
 | **Reports** | Everyone | View, approve, and download PDF Certificates of Analysis. |
 | **Spectral Library** | Technician, Manager, Viewer | Upload and inspect mid-infrared and near-infrared soil spectra. |
 | **Inventory** | Technician, Lab Manager | Check reagent stock levels and lot expiry dates. |
-| **Equipment** | Reception, Technician, Manager, Auditor | Check instrument status, calibration dates, and reference materials. |
+| **Equipment** | Reception, Technician, Manager, Auditor | Check instrument status and calibration dates. |
 | **Laboratory Staff** | Lab Manager | Create staff accounts, assign roles, and reset forgotten passwords. |
-| **My Laboratory** / **Lab Management** | Lab Manager, Administrator | Update your laboratory name, address, logo, and active methods. |
-| **Admin Panel** | Lab Manager, Administrator | Manage branding, translations, analysis catalogue, and audit logs. |
+| **My Laboratory** | Laboratory Manager | Update your own laboratory profile and active methods. |
+| **Lab Management** | Super Administrator, Master User | Select a laboratory and open its workspace. |
+| **Admin Panel** | Lab Manager, Administrator | Manage branding, translations, the analysis catalogue, and **Quality** reference-material settings. Open the full audit log from **QA Dashboard** → **Full Audit Log**. |
 | **Policies** | Everyone | View or update your laboratory's quality rules and batch settings. |
 | **About SoilFER** | Everyone | Read information about the SoilFER programme and software release. |
+
+---
+
+## Menu names in your language
+
+Find the English name used in this Manual in the first column, then look across to your screen language. Your role determines which menu items you see. The queue tabs are inside **Manager Task List**, rather than separate sidebar entries.
+
+<!-- BEGIN GENERATED MENU NAMES -->
+### Left menu and sidebar controls
+
+| English | Español | Español (América Latina) | Français | Português |
+| :--- | :--- | :--- | :--- | :--- |
+| Dashboard | Panel de control | Panel de control | Tableau de bord | Painel |
+| Projects | Proyectos | Proyectos | Projets | Projetos |
+| Sample Reception | Recepción de muestras | Recepción de muestras | Réception d'échantillons | Recepção de amostras |
+| Samples | Muestras | Muestras | Échantillons | Amostras |
+| My Work | Mi trabajo | Mis Asignaciones | Mon travail | Meu trabalho |
+| Workbench | Mesa de trabajo | Mesa de trabajo | Poste de travail | Bancada de trabalho |
+| Manager Task List | Lista de tareas | Lista de tareas | Liste de tâches | Lista de tarefas |
+| QA Dashboard | Panel de QA | Panel de QA | Tableau de bord QA | Painel de QA |
+| Data Results | Resultados de datos | Resultados de datos | Résultats des données | Resultados de dados |
+| Reports | Informes | Informes | Rapports | Relatórios |
+| Spectral Library | Biblioteca espectral | Biblioteca espectral | Bibliothèque spectrale | Biblioteca espectral |
+| Inventory | Inventario | Inventario | Inventaire | Inventário |
+| Equipment | Equipo | Equipo | Équipement | Equipamento |
+| Laboratory Staff | Personal del laboratorio | Personal de Laboratorio | Personnel du laboratoire | Equipe do laboratório |
+| My Laboratory | Mi Laboratorio | Mi Laboratorio | Mon Laboratoire | Meu Laboratório |
+| Lab Management | Gestión de laboratorio | Gestión de laboratorio | Gestion de laboratoire | Gestão de laboratório |
+| Admin Panel | Panel de administración | Panel de administración | Panneau d'administration | Painel administrativo |
+| Policies | Políticas | Políticas | Politiques | Políticas |
+| About SoilFER | Acerca de SoilFER | Acerca de SoilFER | À propos de SoilFER | Sobre o SoilFER |
+| Expand sidebar | Expandir barra lateral | Expandir barra lateral | Développer la barre latérale | Expandir barra lateral |
+| Collapse sidebar | Plegar barra lateral | Plegar barra lateral | Réduire la barre latérale | Recolher barra lateral |
+
+### Manager Task List tabs
+
+| English | Español | Español (América Latina) | Français | Português |
+| :--- | :--- | :--- | :--- | :--- |
+| QC Exceptions | Excepciones de CC | Excepciones de CC | Exceptions CQ | Exceções de CQ |
+| New (Intake) | Nuevo (Recepción) | Nuevo (Recepción) | Nouveau (Réception) | Novo (Recepção) |
+| Assign Work | Asignar trabajo | Asignar trabajo | Assigner le travail | Atribuir trabalho |
+| Review Submissions | Revisar envíos | Revisar envíos | Examiner les soumissions | Revisar envios |
+| Final Approvals | Aprobaciones finales | Aprobaciones finales | Approbations finales | Aprovações finais |
+<!-- END GENERATED MENU NAMES -->
 
 ---
 

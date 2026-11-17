@@ -1,5 +1,7 @@
 # Your First Day as a Laboratory Manager
 
+Use [Menu names in your language](screen-tour.md#menu-names-in-your-language) to find the same screen names in English, Spanish, Latin American Spanish, French or Portuguese.
+
 ## What This Is For
 
 Walk through a complete day managing laboratory work and quality control. You will assign incoming tests to technicians, review a passing analytical batch, handle a batch where quality control failed, and issue a signed PDF Certificate of Analysis.

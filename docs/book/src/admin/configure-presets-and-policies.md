@@ -17,7 +17,7 @@ Every laboratory can choose its own starting rule set and customize individual r
 
 ### Step 1: Open Policies for your laboratory
 
-1. Open **My Laboratory** (or **Lab Management**), click the **Settings** tab, and click **Open policy settings** (or navigate directly to **Policies**).
+1. Open **My Laboratory** (Laboratory Manager) or **Lab Management** (Super Administrator or Master User), click the **Settings** tab, and click **Open policy settings** (or navigate directly to **Policies**).
 2. If you manage more than one facility, select your target facility in the **Laboratory** dropdown at the top of the page.
 
 ### Step 2: Select a preset and record your reason

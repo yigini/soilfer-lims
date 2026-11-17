@@ -36,6 +36,9 @@ jobs:
       - name: Check shared pilot support text
         run: node tools/docs/generate_support_contact.cjs --check
 
+      - name: Check Manual menu names and translations
+        run: node tools/docs/generate_menu_names.cjs --check
+
       - name: Check installation configuration
         run: |
           docker compose --env-file /dev/null -f docker-compose.yml -f docker-compose.nginx.yml config --quiet
