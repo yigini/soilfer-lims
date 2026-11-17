@@ -18,6 +18,7 @@ Prepare everything in a test lab (or inside a clearly named training project on 
   - Switch on a Soil pH method, mark one pH meter **Ready / Calibrated**, and register one active check soil bottle so nothing blocks the bench run.
 - *Three practice soil samples on the table (physical bags labelled with masking tape):*
   - *Sample 1 (for Task 1):* Not checked in yet. Put the bag on the counter with a note saying *Farmer topsoil, 0–20 cm, about 500 g, dry and intact, Soil pH requested*.
+    - *A note for you:* if you set up the practice lab with the user-test setup, Samples 2 and 3 are already checked in, so the lab number on screen for Sample 1 will be the third one (for example `DEMO-26-0003`). That is expected, so there's no need to correct it.
   - *Sample 2 (for Task 2):* Already checked in as **Accepted** before the session starts. That way the technician can start Task 2 smoothly even if Task 1 runs out of time.
   - *Sample 3 (for Tasks 3 and 4):* Already checked in as **Accepted**, with both **Air Drying** and **Sample Preparation** finished before the session starts, and Soil pH ordered and assigned to the test technician account.
 - *Printed pages beside the keyboard:*
