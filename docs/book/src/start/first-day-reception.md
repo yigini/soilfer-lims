@@ -1,5 +1,7 @@
 # Your First Day at Sample Reception
 
+Use [Menu names in your language](screen-tour.md#menu-names-in-your-language) to find the same screen names in English, Spanish, Latin American Spanish, French or Portuguese.
+
 ## What This Is For
 
 Walk through a complete day at the reception desk using five practice soil bags from the Demo Soil Lab. You will check in pre-registered field samples, handle one damaged bag, register a walk-in sample, print barcode labels, and hand the accepted samples over for drying.

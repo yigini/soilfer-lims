@@ -16,7 +16,7 @@ Your laboratory's name, address, timezone, logo, and support email appear on the
 
 ## Task A: Configure Your Laboratory Facility Profile & Local Timezone
 
-1. Click **My Laboratory** (or **Lab Management**) in the left sidebar to open **Laboratory Workspace**.
+1. Click **My Laboratory** (Laboratory Manager) or **Lab Management** (Super Administrator or Master User) in the left sidebar to open **Laboratory Workspace**.
 2. Select the **Settings** tab to open **Laboratory Configuration** (**Facility Profile & Local Time**).
 3. Fill in or review your facility fields:
    - **Laboratory Name** and **City**

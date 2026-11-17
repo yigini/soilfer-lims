@@ -4,7 +4,7 @@
 
 Manage your laboratory's **Reference Materials** (check soils and certified standards), propose and approve statistical **Control charts** limits with two-person sign-off, resolve **QC review obligations**, and evaluate **LOD/LOQ proposals from method blanks** (proposed limit of detection and limit of quantification (lowest detectable and lowest reliably measurable amounts) calculated from blank runs).
 
-> *Screenshot placeholder — docs/book/src/img/screenshots/qc-control-charts-and-blank-history.png (screenshot coming once the training data is ready): The **Reference Materials** page showing **Control charts** (**Propose limits**, **Approve limits**, **QC review obligations**) and **LOD/LOQ proposals from method blanks**.*
+> *Screenshot placeholder — docs/book/src/img/screenshots/qc-control-charts-and-blank-history.png (screenshot coming once the training data is ready): The **Admin Panel** → **Quality** tab showing **Control charts** (**Propose limits**, **Approve limits**, **QC review obligations**) and **LOD/LOQ proposals from method blanks**.*
 
 ---
 
@@ -19,14 +19,14 @@ Manage your laboratory's **Reference Materials** (check soils and certified stan
 
 ### Part 1: Check Reference Material Lots and Expiry Dates (**Reference Materials**)
 
-1. Click **Reference Materials** in the left menu (under the administration section).
+1. Click **Admin Panel** in the left menu, then open **Quality** (**Reference materials**). Reference materials are not a separate sidebar entry. Use **Inventory** for stock quantities and expiry alerts.
    *You should see your laboratory's registered **Laboratory reference material (LRM)** (your lab's own in-house check soil) and **Certified reference material (CRM)** (official standard soil with a certified value) lots.*
 2. Check the **Status** badge on each lot (**Active**, **Quarantined**, **Expired**, or **Retired**) and watch for lots flagged **Expiring soon**.
 3. Click a lot to inspect its **Assigned values by analyte** (**Assigned value**, **Unit**, **Method (optional)**, and **Expanded uncertainty**).
 
 ### Part 2: Propose and Approve **Control charts** Limits
 
-1. On the **Reference Materials** page, scroll to the **Control charts** panel and select a chart series under **Choose a series**.
+1. In **Admin Panel** → **Quality**, scroll to the **Control charts** panel and select a chart series under **Choose a series**.
    *While a new check soil lot has fewer than **Minimum baseline points** (default 20), it operates in **Provisional** (**Fixed window**) mode.*
 2. Once enough passing points are recorded, review the **Observations** table:
    - Any statistical outlier is marked **Trial outlier: review this point** for your inspection.

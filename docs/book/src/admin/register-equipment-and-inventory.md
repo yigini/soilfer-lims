@@ -18,7 +18,7 @@ This guide shows you how to register laboratory instruments and log calibration 
 
 ### Step 1: Register the asset in Equipment
 
-1. Click **Equipment** (**Equipment & Instruments**) in the left navigation bar.
+1. Click **Equipment** in the left navigation bar to open **Equipment & Instruments**.
 2. Click **Register New Asset**.
 3. Fill in the instrument details:
    - **Instrument Name** (for example, *Bench pH Meter 01*)
@@ -67,7 +67,7 @@ This guide shows you how to register laboratory instruments and log calibration 
 
 ## Task C: Add Reagents and Adjust Inventory Stock
 
-1. Click **Inventory** (**Reagents & Inventory**) in the left sidebar.
+1. Click **Inventory** in the left sidebar to open **Reagents & Inventory**.
 2. Click **Add Inventory Item** and fill in:
    - **Item Name**, **Item Code / SKU**, and **Category** (**Reagents & Chemicals**, **Reference Standards (CRM)** (certified reference material — official standard soil with a certified value), **Consumables & Labware**, or **Glassware**)
    - **Current Quantity**, **Unit of Measure**, and **Minimum Alert Threshold**

@@ -4,7 +4,7 @@
 
 Track and close laboratory **Problem records** (root cause and corrective action), log external **Proficiency testing** rounds and z-scores, and inspect the permanent and locked **System Audit Logs**.
 
-> *Screenshot placeholder — docs/book/src/img/screenshots/qc-ncr-pt-and-audit-logs.png (screenshot coming once the training data is ready): The **QA Dashboard** showing **Problem records**, the **Proficiency testing** page showing z-score classifications, and **System Audit Logs**.*
+> *Screenshot placeholder — docs/book/src/img/screenshots/qc-ncr-pt-and-audit-logs.png (screenshot coming once the training data is ready): The **QA Dashboard** showing **Problem records**, the **QA Dashboard** → **Lab overview** PT cards showing recorded results, and **System Audit Logs**.*
 
 ---
 
@@ -26,18 +26,16 @@ Track and close laboratory **Problem records** (root cause and corrective action
 3. Once your team has fixed the underlying problem (for example, replacing a contaminated reagent or recalibrating an instrument), type what was done in **Corrective action**. Advance the record from **Action** to **Closed**.
    *Closed records are permanently locked for audit inspection.*
 
-### Part 2: Record and Review External **Proficiency testing** Rounds
+### Part 2: Review External **Proficiency testing** Summaries
 
-1. Click **Proficiency Testing** in the left menu (under the administration section) or view **PT z-score trend** and **PT results** in **QA Dashboard** (**Lab overview**).
-2. To record a new inter-laboratory comparison result in **Proficiency Testing**:
-   - Enter the **Provider** (for example, GLOSOLAN or WEPAL), **Round**, **Analysis**, **Method**, **Unit**, and **Date**.
-   - Enter the **Assigned value**, **Lab result**, **Expanded uncertainty**, assessment sigma, and **z-score**.
-   - Check the resulting classification (**Satisfactory**, **Questionable**, or **Unsatisfactory**) and click **Save**.
-   *If a round is recorded as **Unsatisfactory**, SoilFER LIMS automatically creates a linked record in **Problem records** (**Open problem records**) so you can document the investigation.*
+1. Click **QA Dashboard** in the left menu and open **Lab overview**.
+2. Review the existing **PT z-score trend** and **PT results** cards. Use **Problem records** to follow an unsatisfactory result's investigation.
+
+**Planned / not available:** there is no **Proficiency Testing** sidebar entry or PT data-entry form in this release. These cards show retained results; they do not provide a **Save** form for a new round.
 
 ### Part 3: Inspect the **System Audit Logs**
 
-1. Click **Audit Logs** in the left menu (or click **Full Audit Log** / the **Audit Stream** tab in **QA Dashboard**).
+1. Click **QA Dashboard** in the left menu, then **Full Audit Log**. The **Audit Stream** tab on **QA Dashboard** provides a recent-event view; it is not a separate sidebar entry.
    *You should see **System Audit Logs** showing the full chronological history of events.*
 2. Filter by **All Logs**, **Operational**, or **System**, or type a sample ID, username, or action into **Search logs...**.
 3. Review the **Timestamp**, action type, **User**, and **Details** for any sample, batch, or setting change.

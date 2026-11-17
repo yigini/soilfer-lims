@@ -9,7 +9,7 @@ Use this one-page checklist before you receive your first real box of soil sampl
 
 ## 1. Laboratory Profile, Timezone & Report Branding
 
-- [ ] Open **My Laboratory** (or **Lab Management**) and click the **Settings** tab under **Laboratory Configuration**.
+- [ ] Open **My Laboratory** (Laboratory Manager) or **Lab Management** (Super Administrator or Master User) and click the **Settings** tab under **Laboratory Configuration**.
 - [ ] Enter your official **Laboratory Name**, **City**, **Physical Address**, **Phone**, and **Contact Email**.
 - [ ] Select your local **IANA Timezone** and click **Save Profile Changes**. All reception dates, drying timers, and report timestamps will match your wall clock.
 - [ ] Open **Admin Panel** and select the **Branding & Identity** tab.

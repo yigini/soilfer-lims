@@ -1,5 +1,7 @@
 # Your First Day as a Laboratory Administrator
 
+Use [Menu names in your language](screen-tour.md#menu-names-in-your-language) to find the same screen names in English, Spanish, Latin American Spanish, French or Portuguese.
+
 ## What This Is For
 
 Set up your laboratory in SoilFER LIMS before your team starts live testing. In many soil laboratories, the Laboratory Manager also wears the Laboratory Administrator hat.
@@ -18,7 +20,7 @@ Set up your laboratory in SoilFER LIMS before your team starts live testing. In 
 
 ### Step 1: Set Up Your Laboratory Identity and Branding
 
-1. Click **My Laboratory** (or **Lab Management**) in the left menu.
+1. Click **My Laboratory** (Laboratory Manager) or **Lab Management** (Super Administrator or Master User) in the left menu.
 2. Enter your laboratory's official name, short code, physical address, country, and time zone, then click **Save**.
 3. Click **Admin Panel** in the left menu and open **Branding** to upload your laboratory logo so it appears on the top bar and on printed PDF Certificates of Analysis.
 
