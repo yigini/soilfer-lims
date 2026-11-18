@@ -1,0 +1,27 @@
+[
+  {
+    "id": "BASIC_FERTILITY",
+    "name": "Basic Fertility",
+    "analyses": ["PH_H2O", "SOC", "TN", "P_OLSEN", "EXCH_CA", "EXCH_MG", "EXCH_K", "EXCH_NA", "EC", "SAND", "SILT", "CLAY"]
+  },
+  {
+    "id": "CATION_EXCHANGE_SUITE",
+    "name": "Cation Exchange Suite",
+    "analyses": ["EXCH_CA", "EXCH_MG", "EXCH_K", "EXCH_NA", "CEC", "ECEC", "EXCH_ACID", "baseSaturation"]
+  },
+  {
+    "id": "FULL_CHARACTERIZATION",
+    "name": "Full Characterization",
+    "analyses": ["PH_H2O", "SOC", "TN", "P_OLSEN", "EXT_ZN", "EXT_FE", "EXT_MN", "EXT_CU", "EXT_B", "EXCH_CA", "EXCH_MG", "EXCH_K", "EXCH_NA", "CEC", "ECEC", "EXCH_ACID", "EC", "SAND", "SILT", "CLAY", "BD_WHOLE", "CACO3"]
+  },
+  {
+    "id": "PHYSICAL_PROPERTIES",
+    "name": "Physical Properties",
+    "analyses": ["SAND", "SILT", "CLAY", "BD_WHOLE", "BD_FINE", "VOL_MOISTURE", "SOIL_MOISTURE", "AWC", "POROSITY"]
+  },
+  {
+    "id": "SALINITY_SODICITY",
+    "name": "Salinity and Sodicity",
+    "analyses": ["EC", "SAR", "EXCH_CA", "EXCH_MG", "EXCH_K", "EXCH_NA", "PH_H2O", "GYPSUM"]
+  }
+]

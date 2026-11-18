@@ -97,6 +97,11 @@ async function seedCatalogue(options = {}) {
             });
         }
 
+        if (existingAnalyses.length === 0) {
+            const { seedFreshSoilPackages } = require('./soilPackages');
+            await seedFreshSoilPackages(prisma);
+        }
+
         console.log(`[Catalogue Seed] ✓ Clean seeding complete: ${analyses.length} analyses, ${methodologies.length} methodologies.`);
         return {
             isCleanDb: true,
