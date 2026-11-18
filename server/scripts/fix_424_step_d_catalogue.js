@@ -215,8 +215,17 @@ function runStepDCatalogue({ dbPath, apply = false, expectedPlanSha256 } = {}) {
             if (fields.some(field => !allowed.includes(field))) throw new Refusal('UNAPPROVED_FIELD_CHANGE');
             const actualBefore = db.prepare(`SELECT * FROM ${record.table} WHERE ${record.key}=?`).get(record.target);
             if (rowHash(actualBefore) !== record.beforeRowSha256) throw new Refusal('TARGET_CHANGED', { target: record.target });
-            const result = db.prepare(`UPDATE ${record.table} SET ${fields.map(field => `"${field}"=?`).join(',')} WHERE ${record.key}=? AND labId IS NULL`)
-                .run(...fields.map(field => record.after[field]), record.target);
+            // Keep each writable catalogue table and column explicit. This
+            // script has no authority to update workflow or result tables.
+            let result;
+            if (record.kind === 'package') result = db.prepare('UPDATE AnalysisGroup SET analyses=? WHERE id=? AND labId IS NULL').run(record.after.analyses, record.target);
+            else if (record.kind === 'retirement') result = db.prepare('UPDATE Analysis SET status=? WHERE code=? AND labId IS NULL').run(record.after.status, record.target);
+            else if (record.kind === 'unit' && record.target === 'GYPSUM') result = db.prepare('UPDATE Analysis SET units=?,unitCode=?,validation=?,decimalPlaces=? WHERE code=? AND labId IS NULL')
+                .run(record.after.units, record.after.unitCode, record.after.validation, record.after.decimalPlaces, record.target);
+            else if (record.kind === 'unit' && record.target === 'SAR') result = db.prepare('UPDATE Analysis SET units=?,unitCode=? WHERE code=? AND labId IS NULL').run(record.after.units, record.after.unitCode, record.target);
+            else if (record.kind === 'method' && record.target === 'POROSITY_CALC') result = db.prepare('UPDATE Methodology SET standard=? WHERE id=? AND labId IS NULL').run(record.after.standard, record.target);
+            else if (record.kind === 'method' && record.target === 'USDA_HB60_GYPSUM') result = db.prepare('UPDATE Methodology SET name=? WHERE id=? AND labId IS NULL').run(record.after.name, record.target);
+            else throw new Refusal('UNAPPROVED_TARGET');
             if (result.changes !== 1) throw new Refusal('TARGET_CHANGED', { target: record.target });
             const actual = db.prepare(`SELECT * FROM ${record.table} WHERE ${record.key}=?`).get(record.target);
             if (rowHash(actual) !== record.afterRowSha256) throw new Refusal('UNEXPECTED_TARGET_CHANGE', { target: record.target });

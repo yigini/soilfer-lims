@@ -187,10 +187,10 @@ test.each([
     ['missing dimensionless unit mapping', db => db.prepare("UPDATE Analysis SET unitCode=NULL WHERE code='MUNSELL_COLOR'").run(), 'DIMENSIONLESS_UNIT_MISSING_OR_CHANGED']
 ])('refuses %s without partial changes', (_name, change, code) => { const file = fixture(); edit(file, change); refusal(file, code); });
 test.each([
-    ["CREATE TRIGGER stop_audit BEFORE INSERT ON AuditLog WHEN NEW.entityId='GYPSUM' BEGIN SELECT RAISE(ABORT,'fixture stop'); END", 'SQLITE_CONSTRAINT_TRIGGER'],
-    ["CREATE TRIGGER extra_field AFTER UPDATE OF units ON Analysis WHEN NEW.code='GYPSUM' BEGIN UPDATE Analysis SET version=version+1 WHERE code=NEW.code; END", 'UNEXPECTED_TARGET_CHANGE'],
-    ["CREATE TRIGGER lose_default AFTER UPDATE OF analyses ON AnalysisGroup WHEN NEW.id='BASIC_FERTILITY' BEGIN UPDATE Methodology SET isDefault=0 WHERE analysisCode='EC'; END", 'POSTCONDITION_FAILED']
-])('rolls all package, metadata, retirement and audit writes back on a trigger failure', (sql, code) => { const file = fixture(); edit(file, db => db.exec(sql)); refusal(file, code); });
+    [db => db.exec("CREATE TRIGGER stop_audit BEFORE INSERT ON AuditLog WHEN NEW.entityId='GYPSUM' BEGIN SELECT RAISE(ABORT,'fixture stop'); END"), 'SQLITE_CONSTRAINT_TRIGGER'],
+    [db => db.exec("CREATE TRIGGER extra_field AFTER UPDATE OF units ON Analysis WHEN NEW.code='GYPSUM' BEGIN UPDATE Analysis SET version=version+1 WHERE code=NEW.code; END"), 'UNEXPECTED_TARGET_CHANGE'],
+    [db => db.exec("CREATE TRIGGER lose_default AFTER UPDATE OF analyses ON AnalysisGroup WHEN NEW.id='BASIC_FERTILITY' BEGIN UPDATE Methodology SET isDefault=0 WHERE analysisCode='EC'; END"), 'POSTCONDITION_FAILED']
+])('rolls all package, metadata, retirement and audit writes back on a trigger failure', (change, code) => { const file = fixture(); edit(file, change); refusal(file, code); });
 test('apply requires the exact reviewed plan hash and refuses a stale plan', () => {
     const file = fixture(), hash = digest(file);
     expect(script.runStepDCatalogue({ dbPath: file, apply: true }).error.code).toBe('EXPECTED_PLAN_SHA256_REQUIRED');
