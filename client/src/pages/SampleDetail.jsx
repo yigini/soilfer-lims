@@ -429,7 +429,8 @@ const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
                     res = await issue(amendment.id);
                 }
                 setExistingReport(res.data);
-                showInfo(t('common.success', 'Success'), `Report v${res.data.version || 1} released successfully!`);
+                showInfo(t('common.success', 'Success'), [`Report v${res.data.version || 1} released successfully!`,
+                    ...(res.data.warnings || []).map(warning => warning.message)].join('\n'));
                 fetchWorkspaceData();
                 const full = await axios.get(`/api/reports/${res.data.id}`, {
                     headers: token ? { Authorization: `Bearer ${token}` } : {}

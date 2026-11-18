@@ -359,7 +359,10 @@ async function assembleReport(sampleId, user, options = {}) {
         sampleLabId: sample.labId || null
     };
 
-    return { content: reportContent, searchKeys };
+    // Retain each pass's identity at its approval time, never from today's directory.
+    const approvalPassEvidence = episodes.map(episode => ({ episodeNumber: episode.episodeNumber,
+        ...contentEvidence.approvalEvidence({ approvedBy: episode.approvedBy, approvedAt: episode.approvedAt }, auditLogs) }));
+    return { content: reportContent, searchKeys, approvalPassEvidence };
 }
 
 function unwrapVal(v) {
