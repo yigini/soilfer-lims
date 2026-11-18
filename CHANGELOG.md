@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.16.1] - 2026-11-18
+
+### Fixed
+- Download the selected saved report as its official PDF, show clear download errors and print the complete report without the surrounding application.
+- Keep every approval round's recorded name and date in new certificates, with separate nonblocking release warnings for missing approver or issuer names.
+- Show recorded method names and versions, retain result qualifiers and use a plain measurements heading in new certificates while preserving older report versions.
+- Align Manual menu paths with the screens and add a shared five-language menu table for the first-day guides.
+- Explain why the participant's first practice sample receives the third laboratory number when two samples are already prepared.
+
+### Removed
+- Remove the unused standalone methods editor; the supported method dialogs keep their existing controls.
+
 ## [1.16.0] - 2026-11-15
 
 ### Added

@@ -83,6 +83,18 @@ const techStack = [
 
 const changelog = [
     {
+        version: 'v1.16.1',
+        date: 'November 18, 2026',
+        tag: 'Report Printing and Certificate Details',
+        badgeColor: 'bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300 border-blue-300 dark:border-blue-800',
+        changes: [
+            'Download the selected saved report PDF and print the complete document without the surrounding app.',
+            'Keep approval-time names, dates, recorded methods and result qualifiers in new certificates while preserving older reports.',
+            'Return clear nonblocking warnings for missing approver or issuer names.',
+            'Match Manual menu paths to the screens and explain practice sample numbering; remove an unused methods editor.'
+        ]
+    },
+    {
         version: 'v1.16.0',
         date: 'November 15, 2026',
         tag: 'Inventory Imports and Everyday Help',
