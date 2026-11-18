@@ -1,10 +1,19 @@
 # Release Notes (1.11–1.16)
 
-This page summarizes what laboratory staff, managers, and server administrators will notice in SoilFER-LIMS **1.16.0**, followed by earlier updates.
+This page summarizes what laboratory staff, managers, and server administrators will notice in SoilFER-LIMS **1.16.1**, followed by earlier updates.
 
 For step-by-step update instructions, see [Updating SoilFER-LIMS](./updates.md).
 
 ---
+
+## Version 1.16.1 — 2026-11-18
+
+- **Report downloads and printing:** download the official PDF for the saved report version selected on screen. A failed download shows a clear message. Printing includes the complete report without the app or report list behind it.
+- **New certificate details:** each approval round keeps the name and date recorded at that time. Recorded method names, versions and result qualifiers stay visible, and the measurements heading uses plain wording. Existing report versions keep their original content and appearance.
+- **Missing signature names:** release returns separate, nonblocking warnings for a missing approver or issuer name. The warning identifies the signature and tells an administrator to set Full Name in the user profile before a future approval or release.
+- **Manual paths:** the Manual names the actual menus for quality, stock, audit records and laboratory management. First-day guides link to a shared table of menu names in all five screen languages.
+- **Practice sample numbering:** the user-test facilitator is told to expect the participant's Sample 1 to receive the third lab number when Samples 2 and 3 were prepared in advance.
+- **Methods screens:** the supported method dialogs are unchanged; an unused standalone editor has been removed.
 
 ## Version 1.16.0 — 2026-11-15
 
