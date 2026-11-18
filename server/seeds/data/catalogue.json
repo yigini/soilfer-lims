@@ -1091,8 +1091,8 @@
       "name": "Sodium Adsorption Ratio (SAR)",
       "description": "Sodium Adsorption Ratio (SAR) standard determination",
       "categoryId": "salinity___sodicity",
-      "units": "(mmol/L)⁰˙⁵",
-      "unitCode": "(mmol/L)⁰˙⁵",
+      "units": "dimensionless",
+      "unitCode": "dimensionless",
       "matrix": "SOIL",
       "module": "FERTILITY",
       "status": "active",
@@ -1163,17 +1163,17 @@
       "name": "Gypsum Content (CaSO₄·2H₂O)",
       "description": "Gypsum Content (CaSO₄·2H₂O) standard determination",
       "categoryId": "salinity___sodicity",
-      "units": "g/kg",
-      "unitCode": "g/kg",
+      "units": "%",
+      "unitCode": "%",
       "matrix": "SOIL",
       "module": "FERTILITY",
       "status": "active",
-      "decimalPlaces": 1,
+      "decimalPlaces": 2,
       "isGlobal": true,
       "validation": {
-        "min": 0.1,
-        "max": 800,
-        "decimalPlaces": 1
+        "min": 0.01,
+        "max": 80,
+        "decimalPlaces": 2
       }
     },
     {
@@ -3065,7 +3065,7 @@
       "unitCode": "mg/kg",
       "matrix": "SOIL",
       "module": "FERTILITY",
-      "status": "active",
+      "status": "inactive",
       "decimalPlaces": 2,
       "isGlobal": true,
       "validation": null
@@ -3434,7 +3434,7 @@
       "id": "POROSITY_CALC",
       "analysisCode": "POROSITY",
       "name": "Calculated: (1 - BD/ρs) × 100",
-      "standard": "FAO Guidelines",
+      "standard": "FAO Guidelines; ISO 11272:2017; ISO 11508:2017",
       "referenceId": null,
       "isDefault": true,
       "glosisProcedure": null,
@@ -3953,7 +3953,7 @@
     {
       "id": "USDA_HB60_GYPSUM",
       "analysisCode": "GYPSUM",
-      "name": "USDA Handbook 60 Acetone Precipitation",
+      "name": "Acetone precipitation + electrical conductivity",
       "standard": "USDA HB 60",
       "referenceId": "USDA-HB60",
       "isDefault": true,

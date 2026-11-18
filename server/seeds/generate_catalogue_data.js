@@ -113,7 +113,7 @@ const methodologies = [];
 
 // Helper to register analysis and its methodologies
 function addAnalysis(a, methods = []) {
-    const unitCode = a.units ? (UNIT_MAP[a.units] || null) : null;
+    const unitCode = a.unitCode || (a.units ? (UNIT_MAP[a.units] || null) : null);
     const isEnv = a.module === 'ENVIRONMENTAL';
     const analysisObj = {
         code: a.code,
@@ -227,7 +227,7 @@ addAnalysis({ code: 'PARTICLE_DENSITY', name: 'Soil Particle Density (ρs)', cat
     { code: 'PYCNOMETER_METHOD', name: 'Gas / Water Displacement Pycnometry', standard: 'ISO 11272:2017', isDefault: true }
 ]);
 addAnalysis({ code: 'POROSITY', name: 'Total Soil Porosity (Φ)', categoryId: 'physical_properties', units: '%', matrix: 'SOIL', module: 'FERTILITY', validation: { min: 10, max: 90, decimalPlaces: 1 } }, [
-    { code: 'POROSITY_CALC', name: 'Calculated: (1 - BD/ρs) × 100', standard: 'FAO Guidelines', isDefault: true }
+    { code: 'POROSITY_CALC', name: 'Calculated: (1 - BD/ρs) × 100', standard: 'FAO Guidelines; ISO 11272:2017; ISO 11508:2017', isDefault: true }
 ]);
 addAnalysis({ code: 'SOIL_MOISTURE', name: 'Gravimetric Moisture Content (θm)', categoryId: 'physical_properties', units: '%', matrix: 'SOIL', module: 'FERTILITY', validation: { min: 0, max: 150, decimalPlaces: 1 } }, [
     { code: 'ISO_11465_GRAV', name: 'ISO 11465 Gravimetric 105°C Oven Drying', standard: 'ISO 11465:1993', isDefault: true }
@@ -353,7 +353,7 @@ addAnalysis({ code: 'EC', name: 'Electrical Conductivity (1:5)', categoryId: 'sa
 addAnalysis({ code: 'EC_E', name: 'EC of Saturated Paste Extract (ECe)', categoryId: 'salinity___sodicity', units: 'dS/m', matrix: 'SOIL', module: 'FERTILITY', validation: { min: 0.01, max: 100.0, decimalPlaces: 2 } }, [
     { code: 'USDA_HB60_ECE', name: 'USDA Handbook 60 Saturated Paste Extract', standard: 'USDA HB 60', isDefault: true }
 ]);
-addAnalysis({ code: 'SAR', name: 'Sodium Adsorption Ratio (SAR)', categoryId: 'salinity___sodicity', units: '(mmol/L)⁰˙⁵', matrix: 'SOIL', module: 'FERTILITY', validation: { min: 0.0, max: 60.0, decimalPlaces: 2 } }, [
+addAnalysis({ code: 'SAR', name: 'Sodium Adsorption Ratio (SAR)', categoryId: 'salinity___sodicity', units: 'dimensionless', unitCode: 'dimensionless', matrix: 'SOIL', module: 'FERTILITY', validation: { min: 0.0, max: 60.0, decimalPlaces: 2 } }, [
     { code: 'SAR_CALC', name: 'Calculated: Na / sqrt((Ca + Mg)/2) from Sat Extract', standard: 'USDA HB 60', isDefault: true }
 ]);
 addAnalysis({ code: 'ESP', name: 'Exchangeable Sodium Percentage (ESP)', categoryId: 'salinity___sodicity', units: '%', matrix: 'SOIL', module: 'FERTILITY', validation: { min: 0.0, max: 100.0, decimalPlaces: 1 } }, [
@@ -366,8 +366,8 @@ addAnalysis({ code: 'CACO3', name: 'Total Carbonate Equivalent (CaCO₃)', categ
 addAnalysis({ code: 'ACTIVE_CACO3', name: 'Active Carbonate (Drouineau Method)', categoryId: 'salinity___sodicity', units: 'g/kg', matrix: 'SOIL', module: 'FERTILITY', validation: { min: 0.1, max: 400.0, decimalPlaces: 1 } }, [
     { code: 'DROUINEAU_ACTIVE_CA', name: 'Drouineau-Galet Ammonium Oxalate Method', standard: 'Drouineau 1942', isDefault: true }
 ]);
-addAnalysis({ code: 'GYPSUM', name: 'Gypsum Content (CaSO₄·2H₂O)', categoryId: 'salinity___sodicity', units: 'g/kg', matrix: 'SOIL', module: 'FERTILITY', validation: { min: 0.1, max: 800.0, decimalPlaces: 1 } }, [
-    { code: 'USDA_HB60_GYPSUM', name: 'USDA Handbook 60 Acetone Precipitation', standard: 'USDA HB 60', isDefault: true }
+addAnalysis({ code: 'GYPSUM', name: 'Gypsum Content (CaSO₄·2H₂O)', categoryId: 'salinity___sodicity', units: '%', matrix: 'SOIL', module: 'FERTILITY', validation: { min: 0.01, max: 80.0, decimalPlaces: 2 } }, [
+    { code: 'USDA_HB60_GYPSUM', name: 'Acetone precipitation + electrical conductivity', desc: 'USDA Handbook 60 Acetone Precipitation', standard: 'USDA HB 60', isDefault: true }
 ]);
 addAnalysis({ code: 'WATER_SOLUBLE_CL', name: 'Water-Soluble Chloride (Cl⁻)', categoryId: 'salinity___sodicity', units: 'mg/kg', matrix: 'SOIL', module: 'FERTILITY', validation: { min: 1.0, max: 5000.0, decimalPlaces: 1 } }, [
     { code: 'MOHR_TITRATION_CL', name: 'Mohr Argentometric Silver Nitrate Titration', standard: 'FAO Guidelines', isDefault: true }
@@ -677,7 +677,7 @@ Object.entries(proceduresByAttr).forEach(([attr, procs]) => {
         addAnalysis({
             code: attr,
             name: info.name,
-            status: GLOSIS_CAT_MAP[attr] ? 'active' : 'inactive',
+            status: attr === 'extractableElements' ? 'inactive' : (GLOSIS_CAT_MAP[attr] ? 'active' : 'inactive'),
             categoryId: info.cat,
             units: info.units,
             matrix: 'SOIL',
