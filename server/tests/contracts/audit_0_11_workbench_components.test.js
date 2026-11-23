@@ -34,6 +34,7 @@ function harness(name, { groups, width = 1200, axios, offline } = {}) {
                 if (mod === '@lims/result-value-validation') return require('../../../shared/resultValueValidation');
                 if (mod === 'axios') return axios;
                 if (mod === '@lims/number-parse') return require('../../../shared/numberParse');
+                if (mod === '@lims/workflow-contract') return require('../../workflowContract');
                 if (mod === 'lucide-react') return new Proxy({}, { get: () => () => null });
                 if (mod === 'clsx') return (...values) => values.filter(Boolean).join(' ');
                 if (mod.includes('LanguageContext')) return { useLanguage: () => ({ t: (key, fallback, params) => key.startsWith('workbenchUi.') ? english(key, fallback, params) : fallback }) };

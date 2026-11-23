@@ -46,6 +46,7 @@ function mountUi(filename, props = {}, { canEdit = true, user = null, responses 
                 if (name === '@lims/delimited-text') return require('../../../shared/delimitedText');
                 if (name === '@lims/result-value-validation') return require('../../../shared/resultValueValidation');
                 if (name === '@lims/soil-calculation') return require('../../../shared/soilCalculation');
+                if (name === '@lims/workflow-contract') return require('../../workflowContract');
                 if (['./entryReadiness', './qcWorksheetNavigation', './worksheetReady', '../../utils/soilCalculations', './useRunBarcodeScan', './BarcodeSafeInput',
                     './QcRunHistory', '../qc/BatchInspectionModal', '../../utils/audioCues'].includes(name))
                     return load(path.resolve(path.dirname(file), name +
@@ -54,14 +55,15 @@ function mountUi(filename, props = {}, { canEdit = true, user = null, responses 
             } });
         return cache[file] = module.exports;
     }
-    const component = load(path.resolve(root, filename)).default;
+    const moduleExports = load(path.resolve(root, filename));
+    const component = moduleExports.default;
     const expand = node => {
         if (Array.isArray(node)) return node.map(expand);
         if (!node || typeof node !== 'object') return node;
         if (typeof node.type === 'function' && node.type.name === 'StoredQcEvidence') return expand(node.type(node.props));
         return { ...node, props: { ...node.props, children: expand(node.props?.children) } };
     };
-    return { axios, props, responses, children, navigate,
+    return { axios, props, responses, children, navigate, moduleExports,
         async render(patch = {}) { Object.assign(props, patch); for (let index = 0; index < 5; index++) {
             cursor = 0; tree = expand(component(props)); effects.splice(0).forEach(effect => { if (runEffects) effect(); }); await new Promise(resolve => setImmediate(resolve));
         } return tree; },

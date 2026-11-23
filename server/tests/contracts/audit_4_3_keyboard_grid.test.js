@@ -67,6 +67,30 @@ test('valid changed Result drafts become ready automatically; invalid, cleared, 
     rows[0].draft.value = '7'; await denied.render(); expect(denied.find('record-all-ready').props['aria-disabled']).toBe(true);
 });
 
+describe.each([
+    ['REPEAT_REQUIRED', true],
+    ['REANALYSIS_REQUIRED', true],
+    ['IN_PROGRESS', false]
+])('%s worksheet readiness', (status, equalReady) => {
+    const { isResultDraftReady } = mountUi('components/workbench/worksheetReady.js').moduleExports;
+
+    test('handles equal and different numeric drafts', () => {
+        const group = { analysis: 'SAND' };
+        const row = item('sand', { status, currentResult: '8', draft: { value: '8.0' } });
+        expect(isResultDraftReady(row, group, true)).toBe(equalReady);
+        expect(isResultDraftReady({ ...row, draft: { value: '9' } }, group, true)).toBe(true);
+    });
+
+    test('handles equal and different texture fractions', () => {
+        const group = { analysis: 'TEXTURE' };
+        const fractions = { sand: '40', silt: '40', clay: '20' };
+        const row = item('texture', { status, editorKind: 'TEXTURE',
+            currentResult: JSON.stringify({ fractions }), draft: { values: fractions } });
+        expect(isResultDraftReady(row, group, true)).toBe(equalReady);
+        expect(isResultDraftReady({ ...row, draft: { values: { sand: '41', silt: '39', clay: '20' } } }, group, true)).toBe(true);
+    });
+});
+
 test('mouse exclusion lasts until the next draft change; Record all ready uses the existing callback', async () => {
     const row = item('one', { draft: { value: '6.2' } }), record = jest.fn(), change = jest.fn();
     const view = mountUi('components/workbench/WorksheetArea.jsx', { activeGroup: { analysis: 'PH_H2O', items: [row] }, onDraftChange: change, onReviewRecord: record });

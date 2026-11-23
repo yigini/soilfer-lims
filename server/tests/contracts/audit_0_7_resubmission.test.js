@@ -71,6 +71,48 @@ describe('Audit 0.7: returned work can be recorded and submitted again', () => {
         expect(old.value).toBe('6.2'); expect(old.numericValue).toBe(6.2); expect(old.isCurrent).toBe(false);
         expect((await prisma.result.findFirst({ where: { sampleId: f.sampleId, isCurrent: true } })).numericValue).toBe(6.4);
     });
+    test('workbench previews and records an equal-value repeat on a new attempt', async () => {
+        const f = await fixture();
+        const response = await post(`/api/work/${f.item.id}/review`, {
+            decision: 'RETURN', attemptId: f.result.attemptId, reasonCode: 'PREP_ERROR', note: 'Repeat after preparation error'
+        });
+        expect(response.status).toBe(200);
+        const item = await prisma.workItem.findUnique({ where: { id: f.item.id } });
+        expect(item.status).toBe('REPEAT_REQUIRED');
+
+        const oldAttempt = await prisma.workAttempt.findUnique({ where: { id: f.result.attemptId } });
+        const oldResult = await prisma.result.findUnique({ where: { id: f.result.id } });
+        expect(oldAttempt.status).toBe('INVALIDATED');
+        expect(oldResult.isValid).toBe(false);
+        const queue = await request(app).get('/api/workbench/queue').query({ view: 'my_work', workItemId: item.id })
+            .set('Authorization', `Bearer ${technician}`);
+        expect(queue.status).toBe(200);
+        expect(queue.body.groups.flatMap(group => group.items)).toContainEqual(expect.objectContaining({
+            workItemId: item.id, status: 'REPEAT_REQUIRED', currentResult: oldResult.value
+        }));
+
+        const entry = { workItemId: item.id, value: f.result.value, version: item.version };
+        const preview = await post('/api/workbench/v2/completion/preview', { entries: [entry] }, technician);
+        expect(preview.status).toBe(200);
+        expect(preview.body).toMatchObject({ eligibleCount: 1, blockedCount: 0 });
+        const committed = await post('/api/workbench/v2/completion/commit', { entries: preview.body.included }, technician);
+        expect(committed.status).toBe(200);
+        expect(committed.body.saved).toBe(1);
+
+        const attempts = await prisma.workAttempt.findMany({ where: { workItemId: item.id }, orderBy: { attemptNo: 'asc' } });
+        expect(attempts).toEqual([oldAttempt, expect.objectContaining({
+            attemptNo: 2, parentAttemptId: oldAttempt.id, status: 'RECORDED'
+        })]);
+        const repeat = await prisma.result.findFirst({ where: { attemptId: attempts[1].id, isCurrent: true } });
+        expect(repeat).toMatchObject({ numericValue: oldResult.numericValue, isValid: true });
+        expect(await prisma.result.findUnique({ where: { id: oldResult.id } })).toMatchObject({
+            value: oldResult.value, attemptId: oldAttempt.id, isValid: false, isCurrent: false, supersededBy: repeat.id
+        });
+
+        const submitted = await post('/api/workbench/v2/submissions/commit', { sampleIds: [f.sampleId], workItemIds: [item.id] }, technician);
+        expect(submitted.status).toBe(200);
+        expect(await prisma.workAttempt.findUnique({ where: { id: attempts[1].id } })).toMatchObject({ status: 'SUBMITTED' });
+    });
     test('QC REANALYZE detaches only mutable work and keeps the old package/reason in history', async () => {
         const f = await fixture({ batchStatus: 'QC_FAIL' });
         const accepted = await createWorkItemFixture(prisma, { data: { id: id('WI-07-ACCEPTED'), sampleId: f.sampleId, analysis: f.analysis,

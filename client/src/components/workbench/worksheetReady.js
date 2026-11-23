@@ -1,5 +1,6 @@
 import numberParse from '@lims/number-parse';
 import { classifyResultValue } from '@lims/result-value-validation';
+import workflow from '@lims/workflow-contract';
 import { calculateUsdaTexture } from '../../utils/soilCalculations';
 import { isEntryReady } from './entryReadiness';
 
@@ -15,8 +16,9 @@ export function isResultDraftReady(item, group, canEnter) {
     if (!canEnter || !item?.draft || item.draft.conflictValue || !isEntryReady(item, group?.eligibleEquipment || [])) return false;
     const isTexture = item.editorKind === 'TEXTURE' ||
         ['TEXTURE', 'SOIL_PSD_TEXTURE', 'SOIL_TEXTURE', 'PSA', 'pSA', 'Particle Size Analysis'].includes(group?.analysis);
-    // A rejected prior attempt is shown as a hint, not the current observation.
-    const current = item.status === 'REANALYSIS_REQUIRED' ? null : item.currentResult;
+    // The prior attempt is historical evidence when a repeat is required.
+    const isRepeat = workflow.normalizeWorkItemState(item.status) === workflow.WORK_ITEM_STATES.REPEAT_REQUIRED;
+    const current = isRepeat ? null : item.currentResult;
     if (isTexture) {
         const values = fractions(item.draft.values).map(value => numberParse.parseNumber(value, item.numberFormat));
         if (!values.every(value => value.valid && !value.qualifier)) return false;
