@@ -1386,6 +1386,20 @@ exports.uploadBatch = async (req, res) => {
             }
             const axisDirection = increasing ? 'ASCENDING' : (decreasing ? 'DESCENDING' : 'UNORDERED');
 
+            // SL-12: Find prior active scan for supersession.
+            const replicateNo = scanItem.replicateNo ? parseInt(scanItem.replicateNo) : 1;
+            const priorScan = sample ? await prisma.spectralData.findFirst({
+                where: {
+                    sampleId: sample.id,
+                    modality: scanItem.modality || 'NIR',
+                    replicateNo,
+                    isCurrent: true,
+                    status: { not: 'DELETED' }
+                }
+            }) : null;
+            const supersedesId = priorScan?.id || null;
+            const quantity = scanItem.quantity || 'UNVERIFIED';
+
             // SL-11: Checksum Deduplication
             const effectiveLabId = sample ? (sample.assignedLab || sample.labId || (user ? user.labId : null)) : (user ? user.labId : null);
             let sha256Hash = scanItem.sha256;
@@ -1401,11 +1415,15 @@ exports.uploadBatch = async (req, res) => {
                 }
             }
 
+            // A manager-rejected scan can be superseded by the same file with its quantity confirmed.
+            const replacesUnconfirmedScan = priorScan?.status === 'REJECTED' && priorScan.sha256 === sha256Hash
+                && (!priorScan.quantity || priorScan.quantity === 'UNVERIFIED') && quantity !== 'UNVERIFIED';
             const duplicate = await prisma.spectralData.findFirst({
                 where: {
                     labId: effectiveLabId,
                     sha256: sha256Hash,
-                    status: { not: 'DELETED' }
+                    status: { not: 'DELETED' },
+                    ...(replacesUnconfirmedScan && { id: { not: priorScan.id } })
                 }
             });
             if (duplicate) {
@@ -1467,25 +1485,7 @@ exports.uploadBatch = async (req, res) => {
                 }
             }
 
-            // SL-12: Find prior active scan for supersession
-            let priorScan = null;
-            let supersedesId = null;
-            const replicateNo = scanItem.replicateNo ? parseInt(scanItem.replicateNo) : 1;
-            if (sample) {
-                priorScan = await prisma.spectralData.findFirst({
-                    where: {
-                        sampleId: sample.id,
-                        modality: scanItem.modality || 'NIR',
-                        replicateNo: replicateNo,
-                        isCurrent: true,
-                        status: { not: 'DELETED' }
-                    }
-                });
-                if (priorScan) supersedesId = priorScan.id;
-            }
-
-            // SL-07 & SL-17: Typed physical quantity & signal metadata (never guess; default to UNVERIFIED)
-            const quantity = scanItem.quantity || 'UNVERIFIED';
+            // SL-07 & SL-17: Typed signal metadata.
             const axisUnit = scanItem.axisUnit || (scanItem.modality === 'MIR' ? 'WAVENUMBER_CM1' : 'WAVELENGTH_NM');
             const region = scanItem.region || scanItem.modality || 'NIR';
 
@@ -1617,7 +1617,8 @@ exports.uploadBatch = async (req, res) => {
                             executableItem?.id, spectralState.suppliedReopenReason(req.body.reopenReason, scanItem.reopenReason));
                         await spectralState.updateScan(tx, currentPrior, {
                             isCurrent: false, supersededBy: newScanId, supersededAt: new Date(),
-                            supersedeReason: scanItem.rescanReason || 'New determination/rescan uploaded'
+                            supersedeReason: scanItem.rescanReason || (replacesUnconfirmedScan
+                                ? 'Physical quantity confirmed on re-upload' : 'New determination/rescan uploaded')
                         });
                         await spectralState.recomputePriorItem(tx, priorItem, user);
                     }
@@ -1785,7 +1786,7 @@ exports.batchReview = async (req, res) => {
         await spectralState.preflightBatch(ids.map(id => ({ id, check: async () => {
             const scan = await prisma.spectralData.findUnique({ where: { id } });
             if (scan) await spectralState.prepareReview(prisma, scan, user,
-                { action, batch: true, reopenReason: req.body.reopenReason, preflight: true });
+                { action, reopenReason: req.body.reopenReason, preflight: true });
         } })));
         const results = { succeeded: 0, failed: 0, errors: [] };
         for (const id of ids) {

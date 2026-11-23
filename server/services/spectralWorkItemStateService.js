@@ -141,14 +141,17 @@ function countsTowardCompletion(scan) {
         && scan.qcStatus != null && scan.qcStatus !== 'FAIL');
 }
 
-async function prepareReview(tx, expected, actor, { action, reopenReason, batch = false, preflight = false }) {
+async function prepareReview(tx, expected, actor, { action, reopenReason, preflight = false }) {
     const scan = await freshScan(tx, expected, actor);
     if (!['APPROVE', 'REJECT', 'UNDO'].includes(action)) throw new rules.TransitionError('Action must be APPROVE, REJECT or UNDO.', 400, 'INVALID_SPECTRAL_REVIEW');
     if (action === 'UNDO' ? scan.status !== 'REJECTED' : !['PENDING', 'VALIDATED'].includes(scan.status)) {
         throw new rules.TransitionError(`Cannot review spectrum in ${scan.status} status.`, 400, 'SPECTRAL_NOT_REVIEWABLE');
     }
-    if (action === 'APPROVE' && !batch && (!scan.quantity || scan.quantity === 'UNVERIFIED')) {
-        throw new rules.TransitionError('Cannot approve spectrum: physical quantity must be confirmed (cannot be empty or UNVERIFIED).', 400, 'SPECTRAL_QUANTITY_REQUIRED');
+    if (action === 'APPROVE' && (!scan.quantity || scan.quantity === 'UNVERIFIED')) {
+        throw new rules.TransitionError(
+            'The physical quantity must be confirmed before approval. Reject this spectrum and have the technician upload it again with the physical quantity selected.',
+            400, 'SPECTRAL_QUANTITY_REQUIRED'
+        );
     }
     const status = action === 'UNDO' ? 'VALIDATED' : action === 'APPROVE' ? 'APPROVED' : 'REJECTED';
     // Review never infers a WorkItem association from sample/modality matching.
@@ -161,7 +164,7 @@ async function prepareReview(tx, expected, actor, { action, reopenReason, batch 
 }
 
 async function reviewScan(tx, expected, actor, { action, notes, reopenReason, batch = false }) {
-    const { scan, status, item, changesCount } = await prepareReview(tx, expected, actor, { action, reopenReason, batch });
+    const { scan, status, item, changesCount } = await prepareReview(tx, expected, actor, { action, reopenReason });
     const updatedScan = await updateScan(tx, scan, { status, reviewedBy: action === 'UNDO' ? null : rules.actorName(actor),
         reviewedAt: action === 'UNDO' ? null : new Date(), reviewNotes: action === 'UNDO' ? null : notes || null });
     const updatedItem = action === 'APPROVE' || changesCount ? await completeItem(tx, item, actor, {

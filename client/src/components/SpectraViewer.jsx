@@ -1,23 +1,13 @@
 import React, { useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { useLanguage } from '../context/LanguageContext';
+import { spectralQuantityLabels } from '../utils/spectralQuantity';
 
 // Color palette for multi-trace overlay
 const TRACE_COLORS = [
     '#2563eb', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6',
     '#06b6d4', '#ec4899', '#84cc16', '#f97316', '#6366f1'
 ];
-
-/**
- * Format physical quantity name for Y-axis and tooltips (SL-03)
- */
-const formatQuantity = (qty, modality) => {
-    if (qty === 'ABSORBANCE') return 'Absorbance';
-    if (qty === 'REFLECTANCE') return 'Reflectance';
-    if (qty === 'LOG_1_R') return 'log(1/R)';
-    if (qty === 'KUBELKA_MUNK') return 'Kubelka-Munk';
-    if (qty === 'TRANSMITTANCE') return 'Transmittance (%)';
-    return modality === 'MIR' ? 'Absorbance' : 'Reflectance';
-};
 
 /**
  * Linear interpolation helper on monotonic curve (SL-05)
@@ -65,7 +55,10 @@ function interpolateAt(sortedPoints, targetX) {
  *                 each: { id, chartData, filename, modality, metadata, quantity, axisUnit }
  */
 const SpectraViewer = ({ data, overlayData }) => {
+    const { t } = useLanguage();
     const isOverlay = overlayData && overlayData.length > 1;
+    const scan = isOverlay ? overlayData[0] : data;
+    const yLabel = spectralQuantityLabels.get(scan?.quantity || scan?.metadata?.quantity) ?? t('spectralWorkflow.quantityNotConfirmed');
 
     // ── OVERLAY MODE (SL-05 & SL-03) ──
     const overlayGrid = useMemo(() => {
@@ -116,7 +109,6 @@ const SpectraViewer = ({ data, overlayData }) => {
         const first = overlayData[0];
         const modality = first?.modality || 'NIR';
         const isWavenumber = first?.axisUnit === 'WAVENUMBER_CM1' || modality === 'MIR';
-        const yLabel = formatQuantity(first?.quantity || first?.metadata?.quantity, modality);
         const xLabel = isWavenumber ? 'Wavenumber (cm⁻¹)' : 'Wavelength (nm)';
 
         return (
@@ -192,7 +184,6 @@ const SpectraViewer = ({ data, overlayData }) => {
 
     const modality = data.modality || 'NIR';
     const isWavenumber = data.axisUnit === 'WAVENUMBER_CM1' || modality === 'MIR';
-    const yLabel = formatQuantity(data.quantity || data.metadata?.quantity, modality);
     const xLabel = isWavenumber ? 'Wavenumber (cm⁻¹)' : 'Wavelength (nm)';
     const dataKey = data.chartData[0]?.value !== undefined ? 'value' : 'absorbance';
 

@@ -794,6 +794,9 @@
     }
   },
   "spectralWorkflow": {
+    "physicalQuantity": "Physical quantity",
+    "selectQuantity": "Select a physical quantity",
+    "quantityNotConfirmed": "Not confirmed",
     "reopenTitle": "Reopen completed work",
     "reopenMessage": "This change affects a completed work item. Enter a reason to reopen it and retry.",
     "reason": "Reason (required)",

@@ -5,6 +5,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useDialog } from '../context/DialogContext';
+import { spectralQuantityLabels } from '../utils/spectralQuantity';
 import { requestWithSpectralReopen } from '../utils/spectralWorkflowRequest';
 
 /**
@@ -43,6 +44,7 @@ const SpectraBatchUpload = ({
     const [previewScan, setPreviewScan] = useState(null); // For showing spectrum chart
     const [labIdMatchInfo, setLabIdMatchInfo] = useState(null); // { matched: [], unmatched: [] }
     const [matchCheckResult, setMatchCheckResult] = useState(null); // Backend sample match check
+    const [quantity, setQuantity] = useState('');
 
     // Fetch active spectrometers on mount
     React.useEffect(() => {
@@ -62,6 +64,7 @@ const SpectraBatchUpload = ({
         if (selected.length > 0) {
             setFiles(selected);
             setFile(selected[0]);
+            setQuantity('');
             setError(null);
         }
     };
@@ -330,7 +333,7 @@ const SpectraBatchUpload = ({
     };
 
     const handleConfirm = async () => {
-        if (!previewData) return;
+        if (!previewData || !spectralQuantityLabels.has(quantity)) return;
         if (!selectedEquipmentId) {
             setError('Please select a spectrometer before uploading.');
             return;
@@ -351,9 +354,11 @@ const SpectraBatchUpload = ({
             const targetFiles = files.length > 0 ? files : (file ? [file] : []);
             targetFiles.forEach(f => formData.append('files', f));
 
-            // If wide-table CSV was parsed into individual scans, also send scans JSON
+            // The server reads quantity per scan for parsed CSV and from the form for raw uploads.
             if (previewData.scans && !previewData.isRawInstrumentFiles) {
-                formData.append('scans', JSON.stringify(previewData.scans));
+                formData.append('scans', JSON.stringify(previewData.scans.map(scan => ({ ...scan, quantity }))));
+            } else {
+                formData.append('quantity', quantity);
             }
 
             const res = await requestWithSpectralReopen(reopenReason => {
@@ -518,6 +523,7 @@ const SpectraBatchUpload = ({
     if (step === 2) {
         const scanCount = previewData?.scans?.length || 0;
         const errorCount = previewData?.errors?.length || 0;
+        const quantityLabel = spectralQuantityLabels.get(quantity) ?? t('spectralWorkflow.quantityNotConfirmed');
 
         return (
             <div className="p-6">
@@ -552,6 +558,20 @@ const SpectraBatchUpload = ({
                         <div className="text-sm text-red-800">Errors</div>
                     </div>
                 </div>
+
+                <label className="mb-4 block text-sm font-medium">
+                    {t('spectralWorkflow.physicalQuantity')}
+                    <select
+                        required
+                        disabled={loading}
+                        value={quantity}
+                        onChange={e => setQuantity(e.target.value)}
+                        className="mt-1 block w-full rounded-lg border border-sf-divider bg-sf-surface px-3 py-2"
+                    >
+                        <option value="">{t('spectralWorkflow.selectQuantity')}</option>
+                        {[...spectralQuantityLabels].map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                    </select>
+                </label>
 
                 {/* Pre-upload Sample Match Check */}
                 {matchCheckResult && !currentSampleLabId && (
@@ -727,7 +747,7 @@ const SpectraBatchUpload = ({
                                     />
                                     <YAxis
                                         tick={{ fontSize: 10, fill: 'var(--sf-chart-axis, var(--sf-muted))' }}
-                                        label={{ value: modality === 'NIR' ? 'Reflectance' : 'Absorbance', angle: -90, position: 'insideLeft', fontSize: 10, fill: 'var(--sf-chart-axis, var(--sf-muted))' }}
+                                        label={{ value: quantityLabel, angle: -90, position: 'insideLeft', fontSize: 10, fill: 'var(--sf-chart-axis, var(--sf-muted))' }}
                                         stroke="var(--sf-chart-axis, var(--sf-muted))"
                                     />
                                     <Tooltip
@@ -738,7 +758,7 @@ const SpectraBatchUpload = ({
                                             borderRadius: '8px',
                                             fontSize: 11
                                         }}
-                                        formatter={(v) => [v?.toFixed(4), modality === 'NIR' ? 'Reflectance' : 'Absorbance']}
+                                        formatter={(v) => [v?.toFixed(4), quantityLabel]}
                                     />
                                     <Line
                                         type="monotone"
@@ -792,7 +812,7 @@ const SpectraBatchUpload = ({
                     <button onClick={() => setStep(1)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">Back</button>
                     <button
                         onClick={handleConfirm}
-                        disabled={loading || scanCount === 0 || (matchCheckResult && matchCheckResult.matchedCount === 0 && !currentSampleId)}
+                        disabled={loading || !spectralQuantityLabels.has(quantity) || scanCount === 0 || (matchCheckResult && matchCheckResult.matchedCount === 0 && !currentSampleId)}
                         className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 flex items-center gap-2"
                     >
                         {loading ? <RefreshCw className="animate-spin" size={18} /> : null}

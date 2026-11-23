@@ -10,7 +10,9 @@ function load(file, resolve = () => ({})) {
     const module = { exports: {} };
     vm.runInNewContext(esbuild.transformSync(fs.readFileSync(path.join(clientRoot, file), 'utf8'),
         { loader: file.endsWith('.jsx') ? 'jsx' : 'js', format: 'cjs' }).code,
-    { module, exports: module.exports, require: resolve, console, FormData: class {
+    { module, exports: module.exports, require: resolve, console, FileReader: class {
+        readAsText(file) { this.onload({ target: { result: file.contents } }); }
+    }, FormData: class {
         constructor() { this.fields = []; }
         append(key, value) { this.fields.push([key, value]); }
         set(key, value) { this.fields = this.fields.filter(([name]) => name !== key); this.append(key, value); }
@@ -20,12 +22,13 @@ function load(file, resolve = () => ({})) {
     return module.exports;
 }
 const workflow = load('utils/spectralWorkflowRequest.js');
+const quantities = load('utils/spectralQuantity.js');
 function elements(tree, predicate) {
     if (Array.isArray(tree)) return tree.flatMap(node => elements(node, predicate));
     if (!tree || typeof tree !== 'object') return [];
     return [...(predicate(tree) ? [tree] : []), ...elements(tree.props?.children, predicate)];
 }
-function host(file, axios = {}) {
+function host(file, axios = {}, translate = t) {
     const states = [], showDialog = jest.fn();
     let cursor = 0;
     const hooks = { ...React, useState(initial) {
@@ -37,12 +40,13 @@ function host(file, axios = {}) {
     const exported = load(file, name => {
         if (name === 'react') return hooks;
         if (name === 'axios') return axios;
-        if (name === 'lucide-react') return icons;
+        if (name === 'lucide-react' || name === 'recharts') return icons;
         if (name.includes('AuthContext')) return { useAuth: () => ({ user: { role: 'LAB_MANAGER' } }) };
-        if (name.includes('LanguageContext')) return { useLanguage: () => ({ t }) };
+        if (name.includes('LanguageContext')) return { useLanguage: () => ({ t: translate }) };
         if (name.includes('DialogContext')) return { useDialog: () => ({ showDialog }) };
         if (name.includes('NotificationContext')) return { useNotifications: () => ({}) };
         if (name.includes('spectralWorkflowRequest')) return workflow;
+        if (name.includes('spectralQuantity')) return quantities;
         return () => null;
     });
     const component = exported.default || exported.DialogProvider;
@@ -110,10 +114,57 @@ test('spectral reason prompts have messages in all five locales', () => {
     for (const locale of ['en', 'es', 'es-419', 'fr', 'pt']) {
         const messages = require(`../../../client/src/translations/${locale}.json`).spectralWorkflow;
         for (const key of ['reason', 'retry', 'reopenTitle', 'reopenMessage', 'trashTitle', 'trashMessage', 'batchTrashMessage', 'trashConfirm',
-            'partialTitle', 'receiptTitle', 'receiptCounts', 'retryFailed']) {
+            'partialTitle', 'receiptTitle', 'receiptCounts', 'retryFailed', 'physicalQuantity', 'selectQuantity', 'quantityNotConfirmed']) {
             expect(messages[key]).toEqual(expect.any(String)); expect(messages[key].trim()).not.toBe('');
         }
     }
+});
+
+test('wide CSV upload requires and sends the selected physical quantity', async () => {
+    const axios = { post: jest.fn(async url => ({ data: url === '/api/spectral/check-matches'
+        ? { matchedCount: 1, unmatchedCount: 0 }
+        : { results: { success: 1, failed: 0, errors: [] } } })) };
+    const h = host('components/SpectraBatchUpload.jsx', axios);
+    const wavelengths = Array.from({ length: 51 }, (_, i) => 400 + i);
+    const file = {
+        name: 'reflectance.csv',
+        contents: ['LabID,' + wavelengths.join(','), 'SAMPLE-1,' + wavelengths.map(() => '0.4').join(',')].join('\n')
+    };
+    const setup = h.render();
+    elements(setup, node => node.type === 'select')[0].props.onChange({ target: { value: 'spectrometer' } });
+    elements(setup, node => node.type === 'input' && node.props.type === 'file')[0].props.onChange({ target: { files: [file] } });
+    await elements(h.render(), node => node.type === 'button' && node.props.onClick?.name === 'handlePreview')[0].props.onClick();
+    await settle();
+
+    const preview = h.render();
+    const uploadButton = tree => elements(tree, node => node.type === 'button' && node.props.onClick?.name === 'handleConfirm')[0];
+    expect(uploadButton(preview).props.disabled).toBe(true);
+    await uploadButton(preview).props.onClick();
+    expect(axios.post).toHaveBeenCalledTimes(1);
+
+    const selector = elements(preview, node => node.type === 'select' && node.props.required)[0];
+    selector.props.onChange({ target: { value: 'REFLECTANCE' } });
+    const confirmed = uploadButton(h.render());
+    expect(confirmed.props.disabled).toBe(false);
+    await confirmed.props.onClick();
+    const [url, body] = axios.post.mock.calls[1];
+    expect(url).toBe('/api/spectral/batch');
+    expect(body.getAll('files')).toEqual([file]);
+    expect(JSON.parse(body.get('scans'))).toEqual([expect.objectContaining({
+        labId: 'SAMPLE-1', modality: 'NIR', quantity: 'REFLECTANCE', wavelengths
+    })]);
+});
+
+test.each([
+    ['NIR', 'UNVERIFIED', 'Not confirmed'],
+    ['MIR', undefined, 'Not confirmed'],
+    ['NIR', 'ABSORBANCE', 'Absorbance']
+])('the viewer labels %s data using its stored quantity (%s)', (modality, quantity, label) => {
+    const messages = require('../../../client/src/translations/en.json').spectralWorkflow;
+    const h = host('components/SpectraViewer.jsx', {}, key => messages[key.split('.').at(-1)]);
+    const scan = { modality, quantity, chartData: [{ wavelength: 500, value: 0.4 }] };
+    const tree = h.render({ data: scan });
+    expect(elements(tree, node => node.type?.iconName === 'YAxis')[0].props.label.value).toBe(label);
 });
 
 test.each(['upload', 'review', 'staged'])('%s flow prompts once and resends the exact original files or decisions', async flow => {
@@ -132,6 +183,7 @@ test.each(['upload', 'review', 'staged'])('%s flow prompts once and resends the 
     if (flow === 'upload') {
         h.states[0] = 2; h.states[1] = file; h.states[2] = [file]; h.states[9] = 'same-equipment';
         h.states[5] = { new: [], errors: [], scans: [{ labId: 'retained-sample', wavelengths: [4000, 400], values: [0.1, 0.2] }] };
+        elements(h.render(props), node => node.type === 'select' && node.props.required)[0].props.onChange({ target: { value: 'ABSORBANCE' } });
     } else if (flow === 'review') h.states[6] = new Set(['scan-a', 'scan-b']);
     else {
         h.states[0] = 3; h.states[2] = 'same-equipment'; h.states[6] = 'same-manifest';
@@ -152,7 +204,7 @@ test.each(['upload', 'review', 'staged'])('%s flow prompts once and resends the 
     if (flow === 'upload') {
         expect(calls[1].body).toBe(calls[0].body);
         expect(calls[1].body.getAll('files')).toEqual([file]);
-        expect(calls[1].body.get('scans')).toBe(JSON.stringify(h.states[5].scans));
+        expect(JSON.parse(calls[1].body.get('scans'))).toEqual([{ ...h.states[5].scans[0], quantity: 'ABSORBANCE' }]);
         expect(calls[1].body.get('contextSampleId')).toBe('same-sample');
     } else {
         expect({ ...calls[1].body, reopenReason: undefined }).toEqual(calls[0].body);
