@@ -14,6 +14,7 @@ import LabelPrintDialog from '../components/common/LabelPrintDialog';
 import ExportModal from '../components/common/ExportModal';
 import LegacyBackfillModal from '../components/projects/LegacyBackfillModal';
 import DisposalQueue from '../components/samples/DisposalQueue';
+import deletableSampleStatuses from '../../../shared/deletableSampleStatuses.json';
 
 const extractUrlState = (searchParams) => {
     const urlView = searchParams.get('view') || 'daily';
@@ -62,7 +63,9 @@ const Samples = () => {
 
     // UI State
     const [drawerOpen, setDrawerOpen] = useState(false);
-    const [selected, setSelected] = useState([]);
+    const [selection, setSelection] = useState(() => new Map());
+    const selected = [...selection.keys()];
+    const selectedDeletableIds = selected.filter(id => deletableSampleStatuses.includes(selection.get(id)));
     const [assignmentSelection, setAssignmentSelection] = useState(null);
     const [options, setOptions] = useState({
         projects: [], countries: [], labs: []
@@ -104,6 +107,10 @@ const Samples = () => {
             });
 
             setData(res.data.data);
+            const visibleStatuses = new Map(res.data.data.map(sample => [sample.id, sample.status]));
+            setSelection(previous => previous.size
+                ? new Map([...previous].map(([id, status]) => [id, visibleStatuses.get(id) ?? status]))
+                : previous);
             setMeta(res.data.meta);
             setFacets(res.data.facets || {});
         } catch (err) {
@@ -346,8 +353,15 @@ const Samples = () => {
             return next;
         }, { replace: true });
     };
-    const handleSelect = (id, checked) => { setSelected(prev => checked ? [...prev, id] : prev.filter(i => i !== id)); };
-    const handleSelectAll = (checked) => { setSelected(checked ? data.map(d => d.id) : []); };
+    const handleSelect = (id, checked) => {
+        setSelection(previous => {
+            const next = new Map(previous);
+            if (checked) next.set(id, data.find(sample => sample.id === id)?.status);
+            else next.delete(id);
+            return next;
+        });
+    };
+    const handleSelectAll = (checked) => setSelection(new Map(checked ? data.map(sample => [sample.id, sample.status]) : []));
 
     // --- Delete Flow ---
 
@@ -402,7 +416,7 @@ const Samples = () => {
             fetchData();
         } catch (err) {
             console.error("Failed to delete sample", err);
-            const msg = err.response?.data?.error || "Failed to delete sample.";
+            const msg = err.response?.data?.message || err.response?.data?.error || t('samples.deleteFailed');
             showDialog({ title: t('common.error', 'Error'), message: msg, type: 'error' });
             // Revert UI if failed
             undoDelete(id);
@@ -423,20 +437,21 @@ const Samples = () => {
     };
 
     const handleBatchDelete = async () => {
-        if (!selected.length) return;
-        if (!window.confirm(`Are you sure you want to permanently delete these ${selected.length} samples and all their associated data (work items, results, spectral data)? This action CANNOT be undone.`)) return;
+        if (!selectedDeletableIds.length) return;
+        if (!window.confirm(t('samples.batchDeleteConfirm', { count: selectedDeletableIds.length }))) return;
 
         setLoading(true);
         try {
-            const res = await axios.post('/api/samples/batch-delete', { ids: selected }, {
+            const res = await axios.post('/api/samples/batch-delete', { ids: selectedDeletableIds }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             showDialog({ title: t('common.success', 'Success'), message: res.data.message || 'Samples deleted successfully', type: 'success' });
-            setSelected([]);
+            setSelection(new Map());
             fetchData();
         } catch (err) {
             console.error("Batch delete failed", err);
-            showDialog({ title: t('common.error', 'Error'), message: err.response?.data?.error || 'Failed to perform batch deletion.', type: 'error' });
+            const message = err.response?.data?.message || err.response?.data?.error || t('samples.batchDeleteFailed');
+            showDialog({ title: t('common.error', 'Error'), message, type: 'error' });
         } finally {
             setLoading(false);
         }
@@ -458,7 +473,7 @@ const Samples = () => {
                         <div className="flex items-center gap-4">
                             <button
                                 onClick={handleBatchDelete}
-                                disabled={loading}
+                                disabled={loading || !selectedDeletableIds.length}
                                 className="flex items-center gap-2 px-4 py-2 rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition-all duration-200 font-semibold text-sm disabled:opacity-50 disabled:cursor-not-allowed group"
                             >
                                 <Trash2 size={18} className="transition-transform group-hover:scale-110" />
@@ -466,7 +481,7 @@ const Samples = () => {
                             </button>
 
                             <button
-                                onClick={() => setSelected([])}
+                                onClick={() => setSelection(new Map())}
                                 className="text-sf-muted hover:text-sf-text transition-colors text-sm font-medium px-2"
                             >
                                 {t('common.cancel', 'Cancel')}
@@ -534,7 +549,7 @@ const Samples = () => {
 
             {assignmentSelection && hasPermission('ASSIGN_WORK') && <BulkAssignmentDialog
                 selection={assignmentSelection} onClose={() => setAssignmentSelection(null)}
-                onAssigned={() => { setSelected([]); fetchData(); }} />}
+                onAssigned={() => { setSelection(new Map()); fetchData(); }} />}
 
             <LabelPrintDialog
                 isOpen={!!printTarget}

@@ -5,6 +5,7 @@ const { success, error } = require('../i18n/response');
 const idGenerator = require('../services/idGenerator');
 const sampleCodes = require('../services/sampleCodeService');
 const workflow = require('../workflowContract');
+const deletableSampleStatuses = require('../../shared/deletableSampleStatuses.json');
 const { hasPermission } = require('../config/roles');
 const scopeGuard = require('../utils/scopeGuard');
 const sampleWorkspaceService = require('../services/sampleWorkspaceService');
@@ -1103,8 +1104,7 @@ exports.deleteSample = async (req, res) => {
 
         // LIFECYCLE CHECK: Deny generic deletion/reset of released, approved, or in-progress samples (I04)
         // This applies to ALL users, including SUPER_ADMIN (cannot bypass lifecycle state via generic delete)
-        const deletableStatuses = ['DRAFT', 'EXPECTED', 'RECEIVED', 'COLLECTED'];
-        if (!deletableStatuses.includes(sample.status)) {
+        if (!deletableSampleStatuses.includes(sample.status)) {
             return res.status(409).json({
                 error: 'ILLEGAL_STATUS_TRANSITION',
                 message: `Cannot delete or discard sample in status '${sample.status}'. Samples that are approved, released, or in progress cannot be deleted or reset outside a controlled amendment.`
@@ -1133,7 +1133,7 @@ exports.deleteSample = async (req, res) => {
                 const current = await tx.sample.findUnique({ where: { id: String(id) } });
                 if (!current) throw new sampleStateService.TransitionError('Sample not found', 404, 'SAMPLE_NOT_FOUND');
 
-                if (!deletableStatuses.includes(current.status)) {
+                if (!deletableSampleStatuses.includes(current.status)) {
                     throw new sampleStateService.TransitionError(
                         `Cannot discard sample in status '${current.status}'. Samples in progress or completed cannot be reset.`,
                         409,
@@ -1222,7 +1222,7 @@ exports.deleteSample = async (req, res) => {
             const current = await tx.sample.findUnique({ where: { id: String(id) } });
             if (!current) throw new sampleStateService.TransitionError('Sample not found', 404, 'SAMPLE_NOT_FOUND');
 
-            if (!deletableStatuses.includes(current.status)) {
+            if (!deletableSampleStatuses.includes(current.status)) {
                 throw new sampleStateService.TransitionError(
                     `Cannot delete sample in status '${current.status}'.`,
                     409,
@@ -1293,8 +1293,7 @@ exports.batchDeleteSamples = async (req, res) => {
 
         // LIFECYCLE CHECK: Deny generic deletion/reset of released, approved, or in-progress samples (I04)
         // This applies to ALL users, including SUPER_ADMIN (cannot bypass lifecycle state via generic delete)
-        const deletableStatuses = ['DRAFT', 'EXPECTED', 'RECEIVED', 'COLLECTED'];
-        const nonDeletable = samples.filter(s => !deletableStatuses.includes(s.status));
+        const nonDeletable = samples.filter(s => !deletableSampleStatuses.includes(s.status));
         if (nonDeletable.length > 0) {
             const blocked = nonDeletable.map(s => `${s.originalId || s.id} (${s.status})`).join(', ');
             return res.status(409).json({
@@ -1359,7 +1358,7 @@ exports.batchDeleteSamples = async (req, res) => {
             }
 
             for (const current of currentSamples) {
-                if (!deletableStatuses.includes(current.status)) {
+                if (!deletableSampleStatuses.includes(current.status)) {
                     throw new sampleStateService.TransitionError(
                         `Cannot discard sample ${current.originalId || current.id} in status '${current.status}'. Samples in progress or completed cannot be reset.`,
                         409,
