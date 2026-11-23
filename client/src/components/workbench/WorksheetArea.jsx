@@ -31,6 +31,9 @@ import { isResultDraftReady, resultDraftSignature } from './worksheetReady';
 
 const isOperationalGroup = group => group?.category === 'Operational Gates' ||
     ['SPEC_VIS_NIR', 'SPEC_MIR', 'SPEC_NIR', 'SPEC_FTIR'].includes(group?.analysis);
+// Confirmation and manager verification are separate actions.
+const canConfirmOperation = item => ['NOT_ASSIGNED', 'ASSIGNED', 'IN_PROGRESS', 'REPEAT_REQUIRED',
+    'PENDING', 'REJECTED', 'REANALYSIS_REQUIRED'].includes(item.status);
 
 /**
  * WorksheetArea
@@ -178,6 +181,9 @@ export default function WorksheetArea({
     const visibleItems = runBatch && selectedRun ? runWorksheetRows(runBatch.positions || [], items, activeGroup?.analysis)
         .map(row => row.item).filter(Boolean) : filteredItems;
     const isResultGrid = !isOperationalGate && !isSpectral;
+    const selectableItems = isOperationalGate ? visibleItems.filter(canConfirmOperation) : visibleItems;
+    const selectedOperations = isOperationalGate ? items.filter(item => selectedRows.has(item.workItemId) && canConfirmOperation(item)) : [];
+    const selectedCount = isOperationalGate ? selectedOperations.length : selectedRows.size;
     const readyCandidates = isResultGrid ? visibleItems.filter(item => isResultDraftReady(item, activeGroup, hasPermission?.('ENTER_RESULTS') === true)) : [];
     const readyIds = new Set(readyCandidates.filter(item => excludedDrafts.get(item.workItemId) !== resultDraftSignature(item)).map(item => item.workItemId));
     useEffect(() => {
@@ -226,7 +232,7 @@ export default function WorksheetArea({
 
     // Select all handler
     const allSelected = isResultGrid ? readyCandidates.length > 0 && readyCandidates.every(item => readyIds.has(item.workItemId)) :
-        visibleItems.length > 0 && visibleItems.every(i => selectedRows.has(i.workItemId));
+        selectableItems.length > 0 && selectableItems.every(i => selectedRows.has(i.workItemId));
     const toggleSelectAll = () => {
         if (isResultGrid) {
             setExcludedDrafts(previous => {
@@ -239,11 +245,12 @@ export default function WorksheetArea({
         if (allSelected) {
             setSelectedRows(new Set());
         } else {
-            setSelectedRows(new Set(visibleItems.map(i => i.workItemId)));
+            setSelectedRows(new Set(selectableItems.map(i => i.workItemId)));
         }
     };
 
-    const toggleRowSelect = (workItemId) => {
+    const toggleRowSelect = (clickedItem) => {
+        const { workItemId } = clickedItem;
         if (isResultGrid) {
             const item = readyCandidates.find(row => row.workItemId === workItemId);
             if (!item) return;
@@ -255,6 +262,7 @@ export default function WorksheetArea({
             });
             return;
         }
+        if (isOperationalGate && !canConfirmOperation(clickedItem)) return;
         const next = new Set(selectedRows);
         if (next.has(workItemId)) {
             next.delete(workItemId);
@@ -306,6 +314,7 @@ export default function WorksheetArea({
                                             type="checkbox"
                                             tabIndex={-1}
                                             checked={allSelected}
+                                            disabled={isOperationalGate && selectableItems.length === 0}
                                             onChange={toggleSelectAll}
                                             aria-label={t("workbenchUi.selectAllRows")}
                                             className="w-4 h-4 rounded text-sf-primary focus:ring-sf-primary"
@@ -332,7 +341,9 @@ export default function WorksheetArea({
                                         <td className="p-3" />
                                     </tr>;
                                     const isSelected = item.workItemId === inspectedItem?.workItemId;
-                                    const isChecked = isResultGrid ? readyIds.has(item.workItemId) : selectedRows.has(item.workItemId);
+                                    const canSelectRow = isResultGrid ? readyCandidates.some(row => row.workItemId === item.workItemId) :
+                                        !isOperationalGate || canConfirmOperation(item);
+                                    const isChecked = isResultGrid ? readyIds.has(item.workItemId) : canSelectRow && selectedRows.has(item.workItemId);
                                     const draft = item.draft;
                                     const hasConflict = !!draft?.conflictValue;
                                     const isRecorded = item.status === 'COMPLETED';
@@ -402,8 +413,8 @@ export default function WorksheetArea({
                                                     type="checkbox"
                                                     tabIndex={-1}
                                                     checked={isChecked}
-                                                    disabled={isResultGrid && !readyCandidates.some(row => row.workItemId === item.workItemId)}
-                                                    onChange={() => toggleRowSelect(item.workItemId)}
+                                                    disabled={!canSelectRow}
+                                                    onChange={() => toggleRowSelect(item)}
                                                     aria-label={t("workbenchUi.selectCount", { value0: item.sampleDisplayId || item.sampleId })}
                                                     className="w-4 h-4 rounded text-sf-primary focus:ring-sf-primary"
                                                 />
@@ -452,7 +463,7 @@ export default function WorksheetArea({
                                                     />
                                                 ) : isOperationalGate ? (
                                                     <OperationalTaskEditor
-                                                        disabled={!item.readiness?.isReady || isRecorded}
+                                                        disabled={!item.readiness?.isReady || !canSelectRow}
                                                         analysis={item.analysis}
                                                         checks={draft?.checks || savedChecks || [false, false, false]}
                                                         savedReceipt={savedReceipt}
@@ -567,26 +578,23 @@ export default function WorksheetArea({
                     {/* Footer */}
                     <div className="p-3 bg-sf-raised border-t border-sf-divider flex items-center justify-between flex-wrap gap-2 text-xs">
                         <span className="text-sf-muted">
-                            {isResultGrid ? t('keyboardGrid.readyHint', { count: readyIds.size }) : <><strong className="text-sf-text">{t("workbenchUi.selectedCount", { count: selectedRows.size })}</strong> · {t("workbenchUi.press")} <kbd className="px-1 py-0.5 rounded border border-sf-divider bg-sf-surface text-sf-text font-mono">{t("workbenchUi.enter")}</kbd> {t("workbenchUi.toAdvanceToNextRow")}</>}
+                            {isResultGrid ? t('keyboardGrid.readyHint', { count: readyIds.size }) : <><strong className="text-sf-text">{t("workbenchUi.selectedCount", { count: selectedCount })}</strong> · {t("workbenchUi.press")} <kbd className="px-1 py-0.5 rounded border border-sf-divider bg-sf-surface text-sf-text font-mono">{t("workbenchUi.enter")}</kbd> {t("workbenchUi.toAdvanceToNextRow")}</>}
                         </span>
 
                         {isOperationalGate ? (
                             <button
                                 type="button"
                                 onClick={() => {
-                                    selectedRows.forEach(wiId => {
-                                        const target = items.find(i => i.workItemId === wiId);
-                                        const checksToConfirm = target?.draft?.checks || [true, true, true];
-                                        if (onConfirmOperation) {
-                                            onConfirmOperation(wiId, checksToConfirm, null, target?.draft?.records, target?.version);
-                                        }
+                                    selectedOperations.forEach(item => {
+                                        const checksToConfirm = item.draft?.checks || [true, true, true];
+                                        onConfirmOperation?.(item.workItemId, checksToConfirm, null, item.draft?.records, item.version);
                                     });
                                 }}
-                                disabled={selectedRows.size === 0}
+                                disabled={selectedCount === 0}
                                 className="px-4 py-2 rounded-lg text-xs font-semibold bg-sf-primary text-sf-on-primary hover:bg-sf-primary-hover disabled:opacity-50 transition-colors flex items-center gap-1.5"
                             >
                                 <CheckCircle2 size={13} />
-                                <span>{t('plainLabels.confirmAnalysisDone', { analysisName: activeGroup?.analysisName || t('resultReports.preparation') })} ({selectedRows.size})</span>
+                                <span>{t('plainLabels.confirmAnalysisDone', { analysisName: activeGroup?.analysisName || t('resultReports.preparation') })} ({selectedCount})</span>
                             </button>
                         ) : (
                             <button

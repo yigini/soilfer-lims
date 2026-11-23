@@ -1,5 +1,37 @@
 const fs = require('node:fs'), path = require('node:path');
 const { mountUi, nativeHost, nativeFixture, nodes, content } = require('../helpers/qcWorksheetUi');
+const { localeTranslator } = require('../helpers/clientTranslation');
+
+test('operational confirmation skips completed and awaiting-verification rows, including after a refresh', async () => {
+    const items = [['completed', 'COMPLETED'], ['waiting', 'AWAITING_VERIFICATION'], ['ready', 'ASSIGNED']]
+        .map(([id, status]) => ({ workItemId: id, sampleId: id, sampleDisplayId: id, analysis: 'PREPARATION',
+            status, readiness: { isReady: true }, draft: { checks: [true, true, true] }, version: 3 }));
+    const onConfirmOperation = jest.fn();
+    const view = mountUi('components/workbench/WorksheetArea.jsx', {
+        activeGroup: { analysis: 'PREPARATION', analysisName: 'Sample Preparation', category: 'Operational Gates', items },
+        onConfirmOperation
+    }, { user: { role: 'LAB_TECHNICIAN' }, translate: localeTranslator('en') });
+    const checkbox = label => view.all().find(node => node.type === 'input' && node.props['aria-label'] === label);
+    const confirm = () => view.all().find(node => node.type === 'button' && content(node).includes('Confirm Sample Preparation is done'));
+    await view.render();
+    expect(checkbox('Select completed').props.disabled).toBe(true);
+    expect(checkbox('Select waiting').props.disabled).toBe(true);
+    checkbox('Select all rows').props.onChange();
+    await view.render();
+    expect(checkbox('Select all rows').props.checked).toBe(true);
+    expect(checkbox('Select completed').props.checked).toBe(false);
+    expect(checkbox('Select waiting').props.checked).toBe(false);
+    expect(checkbox('Select ready').props.checked).toBe(true);
+    confirm().props.onClick();
+    expect(onConfirmOperation).toHaveBeenCalledTimes(1);
+    expect(onConfirmOperation).toHaveBeenCalledWith('ready', [true, true, true], null, undefined, 3);
+
+    items[2] = { ...items[2], status: 'COMPLETED' };
+    await view.render();
+    expect(checkbox('Select ready').props.checked).toBe(false);
+    expect(checkbox('Select all rows').props.disabled).toBe(true);
+    expect(confirm().props.disabled).toBe(true);
+});
 
 test('the real worksheet table combines linked Result editors and all QC positions while keeping their writes separate', async () => {
     const batch = nativeFixture();

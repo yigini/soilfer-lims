@@ -440,19 +440,32 @@ class SampleWorkspaceService {
         const unassignedCount = enrichedWorkItems.filter(w => !w.assignedTo && ['NOT_ASSIGNED', 'PENDING', 'UNASSIGNED'].includes(w.status)).length;
 
         // 10. Operational Gates
+        const gateReceipt = analysis => {
+            const result = sample.workItems.find(item => item.analysis === analysis && !item.duplicateOf)?.result;
+            if (!result) return null;
+            try {
+                const receipt = JSON.parse(result);
+                if (!Array.isArray(receipt?.checklist) || typeof receipt.receiptId !== 'string' || !receipt.receiptId.trim()) return null;
+                return { receiptId: receipt.receiptId, schemaVersion: typeof receipt.schemaVersion === 'string' ? receipt.schemaVersion : null };
+            } catch {
+                return null;
+            }
+        };
         const gates = {
             drying: {
                 code: 'DRYING',
                 label: 'Air Drying (40°C)',
                 status: sample.dryingStatus || 'PENDING',
                 isDone: sample.dryingStatus === 'DONE',
-                isFailed: sample.dryingStatus === 'FAILED'
+                isFailed: sample.dryingStatus === 'FAILED',
+                receipt: gateReceipt('DRYING')
             },
             preparation: {
                 code: 'PREPARATION',
                 label: 'Sieving / Milling',
                 status: sample.preparationStatus || 'PENDING',
-                isDone: sample.preparationStatus === 'DONE'
+                isDone: sample.preparationStatus === 'DONE',
+                receipt: gateReceipt('PREPARATION')
             },
             allGatesPassed: sample.dryingStatus === 'DONE' && sample.preparationStatus === 'DONE'
         };
