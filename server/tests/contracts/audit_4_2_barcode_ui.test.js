@@ -27,6 +27,7 @@ describe('Audit 4.2: real DOM barcode wedge and value-cell boundaries', () => {
                 if (name === '@lims/number-parse') return require('../../../shared/numberParse');
                 if (name === '@lims/result-value-validation') return require('../../../shared/resultValueValidation');
                 if (name === '@lims/soil-calculation') return require('../../../shared/soilCalculation');
+                if (name === '@lims/workflow-contract') return require('../../workflowContract');
                 if (name.includes('LanguageContext')) return { useLanguage: () => ({ t }) };
                 if (name.includes('AuthContext')) return { useAuth: () => ({ hasPermission: () => true }) };
                 if (name.includes('AnalysisCatalogueContext')) return { useAnalysisNames: () => code => code };
