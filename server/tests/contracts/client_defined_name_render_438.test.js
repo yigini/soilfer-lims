@@ -87,6 +87,18 @@ test.each(['RECEIVE', 'ACCEPT_INTAKE', 'RELEASE_REPORT'])('rendered sample prima
     else { expect(document.body.textContent).toContain('Generate & Release Report'); expect(view.axios.post).not.toHaveBeenCalled(); }
     expect(errors).not.toHaveBeenCalled();
 });
+test.each([
+    [{ receiptId: 'REC-OPS-preparation', schemaVersion: 'prep-test-v1' }, 'Completed'],
+    [null, 'Evidence needs verification']
+])('the preparation prerequisite with receipt %p displays %s', async (receipt, expected) => {
+    const sample = { id: 'sample-preparation', originalId: 'PREP-001', status: 'PROCESSING', preparationStatus: 'DONE' };
+    const workspace = { workItems: [], operationalGates: { preparation: { isDone: true, receipt } } };
+    await mount('SampleDetail.jsx', { sample, workspace, search: '?tab=work' });
+    const heading = [...document.querySelectorAll('h3')].find(node => node.textContent === 'Preparation Prerequisites');
+    const card = heading.parentElement.parentElement;
+    const statuses = [...card.querySelectorAll('span')].map(node => node.textContent);
+    expect(statuses.filter(status => ['Completed', 'Evidence needs verification'].includes(status))).toEqual([expected]);
+});
 test.each(['DRAFT', 'RECEIVED'])('rendered Reception resumes %s with saved sampling fields, checklist and notes', async status => {
     const sample = { id: 'draft-1', originalId: 'DEMO-DRAFT', status, isWalkIn: true, depthTopCm: 0, depthBottomCm: 20,
         fieldMetadata: JSON.stringify({ collectionDate: { value: '2026-11-14T12:00:00Z' }, landUse: { value: 'CROPLAND' }, isComposite: { value: false } }),

@@ -122,6 +122,8 @@ describe('Package P2: Sample Workspace Projection & Transactional Foundations', 
         expect(res.body.workItems).toBeDefined();
         expect(res.body.workItems.length).toBe(4);
         expect(res.body.operationalGates.allGatesPassed).toBe(true);
+        expect(res.body.operationalGates.drying.receipt).toBeNull();
+        expect(res.body.operationalGates.preparation.receipt).toBeNull();
         expect(res.body.capabilities).toBeDefined();
         expect(res.body.counters).toBeDefined();
         expect(res.body.counters.ordered).toBe(2);

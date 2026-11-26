@@ -472,11 +472,12 @@ describe('Workbench Single-Entry Architecture & Operational Lifecycle Contract',
             expect(workspace.order.revisionNumber).toBe(2);
             expect(workspace.order.revisionStatus).toBe('ACTIVE');
 
-            // Check gates projection contains durable receipts
-            expect(workspace.operationalGates.drying.isDone).toBe(true);
-            expect(workspace.operationalGates.drying.receipt).not.toBeNull();
-            expect(workspace.operationalGates.preparation.isDone).toBe(true);
-            expect(workspace.operationalGates.preparation.receipt).not.toBeNull();
+            for (const [gate, workItemId] of [['drying', testDryingId], ['preparation', testPrepId]]) {
+                const item = await prisma.workItem.findUnique({ where: { id: workItemId } });
+                const { receiptId, schemaVersion } = JSON.parse(item.result);
+                expect(receiptId).toMatch(/^REC-OPS-/);
+                expect(workspace.operationalGates[gate]).toMatchObject({ isDone: true, receipt: { receiptId, schemaVersion } });
+            }
         });
     });
 });
