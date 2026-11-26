@@ -14,7 +14,11 @@ export default defineConfig({
         __BUILD_DATE__: JSON.stringify(buildDate),
     },
     build: {
-        commonjsOptions: { include: [/node_modules/, /shared[\\/](?:numberParse|reportedValueFormat|nonconformityContract|soilCalculation|resultValueValidation|delimitedText)\.js$/] },
+        commonjsOptions: { include: [
+            /node_modules/,
+            /shared[\\/](?:numberParse|reportedValueFormat|nonconformityContract|soilCalculation|resultValueValidation|delimitedText)\.js$/,
+            /server[\\/]workflowContract\.js$/
+        ] },
         rollupOptions: {
             output: {
                 manualChunks: {
@@ -34,8 +38,10 @@ export default defineConfig({
         '@lims/result-value-validation': fileURLToPath(new URL('../shared/resultValueValidation.js', import.meta.url)),
         '@lims/number-parse': fileURLToPath(new URL('../shared/numberParse.js', import.meta.url)),
         '@lims/reported-value-format': fileURLToPath(new URL('../shared/reportedValueFormat.js', import.meta.url)),
-        '@lims/nonconformity': fileURLToPath(new URL('../shared/nonconformityContract.js', import.meta.url)) } },
-    optimizeDeps: { include: ['@lims/number-parse', '@lims/delimited-text', '@lims/reported-value-format', '@lims/nonconformity', '@lims/soil-calculation', '@lims/result-value-validation'] },
+        '@lims/nonconformity': fileURLToPath(new URL('../shared/nonconformityContract.js', import.meta.url)),
+        '@lims/workflow-contract': fileURLToPath(new URL('../server/workflowContract.js', import.meta.url)) } },
+    optimizeDeps: { include: ['@lims/number-parse', '@lims/delimited-text', '@lims/reported-value-format', '@lims/nonconformity',
+        '@lims/soil-calculation', '@lims/result-value-validation', '@lims/workflow-contract'] },
     server: {
         proxy: {
             '/api': {
