@@ -84,8 +84,8 @@ function planStepD(db, extraPackageIds = []) {
     const original = new Map(groups.map(row => [row.id, parsePackage(row)])), contents = new Map(original);
     const failures = [], records = [], packages = [], eligibility = [];
     const fail = (code, target, context = {}) => failures.push({ code, target, ...context });
-    const record = (kind, table, key, before, after) => records.push({ kind, table, key, target: before[key],
-        state: stableStringify(before) === stableStringify(after) ? 'already_done' : 'planned', before, after,
+    const record = (kind, table, key, before, after, extra = {}) => records.push({ kind, table, key, target: before[key],
+        state: extra.state || (stableStringify(before) === stableStringify(after) ? 'already_done' : 'planned'), ...extra, before, after,
         beforeRowSha256: rowHash(before), afterRowSha256: rowHash(after) });
     for (const id of PACKAGE_IDS) {
         const group = groups.find(row => row.id === id);
@@ -114,12 +114,19 @@ function planStepD(db, extraPackageIds = []) {
             workItems: db.prepare('SELECT count(*) n FROM WorkItem WHERE analysis=?').get(code).n,
             results: db.prepare('SELECT count(*) n FROM Result WHERE param=?').get(code).n };
         const remainingPackages = [...contents].filter(([, codes]) => codes.includes(code)).map(([id]) => id);
-        if (Object.values(usage).some(Boolean)) fail('LEGACY_HAS_USAGE', code, usage);
         if (remainingPackages.length) fail('LEGACY_STILL_IN_PACKAGE', code, { packageIds: remainingPackages });
+        let state = null;
         if (!before) fail('LEGACY_PARAMETER_MISSING', code);
         else if (before.labId !== null || before.isGlobal !== 1 || !['active', 'inactive'].includes(before.status)) fail('LEGACY_PARAMETER_SCOPE_OR_STATUS', code);
-        else record('retirement', 'Analysis', 'code', before, { ...before, status: 'inactive' });
-        return { code, ...usage, remainingPackages };
+        else if (before.status === 'active' && Object.values(usage).some(Boolean)) {
+            state = 'retirement_skipped_in_use';
+            record('retirement', 'Analysis', 'code', before, before, { state, usage });
+        } else {
+            const after = { ...before, status: 'inactive' };
+            state = stableStringify(before) === stableStringify(after) ? 'already_done' : 'planned';
+            record('retirement', 'Analysis', 'code', before, after);
+        }
+        return { code, state, ...usage, remainingPackages };
     });
     const gypsum = analyses.get('GYPSUM');
     if (!gypsum) fail('PARAMETER_MISSING', 'GYPSUM');
@@ -169,7 +176,7 @@ function planStepD(db, extraPackageIds = []) {
     const availabilityAfter = missingDefaultEntries(groups, contents, labs, methods, overrides);
     const beforeMissing = new Set(availabilityBefore.map(stableStringify));
     for (const entry of availabilityAfter) if (!beforeMissing.has(stableStringify(entry))) fail('NEW_MISSING_DEFAULT', entry.code, { packageId: entry.packageId, labId: entry.labId });
-    const targetKeys = new Set(records.map(row => `${row.table}:${row.target}`));
+    const targetKeys = new Set(records.filter(row => row.state !== 'retirement_skipped_in_use').map(row => `${row.table}:${row.target}`));
     const unchanged = {
         analyses: [...analyses.values()].filter(row => !targetKeys.has(`Analysis:${row.code}`)),
         methods: methods.filter(row => !targetKeys.has(`Methodology:${row.id}`)),
