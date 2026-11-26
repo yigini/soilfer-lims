@@ -83,6 +83,18 @@ const techStack = [
 
 const changelog = [
     {
+        version: 'v1.16.3',
+        date: 'November 26, 2026',
+        tag: 'Workbench Guard, Manifest Import, Storage Locations and Catalogue Alignment',
+        badgeColor: 'bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300 border-blue-300 dark:border-blue-800',
+        changes: [
+            'Stop the Workbench from opening an unrelated sample when a technician has no assigned work on the requested sample, and disable unreachable Workbench links with a clear reason.',
+            'Support drag-and-drop manifest uploads and exact-alias column matching for coordinates and top/bottom depths.',
+            'Display all walk-in sample reception metadata (including 0 depths and No values), add a central Locations tab on Inventory with Default location on items, and clarify required fields in the storage movement dialog.',
+            'Label the public report PDF button in all five languages, update Manual wording and menu table order, and ship with the 1.16.2 fixes, Effect dependency update, and catalogue alignment.'
+        ]
+    },
+    {
         version: 'v1.16.2',
         date: 'November 26, 2026',
         tag: 'Workbench, Spectra and Sample Workflow Fixes',

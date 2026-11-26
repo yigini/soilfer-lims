@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.16.3] - 2026-11-26
+
+Ships together with the 1.16.2 fixes (#464–#467 and the Effect dependency pin) in one combined production release.
+
+### Added
+- Add a Locations tab on the Inventory page (Sample storage and Reagent storage trees) with create, edit, deactivate and reactivate controls, plus an optional Default location select on Add/Edit Item and a link from the storage movement dialog when no sample locations exist (all five screen languages, using European Portuguese in `pt`).
+- Add Step D catalogue alignment support that safely skips legacy analysis codes currently in use (`retirement_skipped_in_use`) while applying package swaps, unused retirements, SAR/GYPSUM reporting-unit updates and method renames.
+
+### Fixed
+- Prevent the Workbench from silently opening an unrelated sample when a technician opens a sample with no assigned work; show a clear localized message with a link back to the sample and disable Workbench shortcuts on sample screens when no work is assigned.
+- Enable drag-and-drop file upload on consignment manifest import using the same validation path as Choose File, and replace loose header regexes with exact-alias matching so `top`/`bottom` depths and coordinates map accurately without duplicate assignments.
+- Display walk-in reception metadata keys (`submitterOrganization`, `date`, `depthTopCm`, `depthBottomCm`, `purpose`, `location`, `management`), render `0` and `false` as real values, fall back to the stored submitter name for Client / Submitter, and show why Save is disabled on the storage movement dialog.
+- Add a visible "Download PDF" label to the public share page PDF button in all five languages, align Manual proficiency-testing wording ("review" instead of "log"), and order queue-tab rows in the generated Manual menu table to match the screen.
+
 ## [1.16.2] - 2026-11-26
 
 ### Fixed
