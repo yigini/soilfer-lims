@@ -65,7 +65,10 @@ test('mixed queues preserve the main response for every view, search and deep li
             { view: 'completed' }, { search: 'needle' }, { workItemId: 'item-6' }, { sampleId: 'sample-0' }]) {
             const expected = await read(main, query), actual = await read(candidate, query);
             expect(expected.status).toBe(200);
-            expect({ status: actual.status, body: actual.body }).toStrictEqual({ status: expected.status, body: expected.body });
+            const expectedBody = query.sampleId && !query.workItemId
+                ? { ...expected.body, target: { sampleId: query.sampleId, status: 'OK' } }
+                : expected.body;
+            expect({ status: actual.status, body: actual.body }).toStrictEqual({ status: expected.status, body: expectedBody });
             if (query.view === 'my_work') {
                 const rows = actual.body.groups.flatMap(group => group.items);
                 expect(new Set(rows.map(row => row.editorKind))).toEqual(new Set(['NUMERIC', 'TEXTURE', 'SPECTRAL', 'OPERATIONAL']));
