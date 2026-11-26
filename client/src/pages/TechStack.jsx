@@ -83,6 +83,18 @@ const techStack = [
 
 const changelog = [
     {
+        version: 'v1.16.2',
+        date: 'November 26, 2026',
+        tag: 'Workbench, Spectra and Sample Workflow Fixes',
+        badgeColor: 'bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300 border-blue-300 dark:border-blue-800',
+        changes: [
+            'Record repeat measurements even when the repeated value equals the previously rejected reading.',
+            'Show confirmed preparation evidence in the sample workspace and stop completed preparation rows from being confirmed twice.',
+            'Limit sample deletion to intake statuses with clear guidance to use Undo intake for accepted samples.',
+            'Require a physical quantity on spectrum uploads, enforce it in batch approval, show "Not confirmed" instead of guessing in the viewer, and update Prisma\'s Effect dependency.'
+        ]
+    },
+    {
         version: 'v1.16.1',
         date: 'November 18, 2026',
         tag: 'Report Printing and Certificate Details',

@@ -1,10 +1,18 @@
 # Release Notes (1.11–1.16)
 
-This page summarizes what laboratory staff, managers, and server administrators will notice in SoilFER-LIMS **1.16.1**, followed by earlier updates.
+This page summarizes what laboratory staff, managers, and server administrators will notice in SoilFER-LIMS **1.16.2**, followed by earlier updates.
 
 For step-by-step update instructions, see [Updating SoilFER-LIMS](./updates.md).
 
 ---
+
+## Version 1.16.2 — 2026-11-26
+
+- **Repeat measurements:** technicians can record a repeat reading even when the new value matches the previously rejected value.
+- **Preparation evidence:** the sample workspace displays confirmed preparation receipts, and completed preparation rows can no longer be selected and confirmed again.
+- **Sample deletion:** Delete is only available while a sample is in an intake status (Draft, Expected, Received, or Collected). For samples further along in the workflow, staff are guided to use Undo intake and see the server's message if a deletion is refused.
+- **Spectral physical quantity:** batch spectrum uploads require choosing a physical quantity (available in all five screen languages) before uploading. The viewer displays "Not confirmed" instead of guessing from the modality, batch approval enforces the same confirmed-quantity rule as single approval, and a technician can re-upload a rejected unverified file with its quantity confirmed.
+- **Security maintenance:** updated Prisma's `effect` dependency to `3.22.1`.
 
 ## Version 1.16.1 — 2026-11-18
 
