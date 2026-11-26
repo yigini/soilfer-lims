@@ -3471,7 +3471,8 @@
     "massDeficit": "Mass deficit",
     "acknowledgeMass": "Acknowledge this sample’s mass warning",
     "massCheckFailed": "Mass requirements could not be loaded. The server will check each row when you submit.",
-    "positionalUncertainty": "Recorded positional uncertainty (m)"
+    "positionalUncertainty": "Recorded positional uncertainty (m)",
+    "manifestMultipleFilesNotice": "Multiple files dropped; using {name}."
   },
   "policyEditor": {
     "reasonRequiredHint": "A reason is required to save.",
