@@ -12,6 +12,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import InfoTooltip from '../common/InfoTooltip';
+import deletableSampleStatuses from '../../../../shared/deletableSampleStatuses.json';
 
 const STATE_CONFIG = {
     'EXPECTED': { icon: CalendarClock, color: 'text-gray-500', bg: 'bg-gray-100', label: 'Expected' },
@@ -336,7 +337,7 @@ const SamplesTable = ({ data, sort, order, onSort, selected = [], onSelect, onSe
     const getAnalysisDisplayName = useAnalysisNames();
     const { t } = useLanguage();
     const navigate = useNavigate();
-    const { user, token } = useAuth();
+    const { token } = useAuth();
     const [auditSampleId, setAuditSampleId] = useState(null);
 
     const handleSort = (field) => { const newOrder = sort === field && order === 'asc' ? 'desc' : 'asc'; onSort(field, newOrder); };
@@ -384,6 +385,7 @@ const SamplesTable = ({ data, sort, order, onSort, selected = [], onSelect, onSe
                             const isWalkIn = !sample.projectCode || String(sample.originalId).startsWith('EXT-') || String(sample.originalId).startsWith('W');
                             const isProtected = sample.metadata && (sample.metadata._uuid || sample.metadata['Country']);
                             const isDeleting = deletingIds.includes(sample.id);
+                            const isDeletableStatus = deletableSampleStatuses.includes(sample.status);
                             const attention = computeAttention(sample, t);
                             const progress = computeProgress(sample);
 
@@ -529,8 +531,12 @@ const SamplesTable = ({ data, sort, order, onSort, selected = [], onSelect, onSe
                                     {/* Actions */}
                                     <td className="px-4 py-4 text-right">
                                         <div className="flex items-center justify-end gap-1">
-                                            {user.role === 'SUPER_ADMIN' && !isProtected && !isDeleting && (
-                                                <button onClick={(e) => { e.stopPropagation(); onDelete(sample.id); }} className="text-sf-muted hover:text-red-600 transition-colors hover:bg-red-50 dark:hover:bg-red-900/20 p-1.5 rounded" title="Hard Delete" aria-label="Delete sample"><Trash2 size={15} /></button>
+                                            {canDelete && !isProtected && !isDeleting && (
+                                                <span onClick={(e) => e.stopPropagation()} title={isDeletableStatus ? t('samples.deleteAction') : t('samples.deleteUseUndoIntake')}>
+                                                    <button type="button" disabled={!isDeletableStatus} onClick={() => onDelete(sample.id)}
+                                                        className="text-sf-muted hover:text-red-600 transition-colors hover:bg-red-50 dark:hover:bg-red-900/20 p-1.5 rounded disabled:pointer-events-none disabled:opacity-50"
+                                                        aria-label={t('samples.deleteAction')}><Trash2 size={15} /></button>
+                                                </span>
                                             )}
                                             <button onClick={(e) => { e.stopPropagation(); onPrintLabel(sample); }} className="text-sf-muted hover:text-indigo-600 p-1.5 hover:bg-sf-canvas rounded transition-colors" title="Print Label" aria-label="Print label"><Printer size={15} /></button>
                                             {!['EXPECTED', 'RECEIVED', 'COLLECTED', 'DRAFT'].includes(sample.status) && (

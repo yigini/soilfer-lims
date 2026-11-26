@@ -1,5 +1,6 @@
 const { randomUUID } = require('node:crypto');
 const workflow = require('../workflowContract');
+const deletableSampleStatuses = require('../../shared/deletableSampleStatuses.json');
 const { hasPermission } = require('../config/roles');
 const rules = require('./workflowStateRules');
 const { TransitionError } = rules;
@@ -158,7 +159,7 @@ async function removePreAnalyticSample(tx, ids, { actor, reason, code = 'SAMPLE_
     if (rows.length !== uniqueIds.length) throw new TransitionError('Sample not found', 404, 'SAMPLE_NOT_FOUND');
     for (const sample of rows) {
         rules.assertScope(actor, sample);
-        if (!['DRAFT', 'EXPECTED', 'RECEIVED', 'COLLECTED'].includes(sample.status)) {
+        if (!deletableSampleStatuses.includes(sample.status)) {
             throw new TransitionError('Samples in progress or completed cannot be deleted.', 409, 'ILLEGAL_STATUS_TRANSITION');
         }
     }

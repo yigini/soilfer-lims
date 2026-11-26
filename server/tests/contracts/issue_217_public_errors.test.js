@@ -24,6 +24,8 @@ const analyses = require('../../services/sampleAnalysisStateService');
 const evidence = require('../../services/resultEvidenceService');
 const sample = require('../../controllers/sampleController');
 const reception = require('../../controllers/receptionController');
+const deletableSampleStatuses = require('../../../shared/deletableSampleStatuses.json');
+const { SAMPLE_STATES } = require('../../workflowContract');
 
 function request() {
     return { params: { id: 'public-test-sample' }, query: { originalId: 'PUBLIC-TEST', q: 'PUBLIC' },
@@ -134,6 +136,28 @@ describe('#217 public error responses (mock boundaries; no database)', () => {
         expect(res.statusCode).toBe(422);
         expect(res.body).toEqual(payload);
     });
+
+    test('the shared deletion statuses are the pre-acceptance intake states', () => {
+        expect(deletableSampleStatuses).toEqual(['DRAFT', 'EXPECTED', 'RECEIVED', 'COLLECTED']);
+    });
+
+    test.each([...new Set([...Object.values(SAMPLE_STATES), 'COLLECTED'])])(
+        'single and batch removal follow the shared status rule for %s', async status => {
+            const req = request();
+            const row = { id: req.params.id, originalId: 'PUBLIC-TEST', status };
+            prisma.sample.findUnique.mockResolvedValue(row);
+            prisma.sample.findMany.mockResolvedValue([row]);
+            const allowed = deletableSampleStatuses.includes(status);
+            for (const handler of [sample.deleteSample, sample.batchDeleteSamples]) {
+                const res = response();
+                await handler(req, res);
+                expect(res.statusCode).toBe(allowed ? 200 : 409);
+                expect(res.body.message).toEqual(expect.any(String));
+                if (!allowed) expect(res.body.error).toBe('ILLEGAL_STATUS_TRANSITION');
+            }
+            expect(prisma.$transaction).toHaveBeenCalledTimes(allowed ? 2 : 0);
+        }
+    );
 
     test('a server intake payload retains its envelope/code without exposing error payload fields', async () => {
         failAtBoundary(Object.assign(new Error('PRIVATE_EXCEPTION'), { statusCode: 500, code: 'INTERNAL_FAILURE',
