@@ -76,7 +76,8 @@ const PublicReport = () => {
                     </span>
                     <div style={{ display: 'flex', gap: 8 }}>
                         <ReportPdfButton report={report} publicToken={token}
-                            style={{ padding: '8px 16px', background: '#1e3a5f', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer' }} />
+                            label={t('resultReports.downloadPdf', 'Download PDF')}
+                            style={{ padding: '8px 16px', background: '#1e3a5f', color: '#fff', border: 'none', borderRadius: 6, fontSize: 13, fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 8, cursor: 'pointer' }} />
                     </div>
                 </div>
 

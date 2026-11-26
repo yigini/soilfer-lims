@@ -12,7 +12,8 @@ const end = '<!-- END GENERATED MENU NAMES -->';
 const navigation = fs.readFileSync(path.join(root, 'client/src/navigationConfig.js'), 'utf8');
 const navigationKeys = [...new Set([...navigation.matchAll(/\bt\(\s*['"]((?:nav|policies)\.[^'"]+)['"]/g)].map(match => match[1]))];
 const menuKeys = [...navigationKeys, 'nav.expandSidebar', 'nav.collapseSidebar'];
-const queueKeys = Object.keys(translations.en.queue).filter(key => key.startsWith('tab')).map(key => 'queue.' + key);
+const managerQueue = fs.readFileSync(path.join(root, 'client/src/pages/ManagerQueue.jsx'), 'utf8');
+const queueKeys = [...new Set([...managerQueue.matchAll(/\bt\(\s*['"](queue\.tab[^'"]+)['"]/g)].map(match => match[1]))];
 const cell = text => String(text).replaceAll('|', '\\|').replace(/\r?\n/g, ' ');
 function table(keys) {
     return ['| English | Español | Español (América Latina) | Français | Português |',

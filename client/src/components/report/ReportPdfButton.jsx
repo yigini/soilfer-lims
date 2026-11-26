@@ -4,7 +4,7 @@ import { Printer } from 'lucide-react';
 import { useDialog } from '../../context/DialogContext';
 import { useLanguage } from '../../context/LanguageContext';
 
-export default function ReportPdfButton({ report, publicToken, className, style }) {
+export default function ReportPdfButton({ report, publicToken, label, className, style }) {
     const { showDialog } = useDialog();
     const { t } = useLanguage();
     const [pending, setPending] = useState(false);
@@ -39,8 +39,8 @@ export default function ReportPdfButton({ report, publicToken, className, style 
         }
     };
     return <button onClick={download} disabled={pending} aria-busy={pending} className={className} style={style}
-        aria-label={t('resultReports.printPdf', 'Print / Save as PDF')}
-        title={pending ? t('resultReports.pdfDownloading', 'Preparing PDF…') : t('resultReports.printPdf', 'Print / Save as PDF')}>
-        <Printer size={20} />
+        aria-label={label ? undefined : t('resultReports.printPdf', 'Print / Save as PDF')}
+        title={pending ? t('resultReports.pdfDownloading', 'Preparing PDF…') : (label || t('resultReports.printPdf', 'Print / Save as PDF'))}>
+        <Printer size={20} aria-hidden="true" />{label ? <span>{label}</span> : null}
     </button>;
 }

@@ -3173,6 +3173,7 @@
     "viewReport": "Ver relatório",
     "shareReport": "Partilhar relatório",
     "printPdf": "Imprimir / Guardar em PDF",
+    "downloadPdf": "Descarregar PDF",
     "pdfDownloading": "A preparar o PDF…",
     "pdfDownloadFailed": "Não foi possível descarregar o PDF do relatório. Tente novamente.",
     "noReportContent": "Nenhum conteúdo de relatório disponível",
