@@ -149,7 +149,7 @@ test('the real report viewer downloads its official stored version and prints th
             await publicPage.locator('.report-document').waitFor();
             const sharedResponse = publicPage.waitForResponse(response => response.url() === `${base}/api/reports/public/${shareToken}/pdf`);
             const sharedDownload = publicPage.waitForEvent('download');
-            await publicPage.getByRole('button', { name: 'Print / Save as PDF', exact: true }).click();
+            await publicPage.getByRole('button', { name: 'Download PDF', exact: true }).click();
             expect((await sharedResponse).status()).toBe(200);
             expect(fs.readFileSync(await (await sharedDownload).path())).toEqual(await (await sharedResponse).body());
             await anonymous.close();

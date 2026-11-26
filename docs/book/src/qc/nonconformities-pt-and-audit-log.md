@@ -2,7 +2,7 @@
 
 ## What This Is For
 
-Track and close laboratory **Problem records** (root cause and corrective action), log external **Proficiency testing** rounds and z-scores, and inspect the permanent and locked **System Audit Logs**.
+Track and close laboratory **Problem records** (root cause and corrective action), review external **Proficiency testing** rounds and z-scores, and inspect the permanent and locked **System Audit Logs**.
 
 > *Screenshot placeholder — docs/book/src/img/screenshots/qc-ncr-pt-and-audit-logs.png (screenshot coming once the training data is ready): The **QA Dashboard** showing **Problem records**, the **QA Dashboard** → **Lab overview** PT cards showing recorded results, and **System Audit Logs**.*
 

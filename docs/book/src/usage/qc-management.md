@@ -8,7 +8,7 @@ Monitor daily quality control across your laboratory in **QA Dashboard**. This p
 |---|---|
 | Decide what to do when a batch fails quality control (**Re-analyze Batch**, **Repeat samples since last good instrument check**, or **Proceed with Warning**) | [What to Do When a QC Run Fails (Batch Disposition & Bracket Repeats)](../qc/handle-failed-qc-batch.md) |
 | Propose or approve **Control charts** limits, manage **Reference Materials**, or review **LOD/LOQ proposals from method blanks** (proposed limit of detection and limit of quantification (lowest detectable and lowest reliably measurable amounts) calculated from blank runs) | [Review Control Charts, Reference Materials, and Blank Limits](../qc/control-charts-and-blank-limits.md) |
-| Investigate **Problem records**, log **Proficiency testing** rounds, or inspect **System Audit Logs** | [Manage Nonconformities, Proficiency Testing, and Audit Logs](../qc/nonconformities-pt-and-audit-log.md) |
+| Investigate **Problem records**, review **Proficiency testing** rounds, or inspect **System Audit Logs** | [Manage Nonconformities, Proficiency Testing, and Audit Logs](../qc/nonconformities-pt-and-audit-log.md) |
 | Enter blank, duplicate, and reference soil readings at the bench | [Technician: Workbench & Analytical Runs](technician-workbench.md) |
 
 ![QC Failed, What Now? Decision Tree](../img/diagrams/qc-failed-decision-tree.svg)
