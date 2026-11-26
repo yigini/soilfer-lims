@@ -794,6 +794,9 @@
     }
   },
   "spectralWorkflow": {
+    "physicalQuantity": "Grandeza física",
+    "selectQuantity": "Selecione uma grandeza física",
+    "quantityNotConfirmed": "Não confirmada",
     "reopenTitle": "Reabrir trabalho concluído",
     "reopenMessage": "Esta alteração afeta um trabalho concluído. Introduza um motivo para o reabrir e tentar novamente.",
     "reason": "Motivo (obrigatório)",

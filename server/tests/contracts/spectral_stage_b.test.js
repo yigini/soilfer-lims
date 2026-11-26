@@ -177,7 +177,63 @@ describe('Spectral Library Stage B (SL-06 to SL-12)', () => {
             .send({ action: 'APPROVE' });
 
         expect(reviewRes.status).toBe(400);
-        expect(reviewRes.body.error).toContain('physical quantity must be confirmed');
+        expect(reviewRes.body).toMatchObject({
+            code: 'SPECTRAL_QUANTITY_REQUIRED',
+            error: expect.stringContaining('Reject this spectrum and have the technician upload it again')
+        });
+
+        const batch = await request(app)
+            .post('/api/spectral/batch-review')
+            .set('Authorization', 'Bearer ' + mgrGtmToken)
+            .send({ ids: [unverifiedScan.id], action: 'APPROVE' });
+
+        expect(batch.status).toBe(200);
+        expect(batch.body.results).toMatchObject({
+            succeeded: 0, failed: 1, errors: [{ id: unverifiedScan.id, code: 'SPECTRAL_QUANTITY_REQUIRED' }]
+        });
+        expect(await prisma.spectralData.findUnique({ where: { id: unverifiedScan.id } })).toMatchObject({
+            status: 'VALIDATED', quantity: 'UNVERIFIED'
+        });
+    });
+
+    test('a technician can re-upload the same CSV with quantity after rejection, and a further duplicate is refused', async () => {
+        const techToken = await getAuthToken('LAB_TECHNICIAN', 'LAB-GTM', ['GTM'], ['SOILFER-US']);
+        const filename = 'vnira_quantity_confirmation.csv';
+        const wavelengths = Array.from({ length: 51 }, (_, i) => 400 + i);
+        const values = wavelengths.map((_, i) => 0.25 + i * 0.001);
+        const csv = Buffer.from(['LabID,' + wavelengths.join(','), sampleGtmId + ',' + values.join(',')].join('\n'));
+        const upload = quantity => request(app)
+            .post('/api/spectral/batch')
+            .set('Authorization', 'Bearer ' + techToken)
+            .field('equipmentId', spectrometerId)
+            .field('scans', JSON.stringify([{ labId: sampleGtmId, filename, modality: 'NIR', wavelengths, values, quantity }]))
+            .attach('files', csv, filename);
+
+        const initial = await upload();
+        expect(initial.body.results).toMatchObject({ success: 1 });
+        const rejected = await prisma.spectralData.findFirst({ where: { sampleId: sampleGtmId, filename, isCurrent: true } });
+        expect(rejected).toMatchObject({ status: 'VALIDATED', quantity: 'UNVERIFIED' });
+
+        const earlyRetry = await upload('REFLECTANCE');
+        expect(earlyRetry.body.results).toMatchObject({ success: 0, skipped: 1 });
+        const review = await request(app)
+            .post('/api/spectral/' + rejected.id + '/review')
+            .set('Authorization', 'Bearer ' + mgrGtmToken)
+            .send({ action: 'REJECT', notes: 'Physical quantity missing' });
+        expect(review.status).toBe(200);
+
+        const reupload = await upload('REFLECTANCE');
+        expect(reupload.body.results).toMatchObject({ success: 1, skipped: 0 });
+        const replacement = await prisma.spectralData.findFirst({ where: { sampleId: sampleGtmId, filename, isCurrent: true } });
+        expect(replacement).toMatchObject({ sha256: rejected.sha256, quantity: 'REFLECTANCE', supersedes: rejected.id });
+        expect(await prisma.spectralData.findUnique({ where: { id: rejected.id } })).toMatchObject({
+            status: 'REJECTED', quantity: 'UNVERIFIED', isCurrent: false, supersededBy: replacement.id,
+            reviewNotes: 'Physical quantity missing'
+        });
+
+        const duplicate = await upload('REFLECTANCE');
+        expect(duplicate.body.results).toMatchObject({ success: 0, skipped: 1,
+            errors: [expect.objectContaining({ error: expect.stringContaining('Duplicate spectrum rejected') })] });
     });
 
     test('SL-11: Checksum Deduplication rejects identical file in same lab', async () => {
