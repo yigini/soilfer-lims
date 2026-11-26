@@ -121,20 +121,50 @@ test('all changed package selections work through the actual application resolve
         }
     });
 });
-test.each(['extractableElements', 'solubleSalts', 'porosity', 'gypsum'])('even cancelled order history blocks retirement of %s and the whole plan', async code => {
+test.each(['extractableElements', 'solubleSalts', 'porosity', 'gypsum'])('order line history skips retiring %s, keeps it active, and applies the other eleven changes', async code => {
     const file = fixture(); await sample(file);
     await withClient(file, db => db.sampleOrderRevision.create({ data: { id: 'revision-ref', sampleId: 'sample-ref', version: 1, lines: { create: { id: 'line-ref', analysis: code, status: 'CANCELLED' } } } }));
-    refusal(file, 'LEGACY_HAS_USAGE');
+    const before = snapshot(file), dry = script.runStepDCatalogue({ dbPath: file });
+    expect(dry).toMatchObject({ ok: true, failures: [], plannedChanges: 11, totalChanges: 0, auditRowsCreated: 0 });
+    expect(dry.retirements.find(row => row.code === code)).toEqual({ code, state: 'retirement_skipped_in_use', orderLines: 1, workItems: 0, results: 0, remainingPackages: [] });
+    expect(dry.records.find(row => row.kind === 'retirement' && row.target === code)).toMatchObject({ state: 'retirement_skipped_in_use', usage: { orderLines: 1, workItems: 0, results: 0 } });
+    for (const other of script.RETIRED_CODES.filter(item => item !== code)) expect(dry.retirements.find(row => row.code === other)).toMatchObject({ state: 'planned', orderLines: 0, workItems: 0, results: 0 });
+    const result = script.runStepDCatalogue({ dbPath: file, apply: true, expectedPlanSha256: dry.planSha256 });
+    expect(result).toMatchObject({ ok: true, totalChanges: 11, auditRowsCreated: 11, sqliteTotalChanges: 22, integrityCheck: 'ok', foreignKeyCheckRows: 0 });
+    expect(result.records.find(row => row.kind === 'retirement' && row.target === code)).toMatchObject({ state: 'retirement_skipped_in_use' });
+    const after = snapshot(file);
+    expect(after.Analysis.find(row => row.code === code)).toEqual(before.Analysis.find(row => row.code === code));
+    expect(after.Analysis.find(row => row.code === code).status).toBe('active');
+    expect(after.AuditLog.some(row => row.entityId === code)).toBe(false);
+    for (const other of script.RETIRED_CODES.filter(item => item !== code)) expect(after.Analysis.find(row => row.code === other).status).toBe('inactive');
+    for (const group of after.AnalysisGroup.filter(row => afterPackages[row.id])) expect(JSON.parse(group.analyses)).toEqual(afterPackages[group.id]);
+    const hash = digest(file), second = script.runStepDCatalogue({ dbPath: file });
+    expect(second).toMatchObject({ ok: true, failures: [], plannedChanges: 0, totalChanges: 0, auditRowsCreated: 0 });
+    expect(second.retirements.find(row => row.code === code)).toEqual({ code, state: 'retirement_skipped_in_use', orderLines: 1, workItems: 0, results: 0, remainingPackages: [] });
+    expect(apply(file)).toMatchObject({ ok: true, totalChanges: 0, auditRowsCreated: 0, sqliteTotalChanges: 0 });
+    expect(digest(file)).toBe(hash); expect(snapshot(file)).toEqual(after);
 });
-test('a work item on a legacy code blocks the whole plan', async () => {
+test('a work item or retained non-current result on a legacy code skips only that retirement with usage counts', async () => {
     const file = fixture(); await sample(file);
     await withClient(file, db => createWorkItemFixture(db, { data: { id: 'work-ref', sampleId: 'sample-ref', analysis: 'porosity', assignedLab: 'lab-0' } }));
-    refusal(file, 'LEGACY_HAS_USAGE');
+    edit(file, db => createRawResultFixture(db, { id: 'old-result', sampleId: 'sample-ref', param: 'gypsum', value: '5', isCurrent: 0, updatedAt: '2026-01-01' }));
+    const dry = script.runStepDCatalogue({ dbPath: file });
+    expect(dry).toMatchObject({ ok: true, failures: [], plannedChanges: 10 });
+    expect(dry.retirements.find(row => row.code === 'porosity')).toEqual({ code: 'porosity', state: 'retirement_skipped_in_use', orderLines: 0, workItems: 1, results: 0, remainingPackages: [] });
+    expect(dry.retirements.find(row => row.code === 'gypsum')).toEqual({ code: 'gypsum', state: 'retirement_skipped_in_use', orderLines: 0, workItems: 0, results: 1, remainingPackages: [] });
+    const result = script.runStepDCatalogue({ dbPath: file, apply: true, expectedPlanSha256: dry.planSha256 });
+    expect(result).toMatchObject({ ok: true, totalChanges: 10, auditRowsCreated: 10, sqliteTotalChanges: 20 });
+    const after = snapshot(file);
+    for (const skipped of ['porosity', 'gypsum']) {
+        expect(after.Analysis.find(row => row.code === skipped).status).toBe('active');
+        expect(after.AuditLog.some(row => row.entityId === skipped)).toBe(false);
+    }
+    for (const retired of ['extractableElements', 'solubleSalts']) expect(after.Analysis.find(row => row.code === retired).status).toBe('inactive');
 });
-test.each(['gypsum', 'GYPSUM'])('a retained non-current result for %s prevents all writes', async param => {
+test('a retained non-current result for GYPSUM still prevents all writes', async () => {
     const file = fixture(); await sample(file);
-    edit(file, db => createRawResultFixture(db, { id: 'old-result', sampleId: 'sample-ref', param, value: '5', isCurrent: 0, updatedAt: '2026-01-01' }));
-    refusal(file, param === 'GYPSUM' ? 'GYPSUM_HAS_RESULTS' : 'LEGACY_HAS_USAGE');
+    edit(file, db => createRawResultFixture(db, { id: 'old-result', sampleId: 'sample-ref', param: 'GYPSUM', value: '5', isCurrent: 0, updatedAt: '2026-01-01' }));
+    refusal(file, 'GYPSUM_HAS_RESULTS');
 });
 test('a retained SAR result is counted and blocks the unit change and every other write', async () => {
     const file = fixture(); await sample(file);
