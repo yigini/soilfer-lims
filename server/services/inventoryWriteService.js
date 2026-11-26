@@ -169,12 +169,16 @@ async function createLot(user, body, { db = prisma } = {}) {
         return lot;
 }
 
+const LOCATION_TYPES = Object.freeze(['ROOM', 'FRIDGE', 'FREEZER', 'CABINET', 'SHELF', 'OTHER']);
+
 async function createLocation(user, body, { db = prisma } = {}) {
         if (!body || typeof body !== 'object' || Array.isArray(body)) throw inputError(400, { code: 'CUSTODY_LOCATION_INVALID', error: 'Provide a location request.' });
                 const labId = require('../utils/scopeGuard').hasGlobalAccess(user) ? (body.labId || user.labId) : user.labId;
         if (typeof labId !== 'string' || !labId.trim()) throw inputError(400, { code: 'CUSTODY_LAB_REQUIRED', error: 'labId required' });
         const purpose = body.purpose || 'REAGENT';
+        const locationType = body.locationType || 'SHELF';
         if (!require('../config/custodyContract').LOCATION_PURPOSES.includes(purpose) || typeof body.name !== 'string' || !body.name.trim() ||
+            !LOCATION_TYPES.includes(locationType) ||
             body.parentLocationId != null && typeof body.parentLocationId !== 'string')
             throw inputError(400, { code: 'CUSTODY_LOCATION_INVALID', error: 'Choose a name and valid location purpose.' });
         if (body.parentLocationId) {
@@ -190,9 +194,9 @@ async function createLocation(user, body, { db = prisma } = {}) {
                 labId,
                 purpose,
                 name: body.name.trim(),
-                locationType: body.locationType || 'SHELF',
+                locationType,
                 parentLocationId: body.parentLocationId || null,
-                temperatureRange: body.temperatureRange || null
+                temperatureRange: typeof body.temperatureRange === 'string' ? (body.temperatureRange.trim() || null) : null
             }
         });
 
@@ -205,4 +209,79 @@ async function createLocation(user, body, { db = prisma } = {}) {
         return location;
 }
 
-module.exports = { createItem, createLot, createLocation, audit, createTransaction };
+async function updateLocation(user, locationId, body, { db = prisma } = {}) {
+        if (!body || typeof body !== 'object' || Array.isArray(body)) {
+            throw inputError(400, { code: 'CUSTODY_LOCATION_INVALID', error: 'Provide a location update request.' });
+        }
+        const existing = await db.inventoryLocation.findUnique({ where: { id: locationId } });
+        if (!existing) throw inputError(404, { error: 'Location not found' });
+        if (!require('../utils/scopeGuard').hasGlobalAccess(user) && existing.labId !== user.labId) {
+            throw inputError(403, { error: 'Access denied' });
+        }
+        if (Object.hasOwn(body, 'purpose') && body.purpose !== existing.purpose) {
+            throw inputError(400, { code: 'LOCATION_FIELD_IMMUTABLE', error: 'Location purpose cannot be changed.' });
+        }
+        if (Object.hasOwn(body, 'parentLocationId') && (body.parentLocationId || null) !== (existing.parentLocationId || null)) {
+            throw inputError(400, { code: 'LOCATION_FIELD_IMMUTABLE', error: 'Location parent cannot be changed.' });
+        }
+
+        const data = {};
+        if (Object.hasOwn(body, 'name')) {
+            if (typeof body.name !== 'string' || !body.name.trim()) {
+                throw inputError(400, { code: 'CUSTODY_LOCATION_INVALID', error: 'Location name is required.' });
+            }
+            data.name = body.name.trim();
+        }
+        if (Object.hasOwn(body, 'locationType')) {
+            if (!LOCATION_TYPES.includes(body.locationType)) {
+                throw inputError(400, { code: 'CUSTODY_LOCATION_INVALID', error: 'Choose a valid location type.' });
+            }
+            data.locationType = body.locationType;
+        }
+        if (Object.hasOwn(body, 'temperatureRange')) {
+            if (body.temperatureRange !== null && typeof body.temperatureRange !== 'string') {
+                throw inputError(400, { code: 'CUSTODY_LOCATION_INVALID', error: 'Temperature range must be text.' });
+            }
+            data.temperatureRange = body.temperatureRange ? body.temperatureRange.trim() || null : null;
+        }
+        if (Object.hasOwn(body, 'isActive')) {
+            if (typeof body.isActive !== 'boolean') {
+                throw inputError(400, { code: 'CUSTODY_LOCATION_INVALID', error: 'isActive must be a boolean.' });
+            }
+            data.isActive = body.isActive;
+        }
+        if (Object.keys(data).length === 0) {
+            throw inputError(400, { code: 'CUSTODY_LOCATION_INVALID', error: 'Provide at least one editable location field.' });
+        }
+
+        return inTransaction(db, async (tx) => {
+            if (data.isActive === false) {
+                const activeChildren = await tx.inventoryLocation.count({
+                    where: { parentLocationId: existing.id, labId: existing.labId, isActive: true }
+                });
+                if (activeChildren > 0) {
+                    throw inputError(409, {
+                        code: 'LOCATION_HAS_ACTIVE_CHILDREN',
+                        error: 'Deactivate active child locations before deactivating this location.'
+                    });
+                }
+            }
+            const updated = await tx.inventoryLocation.update({
+                where: { id: existing.id },
+                data
+            });
+            await audit(tx, {
+                entity: 'INVENTORY',
+                entityId: updated.id,
+                action: 'LOCATION_UPDATED',
+                details: `Updated storage location: ${updated.name}`,
+                user,
+                labId: existing.labId,
+                before: existing,
+                after: updated
+            });
+            return updated;
+        });
+}
+
+module.exports = { createItem, createLot, createLocation, updateLocation, LOCATION_TYPES, audit, createTransaction };

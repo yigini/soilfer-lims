@@ -7,13 +7,51 @@ import {
     Package, AlertTriangle, Search, Plus, Download, Bell, Filter,
     ChevronRight, X, Beaker, FlaskConical, Box, TestTube2,
     MapPin, Clock, ShieldAlert, Trash2, ArrowRightLeft, MinusCircle,
-    PlusCircle, Eye, Archive, CheckCircle, XCircle, RefreshCw, BarChart3
+    PlusCircle, Eye, Archive, CheckCircle, XCircle, RefreshCw, BarChart3,
+    Edit2, Power
 } from 'lucide-react';
 import InfoTooltip from '../components/common/InfoTooltip';
 import InventoryImportDialog from '../components/inventory/InventoryImportDialog';
 
 // ─── Constants ───────────────────────────────────────────────────
 const ITEM_TYPES = ['ALL', 'REAGENT', 'CHEMICAL', 'CONSUMABLE', 'STANDARD', 'CRM', 'CONTAINER', 'OTHER'];
+const LOCATION_TYPES = ['ROOM', 'FRIDGE', 'FREEZER', 'CABINET', 'SHELF', 'OTHER'];
+
+function buildLocationTree(rows = []) {
+    const byId = new Map(rows.map(r => [r.id, r]));
+    const childrenMap = new Map();
+    const roots = [];
+    for (const row of rows) {
+        if (row.parentLocationId && byId.has(row.parentLocationId)) {
+            if (!childrenMap.has(row.parentLocationId)) childrenMap.set(row.parentLocationId, []);
+            childrenMap.get(row.parentLocationId).push(row);
+        } else {
+            roots.push(row);
+        }
+    }
+    const sortByName = (a, b) => (a.name || '').localeCompare(b.name || '');
+    roots.sort(sortByName);
+    for (const list of childrenMap.values()) list.sort(sortByName);
+    const ordered = [];
+    const visited = new Set();
+    const visit = (node, depth) => {
+        if (visited.has(node.id)) return;
+        visited.add(node.id);
+        const kids = childrenMap.get(node.id) || [];
+        ordered.push({
+            location: node,
+            depth,
+            hasActiveChild: kids.some(k => k.isActive !== false),
+            parentName: node.parentLocationId ? (byId.get(node.parentLocationId)?.name || null) : null
+        });
+        for (const child of kids) visit(child, depth + 1);
+    };
+    for (const root of roots) visit(root, 0);
+    for (const row of rows) {
+        if (!visited.has(row.id)) visit(row, 0);
+    }
+    return ordered;
+}
 const TYPE_ICONS = { REAGENT: Beaker, CHEMICAL: FlaskConical, CONSUMABLE: Box, STANDARD: TestTube2, CRM: TestTube2, CONTAINER: Archive, OTHER: Package };
 const TYPE_COLORS = {
     REAGENT: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
@@ -325,7 +363,7 @@ const ReceiveStockModal = ({ show, onClose, items, locations, onSuccess, initial
 };
 
 // ─── Item Detail Drawer ──────────────────────────────────────────
-const ItemDrawer = ({ item, show, onClose, onAction, canManage, canConsume, locations, canPrepare = false, onPrepare }) => {
+const ItemDrawer = ({ item, show, onClose, onAction, canManage, canConsume, locations, canPrepare = false, onPrepare, onEdit }) => {
     const { t } = useLanguage();
     const [actionModal, setActionModal] = useState(null); // { type, lotId }
     const [actionForm, setActionForm] = useState({ quantity: '', reason: '', locationId: '' });
@@ -390,7 +428,15 @@ const ItemDrawer = ({ item, show, onClose, onAction, canManage, canConsume, loca
                             {item.grade && <span className="ml-2">• {item.grade}</span>}
                         </p>
                     </div>
-                    <button onClick={onClose} className="p-2 rounded-lg hover:bg-sf-raised"><X size={20} /></button>
+                    <div className="flex items-center gap-1">
+                        {canManage && onEdit && (
+                            <button type="button" onClick={() => onEdit(item)} data-testid="drawer-edit-item"
+                                className="p-2 rounded-lg hover:bg-sf-raised text-sf-muted hover:text-sf-text" title={t('inventory.dialogs.editItem')}>
+                                <Edit2 size={16} />
+                            </button>
+                        )}
+                        <button onClick={onClose} className="p-2 rounded-lg hover:bg-sf-raised"><X size={20} /></button>
+                    </div>
                 </div>
 
                 {/* Summary Cards */}
@@ -423,9 +469,10 @@ const ItemDrawer = ({ item, show, onClose, onAction, canManage, canConsume, loca
                 </div>
 
                 {/* Details */}
-                {(item.hazardClass || item.sopLink || item.preferredVendor || item.notes) && (
+                {(item.hazardClass || item.sopLink || item.preferredVendor || item.notes || item.defaultLocationId) && (
                     <div className="px-6 pb-3">
                         <div className="p-3 rounded-xl bg-sf-canvas/40 text-sm space-y-1">
+                            {item.defaultLocationId && <p>📍 <b>{t('inventory.dialogs.defaultLocationLabel')}:</b> {locations.find(l => l.id === item.defaultLocationId)?.name || item.defaultLocationId}</p>}
                             {item.hazardClass && <p>⚠️ <b>Hazard:</b> {item.hazardClass}</p>}
                             {item.preferredVendor && <p>🏪 <b>Vendor:</b> {item.preferredVendor}</p>}
                             {item.reorderPoint > 0 && <p>📦 <b>Reorder at:</b> {item.reorderPoint} {item.unitOfMeasure}</p>}
@@ -555,27 +602,50 @@ const ItemDrawer = ({ item, show, onClose, onAction, canManage, canConsume, loca
     );
 };
 
-// ─── Create Item Modal ───────────────────────────────────────────
-const emptyItemForm = () => ({ name: '', itemType: 'REAGENT', unitOfMeasure: 'mL', shortCode: '', grade: '', hazardClass: '', reorderPoint: 0 });
-const CreateItemModal = ({ show, onClose, onSuccess }) => {
+// ─── Create / Edit Item Modal ────────────────────────────────────
+const emptyItemForm = () => ({ name: '', itemType: 'REAGENT', unitOfMeasure: 'mL', shortCode: '', grade: '', hazardClass: '', reorderPoint: 0, defaultLocationId: '' });
+const CreateItemModal = ({ show, onClose, onSuccess, locations = [], onGoToLocations, editingItem = null }) => {
     const { t } = useLanguage();
     const [form, setForm] = useState(emptyItemForm);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
+    const isEdit = Boolean(editingItem);
 
     useEffect(() => {
         if (show) {
-            setForm(emptyItemForm());
+            if (editingItem) {
+                setForm({
+                    name: editingItem.name || '',
+                    itemType: editingItem.itemType || 'REAGENT',
+                    unitOfMeasure: editingItem.unitOfMeasure || 'mL',
+                    shortCode: editingItem.shortCode || '',
+                    grade: editingItem.grade || '',
+                    hazardClass: editingItem.hazardClass || '',
+                    reorderPoint: editingItem.reorderPoint ?? 0,
+                    defaultLocationId: editingItem.defaultLocationId || ''
+                });
+            } else {
+                setForm(emptyItemForm());
+            }
             setError('');
         }
-    }, [show]);
+    }, [show, editingItem]);
 
     const handleSubmit = async () => {
         setSaving(true); setError('');
         try {
-            await axios.post('/api/inventory/items', form);
+            if (isEdit) {
+                await axios.put(`/api/inventory/items/${editingItem.id}`, {
+                    ...form,
+                    defaultLocationId: form.defaultLocationId || null
+                });
+            } else {
+                const { defaultLocationId, ...rest } = form;
+                const payload = defaultLocationId ? { ...rest, defaultLocationId } : rest;
+                await axios.post('/api/inventory/items', payload);
+            }
             onSuccess(); onClose();
-        } catch (e) { setError(e.response?.data?.error || t('inventory.dialogs.createFailed')); }
+        } catch (e) { setError(e.response?.data?.error || t(isEdit ? 'inventory.dialogs.updateFailed' : 'inventory.dialogs.createFailed')); }
         finally { setSaving(false); }
     };
 
@@ -584,7 +654,9 @@ const CreateItemModal = ({ show, onClose, onSuccess }) => {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={onClose}>
             <div className="bg-sf-surface rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden" onClick={e => e.stopPropagation()}>
                 <div className="flex items-center justify-between px-6 py-4 border-b dark:border-gray-700">
-                    <h3 className="text-lg font-bold text-sf-text flex items-center gap-2"><Plus size={18} /> {t('inventory.addItem')}</h3>
+                    <h3 className="text-lg font-bold text-sf-text flex items-center gap-2">
+                        {isEdit ? <Edit2 size={18} /> : <Plus size={18} />} {t(isEdit ? 'inventory.dialogs.editItem' : 'inventory.addItem')}
+                    </h3>
                     <button onClick={onClose} aria-label={t('common.close')} className="text-gray-400 hover:text-gray-600"><X size={20} /></button>
                 </div>
                 <div className="p-6 space-y-3 max-h-[60vh] overflow-y-auto">
@@ -611,14 +683,161 @@ const CreateItemModal = ({ show, onClose, onSuccess }) => {
                         className="w-full px-3 py-2 rounded-lg border dark:border-gray-600 bg-white dark:bg-gray-700 text-sm outline-none" />
                     <input type="number" value={form.reorderPoint} onChange={e => setForm(f => ({ ...f, reorderPoint: parseFloat(e.target.value) || 0 }))} placeholder={t('inventory.dialogs.reorderPoint')}
                         className="w-full px-3 py-2 rounded-lg border dark:border-gray-600 bg-white dark:bg-gray-700 text-sm outline-none" />
+                    <div>
+                        <label className="block text-xs font-medium text-sf-muted mb-1">{t('inventory.dialogs.defaultLocationLabel')}</label>
+                        <select aria-label={t('inventory.dialogs.defaultLocationLabel')} value={form.defaultLocationId} onChange={e => setForm(f => ({ ...f, defaultLocationId: e.target.value }))}
+                            className="w-full px-3 py-2 rounded-lg border dark:border-gray-600 bg-white dark:bg-gray-700 text-sm outline-none">
+                            <option value="">— {t('inventory.dialogs.noDefaultLocation')} —</option>
+                            {locations.map(loc => <option key={loc.id} value={loc.id}>{loc.name}</option>)}
+                        </select>
+                        {locations.length === 0 && onGoToLocations && (
+                            <p className="text-xs text-sf-muted mt-1 flex items-center gap-1.5 flex-wrap">
+                                <span>{t('inventory.dialogs.noReagentLocations')}</span>
+                                <button type="button" onClick={onGoToLocations} className="text-blue-600 dark:text-blue-400 font-medium hover:underline">
+                                    {t('inventory.dialogs.manageLocationsLink')}
+                                </button>
+                            </p>
+                        )}
+                    </div>
                 </div>
                 <div className="flex justify-end gap-2 px-6 py-4 border-t dark:border-gray-700">
                     <button onClick={onClose} className="px-4 py-2 text-sm text-gray-500">{t('common.cancel')}</button>
                     <button onClick={handleSubmit} disabled={saving || !form.name}
                         className="px-5 py-2 text-sm font-medium rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-40">
-                        {saving ? t('common.saving') : t('inventory.dialogs.createItem')}
+                        {saving ? t('common.saving') : t(isEdit ? 'inventory.dialogs.saveItem' : 'inventory.dialogs.createItem')}
                     </button>
                 </div>
+            </div>
+        </div>
+    );
+};
+
+// ─── Location Form Modal (Add / Edit) ────────────────────────────
+const LocationFormModal = ({ show, onClose, onSuccess, editingLocation = null, initialPurpose = 'SAMPLE', sampleLocations = [], reagentLocations = [] }) => {
+    const { t } = useLanguage();
+    const isEdit = Boolean(editingLocation);
+    const [form, setForm] = useState({ name: '', purpose: initialPurpose, locationType: 'SHELF', parentLocationId: '', temperatureRange: '' });
+    const [saving, setSaving] = useState(false);
+    const [error, setError] = useState('');
+
+    useEffect(() => {
+        if (!show) return;
+        if (editingLocation) {
+            setForm({
+                name: editingLocation.name || '',
+                purpose: editingLocation.purpose || 'REAGENT',
+                locationType: editingLocation.locationType || 'SHELF',
+                parentLocationId: editingLocation.parentLocationId || '',
+                temperatureRange: editingLocation.temperatureRange || ''
+            });
+        } else {
+            setForm({ name: '', purpose: initialPurpose || 'SAMPLE', locationType: 'SHELF', parentLocationId: '', temperatureRange: '' });
+        }
+        setError('');
+    }, [show, editingLocation, initialPurpose]);
+
+    if (!show) return null;
+    const samePurposeLocations = form.purpose === 'SAMPLE' ? sampleLocations : reagentLocations;
+    const activeParentChoices = samePurposeLocations.filter(loc => loc.isActive !== false);
+    const existingParentName = editingLocation?.parentLocationId
+        ? (samePurposeLocations.find(loc => loc.id === editingLocation.parentLocationId)?.name || editingLocation.parentLocationId)
+        : null;
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setSaving(true); setError('');
+        try {
+            if (isEdit) {
+                await axios.patch(`/api/inventory/locations/${editingLocation.id}`, {
+                    name: form.name.trim(),
+                    locationType: form.locationType,
+                    temperatureRange: form.temperatureRange.trim() || null
+                });
+            } else {
+                await axios.post('/api/inventory/locations', {
+                    name: form.name.trim(),
+                    purpose: form.purpose,
+                    locationType: form.locationType,
+                    parentLocationId: form.parentLocationId || undefined,
+                    temperatureRange: form.temperatureRange.trim() || undefined
+                });
+            }
+            onSuccess(); onClose();
+        } catch (err) {
+            const code = err.response?.data?.code;
+            setError(t(`inventory.locations.errors.${code}`, err.response?.data?.error || t('inventory.locations.saveFailed')));
+        } finally { setSaving(false); }
+    };
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={onClose}>
+            <div className="bg-sf-surface rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden" onClick={e => e.stopPropagation()}>
+                <div className="flex items-center justify-between px-6 py-4 border-b dark:border-gray-700">
+                    <h3 className="text-lg font-bold text-sf-text flex items-center gap-2">
+                        <MapPin size={18} className="text-blue-600" />
+                        {t(isEdit ? 'inventory.locations.editLocation' : 'inventory.locations.addLocation')}
+                    </h3>
+                    <button type="button" onClick={onClose} aria-label={t('common.close')} className="text-gray-400 hover:text-gray-600"><X size={20} /></button>
+                </div>
+                <form onSubmit={handleSubmit}>
+                    <div className="p-6 space-y-3 max-h-[65vh] overflow-y-auto">
+                        {error && <div role="alert" className="p-2 rounded bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-sm">{error}</div>}
+                        <div>
+                            <label className="block text-xs font-medium text-sf-muted mb-1">{t('inventory.locations.name')} *</label>
+                            <input required value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+                                className="w-full px-3 py-2 rounded-lg border dark:border-gray-600 bg-white dark:bg-gray-700 text-sm outline-none focus:ring-2 focus:ring-blue-500" />
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                            <div>
+                                <label className="block text-xs font-medium text-sf-muted mb-1">{t('inventory.locations.purpose')} *</label>
+                                {isEdit ? (
+                                    <input readOnly value={t(`inventory.locations.purposes.${form.purpose}`, form.purpose)}
+                                        className="w-full px-3 py-2 rounded-lg border border-sf-divider bg-sf-canvas text-sm text-sf-muted" />
+                                ) : (
+                                    <select value={form.purpose} onChange={e => setForm(f => ({ ...f, purpose: e.target.value, parentLocationId: '' }))}
+                                        className="w-full px-3 py-2 rounded-lg border dark:border-gray-600 bg-white dark:bg-gray-700 text-sm outline-none">
+                                        <option value="SAMPLE">{t('inventory.locations.purposes.SAMPLE')}</option>
+                                        <option value="REAGENT">{t('inventory.locations.purposes.REAGENT')}</option>
+                                    </select>
+                                )}
+                            </div>
+                            <div>
+                                <label className="block text-xs font-medium text-sf-muted mb-1">{t('inventory.locations.type')}</label>
+                                <select value={form.locationType} onChange={e => setForm(f => ({ ...f, locationType: e.target.value }))}
+                                    className="w-full px-3 py-2 rounded-lg border dark:border-gray-600 bg-white dark:bg-gray-700 text-sm outline-none">
+                                    {LOCATION_TYPES.map(type => <option key={type} value={type}>{t(`inventory.locations.types.${type}`, type)}</option>)}
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label className="block text-xs font-medium text-sf-muted mb-1">{t('inventory.locations.parent')}</label>
+                            {isEdit ? (
+                                <input readOnly value={existingParentName || t('inventory.locations.noParent')}
+                                    className="w-full px-3 py-2 rounded-lg border border-sf-divider bg-sf-canvas text-sm text-sf-muted" />
+                            ) : (
+                                <select value={form.parentLocationId} onChange={e => setForm(f => ({ ...f, parentLocationId: e.target.value }))}
+                                    className="w-full px-3 py-2 rounded-lg border dark:border-gray-600 bg-white dark:bg-gray-700 text-sm outline-none">
+                                    <option value="">— {t('inventory.locations.noParent')} —</option>
+                                    {activeParentChoices.map(loc => <option key={loc.id} value={loc.id}>{loc.name}</option>)}
+                                </select>
+                            )}
+                            {isEdit && <p className="text-xs text-sf-muted mt-1">{t('inventory.locations.immutableNote')}</p>}
+                        </div>
+                        <div>
+                            <label className="block text-xs font-medium text-sf-muted mb-1">{t('inventory.locations.temperatureRange')}</label>
+                            <input value={form.temperatureRange} onChange={e => setForm(f => ({ ...f, temperatureRange: e.target.value }))}
+                                placeholder={t('inventory.locations.temperaturePlaceholder')}
+                                className="w-full px-3 py-2 rounded-lg border dark:border-gray-600 bg-white dark:bg-gray-700 text-sm outline-none focus:ring-2 focus:ring-blue-500" />
+                        </div>
+                    </div>
+                    <div className="flex justify-end gap-2 px-6 py-4 border-t dark:border-gray-700">
+                        <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-gray-500">{t('common.cancel')}</button>
+                        <button type="submit" disabled={saving || !form.name.trim()}
+                            className="px-5 py-2 text-sm font-medium rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-40">
+                            {saving ? t('common.saving') : t(isEdit ? 'inventory.dialogs.saveItem' : 'inventory.locations.addLocation')}
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     );
@@ -627,6 +846,15 @@ const CreateItemModal = ({ show, onClose, onSuccess }) => {
 // ═════════════════════════════════════════════════════════════════
 // MAIN INVENTORY COCKPIT
 // ═════════════════════════════════════════════════════════════════
+const readInitialInventoryTab = () => {
+    try {
+        if (typeof window !== 'undefined' && window.URLSearchParams) {
+            return new window.URLSearchParams(window.location.search).get('tab') === 'locations' ? 'locations' : 'items';
+        }
+    } catch {}
+    return 'items';
+};
+
 const Inventory = () => {
     const { user, hasPermission } = useAuth();
     const { showDialog } = useDialog();
@@ -636,8 +864,17 @@ const Inventory = () => {
     const canAddLot = item => canManage || (canPrepare && item.isActive !== false && ['REAGENT', 'STANDARD'].includes(item.itemType));
     const canConsume = hasPermission('CONSUME_INVENTORY');
 
+    const [activeTab, setActiveTab] = useState(readInitialInventoryTab);
     const [items, setItems] = useState([]);
     const [locations, setLocations] = useState([]);
+    const [sampleLocationsAll, setSampleLocationsAll] = useState([]);
+    const [reagentLocationsAll, setReagentLocationsAll] = useState([]);
+    const [locationsLoading, setLocationsLoading] = useState(false);
+    const [locationsError, setLocationsError] = useState('');
+    const [showLocationModal, setShowLocationModal] = useState(false);
+    const [editingLocation, setEditingLocation] = useState(null);
+    const [newLocationPurpose, setNewLocationPurpose] = useState('SAMPLE');
+    const [togglingLocationId, setTogglingLocationId] = useState(null);
     const [alertCounts, setAlertCounts] = useState(null);
     const [loading, setLoading] = useState(true);
     const [typeFilter, setTypeFilter] = useState('ALL');
@@ -646,12 +883,25 @@ const Inventory = () => {
     const [showReceive, setShowReceive] = useState(false);
     const [initialReceiveItemId, setInitialReceiveItemId] = useState(null);
     const [showCreate, setShowCreate] = useState(false);
+    const [editingItem, setEditingItem] = useState(null);
     const [showQuickConsume, setShowQuickConsume] = useState(false);
     const [quickConsumeItem, setQuickConsumeItem] = useState(null);
     const [showExportMenu, setShowExportMenu] = useState(false);
     const [showImport, setShowImport] = useState(false);
     const [alertFilter, setAlertFilter] = useState(null);
     const [alertsList, setAlertsList] = useState([]);
+
+    const switchTab = useCallback((nextTab) => {
+        setActiveTab(nextTab);
+        try {
+            if (typeof window !== 'undefined' && window.history?.replaceState && window.URL) {
+                const url = new window.URL(window.location.href);
+                if (nextTab === 'locations') url.searchParams.set('tab', 'locations');
+                else url.searchParams.delete('tab');
+                window.history.replaceState(null, '', url.pathname + url.search + url.hash);
+            }
+        } catch {}
+    }, []);
 
     const fetchAll = useCallback(async () => {
         setLoading(true);
@@ -669,7 +919,41 @@ const Inventory = () => {
         finally { setLoading(false); }
     }, [typeFilter, search]);
 
+    const fetchAllLocations = useCallback(async () => {
+        setLocationsLoading(true);
+        setLocationsError('');
+        try {
+            const [sampleRes, reagentRes] = await Promise.all([
+                axios.get('/api/inventory/locations', { params: { purpose: 'SAMPLE', includeInactive: '1' } }),
+                axios.get('/api/inventory/locations', { params: { purpose: 'REAGENT', includeInactive: '1' } })
+            ]);
+            setSampleLocationsAll(Array.isArray(sampleRes.data) ? sampleRes.data : []);
+            setReagentLocationsAll(Array.isArray(reagentRes.data) ? reagentRes.data : []);
+        } catch (e) {
+            setLocationsError(t('inventory.locations.loadFailed'));
+        } finally {
+            setLocationsLoading(false);
+        }
+    }, [t]);
+
     useEffect(() => { fetchAll(); }, [fetchAll]);
+    useEffect(() => {
+        if (activeTab === 'locations') fetchAllLocations();
+    }, [activeTab, fetchAllLocations]);
+
+    const handleToggleLocationActive = async (loc) => {
+        setTogglingLocationId(loc.id);
+        setLocationsError('');
+        try {
+            await axios.patch(`/api/inventory/locations/${loc.id}`, { isActive: !loc.isActive });
+            await Promise.all([fetchAllLocations(), fetchAll()]);
+        } catch (e) {
+            const code = e.response?.data?.code;
+            setLocationsError(t(`inventory.locations.errors.${code}`, e.response?.data?.error || t('inventory.locations.saveFailed')));
+        } finally {
+            setTogglingLocationId(null);
+        }
+    };
 
     const openItem = async (item) => {
         try {
@@ -713,7 +997,7 @@ const Inventory = () => {
                 <div className="flex items-center gap-2 flex-wrap">
                     {canManage && (
                         <>
-                            <button onClick={() => setShowCreate(true)} className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg border border-sf-divider text-sf-muted hover:bg-sf-raised transition-colors">
+                            <button onClick={() => { setEditingItem(null); setShowCreate(true); }} className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg border border-sf-divider text-sf-muted hover:bg-sf-raised transition-colors">
                                 <Plus size={14} /> {t('inventory.addItem', 'New Item')}
                             </button>
                             <button onClick={() => { setInitialReceiveItemId(null); setShowReceive(true); }} className="flex items-center gap-1.5 px-4 py-2 text-sm font-bold rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition-colors shadow-sm">
@@ -738,6 +1022,107 @@ const Inventory = () => {
                 </div>
             </div>
 
+            {/* Section Tabs */}
+            <div role="tablist" className="flex items-center gap-2 border-b border-sf-divider">
+                <button type="button" role="tab" aria-selected={activeTab === 'items'} onClick={() => switchTab('items')}
+                    className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === 'items'
+                        ? 'border-blue-600 text-blue-600 dark:text-blue-400'
+                        : 'border-transparent text-sf-muted hover:text-sf-text'}`}>
+                    {t('inventory.tabs.items', 'Items')}
+                </button>
+                <button type="button" role="tab" aria-selected={activeTab === 'locations'} onClick={() => switchTab('locations')}
+                    className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors flex items-center gap-1.5 ${activeTab === 'locations'
+                        ? 'border-blue-600 text-blue-600 dark:text-blue-400'
+                        : 'border-transparent text-sf-muted hover:text-sf-text'}`}>
+                    <MapPin size={14} /> {t('inventory.tabs.locations', 'Locations')}
+                </button>
+            </div>
+
+            {activeTab === 'locations' ? (
+                <div className="space-y-4 flex-1 overflow-auto" data-testid="inventory-locations-tab">
+                    <div className="flex items-center justify-between gap-3 flex-wrap">
+                        <h2 className="text-lg font-bold text-sf-text">{t('inventory.locations.title', 'Storage Locations')}</h2>
+                        {canManage && (
+                            <button type="button" onClick={() => { setEditingLocation(null); setNewLocationPurpose('SAMPLE'); setShowLocationModal(true); }}
+                                className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors">
+                                <Plus size={14} /> {t('inventory.locations.addLocation', 'Add Location')}
+                            </button>
+                        )}
+                    </div>
+                    {locationsError && (
+                        <div role="alert" className="p-3 rounded-lg bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800/40 text-red-700 dark:text-red-300 text-sm">
+                            {locationsError}
+                        </div>
+                    )}
+                    {locationsLoading ? (
+                        <div className="flex items-center justify-center h-40 text-gray-400"><RefreshCw size={20} className="animate-spin mr-2" /> {t('common.loading', 'Loading...')}</div>
+                    ) : (
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                            {[
+                                { purpose: 'SAMPLE', title: t('inventory.locations.sampleStorage', 'Sample storage'), empty: t('inventory.locations.emptySample'), rows: sampleLocationsAll },
+                                { purpose: 'REAGENT', title: t('inventory.locations.reagentStorage', 'Reagent storage'), empty: t('inventory.locations.emptyReagent'), rows: reagentLocationsAll }
+                            ].map(section => {
+                                const tree = buildLocationTree(section.rows);
+                                return (
+                                    <section key={section.purpose} data-testid={`locations-section-${section.purpose.toLowerCase()}`}
+                                        className="card-base rounded-xl border p-4 space-y-3">
+                                        <div className="flex items-center justify-between gap-2 border-b border-sf-divider pb-2">
+                                            <h3 className="font-bold text-sf-text flex items-center gap-2">
+                                                <MapPin size={16} className="text-blue-600 dark:text-blue-400" /> {section.title}
+                                            </h3>
+                                            {canManage && (
+                                                <button type="button" onClick={() => { setEditingLocation(null); setNewLocationPurpose(section.purpose); setShowLocationModal(true); }}
+                                                    className="text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">
+                                                    <Plus size={12} /> {t('inventory.locations.addLocation', 'Add Location')}
+                                                </button>
+                                            )}
+                                        </div>
+                                        {tree.length === 0 ? (
+                                            <p className="text-sm text-sf-muted py-4 text-center">{section.empty}</p>
+                                        ) : (
+                                            <ul className="divide-y dark:divide-gray-700">
+                                                {tree.map(({ location: loc, depth }) => (
+                                                    <li key={loc.id} data-testid={`location-row-${loc.id}`}
+                                                        className={`py-2.5 flex items-center justify-between gap-2 ${loc.isActive === false ? 'opacity-60' : ''}`}>
+                                                        <div className="min-w-0 flex items-center gap-2 flex-wrap" style={{ paddingLeft: `${depth * 20}px` }}>
+                                                            {depth > 0 && <span className="text-sf-muted text-xs" aria-hidden="true">↳</span>}
+                                                            <span className="font-medium text-sm text-sf-text">{loc.name}</span>
+                                                            <span className="px-2 py-0.5 rounded text-[11px] font-medium bg-gray-100 dark:bg-gray-700 text-sf-muted">
+                                                                {t(`inventory.locations.types.${loc.locationType}`, loc.locationType)}
+                                                            </span>
+                                                            {loc.temperatureRange && (
+                                                                <span className="text-xs text-sf-muted">{loc.temperatureRange}</span>
+                                                            )}
+                                                            <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold ${loc.isActive !== false
+                                                                ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300'
+                                                                : 'bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-400'}`}>
+                                                                {t(loc.isActive !== false ? 'inventory.locations.active' : 'inventory.locations.inactive')}
+                                                            </span>
+                                                        </div>
+                                                        {canManage && (
+                                                            <div className="flex items-center gap-1.5 shrink-0">
+                                                                <button type="button" onClick={() => { setEditingLocation(loc); setShowLocationModal(true); }}
+                                                                    className="px-2 py-1 text-xs rounded border border-sf-divider hover:bg-sf-raised text-sf-muted hover:text-sf-text flex items-center gap-1">
+                                                                    <Edit2 size={12} /> {t('common.edit', 'Edit')}
+                                                                </button>
+                                                                <button type="button" disabled={togglingLocationId === loc.id} onClick={() => handleToggleLocationActive(loc)}
+                                                                    className={`px-2 py-1 text-xs rounded border border-sf-divider hover:bg-sf-raised flex items-center gap-1 ${loc.isActive !== false ? 'text-amber-700 dark:text-amber-300' : 'text-emerald-700 dark:text-emerald-300'}`}>
+                                                                    <Power size={12} /> {t(loc.isActive !== false ? 'inventory.locations.deactivate' : 'inventory.locations.reactivate')}
+                                                                </button>
+                                                            </div>
+                                                        )}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        )}
+                                    </section>
+                                );
+                            })}
+                        </div>
+                    )}
+                </div>
+            ) : (
+            <>
             <AlertBanner
                 alerts={alertCounts}
                 alertFilter={alertFilter}
@@ -889,14 +1274,23 @@ const Inventory = () => {
                     </table>
                 )}
             </div>
+            </>
+            )}
 
             {/* Modals */}
             {showImport && canManage && <InventoryImportDialog onClose={() => setShowImport(false)} onImported={() => { fetchAll(); if (selectedItem) openItem(selectedItem); }} />}
 
             <ReceiveStockModal show={showReceive} onClose={() => setShowReceive(false)} items={items} locations={locations} onSuccess={() => { fetchAll(); if (selectedItem) openItem(selectedItem); }} initialItemId={initialReceiveItemId} canManage={canManage} actor={user} />
             <QuickConsumeModal show={showQuickConsume} onClose={() => setShowQuickConsume(false)} item={quickConsumeItem} locations={locations} onSuccess={fetchAll} />
-            <CreateItemModal show={showCreate} onClose={() => setShowCreate(false)} onSuccess={fetchAll} />
-            <ItemDrawer item={selectedItem} show={!!selectedItem} onClose={() => setSelectedItem(null)} onAction={() => { fetchAll(); if (selectedItem) openItem(selectedItem); }} canManage={canManage} canConsume={canConsume} locations={locations} canPrepare={canPrepare} onPrepare={item => { setInitialReceiveItemId(item.id); setShowReceive(true); }} />
+            <CreateItemModal show={showCreate} onClose={() => { setShowCreate(false); setEditingItem(null); }}
+                onSuccess={() => { fetchAll(); if (selectedItem) openItem(selectedItem); }}
+                locations={locations} editingItem={editingItem}
+                onGoToLocations={() => { setShowCreate(false); setEditingItem(null); switchTab('locations'); }} />
+            <LocationFormModal show={showLocationModal} onClose={() => { setShowLocationModal(false); setEditingLocation(null); }}
+                onSuccess={() => { fetchAllLocations(); fetchAll(); }}
+                editingLocation={editingLocation} initialPurpose={newLocationPurpose}
+                sampleLocations={sampleLocationsAll} reagentLocations={reagentLocationsAll} />
+            <ItemDrawer item={selectedItem} show={!!selectedItem} onClose={() => setSelectedItem(null)} onAction={() => { fetchAll(); if (selectedItem) openItem(selectedItem); }} canManage={canManage} canConsume={canConsume} locations={locations} canPrepare={canPrepare} onPrepare={item => { setInitialReceiveItemId(item.id); setShowReceive(true); }} onEdit={item => { setEditingItem(item); setShowCreate(true); }} />
         </div>
     );
 };

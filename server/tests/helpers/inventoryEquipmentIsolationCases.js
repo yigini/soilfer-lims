@@ -20,6 +20,7 @@ for (const action of ['quarantine', 'release', 'dispose']) add(`POST /api/invent
 add('POST /api/inventory/lots/:id/transfer', `${lot}/transfer`, { locationId: '{reagentLocationA}' });
 add('GET /api/inventory/locations', `${stock}/locations`, null, { purpose: 'SAMPLE', labId: '{labA}' });
 add('POST /api/inventory/locations', `${stock}/locations`, { name: 'Synthetic new child location', purpose: 'SAMPLE', labId: '{labA}', parentLocationId: '{locationA}' });
+add('PATCH /api/inventory/locations/:id', `${stock}/locations/{locationA}`, { name: 'Synthetic renamed location' });
 add('GET /api/inventory/transactions', `${stock}/transactions`, null, { lotId: '{inventoryLotA}', labId: '{labA}' });
 add('GET /api/inventory/alerts', `${stock}/alerts`, null, { labId: '{labA}' });
 add('GET /api/inventory/fefo/:itemId', `${stock}/fefo/{inventoryItemA}`);

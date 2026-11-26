@@ -27,6 +27,7 @@ router.post('/lots/:id/transfer', checkPermission('MANAGE_INVENTORY'), inv.trans
 // ─── Locations ───────────────────────────────────────────────────
 router.get('/locations', checkPermission('VIEW_INVENTORY'), inv.getLocations);
 router.post('/locations', checkPermission('MANAGE_INVENTORY'), inv.createLocation);
+router.patch('/locations/:id', checkPermission('MANAGE_INVENTORY'), inv.updateLocation);
 
 // ─── Transactions (read-only ledger) ─────────────────────────────
 router.get('/transactions', checkPermission('VIEW_INVENTORY'), inv.getTransactions);

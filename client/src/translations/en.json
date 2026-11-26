@@ -2472,7 +2472,14 @@
       "units": {
         "pcs": "pieces",
         "box": "box"
-      }
+      },
+      "editItem": "Edit Inventory Item",
+      "saveItem": "Save Changes",
+      "updateFailed": "Failed to update the item",
+      "defaultLocationLabel": "Default location",
+      "noDefaultLocation": "None (optional)",
+      "noReagentLocations": "No active reagent locations yet.",
+      "manageLocationsLink": "Manage locations"
     },
     "lotStatuses": {
       "AVAILABLE": "Available",
@@ -2481,7 +2488,50 @@
       "EXPIRED": "Expired",
       "DISPOSED": "Disposed"
     },
-    "missing": "Missing"
+    "missing": "Missing",
+    "tabs": {
+      "items": "Items",
+      "locations": "Locations"
+    },
+    "locations": {
+      "title": "Storage Locations",
+      "sampleStorage": "Sample storage",
+      "reagentStorage": "Reagent storage",
+      "addLocation": "Add Location",
+      "editLocation": "Edit Location",
+      "name": "Location name",
+      "purpose": "Purpose",
+      "type": "Type",
+      "parent": "Parent location",
+      "noParent": "None (top-level)",
+      "temperatureRange": "Temperature range",
+      "temperaturePlaceholder": "e.g. 2-8°C",
+      "active": "Active",
+      "inactive": "Inactive",
+      "deactivate": "Deactivate",
+      "reactivate": "Reactivate",
+      "emptySample": "No sample storage locations configured yet.",
+      "emptyReagent": "No reagent storage locations configured yet.",
+      "loadFailed": "Could not load storage locations.",
+      "saveFailed": "Could not save storage location.",
+      "immutableNote": "Purpose and parent location cannot be changed after creation.",
+      "purposes": {
+        "SAMPLE": "Sample storage",
+        "REAGENT": "Reagent storage"
+      },
+      "types": {
+        "ROOM": "Room",
+        "FRIDGE": "Fridge",
+        "FREEZER": "Freezer",
+        "CABINET": "Cabinet",
+        "SHELF": "Shelf",
+        "OTHER": "Other"
+      },
+      "errors": {
+        "LOCATION_HAS_ACTIVE_CHILDREN": "Deactivate active child locations before deactivating this location.",
+        "LOCATION_FIELD_IMMUTABLE": "Location purpose and parent cannot be changed."
+      }
+    }
   },
   "labs": {
     "title": "Laboratory Management",
@@ -2680,7 +2730,8 @@
       "CUSTODY_FORBIDDEN": "You do not have permission to manage custody.",
       "CUSTODY_CONTAINER_INVALID": "Choose a container belonging to this sample.",
       "CUSTODY_TYPE_INVALID": "Choose a supported custody action."
-    }
+    },
+    "manageLocations": "Manage locations"
   },
   "error": {
     "pageNotFound": "Page Not Found",

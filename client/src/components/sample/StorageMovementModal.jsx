@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { Link } from 'react-router-dom';
 import { X } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 
@@ -68,8 +69,14 @@ const StorageMovementModal = ({ sampleId, currentLocation, isOpen, onClose, onSu
                     <select required value={location} onChange={e => setLocation(e.target.value)} className="w-full p-2 border rounded bg-sf-canvas">
                         <option value="">{t('custody.chooseLocation')}</option>{locations.map(row => <option key={row.id} value={row.id}>{row.name}</option>)}
                     </select></label>
-                    <div className="flex gap-2"><input aria-label={t('custody.locationName')} placeholder={t('custody.locationName')} value={newLocation} onChange={e => setNewLocation(e.target.value)} className="min-w-0 flex-1 p-2 border rounded bg-sf-canvas"/>
-                        <button type="button" disabled={!newLocation.trim() || submitting} onClick={createLocation}>{t('custody.createLocation')}</button></div>
+                    <div className="flex items-center gap-2 flex-wrap"><input aria-label={t('custody.locationName')} placeholder={t('custody.locationName')} value={newLocation} onChange={e => setNewLocation(e.target.value)} className="min-w-0 flex-1 p-2 border rounded bg-sf-canvas"/>
+                        <button type="button" disabled={!newLocation.trim() || submitting} onClick={createLocation}>{t('custody.createLocation')}</button>
+                        {locations.length === 0 && (
+                            <Link to="/inventory?tab=locations" onClick={onClose} className="text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline whitespace-nowrap">
+                                {t('custody.manageLocations')}
+                            </Link>
+                        )}
+                    </div>
                 </>}
                 {!dispose && !archive && <label className="block text-sm">{t('custody.container')}
                     <select value={containerId} onChange={e => setContainerId(e.target.value)} className="w-full p-2 border rounded bg-sf-canvas">

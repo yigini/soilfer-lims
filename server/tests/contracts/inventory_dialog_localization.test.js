@@ -75,7 +75,7 @@ const fillCreate = async () => {
 };
 const expectCreateDefaults = () => {
     expect(createFields().map(node => node.value)).toEqual(['', '', '', '', '0']);
-    expect([...modal().querySelectorAll('select')].map(node => node.value)).toEqual(['REAGENT', 'mL']);
+    expect([...modal().querySelectorAll('select')].map(node => node.value)).toEqual(['REAGENT', 'mL', '']);
 };
 
 test.each(['cancel', 'create', 'error'])('Add Item reopens empty after %s without retaining an error or draft', async closeBy => {
