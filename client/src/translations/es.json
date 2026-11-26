@@ -5196,6 +5196,8 @@
     "close": "Cerrar"
   },
   "workbenchUi": {
+    "noWorkAssignedForSample": "Esta muestra no tiene trabajo asignado a usted.",
+    "backToSample": "Volver a la muestra",
     "contradictoryIdentifiersWorkItemCountDoesNotBelongToSample": "Identificadores contradictorios: la tarea '{{initialWorkItemId}}' no pertenece a la muestra '{{initialSampleId}}'",
     "accessDeniedRequestedItemBelongsToAnotherLaboratory": "Acceso denegado: el elemento solicitado pertenece a otro laboratorio.",
     "requestedItemCountWasNotFound": "No se encontró el elemento solicitado '{{value0}}'.",

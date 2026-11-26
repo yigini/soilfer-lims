@@ -5196,6 +5196,8 @@
     "close": "Close"
   },
   "workbenchUi": {
+    "noWorkAssignedForSample": "This sample has no work assigned to you.",
+    "backToSample": "Back to sample",
     "contradictoryIdentifiersWorkItemCountDoesNotBelongToSample": "Contradictory identifiers: work item '{{initialWorkItemId}}' does not belong to sample '{{initialSampleId}}'",
     "accessDeniedRequestedItemBelongsToAnotherLaboratory": "Access denied: requested item belongs to another laboratory.",
     "requestedItemCountWasNotFound": "Requested item '{{value0}}' was not found.",

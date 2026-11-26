@@ -5196,6 +5196,8 @@
     "close": "Fechar"
   },
   "workbenchUi": {
+    "noWorkAssignedForSample": "Esta amostra não tem trabalho atribuído a si.",
+    "backToSample": "Voltar à amostra",
     "contradictoryIdentifiersWorkItemCountDoesNotBelongToSample": "Identificadores contraditórios: a tarefa '{{initialWorkItemId}}' não pertence à amostra '{{initialSampleId}}'",
     "accessDeniedRequestedItemBelongsToAnotherLaboratory": "Acesso recusado: o item pedido pertence a outro laboratório.",
     "requestedItemCountWasNotFound": "O item pedido '{{value0}}' não foi encontrado.",
