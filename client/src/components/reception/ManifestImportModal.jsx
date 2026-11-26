@@ -7,25 +7,49 @@ import { MAX_FILE_SIZE } from '../../utils/spreadsheetImport';
 
 const PROFILE_STORAGE_KEY = 'soilfer_manifest_mapping_profiles';
 
-const LIMS_FIELDS = [
-    { key: 'sampleId', label: 'Sample Identifier (Required)', required: true, pattern: /^(sample.?id|sample.?identifier|barcode|bag.?id|field.?sample.?id|id)$/i },
-    { key: 'profileCode', label: 'Soil profile / sampling point code', required: false, pattern: /^(pit.?id|profile.?id|profile.?code)$/i },
-    { key: 'profileNamespace', label: 'Configured survey reference', required: false, pattern: /^(profile.?namespace|survey.?reference)$/i },
-    { key: 'profileRelation', label: 'Recorded profile meaning', required: false, pattern: /^(profile.?relation|profile.?meaning)$/i },
-    { key: 'collectionDate', label: 'Field collection date', required: false, pattern: /^(collection.?date|collected.?at)$/i },
-    { key: 'latitude', label: 'Latitude (DD)', required: false, pattern: /^lat|latitude/i },
-    { key: 'longitude', label: 'Longitude (DD)', required: false, pattern: /^lon|lng|longitude/i },
-    { key: 'coordinates', label: 'Combined Coords (DD / DMS / UTM)', required: false, pattern: /coord|gps|location/i },
-    { key: 'depthTop', label: 'Depth Top / From (cm)', required: false, pattern: /depth_?top|depth_?min|from/i },
-    { key: 'depthBottom', label: 'Depth Bottom / To (cm)', required: false, pattern: /depth_?bot|depth_?max|to/i },
-    { key: 'receivedMass', label: 'Received Mass (g)', required: false, pattern: /mass|weight/i },
-    { key: 'positionalUncertaintyM', label: 'Positional uncertainty (m)', required: false, pattern: /uncertainty|accuracy/i },
-    { key: 'siteName', label: 'Site / Plot Identifier', required: false, pattern: /site|plot|farm/i },
-    { key: 'village', label: 'Village / Community', required: false, pattern: /village|communit/i },
-    { key: 'admin1', label: 'Department / Province', required: false, pattern: /dept|departamento|district|admin/i },
-    { key: 'crop', label: 'Target Crop', required: false, pattern: /crop|cultivo/i },
-    { key: 'landUse', label: 'Land Use System', required: false, pattern: /land_?use|uso/i }
+export const normalizeHeader = (header) =>
+    String(header ?? '')
+        .trim()
+        .toLowerCase()
+        .replace(/[^\p{L}\p{N}]+/gu, '_')
+        .replace(/^_+|_+$/g, '');
+
+export const LIMS_FIELDS = [
+    { key: 'sampleId', label: 'Sample Identifier (Required)', required: true, aliases: ['sample_id', 'sampleid', 'sample_identifier', 'sampleidentifier', 'barcode', 'bag_id', 'bagid', 'field_sample_id', 'fieldsampleid', 'id'] },
+    { key: 'profileCode', label: 'Soil profile / sampling point code', required: false, aliases: ['pit_id', 'pitid', 'profile_id', 'profileid', 'profile_code', 'profilecode'] },
+    { key: 'profileNamespace', label: 'Configured survey reference', required: false, aliases: ['profile_namespace', 'profilenamespace', 'survey_reference', 'surveyreference'] },
+    { key: 'profileRelation', label: 'Recorded profile meaning', required: false, aliases: ['profile_relation', 'profilerelation', 'profile_meaning', 'profilemeaning'] },
+    { key: 'collectionDate', label: 'Field collection date', required: false, aliases: ['collection_date', 'collectiondate', 'collected_at', 'collectedat'] },
+    { key: 'latitude', label: 'Latitude (DD)', required: false, aliases: ['lat', 'latitude', 'lat_dd', 'latitude_dd', 'latitud'] },
+    { key: 'longitude', label: 'Longitude (DD)', required: false, aliases: ['lon', 'long', 'lng', 'longitude', 'lon_dd', 'lng_dd', 'longitude_dd', 'longitud'] },
+    { key: 'coordinates', label: 'Combined Coords (DD / DMS / UTM)', required: false, aliases: ['coord', 'coords', 'coordinates', 'gps', 'gps_coords', 'gps_coordinates', 'location'] },
+    { key: 'depthTop', label: 'Depth Top / From (cm)', required: false, aliases: ['top', 'depth_top', 'depthtop', 'top_depth', 'depth_from', 'from', 'from_cm', 'upper', 'upper_depth', 'depth_min', 'depthmin', 'min_depth', 'top_cm', 'depth_top_cm'] },
+    { key: 'depthBottom', label: 'Depth Bottom / To (cm)', required: false, aliases: ['bottom', 'bot', 'depth_bottom', 'depthbottom', 'depth_bot', 'depthbot', 'bottom_depth', 'depth_to', 'to', 'to_cm', 'lower', 'lower_depth', 'depth_max', 'depthmax', 'max_depth', 'bottom_cm', 'depth_bottom_cm'] },
+    { key: 'receivedMass', label: 'Received Mass (g)', required: false, aliases: ['mass', 'mass_g', 'received_mass', 'received_mass_g', 'sample_mass', 'sample_mass_g', 'weight', 'weight_g', 'sample_weight', 'sample_weight_g'] },
+    { key: 'positionalUncertaintyM', label: 'Positional uncertainty (m)', required: false, aliases: ['uncertainty', 'positional_uncertainty', 'positional_uncertainty_m', 'uncertainty_m', 'accuracy', 'gps_accuracy', 'gps_accuracy_m', 'accuracy_m'] },
+    { key: 'siteName', label: 'Site / Plot Identifier', required: false, aliases: ['site', 'site_name', 'site_id', 'plot', 'plot_name', 'plot_id', 'farm', 'farm_name', 'farm_id'] },
+    { key: 'village', label: 'Village / Community', required: false, aliases: ['village', 'community', 'comunidad'] },
+    { key: 'admin1', label: 'Department / Province', required: false, aliases: ['dept', 'department', 'departamento', 'province', 'provincia', 'district', 'distrito', 'admin', 'admin1', 'admin_1'] },
+    { key: 'crop', label: 'Target Crop', required: false, aliases: ['crop', 'target_crop', 'cultivo'] },
+    { key: 'landUse', label: 'Land Use System', required: false, aliases: ['land_use', 'landuse', 'land_use_system', 'uso', 'uso_suelo', 'uso_del_suelo'] }
 ];
+
+export const autoMapManifestHeaders = (detectedHeaders, fields = LIMS_FIELDS) => {
+    const normalized = detectedHeaders.map(raw => ({ raw, norm: normalizeHeader(raw) }));
+    const usedHeaders = new Set();
+    const autoMap = {};
+
+    fields.forEach(field => {
+        const aliasSet = new Set(field.aliases);
+        const match = normalized.find(h => h.norm && !usedHeaders.has(h.raw) && aliasSet.has(h.norm));
+        if (match) {
+            autoMap[field.key] = match.raw;
+            usedHeaders.add(match.raw);
+        }
+    });
+
+    return autoMap;
+};
 
 const ManifestImportModal = ({ isOpen, onClose, onImport }) => {
     const {t} = useLanguage();
@@ -43,6 +67,8 @@ const ManifestImportModal = ({ isOpen, onClose, onImport }) => {
     const [profiles, setProfiles] = useState({});
     const [selectedProfile, setSelectedProfile] = useState('');
     const [newProfileName, setNewProfileName] = useState('');
+    const [isDragging, setIsDragging] = useState(false);
+    const [dropNotice, setDropNotice] = useState('');
 
     useEffect(() => {
         try {
@@ -61,15 +87,13 @@ const ManifestImportModal = ({ isOpen, onClose, onImport }) => {
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [onClose]);
 
-    const handleFileUpload = (e) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
+    const processFile = (file) => {
+        if (!file) return false;
 
         // Pre-parser file size limit (5 MB bound)
         if (file.size > MAX_FILE_SIZE) {
             alert(`File size (${(file.size / (1024 * 1024)).toFixed(1)} MB) exceeds maximum allowed limit of 5 MB.`);
-            e.target.value = '';
-            return;
+            return false;
         }
 
         // Pre-parser extension and MIME type validation
@@ -85,8 +109,7 @@ const ManifestImportModal = ({ isOpen, onClose, onImport }) => {
         ];
         if (!hasValidExt || (file.type && !validMimes.includes(file.type))) {
             alert('Invalid file format. Please upload a valid spreadsheet (.xlsx, .xls, .csv).');
-            e.target.value = '';
-            return;
+            return false;
         }
 
         setFileName(file.name);
@@ -107,6 +130,47 @@ const ManifestImportModal = ({ isOpen, onClose, onImport }) => {
         };
 
         reader.readAsArrayBuffer(file);
+        return true;
+    };
+
+    const handleFileUpload = (e) => {
+        setDropNotice('');
+        const file = e.target.files?.[0];
+        if (!file) return;
+        if (!processFile(file)) {
+            e.target.value = '';
+        }
+    };
+
+    const handleDragEnter = (e) => {
+        e.preventDefault();
+        setIsDragging(true);
+    };
+
+    const handleDragOver = (e) => {
+        e.preventDefault();
+        if (!isDragging) setIsDragging(true);
+    };
+
+    const handleDragLeave = (e) => {
+        e.preventDefault();
+        if (!e.currentTarget?.contains?.(e.relatedTarget)) {
+            setIsDragging(false);
+        }
+    };
+
+    const handleDrop = (e) => {
+        e.preventDefault();
+        setIsDragging(false);
+        const files = e.dataTransfer?.files;
+        const file = files?.[0];
+        if (!file) return;
+        const multiple = files.length > 1;
+        if (processFile(file)) {
+            setDropNotice(multiple ? t('batchIntake.manifestMultipleFilesNotice', { name: file.name }) : '');
+        } else {
+            setDropNotice('');
+        }
     };
 
     const parseSheetData = (workbook, sheetName) => {
@@ -121,14 +185,8 @@ const ManifestImportModal = ({ isOpen, onClose, onImport }) => {
         setHeaders(detectedHeaders);
         setRawRows(json);
 
-        // Auto-detect mappings based on patterns
-        const autoMap = {};
-        LIMS_FIELDS.forEach(field => {
-            const match = detectedHeaders.find(h => field.pattern.test(h));
-            if (match) autoMap[field.key] = match;
-        });
-
-        setMapping(autoMap);
+        // Auto-detect mappings using normalised whole-name aliases (one header per field)
+        setMapping(autoMapManifestHeaders(detectedHeaders));
         setStep(2);
     };
 
@@ -263,9 +321,27 @@ const ManifestImportModal = ({ isOpen, onClose, onImport }) => {
 
                 {/* Content Area */}
                 <div className="p-6 overflow-y-auto flex-1 bg-sf-surface">
+                    {dropNotice && (
+                        <div role="status" className="mb-4 px-3 py-2 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 text-xs text-amber-800 dark:text-amber-200 flex items-center gap-2">
+                            <AlertCircle size={14} className="shrink-0" />
+                            <span>{dropNotice}</span>
+                        </div>
+                    )}
+
                     {/* STEP 1: UPLOAD */}
                     {step === 1 && (
-                        <div className="flex flex-col items-center justify-center py-12 border-2 border-dashed border-sf-divider rounded-2xl bg-sf-canvas text-center">
+                        <div
+                            data-testid="manifest-drop-zone"
+                            onDragEnter={handleDragEnter}
+                            onDragOver={handleDragOver}
+                            onDragLeave={handleDragLeave}
+                            onDrop={handleDrop}
+                            className={`flex flex-col items-center justify-center py-12 border-2 border-dashed rounded-2xl text-center transition-colors ${
+                                isDragging
+                                    ? 'border-blue-500 bg-blue-50/70 dark:bg-blue-950/30'
+                                    : 'border-sf-divider bg-sf-canvas'
+                            }`}
+                        >
                             <FileSpreadsheet size={48} className="text-emerald-500 mb-4 animate-bounce" />
                             <h4 className="text-lg font-bold text-sf-text mb-1">Select or drop client spreadsheet</h4>
                             <p className="text-xs text-sf-muted mb-6">Supports Microsoft Excel (.xlsx, .xls) and Comma-Separated Values (.csv)</p>

@@ -3471,7 +3471,8 @@
     "massDeficit": "Masa insuficiente",
     "acknowledgeMass": "Confirmar la advertencia de masa de esta muestra",
     "massCheckFailed": "No se pudieron cargar los requisitos de masa. El servidor comprobará cada fila al enviar.",
-    "positionalUncertainty": "Incertidumbre posicional registrada (m)"
+    "positionalUncertainty": "Incertidumbre posicional registrada (m)",
+    "manifestMultipleFilesNotice": "Se soltaron varios archivos; se utilizará {name}."
   },
   "policyEditor": {
     "reasonRequiredHint": "Debes indicar un motivo para guardar.",

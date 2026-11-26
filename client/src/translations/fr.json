@@ -3471,7 +3471,8 @@
     "massDeficit": "Masse insuffisante",
     "acknowledgeMass": "Confirmer l’avertissement de masse de cet échantillon",
     "massCheckFailed": "Les besoins en masse n’ont pas pu être chargés. Le serveur vérifiera chaque ligne lors de l’envoi.",
-    "positionalUncertainty": "Incertitude de position enregistrée (m)"
+    "positionalUncertainty": "Incertitude de position enregistrée (m)",
+    "manifestMultipleFilesNotice": "Plusieurs fichiers déposés ; utilisation de {name}."
   },
   "policyEditor": {
     "reasonRequiredHint": "Un motif est nécessaire pour enregistrer.",
