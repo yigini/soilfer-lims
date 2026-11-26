@@ -2474,12 +2474,12 @@
         "box": "caixa"
       },
       "editItem": "Editar item de inventário",
-      "saveItem": "Salvar alterações",
+      "saveItem": "Guardar alterações",
       "updateFailed": "Falha ao atualizar o item",
-      "defaultLocationLabel": "Local padrão",
-      "noDefaultLocation": "Nenhum (opcional)",
-      "noReagentLocations": "Ainda não há locais ativos de reagentes.",
-      "manageLocationsLink": "Gerenciar locais"
+      "defaultLocationLabel": "Local predefinido",
+      "noDefaultLocation": "Sem local predefinido (opcional)",
+      "noReagentLocations": "Ainda não existem locais ativos de reagentes.",
+      "manageLocationsLink": "Gerir locais"
     },
     "lotStatuses": {
       "AVAILABLE": "Disponível",
@@ -2502,34 +2502,34 @@
       "name": "Nome do local",
       "purpose": "Finalidade",
       "type": "Tipo",
-      "parent": "Local pai",
-      "noParent": "Nenhum (nível superior)",
-      "temperatureRange": "Faixa de temperatura",
+      "parent": "Local superior",
+      "noParent": "Sem local superior (nível de topo)",
+      "temperatureRange": "Intervalo de temperatura",
       "temperaturePlaceholder": "ex.: 2-8 °C",
       "active": "Ativo",
       "inactive": "Inativo",
       "deactivate": "Desativar",
       "reactivate": "Reativar",
-      "emptySample": "Nenhum local de armazenamento de amostras configurado.",
-      "emptyReagent": "Nenhum local de armazenamento de reagentes configurado.",
+      "emptySample": "Ainda não existem locais de armazenamento de amostras configurados.",
+      "emptyReagent": "Ainda não existem locais de armazenamento de reagentes configurados.",
       "loadFailed": "Não foi possível carregar os locais de armazenamento.",
-      "saveFailed": "Não foi possível salvar o local de armazenamento.",
-      "immutableNote": "A finalidade e o local pai não podem ser alterados após a criação.",
+      "saveFailed": "Não foi possível guardar o local de armazenamento.",
+      "immutableNote": "A finalidade e o local superior não podem ser alterados após a criação.",
       "purposes": {
         "SAMPLE": "Armazenamento de amostras",
         "REAGENT": "Armazenamento de reagentes"
       },
       "types": {
         "ROOM": "Sala",
-        "FRIDGE": "Geladeira",
-        "FREEZER": "Freezer",
+        "FRIDGE": "Frigorífico",
+        "FREEZER": "Congelador",
         "CABINET": "Armário",
         "SHELF": "Prateleira",
         "OTHER": "Outro"
       },
       "errors": {
-        "LOCATION_HAS_ACTIVE_CHILDREN": "Desative os locais filhos ativos antes de desativar este local.",
-        "LOCATION_FIELD_IMMUTABLE": "A finalidade e o local pai não podem ser alterados."
+        "LOCATION_HAS_ACTIVE_CHILDREN": "Desative os locais dependentes ativos antes de desativar este local.",
+        "LOCATION_FIELD_IMMUTABLE": "A finalidade e o local superior não podem ser alterados."
       }
     }
   },
@@ -2731,7 +2731,7 @@
       "CUSTODY_CONTAINER_INVALID": "Escolha um recipiente desta amostra.",
       "CUSTODY_TYPE_INVALID": "Escolha uma ação de custódia compatível."
     },
-    "manageLocations": "Gerenciar locais"
+    "manageLocations": "Gerir locais"
   },
   "error": {
     "pageNotFound": "Página não encontrada",
