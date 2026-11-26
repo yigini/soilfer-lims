@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.16.2] - 2026-11-26
+
+### Fixed
+- Allow repeat measurements to record a value equal to the previously rejected result instead of refusing the attempt.
+- Show confirmed preparation evidence in the sample workspace and prevent already-confirmed preparation rows from being selected and confirmed again.
+- Limit sample deletion to intake statuses (`DRAFT`, `EXPECTED`, `RECEIVED`, `COLLECTED`), direct staff to Undo intake for later statuses, and display the server message when deletion is refused.
+- Require selecting a physical quantity on spectral batch uploads (translated in all five screen languages), display "Not confirmed" instead of guessing from modality in the viewer, apply the same quantity check during batch approval, and allow re-uploading a rejected unverified file with its quantity confirmed.
+
+### Security
+- Pin Prisma's transitive `effect` dependency to `3.22.1` to address the security advisory.
+
 ## [1.16.1] - 2026-11-18
 
 ### Fixed
