@@ -52,6 +52,27 @@ import {
     RotateCcw
 } from 'lucide-react';
 
+const parseJsonField = (value) => {
+    if (!value) return {};
+    if (typeof value === 'string') {
+        try { return JSON.parse(value) || {}; } catch { return {}; }
+    }
+    return typeof value === 'object' ? value : {};
+};
+
+const resolveClientSubmitter = (workspace, sample) => {
+    const clientName = workspace?.identity?.clientName;
+    if (clientName && clientName !== 'Not recorded') return clientName;
+    if (sample?.clientName) return sample.clientName;
+    const fieldMeta = parseJsonField(sample?.fieldMetadata);
+    const metaSubmitter = typeof fieldMeta?.submitterName === 'string'
+        ? fieldMeta.submitterName
+        : fieldMeta?.submitterName?.value;
+    if (metaSubmitter) return metaSubmitter;
+    const receptionData = parseJsonField(sample?.receptionData || workspace?.identity?.receptionCondition?.checklist);
+    return receptionData?.submitterDetails?.name || 'Not recorded';
+};
+
 const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
     const getAnalysisDisplayName = useAnalysisNames();
     const { id } = useParams();
@@ -1310,7 +1331,7 @@ const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
                                     </div>
                                     <div className="flex justify-between py-1.5 border-b border-sf-divider">
                                         <span className="text-sf-muted">Client / Submitter</span>
-                                        <span className="font-semibold">{workspace?.identity?.clientName || 'Not recorded'}</span>
+                                        <span className="font-semibold">{resolveClientSubmitter(workspace, sample)}</span>
                                     </div>
                                 </div>
 

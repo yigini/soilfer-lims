@@ -22,20 +22,46 @@ const Badge = ({ text, color = 'gray' }) => {
     );
 };
 
-const InfoCard = ({ icon: Icon, iconColor, label, value, subtitle }) => (
-    <div className="flex items-start gap-3 p-3 rounded-lg bg-gray-50/80 border border-gray-100 hover:bg-gray-100/80 transition-colors">
-        {Icon && (
-            <div className={`p-2 rounded-lg ${iconColor || 'bg-blue-100 text-blue-600'} flex-shrink-0`}>
-                <Icon size={16} />
+const hasValue = (v) => v !== null && v !== undefined && v !== '';
+
+const pick = (meta, ...keys) => {
+    for (const key of keys) {
+        const entry = meta?.[key];
+        if (entry && hasValue(entry.value)) return entry;
+    }
+    return {};
+};
+
+const formatValue = (value) => {
+    if (!hasValue(value)) return null;
+    if (typeof value === 'boolean') return value ? 'Yes' : 'No';
+    return value;
+};
+
+const formatDepth = (value) => {
+    if (!hasValue(value)) return null;
+    const text = String(value).trim();
+    if (!text) return null;
+    return /\bcm\b/i.test(text) ? text : `${text} cm`;
+};
+
+const InfoCard = ({ icon: Icon, iconColor, label, value, subtitle }) => {
+    const display = formatValue(value);
+    return (
+        <div className="flex items-start gap-3 p-3 rounded-lg bg-gray-50/80 border border-gray-100 hover:bg-gray-100/80 transition-colors">
+            {Icon && (
+                <div className={`p-2 rounded-lg ${iconColor || 'bg-blue-100 text-blue-600'} flex-shrink-0`}>
+                    <Icon size={16} />
+                </div>
+            )}
+            <div className="min-w-0 flex-1">
+                <div className="text-[11px] text-gray-400 font-medium uppercase tracking-wider">{label}</div>
+                <div className="text-sm font-semibold text-gray-900 mt-0.5 break-words">{display !== null ? display : <span className="text-gray-300 font-normal italic">—</span>}</div>
+                {subtitle && <div className="text-xs text-gray-400 mt-0.5">{subtitle}</div>}
             </div>
-        )}
-        <div className="min-w-0 flex-1">
-            <div className="text-[11px] text-gray-400 font-medium uppercase tracking-wider">{label}</div>
-            <div className="text-sm font-semibold text-gray-900 mt-0.5 break-words">{value || <span className="text-gray-300 font-normal italic">Not recorded</span>}</div>
-            {subtitle && <div className="text-xs text-gray-400 mt-0.5">{subtitle}</div>}
         </div>
-    </div>
-);
+    );
+};
 
 const SectionHeader = ({ icon: Icon, title, badge, children, defaultOpen = true }) => {
     const [open, setOpen] = useState(defaultOpen);
@@ -458,10 +484,11 @@ const PhotoGallery = ({ attachments, sample }) => {
 // ─── KOBO VIEW ────────────────────────────────────────────────────
 
 const KoboFieldDataView = ({ sample, meta, rawMeta }) => {
-    const get = (key) => meta?.[key]?.value;
+    const get = (...keys) => pick(meta, ...keys).value;
     const lat = get('latitude');
     const lng = get('longitude');
-    const hasCoords = lat && lng && !isNaN(Number(lat)) && !isNaN(Number(lng));
+    const hasCoords = hasValue(lat) && hasValue(lng) && !isNaN(Number(lat)) && !isNaN(Number(lng));
+    const collectionDate = get('date', 'collectionDate');
     // Support both processed attachments (from resync/new sync) and raw Kobo _attachments (legacy)
     const rawAttachments = get('attachments') || rawMeta?.attachments || [];
     // Normalize raw Kobo _attachments if used as fallback (different field names)
@@ -485,13 +512,13 @@ const KoboFieldDataView = ({ sample, meta, rawMeta }) => {
                     subtitle={hasCoords ? 'From Kobo GPS' : null}
                 />
                 <InfoCard icon={User} iconColor="bg-indigo-50 text-indigo-500" label="Surveyor"
-                    value={get('surveyor') || rawMeta?.surveyor}
+                    value={get('surveyor') ?? rawMeta?.surveyor}
                 />
                 <InfoCard icon={Calendar} iconColor="bg-amber-50 text-amber-600" label="Collection Date"
-                    value={get('collectionDate') ? new Date(get('collectionDate')).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : null}
+                    value={hasValue(collectionDate) ? new Date(collectionDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : null}
                 />
                 <InfoCard icon={Globe} iconColor="bg-emerald-50 text-emerald-600" label="Province / Region"
-                    value={get('province') || rawMeta?.province}
+                    value={get('province') ?? rawMeta?.province}
                 />
             </div>
 
@@ -499,12 +526,12 @@ const KoboFieldDataView = ({ sample, meta, rawMeta }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <SectionHeader icon={Layers} title="Site & Sampling" defaultOpen={true}>
                     <div className="grid grid-cols-2 gap-2">
-                        <InfoCard icon={null} label="Site ID" value={get('site_id') || rawMeta?.site_id} />
-                        <InfoCard icon={null} label="Depth" value={get('depth')} />
-                        <InfoCard icon={null} label="Land Cover" value={get('land_cover') || rawMeta?.land_cover} />
+                        <InfoCard icon={null} label="Site ID" value={get('site_id') ?? rawMeta?.site_id} />
+                        <InfoCard icon={null} label="Depth" value={formatDepth(get('depth'))} />
+                        <InfoCard icon={null} label="Land Cover" value={get('land_cover') ?? rawMeta?.land_cover} />
                         <InfoCard icon={null} label="Accessibility" value={rawMeta?.accessibility} />
                         <InfoCard icon={null} label="Sampling" value={rawMeta?.sampling_succeeded === 'yes' ? '✅ Succeeded' : rawMeta?.sampling_succeeded} />
-                        <InfoCard icon={null} label="Kobo ID" value={rawMeta?.kobo_id || get('kobo_submission_id')} />
+                        <InfoCard icon={null} label="Kobo ID" value={rawMeta?.kobo_id ?? get('kobo_submission_id')} />
                     </div>
                 </SectionHeader>
 
@@ -528,22 +555,47 @@ const KoboFieldDataView = ({ sample, meta, rawMeta }) => {
 // ─── WALK-IN / MANUAL VIEW ─────────────────────────────────────────
 
 const ManualFieldDataView = ({ sample, meta }) => {
-    const get = (key) => meta?.[key]?.value;
-    const getSource = (key) => meta?.[key]?.source;
+    const get = (...keys) => pick(meta, ...keys);
 
-    const Row = ({ label, value, source }) => (
-        <div className="flex items-center justify-between py-2.5 border-b border-gray-50 last:border-0 px-2 hover:bg-gray-50 rounded transition-colors">
-            <span className="text-sm text-gray-500 font-medium">{label}</span>
-            <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-900 font-medium">{value || <span className="text-gray-300 italic font-normal">—</span>}</span>
-                {source && <Badge text={source === 'WALK_IN_INTAKE' ? 'Intake' : source === 'MANUAL_EDIT' ? 'Edited' : source} color={source === 'WALK_IN_INTAKE' ? 'blue' : 'orange'} />}
+    const Row = ({ label, value, source }) => {
+        const display = formatValue(value);
+        return (
+            <div className="flex items-center justify-between py-2.5 border-b border-gray-50 last:border-0 px-2 hover:bg-gray-50 rounded transition-colors">
+                <span className="text-sm text-gray-500 font-medium">{label}</span>
+                <div className="flex items-center gap-2">
+                    <span className="text-sm text-gray-900 font-medium">{display !== null ? display : <span className="text-gray-300 italic font-normal">—</span>}</span>
+                    {source && <Badge text={source === 'WALK_IN_INTAKE' ? 'Intake' : source === 'MANUAL_EDIT' ? 'Edited' : source} color={source === 'WALK_IN_INTAKE' ? 'blue' : 'orange'} />}
+                </div>
             </div>
-        </div>
-    );
+        );
+    };
 
+    const projectCode = get('projectCode');
+    const siteName = get('siteName');
+    const surveyor = get('surveyor');
+    const organization = get('submitterOrganization', 'organization');
+    const submitterName = get('submitterName');
+    const contact = get('submitterPhone', 'submitterEmail');
     const lat = get('latitude');
     const lng = get('longitude');
-    const coords = (lat && lng) ? `${Number(lat).toFixed(5)}, ${Number(lng).toFixed(5)}` : null;
+    const coords = (hasValue(lat.value) && hasValue(lng.value) && !isNaN(Number(lat.value)) && !isNaN(Number(lng.value)))
+        ? `${Number(lat.value).toFixed(5)}, ${Number(lng.value).toFixed(5)}`
+        : null;
+    const elevation = get('elevation');
+    const admin1 = get('admin1');
+    const admin2 = get('admin2');
+    const description = get('location', 'locationDescription');
+    const collectionDate = get('date', 'collectionDate');
+    const depthType = get('depthType');
+    const depthTop = get('depthTopCm', 'depthTop');
+    const depthBottom = get('depthBottomCm', 'depthBottom');
+    const isComposite = get('isComposite');
+    const purpose = get('purpose', 'samplingPurpose');
+    const landUse = get('landUse');
+    const crop = get('crop');
+    const previousCrop = get('previousCrop');
+    const management = get('management', 'managementPractices');
+    const fertilizer = get('fertilizer');
 
     return (
         <div className="space-y-3">
@@ -551,42 +603,42 @@ const ManualFieldDataView = ({ sample, meta }) => {
                 <div className="space-y-3">
                     <SectionHeader icon={FileText} title="Identification">
                         <div className="bg-white rounded-lg border border-gray-100 overflow-hidden">
-                            <Row label="Project Code" value={get('projectCode') || sample.projectCode} />
-                            <Row label="Site Name" value={get('siteName')} source={getSource('siteName')} />
-                            <Row label="Collector" value={get('surveyor')} source={getSource('surveyor')} />
-                            <Row label="Organization" value={get('organization')} source={getSource('organization')} />
-                            <Row label="Submitter" value={get('submitterName')} source={getSource('submitterName')} />
-                            <Row label="Contact" value={get('submitterPhone') || get('submitterEmail')} source={getSource('submitterPhone')} />
+                            <Row label="Project Code" value={hasValue(projectCode.value) ? projectCode.value : sample.projectCode} />
+                            <Row label="Site Name" value={siteName.value} source={siteName.source} />
+                            <Row label="Collector" value={surveyor.value} source={surveyor.source} />
+                            <Row label="Organization" value={organization.value} source={organization.source} />
+                            <Row label="Submitter" value={submitterName.value} source={submitterName.source} />
+                            <Row label="Contact" value={contact.value} source={contact.source} />
                         </div>
                     </SectionHeader>
                     <SectionHeader icon={MapPin} title="Location">
                         <div className="bg-white rounded-lg border border-gray-100 overflow-hidden">
-                            <Row label="Coordinates" value={coords} source={getSource('latitude')} />
-                            <Row label="Elevation" value={get('elevation')} source={getSource('elevation')} />
-                            <Row label="Region" value={get('admin1')} source={getSource('admin1')} />
-                            <Row label="District" value={get('admin2')} source={getSource('admin2')} />
-                            <Row label="Description" value={get('locationDescription')} source={getSource('locationDescription')} />
+                            <Row label="Coordinates" value={coords} source={lat.source || lng.source} />
+                            <Row label="Elevation" value={elevation.value} source={elevation.source} />
+                            <Row label="Region" value={admin1.value} source={admin1.source} />
+                            <Row label="District" value={admin2.value} source={admin2.source} />
+                            <Row label="Description" value={description.value} source={description.source} />
                         </div>
                     </SectionHeader>
                 </div>
                 <div className="space-y-3">
                     <SectionHeader icon={Layers} title="Sampling">
                         <div className="bg-white rounded-lg border border-gray-100 overflow-hidden">
-                            <Row label="Collection Date" value={get('collectionDate')} source={getSource('collectionDate')} />
-                            <Row label="Depth Range" value={get('depthType')} source={getSource('depthType')} />
-                            <Row label="Top Depth" value={get('depthTop')} source={getSource('depthTop')} />
-                            <Row label="Bottom Depth" value={get('depthBottom')} source={getSource('depthBottom')} />
-                            <Row label="Composite" value={get('isComposite')} source={getSource('isComposite')} />
-                            <Row label="Purpose" value={get('samplingPurpose')} source={getSource('samplingPurpose')} />
+                            <Row label="Collection Date" value={collectionDate.value} source={collectionDate.source} />
+                            <Row label="Depth Range" value={depthType.value} source={depthType.source} />
+                            <Row label="Top Depth" value={formatDepth(depthTop.value)} source={depthTop.source} />
+                            <Row label="Bottom Depth" value={formatDepth(depthBottom.value)} source={depthBottom.source} />
+                            <Row label="Composite" value={isComposite.value} source={isComposite.source} />
+                            <Row label="Purpose" value={purpose.value} source={purpose.source} />
                         </div>
                     </SectionHeader>
                     <SectionHeader icon={Leaf} title="Land Use">
                         <div className="bg-white rounded-lg border border-gray-100 overflow-hidden">
-                            <Row label="Land Use" value={get('landUse')} source={getSource('landUse')} />
-                            <Row label="Current Crop" value={get('crop')} source={getSource('crop')} />
-                            <Row label="Previous Crop" value={get('previousCrop')} source={getSource('previousCrop')} />
-                            <Row label="Management" value={get('managementPractices')} source={getSource('managementPractices')} />
-                            <Row label="Fertilizer" value={get('fertilizer')} source={getSource('fertilizer')} />
+                            <Row label="Land Use" value={landUse.value} source={landUse.source} />
+                            <Row label="Current Crop" value={crop.value} source={crop.source} />
+                            <Row label="Previous Crop" value={previousCrop.value} source={previousCrop.source} />
+                            <Row label="Management" value={management.value} source={management.source} />
+                            <Row label="Fertilizer" value={fertilizer.value} source={fertilizer.source} />
                         </div>
                     </SectionHeader>
                 </div>

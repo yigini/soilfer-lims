@@ -2624,6 +2624,8 @@
     "currentLocation": "Emplacement actuel",
     "newLocation": "Emplacement de stockage",
     "reason": "Motif",
+    "movementRequiredHint": "Choisissez une destination et indiquez un motif",
+    "reasonRequiredHint": "Indiquez un motif",
     "saveMovement": "Enregistrer le mouvement",
     "chooseLocation": "Choisir un emplacement pour échantillons",
     "locationName": "Nom du nouvel emplacement",
