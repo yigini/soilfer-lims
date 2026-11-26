@@ -2472,7 +2472,14 @@
       "units": {
         "pcs": "peças",
         "box": "caixa"
-      }
+      },
+      "editItem": "Editar item de inventário",
+      "saveItem": "Guardar alterações",
+      "updateFailed": "Falha ao atualizar o item",
+      "defaultLocationLabel": "Local predefinido",
+      "noDefaultLocation": "Sem local predefinido (opcional)",
+      "noReagentLocations": "Ainda não existem locais ativos de reagentes.",
+      "manageLocationsLink": "Gerir locais"
     },
     "lotStatuses": {
       "AVAILABLE": "Disponível",
@@ -2481,7 +2488,50 @@
       "EXPIRED": "Fora de validade",
       "DISPOSED": "Eliminado"
     },
-    "missing": "Em falta"
+    "missing": "Em falta",
+    "tabs": {
+      "items": "Itens",
+      "locations": "Locais"
+    },
+    "locations": {
+      "title": "Locais de armazenamento",
+      "sampleStorage": "Armazenamento de amostras",
+      "reagentStorage": "Armazenamento de reagentes",
+      "addLocation": "Adicionar local",
+      "editLocation": "Editar local",
+      "name": "Nome do local",
+      "purpose": "Finalidade",
+      "type": "Tipo",
+      "parent": "Local superior",
+      "noParent": "Sem local superior (nível de topo)",
+      "temperatureRange": "Intervalo de temperatura",
+      "temperaturePlaceholder": "ex.: 2-8 °C",
+      "active": "Ativo",
+      "inactive": "Inativo",
+      "deactivate": "Desativar",
+      "reactivate": "Reativar",
+      "emptySample": "Ainda não existem locais de armazenamento de amostras configurados.",
+      "emptyReagent": "Ainda não existem locais de armazenamento de reagentes configurados.",
+      "loadFailed": "Não foi possível carregar os locais de armazenamento.",
+      "saveFailed": "Não foi possível guardar o local de armazenamento.",
+      "immutableNote": "A finalidade e o local superior não podem ser alterados após a criação.",
+      "purposes": {
+        "SAMPLE": "Armazenamento de amostras",
+        "REAGENT": "Armazenamento de reagentes"
+      },
+      "types": {
+        "ROOM": "Sala",
+        "FRIDGE": "Frigorífico",
+        "FREEZER": "Congelador",
+        "CABINET": "Armário",
+        "SHELF": "Prateleira",
+        "OTHER": "Outro"
+      },
+      "errors": {
+        "LOCATION_HAS_ACTIVE_CHILDREN": "Desative os locais dependentes ativos antes de desativar este local.",
+        "LOCATION_FIELD_IMMUTABLE": "A finalidade e o local superior não podem ser alterados."
+      }
+    }
   },
   "labs": {
     "title": "Gestão de Laboratórios",
@@ -2682,7 +2732,8 @@
       "CUSTODY_FORBIDDEN": "Você não tem permissão para gerenciar a custódia.",
       "CUSTODY_CONTAINER_INVALID": "Escolha um recipiente desta amostra.",
       "CUSTODY_TYPE_INVALID": "Escolha uma ação de custódia compatível."
-    }
+    },
+    "manageLocations": "Gerir locais"
   },
   "error": {
     "pageNotFound": "Página não encontrada",

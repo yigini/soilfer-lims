@@ -257,6 +257,9 @@ exports.updateItem = async (req, res) => {
         }
 
         const { id, labId, createdAt, updatedAt, lots, methodRequirements, ...updateData } = req.body;
+        if (Object.hasOwn(updateData, 'defaultLocationId') && !updateData.defaultLocationId) {
+            updateData.defaultLocationId = null;
+        }
         if (updateData.defaultLocationId) {
             const location = await prisma.inventoryLocation.findUnique({ where: { id: updateData.defaultLocationId } });
             if (!location || location.labId !== existing.labId) return res.status(403).json({ error: 'Access denied' });
@@ -647,7 +650,9 @@ exports.getLocations = async (req, res) => {
     try {
         const purpose = req.query.purpose || 'REAGENT';
         if (!require('../config/custodyContract').LOCATION_PURPOSES.includes(purpose)) return res.status(400).json({ code: 'CUSTODY_LOCATION_INVALID', error: 'Choose a valid location purpose.' });
-        const where = require('../utils/scopeGuard').buildScopedWhere(req.user, { isActive: true, purpose }, { entityType: 'Inventory', altLabField: null });
+        const includeInactive = req.query.includeInactive === '1';
+        const baseWhere = includeInactive ? { purpose } : { isActive: true, purpose };
+        const where = require('../utils/scopeGuard').buildScopedWhere(req.user, baseWhere, { entityType: 'Inventory', altLabField: null });
         const locations = await prisma.inventoryLocation.findMany({
             where,
             orderBy: { name: 'asc' }
@@ -663,6 +668,17 @@ exports.createLocation = async (req, res) => {
     try {
         const location = await inventoryWriteService.createLocation(req.user, req.body);
         res.status(201).json(location);
+    } catch (e) {
+        if (e.inputPayload) return res.status(e.statusCode).json(e.inputPayload);
+        res.status(500).json({ error: e.message });
+    }
+};
+
+/** PATCH /api/inventory/locations/:id */
+exports.updateLocation = async (req, res) => {
+    try {
+        const location = await inventoryWriteService.updateLocation(req.user, req.params.id, req.body);
+        res.json(location);
     } catch (e) {
         if (e.inputPayload) return res.status(e.statusCode).json(e.inputPayload);
         res.status(500).json({ error: e.message });

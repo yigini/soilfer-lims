@@ -932,6 +932,10 @@
     "registration": 1
   },
   {
+    "key": "PATCH /api/inventory/locations/:id",
+    "registration": 1
+  },
+  {
     "key": "PATCH /api/labs/:id/policies",
     "registration": 1
   },

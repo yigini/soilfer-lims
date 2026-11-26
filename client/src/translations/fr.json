@@ -2472,7 +2472,14 @@
       "units": {
         "pcs": "pièces",
         "box": "boîte"
-      }
+      },
+      "editItem": "Modifier l’article d’inventaire",
+      "saveItem": "Enregistrer les modifications",
+      "updateFailed": "Échec de la mise à jour de l’article",
+      "defaultLocationLabel": "Emplacement par défaut",
+      "noDefaultLocation": "Aucun (facultatif)",
+      "noReagentLocations": "Aucun emplacement de réactifs actif pour le moment.",
+      "manageLocationsLink": "Gérer les emplacements"
     },
     "lotStatuses": {
       "AVAILABLE": "Disponible",
@@ -2481,7 +2488,50 @@
       "EXPIRED": "Périmé",
       "DISPOSED": "Éliminé"
     },
-    "missing": "Manquant"
+    "missing": "Manquant",
+    "tabs": {
+      "items": "Articles",
+      "locations": "Emplacements"
+    },
+    "locations": {
+      "title": "Emplacements de stockage",
+      "sampleStorage": "Stockage des échantillons",
+      "reagentStorage": "Stockage des réactifs",
+      "addLocation": "Ajouter un emplacement",
+      "editLocation": "Modifier l’emplacement",
+      "name": "Nom de l’emplacement",
+      "purpose": "Usage",
+      "type": "Type",
+      "parent": "Emplacement parent",
+      "noParent": "Aucun (niveau supérieur)",
+      "temperatureRange": "Plage de température",
+      "temperaturePlaceholder": "ex. 2-8 °C",
+      "active": "Actif",
+      "inactive": "Inactif",
+      "deactivate": "Désactiver",
+      "reactivate": "Réactiver",
+      "emptySample": "Aucun emplacement de stockage d’échantillons configuré.",
+      "emptyReagent": "Aucun emplacement de stockage de réactifs configuré.",
+      "loadFailed": "Impossible de charger les emplacements de stockage.",
+      "saveFailed": "Impossible d’enregistrer l’emplacement de stockage.",
+      "immutableNote": "L’usage et l’emplacement parent ne peuvent pas être modifiés après la création.",
+      "purposes": {
+        "SAMPLE": "Stockage des échantillons",
+        "REAGENT": "Stockage des réactifs"
+      },
+      "types": {
+        "ROOM": "Salle",
+        "FRIDGE": "Réfrigérateur",
+        "FREEZER": "Congélateur",
+        "CABINET": "Armoire",
+        "SHELF": "Étagère",
+        "OTHER": "Autre"
+      },
+      "errors": {
+        "LOCATION_HAS_ACTIVE_CHILDREN": "Désactivez les emplacements enfants actifs avant de désactiver cet emplacement.",
+        "LOCATION_FIELD_IMMUTABLE": "L’usage et l’emplacement parent ne peuvent pas être modifiés."
+      }
+    }
   },
   "labs": {
     "title": "Gestion des Laboratoires",
@@ -2682,7 +2732,8 @@
       "CUSTODY_FORBIDDEN": "Vous n’avez pas la permission de gérer la garde.",
       "CUSTODY_CONTAINER_INVALID": "Choisissez un contenant appartenant à cet échantillon.",
       "CUSTODY_TYPE_INVALID": "Choisissez une action de garde prise en charge."
-    }
+    },
+    "manageLocations": "Gérer les emplacements"
   },
   "error": {
     "pageNotFound": "Page non trouvée",
