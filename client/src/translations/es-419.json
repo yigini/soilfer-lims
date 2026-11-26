@@ -2624,6 +2624,8 @@
     "currentLocation": "Ubicación actual",
     "newLocation": "Ubicación de almacenamiento",
     "reason": "Motivo",
+    "movementRequiredHint": "Seleccione un destino e indique un motivo",
+    "reasonRequiredHint": "Indique un motivo",
     "saveMovement": "Registrar movimiento",
     "chooseLocation": "Seleccione una ubicación para muestras",
     "locationName": "Nombre de la nueva ubicación de muestras",

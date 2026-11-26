@@ -2624,6 +2624,8 @@
     "currentLocation": "Current location",
     "newLocation": "Storage location",
     "reason": "Reason",
+    "movementRequiredHint": "Choose a destination and give a reason",
+    "reasonRequiredHint": "Give a reason",
     "saveMovement": "Record Movement",
     "chooseLocation": "Choose a sample storage location",
     "locationName": "New sample location name",

@@ -32,6 +32,12 @@ const StorageMovementModal = ({ sampleId, currentLocation, isOpen, onClose, onSu
     const dispose = action === 'DISPOSAL';
     const archive = action === 'ARCHIVING';
     const needsLocation = archive || ['MOVED', 'RETURNED'].includes(eventType);
+    const missingLocation = !dispose && needsLocation && !location;
+    const missingReason = !reason.trim();
+    const saveDisabled = submitting || missingReason || missingLocation;
+    const disabledHint = !submitting && (missingLocation || missingReason)
+        ? t(!dispose && needsLocation ? 'custody.movementRequiredHint' : 'custody.reasonRequiredHint')
+        : '';
     const save = async e => {
         e.preventDefault(); setSubmitting(true); setError('');
         try {
@@ -64,7 +70,7 @@ const StorageMovementModal = ({ sampleId, currentLocation, isOpen, onClose, onSu
                     <select value={eventType} onChange={e => { setEventType(e.target.value); setLocation(''); }} className="w-full p-2 border rounded bg-sf-canvas">
                         {['MOVED','ISSUED','RETURNED','SENT_OUT'].map(type => <option key={type} value={type}>{t(`custody.types.${type}`)}</option>)}
                     </select></label>}
-                {!dispose && needsLocation && <><label className="block text-sm">{t('custody.newLocation')}
+                {!dispose && needsLocation && <><label className="block text-sm">{t('custody.newLocation')}<span className="text-red-500" aria-hidden="true"> *</span>
                     <select required value={location} onChange={e => setLocation(e.target.value)} className="w-full p-2 border rounded bg-sf-canvas">
                         <option value="">{t('custody.chooseLocation')}</option>{locations.map(row => <option key={row.id} value={row.id}>{row.name}</option>)}
                     </select></label>
@@ -77,9 +83,10 @@ const StorageMovementModal = ({ sampleId, currentLocation, isOpen, onClose, onSu
                     </select></label>}
                 {!dispose && !archive && <><label className="block text-sm">{t('custody.counterparty')}<input value={counterparty} required={['ISSUED','SENT_OUT'].includes(eventType)} onChange={e => setCounterparty(e.target.value)} className="w-full p-2 border rounded bg-sf-canvas"/></label>
                     <label className="block text-sm">{t('custody.reference')}<input value={reference} onChange={e => setReference(e.target.value)} className="w-full p-2 border rounded bg-sf-canvas"/></label></>}
-                <label className="block text-sm">{t('custody.reason')}<textarea required value={reason} onChange={e => setReason(e.target.value)} rows={3} className="w-full p-2 border rounded bg-sf-canvas"/></label>
+                <label className="block text-sm">{t('custody.reason')}<span className="text-red-500" aria-hidden="true"> *</span><textarea required value={reason} onChange={e => setReason(e.target.value)} rows={3} className="w-full p-2 border rounded bg-sf-canvas"/></label>
+                {disabledHint && <p id="custody-save-hint" className="text-xs text-sf-muted">{disabledHint}</p>}
                 <div className="flex justify-end gap-3"><button type="button" onClick={onClose}>{t('common.cancel')}</button>
-                    <button type="submit" disabled={submitting || !reason.trim() || !dispose && needsLocation && !location} className="btn-primary">{t(submitting ? 'common.saving' : 'common.save')}</button></div>
+                    <button type="submit" disabled={saveDisabled} aria-describedby={disabledHint ? 'custody-save-hint' : undefined} className="btn-primary">{t(submitting ? 'common.saving' : 'common.save')}</button></div>
             </form>
         </section>
     </div>;
