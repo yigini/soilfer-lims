@@ -5192,6 +5192,8 @@
     "close": "Fermer"
   },
   "workbenchUi": {
+    "noWorkAssignedForSample": "Cet échantillon ne comporte aucun travail qui vous est assigné.",
+    "backToSample": "Retour à l'échantillon",
     "contradictoryIdentifiersWorkItemCountDoesNotBelongToSample": "Identifiants contradictoires : la tâche '{{initialWorkItemId}}' n'appartient pas à l'échantillon '{{initialSampleId}}'",
     "accessDeniedRequestedItemBelongsToAnotherLaboratory": "Accès refusé : l'élément demandé appartient à un autre laboratoire.",
     "requestedItemCountWasNotFound": "Élément demandé '{{value0}}' introuvable.",

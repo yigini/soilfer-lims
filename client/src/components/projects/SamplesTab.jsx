@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Filter, ExternalLink, Calendar, Beaker, CheckCircle2, RefreshCw, AlertCircle } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
+import { useAuth } from '../../context/AuthContext';
 
 export default function SamplesTab({
     project,
@@ -24,6 +25,7 @@ export default function SamplesTab({
 }) {
     const navigate = useNavigate();
     const { t } = useLanguage();
+    const { user } = useAuth();
     const [inputValue, setInputValue] = useState(searchQuery || '');
 
     useEffect(() => {
@@ -289,14 +291,27 @@ export default function SamplesTab({
                                                     >
                                                         <span>{t('projects.samples.viewReport', 'Report →')}</span>
                                                     </button>
-                                                ) : (
-                                                    <button
-                                                        onClick={() => navigate(`/workbench?sampleId=${encodeURIComponent(sample.id)}`)}
-                                                        className="text-sf-primary hover:underline font-medium text-xs inline-flex items-center gap-1"
-                                                    >
-                                                        <span>{t('projects.samples.viewWork', 'Workbench →')}</span>
-                                                    </button>
-                                                )}
+                                                ) : (() => {
+                                                    const hasAssignedWork = user?.role !== 'LAB_TECHNICIAN' || (
+                                                        Array.isArray(sample.workItems)
+                                                            ? sample.workItems.some(wi => wi.assignedTo === user.username || wi.assignedTo === user.id)
+                                                            : (sample.assignedTo ? (sample.assignedTo === user.username || sample.assignedTo === user.id) : true)
+                                                    );
+                                                    return (
+                                                        <button
+                                                            onClick={() => navigate(`/workbench?sampleId=${encodeURIComponent(sample.id)}`)}
+                                                            disabled={!hasAssignedWork}
+                                                            title={hasAssignedWork ? undefined : t('workbenchUi.noWorkAssignedForSample')}
+                                                            className={`font-medium text-xs inline-flex items-center gap-1 ${
+                                                                hasAssignedWork
+                                                                    ? 'text-sf-primary hover:underline'
+                                                                    : 'text-sf-muted opacity-60 cursor-not-allowed'
+                                                            }`}
+                                                        >
+                                                            <span>{t('projects.samples.viewWork', 'Workbench →')}</span>
+                                                        </button>
+                                                    );
+                                                })()}
                                             </td>
                                         </tr>
                                     );

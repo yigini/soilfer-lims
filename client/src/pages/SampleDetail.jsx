@@ -550,6 +550,8 @@ const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
     };
 
     const currentReleasedReport = workspace?.currentReleasedReport || existingReport;
+    const hasAssignedWork = user?.role !== 'LAB_TECHNICIAN' || (workItems || []).some(wi => wi.assignedTo === user.username || wi.assignedTo === user.id);
+    const noAssignedWorkReason = t('workbenchUi.noWorkAssignedForSample');
 
     return (
         <div className="min-h-screen bg-sf-canvas p-3 sm:p-6 text-left transition-colors duration-200">
@@ -691,8 +693,13 @@ const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
                                 {/* Open in Workbench Shortcut */}
                                 <button
                                     onClick={() => navigate(`/workbench?sampleId=${sample?.id || id}`)}
-                                    className="px-3 py-2 rounded-xl text-xs font-semibold bg-[var(--sf-selected)] text-sf-primary border border-sf-divider hover:bg-sf-hover flex items-center gap-1.5 transition-colors"
-                                    title={t("workbenchUi.openSampleTasks")}
+                                    disabled={!hasAssignedWork}
+                                    className={`px-3 py-2 rounded-xl text-xs font-semibold border flex items-center gap-1.5 transition-colors ${
+                                        hasAssignedWork
+                                            ? 'bg-[var(--sf-selected)] text-sf-primary border-sf-divider hover:bg-sf-hover'
+                                            : 'bg-sf-inset text-sf-muted border-sf-divider opacity-60 cursor-not-allowed'
+                                    }`}
+                                    title={hasAssignedWork ? t("workbenchUi.openSampleTasks") : noAssignedWorkReason}
                                 >
                                     <span>{t("workbenchUi.openWorkbench")}</span>
                                 </button>
@@ -904,9 +911,14 @@ const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
                              identity.status === 'EXPECTED' ? 'Reception · Confirm physical specimen condition, label, and requested methods.' :
                              currentReleasedReport ? 'Report v' + (currentReleasedReport.version || 1) + ' is the released record. Subsequent changes require an amendment.' :
                              (nextAction.action === 'ASSIGN' || (counters.unassigned > 0 && isManager)) ? 'Manager · Assign unassigned analytical tasks to laboratory technicians for testing.' :
+                             !hasAssignedWork ? noAssignedWorkReason :
                              'Technician · Record laboratory results and submit package for managerial review.'}
                         </p>
                     </div>
+                    {(() => {
+                        const isWorksheetFallback = !integrity.hasHistoricalGap && !(counters.submitted > 0) && identity.status !== 'EXPECTED' && identity.status !== 'RECEIVED' && !currentReleasedReport && !(counters.accepted >= counters.ordered && counters.ordered > 0) && !(nextAction.action === 'ASSIGN' || (counters.unassigned > 0 && isManager));
+                        const worksheetDisabled = isWorksheetFallback && !hasAssignedWork;
+                        return (
                     <button
                         onClick={() => {
                             if (integrity.hasHistoricalGap) setActiveTab('work');
@@ -917,7 +929,13 @@ const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
                             else if (nextAction.action === 'ASSIGN' || (counters.unassigned > 0 && isManager)) handleFocusAssignment();
                             else setActiveTab('work');
                         }}
-                        className="px-5 py-2.5 bg-sf-primary text-sf-on-primary hover:brightness-95 rounded-xl text-xs font-bold shadow-sm transition-all flex-shrink-0"
+                        disabled={worksheetDisabled}
+                        title={worksheetDisabled ? noAssignedWorkReason : undefined}
+                        className={`px-5 py-2.5 rounded-xl text-xs font-bold shadow-sm transition-all flex-shrink-0 ${
+                            worksheetDisabled
+                                ? 'bg-sf-inset text-sf-muted border border-sf-divider opacity-60 cursor-not-allowed'
+                                : 'bg-sf-primary text-sf-on-primary hover:brightness-95'
+                        }`}
                     >
                         {integrity.hasHistoricalGap ? 'Inspect evidence' :
                          counters.submitted > 0 ? 'Review submission' :
@@ -927,6 +945,8 @@ const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
                          (nextAction.action === 'ASSIGN' || (counters.unassigned > 0 && isManager)) ? 'Assign to technician' :
                          'Open worksheet'}
                     </button>
+                        );
+                    })()}
                 </div>
 
                 {/* ─── 5. FIVE TABS NAVIGATION ─── */}
@@ -1007,7 +1027,11 @@ const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
                                 <h3 className="text-xs font-bold uppercase tracking-wider text-sf-muted">{t('sampleDetail.prepPrerequisites', 'Preparation Prerequisites')}</h3>
                                 <button
                                     onClick={() => navigate(`/workbench?sampleId=${sample?.id || id}`)}
-                                    className="text-xs font-semibold text-sf-emerald hover:underline flex items-center gap-1"
+                                    disabled={!hasAssignedWork}
+                                    title={hasAssignedWork ? undefined : noAssignedWorkReason}
+                                    className={`text-xs font-semibold flex items-center gap-1 ${
+                                        hasAssignedWork ? 'text-sf-emerald hover:underline' : 'text-sf-muted opacity-60 cursor-not-allowed'
+                                    }`}
                                 >
                                     <span>{t('sampleDetail.executeInWorkbench', 'Execute in Workbench →')}</span>
                                 </button>

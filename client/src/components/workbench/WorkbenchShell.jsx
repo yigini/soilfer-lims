@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
@@ -78,6 +79,7 @@ export default function WorkbenchShell({
     const [openedRun, setOpenedRun] = useState(null);
     const [activeRunId, setActiveRunId] = useState(initialRunId);
     const [activeSampleId, setActiveSampleId] = useState(initialSampleId);
+    const [unassignedSampleTarget, setUnassignedSampleTarget] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [queueSearchQuery, setQueueSearchQuery] = useState('');
 
@@ -113,7 +115,11 @@ export default function WorkbenchShell({
             sampleId: initialSampleId
         };
         hasResolvedDeepLink.current = false;
-    }, [initialWorkItemId, initialSampleId]);
+        setUnassignedSampleTarget(null);
+        if (initialWorkItemId || initialSampleId) {
+            setActiveAnalysis(initialAnalysis || null);
+        }
+    }, [initialAnalysis, initialWorkItemId, initialSampleId]);
 
     // ─────────────────────────────────────────────────────────────────────────
     // Queue & Draft Fetching
@@ -167,8 +173,16 @@ export default function WorkbenchShell({
             setGroups(fetchedGroups);
             setStats(res.data.stats || {});
 
-            // Set active analysis default if not set (functional update to prevent dependency loop)
-            setActiveAnalysis(prev => prev || (fetchedGroups.length > 0 ? fetchedGroups[0].analysis : null));
+            const hasPendingTarget = !bypassDeepLink && Boolean(target.workItemId || target.sampleId);
+            if (!bypassDeepLink && target.sampleId && !target.workItemId && res.data.target?.status === 'NO_ASSIGNED_WORK_FOR_SAMPLE') {
+                setUnassignedSampleTarget({ sampleId: res.data.target.sampleId || target.sampleId });
+                setActiveAnalysis(null);
+                setActiveSampleId(null);
+                hasResolvedDeepLink.current = true;
+            } else if (!hasPendingTarget) {
+                // Set active analysis default if not set (functional update to prevent dependency loop)
+                setActiveAnalysis(prev => prev || (fetchedGroups.length > 0 ? fetchedGroups[0].analysis : null));
+            }
 
             // Count conflicts
             let conflicts = 0;
@@ -290,16 +304,23 @@ export default function WorkbenchShell({
         }
 
         if (initialAnalysis) {
+            setUnassignedSampleTarget(null);
             setActiveAnalysis(initialAnalysis);
             if (initialSampleId) setActiveSampleId(initialSampleId);
             setActiveTab('worksheet');
             hasResolvedDeepLink.current = true;
-        } else if (initialSampleId && groups.length > 0) {
-            const foundGroup = groups.find(g => g.items?.some(i => i.sampleId === initialSampleId || i.originalId === initialSampleId));
+        } else if (initialSampleId) {
+            const foundGroup = groups.find(g => g.items?.some(i => i.sampleId === initialSampleId || i.originalId === initialSampleId || i.labId === initialSampleId));
             if (foundGroup) {
+                setUnassignedSampleTarget(null);
                 setActiveAnalysis(foundGroup.analysis);
                 setActiveSampleId(initialSampleId);
                 setActiveTab('worksheet');
+                hasResolvedDeepLink.current = true;
+            } else {
+                setUnassignedSampleTarget({ sampleId: initialSampleId });
+                setActiveAnalysis(null);
+                setActiveSampleId(null);
                 hasResolvedDeepLink.current = true;
             }
         }
@@ -736,11 +757,12 @@ export default function WorkbenchShell({
     };
 
     // Active Group
+    const targetBlocksDefault = Boolean(unassignedSampleTarget) || (!hasResolvedDeepLink.current && Boolean(initialSampleId || initialWorkItemId));
     const currentGroup = groups.find(g => g.analysis === activeAnalysis) || (openedRun && openedRun.analysis === activeAnalysis ? {
         analysis: openedRun.analysis, analysisName: openedRun.analysis,
         items: (openedRun.workItems || []).map(item => ({ ...item, workItemId: item.id, sampleDisplayId: item.sample?.originalId || item.sampleId,
             originalId: item.sample?.originalId, readiness: { isReady: false, blockers: [] } }))
-    } : groups[0] || null);
+    } : (targetBlocksDefault ? null : groups[0] || null));
 
     return (
         <div data-testid="workbench-shell" data-density={density} className={`flex flex-col gap-4 max-w-7xl mx-auto px-4 py-6 font-sans ${density === 'bench' ? 'workbench-density-bench' : ''}`}>
@@ -828,12 +850,13 @@ export default function WorkbenchShell({
             <div className="pt-2">
                 {activeTab === 'overrides' && <ResultOverrideInbox actorId={user?.id} />}
                 {activeTab === 'runs' && <MyRunsPanel groups={groups} onStarted={() => fetchQueue(queueView)} onOpenRun={run => {
-                    setOpenedRun(run); setActiveRunId(run.id); setActiveAnalysis(run.analysis); setActiveSampleId(null); setActiveTab('worksheet');
+                    setUnassignedSampleTarget(null); setOpenedRun(run); setActiveRunId(run.id); setActiveAnalysis(run.analysis); setActiveSampleId(null); setActiveTab('worksheet');
                 }} />}
                 {(activeTab === 'queue' || activeTab === 'completed') && (
                     <WorkbenchQueue
                         groups={groups}
                         onOpenWorksheet={(analysis, sampleId) => {
+                            setUnassignedSampleTarget(null);
                             setActiveRunId(null); setOpenedRun(null);
                             setActiveAnalysis(analysis);
                             if (sampleId) setActiveSampleId(sampleId);
@@ -846,6 +869,25 @@ export default function WorkbenchShell({
                         searchQuery={queueSearchQuery}
                         onSearchChange={setQueueSearchQuery}
                     />
+                )}
+
+                {activeTab === 'worksheet' && unassignedSampleTarget && !currentGroup && (
+                    <div data-testid="workbench-no-assigned-work" className="rounded-2xl border border-sf-divider bg-sf-surface p-6 text-center space-y-3">
+                        <div className="flex justify-center text-amber-600 dark:text-amber-400">
+                            <AlertTriangle size={24} />
+                        </div>
+                        <p className="text-sm font-semibold text-sf-text">
+                            {t('workbenchUi.noWorkAssignedForSample')}
+                        </p>
+                        <div>
+                            <Link
+                                to={`/samples/${encodeURIComponent(unassignedSampleTarget.sampleId)}`}
+                                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-sf-primary text-sf-on-primary hover:brightness-95 transition-colors"
+                            >
+                                {t('workbenchUi.backToSample')}
+                            </Link>
+                        </div>
+                    </div>
                 )}
 
                 {activeTab === 'worksheet' && currentGroup && (

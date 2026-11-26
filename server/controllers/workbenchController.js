@@ -226,7 +226,13 @@ exports.getQueue = async (req, res) => {
                     submittedCount: 0,
                     completedCount: 0
                 },
-                targetScopedItem: null
+                targetScopedItem: null,
+                ...(canonicalSampleTarget && !workItemId ? {
+                    target: {
+                        sampleId: canonicalSampleTarget.id,
+                        status: 'NO_ASSIGNED_WORK_FOR_SAMPLE'
+                    }
+                } : {})
             });
         }
 
@@ -680,7 +686,14 @@ exports.getQueue = async (req, res) => {
             completedCount
         };
 
-        res.json({ groups, stats, targetScopedItem: targetScopedItem?.id || null });
+        const target = canonicalSampleTarget && !workItemId ? {
+            sampleId: canonicalSampleTarget.id,
+            status: groups.some(g => g.items.some(i => i.sampleId === canonicalSampleTarget.id))
+                ? 'OK'
+                : 'NO_ASSIGNED_WORK_FOR_SAMPLE'
+        } : null;
+
+        res.json({ groups, stats, targetScopedItem: targetScopedItem?.id || null, ...(target ? { target } : {}) });
     } catch (error) {
         console.error('[workbench.getQueue] Error:', error);
         if (error.statusCode) return res.status(error.statusCode).json({ code: error.code, error: error.message });

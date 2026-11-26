@@ -5,6 +5,8 @@ import {
     FlaskConical, Printer, Clock, User, Activity, Sparkles
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import { useLanguage } from '../../context/LanguageContext';
 
 /**
  * Executive Workflow Radar Top Strip
@@ -22,7 +24,10 @@ export default function WorkflowTopStrip({
     onOpenTimeline
 }) {
     const navigate = useNavigate();
+    const { user } = useAuth();
+    const { t } = useLanguage();
     const [isRefreshing, setIsRefreshing] = useState(false);
+    const hasAssignedWork = user?.role !== 'LAB_TECHNICIAN' || (workItems || []).some(wi => wi.assignedTo === user.username || wi.assignedTo === user.id);
 
     const {
         currentRoom,
@@ -232,8 +237,13 @@ export default function WorkflowTopStrip({
                 {/* Jump to Workbench */}
                 <button
                     onClick={() => navigate(`/workbench?sampleId=${sample?.id || sample?.labId}`)}
-                    className="wf-action-btn hidden md:inline-flex text-sf-emerald bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 dark:hover:bg-indigo-900 border-indigo-200 dark:border-indigo-800"
-                    title="Open in Analytical Workbench"
+                    disabled={!hasAssignedWork}
+                    className={`wf-action-btn hidden md:inline-flex ${
+                        hasAssignedWork
+                            ? 'text-sf-emerald bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 dark:hover:bg-indigo-900 border-indigo-200 dark:border-indigo-800'
+                            : 'text-sf-muted bg-sf-inset border-sf-divider opacity-60 cursor-not-allowed'
+                    }`}
+                    title={hasAssignedWork ? 'Open in Analytical Workbench' : t('workbenchUi.noWorkAssignedForSample')}
                     aria-label="Open in Workbench"
                 >
                     <FlaskConical size={14} />

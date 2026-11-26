@@ -4,6 +4,8 @@ import {
     CheckCircle2, Loader2, ArrowRight, ShieldCheck, ChevronRight
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { getStatusColor, getDisplayName, getRoom, ROOM_CONFIG } from '../../utils/workflowMapper';
 
 /**
@@ -21,6 +23,9 @@ export default function WorkflowDetailDrawer({
     onClose,
 }) {
     const navigate = useNavigate();
+    const { user } = useAuth();
+    const { t } = useLanguage();
+    const hasAssignedWork = user?.role !== 'LAB_TECHNICIAN' || (workItems || []).some(wi => wi.assignedTo === user.username || wi.assignedTo === user.id);
 
     useEffect(() => {
         const handleKeyDown = (e) => {
@@ -108,7 +113,7 @@ export default function WorkflowDetailDrawer({
                                 <span>Technician Workbench</span>
                             </div>
                             <div className="text-[11px] text-sf-muted mt-0.5">
-                                Jump to active queue for this station
+                                {hasAssignedWork ? 'Jump to active queue for this station' : t('workbenchUi.noWorkAssignedForSample')}
                             </div>
                         </div>
                         <button
@@ -116,7 +121,13 @@ export default function WorkflowDetailDrawer({
                                 onClose();
                                 navigate(`/workbench?sampleId=${sample?.id || sample?.labId}`);
                             }}
-                            className="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-xs hover:shadow-md transition-all flex items-center gap-1 shrink-0"
+                            disabled={!hasAssignedWork}
+                            title={hasAssignedWork ? undefined : t('workbenchUi.noWorkAssignedForSample')}
+                            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 shrink-0 ${
+                                hasAssignedWork
+                                    ? 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-xs hover:shadow-md'
+                                    : 'bg-sf-inset text-sf-muted border border-sf-divider opacity-60 cursor-not-allowed'
+                            }`}
                         >
                             <span>Open</span>
                             <ArrowRight size={12} />
