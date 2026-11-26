@@ -1,10 +1,21 @@
 # Release Notes (1.11–1.16)
 
-This page summarizes what laboratory staff, managers, and server administrators will notice in SoilFER-LIMS **1.16.2**, followed by earlier updates.
+This page summarizes what laboratory staff, managers, and server administrators will notice in SoilFER-LIMS **1.16.3**, followed by earlier updates.
 
 For step-by-step update instructions, see [Updating SoilFER-LIMS](./updates.md).
 
 ---
+
+## Version 1.16.3 — 2026-11-26
+
+This combined production release includes all changes listed below together with the 1.16.2 fixes.
+
+- **Workbench sample guard:** opening the Workbench for a sample with no work assigned to the technician now shows a clear message ("This sample has no work assigned to you") with a link back to the sample instead of opening an unrelated worksheet. Sample-page Workbench buttons are disabled with the same explanation when the technician has no assigned work on that sample.
+- **Consignment manifest import:** dragging and dropping a CSV or Excel file onto the step-1 box now uses the same validation and reader as Choose File. Automatic column mapping uses exact normalized aliases so `lat`, `long`, `top` and `bottom` map accurately and no column is assigned twice.
+- **Walk-in reception metadata:** all metadata entered during walk-in reception (including organization, collection date, top/bottom depths with `0 cm`, composite `No`, purpose, location description and management) is now displayed consistently in the sample workspace, and Client / Submitter falls back to the stored submitter name when `clientName` is empty.
+- **Storage locations and inventory defaults:** added a Locations tab on the Inventory page showing Sample storage and Reagent storage trees with create, edit, deactivate and reactivate controls, an optional Default location field on Add/Edit Item, and clear required-field guidance (plus a link to Locations when none exist) in the storage movement dialog.
+- **Public report button and Manual tidy-up:** the public report PDF button now displays a visible "Download PDF" label in all five screen languages, Manual proficiency-testing notes say "review" instead of "log", and queue-tab rows in the generated menu table follow on-screen order.
+- **Catalogue alignment (Step D):** updates global analysis packages, reporting units for `SAR` and `GYPSUM`, and method labels while safely keeping any legacy code with in-progress orders active.
 
 ## Version 1.16.2 — 2026-11-26
 
