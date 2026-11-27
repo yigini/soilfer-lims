@@ -2025,7 +2025,16 @@ exports.listProjectKoboConnections = async (req, res) => {
 
 exports.createProjectKoboConnection = async (req, res) => {
     const { id } = req.params;
-    const { destinationLabId, labId: reqLabId, formId, apiToken, koboServerUrl = 'https://kf.kobotoolbox.org' } = req.body;
+    const { destinationLabId, labId: reqLabId, formId, apiToken } = req.body;
+    let koboServerUrl = 'https://kf.kobotoolbox.org';
+    if (req.body.koboServerUrl) {
+        let parsed;
+        try { parsed = new URL(String(req.body.koboServerUrl).trim()); } catch { parsed = null; }
+        if (!parsed || parsed.protocol !== 'https:') {
+            return res.status(400).json({ code: 'INVALID_KOBO_SERVER_URL', message: 'The Kobo server URL must start with https://' });
+        }
+        koboServerUrl = parsed.origin + parsed.pathname.replace(/\/$/, '');
+    }
 
     try {
         const project = await prisma.project.findFirst({
@@ -2119,6 +2128,7 @@ exports.createProjectKoboConnection = async (req, res) => {
         });
     } catch (err) {
         console.error('[createProjectKoboConnection] Error:', err);
+        if (err.code === 'P2002') return res.status(409).json({ code: 'CONNECTION_EXISTS', message: 'This laboratory already has a Kobo connection for this project. Reload the page to edit it.' });
         return res.status(500).json({ error: 'Failed to create Kobo connection: ' + err.message });
     }
 };

@@ -175,6 +175,14 @@ export default function DataConnectionsTab({
                     </p>
 
                     {/* Action buttons when user has connection management capability */}
+                    {canManageConnections && !isConfigured && !isAmbiguous && !koboConfig?.configId && destinationLab && (
+                        <KoboConnectionSettings
+                            key="new-kobo-link"
+                            projectId={project.id}
+                            destinationLabId={destinationLab}
+                            onSaved={onKoboConfigChanged}
+                        />
+                    )}
                     {canManageConnections && koboConfig?.configId && (
                         <KoboConnectionSettings
                             key={koboConfig.configId}
