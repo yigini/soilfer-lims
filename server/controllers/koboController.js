@@ -603,6 +603,8 @@ async function syncLabSubmissions(config, performedBy, options = {}) {
     let newCount = 0;
     let skippedCount = 0;
     const skippedReasons = [];
+    const unrecognized = [];
+    let unrecognizedFieldNames = null;
     let lastCommittedSubmissionId = currentConfig.lastSubmissionId;
     let hasRetriableSkip = false;
     // A malformed hold is isolated to its submission. Later submissions may
@@ -661,6 +663,22 @@ async function syncLabSubmissions(config, performedBy, options = {}) {
         // Transform submission to samples (could be 1 or 2 per submission)
         const rawSamples = koboService.transformSubmission(submission, fieldMapping, currentConfig.labId);
         const samples = Array.isArray(rawSamples) ? rawSamples : (rawSamples ? [rawSamples] : []);
+
+        // A submission with no recognisable site ID or barcode produces no samples.
+        // Report it instead of silently moving the cursor past it, so the form can
+        // be fixed (field names or mapping) and the same submissions read again.
+        const mappedSitePath = fieldMapping?.profileReference?.sitePath;
+        const hasIdentity = (mappedSitePath && koboProfile.exactValue(submission, mappedSitePath) != null) ||
+            koboService.findValue(submission, ['site_id', 'codigo_sitio', 'barcode_d1', 'codigo_barras_p1', 'barcode_d1_scan', 'barcode_d2', 'codigo_barras_p2', 'barcode_d2_scan']) !== undefined;
+        // A submission that has a site but no sample (for example sampling did not
+        // succeed) is a normal empty record and keeps the old behaviour below.
+        if (samples.length === 0 && !hasIdentity) {
+            unrecognized.push(submission._id);
+            if (!unrecognizedFieldNames) {
+                unrecognizedFieldNames = Object.keys(submission || {}).filter(key => !key.startsWith('_')).slice(0, 40);
+            }
+            continue submissionsLoop;
+        }
 
         const candidateSamples = [];
         const seenInSub = new Map();
@@ -1329,6 +1347,9 @@ async function syncLabSubmissions(config, performedBy, options = {}) {
     return {
         newSamples: newCount,
         skipped: skippedCount,
+        fetched: submissions.length,
+        unrecognized: unrecognized.length,
+        unrecognizedFieldNames: unrecognized.length > 0 ? unrecognizedFieldNames : undefined,
         lastSubmissionId: lastCommittedSubmissionId || currentConfig.lastSubmissionId,
         skippedReasons: skippedReasons.length > 0 ? skippedReasons : undefined
     };

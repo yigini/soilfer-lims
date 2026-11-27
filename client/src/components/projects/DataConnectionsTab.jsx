@@ -28,7 +28,23 @@ export default function DataConnectionsTab({
         setActionMsg(null);
         try {
             const res = await axios.post(`/api/projects/${project.id}/kobo-connections/${configId}/sync`);
-            setActionMsg({ type: 'success', text: `Sync complete: ${res.data.newSamples || 0} new samples imported.` });
+            const d = res.data || {};
+            const parts = [`Sync complete: ${d.newSamples || 0} new samples imported`];
+            if (typeof d.fetched === 'number') parts[0] += ` from ${d.fetched} new Kobo submission${d.fetched === 1 ? '' : 's'}`;
+            parts[0] += '.';
+            if (d.message && d.message !== 'No new submissions') parts.push(d.message);
+            if (d.fetched === 0 || d.message === 'No new submissions') parts.push('Kobo returned no new submissions for this form.');
+            if (d.unrecognized > 0) {
+                parts.push(`${d.unrecognized} submission${d.unrecognized === 1 ? ' has' : 's have'} no site ID or barcode the LIMS recognises (expected fields such as site_id, barcode_d1, barcode_d2). They will be read again on the next sync once the form or the field mapping is fixed.`);
+                if (Array.isArray(d.unrecognizedFieldNames) && d.unrecognizedFieldNames.length) parts.push(`Fields found in the form: ${d.unrecognizedFieldNames.join(', ')}.`);
+            }
+            if (d.skipped > 0) {
+                const reasons = Array.isArray(d.skippedReasons) ? [...new Set(d.skippedReasons.map(r => String(r.reason || '').split(':')[0]).filter(Boolean))] : [];
+                parts.push(`${d.skipped} sample${d.skipped === 1 ? ' was' : 's were'} skipped${reasons.length ? ` (${reasons.join(', ')})` : ''}.`);
+            }
+            const warn = (d.newSamples || 0) === 0 && (d.unrecognized > 0 || d.skipped > 0 || (d.message && d.message !== 'No new submissions'));
+            setActionMsg({ type: warn ? 'error' : 'success', text: parts.join(' ') });
+            if (typeof onKoboConfigChanged === 'function') onKoboConfigChanged();
         } catch (err) {
             setActionMsg({ type: 'error', text: err.response?.data?.message || err.response?.data?.error || err.message || 'Sync failed' });
         } finally {

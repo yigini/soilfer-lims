@@ -146,10 +146,22 @@ class KoboService {
      * Find value in submission by checking multiple possible field paths
      */
     findValue(submission, possiblePaths) {
+        const keys = Object.keys(submission);
         for (const path of possiblePaths) {
             // Check all keys that end with this path component
-            for (const key of Object.keys(submission)) {
+            for (const key of keys) {
                 if (key === path || key.endsWith('/' + path)) {
+                    const val = submission[key];
+                    if (val !== undefined && val !== null && val !== '') {
+                        return val;
+                    }
+                }
+            }
+            // Forms often differ only in letter case (barcode_D1, Site_ID): match those too.
+            const lower = String(path).toLowerCase();
+            for (const key of keys) {
+                const k = key.toLowerCase();
+                if (k === lower || k.endsWith('/' + lower)) {
                     const val = submission[key];
                     if (val !== undefined && val !== null && val !== '') {
                         return val;
