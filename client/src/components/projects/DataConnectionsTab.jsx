@@ -30,7 +30,7 @@ export default function DataConnectionsTab({
             const res = await axios.post(`/api/projects/${project.id}/kobo-connections/${configId}/sync`);
             setActionMsg({ type: 'success', text: `Sync complete: ${res.data.newSamples || 0} new samples imported.` });
         } catch (err) {
-            setActionMsg({ type: 'error', text: err.response?.data?.message || err.message || 'Sync failed' });
+            setActionMsg({ type: 'error', text: err.response?.data?.message || err.response?.data?.error || err.message || 'Sync failed' });
         } finally {
             setSyncing(false);
         }
@@ -49,7 +49,7 @@ export default function DataConnectionsTab({
             // Reload the connection so the badge and the button match the saved state.
             if (typeof onKoboConfigChanged === 'function') await onKoboConfigChanged();
         } catch (err) {
-            setActionMsg({ type: 'error', text: err.response?.data?.message || err.message || 'Toggle failed' });
+            setActionMsg({ type: 'error', text: err.response?.data?.message || err.response?.data?.error || err.message || 'Toggle failed' });
         } finally {
             setToggling(false);
         }

@@ -2295,6 +2295,18 @@ exports.syncProjectKoboConnection = async (req, res) => {
         });
     } catch (err) {
         console.error('[syncProjectKoboConnection] Error:', err);
-        return res.status(500).json({ error: 'Failed to sync Kobo connection: ' + err.message });
+        // Give the person a reason they can act on instead of a bare 500.
+        const msg = String(err?.message || '');
+        if (msg.startsWith('Failed to fetch Kobo submissions')) {
+            return res.status(502).json({
+                code: 'KOBO_FETCH_FAILED',
+                message: 'Kobo did not return the submissions. Check the server URL, the form ID and that the API token comes from the same Kobo server. (' + msg.replace(/^Failed to fetch Kobo submissions:\s*/, '') + ')'
+            });
+        }
+        const known = msg.match(/^(?:\[KOBO\]\s*)?(CONFIG_INACTIVE|LAB_NOT_FOUND|LAB_INACTIVE|MEMBERSHIP_NOT_AUTHORIZED)?:?\s*/);
+        if (known && known[1]) {
+            return res.status(409).json({ code: known[1], message: msg.slice(known[0].length) });
+        }
+        return res.status(500).json({ error: 'Failed to sync Kobo connection: ' + msg, message: 'Sync failed: ' + msg });
     }
 };
