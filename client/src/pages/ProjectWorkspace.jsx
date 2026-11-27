@@ -151,6 +151,16 @@ export default function ProjectWorkspace() {
         }
     }, [projectId]);
 
+    const refreshKoboConfig = useCallback(async () => {
+        if (!projectId) return;
+        try {
+            const koboRes = await axios.get(`/api/projects/${projectId}/kobo-config`);
+            setKoboConfig(koboRes.data);
+        } catch (err) {
+            console.warn('[Workspace] Kobo config refresh failed:', err.message);
+        }
+    }, [projectId]);
+
     const fetchWorkspaceData = useCallback(async () => {
         if (!projectId) return;
         setLoading(true);
@@ -364,6 +374,7 @@ export default function ProjectWorkspace() {
                     <DataConnectionsTab
                         project={project}
                         koboConfig={koboConfig}
+                        onKoboConfigChanged={refreshKoboConfig}
                         onOpenImportPreview={() => setImportModalOpen(true)}
                         capabilities={capabilities}
                         userRole={user?.role}

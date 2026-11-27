@@ -2149,10 +2149,29 @@ exports.updateProjectKoboConnection = async (req, res) => {
         }
 
         const data = {};
-        if (formId) data.formId = formId;
-        if (apiToken) data.apiToken = apiToken;
-        if (koboServerUrl) data.koboServerUrl = koboServerUrl;
+        if (formId) data.formId = String(formId).trim();
+        if (apiToken) data.apiToken = String(apiToken).trim();
+        if (koboServerUrl) {
+            let parsed;
+            try { parsed = new URL(String(koboServerUrl).trim()); } catch { parsed = null; }
+            if (!parsed || parsed.protocol !== 'https:') {
+                return res.status(400).json({ code: 'INVALID_KOBO_SERVER_URL', message: 'The Kobo server URL must start with https://' });
+            }
+            data.koboServerUrl = parsed.origin + parsed.pathname.replace(/\/$/, '');
+        }
         if (isActive !== undefined) data.isActive = Boolean(isActive);
+
+        // When the server, form or token changes, check the new details against Kobo
+        // (same check as project creation) and set the connection active only if it works.
+        let connectionTest = null;
+        if (isActive === undefined && (data.formId || data.apiToken || data.koboServerUrl)) {
+            connectionTest = await require('../services/koboService').testConnection(
+                data.koboServerUrl || config.koboServerUrl,
+                data.formId || config.formId,
+                data.apiToken || config.apiToken
+            );
+            data.isActive = Boolean(connectionTest?.success);
+        }
         if (fieldMapping !== undefined) {
             require('../services/koboProfileService').validateMapping(fieldMapping);
             if (!expectedRevision || new Date(expectedRevision).getTime() !== config.updatedAt.getTime()) return res.status(409).json({code: 'STALE_REVISION', message: 'The connection changed. Reload it before saving the field mapping.'});
@@ -2170,7 +2189,10 @@ exports.updateProjectKoboConnection = async (req, res) => {
             koboServerUrl: updated.koboServerUrl,
             isActive: updated.isActive,
             fieldMapping: updated.fieldMapping ? JSON.parse(updated.fieldMapping) : null,
-            updatedAt: updated.updatedAt
+            updatedAt: updated.updatedAt,
+            connectionTest: connectionTest
+                ? { success: Boolean(connectionTest.success), formName: connectionTest.formName, error: connectionTest.error }
+                : null
         });
     } catch (err) {
         console.error('[updateProjectKoboConnection] Error:', err);
@@ -2205,9 +2227,12 @@ exports.toggleProjectKoboConnection = async (req, res) => {
             });
         }
 
+        // Callers may send the desired state; without it this stays a plain toggle.
+        const requested = req.body && typeof req.body.isActive === 'boolean' ? req.body.isActive : null;
+        const nextActive = requested === null ? !config.isActive : requested;
         const updated = await prisma.koboConfig.update({
             where: { id: configId },
-            data: { isActive: !config.isActive }
+            data: { isActive: nextActive }
         });
 
         await prisma.auditLog.create({
@@ -2270,6 +2295,18 @@ exports.syncProjectKoboConnection = async (req, res) => {
         });
     } catch (err) {
         console.error('[syncProjectKoboConnection] Error:', err);
-        return res.status(500).json({ error: 'Failed to sync Kobo connection: ' + err.message });
+        // Give the person a reason they can act on instead of a bare 500.
+        const msg = String(err?.message || '');
+        if (msg.startsWith('Failed to fetch Kobo submissions')) {
+            return res.status(502).json({
+                code: 'KOBO_FETCH_FAILED',
+                message: 'Kobo did not return the submissions. Check the server URL, the form ID and that the API token comes from the same Kobo server. (' + msg.replace(/^Failed to fetch Kobo submissions:\s*/, '') + ')'
+            });
+        }
+        const known = msg.match(/^(?:\[KOBO\]\s*)?(CONFIG_INACTIVE|LAB_NOT_FOUND|LAB_INACTIVE|MEMBERSHIP_NOT_AUTHORIZED)?:?\s*/);
+        if (known && known[1]) {
+            return res.status(409).json({ code: known[1], message: msg.slice(known[0].length) });
+        }
+        return res.status(500).json({ error: 'Failed to sync Kobo connection: ' + msg, message: 'Sync failed: ' + msg });
     }
 };

@@ -3,10 +3,12 @@ import axios from 'axios';
 import { Upload, Smartphone, Database, CheckCircle2, AlertTriangle, ArrowRight, RefreshCw } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 import KoboProfileMappingEditor from './KoboProfileMappingEditor';
+import KoboConnectionSettings from './KoboConnectionSettings';
 
 export default function DataConnectionsTab({
     project,
     koboConfig,
+    onKoboConfigChanged,
     onOpenImportPreview,
     capabilities = {},
     userRole = ''
@@ -28,21 +30,26 @@ export default function DataConnectionsTab({
             const res = await axios.post(`/api/projects/${project.id}/kobo-connections/${configId}/sync`);
             setActionMsg({ type: 'success', text: `Sync complete: ${res.data.newSamples || 0} new samples imported.` });
         } catch (err) {
-            setActionMsg({ type: 'error', text: err.response?.data?.message || err.message || 'Sync failed' });
+            setActionMsg({ type: 'error', text: err.response?.data?.message || err.response?.data?.error || err.message || 'Sync failed' });
         } finally {
             setSyncing(false);
         }
     };
 
-    const handleToggle = async (configId) => {
+    const handleToggle = async (configId, currentlyActive) => {
         if (!configId || !project?.id) return;
         setToggling(true);
         setActionMsg(null);
         try {
-            const res = await axios.post(`/api/projects/${project.id}/kobo-connections/${configId}/toggle`);
+            // Send the state we want, so a double click or a stale page cannot flip it back.
+            const res = await axios.post(`/api/projects/${project.id}/kobo-connections/${configId}/toggle`, {
+                isActive: !currentlyActive
+            });
             setActionMsg({ type: 'success', text: `Connection status updated to ${res.data.isActive ? 'Active' : 'Disabled'}.` });
+            // Reload the connection so the badge and the button match the saved state.
+            if (typeof onKoboConfigChanged === 'function') await onKoboConfigChanged();
         } catch (err) {
-            setActionMsg({ type: 'error', text: err.response?.data?.message || err.message || 'Toggle failed' });
+            setActionMsg({ type: 'error', text: err.response?.data?.message || err.response?.data?.error || err.message || 'Toggle failed' });
         } finally {
             setToggling(false);
         }
@@ -168,7 +175,15 @@ export default function DataConnectionsTab({
                     </p>
 
                     {/* Action buttons when user has connection management capability */}
-                    {canManageConnections && koboConfig?.configId && koboConfig?.updatedAt && <KoboProfileMappingEditor key={koboConfig.configId} projectId={project.id} config={koboConfig}/>}
+                    {canManageConnections && koboConfig?.configId && (
+                        <KoboConnectionSettings
+                            key={koboConfig.configId}
+                            projectId={project.id}
+                            config={koboConfig}
+                            onSaved={onKoboConfigChanged}
+                        />
+                    )}
+                    {canManageConnections && koboConfig?.configId && koboConfig?.updatedAt && <KoboProfileMappingEditor key={`${koboConfig.configId}-${koboConfig.updatedAt}`} projectId={project.id} config={koboConfig}/>}
                     {canManageConnections && (koboConfig?.configId || (Array.isArray(koboConfig?.configs) && koboConfig.configs.length > 0)) && (
                         <div className="pt-2 border-t border-sf-divider space-y-2">
                             {actionMsg && (
@@ -186,7 +201,10 @@ export default function DataConnectionsTab({
                                     <span>{syncing ? t('common.syncing', 'Syncing…') : t('projects.connections.syncNow', 'Sync Now')}</span>
                                 </button>
                                 <button
-                                    onClick={() => handleToggle(koboConfig?.configId || koboConfig?.configs?.[0]?.configId)}
+                                    onClick={() => handleToggle(
+                                        koboConfig?.configId || koboConfig?.configs?.[0]?.configId,
+                                        koboConfig?.configId ? koboConfig?.isActive !== false : koboConfig?.configs?.[0]?.isActive !== false
+                                    )}
                                     disabled={toggling}
                                     className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-sf-border bg-sf-surface hover:bg-sf-hover text-sf-text"
                                 >
