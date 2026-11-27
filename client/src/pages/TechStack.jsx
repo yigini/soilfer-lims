@@ -83,6 +83,17 @@ const techStack = [
 
 const changelog = [
     {
+        version: 'v1.16.4',
+        date: 'November 27, 2026',
+        tag: 'Kobo connection fixes',
+        badgeColor: 'bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300 border-blue-300 dark:border-blue-800',
+        changes: [
+            'Refresh the Kobo status badge when a connection is enabled or disabled.',
+            'Set the Kobo server URL on New project and update the server, form or token in Connection settings.',
+            'Show a clear reason when Sync Now fails.'
+        ]
+    },
+    {
         version: 'v1.16.3',
         date: 'November 26, 2026',
         tag: 'Workbench Guard, Manifest Import, Storage Locations and Catalogue Alignment',
