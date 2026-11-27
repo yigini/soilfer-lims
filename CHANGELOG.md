@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.16.5] - 2026-11-27
+
+### Fixed
+- Kobo: link a Kobo form to an existing project; the Kobo destination lab is added to new projects; clear reasons instead of 'no longer authorized'; submissions with unrecognised fields are reported and read again instead of being skipped; changing the form restarts reading; Sync Now shows a full summary (#491).
+
 ## [1.16.4] - 2026-11-27
 
 ### Fixed
