@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.16.4] - 2026-11-27
+
+### Fixed
+- Kobo: Enable badge refreshes; Kobo server URL on New project; Connection settings to change the server, form and token; clear Sync Now errors instead of a bare 500 (#487).
+
 ## [1.16.3] - 2026-11-26
 
 Ships together with the 1.16.2 fixes (#464–#467 and the Effect dependency pin) in one combined production release.
