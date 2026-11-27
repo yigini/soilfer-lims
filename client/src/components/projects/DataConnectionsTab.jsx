@@ -179,7 +179,8 @@ export default function DataConnectionsTab({
                         <KoboConnectionSettings
                             key="new-kobo-link"
                             projectId={project.id}
-                            destinationLabId={destinationLab}
+                            // A lab manager links for their own lab: let the server pick it.
+                            destinationLabId={userRole === 'LAB_MANAGER' ? undefined : destinationLab}
                             onSaved={onKoboConfigChanged}
                         />
                     )}
