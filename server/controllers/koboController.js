@@ -1312,6 +1312,18 @@ async function syncLabSubmissions(config, performedBy, options = {}) {
         }
     }
 
+    // Never move the cursor past an unrecognised submission, even when a later
+    // submission in the same batch committed: cap it just below the lowest one so
+    // it is read again (already-imported later submissions are matched as existing).
+    if (unrecognized.length > 0 && lastCommittedSubmissionId) {
+        const lowest = Math.min(...unrecognized.map(Number).filter(n => !isNaN(n)));
+        const cursorNum = Number(lastCommittedSubmissionId);
+        if (Number.isFinite(lowest) && !isNaN(cursorNum) && cursorNum >= lowest) {
+            const floor = Number(currentConfig.lastSubmissionId || 0);
+            lastCommittedSubmissionId = lowest - 1 > floor ? String(lowest - 1) : (currentConfig.lastSubmissionId || null);
+        }
+    }
+
     // Update last sync info: only advance lastSubmissionId if it successfully progressed
     const configUpdate = { lastSyncAt: new Date() };
     if (lastCommittedSubmissionId && lastCommittedSubmissionId !== currentConfig.lastSubmissionId) {

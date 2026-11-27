@@ -76,6 +76,32 @@ describe('Kobo connection flow', () => {
         expect(fresh.lastSubmissionId).toBe('202');
     });
 
+    it('does not lose an unrecognised submission when a later one in the same batch imports', async () => {
+        const before = (await prisma.koboConfig.findUnique({ where: { id: config.id } })).lastSubmissionId;
+        const good = { _id: 302, _uuid: 'u-302', site_id: 'S-302' };
+        koboService.fetchSubmissions.mockResolvedValueOnce([{ _id: 301, _uuid: 'u-301', junk: 'x' }, good]);
+        koboService.transformSubmission
+            .mockReturnValueOnce([])
+            .mockReturnValueOnce([{ original_id: 'KCF-MIX-302-' + SUFFIX, site_id: 'S-302', depth: 'D1', kobo_submission_id: 302, kobo_uuid: 'u-302', raw_data: good, attachments: [] }]);
+        const res = await request(app).post(`/api/kobo/sync/${labOwner.id}?configId=${config.id}`).set('Authorization', tokenAdmin);
+        expect(res.status).toBe(200);
+        expect(res.body.unrecognized).toBe(1);
+        expect(res.body.newSamples).toBe(1);
+        const fresh = await prisma.koboConfig.findUnique({ where: { id: config.id } });
+        expect(Number(fresh.lastSubmissionId)).toBeLessThan(301);
+        expect(Number(fresh.lastSubmissionId)).toBeGreaterThanOrEqual(Number(before));
+
+        // Reading the same batch again does not create a second copy of 302.
+        koboService.fetchSubmissions.mockResolvedValueOnce([{ _id: 301, _uuid: 'u-301', junk: 'x' }, good]);
+        koboService.transformSubmission
+            .mockReturnValueOnce([])
+            .mockReturnValueOnce([{ original_id: 'KCF-MIX-302-' + SUFFIX, site_id: 'S-302', depth: 'D1', kobo_submission_id: 302, kobo_uuid: 'u-302', raw_data: good, attachments: [] }]);
+        const again = await request(app).post(`/api/kobo/sync/${labOwner.id}?configId=${config.id}`).set('Authorization', tokenAdmin);
+        expect(again.status).toBe(200);
+        expect(again.body.newSamples).toBe(0);
+        expect(await prisma.sample.count({ where: { originalId: 'KCF-MIX-302-' + SUFFIX } })).toBe(1);
+    });
+
     it('starts reading from the beginning when the form changes', async () => {
         const res = await request(app).put(`/api/projects/${project.code}/kobo-connections/${config.id}`)
             .set('Authorization', tokenAdmin).send({ formId: 'form_new_' + SUFFIX, isActive: true });

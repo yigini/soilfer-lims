@@ -514,10 +514,11 @@ exports.createProject = async (req, res) => {
             }
         }
 
-        // NOTIFICATION: Notify assigned labs
-        if (newProject.assignedLabIds) {
+        // NOTIFICATION: Notify assigned labs (re-read: the Kobo destination lab may have been added)
+        const notifyAssigned = (await prisma.project.findUnique({ where: { code: newProject.code }, select: { assignedLabIds: true } }))?.assignedLabIds || newProject.assignedLabIds;
+        if (notifyAssigned) {
             try {
-                const labIds = JSON.parse(newProject.assignedLabIds);
+                const labIds = JSON.parse(notifyAssigned);
                 if (Array.isArray(labIds) && labIds.length > 0) {
                     const managers = await prisma.user.findMany({
                         where: { labId: { in: labIds }, role: 'LAB_MANAGER' }
