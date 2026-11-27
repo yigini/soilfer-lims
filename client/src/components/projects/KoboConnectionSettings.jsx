@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useLanguage } from '../../context/LanguageContext';
 
-// Lets a lab manager fix the Kobo server, form or token of an existing connection.
-// The stored token is never shown; leaving the token box empty keeps it.
-export default function KoboConnectionSettings({ projectId, config, onSaved }) {
+// Lets a lab manager link a Kobo form to a project, or fix the server, form or
+// token of an existing connection. The stored token is never shown; leaving the
+// token box empty keeps it.
+export default function KoboConnectionSettings({ projectId, config = {}, destinationLabId, onSaved }) {
+    const isNew = !config.configId;
     const { t } = useLanguage();
     const [serverUrl, setServerUrl] = useState(config.koboServerUrl || 'https://kf.kobotoolbox.org');
     const [formId, setFormId] = useState(config.formId || config.koboFormId || '');
@@ -18,9 +20,15 @@ export default function KoboConnectionSettings({ projectId, config, onSaved }) {
         try {
             const body = { koboServerUrl: serverUrl.trim(), formId: formId.trim() };
             if (apiToken.trim()) body.apiToken = apiToken.trim();
-            const res = await axios.put(`/api/projects/${projectId}/kobo-connections/${config.configId}`, body);
+            let test;
+            if (isNew) {
+                const res = await axios.post(`/api/projects/${projectId}/kobo-connections`, { ...body, destinationLabId });
+                test = res.data.isActive ? { success: true } : { success: false };
+            } else {
+                const res = await axios.put(`/api/projects/${projectId}/kobo-connections/${config.configId}`, body);
+                test = res.data.connectionTest;
+            }
             setApiToken('');
-            const test = res.data.connectionTest;
             if (test && !test.success) {
                 setMessage({ ok: false, text: t('projects.connections.settingsSavedTestFailed', 'Saved, but Kobo did not accept these details, so the connection stays disabled. Check that the token comes from the same server as the form.') });
             } else {
@@ -38,9 +46,9 @@ export default function KoboConnectionSettings({ projectId, config, onSaved }) {
 
     const inputClass = 'mt-1 w-full text-xs font-mono rounded-lg border border-sf-border bg-sf-surface p-2 text-sf-text';
     return (
-        <details className="border-t border-sf-divider pt-3">
+        <details className="border-t border-sf-divider pt-3" open={isNew || undefined}>
             <summary className="text-sm font-semibold text-sf-text cursor-pointer">
-                {t('projects.connections.settingsTitle', 'Connection settings')}
+                {isNew ? t('projects.connections.linkTitle', 'Link a Kobo form') : t('projects.connections.settingsTitle', 'Connection settings')}
             </summary>
             <fieldset disabled={busy} className="min-w-0 grid grid-cols-1 gap-3 mt-3">
                 <label className="text-xs text-sf-muted">
@@ -52,7 +60,7 @@ export default function KoboConnectionSettings({ projectId, config, onSaved }) {
                     <input type="text" value={formId} onChange={e => setFormId(e.target.value)} className={inputClass} />
                 </label>
                 <label className="text-xs text-sf-muted">
-                    {t('projects.connections.newApiToken', 'New API token (leave empty to keep the current one)')}
+                    {isNew ? t('projects.create.koboApiToken', 'API Token') : t('projects.connections.newApiToken', 'New API token (leave empty to keep the current one)')}
                     <input type="password" autoComplete="off" value={apiToken} onChange={e => setApiToken(e.target.value)} placeholder="••••••••••••" className={inputClass} />
                 </label>
             </fieldset>
@@ -61,8 +69,8 @@ export default function KoboConnectionSettings({ projectId, config, onSaved }) {
                     {message.text}
                 </p>
             )}
-            <button type="button" onClick={save} disabled={busy || !serverUrl.trim() || !formId.trim()} className="btn-secondary text-xs mt-3">
-                {busy ? t('common.saving', 'Saving…') : t('projects.connections.saveAndTest', 'Save and test')}
+            <button type="button" onClick={save} disabled={busy || !serverUrl.trim() || !formId.trim() || (isNew && !apiToken.trim())} className="btn-secondary text-xs mt-3">
+                {busy ? t('common.saving', 'Saving…') : (isNew ? t('projects.connections.linkAndTest', 'Link and test') : t('projects.connections.saveAndTest', 'Save and test'))}
             </button>
         </details>
     );

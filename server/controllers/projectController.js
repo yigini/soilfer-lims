@@ -434,6 +434,22 @@ exports.createProject = async (req, res) => {
             // Create KoboConfig entry atomically inside transaction
             let createdConfig = null;
             if (validatedTargetKoboLab && req.body.koboFormId && req.body.koboApiToken) {
+                // The lab chosen to receive the Kobo samples must be a lab on the project,
+                // otherwise every later edit and sync is refused. Add it as a servicing lab.
+                if (validatedTargetKoboLab.id !== (labId || null)) {
+                    await tx.projectLab.upsert({
+                        where: { projectCode_labId: { projectCode: uppercaseCode, labId: validatedTargetKoboLab.id } },
+                        update: {},
+                        create: { id: 'pl-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6), projectCode: uppercaseCode, labId: validatedTargetKoboLab.id, role: 'SERVICING' }
+                    });
+                    const current = await tx.project.findUnique({ where: { code: uppercaseCode }, select: { assignedLabIds: true } });
+                    let assigned = [];
+                    try { assigned = JSON.parse(current?.assignedLabIds || '[]'); } catch { assigned = []; }
+                    if (!Array.isArray(assigned)) assigned = [];
+                    if (!assigned.includes(validatedTargetKoboLab.id)) {
+                        await tx.project.update({ where: { code: uppercaseCode }, data: { assignedLabIds: JSON.stringify([...assigned, validatedTargetKoboLab.id]) } });
+                    }
+                }
                 createdConfig = await tx.koboConfig.create({
                     data: {
                         labId: validatedTargetKoboLab.id,
@@ -498,10 +514,11 @@ exports.createProject = async (req, res) => {
             }
         }
 
-        // NOTIFICATION: Notify assigned labs
-        if (newProject.assignedLabIds) {
+        // NOTIFICATION: Notify assigned labs (re-read: the Kobo destination lab may have been added)
+        const notifyAssigned = (await prisma.project.findUnique({ where: { code: newProject.code }, select: { assignedLabIds: true } }))?.assignedLabIds || newProject.assignedLabIds;
+        if (notifyAssigned) {
             try {
-                const labIds = JSON.parse(newProject.assignedLabIds);
+                const labIds = JSON.parse(notifyAssigned);
                 if (Array.isArray(labIds) && labIds.length > 0) {
                     const managers = await prisma.user.findMany({
                         where: { labId: { in: labIds }, role: 'LAB_MANAGER' }
@@ -2025,7 +2042,16 @@ exports.listProjectKoboConnections = async (req, res) => {
 
 exports.createProjectKoboConnection = async (req, res) => {
     const { id } = req.params;
-    const { destinationLabId, labId: reqLabId, formId, apiToken, koboServerUrl = 'https://kf.kobotoolbox.org' } = req.body;
+    const { destinationLabId, labId: reqLabId, formId, apiToken } = req.body;
+    let koboServerUrl = 'https://kf.kobotoolbox.org';
+    if (req.body.koboServerUrl) {
+        let parsed;
+        try { parsed = new URL(String(req.body.koboServerUrl).trim()); } catch { parsed = null; }
+        if (!parsed || parsed.protocol !== 'https:') {
+            return res.status(400).json({ code: 'INVALID_KOBO_SERVER_URL', message: 'The Kobo server URL must start with https://' });
+        }
+        koboServerUrl = parsed.origin + parsed.pathname.replace(/\/$/, '');
+    }
 
     try {
         const project = await prisma.project.findFirst({
@@ -2046,7 +2072,8 @@ exports.createProjectKoboConnection = async (req, res) => {
         if (!allMemberLabIds.includes(targetLabId)) {
             return res.status(400).json({
                 error: 'LAB_NOT_PROJECT_MEMBER',
-                message: `Laboratory '${targetLabId}' is not an authorized servicing laboratory for project '${project.code}'.`
+                code: 'LAB_NOT_PROJECT_MEMBER',
+                message: `Laboratory '${targetLabId}' is not one of this project's labs. Add it under Labs & people (servicing labs) first, then link Kobo.`
             });
         }
 
@@ -2119,6 +2146,7 @@ exports.createProjectKoboConnection = async (req, res) => {
         });
     } catch (err) {
         console.error('[createProjectKoboConnection] Error:', err);
+        if (err.code === 'P2002') return res.status(409).json({ code: 'CONNECTION_EXISTS', message: 'This laboratory already has a Kobo connection for this project. Reload the page to edit it.' });
         return res.status(500).json({ error: 'Failed to create Kobo connection: ' + err.message });
     }
 };
@@ -2163,6 +2191,11 @@ exports.updateProjectKoboConnection = async (req, res) => {
 
         // When the server, form or token changes, check the new details against Kobo
         // (same check as project creation) and set the connection active only if it works.
+        // A different server or form has its own submission numbers: start reading from the beginning.
+        if ((data.formId && data.formId !== config.formId) || (data.koboServerUrl && data.koboServerUrl !== config.koboServerUrl)) {
+            data.lastSubmissionId = null;
+        }
+
         let connectionTest = null;
         if (isActive === undefined && (data.formId || data.apiToken || data.koboServerUrl)) {
             connectionTest = await require('../services/koboService').testConnection(
@@ -2291,7 +2324,8 @@ exports.syncProjectKoboConnection = async (req, res) => {
         return res.json({
             success: true,
             configId: config.id,
-            ...syncResult
+            ...syncResult,
+            skippedReasons: Array.isArray(syncResult?.skippedReasons) ? syncResult.skippedReasons.slice(0, 20) : undefined
         });
     } catch (err) {
         console.error('[syncProjectKoboConnection] Error:', err);
