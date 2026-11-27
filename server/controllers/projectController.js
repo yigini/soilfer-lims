@@ -2149,10 +2149,29 @@ exports.updateProjectKoboConnection = async (req, res) => {
         }
 
         const data = {};
-        if (formId) data.formId = formId;
-        if (apiToken) data.apiToken = apiToken;
-        if (koboServerUrl) data.koboServerUrl = koboServerUrl;
+        if (formId) data.formId = String(formId).trim();
+        if (apiToken) data.apiToken = String(apiToken).trim();
+        if (koboServerUrl) {
+            let parsed;
+            try { parsed = new URL(String(koboServerUrl).trim()); } catch { parsed = null; }
+            if (!parsed || parsed.protocol !== 'https:') {
+                return res.status(400).json({ code: 'INVALID_KOBO_SERVER_URL', message: 'The Kobo server URL must start with https://' });
+            }
+            data.koboServerUrl = parsed.origin + parsed.pathname.replace(/\/$/, '');
+        }
         if (isActive !== undefined) data.isActive = Boolean(isActive);
+
+        // When the server, form or token changes, check the new details against Kobo
+        // (same check as project creation) and set the connection active only if it works.
+        let connectionTest = null;
+        if (isActive === undefined && (data.formId || data.apiToken || data.koboServerUrl)) {
+            connectionTest = await require('../services/koboService').testConnection(
+                data.koboServerUrl || config.koboServerUrl,
+                data.formId || config.formId,
+                data.apiToken || config.apiToken
+            );
+            data.isActive = Boolean(connectionTest?.success);
+        }
         if (fieldMapping !== undefined) {
             require('../services/koboProfileService').validateMapping(fieldMapping);
             if (!expectedRevision || new Date(expectedRevision).getTime() !== config.updatedAt.getTime()) return res.status(409).json({code: 'STALE_REVISION', message: 'The connection changed. Reload it before saving the field mapping.'});
@@ -2170,7 +2189,10 @@ exports.updateProjectKoboConnection = async (req, res) => {
             koboServerUrl: updated.koboServerUrl,
             isActive: updated.isActive,
             fieldMapping: updated.fieldMapping ? JSON.parse(updated.fieldMapping) : null,
-            updatedAt: updated.updatedAt
+            updatedAt: updated.updatedAt,
+            connectionTest: connectionTest
+                ? { success: Boolean(connectionTest.success), formName: connectionTest.formName, error: connectionTest.error }
+                : null
         });
     } catch (err) {
         console.error('[updateProjectKoboConnection] Error:', err);
