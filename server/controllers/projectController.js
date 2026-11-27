@@ -2205,9 +2205,12 @@ exports.toggleProjectKoboConnection = async (req, res) => {
             });
         }
 
+        // Callers may send the desired state; without it this stays a plain toggle.
+        const requested = req.body && typeof req.body.isActive === 'boolean' ? req.body.isActive : null;
+        const nextActive = requested === null ? !config.isActive : requested;
         const updated = await prisma.koboConfig.update({
             where: { id: configId },
-            data: { isActive: !config.isActive }
+            data: { isActive: nextActive }
         });
 
         await prisma.auditLog.create({

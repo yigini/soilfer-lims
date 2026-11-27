@@ -248,6 +248,21 @@ export default function NewProjectModal({
                                         className="w-full text-xs font-mono rounded-lg border border-sf-border bg-sf-surface p-2 text-sf-text"
                                     />
                                 </div>
+                                <div className="col-span-2">
+                                    <label className="block text-[11px] font-medium text-sf-text mb-1">
+                                        {t('projects.create.koboServerUrl', 'Kobo server URL')}
+                                    </label>
+                                    <input
+                                        type="url"
+                                        value={koboServerUrl}
+                                        onChange={(e) => setKoboServerUrl(e.target.value.trim())}
+                                        placeholder="https://kf.kobotoolbox.org"
+                                        className="w-full text-xs font-mono rounded-lg border border-sf-border bg-sf-surface p-2 text-sf-text"
+                                    />
+                                    <p className="mt-1 text-[10px] text-sf-muted">
+                                        {t('projects.create.koboServerUrlHint', 'Use your own Kobo server here if the form lives there, for example https://kf.soilfer-data.fao.org. The API token must come from the same server.')}
+                                    </p>
+                                </div>
                             </div>
                             <div>
                                 <label className="block text-[11px] font-medium text-sf-text mb-1">
